@@ -301,14 +301,16 @@ console.log("2 · what the move cannot carry it refuses, by name — and what it
     const c = st.group.capabilities[2];
     c.format = "projects"; c.items = [];
     c.projects = [{ id: "cap3-PR1", name: "A programme", owner: "Hany Nabil", outcomes: [],
+                    deliverables: [{ id: "d1", name: "A number to hit", status: "delivered" },
+                                   { id: "d2", name: "Another number" }],
                     milestones: [{ id: "m1", name: "First step", finish: "Aug 26", status: "done" },
                                  { id: "m2", name: "Second step", finish: "", status: "" }] }];
     const run = clientAt(readNow, st);
     ok(JSON.stringify(run(`capFoldBlockers()`)) === "[]", "a capability planning in projects is no longer a refusal",
        run(`capFoldBlockers()`));
     const row = run(`capFoldPlan().filter(function(r){ return r.fromProject; })[0]`);
-    ok(!!row && row.tactics === 2 && row.name === st.group.capabilities[2].name,
-       "…the rehearsal says one row, under the capability's own name, with two tactics", row);
+    ok(!!row && row.tactics === 2 && row.measures === 2 && row.name === st.group.capabilities[2].name,
+       "…the rehearsal says one row, under the capability's own name, two measures and two tactics", row);
     ok(run(`capFoldIntoTop()`) === 5, "…and the move runs");
     const got = run(`(function(){ var p = GROUP.items.filter(function(x){ return x.id === "cap3-PR1"; })[0];
       return p ? { name:p.name, kind:p.kind, ts:p.tactics.map(function(t){ return [t.name, t.id, t.status, t.actual, t.q3, t.due]; }) } : null; })()`);
@@ -317,6 +319,41 @@ console.log("2 · what the move cannot carry it refuses, by name — and what it
     ok(!!got && got.ts[0][1] === "m1" && got.ts[0][2] === "Done" && got.ts[0][3] === 100 && got.ts[0][5] === "Aug 26",
        "…each milestone keeps its id, its state and its date", got && got.ts[0]);
     ok(!!got && got.ts[0][4] === 1, "…and is timed by the quarter its date falls in", got && got.ts[0]);
+    /* §544.7: and the deliverables are the measures. Wander's database
+       answered a question its working copy had not been asked — its one
+       project carries five deliverables beside its five milestones, and the
+       first pass of this move carried the milestones and dropped them
+       without a word. Islam, reading his own five: they are targets, so
+       they are key measures; the milestones are steps, so they are tactics. */
+    const ms = run(`(function(){ var p = GROUP.items.filter(function(x){ return x.id === "cap3-PR1"; })[0];
+      return p ? p.measures.map(function(m){ return [m.name, m.id, m.target, m.progress]; }) : null; })()`);
+    ok(!!ms && ms.length === 2 && ms[0][1] === "d1" && ms[1][1] === "d2",
+       "…the deliverables are the measures, each keeping its own id", ms);
+    /* degrades rather than dying when the rows are not there (§215): the
+       break that drops them makes the line above red, and these two must
+       report rather than take the count down with them. */
+    const m0 = (ms || [])[0] || [], m1 = (ms || [])[1] || [];
+    ok(m0[2] === "" && m1[2] === "",
+       "…with the target left blank — the move never writes a figure (§544.7)", ms);
+    ok(m0[3] === 100 && m1[3] === null,
+       "…a delivered one arrives at 100, an unreported one unreported", ms);
+  }
+  /* an OUTCOME still refuses — nobody holds one, so carrying it would be a
+     guess nothing could check (§113.8). Asserted, or the refusal could be
+     quietly dropped with the deliverables' one. */
+  {
+    const st = elAbd();
+    const c = st.group.capabilities[2];
+    c.format = "projects"; c.items = [];
+    c.projects = [{ id: "cap3-PR1", name: "A programme", deliverables: [], milestones: [],
+                    outcomes: [{ id: "o1", name: "A reading", target: "90%" }] }];
+    const run = clientAt(readNow, st);
+    const blk = run(`capFoldBlockers()`);
+    ok(blk.length === 1 && JSON.stringify(blk[0].why).indexOf("nowhere to go") >= 0,
+       "an outcome on the project is named, and refuses", blk);
+    const ids = run(`capFoldPlan().map(function(r){ return r.capId; })`);
+    ok(ids.indexOf(c.id) < 0 && ids.length === 4,
+       "…and the rehearsal does not list a row the move would not carry (§53.5)", [c.id, ids]);
   }
   /* and a milestone carrying something a tactic cannot hold still refuses */
   {

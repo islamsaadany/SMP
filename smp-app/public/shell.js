@@ -16482,10 +16482,34 @@ function capFoldBlockers(){
     } else {
       if (!prs.length) why.push("holds no " + L("project").toLowerCase());
       else if (prs.length > 1) why.push("holds " + prs.length + " " + L("project").toLowerCase() + ", not one");
-      else (prs[0].milestones || []).forEach(function(m){
-        if (m && String(m.covers || "").trim() && why.indexOf("a milestone covers something") < 0)
-          why.push("a milestone covers something");
-      });
+      else {
+        /* §544.7 — AND WHAT ELSE HANGS OFF THE PROJECT. Wander's own
+           database answered a question its working copy had not been asked:
+           `Decision Making`'s one project carries FIVE DELIVERABLES beside
+           its five milestones, and the first rehearsal of this move carried
+           the milestones and dropped the deliverables without a word. A
+           pillar holds measures and tactics; a deliverable and an outcome
+           have nowhere to go until somebody says where, so they refuse.
+           §96.2 is the whole point: the move's promise is that nothing it
+           carries disappears, and a silent drop is worse than a refusal.
+
+           ISLAM ANSWERED THE DELIVERABLES, reading his own five: they are
+           all targets with an [X]% in them, so they become the capability's
+           KEY MEASURES, and the milestones — which are steps — become its
+           tactics. On a pillar, work is tactics and numbers are measures,
+           and that is what these two lists already are.
+
+           AN OUTCOME STILL REFUSES. It maps to a measure even more directly
+           than a deliverable does, and that is exactly why it is left: no
+           client holds one on a capability's project, so building it would
+           be a guess nothing could check (§113.8). The refusal says so. */
+        var o = (prs[0].outcomes || []).length;
+        if (o) why.push(o + " " + L("outcome").toLowerCase() + " with nowhere to go");
+        (prs[0].milestones || []).forEach(function(m){
+          if (m && String(m.covers || "").trim() && why.indexOf("a milestone covers something") < 0)
+            why.push("a milestone covers something");
+        });
+      }
     }
     if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
     if (String(c.def || "").trim()) why.push("a definition of its own");
@@ -16500,8 +16524,15 @@ function capFoldBlockers(){
 function capFoldPlan(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
   var top = topAsUnit(), n = (GROUP.items || []).length, out = [];
+  /* §544.7: a capability the move REFUSES is not a row the rehearsal plans.
+     The two used to agree by construction, because the plan re-tested the
+     same conditions the refusals did; the reasons live in one place now and
+     the plan reads them, so a rehearsal cannot list a row the move would
+     not carry (§53.5). */
+  var blocked = {};
+  capFoldBlockers().forEach(function(b){ blocked[b.id] = true; });
   caps.forEach(function(c){
-    if (!c || !c.id) return;
+    if (!c || !c.id || blocked[c.id]) return;
     var head = personBy(c.head), cust = personBy(c.custodian);
     /* §544.6: one row per inner pillar — one capability may become several,
        and each keeps its own name. A capability planning in projects becomes
@@ -16526,7 +16557,8 @@ function capFoldPlan(){
                was: topCapCode(c), name: c.name || pr.name || "", at: n,
                owner: pr.owner || (head ? head.name : ""),
                custodian: cust ? cust.name : "",
-               measures: 0, tactics: (pr.milestones || []).length });
+               measures: (pr.deliverables || []).length,
+               tactics: (pr.milestones || []).length });
     n++;
   });
   /* The code each row will read, worked out over the list as it WILL be —
@@ -16559,6 +16591,24 @@ function capFoldIntoTop(){
       var pr = (c.projects || []).filter(function(x){ return x && x.id === r.projectId; })[0];
       p = { id: pr.id, code: "", name: r.name, sub: "", kind: "", theme: "",
             owner: "", measures: [], tactics: [] };
+      /* §544.7: the deliverables are the measures (Islam's own reading of
+         his five — they are targets, every one with an [X]% in it). Each
+         keeps its id. A deliverable reports Not started / In progress /
+         Delivered with a per-cent (§104); a measure reports a figure and a
+         progress, so Delivered arrives at 100 and In progress at its own
+         per-cent. One nobody has reported arrives unreported, which is all
+         five of Wander's. The TARGET is left blank on purpose: the [X] is
+         inside the name, and inventing a number here would be the move
+         writing a figure, which it never does. */
+      (pr.deliverables || []).forEach(function(dl, i){
+        var m = { id: dl.id || (pr.id + "-M" + (i + 1)), name: dl.name || "",
+                  dir: "\u2265", target: "", compile: "", actual: null, progress: null };
+        var ds = String(dl.status || "").toLowerCase();
+        if (ds === "delivered" || ds === "done") m.progress = 100;
+        else if (dl.pct != null && dl.pct !== "") m.progress = Number(dl.pct);
+        if (dl.note) m.note = dl.note;
+        p.measures.push(m);
+      });
       (pr.milestones || []).forEach(function(m, i){
         var t = { id: m.id || (pr.id + "-T" + (i + 1)), name: m.name || "", owner: m.owner || "",
                   q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
@@ -16566,8 +16616,12 @@ function capFoldIntoTop(){
         if (mo != null) t["q" + (Math.floor((mo % 12) / 3) + 1)] = 1;
         if (m.finish) t.due = m.finish;
         var st = String(m.status || "").toLowerCase();
-        if (st === "done") { t.status = "Done"; t.actual = 100; }
-        else if (st === "wip") t.status = "WIP";
+        if (st === "done" || st === "delivered") { t.status = "Done"; t.actual = 100; }
+        else if (st === "wip" || st === "in progress") {
+          t.status = "WIP";
+          if (m.pct != null && m.pct !== "") t.actual = Number(m.pct);
+        }
+        if (m.note) t.note = m.note;
         p.tactics.push(t);
       });
       /* the record's own project list goes with it */

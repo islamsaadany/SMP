@@ -65970,3 +65970,24 @@ Islam answered all three, and the move was taught each answer:
 **The rehearsal, on Wander's real numbers:** four rows — C001 *Data analysis and dashboard*, C002 *FFP – Fit-For-purpose tools*, C003 *HIPOs Program & Talent Management*, C004 *Decision Making* — 19 measures and 15 tactics on the company's Capabilities tab, the three units' 8 pillars untouched, the functions untouched, and the Capabilities side gone from the navigation. Nothing was written: the state lived in a browser tab.
 
 **The check** goes from 52 agreements to 62: the two refusals §544.6 lifts are rewritten into what now happens (two pillars → six rows out of five records, each marked a capability, the directions beside them untouched; a project → one pillar keeping its own id, its milestones keeping theirs, a done milestone arriving Done at 100 and timed into its quarter), the two it keeps are asserted unchanged, and the held-by refusal is asserted at **both ends** — it stands, and it lifts the moment the office says where the capabilities live.
+
+### §544.7 — the database found five rows the working copy never showed me
+The read-only look at Wander (§542.5's discipline, three rounds of it) ended with a question nobody had asked: *what else hangs off that project?* The answer was **five deliverables**, beside the five milestones — and the move I had already rehearsed and shown Islam carried the milestones and **dropped the deliverables without a word**. The screenshot he approved was missing five rows.
+
+That is the failure the whole rehearsal discipline exists to catch, and it was caught by asking the database a question rather than by reading the working copy harder: the copy had them all along, in `projects[0].deliverables`, and I printed `outcomes` and `milestones` and stopped.
+
+**First the refusal, before anything else.** A pillar holds measures and tactics; a deliverable and an outcome had nowhere to go, so the move refuses and names them. A silent drop is worse than a refusal (§96.2).
+
+**Then the answer.** Islam, reading his own five — *Achieve [X]% growth…*, *Improve overall portfolio margin by [X]%*, *X% of new agreements moved to performance-linked models* — they are **targets**, every one with an [X]% in it, where the milestones are **steps**. On a pillar, numbers are key measures and work is tactics, and that is what the two lists already are. So: **deliverables → measures, milestones → tactics**, each row keeping its own id.
+
+A deliverable reports Not started / In progress / Delivered with a per-cent (§104); a measure reports a figure and a progress, so Delivered arrives at 100 and In progress at its own per-cent. All five of Wander's are unreported and arrive unreported. **The target is left blank on purpose:** the [X] is inside the name, and inventing a number here would be the move writing a figure, which it never does.
+
+**AN OUTCOME STILL REFUSES**, and that is deliberate. It maps to a measure more directly than a deliverable does — which is exactly why it is left: no client holds one on a capability's project, so building it would be a guess nothing could check (§113.8).
+
+**And the rehearsal cannot list a row the move would not carry.** `capFoldPlan` reads `capFoldBlockers` now rather than re-testing the same conditions in its own words (§53.5) — found by the outcome case, where the plan went on offering a row the move refused.
+
+**Wander, rehearsed again on its own numbers:** four capabilities on the company — C001 *Data analysis and dashboard*, C002 *FFP – Fit-For-purpose tools*, C003 *HIPOs Program & Talent Management*, C004 *Decision Making* — **24 measures and 15 tactics**, up from the 19 and 15 of the first pass, which is the five that were going to be lost. Every one of Decision Making's ten rows keeps its own id: D1–D5 as measures, M1–M5 as tactics.
+
+**The check** goes to 67 agreements, red three ways: dropping the deliverables again → 3, dropping the outcome refusal → 2, letting the plan list a refused row → 1.
+
+**And the register, read while we were there:** ElAbd 0 capabilities and 10 company pillars (stage 3b, done), Raya Trade 0 (Islam: *"raya old ones are already removed"*), RHI 0 with 15 company pillars, testing 0 — so **Wander's three and Meridian Group's two are all that is left** of the old kind anywhere.

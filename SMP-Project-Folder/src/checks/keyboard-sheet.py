@@ -92,7 +92,7 @@ with sync_playwright() as p:
     }""", {})
     ck("pressing ? opens it", shown.get("open") and shown.get("title") == "Keyboard", shown)
     ck("...with every section, not only the live ones (treatment A)",
-       shown.get("rows") == 6 and len(shown.get("secs") or []) == 6, shown)
+       shown.get("rows") == 7 and len(shown.get("secs") or []) == 7, shown)
     ck("...and the deck's keys are on it even though the deck is shut",
        "Presenting" in (shown.get("secs") or []), shown.get("secs"))
     ck("...drawn as keycaps", (shown.get("caps") or 0) >= 20, shown)
@@ -188,6 +188,8 @@ with sync_playwright() as p:
     # are asserted through the product's own tables rather than as `.key ===`.
     NAMED = {"Enter": '"Enter"', "Esc": '"Escape"', "Home": '"Home"', "End": '"End"',
              "F": '"f"', "W": '"w"', "P": '"p"', "N": 'KeyN', "Alt": "altKey",
+             # §545's three, matched on the PHYSICAL key like §528's Alt+N
+             "S": 'KeyS', "D": 'KeyD', "E": 'KeyE',
              "Shift": "shiftKey", "Tab": "Tab", "Space": '" "'}
     missing = []
     for sec in ("figures", "deck", "anywhere", "lists", "rows"):
@@ -196,8 +198,8 @@ with sync_playwright() as p:
             if frag and frag not in code:
                 missing.append(sec + ":" + k)
     ck("every key the sheet names is one the build tests for", not missing, missing[:5])
-    ck("...and the sheet claims six idioms, which is what the product has",
-       len(said) == 6, sorted(said.keys()))
+    ck("...and the sheet claims seven idioms, which is what the product has",
+       len(said) == 7, sorted(said.keys()))
     # NO NEW SHORTCUT: `?` is bound once, by the sheet, and nowhere else.
     qbind = len(re.findall(r'key !== "\?"|key === "\?"', code))
     ck("? is bound in exactly one place — the sheet itself", qbind == 1, qbind)

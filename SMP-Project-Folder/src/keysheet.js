@@ -42,6 +42,11 @@ var KEYSHEET = (function(){
     figures: function(){
       return typeof REP_BOXES === "string" && has(REP_BOXES);
     },
+    /* §545: live where any of the three controls is actually on screen. */
+    acts: function(){
+      return has("[data-submit]") || has("[data-repsave]") ||
+             has(".penbtn[data-page], .secpen[data-page], .editbtn[data-page]");
+    },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
     /* §544: a row worth walking is one with somewhere to walk to. Counted
@@ -81,6 +86,13 @@ var KEYSHEET = (function(){
         { keys:[["↓"], ["↑"]], what:"Move the mark, wrapping at the ends" },
         { keys:[["Home"], ["End"]], what:"First or last of what is showing" },
         { keys:[["Enter"]], what:"Take the marked row — or the first one showing" }
+      ] },
+    /* §545 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
+    { id:"acts", name:"Doing the thing", where:"a report, or a page you can edit",
+      rows:[
+        { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },
+        { keys:[["Alt","D"]], what:"Save draft" },
+        { keys:[["Alt","E"]], what:"The pen, on or off" }
       ] },
     { id:"figures", name:"Entering figures", where:"Reporting",
       rows:[

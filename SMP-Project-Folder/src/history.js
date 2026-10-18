@@ -27,7 +27,38 @@
    document, so a repaint cannot leave a handler bound to a dead element
    (§29.5). Nothing here is drawn over file:// — there is no log to read. */
 var TRAIL = (function(){
+  /* ── THE FILTERS COME BACK AS YOU LEFT THEM (§550) ────────────────────
+     Usability audit, heuristic 7: "no saved views, no default filters". The
+     four dropdowns on this page went back to Everyone / Everywhere / Every
+     kind / Today on every visit, so somebody who checks one person's changes
+     every Monday set all four again every Monday.
+
+     THE PATTERN IS THE PRODUCT'S OWN, not a new one: the people table and the
+     functions table already remember which columns you chose, in localStorage,
+     per browser (§47.1). This is that, one surface further out — and it is
+     read and written in the same shape so there is one habit and not two.
+
+     THE SEARCH BOX IS NOT REMEMBERED, and that is the one judgement here.
+     Choosing "Nadia, Mobile, last 7 days" is a position you took; half a word
+     left in a search box is not. Coming back to a page silently filtered by
+     text you do not remember typing is the kind of help that reads as a bug —
+     so `q` stays out, and starts empty every time. */
+  var FKEY = "smp.hist.filters";
   var F = { person:"", target:"", kind:"", when:"today", q:"" };   /* the page's filters */
+  (function restoreFilters(){
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(FKEY) || "null"); } catch (e) { saved = null; }
+    if (!saved || typeof saved !== "object") return;
+    ["person", "target", "kind", "when"].forEach(function(k){
+      if (typeof saved[k] === "string") F[k] = saved[k];
+    });
+  })();
+  function keepFilters(){
+    try {
+      localStorage.setItem(FKEY, JSON.stringify({
+        person: F.person, target: F.target, kind: F.kind, when: F.when }));
+    } catch (e) {}
+  }
   var rows = [], loading = false, error = null, office = false, loadedFor = null;
   var lastCache = {};      /* target → {at, rows, when} for the unit line   */
   var pending = null;      /* the row a confirmation is open for            */
@@ -229,29 +260,59 @@ var TRAIL = (function(){
 
   /* ── THE SETUP PAGE ────────────────────────────────────────────────── */
   function opt(v, label, cur){ return '<option value="' + E(v) + '"' + (v === cur ? ' selected' : '') + '>' + E(label) + '</option>'; }
-  function toolsHtml(){
-    var people = '';
+  var KIND_OPTS = [["unitPlan","Plan (unit)"],["capPlan","Plan (function)"],["unitReporting","Reporting (unit)"],["capReporting","Reporting (function)"],
+               ["gapFill","Fill"],["reportState","Report submitted"],["setup","Setup"],["access","Access"],["cycle","Cycle"],["group","Group"]];
+  var WHEN_OPTS = [["today","Today"],["yesterday","Yesterday"],["week","Last 7 days"],["month","Last 30 days"],["year","This year"],["all","All time"]];
+  function peopleList(){
+    var out = [];
     try {
       var dn = typeof displayNames === "function" ? displayNames() : null;
       (typeof PEOPLE !== "undefined" ? PEOPLE : []).filter(function(p){ return typeof personActive !== "function" || personActive(p); })
         .sort(function(a, b){ return String(a.name).localeCompare(String(b.name)); })
-        .forEach(function(p){ people += opt(p.key, (typeof knownName === "function" ? knownName(p, dn) : p.name) || p.key, F.person); });
+        .forEach(function(p){ out.push([p.key, (typeof knownName === "function" ? knownName(p, dn) : p.name) || p.key]); });
     } catch (e) {}
-    var places = '';
+    return out;
+  }
+  function placeList(){
+    var out = [];
     try {
-      places += opt("group", "The group", F.target);
-      (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){ places += opt(k, placeWord(k), F.target); });
-      Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function(k){ places += opt("fn:" + k, placeWord("fn:" + k), F.target); });
+      out.push(["group", "The group"]);
+      (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){ out.push([k, placeWord(k)]); });
+      Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function(k){ out.push(["fn:" + k, placeWord("fn:" + k)]); });
     } catch (e) {}
-    var kinds = [["unitPlan","Plan (unit)"],["capPlan","Plan (function)"],["unitReporting","Reporting (unit)"],["capReporting","Reporting (function)"],
-                 ["gapFill","Fill"],["reportState","Report submitted"],["setup","Setup"],["access","Access"],["cycle","Cycle"],["group","Group"]]
-      .map(function(k){ return opt(k[0], k[1], F.kind); }).join("");
+    return out;
+  }
+  /* ── A REMEMBERED FILTER NOBODY CAN SEE IS DROPPED (§550) ─────────────
+     The one way remembering could lie: you filter by Nadia, Nadia leaves the
+     register, and the saved key matches no option any more. The dropdown
+     would read "Everyone" — nothing selected — while the page went on asking
+     the server for Nadia's changes, and the count underneath would be hers.
+     A screen that disagrees with what it is doing is worse than a screen
+     that forgot, so a saved value that is no longer on offer is dropped and
+     unremembered BEFORE the first read (`renderPage` prunes, then asks).
+
+     AN EMPTY LIST MEANS NOT YET, NOT NOBODY: over file:// and before state
+     lands there are no people and no units to compare against, and pruning
+     then would quietly throw away a good filter. So an empty list prunes
+     nothing. The two static lists cannot be empty. */
+  function prune(){
+    var dirty = false;
+    [["person", peopleList()], ["target", placeList()], ["kind", KIND_OPTS]].forEach(function(p){
+      if (!F[p[0]] || !p[1].length) return;
+      if (!p[1].some(function(o){ return o[0] === F[p[0]]; })) { F[p[0]] = ""; dirty = true; }
+    });
+    if (!WHEN_OPTS.some(function(o){ return o[0] === F.when; })) { F.when = "today"; dirty = true; }
+    if (dirty) keepFilters();
+  }
+  function opts(list, cur){ return list.map(function(o){ return opt(o[0], o[1], cur); }).join(""); }
+  function toolsHtml(){
+    prune();
     return '<span class="hist-tools">' +
       '<input class="fld tk-search" type="search" data-hist-q placeholder="Search a row or a person…" autocomplete="off" value="' + E(F.q) + '">' +
-      '<select class="fld" data-hist-f="person" aria-label="Person">' + opt("", "Everyone", F.person) + people + '</select>' +
-      '<select class="fld" data-hist-f="target" aria-label="Place">' + opt("", "Everywhere", F.target) + places + '</select>' +
-      '<select class="fld" data-hist-f="kind" aria-label="Kind">' + opt("", "Every kind", F.kind) + kinds + '</select>' +
-      '<select class="fld" data-hist-f="when" aria-label="When">' + opt("today", "Today", F.when) + opt("yesterday", "Yesterday", F.when) + opt("week", "Last 7 days", F.when) + opt("month", "Last 30 days", F.when) + opt("year", "This year", F.when) + opt("all", "All time", F.when) + '</select>' +
+      '<select class="fld" data-hist-f="person" aria-label="Person">' + opt("", "Everyone", F.person) + opts(peopleList(), F.person) + '</select>' +
+      '<select class="fld" data-hist-f="target" aria-label="Place">' + opt("", "Everywhere", F.target) + opts(placeList(), F.target) + '</select>' +
+      '<select class="fld" data-hist-f="kind" aria-label="Kind">' + opt("", "Every kind", F.kind) + opts(KIND_OPTS, F.kind) + '</select>' +
+      '<select class="fld" data-hist-f="when" aria-label="When">' + opts(WHEN_OPTS, F.when) + '</select>' +
       '</span>';
   }
   function bodyHtml(){
@@ -419,6 +480,7 @@ var TRAIL = (function(){
     var s = ev.target && ev.target.closest && ev.target.closest("[data-hist-f]");
     if (!s) return;
     F[s.dataset.histF] = s.value;
+    keepFilters();
     load(false);
   });
   document.addEventListener("input", function(ev){

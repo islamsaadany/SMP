@@ -31,19 +31,20 @@ measurement.
 | 4 | Consistency and standards | Two findings: six date spellings; a dropdown that declares a pattern it does not implement | **CLOSED** — §537 / §537.1 (there were nine spellings, not six) and §536 (one of its three claims was wrong) |
 | 5 | Error prevention | Passes well; one break of the house rule, in the Copilot | **CLOSED** — §538. There were four breaks, and this one was the mildest |
 | 6 | Recognition rather than recall | Passes (measured) | — |
-| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **CLOSED, bar customisation** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E), §547 (Alt+G, go to a place). Customisation is left, and it is a product question |
+| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **CLOSED** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E), §547 (Alt+G, go to a place), §550 (the change log's filters remembered). "No customisation anywhere" was wrong too: five remembered things that were 18 |
 | 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **MEASURED AND CLOSED** — §548. All 257 read: not one is a description. But this file's own "zero `note:` to `section()`" was wrong — there were three, and one stood on the page |
 | 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **CLOSED — there was nothing to decide.** This section is WRONG: the codes are not on the screen. §549 |
 | 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
 
 ### Where this stands (added 2026-10-16)
 
-**This section is the only part of this file written after 10 October.** Everything below it is the original measurement and is left exactly as it was taken — including where it turned out to be wrong, because what an audit MISSED is worth as much as what it found, and three of its findings were undercounts:
+**This section is the only part of this file written after 10 October.** Everything below it is the original measurement and is left exactly as it was taken — including where it turned out to be wrong, because what an audit MISSED is worth as much as what it found, and five of its findings were undercounts:
 
 - heuristic 3 counted **26** browser dialogs over `shell.html` alone; a scan of the whole built file found **30** (§534);
 - heuristic 4(a) counted **six** date spellings by searching for the browser's own formatters; there were **nine**, three of them written out by hand from a month array (§537.1);
 - heuristic 5 named **one** control greyed the dead way while carrying a reason; there were **four**, and the one it named was the mildest of them (§538);
-- heuristic 7 says the product has **one** keyboard idiom; it had **four**, and the real finding — that none of them was written down anywhere — it does not make at all (§539).
+- heuristic 7 says the product has **one** keyboard idiom; it had **four**, and the real finding — that none of them was written down anywhere — it does not make at all (§539);
+- heuristic 7 also says there is **no customisation anywhere** and names **five** remembered things; there were **18**, twelve of them a choice somebody made. Its last three words were right, and one of them mattered: the change log's filters were the one real default-filter gap, now built (§550).
 
 **And once in the other direction**, which is the harder kind to catch, because it reads as a clean pass rather than as a gap: heuristic 8 reports **zero** `note:` arguments passed to a `section()` call. There were **three** (§548). A claimed pass nobody re-measured is how a rule quietly stops being kept.
 
@@ -218,7 +219,7 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 
 ---
 
-## 7. Flexibility and efficiency of use — GAP · **CLOSED, BAR CUSTOMISATION**
+## 7. Flexibility and efficiency of use — GAP · **CLOSED**
 
 > **Every bullet about the keyboard is answered, and its headline claim was wrong.** It says the product has ONE keyboard idiom. Measured against the sources at the time of writing it had **four**, and the finding it does not make is the one that mattered: *nothing on any screen said so*. There was no list of keys anywhere in the product.
 >
@@ -230,7 +231,9 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 >
 > - a *"go to"* list → **§547**. Alt+G, built on §536's list rather than a second one, and reading the navigation's own buttons so there is no second idea of what the places are. A key per destination is **not possible** and the audit does not claim otherwise: destinations are each tenant's own units, capabilities and functions, so there is nothing fixed to bind.
 >
-> **STILL OPEN: customisation** — no saved views, no default filters, no favourites. This file is right to name it, and it is a **product decision rather than a usability fix**, so it is left rather than built.
+> **AND THE CUSTOMISATION SENTENCE IS THIS FILE'S SIXTH MISCOUNT → §550.** It says the only per-person state in the product is five things. Measured in the sources: **18 named stores**, **12 of them a choice somebody made** — it missed the palette, the typeface, the people table's columns, the functions table's columns, the key-objective year, the terse rail, the knowledge-base tab and the chat popup's place.
+>
+> **Its last three words were right, and one of them mattered.** Favourites nobody has asked for; saved views are a feature, not a gap. **Default filters had exactly one real victim** — the change log's four dropdowns, reset to Everyone / Everywhere / Every kind / Today on every visit, so somebody who checks one person's changes every Monday set all four again every Monday. Built in **§550**, in the people table's own shape rather than a new one, with the **search box deliberately not remembered** and a saved filter nobody can see **dropped and unremembered** before the first read — because a dropdown reading "Everyone" while the page asks for someone else is worse than one that forgot.
 
 **The platform has one keyboard idiom and it is the projector.** `present.js`
 binds arrows, PageUp/PageDown, Home, End, Escape, `f` (fullscreen), `w`

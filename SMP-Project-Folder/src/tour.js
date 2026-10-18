@@ -162,7 +162,7 @@ var TOUR = (function(){
       if (at) return;
       if (r.role === "custodian" || r.role === "owner" || r.role === "fnhead") at = r.at;
     });
-    if (!at || at === "group" || String(at).indexOf("co:") === 0) return null;
+    if (!at || at === "group" || boxRef(at).kind === "mid") return null;
     return at;
   }
 
@@ -180,7 +180,7 @@ var TOUR = (function(){
 
      Stated here, in one place, which is the other half of §53's rule: where
      the two sides differ, say which and why. */
-  function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
+  function isFnPlace(k){ return boxRef(k).kind === "fn"; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
   /* §211.2 dropped `found` here for a function that plans in pillars, because

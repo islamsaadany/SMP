@@ -359,12 +359,42 @@
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    /* §540: the external half, where the box is shown apart.
+                       `drawHalf` is a no-op on a joined box, which is every
+                       box in every client today — so this line changes the
+                       markup of nothing and is passed unconditionally rather
+                       than behind a branch that would have to ask the same
+                       question twice (§53.5). */
+                    render: function(){ return drawHalf("dir", function(){ return renderUnitPlan(topAsUnit()); }); },
                     /* §520: a part owner sees their own part and nothing
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
                     when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                  /* ── §540 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
+                     The same renderer over the same list, filtered to the
+                     pillars marked Capability and labelled with the client's
+                     own word for them — which is how El Abd keeps the two
+                     tabs it reads today once its five capabilities stop being
+                     a record type of their own (spec 066, stage 3b).
+
+                     DRAWN ONLY WHILE IT HOLDS SOMETHING (§45.2, §520.2). The
+                     setting alone is not enough: a box set apart with nothing
+                     marked internal would grow a tab standing over an empty
+                     rail, and the empty state under it would be answering a
+                     question nobody asked. Today that is every box, which is
+                     why turning the setting on moves nobody until the data
+                     moves with it.
+
+                     IT SITS ABOVE `caps` AND TAKES ITS PLACE. While both
+                     could be drawn they are different things — this half is
+                     the company's own pillars, `caps` is the separate record
+                     type — and the order puts them where El Abd's eye already
+                     goes. `caps` hides itself once there is nothing left in
+                     it (`capsReachable()`), so the handover needs no flag. */
+                  { k:"plancap", ac:"g_found", label:L("capability", "bu"),
+                    render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap") && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -607,8 +637,21 @@
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
+                  /* §540: one pillar list, shown as one tab or as two. The
+                     wrapper is a no-op on a joined box — every box today — so
+                     a unit that never touches the setting draws exactly the
+                     tab it drew before. */
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
+                    render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
                     when: function(t){ return planOn(t); } },
+                  /* §540: and the internal half, with the client's own word
+                     for a capability over it, while the box is shown apart
+                     AND holds one (§45.2). Raya's units carry both kinds in
+                     one list today and keep doing so; this is the row that
+                     lets one of them be asked to show them apart. */
+                  { k:"plancap", ac:"u_plan", label:L("capability"),
+                    render: function(x){ return drawHalf("cap", function(){ return renderUnitPlan(x); }); },
+                    when: function(t){ return planOn(t) && boxHasHalf(unitLike(t), "cap"); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -1542,8 +1585,9 @@
      in Setup shows in the navigation the day it is set rather than being
      stored and read by nothing. */
   function navLabelFor(k){
-    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
-    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    var r = boxRef(k);
+    if (r.kind === "cap") return navName(capOfTarget(k));
+    if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
   function unitTabs(){
@@ -2331,8 +2375,9 @@
      arbitrary, and landing on the function is the honest answer there: the
      switch is one press away and both are in the list. */
   function capForBounded(at, reach){
-    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
-    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var ar = boxRef(at);
+    if (ar.kind !== "fn" || !boundedHere(at)) return null;
+    var fk = ar.key, own = fnOwnHolder(fk);
     var mineOf = function(c){
       return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
                         function(p){ return p.owner; });
@@ -2349,16 +2394,16 @@
     return dests.length ? dests[0].k : null;
   }
 
-  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isFn(k){ return typeof k === "string" && boxRef(k).kind === "fn" && !!fnOf(k); }
   /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
      pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
-    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+    return typeof k === "string" && boxRef(k).kind === "cap" && !!capOfTarget(k);
   }
   function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+    return typeof k === "string" && boxRef(k).kind === "mid" && !!COMPANIES[boxRef(k).key];
   }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -7513,7 +7558,7 @@
              definition of what may be held where; this only reads which of the
              two fields it points at. */
           var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
+            return boxRef(w.v).kind === "mid"; });
           var fld = atCo ? "Company" : "Unit";
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
@@ -9054,6 +9099,20 @@
           switchPlanWay("unit", this.dataset.uformat, this.value, this);
         });
       });
+      /* §540: one list or apart. No warning and no switch-and-keep, because
+         nothing is hidden either way — the same rows are drawn, in one tab or
+         in two (unlike `data-uformat`, where the OTHER way's rows go quiet).
+         STORED AS AN ABSENCE: "one list" deletes the key rather than writing
+         `false`, so a box that is set apart and set back is byte for byte the
+         box it was before anybody pressed anything (§50.6). */
+      root.querySelectorAll("select[data-usplit]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var u = UNITS[this.dataset.usplit];
+          if (this.value === "split") u[SMPRules.PILLAR_SPLIT] = true;
+          else delete u[SMPRules.PILLAR_SPLIT];
+          paint();
+        });
+      });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){
         inp.addEventListener("change", function(){
           UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
@@ -10025,10 +10084,10 @@
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -10067,9 +10126,9 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
@@ -12101,7 +12160,7 @@
     if (!it) return;
     var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
-    var scoresOf = String(ukey).indexOf("fn:") === 0
+    var scoresOf = boxRef(ukey).kind === "fn"
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),

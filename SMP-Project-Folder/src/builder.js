@@ -59,9 +59,9 @@ function builderHere(){
    own reader and answers all three, so a fourth format is a case here rather
    than a fall-through. */
 function builderRoute(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
+  var f = FUNCTIONS[r.key];
   if (!f) return null;
   var fmt = fnFormat(f);
   return fmt === "pillars" ? "fnpillars"
@@ -79,7 +79,8 @@ function builderSubjectName(target){
      a projects function is not drawn by them — asked through it, every
      projects function built here was nameless (found by driving, §51.7). */
   var t = String(target || "");
-  if (t.indexOf("fn:") === 0) { var f = FUNCTIONS[t.slice(3)]; return f ? f.name : ""; }
+  var br = boxRef(t);
+  if (br.kind === "fn") { var f = FUNCTIONS[br.key]; return f ? f.name : ""; }
   return UNITS[t] ? UNITS[t].name : "";
 }
 function builderHasPlan(target){

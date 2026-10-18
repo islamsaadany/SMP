@@ -363,12 +363,13 @@ var COPILOT = (function(){
     }
     var holder = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") {
-        var fk = t.slice(3), F = FUNCTIONS[fk];
+      var r = boxRef(t);
+      if (r.kind === "fn" && typeof FUNCTIONS !== "undefined") {
+        var fk = r.key, F = FUNCTIONS[fk];
         if (F) { if (!u) { o.def = F.def; o.keyObjectives = F.keyObjectives; } }
         holder = typeof fnHolders === "function" ? fnHolders(fk) : [];
-      } else if (t.indexOf("cap:") === 0 && typeof capById === "function") {
-        var C = capById(t.slice(4));
+      } else if (r.kind === "cap" && typeof capById === "function") {
+        var C = capById(r.key);
         if (C && !u) { o.def = C.def; o.keyObjectives = C.keyObjectives; holder = [C]; }
       }
     } catch (e) { holder = null; }
@@ -1523,7 +1524,7 @@ var COPILOT = (function(){
   function planSwot(){
     var t = place(), sw = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[t.slice(3)] || {}).swot;
+      if (boxRef(t).kind === "fn" && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[boxRef(t).key] || {}).swot;
       else if (t === "group" && typeof GROUP !== "undefined") sw = GROUP.swot;
       else { var u = typeof unitLike === "function" ? unitLike(t) : null; sw = u && u.swot; }
     } catch (e) { sw = null; }

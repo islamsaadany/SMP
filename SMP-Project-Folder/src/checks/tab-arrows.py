@@ -1,4 +1,4 @@
-"""A ROW OF TABS ANSWERS THE ARROWS (§543).
+"""A ROW OF TABS ANSWERS THE ARROWS (§544).
 
 Usability audit, heuristic 7: "no keyboard route between destinations, tabs or
 sections". The product draws EIGHT `role="tablist"` groups — the destinations,

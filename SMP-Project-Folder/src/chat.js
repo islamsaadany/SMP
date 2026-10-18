@@ -2496,7 +2496,7 @@ var CHAT = (function(){
              a conversation carrying a flagged message, so the row a person
              clicks is the same row wherever they found it. */
           '<div class="chqtabs" id="chqtabs" role="tablist">' +
-            /* §543: SAID AT THE FIRST DRAW, not only after a press. The row
+            /* §544: SAID AT THE FIRST DRAW, not only after a press. The row
                carried its state in `class="on"` alone until somebody clicked
                one, and the handler below has always set `aria-selected` — so
                a screen reader was told which tab was current only once the

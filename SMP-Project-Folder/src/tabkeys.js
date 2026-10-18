@@ -1,4 +1,4 @@
-/* ══ A ROW OF TABS ANSWERS THE ARROWS (§543) ═══════════════════════════════
+/* ══ A ROW OF TABS ANSWERS THE ARROWS (§544) ═══════════════════════════════
    Usability audit, heuristic 7: *"no keyboard route between destinations, tabs
    or sections"*. Measured, the product draws EIGHT `role="tablist"` groups —
    the destinations, the tab row, the section row, the chat queue, the Copilot

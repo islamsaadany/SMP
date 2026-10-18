@@ -16081,9 +16081,26 @@ function boxSplit(u){ return SMPRules.pillarsSplit(u); }
    before it draws itself, because a heading over nothing is not an empty
    state (§520.2, §45.2) — and today it is false for every box in every
    client, which is why turning the setting on moves nobody yet. */
+/* §543 — AND IT IS WHAT *THIS VIEWER* REACHES, NOT WHAT THE BOX HOLDS.
+   Islam, looking at El Abd with the half eye on: *"viewing as osama I
+   shouldn't see the directions part at the top … for amr I shouldn't see the
+   capabilities tab as it has nothing for him there"*.
+
+   He is right and §540 asked the wrong question. It asked *does this box hold
+   an internal pillar*, which is true of El Abd for everybody — so a direction
+   owner narrowed to two directions was still offered a Capabilities tab with
+   nothing of theirs on it, and a capability's owner was shown a Directions
+   heading over the words *there is nothing to report against*. §45.2's rule
+   with the viewer left out of it: an empty state is not an answer to a
+   question nobody asked.
+
+   SO IT GOES THROUGH `partItems`, which is the list AS DRAWN — the half AND
+   the half eye, composed (§539). For the office, who is narrowed by neither,
+   that is every pillar of the half and the answer is what it was. For a part
+   owner it is their own, and a half holding none of theirs is not offered. */
 function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
-  return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
+  return drawHalf(half, function(){ return partItems(u).length > 0; });
 }
 /* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
    headed with the client's word for a capability and its external half with
@@ -33009,10 +33026,28 @@ function renderReport(u, opt){
   }
   return pillars;
   };
-  var pillars = drawHalf("dir", halfBlock);
-  /* §542: the internal half, where the box is shown apart and holds one —
-     a heading over nothing is not an empty state (§45.2). */
-  var capPillars = boxHasHalf(u, "cap") ? drawHalf("cap", halfBlock) : "";
+  /* §543 — EACH HALF ONLY WHERE THIS VIEWER REACHES ONE, AND THE HEADING
+     ONLY WHERE THERE ARE TWO. Islam, reporting as a capability's owner:
+     *"I shouldn't see the directions part at the top, only the capabilities
+     and no need as well to see key measures and tactics.. the title is not
+     relevant. for the user he is just reporting; for the office it might be
+     useful"*.
+
+     Two rules in one sentence, and the second follows from the first: a half
+     that holds nothing of theirs is not drawn at all — no heading, no empty
+     state — and once only one half is left there is nothing for a title to
+     tell apart, so it goes too. The office, who sees both, keeps both
+     headings because for them the title is doing its job. */
+  var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
+  var showCap = boxHasHalf(u, "cap");
+  var pillars = showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap ? drawHalf("cap", halfBlock) : "";
+  /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
+     section and has always been headed, so dropping the title there would
+     take a heading off every unit in every client that never split anything
+     — which is what the first draft of this did, and what section 1b of
+     scripts/test-capability-fold.js caught. */
+  var titled = !boxSplit(u) || (showDir && showCap);
 
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
@@ -33117,15 +33152,17 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
-    (u.topLayer && partOnly() && !partItems(u).length ? "" :
-      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
+      section("", titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+              null, pillars)) +
     /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
        client's own word for a capability — the shape §520.8 settled for the
        capability RECORDS ("it should say Capabilities - key measures and
        tactics"), kept for the pillars that replace them. Empty on every box
        that is not shown apart, which is every box today. */
     (capPillars
-      ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, capPillars)
+      ? section("", titled ? L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+                null, capPillars)
       : "") +
     /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
        a section of the company's plan and never a destination (§520.1), so
@@ -55248,7 +55285,7 @@ var CHAT = (function(){
              a conversation carrying a flagged message, so the row a person
              clicks is the same row wherever they found it. */
           '<div class="chqtabs" id="chqtabs" role="tablist">' +
-            /* §543: SAID AT THE FIRST DRAW, not only after a press. The row
+            /* §544: SAID AT THE FIRST DRAW, not only after a press. The row
                carried its state in `class="on"` alone until somebody clicked
                one, and the handler below has always set `aria-selected` — so
                a screen reader was told which tab was current only once the
@@ -65462,7 +65499,7 @@ var KEYSHEET = (function(){
     },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
-    /* §543: a row worth walking is one with somewhere to walk to. Counted
+    /* §544: a row worth walking is one with somewhere to walk to. Counted
        rather than assumed — a tablist holding a single tab answers the arrows
        and has nothing to say about it. */
     tabs: function(){
@@ -65508,7 +65545,7 @@ var KEYSHEET = (function(){
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
       ] },
-    /* §543 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+    /* §544 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
        sheet exists: the alternative is a fifth idiom nobody can discover. */
     { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
       rows:[
@@ -65632,7 +65669,7 @@ var KEYSHEET = (function(){
 })();
 
 /* ── tabkeys.js ── */
-/* ══ A ROW OF TABS ANSWERS THE ARROWS (§543) ═══════════════════════════════
+/* ══ A ROW OF TABS ANSWERS THE ARROWS (§544) ═══════════════════════════════
    Usability audit, heuristic 7: *"no keyboard route between destinations, tabs
    or sections"*. Measured, the product draws EIGHT `role="tablist"` groups —
    the destinations, the tab row, the section row, the chat queue, the Copilot
@@ -67882,7 +67919,14 @@ var SYNC = (function () {
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
-                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                    /* §543: on a box shown apart the tab follows what this
+                       viewer reaches in THIS half — a capability's owner is
+                       offered no Directions tab at all, rather than one over
+                       an empty rail. Joined, it is the question it always
+                       asked. */
+                    when: function(){ return topPlanOn() &&
+                      (boxSplit(topAsUnit()) ? boxHasHalf(topAsUnit(), "dir")
+                                             : (!partOnly() || partMine())); } },
                   /* ── §540 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
                      The same renderer over the same list, filtered to the
                      pillars marked Capability and labelled with the client's
@@ -67906,7 +67950,9 @@ var SYNC = (function () {
                      it (`capsReachable()`), so the handover needs no flag. */
                   { k:"plancap", ac:"g_found", label:L("capability", "bu"),
                     render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
-                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap") && (!partOnly() || partMine()); } },
+                    /* §543: and `boxHasHalf` now answers for the viewer, so
+                       a direction owner is offered no Capabilities tab. */
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap"); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -68155,7 +68201,11 @@ var SYNC = (function () {
                      tab it drew before. */
                   { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
                     render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
-                    when: function(t){ return planOn(t); } },
+                    /* §543: a split unit's external tab follows what the
+                       viewer reaches in it; a joined one keeps its empty
+                       state, which is the door to the first pillar (§61). */
+                    when: function(t){ var b = unitLike(t);
+                      return planOn(t) && (!boxSplit(b) || boxHasHalf(b, "dir")); } },
                   /* §540: and the internal half, with the client's own word
                      for a capability over it, while the box is shown apart
                      AND holds one (§45.2). Raya's units carry both kinds in
@@ -80113,7 +80163,7 @@ var SYNC = (function () {
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();
-  /* §543: the arrows every row of tabs already promises. One handler for
+  /* §544: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).

@@ -46,6 +46,10 @@
      · the empty capabilities section kept on Performance →  2 of 38 red
      · Reporting drawing no second section                →  2 of 38 red
      · the deck naming both kinds on a JOINED box          →  2 of 42 red
+     · `boxHasHalf` asking the BOX instead of the VIEWER    →  4 of 52 red
+       (and its output is Islam's own symptom, word for word: "This unit has
+        no Pillars yet, so there is nothing to report against")
+     · the heading never dropping                           →  1 of 52 red
 
    Usage:
      node scripts/test-capability-fold.js
@@ -354,6 +358,73 @@ console.log("5 · the pages, before the move and after it");
      deck.indexOf("Pillars & Capabilities") >= 0,
      "and the deck's roll-call lists them under a heading naming both kinds",
      deck.slice(deck.indexOf("E-Commerce Growth"), deck.indexOf("E-Commerce Growth") + 120));
+}
+
+/* ── 6 · AND EACH PERSON IS OFFERED ONLY THE HALF THEY HAVE (§543) ───────
+   Islam, on the live client with the half eye on: *"viewing as osama I
+   shouldn't see the directions part at the top … for amr I shouldn't see the
+   capabilities tab as it has nothing for him there"*, and *"drop the heading
+   when there's only one half"*.
+
+   §540 asked whether the BOX held a half; this asks whether the VIEWER does.
+   Measured on three people at once, because the rule is only right if it
+   narrows two of them and leaves the third alone — a test on the part owners
+   alone would pass over a build that hid the halves from everybody. */
+console.log("6 · each person is offered the half they have, and no heading when it is alone");
+{
+  const s = elAbd();
+  /* TWO PART OWNERS, MADE (§255). The worked example's people all hold a unit
+     seat or a function's, so none of them is narrowed by the half eye — a
+     section built on them would measure nothing. These two hold one part and
+     nothing else, which is what §533's rule means by a part owner. */
+  const capMan = { key: "capman", name: "Osama Yousef", title: "Quality", unit: null };
+  const dirMan = { key: "dirman", name: "Amr Hassan", title: "Retail", unit: null };
+  s.people = s.people.concat([capMan, dirMan]);
+  s.group.capabilities[0].head = capMan.key;      /* the first capability is his */
+  s.group.items[0].owner = dirMan.name;           /* the first direction is hers */
+  s.group.dirScope = "part";                      /* the half eye, as El Abd has it */
+  const run = clientAt(readNow, s);
+  run(`capFoldIntoTop();`);
+  /* String.raw, because a plain template literal eats the escapes before the
+     vm sees them — `\s` became a bare "s" and the count read nought while the
+     headings were plainly there. */
+  const H = String.raw`(function(){ var r = renderReport(topAsUnit()).replace(/<[^>]*>/g," ")
+      .replace(/&mdash;/g,"\u2014").replace(/\s+/g," ");
+    return (r.match(/\u2014 Key [Mm]easures and Tactics/g) || []).length; })()`;
+  const office = run(`PEOPLE.filter(function(p){ return p.role === "super"; })[0].key`);
+  const read = function (key) {
+    run("VIEWER = " + JSON.stringify(key) + ";");
+    return { roles: run(`personRoles(viewer()).map(function(r){ return r.role; }).sort()`),
+             narrowed: run(`partOnly()`),
+             dir: run(`boxHasHalf(topAsUnit(), "dir")`),
+             cap: run(`boxHasHalf(topAsUnit(), "cap")`),
+             heads: run(H) };
+  };
+  const o = read(office), c = read(capMan.key), d = read(dirMan.key);
+  ok(JSON.stringify(c.roles) === JSON.stringify(["dirowner"]) &&
+     JSON.stringify(d.roles) === JSON.stringify(["dirowner"]),
+     "both made people hold one part role and nothing else", [c.roles, d.roles]);
+  ok(o.narrowed === false && c.narrowed === true && d.narrowed === true,
+     "the office is not narrowed and the two part owners are — or this proves nothing",
+     [o.narrowed, c.narrowed, d.narrowed]);
+  ok(o.dir === true && o.cap === true, "the office is offered both halves", o);
+  ok(o.heads === 2, "and both headings, which is what tells them apart for them", o.heads);
+  ok(c.cap === true && c.dir === false,
+     "a capability's owner is offered the capabilities half and NOT the directions one", c);
+  ok(d.dir === true && d.cap === false,
+     "a direction's owner is offered the directions half and NOT the capabilities one", d);
+  ok(c.heads === 0 && d.heads === 0,
+     "and neither gets a heading, because neither has a second half to tell it from",
+     [c.heads, d.heads]);
+  run("VIEWER = " + JSON.stringify(capMan.key) + ";");
+  const capPage = WORDS(run(`renderReport(topAsUnit())`));
+  ok(capPage.indexOf("nothing to report against") < 0,
+     "a capability owner is never told the company has no directions", capPage.slice(0, 140));
+  ok(capPage.indexOf(CAPS[0]) >= 0, "and their own capability is on the page", capPage.slice(0, 140));
+  run("VIEWER = " + JSON.stringify(dirMan.key) + ";");
+  const dirPage = WORDS(run(`renderReport(topAsUnit())`));
+  ok(CAPS.every(function (n) { return dirPage.indexOf(n) < 0; }),
+     "and a direction owner's page names no capability at all", dirPage.slice(0, 140));
 }
 
 console.log("");

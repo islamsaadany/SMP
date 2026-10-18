@@ -1,7 +1,7 @@
 """THREE ACTIONS, FROM THE KEYBOARD (§546).
 
 Usability audit, heuristic 7: "no accelerator for Submit, Save draft, or the
-pen". §544 answered the navigation half with the arrows every row of tabs
+pen". §552 answered the navigation half with the arrows every row of tabs
 already promised. This half had NO standard to follow — somebody had to pick
 the keys, and Islam picked Alt+S, Alt+D, Alt+E.
 

@@ -66411,7 +66411,7 @@ var KEYSHEET = (function(){
     },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
-    /* §544: a row worth walking is one with somewhere to walk to. Counted
+    /* §552: a row worth walking is one with somewhere to walk to. Counted
        rather than assumed — a tablist holding a single tab answers the arrows
        and has nothing to say about it. */
     tabs: function(){
@@ -66465,7 +66465,7 @@ var KEYSHEET = (function(){
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
       ] },
-    /* §544 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+    /* §552 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
        sheet exists: the alternative is a fifth idiom nobody can discover. */
     { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
       rows:[
@@ -66589,7 +66589,7 @@ var KEYSHEET = (function(){
 })();
 
 /* ── tabkeys.js ── */
-/* ══ A ROW OF TABS ANSWERS THE ARROWS (§544) ═══════════════════════════════
+/* ══ A ROW OF TABS ANSWERS THE ARROWS (§552) ═══════════════════════════════
    Usability audit, heuristic 7: *"no keyboard route between destinations, tabs
    or sections"*. Measured, the product draws EIGHT `role="tablist"` groups —
    the destinations, the tab row, the section row, the chat queue, the Copilot
@@ -66688,7 +66688,7 @@ var TABKEYS = (function(){
 /* ── actionkeys.js ── */
 /* ══ THREE ACTIONS, FROM THE KEYBOARD (§546) ═══════════════════════════════
    Usability audit, heuristic 7: *"no accelerator for Submit, Save draft, or
-   the pen"*. §544 answered the navigation half of that finding with the arrows
+   the pen"*. §552 answered the navigation half of that finding with the arrows
    every row of tabs already promised; this is the other half, and unlike the
    arrows it had NO standard to follow — somebody had to pick the keys.
 
@@ -66737,7 +66737,7 @@ var ACTIONKEYS = (function(){
 
   /* WHAT IS ACTUALLY ON THE SCREEN. A control the page is not drawing is not
      one a key can reach, and `offsetParent` is null for anything hidden or
-     inside something hidden — the same test §544 uses on a row of tabs. */
+     inside something hidden — the same test §552 uses on a row of tabs. */
   function live(sel){
     var all = document.querySelectorAll(sel);
     for (var i = 0; i < all.length; i++) {
@@ -81435,7 +81435,7 @@ var SYNC = (function () {
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();
-  /* §544: the arrows every row of tabs already promises. One handler for
+  /* §552: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
   /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */

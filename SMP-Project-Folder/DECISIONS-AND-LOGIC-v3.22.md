@@ -65926,15 +65926,23 @@ Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing a
 **The check** gains a sixth section, measured on three people at once — the office and two part owners the file makes, because the worked example's people all hold a unit or function seat and none of them is narrowed. Asserting on the part owners alone would pass over a build that hid the halves from everybody. 52 agreements. Two deliberate breaks: `boxHasHalf` asking the box → 4 red, and its output is Islam's own symptom word for word; the heading never dropping → 1 red.
 
 
-> **TWO §544s, AND NEITHER IS RENUMBERED HERE.** Stage 4 (this branch) and the
-> tab-arrow audit (main) were both written as §544 while apart, the same way
-> §531–§536 collided before. The merge keeps BOTH in full and renames
-> NEITHER, because a number is referenced from the code that implements it —
-> 169 places across 36 files for stage 4, a comparable spread for the audit's
-> run — and renumbering is Islam's convention to set, not a side effect of a
-> merge. Stage 4 and its §544.1–§544.13b run first below; the audit's §544
-> and everything after it follow, unchanged. **Owed: one of the two renamed,
-> with its references, as its own change.**
+> **TWO §544s, AND THE AUDIT'S IS THE ONE THAT MOVED.** Stage 4 (this branch)
+> and the tab-arrow audit (main) were both written as §544 while apart. Islam:
+> *"keep §544 for stage 4 and renumber main's one"* — so the audit is **§552**
+> and its re-carry **§552.1**, placed after §551.3 where they belong in order,
+> and stage 4 keeps §544 and its §544.1–§544.13c.
+>
+> **WHY THAT WAY ROUND, MEASURED RATHER THAN ASSUMED.** Stage 4 is referenced
+> from 169 places across 36 files; the audit's §544 from **eight**, each read
+> and classified before it was touched, and its §544.1 from none at all — the
+> number existed only in this document. The cheaper one moved.
+>
+> **AND IT HAD MOVED TWICE BEFORE.** §546 records this same work renumbered
+> §540 → §543 → §544 as main landed stages 3a and 3b underneath it. That line
+> now reads §540 → §543 → §544 → §552, so the trail stays whole. The stale
+> reference §546 already admits to — `d5463c7`'s commit message calling the
+> re-carry §543.1 — is still stale and still pushed; it is simply one number
+> further behind, and §552.1 is where that work lives.
 
 ## §544 — Stage 4: seven set-up steps become three, and the tree is the screen
 Islam, having pressed the mockup through eight versions: *"the shape is good, let's build stage 4"*. Spec 066 §6, and the first four stages' reason exactly: *"every change requires me a new addition"*.
@@ -66290,40 +66298,84 @@ where the rail would not be drawn, and they do what a real press does
 pen and went from 1 red to 4.
 
 
-## §544 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
-The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
+### §544.13c — main merged in, and the three comparisons run again
 
-**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
+Islam: *"now merge main and re-run the three comparisons"* — closing §544.12's
+own open item, which said in as many words that comparing two tips is not
+comparing their merge.
 
-**TWO DECISIONS, BOTH DELIBERATE:**
+`origin/main` was 27 commits ahead and this branch 24. **Four conflicts, and
+none in a source file:** both docs, and the two generated files, which were
+REGENERATED from the merged sources rather than hand-resolved — a built file
+settled by hand is a build nobody can reproduce.
 
-- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
-- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
+**THE §544 COLLISION IS REAL AND IS NOT RESOLVED HERE.** Stage 4 and main's
+tab-arrow audit were both written as §544 while apart. Both are kept in full
+and neither renamed, because a number is referenced from the code that
+implements it — 169 places across 36 files for stage 4, a comparable spread
+for the audit's — and renumbering is Islam's convention to set, not a side
+effect of a merge. A note at the join says so. **Owed as its own change.**
 
-**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
+**THE THREE COMPARISONS, re-run against main's tip (4b88ea1):**
 
-**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
+| Client | Result |
+|---|---|
+| **El Abd**, as the stage-3b move left it — 10 company pillars, 5 of them capabilities, no records | **NOTHING MOVED** |
+| **Wander**, as the SQL left it — 4 company pillars, all capabilities, no records | **NOTHING MOVED** |
+| **the demo sample**, which still holds one record | **5 answers moved — all of them the intended change** |
 
-**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
+The demo's capability leaves the sidebar and arrives in the company's plan;
+its Strategy tab leads and carries a Capabilities section; `capAtTop` reads
+true. That is §544.13 happening, on the one client that still had somewhere
+to move from. It is the sample compiled into the build, not a client.
 
-**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
+**AND THE TWO UNREAD ANSWERS WERE ASKED DIRECTLY**, because the script says
+in its own header that a question reading nothing on both builds is not
+evidence — which is exactly how §544.12's regression got past it once. The
+Copilot's separate-Capabilities-section decision was put to the rule behind
+it on each build: **same for El Abd and Wander, moved for the demo**, as
+designed.
 
-**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
+**MEASURING THE MERGE FOUND TWO REDS THAT MEASURING THE TIPS HAD NOT**, and
+both were main's own checks — green on main, red here, which is the only
+signal worth having. Neither was a product fault:
 
-## §544.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
-**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
+- **`owner-from-the-register`** pressed a button whose whole text is
+  "Functions". The demo used to carry THREE nav sides, drawn as three
+  buttons; its capabilities are in the company plan now, so it carries TWO,
+  drawn as §41.8's two-sided toggle — one button holding two spans. Nothing
+  about the switch changed; the demo joined the group every client without
+  capabilities was already in. It presses `[data-fold="fns"]` now, which
+  names the side on BOTH shapes and is what the other checks here press
+  (§53.5).
+- **`action-keys`** appended its fixture pen at the end of the body and
+  relied on the landing page having none of its own — true while the demo
+  opened on Performance. It opens on Strategy now, which HAS a pen, so Alt+E
+  pressed that one. The fixture goes FIRST in the DOM: the precondition was
+  always "the fixture is the pen the key finds", and it is made rather than
+  left to luck (§255).
 
-`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
+Both fixes were then run against **main's own build** and pass there too — a
+fix that only works on one side of a merge is not a fix.
 
-**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
+**One more thing the merge moved.** `test-capability-fold`'s §1b compares two
+builds, and main changed something for EVERY owner on every page (§551's
+"not in the register" flag), which a cross-build comparison cannot tell apart
+from a move this branch caused — it went red naming Mohamed Rizk. The pinned
+baseline moves from `b773ac3` to `4b88ea1`, and §1's Reporting exception is
+read out: §542 is on both sides now, so **every page is word for word what it
+was, with nothing excluded** — a stronger claim than the one it replaces, and
+the fill bar is asserted present in this build instead.
 
-§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
-
-**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
-
-**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
-
-**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+**Proof after the merge:** `capability-entry` 52/0, `capability-first`,
+`-seats`, `-remove`, `-pillar-edit`, `-report-column` 16/0, `plan-level`,
+`shape`, `structure`, `top-plan`, `client-setup`, `direction-part`,
+`direction-seats` all good; main's `tab-arrows`, `go-to-a-place`,
+`keyboard-sheet`, `filters-remembered`, `no-grey-descriptions`,
+`owner-from-the-register`, `action-keys` all good;
+`test-capability-fold` 65/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
+Proved able to fail: `pillarIsCap` forced false reds it 19 ways, and
+breaking `renderGroupFoundation` reds §1's rewritten assertion by name.
 
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
@@ -66343,7 +66395,7 @@ From the live deployment, 18 October 2026. A direction owner on El Abd entered t
 **The check** gains §545, at both ends and in both shapes (§94.2, §53.5): the company page where the pillar is a DIRECTION — the owner and the custodian enter a figure, a row note, and all of them in one save; the direction beside theirs is refused; the target in their own table stays the office's — and a unit's page where it is a plain pillar, by the other road (`onlyOwnLines`), so a fix to one that missed the other cannot pass. The figure is first asserted to classify as `unitReporting@group`, or a build that called it the plan would refuse the owner for a different reason and the rest would not say which. Five deliberate breaks against the unfixed file, reproducing Islam's sentence word for word including its count. 1094 agreements, 0 red.
 
 ## §546 — Three actions from the keyboard: Alt+S, Alt+D, Alt+E (usability audit, heuristic 7; 2026-10-18)
-The audit: *"no accelerator for Submit, Save draft, or the pen"*. §544 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
+The audit: *"no accelerator for Submit, Save draft, or the pen"*. §552 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
 
 **ALT IS THE PRODUCT'S OWN MODIFIER AND NOT A NEW ONE** (§528 chose it for the reporting walk), and the one thing wrong with it here was already solved there: on a Mac, Option+S types "ß" and `e.key` says so, so the match is on the **physical key** (`e.code`) and never on the character. Reusing that answer is the whole reason Alt was safe to pick again. **The check asserts it over the built file**, because a build matching `e.key` would pass every behavioural assertion on this machine and fail for every Mac.
 
@@ -66359,7 +66411,7 @@ The pen's selector is read from the check that already walks it, which records t
 
 **CHECK.** `checks/action-keys.py` — green here, **10 red on the build before**.
 
-**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§544.1**.
+**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 → §552 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§552.1**.
 
 
 ## §547 — Going to a place: Alt+G (usability audit, heuristic 7; 2026-10-18)
@@ -66531,81 +66583,37 @@ Asked **where** stakeholders are written, the answer was worth having before any
 
 **NOT DONE, and named (§54.5):** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.
 
-### §544.13c — main merged in, and the three comparisons run again
+## §552 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
 
-Islam: *"now merge main and re-run the three comparisons"* — closing §544.12's
-own open item, which said in as many words that comparing two tips is not
-comparing their merge.
+**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
 
-`origin/main` was 27 commits ahead and this branch 24. **Four conflicts, and
-none in a source file:** both docs, and the two generated files, which were
-REGENERATED from the merged sources rather than hand-resolved — a built file
-settled by hand is a build nobody can reproduce.
+**TWO DECISIONS, BOTH DELIBERATE:**
 
-**THE §544 COLLISION IS REAL AND IS NOT RESOLVED HERE.** Stage 4 and main's
-tab-arrow audit were both written as §544 while apart. Both are kept in full
-and neither renamed, because a number is referenced from the code that
-implements it — 169 places across 36 files for stage 4, a comparable spread
-for the audit's — and renumbering is Islam's convention to set, not a side
-effect of a merge. A note at the join says so. **Owed as its own change.**
+- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
+- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
 
-**THE THREE COMPARISONS, re-run against main's tip (4b88ea1):**
+**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
 
-| Client | Result |
-|---|---|
-| **El Abd**, as the stage-3b move left it — 10 company pillars, 5 of them capabilities, no records | **NOTHING MOVED** |
-| **Wander**, as the SQL left it — 4 company pillars, all capabilities, no records | **NOTHING MOVED** |
-| **the demo sample**, which still holds one record | **5 answers moved — all of them the intended change** |
+**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
 
-The demo's capability leaves the sidebar and arrives in the company's plan;
-its Strategy tab leads and carries a Capabilities section; `capAtTop` reads
-true. That is §544.13 happening, on the one client that still had somewhere
-to move from. It is the sample compiled into the build, not a client.
+**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
 
-**AND THE TWO UNREAD ANSWERS WERE ASKED DIRECTLY**, because the script says
-in its own header that a question reading nothing on both builds is not
-evidence — which is exactly how §544.12's regression got past it once. The
-Copilot's separate-Capabilities-section decision was put to the rule behind
-it on each build: **same for El Abd and Wander, moved for the demo**, as
-designed.
+**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
 
-**MEASURING THE MERGE FOUND TWO REDS THAT MEASURING THE TIPS HAD NOT**, and
-both were main's own checks — green on main, red here, which is the only
-signal worth having. Neither was a product fault:
+**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
 
-- **`owner-from-the-register`** pressed a button whose whole text is
-  "Functions". The demo used to carry THREE nav sides, drawn as three
-  buttons; its capabilities are in the company plan now, so it carries TWO,
-  drawn as §41.8's two-sided toggle — one button holding two spans. Nothing
-  about the switch changed; the demo joined the group every client without
-  capabilities was already in. It presses `[data-fold="fns"]` now, which
-  names the side on BOTH shapes and is what the other checks here press
-  (§53.5).
-- **`action-keys`** appended its fixture pen at the end of the body and
-  relied on the landing page having none of its own — true while the demo
-  opened on Performance. It opens on Strategy now, which HAS a pen, so Alt+E
-  pressed that one. The fixture goes FIRST in the DOM: the precondition was
-  always "the fixture is the pen the key finds", and it is made rather than
-  left to luck (§255).
+## §552.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
+**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
 
-Both fixes were then run against **main's own build** and pass there too — a
-fix that only works on one side of a merge is not a fix.
+`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
 
-**One more thing the merge moved.** `test-capability-fold`'s §1b compares two
-builds, and main changed something for EVERY owner on every page (§551's
-"not in the register" flag), which a cross-build comparison cannot tell apart
-from a move this branch caused — it went red naming Mohamed Rizk. The pinned
-baseline moves from `b773ac3` to `4b88ea1`, and §1's Reporting exception is
-read out: §542 is on both sides now, so **every page is word for word what it
-was, with nothing excluded** — a stronger claim than the one it replaces, and
-the fill bar is asserted present in this build instead.
+**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
 
-**Proof after the merge:** `capability-entry` 52/0, `capability-first`,
-`-seats`, `-remove`, `-pillar-edit`, `-report-column` 16/0, `plan-level`,
-`shape`, `structure`, `top-plan`, `client-setup`, `direction-part`,
-`direction-seats` all good; main's `tab-arrows`, `go-to-a-place`,
-`keyboard-sheet`, `filters-remembered`, `no-grey-descriptions`,
-`owner-from-the-register`, `action-keys` all good;
-`test-capability-fold` 65/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
-Proved able to fail: `pillarIsCap` forced false reds it 19 ways, and
-breaking `renderGroupFoundation` reds §1's rewritten assertion by name.
+§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
+
+**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
+
+**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
+
+**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.

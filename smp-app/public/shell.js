@@ -16095,7 +16095,7 @@ function boxSplit(u){ return SMPRules.pillarsSplit(u); }
    question nobody asked.
 
    SO IT GOES THROUGH `partItems`, which is the list AS DRAWN — the half AND
-   the half eye, composed (§539). For the office, who is narrowed by neither,
+   the half eye, composed (§542). For the office, who is narrowed by neither,
    that is every pillar of the half and the answer is what it was. For a part
    owner it is their own, and a half holding none of theirs is not offered. */
 function boxHasHalf(u, half){

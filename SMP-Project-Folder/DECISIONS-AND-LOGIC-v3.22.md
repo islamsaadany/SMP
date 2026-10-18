@@ -65814,6 +65814,17 @@ Three functions in `config-data.js`: `capFoldBlockers()` (what stops it, by name
 
 Eight deliberate breaks, each counted: the move refusing nothing → 8 red; the owner not carried → 1; the row not marked internal → 14; the split not set → 5; the Temple reading records only → 2; the deck heading dropping a kind → 1; the empty Performance section kept → 2; Reporting drawing no second section → 2. And `checks/top-plan.py` caught a mistake of mine that none of those would have: rewriting the Temple's base, I dropped the Structure step's own gate, so a client with capabilities switched OFF would have been shown a base again. Both guards are there now, in that order.
 
+## §542.1 — The deck's roll-call asks the setting, not the mark (spec 066 stage 3b; 2026-10-18)
+**NOT THIS SESSION'S WORK.** It was built and pushed as `c23a62d` from another session, under the number §539.1 — which the renumber of §537–§539 to §540–§542 made §542.1, and which no entry was ever written for. It is written here because A7/A8 says the books carry the work, and it was **found by reading every § in the recent commits against this file** rather than by anybody noticing. The code was verified against the commit's own account before this was written; the account is accurate, and what was not re-run is named at the end.
+
+**`checks/deck-figures.py` went red on §542, and it was right.** The roll-call heading named **both kinds** whenever the list held a pillar marked Capability. **Six of the worked example's ten units carry both kinds in ONE JOINED list**, so they read *"Pillars & Capabilities"* on their decks overnight, and their marked rows gained a *"Capability"* sub-line they never had — **exactly the change spec 066 exists to avoid**, and committed by the work meant to prevent it.
+
+**THE SETTING DECIDES, NEVER THE MARK ALONE.** Both the sub-line and the heading now ask `boxSplit(u)` first, which is the rule every other surface in §540–§542 already followed. Verified present on main today at `present.js:535` and `present.js:569`.
+
+**AND THE GAP IN ITS OWN CHECK WAS CLOSED, which is the part worth keeping.** `test-capability-fold` measured the **COMPANY**, whose capabilities are records — so nothing in it ever asked what the new code does to a **joined box holding both kinds**, the one shape the fault lived in. Section 1b does: the plan, the reporting and the deck of every such unit, word for word against the build before §542. **42 agreements, and the break (asking the mark) turns it red 2 of 42** — verified as the script's own words at `scripts/test-capability-fold.js:48`.
+
+**NOT VERIFIED HERE (§54.5):** neither `deck-figures.py` nor `test-capability-fold.js` was re-run for this entry. The code and the counts were read; the checks were not executed. The entry records work already on main, and re-running another stream's suite is not what writing it down requires — but saying so is.
+
 ## §542.2 — Stage 3b (d): the SQL, generated from the move and rehearsed on a real Postgres
 Islam set the terms for the data move: the list first, a rehearsal on a copy, *"and the final step handed over as SQL for Neon's SQL editor"*. This is the SQL, and it has been run.
 

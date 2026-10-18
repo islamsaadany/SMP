@@ -166,6 +166,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/refusal-in-place/2026-10-14_nine-notices.html` | Nine boxes that were not questions at all &mdash; each fired AFTER the platform had refused and changed nothing. Four shapes cover all nine, and three of the four were already in the product. **Approved and BUILT** (&sect;534.2) |
 | `../../design-mockups/remove-a-line/2026-10-14_the-line-asks.html` | One sentence across six screens, hanging off a 24-pixel &times; beside a line somebody is mid-typing. Two treatments; A was recommended and **Islam chose B** &mdash; the line stays readable and the question opens under it, the cost (the list grows by a strip) known and accepted. **BUILT** (&sect;534.4) |
 | `../../design-mockups/grey-with-a-reason/2026-10-15_before-and-after.html` | Four controls greyed the DEAD way while carrying an explanation nobody can reach, drawn before and after. The dashed struck-through box is the sentence as it exists today: written, and shown to nobody. Islam: *"proceed with all"*. **Approved and BUILT** (&sect;538) |
+| `../../design-mockups/shortcuts-sheet/2026-10-18_what-the-keys-do.html` | The keys the platform already answers, written down for the first time &mdash; two treatments: everything with what works HERE marked, or only what works where you are standing. **Islam chose A**, because B never tells a reporter the deck has keys. Every line was read out of the file that binds it. **Approved and BUILT** (&sect;539) |
 
 ### Drawn, awaiting a decision
 

@@ -65694,6 +65694,23 @@ Islam, 2026-10-15, of §536: *"the concept is right but you are having the mark 
 
 Published as version 2. The five sign-off points of §536 §5 stand unchanged; the correction is to the drawing, not to the design.
 
+## §539 — What the keys do: the four idioms, written down (usability audit, heuristic 7; 2026-10-18)
+The audit's headline finding is that the platform has ONE keyboard idiom and it is the projector. Measured against the sources it has **four** — the projector, §528's reporting keys, §536's dropdown and `arrange.js`'s row move — plus Escape bound fifteen times and Enter eleven.
+
+**AND THE FINDING THE AUDIT DOES NOT MAKE is the one this answers: nothing on any screen said so.** There was no list of keys anywhere in the product; every source was searched. §528's hints ride a hover and a per-control `aria-keyshortcuts`, so the only way to discover Alt+Enter was to hover the one button carrying it. Four idioms, no index.
+
+**THIS BOUND NO NEW SHORTCUT.** Every key on the sheet already worked; what is new is that they are written down. **Islam chose treatment A** of the drawing (`design-mockups/shortcuts-sheet/`): the whole product, with the sections that work HERE marked — so a reporter learns the deck and the lists have keys too, which is the thing nobody could find out. Treatment B showed only what was live where you stand, and its cost was exactly the fault this section exists to fix: it answers *what can I press now* and never *what does this product do*.
+
+**EACH SECTION ASKS THE MODULE THAT OWNS IT** whether it is live, through that module's own marker and never a rule copied into the sheet (§53.5): the reporting boxes through `REP_BOXES` itself, the string `shell.html` names once and the walks already read; the dropdown through `data-ss`; the row move through `.grip`; the deck through `#deckroot.on`.
+
+**TWO REFUSALS, BOTH DELIBERATE AND BOTH ASSERTED.** `?` does NOT fire while somebody is typing — a question mark is a character people mean to write, and most of this product is fields, so the guard is the one §528's keys already use. And `?` does NOT open over the deck: the modal is outside the fullscreen element, so there it would open where nobody can see it, which is the control-that-looks-live-and-does-nothing §534 spent thirty conversions removing.
+
+**TWO WAYS IN**, because a sheet reachable only by knowing the key to reach it is this section's own fault one level up: `?`, and a `?` in the top bar beside Light and Dark carrying its own `aria-keyshortcuts`.
+
+**A SECTION NOT LIVE HERE IS QUIETER, NEVER HIDDEN**, and the check asserts it: that is the whole argument for A over B, so a build that quietly hid them would pass every other assertion.
+
+**CHECK.** `checks/keyboard-sheet.py` — green here, **18 red on the build before**. It proves "no new shortcut" rather than claiming it: `?` appears as a binding in exactly ONE place in the whole built file, and every key the sheet names is one the build already tests for, so changing a binding without changing the sheet goes red.
+
 ## §540 — Stage 3b (a): joined or split, as one setting on the box
 Islam, 2026-10-15, authorising it: *"go ahead with a"*. The mockup it builds is §536 / §536.1, signed off at version 2.
 
@@ -65881,6 +65898,41 @@ Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing a
 **The check** gains a sixth section, measured on three people at once — the office and two part owners the file makes, because the worked example's people all hold a unit or function seat and none of them is narrowed. Asserting on the part owners alone would pass over a build that hid the halves from everybody. 52 agreements. Two deliberate breaks: `boxHasHalf` asking the box → 4 red, and its output is Islam's own symptom word for word; the heading never dropping → 1 red.
 
 
+## §544 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
+
+**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
+
+**TWO DECISIONS, BOTH DELIBERATE:**
+
+- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
+- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
+
+**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
+
+**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
+
+**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
+
+**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
+
+**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
+
+## §544.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
+**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
+
+`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
+
+**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
+
+§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
+
+**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
+
+**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
+
+**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
 
@@ -65897,3 +65949,23 @@ From the live deployment, 18 October 2026. A direction owner on El Abd entered t
 **Carried into `smp-app/lib/authorize.cjs`** in the same edit. That copy is the rewrite's save path (`lib/save.ts`), it is one section behind the live file (§531's address parse), and leaving it would plant the same fault in the app being built.
 
 **The check** gains §545, at both ends and in both shapes (§94.2, §53.5): the company page where the pillar is a DIRECTION — the owner and the custodian enter a figure, a row note, and all of them in one save; the direction beside theirs is refused; the target in their own table stays the office's — and a unit's page where it is a plain pillar, by the other road (`onlyOwnLines`), so a fix to one that missed the other cannot pass. The figure is first asserted to classify as `unitReporting@group`, or a build that called it the plan would refuse the owner for a different reason and the rest would not say which. Five deliberate breaks against the unfixed file, reproducing Islam's sentence word for word including its count. 1094 agreements, 0 red.
+
+## §546 — Three actions from the keyboard: Alt+S, Alt+D, Alt+E (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no accelerator for Submit, Save draft, or the pen"*. §544 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
+
+**ALT IS THE PRODUCT'S OWN MODIFIER AND NOT A NEW ONE** (§528 chose it for the reporting walk), and the one thing wrong with it here was already solved there: on a Mac, Option+S types "ß" and `e.key` says so, so the match is on the **physical key** (`e.code`) and never on the character. Reusing that answer is the whole reason Alt was safe to pick again. **The check asserts it over the built file**, because a build matching `e.key` would pass every behavioural assertion on this machine and fail for every Mac.
+
+**SUBMIT JUMPS, THE OTHER TWO ACT, and the line is where the work goes.** Islam, asked directly whether one key should send a report: *"jump to the button"*. So Alt+S lands the cursor ON Submit and the person presses Enter. Save draft and the pen act on the single press, and the rule behind the difference is said rather than left as an inconsistency: **Submit leaves your screen and the other two do not.** A draft is yours until you submit it; the pen only decides whether you can type on the page in front of you. Neither is seen by anybody else, so neither is worth a second press. Submit is read by the office the moment it lands.
+
+**AND JUMPING TO A HELD SUBMIT IS BETTER THAN PRESSING ONE.** When the report is not ready, §538 draws Submit held with its reason in a bubble that opens ON FOCUS — so Alt+S on an unready report lands on the button AND opens the sentence saying what is missing. The accelerator and the refusal were built two sections apart and **meet here without either being changed**.
+
+**A HELD CONTROL IS NOT PRESSED BY A KEY EITHER.** A shortcut that clicked through a refusal would be the one way round something the rest of the product enforces (§538); the key lands on it instead.
+
+The pen's selector is read from the check that already walks it, which records that `.penbtn[data-page]` alone was not enough (§53.5).
+
+**THE KEYS SAY THEMSELVES** on the buttons they belong to, marked in the paint tail beside §528's own marks — so somebody who never opens the sheet still meets them (§61: said only where the control exists). And **the sheet learned them the same day** (§539): it claims seven idioms now, and its check counts them and verifies these three letters against what the build tests for.
+
+**CHECK.** `checks/action-keys.py` — green here, **10 red on the build before**.
+
+**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§544.1**.
+

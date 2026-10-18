@@ -31,7 +31,7 @@ measurement.
 | 4 | Consistency and standards | Two findings: six date spellings; a dropdown that declares a pattern it does not implement | **CLOSED** — §537 / §537.1 (there were nine spellings, not six) and §536 (one of its three claims was wrong) |
 | 5 | Error prevention | Passes well; one break of the house rule, in the Copilot | **CLOSED** — §538. There were four breaks, and this one was the mildest |
 | 6 | Recognition rather than recall | Passes (measured) | — |
-| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **OPEN.** Partly answered by §528 (reporting) and §536 (the dropdown). The rest is a design project, not a fix |
+| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **MOSTLY CLOSED** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E). What is left: a "go to" list, and customisation |
 | 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **UNMEASURED STILL** — the 224 `.why` / `.note` strings have not been read one by one |
 | 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **AWAITING ISLAM.** Not a defect; nobody has ruled on it |
 | 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
@@ -42,7 +42,8 @@ measurement.
 
 - heuristic 3 counted **26** browser dialogs over `shell.html` alone; a scan of the whole built file found **30** (§534);
 - heuristic 4(a) counted **six** date spellings by searching for the browser's own formatters; there were **nine**, three of them written out by hand from a month array (§537.1);
-- heuristic 5 named **one** control greyed the dead way while carrying a reason; there were **four**, and the one it named was the mildest of them (§538).
+- heuristic 5 named **one** control greyed the dead way while carrying a reason; there were **four**, and the one it named was the mildest of them (§538);
+- heuristic 7 says the product has **one** keyboard idiom; it had **four**, and the real finding — that none of them was written down anywhere — it does not make at all (§539).
 
 And twice it was read as a to-do list when it was not: the saved indicator it reports missing was built the day after this file was written (§527), and the ASCII-ellipsis nit under heuristic 1 was never true of anything on screen — only of the comments describing the button. **So: measure the product, never this file.**
 
@@ -213,9 +214,17 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 
 ---
 
-## 7. Flexibility and efficiency of use — GAP · **OPEN**
+## 7. Flexibility and efficiency of use — GAP · **MOSTLY CLOSED**
 
-> **Still open, and the last real gap.** Two of its bullets are answered: the universal dropdown has its arrows and ends (§536), and reporting has a keyboard idiom of its own (§528 — Enter to the next figure, Alt+Enter for the walk, Escape to put the box back). The rest — a keyboard route between destinations, an accelerator for Submit or the pen, and customisation of any kind — is a design project and not a fix.
+> **Four of its five bullets are answered, and its headline claim was wrong.** It says the product has ONE keyboard idiom. Measured against the sources at the time of writing it had **four**, and the finding it does not make is the one that mattered: *nothing on any screen said so*. There was no list of keys anywhere in the product.
+>
+> - a keyboard route between destinations, tabs and sections → **§544**. Not a missing feature but a promise already made: eight `role="tablist"` groups, none of which bound an arrow. §536 again, one control over.
+> - no accelerator for Submit, Save draft or the pen → **§546**. Islam picked Alt+S, Alt+D, Alt+E. Submit JUMPS to the button rather than sending, at his word.
+> - no type-ahead or Enter-to-pick in the universal dropdown → **§536**, and one of this file's three claims about it was wrong: Enter-to-pick was already there.
+> - no shortcut to the next gap → **§528** (Alt+Enter), which predates this file's publication by two days.
+> - **and a fifth the audit did not list: none of it was discoverable.** §539 wrote the keys down, and every idiom added since has appeared on that sheet the same day it was built.
+>
+> **STILL OPEN:** a *"go to"* list — one key opening a searchable list of places, which §536's list already makes keyboard-driven — and **customisation**, which this file is right to name and which is a product decision rather than a usability fix. A key per destination is **not possible** and the audit does not claim otherwise: destinations are each tenant's own units, capabilities and functions, so there is nothing fixed to bind.
 
 **The platform has one keyboard idiom and it is the projector.** `present.js`
 binds arrows, PageUp/PageDown, Home, End, Escape, `f` (fullscreen), `w`

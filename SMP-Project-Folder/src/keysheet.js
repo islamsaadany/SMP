@@ -44,6 +44,19 @@ var KEYSHEET = (function(){
     },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
+    /* §540: a row worth walking is one with somewhere to walk to. Counted
+       rather than assumed — a tablist holding a single tab answers the arrows
+       and has nothing to say about it. */
+    tabs: function(){
+      var out = false;
+      Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function(l){
+        if (out) return;
+        var n = Array.prototype.filter.call(l.querySelectorAll('[role="tab"]'),
+          function(t){ return t.offsetParent !== null; }).length;
+        if (n >= 2) out = true;
+      });
+      return out;
+    },
     /* present.js puts `on` on the deck's root while it is showing (§265). */
     deck: function(){
       var d = document.getElementById("deckroot");
@@ -76,6 +89,14 @@ var KEYSHEET = (function(){
         { keys:[["Alt","Enter"]], what:"Jump to the next thing still owed" },
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
+      ] },
+    /* §540 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+       sheet exists: the alternative is a fifth idiom nobody can discover. */
+    { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
+      rows:[
+        { keys:[["←"], ["→"]], what:"Move along the row, wrapping at the ends" },
+        { keys:[["Home"], ["End"]], what:"First or last tab on the row" },
+        { keys:[["Enter"]], what:"Open the one you have landed on" }
       ] },
     { id:"rows", name:"Moving a row", where:"wherever rows can be rearranged",
       rows:[

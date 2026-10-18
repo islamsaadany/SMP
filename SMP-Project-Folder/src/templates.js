@@ -407,11 +407,31 @@ function mintPlanIds(u, rows){
 function ownerProblems(rows){
   if (typeof ownerStrays !== "function" || typeof ownerKnownSet !== "function") return [];
   var known = ownerKnownSet(), out = [];
+  /* ── COLLABORATORS TOO, AND NAME BY NAME (§551.1) ────────────────────
+     Islam: *"fix the collaborators too."* The hole was the identical one a
+     column over, and the fix is this function reading one more field — not a
+     second validator, because a second one would be a second answer to "is
+     this a real person" (§53.5).
+
+     THE MESSAGE SAYS WHICH FIELD, because a row can be wrong in both at once
+     and "is not in the register" on its own would not say where to look.
+
+     AND THERE IS NO DROPDOWN FOR IT IN EXCEL, which is a limit of the format
+     rather than a decision: a data validation list validates ONE value per
+     cell, and a collaborator cell holds a comma-separated list. Offering the
+     dropdown would mark every multi-name cell invalid, so the file guides
+     instead of guarding — the Owners sheet §551 put in both workbooks is the
+     list to copy from, and the refusal below names it. */
+  var fields = [["owner", "owner"], ["collaborators", "collaborator"]];
   (rows || []).forEach(function(r, n){
-    ownerStrays(r && r.owner, known).forEach(function(bad){
-      out.push({ at:"row " + (n + 2) + (r.name ? " \u2014 " + r.name : ""),
-        msg:'owner "' + bad + '" is not in the register \u2014 pick a name from the ' +
-            'Owner dropdown, or add them to the register first' });
+    if (!r) return;
+    var at = "row " + (n + 2) + (r.name ? " \u2014 " + r.name : "");
+    fields.forEach(function(f){
+      ownerStrays(r[f[0]], known).forEach(function(bad){
+        out.push({ at:at,
+          msg:f[1] + ' "' + bad + '" is not in the register \u2014 pick a name from the ' +
+              'Owners sheet, or add them to the register first' });
+      });
     });
   });
   return out;

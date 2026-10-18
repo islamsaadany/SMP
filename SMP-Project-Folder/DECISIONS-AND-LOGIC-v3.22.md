@@ -66106,4 +66106,25 @@ Islam, straight after §542.6 named a direction owned by *"Tamer Abdelhamid"* wh
 
 **CHECK.** `checks/owner-from-the-register.py` — green here, **28 red on the build before**. **And one of its own assertions could not fail** (§113.8): the §65 check that every validation range names a sheet in the file was first written as the two assertions above it, said a third time. It now reads every `from` range in both workbooks, pulls the sheet name out, and demands it be present — recorded in the check rather than quietly fixed.
 
-**NOT COVERED, named rather than left as an absence (§54.5):** the **Collaborators** columns in the workbook. They are picked from this same register on screen and are still free text in the file, so the identical hole is open one column over. Owners are what was asked for, and widening a change past its ask is how a fix becomes unreviewable. It is Islam's to call.
+**NOT COVERED, named rather than left as an absence (§54.5):** the **Collaborators** columns in the workbook. They are picked from this same register on screen and are still free text in the file, so the identical hole is open one column over. Owners are what was asked for, and widening a change past its ask is how a fix becomes unreviewable. It is Islam's to call. — **He called it the same day: §551.1.** Naming it is what got it closed, which is the argument for naming a boundary rather than quietly drawing it.
+
+## §551.1 — Collaborators too, and the Read me that had gone stale (2026-10-18)
+Islam, told that the Collaborators columns were the same hole one column over and left out of §551 deliberately: *"fix the collaborators too."* §551 named it rather than hiding it, and this is the follow-on it was named for.
+
+**THE SCREEN NEEDED NOTHING, AGAIN.** Both collaborator cells — a milestone's and a tactic's — are already `selectManyOr` fed by `ownerChoices`, the same register list as the owner, ticked and never typed (§227 said so when it built them). So, as with §551, three quarters of the fix was already standing, and the gap was in the file and in how a stray is SHOWN.
+
+**MARKED NAME BY NAME, NOT ONCE FOR THE CELL.** A collaborator cell reading *"Nadia Fouad, Tamer Abdelhamid"* holds one real person and one who matches nobody; one mark on the cell would not say which. `collabShown` splits the joined string `gapCell` built and marks each name on its own. **The mark's words and markup live in ONE place** (`strayMark`) for both readers — or the day somebody improves the sentence they improve half the product (§53.5).
+
+**AND A ROW CAN BE WRONG IN BOTH FIELDS AT ONCE**, so the upload refusal names which: `owner "Ghost One" …` and `collaborator "Ghost Two" …` on the same row. It is the same `ownerProblems` reading one more field rather than a second validator, because a second one would be a second answer to *"is this a real person"*.
+
+**THERE IS NO EXCEL DROPDOWN FOR IT, and that is the format rather than a decision.** A data validation list validates **one** value per cell; a collaborator cell holds a comma-separated list. Offering the dropdown would mark **every multi-name cell invalid**, which is worse than no dropdown at all. So the file **guides instead of guarding**: the Owners sheet §551 put in both workbooks is the list to copy from, and the refusal at the upload still catches a wrong name. **Said plainly in the Read me rather than left for somebody to discover at the upload.**
+
+**AND THE READ ME HAD GONE STALE THE MOMENT §551 LANDED — found here, not reported by anything.** Both workbooks' Read me carried:
+
+> **Owners** — *"Type the person's name."*
+
+**That instruction told you to do the one thing the file now refuses.** It is §61's trap written into a Read me, and it is exactly the class of fault §551's own entry warns about: a change that is right everywhere except in the place that tells people what to do. Both files now say to pick from the dropdown, that the Owners sheet is the same list, and that a name not on it is refused — and the Collaborators line says why it has no dropdown.
+
+**CHECK.** The §551 check gained §8 and §9 — green here, **10 red on the build before** (which is §551 itself on main, so those 10 are precisely this entry's work). §9 asserts the Read me **in both workbooks**, because a document that contradicts the product is a fault the product's own tests will never feel.
+
+**STILL NOT COVERED, and named rather than left as an absence (§54.5): `stakeholders`.** A project's stakeholders are people's names too, and they are **typed on the screen as well** — an `inputOr` text box, not a picker — besides being free text in the workbook's Stakeholders column. So this one is a wider job than collaborators was: it needs the control changed, not just the file. It is not done here because it was not asked for, and because a stakeholder may legitimately be somebody outside the register (a client, a regulator, a partner) — which is a question for Islam before any rule is imposed on it.

@@ -21028,11 +21028,31 @@ function mintPlanIds(u, rows){
 function ownerProblems(rows){
   if (typeof ownerStrays !== "function" || typeof ownerKnownSet !== "function") return [];
   var known = ownerKnownSet(), out = [];
+  /* ── COLLABORATORS TOO, AND NAME BY NAME (§551.1) ────────────────────
+     Islam: *"fix the collaborators too."* The hole was the identical one a
+     column over, and the fix is this function reading one more field — not a
+     second validator, because a second one would be a second answer to "is
+     this a real person" (§53.5).
+
+     THE MESSAGE SAYS WHICH FIELD, because a row can be wrong in both at once
+     and "is not in the register" on its own would not say where to look.
+
+     AND THERE IS NO DROPDOWN FOR IT IN EXCEL, which is a limit of the format
+     rather than a decision: a data validation list validates ONE value per
+     cell, and a collaborator cell holds a comma-separated list. Offering the
+     dropdown would mark every multi-name cell invalid, so the file guides
+     instead of guarding — the Owners sheet §551 put in both workbooks is the
+     list to copy from, and the refusal below names it. */
+  var fields = [["owner", "owner"], ["collaborators", "collaborator"]];
   (rows || []).forEach(function(r, n){
-    ownerStrays(r && r.owner, known).forEach(function(bad){
-      out.push({ at:"row " + (n + 2) + (r.name ? " \u2014 " + r.name : ""),
-        msg:'owner "' + bad + '" is not in the register \u2014 pick a name from the ' +
-            'Owner dropdown, or add them to the register first' });
+    if (!r) return;
+    var at = "row " + (n + 2) + (r.name ? " \u2014 " + r.name : "");
+    fields.forEach(function(f){
+      ownerStrays(r[f[0]], known).forEach(function(bad){
+        out.push({ at:at,
+          msg:f[1] + ' "' + bad + '" is not in the register \u2014 pick a name from the ' +
+              'Owners sheet, or add them to the register first' });
+      });
     });
   });
   return out;
@@ -22686,7 +22706,18 @@ function readme(kind, pickLabel, pickList){
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
        ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
@@ -23575,7 +23606,18 @@ function capReadme(kind, capNames, picked, opts){
        ["Dropdowns", objOnly
          ? "Direction and Compile are lists. Unit suggests rather than insists: type your own if it is not offered."
          : "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
        [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
       .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
@@ -30330,12 +30372,30 @@ function ownerStrays(v, known){
    the row, because a name somebody typed is the only clue to who was meant,
    and deleting it to satisfy a rule would destroy the thing that lets it be
    corrected (§96.2's reasoning about an unparseable date, exactly). */
+/* ONE MARK, TWO SHAPES (§53.5). An owner is one name and a collaborator cell
+   is a list of them, so the two readers differ in how they split — and in
+   nothing else. The words and the markup live here once, or the day somebody
+   improves the sentence they improve half the product. */
+function strayMark(){
+  return ' <span class="ownerstray hasnote" data-tip="This name is not in the register,' +
+    ' so it matches no real person. Pick somebody from the list, or add them to the' +
+    ' register.">not in the register</span>';
+}
 function ownerShown(v){
-  var txt = esc(String(v == null ? "" : v));
-  return ownerStrays(v).length
-    ? txt + ' <span class="ownerstray hasnote" data-tip="This name is not in the register, so it matches no' +
-      ' real person. Pick somebody from the list, or add them to the register.">not in the register</span>'
-    : txt;
+  return esc(String(v == null ? "" : v)) + (ownerStrays(v).length ? strayMark() : "");
+}
+/* ── AND THE SAME FLAG ON A LIST OF THEM (§551.1) ──────────────────────
+   Islam: *"fix the collaborators too."* A collaborator cell is a comma-
+   separated list, so it is marked PER NAME rather than once for the cell: a
+   cell reading "Nadia Fouad, Tamer Abdelhamid" has one real person in it and
+   one that matches nobody, and a single mark on the whole cell would not say
+   which. `gapCell` hands this the joined string its own `text:` built, which
+   is why it splits on the comma it was joined with and nothing cleverer. */
+function collabShown(v){
+  var known = ownerKnownSet();
+  return String(v == null ? "" : v).split(/\s*,\s*/).filter(Boolean).map(function(n){
+    return esc(n) + (known.has(n) ? "" : strayMark());
+  }).join(", ");
 }
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
@@ -34548,6 +34608,7 @@ function projPlanBody(p, subject){
             : collabParse(v); },
           del: true,
           readEmpty: '<span class="nobody">&mdash;</span>',
+          read: collabShown,
           control: function(set, pendCls){
             return selectManyOr("plan", collabNames(m),
               ownerChoices(collabNames(m), false),
@@ -35908,6 +35969,7 @@ function unitPlanBody(it, u, railed, bare){
           : collabParse(v); },
         del: true,
         readEmpty: '<span class="nobody">&mdash;</span>',
+        read: collabShown,
         control: function(set, pendCls){
           return selectManyOr("plan", collabNames(t),
             ownerChoices(collabNames(t), false),

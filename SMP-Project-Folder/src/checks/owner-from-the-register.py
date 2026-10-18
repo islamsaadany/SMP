@@ -216,7 +216,45 @@ with sync_playwright() as p:
     ck("and a function's plan upload refuses it the same way",
        len(capref) == 1 and "A project" in capref[0] and "Nobody Here" in capref[0], capref)
 
-    print("\n§8 · and the build is quiet")
+    print("\n§8 · collaborators too, and name by name (§551.1)")
+    pair = ev(pg, "(n) => collabShown(n + ', Tamer Abdelhamid')", "", good)
+    ck("a list with one stray in it carries ONE mark, not one for the cell",
+       (pair or "").count("ownerstray") == 1, (pair or "")[:120])
+    ck("...and BOTH names survive it",
+       good in (pair or "") and "Tamer Abdelhamid" in (pair or ""), (pair or "")[:120])
+    ck("a list of real people carries none",
+       "ownerstray" not in (ev(pg, "(n) => collabShown(n)", "", good) or "x"))
+    ck("the mark's words are written in ONE place (§53.5)",
+       code.count("not in the register</span>") == 1, code.count("not in the register</span>"))
+    both = ev(pg, """() => validatePlan(UNITS.mobile, [{ id:'mobile-P1', type:'PILLAR',
+        name:'A pillar', theme:'', kind:'Direction', owner:'Ghost One',
+        collaborators:['Ghost Two'] }]).problems
+        .filter(p => /register/.test(p.msg)).map(p => p.msg); }""".replace("; }", ""), [])
+    ck("an upload refuses a collaborator as well as an owner", len(both) == 2, both)
+    ck("...and SAYS WHICH FIELD, because a row can be wrong in both at once",
+       bool(both) and any(m.startswith('owner "') for m in both)
+       and any(m.startswith('collaborator "') for m in both), both)
+    ck("...each naming the name itself",
+       bool(both) and any("Ghost One" in m for m in both) and any("Ghost Two" in m for m in both), both)
+    cc = ev(pg, """() => validateCapPlan((GROUP.capabilities || [])[0],
+        [{ id:'x1', type:'MILESTONE', name:'A milestone', collaborators:['Nobody Here'] }])
+        .problems.filter(p => /collaborator/.test(p.msg)).length""", -1)
+    ck("and a function's file refuses one too", cc == 1, cc)
+
+    print("\n§9 · and the Read me no longer tells you to do what the file refuses")
+    rm = ev(pg, """() => { const r = planWorkbook(UNITS.mobile)[0];
+        const pick = w => (r.rows.find(x => x[0] === w) || [])[1] || "";
+        return { owners: pick("Owners"), collabs: pick("Collaborators") }; }""", {})
+    ck("it no longer says to type the owner's name",
+       "Type the person's name." not in (rm.get("owners") or ""), rm.get("owners"))
+    ck("...it says to pick from the dropdown, and that a stray is refused",
+       "dropdown" in (rm.get("owners") or "") and "refused" in (rm.get("owners") or ""), rm.get("owners"))
+    ck("...and it says plainly why collaborators have no dropdown",
+       "cannot offer a dropdown" in (rm.get("collabs") or ""), rm.get("collabs"))
+    ck("...in BOTH workbooks, not just the unit's",
+       code.count("Pick the name from the dropdown") == 2, code.count("Pick the name from the dropdown"))
+
+    print("\n§10 · and the build is quiet")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

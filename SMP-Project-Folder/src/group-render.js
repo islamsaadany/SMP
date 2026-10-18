@@ -4281,12 +4281,30 @@ function ownerStrays(v, known){
    the row, because a name somebody typed is the only clue to who was meant,
    and deleting it to satisfy a rule would destroy the thing that lets it be
    corrected (§96.2's reasoning about an unparseable date, exactly). */
+/* ONE MARK, TWO SHAPES (§53.5). An owner is one name and a collaborator cell
+   is a list of them, so the two readers differ in how they split — and in
+   nothing else. The words and the markup live here once, or the day somebody
+   improves the sentence they improve half the product. */
+function strayMark(){
+  return ' <span class="ownerstray hasnote" data-tip="This name is not in the register,' +
+    ' so it matches no real person. Pick somebody from the list, or add them to the' +
+    ' register.">not in the register</span>';
+}
 function ownerShown(v){
-  var txt = esc(String(v == null ? "" : v));
-  return ownerStrays(v).length
-    ? txt + ' <span class="ownerstray hasnote" data-tip="This name is not in the register, so it matches no' +
-      ' real person. Pick somebody from the list, or add them to the register.">not in the register</span>'
-    : txt;
+  return esc(String(v == null ? "" : v)) + (ownerStrays(v).length ? strayMark() : "");
+}
+/* ── AND THE SAME FLAG ON A LIST OF THEM (§551.1) ──────────────────────
+   Islam: *"fix the collaborators too."* A collaborator cell is a comma-
+   separated list, so it is marked PER NAME rather than once for the cell: a
+   cell reading "Nadia Fouad, Tamer Abdelhamid" has one real person in it and
+   one that matches nobody, and a single mark on the whole cell would not say
+   which. `gapCell` hands this the joined string its own `text:` built, which
+   is why it splits on the comma it was joined with and nothing cleverer. */
+function collabShown(v){
+  var known = ownerKnownSet();
+  return String(v == null ? "" : v).split(/\s*,\s*/).filter(Boolean).map(function(n){
+    return esc(n) + (known.has(n) ? "" : strayMark());
+  }).join(", ");
 }
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
@@ -8499,6 +8517,7 @@ function projPlanBody(p, subject){
             : collabParse(v); },
           del: true,
           readEmpty: '<span class="nobody">&mdash;</span>',
+          read: collabShown,
           control: function(set, pendCls){
             return selectManyOr("plan", collabNames(m),
               ownerChoices(collabNames(m), false),
@@ -9859,6 +9878,7 @@ function unitPlanBody(it, u, railed, bare){
           : collabParse(v); },
         del: true,
         readEmpty: '<span class="nobody">&mdash;</span>',
+        read: collabShown,
         control: function(set, pendCls){
           return selectManyOr("plan", collabNames(t),
             ownerChoices(collabNames(t), false),

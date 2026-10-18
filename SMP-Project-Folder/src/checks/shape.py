@@ -170,6 +170,59 @@ with sync_playwright() as p:
        press(pg, ".csetup [data-shgroup=bu]", 400) and lvls(pg) == ["top", "bu@g", "bu", "fn@g", "fn"] and
        ev(pg, "()=>UNIT_KEYS.map(k=>UNITS[k].company||'').join(',')", "") == links_before, lvls(pg))
 
+    print("\n3b · and a client WITH a plan in it can still move its layers (§544.14)")
+    # Islam, of El Abd on the live site: *"layer 2 above the business units
+    # I want to remove it but no option there to do that"*. There was none:
+    # both links sat behind `canShape()`, which goes false the moment a
+    # client holds a plan — so EVERY client that has actually been used lost
+    # them, which is every client that would ever need them. Section 3 above
+    # runs on the open fixture and could never see it.
+    #
+    # It MAKES the harder state (§255): one plan line is enough to shut
+    # `canShape()`, and the assertion is that the two layer links survive it
+    # while ADDING a row does not — the line Islam drew when asked.
+    holds0 = ev(pg, "()=>__smpHoldsNow().plans", -1)
+    ck("(fixture) the shape is still open at this point", holds0 == 0, holds0)
+    ev(pg, """()=>{ var k = UNIT_KEYS[0];
+      UNITS[k].items = (UNITS[k].items||[]).concat([{ id:'shape-chk-P1', code:'X1',
+        name:'A pillar that shuts the shape', measures:[], tactics:[] }]); }""")
+    press(pg, ".csetup [data-shlvl=top]", 300)
+    ck("…and one plan line shuts it", ev(pg, "()=>__smpHoldsNow().plans", -1) == 1,
+       ev(pg, "()=>__smpHoldsNow().plans"))
+    ck("the banner says the shape is set from here on",
+       "shape is set from here on" in (ev(pg, "()=>{var b=document.querySelector('.csetup .wzarched');"
+                                            " return b? b.innerText : ''}", "") or ""))
+    ck("…and ADDING a row is gone, which is the half that would lose work",
+       ev(pg, "()=>document.querySelectorAll('.csetup .shadd').length", -1) == 0,
+       ev(pg, "()=>document.querySelectorAll('.csetup .shadd').length"))
+    # BOTH HALVES OF THE PAIR (§94.2, §61): a control you can press one way
+    # and not the other is a trap, so each is asserted present in the state
+    # where it applies.
+    ck("…but removing the units' layer is still offered",
+       bool(pg.query_selector(".csetup [data-shungroup=bu]")))
+    ck("…and grouping the functions, which have none, is still offered",
+       bool(pg.query_selector(".csetup [data-shgroup=fn]")) or
+       bool(pg.query_selector(".csetup [data-shungroup=fn]")))
+    cos2 = ev(pg, "()=>COMPANY_KEYS.map(k=>COMPANIES[k].name).join(',')", "")
+    lnk2 = ev(pg, "()=>UNIT_KEYS.map(k=>UNITS[k].company||'').join(',')", "")
+    ck("pressing it takes the row away on a client with a plan",
+       press(pg, ".csetup [data-shungroup=bu]", 450) and "bu@g" not in lvls(pg), lvls(pg))
+    ck("…and keeps every division and every unit's division (§405)",
+       ev(pg, "()=>COMPANY_KEYS.map(k=>COMPANIES[k].name).join(',')", "") == cos2 and
+       ev(pg, "()=>UNIT_KEYS.map(k=>UNITS[k].company||'').join(',')", "") == lnk2,
+       [ev(pg, "()=>UNIT_KEYS.map(k=>UNITS[k].company||'').join(',')"), lnk2])
+    ck("…and the plan line that shut the shape is untouched",
+       ev(pg, "()=>(UNITS[UNIT_KEYS[0]].items||[]).some(p=>p.id==='shape-chk-P1')", False) is True)
+    ck("…and grouping them again brings the row and the links back",
+       press(pg, ".csetup [data-shgroup=bu]", 450) and "bu@g" in lvls(pg) and
+       ev(pg, "()=>UNIT_KEYS.map(k=>UNITS[k].company||'').join(',')", "") == lnk2, lvls(pg))
+    # PUT IT BACK, because section 4 onwards stands on the open fixture.
+    ev(pg, """()=>{ var k = UNIT_KEYS[0];
+      UNITS[k].items = (UNITS[k].items||[]).filter(function(p){ return p.id !== 'shape-chk-P1'; }); }""")
+    press(pg, ".csetup [data-shlvl=top]", 300)
+    ck("the fixture is open again for the sections below",
+       ev(pg, "()=>__smpHoldsNow().plans", -1) == 0, ev(pg, "()=>__smpHoldsNow().plans"))
+
     print("\n4 · two layers, each with its own name")
     ck("a layer's card offers its own name, one and many",
        press(pg, ".csetup [data-shlvl='fn@g']", 400) and

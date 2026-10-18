@@ -615,9 +615,10 @@ var CLIENTSETUP = (function () {
       hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
       hb.appendChild(el("b", null, "shape is set from here on"));
       hb.appendChild(document.createTextNode(
-        ". Set-up rewrites these lists, which would lose that work, so adding and removing is read-only here — " +
+        ". Set-up rewrites these lists, which would lose that work, so ADDING a row is read-only here — " +
         "rename or retire a row on its own Setup page instead, where the row keeps who runs it. " +
-        "Every name and switch on this screen can still be changed, and saves as you change it."));
+        "Every name and switch on this screen can still be changed, and saves as you change it — " +
+        "a layer included, which only hides and keeps what is under it (§544.14)."));
       HOST.appendChild(hb);
     }
 
@@ -2036,17 +2037,27 @@ var CLIENTSETUP = (function () {
         var lrow = shLvlRow(host, 2, layerWordOf(k, "many"), k + "@g", names.length, k + "@g");
         var side = el("span", "shunder");
         side.appendChild(document.createTextNode("above the " + kindWord(k, "many", "boxes").toLowerCase() + " "));
-        if (shape) {
-          var rm = el("button", "shlink", "remove this layer"); rm.type = "button";
-          rm.setAttribute("data-shungroup", k);
-          rm.addEventListener("click", function (e) {
-            /* HIDDEN, NEVER CLEARED (§405): every division and every
-               assignment stays, so grouping again brings all of it back. */
-            e.stopPropagation();
-            var nx = structNow(); nx[k].layer = false; structWrite(nx);
-          });
-          side.appendChild(rm);
-        }
+        /* §544.14 — NOT GATED ON `shape`, BECAUSE IT TAKES NOTHING AWAY.
+           Islam, of El Abd: *"layer 2 above the business units I want to
+           remove it but no option there to do that"*. There was none: this
+           link sat behind `canShape()`, which goes false the moment a client
+           holds a plan — so every client that has actually been used lost it.
+           It is HIDDEN, NEVER CLEARED (§405): every division and every
+           assignment stays and grouping again brings all of it back, which
+           makes it the same kind of act as the units' own On/Off that this
+           screen has always offered beside it. The banner's own promise —
+           *"every name and switch on this screen can still be changed"* —
+           covers it; what stays gated is ADDING a row, which is what would
+           lose work. */
+        var rm = el("button", "shlink", "remove this layer"); rm.type = "button";
+        rm.setAttribute("data-shungroup", k);
+        rm.title = "Hides the layer. Every " + W("division", "one", "division").toLowerCase() +
+          " and every box under it is kept, and grouping again brings it back.";
+        rm.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var nx = structNow(); nx[k].layer = false; structWrite(nx);
+        });
+        side.appendChild(rm);
         lrow.appendChild(side);
         var grow = el("div", "shrow");
         grow.setAttribute("data-shrow", k + "@g");
@@ -2069,10 +2080,15 @@ var CLIENTSETUP = (function () {
       var row = shLvlRow(host, hasLayer ? 3 : 2, kindWord(k, "many", k === "bu" ? "Business units" : "Functions"),
         k, list.length, k);
       if (hasLayer && under) row.appendChild(el("span", "shsub", "(" + shown.length + " under " + under + ")"));
-      if (!hasLayer && shape) {
+      /* §544.14: the way back, ungated for the same reason — a layer with
+         nothing under it yet hides nothing and loses nothing. A control you
+         can press one way and not the other is a trap (§61). */
+      if (!hasLayer) {
         var side2 = el("span", "shunder");
         var gp = el("button", "shlink", "group these under a layer…"); gp.type = "button";
         gp.setAttribute("data-shgroup", k);
+        gp.title = "Puts a layer above them. Nothing is created and nothing moves until you " +
+          "put a box in one.";
         gp.addEventListener("click", function (e) {
           e.stopPropagation();
           var nx = structNow(); nx[k].layer = true; delete nx.mid.exists; structWrite(nx);

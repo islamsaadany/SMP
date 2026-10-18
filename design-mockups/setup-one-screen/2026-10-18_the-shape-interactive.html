@@ -226,8 +226,8 @@ function drawShape() {
     const par = parentFor(l), list = kids(par, l.k), all = S.boxes.filter(b => b.lvl === l.k);
     out.push('<div class="lvl"><button data-lvl="' + l.k + '">' + esc(l.many) +
              '</button><span class="n">' + all.length + '</span>' +
-             (par !== "top" ? '<span class="n" style="text-transform:none;letter-spacing:0">under ' +
-                esc(boxOf(par).name) + '</span>' : '') + '</div>');
+             (par !== "top" ? '<span class="n" style="text-transform:none;letter-spacing:0">(' +
+                list.length + ' under ' + esc(boxOf(par).name) + ')</span>' : '') + '</div>');
     const rows = list.map(b => {
       const next = S.levels.filter(x => x.under === l.k)[0];
       const n = next ? kids(b.id, next.k).length : 0;

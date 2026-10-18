@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StaffLink } from "../staff-link";
 import { prisma } from "@/ffp/lib/db/client";
 import { reviewBucket, type ReviewBucket } from "@/ffp/lib/domain/process-lifecycle";
 
@@ -22,6 +23,10 @@ export async function ProcessReviewCalendar({ workspaceId }: { workspaceId: stri
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5" aria-labelledby="review-calendar">
+      <div className="mb-4 border-b border-slate-100 pb-3">
+        <StaffLink label="Staff reading page" path={`/${workspaceId}/processes/read`} />
+        <p className="mt-1 text-xs text-slate-500">Everything published, for staff to read and acknowledge. Send it to the people on the register.</p>
+      </div>
       <h2 id="review-calendar" className="text-sm font-semibold text-slate-900">
         Process review calendar
       </h2>

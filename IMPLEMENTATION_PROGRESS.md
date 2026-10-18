@@ -9703,3 +9703,12 @@ Built on branch `claude/vigilant-bohr-snqji9`. Not merged to main. The new migra
 Checked: 12 reader/acknowledgement rules, 7 more calendar rules (33 lifecycle in all), the gate check (37), the typecheck (clean except the `lib/prisma.ts` error present before), the migration applied after all 49 before it, and the reader pages rendered and clicked in Chromium with the data stubbed (9 + 5 checks). **Not checked**: the real signed-in flow — a real client person opening `/read`, and the real door deciding. That needs a deployment with the database.
 
 Not built: how staff get to `/read` (a link from their landing or a notification), and reminders.
+
+## §541 — Processes: the way into the staff reader view (2026-10-18)
+Built on branch `claude/vigilant-bohr-snqji9`. Not merged to main.
+
+The office now has the address to hand staff, with a Copy link button: on the Governance page ("Staff reading page", `/<client>/processes/read`) and on a Published process's Lifecycle tab ("Link for staff", `/<client>/processes/read/<process>`). Staff open it signed in as usual; they must be on the People register.
+
+**What is deliberately NOT done: a link inside the staff person's own top bar or landing.** Staff land in Strategy, whose bar is the frozen shell's (lib/topbar.ts says so), the module list that drives their landing redirect (`openableModules`) must keep excluding Processes, and the standing rule is that a client's own person has no module menu. A link there means editing frozen shell code and the served copies; it is a decision for Islam, not a by-product of this change. The pages drawn by `topBarHtml` (Notes, Tracker, Portfolio, Insights) could carry one link but Strategy could not, which would be worse than none.
+
+Checked: typecheck clean (except the earlier `lib/prisma.ts` error), the gate check 37/37, the copy control in Chromium over HTTP (shows the address, copies the full address, reports a blocked clipboard and keeps the address on screen).

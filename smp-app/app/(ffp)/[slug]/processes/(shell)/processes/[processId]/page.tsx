@@ -7,6 +7,7 @@ import { ProcessTabs, parseTab } from "./process-tabs";
 import { auth } from "@/ffp/lib/auth/config";
 import { daysToReview, isOverdueForReview, mayApprove, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { acknowledgementProgress, expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
+import { StaffLink } from "../../staff-link";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 
@@ -202,6 +203,14 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
                   {overdue
                     ? `${-daysToReview(process.nextReviewDue, today)} day(s) overdue`
                     : `in ${daysToReview(process.nextReviewDue, today)} day(s)`}
+                </p>
+              </Card>
+            )}
+            {process.lifecycleStatus === "PUBLISHED" && (
+              <Card title="Link for staff">
+                <StaffLink label="Send this to the people who should read it" path={`/${workspaceId}/processes/read/${processId}`} />
+                <p className="mt-2 text-xs text-slate-500">
+                  They sign in as usual and need to be on the People register. They see only the published version and can confirm they have read it.
                 </p>
               </Card>
             )}

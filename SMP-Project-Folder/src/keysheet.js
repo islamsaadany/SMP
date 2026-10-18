@@ -42,7 +42,7 @@ var KEYSHEET = (function(){
     figures: function(){
       return typeof REP_BOXES === "string" && has(REP_BOXES);
     },
-    /* §545: live where any of the three controls is actually on screen. */
+    /* §546: live where any of the three controls is actually on screen. */
     acts: function(){
       return has("[data-submit]") || has("[data-repsave]") ||
              has(".penbtn[data-page], .secpen[data-page], .editbtn[data-page]");
@@ -87,7 +87,7 @@ var KEYSHEET = (function(){
         { keys:[["Home"], ["End"]], what:"First or last of what is showing" },
         { keys:[["Enter"]], what:"Take the marked row — or the first one showing" }
       ] },
-    /* §545 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
+    /* §546 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
     { id:"acts", name:"Doing the thing", where:"a report, or a page you can edit",
       rows:[
         { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },

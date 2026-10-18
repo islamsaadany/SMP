@@ -1,4 +1,4 @@
-"""THREE ACTIONS, FROM THE KEYBOARD (§545).
+"""THREE ACTIONS, FROM THE KEYBOARD (§546).
 
 Usability audit, heuristic 7: "no accelerator for Submit, Save draft, or the
 pen". §544 answered the navigation half with the arrows every row of tabs

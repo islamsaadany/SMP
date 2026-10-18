@@ -188,7 +188,7 @@ with sync_playwright() as p:
     # are asserted through the product's own tables rather than as `.key ===`.
     NAMED = {"Enter": '"Enter"', "Esc": '"Escape"', "Home": '"Home"', "End": '"End"',
              "F": '"f"', "W": '"w"', "P": '"p"', "N": 'KeyN', "Alt": "altKey",
-             # §545's three, matched on the PHYSICAL key like §528's Alt+N
+             # §546's three, matched on the PHYSICAL key like §528's Alt+N
              "S": 'KeyS', "D": 'KeyD', "E": 'KeyE',
              "Shift": "shiftKey", "Tab": "Tab", "Space": '" "'}
     missing = []

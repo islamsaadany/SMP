@@ -66035,3 +66035,26 @@ Wander's file got further and stopped again: `null value in column "extra" of re
 **And the diagnostic that was supposed to prevent exactly this asked with a `coalesce`** — `jsonb_array_length(coalesce(o.extra->'items','[]'::jsonb))` — which answered *0 company pillars* for a row that has no key and for a row that has an empty one, identically. The question was written to be robust and was therefore blind. §542.5's discipline is to ask the database; this is its second half: **ask it in a way that can tell the two answers apart.**
 
 Both ends are coalesced in the statement now, and the rehearsal runs twice — once against a row shaped like the live one (`extra` = `{}`, no `items`, no `structure`) and once against one with an empty array — with the result identical to the product's own move both times, and a second run still refused.
+
+### §544.11 — Meridian Group, looked at and parked
+Islam: *"yes do meridian group too"*, then, once the look came back: *"let's pause on meridian now, it's not a priority."* Nothing was run against it; what the read-only look found is recorded here so the next person does not have to ask again.
+
+It is **not a repeat of Wander**. Both of its capabilities refuse, and for reasons nobody has answered yet:
+
+| | Product Mindset (`cap6`, held by Marketing) | Data-led Decisions (`cap9`, held by IT) |
+|---|---|---|
+| Plans in | projects | pillars |
+| Holds | one project, *Portfolio review cadence* | two pillars: *One Source of Truth* (Ziad Maroun) and *Analytics in the Business* (Noura Ghanem) |
+| Refuses because | **a definition of its own**; its project carries **1 outcome**, **2 deliverables and 3 milestones all with a date, a state or a note** | **a definition of its own**; **2 objectives of its own** |
+
+So Meridian needs five answers where Wander needed three:
+
+1. **The definitions.** Both carry one — *"Treat what we sell as a portfolio to be shaped, not a catalogue to be carried"* and *"Decide from one trusted number, available to the people who need it on the day"*. A pillar has `name`, `sub`, `kind`, `theme`, `owner`, measures and tactics (`addPillar`); there is no definition on it. `sub` is the nearest thing and nobody has said it is the right one.
+2. **A capability's own objectives**, which cap9 has two of. They are not its pillars' measures; on the company there is no row for them, and cap9 becomes *two* pillars, so there is not even an obvious one to put them on.
+3. **An outcome**, which cap6's project has one of. §544.7 left this refusing deliberately — it maps to a measure more directly than a deliverable does, which is why it should be decided rather than assumed.
+4. **Dates, states and notes** on the milestones and deliverables. §544.8's generator refuses to emit for these: translating a finish date into its quarter inside PL/pgSQL is the one piece nothing here could test. It is the product's `capFoldIntoTop` that would do the work, so the honest route is a different kind of migration, not a cleverer SQL file.
+5. **`cap9-P2` is marked `kind: "Direction"`** — an *inner pillar of a capability*, marked as a direction. The move sets every row it carries to `Capability`, so that one row's kind would change silently. It is the only row like it in any client, and it needs somebody to say which it is.
+
+Meridian is the demo tenant (`key = 'demo'`, named *Meridian Group*), so none of this is a client waiting on it.
+
+**And the backup tables standing in the database**, read while we were there: `org_before_20261018` and `capabilities_before_20261018` (El Abd's, from §542.2), `org_before_wander_development_20261018` and `capabilities_before_wander_development_20261018` (Wander's, from §544.8). Both pairs can be dropped once their pages have been looked at.

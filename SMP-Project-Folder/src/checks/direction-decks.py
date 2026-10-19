@@ -69,28 +69,48 @@ with sync_playwright() as p:
     pos = [next((i for i, h in enumerate(heads) if k in h), -1) for k in order]
     ck("the review runs foundation, analysis, directions, performance, thank you",
        all(x >= 0 for x in pos) and pos == sorted(pos), heads)
-    ck("…and it is short — no per-direction measure slides", not any("Key measures" in h for h in heads), heads)
-    # REWRITTEN TO THE PROPERTY IT WAS A PROXY FOR (§218, §553.6). It read
-    # "seven slides at most for any number of directions", and §553.6 gave
-    # the company's review the Overall performance divider every other deck
-    # has — Islam: *"and then performance and the overall performance etc."*
-    # — so the budget went to eight and the claim failed while what it was
-    # protecting was untouched.
+    # REVERSED, BECAUSE THE RULE WAS (§218, §553.9). It read "…and it is
+    # short — no per-direction measure slides", which is what §481 built and
+    # what Islam undid once he saw Raya's Mobile beside it: *"yes I want
+    # elabd as a unit"*. A unit's deck draws every pillar's own slides, and
+    # the company's now does the same.
     #
-    # WHAT §481 ACTUALLY PROMISED is that the review does not GROW with the
-    # plan: the company's detail is each owner's own deck, so two directions
-    # and ten must cost the same slides. That is asserted by MAKING both
-    # states (§255) rather than by a number somebody has to keep updating,
-    # and it is the stronger claim — a build that started drawing a slide
-    # per direction would pass "at most seven" for a small plan and fail
-    # this one at any size.
+    # ASSERTED AS SAMENESS, NOT AS PRESENCE (§53.5). "There is a measures
+    # slide" would pass on a second copy of the markup, which is the drift
+    # this whole stage exists to remove. What is asserted is that the slides
+    # the company's review draws for a direction ARE the slides that
+    # direction's own owner presents — the same builder, the same anchors.
+    mine = safe(pg, """()=>{
+      var d = document.createElement('div'); d.innerHTML = deckHtmlFor('dir:group-P1');
+      var own = [...d.querySelectorAll('.dslide')].map(s=>s.dataset.anchor||'')
+        .filter(a => a && a !== 'cover' && a !== 'end' && a !== 'stand');
+      var c = document.createElement('div'); c.innerHTML = deckHtmlFor('group');
+      var co = [...c.querySelectorAll('.dslide')].map(s=>s.dataset.anchor||'');
+      return {own: own, missing: own.filter(a => co.indexOf(a) < 0)};
+    }""")
+    ck("…and it carries each direction's own slides, from the same builder (§553.9)",
+       isinstance(mine, dict) and len(mine.get("own") or []) > 0
+       and mine.get("missing") == [], mine)
+    # AND IT GROWS BY EXACTLY THOSE SLIDES (§218, §553.9). This line has
+    # now been three claims, because the rule behind it moved twice. It was
+    # "seven slides at most for any number of directions" — a number
+    # somebody had to maintain. §553.6 made it the property that number was
+    # a proxy for: the review does not GROW with the plan, because each
+    # direction presents its own deck (§481). §553.9 is Islam undoing that
+    # premise — the company's review now carries every direction, so it
+    # grows, and the claim is HOW MUCH.
+    #
+    # Still MADE rather than read (§255), and still the stronger form: a
+    # build that drew a direction twice, or dropped one, fails it, where
+    # "it grows" would pass.
     grew = safe(pg, """()=>{
-      var before = GROUP.items.slice(), n0;
+      var before = GROUP.items.slice();
       var count = function(){ var d=document.createElement('div');
         d.innerHTML = deckHtmlFor('group');
         return d.querySelectorAll('.dslide').length; };
-      n0 = count();
+      var n0 = count(), added = 0;
       var proto = JSON.parse(JSON.stringify(GROUP.items[0]));
+      var u = topAsUnit();
       for (var i = 0; i < 8; i++) {
         var c = JSON.parse(JSON.stringify(proto));
         c.id = 'group-X' + i; c.code = 'EX0' + i; c.name = 'Extra ' + i;
@@ -99,12 +119,22 @@ with sync_playwright() as p:
         GROUP.items.push(c);
       }
       paint();
+      /* what the eight added pillars cost, asked of the builder itself */
+      u = topAsUnit();
+      GROUP.items.forEach(function(p, i){
+        if (String(p.id).indexOf('group-X') === 0) {
+          var d = document.createElement('div');
+          d.innerHTML = pillarSlidesOf(u, p, i).join("");
+          added += d.querySelectorAll('.dslide').length;
+        }
+      });
       var n1 = count();
       GROUP.items = before; paint();
-      return {two: n0, ten: n1, back: count()};
+      return {two: n0, ten: n1, added: added, back: count()};
     }""")
-    ck("…and the review does not grow with the number of directions (§481)",
-       isinstance(grew, dict) and grew.get("two") == grew.get("ten")
+    ck("…and it grows by exactly what those directions' own slides cost (§553.9)",
+       isinstance(grew, dict) and grew.get("added", 0) > 0
+       and grew.get("ten") == grew.get("two", 0) + grew.get("added", 0)
        and grew.get("back") == grew.get("two"), grew)
 
     # ── 2. A direction's own deck ─────────────────────────────────────

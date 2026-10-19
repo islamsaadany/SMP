@@ -67088,3 +67088,50 @@ El Abd's Foundation is now two slides, five objectives then one. If all six
 on one slide is wanted instead, that is a tightening of §254.9's figures and
 not this mechanism — and it would be a figure retuned against one client
 rather than a rule that holds for ten objectives as well as six.
+
+## §553.8 — El Abd presents as El Abd, and each group is followed by how it did (2026-10-19)
+
+Islam, on the review §553.6 built: *"there is nothing called elabd review as
+a group or as a company … they show their work similar to the business unit.
+foundation, swot, directions grouped and then each direction performance and
+then capabilities grouped and then each capability performance and then
+finally the overall performance"*.
+
+**THE DECK WAS HEADED "GROUP".** `topAsUnit()` hands the top box the tenant's
+WORD for the top layer as its `name` — "Group", beside "Business unit" and
+"Function" — and that is the right word on every page that is about the shape
+of the company. A ROOM IS NOT A NAVIGATION ROW: on a projector the cover says
+who is presenting, and that is El Abd. `deckBoxName()` asks for the company's
+own name and the pages go on asking for the word. The fallback is the word
+again, so a client who has not named their company reads as it does today
+(§50.6). Measured: three clients, one deck each — "Group" becomes El Abd,
+Wander Development, Raya Trade on the cover and on the closing slide, and
+nothing else anywhere moves.
+
+**AND EACH GROUP IS NOW FOLLOWED BY ITS OWN SCORING.** §553.6 left both score
+tables behind the Overall performance divider, where §254.4 put a unit's.
+
+THIS IS NOT §254.4 REVERSED, which is why it is safe to do for one deck and
+not the others. There Islam was looking at a UNIT's deck, where every
+pillar's own measures and tactics sit between the roll-call and the scoring:
+*"move the pillars performance till the end before the where we stand slide"*
+keeps the scoring beside the reading it belongs to, three sections later.
+The company's review has NO detail slides (§481) — the roll-call and the
+scoring are adjacent either way, and reading them as one group is the whole
+point of showing the two kinds apart. Units are untouched; only the split
+company review reorders.
+
+The divider's own line moved with them: it announces what is BEHIND it, and
+with the tables now in front it says the one thing left (§253, §61).
+
+**THE ANALYSIS SLIDE NEEDS NOTHING BUILT.** El Abd's Setup carries the SWOT
+and the slide is drawn from `companyAnalysisSlides`, which draws only where
+a quadrant has something in it (§45.2). Their four quadrants are empty today,
+so the review has no Analysis slide. Written in, it lands exactly where he
+asked — between Foundation and the Directions — and that was verified rather
+than assumed.
+
+El Abd's review, end to end: cover, Foundation (continued, §553.7),
+Analysis where there is one, Directions, Directions — where we stand,
+Capabilities, Capabilities — where we stand, Overall performance, Where
+El Abd stands, Thank you.

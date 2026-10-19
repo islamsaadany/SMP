@@ -281,7 +281,7 @@ function unitSwotSlides(u){
        one accent across a row, never one per card (§41's budget). */
     S.push(sectSlide("swothead", "After the SWOT title page",
       SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
-      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
+      "Where " + (u.topLayer ? deckBoxName(u) : "this unit") + " is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
@@ -349,6 +349,25 @@ function standSlideOf(name, cells, foot){
     cells.join("") + '</div><p class="headfoot">' + foot + '</p></section>';
 }
 
+/* ── A BOX IS PRESENTED UNDER ITS OWN NAME (§553.8) ──────────────────────
+   Islam, of the review built for El Abd: *"there is nothing called elabd
+   review as a group or as a company"*.
+
+   The deck was headed "Group", and ended on "Where Group stands". "Group"
+   is the tenant's WORD for the top layer — what you call it in a navigation
+   row, beside "Business unit" and "Function" — and `topAsUnit()` hands it
+   over as the box's `name` because that is the right word on every page
+   that is about the SHAPE of the company.
+
+   A ROOM IS NOT A NAVIGATION ROW. On a projector the cover says who is
+   presenting, and that is the company: El Abd. So the deck asks for the
+   name and the pages go on asking for the word. The fallback is the word
+   again, so a client who has not named their company reads exactly as it
+   does today (§50.6). */
+function deckBoxName(u){
+  return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -365,11 +384,11 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
+    sec("COVER", deckBoxName(u), true) + '>' +
     (deckMark(u)
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
@@ -457,7 +476,7 @@ function deckSlides(u){
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
-    (u.fnKey || u.topLayer ? esc(u.name) : "the unit"),
+    (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
     [ koShown && standCell(L("keyobj","bu") + ' performance', ko,
         (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare")),
       /* ── IT COUNTS WHAT IT NAMES (§553.6) ───────────────────────────
@@ -616,7 +635,7 @@ function deckSlides(u){
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
-        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
+        " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
   /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
      One group, as every deck has had, EXCEPT on the company's own review of
@@ -684,6 +703,21 @@ function deckSlides(u){
         ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
       g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
       g.cards + '</div></section>');
+    /* ── EACH GROUP, THEN HOW IT DID (§553.8) ─────────────────────────
+       Islam, of El Abd's review: *"foundation, swot, directions grouped
+       and then each direction performance and then capabilities grouped
+       and then each capability performance and then finally the overall
+       performance"*.
+
+       THIS IS NOT §254.4 REVERSED. There he was looking at a UNIT's deck,
+       where every pillar's own measures and tactics sit between the
+       roll-call and the scoring — *"move the pillars performance till the
+       end before the where we stand slide"* keeps the scoring beside the
+       reading it belongs to, three sections later. The company's review
+       has no detail slides at all (§481): the roll-call and the scoring
+       are adjacent either way, and reading them as one group is the whole
+       point of showing the two kinds apart. Units are untouched. */
+    if (capsApart) S.push(groupScoreSlide(g));
   });
 
   /* The score table's rows, built here and pushed at the END (§254.4).
@@ -707,7 +741,7 @@ function deckSlides(u){
      a projector, and two rows in Manage slides' rail that read the same. The
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
-  var pillarScoreSlides = groups.map(function(g){
+  function groupScoreSlide(g){
     if (!g.ix.length) return "";
     return '<section class="dslide"' +
       anch(g.score, "After the " + g.plain + " overview") +
@@ -716,7 +750,10 @@ function deckSlides(u){
       '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
       '<tbody>' + g.ix.map(function(x, n){ return pillarRow(x.p, x.i, n + 1); }).join("") +
       '</tbody></table></section>';
-  }).filter(Boolean);
+  }
+  /* Said at the end for every deck that HAS detail slides in between
+     (§254.4); said beside its own group where there are none (§553.8). */
+  var pillarScoreSlides = capsApart ? [] : groups.map(groupScoreSlide).filter(Boolean);
 
   (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
 
@@ -779,9 +816,11 @@ function deckSlides(u){
      stand slide always draws, so this is never a divider over nothing. */
   S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu") +
-      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
-      (u.fnKey || u.topLayer ? u.name : "the unit") +
+    /* It announces what is BEHIND it, and §553.8 moved the two score
+       tables in front of it — so where they have already been read, this
+       says the one thing left (§253, §61). */
+    (capsApart ? "Where " : "Where the " + L("pillar","bu") + " stand, where ") +
+      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
       " stands, and what the cycle is remembered for.",
     null));
   if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
@@ -791,7 +830,7 @@ function deckSlides(u){
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
+    '<div class="coverrule"></div><p class="coversub">' + esc(deckBoxName(u)) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   return S.join("");

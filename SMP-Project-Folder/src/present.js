@@ -1896,7 +1896,12 @@ function deckBuild(target){
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
   deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
+  /* The company by its own name (§553.8's rule, reaching the strip under the
+     room): the slides it adds itself were labelled "the group" there, which
+     is the word Islam struck out — "there is nothing called elabd review as
+     a group". */
+  var org = String((GROUP && GROUP.org) || "").trim();
+  var name = (target === "group" && org) ? org : placeLabel(target);
   [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
     sl.dataset.subject = target;
     sl.dataset.subjectName = name;

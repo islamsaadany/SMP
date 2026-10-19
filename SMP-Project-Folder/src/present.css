@@ -742,9 +742,12 @@
      On a light slide there is no plate at all — a navy mark on a near
      white ground needs nothing behind it, and a plate there would be a
      visible rectangle for no reason. */
-  /* The same fault on the cover: 340px wide made a round logo 340px tall. */
-  .dcovermark { display:block; width:auto; height:auto;
-                max-width:340px; max-height:150px; margin:0 0 26px; }
+  /* The same fault on the cover: 340px wide made a round logo 340px tall.
+     `align-self` because the cover is a flex column that stretches its
+     children across: with the width no longer fixed, the mark was pulled
+     to 340 wide at 150 tall and drawn as an oval. */
+  .dcovermark { display:block; width:auto; height:auto; align-self:flex-start;
+                object-fit:contain; max-width:340px; max-height:150px; margin:0 0 26px; }
   :root[data-theme="dark"] .dcovermark,
   :root[data-theme="dark"] .dfootmark {
     background:#fff; padding:10px 14px; border-radius:5px; box-sizing:content-box;
@@ -766,7 +769,7 @@
      need."* 32 + 16 + 56 is the 104 reserved above, so it cannot rise —
      and the reserve itself is unchanged, so no table fits one row fewer. */
   .dfootmark { display:block; width:auto; height:auto;
-               max-width:132px; max-height:56px; opacity:.75; }
+               max-width:132px; max-height:56px; object-fit:contain; opacity:.75; }
 
 /* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
    Islam's own concept from the Raya deck, in the platform's language: a row of

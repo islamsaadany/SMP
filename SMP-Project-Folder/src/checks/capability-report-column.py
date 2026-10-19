@@ -100,16 +100,29 @@ def become(pg, who):
 
 def open_report(pg, dest):
     """The destination through the navigation's own controls, never by
-       assigning `current` (§266): a capability lives behind the third side of
-       the switch, and `data-fold` is absent exactly when that side is lit."""
-    ev(pg, "(s)=>{const b=document.querySelector('#units [data-fold=\\\"'+s+'\\\"]');"
-           " if (b) b.click();}", None,
-       "caps" if dest.startswith("cap:") else "units")
-    pg.wait_for_timeout(280)
-    try:
-        pg.click('#units [data-u="%s"]' % dest, timeout=3000); pg.wait_for_timeout(560)
-    except Exception:
-        return None
+       assigning `current` (§266) — EXCEPT a capability, which §544.13 took
+       off the row: it is the company's and is reached from the company's
+       plan (§520's rail), so there is no control here to press and the rail's
+       own act is what this stands in for. A unit still goes the long way."""
+    if dest.startswith("cap:"):
+    # §266 KEPT, NOT WAIVED. The docstring's rule — never assign `current`
+    # — exists so a check cannot walk a viewer somewhere the product would
+    # not let them go, and §544.13 took away the control this pressed
+    # instead. The stand-in therefore asks the SAME question the rail asks
+    # before drawing an entry (`capsReachable`, §42) and refuses where the
+    # rail would not be there, so the negative ends below still mean what
+    # they say.
+        if ev(pg, "(d)=>{ if (!capsReachable().some(function(c){ return 'cap:'+c.id === d; })) return false; if (current !== d) leaveModes(); current = d; currentSub = entrySub(current); paint(); window.scrollTo(0,0); return true; }", None, dest) is not True:
+            return None
+        pg.wait_for_timeout(560)
+    else:
+        ev(pg, "(s)=>{const b=document.querySelector('#units [data-fold=\\\"'+s+'\\\"]');"
+               " if (b) b.click();}", None, "units")
+        pg.wait_for_timeout(280)
+        try:
+            pg.click('#units [data-u="%s"]' % dest, timeout=3000); pg.wait_for_timeout(560)
+        except Exception:
+            return None
     try:
         pg.click('#subtabs button[data-s="report"]', timeout=2500); pg.wait_for_timeout(700)
     except Exception:

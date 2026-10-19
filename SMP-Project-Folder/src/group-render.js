@@ -1590,7 +1590,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -2277,7 +2277,7 @@ function unitCards(keys){
    an empty slot asserts something is missing when the model simply does not
    work that way (§15.1). */
 function renderCompanyPerformance(coKey){
-  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
+  var ckr = boxRef(coKey), ck = ckr.kind === "mid" ? ckr.key : String(coKey);
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
@@ -2785,7 +2785,13 @@ function whereNext(keys){
      company's headline card already prints — nothing new is computed. Only
      while the top layer plans in pillars (§466: a projects company is scored
      by its projects in the headline card). */
-  if (topHasPlan() && planOn("group") && topWay() !== "projects") {
+  /* §542: and where the company is shown apart (§540), the same cards are
+     built twice — the external half under the pillar word, the internal half
+     under the capability word — so the two readings El Abd has on this page
+     today survive its capabilities becoming pillars. Joined, which is every
+     client, `dirGauges` is called once with no half and builds exactly the
+     section it built before. */
+  var dirGauges = function(){
     var dtu = topAsUnit(), dpf = partFilter(dtu), ditems = itemsNow(dtu);
     /* §517: their own directions only — the code still read off the real
        position below, so it is the one every other page shows. */
@@ -2821,15 +2827,31 @@ function whereNext(keys){
        the "Nothing to show yet." note below could never fire (§45.2).
        Nobody else is reached: with no filter `ditems` is `itemsNow` and
        `topHasPlan()` has already said there is a plan. */
-    if (ditems.length) SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
-      '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
+    return ditems.length
+      ? { dir: true, t: halfWord(dtu), h: section("", halfWord(dtu), null,
+            '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') }
+      : null;
+  };
+  if (topHasPlan() && planOn("group") && topWay() !== "projects") {
+    var dsec = drawHalf("dir", dirGauges);
+    if (dsec) SECS.push(dsec);
+    /* §45.2: only where it holds something, which is no box today. */
+    if (boxHasHalf(topAsUnit(), "cap")) {
+      var csec = drawHalf("cap", dirGauges);
+      if (csec) SECS.push(csec);
+    }
   }
 
   /* §520.5: the section is KEPT for a narrowed part owner — their own
      capability's figures are theirs to read — and drawn only while they hold
      one, or the heading stands over nothing (§520.2, §45.2). Everybody else
      is unchanged: with the half eye off `partOnly()` is false. */
-  if (SMPRules.capExists(GROUP) && (!partOnly() || capsHere().length)) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
+  /* §542: AND ONLY WHILE THERE IS ONE. `capExists` is the Structure step's
+     flag, not a count, so a client whose capabilities have become internal
+     pillars (stage 3b) kept a heading over an empty grid — and beside the
+     section §542 draws from the pillar list, two headings reading the same
+     word. §45.2's rule, reached by the one state that makes it visible. */
+  if (SMPRules.capExists(GROUP) && capsHere().length) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -2975,20 +2997,62 @@ function renderTemple(){
     /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
        the top level carries, and a client that switched capabilities off at
        the top is not shown a base with nothing it chose to put there. */
-    (!SMPRules.capExists(GROUP) ? '</div>' :
+    /* §404 still gates it: a client that switched capabilities OFF at the top
+       is shown no base at all, whatever the plan happens to hold. §542 added
+       the second half — a base with nothing in it is not drawn either, which
+       is what a client whose records have become pillars would otherwise get
+       if the flag were on and `templeBase()` empty. Both guards, in that
+       order; checks/top-plan.py caught the first being dropped. */
+    (!SMPRules.capExists(GROUP) || !templeBase() ? '</div>' :
     '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
-      GROUP.capabilities.map(function(c){
-        return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
-          '<span>' + plural(c.projects.length, L1("project"), L("project")) +
-            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
-            '</span></summary>' +
-          '<div class="encard-body"><p>' + esc(c.def) + '</p><ul>' +
-          c.projects.map(function(p){
-            return '<li>' + esc(p.name) + ' &mdash; <span class="mono">' + p.deliverables.length +
-              ' deliverables, ' + p.outcomes.length + ' outcomes, ' + p.milestones.length + ' milestones</span></li>';
-          }).join("") + '</ul></div></details>';
-      }).join("") +
+      templeBase() +
     '</div></div></div>');
+}
+/* ── §542 · THE TEMPLE'S BASE, FROM WHEREVER THE CAPABILITIES ARE ─────────
+   It read `GROUP.capabilities` and nothing else, so a client whose
+   capabilities have become internal pillars of the company's own plan
+   (stage 3b) kept the heading and lost every card under it — an empty base
+   on the one page that is drawn to be looked at whole.
+
+   SO IT READS BOTH, AND THE RECORDS FIRST. While a client still stores
+   capability records those are its capabilities and the base is what it
+   always was, byte for byte; once they are gone the internal pillars take
+   their place. No client has both, and if one ever did the base would show
+   both rather than pick — losing half of a picture is worse than a long one.
+
+   A CARD SAYS WHAT ITS SUBJECT HAS. A record's card counts projects and key
+   objectives, because that is what a capability record holds; a pillar's
+   counts measures and tactics, because that is what a pillar holds. The two
+   are not made to look alike by giving one of them a zero it cannot have
+   (§45.2's cousin: a number that can only ever be nought is not information).
+   El Abd's five read "0 Projects" today for exactly that reason, and will
+   read "6 Key Measures · 4 Tactics" after — which is what is on them. Named
+   in the before-and-after list rather than smoothed over. */
+function templeBase(){
+  var out = (GROUP.capabilities || []).map(function(c){
+    return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
+      '<span>' + plural((c.projects || []).length, L1("project"), L("project")) +
+        ((c.keyObjectives || []).length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
+        '</span></summary>' +
+      '<div class="encard-body"><p>' + esc(c.def || "") + '</p><ul>' +
+      (c.projects || []).map(function(p){
+        return '<li>' + esc(p.name) + ' &mdash; <span class="mono">' + (p.deliverables || []).length +
+          ' deliverables, ' + (p.outcomes || []).length + ' outcomes, ' + (p.milestones || []).length + ' milestones</span></li>';
+      }).join("") + '</ul></div></details>';
+  });
+  var tu = topAsUnit();
+  (tu.items || []).forEach(function(p, i){
+    if (!SMPRules.pillarIsCap(p)) return;
+    var ms = SMPRules.shown(p.measures || []), ts = SMPRules.shown(p.tactics || []);
+    out.push('<details class="encard"><summary><b>' + esc(p.name) + '</b>' +
+      '<span>' + plural(ms.length, L1("measure"), L("measure")) +
+        (ts.length ? ' &middot; ' + plural(ts.length, L1("tactic"), L("tactic")) : '') +
+        '</span></summary>' +
+      '<div class="encard-body"><p>' + esc(p.sub || "") + '</p><ul>' +
+      ts.map(function(t){ return '<li>' + esc(t.name) + '</li>'; }).join("") +
+      '</ul></div></details>');
+  });
+  return out.join("");
 }
 
 function renderGroupFoundation(){
@@ -3478,7 +3542,7 @@ function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
-  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
+  var page = boxRef(TARGET).kind === "fn" ? e.fn : e.unit;
   return page ? [page, e.ac] : null;
 }
 
@@ -4161,19 +4225,103 @@ function ownerDepts(){
   mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
   return a.list;
 }
+/* ── AN OWNER IS PICKED FROM THE REGISTER, NEVER TYPED (§551) ──────────
+   Islam, after the El Abd move turned up a direction owned by *"Tamer
+   Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner
+   should be selected from a drop down, generally all the owners shouldn't be
+   written by hand and only be selected from a list from the registr in a
+   drop down serachable list."*
+
+   THE RULE IS §177's, ONE FIELD OVER. A due date is picked and never typed
+   because a typed date is precision the product cannot use; a typed owner is
+   worse — it is a person who may not exist, and nothing downstream can tell.
+
+   THE SCREENS ALREADY PICKED. Measured before anything was built: all four
+   owner cells on the plan surfaces go through `gapCell` and are fed by
+   `ownerChoices`, which is this register, and past five options `searchsel`
+   makes it the searchable list Islam describes (§536). What was NOT picked
+   was the Copilot's draft table (a bare text box, §551) and the five Owner
+   columns of the workbook (22 validations in it and not one of them Owner).
+
+   AND THE QUIET PART, WHICH IS HOW "Tamer Abdelhamid" SURVIVED. An unknown
+   value was offered back in the dropdown under the heading "Already on this
+   plan" — a label that reads like a fact about the plan rather than a warning
+   about the name, so it looked like a legitimate choice to everyone who ever
+   opened that cell. It is the same group, said truthfully.
+
+   `ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5): the
+   dropdown's grouping, the read-mode flag and the workbook's import refusal
+   all ask it, so a name cannot be a stray in one and fine in another. It is
+   `ownerAdder`'s own set, so trimming and case are settled once.
+
+   NOT MEMOISED, which is deliberate and matches the house: `displayNames()`
+   is recomputed on every call throughout this file, and `ownerChoices` was
+   already paying this exact cost once per cell in the pen. Read mode now
+   pays it too. If a plan is ever large enough for that to show, the cache
+   belongs around `displayNames` for every caller, not here for one. */
+function ownerKnownSet(){
+  var a = ownerAdder();
+  ownerPeople().forEach(function(x){ a.add(x.name); });
+  ownerDepts().forEach(a.add);
+  return a;
+}
+/* The stray values among whatever the field holds — a string or a list.
+   Empty is never a stray: a blank owner is a GAP, which the fill walk and
+   the word "Missing" already handle, and calling it a stray would put two
+   different complaints on one cell. */
+function ownerStrays(v, known){
+  known = known || ownerKnownSet();
+  return (Array.isArray(v) ? v : [v]).map(function(x){
+    return String(x == null ? "" : x).trim();
+  }).filter(function(x){ return x && !known.has(x); });
+}
+/* ── AND IT IS FLAGGED WHERE IT SHOWS, NOT DELETED (Islam's choice) ────
+   Shown the three answers as drawings — flag it, refuse to save it, or leave
+   it — he picked flagging: *"Flag them where they show."* The name STAYS on
+   the row, because a name somebody typed is the only clue to who was meant,
+   and deleting it to satisfy a rule would destroy the thing that lets it be
+   corrected (§96.2's reasoning about an unparseable date, exactly). */
+/* ONE MARK, TWO SHAPES (§53.5). An owner is one name and a collaborator cell
+   is a list of them, so the two readers differ in how they split — and in
+   nothing else. The words and the markup live here once, or the day somebody
+   improves the sentence they improve half the product. */
+function strayMark(){
+  return ' <span class="ownerstray hasnote" data-tip="This name is not in the register,' +
+    ' so it matches no real person. Pick somebody from the list, or add them to the' +
+    ' register.">not in the register</span>';
+}
+function ownerShown(v){
+  return esc(String(v == null ? "" : v)) + (ownerStrays(v).length ? strayMark() : "");
+}
+/* ── AND THE SAME FLAG ON A LIST OF THEM (§551.1) ──────────────────────
+   Islam: *"fix the collaborators too."* A collaborator cell is a comma-
+   separated list, so it is marked PER NAME rather than once for the cell: a
+   cell reading "Nadia Fouad, Tamer Abdelhamid" has one real person in it and
+   one that matches nobody, and a single mark on the whole cell would not say
+   which. `gapCell` hands this the joined string its own `text:` built, which
+   is why it splits on the comma it was joined with and nothing cleverer. */
+function collabShown(v){
+  var known = ownerKnownSet();
+  return String(v == null ? "" : v).split(/\s*,\s*/).filter(Boolean).map(function(n){
+    return esc(n) + (known.has(n) ? "" : strayMark());
+  }).join(", ");
+}
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
+/* `strayGroup` NAMES THE KEPT GROUP, because one sentence cannot be true of
+   both fields (§551.3). An OWNER is matched against the people register to
+   decide who may report a line, so "Not in the register" is exactly what a
+   stray one is. A STAKEHOLDER is a unit or a person in Islam's own words, so
+   over "Finance Department" that sentence points at the wrong list — it reads
+   as though the platform wanted a person there. The default is unchanged, so
+   §551's owners go on saying what they said. */
+function ownerChoices(current, blank, strayGroup){
   var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
+  var known = ownerKnownSet();
   var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
+  ownerStrays(current, known).forEach(kept.add);
+  var out = blank ? [{ v:"", label:"—" }] : [];
+  if (kept.list.length) out.push({ group:strayGroup || "Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -5729,7 +5877,7 @@ function renderUnitAnalysis(u){
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
 function renderFnSW(t){
-  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
@@ -6393,7 +6541,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
-                        (String(sub.key).indexOf("cap:") === 0
+                        (boxRef(sub.key).kind === "cap"
                           ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
@@ -6921,7 +7069,16 @@ function renderReport(u, opt){
     return { done: done, total: total };
   };
 
+  /* ── §542 · THE BLOCK IS BUILT PER HALF ─────────────────────────────────
+     A split box reports its two halves as two sections of this page, the
+     way the directions and the capabilities are two sections today — so the
+     rail, its pane and its empty state are a function called once for each
+     half rather than one block built once. Called with no half on a joined
+     box, which is every box in every client, the filter is null and this is
+     the block it always was, byte for byte. */
+  var halfBlock = function(){
   var sel = unitRailPick(u);
+  var pillars;
   /* §416: a direction that does not run this year is not asked for, so the
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
@@ -6929,12 +7086,11 @@ function renderReport(u, opt){
     var firstNow = partItems(u).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
-  var pillars;
   if (!sel) {
     /* §520.8: a capability with nothing planned says so in the words its own
        rail already uses (`topCapBody`), never "this unit has no directions". */
     pillars = paneOnly ? '<div class="note">Nothing planned yet.</div>'
-      : '<div class="note">This unit has no ' + L("pillar","bu") +
+      : '<div class="note">This unit has no ' + halfWord(u) +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -6959,7 +7115,7 @@ function renderReport(u, opt){
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
       return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
-          esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
+          esc(unitRailSubj(u)) + '|' + esc(pillarRailId(p)) + '">' +
         railName(code, p.name) + yearsTagHtml(p) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
@@ -6973,7 +7129,7 @@ function renderReport(u, opt){
                 : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), partItems(u).length) + railRows +
+    var rail = '<div class="rail">' + railHead(halfWord(u), partItems(u).length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
@@ -6990,6 +7146,30 @@ function renderReport(u, opt){
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
+  return pillars;
+  };
+  /* §543 — EACH HALF ONLY WHERE THIS VIEWER REACHES ONE, AND THE HEADING
+     ONLY WHERE THERE ARE TWO. Islam, reporting as a capability's owner:
+     *"I shouldn't see the directions part at the top, only the capabilities
+     and no need as well to see key measures and tactics.. the title is not
+     relevant. for the user he is just reporting; for the office it might be
+     useful"*.
+
+     Two rules in one sentence, and the second follows from the first: a half
+     that holds nothing of theirs is not drawn at all — no heading, no empty
+     state — and once only one half is left there is nothing for a title to
+     tell apart, so it goes too. The office, who sees both, keeps both
+     headings because for them the title is doing its job. */
+  var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
+  var showCap = boxHasHalf(u, "cap");
+  var pillars = showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap ? drawHalf("cap", halfBlock) : "";
+  /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
+     section and has always been headed, so dropping the title there would
+     take a heading off every unit in every client that never split anything
+     — which is what the first draft of this did, and what section 1b of
+     scripts/test-capability-fold.js caught. */
+  var titled = !boxSplit(u) || (showDir && showCap);
 
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
@@ -7094,8 +7274,18 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
-    (u.topLayer && partOnly() && !partItems(u).length ? "" :
-      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
+      section("", titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+              null, pillars)) +
+    /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
+       client's own word for a capability — the shape §520.8 settled for the
+       capability RECORDS ("it should say Capabilities - key measures and
+       tactics"), kept for the pillars that replace them. Empty on every box
+       that is not shown apart, which is every box today. */
+    (capPillars
+      ? section("", titled ? L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+                null, capPillars)
+      : "") +
     /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
        a section of the company's plan and never a destination (§520.1), so
        this page is the only Reporting page its owner can reach. `capsHere()`
@@ -7111,7 +7301,11 @@ function renderReport(u, opt){
        capability through `capReportBody`. The owner types on theirs, a
        direction's owner reads it, the office types on all — the pane asks
        `cap:<id>` for itself exactly as before. */
-    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+    /* §544.13: `!buExists(GROUP)` was the third of the four places the
+       business units decided something about a capability — here it meant
+       the section appeared only on a client that had no units, although the
+       capabilities it reports are the company's either way. Gone. */
+    (u.topLayer && SMPRules.capExists(GROUP) && capsHere().length
       ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
           reportCapsSplit(capsHere()))
       : "") +
@@ -8133,9 +8327,43 @@ function projFrontMatter(p, ed){
   /* The pills carry their own leading margin, which is right in a sentence and
      wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
      BORDER lines up with the brief's first letter, not its text. */
+  /* ── A STAKEHOLDER IS PICKED FROM THE SAME LIST (§551.3) ──────────────
+     Islam, asked what a stakeholder is, because the demo held "Unit heads"
+     and "Finance Department" and the answer decided whether a rule could be
+     imposed at all: *"stakeholders are either units or people names so it can
+     be a searchable list with functions and people names to be added."*
+
+     SO IT IS §130.1's OWN CONTROL, NOT A NEW ONE. His words there were almost
+     these — *"for the owners in the plans, projects, tactics, milestones, let
+     it be a searchable list from the registry"*, and, asked what the list
+     holds, *"people or department"*. This is that answer one field further
+     out, so it is the collaborators' control with the collaborators' list
+     (§53.5): `selectManyOr` over `ownerChoices`, several answers, searchable
+     past five options through `searchsel` (§536).
+
+     NOTHING ALREADY TYPED IS LOST, which is why `ownerChoices` is handed the
+     current value: a stakeholder the list does not offer stays in it and
+     stays picked. Measured on the demo before this was built — of twelve
+     distinct stakeholders, seven are already in the list and five are not
+     ("Finance Department" and "IT Department", which are Finance and IT with
+     a word added; "Operations" and "Sales", departments this tenant has no
+     page for; and "Unit heads", which is a role group and neither a unit nor
+     a person). All five survive and remain pickable.
+
+     AND THEY ARE NOT FLAGGED THE WAY AN OWNER IS. An owner is matched against
+     the register BY NAME to decide who may report a line (§130.1, §55) — a
+     stray one is a person who owns work and cannot enter its figure. Nothing
+     downstream resolves a stakeholder to anybody, so a stray costs a tidier
+     chip and nothing else, and five flags on the demo would be noise rather
+     than information. Islam asked for a list to pick from, not a rule to
+     enforce; the rule stays his to ask for. */
   var stake = ed
-    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-        function(v){ p.stakeholders = collabParse(v); })
+    ? selectManyOr("plan", p.stakeholders || [],
+        ownerChoices(p.stakeholders || [], false, "Not a unit or a person here"),
+        "collabsel",
+        function(v){ p.stakeholders = Array.isArray(v)
+          ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+          : collabParse(v); }, "Stakeholders")
     : ((p.stakeholders || []).length
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
@@ -8176,6 +8404,7 @@ function projFrontMatter(p, ed){
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
         ctx: { project: p },
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8313,6 +8542,7 @@ function projPlanBody(p, subject){
          both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8332,6 +8562,7 @@ function projPlanBody(p, subject){
             : collabParse(v); },
           del: true,
           readEmpty: '<span class="nobody">&mdash;</span>',
+          read: collabShown,
           control: function(set, pendCls){
             return selectManyOr("plan", collabNames(m),
               ownerChoices(collabNames(m), false),
@@ -8468,6 +8699,7 @@ function fnObjPlanBody(fk, ed){
         (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
       '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
           ctx: { row: a },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", a.owner == null ? "" : a.owner,
               ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
@@ -9042,7 +9274,39 @@ function renderFnReport(fnKey){
    screens below its first in an accordion. Unlike a capability's projects,
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
-function unitRailKey(u){ return "unit:" + u.ukey; }
+/* ── §542 · A RAIL EACH, WHERE A BOX IS SHOWN APART ──────────────────────
+   §540 put the two halves on two tabs and left them sharing one remembered
+   selection, which was tolerable while they were tabs: you only ever see one
+   at a time. The Reporting page draws BOTH at once, stacked, as it draws the
+   directions and the capabilities today — and there one shared key means
+   pressing a row in the lower rail makes the upper pane jump to its first
+   row, for no reason anybody could see. So each half gets a key of its own.
+
+   THE SUBJECT, NOT THE KEY, IS WHAT CARRIES THE HALF, because the rail's
+   button writes `data-urail="<subject>|<row id>"` and the shell's one handler
+   rebuilds the key as `"unit:" + subject`. Putting the half in the subject
+   keeps that one handler right for both halves and for everything that is
+   not split, where the subject is the bare key exactly as it was.
+
+   AND A ROW'S OWN RAIL IS ASKED OF THE ROW. A deep link from the missing-
+   elements walk has to land on the half that holds the pillar it names, and
+   that walk runs outside any render — no half is being drawn — so it asks
+   `pillarRailKey(u, p)`, which reads the pillar's kind rather than the half
+   on screen. One fact, two doors (§53.5). */
+function unitRailSubj(u){
+  return (u ? u.ukey : "") + (PILLAR_HALF && boxSplit(u) ? "@" + PILLAR_HALF : "");
+}
+function unitRailKey(u){ return "unit:" + unitRailSubj(u); }
+function pillarRailKey(u, p){
+  if (!boxSplit(u)) return "unit:" + (u ? u.ukey : "");
+  return "unit:" + u.ukey + "@" + (SMPRules.pillarIsCap(p) ? "cap" : "dir");
+}
+/* And which SECTION holds it, for the same deep link: a split box draws its
+   internal pillars on their own tab (§540), so a walk that sent every pillar
+   to `plan` would open the Directions tab and highlight nothing. */
+function pillarSecKey(u, p, sec){
+  return (boxSplit(u) && SMPRules.pillarIsCap(p) && sec === "plan") ? "plancap" : sec;
+}
 /* §393 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
    added with the pen is minted `code: ""` (addPillar) and nothing fills it in
    on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
@@ -9110,7 +9374,7 @@ function unitRailFor(u, sel){
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
     return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (runsNow(it) ? "" : " later") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+        esc(unitRailSubj(u)) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name, it.kind) + yearsTagHtml(it) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
@@ -9143,7 +9407,8 @@ function unitRailFor(u, sel){
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), pf ? list.filter(pf).length : list.length) +
+    /* §542: the half's own word over the half's own count. */
+    railHead(halfWord(u), pf ? list.filter(pf).length : list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -9294,7 +9559,7 @@ function ownStateChip(target, list, word){
   var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
   var top = String(target) === "group";
   var submits = top ? "office or the CEO" :
-                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+                boxRef(target).kind === "fn" ? "function's custodian" : "unit's custodian";
   var tip = 'You report your own rows. The ' + submits + ' submits the report.';
   /* A capability carries no saved-draft mark (§309 is a project's and a
      direction's), so "done" there — and ONLY there, `noMark` — is every
@@ -9658,6 +9923,7 @@ function unitPlanBody(it, u, railed, bare){
           : collabParse(v); },
         del: true,
         readEmpty: '<span class="nobody">&mdash;</span>',
+        read: collabShown,
         control: function(set, pendCls){
           return selectManyOr("plan", collabNames(t),
             ownerChoices(collabNames(t), false),
@@ -9780,6 +10046,7 @@ function unitPlanBody(it, u, railed, bare){
       '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);
@@ -10106,11 +10373,14 @@ function renderUnitPlan(u){
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
       "this " + L1("pillar")) +
+    /* §540: the count and the rail are of the list AS DRAWN — on a split box
+       this tab holds one half of it, and a hint reading "15 Directions" over
+       a rail of five is the kind of disagreement §116.2 exists to stop. */
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
+      ? '<p class="sec-hint">' + partItems(u).length + ' ' + halfWord(u) +
         ' &middot; drag by the handle to reorder, here and inside each ' +
-        L1("pillar") + '</p>' : '') +
-    (railWorthIt(u.items)
+        halfWord1(u) + '</p>' : '') +
+    (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
@@ -10156,11 +10426,11 @@ function renderUnitPlan(u){
    (§211, §213), so there is one.
 
    WHO IT IS HELD BY IS READ, NEVER SET HERE. A function's head is a fact the
-   register holds and Setup's own picker writes (§33, §226). A capability is
-   held by the function that carries it, so its holder is that function's head
-   — one fact, one door, and no second control that could disagree with the
-   first. Changing which function holds a capability is Setup › Capabilities',
-   because it is a Setup change and the server classifies it as one (§42). */
+   register holds and Setup's own picker writes (§33, §226). §544.13: a
+   capability's is its OWN owner, read the same way from the same door —
+   Setup › Capabilities' Owner picker — because a capability is the
+   company's and no function carries it any more. One fact, one door, and no
+   second control that could disagree with the first. */
 function holderOverview(subject){
   var t = holderTarget(subject), isCap = isCapTarget(t);
   var c = isCap ? capById(capKeyOf(t)) : null;
@@ -10224,16 +10494,20 @@ function holderOverview(subject){
            held by anybody else would be the screen offering what the save
            refuses (§42). The sentence is a hover, never a printed line (1b-ii).
 
-           ON A CAPABILITY IT IS READ AND NAMES THE FUNCTION TOO, because
-           "Rana Fouad" alone does not say which desk holds this work — and
-           editing it here would be a second control writing the FUNCTION's
-           head from a capability's page (§53.5). */
-        '<div class="clause"><dt>' + (isCap ? 'Held by' : 'Led by') + '</dt><dd' +
+           §544.13 — AND ON A CAPABILITY IT IS ITS OWN OWNER NOW. This read
+           *Held by* and named the holding function's head, because "Rana
+           Fouad" alone did not say which desk held the work. A capability
+           is the company's (Islam: *"the company only"*), so there is no
+           desk: this would have printed an em dash on every capability
+           there is, for ever — a row that can only be empty is not a row
+           (§45.2, §61). It reads the OWNER §412 gave it, which is the same
+           fact Setup › Capabilities' own picker writes and the People page
+           shows (§33, §53.5), and it is read here, never set, exactly as a
+           function's head is. */
+        '<div class="clause"><dt>' + (isCap ? 'Owner' : 'Led by') + '</dt><dd' +
           (!isCap && ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
           (isCap
-            ? (f && f.head
-                ? esc(personName(f.head)) + ' <span class="why">' + esc(f.name) + '</span>'
-                : (f ? esc(f.name) : "&mdash;"))
+            ? (c.head ? esc(personName(c.head)) : "&mdash;")
             : (ed && inOffice()
                 ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
                 : (f.head ? esc(personName(f.head)) : "&mdash;"))) + '</dd></div>' +
@@ -10497,7 +10771,7 @@ function koReadBlock(list, emptyLine){
    handle the save would refuse (§94.3's fault, the safe way round). */
 function capKoTarget(c){
   var id = String(c && c.id || "");
-  if (id.indexOf("fn:") === 0) return id;
+  if (boxRef(id).kind === "fn") return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
 /* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
@@ -10587,7 +10861,7 @@ function unitPerfRail(u){
     var now = runsNow(it);
     var perf = now ? pillarPerf(it) : null, r = pillarRatio(it);
     return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
-      esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+      esc(unitRailSubj(u)) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) + yearsTagHtml(it) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
@@ -10602,7 +10876,7 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), partItems(u).length) +
+    railHead(halfWord(u), partItems(u).length) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist

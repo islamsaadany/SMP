@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-07
 
-**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; **stage 1 built on the branch 2026-10-07 (§515.2), not merged** — the six rules of §4 below, with the client copies waived at Islam's word (*"No need for client data proceed"*)
+**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; **stages 1–3 merged; stage 4 built on the branch 2026-10-18 (§544)**; stage 1 (§515.2) — the six rules of §4 below, with the client copies waived at Islam's word (*"No need for client data proceed"*)
 
 **Input**: Islam, 2026-10-07:
 
@@ -328,3 +328,30 @@ office presses one answer.
 - The same box in the same state reads the same number on every page and slide.
 - A request like "a direction owner" or "show the BU SWOT under company planning"
   needs no new build.
+
+### 8.4 Stage 4, as built (§544, 2026-10-18)
+
+Islam, from the signed-off mockup
+(`design-mockups/setup-one-screen/2026-10-18_the-shape-interactive.html`,
+eight versions): *"the shape is good, let's build stage 4"*.
+
+| Part | What changed | Where |
+|---|---|---|
+| Three steps | The client · The shape · The office. Structure and the four list steps are one screen — the tree on the left, the level or box you press on the right | `STEPS`, `shapeStep`, `drawTree`, `drawShapePanel` |
+| The cards | Unchanged. `structureStep(box, only)` draws the level's own card; the capabilities ride with the top | `structureStep` |
+| A box's own row | Unchanged: its name, how it plans, which division it is in | `boxPanel`, `coPanel` |
+| A layer per kind | Each bottom kind carries its own layer above it, created by the kind that needs one and named per kind where a client has two. Read from use, stored as an absence | `layerOn`, `coOnLayer`, `layerCompanies`, `layerWords` |
+| The navigation | Chosen on the row, not derived. Four rows can be a side; unsaid, each answers what `navSides()` answers today | `navPicked`, `navRowUnsaid`, `companyUnitSides` |
+| The capabilities step | Gone. A capability is an internal pillar (stage 3b); the records a client still holds are managed on Setup › Capabilities, named on the tree | — |
+| Where the plan lives | §448's "Where the strategy is planned" gone. Each level says on its own card whether it plans and **both can be on**; the units' layer carries an On/Off like the functions'. Off hides and keeps — nothing is copied (§2.2's reversal of §447, finished) | `structure.bu.exists` |
+
+**Proof:** `scripts/test-shape.js` 30/0 over Raya's shape and El Abd's,
+proved able to fail four ways (2 / 1 / 2 / 2 red); `checks/shape.py` all
+good, proved able to fail three ways (1 / 3 / 1 red); fifteen browser
+checks rewritten to the new route and green, `client-setup.py` and
+`plan-level.py` rewritten to the new rule (§218).
+
+**Not in this stage:** the two layers share the second layer's component
+switches (one `mid` level in the store, and nobody has asked for them to
+differ); a box's code, its navigation short name and its head stay on
+Setup › Business units and on the register (§53.5).

@@ -413,9 +413,9 @@ var SYNC = (function () {
        through nobody's choice. Sending that would have every one of their
        saves judged as that stranger: a narrowing, which is the safe
        direction, and still a bootstrap tenant unable to set itself up.
-       Asked through isSMOSession() and the register, which together are
+       Asked through maySimulateSession() and the register, which together are
        exactly when the control that sets VIEWER is drawn at all. */
-    if (!isSMOSession()) return null;
+    if (!maySimulateSession()) return null;
     if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
     var v = typeof window !== "undefined" ? window.VIEWER : null;
     return v && v !== person.key ? v : null;
@@ -790,9 +790,9 @@ var SYNC = (function () {
      function's plan between them, and getting it wrong here would mean a
      project's rows could never be found. */
   function refusedRoots(target) {
-    var t = String(target || "group");
-    if (t.indexOf("fn:") === 0) {
-      var k = t.slice(3), out = [];
+    var t = String(target || "group"), r = boxRef(t);
+    if (r.kind === "fn") {
+      var k = r.key, out = [];
       if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
       if (typeof GROUP !== "undefined")
         (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
@@ -1151,7 +1151,41 @@ var SYNC = (function () {
      SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
-  function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE OFFICE IS TWO SEATS, NOT ONE (§554) ──────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* This asked for the Super user
+     alone, so the control was named after the seat rather than after the
+     question it answers — and the question is *may this session leave its
+     own view*, which both office seats now answer yes to.
+
+     RENAMED RATHER THAN WIDENED IN PLACE, because `isSMOSession` is read in
+     the one place a mistake is dangerous (`actingAs`, which stamps the save)
+     and a name that says "is the SMO" while meaning "is the office" is how
+     the next person comes to use it for a Super-user-only act. The fail-
+     closed shape above is untouched: still hidden until something proves it
+     should be shown.
+
+     WHO IS *IN* THE LIST is a second question and it is `maySimulatePerson`
+     below — an SMO team member may not look through the Super user, who is
+     the one person on a client's register holding more than they do. */
+  function maySimulateSession() {
+    return !!person && (person.role === "super" || person.role === "smoteam");
+  }
+  /* MAY THIS SESSION LOOK THROUGH *THIS* PERSON (§554). `p.role` is the seat
+     on the register row, which is what the server writes from the membership
+     — the same field `lib/rules.js actingFor` refuses on, so the control the
+     page draws and the save the server accepts cannot disagree (§42, §61).
+
+     NOBODY SIGNED IN LISTS EVERYBODY: the offline copy and the file:// demo
+     have no session at all, and they have always offered the whole cast.
+     That is not a gate failing open — there is no server to act against and
+     nothing to narrow. */
+  function maySimulatePerson(p) {
+    if (!person) return true;
+    if (!maySimulateSession()) return false;
+    if (person.role === "super") return true;
+    return !p || p.role !== "super";
+  }
   /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
      Islam, of the trail standing at full weight while he viewed as somebody:
      *"I think yes greyed is better not to get confused that the user has
@@ -1277,8 +1311,11 @@ var SYNC = (function () {
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
        for EVERYBODY and the switcher was hidden from the one person it is for
-       (§45.3). It is asked through isSMOSession() now, in one place. */
-    if (!isSMOSession()) {
+       (§45.3). It is asked through maySimulateSession() now, in one place —
+       and since §554 that is both office seats, so an SMO team member keeps
+       the control and gets a list with the Super user left out of it
+       (`maySimulatePerson`), rather than their own name in place of it. */
+    if (!maySimulateSession()) {
       sel.hidden = true;
       /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
          the whole mechanism, and it relied on SEARCHSEL noticing on the next
@@ -1596,20 +1633,24 @@ var SYNC = (function () {
        carries the switcher's own two guards (the seat that draws it, and the
        key being on the register), so a second test would be a second idea of
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
-       exactly as `isSMOSession` is below and for the same reason. */
+       exactly as `maySimulateSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
     /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
        — the shell calls this at the end of every paint. */
     markViewing: function () { markViewing(); },
     person: function () { return person; },
-    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
-       the viewer switcher too, and the note above isSMOSession() is explicit
-       that this question must have ONE answer: a control that is dangerous
-       when wrong must fail closed, and two files each testing `role ===
-       "super"` is exactly how one of them comes to test something else.
-       Exported rather than re-asked — §42's rule about one copy of a rule,
-       on the chrome. */
-    isSMOSession: function () { return isSMOSession(); },
+    /* WHO MAY LEAVE THEIR OWN VIEW, ASKED AND NEVER COPIED (§179, §554). The
+       welcome screen draws the viewer switcher too, and the note above
+       maySimulateSession() is explicit that this question must have ONE
+       answer: a control that is dangerous when wrong must fail closed, and
+       two files each testing the seat by hand is exactly how one of them
+       comes to test something else. Exported rather than re-asked — §42's
+       rule about one copy of a rule, on the chrome. */
+    maySimulateSession: function () { return maySimulateSession(); },
+    /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
+       switcher and the People register's row menu both fill their lists
+       from this, so neither offers a view the save would turn down (§61). */
+    maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {

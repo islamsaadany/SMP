@@ -1,0 +1,554 @@
+<title>The shape, working</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --bad:#B04434;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme: dark; }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:66rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.2rem 4rem; }
+  header { border-bottom:2px solid var(--navy); padding-bottom:1rem; margin-bottom:1.3rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--gold-deep); margin:0 0 .35rem; }
+  h1 { font-size:1.8rem; line-height:1.15; margin:0 0 .45rem; font-weight:700; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  p { max-width:48rem; }
+
+  .bar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:0 0 1rem; }
+  .cbtn { border:1px solid var(--line); background:var(--surface); color:var(--ink);
+          border-radius:999px; padding:.3rem .85rem; font:600 13px var(--sans); cursor:pointer; }
+  .cbtn[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .reset { margin-left:auto; border:0; background:none; color:var(--gold-deep);
+           font:600 12.5px var(--sans); cursor:pointer; }
+
+  .screen { background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .schead { background:var(--navy); color:var(--navy-ink); padding:.5rem .85rem;
+            font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+            display:flex; justify-content:space-between; gap:1rem; }
+  .schead .crumb { font-weight:400; letter-spacing:0; text-transform:none; opacity:.85; }
+  .scbody { display:grid; grid-template-columns:1.3fr 1fr; min-height:26rem; }
+  @media (max-width:760px){ .scbody { grid-template-columns:1fr; min-height:0; } }
+  .shape { padding:1rem .9rem; border-right:1px solid var(--line-soft); }
+  @media (max-width:760px){ .shape { border-right:0; border-bottom:1px solid var(--line-soft); } }
+  .panel { padding:1rem .9rem; background:var(--surface-2); }
+
+  .lvl { font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+         color:var(--ink-3); margin:1rem 0 .4rem; display:flex; align-items:baseline; gap:.55rem; }
+  .lvl:first-child { margin-top:0; }
+  .lvl button { border:0; background:none; padding:0; font:inherit; letter-spacing:inherit;
+                text-transform:inherit; color:inherit; cursor:pointer; }
+  .lvl button:hover, .lvl button:focus-visible { color:var(--gold-deep); }
+  .lvl .n { font-variant-numeric:tabular-nums; opacity:.8; }
+  .lay { font-size:9.5px; font-weight:700; letter-spacing:var(--track); color:var(--navy-ink);
+         background:var(--navy); border-radius:3px; padding:.08rem .34rem; }
+  .under { margin-left:auto; display:flex; align-items:center; gap:.35rem;
+           font-size:11px; letter-spacing:0; text-transform:none; color:var(--ink-3); }
+  .under select { border:1px solid var(--line); background:var(--surface); color:var(--ink);
+                  border-radius:5px; padding:.08rem .3rem; font:600 11.5px var(--sans); }
+  .linkish { border:0; background:none; padding:0; color:var(--gold-deep);
+             font:600 11.5px var(--sans); letter-spacing:0; text-transform:none; cursor:pointer; }
+  .linkish:hover { text-decoration:underline; }
+  .navtick { border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+             border-radius:999px; padding:.08rem .5rem; font:600 10.5px var(--sans);
+             letter-spacing:var(--track); text-transform:uppercase; cursor:pointer; }
+  .navtick[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .navtick:hover { border-color:var(--gold); }
+  .needs { margin-top:.5rem; border:1px dashed var(--bad); border-radius:8px;
+           padding:.45rem .55rem; background:color-mix(in srgb, var(--bad) 7%, transparent); }
+  .needs .h { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+              color:var(--bad); margin:0 0 .35rem; }
+  .box.orphan { border-color:var(--bad); border-style:dashed; }
+  .row { margin-left:1.1rem; border-left:2px solid var(--line-soft); padding-left:.75rem; }
+  .row.top { margin-left:0; border-left:0; padding-left:0; }
+  .box { display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--line);
+         background:var(--surface); color:var(--ink); border-radius:7px; padding:.3rem .6rem;
+         margin:0 .3rem .35rem 0; font:400 13.5px var(--sans); cursor:pointer; }
+  .box:hover { border-color:var(--gold); }
+  .box.top { border-color:var(--navy); font-weight:700; }
+  .box.sel { border-color:var(--gold); background:var(--gold-wash); font-weight:600;
+             box-shadow:0 0 0 2px var(--gold-wash); }
+  .box .n { font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  .box.ghost { font-style:italic; color:var(--ink-3); }
+  .add { display:inline-flex; align-items:center; border:1px dashed var(--line); color:var(--ink-3);
+         background:none; border-radius:7px; padding:.3rem .6rem; margin:0 .3rem .35rem 0;
+         font:400 13px var(--sans); cursor:pointer; }
+  .add:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .newin { border:1px solid var(--gold); background:var(--gold-wash); color:var(--ink);
+           border-radius:7px; padding:.3rem .5rem; margin:0 .3rem .35rem 0;
+           font:600 13.5px var(--sans); width:11rem; }
+  .why { font-size:12px; color:var(--ink-3); margin:.45rem 0 0; max-width:30rem; }
+
+  .ptitle { font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+            color:var(--gold-deep); margin:0 0 .15rem; }
+  .psub { font-size:12px; color:var(--ink-3); margin:0 0 .9rem; }
+  .prow { display:flex; align-items:center; gap:.55rem; margin:0 0 .5rem; }
+  .plab { flex:0 0 8.5rem; font-size:12.5px; color:var(--ink-2); font-weight:600; }
+  .fld { flex:1; min-width:0; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+         border-radius:6px; padding:.28rem .45rem; font:400 13px var(--sans); }
+  .chips { display:flex; flex-wrap:wrap; gap:.3rem; margin:.25rem 0 .2rem; }
+  .chip { font:400 12px var(--sans); border:1px solid var(--line); border-radius:999px;
+          padding:.18rem .6rem; background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .chip[aria-pressed="true"] { background:var(--navy); border-color:var(--navy);
+                               color:var(--navy-ink); font-weight:600; }
+  .danger { border:0; background:none; color:var(--bad); font:600 12.5px var(--sans);
+            cursor:pointer; padding:0; margin-top:1rem; }
+  .note { background:var(--gold-wash); border:1px solid var(--gold-line); border-radius:8px;
+          padding:.6rem .75rem; font-size:12.5px; color:var(--ink-2); margin-top:1rem; }
+  .ask { background:var(--gold-wash); border:1px solid var(--gold-line); border-radius:9px;
+         padding:1rem 1.1rem; margin-top:2rem; }
+  .ask h2 { font-size:1.1rem; margin:0 0 .4rem; }
+  .steps { display:flex; flex-wrap:wrap; gap:.4rem; margin:1.4rem 0 .2rem; }
+  .step { border:1px solid var(--line); background:var(--surface); border-radius:999px;
+          padding:.28rem .8rem; font-size:12.5px; font-weight:600; }
+  .step.on { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .cap { font-size:12.5px; color:var(--ink-3); margin:.3rem 0 0; }
+  /* the navigation, derived from the shape rather than set beside it */
+  .navprev { margin-top:1.1rem; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .navprev .h { background:var(--surface-2); padding:.4rem .7rem; font-size:11px; font-weight:700;
+                letter-spacing:var(--track); text-transform:uppercase; color:var(--ink-3); }
+  .navrow { display:flex; flex-wrap:wrap; align-items:center; gap:.1rem;
+            background:#D9C3A0; padding:.3rem .5rem; }
+  :root[data-theme="dark"] .navrow, @media (prefers-color-scheme: dark) { }
+  .navrow .t { font:600 12.5px var(--sans); color:#3A2E1C; padding:.25rem .55rem;
+               border-radius:5px 5px 0 0; white-space:nowrap; }
+  .navrow .t.on { background:#F3E7D3; }
+  .navrow .t.home { font-weight:700; }
+  .navrow .sep { width:1px; height:1.1rem; background:#B59C73; margin:0 .4rem; }
+  .navrow .none { font:400 12px var(--sans); color:#6B5A3E; font-style:italic; padding:.25rem .3rem; }
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Spec 066 · stage 4 · set-up</p>
+  <h1>The shape, working</h1>
+  <p class="standfirst">Press things. Each bottom kind carries <b>its own layer above</b>, created
+    by the kind that needs one — El&nbsp;Abd's functions are grouped under Divisions and its
+    business units are not; Raya's units are grouped and its functions are not. A new client has
+    neither.</p>
+</header>
+
+<div class="steps">
+  <span class="step">The client</span><span class="step on">The shape</span><span class="step">The office</span>
+</div>
+<p class="cap">Three steps instead of seven. This is the middle one.</p>
+
+<div class="bar" style="margin-top:1.2rem">
+  <button class="cbtn" data-client="elabd" aria-pressed="true">El Abd</button>
+  <button class="cbtn" data-client="raya" aria-pressed="false">Raya Trade</button>
+  <button class="cbtn" data-client="fresh" aria-pressed="false">A new client</button>
+  <button class="reset" id="reset">start again</button>
+</div>
+
+<div class="screen">
+  <div class="schead"><span>Client set-up · The shape</span><span class="crumb" id="crumb"></span></div>
+  <div class="scbody">
+    <div class="shape" id="shape"></div>
+    <div class="panel" id="panel"></div>
+  </div>
+</div>
+
+<div class="navprev">
+  <div class="h">the navigation — the rows you tick <b>nav</b> above become its switches</div>
+  <div class="navrow" id="navrow"></div>
+  <div class="navrow" id="navrow2" style="background:#E8D9BE"></div>
+</div>
+
+<div class="ask">
+  <h2>What I still need</h2>
+  <p style="margin:0">Press around, then tell me what is wrong with it. In particular: is one
+    screen enough for El&nbsp;Abd's twenty-two functions, or does that need to stay a list?</p>
+</div>
+</div>
+
+<script>
+/* ── §stage4 · EACH BOTTOM KIND CARRIES ITS OWN LAYER ABOVE ───────────────
+   Islam: "the business units has its own layer above and the functions has
+   their own layer above", and on how it is made: "the main layer is the
+   bottom layer… creating another layer in between these layers and the
+   company should be the thing that is the exception, or the creation."
+
+   So a middle layer is NOT declared and then pointed at. It is created by
+   the kind that needs one, it belongs to that kind, and it has its own name.
+   A client can have none, one, or two — the units grouped under Sectors
+   while the functions are grouped under Divisions, and neither knows about
+   the other.
+
+   WHICH IS A CHANGE TO WHAT IS STORED, and the clients survive it cleanly:
+   measured, Raya's one list is used by 6 units and 0 functions, El Abd's by
+   22 functions and 0 live units. Neither mixes them, so each client's
+   existing list simply becomes that kind's own layer. */
+const PARTS = [["found","Foundation"],["swot","SWOT"],["theme","Themes"],
+               ["pillar","Pillars"],["keyobj","North Star"],["values","Values"],["project","Projects"]];
+let seq = 0;
+function mk(names, lvl, parent) {
+  return names.map(n => ({ id: lvl + "-" + (++seq), lvl, name: n, parent }));
+}
+function elabd() {
+  const g = mk(["Commercial","Operations","Corporate Support"], "fn@g", "top");
+  const by = { "Commercial":["Retail","External Sales","E-Commerce","Marketing","Customer Experience"],
+               "Operations":["Planning","Procurement","Production","Quality","Engineering","HSE","Warehouses","Fleet and Distribution"],
+               "Corporate Support":["Internal Audit","Finance","HR","IT","PMO","Legal","Corporate Governance","Admin","Security"] };
+  let fns = []; g.forEach(x => { fns = fns.concat(mk(by[x.name], "fn", x.id)); });
+  return { name:"ElAbd", top:{ one:"Company", many:"Company", on:["found","swot","pillar","keyobj"] },
+    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar"], group:null },
+             { k:"fn", one:"Function", many:"Functions", on:["found","keyobj","project"],
+               group:{ one:"Division", many:"Divisions", on:["found"], nav:true } } ],
+    boxes: g.concat(fns) };
+}
+function raya() {
+  const g = mk(["Distribution","B2C"], "bu@g", "top");
+  const by = { "Distribution":["Mobile","Consumer Electronics","IT Dist."],
+               "B2C":["Retail Stores","Online Shop","Care"] };
+  let bus = []; g.forEach(x => { bus = bus.concat(mk(by[x.name], "bu", x.id)); });
+  bus = bus.concat(mk(["B2B Ecomm","Corporate","Logistics","Nigeria"], "bu", "top"));
+  const fns = mk(["Finance","HR","Treasury","Marketing","IT","Care","Strategy Management Office","Merchandising"], "fn", "top");
+  return { name:"Raya Trade", top:{ one:"Group", many:"Group", on:["found","theme","keyobj"] },
+    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar","keyobj"], nav:true,
+               group:{ one:"Division", many:"Divisions", on:["found"] } },
+             { k:"fn", one:"Function", many:"Supporting Functions", on:["found","project"], group:null, nav:true } ],
+    boxes: g.concat(bus, fns) };
+}
+function fresh() {
+  return { name:"New client", top:{ one:"Company", many:"Company", on:["found","keyobj"] },
+    /* A NEW CLIENT OPENS WITH ITS TWO KINDS TICKED. Chosen, not derived — but
+       a starting value, because an empty navigation is a dead end and the
+       commonest shape by far is "the units and the functions". Untick either
+       and it goes; tick a layer instead and the layer takes its place. */
+    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar"], group:null, nav:true },
+             { k:"fn", one:"Function", many:"Functions", on:["found","project"], group:null, nav:true } ],
+    boxes: [] };
+}
+const MAKE = { elabd, raya, fresh };
+
+let which = "elabd", S = MAKE[which](), sel = { kind:"box", id:"top" }, adding = null, chosen = {};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const kindOf = (k) => S.kinds.filter(x => x.k === k)[0];
+const gKey = (k) => k + "@g";                       /* the kind's own layer */
+const isG  = (lvl) => lvl.indexOf("@g") > 0;
+const ownerOf = (lvl) => isG(lvl) ? kindOf(lvl.slice(0, -2)) : kindOf(lvl);
+const boxOf = (id) => id === "top" ? { id:"top", lvl:"top", name:S.name, parent:null }
+                                   : S.boxes.filter(b => b.id === id)[0];
+const at = (lvl) => S.boxes.filter(b => b.lvl === lvl);
+const kids = (id, lvl) => S.boxes.filter(b => b.lvl === lvl && b.parent === id);
+/* the boxes of a grouped kind that have not been assigned yet */
+const orphans = (k) => k.group ? at(k.k).filter(b => b.parent === "top") : [];
+
+function pathTo(id) {
+  chosen = {}; let b = boxOf(id);
+  while (b && b.id !== "top") { chosen[b.lvl] = b.id; b = boxOf(b.parent); }
+}
+function parentFor(k) {
+  const g = gKey(k.k);
+  if (chosen[g]) return chosen[g];
+  const first = at(g)[0];
+  return first ? first.id : "top";
+}
+
+/* ── the shape ───────────────────────────────────────────────────────────── */
+function navTick(lvl) {
+  const w = wordsOf(lvl);
+  return '<button class="navtick" data-nav="' + lvl + '" aria-pressed="' + !!(w && w.nav) +
+         '" title="Show this row as a switch in the navigation">nav</button>';
+}
+function lvlRow(label, layer, extra, lvl) {
+  return '<div class="lvl"><span class="lay">Layer ' + layer + '</span>' + label +
+         (lvl ? ' ' + navTick(lvl) : '') + (extra || '') + '</div>';
+}
+function boxesRow(list, cls) {
+  return list.map(b => '<button class="box' + (cls || '') +
+    (sel.kind === "box" && sel.id === b.id ? " sel" : "") +
+    '" data-box="' + b.id + '">' + esc(b.name) + countOn(b) + '</button>').join("");
+}
+function countOn(b) {
+  if (!isG(b.lvl)) return "";
+  const n = kids(b.id, b.lvl.slice(0, -2)).length;
+  return n ? '<span class="n">' + n + '</span>' : "";
+}
+function drawShape() {
+  const out = [];
+  out.push(lvlRow('<button data-lvl="top">' + esc(S.top.many) + '</button>', 1));
+  out.push('<div class="row top"><button class="box top' +
+    (sel.kind === "box" && sel.id === "top" ? " sel" : "") +
+    '" data-box="top">' + esc(S.name) + '</button></div>');
+
+  S.kinds.forEach(k => {
+    const g = gKey(k.k), gl = at(g);
+    /* the kind's OWN layer, where it has one */
+    if (k.group) {
+      out.push(lvlRow('<button data-lvl="' + g + '">' + esc(k.group.many) + '</button>' +
+                      '<span class="n">' + gl.length + '</span>', 2,
+                      '<span class="under">above the ' + esc(k.many.toLowerCase()) +
+                      ' &nbsp;<button class="linkish" data-ungroup="' + k.k + '">remove this layer</button></span>', g));
+      out.push('<div class="row">' + boxesRow(gl) +
+        (adding === g ? '<input class="newin" id="newin" placeholder="name it, then Enter" autocomplete="off">'
+                      : '<button class="add" data-add="' + g + '">+ add</button>') + '</div>');
+    }
+    /* and the kind itself */
+    const all = at(k.k), need = orphans(k);
+    const par = k.group ? parentFor(k) : "top";
+    const list = k.group ? kids(par, k.k) : all;
+    out.push(lvlRow('<button data-lvl="' + k.k + '">' + esc(k.many) + '</button>' +
+      '<span class="n">' + all.length + '</span>' +
+      (k.group && par !== "top"
+        ? '<span class="n" style="text-transform:none;letter-spacing:0">(' + list.length +
+          ' under ' + esc(boxOf(par).name) + ')</span>' : ''),
+      k.group ? 3 : 2,
+      k.group ? '' : '<span class="under"><button class="linkish" data-group="' + k.k +
+        '">group these under a layer…</button></span>', k.k));
+    out.push('<div class="row">' + boxesRow(list) +
+      (adding === k.k ? '<input class="newin" id="newin" placeholder="name it, then Enter" autocomplete="off">'
+        : '<button class="add" data-add="' + k.k + '">+ add' +
+          (k.group && par !== "top" ? ' under ' + esc(boxOf(par).name) : '') + '</button>') + '</div>');
+    if (!all.length && adding !== k.k)
+      out.push('<p class="why">None yet — add one, or leave the ' +
+               esc(k.many.toLowerCase()) + ' out of this client altogether.</p>');
+    if (need.length) out.push('<div class="row"><div class="needs"><p class="h">' +
+      need.length + ' need a ' + esc(k.group.one) + '</p>' + boxesRow(need, " orphan") + '</div></div>');
+    /* naming a brand-new layer */
+    if (adding === "new:" + k.k) out.push('<div class="row"><div class="needs" style="border-style:solid;border-color:var(--gold)">' +
+      '<p class="h" style="color:var(--gold-deep)">What is this layer called?</p>' +
+      '<input class="newin" id="newin" style="width:14rem" placeholder="Divisions, Sectors, Regions…" autocomplete="off"></div></div>');
+  });
+  $("shape").innerHTML = out.join("");
+  if (adding) { const i = $("newin"); if (i) i.focus(); }
+  const c = sel.kind === "lvl"
+    ? (sel.id === "top" ? S.top.many : (isG(sel.id) ? ownerOf(sel.id).group.many : kindOf(sel.id).many))
+    : boxOf(sel.id).name;
+  $("crumb").textContent = S.name + " › " + c;
+}
+
+/* ── the panel ───────────────────────────────────────────────────────────── */
+function wordsOf(lvl) {
+  if (lvl === "top") return S.top;
+  const o = ownerOf(lvl);
+  return isG(lvl) ? (o && o.group) : o;
+}
+function drawPanel() {
+  /* Whatever was selected may have just been removed, so the panel checks
+     that it is still there before it reads it. */
+  if (sel.kind === "lvl" && !wordsOf(sel.id)) sel = { kind:"box", id:"top" };
+  if (sel.kind === "box" && sel.id !== "top" && !boxOf(sel.id)) sel = { kind:"box", id:"top" };
+  if (sel.kind === "lvl") {
+    const w = wordsOf(sel.id);
+    const n = sel.id === "top" ? 1 : at(sel.id).length;
+    $("panel").innerHTML =
+      '<p class="ptitle">' + esc(w.many) + '</p>' +
+      '<p class="psub">The level, set once — ' + n + (n === 1 ? " box" : " boxes") + ' follow it.</p>' +
+      '<div class="prow"><span class="plab">Called, one</span><input class="fld" data-lw="one" value="' + esc(w.one) + '"></div>' +
+      '<div class="prow"><span class="plab">Called, many</span><input class="fld" data-lw="many" value="' + esc(w.many) + '"></div>' +
+      '<p class="ptitle" style="margin-top:1.2rem">What it carries</p>' +
+      '<div class="chips">' + PARTS.map(p => '<button class="chip" data-part="' + p[0] + '" aria-pressed="' +
+        (w.on.indexOf(p[0]) > -1) + '">' + esc(p[1]) + '</button>').join("") + '</div>' +
+      '<p class="why">Set once for every ' + esc(w.one.toLowerCase()) +
+        '. One that differs says so on itself, and only then.</p>';
+    return;
+  }
+  const b = boxOf(sel.id);
+  if (b.id === "top") {
+    $("panel").innerHTML = '<p class="ptitle">' + esc(S.name) + '</p>' +
+      '<p class="psub">' + esc(S.top.one) + ' · everything sits under it</p>' +
+      '<div class="prow"><span class="plab">Name</span><input class="fld" data-f="name" value="' + esc(S.name) + '"></div>';
+    return;
+  }
+  const k = ownerOf(b.lvl), isLayer = isG(b.lvl);
+  const w = isLayer ? k.group : k;
+  const n = isLayer ? kids(b.id, k.k).length : 0;
+  $("panel").innerHTML =
+    '<p class="ptitle">' + esc(b.name) + '</p>' +
+    '<p class="psub">' + esc(w.one) + (isLayer ? ' · ' + n + ' ' + esc(k.many.toLowerCase()) : '') + '</p>' +
+    '<div class="prow"><span class="plab">Name</span><input class="fld" data-f="name" value="' + esc(b.name) + '"></div>' +
+    '<div class="prow"><span class="plab">Shown in the nav</span><input class="fld" data-f="nav" placeholder="' + esc(b.name) + '"></div>' +
+    '<div class="prow"><span class="plab">Code</span><input class="fld" data-f="code" style="max-width:5.5rem" value="' +
+      esc(b.name.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()) + '"></div>' +
+    '<div class="prow"><span class="plab">Head</span><input class="fld" data-f="head" placeholder="— nobody yet —"></div>' +
+    (!isLayer && k.group
+      ? '<div class="prow"><span class="plab">Its ' + esc(k.group.one.toLowerCase()) + '</span>' +
+        '<select class="fld" data-f="parent">' +
+          ['<option value="top"' + (b.parent === "top" ? " selected" : "") + '>— needs one —</option>']
+            .concat(at(gKey(k.k)).map(x => '<option value="' + x.id + '"' +
+              (x.id === b.parent ? " selected" : "") + '>' + esc(x.name) + '</option>')).join("") +
+        '</select></div>' : '') +
+    '<button class="danger" id="rm">Remove this ' + esc(w.one.toLowerCase()) + '</button>';
+}
+/* ── §stage4 · THE NAVIGATION FOLLOWS THE SHAPE; IT IS NOT SET BESIDE IT ──
+   Islam: "we should align what shows in the rail… in case of raya despite
+   having the companies above the units but the units are the ones on the
+   rails and the functions are the second category; for elabd they have 0
+   units so we use the rail for the functions divisions. should we set that
+   from here while we are building or what do you think?"
+
+   NOT SET — AND IT ALREADY WORKS THIS WAY. Measured in the live platform:
+   `navSides()` answers ["Units","Capabilities","Functions"] for Raya and
+   ["Commercial","Operations","Corporate Support"] for El Abd. The behaviour
+   he describes is the behaviour there is; what it has never had is a
+   statement of the rule, which is why it reads as a thing to configure.
+
+   THE RULE: the sides are the bottom KINDS that hold boxes — unless there is
+   only one such kind and it has a layer of its own, and then that layer's
+   boxes become the sides instead. Raya holds units and functions, so both
+   are sides and a unit's division groups it inside its own side. El Abd
+   holds only functions, so its divisions take their place rather than making
+   anybody press "Functions" before they can reach anything.
+
+   So there is nothing to set here, and one fewer thing to keep in step with
+   the shape. */
+function navSidesOf() {
+  /* CHOSEN, NOT DERIVED. Islam, of the first draft, which worked out the
+     sides from the shape: "this should be a choice what are the navigation
+     switch… so it needs to be chosen somehow not derived." He is right that
+     a rule read off two clients is a rule invented from two clients — a
+     third with units, functions AND divisions could reasonably want any of
+     them on the row, and a derivation decides that for them.
+
+     So every row carries a `nav` tick, and the sides are the rows that are
+     ticked. The existing clients open ticked exactly as they read today, so
+     nothing moves; what changes is that it can now be answered. */
+  const out = [];
+  S.kinds.forEach(k => {
+    if (k.group && k.group.nav && at(gKey(k.k)).length)
+      at(gKey(k.k)).forEach(x => out.push({ id:x.id, name:x.name }));
+    if (k.nav && at(k.k).length) out.push({ id:"kind:" + k.k, name:k.many });
+  });
+  return out;
+}
+function drawNav() {
+  const lead = navSidesOf(), selId = sel.kind === "box" ? sel.id : null;
+  $("navrow").innerHTML =
+    '<span class="t home' + (selId === "top" ? " on" : "") + '">' + esc(S.name) + '</span>' +
+    (lead.length ? '<span class="sep"></span>' : '') +
+    (lead.length
+      ? lead.map(x => '<span class="t' + (x.id === selId ? " on" : "") + '">' + esc(x.name) + '</span>').join("")
+      : '<span class="none">nothing on it \u2014 tick a row above</span>');
+  /* what opens inside whichever side you are on */
+  const inside = [];
+  S.kinds.forEach(k => {
+    if (!at(k.k).length) return;
+    if (k.group && k.group.nav) {
+      const par = chosen[gKey(k.k)] || (at(gKey(k.k))[0] || {}).id;
+      if (par) kids(par, k.k).forEach(x => inside.push(x.name));
+    } else if (k.nav) {
+      /* A TICKED ROW SHOWS ITS OWN BOXES, FLAT. Islam: "when I click on the
+         business units on the navigation it will show all the units correct?"
+         — yes. An earlier draft grouped them by their layer whenever one
+         existed, which put Distribution and B2C in a navigation he had not
+         ticked them into. The tick is the whole of the rule: what is in the
+         navigation is what was asked for, and nothing else. */
+      at(k.k).forEach(x => inside.push(x.name));
+    }
+  });
+  $("navrow2").innerHTML = inside.length
+    ? inside.slice(0, 12).map(x => '<span class="t">' + esc(x) + '</span>').join("") +
+      (inside.length > 12 ? '<span class="none">+' + (inside.length - 12) + ' more</span>' : '')
+    : '<span class="none">\u2014</span>';
+}
+function draw() { drawShape(); drawPanel(); drawNav(); }
+
+/* ── pressing things ─────────────────────────────────────────────────────── */
+$("shape").addEventListener("click", (e) => {
+  const g = e.target.closest("[data-group]"), u = e.target.closest("[data-ungroup]");
+  if (g) { adding = "new:" + g.dataset.group; draw(); return; }
+  if (u) {
+    /* HIDDEN, NEVER CLEARED: the layer's boxes and every assignment stay, so
+       grouping again brings all of it back. */
+    kindOf(u.dataset.ungroup).group = null;
+    /* AND THE SELECTION LETS GO OF IT. Removing a layer while it, or one of
+       its boxes, was selected left the panel reading a level that no longer
+       exists — "Cannot read properties of null". Found by pressing it. */
+    sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw(); return;
+  }
+  const nv = e.target.closest("[data-nav]");
+  if (nv) { const w = wordsOf(nv.dataset.nav); if (w) w.nav = !w.nav; draw(); return; }
+  const a = e.target.closest("[data-add]"), b = e.target.closest("[data-box]"),
+        l = e.target.closest("[data-lvl]");
+  if (a) { adding = a.dataset.add; draw(); return; }
+  if (b) { adding = null; sel = { kind:"box", id:b.dataset.box }; pathTo(b.dataset.box); draw(); return; }
+  if (l) { adding = null; sel = { kind:"lvl", id:l.dataset.lvl }; draw(); }
+});
+$("shape").addEventListener("keydown", (e) => {
+  if (e.target.id !== "newin") return;
+  if (e.key === "Escape") { adding = null; draw(); return; }
+  if (e.key !== "Enter") return;
+  const name = e.target.value.trim();
+  if (!name) { adding = null; draw(); return; }
+  if (adding.indexOf("new:") === 0) {
+    /* THE LAYER IS CREATED BY THE KIND THAT NEEDS IT, and named on the spot.
+       Its first box is named next, so one gesture gets you a working layer. */
+    const k = kindOf(adding.slice(4));
+    k.group = { one: name.replace(/s$/, ""), many: name, on:["found"] };
+    adding = gKey(k.k); draw();
+    const i2 = $("newin"); if (i2) { i2.value = ""; i2.focus(); }
+    return;
+  }
+  const lvl = adding, k = ownerOf(lvl);
+  const par = isG(lvl) ? "top" : (k.group ? parentFor(k) : "top");
+  const id = lvl + "-" + (++seq);
+  S.boxes.push({ id, lvl, name, parent: par });
+  sel = { kind:"box", id }; pathTo(id); draw();
+  const i = $("newin"); if (i) { i.value = ""; i.focus(); }
+});
+$("panel").addEventListener("input", (e) => {
+  const f = e.target.dataset.f, lw = e.target.dataset.lw;
+  if (f === "name" && sel.kind === "box") {
+    if (sel.id === "top") S.name = e.target.value; else boxOf(sel.id).name = e.target.value;
+    drawShape();
+  }
+  if (lw && sel.kind === "lvl") { wordsOf(sel.id)[lw] = e.target.value; drawShape(); }
+});
+$("panel").addEventListener("change", (e) => {
+  if (e.target.dataset.f === "parent" && sel.kind === "box") {
+    boxOf(sel.id).parent = e.target.value; pathTo(sel.id); draw();
+  }
+});
+$("panel").addEventListener("click", (e) => {
+  const c = e.target.closest("[data-part]");
+  if (c && sel.kind === "lvl") {
+    const w = wordsOf(sel.id), k = c.dataset.part, i = w.on.indexOf(k);
+    if (i > -1) w.on.splice(i, 1); else w.on.push(k);
+    drawPanel(); return;
+  }
+  if (e.target.id === "rm" && sel.kind === "box" && sel.id !== "top") {
+    const gone = sel.id;
+    S.boxes = S.boxes.filter(b => b.id !== gone);
+    S.boxes.forEach(b => { if (b.parent === gone) b.parent = "top"; });
+    sel = { kind:"box", id:"top" }; chosen = {}; draw();
+  }
+});
+document.querySelectorAll("[data-client]").forEach(btn => btn.addEventListener("click", () => {
+  which = btn.dataset.client; S = MAKE[which]();
+  document.querySelectorAll("[data-client]").forEach(x =>
+    x.setAttribute("aria-pressed", String(x.dataset.client === which)));
+  sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw();
+}));
+$("reset").addEventListener("click", () => {
+  S = MAKE[which](); sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw();
+});
+draw();
+</script>

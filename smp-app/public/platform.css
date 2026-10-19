@@ -1312,6 +1312,43 @@ html[data-client-settings] .viewer { display:none; }
   .modal-b table { min-width:0; width:100%; }
   .modal-b .scroll { border:1px solid var(--line-soft); }
   .modal-b h4.mini:first-child { margin-top:0; }
+
+  /* ── THE KEYBOARD SHEET (§539) ────────────────────────────────────────
+     A two-column grid rather than a table: the keycaps set their own width and
+     the sentence takes the rest, and at phone width the two stack instead of
+     squeezing a run of caps into a column it cannot hold. */
+  .ks-rows { display:grid; grid-template-columns:auto 1fr; gap:6px 14px;
+             align-items:baseline; margin:0 0 4px; }
+  .ks-k { text-align:right; white-space:nowrap; font-size:var(--fs-small); }
+  .ks-v { font-size:13px; color:var(--ink-2); line-height:1.45; }
+  /* "type" is a thing you do, not a key you press, so it must not wear a
+     keycap - a cap around it would be a key nobody can find. */
+  .ks-typ { font-style:italic; color:var(--ink-3); font-size:var(--fs-small); }
+  .ks-or { color:var(--ink-3); font-size:11px; margin:0 2px; }
+  .modal-b kbd { display:inline-block; font:600 11px/1 var(--mono, ui-monospace, monospace);
+                 color:var(--ink); background:var(--surface-2);
+                 border:1px solid var(--field-line); border-bottom-width:2px;
+                 border-radius:4px; padding:4px 6px; margin:0 1px; }
+  h4.mini .ks-where { color:var(--ink-3); letter-spacing:0; text-transform:none;
+                      font-weight:600; font-size:11.5px; margin-left:7px; }
+  /* THE MARK IS A WORD IN A PILL, never a colour alone (§68.10): "here" is
+     legible to somebody who cannot tell the green from the grey. */
+  h4.mini .ks-here { background:var(--good-bg); color:var(--good-tx); border-radius:99px;
+                     padding:2px 8px; font:700 9px/1 var(--sans); letter-spacing:.08em;
+                     margin-left:8px; vertical-align:1px; }
+  /* A section that is not live here is QUIETER AND NOT HIDDEN - the whole
+     argument for treatment A is that a reporter finds out the deck has keys. */
+  .ks-rows.ks-dim .ks-v { color:var(--ink-3); }
+  .ks-rows.ks-dim kbd { opacity:.62; }
+  .ks-foot { border-top:1px solid var(--line-soft); margin-top:18px; padding-top:12px;
+             font-size:var(--fs-small); color:var(--ink-3); line-height:1.5; }
+  .keysbtn { padding:5px 0; width:28px; text-align:center; letter-spacing:0;
+             font-size:13px; text-transform:none; }
+  @media (max-width:560px) {
+    .ks-rows { grid-template-columns:1fr; gap:2px; }
+    .ks-k { text-align:left; }
+    .ks-v { margin-bottom:7px; }
+  }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
@@ -2807,6 +2844,17 @@ html[data-client-settings] .viewer { display:none; }
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
+  /* ── THE GO-TO LIST'S HOST (§547) ─────────────────────────────────────
+     Plumbing, not a control: a `select` and the button `searchsel` builds for
+     it, parked at the top of the window so the popup — which anchors to that
+     button — opens where somebody is already looking. Both are out of the tab
+     order and the accessibility tree, so a host left standing is unreachable;
+     it is 1px rather than `display:none` because a box with no size has no
+     rect for the popup to anchor to. */
+  #gotohost { position:fixed; left:50%; top:76px; transform:translateX(-50%);
+              width:1px; height:1px; overflow:hidden; z-index:119; }
+  #gotohost button, #gotohost select { opacity:0; width:1px; height:1px;
+                                       padding:0; border:0; pointer-events:none; }
   .sslist { max-height:230px; overflow-y:auto; }
   /* Select all / none (§304): a row of its own between the search and the
      list, so a press cannot be mistaken for a row of the list. */
@@ -6415,6 +6463,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      wrong. This is the evidence beside it, not a second alarm. */
   .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
 
+  /* A NAME THAT MATCHES NOBODY IN THE REGISTER (§551). Islam's choice of the
+     three: flag it, do not refuse it and do not delete it — the name is the
+     only clue to who was meant. It borrows `.wasval`'s reasoning and NOT its
+     colour: this one IS a fault to correct rather than evidence beside one,
+     so it carries the warning colour the rest of the product uses for
+     "something here needs attention" — but it stays small and beside the
+     name, never replacing it. */
+  .ownerstray { color:var(--warn); font-style:italic; font-size:11.5px;
+                font-weight:400; white-space:nowrap; }
+
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
   .swotlist { list-style:none; margin:0; padding:0; }
@@ -8580,6 +8638,9 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      untouched; and `.tight` still overrides it, so a plan with many
      objectives shrinks exactly as it did (§69.5). */
   .dslide .aimtop { padding-bottom:16px; }
+  /* §553.7: a continuation carries the rest of the table, not the lead
+     paragraph above it — the aspiration is said once, on the first slide. */
+  .dslide[data-cont] .aimtop { display:none; }
   .dslide .aimbottom table.dbig td { font-size:30px; padding:24px 18px; }
   .dslide .aimbottom table.dbig th { font-size:15px; }
   /* AND THE TIGHTENED SLIDE GETS ITS OWN FLOOR, which is the half that
@@ -11132,6 +11193,10 @@ body.presenting #buildband { display:none; }
 /* §418: a layer's three sections, from the signed-off mockup
    (design-mockups/structure-sections/). Side by side, stacked below 980px. */
 .csetup .wzcol.wzwide { max-width:1240px; }
+/* §544: the shape takes the tree AND a level's three sections, so it is
+   given what the window has; the tree is the narrow half, because the
+   panel is what holds the controls. */
+.csetup .wzcol.wzwide:has(.wzshape) { max-width:1460px; }
 .csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);
   border-radius:var(--r-md); overflow:hidden; margin-top:4px; }
 .csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
@@ -11202,6 +11267,74 @@ body.presenting #buildband { display:none; }
 .csetup .stask { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; background:var(--surface-2); font-size:var(--fs-small); color:var(--ink-2); }
 .csetup .stask p { margin:0 0 8px; }
 .csetup .stbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ══ THE SHAPE, ON ONE SCREEN (§544, spec 066 stage 4) ══════════════════
+   From the signed-off mockup (design-mockups/setup-one-screen/). The tree
+   on the left, whatever is selected on the right; one column below 980px,
+   where two would make both unreadable. */
+.csetup .wzshape { display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr);
+                   gap:16px; align-items:start; }
+@media (max-width:980px) { .csetup .wzshape { grid-template-columns:minmax(0,1fr); } }
+.csetup .shtree { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
+                  padding:12px 14px; min-width:0; }
+.csetup .shpanel { min-width:0; }
+.csetup .shpanel .stcard:last-child { margin-bottom:0; }
+/* a level's row: its number, its name, how many, and the navigation tick */
+.csetup .shlvl { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px; margin:16px 0 5px; }
+.csetup .shtree > .shlvl:first-child { margin-top:0; }
+.csetup .shlay { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                 color:var(--cs-fill-ink); background:var(--cs-fill); border-radius:3px; padding:1px 5px; flex:none; }
+.csetup .shlvlb { border:0; background:none; padding:0; cursor:pointer; color:var(--ink-2);
+                  font:700 var(--fs-micro)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shlvlb:hover, .csetup .shlvlb:focus-visible { color:var(--cs-acc-tx); }
+.csetup .shlvl.sel .shlvlb { color:var(--cs-acc-tx); text-decoration:underline; }
+.csetup .shn { font-size:var(--fs-micro); color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.csetup .shsub { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .shunder { margin-left:auto; display:flex; align-items:center; gap:5px;
+                   font-size:var(--fs-micro); color:var(--ink-3); text-transform:none; letter-spacing:0; }
+.csetup .shlink { border:0; background:none; padding:0; cursor:pointer; color:var(--cs-acc-tx);
+                  font:600 var(--fs-micro)/1.4 var(--sans); }
+.csetup .shlink:hover { text-decoration:underline; }
+.csetup .shnav { border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                 border-radius:999px; padding:0 7px; cursor:pointer;
+                 font:700 var(--fs-micro)/1.7 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shnav.on { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .shnav:hover { border-color:var(--cs-acc-tx); }
+/* the boxes in a row */
+.csetup .shrow { display:flex; flex-wrap:wrap; gap:5px; margin-left:14px;
+                 border-left:2px solid var(--line); padding-left:10px; }
+.csetup .shrow.shtoprow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shb { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:7px; padding:4px 9px;
+               font:400 13.5px/1.35 var(--sans); cursor:pointer; text-align:left; }
+.csetup .shb:hover { border-color:var(--cs-acc-tx); }
+.csetup .shb.top { border-color:var(--cs-fill); font-weight:700; }
+.csetup .shb.sel { border-color:var(--cs-acc-tx); background:var(--cs-wash, var(--surface-2)); font-weight:600; }
+.csetup .shb.under { box-shadow:inset 0 -2px 0 var(--cs-acc-tx); }
+.csetup .shb.orphan { border-style:dashed; border-color:var(--bad-tx); }
+.csetup .shadd { border:1px dashed var(--line); background:none; color:var(--ink-3); border-radius:7px;
+                 padding:4px 9px; font:400 13px/1.35 var(--sans); cursor:pointer; }
+.csetup .shadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .shwhy { font-size:var(--fs-small); color:var(--ink-3); margin:6px 0 0 14px; max-width:46ch; }
+.csetup .shchips { display:flex; flex-wrap:wrap; gap:5px; margin:7px 0 0 14px; }
+.csetup .shchip { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                  padding:3px 8px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .shchip:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .shchip .p { color:var(--ink-3); margin-right:4px; }
+/* the boxes with no layer yet (§544) */
+.csetup .shneeds { margin:7px 0 0 14px; border:1px dashed var(--bad-tx); border-radius:7px;
+                   padding:7px 9px; background:var(--bad-bg, var(--surface-2)); }
+.csetup .shneedh { margin:0 0 5px; font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em;
+                   text-transform:uppercase; color:var(--bad-tx); }
+.csetup .shneeds .shrow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shpanel .danger { border:0; background:none; color:var(--bad-tx); cursor:pointer;
+                           font:600 var(--fs-small)/1.4 var(--sans); padding:0; margin-top:10px; text-align:left; }
+.csetup .shpanel .danger:hover { text-decoration:underline; }
+/* A box's own panel is a short column of fields, not a card of sections, so
+   its labelled boxes sit full width and close together rather than inheriting
+   the 240px tiles a level's name row uses. */
+.csetup .shpanel .stcard > .stnm { max-width:26rem; flex:none; gap:4px; }
+.csetup .shpanel .stcard > .stnm > .lab { margin:0; }
 
 /* ══ THE STRATEGY COPILOT TAB (spec 064, stage 1) ═══════════════════════
    The picture signed off (design-mockups/copilot/2026-09-30_copilot-tab.html):

@@ -66,21 +66,58 @@ with sync_playwright() as p:
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
 
-    # ── 1. The switch, pressed in Client set-up › Structure ──────────
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
-    ck("Client set-up › Structure opens", ok)
-    ck("§448 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
-    geo = safe(pg, "()=>{var l=document.querySelector('.stplanq .lab'),b=document.querySelector('[data-stplan]');if(!l||!b)return null;var a=l.getBoundingClientRect(),c=b.getBoundingClientRect();return {below:c.top>=a.bottom-1,left:Math.abs(c.left-a.left)<2}}", None)
-    ck("§450 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)
-    ck("…and the business units' card has no switch of its own", safe(pg, "()=>!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
-    press(pg, '[data-stplan] button:nth-child(1)')
-    ck("choosing the company ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)
-    ck("…and changes nothing yet", safe(pg, "()=>buExists() && (GROUP.items||[]).length===0") is True)
-    press(pg, '[data-buask-no]')
-    ck("Cancel takes the question away and changes nothing",
-       safe(pg, "()=>!document.querySelector('[data-buask]') && buExists() && (GROUP.items||[]).length===0") is True)
-    press(pg, '[data-stplan] button:nth-child(1)')
-    ck("pressing Move them and plan on the company", press(pg, '[data-buask-go]'))
+    # ── 1. The switch, on the units' own card (§544.4) ─────────────
+    # §448's "Where the strategy is planned" IS GONE. Islam: *"there's no
+    # question that now … you might even have both. What's the point of this
+    # choice now?"* — each level says on its own card whether it plans, and
+    # both can be on, which an either/or cannot say. The units' layer has an
+    # On/Off like the functions' (§418), and OFF HIDES AND KEEPS: Islam,
+    # asked what switching off should do, *"just hide them, keep everything"*,
+    # which is spec 066 §2.2's reversal of §447.
+    #
+    # THE FOLD IS STILL ASSERTED, and in full — it is the record of §447 and
+    # this check owns what it does. What changed is that the PRODUCT no
+    # longer runs it from a button, so it is called directly below (§218:
+    # rewritten to the new rule, never loosened; and the new rule, that off
+    # copies nothing, is asserted first).
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
+        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
+    ck("Client set-up › the shape, on the top level, opens", ok)
+    ck("the top card no longer asks where the strategy is planned (§544.4)",
+       safe(pg, "()=>!document.querySelector('[data-stplan]')") is True)
+    ck("the business units' card carries an On/Off of its own, as the functions' does",
+       press(pg, '[data-shlvl="bu"]') and safe(pg, "()=>!!document.querySelector('[data-stsec=\"bu|layer\"]')") is True and
+       safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|layer\"]')||true") is True)
+    ck("…live, not held: both answers pressable",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stsec=\"bu|layer\"] button')].every(b=>!b.disabled)") is True)
+    keep0 = safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {})
+    press(pg, '[data-stsec="bu|layer"] button:nth-child(2)')
+    ck("pressing Off hides the layer", safe(pg, "()=>buExists()") is False)
+    ck("…and COPIES NOTHING: no company direction, nothing archived, every unit plan where it was",
+       safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {}) == keep0,
+       [keep0, safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})")])
+    ck("…and the units leave the navigation", navUnits() == 0, navUnits())
+    press(pg, '[data-shlvl="bu"]'); press(pg, '[data-stsec="bu|layer"] button:nth-child(1)')
+    # the units' SIDE is back; which side the row is OPEN on is the fold's
+    # own memory and not what this claims (it stayed on the functions).
+    back = [safe(pg, "()=>buExists()"), safe(pg, "()=>navSides().filter(s=>s.fold==='units').length", 0),
+            safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {})]
+    ck("On again brings them straight back, with everything (§94.2)",
+       back[0] is True and back[1] > 0 and back[2] == keep0, [back, keep0])
+    # §447's fold, run directly — everything below is what IT does.
+    ck("the fold is still there to be run", safe(pg, "()=>typeof buFoldIntoTop==='function'") is True)
+    # §544.5: the capabilities no longer follow the units off — the office
+    # says where they live — so the fixture says it, which is the press the
+    # office makes on the company's capabilities card. §465's claims below
+    # are about THAT answer and are unchanged.
+    safe(pg, """()=>{ buFoldIntoTop();
+      var st = JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));
+      st.bu = Object.assign({}, st.bu||{}, {exists:false});
+      st.cap = Object.assign({}, st.cap||{}, {at:'top'});
+      st.top = Object.assign({}, st.top||{}, {on:(SMPRules.levelComponents(GROUP,'top')||[]).slice()});
+      ['pillar','swot'].forEach(function(c){ if (st.top.on.indexOf(c)<0) st.top.on.push(c); });
+      GROUP[SMPRules.STRUCTURE] = st; paint(); }""")
+    pg.wait_for_timeout(400)
     after = safe(pg, "()=>({exists:buExists(), top:(GROUP.items||[]).length, arch:ARCHIVES.length, units:activeKeys().length, kept:UNIT_KEYS.every(k=>UNITS[k].items!==undefined), topOn:SMPRules.levelComponents(GROUP,'top')})", {})
     ck("the layer is off", after.get("exists") is False, after)
     ck("every unit pillar is now on the company page", after.get("top") == (before.get("pillars") or 0) + 1, [after.get("top"), (before.get("pillars") or 0) + 1])

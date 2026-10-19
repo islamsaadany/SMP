@@ -94,8 +94,19 @@ def tabs(pg):
                   ".map(x=>x.dataset.s || x.textContent.trim().split('\\n')[0])", [])
 
 def go(pg, dest):
-    side(pg, "caps" if dest.startswith("cap:") else
-             "fns" if dest.startswith("fn:") else "units")
+    # §544.13: a capability has no side on the row — it is the company's and
+    # is reached from the company's plan (§520's rail). Its pages are still
+    # its own and still answer to `cap:<id>`, so the check goes there the way
+    # the rail does rather than by pressing a button that no longer exists.
+    if dest.startswith("cap:"):
+        try:
+            if pg.evaluate("(d)=>{ if (!capsReachable().some(function(c){ return 'cap:'+c.id === d; })) return false; if (current !== d) leaveModes(); current = d; currentSub = entrySub(current); paint(); window.scrollTo(0,0); return true; }", dest) is not True:
+                return False
+            pg.wait_for_timeout(520)
+            return pg.evaluate("()=>current") == dest
+        except Exception:
+            return False
+    side(pg, "fns" if dest.startswith("fn:") else "units")
     try:
         pg.click('#units [data-u="%s"]' % dest, timeout=4000); pg.wait_for_timeout(520)
         return True
@@ -140,28 +151,36 @@ def main():
         ck("...and it holds projects, so its pages have something on them",
            CAP["n"] >= 1, CAP)
 
-        # ── 2 · the third side, BOTH ENDS ──────────────────────────────────
-        print("\n2 · a side with nothing behind it is not drawn")
+        # ── 2 · there is no third side, BOTH ENDS ─────────────────────────
+        print("\n2 · the capabilities are in the company's plan, not on the row")
+        # §544.13 REVERSES THIS SECTION, and the reversal is the point (§218).
+        # §334 gave the capabilities a side of their own and this proved it
+        # was drawn only when there was one behind it. Islam, asked where a
+        # capability appears: *"inside its owner's plan, with the
+        # directions"*, and who one can belong to: *"the company only"*. So
+        # the side is gone, and the assertion is that it is — both with a
+        # capability and without, because a check that only looked for two
+        # sides would pass on a build that had simply failed to draw a third.
         words = ev(pg, "()=>[...document.querySelectorAll('#units .nsw')]"
                        ".map(x=>x.textContent.trim())", [])
-        ck("the switch has three sides while a capability exists",
-           words == ["Units", "Capabilities", "Functions"], words)
-        ck("...and each is its own button, because 'press to switch' has no "
-           "answer with three (§334)",
-           ev(pg, "()=>document.querySelectorAll('#units .navswitch.multi .nsw[data-fold]')"
-                  ".length", 0) == 3, words)
-        gone = ev(pg, "()=>{const k=GROUP.capabilities.map(c=>c.id);"
-                      " window.__CAPS=GROUP.capabilities.slice();"
+        ck("the switch has two sides although a capability exists",
+           words == ["Units", "Functions"], words)
+        ck("...and no fold on the row belongs to the capabilities",
+           ev(pg, "()=>navSides().some(s=>s.fold==='caps')", None) is False)
+        ck("...and the company's own plan is where they are instead",
+           ev(pg, "()=>[SMPRules.capAtTop(GROUP), topCapsOn()]", []) == [True, True],
+           ev(pg, "()=>[SMPRules.capAtTop(GROUP), topCapsOn()]"))
+        gone = ev(pg, "()=>{window.__CAPS=GROUP.capabilities.slice();"
                       " GROUP.capabilities.length=0; paint();"
-                      " return [...document.querySelectorAll('#units .nsw')]"
-                      ".map(x=>x.textContent.trim());}", [])
-        ck("with none, it is the two-part control every tenant has today",
-           gone == ["Units", "Functions"], gone)
+                      " return [[...document.querySelectorAll('#units .nsw')]"
+                      ".map(x=>x.textContent.trim()), topCapsOn()];}", [])
+        ck("with none, the row is unchanged and the company's plan loses them",
+           gone == [["Units", "Functions"], False], gone)
         back = ev(pg, "()=>{GROUP.capabilities.push.apply(GROUP.capabilities, window.__CAPS);"
-                      " paint(); return [...document.querySelectorAll('#units .nsw')]"
-                      ".map(x=>x.textContent.trim());}", [])
-        ck("...and the third side comes back with the first capability",
-           back == ["Units", "Capabilities", "Functions"], back)
+                      " paint(); return [[...document.querySelectorAll('#units .nsw')]"
+                      ".map(x=>x.textContent.trim()), topCapsOn()];}", [])
+        ck("...and they come back to the company's plan, still not to the row",
+           back == [["Units", "Functions"], True], back)
 
         # ── 3 · its pages are the function's pages ─────────────────────────
         print("\n3 · the same pages a supporting function has")
@@ -201,18 +220,40 @@ def main():
            "%s / %s" % (capSecs, fnSecs))
 
         # ── 4 · the Overview says what the thing is ────────────────────────
-        print("\n4 · Capability · Held by · Definition")
+        print("\n4 · Capability · Owner · Definition")
+        # §544.13 REWRITES THE MIDDLE ROW (§218). It read *Held by* and named
+        # the holding function's head, because "Rana Fouad" alone did not say
+        # which desk held the work. There is no desk: a capability is the
+        # company's, so the row would have printed an em dash on every
+        # capability there is, for ever (§45.2, §61). It reads the OWNER §412
+        # gave it, read from Setup › Capabilities' own picker, never set here.
         go(pg, "cap:" + CID); sec(pg, "found")
         keys = ev(pg, "()=>[...document.querySelectorAll('#panel .clause dt')]"
                       ".map(x=>x.textContent.trim())", [])
-        ck("the Overview reads Capability, Held by, Definition",
-           keys == ["Capability", "Held by", "Definition"], keys)
-        held = ev(pg, "()=>{const d=[...document.querySelectorAll('#panel .clause')]"
-                      ".find(x=>/Held by/.test(x.textContent)); return d? d.innerText"
-                      ".replace(/\\n/g,' ') : null}", None)
-        fname = ev(pg, "(k)=>FUNCTIONS[k].name", "", FK)
-        ck("...and Held by names the FUNCTION too, not a person alone",
-           bool(held) and fname in held, held)
+        ck("the Overview reads Capability, Owner, Definition",
+           keys == ["Capability", "Owner", "Definition"], keys)
+        # BOTH ENDS (§94.2): a named owner shows, and no owner shows the dash
+        # rather than a stale function name.
+        who = ev(pg, "(id)=>{ var k=Object.keys(PEOPLE||{})[0];"
+                     " if(!k) return null; capById(id).head=k; paint(); return k; }", None, CID)
+        ck("a person from the register is given the capability", bool(who), who)
+        pg.wait_for_timeout(300); sec(pg, "found")
+        owned = ev(pg, "()=>{const d=[...document.querySelectorAll('#panel .clause')]"
+                       ".find(x=>/^Owner/.test(x.textContent)); return d? d.innerText"
+                       ".replace(/\\n/g,' ').replace('Owner','').trim() : null}", None)
+        ck("...and the Owner row names the capability's own owner, a person",
+           bool(owned) and owned not in ("", "\u2014"), owned)
+        ck("...and it is NOT the holding function's name",
+           bool(owned) and ev(pg, "(k)=>FUNCTIONS[k].name", "", FK) not in owned, owned)
+        # Read off the Overview as the page draws it, without pressing the
+        # section row again: the press is what this is NOT about, and §215
+        # says a probe degrades rather than drags its subject around.
+        bare = ev(pg, "(id)=>{ delete capById(id).head; current='cap:'+id; paint();"
+                      " const d=[...document.querySelectorAll('#panel .clause')]"
+                      ".find(x=>/^Owner/.test(x.textContent)); return d? d.innerText"
+                      ".replace(/\\n/g,' ').replace('Owner','').trim() : null}", None, CID)
+        ck("...and with no owner it is a dash, not a function",
+           bare in ("\u2014", "-"), repr(bare))
         ck("an empty objectives list says a CAPABILITY is judged by its projects",
            "This capability is judged by its projects" in panel(pg)
            or "Key Objectives" in panel(pg), panel(pg)[:160])
@@ -328,23 +369,67 @@ def main():
            isinstance(a.get("arch"), int) and a["arch"] > before.get("arch", 0),
            "%s -> %s" % (before.get("arch"), a.get("arch")))
 
-        # ── 9 · and giving them back ───────────────────────────────────────
-        print("\n9 · the round trip closes where it started")
-        gave = ev(pg, "(id)=>{ if(!id) return {}; removeCapability(id, 'fn:finance');"
+        # ── 9 · and where the work goes when the box is removed ───────────
+        print("\n9 · the box is removed and the work survives, or is said to go")
+        # §544.13 REWRITES THIS SECTION, and it is the one place the new rule
+        # COSTS something, so it is written down rather than quietly dropped.
+        # §326 made the holding function a destination — Islam's *"the ability
+        # to turn functional projects to a capability and vice versa"* — and
+        # this asserted the round trip closing where it started. A capability
+        # is the company's now (*"the company only"*), so it has no function
+        # to go back to and the vice versa is gone with it.
+        #
+        # What replaces it is what Islam chose when asked where a company
+        # capability's projects should go with nowhere to move them:
+        # *"deleting is fine"*. So BOTH ENDS are asserted — a sibling takes
+        # them with their ids, and alone the dialog says plainly that
+        # removing takes the work too rather than offering a button that
+        # does nothing (§61).
+        sib = ev(pg, "()=>{var n=GROUP.capabilities.length; addCapability();"
+                     " var x=GROUP.capabilities[n]; x.name='A sibling'; paint();"
+                     " return x.id;}", "")
+        ck("a second capability exists to receive the work", bool(sib), sib)
+        gave = ev(pg, "(a)=>{ if(!a[0]) return {}; var ok=removeCapability(a[0], a[1]);"
                       " paint();"
-                      " return {own:(FUNCTIONS.finance.projects||[]).map(p=>p.id),"
-                      " codes:(FUNCTIONS.finance.projects||[]).map(p=>projCode('finance',p)),"
-                      " caps:GROUP.capabilities.map(c=>c.id)};}", {}, a.get("id") or "")
-        ck("every project is back with the function, ids unmoved",
-           bool(gave.get("own")) and
-           sorted(gave.get("own", [])) == sorted(before.get("own", [])),
-           "%s / %s" % (gave.get("own"), before.get("own")))
-        ck("...and every code is back where it started",
-           bool(gave.get("codes")) and gave.get("codes") == before.get("codes"),
-           "%s / %s" % (gave.get("codes"), before.get("codes")))
-        ck("...and the capability is gone",
+                      " var t=capById(a[1]);"
+                      " return {ok:ok, moved:(t&&t.projects||[]).map(p=>p.id),"
+                      " caps:GROUP.capabilities.map(c=>c.id),"
+                      " backOnFn:(FUNCTIONS.finance.projects||[]).map(p=>p.id)};}",
+                  {}, [a.get("id") or "", sib])
+        ck("the projects move to the sibling with their ids unmoved",
+           gave.get("ok") is True and sorted(gave.get("moved", [])) == sorted(a.get("p") or []),
+           "%s / %s" % (gave.get("moved"), a.get("p")))
+        ck("...and the capability that held them is gone",
            bool(a.get("id")) and a["id"] not in gave.get("caps", []),
            "%s / %s" % (a.get("id"), gave.get("caps")))
+        ck("...and they did NOT go back to the function — it is not a destination now",
+           gave.get("backOnFn") == ["FIN01"] or
+           all(x not in (gave.get("backOnFn") or []) for x in (a.get("p") or [])),
+           gave.get("backOnFn"))
+        # THE OTHER END: the last capability holding work, with nowhere to put
+        # it. The dialog must say so in those words and must not offer Keep.
+        lone = ev(pg, """(sid)=>{
+          window.__ALLCAPS = GROUP.capabilities.slice();
+          GROUP.capabilities = GROUP.capabilities.filter(c=>c.id===sid);
+          capRemoveOpen(sid);
+          var box=document.getElementById('modal-b'); if(!box) return null;
+          var keep=box.querySelector('[data-capkeep]');
+          var r = { disabled: keep && keep.getAttribute('aria-disabled')==='true',
+                    why: (box.querySelector('.pick .d')||{}).textContent||'',
+                    hasRemoveAll: !!box.querySelector('[data-caprmall]') };
+          closeModal(); return r; }""", None, sib)
+        ck("alone with the work, Keep them is not offered",
+           isinstance(lone, dict) and lone.get("disabled") is True, lone)
+        ck("...and the reason says the work goes, not that there is none",
+           isinstance(lone, dict) and "nowhere to move" in (lone.get("why") or ""),
+           (lone or {}).get("why"))
+        ck("...and Remove everything is still there, with the archive behind it",
+           isinstance(lone, dict) and lone.get("hasRemoveAll") is True, lone)
+        # PUT THE CLIENT BACK (§255): section 10 stands on the capability
+        # section 1 found, and the line above narrowed the list to one.
+        ck("the client is put back as this section found it",
+           ev(pg, "(id)=>{ if(window.__ALLCAPS) GROUP.capabilities = window.__ALLCAPS;"
+                  " paint(); return !!capById(id); }", False, CID) is True)
 
         # ── 10 · the other form ────────────────────────────────────────────
         print("\n10 · a capability can be planned in pillars (Islam's own answer)")

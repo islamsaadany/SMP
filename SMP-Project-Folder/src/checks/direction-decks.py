@@ -69,8 +69,73 @@ with sync_playwright() as p:
     pos = [next((i for i, h in enumerate(heads) if k in h), -1) for k in order]
     ck("the review runs foundation, analysis, directions, performance, thank you",
        all(x >= 0 for x in pos) and pos == sorted(pos), heads)
-    ck("…and it is short — no per-direction measure slides", not any("Key measures" in h for h in heads), heads)
-    ck("…seven slides at most for any number of directions", len(heads) <= 7, heads)
+    # REVERSED, BECAUSE THE RULE WAS (§218, §553.9). It read "…and it is
+    # short — no per-direction measure slides", which is what §481 built and
+    # what Islam undid once he saw Raya's Mobile beside it: *"yes I want
+    # elabd as a unit"*. A unit's deck draws every pillar's own slides, and
+    # the company's now does the same.
+    #
+    # ASSERTED AS SAMENESS, NOT AS PRESENCE (§53.5). "There is a measures
+    # slide" would pass on a second copy of the markup, which is the drift
+    # this whole stage exists to remove. What is asserted is that the slides
+    # the company's review draws for a direction ARE the slides that
+    # direction's own owner presents — the same builder, the same anchors.
+    mine = safe(pg, """()=>{
+      var d = document.createElement('div'); d.innerHTML = deckHtmlFor('dir:group-P1');
+      var own = [...d.querySelectorAll('.dslide')].map(s=>s.dataset.anchor||'')
+        .filter(a => a && a !== 'cover' && a !== 'end' && a !== 'stand');
+      var c = document.createElement('div'); c.innerHTML = deckHtmlFor('group');
+      var co = [...c.querySelectorAll('.dslide')].map(s=>s.dataset.anchor||'');
+      return {own: own, missing: own.filter(a => co.indexOf(a) < 0)};
+    }""")
+    ck("…and it carries each direction's own slides, from the same builder (§553.9)",
+       isinstance(mine, dict) and len(mine.get("own") or []) > 0
+       and mine.get("missing") == [], mine)
+    # AND IT GROWS BY EXACTLY THOSE SLIDES (§218, §553.9). This line has
+    # now been three claims, because the rule behind it moved twice. It was
+    # "seven slides at most for any number of directions" — a number
+    # somebody had to maintain. §553.6 made it the property that number was
+    # a proxy for: the review does not GROW with the plan, because each
+    # direction presents its own deck (§481). §553.9 is Islam undoing that
+    # premise — the company's review now carries every direction, so it
+    # grows, and the claim is HOW MUCH.
+    #
+    # Still MADE rather than read (§255), and still the stronger form: a
+    # build that drew a direction twice, or dropped one, fails it, where
+    # "it grows" would pass.
+    grew = safe(pg, """()=>{
+      var before = GROUP.items.slice();
+      var count = function(){ var d=document.createElement('div');
+        d.innerHTML = deckHtmlFor('group');
+        return d.querySelectorAll('.dslide').length; };
+      var n0 = count(), added = 0;
+      var proto = JSON.parse(JSON.stringify(GROUP.items[0]));
+      var u = topAsUnit();
+      for (var i = 0; i < 8; i++) {
+        var c = JSON.parse(JSON.stringify(proto));
+        c.id = 'group-X' + i; c.code = 'EX0' + i; c.name = 'Extra ' + i;
+        c.measures = (c.measures||[]).map(function(m, j){
+          return Object.assign({}, m, {id: c.id + '-M' + j}); });
+        GROUP.items.push(c);
+      }
+      paint();
+      /* what the eight added pillars cost, asked of the builder itself */
+      u = topAsUnit();
+      GROUP.items.forEach(function(p, i){
+        if (String(p.id).indexOf('group-X') === 0) {
+          var d = document.createElement('div');
+          d.innerHTML = pillarSlidesOf(u, p, i).join("");
+          added += d.querySelectorAll('.dslide').length;
+        }
+      });
+      var n1 = count();
+      GROUP.items = before; paint();
+      return {two: n0, ten: n1, added: added, back: count()};
+    }""")
+    ck("…and it grows by exactly what those directions' own slides cost (§553.9)",
+       isinstance(grew, dict) and grew.get("added", 0) > 0
+       and grew.get("ten") == grew.get("two", 0) + grew.get("added", 0)
+       and grew.get("back") == grew.get("two"), grew)
 
     # ── 2. A direction's own deck ─────────────────────────────────────
     d1 = safe(pg, "()=>(%s)('dir:group-P1')" % HEADS, []) or []
@@ -80,11 +145,51 @@ with sync_playwright() as p:
     who = safe(pg, "()=>{var d=document.createElement('div');d.innerHTML=deckHtmlFor('dir:group-P1');var e=d.querySelector('.dwho');return e?e.textContent:''}")
     ck("…its cover names who presents it", "Hazem Roushdy" in (who or "") and "Hossam Farid" in (who or ""), who)
 
+    # ── 2b. The cover is the only slide that introduces it (§553.4) ───
+    # Islam: "the cover page is enough let's remove the 2nd page as the
+    # performance appear at the last slide anyway". The title page is drawn
+    # by the builder a direction's deck SHARES with the full plan deck, so
+    # this asserts the half that is this deck's: it has no title page, and
+    # the cover carries what that page carried. The other half — the full
+    # plan deck still opening each pillar on its title page — is asserted in
+    # `deck-figures`, which runs with the units on and reads the readings
+    # off that very slide.
+    anchs = safe(pg, """()=>{var d=document.createElement('div');
+      d.innerHTML=deckHtmlFor('dir:group-P1');
+      return [...d.querySelectorAll('[data-anchor]')].map(e=>e.dataset.anchor)}""", []) or []
+    ck("a direction's own deck has no title page of its own (§553.4)",
+       len(anchs) > 0 and not [a for a in anchs if a.startswith("p") and a.endswith("d")], anchs)
+    # AND NOTHING THAT PAGE CARRIED IS LOST (§96.2). The state is MADE
+    # (§255): the live clients set neither a theme nor a subtitle, so read
+    # against them this would pass on a cover that dropped both.
+    safe(pg, """()=>{var p=GROUP.items.filter(x=>x.id==='group-P1')[0];
+      p.theme='Customer first'; p.sub='Stores we already have'; paint(); return true}""")
+    cov = safe(pg, """()=>{var d=document.createElement('div');
+      d.innerHTML=deckHtmlFor('dir:group-P1');
+      var s=d.querySelector('.dslide'); return s?s.textContent.replace(/\s+/g,' '):''}""", "")
+    ck("…and the cover carries the theme and the subtitle the title page had",
+       "Customer first" in (cov or "") and "Stores we already have" in (cov or ""), cov)
+    safe(pg, """()=>{var p=GROUP.items.filter(x=>x.id==='group-P1')[0];
+      p.theme=''; p.sub=''; paint(); return true}""")
+
     # ── 3. The master flow: directions, capabilities, functions, company last
-    ms = safe(pg, "()=>masterSubjects()", []) or []
+    # ASKED OF THE ORDER, NOT THE CATALOGUE (§218). It read `masterSubjects()`,
+    # which is everything that can be PLACED — and since §553 that list opens
+    # with the company's Foundation and Analysis, so the claim failed while
+    # the running order it was making was unchanged. `masterOrder()` is what
+    # a client with no stored choice actually presents, which is the rule.
+    ms = safe(pg, "()=>masterOrder()", []) or []
     ck("the master flow leads with the directions and ends on the company",
        ms[:2] == ["dir:group-P1", "dir:group-P2"] and ms[-1:] == ["group"], ms)
-    kinds = safe(pg, "()=>masterSubjects().map(t=>masterKind(t).replace(/<[^>]+>/g,''))", []) or []
+    # AND THE CATALOGUE IS THE WIDER ONE, asserted here rather than left as
+    # the thing that quietly broke the claim above (§553): the two company
+    # sections can be placed, and they are not in the order until somebody
+    # places them.
+    subs = safe(pg, "()=>masterSubjects()", []) or []
+    ck("…the company's Foundation and Analysis can be placed, and are not placed yet (§553)",
+       subs[:2] == ["sec:found", "sec:swot"]
+       and not [t for t in ms if t.startswith("sec:")], [subs[:3], ms[:3]])
+    kinds = safe(pg, "()=>masterOrder().map(t=>masterKind(t).replace(/<[^>]+>/g,''))", []) or []
     ck("…each kind named in the picker", "DIR" in kinds and kinds[-1] == "CO", kinds)
 
     # ── 4. The office's menu ──────────────────────────────────────────

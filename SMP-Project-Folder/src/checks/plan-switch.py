@@ -74,13 +74,20 @@ with sync_playwright() as p:
     safe(pg, "()=>{delete GROUP.structure}")
     ck("switched back on, the unit is asked again", safe(pg, "()=>reportItems(UNITS['%s']).length" % unit) > 0)
 
-    print("\n4 · the Structure step: the switch and the split, pressed")
+    print("\n4 · the shape screen's level cards: the switch and the split, pressed (§544)")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="structure"]')
-    ck("the set-up flow's Structure step opens", ok)
+        and press(pg, '.wzstep[data-step="shape"]')
+    ck("the set-up flow's shape screen opens", ok)
+    # §544: one card at a time, opened from the tree (§218: rewritten to
+    # where the card is, never loosened about what it holds).
+    def lvl(k):
+        return press(pg, '[data-shlvl="%s"]' % k)
     ck("every layer's plan section carries an On/Off",
-       all(safe(pg, "()=>!!document.querySelector('[data-stsec=\"%s|plan\"]')" % k) for k in ("top", "bu", "fn")))
-    ck("no plan section says Always on", safe(pg, "()=>[...document.querySelectorAll('.stfixed')].some(e=>/Always on/.test(e.textContent))") is False)
+       all(lvl(k) and safe(pg, "()=>!!document.querySelector('[data-stsec=\"%s|plan\"]')" % k) for k in ("top", "bu", "fn")))
+    ck("no plan section says Always on",
+       all(lvl(k) and safe(pg, "()=>[...document.querySelectorAll('.stfixed')].some(e=>/Always on/.test(e.textContent))") is False
+           for k in ("top", "bu", "fn")))
+    ck("the units' card opens", lvl("bu"))
     groups = safe(pg, "()=>[...document.querySelectorAll('[data-stdetg^=\"bu|\"]')].map(g=>g.dataset.stdetg)", [])
     ck("the units' extra details come in two groups, general then tactics", groups == ["bu|general", "bu|tactics"], groups)
     ck("general holds the overview and the years",
@@ -97,6 +104,7 @@ with sync_playwright() as p:
        safe(pg, "()=>GROUP.structure.bu.words.ovwhy.one") == "Why this matters", safe(pg, "()=>JSON.stringify(GROUP.structure.bu)"))
     ck("…and reaches a unit's overview", "Why this matters" in (safe(pg, "()=>{var it=UNITS['%s'].items[0];it.ovWhy=it.ovWhy||'x';return dirOverview(it, false)}" % unit) or ""))
     ck("…but not a function's", "Why now" in (safe(pg, "()=>{GROUP.structure.fn={details:{overview:true}};var it=fnItems(FUNCTIONS['%s'])[0];it.ovWhy=it.ovWhy||'x';return dirOverview(it, false)}" % fk) or ""))
+    lvl("bu")
     press(pg, '[data-stdetail="bu|years"]')
     ck("the years are shown as Year 1 · 2 · 3, with no name box",
        safe(pg, "()=>{var r=document.querySelector('[data-stdetrow=\"bu|years\"]');return r?[[...r.querySelectorAll('.styr')].map(e=>e.textContent).join(','), r.querySelectorAll('input').length]:null}") == ["Year 1,Year 2,Year 3", 0])

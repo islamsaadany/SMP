@@ -992,6 +992,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      wrong. This is the evidence beside it, not a second alarm. */
   .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
 
+  /* A NAME THAT MATCHES NOBODY IN THE REGISTER (§551). Islam's choice of the
+     three: flag it, do not refuse it and do not delete it — the name is the
+     only clue to who was meant. It borrows `.wasval`'s reasoning and NOT its
+     colour: this one IS a fault to correct rather than evidence beside one,
+     so it carries the warning colour the rest of the product uses for
+     "something here needs attention" — but it stays small and beside the
+     name, never replacing it. */
+  .ownerstray { color:var(--warn); font-style:italic; font-size:11.5px;
+                font-weight:400; white-space:nowrap; }
+
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
   .swotlist { list-style:none; margin:0; padding:0; }

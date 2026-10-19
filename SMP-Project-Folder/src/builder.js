@@ -59,9 +59,9 @@ function builderHere(){
    own reader and answers all three, so a fourth format is a case here rather
    than a fall-through. */
 function builderRoute(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
+  var f = FUNCTIONS[r.key];
   if (!f) return null;
   var fmt = fnFormat(f);
   return fmt === "pillars" ? "fnpillars"
@@ -79,7 +79,8 @@ function builderSubjectName(target){
      a projects function is not drawn by them — asked through it, every
      projects function built here was nameless (found by driving, §51.7). */
   var t = String(target || "");
-  if (t.indexOf("fn:") === 0) { var f = FUNCTIONS[t.slice(3)]; return f ? f.name : ""; }
+  var br = boxRef(t);
+  if (br.kind === "fn") { var f = FUNCTIONS[br.key]; return f ? f.name : ""; }
   return UNITS[t] ? UNITS[t].name : "";
 }
 function builderHasPlan(target){
@@ -403,7 +404,7 @@ function bformDef(kind, ctx){
         { k:"theme", label:L1("theme"), type:"select",
           opts:[["","— cross-cutting, no " + labelWord("theme","group") + " —"]].concat(
             GROUP.themes.map(function(t){ return [t.ab, t.ab + " · " + t.name]; })) },
-        { k:"owner", label:"Owner", ph:"Who answers for it" }
+        { k:"owner", label:"Owner", type:"owner" }
       ] },
     measure: { title:"Add a " + labelWord("measure","group"),
       fields:[
@@ -416,7 +417,7 @@ function bformDef(kind, ctx){
     tactic: { title:"Add a " + L1("tactic"),
       fields:[
         { k:"name", label:L1("tactic"), req:true, ph:"The work itself, as a sentence" },
-        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"q", label:"Quarters it is due in", type:"quarters" }
       ] },
     objective: { title:"Add a " + L1("keyobj"),
@@ -443,7 +444,7 @@ function bformDef(kind, ctx){
     project: { title:"Add a " + L1("project"),
       fields:[
         { k:"name", label:L1("project"), req:true, ph:"What the " + labelWord("project","group") + " is called" },
-        { k:"owner", label:"Owner", ph:"Who answers for it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"start", label:"Start", mono:true, ph:"e.g. Q1 2026" },
         { k:"end", label:"End", mono:true, ph:"e.g. Q4 2026" },
         { k:"brief", label:"Brief", type:"long", ph:"Why this " + labelWord("project","group") + " exists, in two sentences" }
@@ -466,7 +467,7 @@ function bformDef(kind, ctx){
       fields:[
         { k:"name", label:"Milestone", req:true, ph:"Short name" },
         { k:"covers", label:"Description", type:"long", ph:"What done looks like" },
-        { k:"owner", label:"Owner" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"finish", label:"Due date", mono:true, ph:"e.g. March 2026" }
       ] },
     /* §381.2: AN ACTION IS THE MILESTONE'S FORM, THREE FIELDS RATHER THAN
@@ -478,7 +479,7 @@ function bformDef(kind, ctx){
     action: { title:"Add an action",
       fields:[
         { k:"name", label:"Action", req:true, ph:"The work itself, as a sentence" },
-        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
       ] },
     clause: { title:"Add a line to “Who we are”",
@@ -545,6 +546,30 @@ function bformFieldHtml(f, draft){
         return '<button type="button" data-bfv="' + esc(o[0]) + '" aria-pressed="' + (v === o[0]) + '">' +
           o[1] + '</button>';
       }).join("") + '</div></div>';
+  }
+  /* ── AN OWNER IS PICKED IN THE BUILDER TOO (§551.2) ────────────────────
+     Islam, after §551 and §551.1 had both treated the workbook as the wide
+     door: *"do not consider the upload through the sheets. Mostly, we build
+     it through the app, through the builder itself."* **So the premise those
+     two entries argued from was wrong, and THIS is the surface that mattered
+     all along** — five forms here (pillar, tactic, project, milestone,
+     action) each carried a bare text box asking "Who answers for it", and a
+     name typed into one goes straight into the plan.
+
+     IT IS `ownerChoices`, NOT A LIST OF ITS OWN (§53.5), so the register,
+     the departments, the "Not in the register" grouping and `searchsel`'s
+     search past five options all arrive with it. The reader is untouched:
+     shell.html writes `el.value` for every `[data-bf]` on input and change,
+     which a select answers exactly as the input did.
+
+     NO `ph` ON THESE FIELDS ANY MORE: a placeholder on a select draws
+     nothing, so leaving it would be a line of code that looks like a hint
+     nobody can see. The blank option is the hint. */
+  if (f.type === "owner") {
+    return '<div class="bff">' + lab + '<select class="bfi" data-bf="' + f.k + '">' +
+      (typeof ownerChoices === "function" && typeof optionsHtml === "function"
+        ? optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; })
+        : '<option value=""></option>') + '</select></div>';
   }
   if (f.type === "select") {
     return '<div class="bff">' + lab + '<select class="bfi" data-bf="' + f.k + '">' +
@@ -651,7 +676,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "cap") {
-    var made = addCapability(ctx.fnKey); if (!made) return false;
+    var made = addCapability(); if (!made) return false;
     made.name = v("name") || made.name; made.def = v("def");
     return true;
   }

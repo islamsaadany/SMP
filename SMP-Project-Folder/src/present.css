@@ -72,6 +72,9 @@
      untouched; and `.tight` still overrides it, so a plan with many
      objectives shrinks exactly as it did (§69.5). */
   .dslide .aimtop { padding-bottom:16px; }
+  /* §553.7: a continuation carries the rest of the table, not the lead
+     paragraph above it — the aspiration is said once, on the first slide. */
+  .dslide[data-cont] .aimtop { display:none; }
   .dslide .aimbottom table.dbig td { font-size:30px; padding:24px 18px; }
   .dslide .aimbottom table.dbig th { font-size:15px; }
   /* AND THE TIGHTENED SLIDE GETS ITS OWN FLOOR, which is the half that

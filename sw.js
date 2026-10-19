@@ -403,7 +403,13 @@
    behind them differ — so the name goes PAST both rather than picking
    either. Confirmed against origin/main once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.34-held-not-dead";
+/* v6.46-staff-processes-link — the Processes lifecycle, the staff reading view
+   and the staff "Processes" link in the top bar (§539–§544). The built file's
+   bytes changed, which is the whole trigger (§91). Confirmed against
+   origin/main serving "smp-shell-v6.45-stakeholders-picked" and against every
+   ref's history — nobody holds v6.46 (§94.12); confirm once more immediately
+   before the push to main (§94.16). `node --check sw.js` run after the merge. */
+const SHELL = "smp-shell-v6.46-staff-processes-link";
 const ASSETS = [
   "/",
   "/index.html",

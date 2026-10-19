@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-19 — Viewing as is the SMO team's too, up to their own seat (§554).** The **Viewing as** dropdown was the Super user's alone; the SMO team has it now, on both bars — the Strategy top bar and the shared one the modules draw (Insights). Their list is the whole register **except the Super user**: a view hands you the rights of the person you look through, and the Super user is the one person on a client's register holding more than the team does, so looking through them would have been a way up rather than a simulation. Islam picked that over the whole register and over a look-only Super user view, with the cost of each put to him first. **It also closed a leak nobody had reported:** the People register's row menu already offered *View the platform as them* to the team — Setup is the office's — and pressing it changed the screen while their saves went on being judged as themselves, which is §185's fault on the one path that never asked. Measured on the build before, not argued. Checked: the shared rule green 33 ways and red four (one break puts the escalation itself back), six new assertions on the save path (1097 passing), and a **new browser check** that signs in as an SMO team member and presses the real controls — green here, 7 red on the build before. The four neighbouring browser checks stay green.
+
 **2026-10-14 — Internal Tracker: the weekly check, and every topic reachable (§532, §533).** A fifth view, **Weekly check**, built for the Monday meeting: always read by topic, three weeks deep. Inside each topic, last week, this week and next week each get their own card — this week's lit in gold, next week's an outline — and next week's card holds a write line already set to next week, so the next action is written where you are instead of at the top of the page. A line that did not get done is **carried to next week in one press**, as the same action: its notes and history ride with it and the late mark goes on climbing, so nothing can hide behind a fresh date. A topic with nothing this week is still on the list and says so, rather than being skipped in silence. Separately, **Topics** behind the ⋯ lists every topic on the client — including ones with no actions and closed ones, which could not be reached from the page at all — and a name is renamed by typing over it. Nothing new is stored: no table, no column, no migration. Checked: 96 tracker checks green before the database sections, 31 of them new, each rule broken on purpose four ways to prove the checks catch it; the page rendered and the script driven in Chromium (31 assertions), which caught two faults reading the code had not. **The database sections of the tracker check were NOT run — this container has no Postgres**, so that is said rather than claimed.
 
 **2026-10-12 — Entering figures from the keyboard (§528).** The second item on your usability list, and you asked for all four. On a Reporting page: **Enter** moves to the next figure and **Shift+Enter** back, so a long report is typed straight down the page without reaching for the mouse — at the last box Enter stays where it is rather than dropping the cursor onto the page, which it did before this. **Alt+Enter** is the *Next →* button from the keyboard, the one that skips every box already answered. **Escape** puts a box back to what it was before you started typing, the same as it does on the People register, and leaves the cursor in it. And the **note box is out of the tab path** unless that row is at risk — it was nine of eighteen stops on a nine-row pillar, so half the presses were landing on a box nobody is asked to fill — with **Alt+N** as the way to it when you do want it. Enter inside a note is still a new line, deliberately: a note is prose explaining a figure, and it is the one thing a reporter is required to write. **Nothing on the screen changes** — every key is on a hover and announced to a screen reader, the way the eye and the monthly mark already are — so there was nothing to draw and sign off. Nothing stored moves, nothing is migrated, and nobody is signed out. Checked: a new check for the keys passes and was shown to fail thirteen ways from the sources; the five neighbouring reporting checks pass; the whole-platform walk is clean for all 33 people with no errors; and the shipped file and the served copies are in step. One older check about Enter in a plan title had been looking at the wrong page since an earlier version and is repaired here. One check reports the register's *Add someone* dialog jumping; that is the same on `main` and is noted rather than changed, being a screen this work does not touch. **Next, in your order:** the browser's own pop-up boxes moved inside the platform (26 confirms, 11 alerts and one prompt); then what a failed save tells the client; then the dates, which are spelt six different ways. **Merged to `main` on your word.** Production has not been read from here — this container cannot reach the live site — so the deployment is unverified until somebody opens it.
@@ -9671,6 +9673,444 @@ could not reach the live site, because it could not at the last two merges. I
 wrote that without trying it. It worked on the first attempt, so that claim is
 withdrawn — it was not true today, and I should have found that out by running
 the check rather than by remembering.
+
+## §531 — The platform simplification, step 1: one address, one parse (2026-10-14)
+First part of the code-only half of the box work agreed with Islam (spec 066 stage 3a — nothing stored moves, so a revert undoes it). The platform addresses six kinds of thing that hold a plan — the top layer, a division, a business unit, a supporting function, a capability, and a direction for its deck — and until now every reader worked out which kind it had by slicing the address itself. Counted before starting: 58 such places in `config-data.js`, 14 in the shared rules, 9 in the server authoriser, 9 in the shell, and more across sixteen other files. That is the "every change requires a new addition" complaint in its smallest form: six kinds × every reader.
+
+There is now **one function that reads an address**, in the file the browser and the server already share, so both sides get the same answer. This part converted the shared rules and the server authoriser — 20 call sites. `config-data.js` is part 2 and the screens are part 3. **Nothing visual changed and no stored data was touched.**
+
+Checked: a new check (`scripts/test-box-ref.js`) asks every converted reader the same 22 addresses on this build and on the build before it, and reads **UNMOVED** (26 agreements); it was proved able to go red four ways (14 / 7 / 5 / 4 failures). Beside it, unchanged: the authoriser suite **1057/0**, the access baseline **UNMOVED** (33 people × 36 pages × 21 targets, 10,135 real grants), platform rules **69/0**, stage 1's own rules **38/0**, the merged access-table browser check **all good**, and the full browser QA run **ERRORS: none**.
+
+**Waiting on Islam:** nothing for this part. Parts 2 and 3 follow on the same branch; the one role (Part owner) and the per-box one-list-or-split setting come after them, still inside step 1. Step 2 (the data move) comes back separately with the per-client list of exactly what moves, before anything runs.
+
+## §531.1 — Simplification step 1, part 2: the client's data layer (2026-10-14)
+The 58 places in the client's data layer that worked out "is this a unit or a function or a capability?" by reading the address themselves now ask the one function part 1 put in the shared file. 34 functions converted. **Nothing visual changed and no stored data was touched**, so a revert undoes it.
+
+Checked: the check from part 1 gained a section that loads both builds of the client and asks 42 converted calls the same 23 addresses in each — **UNMOVED, 72 agreements**. It missed two deliberate breaks on the first run, and the reason was the worked example rather than the check: it holds one capability, planned in projects, and every unit planning in pillars, so two whole paths were never entered and both builds agreed on nothing. The check now also runs over a state it makes — a capability planned in pillars, a second capability on a second function, and a unit planning in projects — and all five breaks go red. Everything else unchanged: authoriser **1057/0**, access baseline **UNMOVED**, platform rules **69/0**, stage 1 rules **38/0**, merged access table **all good**, browser QA **ERRORS: none**.
+
+**Reported, not fixed:** that same thin fixture is why four capability assertions in the app's own two test files have not been running at all (one file throws at load because it looks for a capability on a function the seed does not put one on). Pre-existing on main, and it matters before step 2 moves capabilities.
+
+**Waiting on Islam:** nothing for this part. Part 3 is the screens; then the one Part owner role and the per-box one-list-or-split setting, still inside step 1.
+
+## §531.2 — Simplification step 1, part 3: the screens, the deck and the exports (2026-10-14)
+The last 44 places that read an address by hand are gone, across fifteen files — the shell, the plan and company pages, the deck and the master flow, the Excel and PowerPoint exports, the builder, the welcome, the tour, the history, the Copilot and the two server endpoints. **Across all three parts of step 1: 118 places in 18 files now ask one function.** Searching the sources for a hand-read address returns nothing.
+
+**Nothing visual changed and no stored data was touched**, so a revert undoes it.
+
+**One thing found and deliberately not changed.** Who may watch a deck, and who may speak for one, have only ever asked "is this a function?" — so a capability's deck is judged by the business-unit column rather than the function column its access actually comes from. That looks like a mistake of the same family as one fixed last month, but correcting it would move somebody's access, and step 1 is the half where nothing moves. It is preserved exactly as it was, written down beside the code, and it is yours to decide.
+
+Checked: the check now holds **86 agreements** over 23 addresses in two states (the worked example, and one it makes with a capability planned in pillars, a second capability on a second function, and a unit planning in projects) — **UNMOVED**, 1,493 real answers in the grid, and red five more ways on part 3's own files. Beside it: authoriser **1057/0**, access baseline **UNMOVED**, platform rules **69/0**, stage 1 rules **38/0**, browser QA **ERRORS: none**, and **37 of the browser checks closest to the changed screens green** (every capability, direction, deck, access, setup, master-flow, import, history, builder, presentation and tour check).
+
+**Not done, and said so:** the full 225-check browser sweep. At about a minute each it is nearly four hours, so the 37 closest were run instead and the rest is worth a single unattended run before this merges.
+
+**Reported, not fixed (both pre-existing on main, measured by rebuilding and re-running the older commits):** `checks/welcome.py` reads one failure about a gold underline on the Home page (§403) — the fix is visual, so it needs a mockup first; and the worked example's single capability on a single function is why four capability assertions in the app's own two test files have not been running at all.
+
+**Waiting on Islam:** two decisions, both small, before the rest of step 1:
+1. The capability-deck access divergence above — leave it, or fix it (it is a one-word change and it would widen or narrow who can watch one capability's deck).
+2. Nothing else. The one Part owner role and the per-box one-list-or-split setting are next, still inside step 1, and neither needs an answer to start.
+
+## §532 — A capability's video clips follow its own seats (2026-10-14)
+Your answer to the one thing step 1 left open. The two gates were about the **video clips** on a review — may you play one, may you add or remove one — and they asked "is this a function?", so a capability was judged by the business-unit column. That column cannot see the two seats that sit on the capability itself, so **the capability's own owner could neither play nor add a clip on their own capability's review**, while the SMO could, and so could anybody who happened to own a business unit as well.
+
+Both gates now read the capability's own seats, which is the same rule every other capability decision already uses. Measured over all 33 people before changing it, with the seats empty and filled: **the capability's owner and the holding function's head gain; nobody loses anything, in either case.**
+
+Checked: a new check, 14 agreements, red six ways when broken. It asserts the **list** of who moves rather than a count, and asserts who *loses* first — a check that only said "the owner can now play" would pass over a build that had quietly taken the right off everyone else. It needed a third fixture before it could fail at all: deleting the rule that stops a bounded role speaking for the whole subject left it green, because nobody in the worked example is bounded on a capability. Everything else unchanged: authoriser **1057/0**, graph-diff **140/0**, access baseline **UNMOVED**, platform rules **69/0**, stage 1 rules **38/0**, the box check **UNMOVED**.
+
+## §532.1 — Correcting what I told you about the broken capability tests (2026-10-14)
+I said "four capability assertions have not been running". Measured properly that was wrong in both directions, and the cause is not what I said.
+
+**What is actually broken:** the app folder carries **two stale copies** of test suites that live in `scripts/`. One of them crashes on startup because it looks for a capability on a function the worked example does not put one on, with two projects where there is one — so **183 of its 352 checks never run**. The other reads 3 failures for the same reason. And because the app's test command chains them, the second never runs either.
+
+**But nothing is actually untested.** Both copies are strict subsets of the live suites, and those are green: **1057/0** and **140/0**. Every section that "stops running" runs and passes in the real ones.
+
+**So the real cost is misleading, not missing:** anyone running the app's own test command is told the authoriser is broken when it is not.
+
+**Waiting on Islam — one small choice:** delete the two stale copies and point the app's test command at the two real suites, or add the fixture the copies want (a second capability on a second function) to the worked example. I would delete them — but the fixture is wanted for step 2 anyway, since that is the migration that moves capabilities, so doing both is defensible.
+
+## §533 — One rule for every part owner (2026-10-15)
+Your rule, built: **you see the thing you own, whole, and the biggest thing you own decides.** A project, a pillar, a direction and a capability are parts; a unit, a function and the company are whole things. The half-eye now reaches all four kinds of part owner instead of two, and somebody is only narrowed by it when a part is **all** they own. Own a whole unit and you see your whole unit, however many pillars you also hold inside it.
+
+The half-eye stays one switch for the client, and the office is still the only one who sets it.
+
+**I have to correct a number I gave you.** I said adding project and pillar would narrow 24 of 33 people, including unit owners and function heads, and I used that to argue for an extra safeguard. That was wrong — my measuring script was faulty. Measured against the real code: today it narrows **nobody** in the worked example, and after the change it narrows **one person** — Ramy, who owns one project and one pillar and nothing else. Exactly what you'd want, and no unit owner or function head is touched either way.
+
+The safeguard still earned its place, but for a smaller reason than I claimed: if the office ever sets the business-unit-owner row's company column to "none", the old way **would** have narrowed every unit head who also owns a pillar. The new way doesn't. That case is now a test.
+
+Checked: authoriser **1082/0**, with a new section over two client shapes (one with business units, one without, since a direction owner can only exist when there are no units). It asserts both ends — a pure part owner is narrowed, a unit head who also owns a pillar is not, a function head who also owns a direction is not, the office and CEO never are, and with the half-eye off nobody is. Red six ways when broken. Everything else unchanged: access baseline **UNMOVED**, graph-diff **140/0**, platform rules **69/0**, stage 1 rules **38/0**, browser QA **ERRORS: none**, and the seven browser checks on this ground all green.
+
+**Before this reaches anybody:** I can only measure the worked example — there is no El Abd, RHI or Raya data in this repository. The same before/after list has to be run on each of the three and shown to you first. That is the one thing standing between this and live.
+
+## §534 — Step 1 is finished, and the two pieces I thought were left are step 2 (2026-10-15)
+You said continue with the rest of step 1. I measured instead of assuming, and there is no rest — **both remaining pieces move stored data**, which is the line step 1 was defined by.
+
+**Folding the four part owners into one role.** They already share one row on the table, but each still keeps its **own stored set of answers** in every client, and those answers disagree in four columns. Making them one role means collapsing four stored sets into one — that is a migration, not a code change.
+
+Measured anyway, so step 2 starts with the answer ready. Best candidate: **a part owner can report their own part, and read the plan around it.** On the worked example that moves six permissions, all upwards — five people gain the ability to report the part they own, each exactly where they own it, and **nobody loses anything**. I checked the thing that matters about giving somebody "edit": all six are still locked to the rows that carry their own name, so it cannot spill onto anybody else's work. The opposite candidate (give part owners nothing) takes those same six away and would stop a project owner reporting their own project — rejected.
+
+**The one-list-or-split setting.** Two parts to this:
+- **Under a unit there is nothing to build.** A unit's pillars already carry whether they are a direction or a capability, and they already show in one list. That is Raya's shape, and it ships today.
+- **At company level — El Abd separated, RHI joined — it cannot be built yet**, and this corrects what I told you earlier. A direction and a capability are not the same kind of thing today: a direction is a pillar, with measures and tactics. A capability is a **container** that holds its own pillars and projects — one level above a direction. You cannot offer "show these as one list" for two different shapes. The setting becomes easy the moment a capability becomes a pillar, which is exactly the move in step 2.
+
+**So step 1 is done.** What it shipped: one address read in one place instead of 118; a capability's video clips following its own seats; and one rule for every part owner. No stored data moved in any of it, so any of it reverts cleanly.
+
+**Waiting on you, to start step 2:**
+1. Confirm the part-owner answer above (report your own part, read the plan around it) — or tell me a different one.
+2. El Abd, RHI and Raya data. I cannot see any of it from here, and step 2 is the half that moves data, so every client needs its own before-and-after list in front of you before anything runs.
+
+## §535 — A capability belongs to a unit or the company, not to a function's plan (2026-10-15)
+Islam corrected the model: a capability is never part of a function's plan. It belongs to a unit or to the company. Who owns it — a person, a function head, a unit head — is a separate question from where it lives.
+
+**This reverses a decision recorded a week ago** ("a capability with its own page becomes an internal pillar of the function that holds it"). Recorded as a reversal, not quietly overwritten.
+
+**And the platform already agreed with him.** The spec written in September lists, under "what the platform does today, and every one of them is the fault": *"A capability can only belong to a supporting function … a capability naming no function is drawn nowhere at all — not on a unit, not at the group"*, and *"a real capability has nowhere of its own to live."* The decision I was working from did not fix that; it made it permanent.
+
+**The awkward case I put to you yesterday has dissolved.** I asked what should happen to Raya's *Product Mindset* and gave you three options. You had already answered it in September: *"the capabilities in Raya Trade are not capabilities, they are just projects under functions."* So it was never a capability — it is Marketing's own project wearing the only label the platform had. Give Marketing its project back, drop the label. No flattening, no choice needed.
+
+**What the data is missing.** A capability records which function, and nothing else. That one field is doing two jobs at once — it decides access, it decides which list the capability appears in, and it decides whose people are offered as its owners. There is no field anywhere saying which unit or which company a capability belongs to. Step 2 has to add that, and turn the function link into plain ownership.
+
+**What I need from you:** El Abd's and RHI's data. The corrected model turns on where each of their capabilities actually sits, and I cannot see either client from here. Raya is the only one in this repository, and by your own answer its capabilities are not capabilities.
+
+## §535.2 — The three client shapes, confirmed from your screens (2026-10-15)
+All five statements confirmed, and the two screenshots settle the shapes.
+
+- **RHI** — one list, 15 pillars, no Capabilities tab. **Joined.**
+- **El Abd** — Directions and Capabilities as two tabs. **Split**, and the split is between two different kinds of record rather than two halves of one list.
+- **Raya** — pillars under each unit, both kinds in one list. Already correct.
+
+**Your naming point is the clearest way to see what is missing.** "Directions" is the client's own word for *pillar*, set in Settings. The platform ships that label as "Pillars", and its note already reads *"a business unit's direction or capability focus areas"* — your model has been written into the label all along.
+
+So there are three separate things, and only one is missing:
+
+| | set where |
+|---|---|
+| **The word** they're called | Settings, today |
+| **The kind** — external or internal | On every pillar row, today |
+| **Joined or split** | **Nowhere.** This is the only build. |
+
+**What step 2 does, per client:**
+
+- **RHI — nothing moves.** Already one list. Setting is *joined*, which is what it does now. Nothing changes on screen.
+- **El Abd — the one real migration.** Its capabilities become internal pillars in the same list as its directions, keeping their ids, figures and history. The two tabs then come from the setting being *split*. Nothing changes on screen.
+- **Raya — a give-back.** Each function gets its project back, the label goes, units untouched.
+
+El Abd is the only real move, and it's the one that proves the model: once its capabilities are pillars, the thing that makes its page special becomes a setting anyone can turn on.
+
+**Still needed before a row moves:** El Abd's actual capability records — how many, what each holds, and whether any of them carries its own pillars instead of measures and tactics. That last case decides whether one capability becomes one pillar or several, and a screenshot cannot show it.
+
+Drawing updated: `design-mockups/capability-placement/2026-10-15_where-a-capability-lives.html`
+
+## §535.3 — Layers are depth, not kinds (2026-10-15)
+Your note about the layers is a second finding of the same shape as the capability one.
+
+**A function sits at layer 2 in RHI and Raya, and at layer 3 in El Abd** — beneath the divisions. A unit moves down a layer too when the top becomes a group. The platform cannot say any of that: it has **five fixed words** for what a thing is — top, division, unit, function, capability — so a thing's depth is implied by what it is *called* rather than recorded as *what it hangs from*.
+
+That is the same fault as the capability's, one level up. It is also exactly why "add a new level" is a code change today instead of a setting. In the box model a layer is just **depth in the tree**; what varies is whether a box carries pillars or is a function with its own plan. And a capability is not a layer at all — so two of the five words go.
+
+**Two things I told you that need correcting**, both from your Setup screen:
+1. **The function link is already optional.** Setup says so in as many words, and that page already counts the unassigned ones as the thing it exists to fix. I implied it was required.
+2. **"Drawn nowhere at all" was true in September**, not now. Once capabilities got a home at company level, El Abd's page started showing all of them, assigned or not.
+
+Both make the point sharper, not softer: **a capability at company level has no recorded placement at all.** It shows at the top because of a client-wide switch, not because its record says it belongs there. The field that exists is optional and means ownership; the field that would say where it lives doesn't exist.
+
+**Step 2, revised:**
+- **Raya — nothing. Already done**, since you've removed its capabilities.
+- **RHI — nothing moves.**
+- **El Abd — the only client that moves at all.**
+
+**One question left, and your Setup screen asks it in a column of its own — "Plans in".** A capability set to *projects* becomes one internal pillar whose work is those projects; that is settled. A capability set to *pillars* holds a list, and one row cannot become several without a rule. So: does any El Abd capability plan in pillars — and if so, should **the capability become one pillar with its pillars as tactics**, or should **each of its pillars become an internal pillar of its own**, with the capability's name surviving as a grouping?
+
+That answer plus El Abd's rows, and the migration can be written. Drawing updated to version 3.
+
+## §535.5 — The open question is closed; a capability already is one pillar (2026-10-15)
+El Abd's Capabilities tab settles it, and the answer is better than either option I offered: **each capability already looks exactly like a direction.** C001 has 6 key measures and 4 tactics. RHI's D001 has 4 and 6. Same pane, same shape.
+
+**And the platform already knew.** The code carries your own sentence from an earlier round: *"a capability planning in a pillar approach is typical to a direction"* — so it draws a capability using the Directions pane itself, and its note says the capability's **one pillar row** carries the measures and tactics. A capability planned in pillars is already one pillar wearing a container's record. My question had been answered before I asked it.
+
+**So the migration is one-to-one.** Each of the five becomes one internal pillar of the company, keeping its measures, tactics, name, description, owner, custodian and its C code — and keeping its id, so every figure and every bit of history still points at the same row. The Capabilities tab then comes from the display setting being *split*, and El Abd's page looks exactly as it does today.
+
+**One edge, already decided by the product:** if a capability carries more than one pillar row, the page today shows the first and says *"holds N plans from before"*. The migration will do the same — and will **report** every capability with extra rows rather than dropping them quietly.
+
+**What's left:** just the five rows themselves, to confirm each carries one pillar and to produce your before-and-after list. There is no open question left in the rule.
+
+## §535.6 — El Abd's five, and the script that prints your list (2026-10-15)
+Your Set-up screen answers everything. All five capabilities **plan in Pillars**, so each is already one pillar and each becomes one internal pillar — one-to-one, nothing to decide.
+
+**And all five are "— unassigned —".** Not one of them names a function. **Your data already matches the model you described**: the capabilities are the company's, and the function link — the field this whole problem turns on — is empty on every single row. The migration doesn't have to re-point anything. It has to stop the platform guessing placement from a field nobody filled in.
+
+**I've written the script that prints your list.** It reads and reports; it moves nothing. It asks the product's own code for every answer rather than working anything out for itself.
+
+**And it solves the problem of me not being able to see your clients.** The platform already hands out what I need: Setup › Reporting cycle › **Contingency files** gives you a working copy of a client with its whole plan inside it. Hand me that file for El Abd and I can print the real list — real names, real counts, real ids — rather than a stand-in.
+
+It names everything that isn't a plain one-to-one and decides none of it: a capability planning in projects, one with no plan yet, and one carrying more than one pillar row — which the page already hides behind *"holds N plans from before"*. Those get printed in full, because the one thing a migration must never do is drop a row nobody was told about.
+
+Proved on the worked example and on an El Abd-shaped stand-in built from your screenshots, with a hidden second plan added to one of them on purpose — the script caught it and named it.
+
+**Next:** the El Abd contingency file. Then you get the real list, and after you have seen it, the migration.
+
+## §535.7 — El Abd's real rows, and a second move nobody has looked at (2026-10-15)
+Your working copy read cleanly. Nothing was written — the script only reads.
+
+**The five capabilities are every one a plain one-to-one.** All unassigned, all planning in pillars, each with exactly one pillar row, nothing hidden behind "plans from before":
+
+| | name | measures · tactics | owner |
+|---|---|---|---|
+| C001 | End-to-End Quality Mindset | 6 · 4 | Osama Yousef |
+| C002 | ERP Enhancement | 3 · 4 | Ehab Hosny |
+| C003 | Digital Transformation | 3 · 7 | Ehab Hosny |
+| C004 | Talent & Workforce Optimization | 3 · 5 | — |
+| C005 | Operational excellence | 4 · 4 | Mohamed Said |
+
+Afterwards the company holds **10 pillars — your 5 directions and these 5** — shown as the same two tabs you have now.
+
+**Two small things in the records that no screen shows**, and the migration handles both: End-to-End Quality Mindset's underlying row has **no name** on it, so it would arrive nameless — the capability's name gets carried onto it. And all five rows are **unmarked** — none of them actually says "capability" in the data; the tab finds them another way. All five get marked.
+
+### The bigger thing I found, and it is not about capabilities
+Your tenant still holds **5 business units, switched off** — all under Commercial — and each one is **still carrying its key objectives**. Twenty-one of them in total, that no page shows anyone:
+
+Retail Expansion Across Egypt (3) · Maximizing Current Stores (6) · FMCG Growth (4) · Exploring Catering and Events (3) · E-Commerce Growth (5)
+
+And their names are almost exactly your five company directions. That is the old "units off" behaviour: it copied the units' plans up onto the company and hid the units. The spec flagged El Abd as the client needing the most care for precisely this, a week before I saw the data.
+
+**So El Abd is two moves, not one — and the second is the bigger one.** The capabilities are settled. The five folded units coming back as real boxes is a separate job, with its own list and its own questions for you: are those 21 objectives still wanted, and when a unit comes back, how does it relate to the direction that was copied out of it?
+
+**Two smaller notes:** the words are already stored per level — the top calls them *Directions*, the capability layer calls its own *Core Capabilities* — so after the merge each tab keeps its own word and you re-type nothing. And **none of your 22 functions carries a plan**, so the whole function question doesn't arise for this client.
+
+**One thing to confirm:** the file's tenant is named **"Test 2"**, though the data is plainly El Abd's. Tell me that's the right copy before anything is written for real.
+
+## §535.8 — The units get deleted, and here is exactly what that costs (2026-10-15)
+Your answer changes move 2 from "bring them back" to "delete them" — which is the more dangerous of the two, so I measured the whole of it before writing anything. **Nothing has been changed; this only reads.**
+
+**Good news first. A delete breaks nothing.** I walked your entire stored state rather than checking the places I happened to remember. The five units are referenced **25 times, and every one is structure** — the lists that name a unit. Not one is a figure, a report or a person.
+
+Then I asked ten separate questions, each on its own: people attached, history, archives, submitted reports, cycle notes, deck slides, objective weights, access rows, owners, figures sourced from them. **All ten clean.** No owner on any of them, every weight zero.
+
+**What would actually go:** 21 objectives — **none of them with a reported figure** — 20 actions, and 5 foundation clauses.
+
+**And the part that matters: 16 of those 21 objectives already exist on your company plan.** They were copied up when the units were switched off, so deleting the units loses nothing of them.
+
+**Five do not exist anywhere on the company plan.** These are the real cost of the delete:
+
+| on the hidden unit | the objective |
+|---|---|
+| Retail Expansion Accross Egypt | new shops contribute 10% of overall retail sales |
+| Maximizing Current Stores | Customer Satisfaction (NPS) |
+| FMCG Growth | New Category Revenue Contribution |
+| FMCG Growth | FMCG Profit Margin |
+| Exploring Catering and Events | Model profitability % |
+
+**That's the one decision left on this move:** each of those five either gets carried onto the matching direction as a key measure, or is let go on purpose. I matched by wording, so please read the list rather than trust my count — a near-match might not be the same thing.
+
+**Also worth recording:** the spec said El Abd's units would "come back as boxes", and named it the hardest part of the whole migration. Your answer makes that wrong in its premise — they were never a shape to restore. Written down as a reversal rather than quietly dropped.
+
+**So El Abd's step 2 is now two clear moves:** the five capabilities become internal pillars (settled, one-to-one, ids kept), and the five dead units get deleted once you have ruled on those five objectives.
+
+## §535.9 — "Nothing changes for the users" is the requirement, and it reorders the work (2026-10-15)
+**The five objectives go.** Recorded by name so what was let go stays on the record rather than disappearing with the rows.
+
+**Your other sentence is the important one, and I want to be straight about it.** "Nothing will change for the users" is achievable — but it is not free, and if the data moved today **three things would visibly change**:
+
+1. **El Abd's Capabilities tab would disappear.** Those two tabs exist today because a capability is a different *kind of record*, not because of a setting. The setting doesn't exist yet. Merge the records with nothing to draw the split, and the five land inside Directions.
+
+2. **C001–C005 would become D006–D010.** A pillar's code is its position in the list. Merge the two lists and the capabilities take positions 6 to 10 — and the C goes. You told us "capabilities take the C" when that code was built, so losing it is a real change, not a detail.
+
+3. **77 places across 14 files still look for the capability container** rather than asking a pillar whether it's internal. Until each one is changed, the rail, the deck, the reporting board, the gap counts, the Copilot, the export and Set-up all stop seeing those five.
+
+**So the order is forced, and it's the reverse of how I framed it.** The data move is the *small* part. The code that makes the move invisible is the big part.
+
+| | | moves data? |
+|---|---|---|
+| a | joined-or-split as a setting, each section keeping its own word | no |
+| b | a pillar's code comes from its kind, so an internal one keeps its C | no |
+| c | the 77 readers ask the kind instead of the container | no |
+| d | **then** the five capabilities move and the five dead units are deleted | **yes** |
+
+a, b and c are code only and revert cleanly, exactly like step 1. Only d touches your data — and by the time it runs, every page already draws the result the same way it draws it today. Which is exactly what you asked to be true.
+
+**Nothing is written to any client until a, b and c are built and proved.** That is the next block of work, and none of it needs anything further from you.
+
+## §535.10 — Your constraint, in your words (2026-10-15)
+Not confused — I wrote it badly. That list was what *would* break if the data moved before the code. It was the argument for doing the code first, and it read like a proposal.
+
+Written down as a fixed requirement rather than my inference:
+
+- **The Capabilities tab stays exactly as it is** — same tab, same place, same rail, same pane.
+- **The codes stay C001–C005.**
+
+Those are now the standard the migration is held to, not something to check afterwards. The two code steps exist for no other reason than to make them true — and if either fails, the data doesn't move.
+
+**The proof is a comparison, not a judgement:** before and after, every code on El Abd's company plan reads the same string, and the Strategy tab draws the same two sections with the same words.
+
+## §536.1 — Mockup corrected, and the order is settled (2026-10-15)
+You caught a real error: the **Directions** tab was lit while the list below it showed **Capabilities**. A page that couldn't exist. Fixed in both panes.
+
+Fixing it turned up a second one, mine: in the unit example I had drawn *split* as **two sections stacked on one page**, while El Abd's split is **two tabs**. One setting can't mean two different things. Now it's two tabs everywhere — a unit that splits gains a Capabilities tab exactly as the company has one.
+
+**And the order question is answered: directions first.** That was the only thing on the page I was guessing at. Nothing is a guess now.
+
+The concept is signed off and the five points stand. Version 2 published.
+
+## §540 — Step (a) built: one list, or two tabs (2026-10-15)
+The setting from the mockup is in. On the branch, nothing merged, and **no client has been touched**.
+
+**What it is.** One row in Set-up, on the box, next to "Plans in", reading **Directions show as** — in each client's own words. Two answers: **One list**, and **Directions and Capabilities apart**. It is on a unit's own card and on the company's card on the Structure step, and it only appears where that box plans in pillars; there is nothing to join or split otherwise.
+
+**What it does.** Set to apart, the box's one list of pillars is drawn on two tabs — the ones marked *Direction* on the first, the ones marked *Capability* on the second, each tab wearing the client's own word. Nothing is copied, moved or renumbered: the same rows, drawn in two places instead of one, with the codes they already have.
+
+**What it does for El Abd.** Nothing yet, and that is the point. When its five capabilities become five rows of the company's own list, this is the switch that keeps the Capabilities tab exactly where it is. It is set on the day the data moves, not before.
+
+**And nothing changed for anybody today.** Every box in every client is unset, and unset means one list — the way all of them read now. Worth saying out loud because it was nearly not true: six of the ten units in the example already hold a row marked *Capability*, so a version that split on the mark rather than on the switch would have given six units a second tab overnight. It doesn't, and that is now one of the things the checks refuse to let slip.
+
+**Checked.** Two new checks, 35 + 46 agreements. The first holds every box's drawn list to exactly what the previous version drew, and proves the two tabs between them hold every pillar, none twice. The second presses the actual controls: the row appears where it should and nowhere else, reads the client's words when the client renames them, adds the tab only when the box is set apart, and leaves nothing behind when set back. Both were broken on purpose, twelve ways between them, to confirm each goes red — and one of those breaks came back **green** the first time, which is how the "six units would have grown a tab" fault above was found. It is red now. Eleven existing screen checks and the server's own rules all pass unchanged.
+
+**What is left before the data can move.**
+- **(b)** a pillar's code comes from its kind, so a capability keeps C001 rather than becoming D006.
+- **(c)** the remaining pages — Performance and Reporting — read a row's kind instead of reading the old capabilities list. The split only reaches the Strategy tab today, deliberately: on those two pages a capability is still a separate record, and writing them now would mean writing them twice.
+- **(d)** El Abd's own move, after the before-and-after list comes out identical.
+
+## §541 — Step (b) built: a code comes from what the row is (2026-10-15)
+On the branch, nothing merged, and **no client has been touched**.
+
+**What changed.** A row's number now counts within the set that shares its letter. At the company that means directions are numbered among the directions (D001, D002…) and capabilities among the capabilities (C001, C002…), whatever order they sit in. So when El Abd's five capabilities join the company's one list, they stay **C001–C005** instead of becoming D006–D010.
+
+**What did not change: every other code in the platform.** A unit uses one letter prefix for everything it holds — MB01, MB02 — and a supporting function the same, so their numbering runs straight through as it always has. This is the part that needed care rather than cleverness: six of the ten units in the example already hold a row marked *Capability*, so a rule that numbered by the mark instead of by the letter would have turned MB03 into MB01 and RS03 into RS01 overnight, on clients that changed nothing. I wrote that version as a deliberate break to see the damage: seven boxes renumbered. The real rule doesn't, and the check refuses to let it.
+
+**One real fault found and fixed on the way.** When you switch a client's business units off, their pillars fold onto the company plan and each is given a code as it arrives. That code was worked out *before* the row joined the list, so it couldn't see whether the row was a direction or a capability — a folded capability would have taken a direction's code. It is now worked out after. The fault couldn't show until the two kinds were coded apart, so it is fixed in the same change that makes it reachable.
+
+**And the El Abd comparison is already green.** The check builds El Abd's shape exactly as it is stored today, reads its ten codes from the two readers the platform uses now, performs the move, and reads all ten from the one reader. Same ten strings, each still on the row whose name it was on. That was going to be the test on the day the data moves; it passes today, before anything has been touched.
+
+**Checked.** 19 new agreements, four deliberate breaks all confirmed red, plus everything from step (a) re-run: the server's rules 1082/0, the data comparison 140/0, the address check 86/0, the split check 35/0, and the screen checks around pillars and codes. The whole functional sweep runs clean.
+
+**Next: (c)** — the Performance and Reporting pages read a row's kind instead of the old capabilities list. Then (d), El Abd's own move.
+
+## §542 — Step (c) built: the pages read what a row is (2026-10-15)
+On the branch, nothing merged, and **no client has been touched**. This is the big one.
+
+**I changed how I did it, and that's worth telling you.** The plan said "move the 77 places in the code that read the old capabilities list". I started by measuring instead: I loaded your El Abd file, rendered every page a capability appears on, performed the move on a copy in memory, and rendered them all again. That turned 77 places into **six surfaces that actually move**, and told me exactly what each one does wrong. Most of those 77 reads are correct as they are.
+
+**The six, all fixed:** the Capabilities tab's heading; the Performance page's cards; the Reporting page's rail; the Temple's base; the review deck's roll-call; and Setup › Capabilities, which would otherwise have shown the office an empty table whose only button would create the old kind of record again — it now says where they went and lists them.
+
+**The move itself is now part of the platform, not a script.** It refuses rather than guesses: a capability that plans in projects, holds more than one pillar, has objectives of its own, a definition, or a function attached is named with the reason, and the whole move stops. Every row keeps its id, so no figure, no reported number and no past cycle loses its place. Where the capability's owner is on the record rather than on the pillar — which is true of three of your five — the owner comes with it. And it turns on the two-tab setting from step (a) in the same breath, so the tabs don't move.
+
+**A real fault found by measuring, and fixed.** Your El Abd Reporting page has never been able to tell you which direction still owes figures — the "28 to finish" bar and the per-direction counts were missing, because of a lookup that returns nothing for a company (it works for every unit and every capability). Your capabilities *did* show their marks, so the move would have taken five red *Still to enter* flags off the page and left the directions' silence. Rather than accept that, I fixed the lookup. **This adds the fill bar to your Reporting page even before anything moves** — it's listed as a change, not hidden.
+
+**The before-and-after, for El Abd.** I wrote it as three columns, not two, because "the page changed" is useless if you can't tell whether the code or the move changed it: *today* / *the new code, same data* / *the new code, after the move*. On your file:
+
+- Five rows move. **C001 → C001, C002 → C002, C003 → C003, C004 → C004, C005 → C005.** Every code unchanged, every id kept, every owner carried.
+- **Four differences on the pages**, all of them named: a separator dot appears between Owner and Custodian on the Capabilities tab; the Reporting fill bar appears (the fix above) and then counts all ten rows instead of five; the Temple's base reads *6 Key Measures · 4 Tactics* where it read *0 Projects*; and the deck's roll-call reads C001–C005 where it read the two-letter EQ / EE / DT / T& / OE — which is your own rule finally reaching the last surface that disagreed with it.
+- Everything else — the Directions tab, Foundation, SWOT, the Performance sections, the Focus board, the workbook, who can reach what — is word for word identical.
+
+**Checked.** 38 new agreements, eight deliberate breaks all confirmed red. One of my own mistakes was caught by an existing check rather than by me: rewriting the Temple's base I dropped the switch that hides it for a client with capabilities turned off. It's back. Everything else re-run clean: the server's rules 1082/0, the data comparison 140/0, the address check 87/0, steps (a) and (b) 35/0 and 19/0, and the capability screen checks.
+
+**You can run the comparison yourself** on any client's working copy:
+`node scripts/stage3-before-after.js <the file>`
+
+**Next is (d) — your El Abd data.** I'll rehearse it on a copy and bring you the list and the SQL. Nothing runs until you say so.
+
+## §542.2 — Step (d) ready: the SQL is written and I have already run it (2026-10-15)
+**Nothing has been run against El Abd.** What follows is a rehearsal on a throwaway copy. The SQL is waiting for your word.
+
+**I didn't hand-write it.** A script reads your working copy, asks the platform itself what the move would do, and writes the SQL from that answer. So the list you approve, the rehearsal I measured, and the statements that run are the same thing — and if the move ever changes, the SQL changes with it.
+
+**And no number is ever retyped.** The SQL builds each new row *from the row already in the database*, adding only three things: that it is a Capability, its name where the inner row has none, and its owner where the inner row has none. Every measure, target, actual and note travels inside the object that's already there, so there is nothing to mistype.
+
+**I set up a real PostgreSQL, loaded your actual El Abd file into it, and ran the SQL.** Not reasoned about — run. What happened:
+
+- **Ten rows on the company plan afterwards: D001–D005, then C001–C005.** Every row id unchanged, every owner carried, the measure and tactic counts exactly as the list says (6/4, 3/4, 3/7, 3/5, 4/4).
+- **It produces exactly what the platform's own move produces** — I compared the database's contents against the in-memory move, field by field: identical, all ten rows. The SQL isn't a second version of the move that happens to look right; it provably does the same thing.
+- **And the pages built from that database are the pages I showed you.** I fed the database's contents back through the platform and rendered Directions, Capabilities, Performance, Reporting, the Temple, the deck and every code: all identical.
+- **Running it twice is refused** — *"expected 5 capabilities by id, found 0"* — and nothing changes.
+- **The undo works**: back to 5 and 5, exactly as it was.
+
+The test database was deleted afterwards.
+
+**The SQL does this, in one transaction:** checks the client is in the state it was written for (and stops if not); copies both tables it touches, so there is an undo; moves the five rows; turns on the two-tab setting so the tabs don't move; deletes the five old records; then checks its own work row by row and refuses to commit if anything is off. It finishes by printing the ten rows so you can read them.
+
+## §542.3 — The four differences are accepted; you don't need to know the schema name (2026-10-18)
+You said the four differences are fine. On the schema: you asked a fair question and my answer was a poor one — I was asking you to confirm a name I'd read out of a file.
+
+**You shouldn't have to know it.** The SQL file now opens with a short read-only query. Run that first, on its own, and the database tells you: one row per client, with the name you see on screen and how many capability records each one holds. El Abd is the row reading **Test 2, 5 capabilities** — identified by what's in it, not by a name anyone has to remember.
+
+**And if the name is wrong anyway, nothing happens.** The very first thing the transaction checks is that the schema really holds this client. Point it at the wrong one and it stops with *"this schema is not Test 2, which this file was generated for"* and changes nothing. I tested that by pointing the El Abd file at a schema holding Raya Trade.
+
+I re-ran the whole rehearsal on the exact file you now have, not an earlier one: it commits, it produces byte-for-byte what the platform's own move produces, and the pages built from the resulting database match what I showed you.
+
+## §542.4 — The name is fixed to ElAbd, in both places (2026-10-18)
+The name is stored in **two** places, which is why doing it by hand wouldn't have stuck: one inside the client (what every page says) and one on the platform's client list (what the card says). Change one and they disagree.
+
+The SQL now does both, as **step 8**, in a transaction of its own — so you can run just the rename if you want, without the move. It ends by printing both side by side so you can see they match.
+
+Tested: both read **ElAbd** afterwards, and running it again leaves it alone.
+
+## §542.5 — The file failed, and why (2026-10-18)
+**Nothing was changed** — the guard caught it and rolled everything back, which is what it is for.
+
+**The cause was mine.** I wrote the file from the code in this repository and assumed the live database matched it. It doesn't. Your database has **three copies** of the SMP tables:
+
+- **`smp`** — the live one. One set of tables with a tenant column on each row, and `smp.tenants` as the client list.
+- **`elabd`** — a leftover. Holds the name "ElAbd" and nothing else: no capabilities, no directions.
+- **`public`** — the original tables, still holding Raya Trade's old data.
+
+Plus an older client list, `platform.clients`, pointing at the last two.
+
+So my file was right about your data and wrong about every name around it. **I should have asked the database to describe itself before writing a line.** That's three read-only queries and one message; instead it cost three rounds. The generator now takes the layout as an explicit option, so it can't be guessed again.
+
+**Rebuilt and re-run.** I made a local copy of your live layout — with **two** clients in it, El Abd and RHI, so the "only this client" filter is actually tested rather than true by accident — loaded your real El Abd rows, and ran the new file:
+
+- Ten rows afterwards: D001–D005, then C001–C005. Every id and owner intact.
+- **RHI completely untouched.**
+- Byte-for-byte what the platform's own move produces; the pages built from it match what I showed you.
+- Running it twice is refused. Pointing it at another client is refused.
+- The name reads **ElAbd** in both places.
+
+**Two things in your live data you should know about, which I have not touched:**
+
+1. A retired client **"ElAbd Foods"** holding 8 capabilities.
+2. Two of El Abd's directions are owned by **"Tamer Abdelhamid"**, but the person in your register is **"Tamer Abdelhameed"**. Different spelling, so those two won't match a real person.
+
+**Run on El Abd, 18 October 2026 — reported successful.** Awaiting a fresh working copy to compare the pages against the before.
+
+**Stage 3b is complete:** (a) the two-tab setting, (b) codes from the row's kind, (c) the pages reading the kind, (d) El Abd's five capabilities moved and the client renamed to ElAbd.
+
+**Still open, not touched:** the retired "ElAbd Foods" client holding 8 capabilities; the "Tamer Abdelhamid" / "Tamer Abdelhameed" spelling on two directions; and the two leftover copies of client data (`elabd` and `public` schemas, and the old `platform.clients` list) sitting unused in the live database.
+
+
+## §543 — Each person sees the half they have (2026-10-18)
+You were right on both counts, and the cause was one wrong question in my code: I asked whether *the company* had capabilities, not whether *you* did.
+
+| | before | after |
+|---|---|---|
+| **Osama** — owns one capability | Directions tab, and "nothing to report against" | **Capabilities only**, opening straight on C001 |
+| **Amr** — owns two directions | Directions plus an empty Capabilities tab | **Directions only** |
+| **The office** | both tabs, both headings | **unchanged** |
+| **Section titles** | always shown | **dropped when there's only one half** |
+
+Two things worth telling you:
+
+- My own check caught me taking the heading off **joined** clients too — every unit in Raya, which has never split anything. The rule is now "drop it when a split leaves one half", not "drop it when there's one section".
+- Breaking the fix on purpose reproduces your exact words — *"This unit has no Pillars yet, so there is nothing to report against"* — so that sentence can't come back without a check going red.
+
+
+## §545 — Amr's category figures were refused (2026-10-18)
+Amr typed 13 lines into his report. The save came back **"5 figures is not yours"** and put all 13 back — the 8 tactic lines he had got right along with them.
+
+The five were the small category table under his pillar: Bakery, Barista, Western, Oriental, Ice Cream.
+
+**What was actually wrong.** The server keeps a list of every row in the plan so it can ask "is this row yours?" — and the category table was never added to it. The server looked for Bakery, could not find it, and a row it cannot find it refuses. Nothing to do with Amr or with directions.
+
+**Why it had never shown up.** The page let him type, because the page knows the pillar is his. Only the server disagreed. And it only bites people who own *part* of the plan — a direction, a pillar. The office and unit heads are never checked row by row, so for them the table always worked, and that is what every earlier check tested.
+
+| | before | after |
+|---|---|---|
+| **Amr** — owns directions | every category figure refused | **enters them** |
+| **A direction's custodian** | the same refusal | **enters them** |
+| **A pillar owner in a unit** | the same refusal | **enters them** |
+| **On somebody else's direction** | refused | **still refused** |
+| **The target in the same table** | the office's | **still the office's** |
+| **The office, a unit head** | worked | **unchanged** |
+
+One more thing worth saying: a save is still all-or-nothing. One line the server won't take puts the whole lot back — that is on purpose, so the screen and the database never hold different pictures. It is why one bad row cost him thirteen.
+
+Breaking the fix on purpose brings your sentence back word for word, so it cannot return quietly.
 
 ## §539 — Processes: the controlled lifecycle (2026-10-18)
 Built on branch `claude/vigilant-bohr-snqji9`. Not merged to main. The migration is written and tested on a scratch database, not applied anywhere real.

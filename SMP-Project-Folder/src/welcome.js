@@ -95,9 +95,10 @@ var WELCOME = (function(){
   function ownTargets(row, rs){
     var out = [];
     function add(t){
-      if (!t || t === "group" || String(t).indexOf("co:") === 0) return;
-      var real = String(t).indexOf("fn:") === 0
-        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[String(t).slice(3)])
+      var r = boxRef(t);
+      if (!t || t === "group" || r.kind === "mid") return;
+      var real = r.kind === "fn"
+        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[r.key])
         : !!(typeof UNITS !== "undefined" && UNITS[t]);
       if (real && out.indexOf(t) < 0) out.push(t);
     }
@@ -125,7 +126,7 @@ var WELCOME = (function(){
     dismiss();
     setTimeout(function(){
       press('#units [data-u="' + t + '"]');
-      var fn = String(t).indexOf("fn:") === 0;
+      var fn = boxRef(t).kind === "fn";
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
       /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
@@ -586,7 +587,7 @@ var WELCOME = (function(){
       var home = targets[0] || null;
       if (home) {
         var nm = subjectName(home);
-        var isFn = String(home).indexOf("fn:") === 0;
+        var isFn = boxRef(home).kind === "fn";
         pageLink(nm + " — Strategy", isFn ? "" : "Plan · Foundation · SWOT",
           function(){ goPlace(home, "strategy"); });
         pageLink(nm + " — Performance", "", function(){ goPlace(home, "performance"); });

@@ -257,6 +257,10 @@
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
+<script src="KEYSHEET"></script>
+<script src="TABKEYS"></script>
+<script src="ACTIONKEYS"></script>
+<script src="GOTO"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -339,10 +343,12 @@
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §465: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §544.13: the capabilities are a section of this tab, full stop. There is
+     no longer a "wherever the office put them" — a capability is the
+     company's, so the company's plan is where it shows (`capAtTop`). What is
+     left to ask is only whether this client has any and whether this viewer
+     reaches them. */
+  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -357,12 +363,51 @@
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    /* §540: the external half, where the box is shown apart.
+                       `drawHalf` is a no-op on a joined box, which is every
+                       box in every client today — so this line changes the
+                       markup of nothing and is passed unconditionally rather
+                       than behind a branch that would have to ask the same
+                       question twice (§53.5). */
+                    render: function(){ return drawHalf("dir", function(){ return renderUnitPlan(topAsUnit()); }); },
                     /* §520: a part owner sees their own part and nothing
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
-                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                    /* §543: on a box shown apart the tab follows what this
+                       viewer reaches in THIS half — a capability's owner is
+                       offered no Directions tab at all, rather than one over
+                       an empty rail. Joined, it is the question it always
+                       asked. */
+                    when: function(){ return topPlanOn() &&
+                      (boxSplit(topAsUnit()) ? boxHasHalf(topAsUnit(), "dir")
+                                             : (!partOnly() || partMine())); } },
+                  /* ── §540 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
+                     The same renderer over the same list, filtered to the
+                     pillars marked Capability and labelled with the client's
+                     own word for them — which is how El Abd keeps the two
+                     tabs it reads today once its five capabilities stop being
+                     a record type of their own (spec 066, stage 3b).
+
+                     DRAWN ONLY WHILE IT HOLDS SOMETHING (§45.2, §520.2). The
+                     setting alone is not enough: a box set apart with nothing
+                     marked internal would grow a tab standing over an empty
+                     rail, and the empty state under it would be answering a
+                     question nobody asked. Today that is every box, which is
+                     why turning the setting on moves nobody until the data
+                     moves with it.
+
+                     IT SITS ABOVE `caps` AND TAKES ITS PLACE. While both
+                     could be drawn they are different things — this half is
+                     the company's own pillars, `caps` is the separate record
+                     type — and the order puts them where El Abd's eye already
+                     goes. `caps` hides itself once there is nothing left in
+                     it (`capsReachable()`), so the handover needs no flag. */
+                  { k:"plancap", ac:"g_found", label:L("capability", "bu"),
+                    render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
+                    /* §543: and `boxHasHalf` now answers for the viewer, so
+                       a direction owner is offered no Capabilities tab. */
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap"); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -605,8 +650,25 @@
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
-                    when: function(t){ return planOn(t); } },
+                  /* §540: one pillar list, shown as one tab or as two. The
+                     wrapper is a no-op on a joined box — every box today — so
+                     a unit that never touches the setting draws exactly the
+                     tab it drew before. */
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
+                    render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
+                    /* §543: a split unit's external tab follows what the
+                       viewer reaches in it; a joined one keeps its empty
+                       state, which is the door to the first pillar (§61). */
+                    when: function(t){ var b = unitLike(t);
+                      return planOn(t) && (!boxSplit(b) || boxHasHalf(b, "dir")); } },
+                  /* §540: and the internal half, with the client's own word
+                     for a capability over it, while the box is shown apart
+                     AND holds one (§45.2). Raya's units carry both kinds in
+                     one list today and keep doing so; this is the row that
+                     lets one of them be asked to show them apart. */
+                  { k:"plancap", ac:"u_plan", label:L("capability"),
+                    render: function(x){ return drawHalf("cap", function(){ return renderUnitPlan(x); }); },
+                    when: function(t){ return planOn(t) && boxHasHalf(unitLike(t), "cap"); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -1459,16 +1521,31 @@
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
      how many sides there are (§53.5). */
+  /* §544.2 — AND WHICH OF THEM IS ON THE ROW IS CHOSEN. Islam, of the shape
+     screen: *"this should be a choice what are the navigation switch… so it
+     needs to be chosen somehow not derived"*. Four rows can be a side — each
+     bottom kind, and each kind's own layer — and the shape screen ticks them.
+
+     EVERY TICK IS READ AS AN ABSENCE FIRST, and the absence is exactly what
+     this function answered before it existed (navRowUnsaid): the units
+     wherever they plan, the functions beside them, and the functions'
+     divisions in their place where the company plans. So no client's row
+     moves by upgrading, and the only thing that changes it is somebody
+     pressing a tick. */
+  function navPick(row){ return SMPRules.navPicked(GROUP, row); }
   function navSides(){
-    var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
-    if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
+    var out = [], us = myUnits(), fs = myFns();
+    if (us.length && navPick("bu@g")) out = out.concat(companyUnitSides(us, navPick("bu")));
+    if (us.length && navPick("bu")) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    /* §447: with the units off, capabilities are a section of the company
-       page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
-      keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
-    if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
+    /* §544.13 — AND NO CAPABILITIES SIDE AT ALL. Islam, asked where a
+       capability appears: *"inside its owner's plan, with the directions"*.
+       A capability is the company's, so it shows in the company's plan and
+       is reached from there (§520's rail) — never as a third kind of thing
+       on this row. The `cap:<id>` destination stays reachable for the
+       clients that still hold records; what goes is the side. */
+    if (fs.length && navPick("fn@g")) out = out.concat(companyFnSides(fs, navPick("fn")));
+    if (fs.length && navPick("fn")) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1485,7 +1562,31 @@
      linking no function this viewer reaches has nothing to list and no
      segment (&sect;61 from the other side: a segment that lists nothing is a
      control with nothing behind it). */
-  function companyFnSides(fs){
+  /* §544.2: THE SAME, FOR THE UNITS' OWN LAYER. Nobody has this row today —
+     Raya's two divisions have never been sides — so this draws nothing until
+     the tick is pressed; it is the segment builder the tick needs to have
+     something behind it (§61). `companyFnSides`'s own shape exactly: one
+     segment per division that holds a unit this viewer reaches, in the order
+     they are declared, and a last segment under the top level's word for the
+     units in none. */
+  /* `alsoWhole` says the kind's OWN row is ticked as well. Then the boxes in
+     no division already have a side, and the catch-all is not added a second
+     time: two sides would carry the same fold key and the row could not say
+     which of them is open. */
+  function companyUnitSides(us, alsoWhole){
+    var left = us.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = unitsOfCompany(ck).filter(function(k){ return us.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name, keys:mine });
+    });
+    if (alsoWhole) return out;
+    if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
+    if (left.length) out.push({ fold:"units", label:labelWord("topword", "group"), keys:left });
+    return out;
+  }
+  function companyFnSides(fs, alsoWhole){
     var left = fs.slice(), out = [];
     activeCompanyKeys().forEach(function(ck){
       var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
@@ -1494,6 +1595,9 @@
       out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
         keys:mine.map(function(k){ return "fn:" + k; }) });
     });
+    /* §544.2, as above: the kind's own row ticked too means the catch-all
+       already has a side of its own. */
+    if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
     if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
@@ -1531,7 +1635,9 @@
        says what the row beside it lists. */
     if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
-    return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
+    /* §544.13: the capabilities clause went with the capabilities side —
+       three kinds can no longer share this row because there are two. */
+    return myUnits().length > 1 && myFns().length > 1;
   }
 
   /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
@@ -1540,8 +1646,9 @@
      in Setup shows in the navigation the day it is set rather than being
      stored and read by nothing. */
   function navLabelFor(k){
-    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
-    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    var r = boxRef(k);
+    if (r.kind === "cap") return navName(capOfTarget(k));
+    if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
   function unitTabs(){
@@ -2329,8 +2436,9 @@
      arbitrary, and landing on the function is the honest answer there: the
      switch is one press away and both are in the list. */
   function capForBounded(at, reach){
-    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
-    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var ar = boxRef(at);
+    if (ar.kind !== "fn" || !boundedHere(at)) return null;
+    var fk = ar.key, own = fnOwnHolder(fk);
     var mineOf = function(c){
       return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
                         function(p){ return p.owner; });
@@ -2347,16 +2455,16 @@
     return dests.length ? dests[0].k : null;
   }
 
-  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isFn(k){ return typeof k === "string" && boxRef(k).kind === "fn" && !!fnOf(k); }
   /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
      pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
-    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+    return typeof k === "string" && boxRef(k).kind === "cap" && !!capOfTarget(k);
   }
   function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+    return typeof k === "string" && boxRef(k).kind === "mid" && !!COMPANIES[boxRef(k).key];
   }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -3722,6 +3830,11 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
+    /* §554: and the three action keys say themselves on the buttons they
+       belong to, marked here for the same reason the boxes above are —
+       these controls are drawn by several renderers and a mark set at each
+       is several places to forget. */
+    if (typeof ACTIONKEYS !== "undefined") ACTIONKEYS.mark();
     /* AND THE KEYS, over that same list and in the same one place (§528).
        Not inside wire(): these boxes are built by eight renderers and a
        keydown wired at each of them is eight places to forget, which is the
@@ -5274,12 +5387,9 @@
     }
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", addFnFromField);
-    document.querySelectorAll("[data-capfn]").forEach(function(el){
-      el.addEventListener("change", function(){
-        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
-        paint();
-      });
-    });
+    /* §544.13: the Held by picker is gone from Setup › Capabilities, so
+       nothing renders that column's select any more and the handler which
+       wrote a capability's function through it goes with it (§61). */
     /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
@@ -7511,7 +7621,7 @@
              definition of what may be held where; this only reads which of the
              two fields it points at. */
           var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
+            return boxRef(w.v).kind === "mid"; });
           var fld = atCo ? "Company" : "Unit";
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
@@ -9052,6 +9162,20 @@
           switchPlanWay("unit", this.dataset.uformat, this.value, this);
         });
       });
+      /* §540: one list or apart. No warning and no switch-and-keep, because
+         nothing is hidden either way — the same rows are drawn, in one tab or
+         in two (unlike `data-uformat`, where the OTHER way's rows go quiet).
+         STORED AS AN ABSENCE: "one list" deletes the key rather than writing
+         `false`, so a box that is set apart and set back is byte for byte the
+         box it was before anybody pressed anything (§50.6). */
+      root.querySelectorAll("select[data-usplit]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var u = UNITS[this.dataset.usplit];
+          if (this.value === "split") u[SMPRules.PILLAR_SPLIT] = true;
+          else delete u[SMPRules.PILLAR_SPLIT];
+          paint();
+        });
+      });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){
         inp.addEventListener("change", function(){
           UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
@@ -10023,10 +10147,10 @@
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -10065,9 +10189,9 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
@@ -10141,15 +10265,9 @@
         promoOpen(fk);
       });
     });
-    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = b.dataset.fncapadd;
-        if (!mayAuthor("k_found", "fn:" + fk)) return;
-        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
-        addCapability(fk);
-        fieldSaved(); paint();
-      });
-    });
+    /* §544.13: the "add a capability under this function" button is gone —
+       a capability is the company's, and nothing renders `[data-fncapadd]`
+       any more, so the handler that waited for it goes too (§61). */
     /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
        §318 put it here, inside a client's Setup. Islam moved it out:
        "the setup should happen on the external creatoin not inside ..
@@ -11758,11 +11876,26 @@
        a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+    /* §544.13 — THE FUNCTION IS A DESTINATION ONLY WHERE THERE IS ONE. A
+       capability is the company's, so a new one has no holding function and
+       this list used to offer "the function itself" anyway: `fn:null`, with
+       the words "the function", and pressing it refused silently inside
+       `removeCapability` — a button that does nothing, which is the one
+       thing a control must never be (§61). Offered where `c.fn` resolves,
+       which is the records that still carry one, and left out where it does
+       not.
+
+       Islam, asked where a company capability's projects should go when
+       there is nowhere to move them: *"deleting is fine"*. So there is
+       nothing to build behind this — only the honest sentence about why
+       Keep them is not available, which `whyNot` now gives. */
+    var dests = (f ? [{ id: "fn:" + c.fn, label: fname + " itself", own: true }] : [])
       .concat(sibs.map(function(x){
         return { id: x.id, label: x.name || x.id, own: false }; }));
-    var keepable = np > 0;
-    var dest = dests.length === 1
+    var toFnOnly = dests.length === 1 && dests[0].own;
+    var keepable = np > 0 && dests.length > 0;
+    var dest = !dests.length ? ''
+      : dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
@@ -11775,7 +11908,7 @@
        which is what this dialog has always said. */
     var fnHasKo = !!((f && f.keyObjectives) || []).length;
     var koNote = !nko ? ''
-      : (dests.length === 1
+      : (toFnOnly
           ? (fnHasKo
               ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
@@ -11784,7 +11917,17 @@
           : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
             '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
-    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
+    /* §544.13: TWO REASONS NOW, AND THE SECOND ONE CAN HAPPEN. "It holds no
+       projects" was the only way Keep them could be unavailable while every
+       capability had a function to fall back on. A company capability with
+       projects and no sibling has nowhere to put them, and saying it holds
+       none would be a lie on the screen about the work it is about to take
+       (§96.2). Removing it removes them, which the row beside this says in
+       full and the archive line backs. */
+    var whyNot = !np
+      ? 'It holds no ' + L("project") + ', so there is nothing to move.'
+      : 'There is nowhere to move ' + (np === 1 ? 'it' : 'them') + ' to \u2014 this is the only ' +
+        L1("capability") + '. Removing it removes ' + (np === 1 ? 'the ' + L1("project") : 'the ' + L("project")) + ' too.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +
@@ -12099,7 +12242,7 @@
     if (!it) return;
     var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
-    var scoresOf = String(ukey).indexOf("fn:") === 0
+    var scoresOf = boxRef(ukey).kind === "fn"
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),
@@ -12369,8 +12512,24 @@
      the signature says when nothing has. */
   var sel = document.getElementById("asWho");
   var viewerSig = null;
+  /* ── AND NOT EVERY SEAT MAY LOOK THROUGH EVERY PERSON (§554) ─────
+     The SMO team holds this control now, and the one row it may not wear is
+     the Super user's — the only person on a client's register who holds more
+     than they do. Asked of sync.js rather than tested here, because the SAVE
+     refuses the same row (`lib/rules.js actingFor`) and a list that offered
+     it would be a control that un-happens when pressed (§61, §42).
+
+     THE SEAT IS IN THE SIGNATURE for the same reason the keys are: granting
+     somebody the Super user seat changes who may be looked through without
+     changing who is on the register, and a list keyed on names alone would
+     go on offering the row until the next person joined. */
+  function viewerPool(){
+    if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return PEOPLE;
+    return PEOPLE.filter(function(p){ return SYNC.maySimulatePerson(p); });
+  }
   function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    var pool = viewerPool();
+    var sig = pool.map(function(p){ return p.key + ":" + (p.role || ""); }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
       /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -12390,7 +12549,7 @@
          The job title goes from the option and stays on the `title`: it is
          the thing you might want and never the thing you scan by. */
       var dn = displayNames();
-      sel.innerHTML = PEOPLE.map(function(p){
+      sel.innerHTML = pool.map(function(p){
         var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
@@ -12537,6 +12696,16 @@
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
+  /* §539: the key and the "?" beside Light and Dark. Wired here beside the
+     theme because both are chrome that exists before any page is drawn. */
+  KEYSHEET.wire();
+  /* §552: the arrows every row of tabs already promises. One handler for
+     all eight rows, delegated, so a row drawn tomorrow answers them too. */
+  TABKEYS.wire();
+  /* §554: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  ACTIONKEYS.wire();
+  /* §547: Alt+G, the list of places. */
+  GOTO.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
      It no longer has anything to do with the first paint — the skeleton wears
      none of these tokens, deliberately, and where there is a server the only

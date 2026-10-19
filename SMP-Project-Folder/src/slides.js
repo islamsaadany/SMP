@@ -25,9 +25,12 @@
    not put a picture in front of the board.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* The stage is 1600x900, so a picture longer than 1600px on its long edge is
-   detail nobody in the room can see, carried in every save for ever. */
-var PIC_MAX_EDGE   = 1600;
+/* The stage is AUTHORED at 1600x900 but SHOWN at the screen's size, and a
+   projector or a 4K panel draws it half as large again or more. Cut to 1600,
+   a full-slide picture was stretched on every big screen and its text went
+   soft — Islam: *"the uploaded pictures quality gets very low."* 2400 is
+   sharp at that size and still bounded, because it rides in every save. */
+var PIC_MAX_EDGE   = 2400;
 var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
 var PIC_PER_SLIDE  = 4;
 
@@ -313,7 +316,7 @@ function picIntake(file){
       reject(new Error("that is not a picture")); return;
     }
     imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
-      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var jpg = cv.toDataURL("image/jpeg", 0.92);
       var png = cv.toDataURL("image/png");
       resolve(png.length < jpg.length ? png : jpg);
     }, reject);
@@ -649,6 +652,17 @@ function slidesAssemble(){
    together: "RS03 Retail Operations ExcellenceKey measures". The parts are
    read separately and joined with a separator, which is what the slide itself
    shows visually. */
+/* ── THE SHORT NAME, FOR THE BAR UNDER THE STAGE (§556.4) ─────────────
+   Islam: *"the title of the slides as well is different"*. His page names
+   the slide you are on in two or three words — "Cover" — and ours was
+   printing the whole breadcrumb: "Maximizing Current Stores · D001 ·
+   Categories", every word of which is already on the slide in front of
+   you. The last part is what tells one slide from its neighbours. */
+function slidesShortLabel(el){
+  var full = slidesLabel(el), bits = full.split(" \u00b7 ");
+  var last = bits[bits.length - 1];
+  return (last && last.length > 1) ? last : full;
+}
 function slidesLabel(el){
   var h = el.querySelector("h1, h2");
   if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
@@ -936,7 +950,7 @@ function slidesFootPaint(all){
   var ct = document.getElementById("slct");
   if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
   var nm = document.getElementById("slnm");
-  if (nm) nm.textContent = all[at] ? slidesLabel(all[at]) +
+  if (nm) nm.textContent = all[at] ? slidesShortLabel(all[at]) +
     (all[at].dataset.off ? " \u00b7 hidden" : "") : "";
   var pr = document.getElementById("slprog");
   if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";

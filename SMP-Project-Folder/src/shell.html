@@ -194,11 +194,14 @@
     <!-- §556.2: and a grid of every slide beside them, for a flow too long
          for a strip — Islam's own page carries one, and forty-nine slides
          is past the point where scrolling a rail finds anything. -->
+    <!-- §556.4: the three buttons are Islam's own, icon for icon — the
+         sidebar, the four squares and the four corners — at his size and
+         his weight, with Present the one filled button. -->
     <span class="sl-acts">
-      <button data-slrail class="sl-b on" title="Show the slides down the side">Slides</button>
-      <button data-slgrid class="sl-b" title="All slides (G)">Grid</button>
-      <button data-slplay class="sl-b go" title="Present (it comes back here)">Present</button>
-      <button data-slexit class="sl-b" title="Done (Esc)">Done</button>
+      <button data-slrail class="sl-b on" title="Show or hide the slide list"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><path d="M14 6h7M14 12h7M14 18h7"/></svg><span class="lbl">Slides</span></button>
+      <button data-slgrid class="sl-b" title="Slide grid (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Grid</span></button>
+      <button data-slplay class="sl-b go" title="Present (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="lbl">Present</span></button>
+      <button data-slexit class="sl-b quiet" title="Done (Esc)">Done</button>
     </span>
   </div>
   <div class="slidebody">
@@ -206,12 +209,12 @@
     <div class="slidecol">
       <div class="slprog"><i id="slprog"></i></div>
       <div class="slidepane" id="slidepane"></div>
-      <button class="sledge l" data-slstep="-1" aria-label="Previous slide">&#8249;</button>
-      <button class="sledge r" data-slstep="1" aria-label="Next slide">&#8250;</button>
+      <button class="sledge l" data-slstep="-1" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="sledge r" data-slstep="1" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       <div class="slfoot">
-        <button class="slnav" data-slstep="-1" aria-label="Previous slide">&#8249;</button>
+        <button class="slnav" data-slstep="-1" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
         <span class="slct" id="slct"></span>
-        <button class="slnav" data-slstep="1" aria-label="Next slide">&#8250;</button>
+        <button class="slnav" data-slstep="1" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
         <span class="slnm" id="slnm"></span>
         <span class="slkeys" id="slkeys"></span>
       </div>

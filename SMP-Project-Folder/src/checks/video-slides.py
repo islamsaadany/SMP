@@ -187,7 +187,10 @@ with sync_playwright() as pw:
     # because two places write that word and only one of them is the rail's
     # first build (§113.8, §53.5).
     def mineword():
-        el = pg.query_selector("#slideroot .slrow.on .sl-lab em")
+        # §556.3 moved the word out of `.sl-lab`, which is gone: the
+        # thumbnail is its own label now and the word stands on its own.
+        # The claim is unchanged — the rail still has to say which it is.
+        el = pg.query_selector("#slideroot .slrow.on .sl-mine")
         return el.inner_text().strip().lower() if el else "(no word)"
     check("the rail says a video is a video", mineword() == "your video", mineword())
 

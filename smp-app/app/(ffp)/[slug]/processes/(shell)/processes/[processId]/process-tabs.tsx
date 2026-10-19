@@ -24,7 +24,8 @@ export function ProcessTabs({
 }: {
   workspaceId: string;
   processId: string;
-  active: ProcessTabKey;
+  /** The tab being shown, or null on a page that is not one of them (the Process Map): none is marked. */
+  active: ProcessTabKey | null;
 }) {
   return (
     <nav className="mb-5 flex gap-1 overflow-x-auto border-b border-slate-200" aria-label="Process sections">

@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import type { Revision } from "@/ffp/lib/domain/sop";
 import { ProcessTabs, parseTab } from "./process-tabs";
+import { ProcessStepper } from "./process-stepper";
+import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { auth } from "@/ffp/lib/auth/config";
 import { daysToReview, isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { acknowledgementProgress, expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
@@ -55,7 +57,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [controls, ncs, stepList, registerPeople, versions, session] = await Promise.all([
+  const [controls, ncs, stepList, registerPeople, versions, session, stepperCounts] = await Promise.all([
     prisma.processControl.findMany({
       where: { processId },
       include: { step: true },
@@ -70,6 +72,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     }),
     prisma.processVersion.findMany({ where: { processId }, orderBy: { number: "desc" } }),
     auth(),
+    getProcessStepperCounts(processId),
   ]);
   const people = registerPeople.map((x) => {
     const roles = x.personRoles.filter((r) => !r.role.archivedAt).map((r) => r.role.name);
@@ -138,6 +141,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
           </Link>
         </p>
 
+        <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
         <ProcessTabs workspaceId={workspaceId} processId={processId} active={tab} />
 
         {tab === "overview" && (

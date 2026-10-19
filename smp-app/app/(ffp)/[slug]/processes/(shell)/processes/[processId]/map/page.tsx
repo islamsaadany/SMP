@@ -9,6 +9,7 @@ import { AddStepForm, BulkAddStepsForm } from "./step-form";
 import { MapView } from "./map-view";
 import { GenerateTemplateForm } from "../../template-form";
 import { ProcessStepper } from "../process-stepper";
+import { ProcessTabs } from "../process-tabs";
 import { ProcessDocumentation } from "./process-documentation";
 import { SopDocumentControl } from "./sop-document-control";
 import type { Revision } from "@/ffp/lib/domain/sop";
@@ -215,6 +216,8 @@ export default async function ProcessMapPage(
       </p>
 
       <ProcessStepper workspaceId={workspaceId} processId={processId} {...stepperCounts} />
+      {/* The way into the rest of this process (Lifecycle, Risks & controls, Quality, People...) from the map. */}
+      <ProcessTabs workspaceId={workspaceId} processId={processId} active={null} />
 
       <ProcessDocumentation
         workspaceId={workspaceId}

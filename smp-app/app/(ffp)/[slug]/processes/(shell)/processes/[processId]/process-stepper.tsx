@@ -4,7 +4,8 @@ import { computeProcessStepper, type StepperKey, type StepperStatus } from "@/ff
 function hrefFor(key: StepperKey, workspaceId: string, processId: string): string {
   switch (key) {
     case "process":
-      return `/${workspaceId}/processes/processes`;
+      // This process's own page (Overview, Lifecycle, Risks & controls...), not the list of all processes.
+      return `/${workspaceId}/processes/processes/${processId}`;
     case "map":
       return `/${workspaceId}/processes/processes/${processId}/map`;
     case "raci":

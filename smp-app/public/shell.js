@@ -49152,21 +49152,24 @@ function deckSlides(u){
         ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
       g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
       g.cards + '</div></section>');
-    /* ── EACH GROUP, THEN HOW IT DID (§553.8) ─────────────────────────
-       Islam, of El Abd's review: *"foundation, swot, directions grouped
-       and then each direction performance and then capabilities grouped
-       and then each capability performance and then finally the overall
-       performance"*.
+    /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
+       Islam, having been shown Raya's Mobile beside El Abd's review:
+       *"yes I want elabd as a unit"*.
 
-       THIS IS NOT §254.4 REVERSED. There he was looking at a UNIT's deck,
-       where every pillar's own measures and tactics sit between the
-       roll-call and the scoring — *"move the pillars performance till the
-       end before the where we stand slide"* keeps the scoring beside the
-       reading it belongs to, three sections later. The company's review
-       has no detail slides at all (§481): the roll-call and the scoring
-       are adjacent either way, and reading them as one group is the whole
-       point of showing the two kinds apart. Units are untouched. */
-    if (capsApart) S.push(groupScoreSlide(g));
+       THIS IS THE WHOLE DIFFERENCE, and it took three readings to see it.
+       A unit's deck draws every pillar's own slides — twelve of Mobile's
+       twenty-eight ARE its four pillars, three slides each. El Abd's
+       review drew none of them: its directions and capabilities were
+       named in a roll-call, scored in a table, and never shown. "Each
+       direction performance" was never the score table; it is the
+       direction's own measures and tactics, exactly as a pillar's are.
+
+       THE SLIDES ARE NOT NEW. `pillarSlidesOf` is the same builder each
+       owner's own deck already calls (§53.5) — the company's review had
+       simply never called it. It is called INSIDE the group, so a group's
+       pillars follow their own roll-call: the directions after Directions,
+       the capabilities after Capabilities. */
+    g.ix.forEach(function(x){ S = S.concat(pillarSlidesOf(u, x.p, x.i)); });
   });
 
   /* The score table's rows, built here and pushed at the END (§254.4).
@@ -49200,11 +49203,14 @@ function deckSlides(u){
       '<tbody>' + g.ix.map(function(x, n){ return pillarRow(x.p, x.i, n + 1); }).join("") +
       '</tbody></table></section>';
   }
-  /* Said at the end for every deck that HAS detail slides in between
-     (§254.4); said beside its own group where there are none (§553.8). */
-  var pillarScoreSlides = capsApart ? [] : groups.map(groupScoreSlide).filter(Boolean);
-
-  (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
+  /* SAID AT THE END, FOR EVERY DECK (§254.4). §553.8 moved the company's
+     two tables up beside their roll-calls, for the one reason that the
+     review had no detail slides between them — *"move the pillars
+     performance till the end before the where we stand slide"* exists to
+     keep the scoring beside the reading it serves, and with nothing in
+     between there was nothing to keep it away from. §553.9 put the detail
+     slides back, so that reason is gone and so is the exception. */
+  var pillarScoreSlides = groups.map(groupScoreSlide).filter(Boolean);
 
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
@@ -49268,7 +49274,8 @@ function deckSlides(u){
     /* It announces what is BEHIND it, and §553.8 moved the two score
        tables in front of it — so where they have already been read, this
        says the one thing left (§253, §61). */
-    (capsApart ? "Where " : "Where the " + L("pillar","bu") + " stand, where ") +
+    "Where the " + L("pillar","bu") +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
       (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
       " stands, and what the cycle is remembered for.",
     null));

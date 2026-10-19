@@ -67136,6 +67136,49 @@ Analysis where there is one, Directions, Directions — where we stand,
 Capabilities, Capabilities — where we stand, Overall performance, Where
 El Abd stands, Thank you.
 
+## §553.9 — The company shows each direction and capability, as a unit shows each pillar (2026-10-19)
+
+Islam, after three readings in which I kept rearranging the wrong thing:
+*"you are still confused … can you review how Business units in raya
+present and let's reflect on how can we make it on elabd presentation"*,
+and then, shown the two side by side: *"yes I want elabd as a unit"*.
+
+**WHAT READING THEM SIDE BY SIDE SHOWED.** Raya's Mobile is 28 slides and
+**twelve of them are its four pillars** — a title page, Key measures and
+Tactics for each, inside the unit's own deck. El Abd's review drew **none**:
+its five directions and five capabilities were named in a roll-call, scored
+in a table, and never shown. Their measures and tactics existed only in each
+owner's separate deck — **32 slides the company's own review did not draw.**
+
+So *"each direction performance"* was never the score table. It is the
+direction's own slides, exactly as a pillar's are in a unit's deck. §553.6
+and §553.8 moved the furniture around a room with no furniture in it.
+
+**THE SLIDES ARE NOT NEW.** `pillarSlidesOf` is the same builder each owner's
+own deck already calls (§53.5); the company's review had simply never called
+it — `(pOn && !short ? u.items : [])`. It is called INSIDE the group now, so
+a group's pillars follow their own roll-call: the directions after
+Directions, the capabilities after Capabilities.
+
+**AND §553.8'S REORDER IS WITHDRAWN.** It moved the two score tables up
+beside their roll-calls for one reason: the review had no detail slides
+between them, so §254.4's *"move the pillars performance till the end before
+the where we stand slide"* had nothing to keep them away from. §553.9 put the
+detail slides back, so the reason is gone and so is the exception — the
+tables are said at the end, for every deck, as they always were. An exception
+that survives the thing that justified it is how a product grows two rules
+for one question (§53.5).
+
+**MEASURED, NOT REASONED:** El Abd, 10 slides become 42, and **one deck in
+the client moves — the company's.** Wander and the demo: not one deck moves.
+
+**WHAT ISLAM TOOK WITH IT.** Shown that the Master presentation runs each
+direction's own deck and then the company's last — which is why §481 made the
+review short — he chose to leave the flow alone and accept that it now shows
+each direction twice. The company's own review is the deck that mattered this
+week. The opening stays El Abd's compact pair (one Foundation, one Analysis)
+rather than a unit's eight slides, which was not asked for.
+
 ## §554 — Viewing as belongs to the SMO team too, up to their own seat (2026-10-19)
 Islam: *"I want to enable the smo team to have the drop down of view as for the other users on the platform."*
 

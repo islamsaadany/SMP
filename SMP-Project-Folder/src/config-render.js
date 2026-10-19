@@ -2904,7 +2904,22 @@ function renderPeople(){
     if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
-    if (personActive(p)) {
+    /* ── AND THIS ENTRY IS A SIMULATION, SO IT OBEYS THE SIMULATION'S RULE
+       (§554) ───────────────────────────────────────────────────────────
+       It was gated on nothing but the row being active, which was true while
+       the whole page was the Super user's. Setup is the office's since
+       §516.2, so an SMO team member already reached this menu and already
+       got the entry — and pressing it CHANGED WHAT WAS DRAWN while their
+       saves went on being judged as themselves, because `actingAs()` would
+       not stamp a view the chrome had not drawn a switcher for. That is
+       §185's fault, open on the one path that never asked.
+
+       Asked of sync.js, the same answer the top bar's list and the server's
+       refusal use (§42): the office may look through the register, and the
+       SMO team through all of it but the Super user. Absent rather than
+       disabled on a row they may not wear — a disabled control invites a
+       press and has nowhere to put "because of who THEY are". */
+    if (personActive(p) && maySimulatePerson(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
     /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).

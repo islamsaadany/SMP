@@ -54,7 +54,7 @@
     "check:handoff:red": "node --experimental-strip-types checks/process-handoff.mjs --red",
     "check:sop:red": "node --experimental-strip-types checks/process-sop.mjs --red",
     "check:viewas": "node --experimental-strip-types checks/view-as.mjs",
-    "check:viewas:red": "for b in viewas-any-seat viewas-unknown-ok viewas-keeps-seat; do SMP_BREAK=$b node --experimental-strip-types checks/view-as.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:viewas:red": "for b in viewas-any-seat viewas-unknown-ok viewas-keeps-seat viewas-team-takes-super; do SMP_BREAK=$b node --experimental-strip-types checks/view-as.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:insights": "node --experimental-strip-types checks/insights.mjs",
     "check:insights:red": "for b in all-categories client-sees-drafts leak-file-path version-always everyone-sees-everything; do SMP_BREAK=$b node --experimental-strip-types checks/insights.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:insights:tab": "node --experimental-strip-types checks/insights-tab.mjs",

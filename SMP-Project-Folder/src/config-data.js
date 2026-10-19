@@ -6818,6 +6818,22 @@ function mayIssuePasswordTo(target){
   return SMPRules.mayIssuePasswordTo(world(), viewer(),
     typeof target === "string" ? personBy(target) : target);
 }
+/* ── MAY THIS SESSION LOOK THROUGH THIS ROW (§554) ─────────────────────
+   NOT asked of `viewer()` like everything else on this line, and the
+   difference is the whole point: every rule above answers about the person
+   being LOOKED AT, and this one answers about the person SIGNED IN. Taking
+   `viewer()` here would let a simulation widen itself — look through the
+   Super user once and the control that let you is suddenly offered on every
+   row (§185's rule: a simulation may only ever narrow).
+
+   sync.js holds it, because the save it must agree with is stamped there
+   (§42). No session — the offline copy, the file:// demo — lists everybody,
+   exactly as it always has. */
+function maySimulatePerson(target){
+  var p = typeof target === "string" ? personBy(target) : target;
+  if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return true;
+  return SYNC.maySimulatePerson(p);
+}
 /* Who a bulk password action would actually reach. The SCREEN counts them so
    it can say a true number; the SERVER picks the set (§35), so a stale screen
    can only ever issue to fewer people than it thinks. */

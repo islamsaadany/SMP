@@ -43,5 +43,13 @@ for (const root of ROOTS) {
 }
 check("scanned the client-facing files", scanned >= 15, `only ${scanned}`);
 
+// The one place AI wording can become step text: "Replace step". The person's own text is
+// what is written; the finding's title is only a fallback for a caller that sends none.
+const action = fs.readFileSync(path.join(APP, "ffp/lib/actions/ai-review.ts"), "utf8");
+check("Replace step writes the person's text, not the AI's title", /label: parsed\.data\.label \?\? finding\.title/.test(action));
+check("the replace text is limited and trimmed on the server", /label: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(200\)\.optional\(\)/.test(action));
+const panel = fs.readFileSync(path.join(APP, `${PROC}/(shell)/processes/[processId]/review/review-panel.tsx`), "utf8");
+check("the screen never replaces a step without the person's text", !/onIntegrate\(selectedStepId, "REPLACED"\)/.test(panel) && /onIntegrate\(selectedStepId, "REPLACED", replaceText\.trim\(\)\)/.test(panel));
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

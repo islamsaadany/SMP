@@ -334,20 +334,42 @@ with sync_playwright() as pw:
       const tbs=[...document.querySelectorAll('#panel table')]
         .filter(t=>t.innerText.indexOf('Bakery')>-1);
       if(!tbs.length) return { tables:0 };
-      const t=tbs[0];
+      const t=tbs[0], r0=[...t.querySelectorAll('tbody tr')][0];
+      const cells=[...r0.children];
+      /* §557: each box's own cell, and the cell BEFORE it — the target
+         column, by position, never by searching the row for the figure. */
+      const pairs=cells.map((td,i)=>td.querySelector('input[data-bdcol]')
+          ? { tgt: cells[i-1].innerText.trim(),
+              tgtBox: !!cells[i-1].querySelector('input'),
+              unitIn: !!td.querySelector('.entry > .unitsuf'),
+              unitOut: [...td.children].some(e=>e.classList.contains('unitsuf')),
+              stacked: td.innerText.indexOf('/') > -1 } : null).filter(Boolean);
       return { tables: tbs.length,
         head: [...t.querySelectorAll('th')].map(x=>x.innerText.trim()),
         boxes: t.querySelectorAll('input[data-bdcol]').length,
         notes: t.querySelectorAll('[data-note]').length,
         rows: t.querySelectorAll('tbody tr').length,
-        behind: [...t.querySelectorAll('tbody tr')][0].innerText.indexOf('/ 7%') > -1,
+        width: cells.length, pairs: pairs,
         wantnote: t.querySelectorAll('tr.wantnote').length }; }""")
     ok("the Reporting page draws the breakdown", rep.get("tables") == 1, rep)
     ok("...with a box per asked cell (three columns, two rows)",
        rep.get("boxes") == 6, rep)
     ok("...ONE note per row, not one per figure", rep.get("notes") == rep.get("rows"), rep)
-    ok("...the target behind each box, so nobody has to remember it",
-       rep.get("behind") is True, rep)
+    # §557: TARGET AND REPORTED, two columns per breakdown column, the way the
+    # Key Measures table beside it reads. Islam: *"needs to appear in the form
+    # of target and report not 1 column"*. The head is asserted WHOLE, so a
+    # build that drops either half of any pair, or reorders them, is red.
+    hd = [h.upper().replace(" ", "") for h in (rep.get("head") or [])]
+    ok("...the head reads each column's own name, then Reported (§557)",
+       hd[2:9] == ["GROWTH≥", "REPORTED", "CM≥", "REPORTED", "MIX", "REPORTED", "NOTE"],
+       rep.get("head"))
+    ok("...and every row is as wide as the head", rep.get("width") == len(hd), rep)
+    pr = rep.get("pairs") or []
+    ok("...each box has its target in the column before it, as a figure (§557)",
+       [p["tgt"] for p in pr] == ["7%", "69%", "13%"] and not any(p["tgtBox"] for p in pr), pr)
+    ok("...and the target is no longer stacked under the box", not any(p["stacked"] for p in pr), pr)
+    ok("...with the unit inside the box, not fallen out under it (§557)",
+       len(pr) == 3 and all(p["unitIn"] and not p["unitOut"] for p in pr), pr)
     ok("...and the row whose growth is off track is rung for a note",
        rep.get("wantnote") == 1, rep)
     typed = pg.evaluate("""()=>{ const p=UNITS['mobile'].items[1];

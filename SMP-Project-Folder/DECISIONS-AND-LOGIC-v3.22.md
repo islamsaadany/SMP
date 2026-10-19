@@ -67566,3 +67566,17 @@ Islam, of El Abd's company Reporting page as the SMO: *"shall we merge the direc
 3. **Existing processes**: those that already name an approver start as Published (with a baseline version 1); the rest start as Draft.
 4. **Review interval**: 12 months from publishing by default, changeable per process.
 5. **Approver**: chosen from the People register, must have an email and a role there; the approval records name and role as they stood. The approver cannot be the person who sends it for review.
+
+## §557 — A breakdown reports as Target and Reported, two columns per column (2026-10-19)
+
+Islam, of El Abd's D001 *Maximizing Current Stores* on Reporting: *"the reporting in elabd target mix needs to appear in the form of target and report not 1 column"*. Mockup `design-mockups/elabd-breakdown-columns/2026-10-19_target-and-reported.html`, then *"go ahead"*.
+
+**WHAT IT WAS.** §343 drew each breakdown column as ONE cell on Reporting: the box, with `/ 13%` in `.subhd` stacked under it. The Key Measures table on the same pane has always read *YTD Target* beside *Reported*, so the one pane asked for figures two different ways.
+
+**WHAT IT IS.** Every breakdown column becomes a PAIR: the column's own name and direction (*Target Mix% ≥*) heading its target as a read-only figure (`td.num`, `tgtShown`), then *Reported* heading the box. One pair per column, in the plan's order; the note stays one per row at the end. An unasked cell (no target) is a dash in both halves. The target is the plan's figure, unprorated, exactly as before — `bdCellScore` passes no compile, and §344's *YTD Target* treatment was never this table's.
+
+**AND THE UNIT GOES BACK INSIDE THE BOX.** `bdEntry` closed `.entry` before writing `.unitsuf`, so the unit — a flex block on its own — fell out under the box as a grey strip the width of the cell: the `%` bar under every category on Islam's screenshot. `repEntry` has always written it inside; this one now does the same. Found while drawing the mockup and shown on it, so it was signed off with the rest rather than riding along unsaid.
+
+**WHERE.** Reporting's breakdown table only (`reportPillarPane`), which is the one builder for every unit, function, capability and company that has a breakdown. Strategy, Performance (`bdReadTable`'s `figure / target` pair), the deck and the workbooks are untouched. Nothing stored moves, nothing is scored differently, no tally or permission changes, and no save is judged differently, so nobody is signed out.
+
+**HEADER CHOSEN, SAID.** The target column is headed by the column's own name rather than a fixed *Target*: with one column, a fixed word would lose the only thing saying what the figures are, and El Abd's column is already called *Target Mix%*. With several columns *Reported* repeats, once per pair; the platform has no two-row header to group them under, and rule A13 says follow what the platform already does rather than invent one here.

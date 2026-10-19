@@ -187,15 +187,22 @@
          they see the manage section part and then present from there and if
          they exit the presentation mood thye get back to the manage ppt."*
          The pair sits in one group so the two do not drift apart (§225). -->
+    <!-- §556.2: and a grid of every slide beside them, for a flow too long
+         for a strip — Islam's own page carries one, and forty-nine slides
+         is past the point where scrolling a rail finds anything. -->
     <span class="sl-acts">
-      <button data-slplay class="sl-play" title="Play the deck (it comes back here)">&#9654;&ensp;Play</button>
+      <button data-slgrid class="txt" title="All slides (G)">All slides</button>
+      <button data-slplay class="sl-play" title="Present (it comes back here)">&#9654;&ensp;Present</button>
       <button data-slexit class="txt" title="Done (Esc)">Done</button>
     </span>
   </div>
   <div class="slidebody">
     <div class="slidelist" id="slidelist"></div>
     <div class="slidepane" id="slidepane"></div>
+    <div class="slgrid" id="slgrid" hidden></div>
   </div>
+  <!-- §556.2: the keys, written where the person is, rather than learned. -->
+  <div class="slkeys" id="slkeys"></div>
 </div>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">

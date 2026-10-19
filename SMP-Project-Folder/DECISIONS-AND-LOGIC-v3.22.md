@@ -67437,3 +67437,50 @@ primary button, a grid of all slides for a deck too long for a strip, hide on
 the slide you are looking at, blank, and the keys written across the bar. The
 mockup in `design-mockups/one-flow/` is the agreed shape; the thumbnails,
 grid and key line are the next slice, not this one.
+
+## §556.1 — One door, not two (2026-10-19)
+
+Islam, of the menu after §556: *"why do we still have manage slides?"*
+
+Because the press above it used to open the projector and this opened the
+editor. Since §556 the press opens the editor — the same screen, the same
+slides, the same Play — so this was the second control onto one act (§24,
+§87). It is gone from all three menus: the company's, a direction owner's,
+and a unit's or function's.
+
+Nothing goes with it. Adding and arranging picture slides is what that screen
+does, and it is reached by pressing Present; anybody who cannot edit a deck
+never saw the entry anyway (it was `canSpeakFor`) and still gets the deck.
+
+## §556.2 — The slide view, as Islam's own page has it (2026-10-19)
+
+*"the view here is not what we agreed on in the mockup"*, of the flow's slide
+view beside `design-mockups/one-flow/`. Three things were missing and one was
+wrong.
+
+**ALL SLIDES.** His Fouad page carries a grid, and a flow of forty-nine
+slides is past the point where scrolling a rail finds anything. It covers the
+rail and the stage together, because it IS the deck — a panel beside them
+would be a third place to look. It reads the same rows the rail reads
+(§53.5), and it says which are hidden, because that is what you open it to
+check. `G` opens it; `Esc` closes the grid before it closes the editor, since
+Escape from a grid means *put this away*.
+
+**THE KEYS, WRITTEN DOWN.** Along the bottom, as his page has them: move,
+all slides, present, done. Nobody should have to be told them.
+
+**PRESENT, NOT PLAY.** One word for one act, and it is the word on the button
+that got you here.
+
+**AND ADD, IN A FLOW, IS A FINAL SLIDE.** The selected row may be a
+direction's, and a picture dropped there would be the office writing into
+somebody else's deck from a screen that is not about them. In a flow the
+button reads *Add a final slide*, says where it lands, and lands at the end
+— which is the company's own ground, and exactly the line Islam drew: *"the
+addition on the sections as directions or capabilities should be from the
+direction or capability presentation itself"*.
+
+Measured: the flow's bar reads All slides · Present · Done; the grid draws 21
+cells for a four-subject flow and Escape closes it without closing the
+editor; and every deck of all three live clients is unchanged, because none
+of this touches what a deck holds.

@@ -1533,11 +1533,17 @@ function companyPresentMenu(){
   if (!office && !mine.length) return "";
   var items;
   if (office) {
-    var slides = canSpeakFor("group")
-      ? '<button role="menuitem" data-picedit="unit" data-pickey="group">Manage slides' +
-          (pslidesOf("group").length ? ' <span class="pill kind">' + pslidesOf("group").length + '</span>' : '') +
-          '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-      : "";
+    /* ── ONE DOOR, NOT TWO (§556.1) ──────────────────────────────────
+       Islam, of the menu after §556: *"why do we still have manage
+       slides?"* Because the press above used to open the projector and
+       this opened the editor. It opens the editor now — the same screen,
+       the same slides, the same Play — so this is the second control onto
+       one act that §556 exists to remove (§24, §87).
+
+       NOTHING IS LOST WITH IT. Adding and arranging picture slides is
+       what that screen does; it is now reached by pressing Present, and
+       anybody who cannot edit a deck never saw this entry either. */
+    var slides = "";
     var dl = SMPRules.mayDownloadPlan(world(), viewer(), "group")
       ? '<button role="menuitem" data-dlpptx="group">Download the plan' +
         '<span class="dlsub">The plan as editable slides (.pptx) &mdash; no reported figures</span></button>'
@@ -1566,13 +1572,9 @@ function companyPresentMenu(){
         '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
       '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
         '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
-      mine.filter(function(p){ return canSpeakFor("dir:" + p.id); }).map(function(p){
-        var n = pslidesOf("dir:" + p.id).length;
-        return '<button role="menuitem" data-picedit="dir" data-pickey="' + esc(p.id) + '">Manage slides' +
-          (mine.length > 1 ? ' &middot; ' + esc(p.name) : '') +
-          (n ? ' <span class="pill kind">' + n + '</span>' : '') +
-          '<span class="dlsub">Add your own picture slides to your ' + esc(L1("pillar")) + '</span></button>';
-      }).join("");
+      /* §556.1: and no Manage slides beside it — Present IS the editor
+         now, and a direction owner's press lands on their own slides. */
+      "";
   }
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
@@ -1583,12 +1585,9 @@ function presentMenu(kind, key){
   /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
-  var slides = canSpeakFor(target)
-    ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
-        'Manage slides' + (pslidesOf(target).length
-          ? ' <span class="pill kind">' + pslidesOf(target).length + '</span>' : '') +
-        '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-    : "";
+  /* §556.1: Present opens the editor, so a second entry onto it is a
+     second control for one act. */
+  var slides = "";
   /* ONE ATTRIBUTE, CARRYING THE TARGET. It used to be `data-present="1"` for a
      unit and `data-present-fn="<key>"` for a function, and the unit handler
      read `UNITS[current]` — so a FUNCTION THAT PLANS IN PILLARS could not be

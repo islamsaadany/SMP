@@ -829,9 +829,12 @@ function slidesPaint(){
   var list = document.getElementById("slidelist");
   var off = all.filter(function(el){ return el.dataset.off; });
   list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
-      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
+      '<span class="picsub">' + (SLED.flow
+        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
+          "\u2019s own slides are added on its own page"
+        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
+            ? "the one selected" : "the slide selected below")) + '</span></div>' +
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
@@ -876,7 +879,45 @@ function slidesPaint(){
      selection already on screen does not jump. */
   var on = list.querySelector(".slrow.on");
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  slidesGridPaint(all);
+  slidesKeysPaint();
   SLED.err = "";
+}
+
+/* ── ALL SLIDES, AND THE KEYS (§556.2) ─────────────────────────────────
+   Both from Islam's own page, which he handed over as the shape to copy:
+   a grid for a deck too long to scroll a rail through, and the keys
+   written along the bottom so nobody has to be told them. The grid reads
+   the SAME rows the rail reads, so it cannot show a different deck
+   (§53.5), and it says which are hidden because that is the thing you
+   open it to check. */
+function slidesGridPaint(all){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  g.innerHTML = all.map(function(el, i){
+    var nm = slidesLabel(el);
+    return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
+      (el.dataset.off ? " off" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
+      '<span class="slgn">' + (i + 1) + '</span>' +
+      '<span class="slgnm">' + esc(nm) + '</span>' +
+      (el.dataset.off ? '<span class="slghid">hidden</span>' : '') + '</button>';
+  }).join("");
+}
+function slidesKeysPaint(){
+  var k = document.getElementById("slkeys");
+  if (!k) return;
+  k.innerHTML =
+    '<span><b>\u2191</b> <b>\u2193</b> move</span>' +
+    '<span><b>G</b> all slides</span>' +
+    '<span><b>P</b> present</span>' +
+    '<span><b>Esc</b> done</span>';
+}
+function slidesGridToggle(on){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  g.hidden = on === undefined ? !g.hidden : !on;
+  var b = document.querySelector("[data-slgrid]");
+  if (b) b.classList.toggle("on", !g.hidden);
 }
 
 /* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
@@ -977,7 +1018,10 @@ function slidesPaneHtml(cur, sl){
           'still on the page.</p></div>'
         : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
           'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>');
+          'deck opens. ' + (SLED.flow
+            ? '<b>Add a final slide</b> puts your own pictures at the end of the flow.'
+            : '<b>Add slide after</b> puts your own pictures after it.') +
+          '</p></div>');
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -1212,7 +1256,16 @@ function slidesAdd(){
     return;
   }
   var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
-  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  /* ── IN A FLOW IT GOES AT THE END (§556.2) ───────────────────────────
+     Islam: *"in the flow slide view I can hide and I can add final slides
+     but the addition on the sections as directions or capabilities should
+     be from the direction or capability presentation itself"*. The
+     selected row may be a direction's, and a picture dropped there would
+     be the office writing into somebody else's deck from a screen that is
+     not about them. The end is the company's own ground. */
+  var after = SLED.flow
+    ? all.length - 1
+    : all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
   if (after < 0) after = all.length - 1;
   var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
   slidesPlace(made, all, after);
@@ -1613,6 +1666,8 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
+  var gb = root.querySelector("[data-slgrid]");
+  if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
   addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
@@ -1629,7 +1684,15 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    if (ev.key === "Escape") slidesClose();
+    if (ev.key === "Escape") {
+      /* §556.2: the grid closes first — Escape from a grid is "put this
+         away", not "leave the editor". */
+      var g = document.getElementById("slgrid");
+      if (g && !g.hidden) { slidesGridToggle(false); return; }
+      slidesClose();
+    }
+    if (ev.key === "g" || ev.key === "G") { slidesGridToggle(); return; }
+    if (ev.key === "p" || ev.key === "P") { slidesPlay(); return; }
     /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
        Islam: "allow the arrows up and down so I can navigate the slides while
        adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —

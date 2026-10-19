@@ -1003,13 +1003,9 @@
   .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .slprog{ height:3px; background:var(--line); flex:none; }
   .slprog i{ display:block; height:100%; width:0; background:var(--panel); }
-  .sledge{ position:absolute; top:50%; transform:translateY(-50%); z-index:2;
-    width:28px; height:28px; border-radius:50%; cursor:pointer;
-    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
-    font:400 16px/1 var(--sans); display:grid; place-items:center; }
-  .sledge.l{ left:8px } .sledge.r{ right:8px }
-  .sledge:hover{ border-color:var(--ink-3); color:var(--ink); }
-  .sledge:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  /* §556.12: no arrows at the stage's edges. Islam: *"these 2 buttons on
+     the right and left are useless"* — the pair under the stage and the
+     arrow keys already do it, and these sat over the slide itself. */
   /* His `.controls`, measure for measure: a 58px row at 18px in, a 12px
      gap, a 36px round step either side of a 52px tabular count, and the
      slide's own name beside it at 600. */
@@ -1018,7 +1014,7 @@
     background:var(--surface); }
   /* His chevrons, drawn rather than typed: a `‹` is a letter, and sits
      thin and off-centre in a round button. */
-  .slnav svg, .sledge svg{ width:18px; height:18px; stroke:currentColor; fill:none;
+  .slnav svg{ width:18px; height:18px; stroke:currentColor; fill:none;
     stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
   .slnav{ width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none;
     border:1px solid var(--line); background:var(--surface); color:var(--ink);

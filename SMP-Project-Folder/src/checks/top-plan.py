@@ -142,7 +142,15 @@ with sync_playwright() as p:
     ck("Reporting asks the pillar's measure and tactic", "Group revenue" in rep and "Open the hub" in rep, rep[:300])
     ck("…and not the Foundation's objectives", "KEY OBJECTIVES" not in rep.upper().split("PILLARS")[0], rep[:200])
     safe(pg, "()=>{currentSub='performance'; paint()}"); pg.wait_for_timeout(250)
-    ck("Performance carries the own-plan card", "OWN PLAN" in (safe(pg, "()=>document.querySelector('#panel').innerText", "") or "").upper())
+    # REWRITTEN TO THE NEW RULE (218, 555). The card is still built; the
+    # page no longer OPENS on it. It lands on the company's own pillars
+    # in a rail, which is what Islam asked for, so the claim reads the
+    # overall section rather than whatever happens to be showing — the
+    # landing is stood down first, or the paint puts it straight back.
+    ck("Performance carries the own-plan card",
+       "OWN PLAN" in (safe(pg, "()=>{ var w=GSEC; GSEC_PICKED=true; GSEC=0; paint();"
+                              " var t=document.querySelector('#panel').innerText;"
+                              " GSEC=w; GSEC_PICKED=false; paint(); return t; }", "") or "").upper())
     perf1 = safe(pg, "()=>[groupKeyObjectives(), groupUnitsObjectives()].map(x=>x==null?null:Math.round(x*100)/100)", [])
     ck("…and every existing figure is unmoved", perf0 == perf1, [perf0, perf1])
     board = safe(pg, "()=>boardUnitTargets()", []) or []

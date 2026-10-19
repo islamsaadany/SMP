@@ -395,6 +395,15 @@ with sync_playwright() as p:
       masterWrite(MFLOW.pick);
       masterPaint();
       document.querySelector('[data-mfgo]').click();
+      /* §556: THE BUTTON OPENS THE SLIDES NOW, not the projector — Islam:
+         *"after we set the master presentation, we say 'here, manage the
+         slides' … and then it takes me to the presentation when I say
+         present"*. Everything below is still about the DECK, so the check
+         does what the person does: looks at the slides, then presses
+         Present. `slidesPlay()` is that press. */
+      const landed = document.getElementById('slideroot').classList.contains('on');
+      const railRows = document.querySelectorAll('#slideroot .slrow').length;
+      slidesPlay();
       const deck = document.querySelector('#deckroot .deck');
       const slides = [...deck.querySelectorAll('.dslide')];
       /* Each subject's deck built ALONE, in the same run and by the same
@@ -415,10 +424,13 @@ with sync_playwright() as p:
           const m = s.querySelector('.dfootmark'); return m ? m.getAttribute('src') : null;
         }).filter(Boolean))].length,
         want: [...new Set(flow.map(t => deckMark(UNITS[t] || null)).filter(Boolean))].length,
-        flow: DECK.flow ? DECK.flow.slice() : null
+        flow: DECK.flow ? DECK.flow.slice() : null,
+        landed: landed, railRows: railRows
       };
     }""", flow, THREW)
-    check("Start opens the deck", get(built, "on") is True, built)
+    check("the button opens the SLIDES, not the projector (§556)",
+          get(built, "landed") is True and (get(built, "railRows") or 0) > 0, built)
+    check("...and Present from there opens the deck", get(built, "on") is True, built)
     check("the flow holds every subject's slides and no others",
           get(built, "total") is not None and get(built, "alone") and
           get(built, "total") >= sum(get(built, "alone") or [0]), built)

@@ -305,7 +305,13 @@ with sync_playwright() as p:
 
     # ── 4. The office's menu ──────────────────────────────────────────
     m = menu(pg) or []
-    ck("the office presents the whole company", any(x["t"] == "Present the whole company" and x["present"] == "group" for x in m), m)
+    # REWRITTEN TO THE NEW RULE (218, 556). "Present the whole company"
+    # opened the company's review straight onto the projector, beside a
+    # flow that already carries the company last. Islam had it removed:
+    # the Master presentation is the one way in, and it is FIRST.
+    ck("the office is offered the Master presentation, first and alone",
+       bool(m) and m[0].get("master") is True
+       and not any(x["present"] == "group" for x in m), m)
     ck("…and no Present per direction", not any((x["present"] or "").startswith("dir:") for x in m), m)
     ck("…and keeps the Master presentation", any(x["master"] for x in m), m)
 
@@ -315,7 +321,11 @@ with sync_playwright() as p:
     m = menu(pg) or []
     ck("the owner's Present opens their direction only", any(x["t"] == "Present" and x["present"] == "dir:group-P1" for x in m), m)
     ck("…the PDF is the same deck", any(x["pdf"] == "dir:group-P1" for x in m), m)
-    ck("…Manage slides is their direction's, named by nothing", any(x["pic"] == "group-P1" and x["t"] == "Manage slides" for x in m), m)
+    # AND NO MANAGE SLIDES BESIDE IT (218, 556.1). Present opens the
+    # editor now, so a second entry onto the same screen is a second
+    # control for one act. Islam: "why do we still have manage slides?"
+    ck("...and no Manage slides beside it, because Present is it",
+       not any(x["pic"] for x in m), m)
     ck("…and nothing of the company's", not any(x["present"] == "group" or x["master"] for x in m), m)
     ck("canSpeakFor: their direction yes", safe(pg, "()=>canSpeakFor('dir:group-P1')") is True)
     ck("canSpeakFor: the direction beside it no", safe(pg, "()=>canSpeakFor('dir:group-P2')") is False)

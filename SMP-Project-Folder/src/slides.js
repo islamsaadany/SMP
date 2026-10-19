@@ -721,7 +721,16 @@ function slidesOpen(kind, key){
    hides against whichever subject the slide belongs to. */
 function slidesOpenFlow(list){
   list = (list || []).filter(Boolean);
-  if (!list.length || !canSpeakFor("group")) return;
+  /* ── THE GATE IS THE FLOW'S, NOT THE COMPANY'S DECK (§556.3) ──────
+     This asked `canSpeakFor("group")`, which is "may you edit the
+     company's own review" — and with the business units ON the company
+     has no plan of its own, so it is FALSE for the very office that
+     arranges the flow. Pressing Go then did nothing at all (§61), which
+     `master-presentation` caught the moment the button changed.
+
+     `mayMasterPresent` is the rule that offers the Master presentation in
+     the first place, so it is the rule that opens what it leads to. */
+  if (!list.length || !SMPRules.mayMasterPresent(world(), viewer())) return;
   SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
   var root = document.getElementById("slideroot");
   root.querySelector(".sl-title").textContent = "Master presentation";
@@ -828,13 +837,20 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   var off = all.filter(function(el){ return el.dataset.off; });
-  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+  /* §556.3: and only where there is a subject to add to. With the business
+     units on, the company has no plan of its own — the flow can still be
+     arranged and presented, and a control that would write nowhere is not
+     drawn (§61). */
+  var mayAdd = canSpeakFor(SLED.target);
+  list.innerHTML = (mayAdd
+    ? '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
       (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
       '<span class="picsub">' + (SLED.flow
         ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
           "\u2019s own slides are added on its own page"
         : (SLED.sel && SLED.sel.indexOf("ps:") === 0
-            ? "the one selected" : "the slide selected below")) + '</span></div>' +
+            ? "the one selected" : "the slide selected below")) + '</span></div>'
+    : "") +
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;

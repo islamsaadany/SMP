@@ -6,7 +6,14 @@ The page itself adds nothing to a slide; it only says which build drew it.
 """
 import io, os, sys
 
+# ONE BUILDER, NOT ONE PER DECK (§53.5). The first version of this page was
+# copied and string-edited for the company's review, which is the drift this
+# whole stage exists to remove — in the tooling as much as in the product.
 BEFORE, AFTER, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
+TITLE = sys.argv[4] if len(sys.argv) > 4 else "Before and after"
+LEAD  = sys.argv[5] if len(sys.argv) > 5 else ""
+NOTE_A = sys.argv[6] if len(sys.argv) > 6 else ""
+NOTE_B = sys.argv[7] if len(sys.argv) > 7 else ""
 
 MARK = '<body><div class="fitbox">'
 
@@ -66,23 +73,15 @@ CHROME = """
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <div class="cmpwrap">
-  <h1>Amr Hassan's deck for D001</h1>
-  <p class="cmpsub">The real deck the platform builds for El Abd, rendered at the
-    size its slides are authored and fitted at. Switch between the build that is
-    live and the build with the change in it.</p>
+  <h1>__TITLE__</h1>
+  <p class="cmpsub">__LEAD__</p>
   <div class="cmppick">
     <button type="button" data-show="b" aria-pressed="false"><b>Today</b></button>
     <button type="button" data-show="a" aria-pressed="true"><b>With the change</b></button>
   </div>
 </div>
-<p class="cmpnote" data-note="a"><b>Three changes.</b> The second page is gone &mdash;
-  the cover already names the direction, its code, the cycle and who presents it. The
-  readings leave the corner of the measures, categories and tactics slides. And they
-  are said once, properly, on a new <b>Where Maximizing Current Stores stands</b>
-  slide at the end, with a word under the figure saying what it counts.</p>
-<p class="cmpnote" data-note="b" hidden><b>Today.</b> The cover and the page after it
-  both introduce the same direction. Key Measures 95% and Execution &mdash; sit in the
-  corner of four slides out of six, and no slide presents them.</p>
+<p class="cmpnote" data-note="a">__NOTE_A__</p>
+<p class="cmpnote" data-note="b" hidden>__NOTE_B__</p>
 """
 
 SWAP = """
@@ -100,9 +99,11 @@ SWAP = """
 </script>
 """
 
-html = ("<title>Amr Hassan's deck for D001</title>"
+chrome = (CHROME.replace("__TITLE__", TITLE).replace("__LEAD__", LEAD)
+          .replace("__NOTE_A__", NOTE_A).replace("__NOTE_B__", NOTE_B))
+html = ("<title>" + TITLE + "</title>"
         "<meta name=\"claude:viewport-fit-sides\" content=\"cover\">"
-        + st + CHROME
+        + st + chrome
         + '<div class="fitbox" data-deck="b" hidden>' + deckB + '</div>'
         + '<div class="fitbox" data-deck="a">' + deckA + '</div>'
         + tail.replace("addEventListener('resize', go); go();",

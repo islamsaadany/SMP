@@ -450,17 +450,41 @@ function deckSlides(u){
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
+  /* §553.6: the company's own review shows its directions and its
+     capabilities apart, so the wording below has two groups to name. */
+  var capsApart = short && boxSplit(u) &&
+    u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
+    u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
     (u.fnKey || u.topLayer ? esc(u.name) : "the unit"),
     [ koShown && standCell(L("keyobj","bu") + ' performance', ko,
         (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare")),
-      standCell(L("pillar","bu") + ' performance', pl,
-        itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+      /* ── IT COUNTS WHAT IT NAMES (§553.6) ───────────────────────────
+         On El Abd this cell read "Directions performance · 10 Directions,
+         by their measures" — and five of the ten are capabilities. The
+         figure was right (it is the average over every pillar the box
+         plans) and the words were wrong, which is the worse of the two:
+         a room can check a name and cannot check an average.
+
+         ONE CELL STILL, not two. The two groups now have a score table
+         each (above), which is where a per-group reading belongs; this
+         slide is the box's overall and stays the box's overall. A fourth
+         cell would also break a grid that goes to three. */
+      standCell(capsApart
+          ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
+          : L("pillar","bu") + ' performance', pl,
+        capsApart
+          ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("pillar","bu")) + ' and ' +
+            itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("capability","bu")) + ', by their measures'
+          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
       standCell('Execution performance', ex,
         dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
+    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.');
 
   /* ── AND IT IS SAID LAST (§254.4) ──────────────────────────────────────
@@ -543,7 +567,20 @@ function deckSlides(u){
      THE ROW DIVIDES FOR ANY NUMBER of pillars, so a unit with two and one with
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
-  var pNames = u.items.map(function(p, i){
+  /* ── §553.6: A CARD, A ROW, AND THE GROUP THEY BELONG TO ────────────
+     Islam, on the company's own review, a week before El Abd present it:
+     *"when we are presenting on a company level it acts like a business unit
+     approach, foundation, aims, key objectives and maybe directions and
+     capabilities showing the directions as one slide and then showing
+     progress then the capabilities as a group"*.
+
+     The card and the row are lifted out of the two `.map`s they were written
+     inside, unchanged, so one group or two is a question of WHICH PILLARS
+     are handed to them — never of a second copy of the markup (§53.5). Each
+     takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
+     from the whole list and must keep doing so when the list is shown in two
+     halves; the row's own counter is separate and restarts per table. */
+  function pillarCard(p, i){
     /* §542: on a box SHOWN APART, an internal pillar says what it is where
        it has nothing else to say — exactly as a capability's own card does
        below, so a client whose capabilities have become pillars reads the
@@ -562,7 +599,7 @@ function deckSlides(u){
       /* §416: the years each direction runs in, and a later one says when. */
       (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
       '</div>';
-  }).join("");
+  }
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
@@ -575,52 +612,111 @@ function deckSlides(u){
       '<span class="pcard-n">' + esc(nm) + '</span>' +
       '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
   }).join("");
-  var nCards = u.items.length + (short ? boardCapTargets().length : 0);
   if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
 
-  if (pOn && u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    /* §542: the heading names both kinds whether the capabilities are
-       records beside the list or pillars inside a list SHOWN APART — never
-       because a joined list happens to hold a marked row (see the sub-line
-       above, and checks/deck-figures.py, which went red on exactly that). */
-    '><h2>' + L("pillar","bu") +
-      (capCards || (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }))
-        ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
-    '<div class="pcards" style="--n:' + nCards +
-      ';--c:' + pillarCols(nCards) +
-      ';--r:' + Math.ceil(nCards / pillarCols(nCards)) + '">' +
-    pNames + capCards + '</div></section>');
+  /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+     One group, as every deck has had, EXCEPT on the company's own review of
+     a plan that is shown apart: there the directions and the capabilities
+     are two things, and reading all ten under one heading called Directions
+     was not a wording slip — the standing slide below counted ten of them
+     and said "10 Directions, by their measures", five of which were
+     capabilities.
 
-  /* The score table, built here and pushed at the END (§254.4). */
-  var pRows = u.items.map(function(p, i){
+     THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+     roll-call or the score table stays where its owner put it; the second
+     group's two slides are new ground and carry new anchors (§96.2).
+
+     A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+     directions and no capabilities reads exactly as it does today. */
+  var groups;
+  if (short && boxSplit(u)) {
+    var dirs = [], caps = [];
+    u.items.forEach(function(p, i){
+      (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+    });
+    groups = [
+      { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+        one: L1("pillar"), head: L("pillar","bu"),
+        names: "pillarnames", score: "pillars", cards: "" },
+      { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+        one: L1("capability"), head: L("capability","bu"),
+        names: "capnames",    score: "caps",    cards: capCards }
+    ].filter(function(g){ return g.ix.length || g.cards; });
+  } else {
+    var bothKinds = !!capCards ||
+      (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+    groups = [{
+      ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+      /* §542: the one heading names both kinds whether the capabilities are
+         records beside the list or pillars inside a list SHOWN APART —
+         never because a joined list happens to hold a marked row (see the
+         sub-line above, and checks/deck-figures.py, which went red on
+         exactly that). */
+      many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+      /* The anchor's label is PLAIN TEXT, not the heading: the heading
+         carries `&amp;`, and a label is escaped on its way into the
+         attribute, so the rail would have read "Directions &amp;amp;
+         Capabilities". */
+      plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+      one: L1("pillar"),
+      /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+         named both kinds (§542); the table below has always been headed
+         with the pillar word alone, and widening it here would have moved
+         a live client's slide for nothing. */
+      head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: capCards
+    }];
+  }
+
+  if (pOn) groups.forEach(function(g){
+    var extra = g.cards ? boardCapTargets().length : 0;
+    var n = g.ix.length + extra;
+    if (!n) return;
+    S.push('<section class="dslide"' +
+      anch(g.names, "After the " + g.plain + " names") +
+      '><h2>' + g.many + '</h2>' +
+      '<div class="pcards" style="--n:' + n +
+        ';--c:' + pillarCols(n) +
+        ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+      g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
+      g.cards + '</div></section>');
+  });
+
+  /* The score table's rows, built here and pushed at the END (§254.4).
+     `i` is the pillar's place in `u.items` (its code); `n` is its place in
+     the table it is being printed in (§553.6). */
+  function pillarRow(p, i, n){
     /* §416: a direction that does not run this year is listed, not scored. */
-    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
       '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-    return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    return '<tr><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(p.kind) + ' &middot; ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span></td>' +
       '<td class="num final ' + dBand(pillarPerf(p)) + '">' + dPct(pillarPerf(p)) + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td></tr>';
-  }).join("");
+  }
   /* NAMED APART FROM THE ROLL-CALL (§254.5). With both slides headed by the
      tenant's word for a pillar, the deck said "Pillars" twice — §87's twins on
      a projector, and two rows in Manage slides' rail that read the same. The
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
-  var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu") + " overview") +
-    '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
-    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("pillar") + '</th>' +
-    '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
-    '<tbody>' + pRows + '</tbody></table></section>';
+  var pillarScoreSlides = groups.map(function(g){
+    if (!g.ix.length) return "";
+    return '<section class="dslide"' +
+      anch(g.score, "After the " + g.plain + " overview") +
+      '><h2>' + g.head + ' &mdash; where we stand</h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + g.one + '</th>' +
+      '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
+      '<tbody>' + g.ix.map(function(x, n){ return pillarRow(x.p, x.i, n + 1); }).join("") +
+      '</tbody></table></section>';
+  }).filter(Boolean);
 
   (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
 
@@ -672,12 +768,23 @@ function deckSlides(u){
      on last cycle: the room reads them once flat and once properly and
      cannot tell which is the real one (§87's twins, in figures). The stand
      slide always draws, so there is always something behind this. */
-  if (!short) S.push(sectSlide("sperf", "After the Overall performance divider",
+  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
+     Islam, of the company's own review: *"and then performance and the
+     overall performance etc."* It was the one deck with no divider in front
+     of its closing block — §481 made the review short by leaving things
+     out, and this went with them. What it announces was always there: the
+     score tables and the slide the whole deck ends on.
+
+     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
+     stand slide always draws, so this is never a divider over nothing. */
+  S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu") + " stand, where " +
-      (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
+    "Where the " + L("pillar","bu") +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
+      (u.fnKey || u.topLayer ? u.name : "the unit") +
+      " stands, and what the cycle is remembered for.",
     null));
-  if (pOn && u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
@@ -990,7 +1097,17 @@ function companyFoundationSlides(){
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
   }).join("");
-  return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+  /* ── IT CONTINUES RATHER THAN RUNS OFF THE SLIDE (§553.7) ──────────
+     On El Abd this slide is 22px taller than the slide it is drawn on, with
+     the last objective cut in half — and the fit pass could do nothing
+     about it, because `.tight` is all it has for a slide that does not say
+     it may be split. It says so now, and the pass continues the objectives
+     table onto a second slide exactly as it does for every other long table
+     in the deck (§69.5). The continuation does not repeat the aspiration:
+     present.css hides `.aimtop` on a `[data-cont]` slide, because a lead
+     paragraph said twice is the room reading it twice. */
+  return ['<section class="dslide" data-split="cofound"' +
+    anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
       (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +

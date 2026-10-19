@@ -67018,3 +67018,73 @@ boxes — so two true statements became false:
 The product was right both times; only the checks were stale. The check also
 learned `SMP_BUILT` (§276), which is how it was shown failing identically on
 main's build and passing on it after the rewrite.
+
+## §553.6 — The company presents on the same spine as a box (2026-10-19)
+
+Islam, a week before El Abd present it: *"the setup gives the boxes and the
+slides should read from whatever is set for this function or business unit …
+when we are presenting on a company level it acts like a business unit
+approach, foundation, aims, key objectives and maybe directions and
+capabilities showing the directions as one slide and then showing progress
+then the capabilities as a group and then performance and the overall
+performance etc. … their spine to be well included is a priority"*.
+
+**WHAT EL ABD'S COMPANY REVIEW ACTUALLY DID**, read off the product rather
+than off the code, because three of the four faults below are invisible in a
+diff:
+
+- ONE roll-call headed *"Directions & Capabilities"*, listing all ten.
+- ONE score table headed *"Directions — where we stand"*, holding all ten —
+  and **489px past the bottom of the slide**. On the projector the last rows
+  were not there at all.
+- NO performance section: §481 made the review short by leaving things out,
+  and the divider went with them.
+- A closing slide reading *"Directions performance · 10 Directions, by their
+  measures"*, five of which are capabilities. The figure was right — it is
+  the average over every pillar the box plans. The words were wrong, which
+  is the worse of the two: **a room can check a name and cannot check an
+  average.**
+
+**THE SPINE WAS ALREADY THERE; IT NEEDED TO BE ASKED FOR TWO GROUPS.** The
+card and the row builders are lifted out of the two `.map`s they were written
+inside, unchanged, and `deckSlides` now builds a list of GROUPS: one, as
+every deck has always had, except on the company's own review of a plan shown
+apart, where it is the directions and the capabilities. Each group gets its
+own roll-call and its own score table. No second copy of the markup exists
+(§53.5), and the slides are the same slides.
+
+- THE FIRST GROUP KEEPS THE ANCHORS (`pillarnames`, `pillars`), so a picture
+  slide an owner placed after either stays where they put it. The second
+  group's slides are new ground and carry new anchors (`capnames`, `caps`).
+- A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2).
+- THE SCORE TABLE KEEPS THE HEADING IT HAD in the joined case. Only the
+  roll-call ever named both kinds (§542); widening the table's heading moved
+  Wander's live deck for nothing, and was put back the moment it was measured.
+- THE CLOSING SLIDE COUNTS WHAT IT NAMES, and stays ONE cell: the two groups
+  now have a score table each, which is where a per-group reading belongs,
+  and a fourth cell would break a grid that goes to three.
+- AND THE COMPANY'S REVIEW GETS THE PERFORMANCE DIVIDER. §253 is satisfied by
+  construction, as for every other deck: the stand slide always draws.
+
+**MEASURED, NOT REASONED** (every box's deck, two builds, each client's own
+state): **El Abd, one deck moves — the company's.** Wander: nothing. The
+demo: nothing.
+
+## §553.7 — The Foundation continues rather than runs off the slide (2026-10-19)
+
+Found while rendering El Abd's company review at the size the product fits
+it at: the Foundation slide is **22px taller than the slide**, with the last
+objective cut in half. The fit pass could do nothing about it — `.tight` is
+all it has for a slide that does not say it may be split, and §254.9's
+tightening was measured against the demo's four objectives. El Abd has six.
+
+So the slide says it may be split, and the pass continues the objectives
+table onto a second slide exactly as it does for every other long table in
+the deck (§69.5). The continuation does NOT repeat the aspiration:
+`present.css` hides `.aimtop` on a `[data-cont]` slide, because a lead
+paragraph said twice is the room reading it twice.
+
+El Abd's Foundation is now two slides, five objectives then one. If all six
+on one slide is wanted instead, that is a tightening of §254.9's figures and
+not this mechanism — and it would be a figure retuned against one client
+rather than a rule that holds for ten objectives as well as six.

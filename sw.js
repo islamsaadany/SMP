@@ -409,7 +409,12 @@
    origin/main serving "smp-shell-v6.45-stakeholders-picked" and against every
    ref's history — nobody holds v6.46 (§94.12); confirm once more immediately
    before the push to main (§94.16). `node --check sw.js` run after the merge. */
-const SHELL = "smp-shell-v6.46-staff-processes-link";
+/* v6.47-target-from-months — §555: the annual target is derived from the
+   months as they are typed, and the box holding it stops taking typing while
+   a monthly plan is there. The built file's bytes changed, which is the whole
+   trigger (§91). Proved held by no commit in any ref's history (§94.12);
+   confirm once more immediately before the push (§94.16). */
+const SHELL = "smp-shell-v6.47-target-from-months";
 const ASSETS = [
   "/",
   "/index.html",

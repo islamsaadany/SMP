@@ -404,6 +404,16 @@ with sync_playwright() as p:
       const landed = document.getElementById('slideroot').classList.contains('on');
       const railRows = document.querySelectorAll('#slideroot .slrow').length;
       const railFirst = (SLED.all && SLED.all[0]) ? SLED.all[0].dataset.anchor || '' : null;
+      /* §556.11: the parts row and the room's keys, read off the screen. */
+      const partsRow = document.getElementById('slparts');
+      const chips = partsRow ? [...partsRow.querySelectorAll('.slpart')] : [];
+      const keysText = (document.getElementById('slkeys') || {}).textContent || '';
+      let jumped = null;
+      if (chips[1]) { chips[1].click();
+        const i = SLED.all.map(e => e.dataset.ed).indexOf(SLED.sel);
+        jumped = { subject: SLED.all[i] && SLED.all[i].dataset.subject,
+                   where: document.getElementById('slnm').textContent,
+                   lit: [...document.querySelectorAll('#slparts .slpart')].findIndex(c => c.classList.contains('on')) }; }
       slidesPlay();
       const deck = document.querySelector('#deckroot .deck');
       const slides = [...deck.querySelectorAll('.dslide')];
@@ -427,6 +437,8 @@ with sync_playwright() as p:
         want: [...new Set(flow.map(t => deckMark(UNITS[t] || null)).filter(Boolean))].length,
         flow: DECK.flow ? DECK.flow.slice() : null,
         landed: landed, railRows: railRows, railFirst: railFirst,
+        parts: chips.length, partsShown: !!partsRow && !partsRow.hidden, jumped: jumped,
+        keysText: keysText,
         deckFirst: slides[0] ? slides[0].dataset.anchor || '' : null
       };
     }""", flow, THREW)
@@ -440,6 +452,18 @@ with sync_playwright() as p:
           get(built, "railFirst") == "flowcover" and get(built, "deckFirst") == "flowcover", built)
     check("...and lists exactly the slides the room shows",
           get(built, "railRows") == get(built, "total"), built)
+    # §556.11: the room's bar moved here. One button per subject, and
+    # pressing the second lands on the second subject, lit, with the bar
+    # under the stage saying which part of how many.
+    check("the slides carry one button per part of the flow (§556.11)",
+          get(built, "partsShown") is True and get(built, "parts") == len(flow), built)
+    j = get(built, "jumped") or {}
+    check("...and a button jumps to that part, lit, saying which of how many",
+          j.get("subject") == flow[1] and j.get("lit") == 1 and
+          ("part 2 of %d" % len(flow)) in (j.get("where") or ""), j)
+    check("the room's timer keys are listed on the slides, in words",
+          "pause / start the timer" in (get(built, "keysText") or "") and
+          "reset the timer" in (get(built, "keysText") or ""), get(built, "keysText"))
     check("the flow holds every subject's slides and no others",
           get(built, "total") is not None and get(built, "alone") and
           get(built, "total") >= sum(get(built, "alone") or [0]), built)

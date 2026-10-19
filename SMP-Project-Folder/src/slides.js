@@ -814,10 +814,14 @@ function slidesSuspend(){
   root.inert = true;
   root.setAttribute("aria-hidden", "true");
 }
-function slidesResume(){
+function slidesResume(reached){
   var root = document.getElementById("slideroot");
   root.inert = false;
   root.removeAttribute("aria-hidden");
+  /* §556.11: back on the slide the room was showing, as his page does —
+     not on the one Present was pressed from twenty slides ago. */
+  var at = reached ? slidesFindIn(SLED.all || [], reached) : -1;
+  if (at >= 0) { SLED.sel = SLED.all[at].dataset.ed; slidesPaint(); }
   root.focus();
 }
 /* The deck for whatever this editor is editing, through the ONE resolver
@@ -831,10 +835,52 @@ function slidesPlay(){
      OF IT if the deck cannot be built — an editor nobody can click, with the
      reason in a console nobody has open (§32, §171). Standing down after the
      open means a throw costs the press and nothing else. */
+  var from = slidesSelEl();
   if (SLED.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
                               flowWithParts(SLED.flow), "editor");
   else openDeckFor(SLED.target, "editor");
+  /* ── STRAIGHT TO FULL SCREEN, AT THE SLIDE YOU ARE ON (§556.11) ─────
+     Islam: *"present should go to the full screen right away like the
+     html"* — his page's Present is the same deck, filling the screen, from
+     where you are. The bar is still there for a deck opened from anywhere
+     else; from here it never shows, and Esc comes straight back. */
+  var at = from ? slidesFindIn(DECK.slides, from) : -1;
+  if (at > 0) deckShow(at);
+  deckGoFull();
   slidesSuspend();
+}
+/* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
+   page, which picture — and which of its kind. Never by counting: the room
+   leaves out hidden slides and the two screens split long tables at their
+   own sizes, so the tenth slide here is not the tenth slide there. */
+function slidesKeyOf(el){
+  return [el.dataset.subject || "", el.dataset.anchor || "", el.dataset.ps || ""].join("|");
+}
+function slidesWhich(list, i){
+  while (i > 0 && list[i] && list[i].dataset.cont) i--;
+  var el = list[i];
+  if (!el) return null;
+  var key = slidesKeyOf(el), n = 0;
+  for (var j = 0; j < i; j++) if (!list[j].dataset.cont && slidesKeyOf(list[j]) === key) n++;
+  return { key:key, n:n };
+}
+function slidesFindIn(list, w){
+  if (!w) return -1;
+  var n = w.n;
+  for (var j = 0; j < list.length; j++) {
+    if (list[j].dataset.cont || slidesKeyOf(list[j]) !== w.key) continue;
+    if (!n) return j;
+    n--;
+  }
+  return -1;
+}
+/* The selected slide, or the next one the room will show if it is hidden. */
+function slidesSelEl(){
+  var all = SLED.all || [];
+  var i = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (i < 0) return null;
+  while (i < all.length - 1 && all[i].dataset.off) i++;
+  return slidesWhich(all, i);
 }
 
 function slidesClose(){
@@ -1023,14 +1069,80 @@ function slidesFootPaint(all){
   var ct = document.getElementById("slct");
   if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
   var nm = document.getElementById("slnm");
-  if (nm) nm.textContent = all[at] ? slidesShortLabel(all[at]) +
-    (all[at].dataset.off ? " \u00b7 hidden" : "") : "";
+  if (nm) nm.innerHTML = slidesWhere(all, at);
   var pr = document.getElementById("slprog");
   if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";
   var k = document.getElementById("slkeys");
+  /* §556.11: the room's own keys are listed HERE, because the room shows no
+     bar any more — in full screen there is nowhere else to read them. Said
+     in full, not as letters: "T timer" told Islam nothing. */
   if (k) k.innerHTML =
     '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
-    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done';
+    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
+    '<span class="slksep"></span>while presenting: ' +
+    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+  slidesPartsPaint(all, at);
+}
+/* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────
+   Islam: the three things the room's bar carried — the jump to each part,
+   which part you are in, and its time — *"we can include them in the slide
+   management page we already have"*. The parts are read off the slides'
+   own stamps, as the room's stops are (§266), so the two count alike. */
+function slidesParts(all){
+  var out = [];
+  all.forEach(function(el, i){
+    var t = el.dataset.subject;
+    if (!t || el.dataset.flowpart) return;
+    if (out.length && out[out.length - 1].t === t) return;
+    var org = String(GROUP.org || "").trim();
+    var name = (t === "group" && org) ? org : placeLabel(t);
+    out.push({ t:t, name:name, code:deckCode(t, name), at:i });
+  });
+  return out;
+}
+function slidesPartAt(parts, i){
+  var k = -1;
+  parts.forEach(function(p, j){ if (p.at <= i) k = j; });
+  return k;
+}
+function slidesWhere(all, at){
+  var el = all[at];
+  if (!el) return "";
+  var off = el.dataset.off ? " \u00b7 hidden" : "";
+  if (!SLED.flow) return esc(slidesShortLabel(el)) + off;
+  if (el.dataset.flowpart) return '<b>' + esc(String(GROUP.org || "").trim()) + '</b> <span>\u00b7 ' +
+    esc(el.dataset.anchor === "flowcover" ? "Cover" : slidesShortLabel(el)) + '</span>';
+  var parts = slidesParts(all), k = slidesPartAt(parts, at), p = parts[k];
+  if (!p) return esc(slidesShortLabel(el)) + off;
+  var mins = SMPRules.presentMins(GROUP, p.t), short = slidesShortLabel(el);
+  return '<b>' + esc(p.name) + '</b> <span>\u00b7 part ' + (k + 1) + ' of ' + parts.length +
+    (mins ? ' \u00b7 ' + mins + ' minutes' : '') + '</span>' +
+    (short && short !== p.name ? ' \u00b7 ' + esc(short) : '') + off;
+}
+/* One button per part, under the bar; the part you are in filled. Only in a
+   flow: one subject's slides are one part, and a row of one is not a choice. */
+function slidesPartsPaint(all, at){
+  var row = document.getElementById("slparts");
+  if (!row) return;
+  var parts = SLED.flow ? slidesParts(all) : [];
+  row.hidden = parts.length < 2;
+  if (row.hidden) { row.innerHTML = ""; return; }
+  var k = all[at] && all[at].dataset.flowpart ? -1 : slidesPartAt(parts, at);
+  row.innerHTML = parts.map(function(p, j){
+    var mins = SMPRules.presentMins(GROUP, p.t);
+    return '<button class="slpart' + (j === k ? " on" : "") + '" data-slpart="' + p.at +
+      '" title="' + esc(p.name) + (mins ? " \u00b7 " + mins + " minutes" : "") + '">' +
+      esc(p.code) + '</button>';
+  }).join("");
+  /* Wired where drawn — the row is painted after slidesWire() (§556.7). */
+  [].forEach.call(row.querySelectorAll("[data-slpart]"), function(b){
+    b.addEventListener("click", function(){
+      var el = all[+b.dataset.slpart];
+      if (el) { SLED.sel = el.dataset.ed; slidesPaint(); }
+    });
+  });
+  var on = row.querySelector(".slpart.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" });
 }
 function slidesGridToggle(on){
   var g = document.getElementById("slgrid");

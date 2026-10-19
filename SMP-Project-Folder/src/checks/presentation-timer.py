@@ -296,6 +296,25 @@ with sync_playwright() as p:
        val(tap, "moved") is False, tap)
     eva(pg, "()=>document.getElementById('dclock').click()"); pg.wait_for_timeout(150)
 
+    # §556.11: T pauses and starts and R resets — the room has no bar from
+    # the slides, so these are listed there. Pressed as an ARABIC keyboard
+    # sends them ("ف" on the T key, "ق" on R), which is how Islam found T
+    # dead: a handler that asks for the letter hears nothing.
+    def arabic(code, ch):
+        eva(pg, "([c,k])=>document.dispatchEvent(new KeyboardEvent('keydown',{code:c,key:k,bubbles:true}))", [code, ch])
+        pg.wait_for_timeout(150)
+    arabic("KeyT", "\u0641")
+    ok("T holds it, from an Arabic keyboard too (§556.11)", eva(pg, "()=>!DECK.clock.from") is True)
+    arabic("KeyT", "\u0641")
+    ok("...and T starts it again", eva(pg, "()=>!!DECK.clock.from") is True)
+    eva(pg, "()=>{ DECK.clock.ran = 5*60000; DECK.clock.from = Date.now(); clockPaint(); }")
+    arabic("KeyR", "\u0642")
+    left = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    full = eva(pg, "()=>DECK.clock.mins*60")
+    ok("R puts the part's time back to the top (§556.11)",
+       isinstance(left, (int, float)) and isinstance(full, (int, float)) and full - 3 <= left <= full,
+       {"left": left, "full": full})
+
     # RESET IS THE BAR'S ALONE. Asserted as an absence on the other two, or a
     # build that put it on the key would pass every assertion above (§94.2).
     eva(pg, """()=>{ DECK.clock.ran = 5*60000; DECK.clock.from = Date.now(); clockPaint(); }""")

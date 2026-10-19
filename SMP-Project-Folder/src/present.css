@@ -1065,6 +1065,20 @@
   .slgcell:focus-visible{ outline:none; }
   .slgcell:focus-visible .slgthumb{ box-shadow:0 0 0 3px var(--gold); }
   .slgcell.off .slgthumb{ opacity:.35; filter:grayscale(1); }
+  /* §556.11: the parts of the flow, under the bar — the room's pills,
+     moved to where the presenter arranges. */
+  .slparts{ display:flex; gap:6px; flex:none; overflow-x:auto; padding:9px 16px;
+    background:var(--surface); border-bottom:1px solid var(--line); scrollbar-width:thin; }
+  .slpart{ font:700 11px/1 var(--sans); letter-spacing:.06em; padding:7px 10px; flex:none;
+    border-radius:var(--r-pill); border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); cursor:pointer; white-space:nowrap; }
+  .slpart:hover{ border-color:var(--ink-3); color:var(--ink); }
+  .slpart.on{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .slpart:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .slnm b{ color:var(--ink); font-weight:700; }
+  .slnm span{ color:var(--ink-3); }
+  .slksep{ display:inline-block; width:1px; height:12px; background:var(--line);
+    margin:0 8px; vertical-align:middle; }
   .slkeys{ margin-left:auto; flex:none; font-size:12px; color:var(--ink-3);
     white-space:nowrap; }
   @media (max-width:860px){ .slkeys{ display:none; } }

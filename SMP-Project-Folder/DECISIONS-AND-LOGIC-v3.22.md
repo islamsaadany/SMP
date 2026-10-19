@@ -67228,3 +67228,18 @@ groups rather than the English ones — the first draft looked for "Direction"
 in a fixture that calls a pillar a Pillar, found only the capabilities, and
 reported a correct build as one that had lost a slide (§395). Shown failing
 on main's build: the stored order moves nothing there.
+
+## §553.11 — The picker's Kind column knew two kinds out of five (2026-10-19)
+
+The last red in the deck-and-flow sweep, and red on `origin/main` too:
+`master-picker` built its expectation for the Kind column as
+`FUNC : BU`. That was the whole vocabulary until §334 added capabilities,
+§481 added the company and a direction, and §553 added the company's own
+Foundation — so a picker correctly showing CAP and SECTION read as a broken
+one.
+
+Rewritten to the five kinds, and still computed from the BOARD's own lists
+and the target's own prefix (§94.8) rather than from `masterKind`, which is
+the function that draws the column and so cannot be its own witness. Green
+on both builds afterwards, which is the shape of a check fault: the product
+was right the whole time.

@@ -284,7 +284,20 @@ with sync_playwright() as p:
       const want = MFLOW.pick.slice();
       return {
         kinds: rows.map(r => r.querySelector('.mfkind').textContent.trim()),
-        wantKinds: want.map(t => fns.indexOf(t) >= 0 ? 'FUNC' : 'BU'),
+        /* FIVE KINDS, NOT TWO (§218). This read `FUNC : BU`, which was the
+           whole vocabulary until §334 added capabilities, §481 the company
+           and a direction, and §553 the company's own Foundation — so a
+           correct picker showing CAP and SECTION read as a broken one.
+           Still computed from the BOARD's own lists and the target's own
+           prefix (§94.8), never from `masterKind`, which is the thing the
+           column is drawn by and so cannot be its own witness. */
+        wantKinds: want.map(function(t){
+          if (t.indexOf('sec:') === 0) return 'SECTION';
+          if (t.indexOf('dir:') === 0) return 'DIR';
+          if (boardCapTargets().indexOf(t) >= 0) return 'CAP';
+          if (t === 'group') return companyReviewOn() ? 'CO' : 'BU';
+          return fns.indexOf(t) >= 0 ? 'FUNC' : 'BU';
+        }),
         slides: rows.map(r => +r.querySelector('.c-n').textContent.trim()),
         wantSlides: want.map(t => masterCount(t)),
         names: rows.map(r => r.querySelector('.c-nm').textContent.trim()),

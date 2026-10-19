@@ -66992,3 +66992,29 @@ there is still the seed list. So the menu is correct and nobody can reach it
 as Amr until he is a user on that client. §551 ("an owner is picked from the
 register, never typed") is the rule that prevents this from here on; El Abd's
 data predates it.
+
+## §553.5 — The Master presentation's picker knew only boxes (2026-10-19)
+
+Found while running every check that touches the decks before shipping stage
+5 (c): `master-presentation` was red — and red on `origin/main` too, so this
+is §553's own debt, not the branch's.
+
+§553 put two things in the picker that are not boxes: the company's
+Foundation and its Analysis, placeable in the running order and NOT in it
+until somebody places them (`masterDefault`). The check built its expectation
+from `boardUnitTargets() + boardCapTargets() + boardFunctionTargets()` — the
+boxes — so two true statements became false:
+
+- *"...so the waiting column is empty AND says why (§45.2)"*. With nothing
+  stored, every BOX presents, which is still true; the column is not empty
+  because Foundation is waiting in it. Rewritten to the rule, at both ends
+  (§94.2): exactly the unplaced parts wait, and no box does. An empty state
+  drawn over a row that IS there would be the very §45.2 fault the old line
+  guarded against.
+- *"a subject taken out moves to the waiting column, and only there"*. Its
+  `out` list was boxes only, so a correct build read as one that had lost a
+  row. It asks `masterSubjects()` now.
+
+The product was right both times; only the checks were stale. The check also
+learned `SMP_BUILT` (§276), which is how it was shown failing identically on
+main's build and passing on it after the rewrite.

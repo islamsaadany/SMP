@@ -146,6 +146,18 @@ A drift between specs and code is a documentation bug — report it before silen
 - **State what you verified and how** when handing over. If something is genuinely un-testable from here, say so explicitly and explain the residual risk — don't present unverified work as done.
 - **When a symptom persists, re-audit from first principles** instead of repeating the same instruction — find the proof before concluding.
 
+### 3c. CRITICAL: A Built File's Changes Are Not All Yours (2026-10-19)
+- **The built files are put together on demand, not every time somebody edits a
+  source file** — so they normally sit behind the sources by whatever other
+  people have finished and not yet rebuilt.
+- **Rebuilding one brings all of that with it.** It is all or nothing: there is
+  no way to include your work and leave theirs out.
+- **So never say a built file's changes are yours without looking.** This rule
+  exists because I told Islam a rebuilt file was "all of this change" when
+  roughly sixty per cent of it was somebody else's unshipped work.
+- **When you rebuild, say plainly what came along for the ride**, and run the
+  checks that belong to that work too — do not ship it on trust.
+
 ### 3b. Engineering Preferences (Overrides Defaults)
 - **DRY: flag repetition aggressively** — extract at 3+ repeats; flag at 2.
 - **Edge cases: handle more, not fewer** — nulls, empty states, unexpected input, boundaries.

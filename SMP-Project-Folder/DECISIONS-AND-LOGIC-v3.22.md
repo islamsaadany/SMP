@@ -67257,3 +67257,72 @@ Islam: *"I want to enable the smo team to have the drop down of view as for the 
 **RENAMED RATHER THAN WIDENED IN PLACE.** `isSMOSession()` is `maySimulateSession()` now. The question was always *may this session leave its own view*, and a name saying *is the SMO* while meaning *is the office* is how the next person comes to use it to gate a Super-user-only act. The fail-closed shape (§69.15) is untouched: hidden until something proves it should be shown. **The offline copy and the `file://` demo still list everybody** — there is no session to narrow and no server to act against.
 
 **CHECKS.** `smp-app/checks/view-as.mjs` — 33 green, **red four ways** (`viewas-any-seat`, `viewas-unknown-ok`, `viewas-keeps-seat`, and `viewas-team-takes-super`, the new one putting the escalation itself back). `scripts/test-authorize.js` — six new assertions on the save path, 1097 passing. `SMP-Project-Folder/src/checks/viewas-smoteam.py` — a new browser check that signs in as an SMO team member and presses the real controls: **green here, 7 red across §1–§4 on the build before**, which is where the leak above was measured. `checks/viewer-switch.py`, `checks/viewas-fresh.py`, `checks/role-picker.py` and `checks/seat-grant.py` all stay green.
+
+## §554.1 — The master flow is one presentation, so it opens like one (2026-10-19)
+
+Islam, having played it: *"we need a cover slide for the whole presentation
+as we are presenting elabd q3 strategy review and before the directions I
+find the grouped directions and same for the capabilities"*.
+
+The flow was each subject's deck back to back — nineteen covers and no cover
+for the thing itself, and the directions arriving one after another with
+nothing in front of them saying what the room was about to see. The company's
+own review has had that page since §553.6; the flow gets the SAME page,
+through the same builder.
+
+**LIFTED, NOT COPIED (§53.5).** `pillarCard`, `rollCallSlide` and
+`pillarGroups` came out of `deckSlides` unchanged, so the page the flow draws
+and the page the company's review draws are one page. Proved by measurement
+rather than by reading: with the three lifted out and nothing else altered,
+every deck of all three live clients is byte-identical.
+
+**INSERTED, NOT PLACED.** The cover and the two roll-calls are not subjects
+anybody ticks: the cover opens the flow because the flow is a presentation,
+and a group's page goes in front of the first of its members because that is
+what the page is for. Islam's word for it, twice, was *"automatically"*. A
+group with nobody in the flow gets no page (§45.2, §253).
+
+The divider that used to be built beside the roll-call stayed with the DECK,
+because the flow draws the roll-calls without it.
+
+## §554.2 — Three things the picker owed whoever uses it (2026-10-19)
+
+All three are Islam's, from one message after using it on El Abd.
+
+**IT STAYS WHERE IT WAS.** *"everytime I remove something from the right the
+list jumps it needs to stay still"*. Every press repaints the whole dialog,
+so both columns were scrolled back to the top under the finger — on a flow of
+nineteen, taking out the last row put the row you were working on off the
+screen. Each column's position is read before the repaint and put back after.
+
+**IT NARROWS BY KIND.** *"on the left list I need to have filters so I can
+choose from directions or capabilities or divisions to filter the functions
+so I can select properly or all"*. The chips are built from the kinds the
+client ACTUALLY has, so a client with no divisions is not offered a chip over
+nothing (§45.2), and they are asserted to add up to the whole list — a filter
+that hides a row nobody can reach another way is worse than no filter (§96.2).
+
+**AND IT EMPTIES.** *"there should be somewhere where I reset all and bring
+all selected flow to the left as if deselect all from the right pan"*.
+Nineteen presses, or one. Drawn only while there is something to take out
+(§61).
+
+**ONE WORD FOR WHAT A SUBJECT IS, AND IT FIXED WHAT THE COLUMN SAID.** The
+filter needed the kind as a bare word; `masterKind` spelled the same question
+out again as a chip. The chip is built FROM the word now, and the word is
+read from the pillar's own stored kind — which is how it came out that **a
+capability of El Abd's read DIR in the Kind column**, all five of them,
+because a capability is presented as `dir:<id>` exactly as a direction is.
+
+**A CORRECTION TO §553.11'S OWN RECORD.** It says the rewritten Kind claim was
+"green on both builds". `master-picker` did not read `SMP_BUILT` at all, so
+both runs were this build and the second proved nothing. It reads it now, and
+on main's build the six new claims here fail as they should — the scroll one
+reading 0 where it should read 200, which is the jump Islam reported. The
+Kind claim does pass on main's build, as that record said; it was the
+verification that was worthless, not the sentence.
+
+`master-picker` §9 holds the three, and `direction-decks` §3b the flow's
+cover and pages — the capability's Kind word among them, because the demo
+client has units and so its picker holds no `dir:` row for `master-picker` to
+see it on.

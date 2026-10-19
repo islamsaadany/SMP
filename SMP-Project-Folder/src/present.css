@@ -971,6 +971,24 @@
   .mflow .mfcount {
     flex:none; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums;
   }
+  /* §554.2: the kind chips sit on their own line under the head's one line,
+     so the search keeps the width it had and a client with six kinds does
+     not squeeze it to nothing. `order` rather than a second container: the
+     head is already the row these belong to. */
+  .mflow .mfhead { flex-wrap:wrap; }
+  .mflow .mfkinds {
+    order:1; flex:1 0 100%; display:flex; flex-wrap:wrap; gap:5px; padding-top:2px;
+  }
+  .mflow .mfchip {
+    font:inherit; font-size:11px; line-height:1; padding:5px 9px; cursor:pointer;
+    border:1px solid var(--line); border-radius:999px;
+    background:var(--surface); color:var(--ink-2);
+  }
+  .mflow .mfchip:hover { border-color:var(--ink-3); }
+  .mflow .mfchip.on {
+    border-color:var(--gold); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold);
+  }
+  .mflow .mfchip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   /* A column that has legitimately emptied says so, or it reads as a pane that
      failed to render (§45.2). Quiet, because neither state is a fault. */
   .mflow .mfempty {

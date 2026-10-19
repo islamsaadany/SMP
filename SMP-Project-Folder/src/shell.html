@@ -1609,7 +1609,7 @@
     });
     if (alsoWhole) return out;
     if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
-    if (left.length) out.push({ fold:"units", label:labelWord("topword", "group"), keys:left });
+    if (left.length) out.push({ fold:"units", label:topOwnName() || labelWord("topword", "group"), keys:left });
     return out;
   }
   function companyFnSides(fs, alsoWhole){
@@ -1626,7 +1626,7 @@
     if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
-    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
+    if (left.length) out.push({ fold:"fns", label:topOwnName() || labelWord("topword", "group"),
       keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1694,7 +1694,7 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topOwnName() || labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
     /* §448: planned on the company, a division is read under Strategy ›
        Performance rather than visited, so it leaves the navigation — unless
        the group is out of reach, when the divisions are all there is. */

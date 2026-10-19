@@ -1898,8 +1898,19 @@ function roleWhereLabel(at){
        So it is dropped from the seven that are unambiguous and kept for the one
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
+/* ── A COMPANY IS CALLED BY ITS OWN NAME (§556.13) ──────────────────────
+   Islam, of El Abd: *"there is nothing called elabd review as a group"* —
+   and then of the two places the platform still said it, the top tab and
+   "Mohamed Essam — the group" in Viewing as. With no business units the
+   top IS the company, and its name is the word; with units it really is a
+   group, and the client's own top word (§404) still stands. Empty when
+   there is no name to use, so every caller keeps its old word. */
+function topOwnName(){
+  var org = String((GROUP && GROUP.org) || "").trim();
+  return (org && !buExists()) ? org : "";
+}
 function placeLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topOwnName() || "the group";
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is

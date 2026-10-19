@@ -9558,8 +9558,19 @@ function roleWhereLabel(at){
        So it is dropped from the seven that are unambiguous and kept for the one
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
+/* ── A COMPANY IS CALLED BY ITS OWN NAME (§556.13) ──────────────────────
+   Islam, of El Abd: *"there is nothing called elabd review as a group"* —
+   and then of the two places the platform still said it, the top tab and
+   "Mohamed Essam — the group" in Viewing as. With no business units the
+   top IS the company, and its name is the word; with units it really is a
+   group, and the client's own top word (§404) still stands. Empty when
+   there is no name to use, so every caller keeps its old word. */
+function topOwnName(){
+  var org = String((GROUP && GROUP.org) || "").trim();
+  return (org && !buExists()) ? org : "";
+}
 function placeLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topOwnName() || "the group";
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
@@ -71683,7 +71694,7 @@ var SYNC = (function () {
     });
     if (alsoWhole) return out;
     if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
-    if (left.length) out.push({ fold:"units", label:labelWord("topword", "group"), keys:left });
+    if (left.length) out.push({ fold:"units", label:topOwnName() || labelWord("topword", "group"), keys:left });
     return out;
   }
   function companyFnSides(fs, alsoWhole){
@@ -71700,7 +71711,7 @@ var SYNC = (function () {
     if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
-    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
+    if (left.length) out.push({ fold:"fns", label:topOwnName() || labelWord("topword", "group"),
       keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -71768,7 +71779,7 @@ var SYNC = (function () {
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topOwnName() || labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
     /* §448: planned on the company, a division is read under Strategy ›
        Performance rather than visited, so it leaves the navigation — unless
        the group is out of reach, when the divisions are all there is. */

@@ -695,7 +695,8 @@ function slidesOpen(kind, key){
   if (!canSpeakFor(target)) return;
   SLED = { target:target, kind:kind, key:key, sel:null, err:"", flow:null };
   var root = document.getElementById("slideroot");
-  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-title").textContent = picTargetName(kind, key);
+  slidesLogo(root, deckMark(UNITS[target] || null));
   /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
      see it. Islam's own reason for asking: somebody who knows they have
      fifteen minutes builds a shorter deck.
@@ -710,8 +711,7 @@ function slidesOpen(kind, key){
      minutes" is wrong said to the person who set it. And nothing at all when
      no time is set — silence rather than a nought nobody chose (§35). */
   var mins = SMPRules.presentMins(GROUP, target);
-  root.querySelector(".sl-sub").textContent =
-    picTargetName(kind, key) + " · " + (REVIEW.name || "") +
+  root.querySelector(".sl-sub").textContent = (REVIEW.name || "") +
     (mins ? " · " + mins + " minutes to present" : "");
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -747,7 +747,10 @@ function slidesOpenFlow(list){
   if (!list.length || !SMPRules.mayMasterPresent(world(), viewer())) return;
   SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
   var root = document.getElementById("slideroot");
-  root.querySelector(".sl-title").textContent = "Master presentation";
+  var org = String(GROUP.org || "").trim();
+  root.querySelector(".sl-title").textContent =
+    (org ? org + " \u00b7 " : "") + "Master presentation";
+  slidesLogo(root, groupLogo());
   root.querySelector(".sl-sub").textContent =
     plural(list.length, "subject") + " \u00b7 " + (REVIEW.name || "");
   root.classList.add("on");
@@ -756,6 +759,14 @@ function slidesOpenFlow(list){
   if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
   slidesPaint();
   root.focus();
+}
+/* The mark on the left of the bar, as Islam's page carries it: the client's
+   round logo beside the name. None set, none drawn — an empty frame is not
+   a logo (§45.2). */
+function slidesLogo(root, src){
+  var im = root.querySelector(".sl-logo");
+  if (!im) return;
+  if (src) { im.src = src; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
 }
 function picTargetName(kind, key){
   return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
@@ -836,13 +847,13 @@ function slidesPaint(){
         + "produces no deck, so there is nowhere to put a picture.") + '</p>';
     return;
   }
-  /* Keep the selection if it still exists; otherwise take the first picture
-     slide, and failing that the first slide. */
+  /* Keep the selection if it still exists; otherwise the FIRST SLIDE.
+     It took the first picture slide, from when this screen was only for
+     managing pictures. It is the deck now, and a deck opens on its cover —
+     Islam: *"why the presentation open on the added slide the default
+     should start from the first slide"*. */
   var keys = all.map(function(el){ return el.dataset.ed; });
-  if (keys.indexOf(SLED.sel) < 0) {
-    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
-    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
-  }
+  if (keys.indexOf(SLED.sel) < 0) SLED.sel = keys[0];
 
   /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
      rail, after all twenty-three rows — so the one control the whole mode
@@ -932,14 +943,54 @@ function slidesPaint(){
 function slidesGridPaint(all){
   var g = document.getElementById("slgrid");
   if (!g) return;
-  g.innerHTML = all.map(function(el, i){
-    var nm = slidesLabel(el);
-    return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
-      (el.dataset.off ? " off" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
-      '<span class="slgn">' + (i + 1) + '</span>' +
-      '<span class="slgnm">' + esc(nm) + '</span>' +
-      (el.dataset.off ? '<span class="slghid">hidden</span>' : '') + '</button>';
-  }).join("");
+  SLED.all = all;
+  /* Drawn only while open: every cell is a whole slide, and a flow is two
+     hundred of them — built on every repaint behind a closed grid, they
+     would double the cost of every press for nobody. */
+  if (g.hidden) { g.innerHTML = ""; return; }
+  g.innerHTML =
+    '<div class="slghead"><h3>All slides</h3>' +
+      '<button class="sl-b" data-slgclose>Close (Esc)</button></div>' +
+    '<div class="slglist">' + all.map(function(el, i){
+      return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (el.dataset.off ? " off" : "") + '" data-slgcell="' + esc(el.dataset.ed) +
+        '" title="' + esc(slidesLabel(el)) + '">' +
+        '<span class="slgn">' + (i + 1) +
+          (el.dataset.off ? ' <em>Hidden</em>' : '') + '</span>' +
+        '<span class="slgthumb"><span class="slgthumb-in"></span></span></button>';
+    }).join("") + '</div>';
+  /* A REAL SLIDE IN EVERY CELL, like the rail (§51) and like his grid —
+     a list of titles on cards is not a picture of the deck. */
+  var holders = g.querySelectorAll(".slgthumb-in");
+  [].forEach.call(holders, function(h, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    h.appendChild(c);
+  });
+  slidesGridFit();
+  /* WIRED HERE, because the grid is drawn AFTER slidesWire() has run — the
+     first version's cells carried `data-slgo` and nothing listened. Picking
+     a slide closes the grid on it, as his does. */
+  [].forEach.call(g.querySelectorAll("[data-slgcell]"), function(b){
+    b.addEventListener("click", function(){
+      SLED.sel = b.dataset.slgcell;
+      g.hidden = true;
+      slidesPaint();
+    });
+  });
+  var x = g.querySelector("[data-slgclose]");
+  if (x) x.addEventListener("click", function(){ slidesGridToggle(false); });
+  var on = g.querySelector(".slgcell.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"center" });
+}
+/* Each cell is as wide as the grid gives it, so the slide inside is scaled
+   to that width rather than to a number guessed here. */
+function slidesGridFit(){
+  [].forEach.call(document.querySelectorAll("#slgrid .slgthumb"), function(t){
+    var w = t.clientWidth;
+    var inn = t.firstChild;
+    if (w && inn) inn.style.transform = "scale(" + (w / 1600) + ")";
+  });
 }
 /* The counter, the slide's name and the keys, on ONE bar under the stage
    (§556.3) — Islam's own page carries exactly these three, in this order,
@@ -965,6 +1016,7 @@ function slidesGridToggle(on){
   g.hidden = on === undefined ? !g.hidden : !on;
   var b = document.querySelector("[data-slgrid]");
   if (b) b.classList.toggle("on", !g.hidden);
+  slidesGridPaint(SLED.all || []);
 }
 
 /* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
@@ -1727,7 +1779,7 @@ function wireSlides(){
     rb.classList.toggle("on", !on);
     slidesFitStage();
   });
-  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  addEventListener("resize", function(){ if (root.classList.contains("on")) { slidesFitStage(); slidesGridFit(); } });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     /* ── THE DECK IN FRONT HAS THE KEYBOARD (§295) ──────────────────

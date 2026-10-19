@@ -965,16 +965,22 @@
   .slidebar{ background:var(--surface); color:var(--ink);
     border-bottom:1px solid var(--line); }
   .sl-who{ display:flex; flex-direction:column; min-width:0; }
-  .slidebar .sl-title{ font-size:var(--fs-small); font-weight:700; color:var(--ink);
-    letter-spacing:0; text-transform:none; }
-  .slidebar .sl-sub{ font-size:var(--fs-micro); color:var(--ink-3); margin-top:2px; }
+  /* His `.brand`: a 40px mark, the name bold at 16px, the line under it 12px
+     and quiet, neither wrapping. */
+  .slidebar{ min-height:56px; }
+  .sl-logo{ width:40px; height:40px; object-fit:contain; flex:none; display:block; }
+  .slidebar .sl-title{ font-size:16px; font-weight:700; color:var(--ink);
+    letter-spacing:0; text-transform:none; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .slidebar .sl-sub{ font-size:12px; color:var(--ink-3); margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   /* His `.btn`, measure for measure: inline-flex, 7px gap, 9px radius,
      7/12 padding, 13px at 600, a 16px icon stroked at 2 in currentColor,
      and one filled button. */
   .sl-b{ display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
     font:inherit; font-size:13px; font-weight:600; cursor:pointer;
     padding:7px 12px; border-radius:9px; border:1px solid var(--line);
-    background:var(--bg); color:var(--ink); }
+    background:var(--surface); color:var(--ink); }
   .sl-b svg{ width:16px; height:16px; stroke:currentColor; fill:none;
     stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   /* No case or tracking of its own: the bar it sits in sets both, and his
@@ -1012,7 +1018,7 @@
   .slnav{ width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none;
     border:1px solid var(--line); background:var(--surface); color:var(--ink);
     font:400 18px/1 var(--sans); display:grid; place-items:center; }
-  .slnav:hover{ background:var(--line-2, var(--bg)); }
+  .slnav:hover{ background:var(--zebra); }
   .slnav:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
   .slct{ font-size:13px; font-weight:700; color:var(--ink);
     min-width:52px; text-align:center; font-variant-numeric:tabular-nums; }
@@ -1026,25 +1032,34 @@
   /* ── §556.2: ALL SLIDES, AND THE KEYS ─────────────────────────────
      The grid covers the rail and the stage together, because it IS the
      deck — a panel beside them would be a third place to look. */
-  .slgrid{
-    position:absolute; inset:0; z-index:3; overflow:auto; background:var(--bg);
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-    gap:10px; padding:16px; align-content:start;
-  }
-  .slgcell{
-    text-align:left; cursor:pointer; background:var(--surface); color:var(--ink);
-    border:1px solid var(--line); border-radius:7px; padding:9px 10px; font:inherit;
-    display:flex; flex-direction:column; gap:4px; min-width:0;
-  }
-  .slgcell:hover{ border-color:var(--ink-3); }
-  .slgcell.on{ border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
-  .slgcell:focus-visible{ outline:2px solid var(--gold); outline-offset:1px; }
-  .slgn{ font:700 10px/1 var(--sans); color:var(--ink-3); letter-spacing:.08em; }
-  .slgnm{ font-size:12.5px; line-height:1.3; color:var(--ink-2);
-    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-  .slgcell.off .slgnm{ color:var(--ink-3); text-decoration:line-through; }
-  .slghid{ font:700 9.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+  /* His grid: a solid page over everything (it was `var(--bg)`, a token
+     this platform does not have, so the slide behind showed through), a
+     heading with a way out, and every slide drawn small with its number
+     above it. */
+  .slgrid{ position:absolute; inset:0; z-index:3; overflow:auto;
+    background:var(--ground); padding:22px 24px 30px; }
+  .slghead{ display:flex; align-items:center; justify-content:space-between;
+    margin:0 0 14px; }
+  .slghead h3{ margin:0; font-size:20px; font-weight:700; color:var(--ink); }
+  .slglist{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:22px 20px; }
+  .slgcell{ text-align:left; cursor:pointer; background:none; border:0; padding:0;
+    font:inherit; color:var(--ink); display:flex; flex-direction:column; gap:7px;
+    min-width:0; }
+  .slgn{ font-size:13px; font-weight:600; color:var(--ink-3); }
+  .slgn em{ font-style:normal; font-size:11px; font-weight:700; margin-left:6px;
     color:var(--ink-3); }
+  .slgthumb{ display:block; position:relative; width:100%; aspect-ratio:16/9;
+    overflow:hidden; border-radius:6px; border:1px solid var(--line);
+    background:var(--surface); box-shadow:var(--shadow-sm); }
+  .slgthumb-in{ display:block; position:relative; width:1600px; height:900px;
+    transform-origin:0 0; pointer-events:none; }
+  .slgcell:hover .slgthumb{ border-color:var(--ink-3); }
+  .slgcell.on .slgthumb{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); }
+  .slgcell.on .slgn{ color:var(--ink); }
+  .slgcell:focus-visible{ outline:none; }
+  .slgcell:focus-visible .slgthumb{ box-shadow:0 0 0 3px var(--gold); }
+  .slgcell.off .slgthumb{ opacity:.35; filter:grayscale(1); }
   .slkeys{ margin-left:auto; flex:none; font-size:12px; color:var(--ink-3);
     white-space:nowrap; }
   @media (max-width:860px){ .slkeys{ display:none; } }

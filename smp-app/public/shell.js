@@ -6253,7 +6253,7 @@ var GROUP = {
       projects: [
         { name: "Standardise the core order process across units", owner: "Ashraf Abdelaty",
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
-          stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Single documented order process", due: "Sep 26", status: "done" },
             { name: "Unit-by-unit gap assessment", due: "Oct 26", status: "done" },
@@ -6272,7 +6272,7 @@ var GROUP = {
           ] },
         { name: "Cost-to-serve model and monthly review", owner: "Fayad Sobhy",
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
-          stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Finance"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Cost-to-serve model built and validated", due: "Sep 26", status: "done" },
             { name: "Monthly review running with all units", due: "Oct 26", status: "wip", pct: 60 }
@@ -6287,7 +6287,7 @@ var GROUP = {
           ] },
         { name: "First-time-right programme in distribution", owner: "Hala",
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
-          stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["Distribution"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Failure analysis on twelve months of orders", due: "Dec 26", status: "done" },
             { name: "Corrective standard operating procedures", due: "May 26", status: "wip", pct: 40, note: "Drafted for the two largest warehouses; the rest follow the Q3 process review." }
@@ -6311,7 +6311,7 @@ var GROUP = {
       projects: [
         { name: "Key-role succession map for every unit", owner: "Noran Adel",
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
-          stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
+          stakeholders: ["HR"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
             { name: "Key-role definition agreed group-wide", due: "Apr 26", status: "done" },
             { name: "Succession map per unit", due: "Oct 26", status: "wip", pct: 70 }
@@ -6343,7 +6343,7 @@ var GROUP = {
           ] },
         { name: "Group training calendar and delivery", owner: "Hala",
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
-          stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["HR"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Annual training calendar published", due: "Apr 26", status: "done" },
             { name: "Calendar delivered", due: "Mar 26", status: "wip", pct: 44, note: "Half the calendar is delivered; the rest is scheduled around the peak trading period." }
@@ -6368,7 +6368,7 @@ var GROUP = {
       projects: [
         { name: "Consolidate ERP instances across units", owner: "Abdelhamid",
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
-          stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Target instance design", due: "Sep 26", status: "done" },
             { name: "Instances migrated", due: "Jun 26", status: "wip", pct: 33,
@@ -6437,7 +6437,7 @@ var GROUP = {
           ] },
         { name: "Trade communication programme", owner: "Tarek Nour",
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
-          stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["Marketing"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Twelve-month communication calendar", due: "Sep 26", status: "done" },
             { name: "Calendar executed", due: "Dec 26", status: "wip", pct: 35 }
@@ -6460,7 +6460,7 @@ var GROUP = {
       projects: [
         { name: "Voice of customer loop across units", owner: "Mennah Farouk",
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
-          stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Care"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Feedback instrument agreed across units", due: "Apr 26", status: "done" },
             { name: "Loop running in all units", due: "Dec 26", status: "wip", pct: 50 }
@@ -6496,7 +6496,7 @@ var GROUP = {
       projects: [
         { name: "Portfolio review cadence", owner: "Tarek Nour",
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
-          stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Review framework and evidence pack", due: "Mar 26", status: "done" },
             { name: "Quarterly reviews held", due: "Feb 26", status: "wip", pct: 50 }
@@ -6526,7 +6526,7 @@ var GROUP = {
            refused. */
         { name: "Average debt utilisation report automation", owner: "Hossam Abuelenien", real: true,
           brief: "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
-          stakeholders: ["Finance Department", "IT Department"], timeline: "date",
+          stakeholders: ["Finance", "IT"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
             { name: "Oracle-based interest utilisation form", due: "Feb 26", status: "done" },
@@ -6549,7 +6549,7 @@ var GROUP = {
           ] },
         { name: "Credit facility consolidation", owner: "Fayad Sobhy",
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
-          stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Finance", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Facility term sheet agreed with lead bank", due: "Feb 26", status: "wip", pct: 50, note: "Terms are back from two of the three lenders; the third is expected in July and the sheet is signed once all three are in." },
             { name: "Covenant reporting pack rebuilt", due: "Sep 26", status: null },
@@ -6566,7 +6566,7 @@ var GROUP = {
           ] },
         { name: "Working capital programme across units", owner: "Hossam Abuelenien",
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
-          stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
+          stakeholders: ["Finance"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
             { name: "Working capital baseline per unit", due: "Sep 26", status: null },
             { name: "Unit-level release plans agreed", due: "Dec 26", status: null }
@@ -6592,7 +6592,7 @@ var GROUP = {
       projects: [
         { name: "Quarterly review cadence with every unit", owner: "Islam Saadany",
           brief: "A review with every unit every quarter, on the same evidence, in the same shape.",
-          stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
+          stakeholders: ["Strategy Management Office"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Review format and evidence pack", due: "May 26", status: "done" },

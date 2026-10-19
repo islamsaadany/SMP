@@ -325,8 +325,17 @@ with sync_playwright() as p:
        sh.get("multiple") is True and (sh.get("n") or 0) > 20, sh)
     ck("...holding people AND the units and functions, as Islam described it",
        "People" in (sh.get("groups") or []) and "Departments" in (sh.get("groups") or []), sh)
-    ck("...with what the project already held still picked, not dropped",
-       sorted(sh.get("picked") or []) == ["Finance Department", "IT Department"], sh)
+    # READ OFF THE PROJECT, NOT TYPED HERE (§48's rule for rows, applied to a
+    # fixture): the first draft asserted ["Finance Department", "IT Department"]
+    # as literals and went red the moment §551.4 tidied the demo — a check that
+    # breaks when the CONTENT changes is measuring the content, not the control.
+    held = ev(pg, """() => { const pr = (FUNCTIONS.finance.projects || [])
+        .find(p => (p.name || '').indexOf('debt utilisation') > -1);
+        return pr ? pr.stakeholders : null; }""", None)
+    ck("(fixture) that project carries stakeholders to begin with",
+       isinstance(held, list) and len(held) > 1, held)
+    ck("...and every one of them is still picked, not dropped",
+       sorted(sh.get("picked") or []) == sorted(held or [None]), (sh.get("picked"), held))
     ck("...and it is searchable, through §536's own list",
        ev(pg, """() => { const s = document.querySelector("select.collabsel[aria-label='Stakeholders']");
             return (typeof SEARCHSEL !== 'undefined' && SEARCHSEL.openOn) ? SEARCHSEL.openOn(s) : false; }""", False) is True)
@@ -347,7 +356,40 @@ with sync_playwright() as p:
     ck("AND PICKING WRITES THE WHOLE LIST TO THE PROJECT, not just the first name",
        wrote.get("wrote") == wrote.get("pick") and len(wrote.get("pick") or []) == 2, wrote)
 
-    print("\n§12 · and the build is quiet")
+    print("\n§12 · and the demo names only real units and people (§551.4)")
+    # Islam: "fix the demo stakeholders too." Of twelve distinct values, two were
+    # the register's own names with a word added ("Finance Department" for
+    # Finance) and three matched nothing he has — "Operations", "Sales" and
+    # "Unit heads", the last a role group rather than a unit or a person. Shown
+    # the four ways out, he took: drop the three, keep the real stakeholder
+    # beside them, and let the one project that names distribution in its own
+    # title say Distribution.
+    demo = ev(pg, """() => { const all = new Set(), rows = [];
+        const add = p => { (p.stakeholders || []).forEach(s => all.add(s));
+                           rows.push([p.name, (p.stakeholders || []).length]); };
+        (GROUP.capabilities || []).forEach(c => (c.projects || []).forEach(add));
+        Object.keys(FUNCTIONS || {}).forEach(k => (FUNCTIONS[k].projects || []).forEach(add));
+        const known = ownerKnownSet();
+        return { strays: [...all].filter(s => !known.has(s)).sort(),
+                 emptied: rows.filter(r => !r[1]).map(r => r[0]),
+                 carrying: rows.length }; }""", {})
+    ck("(fixture) the demo has projects with stakeholders to measure",
+       (demo.get("carrying") or 0) > 10, demo.get("carrying"))
+    ck("not one stakeholder in the demo is outside the register now",
+       demo.get("strays") == [], demo.get("strays"))
+    # ONE ASSERTION, NOT TWO. The first draft split this label over two `ck`
+    # calls with the SAME condition, so the second could never say anything the
+    # first had not — §113.8's family, a line that looks like evidence.
+    ck("...and no project was emptied to achieve it, which would trade one fault for another",
+       demo.get("emptied") == [], demo.get("emptied"))
+    ck("the project whose own title names distribution says Distribution",
+       ev(pg, """() => { const all = [];
+            (GROUP.capabilities || []).forEach(c => (c.projects || []).forEach(p => all.push(p)));
+            Object.keys(FUNCTIONS || {}).forEach(k => (FUNCTIONS[k].projects || []).forEach(p => all.push(p)));
+            const p = all.find(x => /first-time-right/i.test(x.name || ''));
+            return p ? p.stakeholders : null; }""", None) == ["Distribution"])
+
+    print("\n§13 · and the build is quiet")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

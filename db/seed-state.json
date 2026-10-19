@@ -207,8 +207,7 @@
       "owner": "Tarek Nour",
       "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
       "stakeholders": [
-       "Marketing",
-       "Unit heads"
+       "Marketing"
       ],
       "timeline": "quarter",
       "start": "Q1 2026",
@@ -4201,8 +4200,8 @@
      "real": true,
      "brief": "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
      "stakeholders": [
-      "Finance Department",
-      "IT Department"
+      "Finance",
+      "IT"
      ],
      "timeline": "date",
      "start": "1 Jan 2026",
@@ -4307,7 +4306,7 @@
      "owner": "Fayad Sobhy",
      "brief": "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
      "stakeholders": [
-      "Finance Department",
+      "Finance",
       "Treasury"
      ],
      "timeline": "quarter",
@@ -4391,7 +4390,7 @@
      "owner": "Hossam Abuelenien",
      "brief": "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
      "stakeholders": [
-      "Finance Department"
+      "Finance"
      ],
      "timeline": "quarter",
      "start": "Q3 2026",
@@ -4507,8 +4506,7 @@
      "owner": "Noran Adel",
      "brief": "Name a successor for every key role in every unit, and know which ones have nobody.",
      "stakeholders": [
-      "HR",
-      "Unit heads"
+      "HR"
      ],
      "timeline": "quarter",
      "start": "Q1 2026",
@@ -4641,8 +4639,7 @@
      "owner": "Hala",
      "brief": "One training calendar for the group, published ahead of the year and actually delivered.",
      "stakeholders": [
-      "HR",
-      "Unit heads"
+      "HR"
      ],
      "timeline": "quarter",
      "start": "Q1 2026",
@@ -4754,7 +4751,6 @@
      "owner": "Ashraf Abdelaty",
      "brief": "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
      "stakeholders": [
-      "Operations",
       "IT"
      ],
      "timeline": "quarter",
@@ -4845,8 +4841,7 @@
      "owner": "Fayad Sobhy",
      "brief": "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
      "stakeholders": [
-      "Finance",
-      "Operations"
+      "Finance"
      ],
      "timeline": "quarter",
      "start": "Q1 2026",
@@ -4912,7 +4907,7 @@
      "owner": "Hala",
      "brief": "Cut the rework in distribution by fixing the two failure points that produce most of it.",
      "stakeholders": [
-      "Operations"
+      "Distribution"
      ],
      "timeline": "quarter",
      "start": "Q2 2026",
@@ -5069,8 +5064,7 @@
      "owner": "Tarek Nour",
      "brief": "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
      "stakeholders": [
-      "Marketing",
-      "Sales"
+      "Marketing"
      ],
      "timeline": "quarter",
      "start": "Q2 2026",
@@ -5149,8 +5143,7 @@
      "brief": "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
      "stakeholders": [
       "IT",
-      "Finance",
-      "Unit heads"
+      "Finance"
      ],
      "timeline": "quarter",
      "start": "Q2 2026",
@@ -5396,8 +5389,7 @@
      "owner": "Mennah Farouk",
      "brief": "One feedback loop, running continuously, whose output reaches the people who can act on it.",
      "stakeholders": [
-      "Care",
-      "Unit heads"
+      "Care"
      ],
      "timeline": "quarter",
      "start": "Q1 2026",
@@ -5556,8 +5548,7 @@
      "owner": "Islam Saadany",
      "brief": "A review with every unit every quarter, on the same evidence, in the same shape.",
      "stakeholders": [
-      "Strategy Management Office",
-      "Unit heads"
+      "Strategy Management Office"
      ],
      "timeline": "quarter",
      "start": "Q1 2026",

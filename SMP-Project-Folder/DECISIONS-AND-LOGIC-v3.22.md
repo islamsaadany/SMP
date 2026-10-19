@@ -66165,4 +66165,21 @@ Asked **where** stakeholders are written, the answer was worth having before any
 
 **CHECK.** The §551 check gained §11 — green here, **9 red on the build before**. It asserts owners keep their wording (the new argument must not have reached them), that what the project held is still picked rather than dropped, and that **picking writes the WHOLE list** to the project — a `<select multiple>` wired through the single-value path saves one name and silently drops the rest, which is the fault §130.1 recorded when the collaborators cell was built.
 
-**NOT DONE, and named (§54.5):** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.
+**NOT DONE, and named (§54.5)** — **done the next morning, §551.4, because naming it got it asked for:** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.
+
+## §551.4 — The demo names only real units and people (2026-10-19)
+Islam: *"fix the demo stakeholders too."* §551.3 had named the five non-conforming values and left them, on the grounds that demo content is a separate change with his name on it. This is that change.
+
+**TWO WERE MIS-SPELLINGS AND NEEDED NO DECISION.** *"Finance Department"* (three projects) and *"IT Department"* (one) are the register's own names with a word added — Finance and IT. Fixed outright, because they are right under every reading of what a stakeholder is.
+
+**THREE HAD NO HOME AT ALL, and that was worth establishing before guessing.** *"Operations"*, *"Sales"* and *"Unit heads"* match **no unit, function, company or business unit this tenant has** — checked against all 25 of them, and against the 33 people. The last is not even the same kind of thing: a role group, where Islam's rule is *"either units or people names."*
+
+**SO HE WAS SHOWN FOUR WAYS OUT, each with the rows it would produce**, and took the first: **drop the three, keep the real stakeholder beside them.** Every affected project already named a real one — except *"First-time-right programme in distribution"*, which carried *"Operations"* alone, and **whose own title names distribution**, so it says **Distribution** now. That is the only value substituted, and it is read off the project's own name rather than inferred.
+
+**WHAT WAS NOT DONE, and it is the reason the question was asked at all.** The third option would have mapped *Operations → Logistics*, *Sales → Merchandising*, *Unit heads → Corporate*. **Every one of those is a guess about what the demo meant**, and nothing in the projects' own text points at any of them. Putting a guess into seed data is worse than leaving a visible oddity, because the oddity invites a question and the guess answers one nobody asked. §551.2 is the whole lesson: a theory formed before the measurement is finished.
+
+**THE SEED FOLLOWED MECHANICALLY.** `db/seed-state.json` is generated from `group-data.js` by `scripts/extract-state.js`, so the file was edited once and the seed regenerated — the demo content in the database cannot drift from the sources, which is what that script exists for.
+
+**CHECK.** The §551 check gained §12 — green here, **2 red on the build before**. It asserts **no stakeholder anywhere in the demo is outside the register**, which is a permanent regression guard rather than a statement about today's values, and **that no project was emptied to achieve it** — dropping names until nothing is left would satisfy the first assertion and trade one fault for another. 19 projects carry stakeholders; all 19 still do.
+
+**AND ONE FAULT IN THE CHECK ITSELF, recorded rather than quietly fixed.** §551.3's assertion that the project's stakeholders are still picked was written with `["Finance Department", "IT Department"]` as **literals**, and went red the moment this entry tidied the demo. **A check that breaks when the content changes is measuring the content, not the control.** It reads the project's own list now (§48's rule about addressing a row, applied to a fixture). A second draft also split one label across two `ck` calls with the same condition, so the second could never say anything the first had not — §113.8's family, a line that looks like evidence.

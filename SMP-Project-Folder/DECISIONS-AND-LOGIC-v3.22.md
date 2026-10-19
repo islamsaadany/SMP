@@ -67178,3 +67178,53 @@ review short — he chose to leave the flow alone and accept that it now shows
 each direction twice. The company's own review is the deck that mattered this
 week. The opening stays El Abd's compact pair (one Foundation, one Analysis)
 rather than a unit's eight slides, which was not asked for.
+
+## §553.10 — The running order is the order the company's review runs in (2026-10-19)
+
+Islam: *"I need to be able to set the arrangement of the directions and
+capabilties which appears first and which after"*, and then, of the shape put
+back to him: *"the company picker should pick the foundation of the company
+then I pick the directions arrangement and then the capabilities arranged.
+and the grouped directions comes before the directions automatically and the
+capability grouped comes before the capabilities automatically … is that
+ok?"* It is.
+
+**TWO PLACES ALREADY ORDERED THESE, AND ONE OF THEM RENUMBERS.** Measured
+before anything was built: the plan's own Arrange (Strategy › Directions ›
+Edit, drag by the handle) reorders them and the deck follows — and
+`pillarCode` counts position within a kind, so dragging Egypt Expansion to
+the top makes it **D001 on every surface in the platform**. An order for a
+room must not rewrite the codes the year is filed under.
+
+The other is the Master presentation's running order, which already lists
+every one of El Abd's five directions and five capabilities by name
+(`dir:<id>`), draggable, stored per client as an absence. So the company's
+review reads THAT. No second control, nothing to keep in step (§53.5).
+
+**THE ORDER ONLY, NEVER THE MEMBERSHIP.** A tick in that picker says who
+presents in the MASTER FLOW. It cannot also mean "and is therefore in the
+company's own deck", or unticking a direction would silently drop it from
+the company's review of its own plan (§96.2). What the order does not name
+keeps its place in the plan, after what it does.
+
+**AND THE ROLL-CALLS ARE NOT SUBJECTS.** "Directions" and "Capabilities" are
+drawn in front of their own group automatically, because they ARE the group
+— Islam's own word, *"automatically"*. The groups then lead in the order
+their first member does, so dragging a capability above every direction
+makes Capabilities the first group, score table and all. One list, one
+answer, no second setting for "which kind comes first".
+
+**MEASURED ON EL ABD'S REAL STATE:** nothing dragged — unchanged; E-Commerce
+dragged to the front — it leads the directions and **stays D005**; a
+capability dragged above every direction — Capabilities leads, roll-call,
+its five, then the directions, and the two score tables follow the same
+order; the order cleared — straight back to the plan's. And because the
+default is an absence (§50.6), **no client moves until somebody drags**: El
+Abd, Wander and the demo all read byte-identical to main.
+
+`direction-decks` §2c asserts all three ends, MAKING the split review the
+fixture does not have (§255), and reads the client's OWN words for the two
+groups rather than the English ones — the first draft looked for "Direction"
+in a fixture that calls a pillar a Pillar, found only the capabilities, and
+reported a correct build as one that had lost a slide (§395). Shown failing
+on main's build: the stored order moves nothing there.

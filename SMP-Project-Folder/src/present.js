@@ -657,6 +657,39 @@ function deckSlides(u){
     u.items.forEach(function(p, i){
       (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
     });
+    /* ── THE RUNNING ORDER IS THE ORDER (§553.10) ──────────────────────
+       Islam: *"the company picker should pick the foundation of the company
+       then I pick the directions arrangement and then the capabilities
+       arranged. and the grouped directions comes before the directions
+       automatically and the capability grouped comes before the
+       capabilities automatically"*.
+
+       THE PICKER ALREADY HOLDS THEM. The Master presentation's running
+       order lists every direction and every capability by name, draggable,
+       stored per client as an absence (§50.6) — `dir:<id>` for each. So the
+       company's own review reads THAT, and there is no second control to
+       keep in step (§53.5). The alternative was the plan's own Arrange,
+       which works today and renumbers as it goes: drag Egypt Expansion to
+       the top and it becomes D001 on every surface in the platform. An
+       order for a room must not rewrite the codes the year is filed under.
+
+       THE ORDER ONLY, NEVER THE MEMBERSHIP. A tick in that picker says
+       who presents in the MASTER FLOW; it cannot mean "and is therefore in
+       the company's own deck", or unticking a direction would silently
+       drop it from the company's review of its own plan (§96.2). Anything
+       the order does not name keeps its place in the plan, after those it
+       does.
+
+       AND THE ROLL-CALLS ARE NOT IN THE PICKER. "Directions" and
+       "Capabilities" are drawn in front of their own group, automatically,
+       because they are the group — not a subject somebody places. */
+    var flow = masterOrder();
+    var at = function(x){
+      var k = flow.indexOf("dir:" + x.p.id);
+      return k < 0 ? flow.length + x.i : k;
+    };
+    var byFlow = function(a, b){ return at(a) - at(b); };
+    dirs.sort(byFlow); caps.sort(byFlow);
     groups = [
       { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
         one: L1("pillar"), head: L("pillar","bu"),
@@ -665,6 +698,14 @@ function deckSlides(u){
         one: L1("capability"), head: L("capability","bu"),
         names: "capnames",    score: "caps",    cards: capCards }
     ].filter(function(g){ return g.ix.length || g.cards; });
+    /* AND THE GROUPS LEAD IN THE ORDER THEIR FIRST MEMBER DOES, so dragging
+       a capability above every direction makes Capabilities the first
+       group — one list, one answer, no second setting for "which kind
+       comes first" (§53.5). */
+    groups.sort(function(a, b){
+      return (a.ix.length ? at(a.ix[0]) : flow.length + 99) -
+             (b.ix.length ? at(b.ix[0]) : flow.length + 99);
+    });
   } else {
     var bothKinds = !!capCards ||
       (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));

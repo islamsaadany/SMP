@@ -172,6 +172,52 @@ with sync_playwright() as p:
     safe(pg, """()=>{var p=GROUP.items.filter(x=>x.id==='group-P1')[0];
       p.theme=''; p.sub=''; paint(); return true}""")
 
+    # ── 2c. The review follows the running order (§553.10) ───────────
+    # Islam: *"the company picker should pick the foundation of the company
+    # then I pick the directions arrangement and then the capabilities
+    # arranged. and the grouped directions comes before the directions
+    # automatically and the capability grouped comes before the capabilities
+    # automatically"*.
+    #
+    # IT MAKES ITS STATE (§255): the worked fixture has two directions and no
+    # capability, so the split review this claim is about does not exist
+    # until the check builds it. BOTH ENDS (§94.2): a stored order is
+    # followed, the kind whose member leads becomes the first group, and
+    # CLEARING it puts the plan's own order back — a default that is an
+    # absence (§50.6) is only a default if removing the record restores it.
+    ord_ = safe(pg, r"""()=>{
+      var keepS = JSON.stringify(GROUP.structure), keepI = JSON.stringify(GROUP.items);
+      GROUP.structure.top.plan = {split: true};
+      GROUP.items[1].kind = SMPRules.PILLAR_CAP;
+      paint();
+      /* THE CLIENT'S OWN WORDS, never the English ones (§395). The worked
+         fixture calls a pillar a "Pillar", so a filter looking for
+         "Direction" found only the capabilities' group and reported a
+         correct build as one that had lost a slide. */
+      var W = {dir: L('pillar','bu'), cap: L('capability','bu')};
+      var read = function(){
+        var d = document.createElement('div'); d.innerHTML = deckHtmlFor('group');
+        return [...d.querySelectorAll('.dslide')]
+          .map(s => ((s.querySelector('h1,h2')||{}).textContent||'').replace(/\s+/g,' ').trim())
+          .filter(h => h === W.dir || h === W.cap);
+      };
+      var natural = read();
+      GROUP[SMPRules.MASTER_FLOW] = ['dir:group-P2', 'dir:group-P1']; paint();
+      var flipped = read();
+      delete GROUP[SMPRules.MASTER_FLOW]; paint();
+      var back = read();
+      GROUP.structure = JSON.parse(keepS); GROUP.items = JSON.parse(keepI); paint();
+      return {natural: natural, flipped: flipped, back: back, words: W};
+    }""")
+    ck("the company's review leads with the group the plan leads with (§553.10)",
+       isinstance(ord_, dict) and (ord_.get("natural") or [""])[0] == (ord_.get("words") or {}).get("dir"),
+       ord_)
+    ck("…and the running order moves the capability's group in front of it",
+       isinstance(ord_, dict) and (ord_.get("flipped") or [""])[0] == (ord_.get("words") or {}).get("cap"),
+       ord_)
+    ck("…and clearing the order puts the plan's own back (§50.6)",
+       isinstance(ord_, dict) and ord_.get("back") == ord_.get("natural"), ord_)
+
     # ── 3. The master flow: directions, capabilities, functions, company last
     # ASKED OF THE ORDER, NOT THE CATALOGUE (§218). It read `masterSubjects()`,
     # which is everything that can be PLACED — and since §553 that list opens

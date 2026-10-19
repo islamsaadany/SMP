@@ -1,0 +1,258 @@
+<title>El Abd like a business unit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Three running orders side by side; the middle one is what El Abd has
+     today, read off the product, and the right one is what "like a business
+     unit" means slide for slide. Section bands align the three. */
+  :root{
+    --ink:#16202c; --ink2:#4a5563; --dim:#78828f;
+    --ground:#efece7; --card:#ffffff; --line:#dcd7cf;
+    --navy:#17304f; --gold:#b08430; --new:#1f7a4d; --newbg:#e7f3ec;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif: Georgia,"Times New Roman",serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ink:#e9e6e1; --ink2:#b9c0c9; --dim:#8b949f;
+    --ground:#191b1f; --card:#232629; --line:#383c42;
+    --navy:#9db6d8; --gold:#d6a84a; --new:#6fcf9b; --newbg:#1d2d25;
+    color-scheme:dark; } }
+  :root[data-theme="dark"]{
+    --ink:#e9e6e1; --ink2:#b9c0c9; --dim:#8b949f;
+    --ground:#191b1f; --card:#232629; --line:#383c42;
+    --navy:#9db6d8; --gold:#d6a84a; --new:#6fcf9b; --newbg:#1d2d25;
+    color-scheme:dark; }
+
+  body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);}
+  .wrap{max-width:1180px;margin:0 auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-block:30px 48px;}
+  h1{font:700 30px/1.15 var(--serif);margin:0 0 8px;text-wrap:balance;}
+  .lead{margin:0 0 6px;color:var(--ink2);max-width:66ch;}
+  .lead b{color:var(--ink);}
+  .rule{height:3px;width:74px;background:var(--gold);margin:16px 0 26px;}
+
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start;}
+  @media (max-width:820px){ .cols{grid-template-columns:1fr;} }
+  .col{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;min-width:0;}
+  .col > header{padding:14px 16px;border-bottom:1px solid var(--line);}
+  .col h2{font:700 16px/1.25 var(--sans);margin:0;}
+  .col .who{font-size:12.5px;color:var(--dim);margin-top:3px;}
+  .col .n{font:700 12px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--navy);margin-top:8px;display:block;}
+  .col.is-new{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);}
+
+  .band{font:700 10.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);padding:13px 16px 6px;}
+  ul{list-style:none;margin:0;padding:0 16px 4px;}
+  li{display:flex;gap:9px;align-items:baseline;padding:3px 0;font-size:13.5px;
+    color:var(--ink2);min-width:0;}
+  li .k{font:400 10.5px/1.5 var(--mono);color:var(--dim);flex:none;width:66px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  li .t{min-width:0;}
+  li.add{color:var(--ink);}
+  li.add .t{background:var(--newbg);box-shadow:0 0 0 3px var(--newbg);border-radius:2px;}
+  li.gone{color:var(--dim);text-decoration:line-through;text-decoration-thickness:1px;}
+  li.rep{color:var(--dim);font-style:italic;}
+  .foot{padding:10px 16px 16px;font-size:12.5px;color:var(--dim);border-top:1px solid var(--line);margin-top:8px;}
+
+  .asks{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:820px){ .asks{grid-template-columns:1fr;} }
+  .ask{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:8px;padding:16px 18px;min-width:0;}
+  .ask h3{font:700 15px/1.3 var(--sans);margin:0 0 8px;}
+  .ask p{margin:0 0 10px;color:var(--ink2);font-size:14px;}
+  .ask p:last-child{margin-bottom:0;}
+  .ask .opt{font-size:13.5px;color:var(--ink2);padding-left:16px;position:relative;margin:5px 0;}
+  .ask .opt::before{content:"";position:absolute;left:0;top:.55em;width:6px;height:6px;
+    border-radius:50%;background:var(--gold);}
+  .ask b{color:var(--ink);}
+</style>
+
+<div class="wrap">
+  <h1>El Abd like a business unit</h1>
+  <p class="lead">Three running orders, read off the product on each client's own
+    state. <b>A Raya business unit shows every pillar's own slides inside its deck.</b>
+    El Abd's review shows none of them — it lists the directions and scores them, and
+    that is the whole difference.</p>
+  <div class="rule"></div>
+
+  <div class="cols">
+
+    <section class="col">
+      <header>
+        <h2>Raya &middot; Mobile</h2>
+        <div class="who">a business unit</div>
+        <span class="n">28 slides</span>
+      </header>
+      <div class="band">Opening</div>
+      <ul><li><span class="k">cover</span><span class="t">Mobile</span></li></ul>
+      <div class="band">Foundation</div>
+      <ul>
+        <li><span class="k">sfound</span><span class="t">Foundation</span></li>
+        <li><span class="k">aim</span><span class="t">What we are aiming at</span></li>
+        <li><span class="k">objectives</span><span class="t">Key Objectives &mdash; where we stand</span></li>
+      </ul>
+      <div class="band">Analysis</div>
+      <ul>
+        <li><span class="k">swothead</span><span class="t">SWOT</span></li>
+        <li><span class="k">swots</span><span class="t">Strengths</span></li>
+        <li><span class="k">swotw</span><span class="t">Weaknesses</span></li>
+        <li><span class="k">swoto</span><span class="t">Opportunities</span></li>
+        <li><span class="k">swot</span><span class="t">Threats</span></li>
+      </ul>
+      <div class="band">The pillars</div>
+      <ul>
+        <li><span class="k">spillars</span><span class="t">Strategic Pillars</span></li>
+        <li><span class="k">pillarnames</span><span class="t">Pillars</span></li>
+      </ul>
+      <div class="band">Each pillar, in turn</div>
+      <ul>
+        <li><span class="k">pMB01d</span><span class="t">MB01 Digital &amp; Data-Driven Operations</span></li>
+        <li><span class="k">pMB01m</span><span class="t">&hellip; Key measures</span></li>
+        <li><span class="k">pMB01</span><span class="t">&hellip; Tactics</span></li>
+        <li><span class="k">pMB02&hellip;</span><span class="t">MB02 Channel Preference &mdash; 3 slides</span></li>
+        <li><span class="k">pMB03&hellip;</span><span class="t">MB03 Portfolio &amp; Value Chain &mdash; 3 slides</span></li>
+        <li><span class="k">pMB04&hellip;</span><span class="t">MB04 Asset-Light Model &mdash; 3 slides</span></li>
+      </ul>
+      <div class="band">Performance</div>
+      <ul>
+        <li><span class="k">sperf</span><span class="t">Overall performance</span></li>
+        <li><span class="k">pillars</span><span class="t">Pillars &mdash; where we stand</span></li>
+      </ul>
+      <div class="band">Closing</div>
+      <ul>
+        <li><span class="k">stand</span><span class="t">Where the unit stands</span></li>
+        <li><span class="k">notes</span><span class="t">Notes and achievements</span></li>
+        <li><span class="k">end</span><span class="t">Thank you</span></li>
+      </ul>
+      <p class="foot">Four pillars &times; three slides each = <b>12 of its 28 slides
+        are the pillars themselves.</b></p>
+    </section>
+
+    <section class="col">
+      <header>
+        <h2>El Abd &middot; today</h2>
+        <div class="who">live on main this morning</div>
+        <span class="n">10 slides</span>
+      </header>
+      <div class="band">Opening</div>
+      <ul><li><span class="k">cover</span><span class="t">El Abd</span></li></ul>
+      <div class="band">Foundation</div>
+      <ul>
+        <li><span class="k">aim</span><span class="t">Foundation <em>(aspiration + the six objectives)</em></span></li>
+        <li><span class="k">aim&nbsp;2</span><span class="t">Foundation, continued</span></li>
+      </ul>
+      <div class="band">Analysis</div>
+      <ul>
+        <li><span class="k">swot</span><span class="t">Analysis &mdash; one slide, four quadrants <em>(empty today)</em></span></li>
+      </ul>
+      <div class="band">The pillars</div>
+      <ul>
+        <li><span class="k">pillarnames</span><span class="t">Directions</span></li>
+        <li><span class="k">pillars</span><span class="t">Directions &mdash; where we stand</span></li>
+        <li><span class="k">capnames</span><span class="t">Capabilities</span></li>
+        <li><span class="k">caps</span><span class="t">Capabilities &mdash; where we stand</span></li>
+      </ul>
+      <div class="band">Each pillar, in turn</div>
+      <ul>
+        <li class="gone"><span class="k">&mdash;</span><span class="t">nothing. 32 slides are not drawn.</span></li>
+      </ul>
+      <div class="band">Performance</div>
+      <ul>
+        <li><span class="k">sperf</span><span class="t">Overall performance</span></li>
+      </ul>
+      <div class="band">Closing</div>
+      <ul>
+        <li><span class="k">stand</span><span class="t">Where El Abd stands</span></li>
+        <li><span class="k">end</span><span class="t">Thank you</span></li>
+      </ul>
+      <p class="foot">The directions and capabilities are <b>named and scored, never
+        shown.</b> Each one's measures and tactics live only in its own separate deck.</p>
+    </section>
+
+    <section class="col is-new">
+      <header>
+        <h2>El Abd &middot; like a unit</h2>
+        <div class="who">what you are asking for</div>
+        <span class="n">42 slides &middot; 43 with the SWOT</span>
+      </header>
+      <div class="band">Opening</div>
+      <ul><li><span class="k">cover</span><span class="t">El Abd</span></li></ul>
+      <div class="band">Foundation</div>
+      <ul>
+        <li><span class="k">aim</span><span class="t">Foundation</span></li>
+        <li><span class="k">aim&nbsp;2</span><span class="t">Foundation, continued</span></li>
+      </ul>
+      <div class="band">Analysis</div>
+      <ul>
+        <li><span class="k">swot</span><span class="t">Analysis <em>(once the SWOT is filled)</em></span></li>
+      </ul>
+      <div class="band">The directions</div>
+      <ul>
+        <li><span class="k">pillarnames</span><span class="t">Directions</span></li>
+      </ul>
+      <div class="band">Each direction, in turn</div>
+      <ul>
+        <li class="add"><span class="k">pD001&hellip;</span><span class="t">D001 Maximizing Current Stores &mdash; 4 slides</span></li>
+        <li class="add"><span class="k">pD002&hellip;</span><span class="t">D002 Egypt Expansion &mdash; 4 slides</span></li>
+        <li class="add"><span class="k">pD003&hellip;</span><span class="t">D003 Growing FMCG &mdash; 3 slides</span></li>
+        <li class="add"><span class="k">pD004&hellip;</span><span class="t">D004 ELABD Corner &mdash; 3 slides</span></li>
+        <li class="add"><span class="k">pD005&hellip;</span><span class="t">D005 E-Commerce Growth &mdash; 3 slides</span></li>
+      </ul>
+      <div class="band">The capabilities</div>
+      <ul>
+        <li><span class="k">capnames</span><span class="t">Capabilities</span></li>
+      </ul>
+      <div class="band">Each capability, in turn</div>
+      <ul>
+        <li class="add"><span class="k">pC001&hellip;</span><span class="t">C001 End-to-End Quality Mindset &mdash; 3</span></li>
+        <li class="add"><span class="k">pC002&hellip;</span><span class="t">C002 ERP Enhancement &mdash; 3</span></li>
+        <li class="add"><span class="k">pC003&hellip;</span><span class="t">C003 Digital Transformation &mdash; 3</span></li>
+        <li class="add"><span class="k">pC004&hellip;</span><span class="t">C004 Talent &amp; Workforce &mdash; 3</span></li>
+        <li class="add"><span class="k">pC005&hellip;</span><span class="t">C005 Operational excellence &mdash; 3</span></li>
+      </ul>
+      <div class="band">Performance</div>
+      <ul>
+        <li><span class="k">sperf</span><span class="t">Overall performance</span></li>
+        <li><span class="k">pillars</span><span class="t">Directions &mdash; where we stand</span></li>
+        <li><span class="k">caps</span><span class="t">Capabilities &mdash; where we stand</span></li>
+      </ul>
+      <div class="band">Closing</div>
+      <ul>
+        <li><span class="k">stand</span><span class="t">Where El Abd stands</span></li>
+        <li><span class="k">end</span><span class="t">Thank you</span></li>
+      </ul>
+      <p class="foot"><b>32 slides come back</b> &mdash; the same slides each owner
+        already presents, built by the same builder, in the company's own deck.</p>
+    </section>
+
+  </div>
+
+  <div class="asks">
+    <div class="ask">
+      <h3>One thing this collides with</h3>
+      <p>The Master presentation runs <b>each direction's own deck, then the company's
+        last</b>. That is why the company's review was made short in the first place.
+        If the company's deck now holds every direction too, that flow shows all of it
+        twice.</p>
+      <p class="opt"><b>The company's deck is the whole story.</b> The Master flow
+        presents the company only &mdash; owners' decks stay for the owners.</p>
+      <p class="opt"><b>Two lengths.</b> El Abd's own review is full; the Master flow
+        keeps the short one, so nothing repeats.</p>
+      <p class="opt"><b>Leave the flow as it is</b> and accept the repeat.</p>
+    </div>
+    <div class="ask">
+      <h3>And one smaller choice</h3>
+      <p>A Raya unit opens with <b>three Foundation slides</b> (Foundation, What we are
+        aiming at, Key Objectives) and <b>five SWOT slides</b> (a divider, then one per
+        quadrant).</p>
+      <p>El Abd gets <b>one Foundation</b> (aspiration and objectives together, running
+        to two) and <b>one Analysis</b> slide with four quadrants on it.</p>
+      <p class="opt"><b>Keep El Abd's compact pair.</b></p>
+      <p class="opt"><b>Match the unit</b> &mdash; eight slides instead of three.</p>
+    </div>
+  </div>
+</div>

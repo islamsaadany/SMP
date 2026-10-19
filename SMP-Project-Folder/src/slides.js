@@ -589,20 +589,42 @@ function slidesAssemble(){
        subject, with each slide stamped with whose it is — the stamp is
        what lets the eye below hide a slide that belongs to somebody else
        without the editor having to be about them. */
-    (SLED.flow || [SLED.target]).forEach(function(t){
+    /* ── AND THE FLOW'S OWN PAGES, WHERE THE ROOM HAS THEM (§556.8) ──
+       The cover and each group's page were drawn by the room alone, so
+       the list here started at the first direction and the room started
+       somewhere else. Islam: *"where is the first cover page about elabd
+       review"*. The same `flowWithParts` the room reads, so the two
+       cannot disagree about what comes first. */
+    var subjects = SLED.flow ? flowWithParts(SLED.flow) : [SLED.target];
+    subjects.forEach(function(t){
+      var part = String(t).indexOf("flow:") === 0;
       var frag = document.createElement("div");
-      frag.innerHTML = deckHtmlFor(t);
-      insertPictureSlides(frag, t, true);
-      if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
+      frag.innerHTML = part ? flowPartHtml(t) : deckHtmlFor(t);
+      if (!part) insertPictureSlides(frag, t, true);
+      if (part) deckFootMarks(frag, null);
+      else if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
       else if (boxRef(t).kind === "dir") deckFootMarks(frag, null);
-      var tsubj = deckSubject(t);
+      var tsubj = part ? null : deckSubject(t);
       [].forEach.call(frag.querySelectorAll(".dslide"), function(el){
         el.dataset.subject = t;
+        /* A flow page is nobody's to hide: the room reads hidden slides
+           per subject, and these belong to none. */
+        if (part) { el.dataset.flowpart = "1"; return; }
         if (el.dataset.anchor && SMPRules.slideHidden(tsubj, el.dataset.anchor))
           el.dataset.off = "1";
       });
       while (frag.firstChild) box.appendChild(frag.firstChild);
     });
+    /* Each flow page is stamped with what it introduces, as the room does
+       (§554.3) — so it rides inside the section it opens rather than
+       counting as a subject of its own. */
+    var made = [].slice.call(box.querySelectorAll(".dslide"));
+    for (var mi = made.length - 1; mi >= 0; mi--) {
+      if (!made[mi].dataset.flowpart) continue;
+      var nx = made[mi + 1];
+      if (nx && nx.dataset.subject) made[mi].dataset.subject = nx.dataset.subject;
+      else made[mi].removeAttribute("data-subject");
+    }
     /* The footing happens per subject above, in the same order
        openDeckWith() uses: AFTER the picture slides so a custodian's own
        slide is footed too, and BEFORE the fit pass so a slide it splits
@@ -1049,7 +1071,7 @@ function slidesCanHide(el, all){
 function slidesEye(el, all){
   /* A picture slide has no anchor and is not hidden — it is REMOVED, by the
      control the pane already carries (§24: not a second way to do one act). */
-  if (!el.dataset.anchor || !inOffice()) return "";
+  if (!el.dataset.anchor || el.dataset.flowpart || !inOffice()) return "";
   var hid = !!el.dataset.off, can = slidesCanHide(el, all);
   return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
     /* §556: whose slide this is. In a flow the editor is standing in the

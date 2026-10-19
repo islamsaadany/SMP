@@ -403,6 +403,7 @@ with sync_playwright() as p:
          Present. `slidesPlay()` is that press. */
       const landed = document.getElementById('slideroot').classList.contains('on');
       const railRows = document.querySelectorAll('#slideroot .slrow').length;
+      const railFirst = (SLED.all && SLED.all[0]) ? SLED.all[0].dataset.anchor || '' : null;
       slidesPlay();
       const deck = document.querySelector('#deckroot .deck');
       const slides = [...deck.querySelectorAll('.dslide')];
@@ -425,12 +426,20 @@ with sync_playwright() as p:
         }).filter(Boolean))].length,
         want: [...new Set(flow.map(t => deckMark(UNITS[t] || null)).filter(Boolean))].length,
         flow: DECK.flow ? DECK.flow.slice() : null,
-        landed: landed, railRows: railRows
+        landed: landed, railRows: railRows, railFirst: railFirst,
+        deckFirst: slides[0] ? slides[0].dataset.anchor || '' : null
       };
     }""", flow, THREW)
     check("the button opens the SLIDES, not the projector (§556)",
           get(built, "landed") is True and (get(built, "railRows") or 0) > 0, built)
     check("...and Present from there opens the deck", get(built, "on") is True, built)
+    # §556.8: the list is the room's list — it opens on the flow's own cover
+    # and counts the same slides, so what you arrange is what you present.
+    # Read off both screens, never off flowWithParts (§94.8).
+    check("the slide list starts on the flow's cover, as the room does (§556.8)",
+          get(built, "railFirst") == "flowcover" and get(built, "deckFirst") == "flowcover", built)
+    check("...and lists exactly the slides the room shows",
+          get(built, "railRows") == get(built, "total"), built)
     check("the flow holds every subject's slides and no others",
           get(built, "total") is not None and get(built, "alone") and
           get(built, "total") >= sum(get(built, "alone") or [0]), built)

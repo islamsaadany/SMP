@@ -520,7 +520,14 @@ function videoUpload(file, target, onProgress){
    Nothing about what is STORED changed. Still a title, an anchor, an
    arrangement and the pictures (§50.2). */
 
-var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+/* `flow` is the master presentation's list of subjects, set only when the
+   editor was opened on one (§556). `target` is still a single subject —
+   the company's, for a flow — because adding and removing a picture
+   slide belongs to a subject and Islam put that plainly: *"in the flow
+   slide view I can hide and I can add final slides but the addition on
+   the sections as directions or capabilities should be from the
+   direction or capability presentation itself"*. */
+var SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
 
 /* Every section in the assembled deck gets an identity the rail can hold on
    to across a repaint: a picture slide by its own id, a generated slide by its
@@ -572,18 +579,31 @@ function slidesAssemble(){
   try {
     /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
        through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
-    insertPictureSlides(box, SLED.target, true);
-    /* The same order openDeckWith() uses, and the order matters both ways:
-       AFTER the picture slides so a custodian's own slide is footed too, and
-       BEFORE the fit pass so a slide it splits carries the footer into every
-       continuation (§52.9). */
-    if (boxRef(SLED.target).kind !== "fn" && UNITS[SLED.target]) {
-      deckFootMarks(box, UNITS[SLED.target]);
-    } else if (boxRef(SLED.target).kind === "dir") {
-      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
-      deckFootMarks(box, null);
-    }
+    /* ── ONE DECK, OR THE WHOLE FLOW (§556) ──────────────────────────
+       The editor built one subject's deck, which is why pressing Manage
+       slides from the company showed the company's review and not the
+       flow somebody had just arranged. A flow is the same build, once per
+       subject, with each slide stamped with whose it is — the stamp is
+       what lets the eye below hide a slide that belongs to somebody else
+       without the editor having to be about them. */
+    (SLED.flow || [SLED.target]).forEach(function(t){
+      var frag = document.createElement("div");
+      frag.innerHTML = deckHtmlFor(t);
+      insertPictureSlides(frag, t, true);
+      if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
+      else if (boxRef(t).kind === "dir") deckFootMarks(frag, null);
+      var tsubj = deckSubject(t);
+      [].forEach.call(frag.querySelectorAll(".dslide"), function(el){
+        el.dataset.subject = t;
+        if (el.dataset.anchor && SMPRules.slideHidden(tsubj, el.dataset.anchor))
+          el.dataset.off = "1";
+      });
+      while (frag.firstChild) box.appendChild(frag.firstChild);
+    });
+    /* The footing happens per subject above, in the same order
+       openDeckWith() uses: AFTER the picture slides so a custodian's own
+       slide is footed too, and BEFORE the fit pass so a slide it splits
+       carries the footer into every continuation (§52.9). */
     deckFitPass(box);
     /* The keys are minted AFTER the fit pass, or a continuation slide it mints
        carries a clone of its parent's `data-ed` — two rows in the rail with one
@@ -608,10 +628,9 @@ function slidesAssemble(){
        INSIDE THE TRY, with §253.3's catch below it: a subject whose stored
        list cannot be read is a deck that could not be built, and the person
        gets that sentence rather than a blank rail. */
-    var subj = deckSubject(SLED.target);
-    [].forEach.call(box.querySelectorAll(".dslide[data-anchor]"), function(el){
-      if (SMPRules.slideHidden(subj, el.dataset.anchor)) el.dataset.off = "1";
-    });
+    /* The stamping happens per subject above, before the fit pass marks a
+       continuation — and a continuation inherits `data-off` from the clone
+       it is made of, so both parts of a hidden long table wear it. */
   } catch (e) {
     /* Kept, not rethrown: the editor is already open, and the person needs a
        sentence rather than a blank screen. `slidesPaint()` reads it. */
@@ -660,7 +679,7 @@ function slidesOpen(kind, key){
              : kind === "cap" ? "cap:" + key
              : kind === "dir" ? "dir:" + key : key;
   if (!canSpeakFor(target)) return;
-  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"", flow:null };
   var root = document.getElementById("slideroot");
   root.querySelector(".sl-title").textContent = "Manage slides";
   /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
@@ -680,6 +699,34 @@ function slidesOpen(kind, key){
   root.querySelector(".sl-sub").textContent =
     picTargetName(kind, key) + " · " + (REVIEW.name || "") +
     (mins ? " · " + mins + " minutes to present" : "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
+}
+/* ── THE FLOW, OPENED AS SLIDES (§556) ─────────────────────────────────
+   Islam: *"after we set the master presentation, we say 'here, manage the
+   slides'. When we go, we see a view of managing the slides that we chose
+   as a flow, and maybe hide things or add something to have a proper
+   view"* — and, of the whole product: *"even for the users that have the
+   present button it takes them to the slides management and then they move
+   to the presentation, not 2 buttons"*.
+
+   THE SUBJECT IS THE COMPANY and the flow is what is DRAWN. Adding a slide
+   is a subject's act — his rule: the final slides are added here, a
+   direction's are added on the direction. So `target` stays the company
+   and `flow` is the list; `slidesAssemble` draws the list and the eye
+   hides against whichever subject the slide belongs to. */
+function slidesOpenFlow(list){
+  list = (list || []).filter(Boolean);
+  if (!list.length || !canSpeakFor("group")) return;
+  SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
+  var root = document.getElementById("slideroot");
+  root.querySelector(".sl-title").textContent = "Master presentation";
+  root.querySelector(".sl-sub").textContent =
+    plural(list.length, "subject") + " \u00b7 " + (REVIEW.name || "");
   root.classList.add("on");
   document.body.classList.add("presenting");
   var wrap = document.querySelector(".wrap");
@@ -728,7 +775,9 @@ function slidesPlay(){
      OF IT if the deck cannot be built — an editor nobody can click, with the
      reason in a console nobody has open (§32, §171). Standing down after the
      open means a throw costs the press and nothing else. */
-  openDeckFor(SLED.target, "editor");
+  if (SLED.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+                              flowWithParts(SLED.flow), "editor");
+  else openDeckFor(SLED.target, "editor");
   slidesSuspend();
 }
 
@@ -739,7 +788,7 @@ function slidesClose(){
   document.body.classList.remove("presenting");
   var wrap = document.querySelector(".wrap");
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
-  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
 }
 
@@ -863,6 +912,10 @@ function slidesEye(el, all){
   if (!el.dataset.anchor || !inOffice()) return "";
   var hid = !!el.dataset.off, can = slidesCanHide(el, all);
   return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
+    /* §556: whose slide this is. In a flow the editor is standing in the
+       company and the slide may be a direction's, so the anchor alone is
+       not an address. */
+    (el.dataset.subject ? ' data-slhidet="' + esc(el.dataset.subject) + '"' : '') +
     (can ? "" : ' aria-disabled="true"') +
     ' title="' + (hid ? "Show this slide in the review again"
                       : can ? "Hide this slide from the review"
@@ -886,8 +939,8 @@ function slidesHiddenLine(n){
    array that remembers the order it was written in reports a change to the
    server every time somebody hides two slides in the other sequence.
    The emptied key is DELETED (§50.6). */
-function slidesSetHidden(anchor, on){
-  var subj = deckSubject(SLED.target);
+function slidesSetHidden(anchor, on, target){
+  var subj = deckSubject(target || SLED.target);
   if (!subj || !anchor) return;
   var list = SMPRules.hiddenSlides(subj).slice(), i = list.indexOf(anchor);
   if (on && i < 0) list.push(anchor);
@@ -1271,8 +1324,9 @@ function slidesWire(){
         slidesPaint();
         return;
       }
-      var subj = deckSubject(SLED.target);
-      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide));
+      var t = b.dataset.slhidet || SLED.target;
+      var subj = deckSubject(t);
+      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide), t);
     });
   });
   root.querySelectorAll("[data-slshow]").forEach(function(b){

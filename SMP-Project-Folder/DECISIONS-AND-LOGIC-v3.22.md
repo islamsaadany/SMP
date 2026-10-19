@@ -67387,3 +67387,53 @@ capabilities rather than the overall figures**, because those are its
 pillars — a real change to a live client's landing, stated rather than
 discovered. Raya is untouched: it has units, so it has no company-pillar
 section at all.
+
+## §556 — One way in: the flow, the slides, then the room (2026-10-19)
+
+Islam, after playing it: *"in the master presentation it takes me directly to
+the presentation, not the slides management, which I think is a better way in
+general to do — even for the users that have the present button, it takes
+them to the slides management and then they move to the presentation, not 2
+buttons"*, and then: *"you should remove the one 'present the whole company'.
+The first button should be master presentation, where it takes me to the
+flow, and then when I say go it shows me the manage slides, and then it takes
+me to the presentation when I say present."*
+
+**WHAT WAS WRONG WITH TWO DOORS.** The first time anybody saw their deck was
+in front of the room. "Present the whole company" was a second door onto the
+same evening, beside a flow that already carries the company last — and the
+flow's own button went straight to the projector, so the arrangement somebody
+had just made could not be looked at before it was shown.
+
+**THE SHAPE, AND IT IS HIS.** Master presentation is the first and only
+entry; the picker's button reads **Go to the slides**; that opens the slide
+view on the WHOLE FLOW; Play from there opens the show, and leaving the show
+comes back (§295, already true). A subject's own Present does the same with
+its own deck.
+
+**THE EDITOR HOLDS A FLOW, AND THE SUBJECT IS STILL A SUBJECT.** `SLED.flow`
+is the list; `SLED.target` stays the company. Each slide is stamped with
+whose it is as it is built, and the eye hides against THAT subject — so a
+direction's slide can be taken out from the flow view without the editor
+pretending to be about that direction. Islam drew the line himself: *"in the
+flow slide view I can hide and I can add final slides, but the addition on
+the sections as directions or capabilities should be from the direction or
+capability presentation itself"*, which is exactly what keeping `target` on
+the company gives.
+
+**AND NOBODY LOSES THE PROJECTOR.** The slide view is `canSpeakFor`, so
+anyone who cannot edit a deck still presses Present and gets the deck, as
+before — a control that opens nothing is worse than two controls (§61).
+
+**MEASURED, not reasoned:** on a unit, Present opens the editor on 31 rows
+and Play opens 31 slides with the way back reading *Back to slides*; on El
+Abd, the flow opens as 16 rows across three subjects, every row carrying its
+own subject, and hiding a direction's cover from there stores against that
+direction and drops it from the played deck.
+
+**FROM ISLAM'S OWN PAGE** (`Fouad_2026_2027_Customer_Story_Motion.html`, read
+rather than guessed at): thumbnails beside the stage, Present as the single
+primary button, a grid of all slides for a deck too long for a strip, hide on
+the slide you are looking at, blank, and the keys written across the bar. The
+mockup in `design-mockups/one-flow/` is the agreed shape; the thumbnails,
+grid and key line are the next slice, not this one.

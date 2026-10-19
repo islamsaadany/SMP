@@ -2568,7 +2568,7 @@ function masterPaint(){
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
+      '>Go to the slides</button></div></div>';
   masterWire();
   [].forEach.call(box.querySelectorAll(".mflist"), function(e, i){
     if (keepTop[i] != null) e.scrollTop = keepTop[i];
@@ -2764,9 +2764,17 @@ function masterWire(){
       masterPaint();
       return;
     }
-    var list = flowWithParts(MFLOW.pick.slice());
+    /* ── IT OPENS THE SLIDES, NOT THE SHOW (§556) ──────────────────
+       Islam: *"after we set the master presentation, we say 'here, manage
+       the slides' … and then it takes me to the presentation when I say
+       present"*. The first time anybody saw this deck was in front of the
+       room; now the flow lands on its own slides, where a slide that
+       should not be there can be taken out before it is projected. Play
+       is one press from there, and leaving the show comes back here
+       (§295). */
+    var list = MFLOW.pick.slice();
     closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    slidesOpenFlow(list);
   });
 }
 

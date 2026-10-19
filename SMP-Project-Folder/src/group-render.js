@@ -1546,11 +1546,20 @@ function companyPresentMenu(){
       ? '<button role="menuitem" data-master="1">Master presentation' +
         '<span class="dlsub">Directions, capabilities and functions in order, with timers; the company last</span></button>'
       : "";
-    items = '<button role="menuitem" data-present="group">Present the whole company' +
-        '<span class="dlsub">The short company review: foundation, analysis, directions, performance</span></button>' +
+    /* ── ONE WAY IN (§556) ───────────────────────────────────────────
+       Islam: *"you should remove the one 'present the whole company'. The
+       first button should be master presentation, where it takes me to the
+       flow, and then when I say go it shows me the manage slides, and then
+       it takes me to the presentation when I say present"*.
+
+       "Present the whole company" opened the company's own review straight
+       onto the projector — a second door onto the same evening, beside a
+       flow that already carries the company last. The flow is the door
+       now, and it is first. */
+    items = master +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
-      slides + dl + master;
+      slides + dl;
   } else {
     var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
     items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +

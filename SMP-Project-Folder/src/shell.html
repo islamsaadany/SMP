@@ -5156,7 +5156,35 @@
            §253.3 each came to be fixed on one surface and left broken on
            another. Two functions answering it was found and closed AT THE
            MERGE that brought both here (§281). */
-        openDeckFor(this.dataset.present);
+        /* ── IT OPENS THE SLIDES FIRST (§556) ──────────────────────
+           Islam: *"even for the users that have the present button it
+           takes them to the slides management and then they move to the
+           presentation, not 2 buttons"*. The first time anybody saw their
+           deck was in front of the room; now the press lands on the
+           slides, where Play is one more press and a slide that should
+           not be there can be taken out before it is projected.
+
+           ONLY WHERE THERE IS AN EDITOR TO LAND IN. `slidesOpen` is
+           `canSpeakFor` — the subject's own head or custodian, and the
+           office — so anybody else goes straight to the deck as before,
+           rather than pressing Present and getting nothing (§61). A list
+           of targets is a direction owner's several, and those open as a
+           flow of their own. */
+        var t = this.dataset.present, many = t.indexOf(",") >= 0;
+        if (many) {
+          var mine = t.split(",").filter(Boolean);
+          if (mine.every(function(x){ return canSpeakFor(x); })) slidesOpenFlow(mine);
+          else openDeckFor(t);
+        } else if (canSpeakFor(t)) {
+          slidesOpen(boxRef(t).kind === "dir" ? "dir"
+                   : boxRef(t).kind === "fn" ? "fn"
+                   : boxRef(t).kind === "cap" ? "cap" : "unit",
+                   boxRef(t).kind === "dir" ? t.slice(4)
+                   : boxRef(t).kind === "fn" || boxRef(t).kind === "cap" ? t.slice(t.indexOf(":") + 1)
+                   : t);
+        } else {
+          openDeckFor(t);
+        }
       });
     });
     /* The same deck, taken away as a PDF. Beside Present and through the same

@@ -66933,3 +66933,62 @@ catalogue of everything PLACEABLE, for a claim about the running ORDER; since
 §553 that catalogue opens with the company's Foundation and Analysis, so the
 claim failed while the order it described was unchanged. It asks
 `masterOrder()` now, and asserts the wider catalogue separately.
+
+## §553.4 — Stage 5 (c): one slide introduces a direction, not two (2026-10-19)
+
+Islam, on the deck §553.3 left: *"the cover page is enough let's remove the
+2nd page as the performance appear at the last slide anyway"*.
+
+**WHAT THE SECOND PAGE WAS FOR.** It carried the direction's kind, theme and
+owner, its code and name, its subtitle, and the two readings. The cover
+already carries the name, the code, the cycle and *Presented by …* — and
+§553.3 moved the readings to the end. So the page was introducing, a second
+time, a direction the room had just been shown.
+
+**IT IS THE CALLER'S FACT, NOT THE CLIENT'S SETTING (§50.6).** `pillarSlidesOf`
+takes a fourth argument, `named`: the deck has already said whose slides these
+are. A direction's own deck passes it; the full plan deck does not, and must
+not — there is no per-pillar cover there, so the title page is the only slide
+that names the pillar it opens. Nothing is switched: the flag states what the
+caller has already drawn.
+
+**AND NOTHING THAT PAGE CARRIED IS LOST (§96.2).** The theme and the subtitle
+were on it and on nothing else in this deck, so the cover now carries both —
+each drawn only where the direction HAS one (§45.2). No live client sets
+either today, which is exactly why the check MAKES the state (§255) rather
+than reading against them: against El Abd, Wander or the demo, a cover that
+dropped both would pass.
+
+A picture slide an owner had placed on the title page is not lost either: an
+anchor that is no longer there sends its slide to the end of the deck
+(`insertPictureSlides`).
+
+**MEASURED, NOT REASONED** (every box's deck, two builds, each client's own
+state): El Abd, 10 decks lose the page — its five directions' and its five
+capabilities' own decks — and the one full plan deck in the client,
+`fn:merchandising`, keeps it. Wander and the demo: not one deck loses it, and
+3 and 11 full plan decks respectively keep theirs.
+
+**ASSERTED AT BOTH ENDS, IN TWO CHECKS (§94.2).** `direction-decks` §2b: a
+direction's own deck carries no `p<code>d` anchor, and — with a theme and a
+subtitle written in — the cover carries both. Shown failing on the build it
+changed from: `['cover', 'pD001d', 'pD001m', 'end']`. The other end is
+`deck-figures`, which runs with the units on and reads both readings off that
+very title page in every full plan deck.
+
+**AND WHAT THE OWNER CAN DO WITH HIS DECK**, since Islam asked: the
+Presentation menu already gives a direction's owner **Manage slides** —
+*"Add your own picture slides to your Direction"*. Inside it he can add
+slides, make each a picture or a video, choose where each one sits (the deck's
+own anchors: after the cover, after Key Measures, after Tactics, before Thank
+you), reorder them and remove them. He cannot hide the built-in slides; that
+stays the office's (`inOffice()`), as §255's pane has always had it. The gate
+is `canSpeakForDir`: the cycle open, the plan on, and the signed-in person
+matching the direction's owner or custodian.
+
+**ONE THING THAT IS ISLAM'S, NOT THE CODE'S.** On El Abd today *Amr Hassan*
+is a typed owner name, not a person in the client's register — the register
+there is still the seed list. So the menu is correct and nobody can reach it
+as Amr until he is a user on that client. §551 ("an owner is picked from the
+register, never typed") is the rule that prevents this from here on; El Abd's
+data predates it.

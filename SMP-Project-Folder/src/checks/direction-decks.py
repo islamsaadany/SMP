@@ -80,6 +80,33 @@ with sync_playwright() as p:
     who = safe(pg, "()=>{var d=document.createElement('div');d.innerHTML=deckHtmlFor('dir:group-P1');var e=d.querySelector('.dwho');return e?e.textContent:''}")
     ck("…its cover names who presents it", "Hazem Roushdy" in (who or "") and "Hossam Farid" in (who or ""), who)
 
+    # ── 2b. The cover is the only slide that introduces it (§553.4) ───
+    # Islam: "the cover page is enough let's remove the 2nd page as the
+    # performance appear at the last slide anyway". The title page is drawn
+    # by the builder a direction's deck SHARES with the full plan deck, so
+    # this asserts the half that is this deck's: it has no title page, and
+    # the cover carries what that page carried. The other half — the full
+    # plan deck still opening each pillar on its title page — is asserted in
+    # `deck-figures`, which runs with the units on and reads the readings
+    # off that very slide.
+    anchs = safe(pg, """()=>{var d=document.createElement('div');
+      d.innerHTML=deckHtmlFor('dir:group-P1');
+      return [...d.querySelectorAll('[data-anchor]')].map(e=>e.dataset.anchor)}""", []) or []
+    ck("a direction's own deck has no title page of its own (§553.4)",
+       len(anchs) > 0 and not [a for a in anchs if a.startswith("p") and a.endswith("d")], anchs)
+    # AND NOTHING THAT PAGE CARRIED IS LOST (§96.2). The state is MADE
+    # (§255): the live clients set neither a theme nor a subtitle, so read
+    # against them this would pass on a cover that dropped both.
+    safe(pg, """()=>{var p=GROUP.items.filter(x=>x.id==='group-P1')[0];
+      p.theme='Customer first'; p.sub='Stores we already have'; paint(); return true}""")
+    cov = safe(pg, """()=>{var d=document.createElement('div');
+      d.innerHTML=deckHtmlFor('dir:group-P1');
+      var s=d.querySelector('.dslide'); return s?s.textContent.replace(/\s+/g,' '):''}""", "")
+    ck("…and the cover carries the theme and the subtitle the title page had",
+       "Customer first" in (cov or "") and "Stores we already have" in (cov or ""), cov)
+    safe(pg, """()=>{var p=GROUP.items.filter(x=>x.id==='group-P1')[0];
+      p.theme=''; p.sub=''; paint(); return true}""")
+
     # ── 3. The master flow: directions, capabilities, functions, company last
     # ASKED OF THE ORDER, NOT THE CATALOGUE (§218). It read `masterSubjects()`,
     # which is everything that can be PLACED — and since §553 that list opens

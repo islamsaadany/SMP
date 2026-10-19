@@ -71,16 +71,18 @@ CHROME = """
     size its slides are authored and fitted at. Switch between the build that is
     live and the build with the change in it.</p>
   <div class="cmppick">
-    <button type="button" data-show="b" aria-pressed="false"><b>Today</b> <span>&middot; 6 slides</span></button>
-    <button type="button" data-show="a" aria-pressed="true"><b>With the change</b> <span>&middot; 7 slides</span></button>
+    <button type="button" data-show="b" aria-pressed="false"><b>Today</b></button>
+    <button type="button" data-show="a" aria-pressed="true"><b>With the change</b></button>
   </div>
 </div>
-<p class="cmpnote" data-note="a"><b>Two changes.</b> The readings leave the corner of
-  the measures, categories and tactics slides &mdash; and are said once, properly, on a
-  new <b>Where Maximizing Current Stores stands</b> slide at the end, with a word
-  under each figure saying what it counts.</p>
-<p class="cmpnote" data-note="b" hidden><b>Today.</b> Key Measures 95% and Execution
-  &mdash; sit in the corner of four slides out of six. No slide presents them.</p>
+<p class="cmpnote" data-note="a"><b>Three changes.</b> The second page is gone &mdash;
+  the cover already names the direction, its code, the cycle and who presents it. The
+  readings leave the corner of the measures, categories and tactics slides. And they
+  are said once, properly, on a new <b>Where Maximizing Current Stores stands</b>
+  slide at the end, with a word under the figure saying what it counts.</p>
+<p class="cmpnote" data-note="b" hidden><b>Today.</b> The cover and the page after it
+  both introduce the same direction. Key Measures 95% and Execution &mdash; sit in the
+  corner of four slides out of six, and no slide presents them.</p>
 """
 
 SWAP = """

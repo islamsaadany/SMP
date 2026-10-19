@@ -717,12 +717,30 @@ function pillarCols(n){
    present he will only see his slides"*). deckSlides calls this for every
    direction, so the whole-plan deck and a direction's own deck cannot
    disagree about what a direction's slides are (§53.5). */
-function pillarSlidesOf(u, p, pi){
+/* ── `named`: THE DECK HAS ALREADY SAID WHOSE SLIDES THESE ARE (§553.4) ──
+   Islam, of a direction owner's own deck: *"the cover page is enough let's
+   remove the 2nd page as the performance appear at the last slide anyway"*.
+
+   A direction's own deck opens on a cover carrying that direction's name,
+   its code, the cycle and who presents it — and then said all of it again on
+   a title page, whose other job, the two readings, §553.3 moved to the end.
+   Two slides introducing one direction to a room that has just been told.
+
+   NOT A SETTING, A FACT ABOUT THE DECK (§50.6). The full plan deck has no
+   per-pillar cover: there the title page is the ONLY slide that names the
+   pillar it is opening, so it stays, and `named` is false for it. The flag
+   says what the caller has already drawn, which is why it is the caller's to
+   pass and not the client's to choose.
+
+   A PICTURE SLIDE PLACED ON THE TITLE PAGE IS NOT LOST: an anchor that is no
+   longer there sends its slide to the end of the deck rather than dropping
+   it (§96.2, and `insertPictureSlides`'s own note). */
+function pillarSlidesOf(u, p, pi, named){
   var S = [];
   /* §416: and it gets no slides of its own until its year comes. */
   if (!runsNow(p)) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-  S.push('<section class="dslide d-cover"' +
+  if (!named) S.push('<section class="dslide d-cover"' +
     anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
     sec(pillarCode(u, pi), p.name) +
     '><span class="seclab">' + esc(p.kind) +
@@ -1063,9 +1081,18 @@ function dirDeckHtml(t){
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">' + esc(code) + ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    /* AND IT CARRIES WHAT THE TITLE PAGE CARRIED (§96.2, §553.4). Dropping
+       that slide would otherwise take the theme and the subtitle with it —
+       neither is on the cover, and neither is anywhere else in this deck.
+       Both are drawn only where the direction HAS one (§45.2); on all three
+       live clients today, none of them does, so no cover moves. */
+    '<p class="coversub">' + esc(code) +
+      (String(p.theme || "").trim()
+        ? ' &middot; ' + L1("theme") + ' ' + esc(p.theme) : '') +
+      ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
     (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
-  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i));
+  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i, true));
 
   /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
      The deck a direction's owner presents had no slide that said how the

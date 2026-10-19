@@ -156,6 +156,16 @@ await A.page.goto(BASE + "/" + S + "/processes/governance", { waitUntil: "networ
 const gov = await body(A.page);
 check(/Process review calendar/.test(gov) && /Later · 1/i.test(gov) && /Supplier onboarding/.test(gov) && /Staff reading page/.test(gov), "the review calendar and the staff link are on Governance", (gov.match(/Process review calendar.{0,260}/) || ["no calendar section: " + gov.slice(0, 200)])[0]);
 
+/* ── 1a · the exported report states the process's real document control ── */
+const report = async (id) => { await A.page.goto(BASE + "/" + S + "/processes/reports?ids=" + id, { waitUntil: "networkidle" }); return body(A.page); };
+const rp = await report(P2);
+const an = (await st(P2)).an;
+check(/Status Published/.test(rp) && /Version v1/.test(rp) && /Effective Date \d{4}-\d{2}-\d{2}/.test(rp), "the report shows the published version, status and effective date", (rp.match(/Document ID.{0,260}/) || [rp.slice(0, 200)])[0]);
+check(new RegExp("Approved By " + an.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(rp), "…and who approved it");
+check(/Review Cycle Every 12 months · next \d{4}-\d{2}-\d{2}/.test(rp), "…and the real review cycle and next review date, not 'Annual'");
+const rd1 = await report(P1);
+check(/Status Draft/.test(rd1) && /Version —/.test(rd1) && /Approved By —/.test(rd1), "a draft says Draft and shows dashes, not an invented version", (rd1.match(/Document ID.{0,260}/) || [rd1.slice(0, 200)])[0]);
+
 /* ── 1b · moving in and out of every part of a process ── */
 const nav = async (pg, path) => { await pg.goto(BASE + "/" + S + "/processes/processes/" + P2 + path, { waitUntil: "networkidle" }); return pg.$$eval("nav[aria-label='Process sections'] a", (a) => a.map((x) => x.textContent)); };
 const onMap = await nav(A.page, "/map");

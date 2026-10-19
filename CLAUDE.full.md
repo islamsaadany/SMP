@@ -59,6 +59,23 @@ A drift between specs and code is a documentation bug — report it before silen
   and the section numbers on purpose. The rule is about what is said to a
   person, not about what is written down for the next one.
 
+### 1b-iv. SHORT, NOT JUST PLAIN (2026-10-19)
+- **Islam, of a reply he had just been handed: *"I DIDN'T UNDERSTAND ANYTHING
+  FROM THAT."*** Rule 1b-iii above said plain words and said nothing about
+  LENGTH, so the reply obeyed it line by line and was still unreadable — four
+  headings and a list, about work he had asked one question about.
+- **Answer the question that was asked. Stop there.** A few sentences. If it
+  needs headings, it is too long.
+- **Never put these in front of him**: file names, line counts, commit codes,
+  § numbers, check names, git words (branch, merge, fast-forward, force-push).
+  They are the record's vocabulary, not his. Say *the dropdown works for the
+  SMO team* — not which file it is in.
+- **Bad news is one sentence, not an essay.** "I got that wrong — the file has
+  other people's work in it too" is the whole thing. The explaining goes in the
+  commit message where it belongs.
+- **He will ask if he wants more.** Offering less is the safe mistake;
+  burying the answer is not.
+
 ### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
 - **Islam: *"remove the grey descriptions and stop adding descriptions to
   pages."*** A heading names the thing; a paragraph under it in grey saying the
@@ -145,18 +162,6 @@ A drift between specs and code is a documentation bug — report it before silen
   - For behavior changes, trace the actual code path end-to-end.
 - **State what you verified and how** when handing over. If something is genuinely un-testable from here, say so explicitly and explain the residual risk — don't present unverified work as done.
 - **When a symptom persists, re-audit from first principles** instead of repeating the same instruction — find the proof before concluding.
-
-### 3c. CRITICAL: A Built File's Changes Are Not All Yours (2026-10-19)
-- **The built files are put together on demand, not every time somebody edits a
-  source file** — so they normally sit behind the sources by whatever other
-  people have finished and not yet rebuilt.
-- **Rebuilding one brings all of that with it.** It is all or nothing: there is
-  no way to include your work and leave theirs out.
-- **So never say a built file's changes are yours without looking.** This rule
-  exists because I told Islam a rebuilt file was "all of this change" when
-  roughly sixty per cent of it was somebody else's unshipped work.
-- **When you rebuild, say plainly what came along for the ride**, and run the
-  checks that belong to that work too — do not ship it on trust.
 
 ### 3b. Engineering Preferences (Overrides Defaults)
 - **DRY: flag repetition aggressively** — extract at 3+ repeats; flag at 2.

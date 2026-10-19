@@ -1918,12 +1918,41 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
+     §554.1's cover and roll-calls are slides, not people presenting — and
+     the presenter counts SUBJECTS off `data-subject`, so each of them took
+     a dot of its own, a pill reading "FL", and turned "1 of 3" into
+     "1 of 4". Found by the checks rather than by looking, which is the
+     point of them.
+
+     EACH ONE IS STAMPED WITH WHAT IT INTRODUCES: the cover with the first
+     subject of the flow, a group's page with the first of that group. So
+     the strip, the dots and the pills read exactly as they did before the
+     pages existed, and the pages ride inside the section they open. */
+  var slides = [].slice.call(root.querySelectorAll(".deck .dslide"));
+  for (var i = slides.length - 1; i >= 0; i--) {
+    var sub = slides[i].dataset.subject || "";
+    if (sub.indexOf("flow:") !== 0) continue;
+    var next = slides[i + 1];
+    if (next && next.dataset.subject) {
+      slides[i].dataset.subject = next.dataset.subject;
+      /* BOTH, because the strip names a stop from `subjectName` and falls
+         back to the target only when there is none — so rewriting the
+         subject alone left the first dot reading "flow:cover". */
+      if (next.dataset.subjectName) slides[i].dataset.subjectName = next.dataset.subjectName;
+      else slides[i].removeAttribute("data-subject-name");
+    } else {
+      slides[i].removeAttribute("data-subject");
+      slides[i].removeAttribute("data-subject-name");
+    }
+  }
   /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
      `.dslide` siblings and leaves it alone. */
-  DECK.targets = list.slice();
+  /* …and they are not in the list of who is presenting either (§554.3). */
+  DECK.targets = list.filter(function(t){ return String(t).indexOf("flow:") !== 0; });
   DECK.clock = null;
   clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
@@ -1945,7 +1974,9 @@ function openDeckWith(titleHtml, targets, from){
   var ex = root.querySelector("[data-dexit]");
   ex.textContent = back ? "Back to slides" : "Exit";
   ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
-  DECK.flow = list.length > 1 ? list : null;
+  /* §554.3: and the stops are the subjects, so the flow's own pages are
+     not in the list the strip is built from either. */
+  DECK.flow = DECK.targets.length > 1 ? DECK.targets : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");

@@ -67326,3 +67326,23 @@ verification that was worthless, not the sentence.
 cover and pages — the capability's Kind word among them, because the demo
 client has units and so its picker holds no `dir:` row for `master-picker` to
 see it on.
+
+## §554.3 — A flow's own pages are not people presenting (2026-10-19)
+
+§554.1 gave the master flow a cover and the two roll-calls, and the presenter
+counts SUBJECTS off `data-subject` — so each of those pages took a dot of its
+own, a pill reading **FL**, and turned "1 of 3" into "1 of 4". The
+contingency pack counted twenty-one subjects where twenty present.
+
+Caught by `master-presentation` and `contingency` rather than by looking at
+it, which is what they are for.
+
+Each page is stamped with what it INTRODUCES — the cover with the first
+subject of the flow, a group's page with the first of that group — and the
+flow's own entries are kept out of `DECK.targets` and `DECK.flow`. So the
+strip, the dots, the pills and the pack read exactly as they did before the
+pages existed, and each page rides inside the section it opens.
+
+**BOTH ATTRIBUTES, NOT ONE.** The first fix rewrote `data-subject` and the
+first dot went on reading `flow:cover`: a stop takes its name from
+`data-subject-name` and falls back to the target only when there is none.

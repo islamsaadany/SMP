@@ -7139,15 +7139,23 @@ function renderReport(u, opt){
      rail, its pane and its empty state are a function called once for each
      half rather than one block built once. Called with no half on a joined
      box, which is every box in every client, the filter is null and this is
-     the block it always was, byte for byte. */
-  var halfBlock = function(){
-  var sel = unitRailPick(u);
+     the block it always was, byte for byte.
+     §556: AND CALLED ONCE WITH `one` WHERE THIS VIEWER REACHES BOTH HALVES
+     (`reportOneRail`) — no half set, so the rail's key is the box's own, and
+     the rows drawn directions first, then capabilities, each half under its
+     own word in the rail's group band (`.rgroup`, railFor's). Islam: *"directions
+     first yes"*. The stored order and every code are untouched: the halves
+     are skipped through, never copied (§517). */
+  var halfBlock = function(one){
+  var inHalf = function(h){ return function(p){ return SMPRules.pillarInHalf(p, h); }; };
+  var order = one ? partItems(u).filter(inHalf("dir")).concat(partItems(u).filter(inHalf("cap"))) : null;
+  var sel = unitRailPick(u, order);
   var pillars;
   /* §416: a direction that does not run this year is not asked for, so the
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = partItems(u).filter(runsNow)[0];
+    var firstNow = (order || partItems(u)).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
   if (!sel) {
@@ -7167,8 +7175,7 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
-    var railRows = u.items.map(function(p, pi){
-      if (rpf && !rpf(p)) return "";
+    var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -7192,9 +7199,19 @@ function renderReport(u, opt){
                 owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>'
                 : !now ? esc(sub) : "") +
         '</button>';
+    };
+    var rowsOf = function(keep){
+      return u.items.map(function(p, pi){
+        return (rpf && !rpf(p)) || (keep && !keep(p)) ? "" : railRow(p, pi);
+      }).join("");
+    };
+    var railRows = !one ? rowsOf(null) : ["dir", "cap"].map(function(h){
+      return '<div class="rgroup">' + drawHalf(h, function(){ return halfWord(u); }) +
+        ' <span class="rgn">' + order.filter(inHalf(h)).length + '</span></div>' + rowsOf(inHalf(h));
     }).join("");
-    var rail = '<div class="rail">' + railHead(halfWord(u), partItems(u).length) + railRows +
-      '<div class="rfoot">Tally is entries given of asked</div></div>';
+    var rail = '<div class="rail">' +
+      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u), partItems(u).length) +
+      railRows + '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
     /* §520.8: inside the company's capabilities split the capability's own
@@ -7226,8 +7243,11 @@ function renderReport(u, opt){
      headings because for them the title is doing its job. */
   var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
   var showCap = boxHasHalf(u, "cap");
-  var pillars = showDir ? drawHalf("dir", halfBlock) : "";
-  var capPillars = showCap ? drawHalf("cap", halfBlock) : "";
+  /* §556: both halves reached → one section, one rail, one pane. */
+  var oneRail = reportOneRail(u);
+  var pillars = oneRail ? drawHalf("", function(){ return halfBlock(true); })
+              : showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap && !oneRail ? drawHalf("cap", halfBlock) : "";
   /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
      section and has always been headed, so dropping the title there would
      take a heading off every unit in every client that never split anything
@@ -7338,8 +7358,12 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
+    /* §556: one rail, and the heading is the client's two words alone —
+       Islam: *"heading directions and capabilities and remove key mesasures
+       and tactics"*. */
     (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
-      section("", titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+      section("", oneRail ? L("pillar","bu") + " and " + L("capability","bu")
+                : titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
               null, pillars)) +
     /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
        client's own word for a capability — the shape §520.8 settled for the
@@ -9365,6 +9389,12 @@ function pillarRailKey(u, p){
   if (!boxSplit(u)) return "unit:" + (u ? u.ukey : "");
   return "unit:" + u.ukey + "@" + (SMPRules.pillarIsCap(p) ? "cap" : "dir");
 }
+/* §556: the REPORTING rail that holds it. Where that page draws both halves
+   on one rail, the rail is drawn with no half and its key carries none — the
+   key every joined box has always had. */
+function reportRailKey(u, p){
+  return reportOneRail(u) ? "unit:" + u.ukey : pillarRailKey(u, p);
+}
 /* And which SECTION holds it, for the same deep link: a split box draws its
    internal pillars on their own tab (§540), so a walk that sent every pillar
    to `plan` would open the Directions tab and highlight nothing. */
@@ -9379,8 +9409,10 @@ function pillarSecKey(u, p, sec){
    row's address everywhere else (§48, §191). The code is the fallback only
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
-function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
+/* §556: `order` is the list as the rail DRAWS it, where that is not the
+   stored order — so the page opens on the rail's first row, not the plan's. */
+function unitRailPick(u, order){
+  var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }

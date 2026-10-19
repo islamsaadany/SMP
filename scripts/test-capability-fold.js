@@ -32,7 +32,8 @@
      5 · page by page, what a person reads is the same — the Capabilities tab
          (compared ACROSS the two different renderers that draw it before and
          after), the Directions tab, Performance's sections, the Reporting
-         page's two sections, the Temple's base and the deck's roll-call;
+         page's one rail (§556; two sections before it), the Temple's base
+         and the deck's roll-call;
      6 · and the four differences that ARE intended are asserted to be
          exactly those four and no others.
 
@@ -45,6 +46,11 @@
      · the deck's heading dropping the second kind        →  1 of 38 red
      · the empty capabilities section kept on Performance →  2 of 38 red
      · Reporting drawing no second section                →  2 of 38 red
+       (retired by §556, which draws the office ONE rail; its replacements:)
+     · Reporting drawing the halves apart again (§556)     →  3 of 68 red
+     · capabilities first on the one rail (§556)           →  1 of 68 red
+       (each over the 2 of §1 and §1b that are red on the build before
+        §556 too, against this file's own base commit)
      · the deck naming both kinds on a JOINED box          →  2 of 42 red
      · `boxHasHalf` asking the BOX instead of the VIEWER    →  4 of 52 red
        (and its output is Islam's own symptom, word for word: "This unit has
@@ -482,8 +488,24 @@ console.log("5 · the pages, before the move and after it");
   const rep = WORDS(after(`renderReport(topAsUnit())`));
   ok(CAPS.every(function (n) { return rep.indexOf(n) >= 0; }),
      "Reporting still asks for every capability");
-  ok(rep.indexOf("Capabilities —") >= 0,
-     "under its own heading, in the client's word", rep.slice(rep.indexOf("Capabilities") - 20, rep.indexOf("Capabilities") + 60));
+  /* §556 REWROTE THIS, NEVER LOOSENED IT (§218). It asserted a second
+     section headed "Capabilities — …"; Islam then asked for the office's two
+     halves on ONE rail, headed with the client's two words and nothing else.
+     So: one rail, its two group bands, one heading naming both kinds, no
+     "— Key measures and Tactics" left anywhere, and every direction's row
+     before every capability's (*"directions first yes"*). */
+  const repHtml = after(`renderReport(topAsUnit())`);
+  const both = after(`L("pillar","bu") + " and " + L("capability","bu")`);
+  const railCodes = (repHtml.match(/class="rcode">[^<]*/g) || []).map(function (s) { return s.slice(s.indexOf(">") + 1); });
+  ok(rep.indexOf(both) >= 0 && !/— Key [Mm]easures and Tactics/.test(rep),
+     "under one heading, the client's two words and nothing after them (§556)",
+     rep.slice(rep.indexOf(both) - 20, rep.indexOf(both) + 60));
+  ok((repHtml.match(/class="rail"/g) || []).length === 1 &&
+     (repHtml.match(/class="rgroup"/g) || []).length === 2,
+     "on one rail, the two kinds under two group bands (§556)",
+     [(repHtml.match(/class="rail"/g) || []).length, (repHtml.match(/class="rgroup"/g) || []).length]);
+  ok(railCodes.length === 10 && /^(D\d+,)+(C\d+,?)+$/.test(railCodes.join(",")),
+     "every direction on the rail before every capability (§556)", railCodes);
   const tem = WORDS(after(`renderTemple()`));
   ok(CAPS.every(function (n) { return tem.indexOf(n) >= 0; }),
      "the Temple's base still names all five");
@@ -525,6 +547,10 @@ console.log("6 · each person is offered the half they have, and no heading when
   const H = String.raw`(function(){ var r = renderReport(topAsUnit()).replace(/<[^>]*>/g," ")
       .replace(/&mdash;/g,"\u2014").replace(/\s+/g," ");
     return (r.match(/\u2014 Key [Mm]easures and Tactics/g) || []).length; })()`;
+  /* \u00a7556: and the one heading the office reads instead, counted the same way. */
+  const BOTH = String.raw`(function(){ var r = renderReport(topAsUnit()).replace(/<[^>]*>/g," ")
+      .replace(/\s+/g," "), w = L("pillar","bu") + " and " + L("capability","bu");
+    return r.split(w).length - 1; })()`;
   const office = run(`PEOPLE.filter(function(p){ return p.role === "super"; })[0].key`);
   const read = function (key) {
     run("VIEWER = " + JSON.stringify(key) + ";");
@@ -532,6 +558,8 @@ console.log("6 · each person is offered the half they have, and no heading when
              narrowed: run(`partOnly()`),
              dir: run(`boxHasHalf(topAsUnit(), "dir")`),
              cap: run(`boxHasHalf(topAsUnit(), "cap")`),
+             one: run(`reportOneRail(topAsUnit())`),
+             both: run(BOTH),
              heads: run(H) };
   };
   const o = read(office), c = read(capMan.key), d = read(dirMan.key);
@@ -542,7 +570,13 @@ console.log("6 · each person is offered the half they have, and no heading when
      "the office is not narrowed and the two part owners are — or this proves nothing",
      [o.narrowed, c.narrowed, d.narrowed]);
   ok(o.dir === true && o.cap === true, "the office is offered both halves", o);
-  ok(o.heads === 2, "and both headings, which is what tells them apart for them", o.heads);
+  /* §556 rewrote this one too (§218): the office's two headings became one
+     naming both kinds over one rail, and the two part owners are not offered
+     the one rail, so their single untitled half is exactly §543's. */
+  ok(o.one === true && o.both === 1 && o.heads === 0,
+     "and one heading naming both kinds, over one rail (§556)", o);
+  ok(c.one === false && d.one === false,
+     "a part owner reaching one half is not given the one rail (§556)", [c.one, d.one]);
   ok(c.cap === true && c.dir === false,
      "a capability's owner is offered the capabilities half and NOT the directions one", c);
   ok(d.dir === true && d.cap === false,

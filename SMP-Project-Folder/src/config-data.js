@@ -5757,8 +5757,10 @@ function reportItems(u){
     /* §542: the rail that HOLDS this pillar, which on a split box is the
        half its kind puts it in — not the half on screen, because this walk
        runs outside any render. */
+    /* §556: and where Reporting draws both halves on one rail, it is that
+       rail — the Reporting bar's chip is the only reader of this key. */
     var place = { key:"p:" + (p.id || pi), label:code,
-                  rail:pillarRailKey(u, p), code:pillarRailId(p) };
+                  rail:reportRailKey(u, p), code:pillarRailId(p) };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -8764,6 +8766,16 @@ function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
   return drawHalf(half, function(){ return partItems(u).length > 0; });
 }
+/* §556 — REPORTING DRAWS BOTH HALVES ON ONE RAIL WHERE THIS VIEWER REACHES
+   BOTH. Islam, of El Abd's company Reporting as the SMO: *"shall we merge the
+   directions and pillars for better usabiilty in one rail?"*. §542 drew a box
+   shown apart as two stacked sections there, each with its own rail and its
+   own open pane, so the second rail started below the first pane and two rows
+   were selected at once. Strategy keeps its two tabs; this is Reporting's
+   alone. One question, asked by the page and by the rows' jump keys alike
+   (§53.5), and false wherever the box is joined or the viewer reaches one half
+   — which is every box but El Abd's company page, for the office, today. */
+function reportOneRail(u){ return boxHasHalf(u, "dir") && boxHasHalf(u, "cap"); }
 /* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
    headed with the client's word for a capability and its external half with
    the word for a pillar, because the two tabs are the two words — that is

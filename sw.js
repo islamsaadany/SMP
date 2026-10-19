@@ -414,7 +414,13 @@
    a monthly plan is there. The built file's bytes changed, which is the whole
    trigger (§91). Proved held by no commit in any ref's history (§94.12);
    confirm once more immediately before the push (§94.16). */
-const SHELL = "smp-shell-v6.47-target-from-months";
+/* v6.48-report-one-rail — §556: where the office reaches both halves of a box
+   shown apart (El Abd's company page), Reporting draws its directions and its
+   capabilities on one rail, under one heading naming both. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history (§94.12) after fetching every ref; confirm once more
+   immediately before the push (§94.16). */
+const SHELL = "smp-shell-v6.48-report-one-rail";
 const ASSETS = [
   "/",
   "/index.html",

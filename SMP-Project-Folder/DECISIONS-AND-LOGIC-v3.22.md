@@ -67484,3 +67484,36 @@ Measured: the flow's bar reads All slides · Present · Done; the grid draws 21
 cells for a four-subject flow and Escape closes it without closing the
 editor; and every deck of all three live clients is unchanged, because none
 of this touches what a deck holds.
+
+## §556.3 — The slide view, laid out as Islam's own page lays it out (2026-10-19)
+
+*"WHY ON EARTH YOU DIDN'T FOLLOW THE GUIDELINES IN THE HTML?!!!"* — fair.
+§556.2 bolted a grid and a line of keys onto our editor and left everything
+else where it was. He had handed over a working page and asked for its shape;
+what came back was our old chrome with two parts added.
+
+Read beside `Fouad_2026_2027_Customer_Story_Motion.html`, five things were
+wrong, and all five are now the way his page has them:
+
+- **A quiet header**, not a coloured band: who is presenting on the left, the
+  buttons on the right, **Present** the one filled button, Slides and Grid
+  beside it.
+- **The thumbnail IS the label.** A line of text under every preview said
+  what the preview already showed, and on a flow of forty-nine it pushed
+  three slides off the screen. The number sits outside; the name is on the
+  row's title and on the bar under the stage, where somebody reading it is
+  looking.
+- **One bar under the stage** carrying the counter, the slide's name and the
+  keys — his order, his three things.
+- **A progress rule over the stage and arrows at its edges.** The arrows call
+  the same stepper the keyboard calls (§53.5).
+- **Adding sits at the foot of the rail.** It was the loudest thing on a
+  screen whose job is to look at the deck. His page has no add at all; ours
+  needs one, and the foot is where it belongs.
+
+**AND THE PARAGRAPH UNDER THE STAGE IS GONE** — the same sentence under every
+one of forty-nine built slides, explaining a screen that now explains itself
+(§24, §15.1).
+
+`Slides` toggles the rail, `H` hides the slide in front of you by pressing the
+row's own eye (§53.5 — one act, one handler).

@@ -842,29 +842,37 @@ function slidesPaint(){
      arranged and presented, and a control that would write nowhere is not
      drawn (§61). */
   var mayAdd = canSpeakFor(SLED.target);
-  list.innerHTML = (mayAdd
-    ? '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
-      '<span class="picsub">' + (SLED.flow
-        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
-          "\u2019s own slides are added on its own page"
-        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
-            ? "the one selected" : "the slide selected below")) + '</span></div>'
-    : "") +
+  list.innerHTML =
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + (el.dataset.off ? " off" : "") +
-        '" data-slgo="' + esc(el.dataset.ed) + '">' +
+        '" data-slgo="' + esc(el.dataset.ed) + '" title="' + esc(slidesLabel(el)) + '">' +
+      /* §556.3: THE THUMBNAIL IS THE LABEL. A line of text under every
+         preview said what the preview already showed, and on a flow of
+         forty-nine it pushed three slides off the screen. The name is on
+         the row's title and on the bar under the stage, where somebody
+         reading it is looking. */
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
-      '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>' + esc(slidesMineWord(
-          pslideById(SLED.target, el.dataset.ps))) + '</em>' : '') + '</span>' +
+      (mine ? '<span class="sl-mine">' + esc(slidesMineWord(
+          pslideById(SLED.target, el.dataset.ps))) + '</span>' : '') +
       (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
       slidesEye(el, all) + '</div>';
-  }).join("");
+  }).join("") +
+  /* ── ADDING SITS AT THE FOOT (§556.3) ──────────────────────────────
+     It was the loudest thing on the screen, above the deck, on a screen
+     whose job is to look at the deck. Islam's own page has no add at all;
+     ours needs one, and the foot of the rail is where it belongs. */
+  (!mayAdd ? "" :
+    '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
+      '<span class="picsub">' + (SLED.flow
+        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
+          "\u2019s own slides are added on its own page"
+        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
+            ? "the one selected" : "the slide selected below")) + '</span></div>');
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -896,7 +904,7 @@ function slidesPaint(){
   var on = list.querySelector(".slrow.on");
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
   slidesGridPaint(all);
-  slidesKeysPaint();
+  slidesFootPaint(all);
   SLED.err = "";
 }
 
@@ -919,14 +927,23 @@ function slidesGridPaint(all){
       (el.dataset.off ? '<span class="slghid">hidden</span>' : '') + '</button>';
   }).join("");
 }
-function slidesKeysPaint(){
+/* The counter, the slide's name and the keys, on ONE bar under the stage
+   (§556.3) — Islam's own page carries exactly these three, in this order,
+   and the name is here rather than under every thumbnail. */
+function slidesFootPaint(all){
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) at = 0;
+  var ct = document.getElementById("slct");
+  if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
+  var nm = document.getElementById("slnm");
+  if (nm) nm.textContent = all[at] ? slidesLabel(all[at]) +
+    (all[at].dataset.off ? " \u00b7 hidden" : "") : "";
+  var pr = document.getElementById("slprog");
+  if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";
   var k = document.getElementById("slkeys");
-  if (!k) return;
-  k.innerHTML =
-    '<span><b>\u2191</b> <b>\u2193</b> move</span>' +
-    '<span><b>G</b> all slides</span>' +
-    '<span><b>P</b> present</span>' +
-    '<span><b>Esc</b> done</span>';
+  if (k) k.innerHTML =
+    '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
+    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done';
 }
 function slidesGridToggle(on){
   var g = document.getElementById("slgrid");
@@ -1032,12 +1049,13 @@ function slidesPaneHtml(cur, sl){
           '</div><p class="picsub">It is skipped when the deck is presented. Nothing ' +
           'else changes &mdash; the figures on it are still reported, still scored and ' +
           'still on the page.</p></div>'
-        : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
-          'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. ' + (SLED.flow
-            ? '<b>Add a final slide</b> puts your own pictures at the end of the flow.'
-            : '<b>Add slide after</b> puts your own pictures after it.') +
-          '</p></div>');
+        /* ── AND NOTHING UNDER A SLIDE THAT IS FINE (§556.3) ──────────
+           A paragraph under the stage, on every one of forty-nine built
+           slides, saying the same sentence about all of them. The bar
+           under the stage now names the slide, and the add control at the
+           foot of the rail says where it lands — so this was explaining a
+           screen that explains itself (§24, §15.1). */
+        : "");
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -1684,6 +1702,17 @@ function wireSlides(){
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
   var gb = root.querySelector("[data-slgrid]");
   if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §556.3: the arrows at the stage's edge and under it are the same act as
+     the keyboard's, so they call the same stepper (§53.5). */
+  root.querySelectorAll("[data-slstep]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesStep(+b.dataset.slstep); });
+  });
+  var rb = root.querySelector("[data-slrail]");
+  if (rb) rb.addEventListener("click", function(){
+    var on = root.classList.toggle("norail");
+    rb.classList.toggle("on", !on);
+    slidesFitStage();
+  });
   addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
@@ -1709,6 +1738,13 @@ function wireSlides(){
     }
     if (ev.key === "g" || ev.key === "G") { slidesGridToggle(); return; }
     if (ev.key === "p" || ev.key === "P") { slidesPlay(); return; }
+    /* §556.3: hide the slide you are looking at, which is where Islam's own
+       page puts it — the eye on the row does the same act for the row. */
+    if (ev.key === "h" || ev.key === "H") {
+      var cur = document.querySelector("#slidelist .slrow.on .slhide");
+      if (cur) cur.click();
+      return;
+    }
     /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
        Islam: "allow the arrows up and down so I can navigate the slides while
        adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —

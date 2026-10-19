@@ -70,7 +70,42 @@ with sync_playwright() as p:
     ck("the review runs foundation, analysis, directions, performance, thank you",
        all(x >= 0 for x in pos) and pos == sorted(pos), heads)
     ck("…and it is short — no per-direction measure slides", not any("Key measures" in h for h in heads), heads)
-    ck("…seven slides at most for any number of directions", len(heads) <= 7, heads)
+    # REWRITTEN TO THE PROPERTY IT WAS A PROXY FOR (§218, §553.6). It read
+    # "seven slides at most for any number of directions", and §553.6 gave
+    # the company's review the Overall performance divider every other deck
+    # has — Islam: *"and then performance and the overall performance etc."*
+    # — so the budget went to eight and the claim failed while what it was
+    # protecting was untouched.
+    #
+    # WHAT §481 ACTUALLY PROMISED is that the review does not GROW with the
+    # plan: the company's detail is each owner's own deck, so two directions
+    # and ten must cost the same slides. That is asserted by MAKING both
+    # states (§255) rather than by a number somebody has to keep updating,
+    # and it is the stronger claim — a build that started drawing a slide
+    # per direction would pass "at most seven" for a small plan and fail
+    # this one at any size.
+    grew = safe(pg, """()=>{
+      var before = GROUP.items.slice(), n0;
+      var count = function(){ var d=document.createElement('div');
+        d.innerHTML = deckHtmlFor('group');
+        return d.querySelectorAll('.dslide').length; };
+      n0 = count();
+      var proto = JSON.parse(JSON.stringify(GROUP.items[0]));
+      for (var i = 0; i < 8; i++) {
+        var c = JSON.parse(JSON.stringify(proto));
+        c.id = 'group-X' + i; c.code = 'EX0' + i; c.name = 'Extra ' + i;
+        c.measures = (c.measures||[]).map(function(m, j){
+          return Object.assign({}, m, {id: c.id + '-M' + j}); });
+        GROUP.items.push(c);
+      }
+      paint();
+      var n1 = count();
+      GROUP.items = before; paint();
+      return {two: n0, ten: n1, back: count()};
+    }""")
+    ck("…and the review does not grow with the number of directions (§481)",
+       isinstance(grew, dict) and grew.get("two") == grew.get("ten")
+       and grew.get("back") == grew.get("two"), grew)
 
     # ── 2. A direction's own deck ─────────────────────────────────────
     d1 = safe(pg, "()=>(%s)('dir:group-P1')" % HEADS, []) or []

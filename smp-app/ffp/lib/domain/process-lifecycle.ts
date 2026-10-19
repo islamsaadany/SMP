@@ -34,19 +34,20 @@ export function editResetsToDraft(status: ProcessLifecycleStatus): boolean {
 }
 
 /**
- * Whether `actorEmail` may approve. The named approver, and only them — and
- * never the person who sent it for review. Emails are compared case-blind;
- * a missing email on either side is a refusal, not a pass.
+ * Whether somebody may approve: the named approver, identified by the People-register key the door
+ * gave them (the approver is a client's own person, and signs in as one), and never the person who
+ * sent it for review (compared by email, case-blind; a missing one on either side is no match).
  */
 export function mayApprove(args: {
+  actorPersonKey: string | null | undefined;
+  approverPersonKey: string | null | undefined;
   actorEmail: string | null | undefined;
-  approverEmail: string | null | undefined;
   submitterEmail: string | null | undefined;
 }): { ok: true } | { ok: false; reason: "NOT_THE_APPROVER" | "OWN_DRAFT" } {
-  const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
-  const actor = norm(args.actorEmail);
-  if (!actor || actor !== norm(args.approverEmail)) return { ok: false, reason: "NOT_THE_APPROVER" };
-  if (actor === norm(args.submitterEmail)) return { ok: false, reason: "OWN_DRAFT" };
+  const key = (args.actorPersonKey ?? "").trim();
+  if (!key || key !== (args.approverPersonKey ?? "").trim()) return { ok: false, reason: "NOT_THE_APPROVER" };
+  const norm = (x: string | null | undefined) => (x ?? "").trim().toLowerCase();
+  if (norm(args.actorEmail) && norm(args.actorEmail) === norm(args.submitterEmail)) return { ok: false, reason: "OWN_DRAFT" };
   return { ok: true };
 }
 

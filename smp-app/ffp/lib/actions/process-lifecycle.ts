@@ -4,8 +4,8 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { auth } from "@/ffp/lib/auth/config";
-import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
-import { ok, notFound, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
+import { readerSeat, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
+import { ok, notFound, unauthorized, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
 import {
   addMonths,
   mayApprove,
@@ -42,12 +42,13 @@ async function registerPerson(workspaceId: string, personId: string) {
       id: true,
       name: true,
       email: true,
+      smpKey: true,
       personRoles: { select: { role: { select: { name: true, archivedAt: true } } } },
     },
   });
   if (!person) return null;
   const roles = person.personRoles.filter((r) => !r.role.archivedAt).map((r) => r.role.name);
-  return { id: person.id, name: person.name, email: person.email, role: roles.length ? roles.join(", ") : null };
+  return { id: person.id, name: person.name, email: person.email, smpKey: person.smpKey, role: roles.length ? roles.join(", ") : null };
 }
 
 /** Moves a process from `from` to the state `action` leads to — only if nobody moved it first. */
@@ -119,17 +120,19 @@ export async function approveProcess(input: z.infer<typeof approveSchema>): Prom
   const parsed = approveSchema.safeParse(input);
   if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
   const d = parsed.data;
-  const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
-  if (!access.ok) return access;
+  /* The named approver is a client's own person on the People register, and approves from their own
+     reading page — so this asks readerSeat (their register key), not the office's seat. */
+  const seat = await readerSeat(d.workspaceId);
+  if (!seat.ok) return unauthorized();
   const process = await load(d.workspaceId, d.processId);
   if (!process) return notFound();
   if (!nextStatus(process.lifecycleStatus, "approve")) return refuse("Only a process in review can be approved");
 
   const approver = process.approverPersonId ? await registerPerson(d.workspaceId, process.approverPersonId) : null;
-  const session = await auth();
   const verdict = mayApprove({
-    actorEmail: session?.user.email,
-    approverEmail: approver?.email,
+    actorPersonKey: seat.personKey,
+    approverPersonKey: approver?.smpKey,
+    actorEmail: seat.email,
     submitterEmail: process.submittedByEmail,
   });
   if (!verdict.ok) {
@@ -158,6 +161,7 @@ export async function approveProcess(input: z.infer<typeof approveSchema>): Prom
     },
   });
   refresh(d.workspaceId, d.processId);
+  revalidatePath(`/${d.workspaceId}/processes/read`);
   return ok({ version: number });
 }
 
@@ -167,22 +171,30 @@ export async function returnProcessToDraft(input: z.infer<typeof returnSchema>):
   const parsed = returnSchema.safeParse(input);
   if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
   const d = parsed.data;
-  const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
-  if (!access.ok) return access;
   const process = await load(d.workspaceId, d.processId);
   if (!process) return notFound();
   if (!nextStatus(process.lifecycleStatus, "return")) return refuse("This process is not in review or approved");
 
+  let allowed = false;
   if (process.lifecycleStatus === "IN_REVIEW") {
-    // The approver sends it back, or whoever sent it up withdraws it.
-    const session = await auth();
-    const me = (session?.user.email ?? "").trim().toLowerCase();
-    const approver = process.approverPersonId ? await registerPerson(d.workspaceId, process.approverPersonId) : null;
-    const isApprover = !!me && me === (approver?.email ?? "").trim().toLowerCase();
-    const isSubmitter = !!me && me === (process.submittedByEmail ?? "").trim().toLowerCase();
-    if (!isApprover && !isSubmitter) return refuse(`Only ${process.approverName ?? "the approver"} or the person who sent it can send it back`);
+    // The named approver sends it back, from their own reading page...
+    const seat = await readerSeat(d.workspaceId);
+    if (seat.ok && seat.personKey) {
+      const approver = process.approverPersonId ? await registerPerson(d.workspaceId, process.approverPersonId) : null;
+      allowed = !!approver?.smpKey && approver.smpKey === seat.personKey;
+    }
+    // ...or whoever sent it up withdraws it.
+    if (!allowed) {
+      const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
+      if (!access.ok) return access;
+      const me = (await auth())?.user.email.trim().toLowerCase() ?? "";
+      allowed = !!me && me === (process.submittedByEmail ?? "").trim().toLowerCase();
+    }
+    if (!allowed) return refuse(`Only ${process.approverName ?? "the approver"} or the person who sent it can send it back`);
   } else {
     // An approved version that will not be published goes back. The version it created stays on record.
+    const access = await requireWorkspaceAccess(d.workspaceId, "EDITOR");
+    if (!access.ok) return access;
   }
 
   const moved = await move(d.processId, process.lifecycleStatus, {
@@ -192,6 +204,7 @@ export async function returnProcessToDraft(input: z.infer<typeof returnSchema>):
   });
   if (!moved) return { ok: false, error: "CONFLICT" };
   refresh(d.workspaceId, d.processId);
+  revalidatePath(`/${d.workspaceId}/processes/read`);
   return ok(null);
 }
 

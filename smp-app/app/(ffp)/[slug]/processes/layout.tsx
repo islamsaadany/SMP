@@ -6,8 +6,8 @@
      · the door — SMP's sign-in, asked through resolveTenant exactly as every
        other page asks it, and the module must be switched on for the client;
      · who may open WHICH part is asked by the part itself, not here: the
-       office-only areas ((shell), reports) call officeOnlyNotice first — a
-       client's own person is told so in words with the way back (§61) — and
+       office-only areas ((shell), reports) call requireOffice first — a
+       client's own person is sent to their reading page — and
        the staff reader view (read) asks readerSeat. This frame only makes
        sure the person got through the door. tests/processes-gate.mjs fails if
        a page is left without one of the two;

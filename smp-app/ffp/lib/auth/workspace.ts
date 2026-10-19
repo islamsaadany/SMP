@@ -48,8 +48,8 @@ export type ReaderSeat =
   | { ok: false };
 
 export const readerSeat = cache(async (slug: string): Promise<ReaderSeat> => {
-  const session = await auth();
-  if (!session) return { ok: false };
+  /* SMP's own session, NOT this module's auth(): that one answers only for the office, and the whole
+     point of the reading view is that a client's own person can open it. */
   const user = await currentUser();
   if (!user) return { ok: false };
   const door = await resolveTenant(doorPool(), user, slug);
@@ -59,9 +59,9 @@ export const readerSeat = cache(async (slug: string): Promise<ReaderSeat> => {
   return {
     ok: true,
     office,
-    userId: session.user.id,
-    email: session.user.email,
-    name: session.user.name ?? session.user.email,
+    userId: user.id,
+    email: user.email,
+    name: user.name || user.email,
     personKey: door.personKey,
     tenantName: door.tenant.name,
   };

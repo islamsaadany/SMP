@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
 import { WorkspacePageHeader } from "../workspace-page-header";
@@ -16,6 +17,8 @@ import { HelicopterView } from "./helicopter-view";
  */
 export default async function HelicopterViewPage(props: PageProps<"/[slug]/processes/helicopter">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
 
   const [workspace, processes] = await Promise.all([

@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound as nextNotFound, redirect } from "next/navigation";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
@@ -15,6 +16,8 @@ export default async function SopPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
   const searchParams = await props.searchParams;
   const idsRaw = searchParams["ids"];

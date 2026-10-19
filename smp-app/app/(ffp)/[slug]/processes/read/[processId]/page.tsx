@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import { readerSeat } from "@/ffp/lib/auth/workspace";
 import { AcknowledgeBar } from "./acknowledge-bar";
+import { ApprovalBar } from "./approval-bar";
+import { awaitingApproval } from "@/ffp/lib/data/process-reading";
 
-/** One published process, read-only: what it is, what changed, who does what. */
+/** One published process, read-only: what it is, what changed, who does what. The named approver also sees it while it waits for them. */
 export default async function ReadProcess(props: PageProps<"/[slug]/processes/read/[processId]">) {
   const { slug, processId } = await props.params;
   const seat = await readerSeat(slug);
@@ -12,22 +14,26 @@ export default async function ReadProcess(props: PageProps<"/[slug]/processes/re
     where: { id: processId },
     select: {
       workspaceId: true, archivedAt: true, lifecycleStatus: true, code: true, name: true, processPurpose: true,
-      inScope: true, outOfScope: true, sopVersion: true, sopEffectiveDate: true,
+      inScope: true, outOfScope: true, sopVersion: true, sopEffectiveDate: true, pendingChangeNote: true, submittedByName: true,
       steps: {
         orderBy: { order: "asc" },
         select: { id: true, type: true, label: true, detailedAction: true, assignedRole: { select: { name: true } } },
       },
     },
   });
-  // Only what is published, in this client: a draft or a retired process is not for staff to read.
-  if (!process || process.workspaceId !== slug || process.archivedAt || process.lifecycleStatus !== "PUBLISHED") notFound();
+  // Only what is published, in this client — a draft or a retired process is not for staff to read —
+  // or one that is waiting for THIS person's approval.
+  if (!process || process.workspaceId !== slug || process.archivedAt) notFound();
+  const key = seat.ok ? seat.personKey : null;
+  const approving =
+    process.lifecycleStatus === "IN_REVIEW" && !!key && (await awaitingApproval(slug, key)).some((p) => p.id === processId);
+  if (process.lifecycleStatus !== "PUBLISHED" && !approving) notFound();
 
   const version = await prisma.processVersion.findFirst({
     where: { processId, publishedAt: { not: null } },
     orderBy: { number: "desc" },
     select: { number: true, changeNote: true },
   });
-  const key = seat.ok ? seat.personKey : null;
   const already =
     key && version
       ? !!(await prisma.processAcknowledgement.findUnique({
@@ -46,11 +52,18 @@ export default async function ReadProcess(props: PageProps<"/[slug]/processes/re
         {process.name} <span className="ms-1 rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-xs font-bold text-indigo-700">{process.code}</span>
       </h1>
       <p className="mt-1 text-sm text-slate-500">
-        Version {version?.number ?? "—"}
-        {process.sopEffectiveDate ? ` · in force from ${process.sopEffectiveDate}` : ""}
+        {approving
+          ? `For your approval${process.submittedByName ? ` · sent by ${process.submittedByName}` : ""}`
+          : `Version ${version?.number ?? "—"}${process.sopEffectiveDate ? ` · in force from ${process.sopEffectiveDate}` : ""}`}
       </p>
 
-      {version?.changeNote && (
+      {approving && process.pendingChangeNote && (
+        <section className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <h2 className="text-sm font-semibold text-amber-900">What changed in this version</h2>
+          <p className="mt-1 text-sm text-amber-900">{process.pendingChangeNote}</p>
+        </section>
+      )}
+      {!approving && version?.changeNote && (
         <section className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <h2 className="text-sm font-semibold text-amber-900">What changed in this version</h2>
           <p className="mt-1 text-sm text-amber-900">{version.changeNote}</p>
@@ -99,13 +112,17 @@ export default async function ReadProcess(props: PageProps<"/[slug]/processes/re
         )}
       </section>
 
-      <AcknowledgeBar
-        workspaceId={slug}
-        processId={processId}
-        version={version?.number ?? null}
-        canAcknowledge={!!key && !!version}
-        already={already}
-      />
+      {approving ? (
+        <ApprovalBar workspaceId={slug} processId={processId} />
+      ) : (
+        <AcknowledgeBar
+          workspaceId={slug}
+          processId={processId}
+          version={version?.number ?? null}
+          canAcknowledge={!!key && !!version}
+          already={already}
+        />
+      )}
     </main>
   );
 }

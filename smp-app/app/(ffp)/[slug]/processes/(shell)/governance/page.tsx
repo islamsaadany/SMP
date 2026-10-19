@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
 import { WorkspacePageHeader } from "../workspace-page-header";
@@ -41,6 +42,8 @@ function formatDateOnly(d: Date): string {
  */
 export default async function GovernancePage(props: PageProps<"/[slug]/processes/governance">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
   const locale = await getLocale();
   const m = messagesFor(locale);

@@ -1,8 +1,7 @@
-import { officeOnlyNotice } from "../office-only-notice";
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 
 export default async function ReportsLayout(props: LayoutProps<"/[slug]/processes/reports">) {
   const { slug } = await props.params;
-  const notice = await officeOnlyNotice(slug);
-  if (notice) return notice;
+  await requireOffice(slug);
   return props.children;
 }

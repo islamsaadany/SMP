@@ -4,12 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   submitProcessForReview,
-  approveProcess,
   returnProcessToDraft,
   publishProcess,
   retireProcess,
   setReviewInterval,
 } from "@/ffp/lib/actions/process-lifecycle";
+import { StaffLink } from "../../staff-link";
 import { STATUS_LABEL, type ProcessLifecycleStatus } from "@/ffp/lib/domain/process-lifecycle";
 
 const FLOW: ProcessLifecycleStatus[] = ["DRAFT", "IN_REVIEW", "APPROVED", "PUBLISHED", "RETIRED"];
@@ -30,8 +30,6 @@ export type PanelProps = {
   submittedBy: string | null;
   returnReason: string | null;
   reviewIntervalMonths: number;
-  /** Server-decided: this signed-in person is the named approver and did not send it up. */
-  canApprove: boolean;
   /** Server-decided: this signed-in person is the approver or the sender. */
   canReturnFromReview: boolean;
 };
@@ -188,20 +186,10 @@ export function LifecyclePanel(p: PanelProps) {
 
       {p.status === "IN_REVIEW" && (
         <div className="space-y-3">
-          {p.canApprove ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => run(() => approveProcess(ids))}
-              className={primary}
-            >
-              Approve
-            </button>
-          ) : (
-            <p className="text-sm text-slate-600">
-              Waiting for {p.approver ? label(p.approver) : "the approver"} to approve.
-            </p>
-          )}
+          <p className="text-sm text-slate-600">
+            Waiting for {p.approver ? label(p.approver) : "the approver"} to approve. They approve from their own reading page, so send them the link.
+          </p>
+          <StaffLink label="Their reading page" path={`/${p.workspaceId}/processes/read`} />
           {p.canReturnFromReview && <ReturnForm reason={reason} setReason={setReason} pending={pending} onReturn={() => run(() => returnProcessToDraft({ ...ids, reason }))} />}
         </div>
       )}

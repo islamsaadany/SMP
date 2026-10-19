@@ -8,7 +8,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 /** How many processes are published for this person, and how many they have not yet acknowledged. */
-export type ProcessesRead = { published: number; waiting: number };
+export type ProcessesRead = { published: number; waiting: number; approvals?: number };
 export type BarExtras = { processesRead: ProcessesRead | null };
 
 const store = new AsyncLocalStorage<BarExtras>();
@@ -21,8 +21,11 @@ export function barExtras(): BarExtras {
   return store.getStore() ?? { processesRead: null };
 }
 
-/** The link's words, or null when there is nothing published and so no link at all. */
+/** The link's words, or null when there is nothing to read or approve and so no link at all. */
 export function readingLink(r: ProcessesRead | null | undefined): { label: string; count: string | null } | null {
-  if (!r || r.published <= 0) return null;
-  return { label: "Processes", count: r.waiting > 0 ? r.waiting + " to read" : null };
+  if (!r) return null;
+  const approvals = r.approvals ?? 0;
+  if (r.published <= 0 && approvals <= 0) return null;
+  const parts = [r.waiting > 0 ? r.waiting + " to read" : "", approvals > 0 ? approvals + " to approve" : ""].filter(Boolean);
+  return { label: "Processes", count: parts.length ? parts.join(" · ") : null };
 }

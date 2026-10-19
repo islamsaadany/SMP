@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import Link from "next/link";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
@@ -5,7 +6,7 @@ import { prisma } from "@/ffp/lib/db/client";
 import type { Revision } from "@/ffp/lib/domain/sop";
 import { ProcessTabs, parseTab } from "./process-tabs";
 import { auth } from "@/ffp/lib/auth/config";
-import { daysToReview, isOverdueForReview, mayApprove, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
+import { daysToReview, isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { acknowledgementProgress, expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
 import { StaffLink } from "../../staff-link";
 import { LifecyclePanel } from "./lifecycle-panel";
@@ -43,6 +44,8 @@ function List({ items }: { items: string[] }) {
 
 export default async function ProcessPage(props: PageProps<"/[slug]/processes/processes/[processId]">) {
   const { slug: workspaceId, processId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   const tab = parseTab((await props.searchParams).tab);
   await registerReady(workspaceId);
 
@@ -88,9 +91,6 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   );
   const approverRow = people.find((x) => x.id === process.approverPersonId);
   const me = (session?.user.email ?? "").trim().toLowerCase();
-  const canApprove =
-    process.lifecycleStatus === "IN_REVIEW" &&
-    mayApprove({ actorEmail: me, approverEmail: approverRow?.email, submitterEmail: process.submittedByEmail }).ok;
   const canReturnFromReview =
     !!me && (me === (approverRow?.email ?? "").trim().toLowerCase() || me === (process.submittedByEmail ?? "").trim().toLowerCase());
   const today = new Date();
@@ -193,7 +193,6 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
               submittedBy={process.submittedByName}
               returnReason={process.returnReason}
               reviewIntervalMonths={process.reviewIntervalMonths}
-              canApprove={canApprove}
               canReturnFromReview={canReturnFromReview}
             />
             {process.lifecycleStatus === "PUBLISHED" && process.nextReviewDue && (

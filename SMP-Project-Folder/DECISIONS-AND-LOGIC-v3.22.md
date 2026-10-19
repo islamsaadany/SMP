@@ -67218,6 +67218,19 @@ Islam: *"I want to enable the smo team to have the drop down of view as for the 
 
 **CHECKS.** `smp-app/checks/view-as.mjs` — 33 green, **red four ways** (`viewas-any-seat`, `viewas-unknown-ok`, `viewas-keeps-seat`, and `viewas-team-takes-super`, the new one putting the escalation itself back). `scripts/test-authorize.js` — six new assertions on the save path, 1097 passing. `SMP-Project-Folder/src/checks/viewas-smoteam.py` — a new browser check that signs in as an SMO team member and presses the real controls: **green here, 7 red across §1–§4 on the build before**, which is where the leak above was measured. `checks/viewer-switch.py`, `checks/viewas-fresh.py`, `checks/role-picker.py` and `checks/seat-grant.py` all stay green.
 
+## §556 — El Abd reports its directions and capabilities on one rail (2026-10-19)
+Islam, of El Abd's company Reporting page as the SMO: *"shall we merge the directions and pillars for better usabiilty in one rail?"*, then *"that's for elabd mainly"* with a screenshot of the two blocks.
+
+**THE PROBLEM IS §542's TWO SECTIONS.** A box shown apart reports each half as its own section, each with its own rail and its own open pane. Measured on the worked example's Mobile set apart, as the SMO at 1440×900: the second section's heading sits at 1,417px, the page is 2,619px tall against 1,722px joined, and two rows are selected at once. The rail exists so every row's state stays in view while one is entered (§15.12); stacked, the capabilities' tallies and red lines are below the fold while a direction is open.
+
+**PROPOSED, AND ANSWERED.** One section, one rail, one pane. The rail carries two group labels, which is the rail's existing group band (`.rgroup`, the Setup rail's since §46.1), not a new part. Mockup: `design-mockups/elabd-report-rail/2026-10-19_one-rail.html`. Islam's two answers: **the heading reads *Directions and Capabilities***, the client's two words with *Key Measures and Tactics* dropped; and **directions first, then capabilities**, each under its label.
+
+**SCOPE.** Only where a viewer reaches both halves of a box shown apart, which today is El Abd's company page for the office. Wander's company holds capabilities only and every unit is one list, so neither moves. A part owner who reaches one half keeps §543's single untitled half. Strategy keeps its two tabs (§535.10) and Performance its two gauge groups. On a phone the rail is the strip it already becomes, where `.rgroup` is already hidden and the D and C codes tell the kinds apart.
+
+**WHAT IT COSTS.** Reporting goes back to one remembered selection on this page in place of §542's two. The missing-elements deep link has to land on the one rail. `scripts/test-capability-fold.js`'s "Reporting draws a second section" assertion is rewritten to the new rule rather than loosened (§218).
+
+**NOT BUILT.** Waiting on Islam's go-ahead.
+
 ## §539 — Processes lifecycle: decisions (2026-10-18)
 1. **Governance sits in the side rail**, not as a top tab. The Processes side rail already has a "Governance" page (policies, risks, assessments); the new cross-process views (review calendar, compliance coverage, non-conformances, acknowledgements, audit trail) become sections of it.
 2. **The reader view opens to client staff, read-only**: approved or published versions only, with an Acknowledge button; no drafts, risks or quality data. Built after the lifecycle.

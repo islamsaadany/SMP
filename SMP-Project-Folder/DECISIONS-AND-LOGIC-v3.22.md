@@ -67346,3 +67346,44 @@ pages existed, and each page rides inside the section it opens.
 **BOTH ATTRIBUTES, NOT ONE.** The first fix rewrote `data-subject` and the
 first dot went on reading `flow:cover`: a stop takes its name from
 `data-subject-name` and falls back to the target only when there is none.
+
+## §555 — The company's performance reads like a unit's (2026-10-19)
+
+Islam, of a direction owner: *"he should see the performance of the
+directions, like we see it in the business units format in Raya, as if he has
+a business unit of two directions. He sees the two directions on the left,
+and the performance is clear"* — and of his own view: *"for the super user or
+the SMO … it should show the performance, like the business units and
+directions, on the left, and the performance is clear in front of me"*.
+
+**TWO FAULTS, AND THE FIRST DRAFT FIXED NEITHER.** The page already had a
+Directions section and a Capabilities section, so the first thing written
+here was a SECOND pair beside them — added before the existing ones were
+looked at. Reverted. What the two sections actually drew was a grid of gauge
+cards, every direction's measures and tactics at once; and the page opened on
+the overall figures every time, so even that was one press away.
+
+So: **the sections draw `unitPerfRail`**, the rail and the pane a unit's page
+has had since the beginning. It takes the company box exactly as it takes a
+unit — §416's not-yet-running rows, §517's narrowing to a part owner's own,
+the execution line and the owner all come with it (§53.5). `drawHalf` has
+already set the half, so the rail asks for nothing new. The gauge grid is
+deleted rather than kept beside it: the pane says everything a card said, and
+two readings of one thing is §87's twins.
+
+**AND THE PAGE LANDS ON THEM.** A landing, not an override — once somebody
+chooses a section it stays chosen (§124).
+
+**A SECOND DEAD END WORTH RECORDING.** Before finding `drawHalf`, this change
+threaded an optional `half` argument through `halfWord`, `halfFilter`,
+`partFilter`, `partItems`, `unitRailSubj`, `unitRailKey`, `unitRailPick` and
+`unitPerfRail` so two rails could be drawn on one page. `drawHalf` already
+does exactly that, by setting `PILLAR_HALF` around the call — eight functions
+of new surface for a thing the codebase had. All of it reverted (§24).
+
+**MEASURED:** El Abd opens on its five directions, in a rail, with the pane
+in front; Capabilities is the tab beside it. **Wander now opens on its
+capabilities rather than the overall figures**, because those are its
+pillars — a real change to a live client's landing, stated rather than
+discovered. Raya is untouched: it has units, so it has no company-pillar
+section at all.

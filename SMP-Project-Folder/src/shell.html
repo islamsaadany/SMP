@@ -6547,7 +6547,10 @@
       b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
     });
     document.querySelectorAll("[data-sec]").forEach(function(b){
-      b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
+      b.addEventListener("click", function(){
+        /* §555: a chosen section stays chosen — the landing only applies
+           until somebody says otherwise. */
+        GSEC = +b.dataset.sec; GSEC_PICKED = true; paint(); window.scrollTo(0,0); });
     });
     /* Cards or a table, per section (§16.6). A view preference — it changes
        how a section is laid out, never what anything is or in what order it

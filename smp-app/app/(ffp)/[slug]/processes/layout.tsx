@@ -5,14 +5,20 @@
 
      · the door — SMP's sign-in, asked through resolveTenant exactly as every
        other page asks it, and the module must be switched on for the client;
-     · the office only, by seat (super user or SMO team) — a client's own
-       person is told so in words with the way back (§61);
+     · who may open WHICH part is asked by the part itself, not here: the
+       office-only areas ((shell), reports) call requireOffice first — a
+       client's own person is sent to their reading page — and
+       the staff reader view (read) asks readerSeat. This frame only makes
+       sure the person got through the door. tests/processes-gate.mjs fails if
+       a page is left without one of the two;
      · SMP's white top bar (lib/topbar.ts, §444), the same on every module,
        in place of FFProcess's own header.
 
    FFProcess's root layout set the language on <html>; SMP's root layout owns
    <html>, so the language and direction ride a wrapper element instead —
    Tailwind's rtl: variants and logical properties read the nearest `dir`. */
+import { readingFor } from "@/ffp/lib/data/process-reading";
+import { offersReadingLink } from "@/ffp/lib/domain/process-reader";
 import { registerReady } from "@/ffp/lib/register-sync";
 import "@/ffp/globals.css";
 import { redirect } from "next/navigation";
@@ -55,7 +61,13 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
      register-sync.ts registerReady — the pages that list people await the
      same per-request sync, so none reads ahead of it). */
   if (office) await registerReady(slug);
-  const bar = topBarHtml({ slug, tenantName: door.tenant.name, module: "processes", have, consultant: user.kind !== "client" });
+  // The staff reading link, for a client's own person on the register: this frame is not
+  // served by the router that sets it for every other page (lib/bar-extras.ts).
+  const processesRead =
+    !office && door.personKey && offersReadingLink({ clientHasProcesses: true, office, userKind: user.kind, personKey: door.personKey })
+      ? await readingFor(slug, door.personKey)
+      : null;
+  const bar = topBarHtml({ slug, tenantName: door.tenant.name, module: "processes", have, consultant: user.kind !== "client", processesRead });
   const locale = await getLocale();
 
   return (
@@ -71,19 +83,7 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
         className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} flex min-h-[calc(100vh-41px)] flex-col bg-slate-50 font-sans text-slate-900 antialiased`}
       >
         <LocaleProvider locale={locale}>
-          {office ? (
-            props.children
-          ) : (
-            <main className="mx-auto max-w-xl px-6 py-16">
-              <h1 className="text-lg font-semibold">Processes is the office&apos;s own</h1>
-              <p className="mt-2 text-sm text-slate-600">
-                The process maps for {door.tenant.name} are kept by the Strategy Management Office.
-              </p>
-              <a className="mt-4 inline-block text-sm font-medium text-indigo-700 hover:underline" href={clientHref(slug, DEFAULT_MODULE, "")}>
-                Back to the platform
-              </a>
-            </main>
-          )}
+          {props.children}
         </LocaleProvider>
       </div>
     </>

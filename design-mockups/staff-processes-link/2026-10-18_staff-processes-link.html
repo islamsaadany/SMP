@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Staff Processes Link</title>
+<style>
+/* The bar is drawn with the platform's own tokens (lib/topbar.ts), so what is shown is what would ship. */
+:root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D;--tb-gold-ink:#6B4E0F;--tb-gold-bg:#FBF3E4;
+  --ground:#F5F6F9;--card:#FFFFFF;--ok:#1F7A4D;--warn:#9C5D08}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665;--tb-gold-ink:#F0D58E;--tb-gold-bg:#2A2416;--ground:#12151C;--card:#1A1F29;--ok:#5CC38F;--warn:#F5A623;color-scheme:dark}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665;--tb-gold-ink:#F0D58E;--tb-gold-bg:#2A2416;--ground:#12151C;--card:#1A1F29;--ok:#5CC38F;--warn:#F5A623;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--tb-ink);font:400 15px/1.55 'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 64px;display:grid;gap:30px}
+h1{margin:0;font-size:22px;font-weight:700}
+h2{margin:0;font-size:16px;font-weight:700}
+.lede{margin:6px 0 0;color:var(--tb-ink-2);max-width:70ch}
+.tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tb-ink-3);font-weight:700}
+.top-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.tgl{font:inherit;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--tb-line);background:var(--card);color:var(--tb-ink-2);border-radius:99px;padding:5px 12px;cursor:pointer}
+section{display:grid;gap:10px}
+.frame{border:1px solid var(--tb-line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.scroll{overflow-x:auto}.page{min-width:860px}
+.body{padding:16px 24px;color:var(--tb-ink-3);font-size:13px}
+.ph{height:10px;border-radius:5px;background:var(--tb-surface-2);margin-top:9px;width:58%}.ph.s{width:36%}
+.cap{font-size:13px;color:var(--tb-ink-2);margin:0}
+.cap b{color:var(--tb-ink)}
+.pair{display:grid;gap:14px}
+/* ── the client person's bar, as lib/topbar.ts draws it ── */
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink)}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.tbbrand{font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
+.tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;font-size:12px}
+.tbout{font:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:3px 10px}
+/* ── the proposed addition: one link, no menu ── */
+.tbread{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--tb-ink);text-decoration:none;padding:3px 8px;border-radius:7px}
+.tbread:hover{background:var(--tb-surface-2)}
+.tbread .n{font-size:11.5px;font-weight:700;background:var(--tb-gold-bg);color:var(--tb-gold-ink);border:1px solid var(--tb-gold);border-radius:99px;padding:0 7px;line-height:18px}
+.quiet{color:var(--tb-ink-2);font-weight:600}
+.hl{outline:2px dashed var(--tb-gold);outline-offset:3px;border-radius:7px}
+/* ── the reader list, as it is built ── */
+.rd{max-width:720px;margin:0 auto;padding:22px 24px 30px;background:var(--ground);color:var(--tb-ink)}
+.rd h3{margin:0;font-size:20px;font-weight:600}
+.rd p{margin:4px 0 14px;font-size:13.5px;color:var(--tb-ink-3)}
+.rd ul{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--tb-line);border-radius:12px}
+.rd li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:12px 16px;border-top:1px solid var(--tb-line)}
+.rd li:first-child{border-top:0}
+.rd .c{font:12px ui-monospace,monospace;color:var(--tb-ink-3)}.rd .t{font-weight:600}.rd .v{font-size:12px;color:var(--tb-ink-3)}
+.rd .s{margin-left:auto;font-size:12px;font-weight:700}.s.w{color:var(--warn)}.s.o{color:var(--ok)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--card);border:1px solid var(--tb-line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--tb-line);vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tb-ink-3);border-top:0;background:var(--tb-surface-2)}
+.ask{background:var(--tb-gold-bg);border:1px solid var(--tb-gold);border-radius:10px;padding:14px 16px;color:var(--tb-ink)}
+.ask b{color:var(--tb-gold-ink)}
+</style>
+
+<div class="wrap">
+  <div class="top-row">
+    <div>
+      <div class="tag">Mockup · not built</div>
+      <h1>A way into Processes for staff</h1>
+      <p class="lede">Today a client's own person has no way to find the processes they should read. This adds <b>one link</b> to their top bar. It is not a menu, and it appears only where there is something for them.</p>
+    </div>
+    <button class="tgl" id="tgl" type="button">Light / dark</button>
+  </div>
+
+  <section>
+    <div class="tag">1 · Staff person's top bar</div>
+    <h2>Before and after</h2>
+    <div class="pair">
+      <div class="frame"><div class="scroll"><div class="page">
+        <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+        <div class="body"><b>Today.</b> Nothing leads to Processes.<div class="ph"></div><div class="ph s"></div></div>
+      </div></div></div>
+      <div class="frame"><div class="scroll"><div class="page">
+        <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><a class="tbread hl">Processes <span class="n">2 to read</span></a><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+        <div class="body"><b>Proposed (A).</b> The link sits between the client name and the theme switch, the same on every page that draws this bar.<div class="ph"></div><div class="ph s"></div></div>
+      </div></div></div>
+    </div>
+    <p class="cap"><b>The gold count</b> is the number of published processes this person has not yet acknowledged. When they have read everything it disappears and the link stays, quietly.</p>
+  </section>
+
+  <section>
+    <div class="tag">2 · The link's states</div>
+    <h2>What they see, and when</h2>
+    <div class="frame"><div class="scroll"><div class="page">
+      <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><a class="tbread">Processes <span class="n">2 to read</span></a><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+      <div class="body">Something is waiting</div>
+      <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><a class="tbread quiet">Processes</a><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+      <div class="body">All read: the link stays, no count</div>
+      <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+      <div class="body">Nothing is published yet, or the person is not on the People register, or the client does not use Processes: <b>no link at all</b></div>
+    </div></div></div>
+  </section>
+
+  <section>
+    <div class="tag">3 · Where it leads</div>
+    <h2>The reading list, as it is built</h2>
+    <div class="frame"><div class="scroll"><div class="page">
+      <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><a class="tbread">Processes <span class="n">2 to read</span></a><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+      <div class="rd">
+        <h3>Processes</h3>
+        <p>The approved way we work. Open one to read it and confirm you have.</p>
+        <ul>
+          <li><span class="c">P1.1</span><span class="t">Order to cash</span><span class="v">v3</span><span class="s w">Needs your acknowledgement</span></li>
+          <li><span class="c">P2.4</span><span class="t">Supplier onboarding</span><span class="v">v1</span><span class="s w">Needs your acknowledgement</span></li>
+          <li><span class="c">P3.2</span><span class="t">Month-end close</span><span class="v">v2</span><span class="s o">You have read this version</span></li>
+        </ul>
+      </div>
+    </div></div></div>
+  </section>
+
+  <section>
+    <div class="tag">4 · Which bars</div>
+    <h2>Every page a staff person can be on</h2>
+    <table>
+      <tr><th>Page</th><th>Whose bar</th><th>What it takes</th></tr>
+      <tr><td>Strategy (where staff land)</td><td>The frozen shell's own bar, painted in the browser</td><td>A small addition to the shell, a stamp from the server saying how many are waiting, regenerated served copies and the shell version bumped</td></tr>
+      <tr><td>Notes, Tracker, Portfolio, Insights</td><td>The shared bar (<code>lib/topbar.ts</code>)</td><td>One new field on the bar; each module's page passes it</td></tr>
+      <tr><td>Consultants and the office</td><td>The trail and module menu</td><td>Unchanged. They already have Processes in the module menu</td></tr>
+    </table>
+    <p class="cap">It would be added to <b>all of them in one go</b>. A link that showed on Notes but not on Strategy, where staff actually arrive, would be worse than none.</p>
+  </section>
+
+  <section>
+    <div class="tag">5 · Option B</div>
+    <h2>The quiet version, no count</h2>
+    <div class="frame"><div class="scroll"><div class="page">
+      <header class="tb"><div class="tbin"><a class="tbbrand">Strategy Management Platform</a><span class="tborg">Raya Trade</span><a class="tbread quiet hl">Processes</a><div class="tbacts"><span class="tbtheme">◐</span><span class="tbout">Sign out</span></div></div></header>
+      <div class="body">The same link, always plain. Simpler to build (no count to compute on every page), but nothing tells a person something is waiting for them.</div>
+    </div></div></div>
+  </section>
+
+  <div class="ask">
+    <b>What I need from you</b>
+    <p style="margin:6px 0 0">Approve <b>A (with the count)</b>, or choose <b>B (plain)</b>, or say no. If yes, it goes on all the bars in section 4 together, and I show the real bar before anything merges. The rule that client people get no module menu stays: this is one link, not a menu.</p>
+  </div>
+</div>
+<script>
+document.getElementById('tgl').addEventListener('click',function(){var r=document.documentElement;var dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);r.setAttribute('data-theme',dark?'light':'dark')});
+</script>
+</html>

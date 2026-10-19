@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
 import { prisma } from "@/ffp/lib/db/client";
@@ -9,6 +10,8 @@ export default async function WorkspaceDashboardPage(
   props: PageProps<"/[slug]/processes">
 ) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
 
   const [processCount, memberCount, workspace] = await Promise.all([

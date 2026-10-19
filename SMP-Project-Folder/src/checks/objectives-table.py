@@ -367,9 +367,39 @@ with sync_playwright() as pw:
     openpen(pg, page)
     ev(pg, "()=>{const c=document.querySelector('#panel .mpopen'); if(c)c.click();}")
     pg.wait_for_timeout(600)
-    txt = ev(pg, "()=>{const m=document.querySelector('.mpmsg'); return m?m.textContent:'';}")
-    ok(isinstance(txt, str) and "yetUntil" not in txt and "yet Until" in txt,
-       "the two halves of the sentence are separated", json.dumps(txt[:90]))
+    # §555 REWROTE THIS, RATHER THAN LOOSENING IT (§218). It held the literal
+    # words — "yet Until" present, "yetUntil" absent — and §555 changed the
+    # sentence, so a check keyed to the wording went red on a build saying
+    # exactly what it should. What §278 actually promised is that the parts
+    # of the sentence do not RUN TOGETHER: `.mpfoot` is a flex row whose gap
+    # falls outside this element, so the space has to be in the markup. Asked
+    # of the parts themselves, which is the promise and not a phrasing — and
+    # asked in BOTH states, because the complete one had the same fault
+    # ("12 of 12 months setAdds up to 300M EGP") for as long as it existed.
+    FOOT = """()=>{const m=document.querySelector('.mpmsg');
+      if(!m) return {none:true};
+      const parts=[...m.children].map(x=>x.textContent);
+      return {text:m.textContent, parts:parts};}"""
+
+    def joined(r):
+        return (isinstance(r, dict) and len(r.get("parts") or []) >= 2 and
+                r.get("text") == " ".join(r["parts"]))
+
+    txt = ev(pg, FOOT)
+    ok(joined(txt), "the two halves of the sentence are separated",
+       json.dumps(str(txt)[:120]))
+    full = ev(pg, """()=>{
+      // MAKE the complete state — no demo row carries twelve months (§94.2).
+      const m = UNITS.mobile.keyObjectives[0];
+      m.monthly = [1,2,3,4,5,6,7,8,9,10,11,12]; m.compile = "Sum";
+      paint();
+      const el=document.querySelector('.mpmsg');
+      if(!el) return {none:true};
+      const parts=[...el.children].map(x=>x.textContent);
+      return {text:el.textContent, parts:parts};}""")
+    ok(joined(full) and "12 of 12" in (full.get("text") or ""),
+       "...and so do the two halves of the COMPLETE sentence",
+       json.dumps(str(full)[:120]))
     rules = ev(pg, """()=>{
       const t=(%s)(); const r=[...t.querySelectorAll('tbody tr:not(.mprow):not(.newrow)')][0];
       return { list: (typeof SMPRules !== 'undefined' && SMPRules.COMPILES) || null };}""" % TBL)

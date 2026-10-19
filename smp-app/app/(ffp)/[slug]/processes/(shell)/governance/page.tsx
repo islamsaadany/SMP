@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
 import { WorkspacePageHeader } from "../workspace-page-header";
@@ -13,6 +14,7 @@ import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/l
 import { isPolicyOverdueForReview } from "@/ffp/lib/domain/policy-lifecycle";
 import { dayOf, isChecklistItemOverdue } from "@/ffp/lib/domain/checklist-due";
 import { isTreatmentActionOverdue } from "@/ffp/lib/domain/risk-treatment";
+import { ProcessReviewCalendar } from "./process-review-calendar";
 import { GovernanceDashboard } from "./governance-dashboard";
 import { GovernanceActivityLog } from "./governance-activity-log";
 import { loadGovernanceActivity } from "@/ffp/lib/data/governance-activity";
@@ -40,6 +42,8 @@ function formatDateOnly(d: Date): string {
  */
 export default async function GovernancePage(props: PageProps<"/[slug]/processes/governance">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
   const locale = await getLocale();
   const m = messagesFor(locale);
@@ -306,6 +310,10 @@ export default async function GovernancePage(props: PageProps<"/[slug]/processes
           tiles={buildDashboardTiles(dashboardInput)}
           empty={isDashboardEmpty(dashboardInput)}
         />
+      </div>
+
+      <div className="mb-4">
+        <ProcessReviewCalendar workspaceId={workspaceId} />
       </div>
 
       <div className="mb-4">

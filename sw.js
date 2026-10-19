@@ -403,7 +403,24 @@
    behind them differ — so the name goes PAST both rather than picking
    either. Confirmed against origin/main once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.45-stakeholders-picked";
+/* v6.46-staff-processes-link — the Processes lifecycle, the staff reading view
+   and the staff "Processes" link in the top bar (§539–§544). The built file's
+   bytes changed, which is the whole trigger (§91). Confirmed against
+   origin/main serving "smp-shell-v6.45-stakeholders-picked" and against every
+   ref's history — nobody holds v6.46 (§94.12); confirm once more immediately
+   before the push to main (§94.16). `node --check sw.js` run after the merge. */
+/* v6.47-target-from-months — §555: the annual target is derived from the
+   months as they are typed, and the box holding it stops taking typing while
+   a monthly plan is there. The built file's bytes changed, which is the whole
+   trigger (§91). Proved held by no commit in any ref's history (§94.12);
+   confirm once more immediately before the push (§94.16). */
+/* v6.48-report-one-rail — §556: where the office reaches both halves of a box
+   shown apart (El Abd's company page), Reporting draws its directions and its
+   capabilities on one rail, under one heading naming both. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history (§94.12) after fetching every ref; confirm once more
+   immediately before the push (§94.16). */
+const SHELL = "smp-shell-v6.48-report-one-rail";
 const ASSETS = [
   "/",
   "/index.html",

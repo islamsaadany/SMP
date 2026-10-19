@@ -1,5 +1,6 @@
 "use server";
 
+import { resetIfInForce } from "@/ffp/lib/data/process-lifecycle-reset";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
@@ -386,6 +387,7 @@ export async function updateProcess(
     });
   });
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   return ok({ id: updated.id });
@@ -432,6 +434,7 @@ export async function updateProcessScope(
     },
   });
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   return ok({ id: updated.id });
 }
@@ -466,6 +469,7 @@ export async function updateProcessKpis(
     data: { kpis: parsed.data.kpis },
   });
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   return ok({ id: updated.id });
 }
@@ -511,6 +515,7 @@ export async function updateProcessSop(
     },
   });
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/reports/sop`);
   return ok({ id: updated.id });
@@ -748,6 +753,7 @@ export async function addProcessStep(
     return newStep;
   });
 
+  await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
   return ok({ id: created.id });
 }
@@ -814,6 +820,7 @@ export async function addProcessStepsBulk(
     return createdIds;
   });
 
+  await resetIfInForce(processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${processId}/map`);
   return ok({ ids });
 }
@@ -917,6 +924,7 @@ export async function updateProcessStep(
   // recomputed rather than just this step's.
   await realignSwimlanes(parsed.data.processId);
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/helicopter`);
   return ok({ id: updated.id });
@@ -988,6 +996,7 @@ export async function deleteProcessStep(
 
   await prisma.processStep.delete({ where: { id: parsed.data.stepId } });
 
+  await resetIfInForce(parsed.data.processId);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
   return ok({ id: parsed.data.stepId });
 }

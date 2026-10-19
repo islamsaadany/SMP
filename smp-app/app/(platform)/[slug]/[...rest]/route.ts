@@ -10,6 +10,9 @@ import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 import { viewAsOf, narrowToViewed } from "../../../../lib/view-as.ts";
 import { libraryStampFor } from "../../../../lib/library-viewer.ts";
 import { copilotStampFor } from "../../../../lib/copilot.ts";
+import { withBarExtras } from "../../../../lib/bar-extras.ts";
+import { readingFor } from "../../../../ffp/lib/data/process-reading.ts";
+import { offersReadingLink } from "../../../../ffp/lib/domain/process-reader.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -100,6 +103,21 @@ export async function GET(req: Request, { params }: P) {
   if (w.module && !(await mayOpenModule(ans.tenant.id, who.seat, who.personKey, w.module)))
     return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
   const open = await openableModules(ans.tenant.id, who.seat, who.personKey, ans.tenant.modules);
+  /* WHAT THE BAR SAYS ABOUT THE PERSON (lib/bar-extras.ts): for a client's own
+     person on the People register, the staff reading link and how many
+     processes wait for them. A page load only — the saves behind it do not
+     draw a bar — and never an error: a count that cannot be read draws no link. */
+  const processesRead =
+    req.method === "GET" && who.personKey &&
+    offersReadingLink({
+      clientHasProcesses: modulesFor(ans.tenant.modules).includes("processes"),
+      office: who.seat === "super" || who.seat === "smoteam",
+      userKind: user.kind,
+      personKey: who.personKey,
+    })
+      ? await readingFor(slug, who.personKey)
+      : null;
+  const extras = { processesRead };
   if (w.rest[0] === "setup") {
     /* the module's Landing line page reads its declaration off the document
        (§359.4) — computed here, on the Setup document alone — and its Access
@@ -116,20 +134,20 @@ export async function GET(req: Request, { params }: P) {
        one too, or the tab drawn on arrival would offer the module's whole
        list. The same answer the module's own document is stamped with
        (lib/library-viewer.ts), asked once per document and never per paint. */
-    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
-                                      w.module ? key : "client",
-                                      await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open),
-                                      copilotStampFor(open, who.seat)),
-                        { status: 200, headers: shellHeaders() });
+    const library = await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open);
+    return withBarExtras(extras, () =>
+      new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
+                                 w.module ? key : "client", library, copilotStampFor(open, who.seat)),
+                   { status: 200, headers: shellHeaders() }));
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
   /* WHO IS LOOKING travels with the address (spec 046 §4.10). The door has
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
-  return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
+  return withBarExtras(extras, () => serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
     have: open, rest: w.rest, personKey: who.personKey, seat: who.seat, admin: user.isAdmin && !asked,
-    consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } });
+    consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } }));
 }
 
 /* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are

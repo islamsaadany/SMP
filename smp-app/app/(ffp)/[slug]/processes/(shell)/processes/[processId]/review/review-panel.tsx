@@ -100,9 +100,9 @@ export function ReviewPanel({
     });
   }
 
-  function integrate(id: string, stepId: string, mode: "MERGED" | "REPLACED") {
+  function integrate(id: string, stepId: string, mode: "MERGED" | "REPLACED", label?: string) {
     startTransition(async () => {
-      const outcome = await integrateReviewFinding({ workspaceId, findingId: id, stepId, mode });
+      const outcome = await integrateReviewFinding({ workspaceId, findingId: id, stepId, mode, label });
       if (outcome.ok) {
         setFindings((prev) => prev.map((f) => (f.id === id ? outcome.data : f)));
         setIntegratingId(null);
@@ -207,7 +207,7 @@ export function ReviewPanel({
               onWithdrawProposal={() => withdrawProposal(finding.id)}
               onStartIntegrate={() => setIntegratingId(finding.id)}
               onCancelIntegrate={() => setIntegratingId(null)}
-              onIntegrate={(stepId, mode) => integrate(finding.id, stepId, mode)}
+              onIntegrate={(stepId, mode, label) => integrate(finding.id, stepId, mode, label)}
             />
           ))}
         </ul>
@@ -251,12 +251,16 @@ function FindingCard({
   onWithdrawProposal: () => void;
   onStartIntegrate: () => void;
   onCancelIntegrate: () => void;
-  onIntegrate: (stepId: string, mode: "MERGED" | "REPLACED") => void;
+  onIntegrate: (stepId: string, mode: "MERGED" | "REPLACED", label?: string) => void;
 }) {
   const [title, setTitle] = useState(finding.title);
   const [description, setDescription] = useState(finding.description);
   const [recommendation, setRecommendation] = useState(finding.recommendation);
   const [selectedStepId, setSelectedStepId] = useState(steps[0]?.id ?? "");
+  // Replacing a step: the person says what it should read. The AI's title is only where they start,
+  // so AI wording never reaches the step (and the client's report) unreviewed.
+  const [replacing, setReplacing] = useState(false);
+  const [replaceText, setReplaceText] = useState(finding.title);
 
   const [stepText, setStepText] = useState(finding.proposal?.label ?? finding.recommendation);
   const [stepNotes, setStepNotes] = useState(finding.proposal?.notes ?? "");
@@ -460,13 +464,45 @@ function FindingCard({
                 <button
                   type="button"
                   disabled={pending || !selectedStepId}
-                  onClick={() => onIntegrate(selectedStepId, "REPLACED")}
+                  onClick={() => setReplacing(true)}
+                  aria-expanded={replacing}
                   className="flex-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-start text-xs hover:border-red-400 disabled:opacity-40"
                 >
                   <div className="font-bold text-red-700">Replace step</div>
-                  <div className="mt-0.5 text-slate-500">Overwrites the step&apos;s label with this fix. The old label is deleted, not kept.</div>
+                  <div className="mt-0.5 text-slate-500">Overwrites the step&apos;s label with text you write. The old label is deleted, not kept.</div>
                 </button>
               </div>
+              {replacing && (
+                <div className="mt-2.5 rounded-lg border border-red-200 bg-white p-2.5">
+                  <div className="mb-1 text-[11px] text-slate-500">
+                    Replaces: <span className="font-semibold text-slate-700">{steps.find((s) => s.id === selectedStepId)?.label}</span>
+                  </div>
+                  <label className="block text-[11px] font-semibold text-slate-600" htmlFor={`replace-${finding.id}`}>
+                    What the step should say (this is what the report prints)
+                  </label>
+                  <textarea
+                    id={`replace-${finding.id}`}
+                    value={replaceText}
+                    onChange={(e) => setReplaceText(e.target.value)}
+                    maxLength={200}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-800"
+                  />
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={pending || !selectedStepId || !replaceText.trim()}
+                      onClick={() => onIntegrate(selectedStepId, "REPLACED", replaceText.trim())}
+                      className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+                    >
+                      Replace step
+                    </button>
+                    <button type="button" onClick={() => setReplacing(false)} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      Back
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </>

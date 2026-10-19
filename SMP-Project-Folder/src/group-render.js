@@ -789,7 +789,8 @@ function outcomeEdit(t, set, pendCls, fillOnly){
       : selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
                  function(v){ setOr(t, "outDir", v); }) +
         selectOr("plan", t.outCompile || "", [""].concat(SMPRules.COMPILES), "",
-                 function(v){ setOr(t, "outCompile", v); })) +
+                 function(v){ setOr(t, "outCompile", v);
+                              monthlyAfterCompile(t, "outMonthly")(); })) +
     '</div>';
 }
 /* `setTargetUnit` is written against a measure's `target`/`target3y` pair; the
@@ -4656,6 +4657,12 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
+      /* §555: WHAT THIS WRITE CHANGES ABOUT ANOTHER CELL, rewritten where it
+         stands. The one caller is the compile rule, which is half of the
+         arithmetic deriving the target beside it — and this listener writes
+         WITHOUT repainting (§71.2), so without the hook the row goes on
+         showing the old figure until something else redraws the page. */
+      if (opts.after) opts.after(row);
     }, open && !SMPRules.isHidden(row) &&
        gapWalkable(field, opts.fillKind) ? "gapwalk" : "");
   }
@@ -4698,6 +4705,7 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
+      if (opts.after) opts.after(row);                     /* §555, as above */
       /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk
          and the count are one list (§116.2) and §187 split them: it took
          collaborators out of GAP_FIELDS, so the band stopped counting them and
@@ -5073,35 +5081,90 @@ function monthlyMsg(row, fld, tfld){
      the Clear button, and nothing at all separated these: the footer read
      "not in force yetUntil all twelve are filled" (found by looking at the
      built page, not by reading the source). */
-  if (n < 12)
-    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
-      ' <span>Until all twelve are filled, this target is still spread evenly ' +
-      'across the year.</span>';
   var c = SMPRules.monthlyCompile(sh);
   /* THE RULES ARE READ, NEVER LISTED. This sentence said "Set Sum, Latest or
      Average" — written before §276 added Count, so it named three of four and
      nothing compared it with the list (§214.3). It is `COMPILES` now, so the
-     day a fifth rule is added the sentence is already right. */
+     day a fifth rule is added the sentence is already right.
+     ASKED FIRST NOW (§555): with the target derived from the FIRST month, a
+     row with no compile rule is stuck at month one rather than at month
+     twelve, so the sentence that says why has to arrive there too. */
   if (!c)
-    return '<span class="part">Twelve months set — not in force yet</span>' +
+    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
       ' <span>This row has no compile rule, so the platform cannot tell what ' +
-      'the twelve add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
-  var ann = SMPRules.monthlyAnnual(sh);
+      'the months add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
   /* §276's Count adds up like Sum and is then owed in whole ones, so it says
      the same word — the rounding is what the figure beside it shows. */
   var word = (c === "sum" || c === "count") ? "Adds up to"
            : c === "average" ? "Averages" : "Ends at";
-  return '<b>12 of 12 months set</b><span>' + word + ' <b>' +
+  /* NOTHING TYPED YET, so there is no figure to show — and the sentence has
+     to say where the target comes from now, because the box above has stopped
+     taking typing the moment the first month lands (§61: the page says what
+     happened rather than leaving somebody to find it). */
+  if (!n)
+    return '<span class="part">No month set yet</span>' +
+      ' <span>Fill a month and the target above becomes what the months set ' +
+      'come to — it is no longer typed by hand.</span>';
+  /* §555: THE TARGET IS DERIVED FROM THE FIRST MONTH, AND THE YEAR IS NOT.
+     Two different things, and the sentence says both — what the figure above
+     now is, and that the row is still measured flat until the twelfth lands.
+     §278's wording said only the second, on a build where the first was not
+     true yet. */
+  if (n < 12)
+    return '<span class="part">' + n + ' of 12 months set</span>' +
+      ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
+      '</b> — the target, from the months set so far. Until all twelve are ' +
+      'filled, it is still spread evenly across the year.</span>';
+  /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
+     is a flex row and these two are ONE flex item, so the gap falls between
+     the message and the Clear button and nothing at all separated them — the
+     complete case read "12 of 12 months setAdds up to 300M EGP". The very
+     fault §278's own comment describes, two lines above, in the branch it was
+     not written about. */
+  return '<b>12 of 12 months set</b> <span>' + word + ' <b>' +
     esc(monthlyAnnualText(row, fld, tfld)) + '</b> — the annual target</span>';
 }
 /* The derived year, written the way the target is written — through the
    platform's own joiner, so `300M EGP` keeps its spelling rather than coming
-   back as `300 M EGP` (§254.1). */
+   back as `300 M EGP` (§254.1).
+   IT ASKS `monthlySoFar` AND NOT `monthlyAnnual` (§555): the figure is owed
+   from the first month typed, and on a complete plan the two answer the same
+   — which the rules' own check asserts, so this is one figure and not two. */
 function monthlyAnnualText(row, fld, tfld){
-  var ann = SMPRules.monthlyAnnual(monthlyShape(row, fld));
+  var ann = SMPRules.monthlySoFar(monthlyShape(row, fld));
   if (ann == null) return "";
   return targetFromPair(row[tfld], String(Math.round(ann * 100) / 100),
                         unitOfTarget(row[tfld]));
+}
+/* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
+   question the locked box and the refresh both ask, so the box and the figure
+   inside it can never disagree about which it is. NOT `monthlyInForce`, which
+   is about PRORATION and still waits for all twelve. */
+function monthlyDerived(row, fld){
+  return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
+}
+/* WHICH TARGET FIELD A SET OF MONTHS DERIVES. The same pairing `monthlyShape`
+   makes — a measure's and an objective's months are `monthly` beside `target`,
+   a tactic outcome's are `outMonthly` beside `outTarget` (§248) — read once
+   here rather than passed down a second time from four call sites (§53.5). */
+function monthlyTgtField(fld){
+  return fld === "outMonthly" ? "outTarget" : "target";
+}
+/* ── THE COMPILE RULE IS HALF OF THE ARITHMETIC (§555) ─────────────────
+   Setting it on a row whose months are already typed is the same event as
+   typing the last month: until there is a rule the platform cannot say what
+   the months come to, and the moment there is one it can. Before this, that
+   row kept the figure somebody had typed and the drawer's own sentence said a
+   different number — and once the box locks, nobody can correct it by typing.
+   It goes through `monthlyWrite`'s own ending rather than repeating it, so
+   there is one place where a derived target is written. */
+function monthlyAfterCompile(row, fld){
+  return function(){
+    if (!monthlyDerived(row, fld)) return;
+    var tfld = monthlyTgtField(fld), ann = monthlyAnnualText(row, fld, tfld);
+    if (ann) { row[tfld] = ann; gapLift(row, tfld); }
+    monthlyRefresh(row, fld, tfld);
+  };
 }
 /* TYPING A MONTH. Stored as a NUMBER where it is one and as what was typed
    where it is not (§96.2) — a value the platform cannot read leaves the plan
@@ -5118,15 +5181,15 @@ function monthlyWrite(row, fld, tfld, i, v){
   var any = false;
   for (var k = 0; k < 12; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
   if (any) row[fld] = a; else delete row[fld];
-  /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE TWELFTH LANDS, and written
-     into the target field itself rather than left to be worked out by every
-     reader. That is what makes the deck, the workbook, the archive and the
-     Focus board right without one of them being taught anything: they all
-     read `target`, and `target` is now the number the twelve months say
-     (Islam's (a), agreed before this was built). Nothing is destroyed that
-     cannot be got back — the twelve stay stored, and clearing one leaves the
-     last derived total as the authored target, which is the number the office
-     last agreed to rather than a hole. */
+  /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE FIRST MONTH LANDS (§555, and
+     §278's twelfth before it), and written into the target field itself
+     rather than left to be worked out by every reader. That is what makes the
+     deck, the workbook, the archive and the Focus board right without one of
+     them being taught anything: they all read `target`, and `target` is now
+     the number the months say (Islam's (a), agreed before this was built).
+     Clearing a month re-derives from the ones that are left; clearing the LAST
+     one leaves the figure they last came to as the authored target, which is
+     the number the office last agreed to rather than a hole. */
   var ann = monthlyAnnualText(row, fld, tfld);
   if (ann) {
     row[tfld] = ann;
@@ -5167,10 +5230,10 @@ function monthlyRefresh(row, fld, tfld){
   if (clr) clr.hidden = !SMPRules.monthlySet(monthlyShape(row, fld));
   var td = document.querySelector('td[data-mptgt="' + k.replace(/"/g, '\\"') + '"]');
   if (td) {
-    var inForce = SMPRules.monthlyInForce(monthlyShape(row, fld));
-    td.setAttribute("data-mplock", inForce ? "1" : "0");
+    var derived = monthlyDerived(row, fld);
+    td.setAttribute("data-mplock", derived ? "1" : "0");
     var i = td.querySelector("input.fld");
-    if (i && inForce) i.value = td.getAttribute("data-mppart") === "1"
+    if (i && derived) i.value = td.getAttribute("data-mppart") === "1"
       ? targetKeep(row[tfld] || "") : (row[tfld] == null ? "" : row[tfld]);
     monthlyLock(td);
   }
@@ -5200,7 +5263,7 @@ function monthlyTgtAttrs(row, fld, partOnly){
      into the second would put the unit in the box AND in the picker, so the
      cell says which it is rather than the refresh guessing. */
   return ' data-mptgt="' + esc(monthlyKey(row, fld)) + '" data-mplock="' +
-    (SMPRules.monthlyInForce(monthlyShape(row, fld)) ? "1" : "0") + '"' +
+    (monthlyDerived(row, fld) ? "1" : "0") + '"' +
     (partOnly ? ' data-mppart="1"' : '');
 }
 /* THE DRAWER. `cols` is the table's own column count — a full-width row has
@@ -5542,7 +5605,8 @@ function koEdit(list, page, acKey, owner){
           pg && !yn) +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
-          { kind:"select", opts:SMPRules.COMPILES })) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES,
+            after: monthlyAfterCompile(m, "monthly") })) + '</td>' +
         /* §243: the same cell the capability's table already draws — one
            column, one field, one answer on all three surfaces (§53.5). Left
            blank it is not nought: koWeights() gives it the average of the
@@ -7089,15 +7153,23 @@ function renderReport(u, opt){
      rail, its pane and its empty state are a function called once for each
      half rather than one block built once. Called with no half on a joined
      box, which is every box in every client, the filter is null and this is
-     the block it always was, byte for byte. */
-  var halfBlock = function(){
-  var sel = unitRailPick(u);
+     the block it always was, byte for byte.
+     §556: AND CALLED ONCE WITH `one` WHERE THIS VIEWER REACHES BOTH HALVES
+     (`reportOneRail`) — no half set, so the rail's key is the box's own, and
+     the rows drawn directions first, then capabilities, each half under its
+     own word in the rail's group band (`.rgroup`, railFor's). Islam: *"directions
+     first yes"*. The stored order and every code are untouched: the halves
+     are skipped through, never copied (§517). */
+  var halfBlock = function(one){
+  var inHalf = function(h){ return function(p){ return SMPRules.pillarInHalf(p, h); }; };
+  var order = one ? partItems(u).filter(inHalf("dir")).concat(partItems(u).filter(inHalf("cap"))) : null;
+  var sel = unitRailPick(u, order);
   var pillars;
   /* §416: a direction that does not run this year is not asked for, so the
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = partItems(u).filter(runsNow)[0];
+    var firstNow = (order || partItems(u)).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
   if (!sel) {
@@ -7117,8 +7189,7 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
-    var railRows = u.items.map(function(p, pi){
-      if (rpf && !rpf(p)) return "";
+    var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -7142,9 +7213,19 @@ function renderReport(u, opt){
                 owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>'
                 : !now ? esc(sub) : "") +
         '</button>';
+    };
+    var rowsOf = function(keep){
+      return u.items.map(function(p, pi){
+        return (rpf && !rpf(p)) || (keep && !keep(p)) ? "" : railRow(p, pi);
+      }).join("");
+    };
+    var railRows = !one ? rowsOf(null) : ["dir", "cap"].map(function(h){
+      return '<div class="rgroup">' + drawHalf(h, function(){ return halfWord(u); }) +
+        ' <span class="rgn">' + order.filter(inHalf(h)).length + '</span></div>' + rowsOf(inHalf(h));
     }).join("");
-    var rail = '<div class="rail">' + railHead(halfWord(u), partItems(u).length) + railRows +
-      '<div class="rfoot">Tally is entries given of asked</div></div>';
+    var rail = '<div class="rail">' +
+      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u), partItems(u).length) +
+      railRows + '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
     /* §520.8: inside the company's capabilities split the capability's own
@@ -7176,8 +7257,11 @@ function renderReport(u, opt){
      headings because for them the title is doing its job. */
   var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
   var showCap = boxHasHalf(u, "cap");
-  var pillars = showDir ? drawHalf("dir", halfBlock) : "";
-  var capPillars = showCap ? drawHalf("cap", halfBlock) : "";
+  /* §556: both halves reached → one section, one rail, one pane. */
+  var oneRail = reportOneRail(u);
+  var pillars = oneRail ? drawHalf("", function(){ return halfBlock(true); })
+              : showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap && !oneRail ? drawHalf("cap", halfBlock) : "";
   /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
      section and has always been headed, so dropping the title there would
      take a heading off every unit in every client that never split anything
@@ -7288,8 +7372,12 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
+    /* §556: one rail, and the heading is the client's two words alone —
+       Islam: *"heading directions and capabilities and remove key mesasures
+       and tactics"*. */
     (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
-      section("", titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+      section("", oneRail ? L("pillar","bu") + " and " + L("capability","bu")
+                : titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
               null, pillars)) +
     /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
        client's own word for a capability — the shape §520.8 settled for the
@@ -9315,6 +9403,12 @@ function pillarRailKey(u, p){
   if (!boxSplit(u)) return "unit:" + (u ? u.ukey : "");
   return "unit:" + u.ukey + "@" + (SMPRules.pillarIsCap(p) ? "cap" : "dir");
 }
+/* §556: the REPORTING rail that holds it. Where that page draws both halves
+   on one rail, the rail is drawn with no half and its key carries none — the
+   key every joined box has always had. */
+function reportRailKey(u, p){
+  return reportOneRail(u) ? "unit:" + u.ukey : pillarRailKey(u, p);
+}
 /* And which SECTION holds it, for the same deep link: a split box draws its
    internal pillars on their own tab (§540), so a walk that sent every pillar
    to `plan` would open the Directions tab and highlight nothing. */
@@ -9329,8 +9423,10 @@ function pillarSecKey(u, p, sec){
    row's address everywhere else (§48, §191). The code is the fallback only
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
-function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
+/* §556: `order` is the list as the rail DRAWS it, where that is not the
+   stored order — so the page opens on the rail's first row, not the plan's. */
+function unitRailPick(u, order){
+  var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -9893,7 +9989,8 @@ function unitPlanBody(it, u, railed, bare){
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.compile || "\u2014")
         : gapCell("plan", "u_plan", m, "compile",
         { ctx:pctx(m), kind:"select", opts:SMPRules.COMPILES,
-          readEmpty:"\u2014", read:compileCell })) + '</td></tr>' +
+          readEmpty:"\u2014", read:compileCell,
+          after: monthlyAfterCompile(m, "monthly") })) + '</td></tr>' +
       (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 6, m.name) : "");
   }).join("");
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
@@ -10840,7 +10937,8 @@ function capKoEdit(c, pgIn, acIn){
           { kind:"input", cls:"mono", parse: unitInherit(m) }),
           ed && !isYesNoRow(m)) +
         '<td class="cc">' + gapCell(pg, ac, m, "compile",
-          { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES,
+            after: monthlyAfterCompile(m, "monthly") }) + '</td>' +
         '<td class="cc">' + gapCell(pg, ac, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +

@@ -1582,15 +1582,32 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      a session that cannot simulate buys nothing and is judged as itself.
      An unknown key is REFUSED rather than treated as somebody with no roles:
      "no roles" is a narrowing that hides a mistake instead of reporting it. */
+  /* ── AND THE SMO TEAM ACTS THROUGH ONE TOO (§554) ─────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* The team holds Setup, the
+     register and the cycle (§516.2) — they set the narrowings, so they are
+     the people who need the mirror to check one in.
+
+     WITH A CEILING, because this hands the ACTOR over and everything
+     downstream judges by what that actor holds: a team member acting through
+     the Super user's row would be writing as the one person on the register
+     who holds more than they do, which is a way up rather than a simulation.
+     The Super user may act through anybody; the SMO team through anybody but
+     the Super user. `them.role` is the SEAT on the register row — the same
+     field `personRoles` reads a seat from (§187), and the one the server
+     writes from the membership (lib/state-api.ts officeRow) — never a role
+     read out of the incoming state, which is the thing being written. */
   function actingFor(me, viewAs, seatRole, people) {
     var want = typeof viewAs === "string" ? viewAs.trim() : "";
     if (!me || !want || want === me.key) return { person: me };
-    if (seatRole !== "super")
+    if (seatRole !== "super" && seatRole !== "smoteam")
       return { refuse: "Only the SMO can act through somebody else's view." };
     var them = null;
     (people || []).forEach(function (p) { if (p && p.key === want) them = p; });
     if (!them)
       return { refuse: "The register does not hold the person this view belongs to." };
+    if (seatRole !== "super" && them.role === "super")
+      return { refuse: "The SMO team cannot act through the Super user's view." };
     return { person: them, simulated: true };
   }
 
@@ -14406,6 +14423,22 @@ function mayDestroy(){ return SMPRules.mayDestroy(world(), viewer()); }
 function mayIssuePasswordTo(target){
   return SMPRules.mayIssuePasswordTo(world(), viewer(),
     typeof target === "string" ? personBy(target) : target);
+}
+/* ── MAY THIS SESSION LOOK THROUGH THIS ROW (§554) ─────────────────────
+   NOT asked of `viewer()` like everything else on this line, and the
+   difference is the whole point: every rule above answers about the person
+   being LOOKED AT, and this one answers about the person SIGNED IN. Taking
+   `viewer()` here would let a simulation widen itself — look through the
+   Super user once and the control that let you is suddenly offered on every
+   row (§185's rule: a simulation may only ever narrow).
+
+   sync.js holds it, because the save it must agree with is stamped there
+   (§42). No session — the offline copy, the file:// demo — lists everybody,
+   exactly as it always has. */
+function maySimulatePerson(target){
+  var p = typeof target === "string" ? personBy(target) : target;
+  if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return true;
+  return SYNC.maySimulatePerson(p);
 }
 /* Who a bulk password action would actually reach. The SCREEN counts them so
    it can say a true number; the SERVER picks the set (§35), so a stale screen
@@ -40332,7 +40365,22 @@ function renderPeople(){
     if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
-    if (personActive(p)) {
+    /* ── AND THIS ENTRY IS A SIMULATION, SO IT OBEYS THE SIMULATION'S RULE
+       (§554) ───────────────────────────────────────────────────────────
+       It was gated on nothing but the row being active, which was true while
+       the whole page was the Super user's. Setup is the office's since
+       §516.2, so an SMO team member already reached this menu and already
+       got the entry — and pressing it CHANGED WHAT WAS DRAWN while their
+       saves went on being judged as themselves, because `actingAs()` would
+       not stamp a view the chrome had not drawn a switcher for. That is
+       §185's fault, open on the one path that never asked.
+
+       Asked of sync.js, the same answer the top bar's list and the server's
+       refusal use (§42): the office may look through the register, and the
+       SMO team through all of it but the Super user. Absent rather than
+       disabled on a row they may not wear — a disabled control invites a
+       press and has nowhere to put "because of who THEY are". */
+    if (personActive(p) && maySimulatePerson(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
     /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
@@ -48682,7 +48730,7 @@ function unitSwotSlides(u){
        one accent across a row, never one per card (§41's budget). */
     S.push(sectSlide("swothead", "After the SWOT title page",
       SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
-      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
+      "Where " + (u.topLayer ? deckBoxName(u) : "this unit") + " is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
@@ -48750,6 +48798,25 @@ function standSlideOf(name, cells, foot){
     cells.join("") + '</div><p class="headfoot">' + foot + '</p></section>';
 }
 
+/* ── A BOX IS PRESENTED UNDER ITS OWN NAME (§553.8) ──────────────────────
+   Islam, of the review built for El Abd: *"there is nothing called elabd
+   review as a group or as a company"*.
+
+   The deck was headed "Group", and ended on "Where Group stands". "Group"
+   is the tenant's WORD for the top layer — what you call it in a navigation
+   row, beside "Business unit" and "Function" — and `topAsUnit()` hands it
+   over as the box's `name` because that is the right word on every page
+   that is about the SHAPE of the company.
+
+   A ROOM IS NOT A NAVIGATION ROW. On a projector the cover says who is
+   presenting, and that is the company: El Abd. So the deck asks for the
+   name and the pages go on asking for the word. The fallback is the word
+   again, so a client who has not named their company reads exactly as it
+   does today (§50.6). */
+function deckBoxName(u){
+  return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -48766,11 +48833,11 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
+    sec("COVER", deckBoxName(u), true) + '>' +
     (deckMark(u)
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
@@ -48851,17 +48918,41 @@ function deckSlides(u){
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
+  /* §553.6: the company's own review shows its directions and its
+     capabilities apart, so the wording below has two groups to name. */
+  var capsApart = short && boxSplit(u) &&
+    u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
+    u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
-    (u.fnKey || u.topLayer ? esc(u.name) : "the unit"),
+    (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
     [ koShown && standCell(L("keyobj","bu") + ' performance', ko,
         (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare")),
-      standCell(L("pillar","bu") + ' performance', pl,
-        itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+      /* ── IT COUNTS WHAT IT NAMES (§553.6) ───────────────────────────
+         On El Abd this cell read "Directions performance · 10 Directions,
+         by their measures" — and five of the ten are capabilities. The
+         figure was right (it is the average over every pillar the box
+         plans) and the words were wrong, which is the worse of the two:
+         a room can check a name and cannot check an average.
+
+         ONE CELL STILL, not two. The two groups now have a score table
+         each (above), which is where a per-group reading belongs; this
+         slide is the box's overall and stays the box's overall. A fourth
+         cell would also break a grid that goes to three. */
+      standCell(capsApart
+          ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
+          : L("pillar","bu") + ' performance', pl,
+        capsApart
+          ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("pillar","bu")) + ' and ' +
+            itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("capability","bu")) + ', by their measures'
+          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
       standCell('Execution performance', ex,
         dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
+    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.');
 
   /* ── AND IT IS SAID LAST (§254.4) ──────────────────────────────────────
@@ -48944,7 +49035,20 @@ function deckSlides(u){
      THE ROW DIVIDES FOR ANY NUMBER of pillars, so a unit with two and one with
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
-  var pNames = u.items.map(function(p, i){
+  /* ── §553.6: A CARD, A ROW, AND THE GROUP THEY BELONG TO ────────────
+     Islam, on the company's own review, a week before El Abd present it:
+     *"when we are presenting on a company level it acts like a business unit
+     approach, foundation, aims, key objectives and maybe directions and
+     capabilities showing the directions as one slide and then showing
+     progress then the capabilities as a group"*.
+
+     The card and the row are lifted out of the two `.map`s they were written
+     inside, unchanged, so one group or two is a question of WHICH PILLARS
+     are handed to them — never of a second copy of the markup (§53.5). Each
+     takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
+     from the whole list and must keep doing so when the list is shown in two
+     halves; the row's own counter is separate and restarts per table. */
+  function pillarCard(p, i){
     /* §542: on a box SHOWN APART, an internal pillar says what it is where
        it has nothing else to say — exactly as a capability's own card does
        below, so a client whose capabilities have become pillars reads the
@@ -48963,7 +49067,7 @@ function deckSlides(u){
       /* §416: the years each direction runs in, and a later one says when. */
       (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
       '</div>';
-  }).join("");
+  }
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
@@ -48976,54 +49080,137 @@ function deckSlides(u){
       '<span class="pcard-n">' + esc(nm) + '</span>' +
       '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
   }).join("");
-  var nCards = u.items.length + (short ? boardCapTargets().length : 0);
   if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
-        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
+        " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  if (pOn && u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    /* §542: the heading names both kinds whether the capabilities are
-       records beside the list or pillars inside a list SHOWN APART — never
-       because a joined list happens to hold a marked row (see the sub-line
-       above, and checks/deck-figures.py, which went red on exactly that). */
-    '><h2>' + L("pillar","bu") +
-      (capCards || (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }))
-        ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
-    '<div class="pcards" style="--n:' + nCards +
-      ';--c:' + pillarCols(nCards) +
-      ';--r:' + Math.ceil(nCards / pillarCols(nCards)) + '">' +
-    pNames + capCards + '</div></section>');
+  /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+     One group, as every deck has had, EXCEPT on the company's own review of
+     a plan that is shown apart: there the directions and the capabilities
+     are two things, and reading all ten under one heading called Directions
+     was not a wording slip — the standing slide below counted ten of them
+     and said "10 Directions, by their measures", five of which were
+     capabilities.
 
-  /* The score table, built here and pushed at the END (§254.4). */
-  var pRows = u.items.map(function(p, i){
+     THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+     roll-call or the score table stays where its owner put it; the second
+     group's two slides are new ground and carry new anchors (§96.2).
+
+     A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+     directions and no capabilities reads exactly as it does today. */
+  var groups;
+  if (short && boxSplit(u)) {
+    var dirs = [], caps = [];
+    u.items.forEach(function(p, i){
+      (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+    });
+    groups = [
+      { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+        one: L1("pillar"), head: L("pillar","bu"),
+        names: "pillarnames", score: "pillars", cards: "" },
+      { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+        one: L1("capability"), head: L("capability","bu"),
+        names: "capnames",    score: "caps",    cards: capCards }
+    ].filter(function(g){ return g.ix.length || g.cards; });
+  } else {
+    var bothKinds = !!capCards ||
+      (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+    groups = [{
+      ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+      /* §542: the one heading names both kinds whether the capabilities are
+         records beside the list or pillars inside a list SHOWN APART —
+         never because a joined list happens to hold a marked row (see the
+         sub-line above, and checks/deck-figures.py, which went red on
+         exactly that). */
+      many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+      /* The anchor's label is PLAIN TEXT, not the heading: the heading
+         carries `&amp;`, and a label is escaped on its way into the
+         attribute, so the rail would have read "Directions &amp;amp;
+         Capabilities". */
+      plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+      one: L1("pillar"),
+      /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+         named both kinds (§542); the table below has always been headed
+         with the pillar word alone, and widening it here would have moved
+         a live client's slide for nothing. */
+      head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: capCards
+    }];
+  }
+
+  if (pOn) groups.forEach(function(g){
+    var extra = g.cards ? boardCapTargets().length : 0;
+    var n = g.ix.length + extra;
+    if (!n) return;
+    S.push('<section class="dslide"' +
+      anch(g.names, "After the " + g.plain + " names") +
+      '><h2>' + g.many + '</h2>' +
+      '<div class="pcards" style="--n:' + n +
+        ';--c:' + pillarCols(n) +
+        ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+      g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
+      g.cards + '</div></section>');
+    /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
+       Islam, having been shown Raya's Mobile beside El Abd's review:
+       *"yes I want elabd as a unit"*.
+
+       THIS IS THE WHOLE DIFFERENCE, and it took three readings to see it.
+       A unit's deck draws every pillar's own slides — twelve of Mobile's
+       twenty-eight ARE its four pillars, three slides each. El Abd's
+       review drew none of them: its directions and capabilities were
+       named in a roll-call, scored in a table, and never shown. "Each
+       direction performance" was never the score table; it is the
+       direction's own measures and tactics, exactly as a pillar's are.
+
+       THE SLIDES ARE NOT NEW. `pillarSlidesOf` is the same builder each
+       owner's own deck already calls (§53.5) — the company's review had
+       simply never called it. It is called INSIDE the group, so a group's
+       pillars follow their own roll-call: the directions after Directions,
+       the capabilities after Capabilities. */
+    g.ix.forEach(function(x){ S = S.concat(pillarSlidesOf(u, x.p, x.i)); });
+  });
+
+  /* The score table's rows, built here and pushed at the END (§254.4).
+     `i` is the pillar's place in `u.items` (its code); `n` is its place in
+     the table it is being printed in (§553.6). */
+  function pillarRow(p, i, n){
     /* §416: a direction that does not run this year is listed, not scored. */
-    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
       '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-    return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    return '<tr><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(p.kind) + ' &middot; ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span></td>' +
       '<td class="num final ' + dBand(pillarPerf(p)) + '">' + dPct(pillarPerf(p)) + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td></tr>';
-  }).join("");
+  }
   /* NAMED APART FROM THE ROLL-CALL (§254.5). With both slides headed by the
      tenant's word for a pillar, the deck said "Pillars" twice — §87's twins on
      a projector, and two rows in Manage slides' rail that read the same. The
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
-  var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu") + " overview") +
-    '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
-    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("pillar") + '</th>' +
-    '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
-    '<tbody>' + pRows + '</tbody></table></section>';
-
-  (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
+  function groupScoreSlide(g){
+    if (!g.ix.length) return "";
+    return '<section class="dslide"' +
+      anch(g.score, "After the " + g.plain + " overview") +
+      '><h2>' + g.head + ' &mdash; where we stand</h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + g.one + '</th>' +
+      '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
+      '<tbody>' + g.ix.map(function(x, n){ return pillarRow(x.p, x.i, n + 1); }).join("") +
+      '</tbody></table></section>';
+  }
+  /* SAID AT THE END, FOR EVERY DECK (§254.4). §553.8 moved the company's
+     two tables up beside their roll-calls, for the one reason that the
+     review had no detail slides between them — *"move the pillars
+     performance till the end before the where we stand slide"* exists to
+     keep the scoring beside the reading it serves, and with nothing in
+     between there was nothing to keep it away from. §553.9 put the detail
+     slides back, so that reason is gone and so is the exception. */
+  var pillarScoreSlides = groups.map(groupScoreSlide).filter(Boolean);
 
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
@@ -49073,19 +49260,33 @@ function deckSlides(u){
      on last cycle: the room reads them once flat and once properly and
      cannot tell which is the real one (§87's twins, in figures). The stand
      slide always draws, so there is always something behind this. */
-  if (!short) S.push(sectSlide("sperf", "After the Overall performance divider",
+  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
+     Islam, of the company's own review: *"and then performance and the
+     overall performance etc."* It was the one deck with no divider in front
+     of its closing block — §481 made the review short by leaving things
+     out, and this went with them. What it announces was always there: the
+     score tables and the slide the whole deck ends on.
+
+     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
+     stand slide always draws, so this is never a divider over nothing. */
+  S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu") + " stand, where " +
-      (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
+    /* It announces what is BEHIND it, and §553.8 moved the two score
+       tables in front of it — so where they have already been read, this
+       says the one thing left (§253, §61). */
+    "Where the " + L("pillar","bu") +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
+      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
+      " stands, and what the cycle is remembered for.",
     null));
-  if (pOn && u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
+    '<div class="coverrule"></div><p class="coversub">' + esc(deckBoxName(u)) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   return S.join("");
@@ -49118,12 +49319,30 @@ function pillarCols(n){
    present he will only see his slides"*). deckSlides calls this for every
    direction, so the whole-plan deck and a direction's own deck cannot
    disagree about what a direction's slides are (§53.5). */
-function pillarSlidesOf(u, p, pi){
+/* ── `named`: THE DECK HAS ALREADY SAID WHOSE SLIDES THESE ARE (§553.4) ──
+   Islam, of a direction owner's own deck: *"the cover page is enough let's
+   remove the 2nd page as the performance appear at the last slide anyway"*.
+
+   A direction's own deck opens on a cover carrying that direction's name,
+   its code, the cycle and who presents it — and then said all of it again on
+   a title page, whose other job, the two readings, §553.3 moved to the end.
+   Two slides introducing one direction to a room that has just been told.
+
+   NOT A SETTING, A FACT ABOUT THE DECK (§50.6). The full plan deck has no
+   per-pillar cover: there the title page is the ONLY slide that names the
+   pillar it is opening, so it stays, and `named` is false for it. The flag
+   says what the caller has already drawn, which is why it is the caller's to
+   pass and not the client's to choose.
+
+   A PICTURE SLIDE PLACED ON THE TITLE PAGE IS NOT LOST: an anchor that is no
+   longer there sends its slide to the end of the deck rather than dropping
+   it (§96.2, and `insertPictureSlides`'s own note). */
+function pillarSlidesOf(u, p, pi, named){
   var S = [];
   /* §416: and it gets no slides of its own until its year comes. */
   if (!runsNow(p)) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-  S.push('<section class="dslide d-cover"' +
+  if (!named) S.push('<section class="dslide d-cover"' +
     anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
     sec(pillarCode(u, pi), p.name) +
     '><span class="seclab">' + esc(p.kind) +
@@ -49373,7 +49592,17 @@ function companyFoundationSlides(){
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
   }).join("");
-  return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+  /* ── IT CONTINUES RATHER THAN RUNS OFF THE SLIDE (§553.7) ──────────
+     On El Abd this slide is 22px taller than the slide it is drawn on, with
+     the last objective cut in half — and the fit pass could do nothing
+     about it, because `.tight` is all it has for a slide that does not say
+     it may be split. It says so now, and the pass continues the objectives
+     table onto a second slide exactly as it does for every other long table
+     in the deck (§69.5). The continuation does not repeat the aspiration:
+     present.css hides `.aimtop` on a `[data-cont]` slide, because a lead
+     paragraph said twice is the room reading it twice. */
+  return ['<section class="dslide" data-split="cofound"' +
+    anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
       (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
@@ -49464,9 +49693,60 @@ function dirDeckHtml(t){
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">' + esc(code) + ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    /* AND IT CARRIES WHAT THE TITLE PAGE CARRIED (§96.2, §553.4). Dropping
+       that slide would otherwise take the theme and the subtitle with it —
+       neither is on the cover, and neither is anywhere else in this deck.
+       Both are drawn only where the direction HAS one (§45.2); on all three
+       live clients today, none of them does, so no cover moves. */
+    '<p class="coversub">' + esc(code) +
+      (String(p.theme || "").trim()
+        ? ' &middot; ' + L1("theme") + ' ' + esc(p.theme) : '') +
+      ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
     (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
-  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i));
+  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i, true));
+
+  /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
+     The deck a direction's owner presents had no slide that said how the
+     direction did. It carried the two figures in the corner of every slide
+     after the title (`deckPillarHead`, until §553.3) and presented neither,
+     so the owner stood in front of 95% with nothing on the screen saying
+     what it counts or what it is measured against.
+
+     IT IS THE SAME SLIDE THE FULL DECK ENDS ON, through the same builder
+     (§553.2, §53.5): a word under each reading saying what it counts, and a
+     line under both saying why they are different questions. Only the cells
+     are this direction's.
+
+     AND IT IS SAID LAST, where §254.4 put it — Islam: *"where the units
+     stands to be the last slide"*. The measures, the categories and the
+     tactics are worked through first; then the reading they add up to.
+
+     DRAWN ONLY WHERE THERE IS A READING (§45.2). A direction with no
+     measures and nothing delivered would otherwise get a headline slide
+     carrying two dashes, which says the plan owes an answer nobody asked
+     it for. */
+  var dirPerf = planOn(u) ? pillarPerf(p) : null;
+  var dirExec = planOn(u) && pillarExec(p) && pillarPlan(p)
+    ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
+  if (dirPerf != null || dirExec != null) {
+    S.push(standSlideOf(esc(p.name),
+      [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
+          SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
+          ', by their targets'),
+        dirExec != null && standCell('Execution performance', dirExec,
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+      /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
+         direction with nothing delivered draws no Execution cell, and a
+         footnote explaining Execution would be the slide explaining a
+         figure it is not showing. */
+      (dirPerf != null
+        ? esc(L("measure")) + ' measure how the work set against this ' +
+          esc(p.kind || L1("pillar")).toLowerCase() + ' is going. ' : '') +
+      (dirExec != null
+        ? 'Execution measures whether that work is landing on time.' : '')));
+  }
+
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
     sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
@@ -49474,29 +49754,37 @@ function dirDeckHtml(t){
   return S.join("");
 }
 
+/* ── THE RUNNING HEAD SAYS WHICH SLIDE, NOT HOW IT WENT (§553.3) ────────
+   Islam, of a direction owner's own deck: *"the user view of a performance
+   where he opens the presentation is not clear as the user only sees the
+   performance of his directions in the presentation directly"* — and, shown
+   that deck rendered: the two readings stood in the corner of four slides
+   out of six, and no slide presented them.
+
+   A NUMBER REPEATED IS NOT A NUMBER PRESENTED. Key Measures and Execution
+   were drawn here, small, over the measures, the categories and the tactics
+   — three slides that are each ABOUT something else, and none of which can
+   explain what the two figures mean or what they are measured against. The
+   reader meets 95% four times and is told once what it is: never.
+
+   So the figures leave the running head and are said ONCE, properly, on
+   "Where it stands" — the slide §553.2 made every box's, with a word under
+   each reading saying what it counts and a line under both saying why they
+   are different questions. A direction's own deck gets that slide for the
+   first time (`dirDeckHtml`); the full plan deck already ended on it.
+
+   NOTHING IS HIDDEN BY THIS. The pillar's own title page still carries both
+   readings large (`.leadstats`, the slide immediately before these), and the
+   score table still scores every pillar. What goes is the third printing.
+
+   IT GOES EVERYWHERE, not only in a direction's own deck. The four callers
+   are all `pillarSlidesOf`, which is the ONE builder a direction's deck and
+   the full plan deck share (§53.5) — so "only on the owner's copy" is not a
+   setting, it is a fork of the shared builder, and it would make the same
+   direction read two different ways depending on who opened it. */
 function deckPillarHead(u, p, pi, which){
-  var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
-    esc(p.name) + '<span class="dwhich">' + which + '</span></h2>' +
-    /* ── TWO NUMBERS, NOT FOUR (§254.10) ──────────────────────────────
-       Islam: *"remove the deliverd /planned from the slides maintain just the
-       2 numbers of measurs and execution"*, and of the reading put back to
-       him, *"yes drop for both keep the 2 measures only across."*
-
-       DELIVERED AND PLANNED APPEARED IN TWO PLACES, SPELLED DIFFERENTLY, which
-       is why the instruction was read back before it was obeyed: the pillar's
-       title slide carried Key measures · Execution · Delivered / planned, so
-       dropping the third leaves the two he named — while THIS head carried
-       Measures · Delivered · Planned and had no Execution on it at all.
-       Dropping two here would have left one number, so Execution takes their
-       place and both surfaces end up saying the same two things.
-
-       The figures are unchanged: `pillarExec` and `pillarPlan` are still what
-       Execution is computed from, and are still explained in words on "Where
-       the unit stands", which he looked at and kept. */
-    '<div class="dstats"><span><i>' + L("measure") + '</i><b class="' + dBand(pillarPerf(p)) + '">' +
-      dPct(pillarPerf(p)) + '</b></span>' +
-    '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
+    esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
 }
 
 /* ── A supporting function's review (§15.12) ──────────────────────────────
@@ -67572,9 +67860,9 @@ var SYNC = (function () {
        through nobody's choice. Sending that would have every one of their
        saves judged as that stranger: a narrowing, which is the safe
        direction, and still a bootstrap tenant unable to set itself up.
-       Asked through isSMOSession() and the register, which together are
+       Asked through maySimulateSession() and the register, which together are
        exactly when the control that sets VIEWER is drawn at all. */
-    if (!isSMOSession()) return null;
+    if (!maySimulateSession()) return null;
     if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
     var v = typeof window !== "undefined" ? window.VIEWER : null;
     return v && v !== person.key ? v : null;
@@ -68310,7 +68598,41 @@ var SYNC = (function () {
      SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
-  function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE OFFICE IS TWO SEATS, NOT ONE (§554) ──────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* This asked for the Super user
+     alone, so the control was named after the seat rather than after the
+     question it answers — and the question is *may this session leave its
+     own view*, which both office seats now answer yes to.
+
+     RENAMED RATHER THAN WIDENED IN PLACE, because `isSMOSession` is read in
+     the one place a mistake is dangerous (`actingAs`, which stamps the save)
+     and a name that says "is the SMO" while meaning "is the office" is how
+     the next person comes to use it for a Super-user-only act. The fail-
+     closed shape above is untouched: still hidden until something proves it
+     should be shown.
+
+     WHO IS *IN* THE LIST is a second question and it is `maySimulatePerson`
+     below — an SMO team member may not look through the Super user, who is
+     the one person on a client's register holding more than they do. */
+  function maySimulateSession() {
+    return !!person && (person.role === "super" || person.role === "smoteam");
+  }
+  /* MAY THIS SESSION LOOK THROUGH *THIS* PERSON (§554). `p.role` is the seat
+     on the register row, which is what the server writes from the membership
+     — the same field `lib/rules.js actingFor` refuses on, so the control the
+     page draws and the save the server accepts cannot disagree (§42, §61).
+
+     NOBODY SIGNED IN LISTS EVERYBODY: the offline copy and the file:// demo
+     have no session at all, and they have always offered the whole cast.
+     That is not a gate failing open — there is no server to act against and
+     nothing to narrow. */
+  function maySimulatePerson(p) {
+    if (!person) return true;
+    if (!maySimulateSession()) return false;
+    if (person.role === "super") return true;
+    return !p || p.role !== "super";
+  }
   /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
      Islam, of the trail standing at full weight while he viewed as somebody:
      *"I think yes greyed is better not to get confused that the user has
@@ -68436,8 +68758,11 @@ var SYNC = (function () {
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
        for EVERYBODY and the switcher was hidden from the one person it is for
-       (§45.3). It is asked through isSMOSession() now, in one place. */
-    if (!isSMOSession()) {
+       (§45.3). It is asked through maySimulateSession() now, in one place —
+       and since §554 that is both office seats, so an SMO team member keeps
+       the control and gets a list with the Super user left out of it
+       (`maySimulatePerson`), rather than their own name in place of it. */
+    if (!maySimulateSession()) {
       sel.hidden = true;
       /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
          the whole mechanism, and it relied on SEARCHSEL noticing on the next
@@ -68755,20 +69080,24 @@ var SYNC = (function () {
        carries the switcher's own two guards (the seat that draws it, and the
        key being on the register), so a second test would be a second idea of
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
-       exactly as `isSMOSession` is below and for the same reason. */
+       exactly as `maySimulateSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
     /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
        — the shell calls this at the end of every paint. */
     markViewing: function () { markViewing(); },
     person: function () { return person; },
-    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
-       the viewer switcher too, and the note above isSMOSession() is explicit
-       that this question must have ONE answer: a control that is dangerous
-       when wrong must fail closed, and two files each testing `role ===
-       "super"` is exactly how one of them comes to test something else.
-       Exported rather than re-asked — §42's rule about one copy of a rule,
-       on the chrome. */
-    isSMOSession: function () { return isSMOSession(); },
+    /* WHO MAY LEAVE THEIR OWN VIEW, ASKED AND NEVER COPIED (§179, §554). The
+       welcome screen draws the viewer switcher too, and the note above
+       maySimulateSession() is explicit that this question must have ONE
+       answer: a control that is dangerous when wrong must fail closed, and
+       two files each testing the seat by hand is exactly how one of them
+       comes to test something else. Exported rather than re-asked — §42's
+       rule about one copy of a rule, on the chrome. */
+    maySimulateSession: function () { return maySimulateSession(); },
+    /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
+       switcher and the People register's row menu both fill their lists
+       from this, so neither offers a view the save would turn down (§61). */
+    maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
@@ -72768,7 +73097,7 @@ var SYNC = (function () {
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* §546: and the three action keys say themselves on the buttons they
+    /* §554: and the three action keys say themselves on the buttons they
        belong to, marked here for the same reason the boxes above are —
        these controls are drawn by several renderers and a mark set at each
        is several places to forget. */
@@ -81450,8 +81779,24 @@ var SYNC = (function () {
      the signature says when nothing has. */
   var sel = document.getElementById("asWho");
   var viewerSig = null;
+  /* ── AND NOT EVERY SEAT MAY LOOK THROUGH EVERY PERSON (§554) ─────
+     The SMO team holds this control now, and the one row it may not wear is
+     the Super user's — the only person on a client's register who holds more
+     than they do. Asked of sync.js rather than tested here, because the SAVE
+     refuses the same row (`lib/rules.js actingFor`) and a list that offered
+     it would be a control that un-happens when pressed (§61, §42).
+
+     THE SEAT IS IN THE SIGNATURE for the same reason the keys are: granting
+     somebody the Super user seat changes who may be looked through without
+     changing who is on the register, and a list keyed on names alone would
+     go on offering the row until the next person joined. */
+  function viewerPool(){
+    if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return PEOPLE;
+    return PEOPLE.filter(function(p){ return SYNC.maySimulatePerson(p); });
+  }
   function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    var pool = viewerPool();
+    var sig = pool.map(function(p){ return p.key + ":" + (p.role || ""); }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
       /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -81471,7 +81816,7 @@ var SYNC = (function () {
          The job title goes from the option and stays on the `title`: it is
          the thing you might want and never the thing you scan by. */
       var dn = displayNames();
-      sel.innerHTML = PEOPLE.map(function(p){
+      sel.innerHTML = pool.map(function(p){
         var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
@@ -81624,7 +81969,7 @@ var SYNC = (function () {
   /* §552: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
-  /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  /* §554: Alt+S, Alt+D, Alt+E — Islam's letters. */
   ACTIONKEYS.wire();
   /* §547: Alt+G, the list of places. */
   GOTO.wire();

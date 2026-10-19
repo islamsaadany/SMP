@@ -2514,6 +2514,31 @@ console.log("\n21 · viewing as somebody is judged as somebody (§185)");
   check("§185: the refusal is a sentence somebody can act on",
         /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
                                         "custodian", people).refuse));
+
+  /* ── §554: THE SMO TEAM ACTS THROUGH ONE TOO, UP TO ITS OWN SEAT ───
+     Islam asked for the team to hold the switcher. The widening and its
+     ceiling are asserted together, because a build that refused the team
+     everything satisfies every "it does not widen" line above, and a build
+     with no ceiling satisfies every "it works" line here (§94.2). */
+  const team = R.actingFor(smo, "t185_hala", "smoteam", people);
+  check("§554: an SMO team seat may act through a client's own person",
+        team.person && team.person.key === "t185_hala" && team.simulated === true,
+        JSON.stringify(team));
+  check("§554: ...and it is judged as HER, exactly as the office's is",
+        !A.authorize(base, edit(), team.person).ok);
+  /* The register row carries the seat (§187), so the one row above them is
+     recognisable without asking anything else. */
+  const superRow = personOf(base, "smo");
+  check("§554: the Super user's row IS the seat this reads",
+        !!superRow && superRow.role === "super", JSON.stringify(superRow));
+  const upward = R.actingFor(personOf(base, "t185_hala"), "smo", "smoteam", people);
+  check("§554: an SMO team seat may NOT act through the Super user — a " +
+        "simulation may only ever narrow",
+        !!upward.refuse, JSON.stringify(upward));
+  check("§554: ...and the refusal says which rule it is",
+        /SMO team cannot act through the Super user/.test(upward.refuse || ""));
+  check("§554: a client's own person still cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
 })();
 
 console.log("\n22 · a seat is granted, never derived (§187)");

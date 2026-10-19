@@ -3830,7 +3830,7 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* §546: and the three action keys say themselves on the buttons they
+    /* §554: and the three action keys say themselves on the buttons they
        belong to, marked here for the same reason the boxes above are —
        these controls are drawn by several renderers and a mark set at each
        is several places to forget. */
@@ -12512,8 +12512,24 @@
      the signature says when nothing has. */
   var sel = document.getElementById("asWho");
   var viewerSig = null;
+  /* ── AND NOT EVERY SEAT MAY LOOK THROUGH EVERY PERSON (§554) ─────
+     The SMO team holds this control now, and the one row it may not wear is
+     the Super user's — the only person on a client's register who holds more
+     than they do. Asked of sync.js rather than tested here, because the SAVE
+     refuses the same row (`lib/rules.js actingFor`) and a list that offered
+     it would be a control that un-happens when pressed (§61, §42).
+
+     THE SEAT IS IN THE SIGNATURE for the same reason the keys are: granting
+     somebody the Super user seat changes who may be looked through without
+     changing who is on the register, and a list keyed on names alone would
+     go on offering the row until the next person joined. */
+  function viewerPool(){
+    if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return PEOPLE;
+    return PEOPLE.filter(function(p){ return SYNC.maySimulatePerson(p); });
+  }
   function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    var pool = viewerPool();
+    var sig = pool.map(function(p){ return p.key + ":" + (p.role || ""); }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
       /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -12533,7 +12549,7 @@
          The job title goes from the option and stays on the `title`: it is
          the thing you might want and never the thing you scan by. */
       var dn = displayNames();
-      sel.innerHTML = PEOPLE.map(function(p){
+      sel.innerHTML = pool.map(function(p){
         var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
@@ -12686,7 +12702,7 @@
   /* §552: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
-  /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  /* §554: Alt+S, Alt+D, Alt+E — Islam's letters. */
   ACTIONKEYS.wire();
   /* §547: Alt+G, the list of places. */
   GOTO.wire();

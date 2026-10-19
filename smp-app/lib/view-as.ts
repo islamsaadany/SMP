@@ -46,10 +46,11 @@ export type Seat = "super" | "smoteam" | "none" | null;
 export type Who = { personKey: string | null; seat: Seat };
 export type Narrowed = Who & { simulated?: boolean };
 
-/* The two sentences are the frozen rule's, word for word (lib/rules.js
+/* The three sentences are the frozen rule's, word for word (lib/rules.js
    actingFor), so a refusal reads the same whichever path met it. */
 export const NOT_ALLOWED = "Only the SMO can act through somebody else's view.";
 export const NO_SUCH_PERSON = "The register does not hold the person this view belongs to.";
+export const NOT_THE_SUPER = "The SMO team cannot act through the Super user's view.";
 
 export function viewAsOf(url: string): string {
   try { return (new URL(url).searchParams.get("viewAs") || "").trim(); } catch { return ""; }
@@ -62,10 +63,51 @@ export function viewAsOf(url: string): string {
    this. */
 const brk = (): string => (typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "");
 
+/* ── AND THE SMO TEAM HOLDS IT TOO (§554) ─────────────────────────────
+   Islam: *"I want to enable the smo team to have the drop down of view as
+   for the other users on the platform."*
+
+   THE TEAM ALREADY DOES THE WORK THE CONTROL IS FOR. They hold Setup, the
+   register, the access matrix and the reporting cycle (§516.2) — so they are
+   the people who set a narrowing and then need the mirror to check it in,
+   and until now the mirror was the Super user's alone. A team member asking
+   "does Karim actually see this report" had to ask somebody else to look.
+
+   IT STILL ONLY EVER NARROWS, which is §185's rule and the whole of why
+   simulating is safe — but "narrows" has a second meaning now that two seats
+   can simulate. The view hands you the seat of the person you are looking
+   THROUGH (`viewAsDecision` below), so an SMO team member wearing the Super
+   user's view would hold the Super user's rights: the one person on a
+   client's register who holds MORE than they do. That is not a simulation,
+   it is a way up.
+
+   SO THE CEILING IS YOUR OWN SEAT, and with only two office seats that is one
+   sentence: the Super user may look through anybody, the SMO team through
+   anybody but the Super user. Islam's pick of three put to him with the cost
+   of each stated (rule 1c) — the alternatives were the whole register, and a
+   view of the Super user that refuses every save, which buys a mirror nobody
+   can act in and a second behaviour to explain.
+
+   BOTH ENDS, OR IT IS HALF DONE (§94.2, §61): the lists are filtered to what
+   this seat may look through — the frozen bar's (sync.js `maySimulatePerson`),
+   the served bar's (modules/insights/index.ts `viewerList`) and the People
+   register's row menu — so the refusal below is the backstop for a forged
+   address rather than the thing anybody meets by pressing a control. */
 export function maySimulate(me: Who): boolean {
   /* A build that let any seat act through somebody else's view. */
   if (brk() === "viewas-any-seat") return true;
-  return me.seat === "super";
+  return me.seat === "super" || me.seat === "smoteam";
+}
+
+/* WHICH OF THEM, asked of the two seats rather than of a list of people, so
+   the three lists and the refusal cannot disagree about one person (§42). */
+export function maySimulateSeat(me: Who, theirSeat: Seat): boolean {
+  if (!maySimulate(me)) return false;
+  /* A build where the team's simulation took the Super user's seat — §185's
+     own fault with the sign reversed: a widening rather than a narrowing. */
+  if (brk() === "viewas-team-takes-super") return true;
+  if (me.seat === "super") return true;
+  return theirSeat !== "super";
 }
 
 export function viewAsDecision(
@@ -77,6 +119,10 @@ export function viewAsDecision(
   /* A build that read an unknown key as somebody with nothing — the
      narrowing that hides a mistake instead of reporting it (§185). */
   if (!onRegister && brk() !== "viewas-unknown-ok") return { refuse: NO_SUCH_PERSON };
+  /* THE CEILING IS YOUR OWN SEAT (§554) — asked after the register, so an
+     SMO team member who names a key that is not there is told THAT, which is
+     the mistake they actually made. */
+  if (!maySimulateSeat(me, theirSeat)) return { refuse: NOT_THE_SUPER };
   /* THE SEAT THEY HOLD, NOT THE ONE YOU HOLD — this is the narrowing, and
      `none` is the ordinary answer, because nobody on a client's register
      holds a seat unless somebody put them on the account team. */

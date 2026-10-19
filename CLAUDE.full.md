@@ -59,6 +59,23 @@ A drift between specs and code is a documentation bug — report it before silen
   and the section numbers on purpose. The rule is about what is said to a
   person, not about what is written down for the next one.
 
+### 1b-iv. SHORT, NOT JUST PLAIN (2026-10-19)
+- **Islam, of a reply he had just been handed: *"I DIDN'T UNDERSTAND ANYTHING
+  FROM THAT."*** Rule 1b-iii above said plain words and said nothing about
+  LENGTH, so the reply obeyed it line by line and was still unreadable — four
+  headings and a list, about work he had asked one question about.
+- **Answer the question that was asked. Stop there.** A few sentences. If it
+  needs headings, it is too long.
+- **Never put these in front of him**: file names, line counts, commit codes,
+  § numbers, check names, git words (branch, merge, fast-forward, force-push).
+  They are the record's vocabulary, not his. Say *the dropdown works for the
+  SMO team* — not which file it is in.
+- **Bad news is one sentence, not an essay.** "I got that wrong — the file has
+  other people's work in it too" is the whole thing. The explaining goes in the
+  commit message where it belongs.
+- **He will ask if he wants more.** Offering less is the safe mistake;
+  burying the answer is not.
+
 ### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
 - **Islam: *"remove the grey descriptions and stop adding descriptions to
   pages."*** A heading names the thing; a paragraph under it in grey saying the

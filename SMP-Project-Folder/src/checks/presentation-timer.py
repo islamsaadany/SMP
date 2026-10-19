@@ -253,6 +253,21 @@ with sync_playwright() as p:
     ok("from the top, not from where the last one left off",
        isinstance(ran, (int, float)) and 0 <= ran < 4000, (ran, f2))
 
+    # §556.9: the flow's own cover and group pages are nobody's time. With
+    # the cover in front, the first subject's clock must not be running on
+    # it, and must start fresh on that subject's own first slide.
+    eva(pg, "()=>{ closeDeck(); openDeckWith('<b>Master</b>', flowWithParts(['mobile','retailstores'])); deckShow(0); }")
+    pg.wait_for_timeout(500)
+    c0 = eva(pg, "()=>({part: DECK.slides[0].dataset.flowpart || null, clock: !!DECK.clock, "
+                 "shown: !document.getElementById('dclock').hidden})")
+    ok("the flow's cover runs no clock (§556.9)",
+       val(c0, "part") == "1" and val(c0, "clock") is False and val(c0, "shown") is False, c0)
+    eva(pg, "()=>{ var i = DECK.slides.findIndex(s => !s.dataset.flowpart); deckShow(i); }")
+    pg.wait_for_timeout(300)
+    c1 = eva(pg, "()=>({m: DECK.clock && DECK.clock.mins, ran: DECK.clock ? DECK.clock.mins*60000 - clockLeft() : null})")
+    ok("...and the first subject's time starts fresh on its own first slide",
+       val(c1, "m") == 15 and isinstance(val(c1, "ran"), (int, float)) and 0 <= val(c1, "ran") < 4000, c1)
+
     # ── 7 · pause: three ways in. Reset: one ─────────────────────────────
     print("\n7 · three ways to pause, one way to reset")
     eva(pg, "()=>{ closeDeck(); openDeck(UNITS['mobile']); }"); pg.wait_for_timeout(500)

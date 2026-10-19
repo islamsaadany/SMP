@@ -1938,6 +1938,10 @@ function openDeckWith(titleHtml, targets, from){
   for (var i = slides.length - 1; i >= 0; i--) {
     var sub = slides[i].dataset.subject || "";
     if (sub.indexOf("flow:") !== 0) continue;
+    /* …and marked as the flow's own, so the clock can tell it is nobody's
+       time (§556.9): stamped with the first direction, the cover was
+       spending that direction's minutes before it had begun. */
+    slides[i].dataset.flowpart = "1";
     var next = slides[i + 1];
     if (next && next.dataset.subject) {
       slides[i].dataset.subject = next.dataset.subject;
@@ -3070,6 +3074,14 @@ var CLOCKTICK = null;
    §303 baseline run from this directory measures this build and says the
    failure is not yours (§334.13, walked into an hour before this comment). */
 function clockSubject(){
+  /* THE FLOW'S OWN PAGES RUN NO CLOCK (§556.9). Islam: *"it should reset
+     when we get to a new direction as we set in the start of the flow"* —
+     the cover and the group pages ride inside the first subject's section
+     (§554.3), so its time was running from the cover, and by its own first
+     slide it no longer read what the flow had set. A subject's time starts
+     on that subject's slides. */
+  var here = DECK.slides && DECK.slides[DECK.i];
+  if (here && here.dataset.flowpart) return null;
   if (DECK.flow && DECK.stops) {
     var k = deckStopAt(DECK.i);
     return k >= 0 ? DECK.stops[k].t : null;

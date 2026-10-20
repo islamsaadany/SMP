@@ -270,7 +270,13 @@ function unitAimSlides(u, bare){
 /* §405: the SWOT section, lifted out of deckSlides for the same reason. */
 function unitSwotSlides(u){
   var S = [];
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
+  /* §557 reverses §243's "a unit with an empty SWOT still draws its
+     section": Islam chose the deck model on a page that said, of every
+     part, switched on but empty draws no slide yet — and the company's
+     analysis has always worked that way. One rule for every box. */
+  var swAny = u.swot && SMPRules.swotQuads(GROUP, u.ukey).some(function(q){
+    return (u.swot[q] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!u.fnKey && compOn(u.ukey, "swot") && swAny) {
     /* §418: the boxes this layer carries, under the layer's own names. */
     var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
     var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
@@ -360,13 +366,16 @@ function valuesSlide(target){
    we are, what we are aiming at, the values, and the key objectives read
    against their targets. The divider is drawn only when something follows
    it (§253), and it is the part's own: Islam chose *"before every part"*. */
-function foundationPart(target, name, cells, aim, objectives){
+function foundationBody(target, aim, objectives){
   /* The whole section has a switch of its own (Client set-up › Structure,
      `foundOn`), and a name of its own on each layer — "Overview" on a
      function and a capability (`foundTitle`). Off, the part is not drawn. */
   if (!SMPRules.foundOn(GROUP, target)) return [];
-  var body = [whoWeAreSlide(target)].concat(aim || [], [valuesSlide(target)], objectives || [])
+  return [whoWeAreSlide(target)].concat(aim || [], [valuesSlide(target)], objectives || [])
     .filter(Boolean);
+}
+function foundationPart(target, name, cells, aim, objectives){
+  var body = foundationBody(target, aim, objectives);
   if (!body.length) return [];
   return [sectSlide("sfound", "After the Foundation divider", SMPRules.foundTitle(GROUP, target) || "Foundation",
     "What " + name + " is aiming at, and the objectives it is judged on.", cells)].concat(body);
@@ -1371,7 +1380,9 @@ function companyAnalysisSlides(u){
    same reason: a part is a part. */
 var SEC_PART_KEYS = ["found", "swot"];
 var SEC_PARTS = {
-  found: { name: "Foundation", slides: function(u){ return companyFoundationSlides(u); } },
+  /* §557: the whole Foundation part, as the company's deck draws it — Who
+     we are and Values included — under the part's own cover. */
+  found: { name: "Foundation", slides: function(u){ return foundationBody("group", companyFoundationSlides(u), []); } },
   swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
 };
 function secDeckHtml(t){
@@ -1725,7 +1736,7 @@ function deckSlidesFn(subject){
           '<span class="pcard-n">' + esc(p.name) + '</span>' +
           (who ? '<span class="pcard-s">' + esc(who) + '</span>' : '') + '</div>';
       }).join("") + '</div></section>');
-        scoreTables.push('<section class="dslide"' + anch("cap" + c.id + "p", "After " + c.name + " \u2014 " + labelWord("project","bu") + " where we stand") +
+        if (c.projects.length) scoreTables.push('<section class="dslide"' + anch("cap" + c.id + "p", "After " + c.name + " \u2014 " + labelWord("project","bu") + " where we stand") +
       '><h2>' + L("project") + ' &mdash; where we stand<span class="dwhich">' + esc(c.name) + '</span></h2>' +
       '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +

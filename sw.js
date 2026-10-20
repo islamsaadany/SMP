@@ -420,13 +420,24 @@
    bytes changed, which is the whole trigger (§91). Proved held by no commit in
    any ref's history (§94.12) after fetching every ref; confirm once more
    immediately before the push (§94.16). */
-/* v6.50-reporting-phone — §559: Reporting fits a phone. The Reporting bar and
+/* v6.49-breakdown-target-reported — §557: a breakdown's columns report as
+   Target and Reported. */
+/* v6.50-role-chip-and-order — §558: a role held over its own thing names
+   itself and stops on Home's strip; the four places that said "the group" as
+   a fixed word read the client's `topword` row instead; and a person's roles
+   list in Islam's own sequence — seat, unit, direction, capability, project &
+   pillar, function. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history (§94.12) after fetching
+   every ref; confirm once more immediately before the push (§94.16). */
+/* v6.51-reporting-phone — §559: Reporting fits a phone. The Reporting bar and
    the pane band wrap when they do not fit; below 520px the top bar takes two
-   lines and the band stops pinning. The built file's bytes changed, which is
-   the whole trigger (§91). Proved held by no commit in any ref's history
-   (§94.12) after fetching every ref; confirm once more immediately before the
+   lines and the band stops pinning. First written as v6.50 on the branch, the
+   name main took for §558 while this was being checked — §94.12's collision,
+   caught by the search before the merge, and rebuilt from main's copy with
+   this one line re-applied (§146.2). Proved held by no commit in any ref's
+   history after fetching every ref; confirm once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.50-reporting-phone";
+const SHELL = "smp-shell-v6.51-reporting-phone";
 const ASSETS = [
   "/",
   "/index.html",

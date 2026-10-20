@@ -447,9 +447,44 @@ var WELCOME = (function(){
     try { name = SMPRules.firstName(row); } catch(e){}
     if (!name) name = String(row.name || person.name || "").split(/\s+/)[0] || "";
 
+    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§558) ────────
+       Islam's ask, of the chips under the name on this screen: a capability's
+       owner and a direction's owner should read the ROLE and nothing after it.
+       Each printed its place — the capability's own title for one, the top
+       level's word for the other — and neither says anything the role name has
+       not already said.
+
+       THEY LOOKED LIKE ONE FAULT AND WERE TWO. A direction's owner holds a
+       role recorded AT THE TOP LEVEL (§505: `dirowner`, scope "group" —
+       nothing records WHICH direction, because `ownsTopPillar` is what
+       answers that), so the place it printed was the top level's word. A
+       capability's owner and custodian hold theirs at the capability (§412),
+       and `roleWhereLabel()` has named a capability by its own title since
+       §334 — deliberately, because that is the word the cycle board, the
+       register's Unit column, the role chips and the switcher's own dropdown
+       all read.
+
+       SO NEITHER OF THOSE TWO COULD MOVE. Renaming the capability inside
+       `roleWhereLabel()` renames it on five screens, and moving where a
+       direction's role is recorded moves who may open what (§505 ships it at
+       VIEW on the group and NONE everywhere else). What is wrong is only that
+       THIS STRIP prints a place for a role whose place is already in its name
+       — so the place is dropped here, in the one line that prints it, and the
+       two functions that answer *what is this place called* are untouched.
+
+       KEYED ON WHERE THE ROLE IS HELD, not on a list of role keys, because
+       that is the actual question: a role held at a capability has the
+       capability in its name already. That covers the owner (scope "cap", so
+       always there) and the capability's Strategy custodian in one rule, which
+       is what Islam asked for after the first build covered only the owners. A
+       DIRECTION's custodian needs nothing here: being named one derives
+       `dirowner` (§505), so they arrive as a direction owner and are already
+       out. Every other role keeps its place — a unit custodian and a function
+       head read exactly as they did before. */
     var chips = rs.slice(0, 3).map(function(r){
       var where = "";
       try { where = roleWhereLabel(r.at); } catch(e){ where = String(r.at || ""); }
+      if (String(r.at || "").indexOf("cap:") === 0 || r.role === "dirowner") where = "";
       return '<span class="wchip">' + wesc(roleName(r.role)) +
              (where ? " · " + wesc(where) : "") + "</span>";
     });

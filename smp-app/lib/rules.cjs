@@ -666,11 +666,43 @@
       if (r.head === p.key)      out.push({ role:"owner",     at:k });
       if (r.custodian === p.key) out.push({ role:"custodian", at:k });
     });
-    w.functionKeys.forEach(function (k) {
-      var f = w.functions[k] || {};
-      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
-      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
-    });
+    /* ── THE ORDER THESE SIX BLOCKS RUN IN IS THE ORDER THEY READ IN (§558) ──
+       Islam, having been shown what the strip actually printed: the sequence
+       should be **seat, unit, direction, capability, project & pillar,
+       function**. It was seat, unit, FUNCTION, capability, project & pillar,
+       DIRECTION — those two exactly swapped, everything else already his
+       order — because each block was appended where its own section happened
+       to add it (§505 put the direction last simply by being newest) and
+       nothing had ever asked what order the LIST should read in.
+
+       IT IS A PRESENTATION ORDER AND IT CHANGES NO PERMISSION. Every consumer
+       asks this list with `.some()`, `.filter()` or `.map()`; nothing reads
+       `[0]` or takes a first-match, so no grant, no reach and no refusal moves
+       with it. Measured before the change rather than assumed.
+
+       WHERE IT BITES IS THE HOME STRIP, which draws the first three roles and
+       no more (`welcome.js`): the direction being last meant a person holding
+       four roles did not see Direction owner pushed to the end, they did not
+       see it at all. Which is the whole reason the order was worth his asking
+       about and not a tidiness.
+
+       `seen`/`once` are hoisted to here because the direction block below is
+       the first caller now; the project and pillar blocks further down share
+       the same two, so one role at one place is still entered once (§147.7). */
+    var seen = {};
+    var once = function (role, at) {
+      if (seen[role + "|" + at]) return;
+      seen[role + "|" + at] = 1;
+      out.push({ role: role, at: at });
+    };
+
+    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
+       one rule that lets them report (`ownsTopPillar`), so the role and the
+       reporting right cannot disagree about who is named (§42, §53.5) — and
+       it is false whenever the business units are on, because then the top
+       layer's pillars are not directions anybody reports. */
+    if (ownsTopPillar(w, p)) once("dirowner", "group");
+
     /* §412: a capability's own seats, read off the capability exactly as a
        unit's are read off the unit (§33) -- one fact, one place. */
     (w.capabilities || []).forEach(function (c) {
@@ -687,12 +719,8 @@
        one): the Owner is picked from the register in the office's own pen, so
        the naming is already a deliberate act about a known person. One entry
        per place, however many projects or pillars there name them. */
-    var seen = {};
-    var once = function (role, at) {
-      if (seen[role + "|" + at]) return;
-      seen[role + "|" + at] = 1;
-      out.push({ role: role, at: at });
-    };
+    /* `seen`/`once` are declared above, with the direction block that is now
+       their first caller (§558). */
     var owns = function (row) { return namedOn({ owner: row && row.owner }, p); };
     (w.capabilities || []).forEach(function (c) {
       if (!c || !c.fn) return;
@@ -739,12 +767,19 @@
       if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
-    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
-       one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
-    if (ownsTopPillar(w, p)) once("dirowner", "group");
+    /* A SUPPORTING FUNCTION'S OWN SEATS — LAST OF THE SIX (§558). The head
+       and the Strategy custodian of a function, unmoved in what they derive
+       and moved only in where they come in the list: Islam put the function
+       below the direction, the capability and the plan's own owners. It stays
+       ABOVE the floor below, which is reached only on `!out.length` — a
+       function head arriving after that test would be read as holding nothing
+       and handed a Contributor's floor instead (§387's own trap, from the
+       other end). */
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
+      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
+    });
     /* §384 DERIVED A `towner` HERE AND §387 TOOK IT OUT — the whole role went
        with the Roles & access row (see ROLES above). A tactic's owner is
        `namedInUnit` by the floor below, exactly as they were before §384, and

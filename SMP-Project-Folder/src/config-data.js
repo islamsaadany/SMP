@@ -1852,13 +1852,39 @@ function personIdentified(p){
    row then reads "Strategy custodian · Care" twice and looks like a duplicate
    rather than two real roles over two different things. The kind is part of
    the answer, so it is part of the label. */
-/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers "the
-   group" for a null, which is right on a role chip (a role is always held over
-   something) and wrong in a file column, where blank means "nothing to say"
-   and "the group" would be an assertion nobody made (§65). */
+/* ── THE TOP LEVEL IS CALLED WHAT THE CLIENT CALLS IT (§558) ───────────
+   `topword` has been a real terminology row since §404 — "The level at the
+   top: the group, the company, or the client's own word" — and eight screens
+   read it. The place-naming functions below were not among them: they said
+   "the group" as a literal, so a tenant whose top level is a COMPANY read its
+   own word on the navigation and "the group" on every role chip, every place
+   list and every refusal sentence. One wording, wrong in four places.
+
+   LOWERCASED, because it is read mid-sentence ("held at the company", "Strategy
+   custodian · the company") and the row stores the word as a heading does
+   ("Group", "Company"). That is `client-setup.js`'s own treatment of the same
+   row, so the two agree rather than each choosing a case.
+
+   `labelWord()` and not `L1()`: these functions return PLAIN text that their
+   callers escape (`esc`, `wesc`), and L1 escapes on the way out — so L1 here
+   would escape an ampersand twice. Called from this file as §461's
+   `roleAtWord` already calls it: the scripts are concatenated in build.py's
+   order and these run long after config-render.js has loaded. */
+function topWord(){
+  try {
+    var w = labelWord("topword", "group");
+    if (w) return "the " + String(w).toLowerCase();
+  } catch (e) {}
+  return "the group";
+}
+
+/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers the
+   top level's word for a null, which is right on a role chip (a role is always
+   held over something) and wrong in a file column, where blank means "nothing
+   to say" and naming the top level would be an assertion nobody made (§65). */
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topWord();
   var r = boxRef(at);
   if (r.kind === "cap") {
     var cw = capById(r.key);
@@ -1880,10 +1906,15 @@ function roleWhereLabel(at){
    names, and for the units remove the word function that comes between
    brackets."
 
-   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
-   because it is also the people workbook's vocabulary — the Unit column is
-   written from it and read back against it (§65), so renaming it would leave
-   every file downloaded before today failing to match.
+   Two changes, and only on the REGISTER. `roleWhereLabel()` keeps its own
+   wording for the units and functions, because it is also the people
+   workbook's vocabulary — the Unit column is written from it and read back
+   against it (§65), so renaming it would leave every file downloaded before
+   today failing to match. §558 moved its word for the TOP LEVEL onto
+   `topword` and that one case is safe for exactly one reason: `placeByLabel()`
+   still accepts "the group" and "group" alongside the client's own word, so a
+   file downloaded before today reads back unchanged. A rename anywhere else
+   in here would not have that, and is still off the table.
 
    1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
        where somebody learned the word: this tenant's `it` unit is "IT Dist." in
@@ -1899,7 +1930,7 @@ function roleWhereLabel(at){
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
 function placeLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topWord();   /* §558: the client's own word */
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
@@ -2413,7 +2444,7 @@ function mergePeople(keepKey, dropKey, picks){
    whose scope is the group has exactly one answer, and the control says so
    rather than offering a list of one. */
 function roleWheres(roleKey){
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:"the group" }];
+  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:topWord() }];
   if (roleKey === "cceo") {
     /* A retired company is not somewhere a new CEO can be seated (§49.3). An
        existing role pointing at one is left alone — restoring the company
@@ -2841,7 +2872,21 @@ function placeOptions(){
 function placeByLabel(name){
   var want = String(name == null ? "" : name).trim().toLowerCase();
   if (!want) return { at:null };
-  if (want === "the group" || want === "group") return { at:"group" };
+  /* THE TOP LEVEL ANSWERS TO THREE NAMES, NOT ONE (§558). The screen now
+     writes the client's own word for it (`topword` — "the company" on a tenant
+     whose top level is a company), and "the group" and "group" are kept
+     BESIDE it rather than replaced: the Unit column is written from
+     `roleWhereLabel()` and read back through here (§65), so a workbook
+     downloaded before today would otherwise arrive with a column this cannot
+     resolve — and it is the one place in the file where an unresolved name
+     means every person at the top level silently detaches. Widening what is
+     accepted can only ever make a file land; narrowing it is what breaks one.
+
+     THE THREE CANNOT COLLIDE, because `topword` names the top level and
+     `placeOptions()` lists only units and functions — and if a client ever did
+     call a unit "Group", this branch answers first and the exact-match below
+     never sees it. That is the pre-§558 behaviour for that name, unchanged. */
+  if (want === "the group" || want === "group" || want === topWord().toLowerCase()) return { at:"group" };
   var opts = placeOptions();
   var exact = opts.filter(function(o){ return o.label.toLowerCase() === want; });
   if (exact.length > 1) return { ambiguous:exact.map(function(o){ return o.label; }) };
@@ -3212,7 +3257,7 @@ function roleAtWord(roleKey){
     var k = boxRef(w.v).kind;
     kinds[w.v === "group" ? "top" : (k === "fn" || k === "mid") ? k : "unit"] = 1;
   });
-  var WORD = { top:"the group", unit:"a " + labelWord("unitword","group"),
+  var WORD = { top:topWord(), unit:"a " + labelWord("unitword","group"),
                fn:"a " + labelWord("fnword","group"), mid:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";

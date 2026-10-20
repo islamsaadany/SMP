@@ -67695,3 +67695,16 @@ Islam: *"a direction owner can add max of 2 slides and the units owner can add 4
 **AN OWNER OF SEVERAL DIRECTIONS GETS A LINE FOR EACH.** Present carried the list and opened a flow, which is the office's (`mayMasterPresent`), so an owner of two pressed it and nothing opened (§61). Each direction is its own subject, so each gets *Slides · D001 Name*; one direction stays unnamed (§481).
 
 **CHECKED.** New `slide-limits` (13 claims, 8 red on the live build). `direction-decks` claim rewritten to the new word (§218).
+
+## §563 — The plan download is the presentation without its figures (2026-10-20)
+Islam, on the mockup (Raya's Mobile now and proposed, El Abd's company proposed): *"proceed"*. Spec 066 §5: *"the plan download is the same template without the reported figures — never a second builder."*
+
+**WHY.** The plan download had its own builder (`pptxUnitSlides`, `pptxFnSlides`), so it had its own look and order and drifted from the deck; and for a company whose plan is its own it threw on `UNITS["group"]` and made no file at all — El Abd's office pressed Download the plan and got nothing.
+
+**HOW.** `buildPlanPptx` asks `deckHtmlFor` with `DECK_PLAN` on (set in a `try/finally`, never left on) and converts the slides exactly as the review download does (`deckSlidePptx`, spec 030). Two halves, each in one place:
+- **The deck draws what only a plan carries** while `DECK_PLAN` is on: every direction, the ones not running yet included, with its years on its title page (§416); a tactic's requirements under its name (§415); a breakdown's targets alone; and what the plan still owes named in red — a tactic's owner or quarters, the aspiration, an empty SWOT box (§119). The review shows none of it.
+- **`planDeckBox` takes out what was reported**, by what the deck already says about it and never by reading a heading: the Overall performance part (its divider to Thank you), the objectives' "where we stand", the notes; every column the deck marks `th.fig` (actual, progress, score, status, note), cell by cell through row and column spans, so a tactic's outcome lines and "Outside this cycle" come out whole; the headline figures and tallies (`.leadstats`, `.dstats`, `.headgrid`, `.headfoot`). The cover says *Strategy plan — as agreed, no reported figures*.
+
+**WHAT IS NOT CARRIED ANY MORE, SAID RATHER THAN FOUND:** a measure's direction and compile rule (the deck's measures table is Measure · Annual target), so those two gaps are no longer named in the file; and a capability held apart on Setup › Capabilities (§334) is its own subject with its own deck, no longer folded into its function's file. The old builders and their helpers are deleted (§24).
+
+**CHECKED.** New `plan-download` (21 claims; on the live build the company's file, its contents and its name are red). Rewritten to the new rule (§218): `strategy-split` (the SWOT's own slides; the function's own projects; four gaps named, not six; one Quarters column with Missing in red), `tactic-requirements`, `years`, `review-pptx` §10. Rendered through LibreOffice on Raya's Mobile, Marketing and Merchandising and on El Abd's company.

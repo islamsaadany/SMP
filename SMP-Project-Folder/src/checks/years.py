@@ -181,8 +181,13 @@ with sync_playwright() as p:
     ok("the review deck gives the not-running direction no title slide",
        dk and ("data-anchor=\"p%sd\"" % code) not in dk, code)
     ok("but the running one keeps its", dk and ("data-anchor=\"p%sd\"" % safe(pg, "()=>pillarCode(UNITS.mobile,0)")) in dk)
-    px = safe(pg, "()=>pptxUnitSlides(UNITS.mobile,'M').join('')")
+    # REWRITTEN TO THE NEW RULE (218, 563): the plan download is the deck
+    # without its figures, and in the plan every direction draws, the one not
+    # running yet included, with its years on its title page.
+    px = safe(pg, """()=>{var out=[]; [].forEach.call(planDeckBox('mobile').querySelectorAll('.dslide'), function(sl){ out=out.concat(deckSlidePptx(sl,'M',null)); }); return out.join('')}""")
     ok("the plan download names the years", px and "Y2–3" in px)
+    ok("…and carries the direction that is not running yet",
+       px and (safe(pg, "()=>UNITS.mobile.items[1].name") or "@").replace("&", "&amp;") in px)
     rt = safe(pg, """async ()=>{ try {
         var u = UNITS.mobile, wb = planWorkbook(u);
         var sh = wb.filter(x=>x.name==='Pillars')[0];

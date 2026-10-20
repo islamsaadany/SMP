@@ -115,16 +115,8 @@ function pptxColors(){
    quarter column left unmarked is the mark. What gets the word is what the
    PLAN OWES — a direction, a target, a compile rule, a tactic's owner, a
    project's owner and dates, a capability's definition, the aspiration, and
-   an empty SWOT quadrant. */
-var PPTX_MISS = { miss: true };
-function orMiss(v){ return v ? v : PPTX_MISS; }
-/* §145: a value filled but not yet confirmed is ANSWERED, not missing — it
-   prints as the value plus "(pending)", never as the bold red gap mark. */
-function orPend(row, f){
-  var v = row && row[f];
-  if (v && row.pend && row.pend[f]) return String(v) + " (pending)";
-  return orMiss(v);
-}
+   an empty SWOT quadrant. The deck marks them `.missing`, and `deckCellSpec`
+   carries the mark into the file. */
 
 /* ── The DrawingML fragments ────────────────────────────────────────── */
 function pptxRun(text, o){
@@ -303,69 +295,6 @@ function pptxHead(kicker, title, stats){
 
 /* ── The slides themselves ──────────────────────────────────────────── */
 var PPTX_TABLE_Y = 1381125;
-var PPTX_ROWS_PER_SLIDE = 11;
-
-/* A long table continues on its own next slide rather than shrinking to fit —
-   the deck's own fit-pass argument (§51.10), decided by counting rather than
-   measuring because a table row here has a fixed height by construction. */
-/* `per` is how many rows a slide holds when a caller knows its rows are
-   taller than one line (§415: a tactic carrying its requirements); absent,
-   it is the fixed count every table has always used. */
-function pptxTableSlides(kicker, title, widths, head, rows, per){
-  var out = [], n = per || PPTX_ROWS_PER_SLIDE;
-  for (var i = 0; i < rows.length || i === 0; i += n) {
-    var part = rows.slice(i, i + n);
-    var t = i ? title + " (continued)" : title;
-    out.push(pptxSlideXml(pptxHead(kicker, t).concat(part.length
-      ? [pptxTable(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW }, widths, head, part)]
-      : [pptxText(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:457200 },
-          [pptxPara(pptxRun("Nothing here yet.", { sz:1200, i:true, color:pptxColors().quiet }))])])));
-  }
-  return out;
-}
-
-/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
-   the tactics columns a column for each Q with a mark for the qs in action",
-   the shape the plan workbook's Q1–Q4 columns already have). */
-function pptxQCells(t){
-  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§128.1,
-     corrected by Islam the same day).
-
-     §128 first answered this by merging one bold red `Missing` across the
-     four columns. Islam: "you changed the quarters columns format to type
-     missing that's wrong, the template should stay the same — revert the
-     columns of the quarters to separate columns and maybe make check marks in
-     bold red inside all as an indicator of missing."
-
-     THE COLUMN SHAPE IS THE TEMPLATE'S AND IS NOT MINE TO SPEND. The four Q
-     columns exist because the plan workbook has four, and a reader moves
-     between the two; a table that keeps its grid on every row can be scanned
-     down, and one whose cells merge when a row is incomplete cannot. Saying
-     the gap cost the shape that carries every other row — a bad trade, and
-     the mark can carry the alarm on its own.
-
-     SO THE MARK CHANGES RATHER THAN THE TABLE CHANGING SHAPE: the four cells
-     carry a mark in the one colour the deck uses for nothing but a gap,
-     beside a Missing owner in the same red. §119.1 is untouched — a tactic
-     that names SOME quarters is answering the question, and its ticks stay
-     the ordinary ink.
-
-     AND THE MARK IS A QUESTION MARK, NOT A TICK (§128.2, Islam: "rather than
-     the red check mark for the missing qs make it red question marks to
-     indicate the missing"). §128.1 shipped a red ✓ in all four, and a tick
-     is an AFFIRMATION whatever colour it wears — it says the tactic runs in
-     that quarter, so the row read "runs everywhere" to anybody who did not
-     also read the colour, which is the opposite of what it is there to say.
-     A `?` says the same thing the colour says: nobody answered this. The
-     colour is now the emphasis rather than the whole message. */
-  var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
-  if (!any) return ["q1","q2","q3","q4"].map(function(){
-    return { t:"?", align:"ctr", alarm:true };
-  });
-  return ["q1","q2","q3","q4"].map(function(q){
-    return { t: t[q] ? "\u2713" : "", align: "ctr" };
-  });
-}
 
 /* THE DECK CLOSES THE WAY THE REVIEW DECK CLOSES (§119.8). Islam: "add a
    thank you page at the end of the ppt." `present.js` has ended on a
@@ -401,143 +330,6 @@ function pptxCover(orgLine, name, subLine){
 
 /* The plan of a unit — or of a pillars-planning function through fnAsUnit(),
    which is the whole point of that reader existing (§61). */
-function pptxUnitSlides(u, kicker){
-  var C = pptxColors(), slides = [];
-  var today = dateDay(new Date());
-  slides.push(pptxCover(GROUP.org || "Strategy Management Platform", u.name,
-    "Strategy plan — as agreed, no reported figures · " + today));
-
-  /* Foundation: the clauses read as the sentences they are, the aspiration as
-     the one big statement the objectives hang off. */
-  var found = [];
-  (u.clauses || []).forEach(function(c){
-    found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
-                         pptxRun(c[1], { sz:1200 })], { before:600 }));
-  });
-  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
-     for being empty hides exactly the gap the Missing marks exist to show. */
-  var fShapes = pptxHead(kicker, "Foundation");
-  fShapes.push(pptxText(6,
-    { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
-    [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
-     u.aspiration
-       ? pptxPara(pptxRun(u.aspiration +
-           (u.pend && u.pend.aspiration ? " (pending)" : ""),
-           { sz:1500, i:true, color:C.bar }), { before:600 })
-       : pptxPara(pptxRun("Missing", { sz:1500, b:true, color:C.bad }), { before:600 })],
-    { fill:C.zebra }));
-  if (found.length) fShapes.push(pptxText(7,
-    { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
-  slides.push(pptxSlideXml(fShapes));
-
-  var kos = SMPRules.shown(u.keyObjectives);
-  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, labelWord("keyobj","bu"),
-    [4754880, 914400, 2621280, 2621280],
-    ["Objective", "Dir.", "This year's target", "3-year target"],
-    kos.map(function(k){ return [k.name, orPend(k, "dir"), orPend(k, "target"), orPend(k, "target3y")]; })));
-
-  /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
-     the shape the Analysis page draws. */
-  var sw = u.swot || {};
-  (function(){
-    var half = (PPTX_CW - 228600) / 2, boxH = 2103120, id = 6;
-    var quad = function(x, y, title, items){
-      var body = (items || []).length
-        ? (items || []).map(function(t){
-            return pptxPara(pptxRun("·  " + t, { sz:1000 }), { before:300 });
-          })
-        : [pptxPara(pptxRun("Missing", { sz:1100, b:true, color:C.bad }), { before:300 })];
-      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
-        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(body),
-        { fill:C.zebra });
-    };
-    slides.push(pptxSlideXml(pptxHead(kicker, "Analysis — SWOT").concat([
-      quad(PPTX_MX, PPTX_TABLE_Y, "Strengths", sw.s),
-      quad(PPTX_MX + half + 228600, PPTX_TABLE_Y, "Weaknesses", sw.w),
-      quad(PPTX_MX, PPTX_TABLE_Y + boxH + 182880, "Opportunities", sw.o),
-      quad(PPTX_MX + half + 228600, PPTX_TABLE_Y + boxH + 182880, "Threats", sw.t)
-    ])));
-  })();
-
-  /* One pillar, two tables, two slides — measures then tactics, the order the
-     Plan pane reads them in. */
-  /* §422: a plan section switched off leaves the plan out of its slides too. */
-  (planOn(u) ? (u.items || []) : []).forEach(function(p, pi){
-    var code = (u.codePrefix || "") + (p.code || (pi + 1));
-    /* §416: the plan download carries every direction — it is the plan —
-       and names the years each runs in beside its code. */
-    var pk = kicker + " · " + code + (yearsOn(p) ? " · " + yearsTag(p) : "");
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("measure","bu"),
-      [5303520, 914400, 2346960, 2346960],
-      [labelWord("measure","group"), "Dir.", "Target", "Compiles"],
-      SMPRules.shown(p.measures).map(function(m){
-        return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
-      })));
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("tactic","bu"),
-      [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
-      [labelWord("tactic","group"), "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
-      SMPRules.shown(p.tactics).map(function(t){
-        /* §415: what the tactic needs rides UNDER its name, as it does on
-           the Plan page (Islam: "B, plan download only") — the review deck
-           is about how the figures went and does not carry it. */
-        var rq = requirementsOn(t) ? reqsOf(t) : [];
-        return [rq.length ? { t:t.name, sub:detailWord("requirements", "many", t) + ": " + rq.join("  \u00b7  ") } : t.name,
-                orPend(t, "owner"),
-                (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
-      }),
-      /* A slide with requirements on it holds fewer rows, or the taller
-         rows run off the bottom of the slide. */
-      requirementsOn(p) && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
-        ? 7 : undefined));
-  });
-  slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
-  return slides;
-}
-
-/* A capability function's plan: one overview slide per capability (what it
-   is, and its key objectives), then its projects — plan-level facts only.
-   The rows inside a project (deliverables, outcomes, milestones) are counted
-   rather than listed: the slide answers "what did we commit to", and the
-   product is where a project's inside lives. */
-function pptxFnSlides(fk){
-  var f = FUNCTIONS[fk], C = pptxColors(), slides = [];
-  var today = dateDay(new Date());
-  slides.push(pptxCover(GROUP.org || "Strategy Management Platform", f.name,
-    "Strategy plan — as agreed, no reported figures · " + today));
-  capsOfFunction(fk).forEach(function(c){
-    var shapes = pptxHead(f.name, c.name);
-    shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
-      [pptxPara(pptxRun("WHAT IT IS", { sz:1000, b:true, color:C.quiet })),
-       c.def
-         ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
-         : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
-      { fill:C.zebra }));
-    var kos = SMPRules.shown(c.keyObjectives);
-    if (kos.length) shapes.push(pptxTable(7,
-      { x:PPTX_MX, y:2529840, cx:PPTX_CW },
-      [5760720, 914400, 2118360, 2118360],
-      [labelWord("keyobj","group"), "Dir.", "Target", "Weight"],
-      kos.slice(0, 8).map(function(k){
-        return [k.name, orPend(k, "dir"), orPend(k, "target"),
-                k.weight != null
-                  ? k.weight + "%" + (k.pend && k.pend.weight ? " (pending)" : "")
-                  : PPTX_MISS];
-      })));
-    slides.push(pptxSlideXml(shapes));
-    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, labelWord("project","bu"),
-      [3931920, 1737360, 1188720, 1188720, 2865120],
-      [labelWord("project","group"), "Owner", "Start", "End", "Carries"],
-      (c.projects || []).map(function(p){
-        return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
-          plural(SMPRules.shown(p.deliverables).length, "deliverable") + " · " +
-          plural(SMPRules.shown(p.outcomes).length, "outcome") + " · " +
-          plural(SMPRules.shown(p.milestones).length, "milestone")];
-      })));
-  });
-  slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
-  return slides;
-}
-
 /* ── The package around the slides ──────────────────────────────────── */
 function pptxTheme(){
   var C = pptxColors();
@@ -655,23 +447,84 @@ function pptxPackage(slides, title, media){
 
 /* ── The one door the button calls ──────────────────────────────────── */
 function planPptxName(target){
-  var t = String(target || ""), r = boxRef(t);
-  var name = r.kind === "fn"
-    ? (FUNCTIONS[r.key] || {}).name : (UNITS[t] || {}).name;
-  return (name || "Plan") + " — Strategy plan.pptx";
+  return (placeLabel(target) || "Plan") + " — Strategy plan.pptx";
 }
 
+/* ── THE PLAN IS THE DECK WITHOUT ITS FIGURES (§563) ───────────────────
+   Islam, on the mockup: the plan download becomes the presentation's own
+   slides with every reported figure taken out — spec 066 §5, *"the same
+   template without the reported figures — never a second builder"*. It had
+   its own builder (`pptxUnitSlides`, `pptxFnSlides`), so it drifted: its own
+   look and order, and nothing at all for a company whose plan is the
+   company's own (El Abd's press threw on `UNITS["group"]`).
+
+   SO THE DECK IS ASKED WITH `DECK_PLAN` ON — it then carries what only a plan
+   carries (every direction with its years, a tactic's requirements, a
+   breakdown's targets) — and what is REPORTED is taken out here, by what the
+   deck already says about it, never by reading a heading's words:
+     · the Overall performance part, from its divider to Thank you, the
+       objectives' "where we stand", and the notes;
+     · every column the deck marks `fig` (actual, progress, score, status,
+       note), cell by cell through spans, so a tactic's several outcome lines
+       and an "Outside this cycle" cell come out whole;
+     · the headline figures on a divider (`.leadstats`, `.dstats`, `.headgrid`)
+       and the tallies under a table (`.headfoot`).
+   Then it is converted exactly as the review download is (`deckSlidePptx`). */
+var PLAN_DROP = { objectives:1, notes:1, stand:1 };
+function planStripFigs(tbl){
+  var ths = [].slice.call(tbl.querySelectorAll("thead th"));
+  var fig = ths.map(function(th){ return th.classList.contains("fig"); });
+  if (!fig.some(Boolean)) return;
+  var carry = [];
+  [].forEach.call(tbl.querySelectorAll("tbody tr"), function(tr){
+    var col = 0;
+    [].slice.call(tr.children).forEach(function(td){
+      while (carry[col] > 0) col++;
+      var span = td.colSpan || 1, rs = td.rowSpan || 1, keep = 0;
+      for (var k = 0; k < span; k++) {
+        if (!fig[col + k]) keep++;
+        if (rs > 1) carry[col + k] = rs;
+      }
+      if (!keep) td.remove(); else if (keep < span) td.colSpan = keep;
+      col += span;
+    });
+    for (var c = 0; c < carry.length; c++) if (carry[c] > 0) carry[c]--;
+  });
+  ths.forEach(function(th, i){ if (fig[i]) th.remove(); });
+}
+function planDeckBox(target){
+  var box = document.createElement("div");
+  DECK_PLAN = true;
+  try { box.innerHTML = deckHtmlFor(target); } finally { DECK_PLAN = false; }
+  var cut = false;
+  [].slice.call(box.querySelectorAll(".dslide")).forEach(function(sl){
+    var a = sl.dataset.anchor || "";
+    if (a === "sperf") cut = true;
+    if (a === "end") cut = false;
+    if (cut || PLAN_DROP[a]) { sl.remove(); return; }
+    [].forEach.call(sl.querySelectorAll("table"), planStripFigs);
+    [].forEach.call(sl.querySelectorAll(".leadstats, .dstats, .headgrid, .headfoot"), function(x){ x.remove(); });
+    /* A direction's title page names its kind, theme, owner and — in the plan
+       — its years on the line above its name; the converter reads only the
+       line below, so the plan carries it there. */
+    var lab = sl.classList.contains("d-cover") && !sl.classList.contains("d-sect") && sl.querySelector(".seclab");
+    if (lab && deckTxt(lab)) {
+      var sub = sl.querySelector(".coversub");
+      if (!sub) { sub = document.createElement("p"); sub.className = "coversub"; sl.appendChild(sub); }
+      sub.textContent = deckTxt(lab) + (deckTxt(sub) ? "  \u00b7  " + deckTxt(sub) : "");
+    }
+  });
+  var cover = box.querySelector('.dslide.d-cover[data-anchor="cover"] .coversub');
+  if (cover) cover.textContent = "Strategy plan \u2014 as agreed, no reported figures \u00b7 " + dateDay(new Date());
+  return box;
+}
 function buildPlanPptx(target){
-  var t = String(target || ""), r = boxRef(t);
-  var slides;
-  if (r.kind === "fn") {
-    var fk = r.key, f = FUNCTIONS[fk];
-    slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
-                                 : pptxFnSlides(fk);
-  } else {
-    slides = pptxUnitSlides(UNITS[t], (UNITS[t] || {}).name || "");
-  }
-  return pptxPackage(slides, planPptxName(target).replace(/\.pptx$/, ""));
+  var m = reviewPptxMark(target), kicker = placeLabel(target) || String(target || "");
+  var out = [];
+  [].forEach.call(planDeckBox(target).querySelectorAll(".dslide"), function(sl){
+    out = out.concat(deckSlidePptx(sl, kicker, m && m.shape));
+  });
+  return pptxPackage(out, planPptxName(target).replace(/\.pptx$/, ""), m && m.media);
 }
 
 function sendPlanPptx(target){
@@ -972,7 +825,8 @@ function deckLead(sl){
     }
     var t = deckPieces(el);
     if (!t) return;
-    out.push({ t:t, key: el.classList.contains("dlab") });
+    /* §563: a gap the plan names (`.missing`) keeps its red in prose too. */
+    out.push({ t:t, key: el.classList.contains("dlab"), miss: !!el.querySelector(".missing") });
   });
   /* A SLIDE THAT IS NEITHER PROSE NOR A TABLE IS STILL A SLIDE. A card kind
      added to the deck tomorrow matches none of the selectors above, so the
@@ -1108,7 +962,7 @@ function deckSlidePptx(sl, kicker, mark){
       { sz:1000, b:true, color:C.quiet }), { before:300 });
     var runs = [];
     if (l.n) runs.push(pptxRun(l.n + "   ", { sz:LSZ, b:true, color:C.accent }));
-    runs.push(pptxRun(l.t, { sz:LSZ, color:C.ink }));
+    runs.push(pptxRun(l.t, l.miss ? { sz:LSZ, b:true, color:C.bad } : { sz:LSZ, color:C.ink }));
     return pptxPara(runs, { before:LGAP });
   });
 

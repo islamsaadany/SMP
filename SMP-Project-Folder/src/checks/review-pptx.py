@@ -359,7 +359,11 @@ def main():
                None)
 
         # ── §10 ──────────────────────────────────────────────────────────
-        print("\n§10 · and the plan download is untouched (§94.2)")
+        print("\n§10 · and the plan download is this deck without its figures (§563)")
+        # REWRITTEN TO THE NEW RULE (218, 563). §10 said the plan download
+        # was untouched by this converter; it is now made BY it, from the same
+        # deck with DECK_PLAN on, so its rows are the review's and it carries
+        # the subject's mark — and no reported figure.
         plan = js(pg, """(t)=>{
           const b = buildPlanPptx(t);
           let s = ''; const CH = 0x8000;
@@ -372,10 +376,10 @@ def main():
             pxml = "".join(pz.read(n).decode("utf-8") for n in pz.namelist()
                            if n.startswith("ppt/slides/slide"))
             hs = set(re.findall(r'<a:tr h="(\d+)"', pxml))
-            ok("the plan's rows are still 335280", hs == {"335280"}, sorted(hs))
-            ok("its cells are still 11pt", 'sz="1100"' in pxml, None)
-            ok("and it carries no media part",
-               "ppt/media/mark.png" not in pz.namelist(), None)
+            ok("the plan's rows are the review's", hs == {ROW_H}, sorted(hs))
+            ok("no figure column survives in it",
+               not any(w in pxml for w in [">YTD actual<", ">Progress<", ">Actual<"]), None)
+            ok("and no Overall performance part", "Overall performance" not in pxml, None)
         else:
             ok("the plan download still builds", False, plan)
 

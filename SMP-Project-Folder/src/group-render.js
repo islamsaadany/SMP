@@ -1569,8 +1569,23 @@ function companyPresentMenu(){
       slides + dl;
   } else {
     var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
-    items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +
-        '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
+    /* ── SLIDES, ONE LINE PER DIRECTION (§562) ─────────────────────────
+       Islam: *"for the direction owner he can get slides only to manage and
+       present from inside"*. Present with several directions opened a flow,
+       which is the office's (`mayMasterPresent`), so an owner of two pressed
+       it and nothing opened (§61). Each direction is its own subject with
+       its own slides, so each gets its own line, named only when there is
+       more than one to tell apart (§481 kept the single one unnamed). */
+    var mayAll = mine.every(function(p){ return canSpeakFor("dir:" + p.id); });
+    items = (mayAll
+      ? mine.map(function(p){
+          return '<button role="menuitem" data-present="dir:' + esc(p.id) + '">Slides' +
+            (mine.length > 1 ? ' \u00b7 ' + esc(pillarCode(topAsUnit(), GROUP.items.indexOf(p))) + ' ' + esc(p.name) : '') +
+            '<span class="dlsub">Add, hide and arrange ' + (mine.length > 1 ? 'its' : 'your ' + esc(L1("pillar")).toLowerCase() + '\u2019s') +
+            ' slides, then present</span></button>';
+        }).join("")
+      : '<button role="menuitem" data-present="' + esc(list) + '">Present' +
+        '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>') +
       '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
         '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
       /* §556.1: and no Manage slides beside it — Present IS the editor
@@ -1597,9 +1612,16 @@ function presentMenu(kind, key){
      now says which target it is for and the handler resolves it, which is
      §59's `unitLike()` rule applied to the one place that still asked
      differently. */
-  var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
-    '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit") + '</span></button>';
+  /* §562: ONE WORD FOR ONE ACT. Where the press lands on the slides (the
+     handler asks `canSpeakFor`, as below) it is called Slides, the word the
+     direction's own button and an owner's menu use; where it goes straight
+     to the room it is still Present. */
+  var what = target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit";
+  var present = canSpeakFor(target)
+    ? '<button role="menuitem" data-present="' + esc(target) + '">Slides' +
+      '<span class="dlsub">Add, hide and arrange this ' + what + '\u2019s slides, then present</span></button>'
+    : '<button role="menuitem" data-present="' + esc(target) + '">Present' +
+      '<span class="dlsub">Open the review deck for this ' + what + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below

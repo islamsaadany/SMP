@@ -67682,3 +67682,14 @@ Islam, on the live page: *"remove the title named directions and capabilities ab
 **THE BUTTON SITS AT THE RIGHT EDGE.** The band reserves 76px on its right for the pen's corner (§117); a pane with no pen there now drops that reservation when the band carries Slides, so the button sits 18px from the edge.
 
 **CHECKED.** On El Abd's state: no heading on Directions or Capabilities, the button 18px from the band's edge on both. `direction-part`, `top-plan`, `direction-decks`, `objectives-actions`, `several-outcomes`, `pillar-rail`, `direction-slides`, `structure`, `strategy-split`, `capability-tab-edit` green; `single-company` 1 red, identical on the live build (§449).
+
+## §562 — How many slides a subject adds, and one word for its slides (2026-10-20)
+Islam: *"a direction owner can add max of 2 slides and the units owner can add 4 max"*; agreed on the rest — a capability a direction's size, a function a unit's, the company's closing slides 4, counted per subject whoever adds, the office included. And: *"for the direction owner he can get slides only to manage and present from inside isn't that how slides work?"*
+
+**THE LIMITS** are `SMPRules.slidesMax(target)`: `dir:` and `cap:` 2, everything else 4 (it was 12 for all). Read by the add and by the check, so they are written once. A subject already holding more keeps them; only a new add is refused, with *"N slides is the limit here — remove one to add another."* The add's own line says *"· 1 of 2 added"*, so the refusal is no surprise. The count is read with `pslidesOf`, never the writer, so opening the screen or a refused add leaves no empty container (§42, §50.6) — the first try used the writer and `slide-move` caught it.
+
+**ONE WORD.** Where the press lands on the subject's own slides it reads **Slides** — a unit's and a function's Presentation menu, as the direction's own button already did (§561). Where it goes straight to the room (anybody `canSpeakFor` refuses) it still reads Present.
+
+**AN OWNER OF SEVERAL DIRECTIONS GETS A LINE FOR EACH.** Present carried the list and opened a flow, which is the office's (`mayMasterPresent`), so an owner of two pressed it and nothing opened (§61). Each direction is its own subject, so each gets *Slides · D001 Name*; one direction stays unnamed (§481).
+
+**CHECKED.** New `slide-limits` (13 claims, 8 red on the live build). `direction-decks` claim rewritten to the new word (§218).

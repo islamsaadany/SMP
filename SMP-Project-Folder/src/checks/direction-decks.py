@@ -319,7 +319,12 @@ with sync_playwright() as p:
     key = safe(pg, "()=>(PEOPLE.find(p=>p.name==='Hazem Roushdy')||{}).key")
     as_(pg, key)
     m = menu(pg) or []
-    ck("the owner's Present opens their direction only", any(x["t"] == "Present" and x["present"] == "dir:group-P1" for x in m), m)
+    # REWRITTEN TO THE NEW RULE (218, 562). The press lands on the owner's
+    # own slides, so it carries the word that screen carries everywhere —
+    # Islam: "he can get slides only to manage and present from inside".
+    ck("the owner's Slides opens their direction only",
+       [x["present"] for x in m if x["present"]] == ["dir:group-P1"]
+       and any(x["t"] == "Slides" and x["present"] == "dir:group-P1" for x in m), m)
     ck("…the PDF is the same deck", any(x["pdf"] == "dir:group-P1" for x in m), m)
     # AND NO MANAGE SLIDES BESIDE IT (218, 556.1). Present opens the
     # editor now, so a second entry onto the same screen is a second

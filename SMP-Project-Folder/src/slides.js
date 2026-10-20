@@ -31,7 +31,8 @@
    soft — Islam: *"the uploaded pictures quality gets very low."* 2400 is
    sharp at that size and still bounded, because it rides in every save. */
 var PIC_MAX_EDGE   = 2400;
-var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
+/* §562: how many slides a subject may add is SMPRules.slidesMax — 2 for a
+   direction or capability, 4 for a unit, a function or the company. */
 var PIC_PER_SLIDE  = 4;
 
 /* ── The model ───────────────────────────────────────────────────────────
@@ -965,7 +966,10 @@ function slidesPaint(){
         ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
           "\u2019s own slides are added on its own page"
         : (SLED.sel && SLED.sel.indexOf("ps:") === 0
-            ? "the one selected" : "the slide selected below")) + '</span></div>');
+            ? "the one selected" : "the slide selected below")) +
+        /* §562: the limit, where the add is, so a refusal is no surprise. */
+        " \u00b7 " + pslidesOf(SLED.target).length + " of " +
+        SMPRules.slidesMax(SLED.target) + " added" + '</span></div>');
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -1483,9 +1487,11 @@ function slidesPlace(sl, all, after){
 }
 
 function slidesAdd(){
-  var list = pslidesFor(SLED.target);
-  if (list.length >= PIC_MAX_SLIDES) {
-    SLED.err = PIC_MAX_SLIDES + " slides is the limit — remove one to add another.";
+  /* Counted by the READER: a refused add must not leave an empty container
+     behind (§42, §50.6). The writer is asked only once the add is going in. */
+  var max = SMPRules.slidesMax(SLED.target);
+  if (pslidesOf(SLED.target).length >= max) {
+    SLED.err = max + " slides is the limit here — remove one to add another.";
     slidesPaint();
     return;
   }

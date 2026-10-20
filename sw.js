@@ -420,7 +420,13 @@
    bytes changed, which is the whole trigger (§91). Proved held by no commit in
    any ref's history (§94.12) after fetching every ref; confirm once more
    immediately before the push (§94.16). */
-const SHELL = "smp-shell-v6.49-breakdown-target-reported";
+/* v6.50-reporting-phone — §559: Reporting fits a phone. The Reporting bar and
+   the pane band wrap when they do not fit; below 520px the top bar takes two
+   lines and the band stops pinning. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   (§94.12) after fetching every ref; confirm once more immediately before the
+   push (§94.16). */
+const SHELL = "smp-shell-v6.50-reporting-phone";
 const ASSETS = [
   "/",
   "/index.html",

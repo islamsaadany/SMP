@@ -30212,14 +30212,25 @@ var SEC_PENS = {
   compete: { unit: "analysis",                        ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
-  proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
+  proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
+  /* §560: a split box's Capabilities tab, as below. */
+  plancap: { unit: "plan",       fn: "plan",          ac: "u_plan"  }
 };
 /* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
    page and grant (g_found), and its SWOT and Plan take the unit's. */
 /* §488: the company's Capabilities section takes the plan's own pen, so one
    Edit opens the chosen capability for editing in place — the same fields its
    own Plan page draws (Islam: "there is no edit here in the capability"). */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], compete: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
+/* §560 — AND SO DOES THE TAB THAT REPLACED IT. Islam: *"the edit button in
+   the capabilities disappeared for the smo team"*. §540 drew a split box's
+   capabilities as `plancap` — `renderUnitPlan` under `drawHalf("cap")`, whose
+   fields already open on `EDIT_PAGE.plan` — and El Abd's move (§544.13) handed
+   `caps` over to it, but neither table listed the new key, so `secPagePair`
+   answered null and NOBODY was drawn the Edit there, the Super user included.
+   It names `plan`, the page its renderer reads, so one Edit opens both halves
+   and `secPagesOpen()` dedupes it with the Pillars tab (§269). No grant moves:
+   `mayAuthor("u_plan")` is the question the Pillars tab already asks. */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], compete: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"], plancap: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];

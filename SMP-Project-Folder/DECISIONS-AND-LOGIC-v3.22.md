@@ -67671,3 +67671,5 @@ Islam: *"when the SMO starts to work on the addition they can't find the Manage 
 **THE MASTER KEEPS "+ Add a final slide"**, as he said.
 
 **CHECKED.** New `direction-slides` (12 claims; 6 red on the previous build, the ones about the button). On El Abd's state: the button on D001 and on C001, and C001 opens its own slides. `direction-decks`, `master-presentation`, `deck-model`, `presentation-parts`, `present-loop`, `structure`, `no-twin-functions`, `built-in-step` green.
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Main was merged into the branch first and the generated files rebuilt; fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.52-capabilities-edit` → **`v6.53-direction-slides`**. Pages only: no save is judged differently, so no forced sign-out.

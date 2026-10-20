@@ -3092,3 +3092,47 @@ table.cmptab tbody tr:nth-child(even) > td.cmpval, table.cmptab tbody tr:hover >
 table.cmptab td.cmpnone { text-align: center; vertical-align: middle; }
 textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 .cmp .addrow { margin-top: 10px; }
+
+/* ── §559 · REPORTING FITS A PHONE ───────────────────────────────────────
+   Islam: *"fix the phone overflow on reporting"*, then *"ok"* on the before/
+   after drawn from the running page (design-mockups/reporting-phone/).
+   Measured at 390px as the SMO: the page was 836px wide. Three things never
+   gave way, and nothing else on the page was wide — the tables already
+   scroll inside their own box:
+     · the Reporting bar on the tab row (`.tabacts` > `.repchrome`, 515px),
+       `flex:0 0 auto` on a row that never wraps;
+     · the pane band's right end (`.pband-r`, 306px), `flex:none`;
+     · the top bar, 7px over: the names are `flex:none` by rule (*"the
+       product's and the client's names are never the thing that gives
+       way"*), so at a phone's width nothing could.
+   THE FIRST TWO ONLY WRAP WHEN THEY DO NOT FIT, so they need no breakpoint:
+   at 1440, 1280 and 1024 Reporting, Performance and Strategy are
+   pixel-identical built against built (the one 2x2px spot that sometimes
+   differs reproduces with a no-op stylesheet). The bar's natural break puts the count above Submit, Save
+   draft and Close; the band's puts its counts and tally under the name. */
+#subtabs { flex-wrap:wrap; }
+#subtabs .tabacts { flex:0 1 auto; max-width:100%; }
+.repchrome { flex-wrap:wrap; row-gap:8px; }
+.pband { flex-wrap:wrap; }
+.pband-r { flex:0 1 auto; flex-wrap:wrap; max-width:100%; }
+/* ON A PHONE, two more, and both reach every page that has them:
+     · THE TOP BAR TAKES TWO LINES and the names stay whole, as the rule
+       above says; the line break is a zero-height item ordered between the
+       names and the viewer, so a client logo before the names stays on the
+       first line with them. The viewer gives way instead (§410, the top bar:
+       *"the role line beside the viewer is"*), and its role note goes,
+       there being no room and no hover on a phone;
+     · THE BAND STOPS PINNING. Wrapped it is 219px tall, and pinned under a
+       chrome that wrapping makes taller it held 500px of a 760px screen.
+       Unpinned, 275px stays pinned while scrolling against 272px today. It
+       is the same band on Strategy and Performance (§53.5), so it behaves
+       the same there. */
+@media (max-width:520px){
+  .top-in { flex-wrap:wrap; row-gap:4px; padding-block:6px; }
+  .top-in::after { content:""; order:1; flex-basis:100%; height:0; }
+  .top-in .viewer { order:2; flex:1 1 0; min-width:0; }
+  .top-in .topacts { order:3; }
+  .viewer .ssbtn { min-width:0; }
+  .viewer-note { display:none; }
+  .pane > .pband { position:static; }
+}

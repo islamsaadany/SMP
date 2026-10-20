@@ -67671,3 +67671,12 @@ Islam: *"when the SMO starts to work on the addition they can't find the Manage 
 **THE MASTER KEEPS "+ Add a final slide"**, as he said.
 
 **CHECKED.** New `direction-slides` (12 claims; 6 red on the previous build, the ones about the button). On El Abd's state: the button on D001 and on C001, and C001 opens its own slides. `direction-decks`, `master-presentation`, `deck-model`, `presentation-parts`, `present-loop`, `structure`, `no-twin-functions`, `built-in-step` green.
+
+## §561.1 — No heading over the company's rail; Slides at the far right (2026-10-20)
+Islam, on the live page: *"remove the title named directions and capabilities above the rail it's already writtn on the rail and make the slides button go to the far right"*.
+
+**THE HEADING GOES** from the company's Performance rail section (directions and, where drawn apart, capabilities); the rail's own head already says the word. The section nav keeps its label. The capability-records gauge section is not a rail and keeps its heading.
+
+**THE BUTTON SITS AT THE RIGHT EDGE.** The band reserves 76px on its right for the pen's corner (§117); a pane with no pen there now drops that reservation when the band carries Slides, so the button sits 18px from the edge.
+
+**CHECKED.** On El Abd's state: no heading on Directions or Capabilities, the button 18px from the band's edge on both. `direction-part`, `top-plan`, `direction-decks`, `objectives-actions`, `several-outcomes`, `pillar-rail`, `direction-slides`, `structure`, `strategy-split`, `capability-tab-edit` green; `single-company` 1 red, identical on the live build (§449).

@@ -2254,6 +2254,9 @@ html[data-client-settings] .viewer { display:none; }
               background:var(--surface); color:var(--ink); cursor:pointer; white-space:nowrap; }
   .pbslides:hover { background:var(--gold-deep); color:var(--surface); }
   .pbslides svg { width:15px; height:15px; flex:none; }
+  /* §561.1: at the far right, as Islam asked. The 76px above is kept for the
+     pen's corner; a band with no pen in its pane has nothing to keep it for. */
+  .pane:not(:has(> .paneact)) > .pband:has(.pbslides) { padding-right:18px; }
   /* ── A PROJECT SAVED AS A DRAFT (§309) ────────────────────────────────
      The bar's own two volumes, on the band: the state speaks and the way
      back is a bordered control. `.pbdone` takes `.rc-state.draft`'s exact

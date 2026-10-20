@@ -2834,7 +2834,10 @@ function whereNext(keys){
        thing, which is §87's twins — and the pane says everything a card
        said, with room for the measures' own table. */
     return ditems.length
-      ? { dir: true, t: halfWord(dtu), h: section("", halfWord(dtu), null,
+      /* §561.1: no heading over the rail — Islam: *"remove the title named
+         directions and capabilities above the rail it's already written on
+         the rail"*. The section nav keeps its word (`t`). */
+      ? { dir: true, t: halfWord(dtu), h: section("", "", null,
             unitPerfRail(dtu)) }
       : null;
   };

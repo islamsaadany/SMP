@@ -48693,7 +48693,7 @@ function dBand(v){ return band(v); }
    which is one test rather than an unconditional plate and a white rectangle
    in the corner of every divider. */
 var SEC_WORD = { sfound:"FOUND", swothead:"SWOT", spillars:"PILLARS",
-                 sperf:"SCORE" };
+                 sperf:"SCORE", scaps:"CAPS", sprojects:"PLAN" };
 function sectSlide(key, label, title, sub, cells){
   return '<section class="dslide d-cover d-sect"' + anch(key, label) +
     sec(SEC_WORD[key] || secTwo(title), title, true) + '>' +
@@ -48844,7 +48844,7 @@ function deckAnchors(kind, key){
 
 /* §405: the aim slides, lifted out of deckSlides so a unit that plans in
    projects or objectives presents its aspiration too (§53.5: one builder). */
-function unitAimSlides(u){
+function unitAimSlides(u, bare){
   var S = [];
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
@@ -48877,7 +48877,9 @@ function unitAimSlides(u){
      one thing rather than printing a horizon that appears nowhere after it. */
   var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
   if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || aimAsp)
+  /* §557: `bare` leaves the divider to foundationPart(), which draws it
+     once in front of the whole part, Who we are and Values included. */
+  if (!bare && (aimRows || aimAsp))
     S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
       "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
       foundCells));
@@ -48906,7 +48908,13 @@ function unitAimSlides(u){
 /* §405: the SWOT section, lifted out of deckSlides for the same reason. */
 function unitSwotSlides(u){
   var S = [];
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
+  /* §557 reverses §243's "a unit with an empty SWOT still draws its
+     section": Islam chose the deck model on a page that said, of every
+     part, switched on but empty draws no slide yet — and the company's
+     analysis has always worked that way. One rule for every box. */
+  var swAny = u.swot && SMPRules.swotQuads(GROUP, u.ukey).some(function(q){
+    return (u.swot[q] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!u.fnKey && compOn(u.ukey, "swot") && swAny) {
     /* §418: the boxes this layer carries, under the layer's own names. */
     var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
     var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
@@ -48940,6 +48948,85 @@ function unitSwotSlides(u){
   }
 
   return S;
+}
+/* ── §557: THE DECK SHOWS WHAT THE BOX'S STRUCTURE HAS ──────────────────
+   Islam, choosing the deck model: *"the presentation should show what the
+   function or unit or company has in their structure"* — not a list kept per
+   kind of box. Client set-up › Structure switches each Foundation part on or
+   off per layer (`compOn`, §404); a part that is on AND filled in is a slide,
+   on every kind of box, through these two builders and the aim slide beside
+   them. Off, or on and empty, draws nothing (§253: a heading over nothing is
+   not a slide).
+
+   WHERE A BOX'S FOUNDATION IS KEPT: the group's on GROUP, a unit's on its
+   UNITS entry, a function's on FUNCTIONS, a capability's on its own record.
+   Read from the target, never from the kind of deck asking. */
+function foundSrc(target){
+  var t = String(target || ""), r = boxRef(t);
+  if (t === "group") return GROUP;
+  if (r.kind === "fn") return FUNCTIONS[r.key] || null;
+  if (r.kind === "cap") return capById(r.key) || null;
+  return UNITS[t] || null;
+}
+/* "Who we are": the brief's lines and the description, with the purpose
+   under them — each only where it is switched on and written. */
+function whoWeAreSlide(target){
+  var o = foundSrc(target);
+  if (!o) return "";
+  var lines = !compOn(target, "brief") ? [] : (o.clauses || []).filter(function(c){
+    return c && String(c[1] || "").trim(); });
+  var desc = !compOn(target, "desc") ? "" : String(o.desc || o.def || "").trim();
+  var mission = !compOn(target, "purpose") ? "" : String(o.mission || "").trim();
+  if (!lines.length && !desc && !mission) return "";
+  return '<section class="dslide d-who"' + anch("who", "After “Who we are”") + '>' +
+    '<h2>Who we are</h2>' +
+    (desc ? '<p class="whodesc">' + esc(desc) + '</p>' : '') +
+    (lines.length ? '<dl class="wholines">' + lines.map(function(c){
+      return '<dt>' + esc(c[0] || "") + '</dt><dd>' + esc(c[1]) + '</dd>'; }).join("") + '</dl>' : '') +
+    (mission ? '<div class="whomission"><span class="dlab">' + L1("purpose") + '</span>' +
+      '<p>' + esc(mission) + '</p></div>' : '') +
+    '</section>';
+}
+/* The values, one card each, where Values is switched on and written. */
+function valuesSlide(target){
+  var o = foundSrc(target);
+  if (!o || !compOn(target, "values")) return "";
+  var vals = (o.values || []).filter(function(v){ return v && String(v.name || "").trim(); });
+  if (!vals.length) return "";
+  return '<section class="dslide d-values"' + anch("values", "After the values") + '>' +
+    '<h2>' + esc(L("values", target === "group" ? "group" : "bu")) + '</h2>' +
+    '<div class="dvals" style="--n:' + vals.length + '">' + vals.map(function(v){
+      return '<div class="dval"><b>' + esc(v.name) + '</b>' +
+        (String(v.def || "").trim() ? '<span>' + esc(v.def) + '</span>' : '') + '</div>'; }).join("") +
+    '</div></section>';
+}
+/* THE FOUNDATION PART, IN ONE ORDER FOR EVERY BOX (§557): its divider, who
+   we are, what we are aiming at, the values, and the key objectives read
+   against their targets. The divider is drawn only when something follows
+   it (§253), and it is the part's own: Islam chose *"before every part"*. */
+function deckFoundationBody(target, aim, objectives){
+  /* The whole section has a switch of its own (Client set-up › Structure,
+     `foundOn`), and a name of its own on each layer — "Overview" on a
+     function and a capability (`foundTitle`). Off, the part is not drawn. */
+  if (!SMPRules.foundOn(GROUP, target)) return [];
+  return [whoWeAreSlide(target)].concat(aim || [], [valuesSlide(target)], objectives || [])
+    .filter(Boolean);
+}
+function foundationPart(target, name, cells, aim, objectives){
+  var body = deckFoundationBody(target, aim, objectives);
+  if (!body.length) return [];
+  return [sectSlide("sfound", "After the Foundation divider", SMPRules.foundTitle(GROUP, target) || "Foundation",
+    "What " + name + " is aiming at, and the objectives it is judged on.", cells)].concat(body);
+}
+/* A SWOT divider in front of a SWOT drawn as one slide (a function's
+   strengths and weaknesses, the company's analysis), so every part opens
+   the same way (§557). */
+function swotPart(target, name, slides){
+  slides = (slides || []).filter(Boolean);
+  if (!slides.length) return [];
+  return [sectSlide("swothead", "After the SWOT title page",
+    SMPRules.swotTitle(GROUP, target) || LTraw(target, "swot"),
+    "Where " + name + " is strong, exposed, and what the market is offering it.", null)].concat(slides);
 }
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
@@ -49220,7 +49307,12 @@ function deckSlides(u){
 
      A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
      asserted, because a unit authors both. */
-  S = S.concat(short ? companyFoundationSlides() : unitAimSlides(u));
+  /* §557: built here, pushed as one Foundation part with the objectives
+     slide below — so Who we are, the aim, the values and the objectives
+     read in one order under one divider on every box. The company's own
+     aim is its Foundation's (`companyFoundationSlides`) whether or not its
+     units present too: the structure decides what shows, not the shape. */
+  var aimS = u.topLayer ? companyFoundationSlides() : unitAimSlides(u, true);
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -49330,11 +49422,17 @@ function deckSlides(u){
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
   /* §404: a switched-off North Star draws no slide. */
-  if (oRows && compOn(u.ukey, "keyobj")) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  var objS = !(oRows && compOn(u.ukey, "keyobj")) ? [] : ['<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Annual target</th><th class="num">Actual</th>' +
-    '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
+    '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>'];
+  var foundKOs = u.topLayer ? SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])
+                            : SMPRules.shown(u.keyObjectives);
+  var foundCells = foundKOs.length ? [[foundKOs.length, L("keyobj","bu")]] : [];
+  if (!u.fnKey && GROUP.horizon && foundKOs.length) foundCells.push([GROUP.horizon, "Horizon"]);
+  S = S.concat(foundationPart(u.ukey,
+    u.fnKey ? u.name : u.topLayer ? deckBoxName(u) : "this unit", foundCells, aimS, objS));
 
 /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§243) ──────────────
      Islam: *"the functions has no swot, remove from the slides."* Measured on
@@ -49357,8 +49455,8 @@ function deckSlides(u){
      has something on it (§253: a table with no rows is not a slide).
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
-  if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  S = S.concat(short ? companyAnalysisSlides(u) : unitSwotSlides(u));
+  if (u.fnKey && compOn(u.ukey, "swot")) S = S.concat(swotPart(u.ukey, u.name, [fnSWSlide(FUNCTIONS[u.fnKey])]));
+  S = S.concat(u.topLayer ? swotPart("group", deckBoxName(u), companyAnalysisSlides(u)) : unitSwotSlides(u));
   S = S.concat(competeSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
@@ -49412,6 +49510,12 @@ function deckSlides(u){
 
   if (pOn) groups.forEach(function(g){
     if (!groupSize(g)) return;
+    /* §557: Islam's *"before every part"* — the company's review shows its
+       directions and its capabilities as two parts, so each opens with its
+       own divider, as the one group of a unit's deck does above. */
+    if (short) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
+      "After the " + g.plain + " divider", (g.names === "capnames" ? "" : "Strategic ") + g.plain,
+      "The " + groupSize(g) + " " + g.plain + " " + deckBoxName(u) + " committed to, and how each is going.", null));
     S.push(rollCallSlide(u, g));
     /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
        Islam, having been shown Raya's Mobile beside El Abd's review:
@@ -49845,8 +49949,10 @@ function companyReviewOn(){
    there; the unit-shaped view carries none). Nothing to say draws nothing
    (§253). */
 function companyFoundationSlides(){
-  var asp = String(GROUP.aspiration || "").trim(), end = String(GROUP.endInMind || "").trim();
-  var kos = SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
+  /* §557: what the company's structure switches on, and nothing it does not. */
+  var aspOn = compOn("group", "aspiration");
+  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
+  var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
   var rows = kos.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
@@ -49863,7 +49969,7 @@ function companyFoundationSlides(){
      present.css hides `.aimtop` on a `[data-cont]` slide, because a lead
      paragraph said twice is the room reading it twice. */
   return ['<section class="dslide" data-split="cofound"' +
-    anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+    anch("aim", "After the Foundation") + '><h2>What we are aiming at</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
       (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
@@ -49912,7 +50018,9 @@ function companyAnalysisSlides(u){
    same reason: a part is a part. */
 var SEC_PART_KEYS = ["found", "swot"];
 var SEC_PARTS = {
-  found: { name: "Foundation", slides: function(u){ return companyFoundationSlides(u); } },
+  /* §557: the whole Foundation part, as the company's deck draws it — Who
+     we are and Values included — under the part's own cover. */
+  found: { name: "Foundation", slides: function(u){ return deckFoundationBody("group", companyFoundationSlides(u), []); } },
   swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
 };
 function secDeckHtml(t){
@@ -50131,9 +50239,47 @@ function deckSlidesFn(subject){
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
-  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
-  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
+  /* ── §557: THE PARTS, IN THE ONE ORDER ──────────────────────────────
+     Foundation, then SWOT, then the plan, then Overall performance, each
+     behind its own divider (Islam: *"before every part"*). The key
+     objectives of the box's OWN work are its Foundation's; those of a
+     capability it carries stay inside that capability, where they are
+     read. A unit presents its aspiration and its SWOT whichever way it
+     plans (§405). */
+  var structT = isUnit ? subjKey(target) : isCap ? target : "fn:" + fk;
+  var kSlide = function(c){
+    var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
+      return '<tr><td class="idx">' + (i+1) + '</td>' +
+        '<td class="lead">' + esc(m.name) + '</td>' +
+        '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+        '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
+        '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+        (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+    }).join("");
+    return '<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
+      '><h2>' + L("keyobj") + ' &mdash; where we stand' +
+      '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+      '<th class="num">Weight</th><th class="num">Annual target</th>' +
+      '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
+      '<tbody>' + kRows + '</tbody></table></section>';
+  };
+  var ownKs = caps.filter(function(c){ return c.own && holderHasKOs(c); });
+  var nKO = ownKs.reduce(function(n, c){ return n + SMPRules.shown(c.keyObjectives).length; }, 0);
+  S = S.concat(foundationPart(structT, f.name, nKO ? [[nKO, L("keyobj","bu")]] : [],
+    isUnit ? unitAimSlides(f, true) : [], ownKs.map(kSlide)));
+  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) S = S.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (isUnit) { S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
+  /* The plan's divider: projects, or actions where the box plans that way. */
+  var nWork = caps.reduce(function(n, c){
+    return n + (objMode ? SMPRules.shown(c.actions).length : (c.projects || []).length); }, 0);
+  if (planOn(target) && nWork)
+    S.push(sectSlide("sprojects", "After the " + (objMode ? "Actions" : labelWord("project","bu")) + " divider",
+      objMode ? "Actions" : L("project"),
+      "The " + nWork + " " + (objMode ? (nWork === 1 ? "action" : "actions") : (nWork === 1 ? L1("project") : L("project"))).toLowerCase() +
+        " " + f.name + " committed to, and how each is going.", null));
+  var scoreTables = [];
 
   caps.forEach(function(c){
     /* §515.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
@@ -50170,26 +50316,7 @@ function deckSlidesFn(subject){
 
     /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
        objectives switched off (§437) draw no slide here either. */
-    if (holderHasKOs(c)) {
-      var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(m.name) + '</td>' +
-          '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
-          '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
-          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-      }).join("");
-      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
-        '><h2>' + L("keyobj") + ' &mdash; where we stand' +
-        '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
-        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-        '<th class="num">Weight</th><th class="num">Annual target</th>' +
-        '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
-        '<tbody>' + kRows + '</tbody></table></section>');
-    }
-
-    /* §422: a plan switched off draws its objectives and no plan slides. */
+    if (!c.own && holderHasKOs(c)) S.push(kSlide(c));
     if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
@@ -50230,8 +50357,25 @@ function deckSlidesFn(subject){
         '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
-    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
-      '><h2>' + L("project") + '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+/* ── §557: THE PROJECTS ARE NAMED BEFORE THEY ARE SCORED ─────────
+       Islam: *"the projects view at the start should show the projects
+       like the pillars not the performance … in the overall performance
+       view it's fine to show it as performance"*. The same cards as the
+       pillars' roll-call (§254.5); the table with the figures moves to
+       Overall performance. The anchor stays here, where the list was, so
+       a picture placed after it keeps its place. */
+    if (c.projects.length) S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
+      '><h2>' + L("project") + (c.own ? '' : '<span class="dwhich">' + esc(c.name) + '</span>') + '</h2>' +
+      '<div class="pcards" style="--n:' + c.projects.length + ';--c:' + pillarCols(c.projects.length) +
+        ';--r:' + Math.ceil(c.projects.length / pillarCols(c.projects.length)) + '">' +
+      c.projects.map(function(p){
+        var who = [p.owner || "", (p.start || "") + (p.end ? " \u2192 " + p.end : "")].filter(function(x){ return String(x).trim(); }).join(" \u00b7 ");
+        return '<div class="pcard"><span class="pcard-c">' + esc(projCode(holderCodeOwner(c), p)) + '</span>' +
+          '<span class="pcard-n">' + esc(p.name) + '</span>' +
+          (who ? '<span class="pcard-s">' + esc(who) + '</span>' : '') + '</div>';
+      }).join("") + '</div></section>');
+        if (c.projects.length) scoreTables.push('<section class="dslide"' + anch("cap" + c.id + "p", "After " + c.name + " \u2014 " + labelWord("project","bu") + " where we stand") +
+      '><h2>' + L("project") + ' &mdash; where we stand<span class="dwhich">' + esc(c.name) + '</span></h2>' +
       '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
@@ -50357,11 +50501,15 @@ function deckSlidesFn(subject){
      change meant to remove it. `checks/projects-box-stands.py` caught it. */
   var exTally = capExec(f) || {}, exPct = exTally.pct;
   var koHere = holderHasKOs(f) ? capKOScore(f) : null;
-  if (exPct != null || koHere != null) {
+  if (exPct != null || koHere != null || scoreTables.length) {
     S.push(sectSlide("sperf", "After the Overall performance divider",
       "Overall performance",
-      "Where " + esc(f.name) + " stands, and what the cycle is remembered for.",
+      "Where " + (scoreTables.length ? "the " + L("project").toLowerCase() + " stand, where " : "") +
+        esc(f.name) + " stands, and what the cycle is remembered for.",
       null));
+    S = S.concat(scoreTables);
+  }
+  if (exPct != null || koHere != null) {
     S.push(standSlideOf(esc(f.name),
       [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
           'by their measures'),
@@ -50639,7 +50787,9 @@ function openDeckWith(titleHtml, targets, from){
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
 function openDeck(u, from){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
+  /* The bar under the room names the box as its cover does (§553.8): the
+     company by its own name, never the top word "Group". */
+  openDeckWith("<b>" + esc(deckBoxName(u)) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
 function openDeckFn(subject, from){
   /* §334: a TARGET, so a capability opens its own review with its own name on

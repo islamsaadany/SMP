@@ -8755,6 +8755,32 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .asp2 { font:400 40px/1.32 var(--serif); color:var(--ink); margin:0; }
   .asp3 { font:400 27px/1.4 var(--serif); color:var(--ink-2); margin:0; }
   .aimbottom { margin-top:34px; }
+  /* §557: Who we are and the values — the Foundation parts a box's
+     structure switches on, at the aim slide's own sizes, so the part reads
+     as one voice (the brief at the aim's secondary size, the purpose at its
+     statement size). */
+  .whodesc { font:400 30px/1.4 var(--serif); color:var(--ink); margin:6px 0 0; }
+  .wholines { display:grid; grid-template-columns:minmax(180px, 24%) 1fr; gap:14px 36px;
+              margin:24px 0 0; font-size:24px; line-height:1.4; }
+  .wholines dt { font-weight:700; color:var(--ink); }
+  .wholines dd { margin:0; color:var(--ink-2); }
+  .whomission { margin-top:34px; padding-top:26px; border-top:1px solid var(--line); }
+  .whomission p { font:400 34px/1.35 var(--serif); color:var(--ink); margin:8px 0 0; }
+  .dvals { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:22px; margin-top:28px; }
+  .dval { border:1px solid var(--line); border-top:5px solid var(--gold); border-radius:6px;
+          padding:22px 26px; background:var(--surface); }
+  .dval b { display:block; font-size:30px; line-height:1.25; color:var(--ink); }
+  .dval span { display:block; margin-top:8px; font-size:22px; line-height:1.45; color:var(--ink-2); }
+  /* A long brief with a purpose under it is the slide most likely to run
+     past its foot; the fit pass marks it `.tight` (§69.5) and it steps down
+     to sizes that still read from the back of a room. */
+  .dslide.tight .whodesc { font-size:24px; }
+  .dslide.tight .wholines { font-size:20px; gap:10px 30px; margin-top:16px; }
+  .dslide.tight .whomission { margin-top:20px; padding-top:16px; }
+  .dslide.tight .whomission p { font-size:25px; }
+  .dslide.tight .dval { padding:16px 20px; }
+  .dslide.tight .dval b { font-size:24px; }
+  .dslide.tight .dval span { font-size:18px; }
   .big3 { color:var(--gold-deep); }
 
   .d-cover { justify-content:center; }

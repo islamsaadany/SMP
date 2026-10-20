@@ -366,7 +366,7 @@ function valuesSlide(target){
    we are, what we are aiming at, the values, and the key objectives read
    against their targets. The divider is drawn only when something follows
    it (§253), and it is the part's own: Islam chose *"before every part"*. */
-function foundationBody(target, aim, objectives){
+function deckFoundationBody(target, aim, objectives){
   /* The whole section has a switch of its own (Client set-up › Structure,
      `foundOn`), and a name of its own on each layer — "Overview" on a
      function and a capability (`foundTitle`). Off, the part is not drawn. */
@@ -375,7 +375,7 @@ function foundationBody(target, aim, objectives){
     .filter(Boolean);
 }
 function foundationPart(target, name, cells, aim, objectives){
-  var body = foundationBody(target, aim, objectives);
+  var body = deckFoundationBody(target, aim, objectives);
   if (!body.length) return [];
   return [sectSlide("sfound", "After the Foundation divider", SMPRules.foundTitle(GROUP, target) || "Foundation",
     "What " + name + " is aiming at, and the objectives it is judged on.", cells)].concat(body);
@@ -1382,7 +1382,7 @@ var SEC_PART_KEYS = ["found", "swot"];
 var SEC_PARTS = {
   /* §557: the whole Foundation part, as the company's deck draws it — Who
      we are and Values included — under the part's own cover. */
-  found: { name: "Foundation", slides: function(u){ return foundationBody("group", companyFoundationSlides(u), []); } },
+  found: { name: "Foundation", slides: function(u){ return deckFoundationBody("group", companyFoundationSlides(u), []); } },
   swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
 };
 function secDeckHtml(t){

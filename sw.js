@@ -447,7 +447,11 @@
    capability, for the office. The built file's bytes changed, which is the
    whole trigger (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.53-direction-slides";
+/* v6.54-rail-heading — §561.1: no heading over the company's rail, and the
+   Slides button at the band's right edge. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.54-rail-heading";
 const ASSETS = [
   "/",
   "/index.html",

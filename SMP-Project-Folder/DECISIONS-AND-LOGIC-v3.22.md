@@ -67683,6 +67683,8 @@ Islam, on the live page: *"remove the title named directions and capabilities ab
 
 **CHECKED.** On El Abd's state: no heading on Directions or Capabilities, the button 18px from the band's edge on both. `direction-part`, `top-plan`, `direction-decks`, `objectives-actions`, `several-outcomes`, `pillar-rail`, `direction-slides`, `structure`, `strategy-split`, `capability-tab-edit` green; `single-company` 1 red, identical on the live build (§449).
 
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.53-direction-slides` → **`v6.54-rail-heading`**. Pages only: no forced sign-out.
+
 ## §562 — How many slides a subject adds, and one word for its slides (2026-10-20)
 Islam: *"a direction owner can add max of 2 slides and the units owner can add 4 max"*; agreed on the rest — a capability a direction's size, a function a unit's, the company's closing slides 4, counted per subject whoever adds, the office included. And: *"for the direction owner he can get slides only to manage and present from inside isn't that how slides work?"*
 

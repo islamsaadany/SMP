@@ -443,7 +443,11 @@
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref; confirm once more
    immediately before the push (§94.16). */
-const SHELL = "smp-shell-v6.52-capabilities-edit";
+/* v6.53-direction-slides — §561: a Slides button on each direction and
+   capability, for the office. The built file's bytes changed, which is the
+   whole trigger (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.53-direction-slides";
 const ASSETS = [
   "/",
   "/index.html",

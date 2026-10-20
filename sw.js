@@ -459,7 +459,11 @@
    in the client's own word (Function on El Abd, Unit or function on Raya).
    The built file's bytes changed, which is the whole trigger (§91). Proved
    held by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.56-register-word";
+/* v6.57-plan-download — §564: the plan download is the presentation without
+   its figures. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+const SHELL = "smp-shell-v6.57-plan-download";
 const ASSETS = [
   "/",
   "/index.html",

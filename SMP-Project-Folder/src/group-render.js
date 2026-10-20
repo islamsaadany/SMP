@@ -11023,6 +11023,25 @@ function unitPerfRail(u){
    below states both scores again at the size they deserve. The heading was the
    third telling. Nothing on this page is edited in it, so unlike the plan
    there is no edit case to keep it for — only the no-rail one. */
+/* ── A DIRECTION'S OWN SLIDES, ON THE DIRECTION (§561) ───────────────
+   Islam: *"Slides edition should happen from the direction or the
+   capability part"* — the Master presentation is a management area (order,
+   timers, hide, present), and a slide added there would live only there.
+   The office had no way into one direction's slides at all: the company's
+   menu offers the Master presentation and nothing per direction (§556).
+
+   THE OFFICE ONLY, for now — his words on the mockup: *"keep the slides
+   button for the smo only"*. `mayMasterPresent` is that rule already; the
+   owner keeps Present in their own menu. `canSpeakFor` as well, because it
+   is the gate `slidesOpen` asks, and a button that opens nothing is §61. */
+function dirSlidesBtn(it, u){
+  if (!u || !u.topLayer || !it || !it.id) return "";
+  if (!SMPRules.mayMasterPresent(world(), viewer()) || !canSpeakFor("dir:" + it.id)) return "";
+  return '<button class="pbslides" data-dirslides="' + esc(it.id) + '" title="Add, hide and arrange the slides of ' +
+    esc(it.name) + ', then present">' +
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+    '<path d="M8 11.5v2.5M5 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Slides</button>';
+}
 function unitPerfPane(it, u, railed){
   /* §264: the score, not the stored raw ratio — this is the pane Islam
      reported, and its Highest and Lowest are the extremes of exactly the
@@ -11036,7 +11055,7 @@ function unitPerfPane(it, u, railed){
      scorePair below that made the OLD header redundant — a 19px name, a meta
      line and a score pill above two scores stated again at the size they
      deserve — not the fact of naming the pillar at all. */
-  return (railed ? pillarBand(pillarCode(u, u.items.indexOf(it)), it.name, "", it.kind) :
+  return (railed ? pillarBand(pillarCode(u, u.items.indexOf(it)), it.name, dirSlidesBtn(it, u), it.kind) :
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +

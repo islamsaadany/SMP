@@ -67649,3 +67649,14 @@ Islam: *"fix the phone overflow on reporting"*, then *"ok"* on the before/after 
 **MERGED TO `main`** 2026-10-20, Islam: *"merge to main"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.50-role-chip-and-order` → **`v6.51-reporting-phone`**. Pages only: no save is judged differently, so no forced sign-out.
 
 **A NUMBER COLLISION, RECORDED AND NOT RESOLVED HERE.** Two sessions wrote §556 on 2026-10-19 — the slide view (*One way in*, first, 13:00) and the one rail on El Abd's Reporting (14:34). Both are on `main`. The later is the one that should move; it is referenced in code comments, a check, spec 066, the README and the progress file, so the renumber is put to Islam rather than done in passing. `main` also carries two §555s from other sessions. This entry took §559 because §558 was already taken (the role chip, merged to `main` while this was checked).
+
+## §561 — A direction's own slides, from the direction (2026-10-20)
+Islam: *"when the SMO starts to work on the addition they can't find the Manage slides. They only have the master"*, then, refusing an add from inside the Master presentation: *"the master slides is just a management area not a Slides editing approach. Slides edition should happen from the direction or the capability part"*. On the working mockup (El Abd's real Performance page): *"having the slides button on the direction itself is great … for now keep the slides button for the smo only … and keep add a final slide to the master presentation"*.
+
+**A SLIDES BUTTON ON EACH DIRECTION'S AND CAPABILITY'S OWN BAND**, on the company's Performance page. It opens that box's own slides (`slidesOpen("dir", id)`), the same screen a direction owner's Present lands on. A slide added there is kept on the direction and the Master presentation shows it in that direction's part, so the master stays order, timers, hide and present.
+
+**THE OFFICE ONLY, FOR NOW** — `mayMasterPresent`, the rule that offers the Master presentation, and `canSpeakFor`, the gate `slidesOpen` itself asks, so the button never opens nothing (§61). The owner keeps Present in their own menu. Nothing on the server changes: a direction's slides were already the office's to save (§481).
+
+**THE MASTER KEEPS "+ Add a final slide"**, as he said.
+
+**CHECKED.** New `direction-slides` (12 claims; 6 red on the previous build, the ones about the button). On El Abd's state: the button on D001 and on C001, and C001 opens its own slides. `direction-decks`, `master-presentation`, `deck-model`, `presentation-parts`, `present-loop`, `structure`, `no-twin-functions`, `built-in-step` green.

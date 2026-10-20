@@ -5155,6 +5155,10 @@
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
+    /* §561: a direction's or capability's own slides, from its own pane. */
+    document.querySelectorAll("[data-dirslides]").forEach(function(b){
+      b.addEventListener("click", function(){ slidesOpen("dir", this.dataset.dirslides); });
+    });
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);

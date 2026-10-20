@@ -127,7 +127,7 @@ function anch(key, label, where){
    surface to want a deck cannot get a different one. `unitLike()` resolves a
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
-/* ── THE PLAN IS THIS DECK WITHOUT ITS FIGURES (§563) ───────────────────
+/* ── THE PLAN IS THIS DECK WITHOUT ITS FIGURES (§564) ───────────────────
    Islam agreed the plan download be the presentation's own slides with
    every reported figure taken out, one template rather than two builders
    (spec 066 §5). `buildPlanPptx` sets this while it asks `deckHtmlFor`; the
@@ -1078,7 +1078,7 @@ function pillarCols(n){
 function pillarSlidesOf(u, p, pi, named){
   var S = [];
   /* §416: and it gets no slides of its own until its year comes — except in
-     the plan (§563), which carries every direction with its years, as the
+     the plan (§564), which carries every direction with its years, as the
      plan download always has. */
   if (!runsNow(p) && !DECK_PLAN) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
@@ -1172,7 +1172,7 @@ function pillarSlidesOf(u, p, pi, named){
       return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
         bdCols.map(function(c){
           var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
-          /* §563: the plan carries the target alone. */
+          /* §564: the plan carries the target alone. */
           if (DECK_PLAN)
             return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
           if (!String(a).trim())
@@ -1531,7 +1531,7 @@ function dirDeckHtml(t){
    the full plan deck share (§53.5) — so "only on the owner's copy" is not a
    setting, it is a fork of the shared builder, and it would make the same
    direction read two different ways depending on who opened it. */
-/* §563: WHAT A TACTIC NEEDS rides under its name in the plan, as it does on
+/* §564: WHAT A TACTIC NEEDS rides under its name in the plan, as it does on
    the Plan page and always did in the plan download (§415) — never in the
    review, which is about how the figures went. */
 function planReqs(t){

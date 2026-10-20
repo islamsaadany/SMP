@@ -450,7 +450,7 @@ function planPptxName(target){
   return (placeLabel(target) || "Plan") + " — Strategy plan.pptx";
 }
 
-/* ── THE PLAN IS THE DECK WITHOUT ITS FIGURES (§563) ───────────────────
+/* ── THE PLAN IS THE DECK WITHOUT ITS FIGURES (§564) ───────────────────
    Islam, on the mockup: the plan download becomes the presentation's own
    slides with every reported figure taken out — spec 066 §5, *"the same
    template without the reported figures — never a second builder"*. It had
@@ -825,7 +825,7 @@ function deckLead(sl){
     }
     var t = deckPieces(el);
     if (!t) return;
-    /* §563: a gap the plan names (`.missing`) keeps its red in prose too. */
+    /* §564: a gap the plan names (`.missing`) keeps its red in prose too. */
     out.push({ t:t, key: el.classList.contains("dlab"), miss: !!el.querySelector(".missing") });
   });
   /* A SLIDE THAT IS NEITHER PROSE NOR A TABLE IS STILL A SLIDE. A card kind

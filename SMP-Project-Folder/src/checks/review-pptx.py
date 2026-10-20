@@ -359,8 +359,8 @@ def main():
                None)
 
         # ── §10 ──────────────────────────────────────────────────────────
-        print("\n§10 · and the plan download is this deck without its figures (§563)")
-        # REWRITTEN TO THE NEW RULE (218, 563). §10 said the plan download
+        print("\n§10 · and the plan download is this deck without its figures (§564)")
+        # REWRITTEN TO THE NEW RULE (218, 564). §10 said the plan download
         # was untouched by this converter; it is now made BY it, from the same
         # deck with DECK_PLAN on, so its rows are the review's and it carries
         # the subject's mark — and no reported figure.

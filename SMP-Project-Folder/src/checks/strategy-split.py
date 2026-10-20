@@ -287,7 +287,7 @@ with sync_playwright() as p:
         ck("it carries more than a cover", d["slides"] >= 6, d["slides"])
         ck("the plan's own words are inside (a measure)",
            "Orders processed digitally" in d["text"])
-        # REWRITTEN TO THE NEW RULE (218, 563): the plan is the deck without
+        # REWRITTEN TO THE NEW RULE (218, 564): the plan is the deck without
         # its figures, so the SWOT is the deck's own four slides, each headed.
         ck("...the SWOT Islam asked for by name",
            "Strengths" in d["text"] and "Strong brand equity (Raya &amp; i2)" in d["text"] or
@@ -345,7 +345,7 @@ with sync_playwright() as p:
     ck("...and it downloads", ff is not None)
     if ff:
         d = read_pptx(ff)
-        # REWRITTEN TO THE NEW RULE (218, 563): the plan carries what the
+        # REWRITTEN TO THE NEW RULE (218, 564): the plan carries what the
         # function's own deck carries — its own projects. A capability held
         # apart (Setup › Capabilities, §334) is its own subject in the flow,
         # with its own deck, and is no longer folded into the function's file.
@@ -396,7 +396,7 @@ with sync_playwright() as p:
         # SIX GAPS WERE MADE; FOUR ARE ON THE PLAN'S SLIDES AND FOUR ARE
         # NAMED — an exact count, because "at least one" passes a build that
         # marks the aspiration and forgets every table cell. REWRITTEN TO THE
-        # NEW RULE (218, 563): the plan is the deck's slides, and they carry
+        # NEW RULE (218, 564): the plan is the deck's slides, and they carry
         # a measure's target but not its direction or compile rule, so those
         # two gaps have no cell to be named in.
         ck("every gap on the plan's slides is named Missing (4)", len(marks) == 4, len(marks))
@@ -427,7 +427,7 @@ with sync_playwright() as p:
                              for c in row.iter(A + "tc") ]
                     marked += sum(1 for v in vals[-4:] if v.strip())
             break
-        # REWRITTEN TO THE NEW RULE (218, 563): the deck's own Quarters
+        # REWRITTEN TO THE NEW RULE (218, 564): the deck's own Quarters
         # column, the lit quarters written out ("Q2 Q3").
         ck("the tactics table carries the deck's Quarters column, and no figure",
            heads is not None and heads[-1] == "Quarters"
@@ -521,7 +521,7 @@ with sync_playwright() as p:
                         "merged": [c.get("hMerge") for c in qs[1:]] })
             break
         ck("the tactics table was found", len(rows) > 0, len(rows))
-        # REWRITTEN TO THE NEW RULE (218, 563). One Quarters column, the
+        # REWRITTEN TO THE NEW RULE (218, 564). One Quarters column, the
         # deck's; a tactic that names no quarter is a gap and says Missing in
         # the platform's bold red, as §119.7 asked; the one that names a
         # quarter says which, in the ordinary ink.

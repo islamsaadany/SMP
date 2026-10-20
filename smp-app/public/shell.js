@@ -25639,7 +25639,7 @@ function planPptxName(target){
   return (placeLabel(target) || "Plan") + " — Strategy plan.pptx";
 }
 
-/* ── THE PLAN IS THE DECK WITHOUT ITS FIGURES (§563) ───────────────────
+/* ── THE PLAN IS THE DECK WITHOUT ITS FIGURES (§564) ───────────────────
    Islam, on the mockup: the plan download becomes the presentation's own
    slides with every reported figure taken out — spec 066 §5, *"the same
    template without the reported figures — never a second builder"*. It had
@@ -26014,7 +26014,7 @@ function deckLead(sl){
     }
     var t = deckPieces(el);
     if (!t) return;
-    /* §563: a gap the plan names (`.missing`) keeps its red in prose too. */
+    /* §564: a gap the plan names (`.missing`) keeps its red in prose too. */
     out.push({ t:t, key: el.classList.contains("dlab"), miss: !!el.querySelector(".missing") });
   });
   /* A SLIDE THAT IS NEITHER PROSE NOR A TABLE IS STILL A SLIDE. A card kind
@@ -37755,6 +37755,38 @@ function navWord(key, short){
   var d = labelDefault(key);
   return d && labelWord(key, "bu") === d.many ? short : L(key);
 }
+/* ── WHAT THE REGISTER CALLS WHERE SOMEBODY SITS (§563) ──────────────────
+   Islam, of El Abd: *"in elabd people belong to functions not units how to
+   fix this?"* The data was right — El Abd's units were deleted (§535.8), so
+   every person there sits in a function — and the WORD was wrong: the
+   register headed that column "Unit" for every client, and its dialog said
+   "Unit or function" over a dropdown with no unit in it.
+
+   THE WORD FOLLOWS WHAT THE CLIENT HAS SWITCHED ON: units only reads "Unit",
+   functions only "Function", both (Raya, RHI) "Unit or function" — asked of
+   the Structure switches, so the column says what the client is, not what a
+   switched-off layer happens to still store. Both off has nowhere to sit but
+   the top, and keeps the two-word form the dialog always said.
+
+   THE SHORT WORD UNLESS THE CLIENT TYPED ITS OWN, `navWord`'s rule one form
+   over: the default "Business unit" / "Supporting Function" would be the
+   longest heading on the register, and §65 already cut it to "Unit". A word
+   the client typed in Terminology is used as typed; the second word of the
+   pair is lowered as client-setup's sentence words are (§398), an acronym
+   left alone. RAW TEXT — every caller escapes it where it lands. */
+function sitsInWord(){
+  var own = function(key, short){
+    var d = labelDefault(key), v = labelWord(key, "group");
+    return d && v === d.one ? short : v;
+  };
+  var unit = own("unitword", "Unit"), fn = own("fnword", "Function");
+  var u = SMPRules.buExists(GROUP), f = SMPRules.fnExists(GROUP);
+  if (u && !f) return unit;
+  if (f && !u) return fn;
+  return unit + " or " + fn.replace(/\S+/g, function(x){
+    return x.slice(1) === x.slice(1).toLowerCase() ? x.charAt(0).toLowerCase() + x.slice(1) : x;
+  });
+}
 
 /* ── Terminology ─────────────────────────────────────────────────────── */
 function renderLabels(){
@@ -40101,7 +40133,7 @@ function renderPeople(){
         if (!fits) {
           var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
-                 (atCo ? "Company" : "Unit") + " first";
+                 (atCo ? "Company" : sitsInWord()) + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
           hint = "a seat \u2014 asks before it lands";
         } else {
@@ -40238,8 +40270,12 @@ function renderPeople(){
        from 39px to 51, which is the fault §116.4 records three times in this
        one section. So they are two values rather than one string, and the
        cell takes the field alone. */
-    var F = function(label, html, wide, note){
-      out.push({ label:label, html:html, wide:!!wide, note:note || "" });
+    /* `show` IS WHAT THE EYE READS WHEN IT IS NOT THE LABEL (§563). The label
+       is also a KEY — the register's cell (`pcell`/`cellField`) and the
+       attention outline (`ATTN_FIELD`) find a field by it — so a field whose
+       name is the client's word keeps a fixed label and draws its word. */
+    var F = function(label, html, wide, note, show){
+      out.push({ label:label, html:html, wide:!!wide, note:note || "", show:show || "" });
     };
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
@@ -40292,7 +40328,8 @@ function renderPeople(){
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
     /* "Unit or function", because that is what it holds now — the companies
-       moved to the field below it (§135.6). */
+       moved to the field below it (§135.6). It still is, as the KEY; what is
+       drawn is the client's word for it (§563), so El Abd reads "Function". */
     F("Unit or function", '<select class="fld" data-pat="' + esc(p.key) + '">' +
         '<option value="">&mdash; nowhere yet &mdash;</option>' +
         personAtChoices().map(function(o){
@@ -40301,7 +40338,7 @@ function renderPeople(){
         }).join("") + '</select>', false,
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
-      saidWhereNote(p, true));
+      saidWhereNote(p, true), sitsInWord());
     /* ── AND THE COMPANY, WHICH IS SOMETIMES THE UNIT'S ANSWER (§135.6) ──
        Read-only wherever the unit above has already answered it, writable
        where nothing else has — so a person in Mobile reads "Distribution" and
@@ -40392,7 +40429,7 @@ function renderPeople(){
       var req = need[f.label], refused = !!(req && miss[f.label]);
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
         (mine.length ? ' attn' : '') + (refused ? ' reqmiss' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) +
+        '<div class="pdfl">' + esc(f.show || f.label) +
           (req ? '<span class="reqmark" aria-hidden="true">*</span>' : '') + '</div>' +
         f.html + f.note +
         (refused ? '<div class="reqsay">' + esc(req.say) + '</div>' : '') +
@@ -40961,7 +40998,7 @@ function renderPeople(){
       (showCol("company") ? pcell(p, "Company", (function(){
           var ck = personCompany(p);
           var why = personCompanyDerived(p)
-            ? ' title="Comes from the unit. Change the Unit to move them."' : '';
+            ? ' title="Comes from the unit. Change the ' + esc(sitsInWord()) + ' to move them."' : '';
           return ck
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
@@ -41242,8 +41279,11 @@ function renderPeople(){
               '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
               '<button class="linkbu" data-colnone="1">None</button></span></div>' +
             PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
+              /* The Unit column's name is the client's (§563), so the chooser
+                 asks the same word its heading does. */
               return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
+                (showCol(c.k) ? " checked" : "") + '><span>' +
+                esc(c.k === "bu" ? sitsInWord() : c.label) + '</span></label>';
             }).join("") +
             '<div class="hmenu-note">Person is always shown &mdash; a register ' +
             'with the names hidden is not a register.</div>' +
@@ -41506,7 +41546,7 @@ function renderPeople(){
            column the read rows sized. So the COLUMN carries the floor, and the
            select is capped to sit inside it. */
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
-        (showCol("bu")       ? th("Unit", "wcol")        : '') +
+        (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
@@ -41668,7 +41708,7 @@ function mergeStepHtml(){
             (p.empId ? esc(p.empId) : "\u2014") + '</span></div>' +
           '<div class="mgf"><span>Email</span><span>' +
             (p.email ? esc(p.email) : "\u2014") + '</span></div>' +
-          '<div class="mgf"><span>Unit</span><span>' +
+          '<div class="mgf"><span>' + esc(sitsInWord()) + '</span><span>' +
             esc(roleWhereLabel2(personAt(p)) || "\u2014") + '</span></div>' +
           '<div class="mgf"><span>Roles</span><span>' +
             (held.length ? esc(held.map(function(r){ return roleName(r.role); }).join(", "))
@@ -48783,7 +48823,7 @@ function anch(key, label, where){
    surface to want a deck cannot get a different one. `unitLike()` resolves a
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
-/* ── THE PLAN IS THIS DECK WITHOUT ITS FIGURES (§563) ───────────────────
+/* ── THE PLAN IS THIS DECK WITHOUT ITS FIGURES (§564) ───────────────────
    Islam agreed the plan download be the presentation's own slides with
    every reported figure taken out, one template rather than two builders
    (spec 066 §5). `buildPlanPptx` sets this while it asks `deckHtmlFor`; the
@@ -49734,7 +49774,7 @@ function pillarCols(n){
 function pillarSlidesOf(u, p, pi, named){
   var S = [];
   /* §416: and it gets no slides of its own until its year comes — except in
-     the plan (§563), which carries every direction with its years, as the
+     the plan (§564), which carries every direction with its years, as the
      plan download always has. */
   if (!runsNow(p) && !DECK_PLAN) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
@@ -49828,7 +49868,7 @@ function pillarSlidesOf(u, p, pi, named){
       return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
         bdCols.map(function(c){
           var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
-          /* §563: the plan carries the target alone. */
+          /* §564: the plan carries the target alone. */
           if (DECK_PLAN)
             return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
           if (!String(a).trim())
@@ -50187,7 +50227,7 @@ function dirDeckHtml(t){
    the full plan deck share (§53.5) — so "only on the owner's copy" is not a
    setting, it is a fork of the shared builder, and it would make the same
    direction read two different ways depending on who opened it. */
-/* §563: WHAT A TACTIC NEEDS rides under its name in the plan, as it does on
+/* §564: WHAT A TACTIC NEEDS rides under its name in the plan, as it does on
    the Plan page and always did in the plan download (§415) — never in the
    review, which is about how the figures went. */
 function planReqs(t){
@@ -78007,7 +78047,8 @@ var SYNC = (function () {
              two fields it points at. */
           var atCo = wheres.every(function(w){
             return boxRef(w.v).kind === "mid"; });
-          var fld = atCo ? "Company" : "Unit";
+          /* The field's own name, which is the client's word for it (§563). */
+          var fld = atCo ? "Company" : sitsInWord();
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
              there is no open picker any more: the list commits a tick and

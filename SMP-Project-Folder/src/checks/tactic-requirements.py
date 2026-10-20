@@ -139,7 +139,7 @@ with sync_playwright() as p:
     print("\n6 · the review deck and the plan download")
     dk = safe(pg, "()=>{var h=deckHtmlFor('mobile'); return [h.indexOf('Requirements'), h.indexOf('Two data analysts')]}")
     ok("the review deck carries neither the key nor an item", dk == [-1, -1], dk)
-    # REWRITTEN TO THE NEW RULE (218, 563): the plan download is the deck
+    # REWRITTEN TO THE NEW RULE (218, 564): the plan download is the deck
     # without its figures, converted (`planSlidesXml` below reads the file's
     # own slide XML), and a tactic's requirements ride under its name there.
     PLAN = """()=>{var m=null, out=[]; [].forEach.call(planDeckBox('mobile').querySelectorAll('.dslide'), function(sl){ out=out.concat(deckSlidePptx(sl,'Mobile',null)); }); return out}"""

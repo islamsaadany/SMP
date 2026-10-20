@@ -7687,7 +7687,8 @@
              two fields it points at. */
           var atCo = wheres.every(function(w){
             return boxRef(w.v).kind === "mid"; });
-          var fld = atCo ? "Company" : "Unit";
+          /* The field's own name, which is the client's word for it (§563). */
+          var fld = atCo ? "Company" : sitsInWord();
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
              there is no open picker any more: the list commits a tick and

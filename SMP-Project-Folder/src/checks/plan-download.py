@@ -1,4 +1,4 @@
-"""The plan download is the presentation's own slides without figures (§563).
+"""The plan download is the presentation's own slides without figures (§564).
 
 Islam, on the mockup: *"proceed"* — spec 066 §5, *"the plan download is the
 same template without the reported figures — never a second builder"*. It

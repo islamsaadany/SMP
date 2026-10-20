@@ -67682,3 +67682,5 @@ Islam, on the live page: *"remove the title named directions and capabilities ab
 **THE BUTTON SITS AT THE RIGHT EDGE.** The band reserves 76px on its right for the pen's corner (§117); a pane with no pen there now drops that reservation when the band carries Slides, so the button sits 18px from the edge.
 
 **CHECKED.** On El Abd's state: no heading on Directions or Capabilities, the button 18px from the band's edge on both. `direction-part`, `top-plan`, `direction-decks`, `objectives-actions`, `several-outcomes`, `pillar-rail`, `direction-slides`, `structure`, `strategy-split`, `capability-tab-edit` green; `single-company` 1 red, identical on the live build (§449).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.53-direction-slides` → **`v6.54-rail-heading`**. Pages only: no forced sign-out.

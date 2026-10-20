@@ -67695,3 +67695,5 @@ Islam: *"a direction owner can add max of 2 slides and the units owner can add 4
 **AN OWNER OF SEVERAL DIRECTIONS GETS A LINE FOR EACH.** Present carried the list and opened a flow, which is the office's (`mayMasterPresent`), so an owner of two pressed it and nothing opened (§61). Each direction is its own subject, so each gets *Slides · D001 Name*; one direction stays unnamed (§481).
 
 **CHECKED.** New `slide-limits` (13 claims, 8 red on the live build). `direction-decks` claim rewritten to the new word (§218).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.54-rail-heading` → **`v6.55-slide-limits`**. No save is judged differently (the limit is the add's, in the page), so no forced sign-out.

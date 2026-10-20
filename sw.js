@@ -451,7 +451,11 @@
    Slides button at the band's right edge. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.54-rail-heading";
+/* v6.55-slide-limits — §562: 2 slides for a direction or capability, 4 for
+   a unit, a function or the company; Slides as the one word. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.55-slide-limits";
 const ASSETS = [
   "/",
   "/index.html",

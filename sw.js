@@ -437,7 +437,13 @@
    this one line re-applied (§146.2). Proved held by no commit in any ref's
    history after fetching every ref; confirm once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.51-reporting-phone";
+/* v6.52-capabilities-edit — §560: the company's Capabilities tab carries the
+   Edit again. El Abd's move put its capabilities on §540's `plancap` tab and
+   no table listed it, so the line drew no Edit for anybody. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref; confirm once more
+   immediately before the push (§94.16). */
+const SHELL = "smp-shell-v6.52-capabilities-edit";
 const ASSETS = [
   "/",
   "/index.html",

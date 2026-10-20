@@ -150,8 +150,8 @@ with sync_playwright() as p:
     # (§94.2) — the one divider it has, and the slide that divider announces,
     # or a divider over nothing is exactly what §253 forbids.
     ok(not fnc.get("err") and
-       [s["anchor"] for s in fnc["slides"] if s["sect"]] == ["sperf"],
-       "a box that plans in projects has the one divider it has a section for (§553.2)")
+       [s["anchor"] for s in fnc["slides"] if s["sect"]] == ["sprojects", "sperf"],
+       "a box that plans in projects has a divider before each part it draws (§557)")
     ok(not fnc.get("err") and
        any("stands" in (s.get("head") or "") for s in fnc["slides"]),
        "...and the slide behind it is there — %s"

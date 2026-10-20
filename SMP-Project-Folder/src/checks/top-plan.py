@@ -156,6 +156,13 @@ with sync_playwright() as p:
     board = safe(pg, "()=>boardUnitTargets()", []) or []
     ck("the cycle board's first row is the top layer", board[:1] == ["group"], board[:3])
     ck("…reported by the SMO team", safe(pg, "()=>boardWho('group')", "") == "SMO team", safe(pg, "()=>boardWho('group')"))
+    # §557: a SWOT switched on but empty draws no slide (Islam's deck model:
+    # what the structure has AND what is written). The worked example's
+    # company SWOT is empty, so the claim writes one strength first — and
+    # asks for its absence before it, both ends (§94.2).
+    noswot = safe(pg, "()=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor('group'); return [...d.querySelectorAll('.dslide')].some(s=>/^swot/.test(s.dataset.anchor||''))}")
+    ck("an empty company SWOT draws no SWOT slide (§557)", noswot is False, noswot)
+    safe(pg, "()=>{GROUP.swot = { s:['A real strength'], w:[], o:[], t:[] };}")
     heads = safe(pg, "()=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor('group'); return [...d.querySelectorAll('.dslide')].map(s=>((s.querySelector('h2,h1')||{}).textContent||''))}", []) or []
     ck("the deck carries the SWOT and, per pillar, key measures and tactics",
        any("SWOT" in h for h in heads) and any("D001" in h and "Key measures" in h for h in heads)

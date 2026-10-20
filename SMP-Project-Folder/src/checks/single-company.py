@@ -297,7 +297,11 @@ with sync_playwright() as p:
     ck("a division with two functions linked is MADE", bool(DIV), DIV)
     if DIV:
         dname = pg.evaluate("(ck)=>COMPANIES[ck].name", DIV)
-        TW = safe(pg, "()=>labelWord('topword','group')")
+        # §556.13, rewritten from the client's top word alone (§218): a
+        # company with no business units is named by its OWN name, and only
+        # a real group keeps the word. Worked out here from the two facts,
+        # not by asking topOwnName(), the thing under test (§94.8).
+        TW = safe(pg, "()=>{var o=String(GROUP.org||'').trim(); return (o && !SMPRules.buExists(GROUP)) ? o : labelWord('topword','group')}")
         n1 = navNow()
         ck("the navigation has no division dropdown", n1.get("dd") is False, n1)
         ck("…its top button names the layer (§448.1)", TW and TW in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TW)

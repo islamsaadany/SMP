@@ -182,13 +182,18 @@ export async function deleteReviewFinding(
 const integrateFindingSchema = findingIdSchema.extend({
   stepId: z.string().min(1),
   mode: z.enum(["MERGED", "REPLACED"]),
+  /// What the step should read after a REPLACED. The person writes or edits it
+  /// (the screen offers the finding's title to start from): AI wording must not
+  /// reach a client's report unreviewed. Left out, the finding's title is used.
+  label: z.string().trim().min(1).max(200).optional(),
 });
 
 /**
  * Pushes a finding's recommendation into the Process Map. MERGED appends it
  * as a note on the target step, leaving the step's label, connections, and
  * RACI assignments untouched. REPLACED overwrites the step's label with the
- * finding's title and its notes with the recommendation — the old label is
+ * text the person wrote (the finding's title if none was given) and its notes
+ * with the recommendation — the old label is
  * gone, but the step keeps its id, so its connections and RACI assignments
  * carry over unchanged.
  */
@@ -219,7 +224,7 @@ export async function integrateReviewFinding(
     } else {
       await tx.processStep.update({
         where: { id: step.id },
-        data: { label: finding.title, reviewNotes: finding.recommendation },
+        data: { label: parsed.data.label ?? finding.title, reviewNotes: finding.recommendation },
       });
     }
 

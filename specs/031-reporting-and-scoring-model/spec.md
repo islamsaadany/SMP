@@ -249,11 +249,19 @@ Latest takes the month being stood in.
   truthiness test reads seven empty boxes as seven planned noughts and cuts the
   year by more than half.
 - **In force only when all twelve are set.** A half-filled plan is stored, says
-  so in the warning ink, and leaves the annual box authored and live (§61).
+  so in the warning ink, and the row is still spread evenly across the year —
+  the months that are missing are *unknown*, never nought.
 - **The monthly plan becomes the target** (Islam's (a)), so the deck, the
   workbook, the archive and the Focus board are right without being taught
   anything. The normalised-shape alternative was drawn and refused: months
   adding to 1.05B under a 1.0B target stop matching what was typed.
+- **From the FIRST month, not the twelfth** (§555, reversing half of §278).
+  `monthlySoFar()` applies the row's compile rule to the months that *are*
+  set, and the annual box is locked on what it answers for as long as a
+  monthly plan is there — so the same figure is never authored twice. On a
+  complete plan it returns exactly what `monthlyAnnual()` returns. Clearing
+  the plan hands the box back; a row with no compile rule derives nothing and
+  keeps its box live, and picking the rule derives the target there and then.
 - **No migration** — it rides `extra`, proved by round-tripping one on all three
   shapes against a real Postgres rather than claimed (§172's lesson).
 - **The workbook gains twelve columns, appended**, because a validation range is

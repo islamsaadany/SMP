@@ -106,7 +106,7 @@ var COPILOT = (function(){
   function here(){
     var t = typeof TARGET !== "undefined" ? String(TARGET || "") : "";
     return SECTIONS.filter(function(s){
-      if (s.k === "capabilities") return !dvCapsHere();
+      if (s.k === "capabilities") return false;  /* §544.13 */
       if (s.k !== "compete") return true;
       try { return SMPRules.compOffered(t, SMPRules.COMPETE); } catch (e) { return false; }
     });
@@ -163,12 +163,10 @@ var COPILOT = (function(){
     if (!p) return k;
     return (typeof knownName === "function" ? knownName(p) : "") || p.name || k;
   }
-  function when(iso){
-    if (!iso) return "";
-    var d = new Date(iso); if (isNaN(d)) return "";
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + " " + d.getFullYear();
-  }
+  /* The product's one day writer (§537). This had its own month array and
+     its own four-digit year, so a deliverable dated beside anything else on
+     screen read "11 Mar 2026" next to "11 Mar 26". */
+  function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
   function renderPane(){
@@ -365,12 +363,13 @@ var COPILOT = (function(){
     }
     var holder = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") {
-        var fk = t.slice(3), F = FUNCTIONS[fk];
+      var r = boxRef(t);
+      if (r.kind === "fn" && typeof FUNCTIONS !== "undefined") {
+        var fk = r.key, F = FUNCTIONS[fk];
         if (F) { if (!u) { o.def = F.def; o.keyObjectives = F.keyObjectives; } }
         holder = typeof fnHolders === "function" ? fnHolders(fk) : [];
-      } else if (t.indexOf("cap:") === 0 && typeof capById === "function") {
-        var C = capById(t.slice(4));
+      } else if (r.kind === "cap" && typeof capById === "function") {
+        var C = capById(r.key);
         if (C && !u) { o.def = C.def; o.keyObjectives = C.keyObjectives; holder = [C]; }
       }
     } catch (e) { holder = null; }
@@ -1072,10 +1071,16 @@ var COPILOT = (function(){
        the bar already names it ("v3 in progress · v2 is on the plan"), so a
        done line there would read as a claim about work nobody has applied. */
     var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    /* WHY APPLY IS HELD, in the words the moment actually calls for. */
+    var fwhy = !f.saved ? "Save the Foundation first"
+             : busyHere ? "The Copilot is working on this chat" : "";
     return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
       '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
       '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
-      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      /* HELD, NOT DEAD (§538), and the reason is now the RIGHT one: the old
+         line said "Save the Foundation first" even while the Copilot was
+         working on a Foundation already saved. */
+      '<button type="button" class="copbtn' + (fwhy ? ' hasnote' : '') + '" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (fwhy ? ' aria-disabled="true" data-tip="' + E(fwhy) + '"' : '') + '>Apply to plan</button>' +
       '</div></div>';
   }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
@@ -1519,7 +1524,7 @@ var COPILOT = (function(){
   function planSwot(){
     var t = place(), sw = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[t.slice(3)] || {}).swot;
+      if (boxRef(t).kind === "fn" && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[boxRef(t).key] || {}).swot;
       else if (t === "group" && typeof GROUP !== "undefined") sw = GROUP.swot;
       else { var u = typeof unitLike === "function" ? unitLike(t) : null; sw = u && u.swot; }
     } catch (e) { sw = null; }
@@ -2531,7 +2536,7 @@ var COPILOT = (function(){
     if ((s.mode === "capabilities" || s.withCaps) && typeof addCapability === "function" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities)) {
       s.caps.filter(function(x){ return x.keep; }).forEach(function(x){
         var c = x.planId ? GROUP.capabilities.filter(function(y){ return y && y.id === x.planId; })[0] : null;
-        if (!c) c = addCapability(x.ownedBy || null);
+        if (!c) c = addCapability();
         if (!c) return;
         c.name = x.title;
         if (x.ownedBy) c.fn = x.ownedBy;
@@ -2624,7 +2629,7 @@ var COPILOT = (function(){
   }
   function dvNew(mode){
     act({ act:"newDirections", place: place(), mode: mode, title: dvTitle(mode),
-          withCaps: mode === "directions" && dvCapsHere(), hadPlan: dvExisting().length }, function(j){
+          withCaps: mode === "directions", hadPlan: dvExisting().length }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       dvView(j);
@@ -2634,10 +2639,17 @@ var COPILOT = (function(){
       if (PANE.dirs && PANE.dirs.start === "fresh") dvAsk({ act: mode === "capabilities" ? "capSuggest" : "dirSuggest" });
     });
   }
-  /* Where capabilities are chosen (spec §4.5): inside the Directions chat
-     when Structure keeps them in the company plan, in a section of their own
-     when they are a layer. One answer, asked of the shared rule. */
-  function dvCapsHere(){ try { return !!SMPRules.capAtTop(GROUP); } catch (e) { return true; } }
+  /* §544.13 — AND THE QUESTION ITSELF IS GONE. Capabilities were chosen
+     inside the Directions chat when Structure kept them in the company plan,
+     and in a section of their own when they were a layer; there is no layer
+     any more, so they are always chosen in the Directions chat. The rule that
+     asked it answered true for every client the day `capAtTop` did, and a
+     rule that cannot say no is not a rule (§61) — so it is read out here
+     rather than left standing as a constant for a reader to re-derive.
+
+     §544.12's catch is KEPT by this, not lost: it was that El Abd's
+     capabilities are in its company plan although `capAtTop` said otherwise.
+     They are now, for every client. */
 
   /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
      The period first, then each Direction and Capability in turn: its
@@ -2657,7 +2669,7 @@ var COPILOT = (function(){
       var h = dvHolder(), p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null;
       return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
     });
-    if (place() === "group" && dvCapsHere() && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
+    if (place() === "group" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
       GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: c.fn ? dvFnName(c.fn) : "" }); });
     return out;
   }
@@ -2713,9 +2725,31 @@ var COPILOT = (function(){
       '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
     var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
-      '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      /* §551: AN OWNER IS PICKED HERE TOO. This was the one free-text owner
+         box left in the product — the draft a chat writes, which is then
+         saved into a real plan, so a name typed here becomes a name on the
+         plan that matches nobody. It is the register's own list
+         (`ownerChoices`), so there is one list and not a second (§53.5), and
+         past five options `searchsel` makes it searchable like every other
+         (§536). The patch hook below reads `el.value`, which a select
+         answers exactly as the input did. */
+      '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-t="' + i + '|owner" aria-label="Owner">' +
+          optionsHtml(ownerChoices(t.owner, true), function(v){
+            return String(t.owner == null ? "" : t.owner) === v; }) + '</select>'
+        : (typeof ownerShown === "function" ? ownerShown(t.owner || "") : E(t.owner || "")) || E("—")) + '</td>' +
+      /* NOT A CONTROL, SO NOT A BUTTON (§538). A quarter outside the plan
+         period — or any quarter in a view nobody may edit — was drawn as a
+         `disabled` button carrying "Q3 is outside the plan period" as a hover
+         that can never open. Nothing was hidden by that: the strip directly
+         above this table already says which period the plan covers. So the
+         fix is a subtraction — it stops being a button, Tab walks only the
+         quarters that can be pressed, and the sentence survives on a mark that
+         a pointer CAN reach and that a screen reader reads from `aria-label`. */
       '<td class="copex-qs">' + [1,2,3,4].map(function(q){ var inP = qs.indexOf(q) >= 0, on = t.quarters.indexOf(q) >= 0;
-        return '<button type="button" class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '"' + (ed && inP ? ' data-cop-ex-q="' + i + '|' + q + '"' : ' disabled') + ' aria-pressed="' + on + '" title="' + (inP ? "Q" + q : "Q" + q + " is outside the plan period") + '">Q' + q + '</button>'; }).join("") + '</td>' +
+        if (ed && inP) return '<button type="button" class="copex-q' + (on ? " on" : "") + '" data-cop-ex-q="' + i + '|' + q + '" aria-pressed="' + on + '" title="Q' + q + '">Q' + q + '</button>';
+        var say = inP ? ("Q" + q + (on ? ", in this tactic" : ", not in this tactic"))
+                      : ("Q" + q + " is outside the plan period");
+        return '<span class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '" role="img" title="' + E(say) + '" aria-label="' + E(say) + '">Q' + q + '</span>'; }).join("") + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-tx="' + i + '" aria-label="Remove this tactic">&times;</button></td>' : '') + '</tr>'; };
     return '<div class="copex-item" data-cop-ex-item="' + k + '"><div class="copvline"><b>' + E(it.title) + '</b> — ' + (it.kind === "capability" ? "Capability" : "Direction") + ' ' + (k + 1) + ' of ' + PANE.exec.items.length + (it.ownedBy ? ', owned by ' + E(it.ownedBy) : '') + '</div>' +
       '<div class="copcp-wrap"><table class="copcp-tab copex-t"><thead><tr><th>Measure</th><th>Target (period)</th><th>Compile</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.measures.map(mrow).join("") + '</tbody></table></div>' +
@@ -3023,7 +3057,11 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
-    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
+    /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
+       could be read, and `b.disabled` goes false the moment it does — a guard
+       left reading that property would let the held button act. */
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
+      applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided

@@ -58,6 +58,9 @@ var SEARCHSEL = (function(){
      `data-sslabel="count"` asks for "19 of 19 subjects" and everything else
      goes on listing its names. `data-ssnoun` is the word, singular and plural
      separated by a pipe, because "1 of 19 subjects" is not English. */
+  /* §536: one number per opening, so the list and its rows can be pointed at
+     by id. Never reused while a popup stands — close() runs before each open. */
+  var SSN = 0;
   function countLabel(sel){
     var noun = String(sel.dataset.ssnoun || "chosen|chosen").split("|");
     var n = chosenTexts(sel).length, m = sel.options.length;
@@ -184,6 +187,11 @@ var SEARCHSEL = (function(){
     var pop = document.createElement("div");
     pop.className = "sspop" + (many ? " ssmany" : "");
     pop.setAttribute("role", "listbox");
+    /* §536: THE LIST NEEDS AN ID TO BE POINTED AT. One per opening, because
+       two of these never stand at once (close() runs first) but a stale id
+       left in the document would be pointed at by the next one. */
+    var popId = "sspop-" + (++SSN);
+    pop.id = popId;
     if (many) pop.setAttribute("aria-multiselectable", "true");
 
     var q = document.createElement("input");
@@ -192,6 +200,20 @@ var SEARCHSEL = (function(){
     q.placeholder = "Search…";
     q.autocomplete = "off";
     q.setAttribute("aria-label", "Search this list");
+    /* §536: THE BOX BEING TYPED IN OWNS THE LIST. The rows are announced as
+       `option`s inside a `listbox`, which is a promise about arrow keys —
+       and the only key bound was Escape, with Enter taking the first row
+       still showing. Operable, because the rows are real buttons and tab
+       reaches them, but not what the markup told a screen reader to expect.
+
+       `aria-activedescendant` RATHER THAN MOVING FOCUS, because the whole
+       point of this control is typing three letters and then picking: focus
+       that walked into the list would make the next three letters go
+       nowhere. The box keeps focus and POINTS at the row. */
+    q.setAttribute("role", "combobox");
+    q.setAttribute("aria-expanded", "true");
+    q.setAttribute("aria-autocomplete", "list");
+    q.setAttribute("aria-controls", popId);
 
     var list = document.createElement("div");
     list.className = "sslist";
@@ -226,6 +248,7 @@ var SEARCHSEL = (function(){
         r.appendChild(h);
       }
       r.setAttribute("role", "option");
+      r.id = popId + "-r" + rows.length;
       r.setAttribute("aria-selected", on ? "true" : "false");
       r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
       r._op = op;
@@ -251,6 +274,33 @@ var SEARCHSEL = (function(){
       }
     });
 
+    /* ── §536: WHICH ROW THE ARROWS ARE ON ───────────────────────────────
+       Held as the ROW rather than an index, because the index would be into
+       a list whose visible members change under it on every keystroke. */
+    var active = null;
+    var shown = function(){ return rows.filter(function(r){ return !r.hidden; }); };
+    var mark = function(r){
+      if (active && active !== r) active.classList.remove("ssrow-at");
+      active = r || null;
+      if (!active) { q.removeAttribute("aria-activedescendant"); return; }
+      active.classList.add("ssrow-at");
+      q.setAttribute("aria-activedescendant", active.id);
+      /* The row has to be ON SCREEN to be the answer to "where am I" — the
+         lists this opens over run to a whole tenant. `block:"nearest"` so a
+         row already in view does not jolt the list. */
+      if (active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
+    };
+    var step = function(by){
+      var vis = shown();
+      if (!vis.length) return;
+      var i = active ? vis.indexOf(active) : -1;
+      /* From nowhere, Down lands on the first and Up on the last. */
+      i = i < 0 ? (by > 0 ? 0 : vis.length - 1) : i + by;
+      if (i < 0) i = vis.length - 1;
+      if (i >= vis.length) i = 0;
+      mark(vis[i]);
+    };
+
     /* Hides rows in place. Never re-renders the list, never touches the input
        being typed into (§35). */
     q.addEventListener("input", function(){
@@ -265,6 +315,10 @@ var SEARCHSEL = (function(){
           function(r){ return !r.hidden; });
       });
       none.hidden = n > 0;
+      /* §536: a mark on a row the search has just hidden points at nothing.
+         Dropped rather than moved, so Enter falls back to "the first row
+         still showing" exactly as it did before any of this. */
+      if (active && active.hidden) mark(null);
     });
 
     /* ── SELECT ALL / NONE, OPT-IN (§304) ────────────────────────────
@@ -325,10 +379,29 @@ var SEARCHSEL = (function(){
     var onDoc = function(e){ if (!pop.contains(e.target) && e.target !== btn) close(); };
     var onKey = function(e){
       if (e.key === "Escape") { close(); btn.focus(); return; }
+      /* §536: THE KEYS THE MARKUP HAS ALWAYS PROMISED. Only while the search
+         box has focus — a row reached by Tab is a real button and the browser
+         already works it, and stealing its arrows there would be a second
+         answer to one question. */
+      if (document.activeElement === q &&
+          (e.key === "ArrowDown" || e.key === "ArrowUp" ||
+           e.key === "Home" || e.key === "End")) {
+        e.preventDefault();
+        if (e.key === "ArrowDown") step(1);
+        else if (e.key === "ArrowUp") step(-1);
+        else {
+          var vis = shown();
+          if (vis.length) mark(e.key === "Home" ? vis[0] : vis[vis.length - 1]);
+        }
+        return;
+      }
       if (e.key !== "Enter") return;
-      /* Enter takes the first row still showing — the whole point of typing
-         three letters is not having to reach for the mouse afterwards. */
-      var first = rows.filter(function(r){ return !r.hidden; })[0];
+      /* Enter takes the row the arrows are on, and the first row still
+         showing when they are on none — which is what it did before the
+         arrows existed, and what typing three letters and pressing Enter
+         still has to do. */
+      var first = (active && !active.hidden) ? active
+                : rows.filter(function(r){ return !r.hidden; })[0];
       if (first && document.activeElement === q) {
         e.preventDefault();
         first.click();
@@ -422,7 +495,11 @@ var SEARCHSEL = (function(){
        the native multiple select is a scrolling list box that ctrl-clicks, and
        it is not a control this product uses anywhere. Below the floor there is
        still nothing to search — the box is there and matches nothing away. */
-    if (!sel.multiple && sel.options.length < MIN) return;
+    /* §547: the five-option floor is the right rule for a FORM FIELD and the
+       wrong one for the go-to list — a tenant with four places needs that
+       list more than one with forty, not less. One opt-in here rather than a
+       second popup over there (§53.5). */
+    if (!sel.multiple && sel.options.length < MIN && sel.dataset.ssAlways !== "1") return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
       var prev = buttonFor(sel);
       if (prev) {

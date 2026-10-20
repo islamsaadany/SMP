@@ -305,6 +305,84 @@ with sync_playwright() as pw:
     ck("...and NO put-back is offered, because there is no row to put back",
        pg.evaluate("!document.getElementById('refused-keep')"))
     ck("...while Discard still is", pg.evaluate("!!document.getElementById('refused-undo')"))
+
+    # §534.5: DISCARD ASKS IN THE BAND, not in a browser box. It was the last
+    # browser dialog in the product, and the one with a fault of its own: a box
+    # opens OVER the band that has just said why the save was refused, so the
+    # sentence somebody needs in order to answer is the one it covers.
+    boxes = []
+    pg.on("dialog", lambda d: (boxes.append(d.message), d.dismiss()))
+    pg.evaluate("()=>{const b=document.getElementById('refused-undo'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    ck("Discard raises no browser dialog", not boxes, boxes)
+    ck("...it asks in the band instead",
+       pg.evaluate("!!document.getElementById('discard-yes')"))
+    ck("...offering a way back",
+       pg.evaluate("!!document.getElementById('discard-no')"))
+    ck("...and the refusal above it is still readable",
+       pg.evaluate("""()=>{const el=document.getElementById('refused');
+           return !!(el && !el.hidden && /refused|not saved/i.test(el.innerText));}"""))
+    # NOTHING IS THROWN AWAY UNTIL THE SECOND PRESS: the page is still here,
+    # which it would not be if the first press had reloaded.
+    ck("...nothing has been discarded yet",
+       pg.evaluate("()=>!!document.getElementById('refused')"))
+    pg.evaluate("()=>{const b=document.getElementById('discard-no'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    ck("Keep editing puts the band back", pg.evaluate(
+       """()=>{const el=document.getElementById('refused');
+           return !!(el && !el.hidden && document.getElementById('refused-undo'));}"""))
+    ck("...and the question is gone",
+       pg.evaluate("!document.getElementById('discard-yes')"))
+
+    # §534.5: AND THE SECOND DISCARD, which is the one nothing had ever
+    # pressed. It is offered when the refused lines cannot be put back because
+    # they are no longer on the page -- so the fixture makes exactly that: a
+    # refusal with rows to put back, and then the row taken off the page before
+    # Put back is pressed.
+    print("\n── the discard offered when a line cannot be put back")
+    boxes.clear()
+    POSTS.clear()
+    # A FRESH PAGE FIRST. The section above removes the project this fixture
+    # edits, so without a reload the mutation ran against a project that was
+    # no longer there and threw before asserting anything.
+    pg.goto(URL); pg.wait_for_timeout(2600)
+    pg.evaluate(MUTATE, FIX)
+    pg.wait_for_timeout(2600)
+    had_keep = pg.evaluate("!!document.getElementById('refused-keep')")
+    ck("(fixture) a refusal that offers to put lines back", had_keep)
+    if had_keep:
+        pg.evaluate("""(f)=>{
+          /* The refused row leaves the page, so putBackRefused() cannot find
+             it -- which is the only way into this band. */
+          const cap = holderById(f.cap);
+          const p = cap.projects.find(x => x.id === f.proj);
+          if (p) (p.milestones || []).forEach((m, i) => {
+            if (m.id === f.refused) p.milestones.splice(i, 1);
+          });
+        }""", FIX)
+        pg.evaluate("()=>{const b=document.getElementById('refused-keep'); if(b) b.click();}")
+        pg.wait_for_timeout(600)
+        band = pg.evaluate("""()=>{const el=document.getElementById('refused');
+            return el && !el.hidden ? el.innerText : null;}""")
+        ck("the band says the line could not be put back",
+           bool(band) and "could not be put back" in band, (band or "")[:200])
+        ck("...and offers a Discard", pg.evaluate("!!document.getElementById('refused-undo')"))
+        pg.evaluate("()=>{const b=document.getElementById('refused-undo'); if(b) b.click();}")
+        pg.wait_for_timeout(300)
+        ck("THIS one asks too, and raises no browser dialog", not boxes, boxes)
+        ck("...in the band", pg.evaluate("!!document.getElementById('discard-yes')"))
+        ck("...nothing discarded on the first press",
+           pg.evaluate("()=>!!document.getElementById('refused')"))
+        pg.evaluate("()=>{const b=document.getElementById('discard-no'); if(b) b.click();}")
+        pg.wait_for_timeout(300)
+        # THE WAY BACK RESTORES THE BAND IT COVERED, not the one before it: the
+        # question replaces whichever row it opens over, and a single shared
+        # "put it back" would have brought back the wrong message here.
+        back = pg.evaluate("""()=>{const el=document.getElementById('refused');
+            return el && !el.hidden ? el.innerText : null;}""")
+        ck("Keep editing restores THIS band, not the one before it",
+           bool(back) and "could not be put back" in back, (back or "")[:200])
+
     ck("nothing threw", not errs, errs[:1])
 
     b.close()

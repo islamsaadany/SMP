@@ -236,12 +236,12 @@ var CHAT = (function(){
   function when(at){
     var d = new Date(at), now = new Date();
     if (isNaN(d)) return "";
-    var hm = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    var hm = timeOf(d);
     var sameDay = d.toDateString() === now.toDateString();
     if (sameDay) return hm;
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday " + hm;
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " " + hm;
+    return dateAt(d);
   }
   function dayOf(at){
     var d = new Date(at), now = new Date();
@@ -249,7 +249,7 @@ var CHAT = (function(){
     if (d.toDateString() === now.toDateString()) return "Today";
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday";
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+    return dateDay(d);
   }
   function ago(at){
     if (!at) return "";
@@ -2496,10 +2496,16 @@ var CHAT = (function(){
              a conversation carrying a flagged message, so the row a person
              clicks is the same row wherever they found it. */
           '<div class="chqtabs" id="chqtabs" role="tablist">' +
-            '<button class="chqtab on" type="button" data-chtab="waiting" role="tab">' +
+            /* §544: SAID AT THE FIRST DRAW, not only after a press. The row
+               carried its state in `class="on"` alone until somebody clicked
+               one, and the handler below has always set `aria-selected` — so
+               a screen reader was told which tab was current only once the
+               person had already chosen it, which is the one moment they did
+               not need telling. */
+            '<button class="chqtab on" type="button" data-chtab="waiting" role="tab" aria-selected="true">' +
               'Waiting <span data-chn="waiting">0</span></button>' +
-            '<button class="chqtab" type="button" data-chtab="all" role="tab">All</button>' +
-            '<button class="chqtab" type="button" data-chtab="flagged" role="tab">' +
+            '<button class="chqtab" type="button" data-chtab="all" role="tab" aria-selected="false">All</button>' +
+            '<button class="chqtab" type="button" data-chtab="flagged" role="tab" aria-selected="false">' +
               'Flagged <span data-chn="flagged">0</span></button>' +
           "</div>" +
           '<div class="chqlist" id="chqlist"></div>' +

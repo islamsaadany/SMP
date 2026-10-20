@@ -641,7 +641,13 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copex-q { width:26px; height:24px; margin:0 1px; padding:0; border-radius:4px; border:1px solid var(--field-line, var(--line)); background:var(--surface); color:var(--ink-3); font:600 11px/1 var(--sans); cursor:pointer; }
 .copex-q.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
 .copex-q.off { background:var(--surface-2); opacity:.45; text-decoration:line-through; cursor:default; }
-.copex-q:disabled:not(.off) { cursor:default; }
+/* `.copex-q:disabled:not(.off)` was here, for the read-only view's quarters.
+   §538 made those a mark rather than a disabled button, so nothing matches it
+   any more and a dead rule is a rule somebody later reads as a live one. */
+/* §538: Q1–Q4 are buttons only where they can be pressed; everywhere else they
+   are marks. A span needs the box the button got for free. */
+span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
+               text-align:center; vertical-align:middle; cursor:default; }
 .copex-pick { flex-wrap:wrap; align-items:center; font-size:13px; }
 .copex-y { width:72px; }
 

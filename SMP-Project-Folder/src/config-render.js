@@ -31,6 +31,15 @@ function layerOverride(key, which){
   var t = typeof TARGET !== "undefined" ? TARGET : "group";
   return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
 }
+/* ── WHOSE ROW THE BU REFUSAL BELONGS TO (§534.2) ───────────────────────
+   Asked three times while one row is drawn — the mark on the box, the value
+   in it, and the sentence under it — and all three must agree or the box
+   holds one name while the line names another. MBWHY is cleared by the next
+   rename that lands, and names the row by the name it had when it was
+   refused, which is the one thing a repaint cannot have changed. */
+function mbWhy(name){
+  return !!(typeof MBWHY !== "undefined" && MBWHY && MBWHY.at === name);
+}
 function labelWord(key, which){
   var o = layerOverride(key, which);
   if (o) return o;
@@ -1014,7 +1023,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(boxRef(where).area === "fn" ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -1283,6 +1292,27 @@ function unitPlansInCell(k, u){
   return '<span class="pill kind">' + esc(unitPlanWord(unitFormat(u))) + '</span> ' +
     '<span class="mono">' + unitPlanCount(k) + '</span>';
 }
+/* ── §540 · PILLARS SHOWN AS ONE LIST, OR APART ──────────────────────────
+   The row beside "Plans in", and only where the box plans in pillars — there
+   is nothing to join or split otherwise. Two options, both named from the
+   BOX'S OWN WORDS: a client that calls its pillars Directions and its
+   internal ones Core Capabilities reads its own names here, because the whole
+   point of the setting is that the tabs keep saying what they say today.
+
+   ABSENT IS ONE LIST (§50.6). Every box in every client reads that way now,
+   so the control opens on the answer the box already gives and changing
+   nothing changes nothing. */
+function pillarSplitWord(split){
+  return split ? L("pillar", "bu") + " and " + L("capability", "bu") + " apart" : "One list";
+}
+function pillarSplitSelect(k, u){
+  var on = SMPRules.pillarsSplit(u);
+  return '<select class="fld" data-usplit="' + esc(k) + '"' +
+      ' aria-label="How ' + esc(u.name) + ' shows its ' + esc(L("pillar","bu").toLowerCase()) + '">' +
+    [false, true].map(function(v){
+      return '<option value="' + (v ? "split" : "one") + '"' + (on === v ? " selected" : "") + '>' +
+        esc(pillarSplitWord(v)) + '</option>'; }).join("") + '</select>';
+}
 function unitFormatSelect(k, u){
   var f = unitFormat(u);
   return '<select class="fld" data-uformat="' + esc(k) + '"' +
@@ -1457,6 +1487,12 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdField("Plans in", unitFormatSelect(k, u)) +
+        /* §540: and, while it plans in pillars, whether they show as one list
+           or apart. Hidden for the other two ways rather than greyed: there
+           are no pillars on screen to join or to split, so the row would be
+           answering about something the box is not doing (§61). */
+        (unitFormat(u) === "pillars"
+          ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
         pdField(L1("division"),
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
@@ -1623,7 +1659,7 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    show nothing selected. The subject already says which plan it keeps, so
    changing the format IS changing the subject. */
 function impFmtOf(target){
-  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
+  return boxRef(target).kind === "cap" ? "projects" : "pillars";
 }
 /* The subjects a progress file can be downloaded for, in the chosen format. */
 function impSubjects(fmt){
@@ -2379,7 +2415,7 @@ function renderPeople(){
        gets no such line, which is honest: nothing here knows who else holds
        it. */
     function roleHolder(role){
-      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      var hr = boxRef(home), fn = hr.kind === "fn" ? FUNCTIONS[hr.key] : null;
       if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
       if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
       if (role === "fnhead")    return fn ? fn.head : null;
@@ -2395,7 +2431,7 @@ function renderPeople(){
            off `roleWheres()` rather than guessed (§135.6). */
         var hint = "";
         if (!fits) {
-          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
                  (atCo ? "Company" : "Unit") + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
@@ -2868,7 +2904,22 @@ function renderPeople(){
     if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
-    if (personActive(p)) {
+    /* ── AND THIS ENTRY IS A SIMULATION, SO IT OBEYS THE SIMULATION'S RULE
+       (§554) ───────────────────────────────────────────────────────────
+       It was gated on nothing but the row being active, which was true while
+       the whole page was the Super user's. Setup is the office's since
+       §516.2, so an SMO team member already reached this menu and already
+       got the entry — and pressing it CHANGED WHAT WAS DRAWN while their
+       saves went on being judged as themselves, because `actingAs()` would
+       not stamp a view the chrome had not drawn a switcher for. That is
+       §185's fault, open on the one path that never asked.
+
+       Asked of sync.js, the same answer the top bar's list and the server's
+       refusal use (§42): the office may look through the register, and the
+       SMO team through all of it but the Super user. Absent rather than
+       disabled on a row they may not wear — a disabled control invites a
+       press and has nowhere to put "because of who THEY are". */
+    if (personActive(p) && maySimulatePerson(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
     /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
@@ -2922,7 +2973,7 @@ function renderPeople(){
 
        The open row's cell is lifted instead of raising the menu: the menu's
        own z-index cannot escape a context its parent created. */
-    var lifted = open || PDEL === p.key || PSETPW.key === p.key;
+    var lifted = open || PDEL === p.key || PRET === p.key || PSETPW.key === p.key;
     return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
       '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
       'aria-haspopup="true" aria-expanded="' + open + '" ' +
@@ -2931,7 +2982,7 @@ function renderPeople(){
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
       (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + pwPanel(p) + '</td>';
+      retirePanel(p) + deletePanel(p) + pwPanel(p) + '</td>';
   }
 
   /* ── THE PASSWORD PANEL (§69.22) ────────────────────────────────
@@ -2984,6 +3035,31 @@ function renderPeople(){
      BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
      the render that drew this (§48.2). What is drawn here is what to READ;
      what is enforced is asked again at the moment it matters. */
+  /* ── RETIRING, IN THE SAME CORNER AS DELETING (§534.3) ─────────────────
+     The two acts sit next to each other in this row's menu and asked in two
+     different mediums — delete in the panel below, retire in the browser's
+     box. This is the panel's shape, and nothing about it is new: the same
+     frame, the same corner, the same second press.
+
+     IT ONLY ASKS WHEN THERE IS SOMETHING TO TAKE, which the browser's box
+     also did and which must survive the move — a version that asked whatever
+     the row held would be worse than what was there. Somebody holding
+     nothing is retired by the press, because nothing is being decided. */
+  function retirePanel(p){
+    if (PRET !== p.key) return "";
+    var held = personRoles(p).length;
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Retire ' + esc(p.name) + '?</b> ' +
+      (held
+        ? 'They hold ' + plural(held, "role") + '. Retiring takes ' +
+          (held === 1 ? "it" : "them") + ' away and closes their sign-in.'
+        : 'This closes their sign-in.') +
+      ' Everything already reported in their name stays, and <b>Restore</b> ' +
+      'brings them back.</div>' +
+      '<div class="cbtns"><button data-pret-no="1">Cancel</button>' +
+      '<button class="danger" data-pret-yes="' + esc(p.key) + '">Retire</button>' +
+      '</div></div>';
+  }
   function deletePanel(p){
     if (PDEL !== p.key) return "";
     var blockers = personDeleteBlockers(p.key);
@@ -2993,8 +3069,17 @@ function renderPeople(){
            are and the blocker itself opens with a count of its own, so one
            blocker naming two roles read "There is 2 roles still held". The
            blockers are sentences; they do not need introducing. */
-        '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
-        blockers.map(function(b){ return b.full; }).join('; and ') + '.' +
+        /* §534.2: THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO. Drawn
+           on open it says what cannot be done; drawn after Yes was pressed
+           and refused it says what was not done and why that is news —
+           which is the whole of the difference between the two, and the
+           reason the second one is not simply the first repeated. */
+        (REFUSEDLATE === "p:" + p.key
+          ? '<b>' + esc(p.name) + ' was not deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') +
+            ', since this was asked.'
+          : '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') + '.') +
         ' <b>Retire</b> closes the door and keeps every attribution true.</div>' +
         '<div class="cbtns"><button data-pdel-no="1">Close</button></div></div>';
     }
@@ -4246,7 +4331,9 @@ function renderMainbus(){
       return '<span class="uchip">' + esc(roleWhereLabel(at)) +
         (editable ? '<button class="chipx" data-mbdrop="' + esc(b.name) + '|' + esc(at) +
                     '" title="Remove ' + esc(roleWhereLabel(at)) + '">&times;</button>' : '') +
-        '</span>';
+        '</span>' +
+        /* §534.4: the question under the chip it belongs to. */
+        rmStrip("mbdrop", b.name + "|" + at, RMASK ? RMASK.say : "");
     }).join(" ");
     if (!editable) return chips;
     var left = wheres.map(function(g){
@@ -4275,8 +4362,21 @@ function renderMainbus(){
     return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"' +
       (editable ? ' class="tk-open"' : '') + '><td class="idx">' +
       (i + 1) + '</td>' +
+      /* §534.2: THE REFUSAL SITS UNDER THE BOX, AND KEEPS WHAT WAS TYPED.
+         This one fires on leaving the field, which is where the sentence
+         belongs — and the browser's box could not do the other half: the
+         repaint behind it put the old name back, so by the time the refusal
+         had been read the typing was gone and had to be done again. The box
+         holds the refused name, to be corrected rather than retyped. */
       '<td>' + (editable
-        ? '<input class="fld tk-firstfield" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
+        ? '<input class="fld tk-firstfield' + (mbWhy(b.name) ? ' bad' : '') + '" value="' +
+            esc(mbWhy(b.name) ? MBWHY.typed : b.name) + '" data-mbname="' + esc(b.name) + '"' +
+            (mbWhy(b.name) ? ' aria-invalid="true"' : '') + '>' +
+          (mbWhy(b.name)
+            ? '<p class="picerr">There is already a BU called <b>' +
+              esc(MBWHY.typed) + '</b>. Two cannot be merged by renaming one into the ' +
+              'other \u2014 move the people first.</p>'
+            : '')
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
       '<td>' + target(b, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + n + '</span></td>' +
@@ -4288,7 +4388,8 @@ function renderMainbus(){
         !mayEdit || editable ? '' :
           (n ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
              : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')) +
-      '</tr>';
+      '</tr>' +
+      rmStripRow("mbdel", b.name, RMASK ? RMASK.say : "", 5);
   }).join("");
 
   /* The Add row and the table's own existence are the PAGE's question, not a
@@ -4664,7 +4765,7 @@ function whenWord(at){
   if (sameDay) return "today";
   var y = new Date(now.getTime() - 864e5);
   if (d.toDateString() === y.toDateString()) return "yesterday";
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return dateDay(d);
 }
 
 function oneLine160(v){
@@ -5439,7 +5540,29 @@ function renderSeasons(){
               (mayEdit
                 ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
                     'title="Remove this season">×</button></td>'
-                : '') + '</tr>';
+                : '') + '</tr>' +
+              /* ── §534.2: THE REFUSAL IS A LINE UNDER THE ROW ──────────
+                 It was a browser box, which could say the units' names but
+                 could not make them reachable — and this page's own rule is
+                 that a count which cannot take you to what it counts makes
+                 work (§16.7). The names were already here, in the `title` of
+                 the Used by cell: visible to a mouse that hovers the right
+                 four pixels and to nothing else. Pressed, each one opens that
+                 unit's Drivers, which is where the sentence says to go. */
+              (SEASWHY === s.id && used.length
+                ? '<tr class="seasrefuse"><td colspan="' + (mayEdit ? 7 : 6) + '">' +
+                    '<p class="picerr"><b>' + esc(s.name || "This season") +
+                    ' is still in use.</b> ' + plural(used.length, "unit") + ' ' +
+                    (used.length === 1 ? "has" : "have") + ' it as a period of ' +
+                    (used.length === 1 ? "its" : "their") + ' own \u2014 ' +
+                    UNIT_KEYS.filter(function(k){
+                      return SMPRules.seasonUsedBy([UNITS[k]], s.id).length;
+                    }).map(function(k){
+                      return '<button class="linkbu" data-goseas="' + esc(k) + '">' +
+                             esc(UNITS[k].name) + '</button>';
+                    }).join(" ") +
+                    '. Take it off their Drivers page first.</p></td></tr>'
+                : '');
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No seasons yet. A season is a named window of real ' +
           'days that a unit can pull out of its base year — Ramadan, the school ' +
@@ -6349,12 +6472,12 @@ function renderUnitNaming(u){
    reads is not what this round is for (§58's rule for a stored field, applied
    to a local one). */
 function impHolderTarget(){
-  var t = String(IMP.unit || "");
-  if (t.indexOf("cap:") === 0) return t.slice(4);
+  var t = String(IMP.unit || ""), r = boxRef(t);
+  if (r.kind === "cap") return r.key;
   /* §405: a unit that is not planned in pillars imports through its own
      holder, exactly as a projects or objectives function does. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return "u:" + t;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
 }
 function impIsCap(){ return !!impHolderTarget(); }
@@ -6654,10 +6777,7 @@ function contCard(){
 }
 
 function contWhen(iso){
-  var d = new Date(iso);
-  return isFinite(d.getTime())
-    ? d.toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
-    : "";
+  return dateAt(iso);
 }
 
 /* ── The Upload tab ───────────────────────────────────────────────── */
@@ -6696,7 +6816,23 @@ function renderImportUpload(){
     '</div></div>';
 
   var chk = IMP.check;
-  var blocked = chk && chk.problems.length;
+  /* ── §534.2: THE BUTTON IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──────
+     "Importing is the SMO's. Nothing has been applied." was a browser box
+     raised by a live Apply — the whole flow walked through, a file read and
+     checked, and the answer no at the last press. The grant is read here, so
+     the refusal is a line where the button is and the button is held.
+
+     HELD, NEVER `disabled`, and never hidden (§221, §163, §45.2): a disabled
+     button takes no focus, so the reason beside it would be unreachable
+     without a mouse, and a control that vanishes leaves somebody wondering
+     whether the act exists at all. The handler still checks — that is the
+     enforcement, this is what to read (§48.2). */
+  var notMine = grant("c_import") !== "edit";
+  var blocked = (chk && chk.problems.length) || notMine;
+  var notMineSay = notMine
+    ? '<p class="picerr"><b>Importing is the SMO\u2019s.</b> You can read this file and ' +
+      'check it against the plan; applying it is the office\u2019s.</p>'
+    : '';
   var checkBlock = chk && (chk.problems.length || chk.notices.length)
     ? '<div class="imp-checks">' +
         chk.problems.map(function(x){
@@ -6785,8 +6921,13 @@ function renderImportUpload(){
           'Kept as an archive dated today and restorable from <b>Archived plans</b> at any ' +
           'time. Nothing is destroyed.</div>'
         : '') +
+      notMineSay +
       '<div class="imp-row" style="margin-top:14px">' +
-        (blocked
+        (notMine
+          ? '<button class="editbtn apply" aria-disabled="true" ' +
+            'data-tip="Importing is the SMO\u2019s.">' +
+            (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>'
+          : blocked
           ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
           : '<button class="editbtn apply" data-apply="1">' +
             (hasPlan ? "Replace " : "Write ") + esc(u.name) + '’s plan</button>') +
@@ -6812,8 +6953,15 @@ function renderImportUpload(){
         '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
       checkBlock + rowsHtml +
       (changed.length
-        ? '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
+        ? notMineSay +
+          '<div class="imp-row" style="margin-top:14px">' +
+          /* notMine is tested FIRST in both branches: `blocked` already holds
+             it, so the generic "Apply blocked" would otherwise win and say
+             nothing about whose the act is. */
+          (notMine
+            ? '<button class="editbtn apply" aria-disabled="true" ' +
+              'data-tip="Importing is the SMO\u2019s.">Apply to ' + esc(u.name) + '</button>'
+            : blocked
             ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
             : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
           '<button class="linkbu" data-cancel="1">Discard</button></div>'
@@ -6829,6 +6977,26 @@ function renderImportUpload(){
    nervous one: an upload never deletes, and the proof is a list you can read.
 
    The only destructive control in the import flow is Delete, and it asks. */
+/* WHAT AN ARCHIVE HOLDS, SAID IN ONE PLACE (§53.5). The row prints it and
+   the Forget dialog repeats it back before destroying it — two copies of
+   this is how the table and the question come to disagree about what is
+   about to be lost, which is the one disagreement that question cannot
+   survive. Three kinds: a unit's plan, a capability's plan, and a CYCLE's
+   figures, taken when a new cycle clears the last one's numbers (§49.1). */
+function archiveHeld(a){
+  var c = (a && a.counts) || {};
+  return a.kind === "figures"
+    ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
+       plural(c.units || 0, "submitted unit")].join(" &middot; ")
+    : a.kind === "foundation"
+    ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : a.kind === "unit"
+    ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
+       plural(c.tactics, L1("tactic"), L("tactic")),
+       plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
+       c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+}
 function renderArchives(){
   var can = grant("c_import") === "edit";
   if (!ARCHIVES.length)
@@ -6840,21 +7008,11 @@ function renderArchives(){
 
   var rows = ARCHIVES.map(function(a){
     var c = a.counts || {};
-    /* Three kinds now: a unit's plan, a capability's plan, and a CYCLE's
-       figures — taken when a new cycle clears the last one's numbers (§49.1).
-       A figures archive belongs to no one unit, so it is always restorable. */
-    var held = a.kind === "figures"
-      ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
-         plural(c.units || 0, "submitted unit")].join(" &middot; ")
-      : a.kind === "foundation"
+    var held = archiveHeld(a) +
       /* §524: the six parts of a Foundation, replaced from the Copilot. */
-      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
-        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
-      : a.kind === "unit"
-      ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
-         plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
-      : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
-         c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+      (a.kind === "foundation"
+        ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
+        : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
@@ -6878,7 +7036,7 @@ function renderArchives(){
           : '<span class="why">nothing reported</span>') + '</td>' +
       '<td class="cc">' + (can && live
         ? '<button class="editbtn" data-restore="' + esc(a.id) + '">Restore</button> ' +
-          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Delete</button>'
+          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Forget</button>'
         : '<span class="pill none">View only</span>') + '</td></tr>';
   }).join("");
 
@@ -7074,10 +7232,11 @@ function contTakenSection(){
 function reviewDayWord(){
   var w = SMPRules.reviewMoment(REVIEW);
   if (!w) return "";
-  var day = w.toLocaleDateString(undefined, { day:"numeric", month:"short" });
-  return REVIEW.reviewAt
-    ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
-    : day;
+  /* The day and the day-with-time are the SAME two writers everything else
+     uses; this used to build the second one itself out of the day plus the
+     browser's idea of a time, which is "09:00" here and "09:00 AM" on an
+     American machine. */
+  return REVIEW.reviewAt ? dateAt(w) : dateDay(w);
 }
 
 function reviewDayBlock(){
@@ -7676,19 +7835,48 @@ function renderCycle(){
            an end its own arithmetic could not read. The dates go through
            `cyclePick` and write into the draft through FIELDS; only the NAME
            is still typed, so only the name is still read by id. */
-        '<div class="nc-grid nc-1line">' +
-          '<label class="nm-lab"><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          cyclePick("Covers from", NEWCYCLE.from, function(v){
-            NEWCYCLE.from = String(v).trim();
-          }, { wide:true }) +
-          cyclePick("to", NEWCYCLE.to, function(v){
-            NEWCYCLE.to = String(v).trim();
-          }, { wide:true, cls:"tobtn" }) +
-          cyclePick("Reports due", NEWCYCLE.due, function(v){
-            NEWCYCLE.due = String(v).trim();
-          }, { day:true }) +
-        '</div>' +
+        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
+           Both of this panel's refusals were browser boxes, and a box opens
+           OVER the form: the empty field could not be seen while the sentence
+           about it was on screen. The name's box then put the cursor in the
+           field afterwards and the month's did not — one form, two
+           behaviours, because a notice said away from its control has no
+           natural place to point.
+
+           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
+           `NEWCYCLE.why` names the field that was empty when Open was
+           pressed, and this reads it back against the CURRENT value, so
+           filling the box clears the line with no handler to remember. */
+        (function(){
+          var why = NEWCYCLE.why;
+          if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
+          if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
+          return '<div class="nc-grid nc-1line">' +
+            '<label class="nm-lab"><span>Name</span><input class="fld' +
+              (why === "name" ? " bad" : "") + '" id="nc-name"' +
+              (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
+              esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
+            cyclePick("Covers from", NEWCYCLE.from, function(v){
+              NEWCYCLE.from = String(v).trim();
+            }, { wide:true }) +
+            cyclePick("to", NEWCYCLE.to, function(v){
+              NEWCYCLE.to = String(v).trim();
+            }, { wide:true, cls:"tobtn" + (why === "to" ? " bad" : "") }) +
+            cyclePick("Reports due", NEWCYCLE.due, function(v){
+              NEWCYCLE.due = String(v).trim();
+            }, { day:true }) +
+          '</div>' +
+          (why === "name"
+            ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
+              'are filed under once it closes, and what the next cycle compares against.</p>'
+            : why === "to"
+            /* The band below already says what the month decides, and it is on
+               screen — so the refusal names the control and leaves the
+               explaining to the sentence that was always there. */
+            ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
+              'It is the review point, and the line below says what it decides.</p>'
+            : '');
+        })() +
         '<div class="nc-why"><b>The month it covers to decides what every figure is ' +
           'measured against.</b> A target that adds up across the year is compared with ' +
           'the share of it due by then, and a tactic whose span has not started yet is ' +
@@ -7930,12 +8118,30 @@ function capFormatCell(c, editable){
     ? (capItems(c).length ? "its plan" : "")
     : ((c.projects || []).length
         ? plural((c.projects || []).length, L1("project"), L("project")) : "");
-  return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
-      (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
+  /* HELD, NOT DEAD (§538). The row says "holds its plan" beside it, which
+     names the obstacle; the way OUT of it — clear that plan first — sat on a
+     `disabled` control, which takes no pointer and no Tab, so half the answer
+     was on screen and half reached nobody.
+
+     THE BUBBLE IS ON A WRAPPER AND NOT ON THE SELECT, because a browser does
+     not paint `::after` on a form control, and the bubble IS an `::after`. The
+     span opens it on hover; `:focus-within` opens it when the select inside
+     takes focus, which is the half a plain hover never had.
+
+     AND THE REFUSAL MOVED TO THE HANDLER. `aria-disabled` leaves a select
+     genuinely changeable — unlike a button, where it is the handler that
+     declines — so the change listener puts the row back (shell.html). The
+     options are both still drawn, exactly as before: what is held is the
+     change, not the sight of what the other way would be. */
+  var sel = '<select class="fld" data-capformat="' + esc(c.id) + '"' +
+      (blocked ? ' aria-disabled="true" data-capwas="' + (pillars ? "pillars" : "projects") + '"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
     '<option value="projects"' + (pillars ? "" : " selected") + '>' + L("project") + '</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
-    '</select>' +
+    '</select>';
+  return (blocked
+      ? '<span class="hasnote capheld" data-tip="Clear the plan on this row first">' + sel + '</span>'
+      : sel) +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
 /* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
@@ -8072,15 +8278,33 @@ function fnKebab(fk, f, mayEdit){
    delete question. */
 function fnPanels(fk, f){
   if (CLEARING === "fndel|" + fk) {
+    /* ── §534.2: THE QUESTION IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──
+       "Functions are the SMO's. Nothing has been deleted." was a browser box
+       raised by the SECOND press — the question was asked, Yes was pressed,
+       and only then was the answer no. The grant is read here, so what opens
+       is the refusal and there is no Yes to press. The handler still checks
+       (§48.2): this decides what to READ, that decides what happens. */
+    if (grant("c_fns") !== "edit")
+      return '<div class="kmenu kconfirm"><div class="cq">' +
+        '<b>' + esc(f.name) + ' cannot be deleted from here.</b> Functions are the ' +
+        "SMO's. <b>Retire</b> takes it out of your navigation and keeps everything " +
+        'under it.</div>' +
+        '<div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var why = fnDeleteBlockers(fk);
     if (why.length) return '<div class="kmenu kconfirm"><div class="cq">' +
-      '<b>' + esc(f.name) + ' cannot be deleted.</b> ' +
+      /* THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO (§534.2): drawn on
+         open it says what cannot be done; drawn after Yes was pressed and
+         refused it says what was not done, and that this is news. */
+      (REFUSEDLATE === "fn:" + fk
+        ? '<b>' + esc(f.name) + ' was not deleted.</b> '
+        : '<b>' + esc(f.name) + ' cannot be deleted.</b> ') +
       /* Each reason is a sentence in a paragraph of them, so it starts with a
          capital. Written where they are JOINED, not baked into the strings,
          because the same text is spoken mid-sentence by the server's refusal. */
       why.map(function(w){
         return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
       }).join(" ") +
+      (REFUSEDLATE === "fn:" + fk ? ' That has come to be true since this was asked.' : '') +
       ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var takes = fnDeleteTakes(fk);
@@ -8270,8 +8494,19 @@ function renderFunctions(){
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
+      /* ── §534.3: THE NAME IS TYPED IN THE PAGE, NOT IN A prompt() ──────
+         The last browser prompt in the product. §69.22 took the other one
+         out for the reason that applies here too: a browser is allowed to
+         SUPPRESS a prompt, and a suppressed prompt is a control that looks
+         live and does nothing. The shape is the BU list's own add row — a
+         field and an Add beside it — so the two places you name a new thing
+         are named the same way (§53.5). */
       (mayEdit && !arranging
-        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
+        ? '<div class="addrow">' +
+          '<input class="fld" id="newfn" value="' + esc(NEWFN) + '" ' +
+          'placeholder="' + L1("fnword") + ' name" ' +
+          'aria-label="Name of the ' + L1("fnword") + '">' +
+          '<button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
         : ''));
 }
 
@@ -8279,15 +8514,25 @@ function renderFunctions(){
    The SMO decides which capabilities exist and which function owns each. Each
    belongs to exactly one function; the enhancement work inside them arrives by
    template, the way a unit's plan does. */
+/* §542: the company's internal pillars, read as capabilities — code, name
+   and owner, which is all this page ever showed that a pillar also has. */
+function capsAsPillars(){
+  var u = topAsUnit(), out = [];
+  (u.items || []).forEach(function(p, i){
+    if (SMPRules.pillarIsCap(p)) out.push({ code: pillarCode(u, i), name: p.name || "", owner: p.owner || "" });
+  });
+  return out;
+}
 function renderCaps(){
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
+  /* §542: this client's capabilities are pillars, not records. */
+  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
-    var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+    return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
       (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
@@ -8298,18 +8543,14 @@ function renderCaps(){
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
-      '<td>' + (editable
-        /* NAMED. Eight of these on one page announced as eight identical
-           unnamed combo boxes, and the searchable button in front of each
-           inherits the name from here (§48.5). */
-        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
-          esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
-            FUNCTION_KEYS.map(function(k){
-              return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
-                esc(FUNCTIONS[k].name) + '</option>';
-            }).join("") + '</select>'
-        : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
+      /* §544.13 — THE "HELD BY" COLUMN IS GONE. Islam, asked whether set-up
+         should still let the office put a capability under a function:
+         **"no — remove it"**; a capability is the company's. The picker was
+         the last way to attach one, so it goes with the column it sat in,
+         and what is left is the two seats §412 gave it — an Owner and a
+         Custodian of its own, which is how a capability is answered for
+         now. The `fn` already on a record is neither read here nor written
+         (§405). */
       /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
          used to borrow the holding function's head, which is right while a
          capability is only ever held by a function and wrong for a
@@ -8338,7 +8579,9 @@ function renderCaps(){
   /* A capability with no function is a real answer now (§412) — a
      company-wide one is held by nobody. What is still outstanding is one
      that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  /* §544.13: "no owner and no holding function" is just "no owner" — no
+     capability has a holding function any more. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
@@ -8356,15 +8599,39 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit
+      (mayEdit && !capsAreP
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
+        : '') +
+      /* ── §542 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
+         A client whose capabilities have become internal pillars of the
+         company's plan (stage 3b) opened this page on an EMPTY table with an
+         Add button that would mint the very record type the move removed.
+         §61's fault twice over: a page saying nothing about the thing it is
+         named after, and the only control on it being the wrong one.
+
+         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
+         pillar's name, owner and custodian are edited on the plan with the
+         pen, like every other pillar's, and a second place to type them is a
+         second answer to who owns this (§53.5). The Add button goes with
+         them — there is nothing on this page left to add. */
+      (capsAreP
+        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
+            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
+            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
+            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
+            capsAsPillars().map(function(r){
+              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
+                ' <span class="why" style="margin:0">' +
+                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
+          '</ul></div>'
         : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
@@ -9365,11 +9632,18 @@ function renderSentOne(){
           '\u2014 nobody resolved into the audience at all.</span>');
   }
   var m = (SENTONE.data && SENTONE.data.message) || {};
+  /* §548: THE FACT MOVES TO THE HOVER, which is where rule 1b-ii sends a
+     sentence like this one — "it is information, and it belongs on a hover
+     ... never as a paragraph". It is worth keeping: without it this table
+     reads as something the screen worked out just now, when it is the record
+     written at the moment of sending. `section()`'s own fifth argument draws
+     it, so nothing new was built and the words did not change. */
   return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
-    "Written when it was sent, so it is what actually happened rather than what the " +
-    "screen worked out beforehand.",
+    null,
     body + '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+      '<button class="linkbu" data-sentclose="1">Close</button></div>',
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.");
 }
 
 function renderSentList(){
@@ -9724,9 +9998,9 @@ function vidStoreWhere(path){
   return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
 }
 function deckSubjectName(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     return f ? f.name + " (function)" : t;
   }
   var u = UNITS[t];

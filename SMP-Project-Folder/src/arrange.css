@@ -117,6 +117,11 @@
          border:1px solid var(--field-line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* §538: a held control reads as held. `aria-disabled` changes nothing a
+     browser paints, so the look has to be asked for. The wrapper is
+     inline-block so the bubble it carries has something to centre on. */
+  .fld[aria-disabled="true"] { opacity:.45; cursor:default; }
+  .capheld { display:inline-block; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
      A yes/no target carries no number, so the direction, the figure and the
      compile rule beside it have nothing to act on. They stay DRAWN — a hole
@@ -329,6 +334,19 @@
   .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
              min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  /* THE STAFF READING LINK (§542): one link before Sign out, drawn by
+     shell/route.js mountProcessesLink. Not a menu. Same look as the shared
+     bar's own (lib/topbar.ts .tbread), so walking from here into Notes does
+     not change it. */
+  .processes-read { margin-left:auto; display:inline-flex; align-items:center; gap:7px; flex-shrink:0;
+                    font-size:13.5px; font-weight:600; color:var(--ink); text-decoration:none;
+                    padding:3px 8px; border-radius:7px; }
+  .processes-read:hover { background:var(--surface-2); }
+  .processes-read:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .processes-read .prn { font-size:11.5px; font-weight:700; color:var(--ink); line-height:18px; padding:0 7px;
+                         border-radius:99px; border:1px solid var(--gold);
+                         background:color-mix(in srgb, var(--gold) 22%, var(--surface)); }
+  .processes-read + .topacts { margin-left:0; }
 
   /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
 
@@ -973,6 +991,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      product, and the row already carries the red word that says what is
      wrong. This is the evidence beside it, not a second alarm. */
   .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
+
+  /* A NAME THAT MATCHES NOBODY IN THE REGISTER (§551). Islam's choice of the
+     three: flag it, do not refuse it and do not delete it — the name is the
+     only clue to who was meant. It borrows `.wasval`'s reasoning and NOT its
+     colour: this one IS a fault to correct rather than evidence beside one,
+     so it carries the warning colour the rest of the product uses for
+     "something here needs attention" — but it stays small and beside the
+     name, never replacing it. */
+  .ownerstray { color:var(--warn); font-style:italic; font-size:11.5px;
+                font-weight:400; white-space:nowrap; }
 
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */

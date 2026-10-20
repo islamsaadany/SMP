@@ -481,8 +481,9 @@
   table.hist.uns tr.grp td { background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
   table.hist.uns td.hist-act .hist-err { font-size:var(--fs-micro); margin-top:4px; text-align:right; }
   .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
-  .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
-  .hist-rst:disabled { opacity:.45; cursor:default; }
+  .hist-rst:hover:not(:disabled):not([aria-disabled="true"]) { border-color:var(--gold-deep); color:var(--ink); }
+  /* §538: HELD looks exactly as dead looked — the change is that it answers. */
+  .hist-rst:disabled, .hist-rst[aria-disabled="true"] { opacity:.45; cursor:default; }
   .hist-rst:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
   .hist-confirm { border:1px solid var(--attn); background:var(--attn-bg); color:var(--attn-tx); border-radius:8px; padding:12px 14px; font-size:var(--fs-small); margin:0 0 14px; }
   .hist-confirm p { margin:0 0 8px; } .hist-confirm b, .hist-confirm strong { color:inherit; }
@@ -1119,6 +1120,12 @@ html[data-client-settings] .viewer { display:none; }
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
+  /* AND WHEN SOMETHING INSIDE IT TAKES FOCUS (§538). A browser does not paint
+     `::after` on a form control, so a held `<select>` wears the note on a span
+     around it — and a span never takes focus, which would have left the bubble
+     open to a pointer and to nothing else. That is the half this whole section
+     exists to close. */
+  .hasnote:focus-within::after { display:block; }
   /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
      compiled cell carried `hasnote` while still setting a `title`, so this rule
      matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
@@ -1305,6 +1312,43 @@ html[data-client-settings] .viewer { display:none; }
   .modal-b table { min-width:0; width:100%; }
   .modal-b .scroll { border:1px solid var(--line-soft); }
   .modal-b h4.mini:first-child { margin-top:0; }
+
+  /* ── THE KEYBOARD SHEET (§539) ────────────────────────────────────────
+     A two-column grid rather than a table: the keycaps set their own width and
+     the sentence takes the rest, and at phone width the two stack instead of
+     squeezing a run of caps into a column it cannot hold. */
+  .ks-rows { display:grid; grid-template-columns:auto 1fr; gap:6px 14px;
+             align-items:baseline; margin:0 0 4px; }
+  .ks-k { text-align:right; white-space:nowrap; font-size:var(--fs-small); }
+  .ks-v { font-size:13px; color:var(--ink-2); line-height:1.45; }
+  /* "type" is a thing you do, not a key you press, so it must not wear a
+     keycap - a cap around it would be a key nobody can find. */
+  .ks-typ { font-style:italic; color:var(--ink-3); font-size:var(--fs-small); }
+  .ks-or { color:var(--ink-3); font-size:11px; margin:0 2px; }
+  .modal-b kbd { display:inline-block; font:600 11px/1 var(--mono, ui-monospace, monospace);
+                 color:var(--ink); background:var(--surface-2);
+                 border:1px solid var(--field-line); border-bottom-width:2px;
+                 border-radius:4px; padding:4px 6px; margin:0 1px; }
+  h4.mini .ks-where { color:var(--ink-3); letter-spacing:0; text-transform:none;
+                      font-weight:600; font-size:11.5px; margin-left:7px; }
+  /* THE MARK IS A WORD IN A PILL, never a colour alone (§68.10): "here" is
+     legible to somebody who cannot tell the green from the grey. */
+  h4.mini .ks-here { background:var(--good-bg); color:var(--good-tx); border-radius:99px;
+                     padding:2px 8px; font:700 9px/1 var(--sans); letter-spacing:.08em;
+                     margin-left:8px; vertical-align:1px; }
+  /* A section that is not live here is QUIETER AND NOT HIDDEN - the whole
+     argument for treatment A is that a reporter finds out the deck has keys. */
+  .ks-rows.ks-dim .ks-v { color:var(--ink-3); }
+  .ks-rows.ks-dim kbd { opacity:.62; }
+  .ks-foot { border-top:1px solid var(--line-soft); margin-top:18px; padding-top:12px;
+             font-size:var(--fs-small); color:var(--ink-3); line-height:1.5; }
+  .keysbtn { padding:5px 0; width:28px; text-align:center; letter-spacing:0;
+             font-size:13px; text-transform:none; }
+  @media (max-width:560px) {
+    .ks-rows { grid-template-columns:1fr; gap:2px; }
+    .ks-k { text-align:left; }
+    .ks-v { margin-bottom:7px; }
+  }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
@@ -1363,6 +1407,124 @@ html[data-client-settings] .viewer { display:none; }
     .rmconfirm .pick { flex-direction:column; align-items:stretch; }
     .rmconfirm .pick button { width:100%; }
   }
+
+  /* ── DELETING FOR GOOD: what goes, what stays, and no way back (§534) ──
+     Three acts in the product take something away with nothing behind them:
+     a clip's bytes, a batch of them, and a filed archive. Everything else
+     that reads like a deletion archives first and `.archline` says so — so
+     this block is the shape for the three that cannot, and `.noway` is
+     `.archline`'s opposite: same place in the dialog, the other answer.
+
+     TWO ROWS, NOT ONE PARAGRAPH. The browser's box these replace held one
+     run of text, so what goes, what stays and there is no way back arrived
+     as one paragraph with blank lines in it. The mockup Islam signed off
+     (design-mockups/delete-for-good/) splits them, because WHAT STAYS is the
+     half the box was worst at and the half somebody hesitates over: the fear
+     is rarely "will this delete" and nearly always "what does it take with
+     it". The ground is --bad-bg under what goes and nothing under what
+     stays — the alarm is spent once, on the half that earns it (§41). */
+  .rmconfirm .ledger { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .ledger .lrow { display:flex; gap:12px; padding:11px 13px;
+    font-size:13px; line-height:1.5; border-top:1px solid var(--line-soft); }
+  .rmconfirm .ledger .lrow:first-child { border-top:0; }
+  .rmconfirm .ledger .mk { flex:0 0 auto; width:7ch; padding-top:2px;
+    font:700 12px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+  .rmconfirm .ledger .tx { flex:1; min-width:0; }
+  .rmconfirm .ledger .tx b { color:var(--ink); }
+  .rmconfirm .ledger .tx .sub { display:block; color:var(--ink-3);
+    font-size:12.5px; margin-top:2px; line-height:1.45; }
+  .rmconfirm .ledger .goes { background:var(--bad-bg); }
+  .rmconfirm .ledger .goes .mk { color:var(--bad-tx); }
+  .rmconfirm .ledger .goes .tx { color:var(--ink); }
+  .rmconfirm .ledger .stays .mk { color:var(--good-tx); }
+  .rmconfirm .ledger .stays .tx { color:var(--ink-2); }
+  /* `.archline`'s opposite, and deliberately the same size and place: the one
+     sentence the rest of the product can never truthfully say. */
+  .rmconfirm .noway { font-size:12.5px; color:var(--bad-tx); margin:0 0 16px;
+    line-height:1.45; }
+  .rmconfirm .noway b { font-weight:700; }
+  /* THE LIST OF WHAT GOES SCROLLS AND THE DIALOG DOES NOT GROW. Twelve clips
+     named is the whole reason the bulk question is worth asking (§186: a
+     confirmation that does not say which line catches none of the mistakes
+     it exists for) — and twelve rows unrolled would push the buttons off a
+     laptop. Seven are visible and the rest are reached. */
+  .rmconfirm .scroll { max-height:168px; overflow-y:auto; margin:0 0 14px; }
+  .rmconfirm .scroll table { font-size:12.5px; }
+  .rmconfirm .scroll th { position:sticky; top:0; background:var(--surface-2); }
+  @media (max-width:520px) {
+    .rmconfirm .ledger .lrow { flex-direction:column; gap:3px; }
+    .rmconfirm .ledger .mk { width:auto; }
+  }
+
+  /* ── THE ROLES A RESTORE WOULD GIVE BACK, ONE PER LINE (§534.1) ────────
+     The browser's box said them as two runs of commas — "Give back: A, B"
+     and "Held by somebody else now, so left alone: C (Noura)". Three roles
+     in a comma list is readable; six is not, and six is a BU owner who is
+     also custodian of two functions. The WORD at the front of each line is
+     what the answer turns on, so it leads rather than trails. */
+  .rmconfirm .rolelist { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .rolelist .r { display:flex; gap:11px; align-items:baseline;
+    padding:10px 13px; font-size:13px; border-top:1px solid var(--line-soft); }
+  .rmconfirm .rolelist .r:first-child { border-top:0; }
+  .rmconfirm .rolelist .mk { flex:0 0 auto; width:9ch; padding-top:2px;
+    font:700 10.5px/1.4 var(--sans); letter-spacing:.07em; text-transform:uppercase; }
+  .rmconfirm .rolelist .tx { flex:1; min-width:0; line-height:1.5; color:var(--ink-2); }
+  .rmconfirm .rolelist .tx b { color:var(--ink); }
+  .rmconfirm .rolelist .tx .sub { display:block; font-size:12px; color:var(--ink-3);
+    margin-top:1px; }
+  .rmconfirm .rolelist .back .mk { color:var(--good-tx); }
+  /* Taken is not an alarm — nothing is wrong, somebody is simply in the seat
+     — so it wears the page's own quiet ground and the warn ink (§168). */
+  .rmconfirm .rolelist .taken { background:var(--surface-2); }
+  .rmconfirm .rolelist .taken .mk { color:var(--warn-tx); }
+  @media (max-width:520px) {
+    .rmconfirm .rolelist .r { flex-direction:column; gap:2px; }
+    .rmconfirm .rolelist .mk { width:auto; }
+  }
+
+  /* ── THE QUESTION UNDER THE LINE (§534.4) ─────────────────────────────
+     Nine controls across six screens asked one sentence — "Remove X? This
+     cannot be undone here." — in the browser's box, which covers the list it
+     is asking about and never says WHICH line. Islam picked B of the two
+     drawn (design-mockups/remove-a-line/): the line stays where it is and
+     readable, and the question opens under it.
+
+     ITS COST IS KNOWN AND ACCEPTED: the list grows by a strip as you press,
+     so what is below moves. A was the other answer — the line turning into
+     the question, nothing moving, the line's text hidden while it asks.
+
+     ONE SHAPE FOR ALL NINE, built by `rmStrip`/`rmStripRow`, because the
+     sentence and the two words have to be the same in nine places and nine
+     copies is how they stop being (§53.5). Inside a table it is a row of its
+     own; everywhere else it is a block under the field. */
+  .rmask { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--surface-2); border-left:3px solid var(--bad);
+    border-radius:var(--r-sm); padding:8px 11px; margin:4px 0 2px; }
+  .rmask .q { flex:1; min-width:0; font-size:var(--fs-note); color:var(--bad-tx);
+    line-height:1.45; }
+  .rmask .q b { color:var(--ink); font-weight:600; }
+  .rmask button { font:600 12px/1 var(--sans); border-radius:var(--r-sm);
+    padding:6px 10px; cursor:pointer; white-space:nowrap; }
+  .rmask .rmkeep { background:var(--surface); border:1px solid var(--line); color:var(--ink-2); }
+  .rmask .rmkeep:hover { background:var(--surface-2); color:var(--ink); }
+  /* --bad as a FILL carries the page's lightest surface, never white literal
+     (§25, §38.4) — the same pairing `.rmconfirm .danger` uses. */
+  .rmask .rmgo { background:var(--bad); border:1px solid var(--bad); color:var(--surface); }
+  .rmask .rmgo:hover { filter:brightness(1.08); }
+  /* The SWOT's line is a grid of `22px 1fr auto` (arrange.css §270), so the
+     strip takes the two columns UNDER the field rather than a row of its own
+     beside the number. */
+  .swotlist li .rmask { grid-column:2 / -1; }
+  /* In a table the strip is a row, and the cell holding it adds no padding of
+     its own — the strip has its own and a doubled inset reads as a gap in the
+     table rather than a line under the row above. */
+  tr.rmaskrow > td { padding:4px 10px 6px; }
+  /* THE LINE BEING ASKED ABOUT IS MARKED, which is the half the browser's box
+     could never do: it said "this line" over a list of nine. */
+  .rmasking > .fld, .rmasking .fld, .rmasking input, .rmasking textarea { border-color:var(--bad); }
+  tr.rmasking > td { background:var(--bad-bg); }
 
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
@@ -1669,6 +1831,8 @@ html[data-client-settings] .viewer { display:none; }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
+  /* §556: a group band's own count, at the right as the head's sits. */
+  .rail .rgroup .rgn { float:right; font-weight:600; font-variant-numeric:tabular-nums; }
   .rail button.ritem { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
     width:100%; text-align:left; font:inherit; color:inherit; background:none;
     padding:11px 14px 11px 11px; border:0; border-bottom:1px solid var(--line-soft);
@@ -2682,6 +2846,17 @@ html[data-client-settings] .viewer { display:none; }
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
+  /* ── THE GO-TO LIST'S HOST (§547) ─────────────────────────────────────
+     Plumbing, not a control: a `select` and the button `searchsel` builds for
+     it, parked at the top of the window so the popup — which anchors to that
+     button — opens where somebody is already looking. Both are out of the tab
+     order and the accessibility tree, so a host left standing is unreachable;
+     it is 1px rather than `display:none` because a box with no size has no
+     rect for the popup to anchor to. */
+  #gotohost { position:fixed; left:50%; top:76px; transform:translateX(-50%);
+              width:1px; height:1px; overflow:hidden; z-index:119; }
+  #gotohost button, #gotohost select { opacity:0; width:1px; height:1px;
+                                       padding:0; border:0; pointer-events:none; }
   .sslist { max-height:230px; overflow-y:auto; }
   /* Select all / none (§304): a row of its own between the search and the
      list, so a press cannot be mistaken for a row of the list. */
@@ -2695,6 +2870,15 @@ html[data-client-settings] .viewer { display:none; }
   .ssrow:hover { background:var(--surface-2); }
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* ── §536: WHERE THE ARROW KEYS ARE ───────────────────────────────────
+     The row the arrows are on, which is NOT the row the mouse is over and
+     NOT a focused one — focus stays in the search box so the next three
+     letters still land there. It wears the same ground `:hover` does plus a
+     mark of its own, because on a ticking list a row can be lit (`on`),
+     hovered and arrowed-to at once and three states that look alike are one
+     state nobody can read (§41). */
+  .ssrow.ssrow-at { background:var(--surface-2); box-shadow:inset 2px 0 0 var(--gold); }
+  .ssrow.on.ssrow-at { background:var(--over-bg); }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
   /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
      The plan's owner list is fifty entries made of two different kinds of
@@ -4207,6 +4391,17 @@ html[data-client-settings] .viewer { display:none; }
   .nc-1line .nm-lab .fld { width:100%; }
   .nc-1line .dt { flex:0 0 auto; }
   .nc-1line .cycbtn { width:150px; }
+  /* ── A CONTROL THE PLATFORM HAS JUST REFUSED (§534.2) ──────────────
+     The refusal itself is a sentence under the control — `.picerr`, the
+     picture editor's own line, which is already the product's answer for a
+     refusal belonging to ONE control and is why nothing new is invented
+     here. This is the mark on the control it points at, and both halves are
+     needed: the line alone leaves somebody hunting the box in a row of four,
+     and the mark alone says something is wrong without saying what.
+     `aria-invalid` goes on beside it, which is the half a screen reader
+     gets (§163's rule: the reason has to be reachable without a mouse). */
+  .fld.bad, .cycbtn.bad { border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg); }
+  .newcycle .picerr { margin:11px 0 0; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
@@ -5395,6 +5590,11 @@ html[data-client-settings] .viewer { display:none; }
          border:1px solid var(--field-line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* §538: a held control reads as held. `aria-disabled` changes nothing a
+     browser paints, so the look has to be asked for. The wrapper is
+     inline-block so the bubble it carries has something to centre on. */
+  .fld[aria-disabled="true"] { opacity:.45; cursor:default; }
+  .capheld { display:inline-block; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
      A yes/no target carries no number, so the direction, the figure and the
      compile rule beside it have nothing to act on. They stay DRAWN — a hole
@@ -5607,6 +5807,19 @@ html[data-client-settings] .viewer { display:none; }
   .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
              min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  /* THE STAFF READING LINK (§542): one link before Sign out, drawn by
+     shell/route.js mountProcessesLink. Not a menu. Same look as the shared
+     bar's own (lib/topbar.ts .tbread), so walking from here into Notes does
+     not change it. */
+  .processes-read { margin-left:auto; display:inline-flex; align-items:center; gap:7px; flex-shrink:0;
+                    font-size:13.5px; font-weight:600; color:var(--ink); text-decoration:none;
+                    padding:3px 8px; border-radius:7px; }
+  .processes-read:hover { background:var(--surface-2); }
+  .processes-read:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .processes-read .prn { font-size:11.5px; font-weight:700; color:var(--ink); line-height:18px; padding:0 7px;
+                         border-radius:99px; border:1px solid var(--gold);
+                         background:color-mix(in srgb, var(--gold) 22%, var(--surface)); }
+  .processes-read + .topacts { margin-left:0; }
 
   /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
 
@@ -6251,6 +6464,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      product, and the row already carries the red word that says what is
      wrong. This is the evidence beside it, not a second alarm. */
   .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
+
+  /* A NAME THAT MATCHES NOBODY IN THE REGISTER (§551). Islam's choice of the
+     three: flag it, do not refuse it and do not delete it — the name is the
+     only clue to who was meant. It borrows `.wasval`'s reasoning and NOT its
+     colour: this one IS a fault to correct rather than evidence beside one,
+     so it carries the warning colour the rest of the product uses for
+     "something here needs attention" — but it stays small and beside the
+     name, never replacing it. */
+  .ownerstray { color:var(--warn); font-style:italic; font-size:11.5px;
+                font-weight:400; white-space:nowrap; }
 
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
@@ -8417,6 +8640,9 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      untouched; and `.tight` still overrides it, so a plan with many
      objectives shrinks exactly as it did (§69.5). */
   .dslide .aimtop { padding-bottom:16px; }
+  /* §553.7: a continuation carries the rest of the table, not the lead
+     paragraph above it — the aspiration is said once, on the first slide. */
+  .dslide[data-cont] .aimtop { display:none; }
   .dslide .aimbottom table.dbig td { font-size:30px; padding:24px 18px; }
   .dslide .aimbottom table.dbig th { font-size:15px; }
   /* AND THE TIGHTENED SLIDE GETS ITS OWN FLOOR, which is the half that
@@ -8804,36 +9030,9 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      fault §225 recorded when the chat header grew its second button. The group
      carries the auto; the buttons carry the gap. */
   .sl-acts { margin-left:auto; display:flex; align-items:center; gap:10px; }
-  /* ── PLAY IS THE ACCENT AS A FILL (§38.4, §295) ───────────────────
-     Islam's pick from the mockup. It is the reason somebody is on this screen
-     once the arranging is done, so it takes the volume — and on a navy bar the
-     platform's own way of saying that is the accent FILLED with `--on-accent`
-     over it, which is what the deck's own lit pill does two surfaces away
-     (§266.9). Never gold TYPE: the accent carries a mark and cannot carry
-     words.
-
-     `--on-accent`, not a literal and not `--panel-ink`: it is the token
-     `brandTokens()` writes, so a tenant who rebrands gets an ink that can be
-     read on their own accent rather than one chosen for ours (§25).
-     Measured on the shipped palette: 5.34 light, 9.56 dark.
-
-     THE HOVER MOVES THE FILL RATHER THAN ADDING ONE (§94.8's rule for the
-     other solid button, and §154's reason). `--gold-deep` would have been the
-     obvious darker step and FAILS — 2.57:1 against this ink in light — so the
-     hover goes the other way, to `--panel-accent`, the accent as it reads on
-     this very panel: 7.68 light, 11.12 dark, both better than at rest. */
-  .sl-play { font:inherit; font-size:var(--fs-small); letter-spacing:.08em;
-             text-transform:uppercase; font-weight:700; cursor:pointer;
-             background:var(--gold); border:1px solid var(--gold);
-             color:var(--on-accent); border-radius:var(--r-pill);
-             padding:6px 18px; display:inline-flex; align-items:center; gap:8px; }
-  .sl-play:hover { background:var(--panel-accent); border-color:var(--panel-accent); }
-  .slidebar [data-slexit] { font:inherit; font-size:var(--fs-small);
-              letter-spacing:.08em; text-transform:uppercase; font-weight:700;
-              background:none; border:1px solid rgba(255,255,255,.35);
-              color:var(--panel-ink); border-radius:var(--r-pill);
-              padding:6px 16px; cursor:pointer; }
-  .slidebar [data-slexit]:hover { background:rgba(255,255,255,.14); }
+  /* The navy band's gold Play and outlined DONE (§295) are gone: §556.4
+     draws all four buttons as one `.sl-b` family, further down. The old
+     `[data-slexit]` rule outranked it and kept "Done" in capitals. */
   .slidebody { flex:1; min-height:0; display:flex; }
 
   /* The rail. Its own scroller, because the deck is long and the pane is not. */
@@ -8908,10 +9107,18 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .slctl-off .editbtn { margin-left:auto; }
   /* Pinned, and above the list rather than below it: it is the first thing
      you came here to do. */
-  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
-            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
-            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
-  .sl-add .editbtn { width:100%; }
+  /* §556.3: at the foot of the rail, quiet — it is not what this screen
+     is for, and it was the loudest thing on it. */
+  /* FLUSH WITH THE BOTTOM EDGE. The list has 10px of padding, and sticky
+     `bottom:0` pins to the inside of it — so a 10px strip of scrolling
+     slides showed under the button (Islam: *"keep it at the very
+     bottom"*). Pinned into the padding, and spread across it sideways. */
+  .sl-add { position:sticky; bottom:-10px; z-index:2; background:var(--surface);
+    margin:0 -10px -10px; border-top:1px solid var(--line); padding:9px 10px 12px;
+    text-align:center; }
+  .sl-add .editbtn { width:100%; font-size:var(--fs-micro); font-weight:600;
+    border-style:dashed; color:var(--ink-3); }
+  .sl-add .editbtn:hover { color:var(--ink); }
   .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
 
   /* The pane: the slide above, its controls below. */
@@ -9108,7 +9315,12 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      On a light slide there is no plate at all — a navy mark on a near
      white ground needs nothing behind it, and a plate there would be a
      visible rectangle for no reason. */
-  .dcovermark { display:block; width:340px; height:auto; margin:0 0 26px; }
+  /* The same fault on the cover: 340px wide made a round logo 340px tall.
+     `align-self` because the cover is a flex column that stretches its
+     children across: with the width no longer fixed, the mark was pulled
+     to 340 wide at 150 tall and drawn as an oval. */
+  .dcovermark { display:block; width:auto; height:auto; align-self:flex-start;
+                object-fit:contain; max-width:340px; max-height:150px; margin:0 0 26px; }
   :root[data-theme="dark"] .dcovermark,
   :root[data-theme="dark"] .dfootmark {
     background:#fff; padding:10px 14px; border-radius:5px; box-sizing:content-box;
@@ -9120,10 +9332,17 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      footer that quietly lengthens the deck. The space is RESERVED as
      padding on the slide and the mark placed into it. */
   .dslide.hasmark { padding-bottom:104px; }
-  .dfoot { position:absolute; left:62px; right:62px; bottom:36px;
-           display:flex; align-items:center; padding-top:20px;
+  .dfoot { position:absolute; left:62px; right:62px; bottom:32px;
+           display:flex; align-items:center; padding-top:16px;
            border-top:1px solid var(--line-soft); }
-  .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
+  /* CAPPED BY HEIGHT AS WELL AS WIDTH. It was a 150px width and nothing
+     else, which suits a wide wordmark and nobody else: a ROUND logo (El
+     Abd's) came out 150px tall, standing 46px up out of the space reserved
+     for it and over the slide. Islam: *"the icon is very big with no
+     need."* 32 + 16 + 56 is the 104 reserved above, so it cannot rise —
+     and the reserve itself is unchanged, so no table fits one row fewer. */
+  .dfootmark { display:block; width:auto; height:auto;
+               max-width:132px; max-height:56px; object-fit:contain; opacity:.75; }
 
 /* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
    Islam's own concept from the Raya deck, in the platform's language: a row of
@@ -9313,6 +9532,144 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .mflow .mfcount {
     flex:none; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums;
   }
+  /* ── §556.3: THE SLIDE VIEW, LAID OUT AS ISLAM'S OWN PAGE LAYS IT ──
+     A quiet bar, not a coloured band: who is presenting on the left, the
+     buttons on the right, Present the one filled one. */
+  .slidebar{ background:var(--surface); color:var(--ink);
+    border-bottom:1px solid var(--line); }
+  .sl-who{ display:flex; flex-direction:column; min-width:0; }
+  /* His `.brand`: a 40px mark, the name bold at 16px, the line under it 12px
+     and quiet, neither wrapping. */
+  .slidebar{ min-height:56px; }
+  .sl-logo{ width:40px; height:40px; object-fit:contain; flex:none; display:block; }
+  .slidebar .sl-title{ font-size:16px; font-weight:700; color:var(--ink);
+    letter-spacing:0; text-transform:none; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .slidebar .sl-sub{ font-size:12px; color:var(--ink-3); margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* His `.btn`, measure for measure: inline-flex, 7px gap, 9px radius,
+     7/12 padding, 13px at 600, a 16px icon stroked at 2 in currentColor,
+     and one filled button. */
+  .sl-b{ display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+    font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+    padding:7px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); }
+  .sl-b svg{ width:16px; height:16px; stroke:currentColor; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  /* No case or tracking of its own: the bar it sits in sets both, and his
+     buttons read in plain sentence case — "Done", never "DONE". */
+  .sl-b{ text-transform:none; letter-spacing:0; }
+  .sl-b:hover{ border-color:var(--ink-3); }
+  .sl-b.go{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .sl-b.go:hover{ background:var(--ink-2); border-color:var(--ink-2); }
+  .sl-b.quiet{ border-color:transparent; background:none; color:var(--ink-3);
+    font-weight:500; }
+  .sl-b.quiet:hover{ color:var(--ink); }
+  .sl-b:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  @media (max-width:720px){ .sl-b .lbl{ display:none; } }
+
+  .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
+  .slprog{ height:3px; background:var(--line); flex:none; }
+  .slprog i{ display:block; height:100%; width:0; background:var(--panel); }
+  /* §556.12: no arrows at the stage's edges. Islam: *"these 2 buttons on
+     the right and left are useless"* — the pair under the stage and the
+     arrow keys already do it, and these sat over the slide itself. */
+  /* His `.controls`, measure for measure: a 58px row at 18px in, a 12px
+     gap, a 36px round step either side of a 52px tabular count, and the
+     slide's own name beside it at 600. */
+  .slfoot{ display:flex; align-items:center; gap:12px; flex:none;
+    height:58px; padding:0 18px; border-top:1px solid var(--line);
+    background:var(--surface); }
+  /* His chevrons, drawn rather than typed: a `‹` is a letter, and sits
+     thin and off-centre in a round button. */
+  .slnav svg{ width:18px; height:18px; stroke:currentColor; fill:none;
+    stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .slnav{ width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    font:400 18px/1 var(--sans); display:grid; place-items:center; }
+  .slnav:hover{ background:var(--zebra); }
+  .slnav:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .slct{ font-size:13px; font-weight:700; color:var(--ink);
+    min-width:52px; text-align:center; font-variant-numeric:tabular-nums; }
+  .slct span{ margin:0 1px; }
+  .slnm{ font-size:13px; font-weight:600; color:var(--ink-2); min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .slidelist .slrow{ grid-template-columns:18px 1fr; }
+  .sl-mine{ grid-column:2; font-size:var(--fs-micro); color:var(--gold); }
+  .slideroot.norail .slidelist{ display:none; }
+
+  /* ── §556.2: ALL SLIDES, AND THE KEYS ─────────────────────────────
+     The grid covers the rail and the stage together, because it IS the
+     deck — a panel beside them would be a third place to look. */
+  /* His grid: a solid page over everything (it was `var(--bg)`, a token
+     this platform does not have, so the slide behind showed through), a
+     heading with a way out, and every slide drawn small with its number
+     above it. */
+  .slgrid{ position:absolute; inset:0; z-index:3; overflow:auto;
+    background:var(--ground); padding:22px 24px 30px; }
+  .slghead{ display:flex; align-items:center; justify-content:space-between;
+    margin:0 0 14px; }
+  .slghead h3{ margin:0; font-size:20px; font-weight:700; color:var(--ink); }
+  .slglist{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:22px 20px; }
+  .slgcell{ text-align:left; cursor:pointer; background:none; border:0; padding:0;
+    font:inherit; color:var(--ink); display:flex; flex-direction:column; gap:7px;
+    min-width:0; }
+  .slgn{ font-size:13px; font-weight:600; color:var(--ink-3); }
+  .slgn em{ font-style:normal; font-size:11px; font-weight:700; margin-left:6px;
+    color:var(--ink-3); }
+  .slgthumb{ display:block; position:relative; width:100%; aspect-ratio:16/9;
+    overflow:hidden; border-radius:6px; border:1px solid var(--line);
+    background:var(--surface); box-shadow:var(--shadow-sm); }
+  .slgthumb-in{ display:block; position:relative; width:1600px; height:900px;
+    transform-origin:0 0; pointer-events:none; }
+  .slgcell:hover .slgthumb{ border-color:var(--ink-3); }
+  .slgcell.on .slgthumb{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); }
+  .slgcell.on .slgn{ color:var(--ink); }
+  .slgcell:focus-visible{ outline:none; }
+  .slgcell:focus-visible .slgthumb{ box-shadow:0 0 0 3px var(--gold); }
+  .slgcell.off .slgthumb{ opacity:.35; filter:grayscale(1); }
+  /* §556.11: the parts of the flow, under the bar — the room's pills,
+     moved to where the presenter arranges. */
+  .slparts{ display:flex; gap:6px; flex:none; overflow-x:auto; padding:9px 16px;
+    background:var(--surface); border-bottom:1px solid var(--line); scrollbar-width:thin; }
+  .slpart{ font:700 11px/1 var(--sans); letter-spacing:.06em; padding:7px 10px; flex:none;
+    border-radius:var(--r-pill); border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); cursor:pointer; white-space:nowrap; }
+  .slpart:hover{ border-color:var(--ink-3); color:var(--ink); }
+  .slpart.on{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .slpart:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .slnm b{ color:var(--ink); font-weight:700; }
+  .slnm span{ color:var(--ink-3); }
+  .slksep{ display:inline-block; width:1px; height:12px; background:var(--line);
+    margin:0 8px; vertical-align:middle; }
+  .slkeys{ margin-left:auto; flex:none; font-size:12px; color:var(--ink-3);
+    white-space:nowrap; }
+  @media (max-width:860px){ .slkeys{ display:none; } }
+  /* His `.kbd`: 11px, a 2px bottom edge so it reads as a key, nothing more. */
+  .slkeys b{ font-size:11px; font-weight:600; color:var(--ink-3);
+    border:1px solid var(--line); border-bottom-width:2px; border-radius:5px;
+    padding:0 5px; }
+  .slidebody{ position:relative; }
+
+  /* §554.2: the kind chips sit on their own line under the head's one line,
+     so the search keeps the width it had and a client with six kinds does
+     not squeeze it to nothing. `order` rather than a second container: the
+     head is already the row these belong to. */
+  .mflow .mfhead { flex-wrap:wrap; }
+  .mflow .mfkinds {
+    order:1; flex:1 0 100%; display:flex; flex-wrap:wrap; gap:5px; padding-top:2px;
+  }
+  .mflow .mfchip {
+    font:inherit; font-size:11px; line-height:1; padding:5px 9px; cursor:pointer;
+    border:1px solid var(--line); border-radius:999px;
+    background:var(--surface); color:var(--ink-2);
+  }
+  .mflow .mfchip:hover { border-color:var(--ink-3); }
+  .mflow .mfchip.on {
+    border-color:var(--gold); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold);
+  }
+  .mflow .mfchip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   /* A column that has legitimately emptied says so, or it reads as a pane that
      failed to render (§45.2). Quiet, because neither state is a fault. */
   .mflow .mfempty {
@@ -10969,6 +11326,10 @@ body.presenting #buildband { display:none; }
 /* §418: a layer's three sections, from the signed-off mockup
    (design-mockups/structure-sections/). Side by side, stacked below 980px. */
 .csetup .wzcol.wzwide { max-width:1240px; }
+/* §544: the shape takes the tree AND a level's three sections, so it is
+   given what the window has; the tree is the narrow half, because the
+   panel is what holds the controls. */
+.csetup .wzcol.wzwide:has(.wzshape) { max-width:1460px; }
 .csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);
   border-radius:var(--r-md); overflow:hidden; margin-top:4px; }
 .csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
@@ -11039,6 +11400,74 @@ body.presenting #buildband { display:none; }
 .csetup .stask { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; background:var(--surface-2); font-size:var(--fs-small); color:var(--ink-2); }
 .csetup .stask p { margin:0 0 8px; }
 .csetup .stbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ══ THE SHAPE, ON ONE SCREEN (§544, spec 066 stage 4) ══════════════════
+   From the signed-off mockup (design-mockups/setup-one-screen/). The tree
+   on the left, whatever is selected on the right; one column below 980px,
+   where two would make both unreadable. */
+.csetup .wzshape { display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr);
+                   gap:16px; align-items:start; }
+@media (max-width:980px) { .csetup .wzshape { grid-template-columns:minmax(0,1fr); } }
+.csetup .shtree { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
+                  padding:12px 14px; min-width:0; }
+.csetup .shpanel { min-width:0; }
+.csetup .shpanel .stcard:last-child { margin-bottom:0; }
+/* a level's row: its number, its name, how many, and the navigation tick */
+.csetup .shlvl { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px; margin:16px 0 5px; }
+.csetup .shtree > .shlvl:first-child { margin-top:0; }
+.csetup .shlay { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                 color:var(--cs-fill-ink); background:var(--cs-fill); border-radius:3px; padding:1px 5px; flex:none; }
+.csetup .shlvlb { border:0; background:none; padding:0; cursor:pointer; color:var(--ink-2);
+                  font:700 var(--fs-micro)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shlvlb:hover, .csetup .shlvlb:focus-visible { color:var(--cs-acc-tx); }
+.csetup .shlvl.sel .shlvlb { color:var(--cs-acc-tx); text-decoration:underline; }
+.csetup .shn { font-size:var(--fs-micro); color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.csetup .shsub { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .shunder { margin-left:auto; display:flex; align-items:center; gap:5px;
+                   font-size:var(--fs-micro); color:var(--ink-3); text-transform:none; letter-spacing:0; }
+.csetup .shlink { border:0; background:none; padding:0; cursor:pointer; color:var(--cs-acc-tx);
+                  font:600 var(--fs-micro)/1.4 var(--sans); }
+.csetup .shlink:hover { text-decoration:underline; }
+.csetup .shnav { border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                 border-radius:999px; padding:0 7px; cursor:pointer;
+                 font:700 var(--fs-micro)/1.7 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shnav.on { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .shnav:hover { border-color:var(--cs-acc-tx); }
+/* the boxes in a row */
+.csetup .shrow { display:flex; flex-wrap:wrap; gap:5px; margin-left:14px;
+                 border-left:2px solid var(--line); padding-left:10px; }
+.csetup .shrow.shtoprow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shb { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:7px; padding:4px 9px;
+               font:400 13.5px/1.35 var(--sans); cursor:pointer; text-align:left; }
+.csetup .shb:hover { border-color:var(--cs-acc-tx); }
+.csetup .shb.top { border-color:var(--cs-fill); font-weight:700; }
+.csetup .shb.sel { border-color:var(--cs-acc-tx); background:var(--cs-wash, var(--surface-2)); font-weight:600; }
+.csetup .shb.under { box-shadow:inset 0 -2px 0 var(--cs-acc-tx); }
+.csetup .shb.orphan { border-style:dashed; border-color:var(--bad-tx); }
+.csetup .shadd { border:1px dashed var(--line); background:none; color:var(--ink-3); border-radius:7px;
+                 padding:4px 9px; font:400 13px/1.35 var(--sans); cursor:pointer; }
+.csetup .shadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .shwhy { font-size:var(--fs-small); color:var(--ink-3); margin:6px 0 0 14px; max-width:46ch; }
+.csetup .shchips { display:flex; flex-wrap:wrap; gap:5px; margin:7px 0 0 14px; }
+.csetup .shchip { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                  padding:3px 8px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .shchip:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .shchip .p { color:var(--ink-3); margin-right:4px; }
+/* the boxes with no layer yet (§544) */
+.csetup .shneeds { margin:7px 0 0 14px; border:1px dashed var(--bad-tx); border-radius:7px;
+                   padding:7px 9px; background:var(--bad-bg, var(--surface-2)); }
+.csetup .shneedh { margin:0 0 5px; font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em;
+                   text-transform:uppercase; color:var(--bad-tx); }
+.csetup .shneeds .shrow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shpanel .danger { border:0; background:none; color:var(--bad-tx); cursor:pointer;
+                           font:600 var(--fs-small)/1.4 var(--sans); padding:0; margin-top:10px; text-align:left; }
+.csetup .shpanel .danger:hover { text-decoration:underline; }
+/* A box's own panel is a short column of fields, not a card of sections, so
+   its labelled boxes sit full width and close together rather than inheriting
+   the 240px tiles a level's name row uses. */
+.csetup .shpanel .stcard > .stnm { max-width:26rem; flex:none; gap:4px; }
+.csetup .shpanel .stcard > .stnm > .lab { margin:0; }
 
 /* ══ THE STRATEGY COPILOT TAB (spec 064, stage 1) ═══════════════════════
    The picture signed off (design-mockups/copilot/2026-09-30_copilot-tab.html):
@@ -11683,7 +12112,13 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copex-q { width:26px; height:24px; margin:0 1px; padding:0; border-radius:4px; border:1px solid var(--field-line, var(--line)); background:var(--surface); color:var(--ink-3); font:600 11px/1 var(--sans); cursor:pointer; }
 .copex-q.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
 .copex-q.off { background:var(--surface-2); opacity:.45; text-decoration:line-through; cursor:default; }
-.copex-q:disabled:not(.off) { cursor:default; }
+/* `.copex-q:disabled:not(.off)` was here, for the read-only view's quarters.
+   §538 made those a mark rather than a disabled button, so nothing matches it
+   any more and a dead rule is a rule somebody later reads as a live one. */
+/* §538: Q1–Q4 are buttons only where they can be pressed; everywhere else they
+   are marks. A span needs the box the button got for free. */
+span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
+               text-align:center; vertical-align:middle; cursor:default; }
 .copex-pick { flex-wrap:wrap; align-items:center; font-size:13px; }
 .copex-y { width:72px; }
 

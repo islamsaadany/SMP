@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound as nextNotFound, redirect } from "next/navigation";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
@@ -14,6 +15,8 @@ import { ExportPreview } from "./export-preview";
  */
 export default async function ReportPage(props: PageProps<"/[slug]/processes/reports">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
   const searchParams = await props.searchParams;
   const idsRaw = searchParams["ids"];

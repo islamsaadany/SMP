@@ -397,11 +397,11 @@ var CONT = (function () {
     var w = when();
     if (!w) return "";
     var mins = Math.round((w.getTime() - Date.now()) / 60000);
-    var at = w.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    var at = timeOf(w);
     if (mins < 60) return "in " + mins + " minutes";
     if (mins < 24 * 60) return "today at " + at;
     if (mins < 48 * 60) return "tomorrow at " + at;
-    return w.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " at " + at;
+    return dateDay(w) + " at " + at;
   }
 
   function paintBanner() {
@@ -501,8 +501,7 @@ var CONT = (function () {
         return;
       }
       note = "Contingency files taken · " +
-        new Date().toLocaleString(undefined, { day: "numeric", month: "short",
-                                               hour: "2-digit", minute: "2-digit" });
+        dateAt(new Date());
       dismissed.done = false;
       paint();          /* the stamp is state — the list and the card follow it */
     });

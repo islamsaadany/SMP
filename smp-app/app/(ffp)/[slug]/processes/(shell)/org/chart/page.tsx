@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
 import { prisma } from "@/ffp/lib/db/client";
@@ -6,6 +7,8 @@ import { OrgChartCanvas } from "./org-chart-canvas";
 
 export default async function OrgChartPage(props: PageProps<"/[slug]/processes/org/chart">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
 
   const people = await prisma.person.findMany({

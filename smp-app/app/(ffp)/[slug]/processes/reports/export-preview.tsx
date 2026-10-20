@@ -1,5 +1,6 @@
 "use client";
 
+import { documentControl } from "@/ffp/lib/domain/document-control";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Source_Serif_4 } from "next/font/google";
@@ -94,6 +95,9 @@ export type ExportProcessData = {
   sopOwner: string | null;
   sopEffectiveDate: string | null;
   sopApprovedBy: string | null;
+  lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
+  reviewIntervalMonths: number;
+  nextReviewDue: string | null;
   sopRevisions: { version: string; date: string; by: string; change: string }[];
   externalEntities: { name: string; description: string }[];
   kpis: { metric: string; target: string; frequency: string }[];
@@ -875,7 +879,7 @@ function ProcessReportSection({
   const documentedSteps = process.steps.filter(
     (s) => s.detailedAction.length > 0 || s.exceptionHandling?.trim()
   );
-
+  const control = documentControl(process);
 
   return (
     // Every process starts on its own fresh page, whether or not it has a
@@ -905,10 +909,13 @@ function ProcessReportSection({
         </BrandBanner>
         <dl className="mt-3 grid grid-cols-2 gap-x-8 gap-y-1.5 border-b-2 border-slate-100 pb-3 text-xs sm:grid-cols-3">
           <MetaField label="Document ID" value={`${process.code}-${new Date().getFullYear()}`} />
-          <MetaField label="Version" value="1.0" />
-          <MetaField label="Effective Date" value={new Date().toISOString().slice(0, 10)} />
-          <MetaField label="Review Cycle" value="Annual" />
-          <MetaField label="Process Owner" value={process.processOwnerName ?? "—"} />
+          {/* What the process says about itself — never invented (ffp/lib/domain/document-control.ts). */}
+          <MetaField label="Status" value={control.status} />
+          <MetaField label="Version" value={control.version} />
+          <MetaField label="Effective Date" value={control.effectiveDate} />
+          <MetaField label="Approved By" value={control.approvedBy} />
+          <MetaField label="Review Cycle" value={control.reviewCycle} />
+          <MetaField label="Process Owner" value={control.owner} />
           <MetaField label="Process Code" value={process.code} mono />
         </dl>
       </div>

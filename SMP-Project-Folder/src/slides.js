@@ -25,9 +25,12 @@
    not put a picture in front of the board.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* The stage is 1600x900, so a picture longer than 1600px on its long edge is
-   detail nobody in the room can see, carried in every save for ever. */
-var PIC_MAX_EDGE   = 1600;
+/* The stage is AUTHORED at 1600x900 but SHOWN at the screen's size, and a
+   projector or a 4K panel draws it half as large again or more. Cut to 1600,
+   a full-slide picture was stretched on every big screen and its text went
+   soft — Islam: *"the uploaded pictures quality gets very low."* 2400 is
+   sharp at that size and still bounded, because it rides in every save. */
+var PIC_MAX_EDGE   = 2400;
 var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
 var PIC_PER_SLIDE  = 4;
 
@@ -313,7 +316,7 @@ function picIntake(file){
       reject(new Error("that is not a picture")); return;
     }
     imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
-      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var jpg = cv.toDataURL("image/jpeg", 0.92);
       var png = cv.toDataURL("image/png");
       resolve(png.length < jpg.length ? png : jpg);
     }, reject);
@@ -520,7 +523,14 @@ function videoUpload(file, target, onProgress){
    Nothing about what is STORED changed. Still a title, an anchor, an
    arrangement and the pictures (§50.2). */
 
-var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+/* `flow` is the master presentation's list of subjects, set only when the
+   editor was opened on one (§556). `target` is still a single subject —
+   the company's, for a flow — because adding and removing a picture
+   slide belongs to a subject and Islam put that plainly: *"in the flow
+   slide view I can hide and I can add final slides but the addition on
+   the sections as directions or capabilities should be from the
+   direction or capability presentation itself"*. */
+var SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
 
 /* Every section in the assembled deck gets an identity the rail can hold on
    to across a repaint: a picture slide by its own id, a generated slide by its
@@ -572,18 +582,53 @@ function slidesAssemble(){
   try {
     /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
        through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
-    insertPictureSlides(box, SLED.target, true);
-    /* The same order openDeckWith() uses, and the order matters both ways:
-       AFTER the picture slides so a custodian's own slide is footed too, and
-       BEFORE the fit pass so a slide it splits carries the footer into every
-       continuation (§52.9). */
-    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
-      deckFootMarks(box, UNITS[SLED.target]);
-    } else if (SLED.target.indexOf("dir:") === 0) {
-      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
-      deckFootMarks(box, null);
+    /* ── ONE DECK, OR THE WHOLE FLOW (§556) ──────────────────────────
+       The editor built one subject's deck, which is why pressing Manage
+       slides from the company showed the company's review and not the
+       flow somebody had just arranged. A flow is the same build, once per
+       subject, with each slide stamped with whose it is — the stamp is
+       what lets the eye below hide a slide that belongs to somebody else
+       without the editor having to be about them. */
+    /* ── AND THE FLOW'S OWN PAGES, WHERE THE ROOM HAS THEM (§556.8) ──
+       The cover and each group's page were drawn by the room alone, so
+       the list here started at the first direction and the room started
+       somewhere else. Islam: *"where is the first cover page about elabd
+       review"*. The same `flowWithParts` the room reads, so the two
+       cannot disagree about what comes first. */
+    var subjects = SLED.flow ? flowWithParts(SLED.flow) : [SLED.target];
+    subjects.forEach(function(t){
+      var part = String(t).indexOf("flow:") === 0;
+      var frag = document.createElement("div");
+      frag.innerHTML = part ? flowPartHtml(t) : deckHtmlFor(t);
+      if (!part) insertPictureSlides(frag, t, true);
+      if (part) deckFootMarks(frag, null);
+      else if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
+      else if (boxRef(t).kind === "dir") deckFootMarks(frag, null);
+      var tsubj = part ? null : deckSubject(t);
+      [].forEach.call(frag.querySelectorAll(".dslide"), function(el){
+        el.dataset.subject = t;
+        /* A flow page is nobody's to hide: the room reads hidden slides
+           per subject, and these belong to none. */
+        if (part) { el.dataset.flowpart = "1"; return; }
+        if (el.dataset.anchor && SMPRules.slideHidden(tsubj, el.dataset.anchor))
+          el.dataset.off = "1";
+      });
+      while (frag.firstChild) box.appendChild(frag.firstChild);
+    });
+    /* Each flow page is stamped with what it introduces, as the room does
+       (§554.3) — so it rides inside the section it opens rather than
+       counting as a subject of its own. */
+    var made = [].slice.call(box.querySelectorAll(".dslide"));
+    for (var mi = made.length - 1; mi >= 0; mi--) {
+      if (!made[mi].dataset.flowpart) continue;
+      var nx = made[mi + 1];
+      if (nx && nx.dataset.subject) made[mi].dataset.subject = nx.dataset.subject;
+      else made[mi].removeAttribute("data-subject");
     }
+    /* The footing happens per subject above, in the same order
+       openDeckWith() uses: AFTER the picture slides so a custodian's own
+       slide is footed too, and BEFORE the fit pass so a slide it splits
+       carries the footer into every continuation (§52.9). */
     deckFitPass(box);
     /* The keys are minted AFTER the fit pass, or a continuation slide it mints
        carries a clone of its parent's `data-ed` — two rows in the rail with one
@@ -608,10 +653,9 @@ function slidesAssemble(){
        INSIDE THE TRY, with §253.3's catch below it: a subject whose stored
        list cannot be read is a deck that could not be built, and the person
        gets that sentence rather than a blank rail. */
-    var subj = deckSubject(SLED.target);
-    [].forEach.call(box.querySelectorAll(".dslide[data-anchor]"), function(el){
-      if (SMPRules.slideHidden(subj, el.dataset.anchor)) el.dataset.off = "1";
-    });
+    /* The stamping happens per subject above, before the fit pass marks a
+       continuation — and a continuation inherits `data-off` from the clone
+       it is made of, so both parts of a hidden long table wear it. */
   } catch (e) {
     /* Kept, not rethrown: the editor is already open, and the person needs a
        sentence rather than a blank screen. `slidesPaint()` reads it. */
@@ -630,6 +674,17 @@ function slidesAssemble(){
    together: "RS03 Retail Operations ExcellenceKey measures". The parts are
    read separately and joined with a separator, which is what the slide itself
    shows visually. */
+/* ── THE SHORT NAME, FOR THE BAR UNDER THE STAGE (§556.4) ─────────────
+   Islam: *"the title of the slides as well is different"*. His page names
+   the slide you are on in two or three words — "Cover" — and ours was
+   printing the whole breadcrumb: "Maximizing Current Stores · D001 ·
+   Categories", every word of which is already on the slide in front of
+   you. The last part is what tells one slide from its neighbours. */
+function slidesShortLabel(el){
+  var full = slidesLabel(el), bits = full.split(" \u00b7 ");
+  var last = bits[bits.length - 1];
+  return (last && last.length > 1) ? last : full;
+}
 function slidesLabel(el){
   var h = el.querySelector("h1, h2");
   if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
@@ -660,9 +715,10 @@ function slidesOpen(kind, key){
              : kind === "cap" ? "cap:" + key
              : kind === "dir" ? "dir:" + key : key;
   if (!canSpeakFor(target)) return;
-  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"", flow:null };
   var root = document.getElementById("slideroot");
-  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-title").textContent = picTargetName(kind, key);
+  slidesLogo(root, deckMark(UNITS[target] || null));
   /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
      see it. Islam's own reason for asking: somebody who knows they have
      fifteen minutes builds a shorter deck.
@@ -677,8 +733,7 @@ function slidesOpen(kind, key){
      minutes" is wrong said to the person who set it. And nothing at all when
      no time is set — silence rather than a nought nobody chose (§35). */
   var mins = SMPRules.presentMins(GROUP, target);
-  root.querySelector(".sl-sub").textContent =
-    picTargetName(kind, key) + " · " + (REVIEW.name || "") +
+  root.querySelector(".sl-sub").textContent = (REVIEW.name || "") +
     (mins ? " · " + mins + " minutes to present" : "");
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -686,6 +741,54 @@ function slidesOpen(kind, key){
   if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
   slidesPaint();
   root.focus();
+}
+/* ── THE FLOW, OPENED AS SLIDES (§556) ─────────────────────────────────
+   Islam: *"after we set the master presentation, we say 'here, manage the
+   slides'. When we go, we see a view of managing the slides that we chose
+   as a flow, and maybe hide things or add something to have a proper
+   view"* — and, of the whole product: *"even for the users that have the
+   present button it takes them to the slides management and then they move
+   to the presentation, not 2 buttons"*.
+
+   THE SUBJECT IS THE COMPANY and the flow is what is DRAWN. Adding a slide
+   is a subject's act — his rule: the final slides are added here, a
+   direction's are added on the direction. So `target` stays the company
+   and `flow` is the list; `slidesAssemble` draws the list and the eye
+   hides against whichever subject the slide belongs to. */
+function slidesOpenFlow(list){
+  list = (list || []).filter(Boolean);
+  /* ── THE GATE IS THE FLOW'S, NOT THE COMPANY'S DECK (§556.3) ──────
+     This asked `canSpeakFor("group")`, which is "may you edit the
+     company's own review" — and with the business units ON the company
+     has no plan of its own, so it is FALSE for the very office that
+     arranges the flow. Pressing Go then did nothing at all (§61), which
+     `master-presentation` caught the moment the button changed.
+
+     `mayMasterPresent` is the rule that offers the Master presentation in
+     the first place, so it is the rule that opens what it leads to. */
+  if (!list.length || !SMPRules.mayMasterPresent(world(), viewer())) return;
+  SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
+  var root = document.getElementById("slideroot");
+  var org = String(GROUP.org || "").trim();
+  root.querySelector(".sl-title").textContent =
+    (org ? org + " \u00b7 " : "") + "Master presentation";
+  slidesLogo(root, groupLogo());
+  root.querySelector(".sl-sub").textContent =
+    plural(list.length, "subject") + " \u00b7 " + (REVIEW.name || "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
+}
+/* The mark on the left of the bar, as Islam's page carries it: the client's
+   round logo beside the name. None set, none drawn — an empty frame is not
+   a logo (§45.2). */
+function slidesLogo(root, src){
+  var im = root.querySelector(".sl-logo");
+  if (!im) return;
+  if (src) { im.src = src; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
 }
 function picTargetName(kind, key){
   return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
@@ -711,10 +814,14 @@ function slidesSuspend(){
   root.inert = true;
   root.setAttribute("aria-hidden", "true");
 }
-function slidesResume(){
+function slidesResume(reached){
   var root = document.getElementById("slideroot");
   root.inert = false;
   root.removeAttribute("aria-hidden");
+  /* §556.11: back on the slide the room was showing, as his page does —
+     not on the one Present was pressed from twenty slides ago. */
+  var at = reached ? slidesFindIn(SLED.all || [], reached) : -1;
+  if (at >= 0) { SLED.sel = SLED.all[at].dataset.ed; slidesPaint(); }
   root.focus();
 }
 /* The deck for whatever this editor is editing, through the ONE resolver
@@ -728,8 +835,52 @@ function slidesPlay(){
      OF IT if the deck cannot be built — an editor nobody can click, with the
      reason in a console nobody has open (§32, §171). Standing down after the
      open means a throw costs the press and nothing else. */
-  openDeckFor(SLED.target, "editor");
+  var from = slidesSelEl();
+  if (SLED.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+                              flowWithParts(SLED.flow), "editor");
+  else openDeckFor(SLED.target, "editor");
+  /* ── STRAIGHT TO FULL SCREEN, AT THE SLIDE YOU ARE ON (§556.11) ─────
+     Islam: *"present should go to the full screen right away like the
+     html"* — his page's Present is the same deck, filling the screen, from
+     where you are. The bar is still there for a deck opened from anywhere
+     else; from here it never shows, and Esc comes straight back. */
+  var at = from ? slidesFindIn(DECK.slides, from) : -1;
+  if (at > 0) deckShow(at);
+  deckGoFull();
   slidesSuspend();
+}
+/* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
+   page, which picture — and which of its kind. Never by counting: the room
+   leaves out hidden slides and the two screens split long tables at their
+   own sizes, so the tenth slide here is not the tenth slide there. */
+function slidesKeyOf(el){
+  return [el.dataset.subject || "", el.dataset.anchor || "", el.dataset.ps || ""].join("|");
+}
+function slidesWhich(list, i){
+  while (i > 0 && list[i] && list[i].dataset.cont) i--;
+  var el = list[i];
+  if (!el) return null;
+  var key = slidesKeyOf(el), n = 0;
+  for (var j = 0; j < i; j++) if (!list[j].dataset.cont && slidesKeyOf(list[j]) === key) n++;
+  return { key:key, n:n };
+}
+function slidesFindIn(list, w){
+  if (!w) return -1;
+  var n = w.n;
+  for (var j = 0; j < list.length; j++) {
+    if (list[j].dataset.cont || slidesKeyOf(list[j]) !== w.key) continue;
+    if (!n) return j;
+    n--;
+  }
+  return -1;
+}
+/* The selected slide, or the next one the room will show if it is hidden. */
+function slidesSelEl(){
+  var all = SLED.all || [];
+  var i = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (i < 0) return null;
+  while (i < all.length - 1 && all[i].dataset.off) i++;
+  return slidesWhich(all, i);
 }
 
 function slidesClose(){
@@ -739,7 +890,7 @@ function slidesClose(){
   document.body.classList.remove("presenting");
   var wrap = document.querySelector(".wrap");
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
-  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
 }
 
@@ -764,13 +915,13 @@ function slidesPaint(){
         + "produces no deck, so there is nowhere to put a picture.") + '</p>';
     return;
   }
-  /* Keep the selection if it still exists; otherwise take the first picture
-     slide, and failing that the first slide. */
+  /* Keep the selection if it still exists; otherwise the FIRST SLIDE.
+     It took the first picture slide, from when this screen was only for
+     managing pictures. It is the deck now, and a deck opens on its cover —
+     Islam: *"why the presentation open on the added slide the default
+     should start from the first slide"*. */
   var keys = all.map(function(el){ return el.dataset.ed; });
-  if (keys.indexOf(SLED.sel) < 0) {
-    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
-    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
-  }
+  if (keys.indexOf(SLED.sel) < 0) SLED.sel = keys[0];
 
   /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
      rail, after all twenty-three rows — so the one control the whole mode
@@ -779,24 +930,42 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   var off = all.filter(function(el){ return el.dataset.off; });
-  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
-      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+  /* §556.3: and only where there is a subject to add to. With the business
+     units on, the company has no plan of its own — the flow can still be
+     arranged and presented, and a control that would write nowhere is not
+     drawn (§61). */
+  var mayAdd = canSpeakFor(SLED.target);
+  list.innerHTML =
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + (el.dataset.off ? " off" : "") +
-        '" data-slgo="' + esc(el.dataset.ed) + '">' +
+        '" data-slgo="' + esc(el.dataset.ed) + '" title="' + esc(slidesLabel(el)) + '">' +
+      /* §556.3: THE THUMBNAIL IS THE LABEL. A line of text under every
+         preview said what the preview already showed, and on a flow of
+         forty-nine it pushed three slides off the screen. The name is on
+         the row's title and on the bar under the stage, where somebody
+         reading it is looking. */
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
-      '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>' + esc(slidesMineWord(
-          pslideById(SLED.target, el.dataset.ps))) + '</em>' : '') + '</span>' +
+      (mine ? '<span class="sl-mine">' + esc(slidesMineWord(
+          pslideById(SLED.target, el.dataset.ps))) + '</span>' : '') +
       (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
       slidesEye(el, all) + '</div>';
-  }).join("");
+  }).join("") +
+  /* ── ADDING SITS AT THE FOOT (§556.3) ──────────────────────────────
+     It was the loudest thing on the screen, above the deck, on a screen
+     whose job is to look at the deck. Islam's own page has no add at all;
+     ours needs one, and the foot of the rail is where it belongs. */
+  (!mayAdd ? "" :
+    '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
+      '<span class="picsub">' + (SLED.flow
+        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
+          "\u2019s own slides are added on its own page"
+        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
+            ? "the one selected" : "the slide selected below")) + '</span></div>');
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -827,7 +996,161 @@ function slidesPaint(){
      selection already on screen does not jump. */
   var on = list.querySelector(".slrow.on");
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  slidesGridPaint(all);
+  slidesFootPaint(all);
   SLED.err = "";
+}
+
+/* ── ALL SLIDES, AND THE KEYS (§556.2) ─────────────────────────────────
+   Both from Islam's own page, which he handed over as the shape to copy:
+   a grid for a deck too long to scroll a rail through, and the keys
+   written along the bottom so nobody has to be told them. The grid reads
+   the SAME rows the rail reads, so it cannot show a different deck
+   (§53.5), and it says which are hidden because that is the thing you
+   open it to check. */
+function slidesGridPaint(all){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  SLED.all = all;
+  /* Drawn only while open: every cell is a whole slide, and a flow is two
+     hundred of them — built on every repaint behind a closed grid, they
+     would double the cost of every press for nobody. */
+  if (g.hidden) { g.innerHTML = ""; return; }
+  g.innerHTML =
+    '<div class="slghead"><h3>All slides</h3>' +
+      '<button class="sl-b" data-slgclose>Close (Esc)</button></div>' +
+    '<div class="slglist">' + all.map(function(el, i){
+      return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (el.dataset.off ? " off" : "") + '" data-slgcell="' + esc(el.dataset.ed) +
+        '" title="' + esc(slidesLabel(el)) + '">' +
+        '<span class="slgn">' + (i + 1) +
+          (el.dataset.off ? ' <em>Hidden</em>' : '') + '</span>' +
+        '<span class="slgthumb"><span class="slgthumb-in"></span></span></button>';
+    }).join("") + '</div>';
+  /* A REAL SLIDE IN EVERY CELL, like the rail (§51) and like his grid —
+     a list of titles on cards is not a picture of the deck. */
+  var holders = g.querySelectorAll(".slgthumb-in");
+  [].forEach.call(holders, function(h, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    h.appendChild(c);
+  });
+  slidesGridFit();
+  /* WIRED HERE, because the grid is drawn AFTER slidesWire() has run — the
+     first version's cells carried `data-slgo` and nothing listened. Picking
+     a slide closes the grid on it, as his does. */
+  [].forEach.call(g.querySelectorAll("[data-slgcell]"), function(b){
+    b.addEventListener("click", function(){
+      SLED.sel = b.dataset.slgcell;
+      g.hidden = true;
+      slidesPaint();
+    });
+  });
+  var x = g.querySelector("[data-slgclose]");
+  if (x) x.addEventListener("click", function(){ slidesGridToggle(false); });
+  var on = g.querySelector(".slgcell.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"center" });
+}
+/* Each cell is as wide as the grid gives it, so the slide inside is scaled
+   to that width rather than to a number guessed here. */
+function slidesGridFit(){
+  [].forEach.call(document.querySelectorAll("#slgrid .slgthumb"), function(t){
+    var w = t.clientWidth;
+    var inn = t.firstChild;
+    if (w && inn) inn.style.transform = "scale(" + (w / 1600) + ")";
+  });
+}
+/* The counter, the slide's name and the keys, on ONE bar under the stage
+   (§556.3) — Islam's own page carries exactly these three, in this order,
+   and the name is here rather than under every thumbnail. */
+function slidesFootPaint(all){
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) at = 0;
+  var ct = document.getElementById("slct");
+  if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
+  var nm = document.getElementById("slnm");
+  if (nm) nm.innerHTML = slidesWhere(all, at);
+  var pr = document.getElementById("slprog");
+  if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";
+  var k = document.getElementById("slkeys");
+  /* §556.11: the room's own keys are listed HERE, because the room shows no
+     bar any more — in full screen there is nowhere else to read them. Said
+     in full, not as letters: "T timer" told Islam nothing. */
+  if (k) k.innerHTML =
+    '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
+    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
+    '<span class="slksep"></span>while presenting: ' +
+    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+  slidesPartsPaint(all, at);
+}
+/* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────
+   Islam: the three things the room's bar carried — the jump to each part,
+   which part you are in, and its time — *"we can include them in the slide
+   management page we already have"*. The parts are read off the slides'
+   own stamps, as the room's stops are (§266), so the two count alike. */
+function slidesParts(all){
+  var out = [];
+  all.forEach(function(el, i){
+    var t = el.dataset.subject;
+    if (!t || el.dataset.flowpart) return;
+    if (out.length && out[out.length - 1].t === t) return;
+    var org = String(GROUP.org || "").trim();
+    var name = (t === "group" && org) ? org : placeLabel(t);
+    out.push({ t:t, name:name, code:deckCode(t, name), at:i });
+  });
+  return out;
+}
+function slidesPartAt(parts, i){
+  var k = -1;
+  parts.forEach(function(p, j){ if (p.at <= i) k = j; });
+  return k;
+}
+function slidesWhere(all, at){
+  var el = all[at];
+  if (!el) return "";
+  var off = el.dataset.off ? " \u00b7 hidden" : "";
+  if (!SLED.flow) return esc(slidesShortLabel(el)) + off;
+  if (el.dataset.flowpart) return '<b>' + esc(String(GROUP.org || "").trim()) + '</b> <span>\u00b7 ' +
+    esc(el.dataset.anchor === "flowcover" ? "Cover" : slidesShortLabel(el)) + '</span>';
+  var parts = slidesParts(all), k = slidesPartAt(parts, at), p = parts[k];
+  if (!p) return esc(slidesShortLabel(el)) + off;
+  var mins = SMPRules.presentMins(GROUP, p.t), short = slidesShortLabel(el);
+  return '<b>' + esc(p.name) + '</b> <span>\u00b7 part ' + (k + 1) + ' of ' + parts.length +
+    (mins ? ' \u00b7 ' + mins + ' minutes' : '') + '</span>' +
+    (short && short !== p.name ? ' \u00b7 ' + esc(short) : '') + off;
+}
+/* One button per part, under the bar; the part you are in filled. Only in a
+   flow: one subject's slides are one part, and a row of one is not a choice. */
+function slidesPartsPaint(all, at){
+  var row = document.getElementById("slparts");
+  if (!row) return;
+  var parts = SLED.flow ? slidesParts(all) : [];
+  row.hidden = parts.length < 2;
+  if (row.hidden) { row.innerHTML = ""; return; }
+  var k = all[at] && all[at].dataset.flowpart ? -1 : slidesPartAt(parts, at);
+  row.innerHTML = parts.map(function(p, j){
+    var mins = SMPRules.presentMins(GROUP, p.t);
+    return '<button class="slpart' + (j === k ? " on" : "") + '" data-slpart="' + p.at +
+      '" title="' + esc(p.name) + (mins ? " \u00b7 " + mins + " minutes" : "") + '">' +
+      esc(p.code) + '</button>';
+  }).join("");
+  /* Wired where drawn — the row is painted after slidesWire() (§556.7). */
+  [].forEach.call(row.querySelectorAll("[data-slpart]"), function(b){
+    b.addEventListener("click", function(){
+      var el = all[+b.dataset.slpart];
+      if (el) { SLED.sel = el.dataset.ed; slidesPaint(); }
+    });
+  });
+  var on = row.querySelector(".slpart.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" });
+}
+function slidesGridToggle(on){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  g.hidden = on === undefined ? !g.hidden : !on;
+  var b = document.querySelector("[data-slgrid]");
+  if (b) b.classList.toggle("on", !g.hidden);
+  slidesGridPaint(SLED.all || []);
 }
 
 /* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
@@ -860,9 +1183,13 @@ function slidesCanHide(el, all){
 function slidesEye(el, all){
   /* A picture slide has no anchor and is not hidden — it is REMOVED, by the
      control the pane already carries (§24: not a second way to do one act). */
-  if (!el.dataset.anchor || !inOffice()) return "";
+  if (!el.dataset.anchor || el.dataset.flowpart || !inOffice()) return "";
   var hid = !!el.dataset.off, can = slidesCanHide(el, all);
   return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
+    /* §556: whose slide this is. In a flow the editor is standing in the
+       company and the slide may be a direction's, so the anchor alone is
+       not an address. */
+    (el.dataset.subject ? ' data-slhidet="' + esc(el.dataset.subject) + '"' : '') +
     (can ? "" : ' aria-disabled="true"') +
     ' title="' + (hid ? "Show this slide in the review again"
                       : can ? "Hide this slide from the review"
@@ -886,8 +1213,8 @@ function slidesHiddenLine(n){
    array that remembers the order it was written in reports a change to the
    server every time somebody hides two slides in the other sequence.
    The emptied key is DELETED (§50.6). */
-function slidesSetHidden(anchor, on){
-  var subj = deckSubject(SLED.target);
+function slidesSetHidden(anchor, on, target){
+  var subj = deckSubject(target || SLED.target);
   if (!subj || !anchor) return;
   var list = SMPRules.hiddenSlides(subj).slice(), i = list.indexOf(anchor);
   if (on && i < 0) list.push(anchor);
@@ -922,9 +1249,13 @@ function slidesPaneHtml(cur, sl){
           '</div><p class="picsub">It is skipped when the deck is presented. Nothing ' +
           'else changes &mdash; the figures on it are still reported, still scored and ' +
           'still on the page.</p></div>'
-        : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
-          'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>');
+        /* ── AND NOTHING UNDER A SLIDE THAT IS FINE (§556.3) ──────────
+           A paragraph under the stage, on every one of forty-nine built
+           slides, saying the same sentence about all of them. The bar
+           under the stage now names the slide, and the add control at the
+           foot of the rail says where it lands — so this was explaining a
+           screen that explains itself (§24, §15.1). */
+        : "");
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -1046,8 +1377,9 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
-  if (String(target || "").indexOf("dir:") === 0) return L1("pillar");
-  return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
+  var k = boxRef(target).kind;
+  if (k === "dir") return L1("pillar");
+  return k === "fn" ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 
 function slidesSlot(sl, p, i){
@@ -1158,7 +1490,16 @@ function slidesAdd(){
     return;
   }
   var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
-  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  /* ── IN A FLOW IT GOES AT THE END (§556.2) ───────────────────────────
+     Islam: *"in the flow slide view I can hide and I can add final slides
+     but the addition on the sections as directions or capabilities should
+     be from the direction or capability presentation itself"*. The
+     selected row may be a direction's, and a picture dropped there would
+     be the office writing into somebody else's deck from a screen that is
+     not about them. The end is the company's own ground. */
+  var after = SLED.flow
+    ? all.length - 1
+    : all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
   if (after < 0) after = all.length - 1;
   var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
   slidesPlace(made, all, after);
@@ -1270,8 +1611,9 @@ function slidesWire(){
         slidesPaint();
         return;
       }
-      var subj = deckSubject(SLED.target);
-      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide));
+      var t = b.dataset.slhidet || SLED.target;
+      var subj = deckSubject(t);
+      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide), t);
     });
   });
   root.querySelectorAll("[data-slshow]").forEach(function(b){
@@ -1558,7 +1900,20 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
-  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  var gb = root.querySelector("[data-slgrid]");
+  if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §556.3: the arrows at the stage's edge and under it are the same act as
+     the keyboard's, so they call the same stepper (§53.5). */
+  root.querySelectorAll("[data-slstep]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesStep(+b.dataset.slstep); });
+  });
+  var rb = root.querySelector("[data-slrail]");
+  if (rb) rb.addEventListener("click", function(){
+    var on = root.classList.toggle("norail");
+    rb.classList.toggle("on", !on);
+    slidesFitStage();
+  });
+  addEventListener("resize", function(){ if (root.classList.contains("on")) { slidesFitStage(); slidesGridFit(); } });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     /* ── THE DECK IN FRONT HAS THE KEYBOARD (§295) ──────────────────
@@ -1574,7 +1929,22 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    if (ev.key === "Escape") slidesClose();
+    if (ev.key === "Escape") {
+      /* §556.2: the grid closes first — Escape from a grid is "put this
+         away", not "leave the editor". */
+      var g = document.getElementById("slgrid");
+      if (g && !g.hidden) { slidesGridToggle(false); return; }
+      slidesClose();
+    }
+    if (ev.key === "g" || ev.key === "G") { slidesGridToggle(); return; }
+    if (ev.key === "p" || ev.key === "P") { slidesPlay(); return; }
+    /* §556.3: hide the slide you are looking at, which is where Islam's own
+       page puts it — the eye on the row does the same act for the row. */
+    if (ev.key === "h" || ev.key === "H") {
+      var cur = document.querySelector("#slidelist .slrow.on .slhide");
+      if (cur) cur.click();
+      return;
+    }
     /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
        Islam: "allow the arrows up and down so I can navigate the slides while
        adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —

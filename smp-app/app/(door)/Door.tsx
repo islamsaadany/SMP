@@ -35,8 +35,10 @@ const EMAIL_BACK = "smp.door.email";
 
 /* The password reveal, once for every password field (index.html wired it
    over all of them rather than three times by hand). */
-function PasswordField({ id, autoComplete, placeholder, autoFocus, inputRef }: {
+function PasswordField({ id, autoComplete, placeholder, autoFocus, inputRef, invalid, describedBy }: {
   id: string; autoComplete: string; placeholder: string; autoFocus?: boolean; inputRef?: React.RefObject<HTMLInputElement | null>;
+  /* §535: a refused field says so to a screen reader as well as to an eye. */
+  invalid?: boolean; describedBy?: string;
 }) {
   const [shown, setShown] = useState(false);
   const local = useRef<HTMLInputElement | null>(null);
@@ -46,7 +48,8 @@ function PasswordField({ id, autoComplete, placeholder, autoFocus, inputRef }: {
       <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" d={LOCK} />
       </svg>
-      <input ref={ref} type={shown ? "text" : "password"} id={id} name={id} autoComplete={autoComplete} placeholder={placeholder} autoFocus={autoFocus} />
+      <input ref={ref} type={shown ? "text" : "password"} id={id} name={id} autoComplete={autoComplete} placeholder={placeholder} autoFocus={autoFocus}
+        aria-invalid={invalid || undefined} aria-describedby={invalid ? describedBy : undefined} />
       <button type="button" className={"eye" + (shown ? " revealed" : "")} aria-label={shown ? "Hide password" : "Show password"}
         onClick={() => { setShown(!shown); ref.current?.focus(); }}>
         <svg className="i-open" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -265,12 +268,25 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 7l8.5 6 8.5-6" />
                   </svg>
-                  <input ref={emailRef} type="text" id="user" name="email" autoComplete="username" autoCapitalize="none" inputMode="email" spellCheck={false} placeholder="Your work email" />
+                  <input ref={emailRef} type="text" id="user" name="email" autoComplete="username" autoCapitalize="none" inputMode="email" spellCheck={false} placeholder="Your work email"
+                    aria-invalid={error ? true : undefined} aria-describedby={error ? "error" : undefined} />
                 </div>
                 <label htmlFor="password">Password</label>
-                <PasswordField id="password" autoComplete="current-password" placeholder="Enter your password" />
-                <div className="error" id="error" style={{ display: error ? "block" : "none" }}>{error}</div>
-                <button type="submit" disabled={busy}>Sign In</button>
+                <PasswordField id="password" autoComplete="current-password" placeholder="Enter your password"
+                  invalid={!!error} describedBy="error" />
+                {/* §535: A REFUSAL HAS TO REACH A SCREEN READER. The div was
+                    shown and hidden with `display`, which a reader is told
+                    nothing about — so somebody who could not see the page was
+                    told only that the button had come back to life. `role` is
+                    on the box from the first render rather than added with the
+                    text, because a live region announces what arrives IN it
+                    and not the region itself. */}
+                <div className="error" id="error" role="alert" aria-live="assertive"
+                  style={{ display: error ? "block" : "none" }}>{error}</div>
+                {/* The outcome goes in the button, which is the product's own
+                    convention (§136's "Write another", §312's "Opening…") —
+                    disabled alone says "wait" without saying what for. */}
+                <button type="submit" disabled={busy}>{busy ? "Signing in\u2026" : "Sign In"}</button>
               </form>
               <p className="foot">You will stay signed in on this device for 30 days.</p>
             </div>
@@ -282,7 +298,8 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
               <p>The one you were issued is temporary</p>
               <form id="changeForm" method="post" action="/api/auth/password" onSubmit={setPassword}>
                 <label htmlFor="newpw">New password</label>
-                <PasswordField id="newpw" autoComplete="new-password" placeholder="At least 8 characters" inputRef={newRef} />
+                <PasswordField id="newpw" autoComplete="new-password" placeholder="At least 8 characters" inputRef={newRef}
+                  invalid={!!changeError} describedBy="changeError" />
                 <p className="hint">At least 8 characters, with an uppercase letter, a number and a special character.</p>
                 <label htmlFor="newpw2">Repeat it</label>
                 <PasswordField id="newpw2" autoComplete="new-password" placeholder="Type it again" />
@@ -301,8 +318,9 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
                     <p className="hint">The SMO confirms it. Leave it blank if you are not sure.</p>
                   </div>
                 )}
-                <div className="error" id="changeError" style={{ display: changeError ? "block" : "none" }}>{changeError}</div>
-                <button type="submit" disabled={busy}>Set password</button>
+                <div className="error" id="changeError" role="alert" aria-live="assertive"
+                  style={{ display: changeError ? "block" : "none" }}>{changeError}</div>
+                <button type="submit" disabled={busy}>{busy ? "Setting it\u2026" : "Set password"}</button>
               </form>
             </div>
           )}

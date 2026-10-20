@@ -2514,6 +2514,31 @@ console.log("\n21 · viewing as somebody is judged as somebody (§185)");
   check("§185: the refusal is a sentence somebody can act on",
         /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
                                         "custodian", people).refuse));
+
+  /* ── §554: THE SMO TEAM ACTS THROUGH ONE TOO, UP TO ITS OWN SEAT ───
+     Islam asked for the team to hold the switcher. The widening and its
+     ceiling are asserted together, because a build that refused the team
+     everything satisfies every "it does not widen" line above, and a build
+     with no ceiling satisfies every "it works" line here (§94.2). */
+  const team = R.actingFor(smo, "t185_hala", "smoteam", people);
+  check("§554: an SMO team seat may act through a client's own person",
+        team.person && team.person.key === "t185_hala" && team.simulated === true,
+        JSON.stringify(team));
+  check("§554: ...and it is judged as HER, exactly as the office's is",
+        !A.authorize(base, edit(), team.person).ok);
+  /* The register row carries the seat (§187), so the one row above them is
+     recognisable without asking anything else. */
+  const superRow = personOf(base, "smo");
+  check("§554: the Super user's row IS the seat this reads",
+        !!superRow && superRow.role === "super", JSON.stringify(superRow));
+  const upward = R.actingFor(personOf(base, "t185_hala"), "smo", "smoteam", people);
+  check("§554: an SMO team seat may NOT act through the Super user — a " +
+        "simulation may only ever narrow",
+        !!upward.refuse, JSON.stringify(upward));
+  check("§554: ...and the refusal says which rule it is",
+        /SMO team cannot act through the Super user/.test(upward.refuse || ""));
+  check("§554: a client's own person still cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
 })();
 
 console.log("\n22 · a seat is granted, never derived (§187)");
@@ -5797,8 +5822,15 @@ console.log("\n§520 · a capability's owner is a part owner");
         JSON.stringify(rowOf("part").of));
   check("§520: …and no longer on the Owner row", rowOf("owner").of.indexOf("capowner") === -1,
         JSON.stringify(rowOf("owner").of));
-  check("§520: the narrowed roles are the direction's and the capability's",
-        R.PART_ONLY_ROLES.join(",") === "dirowner,capowner", R.PART_ONLY_ROLES.join(","));
+  /* §533 REWRITES THIS ASSERTION rather than widening it (§218). It read
+     "dirowner,capowner" — the two the half eye reached when only those two
+     existed as parts. Islam: *"a part can be project and pillar as well …
+     they are parts that should follow the same rule for consistency"*, so the
+     list is all four and the narrowing is governed by the sentence below it:
+     a part owner is somebody who owns ONLY a part. */
+  check("§533: all four parts are narrowed roles",
+        R.PART_ONLY_ROLES.slice().sort().join(",") === "capowner,dirowner,plowner,powner",
+        R.PART_ONLY_ROLES.join(","));
 
   const P = clone(SEED);
   P.people = P.people.concat([{ key: "t520_cap", name: "Testcase Capability Owner", unit: "group" }]);
@@ -5817,6 +5849,165 @@ console.log("\n§520 · a capability's owner is a part owner");
   const F = clone(P); delete F.group[R.DIR_SCOPE];
   check("§520: with the half eye off they see the full plan",
         R.partOnly(R.worldOf(F), personOf(F, "t520_cap")) === false);
+})();
+
+/* ── §533 · A PART OWNER IS SOMEBODY WHO OWNS ONLY A PART ─────────────────
+   Islam: *"a part can be project and pillar as well … they are parts that
+   should follow the same rule for consistency"*, and the sentence the whole
+   thing rests on — *"the CEO sees everything, and the business unit sees his
+   own business unit"*. So: you see the thing you own, whole, and the BIGGEST
+   thing you own decides.
+
+   THE TRAP THIS SECTION EXISTS FOR, measured on the worked example before the
+   rule was built: adding `powner` and `plowner` to the narrowed list and
+   changing nothing else narrowed 24 of its 33 people — eight business-unit
+   OWNERS and five function HEADS among them, because each also happens to own
+   one pillar inside their own unit. That is the exact opposite of what he
+   asked for, and it is the shape a future change would most easily bring
+   back, so it is asserted from both ends: a pure part owner IS narrowed, and
+   a box owner who ALSO holds a part is NOT (§94.2).
+
+   THE STATES ARE MADE (§255): the worked example has no direction owner and
+   no capability owner at all, so every assertion here would pass over a build
+   that narrowed nobody. */
+console.log("\n§533 · a part owner is somebody who owns only a part");
+(function () {
+  /* TWO STATES, because a DIRECTION owner cannot exist beside business units
+     at all: `ownsTopPillar` refuses outright while `buExists`, so a direction
+     owner is El Abd's shape and a pillar owner is everybody else's. Asserting
+     both in one state would have asserted one of them against nothing. */
+  const P = clone(SEED);
+  P.group[R.DIR_SCOPE] = "part";
+  /* A unit that plans in pillars already; one of its pillars gets an owner, so
+     a plain pillar owner exists, and the unit's own head keeps their unit. */
+  const U = P.units[P.unitKeys[0]];
+  U.items = U.items || [];
+  if (!U.items.length) U.items.push({ id: "u533", code: "U1", name: "A pillar", measures: [], tactics: [] });
+  U.items[0].owner = "Testcase Pillar Owner";
+  P.people = P.people.concat([
+    { key: "t533_pil",  name: "Testcase Pillar Owner", unit: "group" },
+    { key: "t533_both", name: "Testcase Unit Head",    unit: "group" }]);
+  /* The unit's own head, who ALSO owns a pillar inside it — the 24-person
+     case, in one person. */
+  U.items.push({ id: "u533b", code: "U2", name: "A second pillar", owner: "Testcase Unit Head", measures: [], tactics: [] });
+  P.unitRoles = P.unitRoles || {};
+  P.unitRoles[P.unitKeys[0]] = Object.assign({}, P.unitRoles[P.unitKeys[0]], { head: "t533_both" });
+  const w = R.worldOf(P);
+  const roles = function (k) { return R.personRoles(w, personOf(P, k)).map(function (r) { return r.role; }); };
+
+  /* The states really are what they claim, or the assertions below are true
+     for the wrong reason (§113.8). */
+  check("§533: the pillar owner derives plowner and nothing bigger",
+        roles("t533_pil").join(",") === "plowner", roles("t533_pil").join(","));
+  check("§533: the unit head derives owner AND plowner",
+        roles("t533_both").indexOf("owner") > -1 && roles("t533_both").indexOf("plowner") > -1,
+        roles("t533_both").join(","));
+
+  check("§533: a pillar owner owns only a part — narrowed",
+        R.partOnly(w, personOf(P, "t533_pil")) === true);
+  check("§533: a UNIT HEAD who also owns a pillar is NOT narrowed",
+        R.partOnly(w, personOf(P, "t533_both")) === false);
+  /* And every box role, one at a time, because "not a part and not the floor"
+     is the definition and a list would rot (§53.5). */
+  ["super", "smoteam", "gceo", "cceo", "owner", "custodian", "fnhead"].forEach(function (k) {
+    check("§533: " + k + " is a box role, so it never narrows",
+          R.PART_ONLY_ROLES.indexOf(k) === -1);
+  });
+  /* The office is never narrowed however many parts they hold. */
+  check("§533: the SMO is not narrowed", R.partOnly(w, personOf(P, "smo")) === false);
+  check("§533: the CEO is not narrowed", R.partOnly(w, personOf(P, "ceo")) === false);
+
+  /* THE WHOLE REGISTER, counted: exactly the people who own only parts. A
+     count rather than a name, because the point is that the other 33 did NOT
+     move (§303). */
+  const narrowed = P.people.filter(function (p) { return R.partOnly(w, p); }).map(function (p) { return p.key; });
+  check("§533: in the worked example only the pure part owners are narrowed",
+        narrowed.sort().join(",") === "dir,t533_pil", narrowed.sort().join(","));
+
+  /* ── WHAT THE BOX TEST IS ACTUALLY FOR, and the correction behind it ────
+     MEASURED, after a first measurement of this got it wrong and was reported
+     wrong: on the worked example as it SHIPS, adding the two new parts to the
+     list narrows exactly ONE person with or without the box test, because the
+     grant test underneath already answers for a unit owner and a function
+     head — the shipped access table gives both of them something on the
+     company's pages. The "24 of 33" first reported came from a reimplementation
+     of partOnly() in a scratch script that asked the PERSON's overall grant
+     where the real one asks each ROLE's, and whose own agreement check was
+     vacuous because nobody is narrowed under the old list at all (§94.8: an
+     assertion has to agree with something computed independently, and that one
+     agreed with nothing).
+
+     SO THE BOX TEST GUARDS A CONFIGURATION, not the default: the grant test
+     reads the ACCESS TABLE, and the table offers "none" on the company column
+     for the BU owner row. An office that presses it would, without the box
+     test, narrow every unit head who also owns one pillar inside their own
+     unit — *the business unit sees his own business unit*, gone, by a press
+     two columns away. That is the state below, and it is the only state in
+     which the box test changes an answer. Both ends (§94.2). */
+  const N = clone(P);
+  N.access = N.access || {};
+  N.access.owner = Object.assign({}, N.access.owner, { a_group: "none" });
+  const wn = R.worldOf(N);
+  check("§533: the state really does take the company column off the BU owner",
+        R.grantFor(wn, "owner", "a_group") === "none", R.grantFor(wn, "owner", "a_group"));
+  check("§533: with the company column set to none, a unit head who also owns a pillar is STILL not narrowed",
+        R.partOnly(wn, personOf(N, "t533_both")) === false);
+  check("§533: …while a pure pillar owner still is",
+        R.partOnly(wn, personOf(N, "t533_pil")) === true);
+
+  /* AND THE FLOOR IS NOT A PART, so somebody who holds only it is not
+     narrowed. There is deliberately no "a part owner who also holds contrib"
+     case here: `contrib` is pushed only behind `!out.length`, so it can never
+     sit beside a part role, and a state claiming to make one would be making
+     something the platform cannot produce (§100.3). Asserted rather than
+     assumed, because that guard is what this reasoning rests on. */
+  const C = clone(P);
+  C.people = C.people.concat([{ key: "t533_flr", name: "Testcase Contributor", unit: C.unitKeys[0] }]);
+  C.units[C.unitKeys[0]].items[0].measures = (C.units[C.unitKeys[0]].items[0].measures || []).concat(
+    [{ id: "m533", name: "A row they are named on", owner: "Testcase Contributor", dir: "≥", target: "100", compile: "Latest" }]);
+  const wc = R.worldOf(C);
+  const crol = R.personRoles(wc, personOf(C, "t533_flr")).map(function (r) { return r.role; });
+  check("§533: being named on a row alone derives the floor and nothing else",
+        crol.join(",") === "contrib", crol.join(","));
+  check("§533: somebody who holds only the floor is NOT narrowed",
+        R.partOnly(wc, personOf(C, "t533_flr")) === false);
+  const pilRoles = R.personRoles(wc, personOf(C, "t533_pil")).map(function (r) { return r.role; });
+  check("§533: and the floor never sits beside a part role",
+        pilRoles.indexOf("contrib") === -1, pilRoles.join(","));
+
+  /* With the half eye OFF nobody is narrowed, whatever they own (§517). */
+  const F = clone(P); delete F.group[R.DIR_SCOPE];
+  const wf = R.worldOf(F);
+  const anyNarrowed = F.people.filter(function (p) { return R.partOnly(wf, p); });
+  check("§533: with the half eye off, nobody is narrowed at all",
+        anyNarrowed.length === 0, anyNarrowed.map(function (p) { return p.key; }).join(","));
+
+  /* ── THE SECOND STATE: El Abd's shape, where a DIRECTION owner exists ──
+     The units are off, so `ownsTopPillar` answers at all, and the company's
+     own plan carries the direction. The function's head is kept as the box
+     owner who also holds a part, so the trap is asserted here too — with no
+     units, the box role in play is `fnhead` rather than `owner`. */
+  const E = clone(SEED);
+  E.group[R.DIR_SCOPE] = "part";
+  E.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice() } };
+  E.group.items = [
+    { id: "g533a", code: "D1", name: "A direction", owner: "Testcase Direction Owner", measures: [], tactics: [] },
+    { id: "g533b", code: "D2", name: "A second direction", owner: "Testcase Function Head", measures: [], tactics: [] }];
+  E.people = E.people.concat([
+    { key: "t533_dir", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t533_fn",  name: "Testcase Function Head",   unit: "group" }]);
+  E.functions[E.functionKeys[0]] = Object.assign({}, E.functions[E.functionKeys[0]], { head: "t533_fn" });
+  const we = R.worldOf(E);
+  const eroles = function (k) { return R.personRoles(we, personOf(E, k)).map(function (r) { return r.role; }); };
+  check("§533: with the units off, a direction owner derives dirowner and nothing bigger",
+        eroles("t533_dir").join(",") === "dirowner", eroles("t533_dir").join(","));
+  check("§533: …and the function head derives fnhead AND dirowner",
+        eroles("t533_fn").indexOf("fnhead") > -1 && eroles("t533_fn").indexOf("dirowner") > -1,
+        eroles("t533_fn").join(","));
+  check("§533: a direction owner owns only a part — narrowed",
+        R.partOnly(we, personOf(E, "t533_dir")) === true);
+  check("§533: a FUNCTION HEAD who also owns a direction is NOT narrowed",
+        R.partOnly(we, personOf(E, "t533_fn")) === false);
 })();
 
 
@@ -5893,6 +6084,116 @@ console.log("\n§520.6 · a capability's owner enters their own capability's fig
   v = as("smo", function (inc) { inc.review = Object.assign({}, inc.review);
     inc.review.submitted = Object.assign({}, inc.review.submitted); inc.review.submitted.group = true; });
   check("§520.6: the office submits it", v.ok, (v.refusals || []).join(" / "));
+})();
+
+/* ── §545: A BOUNDED REPORTER ENTERS A CATEGORY FIGURE ────────────────────
+   §343 gave a pillar a breakdown and the verdict's row index was never told,
+   so every `a_c<n>` reached it as an id the index did not hold — and an id
+   this map misses is refused whoever asks (`!ctx`). Section 40 above missed
+   it because it asks the unit's HEAD, who is unbounded and returns before
+   the per-row filter runs: the fault exists only for the roles narrowed to
+   their own rows, which is the half of §94.2 that was not asserted.
+
+   MEASURED ON EL ABD, 18 October 2026: a direction's owner entered five
+   category figures (Bakery, Barista, Western, Oriental, Ice Cream) beside
+   eight tactic ones and the whole save came back "Your role reports only
+   your own direction — 5 figures is not yours", with all thirteen lines put
+   back. The screen had offered every box, because `reportItems` carries the
+   pillar's Owner onto each cell and `canReportRow` said yes — §42's drift,
+   in the direction that costs somebody their evening.
+
+   BOTH ENDS AND BOTH SHAPES (§94.2, §53.5): the company page where the
+   pillar is a DIRECTION, and a unit's page where it is a plain pillar. A
+   figure on their own, refused on the one beside it, and the TARGET in the
+   same table still refused — or a fix that opened the whole breakdown would
+   pass this. */
+console.log("\n§545 · a bounded reporter enters a category figure (§343)");
+(function () {
+  const bd = function (pid) {
+    return { name: "Categories",
+             cols: [{ id: "c1", name: "Growth", dir: "≥" }],
+             rows: [{ id: pid + "-B1", name: "Bakery",  t_c1: "7%", a_c1: "" },
+                    { id: pid + "-B2", name: "Barista", t_c1: "22%", a_c1: "" }] };
+  };
+
+  /* ── El Abd's shape: the units off, the pillars ARE the directions ── */
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t544_own", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t544_cus", name: "Testcase Direction Custodian", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian",
+      measures: [], tactics: [], breakdown: bd("group-P1") },
+    { id: "group-P2", code: "EA02", name: "Direction two", sub: "", kind: "", theme: "",
+      owner: "Somebody Else Entirely",
+      measures: [], tactics: [], breakdown: bd("group-P2") }];
+  const as = function (who, mutate) {
+    const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who));
+  };
+  /* The figure is REPORTING before anybody is asked whose it is — a build
+     that classified it as the plan would refuse the owner for the other
+     reason entirely and the assertions below would not say which. */
+  const inc0 = clone(B); inc0.group.items[0].breakdown.rows[0].a_c1 = "4%";
+  const kinds = (A.collect(B, inc0, R.worldOf(B)) || []);
+  check("§545: a category figure on a direction is unitReporting at the group",
+        kinds.length > 0 && kinds.every(function (c) {
+          return c.kind === "unitReporting" && c.target === "group"; }),
+        kinds.map(function (c) { return c.kind + "@" + c.target; }).join(",") || "(nothing classified)");
+
+  const mine  = function (inc) { inc.group.items[0].breakdown.rows[0].a_c1 = "4%"; };
+  const theirs = function (inc) { inc.group.items[1].breakdown.rows[0].a_c1 = "4%"; };
+  let v = as("t544_own", mine);
+  check("§545: a direction's owner enters a category figure on their own direction",
+        v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_cus", mine);
+  check("§545: …so does its custodian", v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_own", function (inc) {
+    inc.group.items[0].breakdown.rows[0].note = "Ramadan shifted the bread mix."; });
+  check("§545: …and the row's note with it", v.ok, (v.refusals || []).join(" / "));
+  /* THE WHOLE SAVE, which is what Islam actually lost: five category figures
+     and a tactic in one post. A fix that took them one at a time would pass
+     the line above and still refuse this. */
+  v = as("t544_own", function (inc) {
+    const p = inc.group.items[0];
+    p.breakdown.rows[0].a_c1 = "4%"; p.breakdown.rows[1].a_c1 = "27%";
+    p.breakdown.rows[0].note = "Ramadan shifted the bread mix."; });
+  check("§545: …and all of them in one save", v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_own", theirs);
+  check("§545 REFUSED: a category figure on the direction beside theirs", !v.ok, "was ALLOWED");
+  v = as("t544_own", function (inc) { inc.group.items[0].breakdown.rows[0].t_c1 = "9%"; });
+  check("§545 REFUSED: …and the TARGET in their own table stays the office's", !v.ok, "was ALLOWED");
+  v = as("smo", theirs);
+  check("§545: the office enters any of them", v.ok, (v.refusals || []).join(" / "));
+
+  /* ── AND A PLAIN PILLAR OWNER IN A UNIT, the same fault one layer down
+     (§147.7). Asserted here rather than left to El Abd's shape: the unit
+     path reaches the per-row filter by a different road (`onlyOwnLines`),
+     and a fix to one that missed the other would pass half this section. */
+  const UK = Object.keys(SEED.units)[0];
+  const P = clone(SEED);
+  P.access.plowner = Object.assign({}, P.access.plowner, { a_unit_own: "edit" });
+  P.people.push({ key: "t544_pill", name: "Pillar Owner 544", active: true });
+  P.units[UK].items[0].owner = "Pillar Owner 544";
+  P.units[UK].items[0].breakdown = bd(P.units[UK].items[0].id);
+  if ((P.units[UK].items || []).length > 1)
+    P.units[UK].items[1].breakdown = bd(P.units[UK].items[1].id);
+  const asP = function (who, mutate) {
+    const inc = clone(P); mutate(inc); return A.authorize(P, inc, personOf(P, who));
+  };
+  check("§545: the fixture's pillar owner derives plowner and nothing bigger",
+        R.personRoleKeys(R.worldOf(P), personOf(P, "t544_pill")).join() === "plowner",
+        R.personRoleKeys(R.worldOf(P), personOf(P, "t544_pill")).join());
+  v = asP("t544_pill", function (inc) { inc.units[UK].items[0].breakdown.rows[0].a_c1 = "4%"; });
+  check("§545: a pillar owner enters a category figure of their own pillar",
+        v.ok, (v.refusals || []).join(" / "));
+  if ((P.units[UK].items || []).length > 1) {
+    v = asP("t544_pill", function (inc) { inc.units[UK].items[1].breakdown.rows[0].a_c1 = "4%"; });
+    check("§545 REFUSED: …and not the pillar beside theirs", !v.ok, "was ALLOWED");
+  }
+  v = asP("t544_pill", function (inc) { inc.units[UK].items[0].breakdown.rows[0].t_c1 = "9%"; });
+  check("§545 REFUSED: …nor its target", !v.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

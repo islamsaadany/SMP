@@ -1,0 +1,248 @@
+<title>Removing a line</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --warn-bg:#33241A; --warn-tx:#E1935F;
+      --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --warn-bg:#33241A; --warn-tx:#E1935F;
+    --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px; padding-left:20px; padding-right:20px; }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:30px 18px; display:flex; justify-content:center; }
+  .stage.plain{ background:var(--surface-2); padding:24px 18px; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
+
+  .osdlg{ background:var(--surface); border:1px solid var(--line); border-radius:12px;
+          width:min(430px,100%); padding:20px 22px 16px; box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .osdlg .host{ font-size:12.5px; color:var(--ink-3); margin:0 0 12px; }
+  .osdlg .msg{ font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; }
+  .osdlg .row{ display:flex; justify-content:flex-end; gap:10px; }
+  .osdlg .row span{ font:600 13px/1 var(--sans); border-radius:7px; padding:10px 16px;
+                    border:1px solid var(--line); color:var(--ink-2); }
+  .osdlg .row .ok{ background:var(--ink); color:var(--surface); border-color:var(--ink); }
+
+  /* the editor: a numbered list of lines, each a field with an × */
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+         width:min(620px,100%); padding:15px 17px 17px; }
+  .cardh{ font:700 13.5px/1.3 var(--sans); margin:0 0 3px; }
+  .cardsub{ font-size:12px; color:var(--ink-3); margin:0 0 13px; }
+  .swotlist{ list-style:none; margin:0; padding:0; }
+  .swotlist li{ display:grid; grid-template-columns:22px 1fr auto; gap:8px;
+                align-items:start; margin:0 0 7px; }
+  .swot-n{ font:600 12px/26px var(--sans); color:var(--ink-3); text-align:center; }
+  .fld{ font:400 13px/1.45 var(--sans); padding:5px 9px; border:1px solid var(--field-line);
+        border-radius:6px; background:var(--surface); color:var(--ink); width:100%;
+        box-sizing:border-box; }
+  .xbtn{ width:24px; height:24px; margin-top:2px; font-size:14px; line-height:1;
+         border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+         border-radius:6px; cursor:pointer; padding:0; }
+  .xbtn:hover{ color:var(--bad-tx); border-color:var(--bad); }
+
+  /* treatment A — the line itself asks, in its own row */
+  .asking{ display:grid; grid-template-columns:22px 1fr auto; gap:8px; align-items:center;
+           background:var(--bad-bg); border-radius:8px; padding:5px 6px 5px 0; margin:0 0 7px; }
+  .asking .q{ font-size:12.5px; color:var(--bad-tx); line-height:1.4; min-width:0; }
+  .asking .q b{ color:var(--ink); font-weight:600; }
+  .asking .btns{ display:flex; gap:6px; }
+  .asking button{ font:600 12px/1 var(--sans); border-radius:6px; padding:6px 10px;
+                  cursor:pointer; white-space:nowrap; }
+  .asking .no{ background:var(--surface); border:1px solid var(--line); color:var(--ink-2); }
+  .asking .yes{ background:var(--bad); border:1px solid var(--bad); color:#fff; }
+
+  /* treatment B — a strip under the line */
+  .under{ grid-column:2 / -1; display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+          background:var(--surface-2); border-left:3px solid var(--bad); border-radius:6px;
+          padding:8px 11px; margin:-2px 0 7px; }
+  .under .q{ flex:1; min-width:0; font-size:12.5px; color:var(--bad-tx); line-height:1.4; }
+  .under button{ font:600 12px/1 var(--sans); border-radius:6px; padding:6px 10px; cursor:pointer; }
+  .under .no{ background:var(--surface); border:1px solid var(--line); color:var(--ink-2); }
+  .under .yes{ background:var(--bad); border:1px solid var(--bad); color:#fff; }
+  .gridwrap{ display:grid; grid-template-columns:22px 1fr auto; gap:8px; }
+
+  .tally{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+          margin-top:18px; overflow:hidden; }
+  .tally div{ display:flex; gap:14px; padding:9px 14px; border-top:1px solid var(--line-soft);
+              font-size:13px; align-items:baseline; }
+  .tally div:first-child{ border-top:0; background:var(--surface-2); font-weight:600;
+                          color:var(--ink-3); font-size:11.5px; letter-spacing:.08em;
+                          text-transform:uppercase; }
+  .tally .w{ flex:1 1 46%; min-width:0; color:var(--ink); }
+  .tally .s{ flex:0 0 40%; color:var(--ink-2); }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:40px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .tally div{ flex-direction:column; gap:3px; } .tally .s, .tally .w{ flex:none; }
+    .asking{ grid-template-columns:22px 1fr; } .asking .btns{ grid-column:2; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>Removing a line</h1>
+  <p class="lede">The last family. Nine controls across six screens ask one sentence —
+  <i>&ldquo;Remove X? This cannot be undone here.&rdquo;</i> — in the browser's box. It is one
+  conversion, not nine, and it is the only one of the twenty-nine with no drawing behind it: the
+  other shapes were either already in the product or drawn and signed off last week.</p>
+  <p class="lede">It needs its own because the control is different. Everything converted so far
+  hangs off a row with a menu, a form with a button, or a page with room. These nine are a
+  <b>24-pixel ×</b> beside a line you are in the middle of typing, in a list of them.</p>
+
+  <div class="tally">
+    <div><span class="w">Where</span><span class="s">What the × takes</span></div>
+    <div><span class="w">The Temple &mdash; key objectives, themes</span><span class="s">a key objective, a theme</span></div>
+    <div><span class="w">A capability's key objectives</span><span class="s">a key objective</span></div>
+    <div><span class="w">Who we are &mdash; the clauses</span><span class="s">a line of the statement</span></div>
+    <div><span class="w">The SWOT</span><span class="s">a line in one of the four lists</span></div>
+    <div><span class="w">How we compete</span><span class="s">a value, with its hows and measures</span></div>
+    <div><span class="w">The revenue tree</span><span class="s">a route, a period, a driver</span></div>
+  </div>
+
+  <hr class="rule">
+  <span class="key">Today <b>— the same box, nine times, wherever you pressed</b></span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Remove this line? This cannot be undone here.</p>
+      <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">It does not say which line. You pressed a × in a list of nine, the box covers
+  the list, and the only thing it tells you is that something will go. &ldquo;This cannot be undone
+  <i>here</i>&rdquo; is also doing quiet work the reader cannot check &mdash; it means the plan is
+  archived on the way out of other doors, not that this line is recoverable.</p>
+
+  <span class="key">The line as it is <b>— the control, in its place</b></span>
+  <div class="stage plain">
+    <div class="card">
+      <div class="cardh">Strengths</div>
+      <p class="cardsub">Trade Finance &middot; SWOT</p>
+      <ol class="swotlist">
+        <li><span class="swot-n">1</span><input class="fld" value="Two-day letter of credit turnaround"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+        <li><span class="swot-n">2</span><input class="fld" value="Relationships with the four largest importers"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+        <li><span class="swot-n">3</span><input class="fld" value="Correspondent network across the Gulf"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+      </ol>
+    </div>
+  </div>
+
+  <hr class="rule">
+  <span class="key">Treatment A <b>— the line asks, in its own place in the list</b></span>
+  <div class="stage plain">
+    <div class="card">
+      <div class="cardh">Strengths</div>
+      <p class="cardsub">Trade Finance &middot; SWOT</p>
+      <ol class="swotlist">
+        <li><span class="swot-n">1</span><input class="fld" value="Two-day letter of credit turnaround"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+        <li class="asking"><span class="swot-n">2</span>
+          <span class="q">Remove <b>&ldquo;Relationships with the four largest importers&rdquo;</b>?</span>
+          <span class="btns"><button class="no">Keep</button><button class="yes">Remove</button></span>
+        </li>
+        <li><span class="swot-n">3</span><input class="fld" value="Correspondent network across the Gulf"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+      </ol>
+    </div>
+  </div>
+  <p class="note"><b>Recommended.</b> The question stands exactly where the line is, so which line is
+  not something to work out — it is the one that has turned into the question. Nothing moves on the
+  page, the list keeps its length and its numbering while you decide, and the rest of the editor
+  stays usable. It is the in-place shape the row menus already use, at the size this control has.</p>
+  <p class="note">The cost, stated: the line's text is hidden while it asks, because the row is only
+  so wide. For a long line the question truncates it — which is the one thing Treatment B fixes.</p>
+
+  <span class="key">Treatment B <b>— the line stays, and a strip under it asks</b></span>
+  <div class="stage plain">
+    <div class="card">
+      <div class="cardh">Strengths</div>
+      <p class="cardsub">Trade Finance &middot; SWOT</p>
+      <ol class="swotlist">
+        <li><span class="swot-n">1</span><input class="fld" value="Two-day letter of credit turnaround"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+        <li class="gridwrap" style="margin:0">
+          <span class="swot-n">2</span>
+          <input class="fld" value="Relationships with the four largest importers" style="border-color:var(--bad)">
+          <button class="xbtn" aria-label="Remove this line" style="color:var(--bad-tx);border-color:var(--bad)">&times;</button>
+          <span class="under">
+            <span class="q">Remove this line? It cannot be brought back from here.</span>
+            <button class="no">Keep</button><button class="yes">Remove</button>
+          </span>
+        </li>
+        <li><span class="swot-n">3</span><input class="fld" value="Correspondent network across the Gulf"><button class="xbtn" aria-label="Remove this line">&times;</button></li>
+      </ol>
+    </div>
+  </div>
+  <p class="note">The line is still readable while you answer, and the mark on the field says which
+  one. The cost is the opposite one: the list grows by a row as you press, so everything below it
+  moves &mdash; on the revenue tree, where the lines are table rows, that is a visible jump.</p>
+
+  <hr class="rule">
+  <span class="key">Three things that must survive the conversion</span>
+  <p class="lede"><b>One.</b> Eight of the nine only ask <i>when the line holds something</i>. An
+  empty line you just added goes on the first press, with no question at all, and that is right
+  &mdash; a version that always asked would be worse than what is there now. Both treatments keep
+  it: the × removes an empty line outright and only turns into a question when there is something
+  to lose.</p>
+  <p class="lede"><b>Two.</b> Three of the nine take more than the line. Removing a route on the
+  revenue tree takes its periods and their drivers; removing a period takes its drivers; removing a
+  value on How we compete takes its hows and its measures. Those three say so today and must keep
+  saying so &mdash; which is one more reason the question has to carry the line's own words rather
+  than a fixed sentence.</p>
+  <p class="lede"><b>Three.</b> This page is already inconsistent and the conversion does not fix
+  it: removing a BU from the list, and taking a BU off a mapping, both go on the first press with
+  no question anywhere. I am not proposing to add questions there &mdash; I am naming it so the
+  difference is a decision rather than an accident. Say if you want them to match.</p>
+
+  <div class="ask">
+    <h2>What I need from you</h2>
+    <ul>
+      <li><b>A or B.</b> I recommend A: the question lands where the line is, nothing on the page
+      moves, and the thing you pressed is the thing that asks. B is right if reading the line while
+      you decide matters more than the list holding still.</li>
+      <li><b>The two words:</b> <i>Keep</i> and <i>Remove</i>. The browser gave you Cancel and Okay,
+      which name nothing.</li>
+      <li><b>The sentence for the three that take more than the line</b> &mdash; today it is
+      &ldquo;Remove &lsquo;Walk-in&rsquo; and its 3 drivers?&rdquo;. I would keep exactly that, in
+      the line's own place.</li>
+      <li>Whether the two controls that ask nothing at all should join this family, or stay as they
+      are.</li>
+    </ul>
+  </div>
+</div>

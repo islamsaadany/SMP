@@ -1,0 +1,148 @@
+<title>Processes Complete</title>
+<style>
+:root{--bg:#F4F6FA;--surface:#fff;--surface2:#EEF1F6;--line:#D6DCE5;--ink:#1B2433;--ink2:#414A58;--ink3:#5C6675;--navy:#16325C;--navy-ink:#fff;--navy-quiet:#B9C6DB;--gold:#B8862B;--goldtx:#8A6112;--good:#2E7D4F;--goodbg:#E3F2E9;--warn:#9A6A00;--warnbg:#FBF0D5;--bad:#B3392A;--badbg:#FBE6E2;--info:#2A5FA8;--infobg:#E2ECF9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151D;--surface:#1A212C;--surface2:#232B38;--line:#333C4B;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#9AA4B4;--navy:#0E2342;--navy-quiet:#9FB0CC;--gold:#E0B14E;--goldtx:#E0B14E;--good:#6FCB93;--goodbg:#173326;--warn:#E5B94F;--warnbg:#3A3015;--bad:#F08A7B;--badbg:#3C1E1A;--info:#8DB6F0;--infobg:#1B2C47;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151D;--surface:#1A212C;--surface2:#232B38;--line:#333C4B;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#9AA4B4;--navy:#0E2342;--navy-quiet:#9FB0CC;--gold:#E0B14E;--goldtx:#E0B14E;--good:#6FCB93;--goodbg:#173326;--warn:#E5B94F;--warnbg:#3A3015;--bad:#F08A7B;--badbg:#3C1E1A;--info:#8DB6F0;--infobg:#1B2C47;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:14px;padding-inline:16px}
+*{box-sizing:border-box}
+.wrap{max-width:1180px;margin:0 auto;padding-block:16px 48px}
+.bar{background:var(--navy);color:var(--navy-ink);padding:12px 16px;border-radius:8px 8px 0 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar b{font-size:16px}.bar span{color:var(--navy-quiet);font-size:12.5px}
+.tabs{background:var(--surface);border:1px solid var(--line);border-top:0;display:flex;gap:2px;overflow-x:auto;padding:0 8px}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);font:600 13.5px inherit;font-family:inherit;padding:11px 12px;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.pane{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;padding:16px;display:none}
+.pane.on{display:block}
+h2{font-size:16px;margin:18px 0 8px;color:var(--ink)}h2:first-child{margin-top:0}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.card{flex:1 1 240px;min-width:0;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:12px}
+.card .n{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}.card .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.sc{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;padding:8px 10px;white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--surface2)}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.p-good{background:var(--goodbg);color:var(--good)}.p-warn{background:var(--warnbg);color:var(--warn)}.p-bad{background:var(--badbg);color:var(--bad)}.p-info{background:var(--infobg);color:var(--info)}.p-grey{background:var(--surface2);color:var(--ink2);border:1px solid var(--line)}
+.flow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 14px}
+.flow .st{border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:var(--surface2);font-weight:600;font-size:13px}
+.flow .st.cur{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+.flow .ar{color:var(--ink3)}
+.btn{background:var(--navy);color:var(--navy-ink);border:0;border-radius:6px;padding:7px 14px;font:600 13px inherit;font-family:inherit}
+.btn.gold{background:var(--gold);color:#1B1400}.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.note{border-left:3px solid var(--gold);background:var(--surface2);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;color:var(--ink2)}
+.bar2{height:8px;background:var(--line);border-radius:4px;overflow:hidden;min-width:80px}.bar2 i{display:block;height:100%;background:var(--good)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.cols>div{min-width:0}
+.tl{list-style:none;margin:0;padding:0}.tl li{padding:6px 0 6px 14px;border-left:2px solid var(--line);margin-left:4px;color:var(--ink2)}.tl li b{color:var(--ink)}
+.h{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+</style>
+<div class="wrap">
+<div class="bar"><b>Processes</b><span>Order-to-Cash · Retail Stores · Mockup of the complete solution (sample data)</span></div>
+<div class="tabs" id="tabs">
+<button data-t="life" class="on">Lifecycle</button><button data-t="risk">Risks &amp; controls</button><button data-t="qual">Quality</button><button data-t="ppl">People</button><button data-t="comp">Compliance</button><button data-t="conn">Connections</button>
+</div>
+
+<div class="pane on" id="life">
+<h2>Order-to-Cash · SOP-014 · version 3.0</h2>
+<div class="flow"><div class="st">Draft</div><span class="ar">›</span><div class="st cur">In review</div><span class="ar">›</span><div class="st">Approved</div><span class="ar">›</span><div class="st">Published</div><span class="ar">›</span><div class="st">Retired</div></div>
+<div class="row">
+<div class="card"><div class="l">Owner</div><div class="n" style="font-size:16px">Hala Mansour</div></div>
+<div class="card"><div class="l">Reviewers</div><div style="margin-top:4px">Omar Fathy <span class="pill p-good">Signed 12 Oct</span><br>Salma Adel <span class="pill p-warn">Waiting</span></div></div>
+<div class="card"><div class="l">Approver</div><div style="margin-top:4px">Yara Kamal <span class="pill p-grey">After review</span></div></div>
+<div class="card"><div class="l">Next review due</div><div class="n" style="font-size:16px">12 Oct 2027</div><span class="pill p-good">Not due</span></div>
+</div>
+<div class="btns"><button class="btn gold">Send to approver</button><button class="btn ghost">Return to draft</button><button class="btn ghost">Compare with v2.0</button></div>
+<h2>Version history</h2>
+<div class="sc"><table><thead><tr><th>Version</th><th>Status</th><th>What changed</th><th>By</th><th>Date</th></tr></thead><tbody>
+<tr><td>3.0</td><td><span class="pill p-info">In review</span></td><td>Credit check moved before order confirmation; two steps merged</td><td>Hala Mansour</td><td>10 Oct 2026</td></tr>
+<tr><td>2.0</td><td><span class="pill p-good">Published</span></td><td>Added returns handling</td><td>Hala Mansour</td><td>03 Oct 2025</td></tr>
+<tr><td>1.0</td><td><span class="pill p-grey">Retired</span></td><td>First issue</td><td>Omar Fathy</td><td>14 Jan 2025</td></tr></tbody></table></div>
+<h2>Review calendar</h2>
+<div class="sc"><table><thead><tr><th>Process</th><th>Owner</th><th>Status</th><th>Review due</th><th></th></tr></thead><tbody>
+<tr><td>Order-to-Cash</td><td>Hala Mansour</td><td><span class="pill p-info">In review</span></td><td>12 Oct 2027</td><td><span class="pill p-good">On time</span></td></tr>
+<tr><td>Supplier onboarding</td><td>Omar Fathy</td><td><span class="pill p-good">Published</span></td><td>30 Oct 2026</td><td><span class="pill p-warn">Due in 16 days</span></td></tr>
+<tr><td>Store cash handling</td><td>Salma Adel</td><td><span class="pill p-good">Published</span></td><td>01 Sep 2026</td><td><span class="pill p-bad">Overdue 43 days</span></td></tr>
+<tr><td>Returns &amp; refunds</td><td>Hala Mansour</td><td><span class="pill p-grey">Draft</span></td><td>—</td><td></td></tr></tbody></table></div>
+</div>
+
+<div class="pane" id="risk">
+<h2>Risk and control matrix · Order-to-Cash</h2>
+<div class="row"><div class="card"><div class="l">Risks</div><div class="n">9</div></div><div class="card"><div class="l">Controls</div><div class="n">12</div></div><div class="card"><div class="l">Steps with no control</div><div class="n" style="color:var(--bad)">2</div></div><div class="card"><div class="l">Controls tested this year</div><div class="n">8 of 12</div></div></div>
+<div class="sc" style="margin-top:12px"><table><thead><tr><th>Step</th><th>Risk</th><th>Control</th><th>Type</th><th>Frequency</th><th>Owner</th><th>Evidence</th><th>Last test</th></tr></thead><tbody>
+<tr><td>3 Credit check</td><td>Order released to a customer over limit</td><td>System blocks orders above credit limit</td><td>Preventive</td><td>Every order</td><td>Finance</td><td>System log</td><td><span class="pill p-good">Effective</span></td></tr>
+<tr><td>5 Pricing</td><td>Manual discount without approval</td><td>Discounts above 10% need manager sign-off</td><td>Preventive</td><td>Every order</td><td>Sales</td><td>Approval record</td><td><span class="pill p-warn">Partly</span></td></tr>
+<tr><td>8 Invoicing</td><td>Invoice differs from delivery</td><td>Weekly match of invoices to deliveries</td><td>Detective</td><td>Weekly</td><td>Finance</td><td>Match report</td><td><span class="pill p-good">Effective</span></td></tr>
+<tr><td>10 Collections</td><td>Overdue balances not chased</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="pill p-bad">No control</span></td></tr></tbody></table></div>
+<div class="note">The AI review can suggest a risk and a control for each step. They stay as suggestions until the owner accepts them.</div>
+</div>
+
+<div class="pane" id="qual">
+<h2>Performance of Order-to-Cash</h2>
+<div class="row">
+<div class="card"><div class="l">Order cycle time</div><div class="n">3.4 days</div><div class="h">Target 3.0 · <span style="color:var(--warn)">Slightly over</span></div></div>
+<div class="card"><div class="l">Invoice accuracy</div><div class="n">98.7%</div><div class="h">Target 98% · <span style="color:var(--good)">On target</span></div></div>
+<div class="card"><div class="l">Days to collect</div><div class="n">52</div><div class="h">Target 45 · <span style="color:var(--bad)">Off track</span></div></div>
+</div>
+<div class="cols">
+<div><h2>Non-conformances</h2><div class="sc"><table style="min-width:420px"><thead><tr><th>Issue</th><th>Raised</th><th>Status</th></tr></thead><tbody>
+<tr><td>Credit limit bypassed at Store 12</td><td>02 Oct</td><td><span class="pill p-warn">Action open</span></td></tr>
+<tr><td>Two invoices sent to the wrong entity</td><td>18 Sep</td><td><span class="pill p-good">Closed</span></td></tr></tbody></table></div></div>
+<div><h2>Corrective actions</h2><div class="sc"><table style="min-width:420px"><thead><tr><th>Action</th><th>Owner</th><th>Due</th></tr></thead><tbody>
+<tr><td>Retrain Store 12 on credit rule</td><td>Salma Adel</td><td>25 Oct <span class="pill p-info">Open</span></td></tr>
+<tr><td>Add collections step reminder</td><td>Omar Fathy</td><td>10 Oct <span class="pill p-bad">Late</span></td></tr></tbody></table></div></div>
+</div>
+<h2>Improvement requests</h2>
+<div class="sc"><table><thead><tr><th>Idea</th><th>From</th><th>Status</th><th></th></tr></thead><tbody>
+<tr><td>Let stores see invoice status without calling Finance</td><td>Store manager, Alexandria</td><td><span class="pill p-info">Under review</span></td><td><button class="btn ghost">Turn into action</button></td></tr>
+<tr><td>AI finding: step 6 and step 7 repeat the same approval</td><td>AI review</td><td><span class="pill p-grey">New</span></td><td><button class="btn ghost">Turn into action</button></td></tr></tbody></table></div>
+</div>
+
+<div class="pane" id="ppl">
+<h2>What staff see</h2>
+<div class="note">Published processes only, read-only, with a step-by-step view and a button to confirm they have read it.</div>
+<div class="cols">
+<div class="card"><div class="h">Reader view · Order-to-Cash v2.0</div><p><b>Step 3 · Run the credit check</b><br>Who: Sales coordinator · Systems: ERP<br>Check the customer's balance against their limit before confirming the order.</p><div class="btns"><button class="btn">I have read and understood v2.0</button><button class="btn ghost">Send feedback</button></div></div>
+<div class="card"><div class="h">Roles on a process</div><p>Owner · Reviewer · Approver · Reader<br><span style="color:var(--ink3)">An owner edits. A reviewer comments. An approver signs. A reader only reads.</span></p></div>
+</div>
+<h2>Read and acknowledge · v2.0</h2>
+<div class="sc"><table><thead><tr><th>Team</th><th>Required</th><th>Acknowledged</th><th>Progress</th><th>Training</th></tr></thead><tbody>
+<tr><td>Sales coordinators</td><td>14</td><td>14</td><td><div class="bar2"><i style="width:100%"></i></div></td><td><span class="pill p-good">Complete</span></td></tr>
+<tr><td>Finance</td><td>9</td><td>7</td><td><div class="bar2"><i style="width:78%"></i></div></td><td><span class="pill p-warn">2 outstanding</span></td></tr>
+<tr><td>Store managers</td><td>22</td><td>11</td><td><div class="bar2"><i style="width:50%;background:var(--warn)"></i></div></td><td><span class="pill p-bad">11 outstanding</span></td></tr></tbody></table></div>
+<div class="btns"><button class="btn gold">Remind those outstanding</button></div>
+</div>
+
+<div class="pane" id="comp">
+<h2>Policies, standards and rules this process meets</h2>
+<div class="sc"><table><thead><tr><th>Requirement</th><th>Source</th><th>Covered by</th><th>Status</th></tr></thead><tbody>
+<tr><td>Credit approval before shipment</td><td>Credit Policy §4</td><td>Steps 3, 4</td><td><span class="pill p-good">Covered</span></td></tr>
+<tr><td>Segregation of invoicing and collection</td><td>ISO 9001 · 7.1</td><td>Steps 8, 10</td><td><span class="pill p-warn">Partly</span></td></tr>
+<tr><td>Tax invoice content</td><td>Tax authority rules</td><td>Step 8</td><td><span class="pill p-good">Covered</span></td></tr>
+<tr><td>Customer data retention</td><td>Data Policy §2</td><td>—</td><td><span class="pill p-bad">Not covered</span></td></tr></tbody></table></div>
+<div class="cols">
+<div><h2>Audit trail</h2><ul class="tl"><li><b>12 Oct</b> Omar Fathy signed the review of v3.0</li><li><b>10 Oct</b> Hala Mansour sent v3.0 to review</li><li><b>09 Oct</b> Step 3 changed: credit check moved</li><li><b>03 Oct 2025</b> Yara Kamal approved v2.0</li></ul></div>
+<div class="card"><div class="h">Audit pack</div><p>One file with the approved version, the sign-offs, the control tests, the acknowledgements and the history for any date range.</p><button class="btn gold">Create audit pack</button></div>
+</div>
+</div>
+
+<div class="pane" id="conn">
+<h2>How this process connects to the rest of the platform</h2>
+<div class="cols">
+<div class="card"><div class="h">Strategy</div><p>Supports pillar <b>Digital &amp; Data-Driven Operations</b> and the project <b>ERP Enhancement</b>.</p><span class="pill p-info">2 links</span></div>
+<div class="card"><div class="h">Internal Tracker</div><p>Corrective action <b>Add collections step reminder</b> appears in Omar's weekly list.</p><span class="pill p-warn">1 late</span></div>
+<div class="card"><div class="h">Notifications</div><p>Review due, approval waiting, new version to read, action late.</p><span class="pill p-good">Email on</span></div>
+<div class="card"><div class="h">Systems per step</div><p>ERP (steps 2–9), Bank portal (step 10), Excel (step 6).</p><span class="pill p-grey">3 systems</span></div>
+</div>
+<h2>Process map</h2>
+<div class="sc"><div style="min-width:640px;padding:14px;display:flex;gap:8px;align-items:center">
+<div class="st card" style="flex:0 0 auto">Order received</div>›<div class="st card" style="flex:0 0 auto">Credit check</div>›<div class="st card" style="flex:0 0 auto">Price &amp; confirm</div>›<div class="st card" style="flex:0 0 auto">Deliver</div>›<div class="st card" style="flex:0 0 auto">Invoice</div>›<div class="st card" style="flex:0 0 auto">Collect</div></div></div>
+</div>
+</div>
+<script>
+var tabs=document.getElementById("tabs");
+tabs.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+tabs.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x===b)});
+document.querySelectorAll(".pane").forEach(function(p){p.classList.toggle("on",p.id===b.dataset.t)})});
+</script>

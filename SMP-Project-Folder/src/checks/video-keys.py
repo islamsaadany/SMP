@@ -210,6 +210,13 @@ with sync_playwright() as p:
     # ── the editor: the same fault, the same helper (§53.5, A15) ────────────
     js(pg, "() => slidesOpen('unit', %s)" % repr(UNIT).replace("'", '"'))
     pg.wait_for_timeout(900)
+    # The slide view opens on slide 1 now (§556.7 — it used to open on the
+    # first picture slide), so the video slide is GONE TO, as anybody would:
+    # the claim is about keys once a player has focus, not about which slide
+    # the screen happens to open on.
+    js(pg, "() => { var r = [].slice.call(document.querySelectorAll('#slidelist .slrow.mine'));"
+           " if (r[0]) { SLED.sel = r[0].dataset.slgo; slidesPaint(); } }")
+    pg.wait_for_timeout(600)
     handoff(pg, "IN MANAGE SLIDES", "#slidepane", "slideroot")
     js(pg, "() => slidesClose()")
     pg.wait_for_timeout(400)

@@ -318,7 +318,10 @@ function monthNums(start){
 var DIRS = ["\u2265", "\u2264"];
 /* §276: the workbook validates the list the pen offers, read from one place. */
 var COMPILES = SMPRules.COMPILES;
-var KINDS = ["Direction", "Capability"];
+/* §540: the two kinds are the shared rule's now, read here exactly as
+   COMPILES is above — the workbook's validation, the pen's picker and the
+   platform's own "is this one internal" test are one list (§53.5). */
+var KINDS = SMPRules.PILLAR_KINDS;
 var YESNO = ["Yes", "No"];
 
 /* A theme is chosen by NAME, never by its code. The codes (OT, VC, DIV) are
@@ -384,6 +387,48 @@ function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
+/* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
+   Islam: *"all the owners shouldn't be written by hand and only be selected
+   from a list from the registr in a drop down serachable list."* The screens
+   have done that since §130.7. This file never did: five sheets across the
+   two plan workbooks carry an Owner column — Pillars and Tactics in a unit's
+   file, Projects, Actions and Milestones in a function's — and of the 22
+   validations in them not one was Owner. A spreadsheet is the widest door
+   into a plan, so it was the widest way a name matching no real person got
+   in, and the likeliest origin of El Abd's "Tamer Abdelhamid" (§542.6).
+
+   `from` AND NOT `list`, FOR THE REASON THE WRITER ALREADY REFUSES: 33 names
+   is far past Excel's 255-character inline limit, where a dropdown is
+   silently ignored. That is the fault §67.5 recorded of the Official BU list,
+   so this takes the route that file took.
+
+   AND NO SHEET AND NO DROPDOWN WHEN THE REGISTER IS EMPTY, which is §380's
+   trap exactly: an EMPTY list still applies, and with `showErrorMessage` on
+   it refuses every value there is — the column could be neither picked from
+   nor typed into, and a template nobody can fill in is worse than one that is
+   merely unguarded. The writer cannot catch this for us, and says so: it
+   leaves a `from` range alone because "whether that sheet has anything on it
+   is not knowable from here." Here it IS knowable, so it is asked.
+
+   THE SHEET IS NEVER DROPPED, which matters because `capPlanWorkbook` drops
+   whole sheets per format: five validation ranges point at Owners, and §65's
+   rule is that a range on a missing sheet is worse than none. It is not in
+   any `drop` list and must not be put in one. */
+function ownerListNames(){
+  return (typeof ownerKnownSet === "function") ? ownerKnownSet().list : [];
+}
+function OWNERS_RANGE(n){ return "Owners!$A$2:$A$" + (n + 1); }
+function ownersSheet(names){
+  return names.length ? [{ name:"Owners", widths:[34],
+    head:["Every name a plan may be owned by"],
+    rows:names.map(function(n){ return [n]; }) }] : [];
+}
+function ownerDV(range, names){
+  return names.length ? [{ range:range, from:OWNERS_RANGE(names.length),
+    error:"Choose a name from the Owners sheet. If somebody is missing, add them " +
+          "to the register first \u2014 a name typed here is refused at the upload." }] : [];
+}
+
 /* ── The Read me sheet ────────────────────────────────────────────────────
    The template is GENERIC: the same file whichever unit is being planned, and
    nothing in it names a unit except one cell. B2 is a dropdown of the tenant's
@@ -405,7 +450,18 @@ function readme(kind, pickLabel, pickList){
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
        ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
@@ -511,6 +567,7 @@ function planSubjectNames(){
 
 function planWorkbook(u){
   var themes = themeNames();
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var units = unitSuggestions();
   var picked = u ? u.name : "";
 
@@ -542,7 +599,7 @@ function planWorkbook(u){
 
      A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
      validation range — and that is asserted rather than assumed. */
-  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+  var isFn = !!(u && boxRef(u.ukey).kind === "fn");
 
   return [
     readmeSheet]
@@ -650,7 +707,7 @@ function planWorkbook(u){
         .concat(yr ? ["Years"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
-                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
+                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }].concat(ownerDV("D2:D60", owners)),
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
         .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : [])
         .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
@@ -707,7 +764,7 @@ function planWorkbook(u){
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
                    { range:"G2:G400", list:COMPILES, soft:true },
                    { range:"J2:M400", list:YESNO },
-                   { range:"N2:N400", list:YESNO, soft:true }],
+                   { range:"N2:N400", list:YESNO, soft:true }].concat(ownerDV("H2:H400", owners)),
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "",
@@ -789,7 +846,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }];
-  })());
+  })()).concat(ownersSheet(owners));
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -1293,7 +1350,18 @@ function capReadme(kind, capNames, picked, opts){
        ["Dropdowns", objOnly
          ? "Direction and Compile are lists. Unit suggests rather than insists: type your own if it is not offered."
          : "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
        [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
       .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
@@ -1362,8 +1430,9 @@ function impSubjectFormat(v){
   /* §405: a business unit that plans in projects or in objectives and
      actions downloads the function's file for that way. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && fnPlansInObjectives(f)) return "objectives";
   }
   return "projects";
@@ -1372,11 +1441,11 @@ function impSubjectFormat(v){
    resolves the one it was handed — or the two disagree about what `fn:finance`
    means and a file downloads and will not come back (§22). */
 function impHolderFor(v){
-  var t = String(v || "");
-  if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  var t = String(v || ""), r = boxRef(t);
+  if (r.kind === "cap") return capById(r.key);
   /* §405: a unit that is not planned in pillars is its own holder. */
   if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
 
@@ -1504,6 +1573,7 @@ function projectSubjectNames(fmt){
    the file does not carry is a column the plan LOSES (§22). */
 function capPlanWorkbook(c, opts){
   var o = opts || {};
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var names = projectSubjectNames(o.fmt);
   var units = unitSuggestions();
   var sheets = [
@@ -1555,7 +1625,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "Repeats"],
       validations:[{ range:"E2:E100", list:TIMELINES },
                    { range:"H2:H100", list:["No"].concat(REPEAT_MONTHS.map(repeatLabel)),
-                     soft:true }],
+                     soft:true }].concat(ownerDV("C2:C100", owners)),
       rows:(c.projects || []).map(function(p){
         return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
                 p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "",
@@ -1613,7 +1683,7 @@ function capPlanWorkbook(c, opts){
        (§22). */
     { name:"Actions", widths:[44, 26, 14, 9],
       head:["Action", "Owner", "Due", "Hidden"],
-      validations:[{ range:"D2:D400", list:YESNO, soft:true }],
+      validations:[{ range:"D2:D400", list:YESNO, soft:true }].concat(ownerDV("B2:B400", owners)),
       rows:(c.actions || []).map(function(a){
         return [a.name, a.owner || "", a.due || "",
                 SMPRules.isHidden(a) ? "Yes" : ""];
@@ -1626,7 +1696,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                   { range:"G2:G400", list:YESNO, soft:true }].concat(ownerDV("D2:D400", owners)),
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
           acc.push([p.name, m.name, m.covers || "", m.owner || "",
@@ -1635,7 +1705,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ]);
+  ]).concat(ownersSheet(owners));
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own

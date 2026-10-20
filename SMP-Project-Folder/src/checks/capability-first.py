@@ -181,14 +181,38 @@ DREW = """()=>({
 
 
 def side(pg, name):
-    """§334: PRESS THE SIDE, NEVER THE CONTROL. The switch has three sides once
-    a capability exists, so cycling it no longer toggles and a check that does
-    hangs for thirty seconds on a build behaving exactly as decided (§214.3).
-    `data-fold` names the side in BOTH shapes and is absent exactly when that
-    side is already lit."""
+    """§334: PRESS THE SIDE, NEVER THE CONTROL. `data-fold` names the side and
+    is absent exactly when that side is already lit.
+
+    §544.13: THERE IS NO CAPABILITIES SIDE. A capability is the company's and
+    is reached from the company's plan (§520's rail), so pressing "caps" is a
+    press on nothing — it is left harmless rather than removed, because the
+    callers below use it to mean "make the capabilities reachable" and that
+    is now true without pressing anything."""
     pg.evaluate("(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
                 " if (b) b.click();}", name)
     pg.wait_for_timeout(260)
+
+
+def capdests(pg):
+    """Every capability this viewer reaches, asked of the product's own rule
+    rather than of the row it no longer sits on (§544.13, §42)."""
+    return sorted(pg.evaluate("()=>capsReachable().map(c=>'cap:'+c.id)") or [])
+
+
+def opencap(pg, dest):
+    """§544.13: reached from the company's plan, the way §520's rail does."""
+    # §266 KEPT, NOT WAIVED. The docstring's rule — never assign `current`
+    # — exists so a check cannot walk a viewer somewhere the product would
+    # not let them go, and §544.13 took away the control this pressed
+    # instead. The stand-in therefore asks the SAME question the rail asks
+    # before drawing an entry (`capsReachable`, §42) and refuses where the
+    # rail would not be there, so the negative ends below still mean what
+    # they say.
+    if pg.evaluate("(d)=>{ if (!capsReachable().some(function(c){ return 'cap:'+c.id === d; })) return false; if (current !== d) leaveModes(); current = d; currentSub = entrySub(current); paint(); window.scrollTo(0,0); return true; }", dest) is not True:
+        return False
+    pg.wait_for_timeout(600)
+    return pg.evaluate("()=>current") == dest
 
 
 def landed(pg):
@@ -265,17 +289,17 @@ with sync_playwright() as pw:
        not str(office_land).startswith("cap:"), office_land)
     # and the capabilities are all reachable, which is what "nothing is
     # hidden" has to mean once a box is a destination rather than a band.
-    side(pg, "caps")
-    office_dests = pg.evaluate("()=>[...document.querySelectorAll('#units [data-u]')]"
-                               ".map(b=>b.dataset.u).filter(x=>x.indexOf('cap:')===0)")
+    # §544.13: "reachable" is no longer "has a button on the row" — the
+    # capabilities are the company's and are reached from its plan, so the
+    # claim is put to the rule that answers it (§42, §53.5).
+    office_dests = capdests(pg)
     ck("the office reaches every capability",
-       sorted(office_dests) == sorted("cap:" + c for c in want_b["caps"]),
+       office_dests == sorted("cap:" + c for c in want_b["caps"]),
        [office_dests, want_b["caps"]])
+    ck("...and none of them is a side on the row",
+       pg.evaluate("()=>navSides().some(s=>s.fold==='caps')") is False)
     # THE OFFICE'S CODES, read on the box that is his — the comparison §5 makes.
-    ck("the office opens his capability", pg.evaluate(
-        "(k)=>{const b=document.querySelector('#units [data-u=\"'+k+'\"]');"
-        " if(b){b.click();return true;} return false;}", want_b["land"]))
-    pg.wait_for_timeout(600)
+    ck("the office opens his capability", opencap(pg, want_b["land"]))
     office = {}
     for word, key in (("Strategy", "projects"), ("Reporting", "report"),
                       ("Performance", "perf")):
@@ -290,14 +314,9 @@ with sync_playwright() as pw:
     his_land = landed(pg)
     ck("he lands on his own capability, not the function and not somebody "
        "else's box", his_land == want_b["land"], [his_land, want_b["land"]])
-    ck("...and nothing is hidden — every capability is still a destination",
-       sorted(x for x in pg.evaluate(DREW)["dests"] if x.startswith("cap:")) ==
-       sorted("cap:" + c for c in want_b["caps"]) or
-       # the caps side may not be the lit one after a switch; press it and ask
-       (side(pg, "caps") or sorted(x for x in pg.evaluate(DREW)["dests"]
-                                   if x.startswith("cap:")) ==
-        sorted("cap:" + c for c in want_b["caps"])),
-       pg.evaluate(DREW)["dests"])
+    ck("...and nothing is hidden — every capability is still reachable",
+       capdests(pg) == sorted("cap:" + c for c in want_b["caps"]),
+       capdests(pg))
 
     print("\n§4 his own work is on the first screen, and live")
     his = {}
@@ -351,8 +370,11 @@ with sync_playwright() as pw:
     else:
         keys = pg.evaluate("()=>[...document.querySelectorAll('.clause dt')]"
                            ".map(d=>d.textContent.trim())")
-        ck("it names the CAPABILITY, not the function",
-           keys[:2] == ["Capability", "Held by"], keys)
+        # §544.13: the second row reads Owner, not Held by — there is no
+        # holding function to name, and a row that can only be empty is not
+        # a row (§45.2).
+        ck("it names the CAPABILITY, and its own owner beside it",
+           keys[:2] == ["Capability", "Owner"], keys)
 
     print("\n§7 an owner whose project is the function's own opens on the function")
     ck("the viewer switches", as_person(pg, FIRST))

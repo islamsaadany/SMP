@@ -1,0 +1,399 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>The running order</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --bad:#B04434;
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme:dark;}}
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme:dark;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.55 var(--sans)}
+  header{background:var(--surface);border-bottom:1px solid var(--line);padding:26px 32px 0}
+  h1{margin:0 0 6px;font-size:28px;letter-spacing:-.01em}
+  .sub{margin:0 0 18px;color:var(--ink-2);max-width:78ch}
+  .clients{display:flex;gap:8px;padding:0 0 18px;flex-wrap:wrap}
+  .cbtn{font:600 14px var(--sans);padding:9px 18px;border:1px solid var(--line);
+        background:var(--surface);color:var(--ink-2);border-radius:999px;cursor:pointer}
+  .cbtn[aria-pressed=true]{background:var(--gold-wash);border-color:var(--gold-line);color:var(--gold-deep)}
+  .cbtn .w{display:block;font:400 12px var(--sans);color:var(--ink-3);letter-spacing:var(--track);text-transform:uppercase}
+  main{display:grid;grid-template-columns:minmax(260px,1fr) minmax(320px,1.15fr) minmax(260px,1fr);
+       gap:20px;padding:24px 32px 60px;align-items:start}
+  @media (max-width:1080px){main{grid-template-columns:1fr}}
+  section{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .hd{padding:13px 16px;background:var(--surface-2);border-bottom:1px solid var(--line-soft)}
+  .hd h2{margin:0;font:700 12px var(--sans);letter-spacing:var(--track);text-transform:uppercase;color:var(--ink-2)}
+  .hd p{margin:4px 0 0;font-size:13px;color:var(--ink-3)}
+  .body{padding:12px}
+  .grp{font:700 11px var(--sans);letter-spacing:var(--track);text-transform:uppercase;
+       color:var(--ink-3);margin:12px 4px 7px}
+  .grp:first-child{margin-top:2px}
+  .part{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+        padding:9px 11px;margin:0 0 6px;border:1px solid var(--line);border-radius:9px;
+        background:var(--surface);color:var(--ink);font:400 15px var(--sans);cursor:pointer}
+  .part:hover{border-color:var(--gold-line);background:var(--gold-wash)}
+  .part[disabled]{opacity:.42;cursor:default;background:var(--surface-2)}
+  .part[disabled]:hover{border-color:var(--line);background:var(--surface-2)}
+  .part .p{color:var(--gold-deep);font-weight:700;width:14px;text-align:center}
+  .part .k{margin-left:auto;font:400 11px var(--sans);color:var(--ink-3);
+           letter-spacing:var(--track);text-transform:uppercase}
+  ol{list-style:none;margin:0;padding:0}
+  li.row{display:flex;align-items:center;gap:11px;padding:10px 11px;margin:0 0 7px;
+         border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+  li.row.drag{opacity:.4}
+  li.row.faint{opacity:.42}
+  li.row .lock{font-size:12px;color:var(--gold-deep);font-weight:600;padding-right:6px}
+  li.row.over{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-wash)}
+  li.row .n{flex:0 0 28px;height:28px;border-radius:7px;background:var(--navy);color:var(--navy-ink);
+            display:grid;place-items:center;font:700 13px var(--sans);cursor:grab}
+  li.row .n:active{cursor:grabbing}
+  li.row .t{flex:1 1 auto}
+  li.row .t b{display:block;font-weight:600}
+  li.row .t span{display:block;font-size:12px;color:var(--ink-3);
+                 letter-spacing:var(--track);text-transform:uppercase}
+  li.row .x{border:0;background:none;color:var(--ink-3);font-size:19px;cursor:pointer;padding:2px 6px;border-radius:6px}
+  li.row .x:hover{background:var(--surface-2);color:var(--bad)}
+  li.pin{background:var(--surface-2);border-style:dashed}
+  li.pin .n{background:var(--ink-3)}
+  li.pin .lock{font-size:12px;color:var(--ink-3);padding-right:6px}
+  .none{padding:18px 12px;color:var(--ink-3);text-align:center;font-style:italic}
+  .run{padding:12px 14px}
+  .slide{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+  .slide:last-child{border-bottom:0}
+  .slide i{flex:0 0 30px;font:400 12px var(--sans);color:var(--ink-3);font-style:normal;text-align:right}
+  .slide b{font-weight:600;font-size:14px}
+  .slide em{font-style:normal;font-size:12px;color:var(--ink-3)}
+  .tally{padding:11px 14px;border-top:1px solid var(--line);background:var(--surface-2);
+         font:600 13px var(--sans);color:var(--ink-2)}
+  .note{margin:22px 32px 48px;padding:16px 18px;background:var(--gold-wash);
+        border:1px solid var(--gold-line);border-radius:10px;max-width:84ch}
+  .note h3{margin:0 0 7px;font:700 12px var(--sans);letter-spacing:var(--track);
+           text-transform:uppercase;color:var(--gold-deep)}
+  .note p{margin:0 0 8px;color:var(--ink-2);font-size:15px}
+  .note p:last-child{margin:0}
+  .who{margin:2px 0 7px;font:700 11px var(--sans);letter-spacing:var(--track);
+       text-transform:uppercase;color:var(--ink-3)}
+  .who span{font:400 12px var(--sans);text-transform:none;letter-spacing:0;color:var(--ink-3)}
+  .viewers .cbtn[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
+  .locked{padding:10px 12px;margin:0 0 8px;border:1px dashed var(--line);border-radius:9px;
+          background:var(--surface-2);color:var(--ink-3);font-size:13px}
+</style>
+
+<header>
+  <h1>The running order</h1>
+  <p class="sub">A presentation is <b>one ordered list of parts</b> — not a deck per box.
+  The company's Foundation and its SWOT are parts you place, like a direction or a
+  function. The company's own results stay pinned last.</p>
+  <div class="clients" id="clients"></div>
+  <p class="who">Who is presenting <span id="whohint"></span></p>
+  <div class="clients viewers" id="viewers"></div>
+</header>
+
+<main>
+  <section>
+    <div class="hd"><h2>What this client has</h2><p>Press to add it to the order.</p></div>
+    <div class="body" id="parts"></div>
+  </section>
+
+  <section>
+    <div class="hd"><h2>The running order</h2><p>Drag by the number. × takes it out — nothing is lost.</p></div>
+    <div class="body"><ol id="order"></ol></div>
+  </section>
+
+  <section>
+    <div class="hd"><h2>What gets presented</h2><p>The slides this order produces.</p></div>
+    <div class="run" id="run"></div>
+    <div class="tally" id="tally"></div>
+  </section>
+</main>
+
+<div class="note">
+  <h3>What is different from today</h3>
+  <p><b>One.</b> The company's Foundation and SWOT can open the meeting. Today they are
+  welded inside a company block the flow forces to the <b>end</b> — so a review that
+  wants to set the scene first cannot.</p>
+  <p><b>Two.</b> Every part is drawn by the same template, so what a part looks like
+  stops depending on how its box happens to plan. Today three builders decide that,
+  and only two slides — the cover and the thank-you — are common to all of them.</p>
+  <p><b>Unchanged:</b> the picker, the dragging and the running order already exist
+  (§266.10, §481) and the company's results still come last, as you asked.</p>
+</div>
+
+<script>
+const CLIENTS = {
+  raya: { name:"Raya Trade", what:"plans on its units",
+    groups:[
+      ["The company", [
+        {id:"found", t:"Foundation", k:"section"},
+        {id:"swot",  t:"SWOT",       k:"section"}]],
+      ["Business units", [
+        {id:"u1", t:"Mobile", k:"unit"}, {id:"u2", t:"Retail Stores", k:"unit"},
+        {id:"u3", t:"B2B eCommerce", k:"unit"}, {id:"u4", t:"Consumer Electronics", k:"unit"}]],
+      ["Functions", [
+        {id:"f1", t:"Finance", k:"function"}, {id:"f2", t:"HR", k:"function"},
+        {id:"f3", t:"IT", k:"function"}]]],
+    start:["u1","u2","u3","u4","f1","f2","f3"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"mob", t:"Mobile\u2019s owner", sub:"their own unit", owns:["u1"]},
+              {id:"fin", t:"Finance", sub:"their own function", owns:["f1"]} ] },
+
+  elabd: { name:"El Abd", what:"plans on the company",
+    groups:[
+      ["The company", [
+        {id:"found", t:"Foundation", k:"section"},
+        {id:"swot",  t:"SWOT",       k:"section"}]],
+      ["Directions", [
+        {id:"d1", t:"Maximizing Current Stores", k:"direction"},
+        {id:"d2", t:"Egypt Expansion", k:"direction"},
+        {id:"d3", t:"Growing FMCG", k:"direction"},
+        {id:"d4", t:"E-Commerce Growth", k:"direction"}]],
+      ["Capabilities", [
+        {id:"c1", t:"End-to-End Quality Mindset", k:"capability"},
+        {id:"c2", t:"Digital Transformation", k:"capability"},
+        {id:"c3", t:"Operational excellence", k:"capability"}]],
+      ["Functions", [
+        {id:"f1", t:"Internal Audit", k:"function"}, {id:"f2", t:"Finance", k:"function"},
+        {id:"f3", t:"HR", k:"function"}, {id:"f4", t:"Legal", k:"function"}]]],
+    start:["found","swot","d1","d2","d3","d4","c1","c2","c3","f1","f2","f3","f4"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"dir", t:"A direction\u2019s owner", sub:"Egypt Expansion", owns:["d2"]},
+              {id:"cap", t:"A capability\u2019s owner", sub:"Digital Transformation", owns:["c2"]},
+              {id:"fn",  t:"Internal Audit", sub:"their own function", owns:["f1"]} ] },
+
+  rhi: { name:"RHI", what:"plans in pillars on the company",
+    groups:[
+      ["The company", [
+        {id:"found", t:"Foundation", k:"section"},
+        {id:"swot",  t:"SWOT",       k:"section"}]],
+      ["Pillars", [
+        {id:"p1", t:"Patient Experience", k:"pillar"},
+        {id:"p2", t:"Clinical Excellence", k:"pillar"},
+        {id:"p3", t:"Network Growth", k:"pillar"}]],
+      ["Functions", [
+        {id:"f1", t:"Finance", k:"function"}, {id:"f2", t:"People", k:"function"}]]],
+    start:["found","p1","p2","p3","f1","f2"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"pil", t:"A pillar\u2019s owner", sub:"Clinical Excellence", owns:["p2"]} ] }
+};
+
+/* WHAT EACH PART PUTS ON THE SCREEN — READ OUT OF THE PRODUCT, NOT INVENTED.
+   The first draft of this mockup made these names up ("What it is aiming
+   at", "Its work", "How it is doing"). Islam: *"that's a very strange
+   components. did you assume that?"* — yes, and a mockup that invents the
+   one thing a reader would check is worse than no mockup. Every line below
+   is the slide's own heading in today's deck, read with
+   scripts/decks/compare.py.
+
+   A CONDITIONAL SLIDE SAYS SO rather than being quietly left out: the
+   Categories slide is drawn only where a pillar HAS categories (`if
+   (bdRows)` in present.js), which is why El Abd's direction has four
+   per-pillar slides and Raya's has three — content, not two builders
+   disagreeing. */
+const SLIDES = {
+  found:      [["Foundation", "divider"],
+               ["What we are aiming at", ""],
+               ["Key Objectives — where we stand", ""]],
+  swot:       [["SWOT", "title page"], ["Strengths", ""], ["Weaknesses", ""],
+               ["Opportunities", ""], ["Threats", ""]],
+  pillarish:  [["{name}", "title page"],
+               ["Key Measures", "{name}"],
+               ["Categories", "{name} — only where it has them"],
+               ["Tactics", "{name}"]],
+  projectish: [["{name}", "title page"],
+               ["Deliverables and outcomes", "{name}"],
+               ["Milestones", "{name}"]],
+  box:        [["{name}", "cover"],
+               ["Strategic Pillars", "divider"],
+               ["Pillars", "the names"],
+               ["…each pillar: title page · Key Measures · Tactics", "{name}"],
+               ["Performance", "{name}"],
+               ["Where {name} stands", ""]],
+  results:    [["Directions — where we stand", ""], ["Where the company stands", ""]]
+};
+function slidesFor(p){
+  if (p.id === "found") return SLIDES.found;
+  if (p.id === "swot")  return SLIDES.swot;
+  if (p.k === "unit" || p.k === "function") return SLIDES.box;
+  return SLIDES.pillarish;      /* a direction, a capability, a pillar */
+}
+
+let CUR = "elabd", WHO = "smo", ORDER = [];
+const byId = {};
+function load(key){
+  CUR = key; byId[key] = byId[key] || {};
+  CLIENTS[key].groups.forEach(g => g[1].forEach(p => byId[key][p.id] = p));
+  ORDER = CLIENTS[key].start.slice();
+  WHO = "smo";
+  draw();
+}
+function part(id){ return byId[CUR][id]; }
+
+function drawClients(){
+  const host = document.getElementById("clients");
+  host.innerHTML = "";
+  Object.keys(CLIENTS).forEach(k => {
+    const b = document.createElement("button");
+    b.className = "cbtn"; b.type = "button";
+    b.setAttribute("aria-pressed", k === CUR ? "true" : "false");
+    b.setAttribute("data-client", k);
+    b.innerHTML = '<span class="w">' + CLIENTS[k].what + '</span>' + CLIENTS[k].name;
+    b.onclick = () => load(k);
+    host.appendChild(b);
+  });
+}
+
+/* WHO IS PRESENTING. Islam: *"that's for the smo team but for the user it
+   will only show their things. like for raya every bu will have it's own
+   presentation and for elabd everyone can present their directions or
+   capabilities"*.
+   The point of drawing it on the SAME screen: a person's presentation is
+   not a different builder, it is THIS LIST filtered to the parts they own.
+   The office keeps the order; everyone else inherits it. */
+function viewer(){ return (CLIENTS[CUR].viewers || []).filter(v => v.id === WHO)[0]
+                          || CLIENTS[CUR].viewers[0]; }
+function mine(id){ const v = viewer(); return !v.owns || v.owns.indexOf(id) >= 0; }
+
+function drawViewers(){
+  const host = document.getElementById("viewers"); host.innerHTML = "";
+  (CLIENTS[CUR].viewers || []).forEach(v => {
+    const b = document.createElement("button");
+    b.className = "cbtn"; b.type = "button";
+    b.setAttribute("aria-pressed", v.id === WHO ? "true" : "false");
+    b.setAttribute("data-viewer", v.id);
+    b.innerHTML = '<span class="w">' + v.sub + '</span>' + v.t;
+    b.onclick = () => { WHO = v.id; draw(); };
+    host.appendChild(b);
+  });
+  document.getElementById("whohint").textContent = viewer().owns
+    ? "— they see the office\u2019s order, narrowed to what is theirs"
+    : "— the office builds the order everyone else inherits";
+}
+
+function drawParts(){
+  const host = document.getElementById("parts"); host.innerHTML = "";
+  if (viewer().owns) {
+    const p = document.createElement("p");
+    p.className = "locked"; p.setAttribute("data-locked", "1");
+    p.textContent = "The office decides what is in the review and in what order. "
+      + viewer().t + " presents their own part of it.";
+    host.appendChild(p);
+  }
+  CLIENTS[CUR].groups.forEach(([label, list]) => {
+    const h = document.createElement("p"); h.className = "grp"; h.textContent = label;
+    host.appendChild(h);
+    list.forEach(p => {
+      const inOrder = ORDER.indexOf(p.id) >= 0;
+      const b = document.createElement("button");
+      b.className = "part"; b.type = "button";
+      b.disabled = inOrder || !!viewer().owns;
+      b.setAttribute("data-add", p.id);
+      b.innerHTML = '<span class="p">+</span>' + p.t + '<span class="k">' + p.k + '</span>';
+      b.onclick = () => { ORDER.push(p.id); draw(); };
+      host.appendChild(b);
+    });
+  });
+}
+
+function drawOrder(){
+  const host = document.getElementById("order"); host.innerHTML = "";
+  if (!ORDER.length) {
+    const li = document.createElement("li");
+    li.className = "none"; li.textContent = "Nothing in the order yet.";
+    host.appendChild(li);
+  }
+  ORDER.forEach((id, i) => {
+    const p = part(id);
+    const li = document.createElement("li");
+    const own = mine(id), office = !viewer().owns;
+    li.className = "row" + (own ? "" : " faint");
+    li.draggable = office; li.setAttribute("data-row", id);
+    if (own && !office) li.setAttribute("data-mine", "1");
+    li.innerHTML = '<span class="n" draggable="false">' + (i + 1) + '</span>' +
+      '<span class="t"><b>' + p.t + '</b><span>' + p.k + '</span></span>' +
+      (office ? '<button class="x" data-drop="' + id + '" aria-label="Take ' + p.t + ' out">&times;</button>'
+              : (own ? '<span class="lock">yours</span>' : ''));
+    if (office) li.querySelector(".x").onclick = () => { ORDER = ORDER.filter(x => x !== id); draw(); };
+    li.addEventListener("dragstart", e => {
+      li.classList.add("drag"); e.dataTransfer.setData("text/plain", id);
+    });
+    li.addEventListener("dragend", () => {
+      li.classList.remove("drag");
+      [...host.children].forEach(c => c.classList.remove("over"));
+    });
+    li.addEventListener("dragover", e => { e.preventDefault(); li.classList.add("over"); });
+    li.addEventListener("dragleave", () => li.classList.remove("over"));
+    li.addEventListener("drop", e => {
+      e.preventDefault();
+      const from = e.dataTransfer.getData("text/plain");
+      if (!from || from === id) return;
+      ORDER = ORDER.filter(x => x !== from);
+      ORDER.splice(ORDER.indexOf(id), 0, from);
+      draw();
+    });
+    host.appendChild(li);
+  });
+  /* THE RESULTS ARE PINNED (Islam: "last, as now"). Drawn in the list so it is
+     obvious they are coming, and not draggable so the one fixed thing looks
+     fixed rather than merely being refused when you try. */
+  if (viewer().owns) return;
+  const li = document.createElement("li");
+  li.className = "row pin"; li.setAttribute("data-pinned", "results");
+  li.innerHTML = '<span class="n">' + (ORDER.length + 1) + '</span>' +
+    '<span class="t"><b>How the company did</b><span>the company’s results</span></span>' +
+    '<span class="lock">always last</span>';
+  host.appendChild(li);
+}
+
+function drawRun(){
+  const host = document.getElementById("run"); host.innerHTML = "";
+  let n = 0;
+  const add = (title, sub) => {
+    n++;
+    const d = document.createElement("div");
+    d.className = "slide";
+    d.innerHTML = '<i>' + n + '</i><span><b>' + title + '</b> ' +
+                  (sub ? '<em>— ' + sub + '</em>' : '') + '</span>';
+    host.appendChild(d);
+  };
+  const office = !viewer().owns;
+  const shown = ORDER.filter(mine);
+  add("Cover", office ? CLIENTS[CUR].name : viewer().sub);
+  shown.forEach(id => {
+    const p = part(id);
+    slidesFor(p).forEach(([title, sub]) =>
+      add(title.replace("{name}", p.t), sub.replace("{name}", p.t)));
+  });
+  if (office) SLIDES.results.forEach(([t, sub]) => add(t, sub));
+  add("Thank you", "");
+  document.getElementById("tally").textContent = office
+    ? n + " slides · " + ORDER.length + " parts in the order"
+    : n + " slides · " + shown.length + " of " + ORDER.length + " parts \u2014 "
+      + viewer().t + "\u2019s own";
+}
+
+function draw(){ drawClients(); drawViewers(); drawParts(); drawOrder(); drawRun(); }
+load("elabd");
+</script>

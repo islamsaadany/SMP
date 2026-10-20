@@ -51,20 +51,46 @@ with sync_playwright() as p:
     # the structuring page off so they shouldn't see it". BOTH ENDS: with the
     # Structure step never saved the tab is Foundation, AFTER Performance, and
     # holds Foundation alone; section 1 then MAKES the other state (§255).
+    #
+    # §544.13 NARROWS WHAT "UNSAID" MEANS HERE, and the narrowing is the
+    # point (§218). A capability is the company's now, so a client that HOLDS
+    # a capability record carries it in the company's plan with nothing said
+    # — and the demo sample is such a client. §428.2's promise is kept for
+    # every client that has no records, which since Islam emptied Raya is
+    # every live client; it is the SAMPLE that differs, and the difference is
+    # asserted rather than worked around.
+    #
+    # So this takes the record away first and asserts §428.2 whole, then puts
+    # it back and asserts what the record adds — both ends (§94.2), and the
+    # check MAKES each state (§255).
+    had = safe(pg, "()=>{var c=GROUP.capabilities.slice(); GROUP.capabilities.length=0; return JSON.stringify(c)}")
+    ck("(the sample holds one capability record; set aside for §428.2)",
+       isinstance(had, str) and had != "[]", had)
     u0 = tabs()
-    ck("§428.2: unsaid, the tabs are the ones before §428, in that order",
+    ck("§428.2: unsaid and with no capability records, the tabs are the ones before §428, in that order",
        u0[:5] == ["performance", "strategy", "focus", "temple", "weighting"], u0)
     ck("…the tab is called by the Foundation's own name, not Strategy",
        safe(pg, "()=>allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].label===SMPRules.foundTitle(GROUP,'group')") is True)
     ck("…and holds Foundation alone, so no section row is drawn",
        safe(pg, "()=>allowed(allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k).join(',')") == "found")
+    # THE OTHER END: the record back, and with still nothing said it is in the
+    # company's plan — which is §544.13's whole sentence, asserted once.
+    safe(pg, "()=>{GROUP.capabilities.push.apply(GROUP.capabilities, %s); return 1}" % (had or "[]"))
+    u0c = tabs()
+    ck("…and with the record back, still unsaid, Strategy leads and carries it",
+       u0c[:1] == ["strategy"] and
+       safe(pg, "()=>allowed(allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k).join(',')") == "found,caps",
+       [u0c[:2], safe(pg, "()=>allowed(allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k).join(',')")])
     safe(pg, "()=>{GROUP.structure={top:{on:SMPRules.STRUCT_COMPONENTS.slice(),temple:true}};}")
 
     # ── 1. Nothing stored: the tabs, and nothing to report ────────────
     t0 = tabs()
     ck("the top layer's tabs lead with Strategy", t0[:1] == ["strategy"], t0)
     ck("…and the old Foundation tab is gone (it lives inside Strategy)", "foundation" not in t0, t0)
-    ck("…Strategy holds Foundation, SWOT and Plan", gsecs() == ["found", "swot", "plan"], gsecs())
+    # §544.13: and the capabilities with them — the sample holds a record, so
+    # the company's plan carries it beside the directions.
+    ck("…Strategy holds Foundation, SWOT, Plan and the capabilities",
+       gsecs() == ["found", "swot", "plan", "caps"], gsecs())
     ck("…Performance, Focus, Temple and Weighting stay",
        all(k in t0 for k in ["performance", "focus", "temple", "weighting"]), t0)
     ck("with no plan of its own there is no Reporting tab", "report" not in t0, t0)
@@ -116,7 +142,15 @@ with sync_playwright() as p:
     ck("Reporting asks the pillar's measure and tactic", "Group revenue" in rep and "Open the hub" in rep, rep[:300])
     ck("…and not the Foundation's objectives", "KEY OBJECTIVES" not in rep.upper().split("PILLARS")[0], rep[:200])
     safe(pg, "()=>{currentSub='performance'; paint()}"); pg.wait_for_timeout(250)
-    ck("Performance carries the own-plan card", "OWN PLAN" in (safe(pg, "()=>document.querySelector('#panel').innerText", "") or "").upper())
+    # REWRITTEN TO THE NEW RULE (218, 555). The card is still built; the
+    # page no longer OPENS on it. It lands on the company's own pillars
+    # in a rail, which is what Islam asked for, so the claim reads the
+    # overall section rather than whatever happens to be showing — the
+    # landing is stood down first, or the paint puts it straight back.
+    ck("Performance carries the own-plan card",
+       "OWN PLAN" in (safe(pg, "()=>{ var w=GSEC; GSEC_PICKED=true; GSEC=0; paint();"
+                              " var t=document.querySelector('#panel').innerText;"
+                              " GSEC=w; GSEC_PICKED=false; paint(); return t; }", "") or "").upper())
     perf1 = safe(pg, "()=>[groupKeyObjectives(), groupUnitsObjectives()].map(x=>x==null?null:Math.round(x*100)/100)", [])
     ck("…and every existing figure is unmoved", perf0 == perf1, [perf0, perf1])
     board = safe(pg, "()=>boardUnitTargets()", []) or []
@@ -130,8 +164,12 @@ with sync_playwright() as p:
     # ── 5. The Capabilities card ──────────────────────────────────────
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
-    ck("the set-up flow opens on Structure", ok and press(pg, '.wzstep[data-step="structure"]'))
-    ck("a fifth card is the capabilities'", safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"]')") is True)
+    # §544: the Structure step is the shape screen, and the capabilities'
+    # card rides with the top level's (§218: the card and everything it
+    # holds are unchanged; only the way in is).
+    ck("the set-up flow opens on the shape screen",
+       ok and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]'))
+    ck("the top level brings the capabilities' card", safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"]')") is True)
     ck("…whose plan names pillars and projects only",
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects")
     ck("…and nothing is stored while it only holds the functions' answers",

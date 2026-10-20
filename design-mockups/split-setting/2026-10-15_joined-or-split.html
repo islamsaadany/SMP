@@ -1,0 +1,291 @@
+<title>Joined or split</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  /* Layout: a reading column; each client gets a today / after pair drawn with
+     the same parts, so "identical" is something to look at rather than a claim.
+     Tokens are the platform's Forefront palette, read off _shared.css. */
+  :root {
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --good:#2E7D5B; --bad:#B04434; --bad-bg:#F7E3E0;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --navy:#0E1014; --navy-ink:#EAF0FA;
+      --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+      --good:#5FB68C; --bad:#D97066; --bad-bg:#33201E;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --good:#5FB68C; --bad:#D97066; --bad-bg:#33201E;
+    color-scheme: dark;
+  }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:62rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.5rem 4rem; }
+
+  header { border-bottom:2px solid var(--navy); padding-bottom:1.1rem; margin-bottom:2rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--gold-deep); margin:0 0 .35rem; }
+  h1 { font-size:1.9rem; line-height:1.15; margin:0 0 .5rem; font-weight:700; text-wrap:balance; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  h2 { font-size:1.2rem; margin:2.8rem 0 .3rem; font-weight:700; text-wrap:balance; }
+  h2 .n { color:var(--gold-deep); font-variant-numeric:tabular-nums; margin-right:.45rem; }
+  h3 { font-size:.95rem; margin:1.4rem 0 .5rem; font-weight:700; }
+  p { max-width:46rem; } .lede { color:var(--ink-2); margin-top:.2rem; }
+
+  /* ── the product's own furniture, drawn to match ── */
+  .screen { background:var(--surface); border:1px solid var(--line); border-radius:10px;
+            overflow:hidden; }
+  .subtabs { display:flex; gap:.35rem; padding:.55rem .6rem; background:var(--surface-2);
+             border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .subtab { font-size:12.5px; font-weight:600; padding:.3rem .75rem; border-radius:7px;
+            border:1px solid transparent; color:var(--ink-2); white-space:nowrap; }
+  .subtab.on { background:var(--navy); color:var(--navy-ink); border-color:var(--navy); }
+  .subtab.plain { background:var(--surface); border-color:var(--line); }
+  .railhd { background:var(--navy); color:var(--navy-ink); font-size:10px; font-weight:700;
+            letter-spacing:var(--track); text-transform:uppercase; padding:.45rem .7rem; }
+  .rail { padding:.5rem; display:flex; flex-direction:column; gap:.35rem; }
+  .card { border:1px solid var(--line); border-radius:7px; padding:.4rem .55rem; background:var(--surface);
+          display:flex; align-items:baseline; gap:.5rem; min-width:0; }
+  .card .code { font-size:11px; font-weight:700; color:var(--gold-deep); font-variant-numeric:tabular-nums;
+                flex:0 0 auto; }
+  .card .nm { font-size:12.5px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pill { font-size:9.5px; font-weight:600; padding:.1rem .4rem; border-radius:999px;
+          background:var(--surface-2); color:var(--ink-2); margin-left:auto; flex:0 0 auto;
+          border:1px solid var(--line-soft); }
+
+  .pair { display:grid; gap:1rem; grid-template-columns:1fr; margin-top:1rem; }
+  @media (min-width:50rem) { .pair { grid-template-columns:1fr 1fr; } }
+  .pane { min-width:0; }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:var(--track);
+         text-transform:uppercase; padding:.2rem .5rem; border-radius:999px; margin-bottom:.5rem; }
+  .tag.today { background:var(--surface-2); color:var(--ink-3); border:1px solid var(--line); }
+  .tag.after { background:var(--gold-wash); color:var(--gold-deep); border:1px solid var(--gold-line); }
+  .tag.opt { background:var(--bad-bg); color:var(--bad); }
+  .verdict { margin-top:.8rem; font-size:13px; font-weight:600; color:var(--good);
+             display:flex; gap:.45rem; align-items:baseline; }
+  .verdict .m { font-size:15px; }
+
+  /* the setting, drawn as Setup draws a field */
+  .setup { background:var(--surface); border:1px solid var(--line); border-radius:10px;
+           padding:1rem 1.1rem; margin-top:1rem; max-width:40rem; }
+  .fieldrow { display:flex; gap:.9rem; align-items:center; flex-wrap:wrap; padding:.5rem 0;
+              border-top:1px solid var(--line-soft); }
+  .fieldrow:first-of-type { border-top:0; }
+  .fieldlbl { font-size:12px; font-weight:600; color:var(--ink-2); flex:0 0 9rem; }
+  .fld { font-family:inherit; font-size:13px; padding:.3rem .55rem; border:1px solid var(--line);
+         border-radius:6px; background:var(--surface); color:var(--ink); min-width:11rem; }
+  .hint { font-size:12px; color:var(--ink-3); margin:.7rem 0 0; }
+
+  .note { margin-top:1.1rem; padding:.75rem 1rem; background:var(--surface-2);
+          border-left:3px solid var(--navy); border-radius:0 8px 8px 0; color:var(--ink-2);
+          font-size:13.5px; max-width:46rem; }
+  .ask { margin-top:2.6rem; background:var(--gold-wash); border:1px solid var(--gold-line);
+         border-radius:12px; padding:1.1rem 1.2rem; }
+  .ask h2 { margin-top:0; }
+  .checks { list-style:none; padding:0; margin:.8rem 0 0; max-width:46rem; }
+  .checks li { display:flex; gap:.7rem; padding:.55rem 0; border-top:1px solid var(--line-soft); }
+  .checks li:first-child { border-top:0; }
+  .checks .k { flex:0 0 1.4rem; font-weight:700; color:var(--gold-deep); }
+  .checks .t { min-width:0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Platform simplification · step 2, part a · mockup</p>
+    <h1>Joined or split</h1>
+    <p class="standfirst">The one new setting: whether a box shows its pillars as one list or as two
+      sections. For El Abd and RHI <b>nothing on screen moves</b> — the pages below are the proof,
+      drawn from their real data. The only new thing is that the choice now exists.</p>
+  </header>
+
+  <h2><span class="n">1</span>El Abd — split, and identical</h2>
+  <p class="lede">Five directions and five capabilities. Today two tabs because they are two kinds of
+    record; after, two tabs because the setting says split.</p>
+
+  <div class="pair">
+    <div class="pane">
+      <span class="tag today">Today</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab plain">Directions</span><span class="subtab on">Capabilities</span>
+        </div>
+        <div class="railhd">Capabilities 5</div>
+        <div class="rail">
+          <div class="card"><span class="code">C001</span><span class="nm">End-to-End Quality Mindset</span></div>
+          <div class="card"><span class="code">C002</span><span class="nm">ERP Enhancement</span></div>
+          <div class="card"><span class="code">C003</span><span class="nm">Digital Transformation</span></div>
+          <div class="card"><span class="code">C004</span><span class="nm">Talent &amp; Workforce Optimization</span></div>
+          <div class="card"><span class="code">C005</span><span class="nm">Operational excellence</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="pane">
+      <span class="tag after">After</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab plain">Directions</span><span class="subtab on">Capabilities</span>
+        </div>
+        <div class="railhd">Capabilities 5</div>
+        <div class="rail">
+          <div class="card"><span class="code">C001</span><span class="nm">End-to-End Quality Mindset</span></div>
+          <div class="card"><span class="code">C002</span><span class="nm">ERP Enhancement</span></div>
+          <div class="card"><span class="code">C003</span><span class="nm">Digital Transformation</span></div>
+          <div class="card"><span class="code">C004</span><span class="nm">Talent &amp; Workforce Optimization</span></div>
+          <div class="card"><span class="code">C005</span><span class="nm">Operational excellence</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict"><span class="m">=</span> Same tabs, same words, same codes, same order. The two
+    panes above are the same markup.</p>
+  <div class="note"><b>What changed underneath:</b> the five capabilities are now pillars of the
+    company marked <i>internal</i>, sitting in the same list as the directions. The Capabilities tab
+    draws the internal ones and the Directions tab the external ones. The codes stay C001–C005
+    because a pillar's code comes from its kind, not from its place in a merged list.</div>
+
+  <h2><span class="n">2</span>RHI — joined, and identical</h2>
+  <p class="lede">One list of fifteen, called Directions. Nothing to merge and nothing to split.</p>
+
+  <div class="pair">
+    <div class="pane">
+      <span class="tag today">Today</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab on">Directions</span>
+        </div>
+        <div class="railhd">Directions 15</div>
+        <div class="rail">
+          <div class="card"><span class="code">D001</span><span class="nm">Developing Brand Presence</span></div>
+          <div class="card"><span class="code">D002</span><span class="nm">Building Processes, OD &amp; …</span></div>
+          <div class="card"><span class="code">D003</span><span class="nm">Launch Training Academy</span></div>
+          <div class="card"><span class="code">D004</span><span class="nm">Establishment of the Best …</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="pane">
+      <span class="tag after">After</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab on">Directions</span>
+        </div>
+        <div class="railhd">Directions 15</div>
+        <div class="rail">
+          <div class="card"><span class="code">D001</span><span class="nm">Developing Brand Presence</span></div>
+          <div class="card"><span class="code">D002</span><span class="nm">Building Processes, OD &amp; …</span></div>
+          <div class="card"><span class="code">D003</span><span class="nm">Launch Training Academy</span></div>
+          <div class="card"><span class="code">D004</span><span class="nm">Establishment of the Best …</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict"><span class="m">=</span> No capabilities in this client, so the setting has
+    nothing to separate. It reads <i>joined</i> and the page is untouched.</p>
+
+  <h2><span class="n">3</span>The setting itself</h2>
+  <p class="lede">One row in Set-up, on the box. It appears only where a box plans in pillars — there
+    is nothing to join or split otherwise.</p>
+
+  <div class="setup">
+    <div class="fieldrow">
+      <span class="fieldlbl">Plans in</span>
+      <select class="fld" id="m-plansin" aria-label="How this box plans">
+        <option selected>Pillars</option><option>Projects</option><option>Objectives &amp; actions</option>
+      </select>
+      <span style="font-size:12px;color:var(--ink-3)">exists today</span>
+    </div>
+    <div class="fieldrow">
+      <span class="fieldlbl">Pillars show as</span>
+      <select class="fld" id="m-showas" aria-label="Whether pillars show as one list or two sections">
+        <option>One list</option><option selected>Directions and Capabilities apart</option>
+      </select>
+      <span style="font-size:12px;color:var(--gold-deep);font-weight:600">the new one</span>
+    </div>
+    <p class="hint">The second option is named from the box's own words, so a client that calls them
+      something else reads its own names here. Switching moves no data and renames nothing — the
+      same rows, drawn in one list or in two.</p>
+  </div>
+
+  <h2><span class="n">4</span>What the choice actually buys</h2>
+  <p class="lede">Neither client has to change. But each could, and today neither can.</p>
+
+  <div class="pair">
+    <div class="pane">
+      <span class="tag opt">Only if El Abd chose it</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab on">Directions</span>
+        </div>
+        <div class="railhd">Directions 10</div>
+        <div class="rail">
+          <div class="card"><span class="code">D001</span><span class="nm">Maximizing Current Stores</span><span class="pill">Direction</span></div>
+          <div class="card"><span class="code">D002</span><span class="nm">Egypt Expansion</span><span class="pill">Direction</span></div>
+          <div class="card"><span class="code">D003</span><span class="nm">Growing FMCG</span><span class="pill">Direction</span></div>
+          <div class="card"><span class="code">C001</span><span class="nm">End-to-End Quality Mindset</span><span class="pill">Capability</span></div>
+          <div class="card"><span class="code">C002</span><span class="nm">ERP Enhancement</span><span class="pill">Capability</span></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-2);margin-top:.6rem">One tab, ten rows, each marked.
+        The mark is the product's existing one — nothing new is drawn.</p>
+    </div>
+    <div class="pane">
+      <span class="tag opt">Only if a unit chose it</span>
+      <div class="screen">
+        <div class="subtabs">
+          <span class="subtab plain">Foundation</span><span class="subtab plain">SWOT</span>
+          <span class="subtab plain">Pillars</span><span class="subtab on">Capabilities</span>
+        </div>
+        <div class="railhd">Capabilities 1</div>
+        <div class="rail">
+          <div class="card"><span class="code">MB02</span><span class="nm">Digital &amp; Data-Driven Operations</span></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-2);margin-top:.6rem">Raya's units hold both kinds in
+        one list today, under a single Pillars tab. Splitting them is the same setting one level
+        down, and it adds a tab exactly as El Abd has one.</p>
+    </div>
+  </div>
+
+  <h2><span class="n">5</span>What I am asking you to sign off</h2>
+  <ul class="checks">
+    <li><span class="k">1</span><span class="t">El Abd and RHI look <b>exactly</b> as they do now — section 1 and 2.</span></li>
+    <li><span class="k">2</span><span class="t">The setting is <b>one row in Set-up on the box</b>, reading “Pillars show as”, beside the “Plans in” row that already exists.</span></li>
+    <li><span class="k">3</span><span class="t">Its two options are <b>One list</b> and <b>Directions and Capabilities apart</b>, named from the box's own words.</span></li>
+    <li><span class="k">4</span><span class="t">In one list, each row carries the <b>existing</b> Direction / Capability mark — no new badge.</span></li>
+    <li><span class="k">5</span><span class="t">In one list the codes stay <b>D</b> and <b>C</b> by kind, so a row keeps the code people already say out loud.</span></li>
+  </ul>
+
+  <div class="ask">
+    <h2 style="margin-bottom:.4rem"><span class="n">6</span>The order in one list</h2>
+    <p><b>Answered, 15 October: directions first.</b> With one list, El Abd's rows come out
+      directions then capabilities, which is the order the merge leaves them in. Not a free drag
+      order mixing the two kinds.</p>
+    <p style="margin-top:.7rem">Nothing on this page is a guess any more.</p>
+  </div>
+</div>

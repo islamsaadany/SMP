@@ -516,6 +516,17 @@
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
+  /* ── THE GO-TO LIST'S HOST (§547) ─────────────────────────────────────
+     Plumbing, not a control: a `select` and the button `searchsel` builds for
+     it, parked at the top of the window so the popup — which anchors to that
+     button — opens where somebody is already looking. Both are out of the tab
+     order and the accessibility tree, so a host left standing is unreachable;
+     it is 1px rather than `display:none` because a box with no size has no
+     rect for the popup to anchor to. */
+  #gotohost { position:fixed; left:50%; top:76px; transform:translateX(-50%);
+              width:1px; height:1px; overflow:hidden; z-index:119; }
+  #gotohost button, #gotohost select { opacity:0; width:1px; height:1px;
+                                       padding:0; border:0; pointer-events:none; }
   .sslist { max-height:230px; overflow-y:auto; }
   /* Select all / none (§304): a row of its own between the search and the
      list, so a press cannot be mistaken for a row of the list. */
@@ -529,6 +540,15 @@
   .ssrow:hover { background:var(--surface-2); }
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* ── §536: WHERE THE ARROW KEYS ARE ───────────────────────────────────
+     The row the arrows are on, which is NOT the row the mouse is over and
+     NOT a focused one — focus stays in the search box so the next three
+     letters still land there. It wears the same ground `:hover` does plus a
+     mark of its own, because on a ticking list a row can be lit (`on`),
+     hovered and arrowed-to at once and three states that look alike are one
+     state nobody can read (§41). */
+  .ssrow.ssrow-at { background:var(--surface-2); box-shadow:inset 2px 0 0 var(--gold); }
+  .ssrow.on.ssrow-at { background:var(--over-bg); }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
   /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
      The plan's owner list is fifty entries made of two different kinds of
@@ -2041,6 +2061,17 @@
   .nc-1line .nm-lab .fld { width:100%; }
   .nc-1line .dt { flex:0 0 auto; }
   .nc-1line .cycbtn { width:150px; }
+  /* ── A CONTROL THE PLATFORM HAS JUST REFUSED (§534.2) ──────────────
+     The refusal itself is a sentence under the control — `.picerr`, the
+     picture editor's own line, which is already the product's answer for a
+     refusal belonging to ONE control and is why nothing new is invented
+     here. This is the mark on the control it points at, and both halves are
+     needed: the line alone leaves somebody hunting the box in a row of four,
+     and the mark alone says something is wrong without saying what.
+     `aria-invalid` goes on beside it, which is the half a screen reader
+     gets (§163's rule: the reason has to be reachable without a mouse). */
+  .fld.bad, .cycbtn.bad { border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg); }
+  .newcycle .picerr { margin:11px 0 0; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }

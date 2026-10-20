@@ -1,0 +1,381 @@
+<title>Deleting for good</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#FBEAE7;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+      --warn-bg:#33241A; --warn-tx:#E1935F;
+      --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+    --warn-bg:#33241A; --warn-tx:#E1935F;
+    --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px; padding-left:20px; padding-right:20px; }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:30px 18px; display:flex; justify-content:center; }
+  .stage.plain{ background:var(--surface-2); padding:24px 18px; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .shapehead{ font-size:19px; margin:44px 0 4px; letter-spacing:-.1px; }
+  .shapehead span{ font-size:12.5px; color:var(--ink-3); font-weight:400; letter-spacing:0; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
+
+  /* today's browser dialog */
+  .osdlg{ background:var(--surface); border:1px solid var(--line); border-radius:12px;
+          width:min(440px,100%); padding:20px 22px 16px; box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .osdlg .host{ font-size:12.5px; color:var(--ink-3); margin:0 0 12px; }
+  .osdlg .msg{ font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; white-space:pre-line; }
+  .osdlg .row{ display:flex; justify-content:flex-end; gap:10px; }
+  .osdlg .row span{ font:600 13px/1 var(--sans); border-radius:7px; padding:10px 16px;
+                    border:1px solid var(--line); color:var(--ink-2); }
+  .osdlg .row .ok{ background:var(--ink); color:var(--surface); border-color:var(--ink); }
+
+  /* the platform's own dialog */
+  .modal{ background:var(--surface); border:1px solid var(--line); border-radius:3px;
+          width:min(540px,100%); box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .modal-h{ display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
+            border-bottom:1px solid var(--line-soft); }
+  .modal-h div{ flex:1; min-width:0; }
+  .modal-h h3{ font-size:21px; margin:0; }
+  .modal-h p{ margin:4px 0 0; font-size:13px; color:var(--ink-3); }
+  .modal-x{ font-size:22px; line-height:1; background:none; border:0; cursor:pointer;
+            color:var(--ink-3); padding:2px 8px; border-radius:2px; }
+  .modal-b{ padding:20px 24px 24px; }
+  .modal-b > p{ font-size:13.5px; color:var(--ink-2); margin:0 0 12px; line-height:1.5; }
+
+  /* what goes, and what stays — the two halves of the question */
+  .ledger{ border:1px solid var(--line-soft); border-radius:10px; overflow:hidden; margin:0 0 14px; }
+  .ledger .lrow{ display:flex; gap:12px; padding:11px 13px; font-size:13px; line-height:1.5;
+                 border-top:1px solid var(--line-soft); }
+  .ledger .lrow:first-child{ border-top:0; }
+  .ledger .lrow .mk{ flex:0 0 auto; font-weight:700; font-size:12px; letter-spacing:.06em;
+                     text-transform:uppercase; width:7ch; padding-top:2px; }
+  .ledger .goes{ background:var(--bad-bg); }
+  .ledger .goes .mk{ color:var(--bad-tx); }
+  .ledger .goes .tx{ color:var(--ink); }
+  .ledger .stays .mk{ color:var(--good-tx); }
+  .ledger .stays .tx{ color:var(--ink-2); }
+  .ledger .tx b{ color:var(--ink); }
+  .ledger .tx .sub{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:2px; }
+  .noway{ font-size:12.5px; color:var(--bad-tx); margin:0 0 16px; line-height:1.45;
+          display:flex; gap:8px; align-items:baseline; }
+  .noway b{ font-weight:700; }
+  .filelist{ margin:0 0 14px; border:1px solid var(--line-soft); border-radius:10px;
+             max-height:168px; overflow:auto; }
+  .filelist table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .filelist th{ text-align:left; font:700 10.5px/1 var(--sans); letter-spacing:.09em;
+                text-transform:uppercase; color:var(--ink-3); padding:9px 12px;
+                background:var(--surface-2); position:sticky; top:0; }
+  .filelist td{ padding:8px 12px; border-top:1px solid var(--line-soft); color:var(--ink-2); }
+  .filelist td b{ color:var(--ink); font-weight:600; }
+  .filelist td.cc{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .mrow{ display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; align-items:center; }
+  .mrow button{ font:600 13px/1 var(--sans); border-radius:8px; padding:10px 14px; cursor:pointer; }
+  .mrow .spacer{ flex:1 }
+  .quiet{ background:none; border:1px solid var(--line); color:var(--ink-2); }
+  .danger{ background:var(--bad); border:1px solid var(--bad); color:#fff; }
+
+  /* the page the button sits on */
+  .cfg{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+        width:min(720px,100%); padding:15px 16px 16px; }
+  .cfg h4{ font:700 13.5px/1.3 var(--sans); margin:0 0 4px; }
+  .cfg .snote{ font-size:12.5px; color:var(--ink-3); margin:0 0 12px; line-height:1.5; }
+  .cfg table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .cfg th{ text-align:left; font:700 10.5px/1 var(--sans); letter-spacing:.09em;
+           text-transform:uppercase; color:var(--ink-3); padding:0 10px 8px; }
+  .cfg td{ padding:9px 10px; border-top:1px solid var(--line-soft); color:var(--ink-2);
+           vertical-align:top; }
+  .cfg td b{ color:var(--ink); }
+  .cfg td.cc{ text-align:right; white-space:nowrap; }
+  .cfg .why{ display:block; font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .rmbtn{ font:600 11.5px/1 var(--sans); background:none; border:1px solid var(--line);
+          color:var(--bad-tx); border-radius:6px; padding:6px 9px; cursor:pointer; }
+  .editbtn{ font:600 11.5px/1 var(--sans); background:none; border:1px solid var(--stone);
+            color:var(--stone); border-radius:6px; padding:6px 9px; cursor:pointer; }
+  .pill{ font:600 11px/1 var(--sans); border:1px solid var(--line); border-radius:999px;
+         padding:5px 9px; color:var(--ink-3); }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:40px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .ledger .lrow{ flex-direction:column; gap:3px; }
+    .ledger .lrow .mk{ width:auto; }
+    /* The archive table is five columns of record and does not fold into a
+       phone — it scrolls inside its own card rather than widening the page. */
+    .cfg{ overflow-x:auto; }
+    .cfg table{ min-width:520px; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>Deleting for good</h1>
+  <p class="lede">Three acts in the platform take something away with nothing behind them: a clip's
+  bytes, a batch of them, and a filed archive. Everything else that reads like a deletion archives
+  first — a plan replaced by an import, a pillar, a project, a retired person. These three are the
+  exceptions, and they are the reason this shape has to be drawn rather than borrowed.</p>
+  <p class="lede">Today each one asks in the browser's box, which is why they are long: the box holds
+  one run of text and no structure, so <i>what goes</i>, <i>what stays</i> and <i>there is no way
+  back</i> arrive as one paragraph with blank lines in it. The platform's own dialog can lay those
+  out as the three things they are. Nothing in the wording is being softened — if anything the
+  proposed version says more.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">One <span>&nbsp; a clip somebody uploaded onto a slide</span></h2>
+
+  <span class="key">Today</span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Delete this clip for good?
+
+site-visit-march.mp4 — 48.2 MB, from Trade Finance
+
+The slide stays where it is and will say the clip was removed. The bytes cannot be brought back.</p>
+      <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="note">This is the best-written confirmation in the product — it names the file, its size
+  and where it came from, which is the platform's own rule about a confirmation that catches
+  nothing because it does not say which line. The only thing wrong with it is the box it is in.</p>
+
+  <span class="key">Proposed <b>— the same facts, laid out as what goes and what stays</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Delete this clip for good?</h3><p>Trade Finance &middot; H1 2026 review</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <div class="ledger">
+          <div class="lrow goes"><span class="mk">Goes</span><span class="tx">
+            <b>site-visit-march.mp4</b> — 48.2 MB, uploaded 11 Mar 2026
+            <span class="sub">The file itself. This is the only thing in the platform where the
+            bytes are destroyed rather than archived.</span></span></div>
+          <div class="lrow stays"><span class="mk">Stays</span><span class="tx">
+            The slide, in its place in the review
+            <span class="sub">It will say the clip was removed. Nothing else about the review
+            changes, and no figure moves.</span></span></div>
+        </div>
+        <p class="noway"><b>There is no way back.</b> Nothing is archived — the archive on this page
+        holds plans, never files. If the clip is needed again it has to be uploaded again.</p>
+        <div class="mrow">
+          <span class="spacer"></span>
+          <button class="quiet">Cancel</button>
+          <button class="danger">Delete the clip</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Three changes beyond the frame: the upload date is added (it is in the table beside
+  the button, and it is how you tell two site visits apart); the review the slide belongs to moves up
+  into the header, where the dialog says what it is about; and the final button says the act rather
+  than <i>Okay</i>.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Two <span>&nbsp; every clip that is not in the open review</span></h2>
+
+  <span class="key">Today</span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Delete 12 clips for good, freeing 612.4 MB?
+
+Nothing on the review that is open now is touched. The bytes cannot be brought back.</p>
+      <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">Twelve files, and not one of them named. The single-clip question names its file,
+  its size and its review; this one — twelve times the damage — names a count. If one of those twelve
+  is something you wanted, nothing here would tell you.</p>
+
+  <span class="key">Proposed <b>— the twelve named, which is the whole reason to ask</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Delete 12 clips for good?</h3><p>Everything not on a slide in H1 2026</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <p>These 12 clips are on slides in reviews that have closed. Deleting them frees
+        <b>612.4 MB</b>.</p>
+        <div class="filelist">
+          <table>
+            <thead><tr><th>File</th><th>Review</th><th class="cc">Size</th></tr></thead>
+            <tbody>
+              <tr><td><b>site-visit-march.mp4</b></td><td>Trade Finance &middot; H2 2025</td><td class="cc">48.2 MB</td></tr>
+              <tr><td><b>ceo-opening.mov</b></td><td>Group &middot; H2 2025</td><td class="cc">124.0 MB</td></tr>
+              <tr><td><b>branch-walkthrough.mp4</b></td><td>Retail &middot; H2 2025</td><td class="cc">86.5 MB</td></tr>
+              <tr><td><b>payments-demo.mp4</b></td><td>Payments &middot; H2 2025</td><td class="cc">61.8 MB</td></tr>
+              <tr><td><b>customer-voice-1.mp4</b></td><td>Retail &middot; H1 2025</td><td class="cc">39.4 MB</td></tr>
+              <tr><td><b>customer-voice-2.mp4</b></td><td>Retail &middot; H1 2025</td><td class="cc">41.1 MB</td></tr>
+              <tr><td><b>treasury-floor.mov</b></td><td>Treasury (function) &middot; H1 2025</td><td class="cc">98.7 MB</td></tr>
+              <tr><td colspan="3" style="color:var(--ink-3)">&hellip; and 5 more</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ledger">
+          <div class="lrow stays"><span class="mk">Stays</span><span class="tx">
+            The 4 clips on slides in H1 2026
+            <span class="sub">The review that is open now is not touched. Every slide in the closed
+            reviews stays where it is and says its clip was removed.</span></span></div>
+        </div>
+        <p class="noway"><b>There is no way back.</b> Nothing is archived — the archive on this page
+        holds plans, never files.</p>
+        <div class="mrow">
+          <span class="spacer"></span>
+          <button class="quiet">Cancel</button>
+          <button class="danger">Delete 12 clips</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">The list scrolls and the dialog does not grow — seven rows visible, the rest
+  reachable. The count is in the button, so the act is named at the moment of pressing rather than
+  only in the heading you read first.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Three <span>&nbsp; forgetting a filed archive</span></h2>
+
+  <span class="key">Today</span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Delete H2 2025's archive of 2026-01-04 for good? This is the one thing here that cannot be undone.</p>
+      <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">The name and a date, and nothing about what is in it. The row you pressed on
+  carries four more columns — what it held, who replaced it, why, and whether it can still be
+  restored — and none of them reach the question. This is the act with the longest reach of the
+  three: an archive is the way back for a whole plan, so forgetting it is forgetting the undo for
+  something else.</p>
+
+  <span class="key">The row the button is on <b>— everything the question needs is already here</b></span>
+  <div class="stage plain">
+    <div class="cfg">
+      <h4>Archived plans</h4>
+      <p class="snote">A plan is archived whenever it is replaced. Restore puts it back into
+      whatever is standing then.</p>
+      <table>
+        <thead><tr><th style="width:24%">Plan</th><th class="cc" style="width:13%">Archived</th>
+          <th style="width:22%">Replaced by</th><th>What it held</th><th class="cc" style="width:17%"></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>H2 2025</b><span class="why">the cycle&rsquo;s figures</span></td>
+            <td class="cc">2026-01-04</td>
+            <td>Islam Saadany<span class="why">cleared when H1 2026 opened</span></td>
+            <td>184 figures &middot; 37 notes<span class="why">put back into whatever plan is standing then</span></td>
+            <td class="cc"><button class="editbtn">Restore</button> <button class="rmbtn">Delete</button></td>
+          </tr>
+          <tr>
+            <td><b>Trade Finance</b></td>
+            <td class="cc">2025-11-20</td>
+            <td>Noura Al-Harbi<span class="why">replaced by an import</span></td>
+            <td>6 projects &middot; 24 deliverables<span class="why">12 reported figures kept with it</span></td>
+            <td class="cc"><button class="editbtn">Restore</button> <button class="rmbtn">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <span class="key">Proposed <b>— the row's own facts, in the question</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Forget this archive for good?</h3><p>H2 2025 &middot; archived 4 Jan 2026</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <div class="ledger">
+          <div class="lrow goes"><span class="mk">Goes</span><span class="tx">
+            <b>184 reported figures and 37 notes</b> from H2 2025
+            <span class="sub">Filed by Islam Saadany when H1 2026 opened, and cleared from the live
+            plan at that moment. This archive is the only copy.</span></span></div>
+          <div class="lrow stays"><span class="mk">Stays</span><span class="tx">
+            H2 2025&rsquo;s closed score, and this cycle&rsquo;s figures
+            <span class="sub">The history keeps a score per unit. What it has never kept is the
+            raw figures, which is what this archive holds.</span></span></div>
+        </div>
+        <p class="noway"><b>There is no way back, and no way back to the plan either.</b>
+        <b>Restore</b> on this row is the undo for the clear that filed it — forgetting the archive
+        takes that away too.</p>
+        <div class="mrow">
+          <span class="spacer"></span>
+          <button class="quiet">Cancel</button>
+          <button class="danger">Forget this archive</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Two words changed on purpose. <b>Forget</b> rather than <b>Delete</b>, because the
+  thing in front of you is already a record of something deleted and &ldquo;delete the archive of the
+  deletion&rdquo; is a sentence nobody can hold; the platform's own function is called
+  <code>forgetArchive</code>. And the row's button would read <b>Forget</b> with it, so the control
+  and the question use one word.</p>
+
+  <hr class="rule">
+  <span class="key">The shape, as one thing</span>
+  <p class="lede">All three are the same three statements in the same order: <b>what goes</b>, named
+  precisely enough to recognise; <b>what stays</b>, because in every one of the three something does
+  and the fear is that it does not; and <b>there is no way back</b>, which is the sentence the rest
+  of the product can never truthfully say. The final button names the act. Cancel is on the left of
+  it and carries no weight.</p>
+  <p class="note">Worth stating plainly: the <i>What stays</i> row is the half the browser's box is
+  worst at and the half that matters most. Twice out of three, the reason somebody hesitates is not
+  &ldquo;will this delete&rdquo; but &ldquo;what else does this take with it&rdquo;.</p>
+
+  <div class="ask">
+    <h2>What I need from you</h2>
+    <ul>
+      <li><b>The shape — yes or no.</b> Goes / Stays / no way back, with the act named on the button.
+      It is the platform's own dialog, the same frame the capability's removal uses.</li>
+      <li><b>Naming the twelve.</b> It is the one real addition of substance here, and the one I would
+      not ship without your word, because it makes that dialog the tallest in the product.
+      Seven rows then scroll — or a flat count, as today, if you would rather it stayed short.</li>
+      <li><b>Forget or Delete</b> for the archive, on the button and in the question. I recommend
+      <i>Forget</i>.</li>
+      <li><b>Should any of the three ask for more than a press?</b> Typing the file's name, say.
+      My recommendation is no — nothing in the platform asks that today, and the act is reached only
+      by somebody the server already lets destroy things. I raise it because these three are the only
+      places where the answer could reasonably be yes.</li>
+    </ul>
+  </div>
+</div>

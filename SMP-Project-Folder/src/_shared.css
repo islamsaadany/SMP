@@ -478,8 +478,9 @@
   table.hist.uns tr.grp td { background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
   table.hist.uns td.hist-act .hist-err { font-size:var(--fs-micro); margin-top:4px; text-align:right; }
   .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
-  .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
-  .hist-rst:disabled { opacity:.45; cursor:default; }
+  .hist-rst:hover:not(:disabled):not([aria-disabled="true"]) { border-color:var(--gold-deep); color:var(--ink); }
+  /* §538: HELD looks exactly as dead looked — the change is that it answers. */
+  .hist-rst:disabled, .hist-rst[aria-disabled="true"] { opacity:.45; cursor:default; }
   .hist-rst:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
   .hist-confirm { border:1px solid var(--attn); background:var(--attn-bg); color:var(--attn-tx); border-radius:8px; padding:12px 14px; font-size:var(--fs-small); margin:0 0 14px; }
   .hist-confirm p { margin:0 0 8px; } .hist-confirm b, .hist-confirm strong { color:inherit; }

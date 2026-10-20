@@ -164,6 +164,95 @@
   ];
   var ROLE_KEYS = ROLES.map(function (r) { return r.key; });
 
+  /* ── 1a · ONE ADDRESS, ONE PARSE (§531, spec 066 stage 3a) ────────
+     A TARGET IS THE ADDRESS OF A THING THAT HOLDS A PLAN: the top layer
+     ("group"), a division ("co:<key>"), a business unit (its bare key), a
+     supporting function ("fn:<key>"), a capability ("cap:<id>") and — for its
+     deck alone — a company direction ("dir:<id>"). Every one of those was
+     added by making it imitate a business unit, and each imitation taught one
+     more reader to read the prefix for itself. Counted before this section was
+     written: 58 places in config-data.js, 14 in this file, 9 in the authoriser
+     and 9 in the shell each asked *which kind is this?* by slicing the string.
+
+     THAT IS THE COMPLEXITY SPEC 066 IS ABOUT, in its smallest form. Five
+     prefixes read in five orders is five chances to put `cap:` after the bare
+     fallback and hand back `UNITS["cap:x"]`, which is undefined and renders as
+     a page with nothing on it — `unitLike` carries the comment of the day that
+     happened. So the parse is ONE function, here, in the file both sides
+     already share (the browser inlines it, api/state.js requires it), for the
+     reason given at the top of this file: two copies of an answer are two
+     copies that will drift, and this drift is silent.
+
+     NOTHING ABOUT IT IS NEW. Each field below is an answer some caller already
+     worked out for itself, returned in one shape instead of five:
+
+       at      the address as given, so a caller can pass it on unchanged
+       kind    top · mid · bu · fn · cap · dir — `structLevelOf`'s own words,
+               which are the Structure step's levels and the product's
+       key     the address with its prefix taken off ("group" for the top)
+       named   whether the address names anything: "", "undefined" and "null"
+               are how a missing target reaches here as text, and `UNIT_TARGET`
+               has guarded against them since it was written
+       area    "fn" for a function and a capability, "unit" for the rest —
+               `areaOfTarget`'s answer, and the pair-of-pages question in
+               `strategyPageOf` below
+
+     WHAT IT DOES NOT PARSE: "u:<key>", which is a HOLDER id and not a target.
+     The two namespaces overlap in text and not in meaning — `u:group` is the
+     top layer's own plan holder, while `group` is the top layer — so folding
+     them into one parse would answer the second question with the first's
+     answer. `subjKey` and `isUnitHolderId` are that namespace's one place.
+
+     STAGE 3a ONLY MOVES THE READING. `kind` still names today's five kinds
+     because today's data still holds them; stage 3b is where a capability
+     becomes an internal pillar and El Abd's units come back as boxes, and the
+     callers that read `kind` are the list of what that migration has to visit
+     (spec 066 §8). Until then every answer here is the answer that was given
+     before, which is what `scripts/test-box-ref.js` holds it to. */
+  /* §553 — AND `sec:` IS THE FIFTH, for a part of the running order that is
+     not a box at all. Islam, of the presentation: *"we choose to present the
+     foundation and then the swot if needed and then every direction and
+     capability in the sequence selected"* — so the company's own Foundation
+     and its SWOT are parts you PLACE, like a direction, and a part needs a
+     target to be placed BY.
+     IT IS LISTED HERE RATHER THAN HANDLED BEFORE `boxRef`, because the
+     fallthrough below reads an unknown target as a BUSINESS UNIT: `sec:found`
+     would have become a unit of that name on every page that asks who the
+     target is (§531 — the prefixes are read once, in one place). */
+  var BOX_PREFIX = [
+    { prefix: "co:",  kind: "mid" },
+    { prefix: "fn:",  kind: "fn"  },
+    { prefix: "cap:", kind: "cap" },
+    { prefix: "dir:", kind: "dir" },
+    { prefix: "sec:", kind: "sec" }
+  ];
+  /* The strings a missing target arrives as. `String(undefined)` is how a page
+     that lost its `current` reaches the authoriser, and it must not read as a
+     business unit called "undefined" (§94.2's shape: a guard asserted at both
+     ends or half a build passes). */
+  var BOX_UNNAMED = { "": 1, "undefined": 1, "null": 1 };
+  function boxRef(target) {
+    var at = String(target == null ? "" : target);
+    var named = !BOX_UNNAMED[at];
+    /* Falsy and "group" are the top layer; "undefined" is NOT, because it is
+       not an address at all and `structLevelOf` has always answered "bu" for
+       it. `named` is the field that says so. */
+    if (!at || at === "group") return boxOf(at, "top", "group", named);
+    for (var i = 0; i < BOX_PREFIX.length; i++) {
+      var p = BOX_PREFIX[i];
+      if (at.indexOf(p.prefix) === 0) return boxOf(at, p.kind, at.slice(p.prefix.length), named);
+    }
+    return boxOf(at, "bu", at, named);
+  }
+  function boxOf(at, kind, key, named) {
+    return { at: at, kind: kind, key: key, named: named,
+             /* §553: a `sec:` part is the COMPANY'S own Foundation or SWOT, so
+                it answers for the top box the way `group` does — anything
+                asking who it belongs to gets the right answer without a
+                second rule (§42). */
+             area: (kind === "fn" || kind === "cap") ? "fn" : "unit" };
+  }
+
   /* ── 2 · Areas (§37; the own pair split in two, §117) ───────────
      THE OWN COLUMNS ARE TWO QUESTIONS EACH (Islam, 2026-08-26): "the strategy
      should be locked from the non SMO but the reporting should be editable by
@@ -579,11 +668,43 @@
       if (r.head === p.key)      out.push({ role:"owner",     at:k });
       if (r.custodian === p.key) out.push({ role:"custodian", at:k });
     });
-    w.functionKeys.forEach(function (k) {
-      var f = w.functions[k] || {};
-      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
-      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
-    });
+    /* ── THE ORDER THESE SIX BLOCKS RUN IN IS THE ORDER THEY READ IN (§558) ──
+       Islam, having been shown what the strip actually printed: the sequence
+       should be **seat, unit, direction, capability, project & pillar,
+       function**. It was seat, unit, FUNCTION, capability, project & pillar,
+       DIRECTION — those two exactly swapped, everything else already his
+       order — because each block was appended where its own section happened
+       to add it (§505 put the direction last simply by being newest) and
+       nothing had ever asked what order the LIST should read in.
+
+       IT IS A PRESENTATION ORDER AND IT CHANGES NO PERMISSION. Every consumer
+       asks this list with `.some()`, `.filter()` or `.map()`; nothing reads
+       `[0]` or takes a first-match, so no grant, no reach and no refusal moves
+       with it. Measured before the change rather than assumed.
+
+       WHERE IT BITES IS THE HOME STRIP, which draws the first three roles and
+       no more (`welcome.js`): the direction being last meant a person holding
+       four roles did not see Direction owner pushed to the end, they did not
+       see it at all. Which is the whole reason the order was worth his asking
+       about and not a tidiness.
+
+       `seen`/`once` are hoisted to here because the direction block below is
+       the first caller now; the project and pillar blocks further down share
+       the same two, so one role at one place is still entered once (§147.7). */
+    var seen = {};
+    var once = function (role, at) {
+      if (seen[role + "|" + at]) return;
+      seen[role + "|" + at] = 1;
+      out.push({ role: role, at: at });
+    };
+
+    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
+       one rule that lets them report (`ownsTopPillar`), so the role and the
+       reporting right cannot disagree about who is named (§42, §53.5) — and
+       it is false whenever the business units are on, because then the top
+       layer's pillars are not directions anybody reports. */
+    if (ownsTopPillar(w, p)) once("dirowner", "group");
+
     /* §412: a capability's own seats, read off the capability exactly as a
        unit's are read off the unit (§33) -- one fact, one place. */
     (w.capabilities || []).forEach(function (c) {
@@ -600,12 +721,8 @@
        one): the Owner is picked from the register in the office's own pen, so
        the naming is already a deliberate act about a known person. One entry
        per place, however many projects or pillars there name them. */
-    var seen = {};
-    var once = function (role, at) {
-      if (seen[role + "|" + at]) return;
-      seen[role + "|" + at] = 1;
-      out.push({ role: role, at: at });
-    };
+    /* `seen`/`once` are declared above, with the direction block that is now
+       their first caller (§558). */
     var owns = function (row) { return namedOn({ owner: row && row.owner }, p); };
     (w.capabilities || []).forEach(function (c) {
       if (!c || !c.fn) return;
@@ -652,12 +769,19 @@
       if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
-    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
-       one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
-    if (ownsTopPillar(w, p)) once("dirowner", "group");
+    /* A SUPPORTING FUNCTION'S OWN SEATS — LAST OF THE SIX (§558). The head
+       and the Strategy custodian of a function, unmoved in what they derive
+       and moved only in where they come in the list: Islam put the function
+       below the direction, the capability and the plan's own owners. It stays
+       ABOVE the floor below, which is reached only on `!out.length` — a
+       function head arriving after that test would be read as holding nothing
+       and handed a Contributor's floor instead (§387's own trap, from the
+       other end). */
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
+      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
+    });
     /* §384 DERIVED A `towner` HERE AND §387 TOOK IT OUT — the whole role went
        with the Roles & access row (see ROLES above). A tactic's owner is
        `namedInUnit` by the floor below, exactly as they were before §384, and
@@ -787,9 +911,9 @@
      mapping runs twice on one question and a `fn:` target has to map to
      itself. */
   function capHolderTarget(w, target) {
-    var s = String(target || "");
-    if (s.indexOf("cap:") !== 0) return s;
-    var id = s.slice(4), cs = (w && w.capabilities) || [];
+    var s = String(target || ""), r = boxRef(s);
+    if (r.kind !== "cap") return s;
+    var id = r.key, cs = (w && w.capabilities) || [];
     for (var i = 0; i < cs.length; i++)
       if (cs[i] && cs[i].id === id) return cs[i].fn ? "fn:" + cs[i].fn : "group";
     return "group";
@@ -800,13 +924,13 @@
        before the capability resolves to its holder, or the seat would be
        compared against the function and never match. The holder's own seats
        still reach it below, because the function stays an option. */
-    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
+    if (String(r.at || "") === String(target || "") && boxRef(target).kind === "cap") return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
-    if (at.indexOf("cap:") === 0) return false;
-    if (String(target).indexOf("fn:") === 0) return at === target;
-    if (at.indexOf("fn:") === 0) return false;
+    if (boxRef(at).kind === "cap") return false;
+    if (boxRef(target).kind === "fn") return at === target;
+    if (boxRef(at).kind === "fn") return false;
     if (r.role === "cceo") {
       var ck = at.replace(/^co:/, "");
       if (target === "group") return false;
@@ -816,7 +940,7 @@
          page into an "other company" and handed the answer to the seeOthers
          flag. Their own is theirs; anybody else's still goes through
          companyAllows(). */
-      if (String(target).indexOf("co:") === 0) return at === target;
+      if (boxRef(target).kind === "mid") return at === target;
       return unitsOfCompany(w, ck).indexOf(target) > -1;
     }
     return at === target;
@@ -828,7 +952,7 @@
     target = capHolderTarget(w, target);
     var co = w.companies[String(r.at || "").replace(/^co:/, "")] || {};
     if (target === "group") return co.seeGroup !== false;
-    if (String(target).indexOf("fn:") === 0) return true;
+    if (boxRef(target).kind === "fn") return true;
     if (roleOwns(w, r, target)) return true;
     return !!co.seeOthers;
   }
@@ -1493,15 +1617,32 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      a session that cannot simulate buys nothing and is judged as itself.
      An unknown key is REFUSED rather than treated as somebody with no roles:
      "no roles" is a narrowing that hides a mistake instead of reporting it. */
+  /* ── AND THE SMO TEAM ACTS THROUGH ONE TOO (§554) ─────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* The team holds Setup, the
+     register and the cycle (§516.2) — they set the narrowings, so they are
+     the people who need the mirror to check one in.
+
+     WITH A CEILING, because this hands the ACTOR over and everything
+     downstream judges by what that actor holds: a team member acting through
+     the Super user's row would be writing as the one person on the register
+     who holds more than they do, which is a way up rather than a simulation.
+     The Super user may act through anybody; the SMO team through anybody but
+     the Super user. `them.role` is the SEAT on the register row — the same
+     field `personRoles` reads a seat from (§187), and the one the server
+     writes from the membership (lib/state-api.ts officeRow) — never a role
+     read out of the incoming state, which is the thing being written. */
   function actingFor(me, viewAs, seatRole, people) {
     var want = typeof viewAs === "string" ? viewAs.trim() : "";
     if (!me || !want || want === me.key) return { person: me };
-    if (seatRole !== "super")
+    if (seatRole !== "super" && seatRole !== "smoteam")
       return { refuse: "Only the SMO can act through somebody else's view." };
     var them = null;
     (people || []).forEach(function (p) { if (p && p.key === want) them = p; });
     if (!them)
       return { refuse: "The register does not hold the person this view belongs to." };
+    if (seatRole !== "super" && them.role === "super")
+      return { refuse: "The SMO team cannot act through the Super user's view." };
     return { person: them, simulated: true };
   }
 
@@ -1888,9 +2029,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      A HALF-FILLED PLAN IS STORED AND NOT USED. Twelve boxes are filled over
      more than one sitting, so what has been typed is kept; what it must not
-     do is quietly become the target. Until the twelfth is set the row is
+     do is quietly shape the year. Until the twelfth is set the row is
      prorated flat exactly as it is today, and the page says so in words
-     rather than leaving somebody to wonder why nothing happened (§61). */
+     rather than leaving somebody to wonder why nothing happened (§61).
+
+     §555 REVERSED ONE HALF OF THAT SENTENCE AND LEFT THE OTHER STANDING.
+     This paragraph used to end "what it must not do is quietly become the
+     TARGET", and that was wrong for the reason Islam gave: with the target
+     typed as well as the months, the same figure is authored twice and
+     nothing checks that the two agree. The target is derived from the first
+     month now (`monthlySoFar`). The PRORATION half is untouched and is the
+     part this paragraph was really about: a missing month is UNKNOWN, never
+     nought, so the year stays flat until all twelve are in. */
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   /* IS THIS MONTH SET. Blank first, THEN the number — see above. A value
@@ -1964,6 +2114,50 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      months, which is what makes the annual figure and the year-to-date one
      impossible to disagree: one function, one compile rule, one plan. */
   function monthlyAnnual(row) { return monthlyDue(row, 12); }
+  /* ── WHAT THE MONTHS SET SO FAR COME TO (§555) ─────────────────────
+     Islam, of a row four months into its plan whose target still read the
+     figure he had typed: *"when I was adding the monthly the target should be
+     a sum of the months calculated automatically not on an entry as well."*
+
+     §278 derived the annual target only when the TWELFTH month landed, so
+     until then the office typed the target AND the months — the same figure
+     authored twice, and nothing checking that the two agreed. This answers
+     the partial question instead: the row's own compile rule applied to the
+     months that ARE set, blanks passed over.
+
+     IT IS NOT A SECOND ARITHMETIC. On a complete plan it returns exactly what
+     `monthlyAnnual` returns — twelve summed, averaged, or the last of them —
+     which is asserted rather than claimed, because the day the two disagree
+     the target on the row stops agreeing with the months under it.
+
+     WHAT IT DOES NOT TOUCH IS PRORATION. `monthlyPlan` still refuses a
+     half-filled plan and `monthlyDue` still returns null for it, so a row is
+     measured flat across the year until all twelve are in exactly as §278
+     decided — the months that are missing are UNKNOWN, not nought, and
+     reading them as nought is the fault §278 was written around. What changes
+     is only which figure the target box holds while the plan is being made.
+
+     NULL WHERE THERE IS NOTHING TO SAY: no month set, no compile rule, or a
+     month holding something that is not a number. The last of those is §278's
+     own safe direction — a plan the platform cannot read leaves the target
+     alone rather than deriving a figure from half of it. */
+  function monthlySoFar(row) {
+    var a = row && row.monthly, c = monthlyCompile(row);
+    if (!Array.isArray(a) || !c) return null;
+    var t = 0, n = 0, last = null, i, v;
+    for (i = 0; i < 12 && i < a.length; i++) {
+      if (a[i] == null || String(a[i]).trim() === "") continue;
+      if (!monthSet(a[i])) return null;          /* present and unreadable */
+      v = Number(String(a[i]).replace(/,/g, ""));
+      t += v; n++; last = v;
+    }
+    if (!n) return null;
+    if (c === "latest") return last;
+    if (c === "average") return t / n;
+    /* §276's rounding, on the months rather than on the share — and the same
+       epsilon, for the same reason `monthlyDue` carries it. */
+    return c === "count" ? Math.floor(t + 1e-9) : t;
+  }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
      the server all ask. A gap is a place holding nothing the platform can
      USE, which for a date includes a value it cannot read: a milestone due
@@ -2152,10 +2346,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* A unit key or `fn:<key>`, resolved in ONE place (§59's rule). */
   function unitLikeOf(w, target) {
     if (!w || !target || target === "group") return null;
-    if (String(target).indexOf("fn:") === 0) {
-      var f = (w.functions || {})[String(target).slice(3)];
-      return f || null;
-    }
+    var r = boxRef(target);
+    if (r.kind === "fn") return (w.functions || {})[r.key] || null;
     return (w.units || {})[target] || null;
   }
 
@@ -2227,8 +2419,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        unit it would consult `u_plan` and `u_found`, which are a business
        unit's columns, and a function head filling a gap on their own
        capability would be refused by the wrong column entirely. */
-    var t = String(target);
-    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
+    return boxRef(target).area === "fn"
       ? (STRATEGY_PAIR[unitPage] || unitPage)
       /* §405: AND THE OTHER WAY. A business unit that plans in projects or
          actions is drawn by the function's own pages, which ask `k_proj`,
@@ -2236,12 +2427,16 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
          FUNCTION columns, which a unit's head owns none of. So on a unit the
          function's keys resolve to the unit's own, and nobody's access moves:
          a unit's plan is judged by the unit's column whichever way it plans. */
-      : (UNIT_TARGET(t) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
+      : (UNIT_TARGET(target) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
   }
   var UNIT_PAIR = { k_found: "u_found", k_proj: "u_plan", k_report: "u_report" };
-  function UNIT_TARGET(t) {
-    return !!t && t !== "group" && t !== "undefined" && t !== "null" &&
-      t.indexOf("co:") !== 0 && t.indexOf("fn:") !== 0 && t.indexOf("cap:") !== 0;
+  /* §531: "a target that is judged by a business unit's own columns" — every
+     address but the top layer, a division, a function, a capability and the
+     three ways a missing target arrives as text. A `dir:<id>` answers TRUE
+     here, as it always has; see `structLevelOf` for why that is left alone. */
+  function UNIT_TARGET(target) {
+    var r = boxRef(target);
+    return r.named && r.kind !== "top" && r.kind !== "mid" && r.area !== "fn";
   }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */
@@ -2250,9 +2445,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   /* The same pairing for the Reporting half (§117). */
   function reportPageOf(target) {
-    var t = String(target);
-    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
-      ? "k_report" : "u_report";
+    return boxRef(target).area === "fn" ? "k_report" : "u_report";
   }
 
   /* ── THE PLAN LEAVES AS SLIDES (§117) ────────────────────────────
@@ -4123,18 +4316,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = group && group[STRUCTURE];
     return s && typeof s === "object" ? s : null;
   }
+  /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
+     Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
+     office saves that card, the capability layer READS the functions' answers
+     (effLevel below), which is exactly what it carried before that card
+     existed — nothing moves for any client.
+
+     §531: the five prefixes are read once, by `boxRef`. A DIRECTION HAS NO
+     LEVEL OF ITS OWN and is answered here as "bu", which is the answer
+     `dir:<id>` has always got from this function — it reached the bare
+     fallback because no branch named it. Said out loud rather than left to the
+     fallback, because `boxRef` now CAN tell a direction apart and a reader who
+     saw that would expect this to as well. It should not: a direction is a
+     pillar, not a layer of the tree (spec 066 §2.3), and the address goes at
+     stage 3b. Until then this is the answer it had. */
   function structLevelOf(target) {
-    var t = String(target || "");
-    if (!t || t === "group") return "top";
-    if (t.indexOf("co:") === 0) return "mid";
-    if (t.indexOf("fn:") === 0) return "fn";
-    /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
-       Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
-       office saves that card, the capability layer READS the functions'
-       answers (effLevel below), which is exactly what it carried before this
-       card existed — nothing moves for any client. */
-    if (t.indexOf("cap:") === 0) return "cap";
-    return "bu";
+    var k = boxRef(target).kind;
+    return k === "dir" ? "bu" : k;
   }
   /* The level whose stored answers apply. The capability layer falls back to
      the functions' while nobody has set it (§428). */
@@ -4152,18 +4350,50 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (c && typeof c.exists === "boolean") return c.exists;
     return levelComponents(group, "top").indexOf("capability") >= 0;
   }
-  /* §465 — WHERE THE CAPABILITIES LIVE. One place at a time (Islam,
-     approving the plan-level mockup): as a section of the company's own
-     Strategy tab, or as a layer of their own with a side in the navigation.
-     Planned at company level they are always the company's (§447); at units
-     level they are a layer unless the office moved them into the company
-     plan, which `structure.cap.at = "top"` records. Stored as an absence, so
-     a client that never chose — Raya Trade — keeps them a layer. */
-  function capAtTop(group) {
-    if (!buExists(group)) return true;
-    var s = structureOf(group), c = s && s.cap;
-    return !!(c && c.at === "top");
-  }
+  /* §544.13 — A CAPABILITY IS THE COMPANY'S. Islam, 2026-10-18, asked the
+     three questions plainly and answered them plainly:
+
+       · *who can a capability belong to?* — **the company only**;
+       · *where does it appear?* — **inside its owner's plan, with the
+         directions**;
+       · *someone owns one — can they always open it and report it?* —
+         **yes, always**.
+
+     And, of the setup screen: *"no — remove it"*, of the route that put a
+     capability under a supporting function.
+
+     SO THERE IS NOTHING LEFT TO ASK HERE. §465 made this a choice between a
+     section of the company plan and a layer of its own; §544.5 took the
+     business units out of deciding it; this takes the question away. A
+     capability lives in the company's plan because that is the only place a
+     capability lives. `structure.cap.at` is dead storage: it is neither read
+     nor written any more, and the clients that hold one are left holding it
+     (§405 — hidden, never cleared).
+
+     WHAT HE SAID FIRST, AND WHY A PATCH WOULD NOT DO. *"It's not about
+     switching units off. Leave the capability completely alone. Everything
+     should follow the rules. Does the capability belong to the business
+     units or not? If it doesn't belong and it belongs to the company, they
+     should be irrelevant. It's not about fixing this. It's about fixing the
+     whole structure."* Measuring found the units written into the capability
+     question in FOUR places, each added for its own reason: here, in
+     `ownsTopPillar`, in `ownsTopCapability`, and in the company Reporting
+     page's capabilities section. One rule now answers all four.
+
+     THIS REVERSES §7.1, which he approved on 2026-10-07 (*"ok for your
+     recommendation"*): a capability held by a function was to become an
+     internal pillar of that function. Asked again against the live shapes he
+     chose **"on the company"**, so a function-held record folds to the
+     company like any other. Recorded as a reversal, not overwritten
+     (Principle II).
+
+     NOTHING MOVES FOR ANYBODY (§50.6's purpose, if not its mechanism). El
+     Abd's, Wander's and Raya's capability records are all gone — folded at
+     stage 3b, or removed by Islam himself; Meridian still holds two and is
+     *"not live and not a priority"*. The only shape this changes on screen
+     is the demo sample compiled into the build, which is code, not a
+     client. */
+  function capAtTop() { return true; }
   /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
      fifth answer says, with ONE exception: a supporting function's own S&W
      (§399). That section is newer than the clients it would appear on, so
@@ -4260,7 +4490,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return "";
   }
   function compOffered(target, comp) {
-    var isFn = String(target || "").indexOf("fn:") === 0;
+    var isFn = boxRef(target).kind === "fn";
     if (comp === FN_DESC) return isFn;
     if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
@@ -4268,7 +4498,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* The part that draws a function's or a capability's "What it is" card:
      a capability keeps its brief (§334), a function asks its description. */
   function descPart(target) {
-    return String(target || "").indexOf("fn:") === 0 ? FN_DESC : "brief";
+    return boxRef(target).kind === "fn" ? FN_DESC : "brief";
   }
   /* §427 (Islam, 2026-09-30, of the audit of what each Structure tick
      changes: *"A for 4,5,6,7"*, then *"leave them ticked off and greyed …
@@ -4400,6 +4630,166 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), b = s && s.bu;
     return !(b && b.exists === false);
   }
+
+  /* ── §544 · EACH BOTTOM KIND CARRIES ITS OWN LAYER ABOVE IT ────────────
+     Spec 066 stage 4. Islam, from the signed-off mockup: *"no not 1 list
+     the business units has it's own layer above and the functions has their
+     own layer above"*, and on how one comes to exist: *"the main layer is
+     the bottom layer, which may be the business units or the functions.
+     Creating another layer in between these layers and the company should be
+     the thing that is the exception, or the creation."*
+
+     SO A MIDDLE LAYER IS NOT DECLARED AND THEN POINTED AT. It is created by
+     the kind that needs one, it belongs to that kind, and it has its own
+     name. A client can have none, one, or two — the units grouped under
+     Sectors while the functions are grouped under Divisions, and neither
+     knows about the other.
+
+     WHICH IS A CHANGE TO WHAT THE SET-UP SCREEN DRAWS AND NOT TO WHAT IS
+     STORED. There is one list of divisions underneath, as there has been
+     since §391 — `COMPANIES`, with a unit or a function naming one — and
+     this says which kind's row each one is drawn on. Measured before it was
+     written: Raya's two divisions are named by 6 units and 0 functions, El
+     Abd's three by 22 functions and 0 live units. Neither client mixes them,
+     so each one's existing list simply becomes that kind's own layer, and
+     nobody's navigation, page or figure moves.
+
+     READ FROM USE, SAID ONLY WHERE USE CANNOT ANSWER (§50.6). A division
+     belongs to the kinds whose boxes name it. One that nothing names yet
+     belongs to the kind that made it (`layer` on the company record, written
+     by the shape screen as it is added) and, failing even that, to every
+     kind that has a layer — which is where a division made on Setup ›
+     Companies before any of this lands, and it is drawn rather than hidden
+     (§61). A division named by BOTH kinds is on both rows, because that is
+     what it is; nothing here splits one in two behind the office's back. */
+  var LAYER_KINDS = ["bu", "fn"];
+  /* Who names this division. The two lists are handed in rather than read
+     off globals, so the server, a check and the browser all ask one
+     function (§53.5); an inactive box still counts, because retiring one
+     does not hand its division to the other kind. */
+  function coUsedBy(coKey, units, functions) {
+    var used = { bu: false, fn: false };
+    var scan = function (map, k) {
+      Object.keys(map || {}).forEach(function (x) {
+        if (map[x] && map[x].company === coKey) used[k] = true;
+      });
+    };
+    scan(units, "bu"); scan(functions, "fn");
+    return used;
+  }
+  /* Whether this division is drawn on THIS kind's layer row. */
+  function coOnLayer(co, coKey, kind, units, functions) {
+    var used = coUsedBy(coKey, units, functions);
+    if (used.bu || used.fn) return !!used[kind];
+    var said = co && (co.layer === "bu" || co.layer === "fn") ? co.layer : "";
+    return said ? said === kind : true;
+  }
+  /* The divisions on one kind's layer, in the order they are declared. */
+  function layerCompanies(kind, companyKeys, companies, units, functions) {
+    return (companyKeys || []).filter(function (k) {
+      return coOnLayer((companies || {})[k], k, kind, units, functions);
+    });
+  }
+  /* WHETHER A KIND HAS A LAYER AT ALL. Said on its own level (`layer`, a
+     real true or false, which is how the shape screen records "group these
+     under a layer" and "remove this layer"); unsaid, it has one exactly
+     when a division is drawn on its row — so a client set up before stage 4
+     reads today's shape and nothing moves. `midExists` still answers for
+     the pair: an office that switched the second layer off has switched
+     both of them off, and that answer is not overridden from underneath. */
+  function layerOn(group, kind, companyKeys, companies, units, functions) {
+    if (!midExists(group, companies)) return false;
+    var s = structureOf(group), l = s && s[kind];
+    if (l && typeof l.layer === "boolean") return l.layer;
+    /* A DIVISION NOBODY HAS PUT ANYTHING IN DOES NOT GIVE A KIND A LAYER.
+       Asked the other way round at first, off `layerCompanies`, and it read
+       El Abd as having a layer above its business units: one division with
+       no function in it yet belongs to both rows, which is right for drawing
+       it and wrong for deciding that a client with no units at all has a
+       layer above them. So the question here is USE — a division this kind
+       actually names — with one exception, a list where nothing has been
+       assigned yet: those are drawn on both rows rather than nowhere (§61). */
+    var usedAnywhere = false, usedHere = false;
+    (companyKeys || []).forEach(function (k) {
+      var u = coUsedBy(k, units, functions);
+      if (u.bu || u.fn) usedAnywhere = true;
+      if (u[kind]) usedHere = true;
+    });
+    if (usedHere) return true;
+    return !usedAnywhere && (companyKeys || []).length > 0;
+  }
+  /* A kind's boxes that have no division yet while its layer is on — the
+     "N need a Division" flag on the shape screen. Not an error and not a
+     refusal: a box with no division sits straight under the top, exactly as
+     it does today, and this only says so out loud. */
+  function layerOrphans(kind, boxKeys, boxes, companyKeys, companies, units, functions) {
+    var on = layerCompanies(kind, companyKeys, companies, units, functions);
+    return (boxKeys || []).filter(function (k) {
+      var b = (boxes || {})[k], co = b && b.company;
+      return !co || on.indexOf(co) < 0;
+    });
+  }
+
+  /* THE LAYER'S OWN NAME. One word for the second layer is what every
+     client holds and what every other screen reads (`division`, §404.4), and
+     while a client has one layer that is the right answer everywhere — the
+     word on the shape screen, on Setup › Companies and in the navigation is
+     one word in one place (§53.5). A client with TWO layers is the case that
+     needs a name each, and only then: `structure[kind].layerWords`, read
+     here and falling back to the client's own word, so nothing is stored
+     and nothing reads differently until a second layer exists. */
+  function layerWords(group, kind) {
+    var s = structureOf(group), l = s && s[kind], w = l && l.layerWords;
+    return w && typeof w === "object" ? w : null;
+  }
+
+  /* ── §544.2 · WHAT IS IN THE NAVIGATION IS CHOSEN, NOT DERIVED ─────────
+     Islam, of a first draft that worked out the row from the shape: *"this
+     should be a choice what are the navigation switch… so it needs to be
+     chosen somehow not derived"*. He is right that a rule read off two
+     clients is a rule invented from two clients: a third with units,
+     functions AND divisions could reasonably want any of them on the row,
+     and a derivation decides that for them.
+
+     SO EVERY ROW ON THE SHAPE SCREEN CARRIES A TICK, and the sides of the
+     navigation are the rows that are ticked. Four rows can be: each bottom
+     kind, and each kind's layer.
+
+     AND THE ANSWER IS STORED AS AN ABSENCE, read as what `navSides()`
+     answers today, so every existing client opens with exactly the row it
+     has:
+       bu    ticked while the units are the level that plans (buExists) —
+             they are a side whenever they exist;
+       fn    ticked while there are functions AND the units plan, which is
+             the only shape in which the functions have a side of their own;
+       fn@g  ticked when the company plans, because then the functions'
+             divisions take that side rather than making anybody press
+             "Functions" before they can reach anything (§464);
+       bu@g  never, today: Raya's two divisions are reachable from a unit's
+             page and have never been on the row.
+     Pressing a tick writes a real true or false; pressing it back to what
+     the absence says deletes it again, so a client the office looked at and
+     left alone stores nothing (§50.6). */
+  var NAV_ROWS = ["bu", "fn", "bu@g", "fn@g"];
+  function navRowParts(row) {
+    var i = String(row || "").indexOf("@g");
+    return i > 0 ? { kind: String(row).slice(0, i), layer: true }
+                 : { kind: String(row || ""), layer: false };
+  }
+  /* What the row answers when nobody has said. */
+  function navRowUnsaid(group, row) {
+    var p = navRowParts(row);
+    if (p.kind !== "bu" && p.kind !== "fn") return false;
+    if (p.layer) return p.kind === "fn" && !buExists(group);
+    if (p.kind === "bu") return buExists(group);
+    return fnExists(group) && buExists(group);
+  }
+  function navPicked(group, row) {
+    var p = navRowParts(row), s = structureOf(group), l = s && s[p.kind];
+    var v = l && (p.layer ? l.layerNav : l.nav);
+    if (typeof v === "boolean") return v;
+    return navRowUnsaid(group, row);
+  }
   /* §447: a direction's owner reports their own direction on the company
      page. A RULE beside mayReportTop, for the same reason: it is one answer
      whatever a tenant sets, and only while the units are off, because that
@@ -4411,8 +4801,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      already. Both are register NAMES, never keys (§130.1), matched the one
      way a plan's Owner column is matched (`namedOn`). `pillarCust` is
      optional so a caller that predates it still answers about the owner. */
+  /* §544.13 — AND THE BUSINESS UNITS DO NOT GATE IT. This opened
+     `if (!person || buExists(w.group)) return false`, because §447's shape
+     was the only one in which the top layer's pillars ARE the directions.
+     Under §2.2 a company plans whether or not it has units, so the units
+     answer nothing here: what admits a direction's owner is a direction with
+     their name on it, which is what the rest of this function asks. */
   function ownsTopPillar(w, person, pillarOwner, pillarCust) {
-    if (!person || buExists(w.group)) return false;
+    if (!person) return false;
     var seat = function (name) { return !!name && namedOn({ owner: name }, person); };
     if (pillarOwner != null || pillarCust != null) return seat(pillarOwner) || seat(pillarCust);
     return (w.topItems || []).some(function (p) {
@@ -4456,16 +4852,61 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      it and what remains is the Foundation. Their own capability is a
      destination of its own and is untouched — that is the half of "his
      capability" the navigation already had right. */
-  var PART_ONLY_ROLES = ["dirowner", "capowner"];
+  /* §533 — AND IT IS ALL FOUR PARTS, UNDER ONE SENTENCE. Islam, asked whether
+     a project and a pillar are parts too: *"don't you think they are parts
+     that should follow the same rule for consistency?"* — and, of the rule
+     itself: *"the visibility is set by the owner of the item … the CEO sees
+     everything, and the business unit sees his own business unit"*.
+
+     SO THE SENTENCE IS: **you see the thing you own, whole.** The biggest
+     thing you own decides. A project, a pillar, a direction and a capability
+     are all PARTS inside something; a unit, a function and the company are
+     BOXES. Own a box and you see that box whole, whatever parts you also hold
+     inside it. Own nothing but parts and this switch narrows you to them.
+
+     A PART OWNER IS SOMEBODY WHO OWNS ONLY A PART, and that correction is the
+     whole of why this is not just two more entries in the list below. Measured
+     on the worked example before it was built: adding `powner` and `plowner`
+     to the list and changing nothing else narrowed **24 of 33 people** —
+     including eight business-unit OWNERS and five function HEADS, because each
+     of them also happens to own one pillar inside their own unit. That is the
+     exact opposite of *the business unit sees his own business unit*. Under
+     the sentence above it narrows ONE person in that client: the one who owns
+     a project in IT and a pillar in Mobile and nothing else.
+
+     SO THE WHOLE RULE IS ONE LINE: narrowed only when EVERY role you hold is
+     a part role. Anything else you hold is bigger, and the biggest wins.
+
+     THAT REPLACES §517's GRANT TEST, which asked instead whether one of your
+     other roles was GRANTED the company's pages. It is replaced and not kept
+     beside it, because the two disagree in a case the table offers: an office
+     that sets the BU-owner row's company column to `none` would, under the
+     grant test, narrow every unit head who also owns one pillar inside their
+     own unit — *the business unit sees his own business unit*, gone, by a
+     press two columns away. Measured, and the only case where the two differ
+     on the worked example. The new rule is also strictly the more generous of
+     the two, so §33's rule that a narrowing must never take away what another
+     row gives is kept rather than weakened.
+
+     THE FLOOR NEEDS NO CASE OF ITS OWN. `contrib` is only ever derived when
+     the person holds NO other role (`!out.length` guards both places it is
+     pushed), so it can never sit beside a part — and somebody whose only role
+     is the floor holds no part, so `holds` stays false and they are not
+     narrowed. Written as "not a part role" rather than as a list of box
+     roles on purpose: the next role somebody adds then defaults to NOT
+     narrowing, which is the safe direction — a new role that silently took
+     the company's pages away from whoever held it is the kind of surprise
+     spec 066 exists to stop. */
+  var PART_ONLY_ROLES = ["powner", "plowner", "dirowner", "capowner"];
+  function isPartRole(role) { return PART_ONLY_ROLES.indexOf(role) > -1; }
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
   function partOnly(w, person) {
     if (!person || !w || !dirScopePart(w.group)) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
-      if (PART_ONLY_ROLES.indexOf(rs[i].role) > -1) { holds = true; continue; }
-      if (!companyAllows(w, rs[i], "group")) continue;
-      if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
+      if (!isPartRole(rs[i].role)) return false;
+      holds = true;
     }
     return holds;
   }
@@ -4484,8 +4925,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      asked here and nowhere else. Which rows they may TYPE on is the
      capability's own question (`cap:<id>`, §334), on the screen and on the
      server, so this opens the page and narrows nothing by itself. */
+  /* §544.13 — AND THE BUSINESS UNITS DO NOT GATE IT EITHER. Islam, asked
+     *"someone owns one capability — should they always be able to open it
+     and report on it?"*: **"yes, always"**. A capability is the company's
+     (`capAtTop`), so the company's Reporting page is the one page its owner
+     needs, units or no units; this used to refuse them the moment the client
+     had a unit, which is the same mistake in a second place. */
   function ownsTopCapability(w, person) {
-    if (!person || !w || buExists(w.group)) return false;
+    if (!person || !w) return false;
     return (w.capabilities || []).some(function (c) {
       return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
     });
@@ -4498,6 +4945,75 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function topWay(group) {
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return b && b.way === "projects" ? "projects" : "pillars";
+  }
+  /* ── 2b · ONE PILLAR LIST, SHOWN AS ONE OR AS TWO (§540) ────────────────
+     Islam, of a capability: *"a pillar is external and internal pillars and
+     they are the same like directions but internal directions are called
+     capabilities"*, and of the whole of stage 3b: *"ok noting that nothing
+     will change for the users this is just a structural change"*.
+
+     SO THE KIND IS THE THING AND THE SPLIT IS A SETTING. A pillar carries a
+     `kind` already — the workbook has validated B2:B60 against these two
+     words since the first import, the `pillars` table has the column, and the
+     rail and the pane have drawn the pill since §488. What the platform has
+     never had is a way to say *and show them apart*: El Abd reads Directions
+     and Capabilities on two tabs only because its capabilities are a SECOND
+     RECORD TYPE, and that record type is what spec 066 removes.
+
+     THIS IS THE SETTING THAT LETS IT BE REMOVED WITHOUT ANYBODY NOTICING. Set
+     on the box, over the one pillar list it already holds: joined, which is
+     every client today, or apart, which is what El Abd's company will be set
+     to on the day its five capabilities become five internal pillars. Each
+     half then keeps its own stored word — `pillar` for the external half and
+     `capability` for the internal one — so the tabs read Directions and
+     Capabilities exactly as they do now (§404's labels, untouched).
+
+     ABSENT IS JOINED (§50.6, §30.2). Not because joined is the better answer
+     but because it is TODAY'S: every box in every client draws its pillar
+     list as one list, Raya's units included, and a default of "apart" would
+     put a second tab on every one of them the day this shipped. The one
+     client that wants two tabs is the one client that already has them, and
+     it is set explicitly, in the same commit as its data moves (stage 3b, d).
+
+     THE BOX IS A UNIT, A COMPANY, OR ANY BOX THAT PLANS IN PILLARS — and it
+     is asked of the UNIT-LIKE OBJECT rather than of the group, so the company
+     answers through `topAsUnit()` exactly as it answers `format` (§466). Not
+     a supporting function: a capability *"is either on a unit or it's on the
+     company … It belongs to something bigger than the function"* (Islam,
+     2026-10-14), so a function's pillar list holds one kind and has nothing
+     to show apart. Not a capability either, for the plainer reason that it
+     IS one.
+
+     THE KINDS ARE READ HERE AND NOWHERE ELSE. `xlsx.js` held the list and
+     built the workbook's validation and the pen's picker from it (§53.5);
+     it reads this one now, so the browser, the server and the spreadsheet
+     cannot disagree about what a kind may say. */
+  var PILLAR_KINDS = ["Direction", "Capability"];
+  var PILLAR_CAP = "Capability";
+  /* INTERNAL IS SAID, NEVER ASSUMED. `addPillar` mints `kind: ""` and most
+     stored pillars carry nothing at all (§488's own finding), so the question
+     is *is this one marked as a capability* and everything else — the blank,
+     "Direction", a word somebody typed — is external. Written this way round
+     so that an unsaid kind lands in the half every client reads today. */
+  function pillarIsCap(p) { return !!p && String(p.kind || "") === PILLAR_CAP; }
+  /* The one stored key, on the box. A boolean and not a word: there are two
+     answers and a third would be a different question (§50.6). */
+  var PILLAR_SPLIT = "pillarSplit";
+  function pillarsSplit(box) { return !!box && box[PILLAR_SPLIT] === true; }
+  /* And where the COMPANY keeps it: beside `way` on the Structure step's own
+     plan block, which is the row the setting is drawn next to (§466). The
+     company has no stored record of its own — `topAsUnit()` is built fresh on
+     every read — so this is what that builder reads. */
+  function topSplit(group) {
+    var s = structureOf(group), t = s && s.top, b = t && t.plan;
+    return !!(b && b.split === true);
+  }
+  /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
+     asking the question in opposite directions. `half` is "cap" or "dir";
+     anything else means the whole list and every pillar is in it. */
+  function pillarInHalf(p, half) {
+    if (half !== "cap" && half !== "dir") return true;
+    return pillarIsCap(p) === (half === "cap");
   }
   /* A company project's named Owner enters that project's figures (Islam:
      the function's own rule, §301) and never submits. A RULE beside
@@ -5075,6 +5591,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     monthlyStarted: monthlyStarted, monthlyPlan: monthlyPlan,
     monthlyCompile: monthlyCompile, monthlyInForce: monthlyInForce,
     monthlyDue: monthlyDue, monthlyAnnual: monthlyAnnual,
+    monthlySoFar: monthlySoFar,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, mayFillPage: mayFillPage,
@@ -5110,11 +5627,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
     FN_DESC: FN_DESC, descPart: descPart, COMPETE: COMPETE, DISCIPLINES: DISCIPLINES, disciplineName: disciplineName,
     STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
+    /* §531: the one address parse, exported so the browser's own pages read
+       the same answer the server does (spec 066 stage 3a). */
+    boxRef: boxRef,
     structureOf: structureOf, structLevelOf: structLevelOf,
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists,
+    LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
+    layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
+    NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -7279,6 +7804,14 @@ var LABEL_DEFAULTS = LABELS.entries.map(function(e){ return { key:e.key, one:e.g
    list, not two (spec 006 §2). */
 var ROLES = SMPRules.ROLES;
 var ROLE_KEYS = SMPRules.ROLE_KEYS;
+/* ── ONE ADDRESS, ONE PARSE (§531) ───────────────────────────────────
+   The same reason as the two lines above: the browser and the server have to
+   read an address the same way, so the parse is lib/rules.js's and this is the
+   alias. `boxRef(target)` answers `{ at, kind, key, named, area }` for the six
+   kinds that hold a plan — see the section it is defined in for what each
+   field is and for why `u:<key>` is NOT one of them (it is a holder id, not a
+   target; `subjKey` and `isUnitHolderId` are that namespace's one place). */
+var boxRef = SMPRules.boxRef;
 function roleName(k){
   var r = ROLES.filter(function(x){ return x.key === k; })[0];
   return r ? r.name : k;
@@ -7343,9 +7876,9 @@ function unitGapOff(u){
    Anything that is not a function answers true, so no unit, capability or
    group moves. */
 function fnKoCounted(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return true;
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return true;
+  var f = FUNCTIONS[r.key];
   if (f && fnPlansInObjectives(f)) return true;
   return compOn(t, "keyobj");
 }
@@ -7574,6 +8107,38 @@ function newPersonReset(){
    the repaint any other change causes would otherwise throw away what is
    half typed. */
 var NEWMAINBU = "";
+/* The BU rename the platform refused, and what was typed when it did (§534.2).
+   Held rather than discarded, because the repaint that follows a refusal used
+   to put the old name back — so the correction had to be typed twice. */
+var MBWHY = null;
+/* ── AN ACT REFUSED AFTER ITS QUESTION WAS ALREADY OPEN (§534.2) ───────
+   Two panels in the product draw a refusal of their own when they open on
+   something that cannot be deleted — a function with capabilities under it, a
+   person something still points at. Both ALSO had a browser box, for the case
+   where the blocker appeared between the question opening and Yes being
+   pressed: the same refusal, a moment later, in another medium, and closing
+   the panel as it went.
+
+   The panels draw it now. This names which act was refused late, so the
+   sentence can say the one thing that is genuinely different about that
+   moment — not "cannot be deleted" but "was not deleted, since this was
+   asked" — and nothing else about either panel has to change. Cleared
+   whenever a question is opened or closed. */
+var REFUSEDLATE = null;
+/* The season whose removal was refused, so the row can say so under itself
+   rather than in a box over the page (§534.2). */
+var SEASWHY = null;
+/* The person whose retirement is being asked about, in the row's own corner
+   (§534.3) — PDEL's twin, for the act beside it in the same menu. */
+var PRET = null;
+/* The name being typed for a new supporting function, held in a global for
+   the reason NEWMAINBU is: the repaint that follows any other change on the
+   page would take a half-typed name with it (§534.3). */
+var NEWFN = "";
+/* Which line's × has been pressed, and the question it opened under that line
+   (§534.4). One at a time: pressing another × moves the question rather than
+   leaving two open, which is what a list of nine asks for. */
+var RMASK = null;
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
@@ -8982,7 +9547,7 @@ function personIdentified(p){
    row then reads "Strategy custodian · Care" twice and looks like a duplicate
    rather than two real roles over two different things. The kind is part of
    the answer, so it is part of the label. */
-/* ── THE TOP LEVEL IS CALLED WHAT THE CLIENT CALLS IT (§534) ───────────
+/* ── THE TOP LEVEL IS CALLED WHAT THE CLIENT CALLS IT (§558) ───────────
    `topword` has been a real terminology row since §404 — "The level at the
    top: the group, the company, or the client's own word" — and eight screens
    read it. The place-naming functions below were not among them: they said
@@ -9015,17 +9580,18 @@ function topWord(){
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
   if (!at || at === "group") return topWord();
-  if (String(at).indexOf("cap:") === 0) {
-    var cw = capById(String(at).slice(4));
-    return (cw ? cw.name : String(at).slice(4)) + " (" + L1("capability").toLowerCase() + ")";
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var cw = capById(r.key);
+    return (cw ? cw.name : r.key) + " (" + L1("capability").toLowerCase() + ")";
   }
-  if (String(at).indexOf("fn:") === 0) {
-    var f = FUNCTIONS[String(at).slice(3)];
-    return (f ? f.name : String(at).slice(3)) + " (function)";
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
+    return (f ? f.name : r.key) + " (function)";
   }
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? c.name : String(at).slice(3);
+  if (r.kind === "mid") {
+    var c = COMPANIES[r.key];
+    return c ? c.name : r.key;
   }
   return UNITS[at] ? UNITS[at].name : at;
 }
@@ -9039,7 +9605,7 @@ function roleWhereLabel(at){
    wording for the units and functions, because it is also the people
    workbook's vocabulary — the Unit column is written from it and read back
    against it (§65), so renaming it would leave every file downloaded before
-   today failing to match. §534 moved its word for the TOP LEVEL onto
+   today failing to match. §558 moved its word for the TOP LEVEL onto
    `topword` and that one case is safe for exactly one reason: `placeByLabel()`
    still accepts "the group" and "group" alongside the client's own word, so a
    file downloaded before today reads back unchanged. A rename anywhere else
@@ -9059,29 +9625,43 @@ function roleWhereLabel(at){
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
 function placeLabel(at){
-  if (!at || at === "group") return topWord();   /* §534: the client's own word */
+  if (!at || at === "group") return topWord();   /* §558: the client's own word */
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
      not the clash §65 guards (a unit and a FUNCTION of one name are two
      things a person is attached TO, and this is not), and adding the word
      everywhere would spend it on a case nobody has met. */
-  if (String(at).indexOf("cap:") === 0) {
-    var cc = capById(String(at).slice(4));
-    return cc ? navName(cc) : String(at).slice(4);
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var cc = capById(r.key);
+    return cc ? navName(cc) : r.key;
+  }
+  /* §553: a section of the company's own review is a place in the flow too,
+     and it is named by what it IS — the picker, the running order and the
+     deck's cover all read this one function, so naming it here is naming it
+     everywhere (§53.5). The company's word for its SWOT is the client's own
+     (§15.1), never the literal "Analysis". */
+  if (r.kind === "sec") {
+    if (r.key === "swot") {
+      var sw = "";
+      try { sw = String(SMPRules.swotTitle(GROUP, "group") || "").trim(); } catch (e) { sw = ""; }
+      return (sw || "Analysis") + " — the " + labelWord("topword", "group").toLowerCase() + "'s";
+    }
+    return "Foundation — the " + labelWord("topword", "group").toLowerCase() + "'s";
   }
   /* §481: a direction is a place in the company's flow, named by itself. */
-  if (String(at).indexOf("dir:") === 0) {
+  if (r.kind === "dir") {
     var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
-      return p && p.id === String(at).slice(4); })[0];
-    return dp ? dp.name : String(at).slice(4);
+      return p && p.id === r.key; })[0];
+    return dp ? dp.name : r.key;
   }
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? navName(c) : String(at).slice(3);
+  if (r.kind === "mid") {
+    var c = COMPANIES[r.key];
+    return c ? navName(c) : r.key;
   }
-  if (String(at).indexOf("fn:") === 0) {
-    var fk = String(at).slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     var nm = f ? navName(f) : fk;
     /* Asked of the units by their NAVIGATION name, because that is the name
        being shown — comparing against `.name` would keep the suffix on a
@@ -9164,28 +9744,30 @@ var SEAT_AT_GROUP = ["super", "smoteam", "gceo"];
 function grantPersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
   if (!p) return;
-  var at = where || "group";
+  var at = where || "group", r = boxRef(at);
   /* THE SEAT ROLES HELD OVER THE GROUP, named once (§89). SMO team joins
      Super user and Group CEO here: a seat is a property of the PERSON (§33),
      and adding it to the list is the whole of what "grant it" means. */
   if (SEAT_AT_GROUP.indexOf(roleKey) > -1) {
     p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
   } else if (roleKey === "cceo") {
-    p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
+    /* A company CEO's attachment is stored as the bare company key, so a
+       `co:<key>` address and a bare one both land on the key (§531). */
+    p.role = "cceo"; p.company = r.kind === "mid" ? r.key : at; p.unit = null;
   } else if (roleKey === "owner") {
     unitRolesFor(at).head = personKey; p.unit = at;
-  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+  } else if (r.kind === "cap" && (roleKey === "capowner" || roleKey === "custodian")) {
     /* §412: a capability's seats sit on the capability. The person is not
        ATTACHED to it -- a capability is not somewhere somebody works -- so
        their unit or function stays what it was. */
-    var cg = capById(at.slice(4));
+    var cg = capById(r.key);
     if (cg) cg[roleKey === "capowner" ? "head" : "custodian"] = personKey;
-  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
-    FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "custodian" && r.kind === "fn") {
+    FUNCTIONS[r.key].custodian = personKey; p.fn = r.key;
   } else if (roleKey === "custodian") {
     unitRolesFor(at).custodian = personKey; p.unit = at;
   } else if (roleKey === "fnhead") {
-    FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
+    FUNCTIONS[r.key].head = personKey; p.fn = r.key;
   } else if (SMPRules.isOwnLinesRole(roleKey)) {
     /* Neither floor role is granted (roleIsGrantable refuses both), but the
        attachment they are read off is the same one thing: which unit this
@@ -9195,21 +9777,21 @@ function grantPersonRole(personKey, roleKey, where){
 }
 function revokePersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
-  var at = where || "group";
+  var at = where || "group", r = boxRef(at);
   if (SEAT_AT_GROUP.indexOf(roleKey) > -1 || roleKey === "cceo") {
     if (p) { delete p.role; delete p.company; }
   } else if (roleKey === "owner") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
-  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
-    var cr = capById(at.slice(4)), fk2 = roleKey === "capowner" ? "head" : "custodian";
+  } else if (r.kind === "cap" && (roleKey === "capowner" || roleKey === "custodian")) {
+    var cr = capById(r.key), fk2 = roleKey === "capowner" ? "head" : "custodian";
     if (cr && cr[fk2] === personKey) delete cr[fk2];
-  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[at.slice(3)];
+  } else if (roleKey === "custodian" && r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && f.custodian === personKey) f.custodian = null;
   } else if (roleKey === "custodian") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].custodian === personKey) UNIT_ROLES[at].custodian = null;
   } else if (roleKey === "fnhead") {
-    var g = FUNCTIONS[at.slice(3)];
+    var g = FUNCTIONS[r.key];
     if (g && g.head === personKey) g.head = null;
   }
   /* contrib is p.unit, which is also how a person is FOUND — clearing it would
@@ -9254,15 +9836,16 @@ function personHeldRoles(key){
   });
 }
 function roleHolderAt(roleKey, at){
-  if (String(at).indexOf("cap:") === 0) {
-    var ch = capById(String(at).slice(4)) || {};
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var ch = capById(r.key) || {};
     return (roleKey === "capowner" ? ch.head : roleKey === "custodian" ? ch.custodian : null) || null;
   }
   if (roleKey === "owner")  return (UNIT_ROLES[at] || {}).head || null;
-  if (roleKey === "fnhead") return (FUNCTIONS[String(at).replace(/^fn:/, "")] || {}).head || null;
+  if (roleKey === "fnhead") return (FUNCTIONS[r.kind === "fn" ? r.key : r.at] || {}).head || null;
   if (roleKey === "custodian") {
-    return String(at).indexOf("fn:") === 0
-      ? (FUNCTIONS[at.slice(3)] || {}).custodian || null
+    return r.kind === "fn"
+      ? (FUNCTIONS[r.key] || {}).custodian || null
       : (UNIT_ROLES[at] || {}).custodian || null;
   }
   /* A seat is a property of the PERSON, so two people may hold it at once and
@@ -9851,9 +10434,10 @@ function attachPersonAt(p, at){
   if (!p) return;
   delete p.unit; delete p.fn; delete p.company;
   if (!at) return;
+  var r = boxRef(at);
   if (at === "group") p.unit = "group";
-  else if (String(at).indexOf("fn:") === 0) p.fn = String(at).slice(3);
-  else if (String(at).indexOf("co:") === 0) p.company = String(at).slice(3);
+  else if (r.kind === "fn") p.fn = r.key;
+  else if (r.kind === "mid") p.company = r.key;
   else p.unit = at;
 }
 /* Where the person's Main BU says they should be, which is not always where
@@ -9983,7 +10567,7 @@ function placeOptions(){
 function placeByLabel(name){
   var want = String(name == null ? "" : name).trim().toLowerCase();
   if (!want) return { at:null };
-  /* THE TOP LEVEL ANSWERS TO THREE NAMES, NOT ONE (§534). The screen now
+  /* THE TOP LEVEL ANSWERS TO THREE NAMES, NOT ONE (§558). The screen now
      writes the client's own word for it (`topword` — "the company" on a tenant
      whose top level is a company), and "the group" and "group" are kept
      BESIDE it rather than replaced: the Unit column is written from
@@ -9996,7 +10580,7 @@ function placeByLabel(name){
      THE THREE CANNOT COLLIDE, because `topword` names the top level and
      `placeOptions()` lists only units and functions — and if a client ever did
      call a unit "Group", this branch answers first and the exact-match below
-     never sees it. That is the pre-§534 behaviour for that name, unchanged. */
+     never sees it. That is the pre-§558 behaviour for that name, unchanged. */
   if (want === "the group" || want === "group" || want === topWord().toLowerCase()) return { at:"group" };
   var opts = placeOptions();
   var exact = opts.filter(function(o){ return o.label.toLowerCase() === want; });
@@ -10362,12 +10946,14 @@ function attentionQueue(){
 function roleAtWord(roleKey){
   var kinds = {};
   roleWheres(roleKey).forEach(function(w){
-    kinds[w.v === "group" ? "group"
-        : String(w.v).indexOf("fn:") === 0 ? "fn"
-        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+    /* §531: `top`, `fn` and `mid` are the three kinds this sentence has a word
+       for; everything else — a unit, a capability, a direction — reads as the
+       unit's word, which is the answer the chain here gave before. */
+    var k = boxRef(w.v).kind;
+    kinds[w.v === "group" ? "top" : (k === "fn" || k === "mid") ? k : "unit"] = 1;
   });
-  var WORD = { group:topWord(), unit:"a " + labelWord("unitword","group"),
-               fn:"a " + labelWord("fnword","group"), co:"a " + labelWord("division","group") };
+  var WORD = { top:topWord(), unit:"a " + labelWord("unitword","group"),
+               fn:"a " + labelWord("fnword","group"), mid:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";
   if (out.length === 1) return out[0];
@@ -10958,10 +11544,10 @@ function peopleFor(where){
   var here = [], rest = [];
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
-    var w = String(where || ""), cap = w.indexOf("cap:") === 0 ? capById(w.slice(4)) : null;
+    var r = boxRef(where), cap = r.kind === "cap" ? capById(r.key) : null;
     /* §412: a capability's nearest people are its holding function's. */
     var mine = cap ? !!(cap.fn && p.fn === cap.fn)
-      : w.indexOf("fn:") === 0 ? p.fn === w.slice(3)
+      : r.kind === "fn" ? p.fn === r.key
       : p.unit === where;
     (mine ? here : rest).push(p);
   });
@@ -11107,16 +11693,17 @@ function focusBands(key){
      (§130.5's own reason for reaching supporting functions in the first
      place). Both forms: pillars through the unit-shaped view, an overview and
      projects as one band of its own objectives. */
-  if (String(key).indexOf("cap:") === 0) {
+  var kr = boxRef(key);
+  if (kr.kind === "cap") {
     var cc = capOfTarget(key);
     if (!cc) return [];
     if (capPlansInPillars(cc)) return unitBands(capAsUnit(cc.id));
     return [{ band:cc.name, src:cc.name, items:cc.keyObjectives || [] }];
   }
-  /* The prefix test rather than `isFn()`, which is the shell's own local
-     helper and not in scope here. */
-  if (String(key).indexOf("fn:") === 0) {
-    var fk = String(key).slice(3), f = FUNCTIONS[fk];
+  /* `boxRef` rather than `isFn()`, which is the shell's own local helper and
+     not in scope here (§531 — it used to be the prefix, read by hand). */
+  if (kr.kind === "fn") {
+    var fk = kr.key, f = FUNCTIONS[fk];
     if (!f) return [];
     if (f.format === "pillars") return unitBands(fnAsUnit(fk));
     /* THE BAND IS THE CAPABILITY'S NAME, and no code is invented for it. A
@@ -11410,20 +11997,22 @@ function functionOf(key){ return FUNCTIONS[key] || null; }
    nothing. `checks/plan-builder.py` caught it, on a UNIT, which is the
    argument for running the whole suite rather than the file you edited. */
 function foundKeyFor(target){
-  var t = String(target || "");
+  var k = boxRef(target).kind;
   /* §404: a company's Foundation is the group's own strategy, drawn over the
-     company's record, so it is asked the group's key. */
-  if (t === "group" || t.indexOf("co:") === 0) return "g_found";
-  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
+     company's record, so it is asked the group's key. §531: an EMPTY target
+     shares the top layer's kind and has always been asked `u_found` here, so
+     the literal "group" is still the test for the first answer. */
+  if (String(target || "") === "group" || k === "mid") return "g_found";
+  return k === "fn" ? "k_found" : "u_found";
 }
 function koHolderById(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) {
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") {
     /* §326: through fnKoHolderWritable, not unitLikeWritable — the latter
        answers only for a function that plans in PILLARS, so on the other
        format an added objective was pushed nowhere and a removed one found
        nothing. The Overview is one page (§213) and its holder is one answer. */
-    var u = fnKoHolderWritable(s.slice(3));
+    var u = fnKoHolderWritable(r.key);
     if (!u) return null;
     return { list: u.keyObjectives, target: s };
   }
@@ -11439,13 +12028,15 @@ function capById(id){
    capability" in twenty places and would start answering with something that
    is not one. */
 function holderById(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) return fnOwnHolder(s.slice(3));
-  /* §405: a business unit's own holder. */
-  if (s.indexOf("u:") === 0) return unitOwnHolder(s.slice(2));
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") return fnOwnHolder(r.key);
+  /* §405: a business unit's own holder. `u:` is the HOLDER namespace, which
+     `boxRef` deliberately does not parse (§531), so it is asked of that
+     namespace's own two functions. */
+  if (isUnitHolderId(s)) return unitOwnHolder(subjKey(s));
   /* A capability answers to its bare id AND to its destination spelling, so a
      caller holding either asks one function (§53.5). */
-  return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
+  return capById(capKeyOf(s));
 }
 /* Who reaches a capability: the SMO and CEO see all of them; a function's own
    people see theirs. A unit head has no business in a capability at all. */
@@ -12278,17 +12869,19 @@ function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null
    rather than a shape for a function that plans in projects, because there is
    no unit-shaped thing there to return. */
 function unitLike(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   /* §334: a capability planned in pillars is drawn by the unit's own pages,
      for the reason a pillars function already is (§59) — a pillar is a pillar
-     whoever holds it. Asked FIRST, because `cap:` is not `fn:` and the bare
-     fallback below would hand back UNITS["cap:x"], which is undefined and
-     renders as a page with nothing on it. */
-  if (t.indexOf("cap:") === 0) return capAsUnit(t);
+     whoever holds it. §531: the ORDER this used to be written in was the whole
+     care of it — `cap:` had to be asked before the bare fallback or it handed
+     back UNITS["cap:x"], which is undefined and renders as a page with nothing
+     on it. One parse answers all five at once, so the order cannot be got
+     wrong again. */
+  if (r.kind === "cap") return capAsUnit(t);
   /* §428: the top layer's own plan, read as a unit. */
   if (t === "group") return topAsUnit();
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnAsUnit(t.slice(3));
+  if (r.kind === "fn") return fnAsUnit(r.key);
+  return UNITS[t] || null;
 }
 function deltaFor(key){
   var h = lastClose(); if (!h) return null;
@@ -12409,8 +13002,9 @@ function canReportRow(unitKey, x){
    function that holds it (§334). */
 function holderTarget(x){
   var t = String(x || "");
-  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("u:") === 0)
-    ? t : "fn:" + t;
+  /* Already addressed — as a function, as a capability, or as a unit's own
+     holder — or a bare function key from the old signature (§531). */
+  return (boxRef(t).area === "fn" || isUnitHolderId(t)) ? t : "fn:" + t;
 }
 function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
@@ -12502,15 +13096,15 @@ function canSpeakForDir(t){
 }
 function canSpeakFor(target){
   var t = subjKey(target);
-  if (String(target || "").indexOf("dir:") === 0) return canSpeakForDir(String(target));
+  if (boxRef(target).kind === "dir") return canSpeakForDir(String(target));
   /* §447: a direction's owner reports their own rows and never submits the
      company's report — that stays the office's and the CEO's (§428). */
   if (t === "group") return canReport("group") && SMPRules.mayReportTop(world(), viewer());
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
-    return canReportFn(t) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
-  }
-  return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
+  /* §531: `area` is the same pair of kinds this asked for by hand — and it is
+     the same word `onlyOwnLines` is then passed, so the two cannot drift. */
+  var area = boxRef(t).area;
+  if (area === "fn") return canReportFn(t) && !SMPRules.onlyOwnLines(world(), viewer(), area, t);
+  return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), area, t);
 }
 
 /* ── THE DOT ON THE PERFORMANCE TAB HAS TO MEAN SOMETHING (§69.9) ──
@@ -12537,11 +13131,11 @@ function canSpeakFor(target){
      nag somebody who has no control that would clear it. */
 function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   if (t && !planOn(t)) return false;
   /* §428: the top layer submits once it has a plan of its own. */
   if (t === "group") return topHasPlan() && !(REVIEW.submitted && REVIEW.submitted.group) && canSpeakFor("group");
-  if (t.indexOf("co:") === 0) return false;
+  if (r.kind === "mid") return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
@@ -12552,8 +13146,8 @@ function reportPending(target){
      never said *not submitted yet* and its Performance tab never wore the dot
      (§69), on the one subject whose whole page is somebody's project. The
      board asked for the report and the tab above it said nothing. */
-  var real = t.indexOf("cap:") === 0 ? !!capOfTarget(t)
-           : t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
+  var real = r.kind === "cap" ? !!capOfTarget(t)
+           : r.kind === "fn" ? !!FUNCTIONS[r.key] : !!UNITS[t];
   if (!real) return false;
   if (REVIEW.submitted && REVIEW.submitted[t]) return false;
   return canSpeakFor(t);
@@ -12756,7 +13350,8 @@ function myLinesHome(){
   if (!at) return "group";
   if (at === "group") return "group";
   if (UNITS[at]) return at;
-  if (String(at).indexOf("fn:") === 0 || String(at).indexOf("co:") === 0) return at;
+  var k = boxRef(at).kind;
+  if (k === "fn" || k === "mid") return at;
   return "group";
 }
 function myLinesHere(target){
@@ -12899,8 +13494,13 @@ function reportItems(u){
        broken — address by the identifier, label with the word — and it would
        fail invisibly on a tenant where the two happen to coincide. Found by
        pressing Next and watching the rail not move. */
+    /* §542: the rail that HOLDS this pillar, which on a split box is the
+       half its kind puts it in — not the half on screen, because this walk
+       runs outside any render. */
+    /* §556: and where Reporting draws both halves on one rail, it is that
+       rail — the Reporting bar's chip is the only reader of this key. */
     var place = { key:"p:" + (p.id || pi), label:code,
-                  rail:unitRailKey(u), code:pillarRailId(p) };
+                  rail:reportRailKey(u, p), code:pillarRailId(p) };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -13220,10 +13820,12 @@ function ownDraftShut(target, id){
    capability, and the mark §301 built for them was not drawn — the whole of
    §310's promise silently dead on the one page it is about, with nothing on
    the screen and nothing on the console (§96's family). */
-function areaOfTarget(target){
-  var t = String(target || "");
-  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
-}
+/* §531: and now it is not even a line of its own — `boxRef` carries the same
+   answer as `area`, which is what the server's three `isFn` sites and
+   `capArea` were taught to read at the same time. The name stays because it
+   is what twenty callers here ask by, and because the paragraph above it is
+   the reason this must be one answer and not two. */
+function areaOfTarget(target){ return boxRef(target).area; }
 function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
@@ -13957,6 +14559,22 @@ function mayDestroy(){ return SMPRules.mayDestroy(world(), viewer()); }
 function mayIssuePasswordTo(target){
   return SMPRules.mayIssuePasswordTo(world(), viewer(),
     typeof target === "string" ? personBy(target) : target);
+}
+/* ── MAY THIS SESSION LOOK THROUGH THIS ROW (§554) ─────────────────────
+   NOT asked of `viewer()` like everything else on this line, and the
+   difference is the whole point: every rule above answers about the person
+   being LOOKED AT, and this one answers about the person SIGNED IN. Taking
+   `viewer()` here would let a simulation widen itself — look through the
+   Super user once and the control that let you is suddenly offered on every
+   row (§185's rule: a simulation may only ever narrow).
+
+   sync.js holds it, because the save it must agree with is stamped there
+   (§42). No session — the offline copy, the file:// demo — lists everybody,
+   exactly as it always has. */
+function maySimulatePerson(target){
+  var p = typeof target === "string" ? personBy(target) : target;
+  if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return true;
+  return SYNC.maySimulatePerson(p);
 }
 /* Who a bulk password action would actually reach. The SCREEN counts them so
    it can say a true number; the SERVER picks the set (§35), so a stale screen
@@ -15202,8 +15820,11 @@ function gapMap(target, all, fillable){
                      : (canAuthor[w.plan] = mayAuthor(w.plan, target)))))
           n += extraOutcomeGaps(x);
       });
+      /* §542: and the SECTION that holds it, so the walk opens the tab the
+         pillar is actually drawn on. */
       entry("p:" + (p.id || i), pillarCode(u, i), n,
-            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: pillarRailId(p) });
+            { sec: pillarSecKey(u, p, w.sec), page: "plan",
+              rail: pillarRailKey(u, p), code: pillarRailId(p) });
     });
   };
   /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§334.13). A function's own work and
@@ -15253,8 +15874,9 @@ function gapMap(target, all, fillable){
       });
     });
   };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
+  var gr = boxRef(t);
+  if (gr.kind === "fn") {
+    var fk = gr.key, fo = functionOf(fk);
     if (fo && String(fo.format) === "pillars") {
       /* THE SAME OVERVIEW ENTRY A CAPABILITY FUNCTION GETS, because since
          §213 it is the same page, counted from the same field list (§53.5).
@@ -15267,7 +15889,7 @@ function gapMap(target, all, fillable){
       entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
       unitHalf(unitLike(t), FN_WORDS); return out; }
     holderHalf(fnHolders(fk));
-  } else if (t.indexOf("cap:") === 0) {
+  } else if (gr.kind === "cap") {
     /* §334.13: A CAPABILITY COUNTS ITS OWN GAPS. Stage 2 gave it a page, a
        band and a rail of its own, and this had a `fn:` branch and a unit
        branch and nothing else — so `cap:<id>` fell through to `UNITS[t]`,
@@ -15438,11 +16060,50 @@ function setKoThisYear(on){
   try { localStorage.setItem(KO_YEAR_KEY, SHOW_KO_THIS_YEAR ? "1" : "0"); } catch (e) {}
 }
 
+/* ── A PILLAR'S CODE COMES FROM ITS KIND (§541, spec 066 stage 3b b) ──────
+   Islam, 2026-10-15: *"the capability tab should stay as is and the coding is
+   c001 to c005"*.
+
+   THE NUMBER COUNTS WITHIN THE SET THAT SHARES ITS PREFIX. That is the whole
+   rule, and it is one sentence because the two cases fall out of it:
+
+     · THE COMPANY HAS TWO PREFIXES — D for a direction, C for a capability
+       (§482: *"capabilities take the C, directions another code"*). So a
+       direction is numbered among the directions and a capability among the
+       capabilities, and El Abd's five internal pillars read C001–C005 however
+       far down the one list they sit. Before this they would have read
+       D011–D015 the moment they joined it, which §535.10 forbids.
+
+     · A UNIT HAS ONE PREFIX for everything it holds (`codePrefix`: MB01,
+       RS02). One prefix, one set, so the number counts across the whole list
+       exactly as it always has. This matters more than it looks: six of the
+       worked example's ten units carry pillars marked Capability, and a rule
+       that numbered per KIND rather than per PREFIX would have renumbered
+       every one of them — MB03 becoming MB01 — on a client that has said
+       nothing and changed nothing. Measured before the rule was written.
+
+   SO THE GUARD IS THE PREFIXES, NOT THE KINDS. Where the internal prefix is
+   absent it falls back to the external one, the two are equal, and the
+   function returns exactly what it returned before §541 — which is every box
+   in the product but the company.
+
+   STILL DERIVED, NEVER STORED (§46.3). This changes what is SHOWN; `p.code`
+   is an identifier and nothing here writes one. The two places that DO mint a
+   code for a row — §447's fold of a unit onto the company plan — now mint it
+   after the row is in the list, so the row's own kind is readable; before,
+   the code was computed from an index one past the end, which could not see
+   the kind of the row it was for. */
 function pillarCode(u, i){
-  /* §482: the company's own directions are D001, D002… (Islam: capabilities
-     take the C, directions another code); everything else is unchanged. */
-  if (u.pillarPrefix) return u.pillarPrefix + String(i + 1).padStart(3, "0");
-  return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
+  var pre = u && u.pillarPrefix;
+  if (!pre) return ((u && u.codePrefix) || "") + String(i + 1).padStart(2, "0");
+  var capPre = u.pillarCapPrefix || pre;
+  if (capPre === pre) return pre + String(i + 1).padStart(3, "0");
+  /* `items[j]` is undefined past the end, which reads as not-a-capability and
+     so counts toward the external run — which is the right answer for the one
+     caller that asks for "the code the next row would take". */
+  var items = u.items || [], cap = SMPRules.pillarIsCap(items[i]), n = 0;
+  for (var j = 0; j <= i; j++) if (SMPRules.pillarIsCap(items[j]) === cap) n++;
+  return (cap ? capPre : pre) + String(n).padStart(3, "0");
 }
 
 /* ── A PROJECT IS THE FUNCTION'S PILLAR, SO IT IS CODED LIKE ONE (§51.3) ──
@@ -15487,13 +16148,14 @@ function projCode(owner, p){
   if (!p) return "";
   var t = String(owner || ""), c = isCapTarget(t) ? capById(capKeyOf(t)) : null;
   var list, pre;
-  if (t.indexOf("fn:") === 0) t = t.slice(3);
+  if (boxRef(t).kind === "fn") t = boxRef(t).key;
   /* §405: a unit's own projects are coded in the unit's letters (RS01), the
-     way its pillars are. */
-  if (t.indexOf("u:") === 0) {
-    var uo = ownUnit(t.slice(2));
+     way its pillars are. `u:` is the holder namespace, asked of its own two
+     functions rather than of `boxRef` (§531). */
+  if (isUnitHolderId(t)) {
+    var uo = ownUnit(subjKey(t));
     if (!uo) return "";
-    list = unitOwnProjects(t.slice(2)); pre = uo.codePrefix || "";
+    list = unitOwnProjects(subjKey(t)); pre = uo.codePrefix || "";
     var ui = list.map(function(x){ return x.id; }).indexOf(p.id);
     return ui < 0 ? "" : pre + String(ui + 1).padStart(2, "0");
   }
@@ -15742,13 +16404,21 @@ function topPrefix(){
 }
 function topAsUnit(){
   return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
-           navName:null, codePrefix:topPrefix(), pillarPrefix:"D",
+           /* §541: two prefixes, because the company's two kinds of pillar
+              are coded apart — D001 for a direction, C001 for a capability,
+              which is what El Abd's Capabilities tab reads today. */
+           navName:null, codePrefix:topPrefix(), pillarPrefix:"D", pillarCapPrefix:"C",
            items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
            keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
            swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,
            /* §466: the way it plans and, in projects, its projects — the view
               a unit's own holder reads (§405), so the function pages draw it. */
            format:topWay() === "projects" ? "projects" : undefined,
+           /* §540: and whether its pillars show as one list or as two — the
+              Structure step's own key, surfaced here so one reader answers
+              for the company and for a unit alike. `undefined` where it is
+              not set, so the box is the same shape it was (§50.6). */
+           pillarSplit:SMPRules.topSplit(GROUP) ? true : undefined,
            projects:topProjectsList(),
            active:true };
 }
@@ -15784,10 +16454,100 @@ function partMine(){
   var u = topAsUnit();
   return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
 }
+/* ── §540 · THE HALF OF A SPLIT BOX A PAGE IS DRAWING ────────────────────
+   The rule (`SMPRules.pillarsSplit`) says whether a box shows its pillars as
+   one list or as two; this says WHICH of the two is on screen, and it rides
+   beside §517's part filter rather than beside it as a second mechanism —
+   every list the product draws already asks `partFilter`/`partItems` and
+   honours what they say, so one hook splits the Plan tab, the rail, the
+   counts and the Reporting page together (§53.5).
+
+   A FILTER AND NEVER A FILTERED ARRAY, for §517's own recorded reason: a
+   pillar's displayed code is its POSITION in `u.items` (`pillarCode`) and the
+   pen writes back through that same index, so handing a page a shortened copy
+   would renumber every row and edit the wrong one. The halves skip; they
+   never renumber.
+
+   SET AROUND A RENDER, CLEARED AFTER IT. `drawHalf()` is the only way in and
+   restores whatever was there even when the renderer throws — the alternative
+   is a global somebody forgets to clear, and a stale one would silently hide
+   half of the next page drawn. */
+var PILLAR_HALF = "";
+function drawHalf(half, fn){
+  var was = PILLAR_HALF;
+  PILLAR_HALF = half;
+  try { return fn(); } finally { PILLAR_HALF = was; }
+}
+/* Whether THIS box is shown apart. The company answers through topAsUnit(),
+   which carries the Structure step's own key (§466's shape). */
+function boxSplit(u){ return SMPRules.pillarsSplit(u); }
+/* Does this box hold anything in the internal half? The question a tab asks
+   before it draws itself, because a heading over nothing is not an empty
+   state (§520.2, §45.2) — and today it is false for every box in every
+   client, which is why turning the setting on moves nobody yet. */
+/* §543 — AND IT IS WHAT *THIS VIEWER* REACHES, NOT WHAT THE BOX HOLDS.
+   Islam, looking at El Abd with the half eye on: *"viewing as osama I
+   shouldn't see the directions part at the top … for amr I shouldn't see the
+   capabilities tab as it has nothing for him there"*.
+
+   He is right and §540 asked the wrong question. It asked *does this box hold
+   an internal pillar*, which is true of El Abd for everybody — so a direction
+   owner narrowed to two directions was still offered a Capabilities tab with
+   nothing of theirs on it, and a capability's owner was shown a Directions
+   heading over the words *there is nothing to report against*. §45.2's rule
+   with the viewer left out of it: an empty state is not an answer to a
+   question nobody asked.
+
+   SO IT GOES THROUGH `partItems`, which is the list AS DRAWN — the half AND
+   the half eye, composed (§542). For the office, who is narrowed by neither,
+   that is every pillar of the half and the answer is what it was. For a part
+   owner it is their own, and a half holding none of theirs is not offered. */
+function boxHasHalf(u, half){
+  if (!u || !boxSplit(u)) return false;
+  return drawHalf(half, function(){ return partItems(u).length > 0; });
+}
+/* §556 — REPORTING DRAWS BOTH HALVES ON ONE RAIL WHERE THIS VIEWER REACHES
+   BOTH. Islam, of El Abd's company Reporting as the SMO: *"shall we merge the
+   directions and pillars for better usabiilty in one rail?"*. §542 drew a box
+   shown apart as two stacked sections there, each with its own rail and its
+   own open pane, so the second rail started below the first pane and two rows
+   were selected at once. Strategy keeps its two tabs; this is Reporting's
+   alone. One question, asked by the page and by the rows' jump keys alike
+   (§53.5), and false wherever the box is joined or the viewer reaches one half
+   — which is every box but El Abd's company page, for the office, today. */
+function reportOneRail(u){ return boxHasHalf(u, "dir") && boxHasHalf(u, "cap"); }
+/* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
+   headed with the client's word for a capability and its external half with
+   the word for a pillar, because the two tabs are the two words — that is
+   what §540's setting is for. Asked here rather than at each rail, heading
+   and empty state, so the page cannot call the same list two things
+   (§53.5). Joined, and everywhere outside a split box, it is the pillar
+   word exactly as it was. */
+function halfWord(u){
+  return (PILLAR_HALF === "cap" && boxSplit(u)) ? L("capability", "bu") : L("pillar", "bu");
+}
+function halfWord1(u){
+  return (PILLAR_HALF === "cap" && boxSplit(u)) ? L1("capability") : L1("pillar");
+}
+function halfFilter(u){
+  if (!PILLAR_HALF || !boxSplit(u)) return null;
+  var half = PILLAR_HALF;
+  return function(p){ return SMPRules.pillarInHalf(p, half); };
+}
+/* §540: BOTH REASONS A ROW MIGHT BE SKIPPED, ANSWERED ONCE. The half and the
+   half eye are independent — a narrowed direction owner looking at a split
+   company sees their own directions on the Directions tab and nothing on the
+   Capabilities one — so they compose rather than override. `null` when
+   neither applies, which is every client today and every page before §517. */
 function partFilter(u){
-  if (!(u && u.topLayer) || !partOnly()) return null;
-  var w = world(), v = viewer();
-  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+  var pf = null, hf = halfFilter(u);
+  if (u && u.topLayer && partOnly()) {
+    var w = world(), v = viewer();
+    pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  if (!pf) return hf;
+  if (!hf) return pf;
+  return function(p){ return pf(p) && hf(p); };
 }
 function partItems(u){
   var f = partFilter(u), list = (u && u.items) || [];
@@ -15831,7 +16591,7 @@ function buFoldIntoTop(){
       var acts = Array.isArray(u.actions) ? u.actions : [];
       if (!kos.length && !acts.length) return;
       var pid = mintRowId(GROUP.items, "group-P");
-      var dp = { id: pid, code: pillarCode(top, GROUP.items.length), name: u.name || "", sub: "",
+      var dp = { id: pid, code: "", name: u.name || "", sub: "",
                  kind: "", theme: "", owner: head ? head.name : "", measures: [], tactics: [],
                  fromUnit: k, fromId: "u:" + k };
       kos.forEach(function(o, i){
@@ -15855,7 +16615,12 @@ function buFoldIntoTop(){
         if (a.hide) t.hide = true;
         dp.tactics.push(t);
       });
-      GROUP.items.push(dp); moved++;
+      /* §541: coded AFTER it is in the list, so `pillarCode` can read the
+         row's own kind. Computed from an index one past the end it could
+         not, and a folded capability would have taken a direction's code. */
+      GROUP.items.push(dp);
+      dp.code = pillarCode(top, GROUP.items.length - 1);
+      moved++;
       archiveUnitPlan(u, "moved to the company page");
       return;
     }
@@ -15864,16 +16629,271 @@ function buFoldIntoTop(){
       if (GROUP.items.some(function(q){ return q && q.fromUnit === k && q.fromId === p.id; })) return;
       var c = clone(p);
       c.id = mintRowId(GROUP.items, "group-P");
-      c.code = pillarCode(top, GROUP.items.length);
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
       (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
-      GROUP.items.push(c); moved++; took = true;
+      /* §541: coded after the push, so a folded pillar marked Capability
+         takes a C and not the next D (see the fold above). */
+      GROUP.items.push(c);
+      c.code = pillarCode(top, GROUP.items.length - 1);
+      moved++; took = true;
     });
     if (took) archiveUnitPlan(u, "moved to the company page");
   });
   return moved;
+}
+/* ── §542 · A CAPABILITY BECOMES AN INTERNAL PILLAR OF THE COMPANY ────────
+   Spec 066 stage 3b, the move itself. Islam: *"a pillar is external and
+   internal pillars and they are the same like directions but internal
+   directions are called capabilities"*, and *"the capability is either on a
+   unit or it's on the company"*.
+
+   THIS IS THE PRODUCT'S OWN MIGRATION, NOT A SCRIPT'S (§100.3). The same
+   function runs in the rehearsal, in the check that proves the pages do not
+   move, and on the client — so there is one answer to *what does the move
+   do*, and the thing measured is the thing that runs.
+
+   IT REFUSES RATHER THAN GUESSES. A capability is a RICHER record than a
+   pillar: it may plan in projects, hold key objectives and a definition of
+   its own, name a function, and carry more than one inner pillar. None of
+   those is representable on a pillar, so each is a REFUSAL with a reason
+   rather than a silent loss, and the move is all or nothing — a half-moved
+   client is the worst state of the three. Measured on El Abd before this was
+   written: five capabilities, every one of them already exactly one pillar,
+   no definition, no key objectives, no projects, no function (§535.6).
+
+   THE INNER PILLAR'S ID IS KEPT. That is the whole safety of the move: every
+   figure, every snapshot, every history entry and every submitted report is
+   keyed on the row's id (§48), so a move that mints a new one silently drops
+   a cycle's reporting. `cap:cap3-P1` stays `cap:cap3-P1` in the company's
+   list, and nothing that points at it has to be found.
+
+   THE OWNER COMES OFF THE RECORD WHERE THE PILLAR HAS NONE. A capability's
+   seat is `head`, which holds a person's KEY; a pillar's `owner` holds their
+   NAME (`namedOn` matches by name, §33). On El Abd all five inner pillars
+   store an empty owner and three of the five records name a head, so without
+   this three capabilities would arrive ownerless and three people would lose
+   the rows they report.
+
+   AND IT SETS THE SPLIT (§540) IN THE SAME BREATH, because the one thing the
+   move must not do is change what anybody sees: the five rows join the
+   company's one pillar list, and the setting is what keeps them on their own
+   tab, reading Capabilities, exactly as they read now. */
+/* §544.6 — AND WHAT WANDER NEEDED, WHICH EL ABD DID NOT. Measured on
+   Wander Development's own working copy before any of this was written:
+   three capabilities, every one held by the Strategy Management Office, one
+   of them holding TWO inner pillars and one planning in projects. The move
+   refused all three, each for a different reason, which is the refusal
+   working — and then Islam answered all three:
+
+     · *"the capabilities are on the company level"* — so a record held by a
+       function is no longer a blocker. §544.13 finished this: asked straight
+       out where a function-held capability should land, Islam answered
+       **"on the company"**, and §7.1's other way (a pillar of the function
+       holding it) is reversed. There is nothing left to guess between, so
+       the office's statement is no longer needed either.
+     · Data Management's two pillars: *"two capability pillars"* — each
+       keeps its own name, measures and tactics. One capability may become
+       several; nothing is merged.
+     · Decision Making's project: *"a capability whose work is its
+       milestones"* — one pillar under the capability's own name, the
+       project's milestones as its tactics, timed by the quarter their
+       finish date falls in, exactly as §447.1 times an action.
+
+   WHAT STILL REFUSES: a capability with objectives of its own or a
+   definition of its own (nobody has said what either becomes), one holding
+   more than one project, one holding nothing at all, and a milestone with
+   a `covers` entered — a tactic has nowhere to put it and dropping it
+   silently is the one thing this must not do (§96.2). */
+function capFoldBlockers(){
+  var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  var out = [];
+  caps.forEach(function(c){
+    if (!c || !c.id) return;
+    var why = [], prs = c.projects || [];
+    if (capPlansInPillars(c)) {
+      if (!capItems(c).length) why.push("holds no " + L("pillar","bu").toLowerCase());
+      if (prs.length) why.push(prs.length + " " + L("project").toLowerCase() + " beside its " + L("pillar","bu").toLowerCase());
+    } else {
+      if (!prs.length) why.push("holds no " + L("project").toLowerCase());
+      else if (prs.length > 1) why.push("holds " + prs.length + " " + L("project").toLowerCase() + ", not one");
+      else {
+        /* §544.7 — AND WHAT ELSE HANGS OFF THE PROJECT. Wander's own
+           database answered a question its working copy had not been asked:
+           `Decision Making`'s one project carries FIVE DELIVERABLES beside
+           its five milestones, and the first rehearsal of this move carried
+           the milestones and dropped the deliverables without a word. A
+           pillar holds measures and tactics; a deliverable and an outcome
+           have nowhere to go until somebody says where, so they refuse.
+           §96.2 is the whole point: the move's promise is that nothing it
+           carries disappears, and a silent drop is worse than a refusal.
+
+           ISLAM ANSWERED THE DELIVERABLES, reading his own five: they are
+           all targets with an [X]% in them, so they become the capability's
+           KEY MEASURES, and the milestones — which are steps — become its
+           tactics. On a pillar, work is tactics and numbers are measures,
+           and that is what these two lists already are.
+
+           AN OUTCOME STILL REFUSES. It maps to a measure even more directly
+           than a deliverable does, and that is exactly why it is left: no
+           client holds one on a capability's project, so building it would
+           be a guess nothing could check (§113.8). The refusal says so. */
+        var o = (prs[0].outcomes || []).length;
+        if (o) why.push(o + " " + L("outcome").toLowerCase() + " with nowhere to go");
+        (prs[0].milestones || []).forEach(function(m){
+          if (m && String(m.covers || "").trim() && why.indexOf("a milestone covers something") < 0)
+            why.push("a milestone covers something");
+        });
+      }
+    }
+    if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
+    if (String(c.def || "").trim()) why.push("a definition of its own");
+    if (why.length) out.push({ id: c.id, name: c.name || "", why: why });
+  });
+  return out;
+}
+/* What the move WOULD do, row by row, without doing it. The rehearsal and
+   the before-and-after list are built from this, so what Islam signs off on
+   and what runs are the same list (§100.3). */
+function capFoldPlan(){
+  var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  var top = topAsUnit(), n = (GROUP.items || []).length, out = [];
+  /* §544.7: a capability the move REFUSES is not a row the rehearsal plans.
+     The two used to agree by construction, because the plan re-tested the
+     same conditions the refusals did; the reasons live in one place now and
+     the plan reads them, so a rehearsal cannot list a row the move would
+     not carry (§53.5). */
+  var blocked = {};
+  capFoldBlockers().forEach(function(b){ blocked[b.id] = true; });
+  caps.forEach(function(c){
+    if (!c || !c.id || blocked[c.id]) return;
+    var head = personBy(c.head), cust = personBy(c.custodian);
+    /* §544.6: one row per inner pillar — one capability may become several,
+       and each keeps its own name. A capability planning in projects becomes
+       ONE row under the capability's own name, its project's milestones the
+       tactics; the project's id is kept as the pillar's, so nothing keyed on
+       it has to be found (§48). */
+    if (capPlansInPillars(c)) {
+      var list = capItems(c), many = list.length > 1;
+      list.forEach(function(p, i){
+        out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c) + (many ? "." + (i + 1) : ""),
+                   name: p.name || c.name || "", at: n,
+                   owner: p.owner || (head ? head.name : ""),
+                   custodian: p.custodian || (cust ? cust.name : ""),
+                   measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+        n++;
+      });
+      return;
+    }
+    var pr = (c.projects || [])[0];
+    if (!pr) return;
+    out.push({ capId: c.id, pillarId: pr.id, projectId: pr.id, fromProject: true,
+               was: topCapCode(c), name: c.name || pr.name || "", at: n,
+               owner: pr.owner || (head ? head.name : ""),
+               custodian: cust ? cust.name : "",
+               measures: (pr.deliverables || []).length,
+               tactics: (pr.milestones || []).length });
+    n++;
+  });
+  /* The code each row will read, worked out over the list as it WILL be —
+     asked of `pillarCode` itself rather than counted here a second time
+     (§53.5), so the rehearsal cannot disagree with the page. */
+  var after = (GROUP.items || []).concat(out.map(function(r){
+    return { id: r.pillarId, name: r.name, kind: SMPRules.PILLAR_CAP }; }));
+  var asList = { pillarPrefix: top.pillarPrefix, pillarCapPrefix: top.pillarCapPrefix,
+                 codePrefix: top.codePrefix, items: after };
+  out.forEach(function(r){ r.becomes = pillarCode(asList, r.at); });
+  return out;
+}
+/* The move. Returns how many rows went, or -1 where something blocks it. */
+function capFoldIntoTop(){
+  if (capFoldBlockers().length) return -1;
+  var rows = capFoldPlan();
+  if (!rows.length) return 0;
+  if (!Array.isArray(GROUP.items)) GROUP.items = [];
+  var byId = {};
+  (GROUP.capabilities || []).forEach(function(c){ if (c && c.id) byId[c.id] = c; });
+  rows.forEach(function(r){
+    var c = byId[r.capId], p;
+    if (r.fromProject) {
+      /* §544.6 — A PROJECT BECOMES A PILLAR WHOSE TACTICS ARE ITS
+         MILESTONES (Islam's own pick). The project's id becomes the
+         pillar's and each milestone keeps its own id, so every figure,
+         snapshot and report keyed on them still matches (§48). A finish
+         date becomes the ONE quarter it falls in, the date kept on the row
+         beside it, exactly as §447.1 times an action. */
+      var pr = (c.projects || []).filter(function(x){ return x && x.id === r.projectId; })[0];
+      p = { id: pr.id, code: "", name: r.name, sub: "", kind: "", theme: "",
+            owner: "", measures: [], tactics: [] };
+      /* §544.7: the deliverables are the measures (Islam's own reading of
+         his five — they are targets, every one with an [X]% in it). Each
+         keeps its id. A deliverable reports Not started / In progress /
+         Delivered with a per-cent (§104); a measure reports a figure and a
+         progress, so Delivered arrives at 100 and In progress at its own
+         per-cent. One nobody has reported arrives unreported, which is all
+         five of Wander's. The TARGET is left blank on purpose: the [X] is
+         inside the name, and inventing a number here would be the move
+         writing a figure, which it never does. */
+      (pr.deliverables || []).forEach(function(dl, i){
+        var m = { id: dl.id || (pr.id + "-M" + (i + 1)), name: dl.name || "",
+                  dir: "\u2265", target: "", compile: "", actual: null, progress: null };
+        var ds = String(dl.status || "").toLowerCase();
+        if (ds === "delivered" || ds === "done") m.progress = 100;
+        else if (dl.pct != null && dl.pct !== "") m.progress = Number(dl.pct);
+        if (dl.note) m.note = dl.note;
+        p.measures.push(m);
+      });
+      (pr.milestones || []).forEach(function(m, i){
+        var t = { id: m.id || (pr.id + "-T" + (i + 1)), name: m.name || "", owner: m.owner || "",
+                  q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+        var mo = monthsOf(m.finish);
+        if (mo != null) t["q" + (Math.floor((mo % 12) / 3) + 1)] = 1;
+        if (m.finish) t.due = m.finish;
+        var st = String(m.status || "").toLowerCase();
+        if (st === "done" || st === "delivered") { t.status = "Done"; t.actual = 100; }
+        else if (st === "wip" || st === "in progress") {
+          t.status = "WIP";
+          if (m.pct != null && m.pct !== "") t.actual = Number(m.pct);
+        }
+        if (m.note) t.note = m.note;
+        p.tactics.push(t);
+      });
+      /* the record's own project list goes with it */
+      c.projects = (c.projects || []).filter(function(x){ return !x || x.id !== r.projectId; });
+    } else {
+      /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
+         own ids too, and an object the page already holds a handle on stays
+         the same object (§48). */
+      p = capItems(c).filter(function(x){ return x && x.id === r.pillarId; })[0];
+      if (!p) return;
+    }
+    p.name = r.name;
+    p.kind = SMPRules.PILLAR_CAP;
+    p.owner = r.owner;
+    if (r.custodian) p.custodian = r.custodian;
+    GROUP.items.push(p);
+  });
+  /* The records go only once every one of their pillars is in the list. */
+  GROUP.capabilities = (GROUP.capabilities || []).filter(function(c){
+    return !c || !c.id || !rows.some(function(r){ return r.capId === c.id; }); });
+  /* §540: and the company shows its pillars apart, so the tabs do not move. */
+  var st = SMPRules.structureOf(GROUP) ? clone(SMPRules.structureOf(GROUP)) : {};
+  st.top = st.top || {}; st.top.plan = st.top.plan || {}; st.top.plan.split = true;
+  /* §544.6 — AND THE COMPANY HAS TO BE SHOWING A PLAN, or the rows arrive
+     stored and invisible. Measured on a company that had never planned
+     anything of its own (Wander's): the three landed in `GROUP.items` and
+     the Strategy tab went on reading Foundation alone, because §428.2
+     starts the top layer's plan OFF and `pillar` is not in its components
+     until somebody ticks it. El Abd never showed this — its top already
+     carried both. Switched on here rather than left to be noticed (§61):
+     the move's whole promise is that nothing it carries disappears. */
+  delete st.top.plan.on;
+  if (!Object.keys(st.top.plan).length) delete st.top.plan;
+  st.top.on = (SMPRules.levelComponents(GROUP, "top") || []).slice();
+  if (st.top.on.indexOf("pillar") < 0) st.top.on.push("pillar");
+  GROUP.structure = st;
+  return rows.length;
 }
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
@@ -15891,9 +16911,9 @@ function fnWriteBack(fk, u){
    A projects or objectives function holds no unit-shaped view, which is why
    the Add and Remove handlers could not reach one through unitLikeWritable(). */
 function swotWritable(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (!f) return null;
     if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
     ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(f.swot[q])) f.swot[q] = []; });
@@ -15910,9 +16930,13 @@ function swotWritable(target){
    (§50.6); the writer mints it. */
 var COMPETE_NONE = Object.freeze({ values: Object.freeze([]) });
 function competeHolder(target){
-  var t = String(target || "");
+  var t = String(target || ""), k = boxRef(t).kind;
   if (t === "group") return GROUP;
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("co:") === 0) return null;
+  /* Only a unit and the top layer carry one (COMPETE_LEVELS in the shared
+     rules says the same thing from the other end). §531: an EMPTY target
+     shares the top layer's kind but has never answered GROUP here — the
+     literal above is still the test — and falls through to UNITS[""]. */
+  if (k === "fn" || k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){
@@ -15940,24 +16964,47 @@ function competeTidy(target){
 }
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return capWritable(t);
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return capWritable(t);
   if (t === "group") return topWritable();
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnWritable(t.slice(3));
+  if (r.kind === "fn") return fnWritable(r.key);
+  return UNITS[t] || null;
 }
 function fnKeyOfTarget(target){
-  var t = String(target || "");
-  return t.indexOf("fn:") === 0 ? t.slice(3) : null;
+  var r = boxRef(target);
+  return r.kind === "fn" ? r.key : null;
 }
 
 /* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
 function plansInPillars(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return capPlansInPillars(capOfTarget(t));
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return capPlansInPillars(capOfTarget(t));
+  if (r.kind === "fn") return fnPlansInPillars(FUNCTIONS[r.key]);
+  /* §542 — AND THE COMPANY ITSELF, WHICH THIS HAS NEVER ANSWERED FOR. The
+     top layer is not in `UNITS`, so `subjUnit("group")` is null and this
+     returned FALSE for a company planning in pillars — which sent
+     `subjectAsked("group")` down the holder branch to an empty list. The
+     visible cost, on El Abd today: its Reporting rail knows which figures
+     each direction still owes (`askedItems(topAsUnit())` has 42 rows) and
+     says nothing, because the one reader that would carry them to the rail
+     answers for every box in the product except this one. §61's fault — a
+     count with no route to what it counts — hidden behind a null lookup.
+
+     FOUND BY MEASURING STAGE 3b, not by reading: its capabilities DO carry
+     the alarm, because each is addressed as `cap:<id>` and that branch above
+     answers properly. So the move would have taken five red *Still to enter*
+     marks off the page and left the directions' silence in their place. It
+     is fixed here rather than reported and left, because leaving it is the
+     regression (§542's own requirement) — and the fix gives the directions
+     the mark they should always have had. STATED AS A CHANGE in the
+     before-and-after list, since it adds marks to five rows that had none.
+
+     `topWay()` and not `topHasPlan()`: the question is how the box plans,
+     not whether anything is in it. A company planning in projects answers
+     false here exactly as a projects unit does. */
+  if (r.kind === "top" && r.named) return topWay() === "pillars";
   /* §405: a unit plans in pillars unless it has chosen otherwise. */
-  if (t.indexOf("fn:") !== 0) { var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars"; }
-  return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
+  var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars";
 }
 /* And whether it is drawn by the objectives-and-actions pages (§342). A
    capability is deliberately NOT offered this format: Islam's word was about a
@@ -15966,10 +17013,10 @@ function plansInPillars(target){
    false for one rather than reading `capFormat`, which would silently accept a
    stored value nothing can set. */
 function plansInObjectives(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return false;
-  if (t.indexOf("fn:") !== 0) { var ou = subjUnit(t); return !!ou && unitFormat(ou) === "objectives"; }
-  return fnPlansInObjectives(FUNCTIONS[t.slice(3)]);
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return false;
+  if (r.kind === "fn") return fnPlansInObjectives(FUNCTIONS[r.key]);
+  var ou = subjUnit(t); return !!ou && unitFormat(ou) === "objectives";
 }
 
 function pillarCarrier(p){
@@ -17001,6 +18048,77 @@ function clearForNewCycle(){
    "1 person" / "2 people". Optional, so every existing call is unchanged —
    and it is here rather than at the call sites because this file already
    records "3 pillarss" as the cost of doing it by hand (§59). */
+/* ── ONE WAY TO WRITE A DATE (§537) ───────────────────────────────────────
+   The usability audit counted six spellings across the product: two spacings
+   of the same options object, "en-GB" hard-coded in two places and the
+   browser's locale everywhere else, and a bare `toLocaleString()`. So how a
+   date read depended on which screen you were standing on — and, wherever the
+   locale was the browser's, on whose machine you were standing at.
+
+   THE FIRST SWEEP FOUND SIX AND THERE WERE NINE. It searched for the
+   browser's formatters and walked past three day dates written out by hand
+   from a `["Jan","Feb",...]` array of their own — the history log's day
+   column, the history log's "set by X on Y", and the Copilot's deliverable
+   dates. Those are the ones this file now also answers; the array is gone
+   from all three. A spelling is a spelling whether a browser made it or a
+   loop did.
+
+   THE SHAPE IS ISLAM'S, and it is one shape: a day reads "5 Mar 26" — day
+   first, no leading zero, the month in three letters, the year in two
+   digits. It is written ONCE, in `DATE_DAY`, so changing it is changing one
+   line. The month picker's "Jul 26" is the same shape with the day taken
+   off, and `dayValue()`'s "30 Sep 2026" is NOT display and is left alone:
+   the platform reads the year back out of that string to do its arithmetic
+   (Islam, asked directly: *"don't touch the stored one"*).
+
+   THE LOCALE IS PINNED, and that is the decision rather than an oversight. A
+   browser set to en-US renders `{day, month:"short"}` as "Sep 30" and a bare
+   time as "09:00 AM" — so one screen would carry the platform's own "30 Sep"
+   beside a "Sep 30" it had just formatted. One of the two has to give, and
+   the authored strings are the ones this product has always shown.
+
+   A DAY, A TIME, AND A STAMP — and the day-with-time is COMPOSED from the
+   first two rather than being a fourth options object. Three formatter calls
+   exist in the whole product and the check counts them.
+
+   A VALUE THAT IS NOT A DATE COMES BACK EMPTY rather than as "Invalid Date" —
+   these are fed from stored strings, and the product's rule is that a value
+   it cannot read is left alone rather than rewritten into nonsense (§96.2). */
+var DATE_LOCALE = "en-GB";
+var DATE_DAY = { day:"numeric", month:"short", year:"2-digit" };
+var DATE_TIME = { hour:"2-digit", minute:"2-digit" };
+function dateOf(x){
+  /* NOTHING IS NOT A DATE, and the browser disagrees: `new Date(null)` is the
+     epoch and `new Date(0)` is a real moment, so a missing value came back as
+     "1 Jan" — the stored-value-rewritten-into-nonsense this is meant to stop,
+     arriving through the one input nobody tests. Caught by the check on its
+     first run, not by reading. */
+  if (x == null || x === "") return null;
+  var d = (x instanceof Date) ? x : new Date(x);
+  return isNaN(d.getTime()) ? null : d;
+}
+function dateDay(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleDateString(DATE_LOCALE, DATE_DAY) : "";
+}
+function timeOf(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleTimeString(DATE_LOCALE, DATE_TIME) : "";
+}
+/* A day with a time on it, for a line that says when something was taken.
+   Found late: the first sweep searched for `toLocaleString()` with empty
+   parens and walked straight past two calls that pass date options to it. */
+function dateAt(x){
+  var d = dateOf(x);
+  return d ? dateDay(d) + ", " + timeOf(d) : "";
+}
+/* The exact moment, on a hover and nowhere else. Deliberately a different
+   register from the day shape: this one is the log's precision, down to the
+   second, and nobody reads it off the screen alongside another date. */
+function dateStamp(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleString(DATE_LOCALE) : "";
+}
 function plural(n, word, many){
   return n + " " + (n === 1 ? word : (many || word + "s"));
 }
@@ -17067,9 +18185,9 @@ function archiveCapPlan(c, why){
    a company's `coFound`, or a unit's (a pillars function's through its view,
    written back the way every other writer does — §129, §232). */
 function foundationRecord(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   if (t === "group") return GROUP;
-  if (t.indexOf("co:") === 0) return coFoundWritable(t.slice(3));
+  if (r.kind === "mid") return coFoundWritable(r.key);
   return unitLikeWritable(t);
 }
 function foundationSnapshot(o){
@@ -17084,8 +18202,9 @@ function foundationIsEmpty(s){
 }
 function foundationName(target){
   var t = String(target || "");
+  var r = boxRef(t);
   if (t === "group") return labelWord("topword","group") || GROUP.org || "Group";
-  if (t.indexOf("co:") === 0) return (COMPANIES[t.slice(3)] || {}).name || t;
+  if (r.kind === "mid") return (COMPANIES[r.key] || {}).name || t;
   var u = unitLike(t);
   return (u && u.name) || t;
 }
@@ -17646,9 +18765,14 @@ function mintCapId(){
   });
   return "cap" + (n + 1);
 }
-function addCapability(fnKey){
+/* §544.13 — AND IT TAKES NO FUNCTION. Islam, asked whether the set-up should
+   still let the office put a capability under a function: **"no — remove
+   it"**. A capability is the company's, so a new one is the company's; `fn`
+   is minted null and stays readable only for the records that already carry
+   one (Meridian's), which stage 3b folds. */
+function addCapability(){
   var made = { id:mintCapId(), name:"New " + labelWord("capability","group"), def:"",
-               fn:fnKey || null, keyObjectives:[], projects:[] };
+               fn:null, keyObjectives:[], projects:[] };
   GROUP.capabilities.push(made);
   renumberCapability(made);
   return made;
@@ -17686,8 +18810,11 @@ function promoteToCapability(fnKey, ids, name){
   var own = fnOwnHolder(fnKey);
   if (own) archiveCapPlan(own, "before " + plural(mv.projects.length, L1("project"), L("project")) +
     " became \u201c" + (String(name || "").trim() || "a capability") + "\u201d");
+  /* §544.13: the projects leave the function and the capability that
+     receives them is the COMPANY'S, not the function's — which is what
+     promoting them means now. The projects keep their ids (§232). */
   var made = { id:mintCapId(), name:String(name || "").trim() || "New " + labelWord("capability","group"),
-               def:"", fn:fnKey, keyObjectives:[], projects:mv.projects.slice() };
+               def:"", fn:null, keyObjectives:[], projects:mv.projects.slice() };
   mv.projects.forEach(function(p){
     var i = f.projects.indexOf(p);
     if (i > -1) f.projects.splice(i, 1);
@@ -17715,11 +18842,14 @@ function promoteToCapability(fnKey, ids, name){
    no help: a project's code has always been its position across the whole
    FUNCTION and not inside its box (§310), so they close up on their own and
    nothing a person reads is renamed. */
+/* §544.13 — EVERY OTHER CAPABILITY IS A SIBLING. This grouped them by the
+   function holding them and answered NOTHING for a capability holding none,
+   which since Islam's *"the company only"* is every capability — so the
+   Remove dialog offered no destination at all and could only delete the
+   work. They are all the company's; they are all siblings. */
 function capSiblings(c){
-  if (!c || !c.fn) return [];
-  return GROUP.capabilities.filter(function(x){
-    return x && x.id !== c.id && x.fn === c.fn;
-  });
+  if (!c) return [];
+  return GROUP.capabilities.filter(function(x){ return x && x.id !== c.id; });
 }
 /* What removing it would move, so the dialog can say so: its own key
    objectives, and every figure inside every project it holds. */
@@ -17784,7 +18914,13 @@ function removeCapability(id, moveToId){
      so it is resolved as a HOLDER and through the WRITING half — a reader
      hands out a frozen empty and the move would push into it. */
   var to = moveToId ? holderByIdWritable(moveToId) : null;
-  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
+  /* §544.13: `to.fn !== c.fn` refused every move the moment a capability
+     stopped having a function — including to a sibling, which is now any
+     other capability. What the guard is for survives in two halves: never
+     into itself, and a FUNCTION destination only for a record that is that
+     function's own. */
+  if (to && to.id === c.id) return false;
+  if (to && to.own && to.fn !== c.fn) return false;
   archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
     "\u201d was removed");
   /* §326: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the
@@ -17952,7 +19088,7 @@ function ownUnit(k){ return k === "group" ? topAsUnit() : UNITS[k]; }
 function subjUnit(t){
   if (String(t || "") === "u:group") return topAsUnit();
   var s = subjKey(t);
-  return (s.indexOf("fn:") === 0 || s.indexOf("cap:") === 0) ? null : (UNITS[s] || null);
+  return boxRef(s).area === "fn" ? null : (UNITS[s] || null);
 }
 function unitActions(k){
   var u = ownUnit(k);
@@ -18009,8 +19145,11 @@ function unitHolders(k){ var h = unitOwnHolder(k); return h ? [h] : []; }
    projects may hold a capability planned in pillars and neither page does two
    jobs. Absent reads as "projects", which is every capability that exists
    today (§50.6: a default is an absence, so nothing is migrated). */
-function isCapTarget(t){ return String(t || "").indexOf("cap:") === 0; }
-function capKeyOf(t){ var s = String(t || ""); return s.indexOf("cap:") === 0 ? s.slice(4) : s; }
+/* §531: both through the one parse. `capKeyOf` keeps answering a BARE id with
+   itself — a capability is addressed either way and thirteen callers hold
+   whichever they were given (§53.5) — so it reads `kind` rather than `key`. */
+function isCapTarget(t){ return boxRef(t).kind === "cap"; }
+function capKeyOf(t){ var r = boxRef(t); return r.kind === "cap" ? r.key : String(t || ""); }
 function capOfTarget(t){ return isCapTarget(t) ? capById(capKeyOf(t)) : null; }
 function capFormat(c){ return (c && c.format === "pillars") ? "pillars" : "projects"; }
 function capPlansInPillars(c){ return capFormat(c) === "pillars"; }
@@ -18114,10 +19253,10 @@ function fnKoHolderWritable(fk){
   return fnPlansInPillars(f) ? unitLikeWritable("fn:" + fk) : fnOwnHolderWritable(fk);
 }
 function holderByIdWritable(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) return fnOwnHolderWritable(s.slice(3));
-  if (s.indexOf("u:") === 0) return unitOwnHolderWritable(s.slice(2));
-  return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") return fnOwnHolderWritable(r.key);
+  if (isUnitHolderId(s)) return unitOwnHolderWritable(subjKey(s));
+  return capById(capKeyOf(s));
 }
 /* The other half of that pair, and a no-op for a capability, which IS the
    stored object. A function's holder is a fresh wrapper on every call, so
@@ -18127,16 +19266,17 @@ function holderWriteBack(id, h){
   var s = String(id || "");
   /* §405: a unit's holder is a wrapper too, so the same rule. */
   if (h && s === "u:group") { GROUP.topProjects = h.projects; return; }
-  if (h && s.indexOf("u:") === 0) {
-    var uu = UNITS[s.slice(2)];
+  if (h && isUnitHolderId(s)) {
+    var uu = UNITS[subjKey(s)];
     if (!uu) return;
     if (unitFormat(uu) === "objectives") uu.actions = h.actions;
     else if (unitFormat(uu) === "projects") uu.projects = h.projects;
     uu.keyObjectives = h.keyObjectives;
     return;
   }
-  if (!h || s.indexOf("fn:") !== 0) return;
-  var f = FUNCTIONS[s.slice(3)];
+  var r = boxRef(s);
+  if (!h || r.kind !== "fn") return;
+  var f = FUNCTIONS[r.key];
   if (!f) return;
   /* §342: the holder is a WRAPPER, so every array a restore assigned has to
      be written back or it is thrown away one line later — the trap §326
@@ -20432,6 +21572,67 @@ function mintPlanIds(u, rows){
    prefix to read, because the file carries neither. What remains is whether
    each row can be placed \u2014 a measure whose pillar was never typed \u2014 and
    whether the few coded values are ones the platform knows. */
+/* ── AN OWNER FROM THE WORKBOOK IS CHECKED AGAINST THE REGISTER (§551) ──
+   The screens have picked their owners from the register since §130.7. The
+   WORKBOOK never did: five sheets across the two plan files carry an Owner
+   column, the file holds 22 validations and not one of them was Owner, so
+   anybody could type any name into a cell and import it. That is the widest
+   way a name matching no real person gets into a plan, and the likeliest
+   origin of El Abd's *"Tamer Abdelhamid"* against the register's *"Tamer
+   Abdelhameed"* (§542.6).
+
+   REFUSED, NOT FLAGGED, AND THAT IS ISLAM'S CHOICE FOR THIS ONE SURFACE.
+   Shown both shapes, he took the dropdown with a refusal on import: *"On
+   import: a name not on the list is refused, and the message names the row
+   and the name."* The screens flag instead, and the two are not in conflict —
+   on a screen the name is already IN the plan and the only thing left is to
+   see it; at an import it is not in yet, and the cheapest moment to stop a
+   wrong name is before it lands.
+
+   IT ASKS `ownerKnownSet`, THE SAME QUESTION THE DROPDOWN AND THE FLAG ASK
+   (§53.5), so a name cannot be refused here and offered there.
+
+   THE WORDS ARE `validatePlan`'s OWN, not a new kind of complaint: a theme
+   that is not one of the themes already reads 'theme "X" is not one of A, B'
+   at 'row N — name'. This is that sentence for a person.
+
+   NOT COVERED, and named rather than left as an absence (§54.5): the
+   Collaborators columns. They are picked from this same register on screen
+   and are still free text in the workbook, so the identical hole is open one
+   column over. It is not fixed here because owners are what was asked for,
+   and widening a change past its ask is how a fix becomes unreviewable. */
+function ownerProblems(rows){
+  if (typeof ownerStrays !== "function" || typeof ownerKnownSet !== "function") return [];
+  var known = ownerKnownSet(), out = [];
+  /* ── COLLABORATORS TOO, AND NAME BY NAME (§551.1) ────────────────────
+     Islam: *"fix the collaborators too."* The hole was the identical one a
+     column over, and the fix is this function reading one more field — not a
+     second validator, because a second one would be a second answer to "is
+     this a real person" (§53.5).
+
+     THE MESSAGE SAYS WHICH FIELD, because a row can be wrong in both at once
+     and "is not in the register" on its own would not say where to look.
+
+     AND THERE IS NO DROPDOWN FOR IT IN EXCEL, which is a limit of the format
+     rather than a decision: a data validation list validates ONE value per
+     cell, and a collaborator cell holds a comma-separated list. Offering the
+     dropdown would mark every multi-name cell invalid, so the file guides
+     instead of guarding — the Owners sheet §551 put in both workbooks is the
+     list to copy from, and the refusal below names it. */
+  var fields = [["owner", "owner"], ["collaborators", "collaborator"]];
+  (rows || []).forEach(function(r, n){
+    if (!r) return;
+    var at = "row " + (n + 2) + (r.name ? " \u2014 " + r.name : "");
+    fields.forEach(function(f){
+      ownerStrays(r[f[0]], known).forEach(function(bad){
+        out.push({ at:at,
+          msg:f[1] + ' "' + bad + '" is not in the register \u2014 pick a name from the ' +
+              'Owners sheet, or add them to the register first' });
+      });
+    });
+  });
+  return out;
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -20475,6 +21676,7 @@ function validatePlan(u, rows){
     if ((r.type === "MEASURE" || r.type === "NORTHSTAR") && !r.value)
       notices.push({ at:at, msg:"no target \u2014 recorded, not scored" });
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 
@@ -21358,6 +22560,7 @@ function validateCapPlan(c, rows){
           " — saved as entered; either the timeline moves or the overrun stands" });
     }
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 
@@ -21947,7 +23150,10 @@ function monthNums(start){
 var DIRS = ["\u2265", "\u2264"];
 /* §276: the workbook validates the list the pen offers, read from one place. */
 var COMPILES = SMPRules.COMPILES;
-var KINDS = ["Direction", "Capability"];
+/* §540: the two kinds are the shared rule's now, read here exactly as
+   COMPILES is above — the workbook's validation, the pen's picker and the
+   platform's own "is this one internal" test are one list (§53.5). */
+var KINDS = SMPRules.PILLAR_KINDS;
 var YESNO = ["Yes", "No"];
 
 /* A theme is chosen by NAME, never by its code. The codes (OT, VC, DIV) are
@@ -22013,6 +23219,48 @@ function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
+/* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
+   Islam: *"all the owners shouldn't be written by hand and only be selected
+   from a list from the registr in a drop down serachable list."* The screens
+   have done that since §130.7. This file never did: five sheets across the
+   two plan workbooks carry an Owner column — Pillars and Tactics in a unit's
+   file, Projects, Actions and Milestones in a function's — and of the 22
+   validations in them not one was Owner. A spreadsheet is the widest door
+   into a plan, so it was the widest way a name matching no real person got
+   in, and the likeliest origin of El Abd's "Tamer Abdelhamid" (§542.6).
+
+   `from` AND NOT `list`, FOR THE REASON THE WRITER ALREADY REFUSES: 33 names
+   is far past Excel's 255-character inline limit, where a dropdown is
+   silently ignored. That is the fault §67.5 recorded of the Official BU list,
+   so this takes the route that file took.
+
+   AND NO SHEET AND NO DROPDOWN WHEN THE REGISTER IS EMPTY, which is §380's
+   trap exactly: an EMPTY list still applies, and with `showErrorMessage` on
+   it refuses every value there is — the column could be neither picked from
+   nor typed into, and a template nobody can fill in is worse than one that is
+   merely unguarded. The writer cannot catch this for us, and says so: it
+   leaves a `from` range alone because "whether that sheet has anything on it
+   is not knowable from here." Here it IS knowable, so it is asked.
+
+   THE SHEET IS NEVER DROPPED, which matters because `capPlanWorkbook` drops
+   whole sheets per format: five validation ranges point at Owners, and §65's
+   rule is that a range on a missing sheet is worse than none. It is not in
+   any `drop` list and must not be put in one. */
+function ownerListNames(){
+  return (typeof ownerKnownSet === "function") ? ownerKnownSet().list : [];
+}
+function OWNERS_RANGE(n){ return "Owners!$A$2:$A$" + (n + 1); }
+function ownersSheet(names){
+  return names.length ? [{ name:"Owners", widths:[34],
+    head:["Every name a plan may be owned by"],
+    rows:names.map(function(n){ return [n]; }) }] : [];
+}
+function ownerDV(range, names){
+  return names.length ? [{ range:range, from:OWNERS_RANGE(names.length),
+    error:"Choose a name from the Owners sheet. If somebody is missing, add them " +
+          "to the register first \u2014 a name typed here is refused at the upload." }] : [];
+}
+
 /* ── The Read me sheet ────────────────────────────────────────────────────
    The template is GENERIC: the same file whichever unit is being planned, and
    nothing in it names a unit except one cell. B2 is a dropdown of the tenant's
@@ -22034,7 +23282,18 @@ function readme(kind, pickLabel, pickList){
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
        ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
@@ -22140,6 +23399,7 @@ function planSubjectNames(){
 
 function planWorkbook(u){
   var themes = themeNames();
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var units = unitSuggestions();
   var picked = u ? u.name : "";
 
@@ -22171,7 +23431,7 @@ function planWorkbook(u){
 
      A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
      validation range — and that is asserted rather than assumed. */
-  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+  var isFn = !!(u && boxRef(u.ukey).kind === "fn");
 
   return [
     readmeSheet]
@@ -22279,7 +23539,7 @@ function planWorkbook(u){
         .concat(yr ? ["Years"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
-                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
+                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }].concat(ownerDV("D2:D60", owners)),
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
         .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : [])
         .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
@@ -22336,7 +23596,7 @@ function planWorkbook(u){
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
                    { range:"G2:G400", list:COMPILES, soft:true },
                    { range:"J2:M400", list:YESNO },
-                   { range:"N2:N400", list:YESNO, soft:true }],
+                   { range:"N2:N400", list:YESNO, soft:true }].concat(ownerDV("H2:H400", owners)),
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "",
@@ -22418,7 +23678,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }];
-  })());
+  })()).concat(ownersSheet(owners));
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -22922,7 +24182,18 @@ function capReadme(kind, capNames, picked, opts){
        ["Dropdowns", objOnly
          ? "Direction and Compile are lists. Unit suggests rather than insists: type your own if it is not offered."
          : "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
-       ["Owners", "Type the person's name."],
+       /* §551: THIS LINE SAID "Type the person's name." It cannot say that any
+          more — the Owner column is a dropdown of the register and a typed
+          name is refused at the upload, so the old instruction told you to do
+          the one thing the file now rejects (§61's trap, in a Read me). */
+       ["Owners", "Pick the name from the dropdown. It lists everybody in the register, which is " +
+                  "also the Owners sheet at the end — a name that is not on it is refused when you " +
+                  "upload. If somebody is missing, add them to the register first."],
+       /* §551.1: and the one place the product has to ASK rather than guard,
+          said plainly instead of left for somebody to discover at the upload. */
+       ["Collaborators", "A list, so Excel cannot offer a dropdown for it — one cell, several " +
+                  "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
+                  "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
        [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
       .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
@@ -22991,8 +24262,9 @@ function impSubjectFormat(v){
   /* §405: a business unit that plans in projects or in objectives and
      actions downloads the function's file for that way. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && fnPlansInObjectives(f)) return "objectives";
   }
   return "projects";
@@ -23001,11 +24273,11 @@ function impSubjectFormat(v){
    resolves the one it was handed — or the two disagree about what `fn:finance`
    means and a file downloads and will not come back (§22). */
 function impHolderFor(v){
-  var t = String(v || "");
-  if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  var t = String(v || ""), r = boxRef(t);
+  if (r.kind === "cap") return capById(r.key);
   /* §405: a unit that is not planned in pillars is its own holder. */
   if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
 
@@ -23133,6 +24405,7 @@ function projectSubjectNames(fmt){
    the file does not carry is a column the plan LOSES (§22). */
 function capPlanWorkbook(c, opts){
   var o = opts || {};
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var names = projectSubjectNames(o.fmt);
   var units = unitSuggestions();
   var sheets = [
@@ -23184,7 +24457,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "Repeats"],
       validations:[{ range:"E2:E100", list:TIMELINES },
                    { range:"H2:H100", list:["No"].concat(REPEAT_MONTHS.map(repeatLabel)),
-                     soft:true }],
+                     soft:true }].concat(ownerDV("C2:C100", owners)),
       rows:(c.projects || []).map(function(p){
         return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
                 p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "",
@@ -23242,7 +24515,7 @@ function capPlanWorkbook(c, opts){
        (§22). */
     { name:"Actions", widths:[44, 26, 14, 9],
       head:["Action", "Owner", "Due", "Hidden"],
-      validations:[{ range:"D2:D400", list:YESNO, soft:true }],
+      validations:[{ range:"D2:D400", list:YESNO, soft:true }].concat(ownerDV("B2:B400", owners)),
       rows:(c.actions || []).map(function(a){
         return [a.name, a.owner || "", a.due || "",
                 SMPRules.isHidden(a) ? "Yes" : ""];
@@ -23255,7 +24528,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                   { range:"G2:G400", list:YESNO, soft:true }].concat(ownerDV("D2:D400", owners)),
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
           acc.push([p.name, m.name, m.covers || "", m.owner || "",
@@ -23264,7 +24537,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ]);
+  ]).concat(ownersSheet(owners));
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own
@@ -24292,7 +25565,7 @@ function pptxCover(orgLine, name, subLine){
    which is the whole point of that reader existing (§61). */
 function pptxUnitSlides(u, kicker){
   var C = pptxColors(), slides = [];
-  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", u.name,
     "Strategy plan — as agreed, no reported figures · " + today));
 
@@ -24390,7 +25663,7 @@ function pptxUnitSlides(u, kicker){
    product is where a project's inside lives. */
 function pptxFnSlides(fk){
   var f = FUNCTIONS[fk], C = pptxColors(), slides = [];
-  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", f.name,
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){
@@ -24544,17 +25817,17 @@ function pptxPackage(slides, title, media){
 
 /* ── The one door the button calls ──────────────────────────────────── */
 function planPptxName(target){
-  var t = String(target || "");
-  var name = t.indexOf("fn:") === 0
-    ? (FUNCTIONS[t.slice(3)] || {}).name : (UNITS[t] || {}).name;
+  var t = String(target || ""), r = boxRef(t);
+  var name = r.kind === "fn"
+    ? (FUNCTIONS[r.key] || {}).name : (UNITS[t] || {}).name;
   return (name || "Plan") + " — Strategy plan.pptx";
 }
 
 function buildPlanPptx(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   var slides;
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
                                  : pptxFnSlides(fk);
   } else {
@@ -25422,6 +26695,56 @@ function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
+/* ── REMOVING A LINE: the question under it (§534.4) ───────────────────────
+   Nine controls across six screens — a key objective, a theme, a capability's
+   objective, a clause of Who we are, a SWOT line, a value on How we compete,
+   and the revenue tree's route, period and driver — asked ONE sentence in the
+   browser's box. The box covers the list it is asking about and never says
+   which line of it is going, which is the whole of what §186 asks a
+   confirmation to do.
+
+   Islam picked B of two drawn (design-mockups/remove-a-line/): the line stays
+   where it is and readable, and the question opens under it. The cost is
+   known and accepted — the list grows by a strip as you press, so what is
+   below moves.
+
+   THREE FUNCTIONS, NOT NINE COPIES. The two words and the closing sentence
+   have to be identical in nine places, and nine copies is how they stop being
+   (§53.5). What differs per site is only the QUESTION, because three of the
+   nine take more than the line and have always said so.
+
+   THE STRIP'S Remove CARRIES THE SAME ATTRIBUTE THE × DOES, plus `rmnow`. So
+   the handler that was already bound to the × is bound to both, resolves the
+   row from its dataset exactly as before (§48.2), and the only thing that
+   tells the two presses apart is which one of them asks. Nothing new is wired
+   and no handler learns a second way in. */
+function rmAsking(attr, val){
+  return !!(typeof RMASK !== "undefined" && RMASK && RMASK.t === attr + ":" + val);
+}
+/* The closing sentence lives HERE and not in any caller, so it cannot come to
+   differ between the nine. */
+function rmStripInner(attr, val, say){
+  return '<div class="rmask"><span class="q">' + say +
+    ' This cannot be undone here.</span>' +
+    '<button class="rmkeep" data-rmkeep="1">Keep</button>' +
+    '<button class="rmgo" data-' + attr + '="' + esc(val) + '" data-rmnow="1">Remove</button></div>';
+}
+/* Under a field, in a list, a cell or a definition — anywhere that is not a
+   table row. */
+function rmStrip(attr, val, say){
+  return rmAsking(attr, val) ? rmStripInner(attr, val, say) : "";
+}
+/* And inside a table, where a block between two rows is not markup a browser
+   will keep: it becomes a row of its own, spanning the columns. */
+function rmStripRow(attr, val, say, cols){
+  return rmAsking(attr, val)
+    ? '<tr class="rmaskrow"><td colspan="' + cols + '">' +
+      rmStripInner(attr, val, say) + '</td></tr>'
+    : "";
+}
+/* The class that marks the line being asked about — the half the browser's box
+   could never do, since it said "this line" over a list of nine. */
+function rmMark(attr, val){ return rmAsking(attr, val) ? " rmasking" : ""; }
 function band(v){ return bandOf(v).key; }
 /* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§154) ────────────────────
    §38.4's rule, applied where it had never been: "a colour that works as a
@@ -26133,7 +27456,8 @@ function outcomeEdit(t, set, pendCls, fillOnly){
       : selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
                  function(v){ setOr(t, "outDir", v); }) +
         selectOr("plan", t.outCompile || "", [""].concat(SMPRules.COMPILES), "",
-                 function(v){ setOr(t, "outCompile", v); })) +
+                 function(v){ setOr(t, "outCompile", v);
+                              monthlyAfterCompile(t, "outMonthly")(); })) +
     '</div>';
 }
 /* `setTargetUnit` is written against a measure's `target`/`target3y` pair; the
@@ -26877,11 +28201,17 @@ function companyPresentMenu(){
   if (!office && !mine.length) return "";
   var items;
   if (office) {
-    var slides = canSpeakFor("group")
-      ? '<button role="menuitem" data-picedit="unit" data-pickey="group">Manage slides' +
-          (pslidesOf("group").length ? ' <span class="pill kind">' + pslidesOf("group").length + '</span>' : '') +
-          '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-      : "";
+    /* ── ONE DOOR, NOT TWO (§556.1) ──────────────────────────────────
+       Islam, of the menu after §556: *"why do we still have manage
+       slides?"* Because the press above used to open the projector and
+       this opened the editor. It opens the editor now — the same screen,
+       the same slides, the same Play — so this is the second control onto
+       one act that §556 exists to remove (§24, §87).
+
+       NOTHING IS LOST WITH IT. Adding and arranging picture slides is
+       what that screen does; it is now reached by pressing Present, and
+       anybody who cannot edit a deck never saw this entry either. */
+    var slides = "";
     var dl = SMPRules.mayDownloadPlan(world(), viewer(), "group")
       ? '<button role="menuitem" data-dlpptx="group">Download the plan' +
         '<span class="dlsub">The plan as editable slides (.pptx) &mdash; no reported figures</span></button>'
@@ -26890,24 +28220,29 @@ function companyPresentMenu(){
       ? '<button role="menuitem" data-master="1">Master presentation' +
         '<span class="dlsub">Directions, capabilities and functions in order, with timers; the company last</span></button>'
       : "";
-    items = '<button role="menuitem" data-present="group">Present the whole company' +
-        '<span class="dlsub">The short company review: foundation, analysis, directions, performance</span></button>' +
+    /* ── ONE WAY IN (§556) ───────────────────────────────────────────
+       Islam: *"you should remove the one 'present the whole company'. The
+       first button should be master presentation, where it takes me to the
+       flow, and then when I say go it shows me the manage slides, and then
+       it takes me to the presentation when I say present"*.
+
+       "Present the whole company" opened the company's own review straight
+       onto the projector — a second door onto the same evening, beside a
+       flow that already carries the company last. The flow is the door
+       now, and it is first. */
+    items = master +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
-      slides + dl + master;
+      slides + dl;
   } else {
     var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
     items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +
         '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
       '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
         '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
-      mine.filter(function(p){ return canSpeakFor("dir:" + p.id); }).map(function(p){
-        var n = pslidesOf("dir:" + p.id).length;
-        return '<button role="menuitem" data-picedit="dir" data-pickey="' + esc(p.id) + '">Manage slides' +
-          (mine.length > 1 ? ' &middot; ' + esc(p.name) : '') +
-          (n ? ' <span class="pill kind">' + n + '</span>' : '') +
-          '<span class="dlsub">Add your own picture slides to your ' + esc(L1("pillar")) + '</span></button>';
-      }).join("");
+      /* §556.1: and no Manage slides beside it — Present IS the editor
+         now, and a direction owner's press lands on their own slides. */
+      "";
   }
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
@@ -26918,12 +28253,9 @@ function presentMenu(kind, key){
   /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
-  var slides = canSpeakFor(target)
-    ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
-        'Manage slides' + (pslidesOf(target).length
-          ? ' <span class="pill kind">' + pslidesOf(target).length + '</span>' : '') +
-        '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-    : "";
+  /* §556.1: Present opens the editor, so a second entry onto it is a
+     second control for one act. */
+  var slides = "";
   /* ONE ATTRIBUTE, CARRYING THE TARGET. It used to be `data-present="1"` for a
      unit and `data-present-fn="<key>"` for a function, and the unit handler
      read `UNITS[current]` — so a FUNCTION THAT PLANS IN PILLARS could not be
@@ -26934,7 +28266,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -27621,7 +28953,7 @@ function unitCards(keys){
    an empty slot asserts something is missing when the model simply does not
    work that way (§15.1). */
 function renderCompanyPerformance(coKey){
-  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
+  var ckr = boxRef(coKey), ck = ckr.kind === "mid" ? ckr.key : String(coKey);
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
@@ -28129,34 +29461,17 @@ function whereNext(keys){
      company's headline card already prints — nothing new is computed. Only
      while the top layer plans in pillars (§466: a projects company is scored
      by its projects in the headline card). */
-  if (topHasPlan() && planOn("group") && topWay() !== "projects") {
+  /* §542: and where the company is shown apart (§540), the same cards are
+     built twice — the external half under the pillar word, the internal half
+     under the capability word — so the two readings El Abd has on this page
+     today survive its capabilities becoming pillars. Joined, which is every
+     client, `dirGauges` is called once with no half and builds exactly the
+     section it built before. */
+  var dirGauges = function(){
     var dtu = topAsUnit(), dpf = partFilter(dtu), ditems = itemsNow(dtu);
     /* §517: their own directions only — the code still read off the real
        position below, so it is the one every other page shows. */
     if (dpf) ditems = ditems.filter(dpf);
-    var dirs = ditems.map(function(p, di){
-      var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
-      var code = pillarCode(dtu, dtu.items.indexOf(p));
-      var mrows = SMPRules.shown(p.measures || []);
-      var pd = miniTable([L1("measure"), "Target", "Actual", "Progress"],
-        mrows.map(function(m){
-          var sc = measureScore(m);
-          return '<tr><td>' + esc(m.name) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
-            '<td class="num">' + figShown(m) + '</td>' +
-            '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Mean across <b>' + mrows.length + '</b> ' + L("measure") + ': <b>' + pct(pf) + '</b>.</p>';
-      var trows = SMPRules.shown(p.tactics || []);
-      var ed = miniTable([L1("tactic"), "Delivered"],
-        trows.map(function(t){
-          return '<tr><td>' + esc(t.name) + '</td><td class="num">' + pct(tacticProgress(t)) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Delivered <b>' + pct(ex) + '</b> against <b>' + pct(pl) + '</b> planned.</p>';
-      return '<div class="gwrap" data-oi="' + di + '" data-topdir="' + esc(p.id || "") + '">' +
-        splitCard(esc(code) + ' ' + esc(p.name || ""),
-          plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
-          pf, ex, pl, pd, ed, p.name || code) + '</div>';
-    }).join("");
     /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
        empties this list for a part owner who owns no direction — which
        before §520 could not happen, since the only part owner was a
@@ -28165,15 +29480,51 @@ function whereNext(keys){
        the "Nothing to show yet." note below could never fire (§45.2).
        Nobody else is reached: with no filter `ditems` is `itemsNow` and
        `topHasPlan()` has already said there is a plan. */
-    if (ditems.length) SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
-      '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
+    /* ── THE COMPANY READS LIKE A UNIT HERE TOO (§555) ─────────────
+       Islam, of a direction owner: *"he should see the performance of the
+       directions, like we see it in the business units format in Raya, as
+       if he has a business unit of two directions. He sees the two
+       directions on the left, and the performance is clear"* — and of his
+       own: *"for the super user or the SMO … it should show the
+       performance, like the business units and directions, on the left,
+       and the performance is clear in front of me"*.
+
+       This section was a grid of gauge cards, every direction's measures
+       and tactics at once. A unit's page has had the rail and the pane
+       since the beginning, and `unitPerfRail` takes the company box
+       exactly as it takes a unit — §416's not-yet-running rows, §517's
+       narrowing to a part owner's own and the execution line all come
+       with it (§53.5). `drawHalf` has already set the half, so the rail
+       asks for nothing new.
+
+       THE GAUGE GRID GOES. Keeping both would be two readings of one
+       thing, which is §87's twins — and the pane says everything a card
+       said, with room for the measures' own table. */
+    return ditems.length
+      ? { dir: true, t: halfWord(dtu), h: section("", halfWord(dtu), null,
+            unitPerfRail(dtu)) }
+      : null;
+  };
+  if (topHasPlan() && planOn("group") && topWay() !== "projects") {
+    var dsec = drawHalf("dir", dirGauges);
+    if (dsec) SECS.push(dsec);
+    /* §45.2: only where it holds something, which is no box today. */
+    if (boxHasHalf(topAsUnit(), "cap")) {
+      var csec = drawHalf("cap", dirGauges);
+      if (csec) SECS.push(csec);
+    }
   }
 
   /* §520.5: the section is KEPT for a narrowed part owner — their own
      capability's figures are theirs to read — and drawn only while they hold
      one, or the heading stands over nothing (§520.2, §45.2). Everybody else
      is unchanged: with the half eye off `partOnly()` is false. */
-  if (SMPRules.capExists(GROUP) && (!partOnly() || capsHere().length)) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
+  /* §542: AND ONLY WHILE THERE IS ONE. `capExists` is the Structure step's
+     flag, not a count, so a client whose capabilities have become internal
+     pillars (stage 3b) kept a heading over an empty grid — and beside the
+     section §542 draws from the pillar list, two headings reading the same
+     word. §45.2's rule, reached by the one state that makes it visible. */
+  if (SMPRules.capExists(GROUP) && capsHere().length) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -28195,9 +29546,18 @@ function whereNext(keys){
      presented from here once it has a plan, through the one menu every
      subject uses (§53.5). No plan, no menu: the page is what it was. */
   var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
+  /* ── AND IT OPENS ON THEM, NOT ON THE AVERAGES (§555) ───────────────
+     The rail was one press away and the page opened on the overall figures
+     every time, which is why Islam could not find it. A LANDING, not an
+     override: once somebody chooses a section it stays chosen (§124). */
+  if (!GSEC_PICKED) {
+    var land = SECS.map(function(x, i){ return x.dir ? i : -1; })
+      .filter(function(i){ return i >= 0; })[0];
+    if (land != null) GSEC = land;
+  }
   return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
-var GROUP_SECTIONS = [], GSEC = 0;
+var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
 
 /* ── GROUP · Temple ───────────────────────────────────────────────
    A view, not a scoreboard: roof, aspiration, key objectives with targets
@@ -28222,14 +29582,16 @@ function templeTables(){
     '</div>';
 
   var koRows = GROUP.keyObjectives.map(function(m, i){
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
+    return '<tr class="' + rmMark("trm", "ko|" + i).replace(/^ /, "") + '">' +
+      '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + fieldOr("temple", m.name, "", function(v){ m.name = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.group || "", "", function(v){ m.group = v || null; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.dir, "mono", function(v){ m.dir = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.target3y || "", "mono", function(v){ m.target3y = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.target || "", "mono", function(v){ m.target = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.compile, "", function(v){ m.compile = v; }) + '</td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>';
+      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>' +
+      rmStripRow("trm", "ko|" + i, RMASK ? RMASK.say : "", 8);
   }).join("");
 
   var themeRows = GROUP.themes.map(function(t, i){
@@ -28317,20 +29679,62 @@ function renderTemple(){
     /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
        the top level carries, and a client that switched capabilities off at
        the top is not shown a base with nothing it chose to put there. */
-    (!SMPRules.capExists(GROUP) ? '</div>' :
+    /* §404 still gates it: a client that switched capabilities OFF at the top
+       is shown no base at all, whatever the plan happens to hold. §542 added
+       the second half — a base with nothing in it is not drawn either, which
+       is what a client whose records have become pillars would otherwise get
+       if the flag were on and `templeBase()` empty. Both guards, in that
+       order; checks/top-plan.py caught the first being dropped. */
+    (!SMPRules.capExists(GROUP) || !templeBase() ? '</div>' :
     '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
-      GROUP.capabilities.map(function(c){
-        return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
-          '<span>' + plural(c.projects.length, L1("project"), L("project")) +
-            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
-            '</span></summary>' +
-          '<div class="encard-body"><p>' + esc(c.def) + '</p><ul>' +
-          c.projects.map(function(p){
-            return '<li>' + esc(p.name) + ' &mdash; <span class="mono">' + p.deliverables.length +
-              ' deliverables, ' + p.outcomes.length + ' outcomes, ' + p.milestones.length + ' milestones</span></li>';
-          }).join("") + '</ul></div></details>';
-      }).join("") +
+      templeBase() +
     '</div></div></div>');
+}
+/* ── §542 · THE TEMPLE'S BASE, FROM WHEREVER THE CAPABILITIES ARE ─────────
+   It read `GROUP.capabilities` and nothing else, so a client whose
+   capabilities have become internal pillars of the company's own plan
+   (stage 3b) kept the heading and lost every card under it — an empty base
+   on the one page that is drawn to be looked at whole.
+
+   SO IT READS BOTH, AND THE RECORDS FIRST. While a client still stores
+   capability records those are its capabilities and the base is what it
+   always was, byte for byte; once they are gone the internal pillars take
+   their place. No client has both, and if one ever did the base would show
+   both rather than pick — losing half of a picture is worse than a long one.
+
+   A CARD SAYS WHAT ITS SUBJECT HAS. A record's card counts projects and key
+   objectives, because that is what a capability record holds; a pillar's
+   counts measures and tactics, because that is what a pillar holds. The two
+   are not made to look alike by giving one of them a zero it cannot have
+   (§45.2's cousin: a number that can only ever be nought is not information).
+   El Abd's five read "0 Projects" today for exactly that reason, and will
+   read "6 Key Measures · 4 Tactics" after — which is what is on them. Named
+   in the before-and-after list rather than smoothed over. */
+function templeBase(){
+  var out = (GROUP.capabilities || []).map(function(c){
+    return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
+      '<span>' + plural((c.projects || []).length, L1("project"), L("project")) +
+        ((c.keyObjectives || []).length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
+        '</span></summary>' +
+      '<div class="encard-body"><p>' + esc(c.def || "") + '</p><ul>' +
+      (c.projects || []).map(function(p){
+        return '<li>' + esc(p.name) + ' &mdash; <span class="mono">' + (p.deliverables || []).length +
+          ' deliverables, ' + (p.outcomes || []).length + ' outcomes, ' + (p.milestones || []).length + ' milestones</span></li>';
+      }).join("") + '</ul></div></details>';
+  });
+  var tu = topAsUnit();
+  (tu.items || []).forEach(function(p, i){
+    if (!SMPRules.pillarIsCap(p)) return;
+    var ms = SMPRules.shown(p.measures || []), ts = SMPRules.shown(p.tactics || []);
+    out.push('<details class="encard"><summary><b>' + esc(p.name) + '</b>' +
+      '<span>' + plural(ms.length, L1("measure"), L("measure")) +
+        (ts.length ? ' &middot; ' + plural(ts.length, L1("tactic"), L("tactic")) : '') +
+        '</span></summary>' +
+      '<div class="encard-body"><p>' + esc(p.sub || "") + '</p><ul>' +
+      ts.map(function(t){ return '<li>' + esc(t.name) + '</li>'; }).join("") +
+      '</ul></div></details>');
+  });
+  return out.join("");
 }
 
 function renderGroupFoundation(){
@@ -28370,11 +29774,13 @@ function foundationBody(o, tgt, gpg){
   return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       (o.clauses || []).map(function(c, ci){
-        return '<div class="clause"><dt>' +
+        var clt = tgt + "|" + ci;
+        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
           (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="' + esc(tgt) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          (gpg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
       (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
@@ -28818,7 +30224,7 @@ function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
-  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
+  var page = boxRef(TARGET).kind === "fn" ? e.fn : e.unit;
   return page ? [page, e.ac] : null;
 }
 
@@ -29501,19 +30907,103 @@ function ownerDepts(){
   mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
   return a.list;
 }
+/* ── AN OWNER IS PICKED FROM THE REGISTER, NEVER TYPED (§551) ──────────
+   Islam, after the El Abd move turned up a direction owned by *"Tamer
+   Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner
+   should be selected from a drop down, generally all the owners shouldn't be
+   written by hand and only be selected from a list from the registr in a
+   drop down serachable list."*
+
+   THE RULE IS §177's, ONE FIELD OVER. A due date is picked and never typed
+   because a typed date is precision the product cannot use; a typed owner is
+   worse — it is a person who may not exist, and nothing downstream can tell.
+
+   THE SCREENS ALREADY PICKED. Measured before anything was built: all four
+   owner cells on the plan surfaces go through `gapCell` and are fed by
+   `ownerChoices`, which is this register, and past five options `searchsel`
+   makes it the searchable list Islam describes (§536). What was NOT picked
+   was the Copilot's draft table (a bare text box, §551) and the five Owner
+   columns of the workbook (22 validations in it and not one of them Owner).
+
+   AND THE QUIET PART, WHICH IS HOW "Tamer Abdelhamid" SURVIVED. An unknown
+   value was offered back in the dropdown under the heading "Already on this
+   plan" — a label that reads like a fact about the plan rather than a warning
+   about the name, so it looked like a legitimate choice to everyone who ever
+   opened that cell. It is the same group, said truthfully.
+
+   `ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5): the
+   dropdown's grouping, the read-mode flag and the workbook's import refusal
+   all ask it, so a name cannot be a stray in one and fine in another. It is
+   `ownerAdder`'s own set, so trimming and case are settled once.
+
+   NOT MEMOISED, which is deliberate and matches the house: `displayNames()`
+   is recomputed on every call throughout this file, and `ownerChoices` was
+   already paying this exact cost once per cell in the pen. Read mode now
+   pays it too. If a plan is ever large enough for that to show, the cache
+   belongs around `displayNames` for every caller, not here for one. */
+function ownerKnownSet(){
+  var a = ownerAdder();
+  ownerPeople().forEach(function(x){ a.add(x.name); });
+  ownerDepts().forEach(a.add);
+  return a;
+}
+/* The stray values among whatever the field holds — a string or a list.
+   Empty is never a stray: a blank owner is a GAP, which the fill walk and
+   the word "Missing" already handle, and calling it a stray would put two
+   different complaints on one cell. */
+function ownerStrays(v, known){
+  known = known || ownerKnownSet();
+  return (Array.isArray(v) ? v : [v]).map(function(x){
+    return String(x == null ? "" : x).trim();
+  }).filter(function(x){ return x && !known.has(x); });
+}
+/* ── AND IT IS FLAGGED WHERE IT SHOWS, NOT DELETED (Islam's choice) ────
+   Shown the three answers as drawings — flag it, refuse to save it, or leave
+   it — he picked flagging: *"Flag them where they show."* The name STAYS on
+   the row, because a name somebody typed is the only clue to who was meant,
+   and deleting it to satisfy a rule would destroy the thing that lets it be
+   corrected (§96.2's reasoning about an unparseable date, exactly). */
+/* ONE MARK, TWO SHAPES (§53.5). An owner is one name and a collaborator cell
+   is a list of them, so the two readers differ in how they split — and in
+   nothing else. The words and the markup live here once, or the day somebody
+   improves the sentence they improve half the product. */
+function strayMark(){
+  return ' <span class="ownerstray hasnote" data-tip="This name is not in the register,' +
+    ' so it matches no real person. Pick somebody from the list, or add them to the' +
+    ' register.">not in the register</span>';
+}
+function ownerShown(v){
+  return esc(String(v == null ? "" : v)) + (ownerStrays(v).length ? strayMark() : "");
+}
+/* ── AND THE SAME FLAG ON A LIST OF THEM (§551.1) ──────────────────────
+   Islam: *"fix the collaborators too."* A collaborator cell is a comma-
+   separated list, so it is marked PER NAME rather than once for the cell: a
+   cell reading "Nadia Fouad, Tamer Abdelhamid" has one real person in it and
+   one that matches nobody, and a single mark on the whole cell would not say
+   which. `gapCell` hands this the joined string its own `text:` built, which
+   is why it splits on the comma it was joined with and nothing cleverer. */
+function collabShown(v){
+  var known = ownerKnownSet();
+  return String(v == null ? "" : v).split(/\s*,\s*/).filter(Boolean).map(function(n){
+    return esc(n) + (known.has(n) ? "" : strayMark());
+  }).join(", ");
+}
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
+/* `strayGroup` NAMES THE KEPT GROUP, because one sentence cannot be true of
+   both fields (§551.3). An OWNER is matched against the people register to
+   decide who may report a line, so "Not in the register" is exactly what a
+   stray one is. A STAKEHOLDER is a unit or a person in Islam's own words, so
+   over "Finance Department" that sentence points at the wrong list — it reads
+   as though the platform wanted a person there. The default is unchanged, so
+   §551's owners go on saying what they said. */
+function ownerChoices(current, blank, strayGroup){
   var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
+  var known = ownerKnownSet();
   var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
+  ownerStrays(current, known).forEach(kept.add);
+  var out = blank ? [{ v:"", label:"—" }] : [];
+  if (kept.list.length) out.push({ group:strayGroup || "Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -29834,6 +31324,12 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
+      /* §555: WHAT THIS WRITE CHANGES ABOUT ANOTHER CELL, rewritten where it
+         stands. The one caller is the compile rule, which is half of the
+         arithmetic deriving the target beside it — and this listener writes
+         WITHOUT repainting (§71.2), so without the hook the row goes on
+         showing the old figure until something else redraws the page. */
+      if (opts.after) opts.after(row);
     }, open && !SMPRules.isHidden(row) &&
        gapWalkable(field, opts.fillKind) ? "gapwalk" : "");
   }
@@ -29876,6 +31372,7 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
+      if (opts.after) opts.after(row);                     /* §555, as above */
       /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk
          and the count are one list (§116.2) and §187 split them: it took
          collaborators out of GAP_FIELDS, so the band stopped counting them and
@@ -30251,35 +31748,90 @@ function monthlyMsg(row, fld, tfld){
      the Clear button, and nothing at all separated these: the footer read
      "not in force yetUntil all twelve are filled" (found by looking at the
      built page, not by reading the source). */
-  if (n < 12)
-    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
-      ' <span>Until all twelve are filled, this target is still spread evenly ' +
-      'across the year.</span>';
   var c = SMPRules.monthlyCompile(sh);
   /* THE RULES ARE READ, NEVER LISTED. This sentence said "Set Sum, Latest or
      Average" — written before §276 added Count, so it named three of four and
      nothing compared it with the list (§214.3). It is `COMPILES` now, so the
-     day a fifth rule is added the sentence is already right. */
+     day a fifth rule is added the sentence is already right.
+     ASKED FIRST NOW (§555): with the target derived from the FIRST month, a
+     row with no compile rule is stuck at month one rather than at month
+     twelve, so the sentence that says why has to arrive there too. */
   if (!c)
-    return '<span class="part">Twelve months set — not in force yet</span>' +
+    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
       ' <span>This row has no compile rule, so the platform cannot tell what ' +
-      'the twelve add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
-  var ann = SMPRules.monthlyAnnual(sh);
+      'the months add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
   /* §276's Count adds up like Sum and is then owed in whole ones, so it says
      the same word — the rounding is what the figure beside it shows. */
   var word = (c === "sum" || c === "count") ? "Adds up to"
            : c === "average" ? "Averages" : "Ends at";
-  return '<b>12 of 12 months set</b><span>' + word + ' <b>' +
+  /* NOTHING TYPED YET, so there is no figure to show — and the sentence has
+     to say where the target comes from now, because the box above has stopped
+     taking typing the moment the first month lands (§61: the page says what
+     happened rather than leaving somebody to find it). */
+  if (!n)
+    return '<span class="part">No month set yet</span>' +
+      ' <span>Fill a month and the target above becomes what the months set ' +
+      'come to — it is no longer typed by hand.</span>';
+  /* §555: THE TARGET IS DERIVED FROM THE FIRST MONTH, AND THE YEAR IS NOT.
+     Two different things, and the sentence says both — what the figure above
+     now is, and that the row is still measured flat until the twelfth lands.
+     §278's wording said only the second, on a build where the first was not
+     true yet. */
+  if (n < 12)
+    return '<span class="part">' + n + ' of 12 months set</span>' +
+      ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
+      '</b> — the target, from the months set so far. Until all twelve are ' +
+      'filled, it is still spread evenly across the year.</span>';
+  /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
+     is a flex row and these two are ONE flex item, so the gap falls between
+     the message and the Clear button and nothing at all separated them — the
+     complete case read "12 of 12 months setAdds up to 300M EGP". The very
+     fault §278's own comment describes, two lines above, in the branch it was
+     not written about. */
+  return '<b>12 of 12 months set</b> <span>' + word + ' <b>' +
     esc(monthlyAnnualText(row, fld, tfld)) + '</b> — the annual target</span>';
 }
 /* The derived year, written the way the target is written — through the
    platform's own joiner, so `300M EGP` keeps its spelling rather than coming
-   back as `300 M EGP` (§254.1). */
+   back as `300 M EGP` (§254.1).
+   IT ASKS `monthlySoFar` AND NOT `monthlyAnnual` (§555): the figure is owed
+   from the first month typed, and on a complete plan the two answer the same
+   — which the rules' own check asserts, so this is one figure and not two. */
 function monthlyAnnualText(row, fld, tfld){
-  var ann = SMPRules.monthlyAnnual(monthlyShape(row, fld));
+  var ann = SMPRules.monthlySoFar(monthlyShape(row, fld));
   if (ann == null) return "";
   return targetFromPair(row[tfld], String(Math.round(ann * 100) / 100),
                         unitOfTarget(row[tfld]));
+}
+/* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
+   question the locked box and the refresh both ask, so the box and the figure
+   inside it can never disagree about which it is. NOT `monthlyInForce`, which
+   is about PRORATION and still waits for all twelve. */
+function monthlyDerived(row, fld){
+  return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
+}
+/* WHICH TARGET FIELD A SET OF MONTHS DERIVES. The same pairing `monthlyShape`
+   makes — a measure's and an objective's months are `monthly` beside `target`,
+   a tactic outcome's are `outMonthly` beside `outTarget` (§248) — read once
+   here rather than passed down a second time from four call sites (§53.5). */
+function monthlyTgtField(fld){
+  return fld === "outMonthly" ? "outTarget" : "target";
+}
+/* ── THE COMPILE RULE IS HALF OF THE ARITHMETIC (§555) ─────────────────
+   Setting it on a row whose months are already typed is the same event as
+   typing the last month: until there is a rule the platform cannot say what
+   the months come to, and the moment there is one it can. Before this, that
+   row kept the figure somebody had typed and the drawer's own sentence said a
+   different number — and once the box locks, nobody can correct it by typing.
+   It goes through `monthlyWrite`'s own ending rather than repeating it, so
+   there is one place where a derived target is written. */
+function monthlyAfterCompile(row, fld){
+  return function(){
+    if (!monthlyDerived(row, fld)) return;
+    var tfld = monthlyTgtField(fld), ann = monthlyAnnualText(row, fld, tfld);
+    if (ann) { row[tfld] = ann; gapLift(row, tfld); }
+    monthlyRefresh(row, fld, tfld);
+  };
 }
 /* TYPING A MONTH. Stored as a NUMBER where it is one and as what was typed
    where it is not (§96.2) — a value the platform cannot read leaves the plan
@@ -30296,15 +31848,15 @@ function monthlyWrite(row, fld, tfld, i, v){
   var any = false;
   for (var k = 0; k < 12; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
   if (any) row[fld] = a; else delete row[fld];
-  /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE TWELFTH LANDS, and written
-     into the target field itself rather than left to be worked out by every
-     reader. That is what makes the deck, the workbook, the archive and the
-     Focus board right without one of them being taught anything: they all
-     read `target`, and `target` is now the number the twelve months say
-     (Islam's (a), agreed before this was built). Nothing is destroyed that
-     cannot be got back — the twelve stay stored, and clearing one leaves the
-     last derived total as the authored target, which is the number the office
-     last agreed to rather than a hole. */
+  /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE FIRST MONTH LANDS (§555, and
+     §278's twelfth before it), and written into the target field itself
+     rather than left to be worked out by every reader. That is what makes the
+     deck, the workbook, the archive and the Focus board right without one of
+     them being taught anything: they all read `target`, and `target` is now
+     the number the months say (Islam's (a), agreed before this was built).
+     Clearing a month re-derives from the ones that are left; clearing the LAST
+     one leaves the figure they last came to as the authored target, which is
+     the number the office last agreed to rather than a hole. */
   var ann = monthlyAnnualText(row, fld, tfld);
   if (ann) {
     row[tfld] = ann;
@@ -30345,10 +31897,10 @@ function monthlyRefresh(row, fld, tfld){
   if (clr) clr.hidden = !SMPRules.monthlySet(monthlyShape(row, fld));
   var td = document.querySelector('td[data-mptgt="' + k.replace(/"/g, '\\"') + '"]');
   if (td) {
-    var inForce = SMPRules.monthlyInForce(monthlyShape(row, fld));
-    td.setAttribute("data-mplock", inForce ? "1" : "0");
+    var derived = monthlyDerived(row, fld);
+    td.setAttribute("data-mplock", derived ? "1" : "0");
     var i = td.querySelector("input.fld");
-    if (i && inForce) i.value = td.getAttribute("data-mppart") === "1"
+    if (i && derived) i.value = td.getAttribute("data-mppart") === "1"
       ? targetKeep(row[tfld] || "") : (row[tfld] == null ? "" : row[tfld]);
     monthlyLock(td);
   }
@@ -30378,7 +31930,7 @@ function monthlyTgtAttrs(row, fld, partOnly){
      into the second would put the unit in the box AND in the picker, so the
      cell says which it is rather than the refresh guessing. */
   return ' data-mptgt="' + esc(monthlyKey(row, fld)) + '" data-mplock="' +
-    (SMPRules.monthlyInForce(monthlyShape(row, fld)) ? "1" : "0") + '"' +
+    (monthlyDerived(row, fld) ? "1" : "0") + '"' +
     (partOnly ? ' data-mppart="1"' : '');
 }
 /* THE DRAWER. `cols` is the table's own column count — a full-width row has
@@ -30720,7 +32272,8 @@ function koEdit(list, page, acKey, owner){
           pg && !yn) +
         '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
-          { kind:"select", opts:SMPRules.COMPILES })) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES,
+            after: monthlyAfterCompile(m, "monthly") })) + '</td>' +
         /* §243: the same cell the capability's table already draws — one
            column, one field, one answer on all three surfaces (§53.5). Left
            blank it is not nought: koWeights() gives it the average of the
@@ -30735,6 +32288,7 @@ function koEdit(list, page, acKey, owner){
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>' +
+        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", 9) +
         (pg && !yn ? monthlyRowFor(m, "monthly", "target", 9, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
@@ -30954,11 +32508,13 @@ function renderUnitFoundation(u){
       ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
+        var clt = u.ukey + "|" + ci;
+        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
           (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(u.ukey) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          (upg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
@@ -31066,7 +32622,7 @@ function renderUnitAnalysis(u){
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
 function renderFnSW(t){
-  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
@@ -31110,9 +32666,11 @@ function renderUnitCompete(u){
   };
   var body =
     row("Value", function(v, i){
-      return '<td class="cmpval">' + (ed
+      var cmt = t + "|" + i;
+      return '<td class="cmpval' + rmMark("cmprm", cmt) + '">' + (ed
         ? inputOr(page, v.title || "", "", function(x){ var w = competeWritable(t); if (w && w.values[i]) w.values[i].title = String(x || "").trim(); }) +
-          '<button class="xbtn" data-cmprm="' + esc(t) + '|' + i + '" title="Remove this value" aria-label="Remove this value">&times;</button>'
+          '<button class="xbtn" data-cmprm="' + esc(cmt) + '" title="Remove this value" aria-label="Remove this value">&times;</button>' +
+          rmStrip("cmprm", cmt, RMASK ? RMASK.say : "")
         : esc(v.title || "")) + '</td>';
     }) +
     row("How", function(v, i){
@@ -31136,11 +32694,14 @@ function swotBoxes(u, quads, page, ac){
     var ed = authoring(page, ac);
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
-        return '<li><span class="swot-n">' + (i + 1) + '</span>' +
+        var swt = u.ukey + "|" + key + "|" + i;
+        return '<li class="' + rmMark("swrm", swt).replace(/^ /, "") + '">' +
+          '<span class="swot-n">' + (i + 1) + '</span>' +
           (ed
             ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
-              '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
-              '" title="Remove this line" aria-label="Remove this line">&times;</button>'
+              '<button class="xbtn" data-swrm="' + esc(swt) +
+              '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+              rmStrip("swrm", swt, RMASK ? RMASK.say : "")
             : '<span>' + esc(x) + '</span>') + '</li>';
       }).join("") + '</ol>' +
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
@@ -31374,7 +32935,8 @@ function drvSubTable(u, seasons, ch, sub, si, ed){
         '<td>' + drvAnswerCell(u, d, ed) + '</td>' +
         (ed ? '<td class="xcell"><button class="xbtn" data-drvrm="' + esc(u.ukey) + '|' +
           esc(d.id) + '" title="Remove this driver" aria-label="Remove this driver">' +
-          '&times;</button></td>' : '') + '</tr>';
+          '&times;</button></td>' : '') + '</tr>' +
+        rmStripRow("drvrm", u.ukey + "|" + d.id, RMASK ? RMASK.say : "", ed ? 8 : 7);
     }).join("");
     return '<tr class="dxband"><th colspan="' + (ed ? 8 : 7) + '">' +
         esc(p.name || "Period") + '<em>' + drvBandLine(seasons, ch, sub, p, f) + '</em>' +
@@ -31382,7 +32944,8 @@ function drvSubTable(u, seasons, ch, sub, si, ed){
           '<button class="linkbu" data-drvadd="' + at + '">+ Add a driver</button>' +
           '<button class="linkbu" data-drvprm="' + at + '">Remove this period</button>' +
           '</span>' : '') +
-      '</th></tr>' + rows;
+      '</th></tr>' +
+      rmStripRow("drvprm", at, RMASK ? RMASK.say : "", ed ? 8 : 7) + rows;
   }).join("");
   return '<div class="scroll"><table class="drvtbl">' + head +
     '<tbody>' + body + '</tbody></table></div>';
@@ -31447,7 +33010,8 @@ function drvPaneActs(u, ch, sub, si, seasons, flat){
         function(v){ return v === SMPRules.driverMode(ch); }) + '</select>' +
     '<button class="editbtn" data-drvsnew="' + esc(u.ukey) + '">+ Add a route</button>' +
     (flat ? '' : '<button class="editbtn" data-drvsrm="' + esc(u.ukey) + '|' + si +
-      '">Remove this route</button>') +
+      '">Remove this route</button>' +
+      rmStrip("drvsrm", u.ukey + "|" + si, RMASK ? RMASK.say : "")) +
     (!free.length && !(seasons || []).length
       ? '<span class="why" style="margin:0">Seasons are set once for the client on ' +
         '<b>Setup \u2192 Seasons</b>.</span>' : '') + '</div>';
@@ -31722,7 +33286,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
-                        (String(sub.key).indexOf("cap:") === 0
+                        (boxRef(sub.key).kind === "cap"
                           ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
@@ -31999,7 +33563,11 @@ function renderReport(u, opt){
      `data-rep`, so the shell's one handler resolves the row and then the
      cell. The unit rides with it exactly as it does for a measure, so the
      figure is stored joined and every screen downstream reads it whole
-     (§199). */
+     (§199).
+     §557: AND THE UNIT SITS INSIDE THE BOX, as `repEntry` draws it. It was
+     written after the box closed, so `.unitsuf` (a flex block) fell out under
+     it as a grey strip the width of the cell — on El Abd's Reporting page,
+     a "%" bar beneath every category's figure. */
   var bdEntry = function(x){
     var t = SMPRules.bdTarget(x.obj, x.col);
     var unit = splitTarget(t).unit;
@@ -32013,8 +33581,8 @@ function renderReport(u, opt){
       '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + ' ' +
-      esc(String(x.col.name || "").trim() || "figure") + '"></span>' +
-      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '');
+      esc(String(x.col.name || "").trim() || "figure") + '">' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
@@ -32180,14 +33748,22 @@ function renderReport(u, opt){
     /* §343: the breakdown, between the measures it is part of and the
        tactics it is not — the same place it sits on the other two panes, or
        somebody entering figures meets the table in a different order from
-       the one they planned it in. The target sits BEHIND each box so nobody
-       has to remember it, and a row's note is asked once however many of its
-       figures are at risk. */
+       the one they planned it in. A row's note is asked once however many of
+       its figures are at risk.
+       §557: TARGET AND REPORTED, TWO COLUMNS PER BREAKDOWN COLUMN. Islam, of
+       El Abd's categories: *"needs to appear in the form of target and report
+       not 1 column"*. §343 stacked the box over `/ 13%` in one cell; the Key
+       Measures table on this same pane has always read *YTD Target* beside
+       *Reported*, so the breakdown now reads the same way — the column's own
+       name and direction head its target, *Reported* heads the box beside it,
+       one pair per column in the plan's order. The target is the plan's
+       figure, unprorated, exactly as before (`bdCellScore` passes no
+       compile). An unasked cell is a dash in both. */
     var bdTable = bds.length
       ? '<h4 class="mini">' + esc(SMPRules.bdName(p)) + '</h4>' +
         miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-            .concat(SMPRules.bdCols(p).map(function(c){
-              return { h:bdColHead(p, c), cls:"cc" }; }))
+            .concat([].concat.apply([], SMPRules.bdCols(p).map(function(c){
+              return [{ h:bdColHead(p, c), cls:"cc" }, { h:"Reported", cls:"cc" }]; })))
             .concat([{h:"Note", cls:""}]),
           SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
             .map(function(r, i){
@@ -32197,11 +33773,12 @@ function renderReport(u, opt){
               '<td>' + esc(r.name) + '</td>' +
               SMPRules.bdCols(p).map(function(c){
                 if (!SMPRules.bdAsked(r, c))
-                  return '<td class="cc"><span class="nobody">&mdash;</span></td>';
+                  return '<td class="num"><span class="nobody">&mdash;</span></td>' +
+                         '<td class="cc"><span class="nobody">&mdash;</span></td>';
                 var x = { id:r.id, obj:r, col:c, kind:"bdcell",
                           owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
-                return '<td class="cc">' + bdEntry(x) +
-                  '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
+                return '<td class="num">' + tgtShown(SMPRules.bdTarget(r, c)) + '</td>' +
+                  '<td class="cc">' + bdEntry(x) + '</td>';
               }).join("") +
               '<td class="notecol">' + noteCell(ri) + '</td></tr>';
           }).join(""))
@@ -32250,20 +33827,36 @@ function renderReport(u, opt){
     return { done: done, total: total };
   };
 
-  var sel = unitRailPick(u);
+  /* ── §542 · THE BLOCK IS BUILT PER HALF ─────────────────────────────────
+     A split box reports its two halves as two sections of this page, the
+     way the directions and the capabilities are two sections today — so the
+     rail, its pane and its empty state are a function called once for each
+     half rather than one block built once. Called with no half on a joined
+     box, which is every box in every client, the filter is null and this is
+     the block it always was, byte for byte.
+     §556: AND CALLED ONCE WITH `one` WHERE THIS VIEWER REACHES BOTH HALVES
+     (`reportOneRail`) — no half set, so the rail's key is the box's own, and
+     the rows drawn directions first, then capabilities, each half under its
+     own word in the rail's group band (`.rgroup`, railFor's). Islam: *"directions
+     first yes"*. The stored order and every code are untouched: the halves
+     are skipped through, never copied (§517). */
+  var halfBlock = function(one){
+  var inHalf = function(h){ return function(p){ return SMPRules.pillarInHalf(p, h); }; };
+  var order = one ? partItems(u).filter(inHalf("dir")).concat(partItems(u).filter(inHalf("cap"))) : null;
+  var sel = unitRailPick(u, order);
+  var pillars;
   /* §416: a direction that does not run this year is not asked for, so the
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = partItems(u).filter(runsNow)[0];
+    var firstNow = (order || partItems(u)).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
-  var pillars;
   if (!sel) {
     /* §520.8: a capability with nothing planned says so in the words its own
        rail already uses (`topCapBody`), never "this unit has no directions". */
     pillars = paneOnly ? '<div class="note">Nothing planned yet.</div>'
-      : '<div class="note">This unit has no ' + L("pillar","bu") +
+      : '<div class="note">This unit has no ' + halfWord(u) +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -32276,8 +33869,7 @@ function renderReport(u, opt){
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
     var rpf = partFilter(u);          /* §517: skipped, never renumbered */
-    var railRows = u.items.map(function(p, pi){
-      if (rpf && !rpf(p)) return "";
+    var railRow = function(p, pi){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -32288,7 +33880,7 @@ function renderReport(u, opt){
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
       return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
-          esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
+          esc(unitRailSubj(u)) + '|' + esc(pillarRailId(p)) + '">' +
         railName(code, p.name) + yearsTagHtml(p) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
@@ -32301,9 +33893,19 @@ function renderReport(u, opt){
                 owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>'
                 : !now ? esc(sub) : "") +
         '</button>';
+    };
+    var rowsOf = function(keep){
+      return u.items.map(function(p, pi){
+        return (rpf && !rpf(p)) || (keep && !keep(p)) ? "" : railRow(p, pi);
+      }).join("");
+    };
+    var railRows = !one ? rowsOf(null) : ["dir", "cap"].map(function(h){
+      return '<div class="rgroup">' + drawHalf(h, function(){ return halfWord(u); }) +
+        ' <span class="rgn">' + order.filter(inHalf(h)).length + '</span></div>' + rowsOf(inHalf(h));
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), partItems(u).length) + railRows +
-      '<div class="rfoot">Tally is entries given of asked</div></div>';
+    var rail = '<div class="rail">' +
+      railHead(one ? L("pillar","bu") + " &amp; " + L("capability","bu") : halfWord(u), partItems(u).length) +
+      railRows + '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
     /* §520.8: inside the company's capabilities split the capability's own
@@ -32319,6 +33921,33 @@ function renderReport(u, opt){
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
+  return pillars;
+  };
+  /* §543 — EACH HALF ONLY WHERE THIS VIEWER REACHES ONE, AND THE HEADING
+     ONLY WHERE THERE ARE TWO. Islam, reporting as a capability's owner:
+     *"I shouldn't see the directions part at the top, only the capabilities
+     and no need as well to see key measures and tactics.. the title is not
+     relevant. for the user he is just reporting; for the office it might be
+     useful"*.
+
+     Two rules in one sentence, and the second follows from the first: a half
+     that holds nothing of theirs is not drawn at all — no heading, no empty
+     state — and once only one half is left there is nothing for a title to
+     tell apart, so it goes too. The office, who sees both, keeps both
+     headings because for them the title is doing its job. */
+  var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
+  var showCap = boxHasHalf(u, "cap");
+  /* §556: both halves reached → one section, one rail, one pane. */
+  var oneRail = reportOneRail(u);
+  var pillars = oneRail ? drawHalf("", function(){ return halfBlock(true); })
+              : showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap && !oneRail ? drawHalf("cap", halfBlock) : "";
+  /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
+     section and has always been headed, so dropping the title there would
+     take a heading off every unit in every client that never split anything
+     — which is what the first draft of this did, and what section 1b of
+     scripts/test-capability-fold.js caught. */
+  var titled = !boxSplit(u) || (showDir && showCap);
 
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
@@ -32423,8 +34052,22 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
-    (u.topLayer && partOnly() && !partItems(u).length ? "" :
-      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    /* §556: one rail, and the heading is the client's two words alone —
+       Islam: *"heading directions and capabilities and remove key mesasures
+       and tactics"*. */
+    (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
+      section("", oneRail ? L("pillar","bu") + " and " + L("capability","bu")
+                : titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+              null, pillars)) +
+    /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
+       client's own word for a capability — the shape §520.8 settled for the
+       capability RECORDS ("it should say Capabilities - key measures and
+       tactics"), kept for the pillars that replace them. Empty on every box
+       that is not shown apart, which is every box today. */
+    (capPillars
+      ? section("", titled ? L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+                null, capPillars)
+      : "") +
     /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
        a section of the company's plan and never a destination (§520.1), so
        this page is the only Reporting page its owner can reach. `capsHere()`
@@ -32440,7 +34083,11 @@ function renderReport(u, opt){
        capability through `capReportBody`. The owner types on theirs, a
        direction's owner reads it, the office types on all — the pane asks
        `cap:<id>` for itself exactly as before. */
-    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+    /* §544.13: `!buExists(GROUP)` was the third of the four places the
+       business units decided something about a capability — here it meant
+       the section appeared only on a client that had no units, although the
+       capabilities it reports are the company's either way. Gone. */
+    (u.topLayer && SMPRules.capExists(GROUP) && capsHere().length
       ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
           reportCapsSplit(capsHere()))
       : "") +
@@ -33462,9 +35109,43 @@ function projFrontMatter(p, ed){
   /* The pills carry their own leading margin, which is right in a sentence and
      wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
      BORDER lines up with the brief's first letter, not its text. */
+  /* ── A STAKEHOLDER IS PICKED FROM THE SAME LIST (§551.3) ──────────────
+     Islam, asked what a stakeholder is, because the demo held "Unit heads"
+     and "Finance Department" and the answer decided whether a rule could be
+     imposed at all: *"stakeholders are either units or people names so it can
+     be a searchable list with functions and people names to be added."*
+
+     SO IT IS §130.1's OWN CONTROL, NOT A NEW ONE. His words there were almost
+     these — *"for the owners in the plans, projects, tactics, milestones, let
+     it be a searchable list from the registry"*, and, asked what the list
+     holds, *"people or department"*. This is that answer one field further
+     out, so it is the collaborators' control with the collaborators' list
+     (§53.5): `selectManyOr` over `ownerChoices`, several answers, searchable
+     past five options through `searchsel` (§536).
+
+     NOTHING ALREADY TYPED IS LOST, which is why `ownerChoices` is handed the
+     current value: a stakeholder the list does not offer stays in it and
+     stays picked. Measured on the demo before this was built — of twelve
+     distinct stakeholders, seven are already in the list and five are not
+     ("Finance Department" and "IT Department", which are Finance and IT with
+     a word added; "Operations" and "Sales", departments this tenant has no
+     page for; and "Unit heads", which is a role group and neither a unit nor
+     a person). All five survive and remain pickable.
+
+     AND THEY ARE NOT FLAGGED THE WAY AN OWNER IS. An owner is matched against
+     the register BY NAME to decide who may report a line (§130.1, §55) — a
+     stray one is a person who owns work and cannot enter its figure. Nothing
+     downstream resolves a stakeholder to anybody, so a stray costs a tidier
+     chip and nothing else, and five flags on the demo would be noise rather
+     than information. Islam asked for a list to pick from, not a rule to
+     enforce; the rule stays his to ask for. */
   var stake = ed
-    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-        function(v){ p.stakeholders = collabParse(v); })
+    ? selectManyOr("plan", p.stakeholders || [],
+        ownerChoices(p.stakeholders || [], false, "Not a unit or a person here"),
+        "collabsel",
+        function(v){ p.stakeholders = Array.isArray(v)
+          ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+          : collabParse(v); }, "Stakeholders")
     : ((p.stakeholders || []).length
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
@@ -33505,6 +35186,7 @@ function projFrontMatter(p, ed){
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
         ctx: { project: p },
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
@@ -33642,6 +35324,7 @@ function projPlanBody(p, subject){
          both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
@@ -33661,6 +35344,7 @@ function projPlanBody(p, subject){
             : collabParse(v); },
           del: true,
           readEmpty: '<span class="nobody">&mdash;</span>',
+          read: collabShown,
           control: function(set, pendCls){
             return selectManyOr("plan", collabNames(m),
               ownerChoices(collabNames(m), false),
@@ -33797,6 +35481,7 @@ function fnObjPlanBody(fk, ed){
         (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
       '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
           ctx: { row: a },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", a.owner == null ? "" : a.owner,
               ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
@@ -34371,7 +36056,45 @@ function renderFnReport(fnKey){
    screens below its first in an accordion. Unlike a capability's projects,
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
-function unitRailKey(u){ return "unit:" + u.ukey; }
+/* ── §542 · A RAIL EACH, WHERE A BOX IS SHOWN APART ──────────────────────
+   §540 put the two halves on two tabs and left them sharing one remembered
+   selection, which was tolerable while they were tabs: you only ever see one
+   at a time. The Reporting page draws BOTH at once, stacked, as it draws the
+   directions and the capabilities today — and there one shared key means
+   pressing a row in the lower rail makes the upper pane jump to its first
+   row, for no reason anybody could see. So each half gets a key of its own.
+
+   THE SUBJECT, NOT THE KEY, IS WHAT CARRIES THE HALF, because the rail's
+   button writes `data-urail="<subject>|<row id>"` and the shell's one handler
+   rebuilds the key as `"unit:" + subject`. Putting the half in the subject
+   keeps that one handler right for both halves and for everything that is
+   not split, where the subject is the bare key exactly as it was.
+
+   AND A ROW'S OWN RAIL IS ASKED OF THE ROW. A deep link from the missing-
+   elements walk has to land on the half that holds the pillar it names, and
+   that walk runs outside any render — no half is being drawn — so it asks
+   `pillarRailKey(u, p)`, which reads the pillar's kind rather than the half
+   on screen. One fact, two doors (§53.5). */
+function unitRailSubj(u){
+  return (u ? u.ukey : "") + (PILLAR_HALF && boxSplit(u) ? "@" + PILLAR_HALF : "");
+}
+function unitRailKey(u){ return "unit:" + unitRailSubj(u); }
+function pillarRailKey(u, p){
+  if (!boxSplit(u)) return "unit:" + (u ? u.ukey : "");
+  return "unit:" + u.ukey + "@" + (SMPRules.pillarIsCap(p) ? "cap" : "dir");
+}
+/* §556: the REPORTING rail that holds it. Where that page draws both halves
+   on one rail, the rail is drawn with no half and its key carries none — the
+   key every joined box has always had. */
+function reportRailKey(u, p){
+  return reportOneRail(u) ? "unit:" + u.ukey : pillarRailKey(u, p);
+}
+/* And which SECTION holds it, for the same deep link: a split box draws its
+   internal pillars on their own tab (§540), so a walk that sent every pillar
+   to `plan` would open the Directions tab and highlight nothing. */
+function pillarSecKey(u, p, sec){
+  return (boxSplit(u) && SMPRules.pillarIsCap(p) && sec === "plan") ? "plancap" : sec;
+}
 /* §393 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
    added with the pen is minted `code: ""` (addPillar) and nothing fills it in
    on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
@@ -34380,8 +36103,10 @@ function unitRailKey(u){ return "unit:" + u.ukey; }
    row's address everywhere else (§48, §191). The code is the fallback only
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
-function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
+/* §556: `order` is the list as the rail DRAWS it, where that is not the
+   stored order — so the page opens on the rail's first row, not the plan's. */
+function unitRailPick(u, order){
+  var k = unitRailKey(u), want = RAIL[k], list = order || partItems(u);
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -34439,7 +36164,7 @@ function unitRailFor(u, sel){
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
     return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (runsNow(it) ? "" : " later") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+        esc(unitRailSubj(u)) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name, it.kind) + yearsTagHtml(it) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
@@ -34472,7 +36197,8 @@ function unitRailFor(u, sel){
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), pf ? list.filter(pf).length : list.length) +
+    /* §542: the half's own word over the half's own count. */
+    railHead(halfWord(u), pf ? list.filter(pf).length : list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -34623,7 +36349,7 @@ function ownStateChip(target, list, word){
   var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
   var top = String(target) === "group";
   var submits = top ? "office or the CEO" :
-                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+                boxRef(target).kind === "fn" ? "function's custodian" : "unit's custodian";
   var tip = 'You report your own rows. The ' + submits + ' submits the report.';
   /* A capability carries no saved-draft mark (§309 is a project's and a
      direction's), so "done" there — and ONLY there, `noMark` — is every
@@ -34943,7 +36669,8 @@ function unitPlanBody(it, u, railed, bare){
       '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.compile || "\u2014")
         : gapCell("plan", "u_plan", m, "compile",
         { ctx:pctx(m), kind:"select", opts:SMPRules.COMPILES,
-          readEmpty:"\u2014", read:compileCell })) + '</td></tr>' +
+          readEmpty:"\u2014", read:compileCell,
+          after: monthlyAfterCompile(m, "monthly") })) + '</td></tr>' +
       (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 6, m.name) : "");
   }).join("");
   /* §267: ONE ANSWER FOR THE WHOLE TABLE, not one per row — the head, the Add
@@ -34987,6 +36714,7 @@ function unitPlanBody(it, u, railed, bare){
           : collabParse(v); },
         del: true,
         readEmpty: '<span class="nobody">&mdash;</span>',
+        read: collabShown,
         control: function(set, pendCls){
           return selectManyOr("plan", collabNames(t),
             ownerChoices(collabNames(t), false),
@@ -35109,6 +36837,7 @@ function unitPlanBody(it, u, railed, bare){
       '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);
@@ -35435,11 +37164,14 @@ function renderUnitPlan(u){
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
       "this " + L1("pillar")) +
+    /* §540: the count and the rail are of the list AS DRAWN — on a split box
+       this tab holds one half of it, and a hint reading "15 Directions" over
+       a rail of five is the kind of disagreement §116.2 exists to stop. */
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
+      ? '<p class="sec-hint">' + partItems(u).length + ' ' + halfWord(u) +
         ' &middot; drag by the handle to reorder, here and inside each ' +
-        L1("pillar") + '</p>' : '') +
-    (railWorthIt(u.items)
+        halfWord1(u) + '</p>' : '') +
+    (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
@@ -35485,11 +37217,11 @@ function renderUnitPlan(u){
    (§211, §213), so there is one.
 
    WHO IT IS HELD BY IS READ, NEVER SET HERE. A function's head is a fact the
-   register holds and Setup's own picker writes (§33, §226). A capability is
-   held by the function that carries it, so its holder is that function's head
-   — one fact, one door, and no second control that could disagree with the
-   first. Changing which function holds a capability is Setup › Capabilities',
-   because it is a Setup change and the server classifies it as one (§42). */
+   register holds and Setup's own picker writes (§33, §226). §544.13: a
+   capability's is its OWN owner, read the same way from the same door —
+   Setup › Capabilities' Owner picker — because a capability is the
+   company's and no function carries it any more. One fact, one door, and no
+   second control that could disagree with the first. */
 function holderOverview(subject){
   var t = holderTarget(subject), isCap = isCapTarget(t);
   var c = isCap ? capById(capKeyOf(t)) : null;
@@ -35553,16 +37285,20 @@ function holderOverview(subject){
            held by anybody else would be the screen offering what the save
            refuses (§42). The sentence is a hover, never a printed line (1b-ii).
 
-           ON A CAPABILITY IT IS READ AND NAMES THE FUNCTION TOO, because
-           "Rana Fouad" alone does not say which desk holds this work — and
-           editing it here would be a second control writing the FUNCTION's
-           head from a capability's page (§53.5). */
-        '<div class="clause"><dt>' + (isCap ? 'Held by' : 'Led by') + '</dt><dd' +
+           §544.13 — AND ON A CAPABILITY IT IS ITS OWN OWNER NOW. This read
+           *Held by* and named the holding function's head, because "Rana
+           Fouad" alone did not say which desk held the work. A capability
+           is the company's (Islam: *"the company only"*), so there is no
+           desk: this would have printed an em dash on every capability
+           there is, for ever — a row that can only be empty is not a row
+           (§45.2, §61). It reads the OWNER §412 gave it, which is the same
+           fact Setup › Capabilities' own picker writes and the People page
+           shows (§33, §53.5), and it is read here, never set, exactly as a
+           function's head is. */
+        '<div class="clause"><dt>' + (isCap ? 'Owner' : 'Led by') + '</dt><dd' +
           (!isCap && ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
           (isCap
-            ? (f && f.head
-                ? esc(personName(f.head)) + ' <span class="why">' + esc(f.name) + '</span>'
-                : (f ? esc(f.name) : "&mdash;"))
+            ? (c.head ? esc(personName(c.head)) : "&mdash;")
             : (ed && inOffice()
                 ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
                 : (f.head ? esc(personName(f.head)) : "&mdash;"))) + '</dd></div>' +
@@ -35826,7 +37562,7 @@ function koReadBlock(list, emptyLine){
    handle the save would refuse (§94.3's fault, the safe way round). */
 function capKoTarget(c){
   var id = String(c && c.id || "");
-  if (id.indexOf("fn:") === 0) return id;
+  if (boxRef(id).kind === "fn") return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
 /* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
@@ -35881,12 +37617,14 @@ function capKoEdit(c, pgIn, acIn){
           { kind:"input", cls:"mono", parse: unitInherit(m) }),
           ed && !isYesNoRow(m)) +
         '<td class="cc">' + gapCell(pg, ac, m, "compile",
-          { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
+          { kind:"select", opts:SMPRules.COMPILES,
+            after: monthlyAfterCompile(m, "monthly") }) + '</td>' +
         '<td class="cc">' + gapCell(pg, ac, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
+        rmStripRow("capkorm", c.id + "|" + i, RMASK ? RMASK.say : "", 8) +
         (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
@@ -35915,7 +37653,7 @@ function unitPerfRail(u){
     var now = runsNow(it);
     var perf = now ? pillarPerf(it) : null, r = pillarRatio(it);
     return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
-      esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+      esc(unitRailSubj(u)) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) + yearsTagHtml(it) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
@@ -35930,7 +37668,7 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), partItems(u).length) +
+    railHead(halfWord(u), partItems(u).length) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -36024,6 +37762,15 @@ function layerOverride(key, which){
   if (typeof TARGET_SETUP !== "undefined" && TARGET_SETUP) return null;
   var t = typeof TARGET !== "undefined" ? TARGET : "group";
   return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
+}
+/* ── WHOSE ROW THE BU REFUSAL BELONGS TO (§534.2) ───────────────────────
+   Asked three times while one row is drawn — the mark on the box, the value
+   in it, and the sentence under it — and all three must agree or the box
+   holds one name while the line names another. MBWHY is cleared by the next
+   rename that lands, and names the row by the name it had when it was
+   refused, which is the one thing a repaint cannot have changed. */
+function mbWhy(name){
+  return !!(typeof MBWHY !== "undefined" && MBWHY && MBWHY.at === name);
 }
 function labelWord(key, which){
   var o = layerOverride(key, which);
@@ -37008,7 +38755,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(boxRef(where).area === "fn" ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -37277,6 +39024,27 @@ function unitPlansInCell(k, u){
   return '<span class="pill kind">' + esc(unitPlanWord(unitFormat(u))) + '</span> ' +
     '<span class="mono">' + unitPlanCount(k) + '</span>';
 }
+/* ── §540 · PILLARS SHOWN AS ONE LIST, OR APART ──────────────────────────
+   The row beside "Plans in", and only where the box plans in pillars — there
+   is nothing to join or split otherwise. Two options, both named from the
+   BOX'S OWN WORDS: a client that calls its pillars Directions and its
+   internal ones Core Capabilities reads its own names here, because the whole
+   point of the setting is that the tabs keep saying what they say today.
+
+   ABSENT IS ONE LIST (§50.6). Every box in every client reads that way now,
+   so the control opens on the answer the box already gives and changing
+   nothing changes nothing. */
+function pillarSplitWord(split){
+  return split ? L("pillar", "bu") + " and " + L("capability", "bu") + " apart" : "One list";
+}
+function pillarSplitSelect(k, u){
+  var on = SMPRules.pillarsSplit(u);
+  return '<select class="fld" data-usplit="' + esc(k) + '"' +
+      ' aria-label="How ' + esc(u.name) + ' shows its ' + esc(L("pillar","bu").toLowerCase()) + '">' +
+    [false, true].map(function(v){
+      return '<option value="' + (v ? "split" : "one") + '"' + (on === v ? " selected" : "") + '>' +
+        esc(pillarSplitWord(v)) + '</option>'; }).join("") + '</select>';
+}
 function unitFormatSelect(k, u){
   var f = unitFormat(u);
   return '<select class="fld" data-uformat="' + esc(k) + '"' +
@@ -37451,6 +39219,12 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdField("Plans in", unitFormatSelect(k, u)) +
+        /* §540: and, while it plans in pillars, whether they show as one list
+           or apart. Hidden for the other two ways rather than greyed: there
+           are no pillars on screen to join or to split, so the row would be
+           answering about something the box is not doing (§61). */
+        (unitFormat(u) === "pillars"
+          ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
         pdField(L1("division"),
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
@@ -37617,7 +39391,7 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    show nothing selected. The subject already says which plan it keeps, so
    changing the format IS changing the subject. */
 function impFmtOf(target){
-  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
+  return boxRef(target).kind === "cap" ? "projects" : "pillars";
 }
 /* The subjects a progress file can be downloaded for, in the chosen format. */
 function impSubjects(fmt){
@@ -38373,7 +40147,7 @@ function renderPeople(){
        gets no such line, which is honest: nothing here knows who else holds
        it. */
     function roleHolder(role){
-      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      var hr = boxRef(home), fn = hr.kind === "fn" ? FUNCTIONS[hr.key] : null;
       if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
       if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
       if (role === "fnhead")    return fn ? fn.head : null;
@@ -38389,7 +40163,7 @@ function renderPeople(){
            off `roleWheres()` rather than guessed (§135.6). */
         var hint = "";
         if (!fits) {
-          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
                  (atCo ? "Company" : "Unit") + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
@@ -38862,7 +40636,22 @@ function renderPeople(){
     if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
-    if (personActive(p)) {
+    /* ── AND THIS ENTRY IS A SIMULATION, SO IT OBEYS THE SIMULATION'S RULE
+       (§554) ───────────────────────────────────────────────────────────
+       It was gated on nothing but the row being active, which was true while
+       the whole page was the Super user's. Setup is the office's since
+       §516.2, so an SMO team member already reached this menu and already
+       got the entry — and pressing it CHANGED WHAT WAS DRAWN while their
+       saves went on being judged as themselves, because `actingAs()` would
+       not stamp a view the chrome had not drawn a switcher for. That is
+       §185's fault, open on the one path that never asked.
+
+       Asked of sync.js, the same answer the top bar's list and the server's
+       refusal use (§42): the office may look through the register, and the
+       SMO team through all of it but the Super user. Absent rather than
+       disabled on a row they may not wear — a disabled control invites a
+       press and has nowhere to put "because of who THEY are". */
+    if (personActive(p) && maySimulatePerson(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
     /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
@@ -38916,7 +40705,7 @@ function renderPeople(){
 
        The open row's cell is lifted instead of raising the menu: the menu's
        own z-index cannot escape a context its parent created. */
-    var lifted = open || PDEL === p.key || PSETPW.key === p.key;
+    var lifted = open || PDEL === p.key || PRET === p.key || PSETPW.key === p.key;
     return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
       '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
       'aria-haspopup="true" aria-expanded="' + open + '" ' +
@@ -38925,7 +40714,7 @@ function renderPeople(){
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
       (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + pwPanel(p) + '</td>';
+      retirePanel(p) + deletePanel(p) + pwPanel(p) + '</td>';
   }
 
   /* ── THE PASSWORD PANEL (§69.22) ────────────────────────────────
@@ -38978,6 +40767,31 @@ function renderPeople(){
      BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
      the render that drew this (§48.2). What is drawn here is what to READ;
      what is enforced is asked again at the moment it matters. */
+  /* ── RETIRING, IN THE SAME CORNER AS DELETING (§534.3) ─────────────────
+     The two acts sit next to each other in this row's menu and asked in two
+     different mediums — delete in the panel below, retire in the browser's
+     box. This is the panel's shape, and nothing about it is new: the same
+     frame, the same corner, the same second press.
+
+     IT ONLY ASKS WHEN THERE IS SOMETHING TO TAKE, which the browser's box
+     also did and which must survive the move — a version that asked whatever
+     the row held would be worse than what was there. Somebody holding
+     nothing is retired by the press, because nothing is being decided. */
+  function retirePanel(p){
+    if (PRET !== p.key) return "";
+    var held = personRoles(p).length;
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Retire ' + esc(p.name) + '?</b> ' +
+      (held
+        ? 'They hold ' + plural(held, "role") + '. Retiring takes ' +
+          (held === 1 ? "it" : "them") + ' away and closes their sign-in.'
+        : 'This closes their sign-in.') +
+      ' Everything already reported in their name stays, and <b>Restore</b> ' +
+      'brings them back.</div>' +
+      '<div class="cbtns"><button data-pret-no="1">Cancel</button>' +
+      '<button class="danger" data-pret-yes="' + esc(p.key) + '">Retire</button>' +
+      '</div></div>';
+  }
   function deletePanel(p){
     if (PDEL !== p.key) return "";
     var blockers = personDeleteBlockers(p.key);
@@ -38987,8 +40801,17 @@ function renderPeople(){
            are and the blocker itself opens with a count of its own, so one
            blocker naming two roles read "There is 2 roles still held". The
            blockers are sentences; they do not need introducing. */
-        '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
-        blockers.map(function(b){ return b.full; }).join('; and ') + '.' +
+        /* §534.2: THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO. Drawn
+           on open it says what cannot be done; drawn after Yes was pressed
+           and refused it says what was not done and why that is news —
+           which is the whole of the difference between the two, and the
+           reason the second one is not simply the first repeated. */
+        (REFUSEDLATE === "p:" + p.key
+          ? '<b>' + esc(p.name) + ' was not deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') +
+            ', since this was asked.'
+          : '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') + '.') +
         ' <b>Retire</b> closes the door and keeps every attribution true.</div>' +
         '<div class="cbtns"><button data-pdel-no="1">Close</button></div></div>';
     }
@@ -40240,7 +42063,9 @@ function renderMainbus(){
       return '<span class="uchip">' + esc(roleWhereLabel(at)) +
         (editable ? '<button class="chipx" data-mbdrop="' + esc(b.name) + '|' + esc(at) +
                     '" title="Remove ' + esc(roleWhereLabel(at)) + '">&times;</button>' : '') +
-        '</span>';
+        '</span>' +
+        /* §534.4: the question under the chip it belongs to. */
+        rmStrip("mbdrop", b.name + "|" + at, RMASK ? RMASK.say : "");
     }).join(" ");
     if (!editable) return chips;
     var left = wheres.map(function(g){
@@ -40269,8 +42094,21 @@ function renderMainbus(){
     return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"' +
       (editable ? ' class="tk-open"' : '') + '><td class="idx">' +
       (i + 1) + '</td>' +
+      /* §534.2: THE REFUSAL SITS UNDER THE BOX, AND KEEPS WHAT WAS TYPED.
+         This one fires on leaving the field, which is where the sentence
+         belongs — and the browser's box could not do the other half: the
+         repaint behind it put the old name back, so by the time the refusal
+         had been read the typing was gone and had to be done again. The box
+         holds the refused name, to be corrected rather than retyped. */
       '<td>' + (editable
-        ? '<input class="fld tk-firstfield" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
+        ? '<input class="fld tk-firstfield' + (mbWhy(b.name) ? ' bad' : '') + '" value="' +
+            esc(mbWhy(b.name) ? MBWHY.typed : b.name) + '" data-mbname="' + esc(b.name) + '"' +
+            (mbWhy(b.name) ? ' aria-invalid="true"' : '') + '>' +
+          (mbWhy(b.name)
+            ? '<p class="picerr">There is already a BU called <b>' +
+              esc(MBWHY.typed) + '</b>. Two cannot be merged by renaming one into the ' +
+              'other \u2014 move the people first.</p>'
+            : '')
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
       '<td>' + target(b, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + n + '</span></td>' +
@@ -40282,7 +42120,8 @@ function renderMainbus(){
         !mayEdit || editable ? '' :
           (n ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
              : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')) +
-      '</tr>';
+      '</tr>' +
+      rmStripRow("mbdel", b.name, RMASK ? RMASK.say : "", 5);
   }).join("");
 
   /* The Add row and the table's own existence are the PAGE's question, not a
@@ -40658,7 +42497,7 @@ function whenWord(at){
   if (sameDay) return "today";
   var y = new Date(now.getTime() - 864e5);
   if (d.toDateString() === y.toDateString()) return "yesterday";
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return dateDay(d);
 }
 
 function oneLine160(v){
@@ -41433,7 +43272,29 @@ function renderSeasons(){
               (mayEdit
                 ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
                     'title="Remove this season">×</button></td>'
-                : '') + '</tr>';
+                : '') + '</tr>' +
+              /* ── §534.2: THE REFUSAL IS A LINE UNDER THE ROW ──────────
+                 It was a browser box, which could say the units' names but
+                 could not make them reachable — and this page's own rule is
+                 that a count which cannot take you to what it counts makes
+                 work (§16.7). The names were already here, in the `title` of
+                 the Used by cell: visible to a mouse that hovers the right
+                 four pixels and to nothing else. Pressed, each one opens that
+                 unit's Drivers, which is where the sentence says to go. */
+              (SEASWHY === s.id && used.length
+                ? '<tr class="seasrefuse"><td colspan="' + (mayEdit ? 7 : 6) + '">' +
+                    '<p class="picerr"><b>' + esc(s.name || "This season") +
+                    ' is still in use.</b> ' + plural(used.length, "unit") + ' ' +
+                    (used.length === 1 ? "has" : "have") + ' it as a period of ' +
+                    (used.length === 1 ? "its" : "their") + ' own \u2014 ' +
+                    UNIT_KEYS.filter(function(k){
+                      return SMPRules.seasonUsedBy([UNITS[k]], s.id).length;
+                    }).map(function(k){
+                      return '<button class="linkbu" data-goseas="' + esc(k) + '">' +
+                             esc(UNITS[k].name) + '</button>';
+                    }).join(" ") +
+                    '. Take it off their Drivers page first.</p></td></tr>'
+                : '');
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No seasons yet. A season is a named window of real ' +
           'days that a unit can pull out of its base year — Ramadan, the school ' +
@@ -42343,12 +44204,12 @@ function renderUnitNaming(u){
    reads is not what this round is for (§58's rule for a stored field, applied
    to a local one). */
 function impHolderTarget(){
-  var t = String(IMP.unit || "");
-  if (t.indexOf("cap:") === 0) return t.slice(4);
+  var t = String(IMP.unit || ""), r = boxRef(t);
+  if (r.kind === "cap") return r.key;
   /* §405: a unit that is not planned in pillars imports through its own
      holder, exactly as a projects or objectives function does. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return "u:" + t;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
 }
 function impIsCap(){ return !!impHolderTarget(); }
@@ -42648,10 +44509,7 @@ function contCard(){
 }
 
 function contWhen(iso){
-  var d = new Date(iso);
-  return isFinite(d.getTime())
-    ? d.toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
-    : "";
+  return dateAt(iso);
 }
 
 /* ── The Upload tab ───────────────────────────────────────────────── */
@@ -42690,7 +44548,23 @@ function renderImportUpload(){
     '</div></div>';
 
   var chk = IMP.check;
-  var blocked = chk && chk.problems.length;
+  /* ── §534.2: THE BUTTON IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──────
+     "Importing is the SMO's. Nothing has been applied." was a browser box
+     raised by a live Apply — the whole flow walked through, a file read and
+     checked, and the answer no at the last press. The grant is read here, so
+     the refusal is a line where the button is and the button is held.
+
+     HELD, NEVER `disabled`, and never hidden (§221, §163, §45.2): a disabled
+     button takes no focus, so the reason beside it would be unreachable
+     without a mouse, and a control that vanishes leaves somebody wondering
+     whether the act exists at all. The handler still checks — that is the
+     enforcement, this is what to read (§48.2). */
+  var notMine = grant("c_import") !== "edit";
+  var blocked = (chk && chk.problems.length) || notMine;
+  var notMineSay = notMine
+    ? '<p class="picerr"><b>Importing is the SMO\u2019s.</b> You can read this file and ' +
+      'check it against the plan; applying it is the office\u2019s.</p>'
+    : '';
   var checkBlock = chk && (chk.problems.length || chk.notices.length)
     ? '<div class="imp-checks">' +
         chk.problems.map(function(x){
@@ -42779,8 +44653,13 @@ function renderImportUpload(){
           'Kept as an archive dated today and restorable from <b>Archived plans</b> at any ' +
           'time. Nothing is destroyed.</div>'
         : '') +
+      notMineSay +
       '<div class="imp-row" style="margin-top:14px">' +
-        (blocked
+        (notMine
+          ? '<button class="editbtn apply" aria-disabled="true" ' +
+            'data-tip="Importing is the SMO\u2019s.">' +
+            (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>'
+          : blocked
           ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
           : '<button class="editbtn apply" data-apply="1">' +
             (hasPlan ? "Replace " : "Write ") + esc(u.name) + '’s plan</button>') +
@@ -42806,8 +44685,15 @@ function renderImportUpload(){
         '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
       checkBlock + rowsHtml +
       (changed.length
-        ? '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
+        ? notMineSay +
+          '<div class="imp-row" style="margin-top:14px">' +
+          /* notMine is tested FIRST in both branches: `blocked` already holds
+             it, so the generic "Apply blocked" would otherwise win and say
+             nothing about whose the act is. */
+          (notMine
+            ? '<button class="editbtn apply" aria-disabled="true" ' +
+              'data-tip="Importing is the SMO\u2019s.">Apply to ' + esc(u.name) + '</button>'
+            : blocked
             ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
             : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
           '<button class="linkbu" data-cancel="1">Discard</button></div>'
@@ -42823,6 +44709,26 @@ function renderImportUpload(){
    nervous one: an upload never deletes, and the proof is a list you can read.
 
    The only destructive control in the import flow is Delete, and it asks. */
+/* WHAT AN ARCHIVE HOLDS, SAID IN ONE PLACE (§53.5). The row prints it and
+   the Forget dialog repeats it back before destroying it — two copies of
+   this is how the table and the question come to disagree about what is
+   about to be lost, which is the one disagreement that question cannot
+   survive. Three kinds: a unit's plan, a capability's plan, and a CYCLE's
+   figures, taken when a new cycle clears the last one's numbers (§49.1). */
+function archiveHeld(a){
+  var c = (a && a.counts) || {};
+  return a.kind === "figures"
+    ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
+       plural(c.units || 0, "submitted unit")].join(" &middot; ")
+    : a.kind === "foundation"
+    ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : a.kind === "unit"
+    ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
+       plural(c.tactics, L1("tactic"), L("tactic")),
+       plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
+       c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+}
 function renderArchives(){
   var can = grant("c_import") === "edit";
   if (!ARCHIVES.length)
@@ -42834,21 +44740,11 @@ function renderArchives(){
 
   var rows = ARCHIVES.map(function(a){
     var c = a.counts || {};
-    /* Three kinds now: a unit's plan, a capability's plan, and a CYCLE's
-       figures — taken when a new cycle clears the last one's numbers (§49.1).
-       A figures archive belongs to no one unit, so it is always restorable. */
-    var held = a.kind === "figures"
-      ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
-         plural(c.units || 0, "submitted unit")].join(" &middot; ")
-      : a.kind === "foundation"
+    var held = archiveHeld(a) +
       /* §524: the six parts of a Foundation, replaced from the Copilot. */
-      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
-        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
-      : a.kind === "unit"
-      ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
-         plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
-      : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
-         c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+      (a.kind === "foundation"
+        ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
+        : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
@@ -42872,7 +44768,7 @@ function renderArchives(){
           : '<span class="why">nothing reported</span>') + '</td>' +
       '<td class="cc">' + (can && live
         ? '<button class="editbtn" data-restore="' + esc(a.id) + '">Restore</button> ' +
-          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Delete</button>'
+          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Forget</button>'
         : '<span class="pill none">View only</span>') + '</td></tr>';
   }).join("");
 
@@ -43068,10 +44964,11 @@ function contTakenSection(){
 function reviewDayWord(){
   var w = SMPRules.reviewMoment(REVIEW);
   if (!w) return "";
-  var day = w.toLocaleDateString(undefined, { day:"numeric", month:"short" });
-  return REVIEW.reviewAt
-    ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
-    : day;
+  /* The day and the day-with-time are the SAME two writers everything else
+     uses; this used to build the second one itself out of the day plus the
+     browser's idea of a time, which is "09:00" here and "09:00 AM" on an
+     American machine. */
+  return REVIEW.reviewAt ? dateAt(w) : dateDay(w);
 }
 
 function reviewDayBlock(){
@@ -43670,19 +45567,48 @@ function renderCycle(){
            an end its own arithmetic could not read. The dates go through
            `cyclePick` and write into the draft through FIELDS; only the NAME
            is still typed, so only the name is still read by id. */
-        '<div class="nc-grid nc-1line">' +
-          '<label class="nm-lab"><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          cyclePick("Covers from", NEWCYCLE.from, function(v){
-            NEWCYCLE.from = String(v).trim();
-          }, { wide:true }) +
-          cyclePick("to", NEWCYCLE.to, function(v){
-            NEWCYCLE.to = String(v).trim();
-          }, { wide:true, cls:"tobtn" }) +
-          cyclePick("Reports due", NEWCYCLE.due, function(v){
-            NEWCYCLE.due = String(v).trim();
-          }, { day:true }) +
-        '</div>' +
+        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
+           Both of this panel's refusals were browser boxes, and a box opens
+           OVER the form: the empty field could not be seen while the sentence
+           about it was on screen. The name's box then put the cursor in the
+           field afterwards and the month's did not — one form, two
+           behaviours, because a notice said away from its control has no
+           natural place to point.
+
+           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
+           `NEWCYCLE.why` names the field that was empty when Open was
+           pressed, and this reads it back against the CURRENT value, so
+           filling the box clears the line with no handler to remember. */
+        (function(){
+          var why = NEWCYCLE.why;
+          if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
+          if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
+          return '<div class="nc-grid nc-1line">' +
+            '<label class="nm-lab"><span>Name</span><input class="fld' +
+              (why === "name" ? " bad" : "") + '" id="nc-name"' +
+              (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
+              esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
+            cyclePick("Covers from", NEWCYCLE.from, function(v){
+              NEWCYCLE.from = String(v).trim();
+            }, { wide:true }) +
+            cyclePick("to", NEWCYCLE.to, function(v){
+              NEWCYCLE.to = String(v).trim();
+            }, { wide:true, cls:"tobtn" + (why === "to" ? " bad" : "") }) +
+            cyclePick("Reports due", NEWCYCLE.due, function(v){
+              NEWCYCLE.due = String(v).trim();
+            }, { day:true }) +
+          '</div>' +
+          (why === "name"
+            ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
+              'are filed under once it closes, and what the next cycle compares against.</p>'
+            : why === "to"
+            /* The band below already says what the month decides, and it is on
+               screen — so the refusal names the control and leaves the
+               explaining to the sentence that was always there. */
+            ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
+              'It is the review point, and the line below says what it decides.</p>'
+            : '');
+        })() +
         '<div class="nc-why"><b>The month it covers to decides what every figure is ' +
           'measured against.</b> A target that adds up across the year is compared with ' +
           'the share of it due by then, and a tactic whose span has not started yet is ' +
@@ -43924,12 +45850,30 @@ function capFormatCell(c, editable){
     ? (capItems(c).length ? "its plan" : "")
     : ((c.projects || []).length
         ? plural((c.projects || []).length, L1("project"), L("project")) : "");
-  return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
-      (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
+  /* HELD, NOT DEAD (§538). The row says "holds its plan" beside it, which
+     names the obstacle; the way OUT of it — clear that plan first — sat on a
+     `disabled` control, which takes no pointer and no Tab, so half the answer
+     was on screen and half reached nobody.
+
+     THE BUBBLE IS ON A WRAPPER AND NOT ON THE SELECT, because a browser does
+     not paint `::after` on a form control, and the bubble IS an `::after`. The
+     span opens it on hover; `:focus-within` opens it when the select inside
+     takes focus, which is the half a plain hover never had.
+
+     AND THE REFUSAL MOVED TO THE HANDLER. `aria-disabled` leaves a select
+     genuinely changeable — unlike a button, where it is the handler that
+     declines — so the change listener puts the row back (shell.html). The
+     options are both still drawn, exactly as before: what is held is the
+     change, not the sight of what the other way would be. */
+  var sel = '<select class="fld" data-capformat="' + esc(c.id) + '"' +
+      (blocked ? ' aria-disabled="true" data-capwas="' + (pillars ? "pillars" : "projects") + '"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
     '<option value="projects"' + (pillars ? "" : " selected") + '>' + L("project") + '</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
-    '</select>' +
+    '</select>';
+  return (blocked
+      ? '<span class="hasnote capheld" data-tip="Clear the plan on this row first">' + sel + '</span>'
+      : sel) +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
 /* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
@@ -44066,15 +46010,33 @@ function fnKebab(fk, f, mayEdit){
    delete question. */
 function fnPanels(fk, f){
   if (CLEARING === "fndel|" + fk) {
+    /* ── §534.2: THE QUESTION IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──
+       "Functions are the SMO's. Nothing has been deleted." was a browser box
+       raised by the SECOND press — the question was asked, Yes was pressed,
+       and only then was the answer no. The grant is read here, so what opens
+       is the refusal and there is no Yes to press. The handler still checks
+       (§48.2): this decides what to READ, that decides what happens. */
+    if (grant("c_fns") !== "edit")
+      return '<div class="kmenu kconfirm"><div class="cq">' +
+        '<b>' + esc(f.name) + ' cannot be deleted from here.</b> Functions are the ' +
+        "SMO's. <b>Retire</b> takes it out of your navigation and keeps everything " +
+        'under it.</div>' +
+        '<div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var why = fnDeleteBlockers(fk);
     if (why.length) return '<div class="kmenu kconfirm"><div class="cq">' +
-      '<b>' + esc(f.name) + ' cannot be deleted.</b> ' +
+      /* THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO (§534.2): drawn on
+         open it says what cannot be done; drawn after Yes was pressed and
+         refused it says what was not done, and that this is news. */
+      (REFUSEDLATE === "fn:" + fk
+        ? '<b>' + esc(f.name) + ' was not deleted.</b> '
+        : '<b>' + esc(f.name) + ' cannot be deleted.</b> ') +
       /* Each reason is a sentence in a paragraph of them, so it starts with a
          capital. Written where they are JOINED, not baked into the strings,
          because the same text is spoken mid-sentence by the server's refusal. */
       why.map(function(w){
         return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
       }).join(" ") +
+      (REFUSEDLATE === "fn:" + fk ? ' That has come to be true since this was asked.' : '') +
       ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var takes = fnDeleteTakes(fk);
@@ -44264,8 +46226,19 @@ function renderFunctions(){
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
+      /* ── §534.3: THE NAME IS TYPED IN THE PAGE, NOT IN A prompt() ──────
+         The last browser prompt in the product. §69.22 took the other one
+         out for the reason that applies here too: a browser is allowed to
+         SUPPRESS a prompt, and a suppressed prompt is a control that looks
+         live and does nothing. The shape is the BU list's own add row — a
+         field and an Add beside it — so the two places you name a new thing
+         are named the same way (§53.5). */
       (mayEdit && !arranging
-        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
+        ? '<div class="addrow">' +
+          '<input class="fld" id="newfn" value="' + esc(NEWFN) + '" ' +
+          'placeholder="' + L1("fnword") + ' name" ' +
+          'aria-label="Name of the ' + L1("fnword") + '">' +
+          '<button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
         : ''));
 }
 
@@ -44273,15 +46246,25 @@ function renderFunctions(){
    The SMO decides which capabilities exist and which function owns each. Each
    belongs to exactly one function; the enhancement work inside them arrives by
    template, the way a unit's plan does. */
+/* §542: the company's internal pillars, read as capabilities — code, name
+   and owner, which is all this page ever showed that a pillar also has. */
+function capsAsPillars(){
+  var u = topAsUnit(), out = [];
+  (u.items || []).forEach(function(p, i){
+    if (SMPRules.pillarIsCap(p)) out.push({ code: pillarCode(u, i), name: p.name || "", owner: p.owner || "" });
+  });
+  return out;
+}
 function renderCaps(){
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
+  /* §542: this client's capabilities are pillars, not records. */
+  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
-    var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+    return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
       (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
@@ -44292,18 +46275,14 @@ function renderCaps(){
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
-      '<td>' + (editable
-        /* NAMED. Eight of these on one page announced as eight identical
-           unnamed combo boxes, and the searchable button in front of each
-           inherits the name from here (§48.5). */
-        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
-          esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
-            FUNCTION_KEYS.map(function(k){
-              return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
-                esc(FUNCTIONS[k].name) + '</option>';
-            }).join("") + '</select>'
-        : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
+      /* §544.13 — THE "HELD BY" COLUMN IS GONE. Islam, asked whether set-up
+         should still let the office put a capability under a function:
+         **"no — remove it"**; a capability is the company's. The picker was
+         the last way to attach one, so it goes with the column it sat in,
+         and what is left is the two seats §412 gave it — an Owner and a
+         Custodian of its own, which is how a capability is answered for
+         now. The `fn` already on a record is neither read here nor written
+         (§405). */
       /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
          used to borrow the holding function's head, which is right while a
          capability is only ever held by a function and wrong for a
@@ -44332,7 +46311,9 @@ function renderCaps(){
   /* A capability with no function is a real answer now (§412) — a
      company-wide one is held by nobody. What is still outstanding is one
      that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  /* §544.13: "no owner and no holding function" is just "no owner" — no
+     capability has a holding function any more. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
@@ -44350,15 +46331,39 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit
+      (mayEdit && !capsAreP
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
+        : '') +
+      /* ── §542 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
+         A client whose capabilities have become internal pillars of the
+         company's plan (stage 3b) opened this page on an EMPTY table with an
+         Add button that would mint the very record type the move removed.
+         §61's fault twice over: a page saying nothing about the thing it is
+         named after, and the only control on it being the wrong one.
+
+         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
+         pillar's name, owner and custodian are edited on the plan with the
+         pen, like every other pillar's, and a second place to type them is a
+         second answer to who owns this (§53.5). The Add button goes with
+         them — there is nothing on this page left to add. */
+      (capsAreP
+        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
+            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
+            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
+            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
+            capsAsPillars().map(function(r){
+              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
+                ' <span class="why" style="margin:0">' +
+                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
+          '</ul></div>'
         : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
@@ -45359,11 +47364,18 @@ function renderSentOne(){
           '\u2014 nobody resolved into the audience at all.</span>');
   }
   var m = (SENTONE.data && SENTONE.data.message) || {};
+  /* §548: THE FACT MOVES TO THE HOVER, which is where rule 1b-ii sends a
+     sentence like this one — "it is information, and it belongs on a hover
+     ... never as a paragraph". It is worth keeping: without it this table
+     reads as something the screen worked out just now, when it is the record
+     written at the moment of sending. `section()`'s own fifth argument draws
+     it, so nothing new was built and the words did not change. */
   return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
-    "Written when it was sent, so it is what actually happened rather than what the " +
-    "screen worked out beforehand.",
+    null,
     body + '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+      '<button class="linkbu" data-sentclose="1">Close</button></div>',
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.");
 }
 
 function renderSentList(){
@@ -45718,9 +47730,9 @@ function vidStoreWhere(path){
   return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
 }
 function deckSubjectName(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     return f ? f.name + " (function)" : t;
   }
   var u = UNITS[t];
@@ -45902,9 +47914,9 @@ function builderHere(){
    own reader and answers all three, so a fourth format is a case here rather
    than a fall-through. */
 function builderRoute(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
+  var f = FUNCTIONS[r.key];
   if (!f) return null;
   var fmt = fnFormat(f);
   return fmt === "pillars" ? "fnpillars"
@@ -45922,7 +47934,8 @@ function builderSubjectName(target){
      a projects function is not drawn by them — asked through it, every
      projects function built here was nameless (found by driving, §51.7). */
   var t = String(target || "");
-  if (t.indexOf("fn:") === 0) { var f = FUNCTIONS[t.slice(3)]; return f ? f.name : ""; }
+  var br = boxRef(t);
+  if (br.kind === "fn") { var f = FUNCTIONS[br.key]; return f ? f.name : ""; }
   return UNITS[t] ? UNITS[t].name : "";
 }
 function builderHasPlan(target){
@@ -46246,7 +48259,7 @@ function bformDef(kind, ctx){
         { k:"theme", label:L1("theme"), type:"select",
           opts:[["","— cross-cutting, no " + labelWord("theme","group") + " —"]].concat(
             GROUP.themes.map(function(t){ return [t.ab, t.ab + " · " + t.name]; })) },
-        { k:"owner", label:"Owner", ph:"Who answers for it" }
+        { k:"owner", label:"Owner", type:"owner" }
       ] },
     measure: { title:"Add a " + labelWord("measure","group"),
       fields:[
@@ -46259,7 +48272,7 @@ function bformDef(kind, ctx){
     tactic: { title:"Add a " + L1("tactic"),
       fields:[
         { k:"name", label:L1("tactic"), req:true, ph:"The work itself, as a sentence" },
-        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"q", label:"Quarters it is due in", type:"quarters" }
       ] },
     objective: { title:"Add a " + L1("keyobj"),
@@ -46286,7 +48299,7 @@ function bformDef(kind, ctx){
     project: { title:"Add a " + L1("project"),
       fields:[
         { k:"name", label:L1("project"), req:true, ph:"What the " + labelWord("project","group") + " is called" },
-        { k:"owner", label:"Owner", ph:"Who answers for it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"start", label:"Start", mono:true, ph:"e.g. Q1 2026" },
         { k:"end", label:"End", mono:true, ph:"e.g. Q4 2026" },
         { k:"brief", label:"Brief", type:"long", ph:"Why this " + labelWord("project","group") + " exists, in two sentences" }
@@ -46309,7 +48322,7 @@ function bformDef(kind, ctx){
       fields:[
         { k:"name", label:"Milestone", req:true, ph:"Short name" },
         { k:"covers", label:"Description", type:"long", ph:"What done looks like" },
-        { k:"owner", label:"Owner" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"finish", label:"Due date", mono:true, ph:"e.g. March 2026" }
       ] },
     /* §381.2: AN ACTION IS THE MILESTONE'S FORM, THREE FIELDS RATHER THAN
@@ -46321,7 +48334,7 @@ function bformDef(kind, ctx){
     action: { title:"Add an action",
       fields:[
         { k:"name", label:"Action", req:true, ph:"The work itself, as a sentence" },
-        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"owner", label:"Owner", type:"owner" },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
       ] },
     clause: { title:"Add a line to “Who we are”",
@@ -46388,6 +48401,30 @@ function bformFieldHtml(f, draft){
         return '<button type="button" data-bfv="' + esc(o[0]) + '" aria-pressed="' + (v === o[0]) + '">' +
           o[1] + '</button>';
       }).join("") + '</div></div>';
+  }
+  /* ── AN OWNER IS PICKED IN THE BUILDER TOO (§551.2) ────────────────────
+     Islam, after §551 and §551.1 had both treated the workbook as the wide
+     door: *"do not consider the upload through the sheets. Mostly, we build
+     it through the app, through the builder itself."* **So the premise those
+     two entries argued from was wrong, and THIS is the surface that mattered
+     all along** — five forms here (pillar, tactic, project, milestone,
+     action) each carried a bare text box asking "Who answers for it", and a
+     name typed into one goes straight into the plan.
+
+     IT IS `ownerChoices`, NOT A LIST OF ITS OWN (§53.5), so the register,
+     the departments, the "Not in the register" grouping and `searchsel`'s
+     search past five options all arrive with it. The reader is untouched:
+     shell.html writes `el.value` for every `[data-bf]` on input and change,
+     which a select answers exactly as the input did.
+
+     NO `ph` ON THESE FIELDS ANY MORE: a placeholder on a select draws
+     nothing, so leaving it would be a line of code that looks like a hint
+     nobody can see. The blank option is the hint. */
+  if (f.type === "owner") {
+    return '<div class="bff">' + lab + '<select class="bfi" data-bf="' + f.k + '">' +
+      (typeof ownerChoices === "function" && typeof optionsHtml === "function"
+        ? optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; })
+        : '<option value=""></option>') + '</select></div>';
   }
   if (f.type === "select") {
     return '<div class="bff">' + lab + '<select class="bfi" data-bf="' + f.k + '">' +
@@ -46494,7 +48531,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "cap") {
-    var made = addCapability(ctx.fnKey); if (!made) return false;
+    var made = addCapability(); if (!made) return false;
     made.name = v("name") || made.name; made.def = v("def");
     return true;
   }
@@ -46811,15 +48848,21 @@ function anch(key, label, where){
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
 function deckHtmlFor(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
+  /* §554.1: and a part of the FLOW that is not a box either — its cover,
+     and a group's roll-call in front of the first of its members. Answered
+     before `boxRef`, which would read an unknown prefix as a business unit. */
+  if (t.indexOf("flow:") === 0) return flowPartHtml(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
-  if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
+  if (r.kind === "dir") return dirDeckHtml(t);
+  /* §553: and a part of the order that is not a box at all. */
+  if (r.kind === "sec") return secDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
      function and a capability, which is the fault §253.3 fixed on one surface
      of three arriving as a third kind of subject. */
-  if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
+  if (r.area === "fn")
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
   /* §405: a unit that plans in projects or in objectives and actions gets the
@@ -46962,7 +49005,7 @@ function unitSwotSlides(u){
        one accent across a row, never one per card (§41's budget). */
     S.push(sectSlide("swothead", "After the SWOT title page",
       SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
-      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
+      "Where " + (u.topLayer ? deckBoxName(u) : "this unit") + " is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
@@ -47000,6 +49043,208 @@ function competeSlides(u){
     '<tr><th class="cmprow">Measure</th>' + cells(function(v){ return '<td>' + ul(v.measure) + '</td>'; }) + '</tr>' +
     '</tbody></table></section>'];
 }
+/* ── §553.2 — "WHERE IT STANDS", BUILT ONCE FOR EVERY KIND OF BOX ───────
+   Stage 5 (b). A box that plans in PILLARS ends its deck on three readings —
+   its objectives, its pillars and its execution — and a box that plans in
+   PROJECTS ended on nothing at all: no Overall performance divider and no
+   standing, so a function presenting its projects never said how it did.
+
+   WHY IT IS NOT A COPY OF THE PILLARS SLIDE. A projects box has no pillars
+   score — `unitPillars` answers null for it — so pasting that slide would
+   print an empty cell where the middle reading goes. What it HAS is its
+   objectives (`capKOScore`) and its execution (`capExec`), measured. So the
+   slide is the same slide and the CELLS are whatever the box has, which is
+   what one template means: the shape is shared, the content is the box's.
+
+   ONE DESCRIPTION, NOT TWO (§53.5). Writing a second copy of this markup
+   beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
+   both callers build cells and hand them here. A change to the wording, the
+   bands or the footer reaches both by construction. */
+function standCell(label, val, sub){
+  return '<div class="headcell"><span class="dlab">' + label + '</span>' +
+    '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
+    '<span class="headsub">' + sub + '</span></div>';
+}
+function standSlideOf(name, cells, foot){
+  cells = cells.filter(Boolean);
+  return '<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
+    '><h2>Where ' + name + ' stands</h2>' +
+    '<div class="headgrid' + (cells.length > 2 ? ' three' : '') + '">' +
+    cells.join("") + '</div><p class="headfoot">' + foot + '</p></section>';
+}
+
+/* ── A BOX IS PRESENTED UNDER ITS OWN NAME (§553.8) ──────────────────────
+   Islam, of the review built for El Abd: *"there is nothing called elabd
+   review as a group or as a company"*.
+
+   The deck was headed "Group", and ended on "Where Group stands". "Group"
+   is the tenant's WORD for the top layer — what you call it in a navigation
+   row, beside "Business unit" and "Function" — and `topAsUnit()` hands it
+   over as the box's `name` because that is the right word on every page
+   that is about the SHAPE of the company.
+
+   A ROOM IS NOT A NAVIGATION ROW. On a projector the cover says who is
+   presenting, and that is the company: El Abd. So the deck asks for the
+   name and the pages go on asking for the word. The fallback is the word
+   again, so a client who has not named their company reads exactly as it
+   does today (§50.6). */
+function deckBoxName(u){
+  return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
+}
+
+function pillarCard(u, p, i){
+  /* §542: on a box SHOWN APART, an internal pillar says what it is where
+     it has nothing else to say — exactly as a capability's own card does
+     below, so a client whose capabilities have become pillars reads the
+     roll-call it read when they were records. Its own sub-line still wins.
+
+     THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
+     six of the worked example's ten units carry a pillar marked Capability
+     in one joined list, and the first draft of this line put the word
+     "Capability" under every one of them on their decks. checks/
+     deck-figures.py caught it on the heading below; the same mistake was
+     here, one line up, and the same guard closes both. */
+  var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
+  return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
+    '<span class="pcard-n">' + esc(p.name) + '</span>' +
+    (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
+    /* §416: the years each direction runs in, and a later one says when. */
+    (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+    '</div>';
+}
+
+/* ── THE ROLL-CALL, FOR WHOEVER IS DRAWING IT (§554.1) ──────────────────
+   It was written inside `deckSlides`, which is the only place that needed
+   it until Islam asked for the same page in the MASTER flow: *"before the
+   directions I find the grouped directions and same for the capabilities"*.
+   Lifted out unchanged so the flow shows the same slide the company's own
+   review shows, and a change to one is a change to both (§53.5). */
+function groupSize(g){
+  return g.ix.length + (g.cards ? boardCapTargets().length : 0);
+}
+function rollCallSlide(u, g){
+  var n = groupSize(g);
+  if (!n) return "";
+  return '<section class="dslide"' +
+    anch(g.names, "After the " + g.plain + " names") +
+    '><h2>' + g.many + '</h2>' +
+    '<div class="pcards" style="--n:' + n +
+      ';--c:' + pillarCols(n) +
+      ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+    g.ix.map(function(x){ return pillarCard(u, x.p, x.i); }).join("") +
+    g.cards + '</div></section>';
+}
+
+/* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
+   Lifted out of `deckSlides` whole, so the master flow can draw the same
+   roll-calls the company's own review draws rather than a second pair
+   that looks like them (§53.5). `short` is the caller's: the company's
+   review splits its two kinds, a unit's deck does not. */
+function pillarGroups(u, short){
+var capCards = !short ? "" : boardCapTargets().map(function(t){
+  var c = capById(t.slice(4)), nm = placeLabel(t);
+  return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
+    '<span class="pcard-n">' + esc(nm) + '</span>' +
+    '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
+}).join("");
+/* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+   One group, as every deck has had, EXCEPT on the company's own review of
+   a plan that is shown apart: there the directions and the capabilities
+   are two things, and reading all ten under one heading called Directions
+   was not a wording slip — the standing slide below counted ten of them
+   and said "10 Directions, by their measures", five of which were
+   capabilities.
+
+   THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+   roll-call or the score table stays where its owner put it; the second
+   group's two slides are new ground and carry new anchors (§96.2).
+
+   A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+   directions and no capabilities reads exactly as it does today. */
+var groups;
+if (short && boxSplit(u)) {
+  var dirs = [], caps = [];
+  u.items.forEach(function(p, i){
+    (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+  });
+  /* ── THE RUNNING ORDER IS THE ORDER (§553.10) ──────────────────────
+     Islam: *"the company picker should pick the foundation of the company
+     then I pick the directions arrangement and then the capabilities
+     arranged. and the grouped directions comes before the directions
+     automatically and the capability grouped comes before the
+     capabilities automatically"*.
+
+     THE PICKER ALREADY HOLDS THEM. The Master presentation's running
+     order lists every direction and every capability by name, draggable,
+     stored per client as an absence (§50.6) — `dir:<id>` for each. So the
+     company's own review reads THAT, and there is no second control to
+     keep in step (§53.5). The alternative was the plan's own Arrange,
+     which works today and renumbers as it goes: drag Egypt Expansion to
+     the top and it becomes D001 on every surface in the platform. An
+     order for a room must not rewrite the codes the year is filed under.
+
+     THE ORDER ONLY, NEVER THE MEMBERSHIP. A tick in that picker says
+     who presents in the MASTER FLOW; it cannot mean "and is therefore in
+     the company's own deck", or unticking a direction would silently
+     drop it from the company's review of its own plan (§96.2). Anything
+     the order does not name keeps its place in the plan, after those it
+     does.
+
+     AND THE ROLL-CALLS ARE NOT IN THE PICKER. "Directions" and
+     "Capabilities" are drawn in front of their own group, automatically,
+     because they are the group — not a subject somebody places. */
+  var flow = masterOrder();
+  var at = function(x){
+    var k = flow.indexOf("dir:" + x.p.id);
+    return k < 0 ? flow.length + x.i : k;
+  };
+  var byFlow = function(a, b){ return at(a) - at(b); };
+  dirs.sort(byFlow); caps.sort(byFlow);
+  groups = [
+    { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+      one: L1("pillar"), head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: "" },
+    { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+      one: L1("capability"), head: L("capability","bu"),
+      names: "capnames",    score: "caps",    cards: capCards }
+  ].filter(function(g){ return g.ix.length || g.cards; });
+  /* AND THE GROUPS LEAD IN THE ORDER THEIR FIRST MEMBER DOES, so dragging
+     a capability above every direction makes Capabilities the first
+     group — one list, one answer, no second setting for "which kind
+     comes first" (§53.5). */
+  groups.sort(function(a, b){
+    return (a.ix.length ? at(a.ix[0]) : flow.length + 99) -
+           (b.ix.length ? at(b.ix[0]) : flow.length + 99);
+  });
+} else {
+  var bothKinds = !!capCards ||
+    (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+  groups = [{
+    ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+    /* §542: the one heading names both kinds whether the capabilities are
+       records beside the list or pillars inside a list SHOWN APART —
+       never because a joined list happens to hold a marked row (see the
+       sub-line above, and checks/deck-figures.py, which went red on
+       exactly that). */
+    many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+    /* The anchor's label is PLAIN TEXT, not the heading: the heading
+       carries `&amp;`, and a label is escaped on its way into the
+       attribute, so the rail would have read "Directions &amp;amp;
+       Capabilities". */
+    plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+    one: L1("pillar"),
+    /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+       named both kinds (§542); the table below has always been headed
+       with the pillar word alone, and widening it here would have moved
+       a live client's slide for nothing. */
+    head: L("pillar","bu"),
+    names: "pillarnames", score: "pillars", cards: capCards
+  }];
+}
+
+  return groups;
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -47016,11 +49261,11 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
+    sec("COVER", deckBoxName(u), true) + '>' +
     (deckMark(u)
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
@@ -47101,27 +49346,42 @@ function deckSlides(u){
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
-  var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
-    '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
-      (koShown
-        ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
-          '<b class="' + dBand(ko) + '">' + dPct(ko) + '</b>' +
-          '<span class="headsub">' + (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare") +
-          '</span></div>'
-        : '') +
-      '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
-        '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + itemsNow(u).length + ' ' + esc(L("pillar","bu")) +
-          ', by their measures</span></div>' +
-      '<div class="headcell"><span class="dlab">Execution performance</span>' +
-        '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
-        '<span class="headsub">' + dPct(unitExec(u)) + ' delivered against ' +
-          dPct(unitPlan(u)) + ' planned</span></div>' +
-    '</div><p class="headfoot">' +
+  /* §553.6: the company's own review shows its directions and its
+     capabilities apart, so the wording below has two groups to name. */
+  var capsApart = short && boxSplit(u) &&
+    u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
+    u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
+  /* §553.2: the cells are this box's; the slide is everyone's. */
+  var standSlide = standSlideOf(
+    (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
+    [ koShown && standCell(L("keyobj","bu") + ' performance', ko,
+        (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare")),
+      /* ── IT COUNTS WHAT IT NAMES (§553.6) ───────────────────────────
+         On El Abd this cell read "Directions performance · 10 Directions,
+         by their measures" — and five of the ten are capabilities. The
+         figure was right (it is the average over every pillar the box
+         plans) and the words were wrong, which is the worse of the two:
+         a room can check a name and cannot check an average.
+
+         ONE CELL STILL, not two. The two groups now have a score table
+         each (above), which is where a per-group reading belongs; this
+         slide is the box's overall and stays the box's overall. A fourth
+         cell would also break a grid that goes to three. */
+      standCell(capsApart
+          ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
+          : L("pillar","bu") + ' performance', pl,
+        capsApart
+          ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("pillar","bu")) + ' and ' +
+            itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
+            ' ' + esc(L("capability","bu")) + ', by their measures'
+          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+      standCell('Execution performance', ex,
+        dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
-    'Execution measures whether that work is landing on time.</p></section>');
+    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    ' measure how the work set against them is going. ' +
+    'Execution measures whether that work is landing on time.');
 
   /* ── AND IT IS SAID LAST (§254.4) ──────────────────────────────────────
      Islam: *"where the units stands to be the last slide"*, and *"move the
@@ -47203,68 +49463,97 @@ function deckSlides(u){
      THE ROW DIVIDES FOR ANY NUMBER of pillars, so a unit with two and one with
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
-  var pNames = u.items.map(function(p, i){
-    return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
-      '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
-      /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
-      '</div>';
-  }).join("");
+  /* ── §553.6: A CARD, A ROW, AND THE GROUP THEY BELONG TO ────────────
+     Islam, on the company's own review, a week before El Abd present it:
+     *"when we are presenting on a company level it acts like a business unit
+     approach, foundation, aims, key objectives and maybe directions and
+     capabilities showing the directions as one slide and then showing
+     progress then the capabilities as a group"*.
+
+     The card and the row are lifted out of the two `.map`s they were written
+     inside, unchanged, so one group or two is a question of WHICH PILLARS
+     are handed to them — never of a second copy of the markup (§53.5). Each
+     takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
+     from the whole list and must keep doing so when the list is shown in two
+     halves; the row's own counter is separate and restarts per table. */
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  var capCards = !short ? "" : boardCapTargets().map(function(t){
-    var c = capById(t.slice(4)), nm = placeLabel(t);
-    return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
-      '<span class="pcard-n">' + esc(nm) + '</span>' +
-      '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
-  }).join("");
-  var nCards = u.items.length + (short ? boardCapTargets().length : 0);
+  /* The divider belongs to the deck, not to the group reader: the master
+     flow draws the roll-calls without it (§554.1). */
   if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
-        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
+        " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  if (pOn && u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    '><h2>' + L("pillar","bu") + (capCards ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
-    '<div class="pcards" style="--n:' + nCards +
-      ';--c:' + pillarCols(nCards) +
-      ';--r:' + Math.ceil(nCards / pillarCols(nCards)) + '">' +
-    pNames + capCards + '</div></section>');
+  var groups = pillarGroups(u, short);
 
-  /* The score table, built here and pushed at the END (§254.4). */
-  var pRows = u.items.map(function(p, i){
+  if (pOn) groups.forEach(function(g){
+    if (!groupSize(g)) return;
+    S.push(rollCallSlide(u, g));
+    /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
+       Islam, having been shown Raya's Mobile beside El Abd's review:
+       *"yes I want elabd as a unit"*.
+
+       THIS IS THE WHOLE DIFFERENCE, and it took three readings to see it.
+       A unit's deck draws every pillar's own slides — twelve of Mobile's
+       twenty-eight ARE its four pillars, three slides each. El Abd's
+       review drew none of them: its directions and capabilities were
+       named in a roll-call, scored in a table, and never shown. "Each
+       direction performance" was never the score table; it is the
+       direction's own measures and tactics, exactly as a pillar's are.
+
+       THE SLIDES ARE NOT NEW. `pillarSlidesOf` is the same builder each
+       owner's own deck already calls (§53.5) — the company's review had
+       simply never called it. It is called INSIDE the group, so a group's
+       pillars follow their own roll-call: the directions after Directions,
+       the capabilities after Capabilities. */
+    g.ix.forEach(function(x){ S = S.concat(pillarSlidesOf(u, x.p, x.i)); });
+  });
+
+  /* The score table's rows, built here and pushed at the END (§254.4).
+     `i` is the pillar's place in `u.items` (its code); `n` is its place in
+     the table it is being printed in (§553.6). */
+  function pillarRow(p, i, n){
     /* §416: a direction that does not run this year is listed, not scored. */
-    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
       '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-    return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+    return '<tr><td class="idx">' + n + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
       '<span class="dsub">' + esc(p.kind) + ' &middot; ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span></td>' +
       '<td class="num final ' + dBand(pillarPerf(p)) + '">' + dPct(pillarPerf(p)) + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td></tr>';
-  }).join("");
+  }
   /* NAMED APART FROM THE ROLL-CALL (§254.5). With both slides headed by the
      tenant's word for a pillar, the deck said "Pillars" twice — §87's twins on
      a projector, and two rows in Manage slides' rail that read the same. The
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
-  var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu") + " overview") +
-    '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
-    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("pillar") + '</th>' +
-    '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
-    '<tbody>' + pRows + '</tbody></table></section>';
-
-  (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
+  function groupScoreSlide(g){
+    if (!g.ix.length) return "";
+    return '<section class="dslide"' +
+      anch(g.score, "After the " + g.plain + " overview") +
+      '><h2>' + g.head + ' &mdash; where we stand</h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + g.one + '</th>' +
+      '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
+      '<tbody>' + g.ix.map(function(x, n){ return pillarRow(x.p, x.i, n + 1); }).join("") +
+      '</tbody></table></section>';
+  }
+  /* SAID AT THE END, FOR EVERY DECK (§254.4). §553.8 moved the company's
+     two tables up beside their roll-calls, for the one reason that the
+     review had no detail slides between them — *"move the pillars
+     performance till the end before the where we stand slide"* exists to
+     keep the scoring beside the reading it serves, and with nothing in
+     between there was nothing to keep it away from. §553.9 put the detail
+     slides back, so that reason is gone and so is the exception. */
+  var pillarScoreSlides = groups.map(groupScoreSlide).filter(Boolean);
 
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
@@ -47314,19 +49603,33 @@ function deckSlides(u){
      on last cycle: the room reads them once flat and once properly and
      cannot tell which is the real one (§87's twins, in figures). The stand
      slide always draws, so there is always something behind this. */
-  if (!short) S.push(sectSlide("sperf", "After the Overall performance divider",
+  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
+     Islam, of the company's own review: *"and then performance and the
+     overall performance etc."* It was the one deck with no divider in front
+     of its closing block — §481 made the review short by leaving things
+     out, and this went with them. What it announces was always there: the
+     score tables and the slide the whole deck ends on.
+
+     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
+     stand slide always draws, so this is never a divider over nothing. */
+  S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu") + " stand, where " +
-      (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
+    /* It announces what is BEHIND it, and §553.8 moved the two score
+       tables in front of it — so where they have already been read, this
+       says the one thing left (§253, §61). */
+    "Where the " + L("pillar","bu") +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
+      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
+      " stands, and what the cycle is remembered for.",
     null));
-  if (pOn && u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     sec("END", "Thank you") +
     '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
+    '<div class="coverrule"></div><p class="coversub">' + esc(deckBoxName(u)) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   return S.join("");
@@ -47359,12 +49662,30 @@ function pillarCols(n){
    present he will only see his slides"*). deckSlides calls this for every
    direction, so the whole-plan deck and a direction's own deck cannot
    disagree about what a direction's slides are (§53.5). */
-function pillarSlidesOf(u, p, pi){
+/* ── `named`: THE DECK HAS ALREADY SAID WHOSE SLIDES THESE ARE (§553.4) ──
+   Islam, of a direction owner's own deck: *"the cover page is enough let's
+   remove the 2nd page as the performance appear at the last slide anyway"*.
+
+   A direction's own deck opens on a cover carrying that direction's name,
+   its code, the cycle and who presents it — and then said all of it again on
+   a title page, whose other job, the two readings, §553.3 moved to the end.
+   Two slides introducing one direction to a room that has just been told.
+
+   NOT A SETTING, A FACT ABOUT THE DECK (§50.6). The full plan deck has no
+   per-pillar cover: there the title page is the ONLY slide that names the
+   pillar it is opening, so it stays, and `named` is false for it. The flag
+   says what the caller has already drawn, which is why it is the caller's to
+   pass and not the client's to choose.
+
+   A PICTURE SLIDE PLACED ON THE TITLE PAGE IS NOT LOST: an anchor that is no
+   longer there sends its slide to the end of the deck rather than dropping
+   it (§96.2, and `insertPictureSlides`'s own note). */
+function pillarSlidesOf(u, p, pi, named){
   var S = [];
   /* §416: and it gets no slides of its own until its year comes. */
   if (!runsNow(p)) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-  S.push('<section class="dslide d-cover"' +
+  if (!named) S.push('<section class="dslide d-cover"' +
     anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
     sec(pillarCode(u, pi), p.name) +
     '><span class="seclab">' + esc(p.kind) +
@@ -47614,7 +49935,17 @@ function companyFoundationSlides(){
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
   }).join("");
-  return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+  /* ── IT CONTINUES RATHER THAN RUNS OFF THE SLIDE (§553.7) ──────────
+     On El Abd this slide is 22px taller than the slide it is drawn on, with
+     the last objective cut in half — and the fit pass could do nothing
+     about it, because `.tight` is all it has for a slide that does not say
+     it may be split. It says so now, and the pass continues the objectives
+     table onto a second slide exactly as it does for every other long table
+     in the deck (§69.5). The continuation does not repeat the aspiration:
+     present.css hides `.aimtop` on a `[data-cont]` slide, because a lead
+     paragraph said twice is the room reading it twice. */
+  return ['<section class="dslide" data-split="cofound"' +
+    anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
       (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
@@ -47644,6 +49975,52 @@ function companyAnalysisSlides(u){
         }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
     }).join("") + '</div></section>'];
 }
+/* ── §553 — A PART OF THE RUNNING ORDER THAT IS NOT A BOX ────────────────
+   Islam, of the presentation: *"we choose to present the foundation and then
+   the swot if needed and then every direction and capability in the sequence
+   selected and then the functions in the sequence selected as well"*.
+
+   The company's Foundation and its SWOT were only ever drawn INSIDE the
+   company's own deck, which the flow puts LAST (§481, his *"company comes
+   last"*) — so a review that wants to set the scene first could not. They are
+   parts now, placed anywhere in the order, and `sec:found` / `sec:swot` are
+   how you place them.
+
+   NOT A SECOND DESCRIPTION OF THE SAME SLIDES (§53.5). It calls the very
+   functions the company review calls — `companyFoundationSlides` and
+   `companyAnalysisSlides` — so a change to either reaches both, and a part
+   presented on its own cannot drift from the same part presented in the
+   company's deck. The cover and the Thank you are `dirDeckHtml`'s, for the
+   same reason: a part is a part. */
+var SEC_PART_KEYS = ["found", "swot"];
+var SEC_PARTS = {
+  found: { name: "Foundation", slides: function(u){ return companyFoundationSlides(u); } },
+  swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
+};
+function secDeckHtml(t){
+  var key = boxRef(t).key, part = SEC_PARTS[key];
+  if (!part) return "";
+  var u = topAsUnit(), body = part.slides(u) || [];
+  /* NOTHING TO SHOW IS NOTHING TO PRESENT (§45.2): a cover and a Thank you
+     over an empty section is a blank slide with a heading on it. */
+  if (!body.length) return "";
+  var title = part.name;
+  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", title, true) + '>' +
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
+    esc(REVIEW.name) + '</p></section>'];
+  S = S.concat(body);
+  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
+    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(title) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+  return S.join("");
+}
+
 /* A direction's own deck: its cover naming who presents it, the direction's
    own slides — the very ones the full plan deck draws, through the one
    builder (§53.5) — and Thank you. */
@@ -47659,9 +50036,60 @@ function dirDeckHtml(t){
         ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">' + esc(code) + ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    /* AND IT CARRIES WHAT THE TITLE PAGE CARRIED (§96.2, §553.4). Dropping
+       that slide would otherwise take the theme and the subtitle with it —
+       neither is on the cover, and neither is anywhere else in this deck.
+       Both are drawn only where the direction HAS one (§45.2); on all three
+       live clients today, none of them does, so no cover moves. */
+    '<p class="coversub">' + esc(code) +
+      (String(p.theme || "").trim()
+        ? ' &middot; ' + L1("theme") + ' ' + esc(p.theme) : '') +
+      ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
     (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
-  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i));
+  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i, true));
+
+  /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
+     The deck a direction's owner presents had no slide that said how the
+     direction did. It carried the two figures in the corner of every slide
+     after the title (`deckPillarHead`, until §553.3) and presented neither,
+     so the owner stood in front of 95% with nothing on the screen saying
+     what it counts or what it is measured against.
+
+     IT IS THE SAME SLIDE THE FULL DECK ENDS ON, through the same builder
+     (§553.2, §53.5): a word under each reading saying what it counts, and a
+     line under both saying why they are different questions. Only the cells
+     are this direction's.
+
+     AND IT IS SAID LAST, where §254.4 put it — Islam: *"where the units
+     stands to be the last slide"*. The measures, the categories and the
+     tactics are worked through first; then the reading they add up to.
+
+     DRAWN ONLY WHERE THERE IS A READING (§45.2). A direction with no
+     measures and nothing delivered would otherwise get a headline slide
+     carrying two dashes, which says the plan owes an answer nobody asked
+     it for. */
+  var dirPerf = planOn(u) ? pillarPerf(p) : null;
+  var dirExec = planOn(u) && pillarExec(p) && pillarPlan(p)
+    ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
+  if (dirPerf != null || dirExec != null) {
+    S.push(standSlideOf(esc(p.name),
+      [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
+          SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
+          ', by their targets'),
+        dirExec != null && standCell('Execution performance', dirExec,
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+      /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
+         direction with nothing delivered draws no Execution cell, and a
+         footnote explaining Execution would be the slide explaining a
+         figure it is not showing. */
+      (dirPerf != null
+        ? esc(L("measure")) + ' measure how the work set against this ' +
+          esc(p.kind || L1("pillar")).toLowerCase() + ' is going. ' : '') +
+      (dirExec != null
+        ? 'Execution measures whether that work is landing on time.' : '')));
+  }
+
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
     sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
@@ -47669,29 +50097,37 @@ function dirDeckHtml(t){
   return S.join("");
 }
 
+/* ── THE RUNNING HEAD SAYS WHICH SLIDE, NOT HOW IT WENT (§553.3) ────────
+   Islam, of a direction owner's own deck: *"the user view of a performance
+   where he opens the presentation is not clear as the user only sees the
+   performance of his directions in the presentation directly"* — and, shown
+   that deck rendered: the two readings stood in the corner of four slides
+   out of six, and no slide presented them.
+
+   A NUMBER REPEATED IS NOT A NUMBER PRESENTED. Key Measures and Execution
+   were drawn here, small, over the measures, the categories and the tactics
+   — three slides that are each ABOUT something else, and none of which can
+   explain what the two figures mean or what they are measured against. The
+   reader meets 95% four times and is told once what it is: never.
+
+   So the figures leave the running head and are said ONCE, properly, on
+   "Where it stands" — the slide §553.2 made every box's, with a word under
+   each reading saying what it counts and a line under both saying why they
+   are different questions. A direction's own deck gets that slide for the
+   first time (`dirDeckHtml`); the full plan deck already ended on it.
+
+   NOTHING IS HIDDEN BY THIS. The pillar's own title page still carries both
+   readings large (`.leadstats`, the slide immediately before these), and the
+   score table still scores every pillar. What goes is the third printing.
+
+   IT GOES EVERYWHERE, not only in a direction's own deck. The four callers
+   are all `pillarSlidesOf`, which is the ONE builder a direction's deck and
+   the full plan deck share (§53.5) — so "only on the owner's copy" is not a
+   setting, it is a fork of the shared builder, and it would make the same
+   direction read two different ways depending on who opened it. */
 function deckPillarHead(u, p, pi, which){
-  var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
-    esc(p.name) + '<span class="dwhich">' + which + '</span></h2>' +
-    /* ── TWO NUMBERS, NOT FOUR (§254.10) ──────────────────────────────
-       Islam: *"remove the deliverd /planned from the slides maintain just the
-       2 numbers of measurs and execution"*, and of the reading put back to
-       him, *"yes drop for both keep the 2 measures only across."*
-
-       DELIVERED AND PLANNED APPEARED IN TWO PLACES, SPELLED DIFFERENTLY, which
-       is why the instruction was read back before it was obeyed: the pillar's
-       title slide carried Key measures · Execution · Delivered / planned, so
-       dropping the third leaves the two he named — while THIS head carried
-       Measures · Delivered · Planned and had no Execution on it at all.
-       Dropping two here would have left one number, so Execution takes their
-       place and both surfaces end up saying the same two things.
-
-       The figures are unchanged: `pillarExec` and `pillarPlan` are still what
-       Execution is computed from, and are still explained in words on "Where
-       the unit stands", which he looked at and kept. */
-    '<div class="dstats"><span><i>' + L("measure") + '</i><b class="' + dBand(pillarPerf(p)) + '">' +
-      dPct(pillarPerf(p)) + '</b></span>' +
-    '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
+    esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
 }
 
 /* ── A supporting function's review (§15.12) ──────────────────────────────
@@ -47981,6 +50417,42 @@ function deckSlidesFn(subject){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
+  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
+     milestone: no Overall performance divider, no standing, nothing that
+     answers the question the review is for. The pillars deck has said this
+     since §254.4 (Islam: *"where the units stands to be the last slide"*),
+     and there was never a decision that a projects box should not — it
+     simply fell between two builders.
+
+     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
+     because it has no pillars. Its objectives where it has them (§515.2's
+     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
+     cannot disagree), and its execution, which `capExec` counts the one way
+     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
+     a heading over three dashes (§45.2).
+
+     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
+     sperf, pillars, stand, notes, end. The first draft of this pushed it
+     after them, so a projects box alone would have ended notes, sperf,
+     stand — the same slides in a different order from every other box,
+     which is the drift this stage exists to remove, introduced by the
+     change meant to remove it. `checks/projects-box-stands.py` caught it. */
+  var exTally = capExec(f) || {}, exPct = exTally.pct;
+  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
+  if (exPct != null || koHere != null) {
+    S.push(sectSlide("sperf", "After the Overall performance divider",
+      "Overall performance",
+      "Where " + esc(f.name) + " stands, and what the cycle is remembered for.",
+      null));
+    S.push(standSlideOf(esc(f.name),
+      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
+          'by their measures'),
+        exPct != null && standCell('Execution performance', exPct,
+          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
+      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
+      'Execution measures whether the work is landing on time.'));
+  }
+
   var fnote = cycleNote(noteKey);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
@@ -48053,8 +50525,9 @@ function insertPictureSlides(deck, target, blank){
 function deckSubject(target){
   if (!target) return null;
   /* §481: a direction hides its own slides on the direction itself. */
-  if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
-  return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
+  var r = boxRef(target);
+  if (r.kind === "dir") { var d = dirPillar(target); return d ? d.p : null; }
+  return r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
 }
 
 /* AFTER THE PICTURES ARE PLACED, AND BEFORE THE FIT PASS. Both halves of
@@ -48143,7 +50616,12 @@ function deckBuild(target){
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
   deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
+  /* The company by its own name (§553.8's rule, reaching the strip under the
+     room): the slides it adds itself were labelled "the group" there, which
+     is the word Islam struck out — "there is nothing called elabd review as
+     a group". */
+  var org = String((GROUP && GROUP.org) || "").trim();
+  var name = (target === "group" && org) ? org : placeLabel(target);
   [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
     sl.dataset.subject = target;
     sl.dataset.subjectName = name;
@@ -48165,12 +50643,45 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
+     §554.1's cover and roll-calls are slides, not people presenting — and
+     the presenter counts SUBJECTS off `data-subject`, so each of them took
+     a dot of its own, a pill reading "FL", and turned "1 of 3" into
+     "1 of 4". Found by the checks rather than by looking, which is the
+     point of them.
+
+     EACH ONE IS STAMPED WITH WHAT IT INTRODUCES: the cover with the first
+     subject of the flow, a group's page with the first of that group. So
+     the strip, the dots and the pills read exactly as they did before the
+     pages existed, and the pages ride inside the section they open. */
+  var slides = [].slice.call(root.querySelectorAll(".deck .dslide"));
+  for (var i = slides.length - 1; i >= 0; i--) {
+    var sub = slides[i].dataset.subject || "";
+    if (sub.indexOf("flow:") !== 0) continue;
+    /* …and marked as the flow's own, so the clock can tell it is nobody's
+       time (§556.9): stamped with the first direction, the cover was
+       spending that direction's minutes before it had begun. */
+    slides[i].dataset.flowpart = "1";
+    var next = slides[i + 1];
+    if (next && next.dataset.subject) {
+      slides[i].dataset.subject = next.dataset.subject;
+      /* BOTH, because the strip names a stop from `subjectName` and falls
+         back to the target only when there is none — so rewriting the
+         subject alone left the first dot reading "flow:cover". */
+      if (next.dataset.subjectName) slides[i].dataset.subjectName = next.dataset.subjectName;
+      else slides[i].removeAttribute("data-subject-name");
+    } else {
+      slides[i].removeAttribute("data-subject");
+      slides[i].removeAttribute("data-subject-name");
+    }
+  }
   /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
      `.dslide` siblings and leaves it alone. */
-  DECK.targets = list.slice();
+  /* …and they are not in the list of who is presenting either (§554.3). */
+  DECK.targets = list.filter(function(t){ return String(t).indexOf("flow:") !== 0; });
   DECK.clock = null;
   clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
@@ -48192,7 +50703,9 @@ function openDeckWith(titleHtml, targets, from){
   var ex = root.querySelector("[data-dexit]");
   ex.textContent = back ? "Back to slides" : "Exit";
   ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
-  DECK.flow = list.length > 1 ? list : null;
+  /* §554.3: and the stops are the subjects, so the flow's own pages are
+     not in the list the strip is built from either. */
+  DECK.flow = DECK.targets.length > 1 ? DECK.targets : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
@@ -48231,10 +50744,12 @@ function openDeckFn(subject, from){
    capability function takes `openDeckFn`. Asking by `fn:` alone is what gave a
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
-  var t = String(target);
+  var t = String(target), r = boxRef(t);
   /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
-     each its own deck back to back — the owner's Present shows only theirs. */
-  if (t.indexOf("dir:") === 0) {
+     each its own deck back to back — the owner's Present shows only theirs.
+     A comma-joined list still reads as `dir` on its first address, which is
+     the answer the prefix test gave here before §531. */
+  if (r.kind === "dir") {
     var ds = t.split(",").filter(function(x){ return dirPillar(x); });
     if (!ds.length) return;
     openDeckWith(ds.map(function(x){ return esc(placeLabel(x)); }).join(" &middot; "), ds, from);
@@ -48243,7 +50758,7 @@ function openDeckFor(target, from){
   /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
+  if (r.area === "fn") {
     if (plansInPillars(t)) openDeck(unitLike(t), from);
     else openDeckFn(t, from);
     return;
@@ -48329,11 +50844,66 @@ function contFlowTargets(){
   return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
 }
 
+/* ── THE FLOW IS ONE PRESENTATION, SO IT OPENS LIKE ONE (§554.1) ────────
+   Islam, having played it: *"we need a cover slide for the whole
+   presentation as we are presenting elabd q3 strategy review and before the
+   directions I find the grouped directions and same for the capabilities"*.
+
+   The master flow was each subject's deck, back to back — nineteen covers
+   and no cover for the thing itself, and the directions arriving one after
+   another with nothing in front of them saying what the room was about to
+   see. The company's own review has had that page since §553.6; this gives
+   the flow the SAME page, through the same builder, rather than a second
+   one that looks like it (§53.5).
+
+   INSERTED, NOT PLACED. The cover and the two roll-calls are not subjects
+   somebody ticks: the cover opens the flow because the flow is a
+   presentation, and a group's page goes in front of the first of its
+   members because that is what the page is for. Islam's word for it was
+   *"automatically"*, twice.
+
+   A GROUP WITH NOBODY IN THE FLOW GETS NO PAGE (§45.2, §253): tick three
+   directions and no capability and the Capabilities page is not drawn. */
+function flowCoverHtml(){
+  var u = topAsUnit();
+  return '<section class="dslide d-cover"' + anch("flowcover", "After the cover") +
+    sec("COVER", deckBoxName(u), true) + '>' +
+    (deckMark(u)
+      ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(deckBoxName(u)) + '">'
+      : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+function flowPartHtml(t){
+  if (t === "flow:cover") return flowCoverHtml();
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  for (var i = 0; i < gs.length; i++)
+    if ("flow:g" + gs[i].names === t) return rollCallSlide(u, gs[i]);
+  return "";
+}
+/* The flow, with its own cover in front and each group's page in front of
+   the first of its members. */
+function flowWithParts(list){
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  var owner = {};
+  gs.forEach(function(g){
+    g.ix.forEach(function(x){ owner["dir:" + x.p.id] = "flow:g" + g.names; });
+  });
+  var seen = {}, out = ["flow:cover"];
+  list.forEach(function(t){
+    var k = owner[t];
+    if (k && !seen[k]) { seen[k] = 1; out.push(k); }
+    out.push(t);
+  });
+  return out;
+}
+
 function flowToPdf(){
   var list = contFlowTargets();
   if (!list.length) return false;
   deckPrint(function(){
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+      flowWithParts(list));
   });
   return true;
 }
@@ -48366,23 +50936,53 @@ function masterSubjects(){
   /* §481: with the company's plan the whole plan, the flow is its directions,
      its capabilities and its functions, and the short company review LAST —
      Islam: *"company comes last"*. */
+  /* §553 — THE COMPANY'S OWN SECTIONS ARE PARTS, AND THEY COME FIRST in the
+     list the picker opens on. Islam: *"the foundation and then the swot if
+     needed and then every direction and capability"* — "if needed" is the
+     half that matters, so a part is offered only where it would draw
+     something (`secDeckHtml` answers "" over an empty section, §45.2) and a
+     client with no Foundation written never sees it in the picker (§61).
+
+     OFFERED TO EVERY SHAPE, not only a company that plans its own strategy:
+     Raya's review can open on the group's Foundation before its units, which
+     is the same sentence read on a client with units.
+
+     OFFERED, NOT PLACED — and the first draft of this got it wrong. Putting
+     the parts in `masterSubjects` alone also put them in the DEFAULT order,
+     because `masterOrder` falls back to the whole list when nobody has
+     chosen — so every tenant that never touched its flow would have found
+     the Foundation at the front of its review. The comment here claimed
+     "no tenant's order moves" while the code moved every one of them.
+     Islam's word was *"we CHOOSE to present the foundation"*, so a section
+     part is placeable and is not placed until somebody places it:
+     `masterDefault()` is the order a tenant that has chosen nothing gets,
+     and it is the list WITHOUT them. */
+  var secs = SEC_PART_KEYS.filter(function(k){ return secDeckHtml("sec:" + k) !== ""; })
+                          .map(function(k){ return "sec:" + k; });
   if (companyReviewOn()) {
     var dirs = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
       return p && p.id && runsNow(p) && planOn("group"); }).map(function(p){ return "dir:" + p.id; });
-    return dirs.concat(boardCapTargets()).concat(boardFunctionTargets())
+    return secs.concat(dirs).concat(boardCapTargets()).concat(boardFunctionTargets())
       .concat(topHasPlan() && planOn("group") ? ["group"] : []);
   }
-  return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
+  return secs.concat(boardUnitTargets()).concat(boardCapTargets()).concat(boardFunctionTargets());
 }
 /* The running order to open the picker on: the stored one, filtered to
    subjects that still report, and the whole list in board order when nothing
    is stored. A subject added to the tenant AFTER an order was agreed arrives
    NOT presenting rather than being appended — walking a new unit into a board
    meeting because somebody created it is the office's decision, not ours. */
+/* §553: everything the picker may offer, minus the parts nobody has placed.
+   Two lists where there was one, because "what can be in the order" and
+   "what IS in the order when nobody has said" stopped being the same
+   question the moment a part could be offered without being default. */
+function masterDefault(){
+  return masterSubjects().filter(function(t){ return t.indexOf("sec:") !== 0; });
+}
 function masterOrder(){
   var all = masterSubjects();
   var kept = SMPRules.masterFlow(GROUP).filter(function(t){ return all.indexOf(t) >= 0; });
-  return kept.length ? kept : all.slice();
+  return kept.length ? kept : masterDefault();
 }
 /* Stored as an ABSENCE (§50.6): an order that is simply everybody in the
    board's own order is what an untouched tenant already has, so it deletes the
@@ -48390,7 +50990,11 @@ function masterOrder(){
    added tomorrow joins the flow of a tenant that never chose one, and does not
    join one that did. */
 function masterWrite(list){
-  var all = masterSubjects();
+  /* §553: measured against the DEFAULT, not against everything placeable —
+     otherwise an order that is exactly the default would be written out in
+     full rather than deleting the key (§50.6), and tomorrow's new unit would
+     not join the flow of a tenant that never chose one. */
+  var all = masterDefault();
   if (list.length && !(list.length === all.length && list.every(function(t, i){ return t === all[i]; })))
     GROUP[SMPRules.MASTER_FLOW] = list.slice();
   else delete GROUP[SMPRules.MASTER_FLOW];
@@ -48544,20 +51148,69 @@ function masterCount(t){
    rewrites two counts; a repaint would replace the box being typed into. And
    a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
    again to a person who believes they are reading their results. */
-function masterKind(t){
+/* ── WHAT KIND A SUBJECT IS, IN ONE WORD (§554.2) ───────────────────────
+   `masterKind` above answers the same question in a chip; this answers it
+   as the bare word the filter groups by, and the chip is built FROM this
+   so a filter can never offer a word the column does not show (§53.5). */
+function masterKindWord(t){
   t = String(t);
-  /* §481: four kinds in the company's flow, said in the picker's own chips. */
-  if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
-  if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
-  if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return t.indexOf("fn:") === 0
-    ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
+  var k = boxRef(t).kind;
+  if (k === "sec") return "SECTION";
+  if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
+  if (k === "cap") return "CAP";
+  if (t === "group" && companyReviewOn()) return "CO";
+  return k === "fn" ? "FUNC" : "BU";
+}
+var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",
+                    BU:"Business units", FUNC:"Functions", CO:"The company" };
+
+function masterKind(t){
+  /* ── ONE ANSWER, WORN AS A CHIP (§554.2) ──────────────────────────────
+     §481's four kinds were spelled out again here, and the filter above
+     would have been a fifth spelling — so the chip is built FROM
+     `masterKindWord` and the two cannot disagree by construction (§53.5).
+
+     IT ALSO FIXES WHAT THE COLUMN SAID. A capability of El Abd's is
+     presented as `dir:<id>` like a direction is, so every one of its five
+     read DIR in this column while the Capabilities tab, the roll-call and
+     the deck all called them capabilities (§542). */
+  var k = masterKindWord(t);
+  return '<span class="mfkind' + (k === "CAP" || k === "FUNC" ? " fn" : "") +
+    '">' + k + '</span>';
 }
 function masterPaint(){
   var box = document.getElementById("modal-b");
   if (!box || !MFLOW) return;
   var all = masterSubjects();
+  /* ── THE LISTS STAY WHERE THEY WERE (§554.2) ──────────────────────
+     Islam: *"everytime I remove something from the right the list jumps it
+     needs to stay still"*. Every press repaints the whole dialog, so both
+     columns were scrolled back to the top under the finger — on a flow of
+     nineteen, taking out the last one put the row you were working on off
+     the screen. Read before the repaint, put back after. */
+  var keepTop = [].map.call(box.querySelectorAll(".mflist"), function(e){ return e.scrollTop; });
   var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
+  /* ── AND THE LEFT COLUMN NARROWS BY KIND (§554.2) ─────────────────
+     Islam: *"on the left list I need to have filters so I can choose from
+     directions or capabilities or divisions to filter the functions so I
+     can select properly or all"*. The chips are built from the kinds the
+     client ACTUALLY has, in the picker's own order, so a client with no
+     divisions is not offered a Divisions chip over nothing (§45.2). */
+  var kinds = [];
+  all.forEach(function(t){
+    var k = masterKindWord(t);
+    if (kinds.indexOf(k) < 0) kinds.push(k);
+  });
+  if (MFLOW.kind && kinds.indexOf(MFLOW.kind) < 0) MFLOW.kind = "";
+  if (MFLOW.kind) rest = rest.filter(function(t){ return masterKindWord(t) === MFLOW.kind; });
+  var chips = kinds.length < 2 ? "" :
+    '<div class="mfkinds" role="group" aria-label="Narrow the list by kind">' +
+    [""].concat(kinds).map(function(k){
+      var lit = (MFLOW.kind || "") === k;
+      return '<button type="button" class="mfchip' + (lit ? " on" : "") +
+        '" data-mfkind="' + esc(k) + '" aria-pressed="' + (lit ? "true" : "false") + '">' +
+        esc(k ? (MFKIND_NAME[k] || k) : "All") + '</button>';
+    }).join("") + '</div>';
   var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
   /* Waiting to be picked. The row carries the name AND the code the deck's own
      pills show while presenting (§266.9), because both are what somebody would
@@ -48611,7 +51264,7 @@ function masterPaint(){
   };
   box.innerHTML = '<div class="mflow"><div class="mfcols">' +
     '<div class="mfcol"><div class="mfhead">' +
-      '<h4>Everyone who reports</h4>' +
+      '<h4>Everyone who reports</h4>' + chips +
       '<input class="mffind" data-mffind-box="1" autocomplete="off"' +
         ' placeholder="Search a unit or function…"' +
         ' aria-label="Search a unit or function" value="' + esc(MFLOW.q || "") + '">' +
@@ -48623,6 +51276,14 @@ function masterPaint(){
       '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
         'Everybody is in the flow.</p></div></div>' +
     '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
+      /* ── AND A WAY BACK TO AN EMPTY FLOW (§554.2) ─────────────────
+         Islam: *"there should be somewhere where I reset all and bring all
+         selected flow to the left as if deselect all from the right pan"*.
+         Nineteen presses, or one. Drawn only while there is something to
+         take out, so it is never a control over nothing (§61). */
+      (MFLOW.pick.length
+        ? '<button type="button" class="lnk" data-mfnone="1">Take all out</button>'
+        : '') +
       '<span class="mfcount" data-mfsum>' + masterSumLine(total) + '</span></div>' +
       '<div class="mflist"><table class="mftbl"><thead><tr>' +
         '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
@@ -48636,8 +51297,11 @@ function masterPaint(){
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
+      '>Go to the slides</button></div></div>';
   masterWire();
+  [].forEach.call(box.querySelectorAll(".mflist"), function(e, i){
+    if (keepTop[i] != null) e.scrollTop = keepTop[i];
+  });
   /* AFTER the wiring, and from HERE rather than from inside it: the count is
      the whole list's, which `masterWire()` does not hold — the first build
      passed it `all.length` from a scope that function cannot see, and every
@@ -48705,6 +51369,22 @@ function masterWire(){
   var box = document.getElementById("modal-b");
   if (!box) return;
   var find = box.querySelector("[data-mffind-box]");
+  /* §554.2: the kind chips and the way back to an empty flow. Both repaint
+     through `masterPaint`, which now keeps each column where it was. */
+  [].forEach.call(box.querySelectorAll("[data-mfkind]"), function(b){
+    b.addEventListener("click", function(){
+      MFLOW.kind = (MFLOW.kind || "") === this.dataset.mfkind ? "" : this.dataset.mfkind;
+      MFLOW.note = "";
+      masterPaint();
+    });
+  });
+  var none = box.querySelector("[data-mfnone]");
+  if (none) none.addEventListener("click", function(){
+    MFLOW.pick = [];
+    MFLOW.note = "";
+    masterWrite(MFLOW.pick);
+    masterPaint();
+  });
   [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
     b.addEventListener("click", function(){
       /* The search keeps the cursor when a tick was made from the search: the
@@ -48813,9 +51493,17 @@ function masterWire(){
       masterPaint();
       return;
     }
+    /* ── IT OPENS THE SLIDES, NOT THE SHOW (§556) ──────────────────
+       Islam: *"after we set the master presentation, we say 'here, manage
+       the slides' … and then it takes me to the presentation when I say
+       present"*. The first time anybody saw this deck was in front of the
+       room; now the flow lands on its own slides, where a slide that
+       should not be there can be taken out before it is projected. Play
+       is one press from there, and leaving the show comes back here
+       (§295). */
     var list = MFLOW.pick.slice();
     closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    slidesOpenFlow(list);
   });
 }
 
@@ -48843,6 +51531,20 @@ function masterMoved(order){
    the two with NO CONFLICT: the later one wins by hoisting, so the product
    would have run this copy and main's would have been dead (§146.2, §56.7).
    Removed rather than reconciled, because one question may have one answer. */
+/* ── FULL SCREEN, STRAIGHT AWAY (§556.11) ──────────────────────────────
+   The class first, so the bar is gone even where the browser refuses full
+   screen (a preview frame, a locked-down kiosk): the deck still fills what
+   it has, and Esc still comes back. */
+function deckGoFull(){
+  var root = document.getElementById("deckroot");
+  DECK.direct = true;
+  root.classList.add("fs");
+  try {
+    var p = root.requestFullscreen && root.requestFullscreen();
+    if (p && p.catch) p.catch(function(){});
+  } catch (e) { /* refused: the class above already did what it can */ }
+  deckScale();
+}
 function closeDeck(){
   var root = document.getElementById("deckroot");
   /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
@@ -48855,7 +51557,10 @@ function closeDeck(){
      inert behind it. Both, or neither. */
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
+  /* §556.11: which slide the room reached, so the slides come back on it. */
+  var reached = toEditor ? slidesWhich(DECK.slides, DECK.i) : null;
   DECK.from = "page";
+  DECK.direct = false;
   /* §340: the clock's own interval, stopped with the deck it was drawing. An
      interval left running is the leak §24 is about — it would go on writing
      into a node that has been replaced, twice a second, for the life of the
@@ -48874,7 +51579,7 @@ function closeDeck(){
      moment a deck closed over it. */
   if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
-  if (toEditor) slidesResume();
+  if (toEditor) slidesResume(reached);
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -48956,12 +51661,12 @@ function deckFitPass(deck){
    and not yet given a prefix. Two letters, because one is not a name and three
    from an unknown word is a guess. */
 function deckCode(target, name){
-  if (String(target).indexOf("dir:") === 0) {
+  var r = boxRef(target);
+  if (r.kind === "dir") {
     var dd = dirPillar(target);
     if (dd) return pillarCode(topAsUnit(), dd.i);
   }
-  var o = String(target).indexOf("fn:") === 0
-    ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
+  var o = r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
   var pre = o && o.codePrefix;
   if (pre) return String(pre).toUpperCase();
   var words = String(name || target).trim().split(/\s+/).filter(Boolean);
@@ -49106,6 +51811,14 @@ var CLOCKTICK = null;
    §303 baseline run from this directory measures this build and says the
    failure is not yours (§334.13, walked into an hour before this comment). */
 function clockSubject(){
+  /* THE FLOW'S OWN PAGES RUN NO CLOCK (§556.9). Islam: *"it should reset
+     when we get to a new direction as we set in the start of the flow"* —
+     the cover and the group pages ride inside the first subject's section
+     (§554.3), so its time was running from the cover, and by its own first
+     slide it no longer read what the flow had set. A subject's time starts
+     on that subject's slides. */
+  var here = DECK.slides && DECK.slides[DECK.i];
+  if (here && here.dataset.flowpart) return null;
   if (DECK.flow && DECK.stops) {
     var k = deckStopAt(DECK.i);
     return k >= 0 ? DECK.stops[k].t : null;
@@ -49430,7 +52143,14 @@ function wireDeck(){
      inset and scales the deck to the box it is about to stop being. */
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
-    root.classList.toggle("fs", document.fullscreenElement === root);
+    /* §556.11: a deck the slides opened full screen has no windowed state
+       to fall back to — leaving full screen IS leaving the deck, or one Esc
+       lands on the bar Islam asked never to see. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+      closeDeck();
+      return;
+    }
+    root.classList.toggle("fs", document.fullscreenElement === root || !!DECK.direct);
     deckScale();
   });
   addEventListener("keydown", function(ev){
@@ -49488,6 +52208,13 @@ function wireDeck(){
        never gets here, because the contenteditable branch above returns
        first. */
     if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); clockToggle(); }
+    /* §556.11: T pauses and starts, R resets — listed on the slides, which
+       is where they are read now the room has no bar. BY THE KEY'S PLACE as
+       well as its letter: on an Arabic keyboard the T key sends "ف" and R
+       "ق", and Islam's "T is not working" was exactly that. */
+    var kc = ev.code || "";
+    if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
@@ -49521,9 +52248,12 @@ function wireDeck(){
    not put a picture in front of the board.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* The stage is 1600x900, so a picture longer than 1600px on its long edge is
-   detail nobody in the room can see, carried in every save for ever. */
-var PIC_MAX_EDGE   = 1600;
+/* The stage is AUTHORED at 1600x900 but SHOWN at the screen's size, and a
+   projector or a 4K panel draws it half as large again or more. Cut to 1600,
+   a full-slide picture was stretched on every big screen and its text went
+   soft — Islam: *"the uploaded pictures quality gets very low."* 2400 is
+   sharp at that size and still bounded, because it rides in every save. */
+var PIC_MAX_EDGE   = 2400;
 var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
 var PIC_PER_SLIDE  = 4;
 
@@ -49809,7 +52539,7 @@ function picIntake(file){
       reject(new Error("that is not a picture")); return;
     }
     imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
-      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var jpg = cv.toDataURL("image/jpeg", 0.92);
       var png = cv.toDataURL("image/png");
       resolve(png.length < jpg.length ? png : jpg);
     }, reject);
@@ -50016,7 +52746,14 @@ function videoUpload(file, target, onProgress){
    Nothing about what is STORED changed. Still a title, an anchor, an
    arrangement and the pictures (§50.2). */
 
-var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+/* `flow` is the master presentation's list of subjects, set only when the
+   editor was opened on one (§556). `target` is still a single subject —
+   the company's, for a flow — because adding and removing a picture
+   slide belongs to a subject and Islam put that plainly: *"in the flow
+   slide view I can hide and I can add final slides but the addition on
+   the sections as directions or capabilities should be from the
+   direction or capability presentation itself"*. */
+var SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
 
 /* Every section in the assembled deck gets an identity the rail can hold on
    to across a repaint: a picture slide by its own id, a generated slide by its
@@ -50068,18 +52805,53 @@ function slidesAssemble(){
   try {
     /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
        through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
-    insertPictureSlides(box, SLED.target, true);
-    /* The same order openDeckWith() uses, and the order matters both ways:
-       AFTER the picture slides so a custodian's own slide is footed too, and
-       BEFORE the fit pass so a slide it splits carries the footer into every
-       continuation (§52.9). */
-    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
-      deckFootMarks(box, UNITS[SLED.target]);
-    } else if (SLED.target.indexOf("dir:") === 0) {
-      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
-      deckFootMarks(box, null);
+    /* ── ONE DECK, OR THE WHOLE FLOW (§556) ──────────────────────────
+       The editor built one subject's deck, which is why pressing Manage
+       slides from the company showed the company's review and not the
+       flow somebody had just arranged. A flow is the same build, once per
+       subject, with each slide stamped with whose it is — the stamp is
+       what lets the eye below hide a slide that belongs to somebody else
+       without the editor having to be about them. */
+    /* ── AND THE FLOW'S OWN PAGES, WHERE THE ROOM HAS THEM (§556.8) ──
+       The cover and each group's page were drawn by the room alone, so
+       the list here started at the first direction and the room started
+       somewhere else. Islam: *"where is the first cover page about elabd
+       review"*. The same `flowWithParts` the room reads, so the two
+       cannot disagree about what comes first. */
+    var subjects = SLED.flow ? flowWithParts(SLED.flow) : [SLED.target];
+    subjects.forEach(function(t){
+      var part = String(t).indexOf("flow:") === 0;
+      var frag = document.createElement("div");
+      frag.innerHTML = part ? flowPartHtml(t) : deckHtmlFor(t);
+      if (!part) insertPictureSlides(frag, t, true);
+      if (part) deckFootMarks(frag, null);
+      else if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
+      else if (boxRef(t).kind === "dir") deckFootMarks(frag, null);
+      var tsubj = part ? null : deckSubject(t);
+      [].forEach.call(frag.querySelectorAll(".dslide"), function(el){
+        el.dataset.subject = t;
+        /* A flow page is nobody's to hide: the room reads hidden slides
+           per subject, and these belong to none. */
+        if (part) { el.dataset.flowpart = "1"; return; }
+        if (el.dataset.anchor && SMPRules.slideHidden(tsubj, el.dataset.anchor))
+          el.dataset.off = "1";
+      });
+      while (frag.firstChild) box.appendChild(frag.firstChild);
+    });
+    /* Each flow page is stamped with what it introduces, as the room does
+       (§554.3) — so it rides inside the section it opens rather than
+       counting as a subject of its own. */
+    var made = [].slice.call(box.querySelectorAll(".dslide"));
+    for (var mi = made.length - 1; mi >= 0; mi--) {
+      if (!made[mi].dataset.flowpart) continue;
+      var nx = made[mi + 1];
+      if (nx && nx.dataset.subject) made[mi].dataset.subject = nx.dataset.subject;
+      else made[mi].removeAttribute("data-subject");
     }
+    /* The footing happens per subject above, in the same order
+       openDeckWith() uses: AFTER the picture slides so a custodian's own
+       slide is footed too, and BEFORE the fit pass so a slide it splits
+       carries the footer into every continuation (§52.9). */
     deckFitPass(box);
     /* The keys are minted AFTER the fit pass, or a continuation slide it mints
        carries a clone of its parent's `data-ed` — two rows in the rail with one
@@ -50104,10 +52876,9 @@ function slidesAssemble(){
        INSIDE THE TRY, with §253.3's catch below it: a subject whose stored
        list cannot be read is a deck that could not be built, and the person
        gets that sentence rather than a blank rail. */
-    var subj = deckSubject(SLED.target);
-    [].forEach.call(box.querySelectorAll(".dslide[data-anchor]"), function(el){
-      if (SMPRules.slideHidden(subj, el.dataset.anchor)) el.dataset.off = "1";
-    });
+    /* The stamping happens per subject above, before the fit pass marks a
+       continuation — and a continuation inherits `data-off` from the clone
+       it is made of, so both parts of a hidden long table wear it. */
   } catch (e) {
     /* Kept, not rethrown: the editor is already open, and the person needs a
        sentence rather than a blank screen. `slidesPaint()` reads it. */
@@ -50126,6 +52897,17 @@ function slidesAssemble(){
    together: "RS03 Retail Operations ExcellenceKey measures". The parts are
    read separately and joined with a separator, which is what the slide itself
    shows visually. */
+/* ── THE SHORT NAME, FOR THE BAR UNDER THE STAGE (§556.4) ─────────────
+   Islam: *"the title of the slides as well is different"*. His page names
+   the slide you are on in two or three words — "Cover" — and ours was
+   printing the whole breadcrumb: "Maximizing Current Stores · D001 ·
+   Categories", every word of which is already on the slide in front of
+   you. The last part is what tells one slide from its neighbours. */
+function slidesShortLabel(el){
+  var full = slidesLabel(el), bits = full.split(" \u00b7 ");
+  var last = bits[bits.length - 1];
+  return (last && last.length > 1) ? last : full;
+}
 function slidesLabel(el){
   var h = el.querySelector("h1, h2");
   if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
@@ -50156,9 +52938,10 @@ function slidesOpen(kind, key){
              : kind === "cap" ? "cap:" + key
              : kind === "dir" ? "dir:" + key : key;
   if (!canSpeakFor(target)) return;
-  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"", flow:null };
   var root = document.getElementById("slideroot");
-  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-title").textContent = picTargetName(kind, key);
+  slidesLogo(root, deckMark(UNITS[target] || null));
   /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
      see it. Islam's own reason for asking: somebody who knows they have
      fifteen minutes builds a shorter deck.
@@ -50173,8 +52956,7 @@ function slidesOpen(kind, key){
      minutes" is wrong said to the person who set it. And nothing at all when
      no time is set — silence rather than a nought nobody chose (§35). */
   var mins = SMPRules.presentMins(GROUP, target);
-  root.querySelector(".sl-sub").textContent =
-    picTargetName(kind, key) + " · " + (REVIEW.name || "") +
+  root.querySelector(".sl-sub").textContent = (REVIEW.name || "") +
     (mins ? " · " + mins + " minutes to present" : "");
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -50182,6 +52964,54 @@ function slidesOpen(kind, key){
   if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
   slidesPaint();
   root.focus();
+}
+/* ── THE FLOW, OPENED AS SLIDES (§556) ─────────────────────────────────
+   Islam: *"after we set the master presentation, we say 'here, manage the
+   slides'. When we go, we see a view of managing the slides that we chose
+   as a flow, and maybe hide things or add something to have a proper
+   view"* — and, of the whole product: *"even for the users that have the
+   present button it takes them to the slides management and then they move
+   to the presentation, not 2 buttons"*.
+
+   THE SUBJECT IS THE COMPANY and the flow is what is DRAWN. Adding a slide
+   is a subject's act — his rule: the final slides are added here, a
+   direction's are added on the direction. So `target` stays the company
+   and `flow` is the list; `slidesAssemble` draws the list and the eye
+   hides against whichever subject the slide belongs to. */
+function slidesOpenFlow(list){
+  list = (list || []).filter(Boolean);
+  /* ── THE GATE IS THE FLOW'S, NOT THE COMPANY'S DECK (§556.3) ──────
+     This asked `canSpeakFor("group")`, which is "may you edit the
+     company's own review" — and with the business units ON the company
+     has no plan of its own, so it is FALSE for the very office that
+     arranges the flow. Pressing Go then did nothing at all (§61), which
+     `master-presentation` caught the moment the button changed.
+
+     `mayMasterPresent` is the rule that offers the Master presentation in
+     the first place, so it is the rule that opens what it leads to. */
+  if (!list.length || !SMPRules.mayMasterPresent(world(), viewer())) return;
+  SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
+  var root = document.getElementById("slideroot");
+  var org = String(GROUP.org || "").trim();
+  root.querySelector(".sl-title").textContent =
+    (org ? org + " \u00b7 " : "") + "Master presentation";
+  slidesLogo(root, groupLogo());
+  root.querySelector(".sl-sub").textContent =
+    plural(list.length, "subject") + " \u00b7 " + (REVIEW.name || "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
+}
+/* The mark on the left of the bar, as Islam's page carries it: the client's
+   round logo beside the name. None set, none drawn — an empty frame is not
+   a logo (§45.2). */
+function slidesLogo(root, src){
+  var im = root.querySelector(".sl-logo");
+  if (!im) return;
+  if (src) { im.src = src; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
 }
 function picTargetName(kind, key){
   return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
@@ -50207,10 +53037,14 @@ function slidesSuspend(){
   root.inert = true;
   root.setAttribute("aria-hidden", "true");
 }
-function slidesResume(){
+function slidesResume(reached){
   var root = document.getElementById("slideroot");
   root.inert = false;
   root.removeAttribute("aria-hidden");
+  /* §556.11: back on the slide the room was showing, as his page does —
+     not on the one Present was pressed from twenty slides ago. */
+  var at = reached ? slidesFindIn(SLED.all || [], reached) : -1;
+  if (at >= 0) { SLED.sel = SLED.all[at].dataset.ed; slidesPaint(); }
   root.focus();
 }
 /* The deck for whatever this editor is editing, through the ONE resolver
@@ -50224,8 +53058,52 @@ function slidesPlay(){
      OF IT if the deck cannot be built — an editor nobody can click, with the
      reason in a console nobody has open (§32, §171). Standing down after the
      open means a throw costs the press and nothing else. */
-  openDeckFor(SLED.target, "editor");
+  var from = slidesSelEl();
+  if (SLED.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+                              flowWithParts(SLED.flow), "editor");
+  else openDeckFor(SLED.target, "editor");
+  /* ── STRAIGHT TO FULL SCREEN, AT THE SLIDE YOU ARE ON (§556.11) ─────
+     Islam: *"present should go to the full screen right away like the
+     html"* — his page's Present is the same deck, filling the screen, from
+     where you are. The bar is still there for a deck opened from anywhere
+     else; from here it never shows, and Esc comes straight back. */
+  var at = from ? slidesFindIn(DECK.slides, from) : -1;
+  if (at > 0) deckShow(at);
+  deckGoFull();
   slidesSuspend();
+}
+/* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
+   page, which picture — and which of its kind. Never by counting: the room
+   leaves out hidden slides and the two screens split long tables at their
+   own sizes, so the tenth slide here is not the tenth slide there. */
+function slidesKeyOf(el){
+  return [el.dataset.subject || "", el.dataset.anchor || "", el.dataset.ps || ""].join("|");
+}
+function slidesWhich(list, i){
+  while (i > 0 && list[i] && list[i].dataset.cont) i--;
+  var el = list[i];
+  if (!el) return null;
+  var key = slidesKeyOf(el), n = 0;
+  for (var j = 0; j < i; j++) if (!list[j].dataset.cont && slidesKeyOf(list[j]) === key) n++;
+  return { key:key, n:n };
+}
+function slidesFindIn(list, w){
+  if (!w) return -1;
+  var n = w.n;
+  for (var j = 0; j < list.length; j++) {
+    if (list[j].dataset.cont || slidesKeyOf(list[j]) !== w.key) continue;
+    if (!n) return j;
+    n--;
+  }
+  return -1;
+}
+/* The selected slide, or the next one the room will show if it is hidden. */
+function slidesSelEl(){
+  var all = SLED.all || [];
+  var i = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (i < 0) return null;
+  while (i < all.length - 1 && all[i].dataset.off) i++;
+  return slidesWhich(all, i);
 }
 
 function slidesClose(){
@@ -50235,7 +53113,7 @@ function slidesClose(){
   document.body.classList.remove("presenting");
   var wrap = document.querySelector(".wrap");
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
-  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
 }
 
@@ -50260,13 +53138,13 @@ function slidesPaint(){
         + "produces no deck, so there is nowhere to put a picture.") + '</p>';
     return;
   }
-  /* Keep the selection if it still exists; otherwise take the first picture
-     slide, and failing that the first slide. */
+  /* Keep the selection if it still exists; otherwise the FIRST SLIDE.
+     It took the first picture slide, from when this screen was only for
+     managing pictures. It is the deck now, and a deck opens on its cover —
+     Islam: *"why the presentation open on the added slide the default
+     should start from the first slide"*. */
   var keys = all.map(function(el){ return el.dataset.ed; });
-  if (keys.indexOf(SLED.sel) < 0) {
-    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
-    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
-  }
+  if (keys.indexOf(SLED.sel) < 0) SLED.sel = keys[0];
 
   /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
      rail, after all twenty-three rows — so the one control the whole mode
@@ -50275,24 +53153,42 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   var off = all.filter(function(el){ return el.dataset.off; });
-  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
-      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+  /* §556.3: and only where there is a subject to add to. With the business
+     units on, the company has no plan of its own — the flow can still be
+     arranged and presented, and a control that would write nowhere is not
+     drawn (§61). */
+  var mayAdd = canSpeakFor(SLED.target);
+  list.innerHTML =
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + (el.dataset.off ? " off" : "") +
-        '" data-slgo="' + esc(el.dataset.ed) + '">' +
+        '" data-slgo="' + esc(el.dataset.ed) + '" title="' + esc(slidesLabel(el)) + '">' +
+      /* §556.3: THE THUMBNAIL IS THE LABEL. A line of text under every
+         preview said what the preview already showed, and on a flow of
+         forty-nine it pushed three slides off the screen. The name is on
+         the row's title and on the bar under the stage, where somebody
+         reading it is looking. */
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
-      '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>' + esc(slidesMineWord(
-          pslideById(SLED.target, el.dataset.ps))) + '</em>' : '') + '</span>' +
+      (mine ? '<span class="sl-mine">' + esc(slidesMineWord(
+          pslideById(SLED.target, el.dataset.ps))) + '</span>' : '') +
       (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
       slidesEye(el, all) + '</div>';
-  }).join("");
+  }).join("") +
+  /* ── ADDING SITS AT THE FOOT (§556.3) ──────────────────────────────
+     It was the loudest thing on the screen, above the deck, on a screen
+     whose job is to look at the deck. Islam's own page has no add at all;
+     ours needs one, and the foot of the rail is where it belongs. */
+  (!mayAdd ? "" :
+    '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
+      '<span class="picsub">' + (SLED.flow
+        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
+          "\u2019s own slides are added on its own page"
+        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
+            ? "the one selected" : "the slide selected below")) + '</span></div>');
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -50323,7 +53219,161 @@ function slidesPaint(){
      selection already on screen does not jump. */
   var on = list.querySelector(".slrow.on");
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  slidesGridPaint(all);
+  slidesFootPaint(all);
   SLED.err = "";
+}
+
+/* ── ALL SLIDES, AND THE KEYS (§556.2) ─────────────────────────────────
+   Both from Islam's own page, which he handed over as the shape to copy:
+   a grid for a deck too long to scroll a rail through, and the keys
+   written along the bottom so nobody has to be told them. The grid reads
+   the SAME rows the rail reads, so it cannot show a different deck
+   (§53.5), and it says which are hidden because that is the thing you
+   open it to check. */
+function slidesGridPaint(all){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  SLED.all = all;
+  /* Drawn only while open: every cell is a whole slide, and a flow is two
+     hundred of them — built on every repaint behind a closed grid, they
+     would double the cost of every press for nobody. */
+  if (g.hidden) { g.innerHTML = ""; return; }
+  g.innerHTML =
+    '<div class="slghead"><h3>All slides</h3>' +
+      '<button class="sl-b" data-slgclose>Close (Esc)</button></div>' +
+    '<div class="slglist">' + all.map(function(el, i){
+      return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (el.dataset.off ? " off" : "") + '" data-slgcell="' + esc(el.dataset.ed) +
+        '" title="' + esc(slidesLabel(el)) + '">' +
+        '<span class="slgn">' + (i + 1) +
+          (el.dataset.off ? ' <em>Hidden</em>' : '') + '</span>' +
+        '<span class="slgthumb"><span class="slgthumb-in"></span></span></button>';
+    }).join("") + '</div>';
+  /* A REAL SLIDE IN EVERY CELL, like the rail (§51) and like his grid —
+     a list of titles on cards is not a picture of the deck. */
+  var holders = g.querySelectorAll(".slgthumb-in");
+  [].forEach.call(holders, function(h, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    h.appendChild(c);
+  });
+  slidesGridFit();
+  /* WIRED HERE, because the grid is drawn AFTER slidesWire() has run — the
+     first version's cells carried `data-slgo` and nothing listened. Picking
+     a slide closes the grid on it, as his does. */
+  [].forEach.call(g.querySelectorAll("[data-slgcell]"), function(b){
+    b.addEventListener("click", function(){
+      SLED.sel = b.dataset.slgcell;
+      g.hidden = true;
+      slidesPaint();
+    });
+  });
+  var x = g.querySelector("[data-slgclose]");
+  if (x) x.addEventListener("click", function(){ slidesGridToggle(false); });
+  var on = g.querySelector(".slgcell.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"center" });
+}
+/* Each cell is as wide as the grid gives it, so the slide inside is scaled
+   to that width rather than to a number guessed here. */
+function slidesGridFit(){
+  [].forEach.call(document.querySelectorAll("#slgrid .slgthumb"), function(t){
+    var w = t.clientWidth;
+    var inn = t.firstChild;
+    if (w && inn) inn.style.transform = "scale(" + (w / 1600) + ")";
+  });
+}
+/* The counter, the slide's name and the keys, on ONE bar under the stage
+   (§556.3) — Islam's own page carries exactly these three, in this order,
+   and the name is here rather than under every thumbnail. */
+function slidesFootPaint(all){
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) at = 0;
+  var ct = document.getElementById("slct");
+  if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
+  var nm = document.getElementById("slnm");
+  if (nm) nm.innerHTML = slidesWhere(all, at);
+  var pr = document.getElementById("slprog");
+  if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";
+  var k = document.getElementById("slkeys");
+  /* §556.11: the room's own keys are listed HERE, because the room shows no
+     bar any more — in full screen there is nowhere else to read them. Said
+     in full, not as letters: "T timer" told Islam nothing. */
+  if (k) k.innerHTML =
+    '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
+    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
+    '<span class="slksep"></span>while presenting: ' +
+    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+  slidesPartsPaint(all, at);
+}
+/* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────
+   Islam: the three things the room's bar carried — the jump to each part,
+   which part you are in, and its time — *"we can include them in the slide
+   management page we already have"*. The parts are read off the slides'
+   own stamps, as the room's stops are (§266), so the two count alike. */
+function slidesParts(all){
+  var out = [];
+  all.forEach(function(el, i){
+    var t = el.dataset.subject;
+    if (!t || el.dataset.flowpart) return;
+    if (out.length && out[out.length - 1].t === t) return;
+    var org = String(GROUP.org || "").trim();
+    var name = (t === "group" && org) ? org : placeLabel(t);
+    out.push({ t:t, name:name, code:deckCode(t, name), at:i });
+  });
+  return out;
+}
+function slidesPartAt(parts, i){
+  var k = -1;
+  parts.forEach(function(p, j){ if (p.at <= i) k = j; });
+  return k;
+}
+function slidesWhere(all, at){
+  var el = all[at];
+  if (!el) return "";
+  var off = el.dataset.off ? " \u00b7 hidden" : "";
+  if (!SLED.flow) return esc(slidesShortLabel(el)) + off;
+  if (el.dataset.flowpart) return '<b>' + esc(String(GROUP.org || "").trim()) + '</b> <span>\u00b7 ' +
+    esc(el.dataset.anchor === "flowcover" ? "Cover" : slidesShortLabel(el)) + '</span>';
+  var parts = slidesParts(all), k = slidesPartAt(parts, at), p = parts[k];
+  if (!p) return esc(slidesShortLabel(el)) + off;
+  var mins = SMPRules.presentMins(GROUP, p.t), short = slidesShortLabel(el);
+  return '<b>' + esc(p.name) + '</b> <span>\u00b7 part ' + (k + 1) + ' of ' + parts.length +
+    (mins ? ' \u00b7 ' + mins + ' minutes' : '') + '</span>' +
+    (short && short !== p.name ? ' \u00b7 ' + esc(short) : '') + off;
+}
+/* One button per part, under the bar; the part you are in filled. Only in a
+   flow: one subject's slides are one part, and a row of one is not a choice. */
+function slidesPartsPaint(all, at){
+  var row = document.getElementById("slparts");
+  if (!row) return;
+  var parts = SLED.flow ? slidesParts(all) : [];
+  row.hidden = parts.length < 2;
+  if (row.hidden) { row.innerHTML = ""; return; }
+  var k = all[at] && all[at].dataset.flowpart ? -1 : slidesPartAt(parts, at);
+  row.innerHTML = parts.map(function(p, j){
+    var mins = SMPRules.presentMins(GROUP, p.t);
+    return '<button class="slpart' + (j === k ? " on" : "") + '" data-slpart="' + p.at +
+      '" title="' + esc(p.name) + (mins ? " \u00b7 " + mins + " minutes" : "") + '">' +
+      esc(p.code) + '</button>';
+  }).join("");
+  /* Wired where drawn — the row is painted after slidesWire() (§556.7). */
+  [].forEach.call(row.querySelectorAll("[data-slpart]"), function(b){
+    b.addEventListener("click", function(){
+      var el = all[+b.dataset.slpart];
+      if (el) { SLED.sel = el.dataset.ed; slidesPaint(); }
+    });
+  });
+  var on = row.querySelector(".slpart.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" });
+}
+function slidesGridToggle(on){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  g.hidden = on === undefined ? !g.hidden : !on;
+  var b = document.querySelector("[data-slgrid]");
+  if (b) b.classList.toggle("on", !g.hidden);
+  slidesGridPaint(SLED.all || []);
 }
 
 /* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
@@ -50356,9 +53406,13 @@ function slidesCanHide(el, all){
 function slidesEye(el, all){
   /* A picture slide has no anchor and is not hidden — it is REMOVED, by the
      control the pane already carries (§24: not a second way to do one act). */
-  if (!el.dataset.anchor || !inOffice()) return "";
+  if (!el.dataset.anchor || el.dataset.flowpart || !inOffice()) return "";
   var hid = !!el.dataset.off, can = slidesCanHide(el, all);
   return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
+    /* §556: whose slide this is. In a flow the editor is standing in the
+       company and the slide may be a direction's, so the anchor alone is
+       not an address. */
+    (el.dataset.subject ? ' data-slhidet="' + esc(el.dataset.subject) + '"' : '') +
     (can ? "" : ' aria-disabled="true"') +
     ' title="' + (hid ? "Show this slide in the review again"
                       : can ? "Hide this slide from the review"
@@ -50382,8 +53436,8 @@ function slidesHiddenLine(n){
    array that remembers the order it was written in reports a change to the
    server every time somebody hides two slides in the other sequence.
    The emptied key is DELETED (§50.6). */
-function slidesSetHidden(anchor, on){
-  var subj = deckSubject(SLED.target);
+function slidesSetHidden(anchor, on, target){
+  var subj = deckSubject(target || SLED.target);
   if (!subj || !anchor) return;
   var list = SMPRules.hiddenSlides(subj).slice(), i = list.indexOf(anchor);
   if (on && i < 0) list.push(anchor);
@@ -50418,9 +53472,13 @@ function slidesPaneHtml(cur, sl){
           '</div><p class="picsub">It is skipped when the deck is presented. Nothing ' +
           'else changes &mdash; the figures on it are still reported, still scored and ' +
           'still on the page.</p></div>'
-        : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
-          'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>');
+        /* ── AND NOTHING UNDER A SLIDE THAT IS FINE (§556.3) ──────────
+           A paragraph under the stage, on every one of forty-nine built
+           slides, saying the same sentence about all of them. The bar
+           under the stage now names the slide, and the add control at the
+           foot of the rail says where it lands — so this was explaining a
+           screen that explains itself (§24, §15.1). */
+        : "");
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -50542,8 +53600,9 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
-  if (String(target || "").indexOf("dir:") === 0) return L1("pillar");
-  return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
+  var k = boxRef(target).kind;
+  if (k === "dir") return L1("pillar");
+  return k === "fn" ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 
 function slidesSlot(sl, p, i){
@@ -50654,7 +53713,16 @@ function slidesAdd(){
     return;
   }
   var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
-  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  /* ── IN A FLOW IT GOES AT THE END (§556.2) ───────────────────────────
+     Islam: *"in the flow slide view I can hide and I can add final slides
+     but the addition on the sections as directions or capabilities should
+     be from the direction or capability presentation itself"*. The
+     selected row may be a direction's, and a picture dropped there would
+     be the office writing into somebody else's deck from a screen that is
+     not about them. The end is the company's own ground. */
+  var after = SLED.flow
+    ? all.length - 1
+    : all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
   if (after < 0) after = all.length - 1;
   var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
   slidesPlace(made, all, after);
@@ -50766,8 +53834,9 @@ function slidesWire(){
         slidesPaint();
         return;
       }
-      var subj = deckSubject(SLED.target);
-      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide));
+      var t = b.dataset.slhidet || SLED.target;
+      var subj = deckSubject(t);
+      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide), t);
     });
   });
   root.querySelectorAll("[data-slshow]").forEach(function(b){
@@ -51054,7 +54123,20 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
-  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  var gb = root.querySelector("[data-slgrid]");
+  if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §556.3: the arrows at the stage's edge and under it are the same act as
+     the keyboard's, so they call the same stepper (§53.5). */
+  root.querySelectorAll("[data-slstep]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesStep(+b.dataset.slstep); });
+  });
+  var rb = root.querySelector("[data-slrail]");
+  if (rb) rb.addEventListener("click", function(){
+    var on = root.classList.toggle("norail");
+    rb.classList.toggle("on", !on);
+    slidesFitStage();
+  });
+  addEventListener("resize", function(){ if (root.classList.contains("on")) { slidesFitStage(); slidesGridFit(); } });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     /* ── THE DECK IN FRONT HAS THE KEYBOARD (§295) ──────────────────
@@ -51070,7 +54152,22 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    if (ev.key === "Escape") slidesClose();
+    if (ev.key === "Escape") {
+      /* §556.2: the grid closes first — Escape from a grid is "put this
+         away", not "leave the editor". */
+      var g = document.getElementById("slgrid");
+      if (g && !g.hidden) { slidesGridToggle(false); return; }
+      slidesClose();
+    }
+    if (ev.key === "g" || ev.key === "G") { slidesGridToggle(); return; }
+    if (ev.key === "p" || ev.key === "P") { slidesPlay(); return; }
+    /* §556.3: hide the slide you are looking at, which is where Islam's own
+       page puts it — the eye on the row does the same act for the row. */
+    if (ev.key === "h" || ev.key === "H") {
+      var cur = document.querySelector("#slidelist .slrow.on .slhide");
+      if (cur) cur.click();
+      return;
+    }
     /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
        Islam: "allow the arrows up and down so I can navigate the slides while
        adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —
@@ -51185,6 +54282,9 @@ var SEARCHSEL = (function(){
      `data-sslabel="count"` asks for "19 of 19 subjects" and everything else
      goes on listing its names. `data-ssnoun` is the word, singular and plural
      separated by a pipe, because "1 of 19 subjects" is not English. */
+  /* §536: one number per opening, so the list and its rows can be pointed at
+     by id. Never reused while a popup stands — close() runs before each open. */
+  var SSN = 0;
   function countLabel(sel){
     var noun = String(sel.dataset.ssnoun || "chosen|chosen").split("|");
     var n = chosenTexts(sel).length, m = sel.options.length;
@@ -51311,6 +54411,11 @@ var SEARCHSEL = (function(){
     var pop = document.createElement("div");
     pop.className = "sspop" + (many ? " ssmany" : "");
     pop.setAttribute("role", "listbox");
+    /* §536: THE LIST NEEDS AN ID TO BE POINTED AT. One per opening, because
+       two of these never stand at once (close() runs first) but a stale id
+       left in the document would be pointed at by the next one. */
+    var popId = "sspop-" + (++SSN);
+    pop.id = popId;
     if (many) pop.setAttribute("aria-multiselectable", "true");
 
     var q = document.createElement("input");
@@ -51319,6 +54424,20 @@ var SEARCHSEL = (function(){
     q.placeholder = "Search…";
     q.autocomplete = "off";
     q.setAttribute("aria-label", "Search this list");
+    /* §536: THE BOX BEING TYPED IN OWNS THE LIST. The rows are announced as
+       `option`s inside a `listbox`, which is a promise about arrow keys —
+       and the only key bound was Escape, with Enter taking the first row
+       still showing. Operable, because the rows are real buttons and tab
+       reaches them, but not what the markup told a screen reader to expect.
+
+       `aria-activedescendant` RATHER THAN MOVING FOCUS, because the whole
+       point of this control is typing three letters and then picking: focus
+       that walked into the list would make the next three letters go
+       nowhere. The box keeps focus and POINTS at the row. */
+    q.setAttribute("role", "combobox");
+    q.setAttribute("aria-expanded", "true");
+    q.setAttribute("aria-autocomplete", "list");
+    q.setAttribute("aria-controls", popId);
 
     var list = document.createElement("div");
     list.className = "sslist";
@@ -51353,6 +54472,7 @@ var SEARCHSEL = (function(){
         r.appendChild(h);
       }
       r.setAttribute("role", "option");
+      r.id = popId + "-r" + rows.length;
       r.setAttribute("aria-selected", on ? "true" : "false");
       r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
       r._op = op;
@@ -51378,6 +54498,33 @@ var SEARCHSEL = (function(){
       }
     });
 
+    /* ── §536: WHICH ROW THE ARROWS ARE ON ───────────────────────────────
+       Held as the ROW rather than an index, because the index would be into
+       a list whose visible members change under it on every keystroke. */
+    var active = null;
+    var shown = function(){ return rows.filter(function(r){ return !r.hidden; }); };
+    var mark = function(r){
+      if (active && active !== r) active.classList.remove("ssrow-at");
+      active = r || null;
+      if (!active) { q.removeAttribute("aria-activedescendant"); return; }
+      active.classList.add("ssrow-at");
+      q.setAttribute("aria-activedescendant", active.id);
+      /* The row has to be ON SCREEN to be the answer to "where am I" — the
+         lists this opens over run to a whole tenant. `block:"nearest"` so a
+         row already in view does not jolt the list. */
+      if (active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
+    };
+    var step = function(by){
+      var vis = shown();
+      if (!vis.length) return;
+      var i = active ? vis.indexOf(active) : -1;
+      /* From nowhere, Down lands on the first and Up on the last. */
+      i = i < 0 ? (by > 0 ? 0 : vis.length - 1) : i + by;
+      if (i < 0) i = vis.length - 1;
+      if (i >= vis.length) i = 0;
+      mark(vis[i]);
+    };
+
     /* Hides rows in place. Never re-renders the list, never touches the input
        being typed into (§35). */
     q.addEventListener("input", function(){
@@ -51392,6 +54539,10 @@ var SEARCHSEL = (function(){
           function(r){ return !r.hidden; });
       });
       none.hidden = n > 0;
+      /* §536: a mark on a row the search has just hidden points at nothing.
+         Dropped rather than moved, so Enter falls back to "the first row
+         still showing" exactly as it did before any of this. */
+      if (active && active.hidden) mark(null);
     });
 
     /* ── SELECT ALL / NONE, OPT-IN (§304) ────────────────────────────
@@ -51452,10 +54603,29 @@ var SEARCHSEL = (function(){
     var onDoc = function(e){ if (!pop.contains(e.target) && e.target !== btn) close(); };
     var onKey = function(e){
       if (e.key === "Escape") { close(); btn.focus(); return; }
+      /* §536: THE KEYS THE MARKUP HAS ALWAYS PROMISED. Only while the search
+         box has focus — a row reached by Tab is a real button and the browser
+         already works it, and stealing its arrows there would be a second
+         answer to one question. */
+      if (document.activeElement === q &&
+          (e.key === "ArrowDown" || e.key === "ArrowUp" ||
+           e.key === "Home" || e.key === "End")) {
+        e.preventDefault();
+        if (e.key === "ArrowDown") step(1);
+        else if (e.key === "ArrowUp") step(-1);
+        else {
+          var vis = shown();
+          if (vis.length) mark(e.key === "Home" ? vis[0] : vis[vis.length - 1]);
+        }
+        return;
+      }
       if (e.key !== "Enter") return;
-      /* Enter takes the first row still showing — the whole point of typing
-         three letters is not having to reach for the mouse afterwards. */
-      var first = rows.filter(function(r){ return !r.hidden; })[0];
+      /* Enter takes the row the arrows are on, and the first row still
+         showing when they are on none — which is what it did before the
+         arrows existed, and what typing three letters and pressing Enter
+         still has to do. */
+      var first = (active && !active.hidden) ? active
+                : rows.filter(function(r){ return !r.hidden; })[0];
       if (first && document.activeElement === q) {
         e.preventDefault();
         first.click();
@@ -51549,7 +54719,11 @@ var SEARCHSEL = (function(){
        the native multiple select is a scrolling list box that ctrl-clicks, and
        it is not a control this product uses anywhere. Below the floor there is
        still nothing to search — the box is there and matches nothing away. */
-    if (!sel.multiple && sel.options.length < MIN) return;
+    /* §547: the five-option floor is the right rule for a FORM FIELD and the
+       wrong one for the go-to list — a tenant with four places needs that
+       list more than one with forty, not less. One opt-in here rather than a
+       second popup over there (§53.5). */
+    if (!sel.multiple && sel.options.length < MIN && sel.dataset.ssAlways !== "1") return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
       var prev = buttonFor(sel);
       if (prev) {
@@ -51897,12 +55071,12 @@ var CHAT = (function(){
   function when(at){
     var d = new Date(at), now = new Date();
     if (isNaN(d)) return "";
-    var hm = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    var hm = timeOf(d);
     var sameDay = d.toDateString() === now.toDateString();
     if (sameDay) return hm;
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday " + hm;
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " " + hm;
+    return dateAt(d);
   }
   function dayOf(at){
     var d = new Date(at), now = new Date();
@@ -51910,7 +55084,7 @@ var CHAT = (function(){
     if (d.toDateString() === now.toDateString()) return "Today";
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday";
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+    return dateDay(d);
   }
   function ago(at){
     if (!at) return "";
@@ -54157,10 +57331,16 @@ var CHAT = (function(){
              a conversation carrying a flagged message, so the row a person
              clicks is the same row wherever they found it. */
           '<div class="chqtabs" id="chqtabs" role="tablist">' +
-            '<button class="chqtab on" type="button" data-chtab="waiting" role="tab">' +
+            /* §544: SAID AT THE FIRST DRAW, not only after a press. The row
+               carried its state in `class="on"` alone until somebody clicked
+               one, and the handler below has always set `aria-selected` — so
+               a screen reader was told which tab was current only once the
+               person had already chosen it, which is the one moment they did
+               not need telling. */
+            '<button class="chqtab on" type="button" data-chtab="waiting" role="tab" aria-selected="true">' +
               'Waiting <span data-chn="waiting">0</span></button>' +
-            '<button class="chqtab" type="button" data-chtab="all" role="tab">All</button>' +
-            '<button class="chqtab" type="button" data-chtab="flagged" role="tab">' +
+            '<button class="chqtab" type="button" data-chtab="all" role="tab" aria-selected="false">All</button>' +
+            '<button class="chqtab" type="button" data-chtab="flagged" role="tab" aria-selected="false">' +
               'Flagged <span data-chn="flagged">0</span></button>' +
           "</div>" +
           '<div class="chqlist" id="chqlist"></div>' +
@@ -55358,7 +58538,7 @@ var TOUR = (function(){
       if (at) return;
       if (r.role === "custodian" || r.role === "owner" || r.role === "fnhead") at = r.at;
     });
-    if (!at || at === "group" || String(at).indexOf("co:") === 0) return null;
+    if (!at || at === "group" || boxRef(at).kind === "mid") return null;
     return at;
   }
 
@@ -55376,7 +58556,7 @@ var TOUR = (function(){
 
      Stated here, in one place, which is the other half of §53's rule: where
      the two sides differ, say which and why. */
-  function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
+  function isFnPlace(k){ return boxRef(k).kind === "fn"; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
   /* §211.2 dropped `found` here for a function that plans in pillars, because
@@ -56139,9 +59319,10 @@ var WELCOME = (function(){
   function ownTargets(row, rs){
     var out = [];
     function add(t){
-      if (!t || t === "group" || String(t).indexOf("co:") === 0) return;
-      var real = String(t).indexOf("fn:") === 0
-        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[String(t).slice(3)])
+      var r = boxRef(t);
+      if (!t || t === "group" || r.kind === "mid") return;
+      var real = r.kind === "fn"
+        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[r.key])
         : !!(typeof UNITS !== "undefined" && UNITS[t]);
       if (real && out.indexOf(t) < 0) out.push(t);
     }
@@ -56169,7 +59350,7 @@ var WELCOME = (function(){
     dismiss();
     setTimeout(function(){
       press('#units [data-u="' + t + '"]');
-      var fn = String(t).indexOf("fn:") === 0;
+      var fn = boxRef(t).kind === "fn";
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
       /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
@@ -56490,7 +59671,7 @@ var WELCOME = (function(){
     try { name = SMPRules.firstName(row); } catch(e){}
     if (!name) name = String(row.name || person.name || "").split(/\s+/)[0] || "";
 
-    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§534) ────────
+    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§558) ────────
        Islam's ask, of the chips under the name on this screen: a capability's
        owner and a direction's owner should read the ROLE and nothing after it.
        Each printed its place — the capability's own title for one, the top
@@ -56665,7 +59846,7 @@ var WELCOME = (function(){
       var home = targets[0] || null;
       if (home) {
         var nm = subjectName(home);
-        var isFn = String(home).indexOf("fn:") === 0;
+        var isFn = boxRef(home).kind === "fn";
         pageLink(nm + " — Strategy", isFn ? "" : "Plan · Foundation · SWOT",
           function(){ goPlace(home, "strategy"); });
         pageLink(nm + " — Performance", "", function(){ goPlace(home, "performance"); });
@@ -56877,7 +60058,38 @@ var WELCOME = (function(){
    document, so a repaint cannot leave a handler bound to a dead element
    (§29.5). Nothing here is drawn over file:// — there is no log to read. */
 var TRAIL = (function(){
+  /* ── THE FILTERS COME BACK AS YOU LEFT THEM (§550) ────────────────────
+     Usability audit, heuristic 7: "no saved views, no default filters". The
+     four dropdowns on this page went back to Everyone / Everywhere / Every
+     kind / Today on every visit, so somebody who checks one person's changes
+     every Monday set all four again every Monday.
+
+     THE PATTERN IS THE PRODUCT'S OWN, not a new one: the people table and the
+     functions table already remember which columns you chose, in localStorage,
+     per browser (§47.1). This is that, one surface further out — and it is
+     read and written in the same shape so there is one habit and not two.
+
+     THE SEARCH BOX IS NOT REMEMBERED, and that is the one judgement here.
+     Choosing "Nadia, Mobile, last 7 days" is a position you took; half a word
+     left in a search box is not. Coming back to a page silently filtered by
+     text you do not remember typing is the kind of help that reads as a bug —
+     so `q` stays out, and starts empty every time. */
+  var FKEY = "smp.hist.filters";
   var F = { person:"", target:"", kind:"", when:"today", q:"" };   /* the page's filters */
+  (function restoreFilters(){
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(FKEY) || "null"); } catch (e) { saved = null; }
+    if (!saved || typeof saved !== "object") return;
+    ["person", "target", "kind", "when"].forEach(function(k){
+      if (typeof saved[k] === "string") F[k] = saved[k];
+    });
+  })();
+  function keepFilters(){
+    try {
+      localStorage.setItem(FKEY, JSON.stringify({
+        person: F.person, target: F.target, kind: F.kind, when: F.when }));
+    } catch (e) {}
+  }
   var rows = [], loading = false, error = null, office = false, loadedFor = null;
   var lastCache = {};      /* target → {at, rows, when} for the unit line   */
   var pending = null;      /* the row a confirmation is open for            */
@@ -56931,27 +60143,29 @@ var TRAIL = (function(){
     } catch (x) {}
     return e.person_name || e.person_key || "";
   }
-  function pad(n){ return (n < 10 ? "0" : "") + n; }
-  function dateWord(at){
-    var d = new Date(at); if (isNaN(d)) return "";
-    var now = new Date();
-    var sameDay = function(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
-    if (sameDay(d, now)) return "Today";
-    var y = new Date(now); y.setDate(now.getDate() - 1);
-    if (sameDay(d, y)) return "Yesterday";
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "");
+  /* TODAY AND YESTERDAY ARE THIS FILE'S OWN, and they stay: a log read
+     minutes after the act is mostly today, and "Today" says that better
+     than the date does. Everything past yesterday is the product's one day
+     writer now (§537). What went was a `["Jan","Feb",...]` array kept here
+     twice, which printed the year only when it was not this one — so the
+     log said "11 Mar" where every other screen said "11 Mar 26". */
+  function sameDayAs(a, b){
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
-  function timeWord(at){ var d = new Date(at); return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function dayName(at){
+    var d = dateOf(at); if (!d) return "";
+    var now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+    return sameDayAs(d, now) ? "Today" : sameDayAs(d, y) ? "Yesterday" : "";
+  }
+  function dateWord(at){
+    var d = dateOf(at); if (!d) return "";
+    return dayName(at) || dateDay(d);
+  }
+  function timeWord(at){ return timeOf(at); }
   function whenWord(at){
-    var d = new Date(at); if (isNaN(d)) return "";
-    var now = new Date(), t = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    var sameDay = function(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
-    if (sameDay(d, now)) return "Today " + t;
-    var y = new Date(now); y.setDate(now.getDate() - 1);
-    if (sameDay(d, y)) return "Yesterday " + t;
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "") + ", " + t;
+    var d = dateOf(at); if (!d) return "";
+    var near = dayName(at);
+    return near ? near + " " + timeOf(d) : dateAt(d);
   }
   function plain(v){
     if (v === null || v === undefined || v === "") return "nothing";
@@ -57020,7 +60234,7 @@ var TRAIL = (function(){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
       h += '<tr data-hist-row="' + i + '">' +
-        '<td class="hist-t" title="' + E(new Date(e.at).toLocaleString()) + '">' + E(dateWord(e.at)) + '</td>' +
+        '<td class="hist-t" title="' + E(dateStamp(e.at)) + '">' + E(dateWord(e.at)) + '</td>' +
         '<td class="hist-t">' + E(timeWord(e.at)) + '</td>' +
         '<td title="' + E(e.person_name || "") + '">' + E(whoWord(e)) + '</td>' +
         (opts.noPlace ? '' : '<td>' + E(placeWord(e.target)) + '</td>') +
@@ -57029,7 +60243,14 @@ var TRAIL = (function(){
         '<td class="hist-fld">' + (m ? E(fieldWord(m.field)) : '') + '</td>' +
         '<td class="hist-fromto hist-wrap" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
         '<td class="hist-act">' + (why
-          ? '<button type="button" class="hist-rst" disabled aria-disabled="true" title="' + E(why) + '">Restore</button>'
+          /* HELD, NOT DEAD (§538). It carried BOTH attributes, and `disabled`
+             wins: the button took no pointer and no Tab, so the one sentence
+             saying why this change cannot be put back reached nobody — and
+             nothing else in the row says it. `aria-disabled` alone leaves it
+             reachable, `.hasnote` opens the product's own bubble on hover AND
+             on focus, and the press stays inert because the held button never
+             carries `data-hist-restore` for the handler to find. */
+          ? '<button type="button" class="hist-rst hasnote" aria-disabled="true" data-tip="' + E(why) + '">Restore</button>'
           : '<button type="button" class="hist-rst" data-hist-restore="' + i + '">Restore</button>') + '</td>' +
         '</tr>';
     });
@@ -57070,29 +60291,59 @@ var TRAIL = (function(){
 
   /* ── THE SETUP PAGE ────────────────────────────────────────────────── */
   function opt(v, label, cur){ return '<option value="' + E(v) + '"' + (v === cur ? ' selected' : '') + '>' + E(label) + '</option>'; }
-  function toolsHtml(){
-    var people = '';
+  var KIND_OPTS = [["unitPlan","Plan (unit)"],["capPlan","Plan (function)"],["unitReporting","Reporting (unit)"],["capReporting","Reporting (function)"],
+               ["gapFill","Fill"],["reportState","Report submitted"],["setup","Setup"],["access","Access"],["cycle","Cycle"],["group","Group"]];
+  var WHEN_OPTS = [["today","Today"],["yesterday","Yesterday"],["week","Last 7 days"],["month","Last 30 days"],["year","This year"],["all","All time"]];
+  function peopleList(){
+    var out = [];
     try {
       var dn = typeof displayNames === "function" ? displayNames() : null;
       (typeof PEOPLE !== "undefined" ? PEOPLE : []).filter(function(p){ return typeof personActive !== "function" || personActive(p); })
         .sort(function(a, b){ return String(a.name).localeCompare(String(b.name)); })
-        .forEach(function(p){ people += opt(p.key, (typeof knownName === "function" ? knownName(p, dn) : p.name) || p.key, F.person); });
+        .forEach(function(p){ out.push([p.key, (typeof knownName === "function" ? knownName(p, dn) : p.name) || p.key]); });
     } catch (e) {}
-    var places = '';
+    return out;
+  }
+  function placeList(){
+    var out = [];
     try {
-      places += opt("group", "The group", F.target);
-      (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){ places += opt(k, placeWord(k), F.target); });
-      Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function(k){ places += opt("fn:" + k, placeWord("fn:" + k), F.target); });
+      out.push(["group", "The group"]);
+      (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){ out.push([k, placeWord(k)]); });
+      Object.keys(typeof FUNCTIONS !== "undefined" ? FUNCTIONS : {}).forEach(function(k){ out.push(["fn:" + k, placeWord("fn:" + k)]); });
     } catch (e) {}
-    var kinds = [["unitPlan","Plan (unit)"],["capPlan","Plan (function)"],["unitReporting","Reporting (unit)"],["capReporting","Reporting (function)"],
-                 ["gapFill","Fill"],["reportState","Report submitted"],["setup","Setup"],["access","Access"],["cycle","Cycle"],["group","Group"]]
-      .map(function(k){ return opt(k[0], k[1], F.kind); }).join("");
+    return out;
+  }
+  /* ── A REMEMBERED FILTER NOBODY CAN SEE IS DROPPED (§550) ─────────────
+     The one way remembering could lie: you filter by Nadia, Nadia leaves the
+     register, and the saved key matches no option any more. The dropdown
+     would read "Everyone" — nothing selected — while the page went on asking
+     the server for Nadia's changes, and the count underneath would be hers.
+     A screen that disagrees with what it is doing is worse than a screen
+     that forgot, so a saved value that is no longer on offer is dropped and
+     unremembered BEFORE the first read (`renderPage` prunes, then asks).
+
+     AN EMPTY LIST MEANS NOT YET, NOT NOBODY: over file:// and before state
+     lands there are no people and no units to compare against, and pruning
+     then would quietly throw away a good filter. So an empty list prunes
+     nothing. The two static lists cannot be empty. */
+  function prune(){
+    var dirty = false;
+    [["person", peopleList()], ["target", placeList()], ["kind", KIND_OPTS]].forEach(function(p){
+      if (!F[p[0]] || !p[1].length) return;
+      if (!p[1].some(function(o){ return o[0] === F[p[0]]; })) { F[p[0]] = ""; dirty = true; }
+    });
+    if (!WHEN_OPTS.some(function(o){ return o[0] === F.when; })) { F.when = "today"; dirty = true; }
+    if (dirty) keepFilters();
+  }
+  function opts(list, cur){ return list.map(function(o){ return opt(o[0], o[1], cur); }).join(""); }
+  function toolsHtml(){
+    prune();
     return '<span class="hist-tools">' +
       '<input class="fld tk-search" type="search" data-hist-q placeholder="Search a row or a person…" autocomplete="off" value="' + E(F.q) + '">' +
-      '<select class="fld" data-hist-f="person" aria-label="Person">' + opt("", "Everyone", F.person) + people + '</select>' +
-      '<select class="fld" data-hist-f="target" aria-label="Place">' + opt("", "Everywhere", F.target) + places + '</select>' +
-      '<select class="fld" data-hist-f="kind" aria-label="Kind">' + opt("", "Every kind", F.kind) + kinds + '</select>' +
-      '<select class="fld" data-hist-f="when" aria-label="When">' + opt("today", "Today", F.when) + opt("yesterday", "Yesterday", F.when) + opt("week", "Last 7 days", F.when) + opt("month", "Last 30 days", F.when) + opt("year", "This year", F.when) + opt("all", "All time", F.when) + '</select>' +
+      '<select class="fld" data-hist-f="person" aria-label="Person">' + opt("", "Everyone", F.person) + opts(peopleList(), F.person) + '</select>' +
+      '<select class="fld" data-hist-f="target" aria-label="Place">' + opt("", "Everywhere", F.target) + opts(placeList(), F.target) + '</select>' +
+      '<select class="fld" data-hist-f="kind" aria-label="Kind">' + opt("", "Every kind", F.kind) + opts(KIND_OPTS, F.kind) + '</select>' +
+      '<select class="fld" data-hist-f="when" aria-label="When">' + opts(WHEN_OPTS, F.when) + '</select>' +
       '</span>';
   }
   function bodyHtml(){
@@ -57136,7 +60387,7 @@ var TRAIL = (function(){
   function target(){
     var c = typeof current !== "undefined" ? current : null;
     if (!c || c === "setup" || c === "manage" || c === "group") return null;
-    if (String(c).indexOf("co:") === 0) return null;
+    if (boxRef(c).kind === "mid") return null;
     return typeof TARGET !== "undefined" ? TARGET : null;
   }
   function lineHtml(t, entry){
@@ -57215,7 +60466,7 @@ var TRAIL = (function(){
          that function's capabilities are still walked beside its own work or
          a restore that used to work stops. */
       var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();
-      if (String(t).indexOf("fn:") === 0)
+      if (boxRef(t).kind === "fn")
         (GROUP.capabilities || []).forEach(function(c){
           if ("fn:" + c.fn === String(t) && holders.indexOf(c) === -1) holders.push(c); });
       holders.forEach(function(c){
@@ -57260,6 +60511,7 @@ var TRAIL = (function(){
     var s = ev.target && ev.target.closest && ev.target.closest("[data-hist-f]");
     if (!s) return;
     F[s.dataset.histF] = s.value;
+    keepFilters();
     load(false);
   });
   document.addEventListener("input", function(ev){
@@ -57819,7 +61071,7 @@ var COPILOT = (function(){
   function here(){
     var t = typeof TARGET !== "undefined" ? String(TARGET || "") : "";
     return SECTIONS.filter(function(s){
-      if (s.k === "capabilities") return !dvCapsHere();
+      if (s.k === "capabilities") return false;  /* §544.13 */
       if (s.k !== "compete") return true;
       try { return SMPRules.compOffered(t, SMPRules.COMPETE); } catch (e) { return false; }
     });
@@ -57876,12 +61128,10 @@ var COPILOT = (function(){
     if (!p) return k;
     return (typeof knownName === "function" ? knownName(p) : "") || p.name || k;
   }
-  function when(iso){
-    if (!iso) return "";
-    var d = new Date(iso); if (isNaN(d)) return "";
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + " " + d.getFullYear();
-  }
+  /* The product's one day writer (§537). This had its own month array and
+     its own four-digit year, so a deliverable dated beside anything else on
+     screen read "11 Mar 2026" next to "11 Mar 26". */
+  function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
   function renderPane(){
@@ -58078,12 +61328,13 @@ var COPILOT = (function(){
     }
     var holder = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") {
-        var fk = t.slice(3), F = FUNCTIONS[fk];
+      var r = boxRef(t);
+      if (r.kind === "fn" && typeof FUNCTIONS !== "undefined") {
+        var fk = r.key, F = FUNCTIONS[fk];
         if (F) { if (!u) { o.def = F.def; o.keyObjectives = F.keyObjectives; } }
         holder = typeof fnHolders === "function" ? fnHolders(fk) : [];
-      } else if (t.indexOf("cap:") === 0 && typeof capById === "function") {
-        var C = capById(t.slice(4));
+      } else if (r.kind === "cap" && typeof capById === "function") {
+        var C = capById(r.key);
         if (C && !u) { o.def = C.def; o.keyObjectives = C.keyObjectives; holder = [C]; }
       }
     } catch (e) { holder = null; }
@@ -58785,10 +62036,16 @@ var COPILOT = (function(){
        the bar already names it ("v3 in progress · v2 is on the plan"), so a
        done line there would read as a claim about work nobody has applied. */
     var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    /* WHY APPLY IS HELD, in the words the moment actually calls for. */
+    var fwhy = !f.saved ? "Save the Foundation first"
+             : busyHere ? "The Copilot is working on this chat" : "";
     return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
       '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
       '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
-      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      /* HELD, NOT DEAD (§538), and the reason is now the RIGHT one: the old
+         line said "Save the Foundation first" even while the Copilot was
+         working on a Foundation already saved. */
+      '<button type="button" class="copbtn' + (fwhy ? ' hasnote' : '') + '" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (fwhy ? ' aria-disabled="true" data-tip="' + E(fwhy) + '"' : '') + '>Apply to plan</button>' +
       '</div></div>';
   }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
@@ -59232,7 +62489,7 @@ var COPILOT = (function(){
   function planSwot(){
     var t = place(), sw = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[t.slice(3)] || {}).swot;
+      if (boxRef(t).kind === "fn" && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[boxRef(t).key] || {}).swot;
       else if (t === "group" && typeof GROUP !== "undefined") sw = GROUP.swot;
       else { var u = typeof unitLike === "function" ? unitLike(t) : null; sw = u && u.swot; }
     } catch (e) { sw = null; }
@@ -60244,7 +63501,7 @@ var COPILOT = (function(){
     if ((s.mode === "capabilities" || s.withCaps) && typeof addCapability === "function" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities)) {
       s.caps.filter(function(x){ return x.keep; }).forEach(function(x){
         var c = x.planId ? GROUP.capabilities.filter(function(y){ return y && y.id === x.planId; })[0] : null;
-        if (!c) c = addCapability(x.ownedBy || null);
+        if (!c) c = addCapability();
         if (!c) return;
         c.name = x.title;
         if (x.ownedBy) c.fn = x.ownedBy;
@@ -60337,7 +63594,7 @@ var COPILOT = (function(){
   }
   function dvNew(mode){
     act({ act:"newDirections", place: place(), mode: mode, title: dvTitle(mode),
-          withCaps: mode === "directions" && dvCapsHere(), hadPlan: dvExisting().length }, function(j){
+          withCaps: mode === "directions", hadPlan: dvExisting().length }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       dvView(j);
@@ -60347,10 +63604,17 @@ var COPILOT = (function(){
       if (PANE.dirs && PANE.dirs.start === "fresh") dvAsk({ act: mode === "capabilities" ? "capSuggest" : "dirSuggest" });
     });
   }
-  /* Where capabilities are chosen (spec §4.5): inside the Directions chat
-     when Structure keeps them in the company plan, in a section of their own
-     when they are a layer. One answer, asked of the shared rule. */
-  function dvCapsHere(){ try { return !!SMPRules.capAtTop(GROUP); } catch (e) { return true; } }
+  /* §544.13 — AND THE QUESTION ITSELF IS GONE. Capabilities were chosen
+     inside the Directions chat when Structure kept them in the company plan,
+     and in a section of their own when they were a layer; there is no layer
+     any more, so they are always chosen in the Directions chat. The rule that
+     asked it answered true for every client the day `capAtTop` did, and a
+     rule that cannot say no is not a rule (§61) — so it is read out here
+     rather than left standing as a constant for a reader to re-derive.
+
+     §544.12's catch is KEPT by this, not lost: it was that El Abd's
+     capabilities are in its company plan although `capAtTop` said otherwise.
+     They are now, for every client. */
 
   /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
      The period first, then each Direction and Capability in turn: its
@@ -60370,7 +63634,7 @@ var COPILOT = (function(){
       var h = dvHolder(), p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null;
       return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
     });
-    if (place() === "group" && dvCapsHere() && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
+    if (place() === "group" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
       GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: c.fn ? dvFnName(c.fn) : "" }); });
     return out;
   }
@@ -60426,9 +63690,31 @@ var COPILOT = (function(){
       '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
     var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
-      '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      /* §551: AN OWNER IS PICKED HERE TOO. This was the one free-text owner
+         box left in the product — the draft a chat writes, which is then
+         saved into a real plan, so a name typed here becomes a name on the
+         plan that matches nobody. It is the register's own list
+         (`ownerChoices`), so there is one list and not a second (§53.5), and
+         past five options `searchsel` makes it searchable like every other
+         (§536). The patch hook below reads `el.value`, which a select
+         answers exactly as the input did. */
+      '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-t="' + i + '|owner" aria-label="Owner">' +
+          optionsHtml(ownerChoices(t.owner, true), function(v){
+            return String(t.owner == null ? "" : t.owner) === v; }) + '</select>'
+        : (typeof ownerShown === "function" ? ownerShown(t.owner || "") : E(t.owner || "")) || E("—")) + '</td>' +
+      /* NOT A CONTROL, SO NOT A BUTTON (§538). A quarter outside the plan
+         period — or any quarter in a view nobody may edit — was drawn as a
+         `disabled` button carrying "Q3 is outside the plan period" as a hover
+         that can never open. Nothing was hidden by that: the strip directly
+         above this table already says which period the plan covers. So the
+         fix is a subtraction — it stops being a button, Tab walks only the
+         quarters that can be pressed, and the sentence survives on a mark that
+         a pointer CAN reach and that a screen reader reads from `aria-label`. */
       '<td class="copex-qs">' + [1,2,3,4].map(function(q){ var inP = qs.indexOf(q) >= 0, on = t.quarters.indexOf(q) >= 0;
-        return '<button type="button" class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '"' + (ed && inP ? ' data-cop-ex-q="' + i + '|' + q + '"' : ' disabled') + ' aria-pressed="' + on + '" title="' + (inP ? "Q" + q : "Q" + q + " is outside the plan period") + '">Q' + q + '</button>'; }).join("") + '</td>' +
+        if (ed && inP) return '<button type="button" class="copex-q' + (on ? " on" : "") + '" data-cop-ex-q="' + i + '|' + q + '" aria-pressed="' + on + '" title="Q' + q + '">Q' + q + '</button>';
+        var say = inP ? ("Q" + q + (on ? ", in this tactic" : ", not in this tactic"))
+                      : ("Q" + q + " is outside the plan period");
+        return '<span class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '" role="img" title="' + E(say) + '" aria-label="' + E(say) + '">Q' + q + '</span>'; }).join("") + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-tx="' + i + '" aria-label="Remove this tactic">&times;</button></td>' : '') + '</tr>'; };
     return '<div class="copex-item" data-cop-ex-item="' + k + '"><div class="copvline"><b>' + E(it.title) + '</b> — ' + (it.kind === "capability" ? "Capability" : "Direction") + ' ' + (k + 1) + ' of ' + PANE.exec.items.length + (it.ownedBy ? ', owned by ' + E(it.ownedBy) : '') + '</div>' +
       '<div class="copcp-wrap"><table class="copcp-tab copex-t"><thead><tr><th>Measure</th><th>Target (period)</th><th>Compile</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.measures.map(mrow).join("") + '</tbody></table></div>' +
@@ -60736,7 +64022,11 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
-    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
+    /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
+       could be read, and `b.disabled` goes false the moment it does — a guard
+       left reading that property would let the held button act. */
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
+      applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
@@ -61525,11 +64815,11 @@ var CONT = (function () {
     var w = when();
     if (!w) return "";
     var mins = Math.round((w.getTime() - Date.now()) / 60000);
-    var at = w.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    var at = timeOf(w);
     if (mins < 60) return "in " + mins + " minutes";
     if (mins < 24 * 60) return "today at " + at;
     if (mins < 48 * 60) return "tomorrow at " + at;
-    return w.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " at " + at;
+    return dateDay(w) + " at " + at;
   }
 
   function paintBanner() {
@@ -61629,8 +64919,7 @@ var CONT = (function () {
         return;
       }
       note = "Contingency files taken · " +
-        new Date().toLocaleString(undefined, { day: "numeric", month: "short",
-                                               hour: "2-digit", minute: "2-digit" });
+        dateAt(new Date());
       dismissed.done = false;
       paint();          /* the stamp is state — the list and the card follow it */
     });
@@ -61725,7 +65014,7 @@ function __smpHoldsNow() {
   });
   (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
     .forEach(function (t) {
-      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
+      var tr = boxRef(t), u = tr.kind === "fn" ? FUNCTIONS[tr.key] : UNITS[t];
       if (!u) return;
       plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
       var sw = u.swot || {};
@@ -61782,6 +65071,15 @@ function __smpShape(state, a, hydrate) {
     COMPANIES[k].name = nm;
     var had = coByName[nm.toLowerCase()];
     if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
+    /* §544: which kind's layer this division sits on, written only when
+       the answer SAYS one — after the carry, or a division made on the
+       shape screen would take back the kind it was created under. An empty
+       answer deletes the key rather than writing one, so a division that
+       holds boxes goes on being read from use (§50.6). */
+    if (Object.prototype.hasOwnProperty.call(c, "layer")) {
+      if (c.layer === "bu" || c.layer === "fn") COMPANIES[k].layer = c.layer;
+      else delete COMPANIES[k].layer;
+    }
     byName[nm.toLowerCase()] = k;
   });
   /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§360.3).
@@ -61885,16 +65183,10 @@ function __smpShape(state, a, hydrate) {
     if (co) FUNCTIONS[k].company = co;
     else { delete FUNCTIONS[k].company; delete FUNCTIONS[k].coWeight; }
   });
-  var fnByName = {};
-  (FUNCTION_KEYS || []).forEach(function (k) {
-    var nm = String((FUNCTIONS[k] && FUNCTIONS[k].name) || "").trim().toLowerCase();
-    if (nm && !fnByName[nm]) fnByName[nm] = k;
-  });
   (a.capabilities || []).forEach(function (cp) {
     var nm = String((cp && cp.name) || "").trim();
     if (!nm) return;
-    var holder = fnByName[String((cp && cp.fn) || "").trim().toLowerCase()] || null;
-    var made = addCapability(holder);
+    var made = addCapability();
     made.name = nm;
     made.format = (cp && cp.format) === "pillars" ? "pillars" : "projects";
     var had = wasCaps[nm.toLowerCase()];
@@ -61960,32 +65252,23 @@ var CLIENTSETUP = (function () {
     });
   }
   function wc(k, form, fb){ var v = w(k, form, fb); return v.charAt(0).toUpperCase() + v.slice(1); }
+  /* §544, spec 066 §6 — THREE STEPS: THE CLIENT, THE SHAPE, THE OFFICE.
+     Structure, the divisions, the units, the functions and the capabilities
+     were five screens holding one answer each about the same tree, and the
+     tree was on none of them. They are one screen now (shapeStep), and every
+     answer they held is still asked, in the same words, on the level or the
+     box it is about. Nothing was dropped: the capabilities step's answers
+     live on the top level's own card, where §428 already drew them, and on
+     Setup › Capabilities, which is unchanged. */
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
-    /* §404: THE STRUCTURE COMES SECOND, before anything is named inside it
-       (his order, from the signed-off mockup): how many levels sit above the
-       business units, what each is called, and what each carries. */
-    { k:"structure", key:"The organisation", label:"Structure",
-      q:"How is this client built, and what does each level carry?" },
-    /* The questions speak the client's words too (§396): a step headed
-       "Divisions" asking about "companies" is two names for one thing on one
-       screen. Each word is taken as typed, never inflected (§107.8). */
-    /* §404.4, his order: the divisions are named BEFORE the units, so a
-       unit can be put in one as it is named. Whether there is a second layer
-       at all is the Structure step's question and is not asked again here. */
-    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },
-      get q(){ return "What are the " + w("division", "many", "companies") + "?"; } },
-    { k:"units",  key:"The organisation", get label(){ return W("unitword", "many", "Business units"); },
-      get q(){ return "What are the " + w("unitword", "many", "business units") + "?"; } },
-    { k:"fns",    key:"Strategy",         get label(){ return W("fnword", "many", "Functions"); },
-      get q(){ return "What " + w("fnword", "many", "supporting functions") + " are there?"; } },
-    { k:"caps",   key:"Strategy",         get label(){ return W("capability", "many", "Capabilities"); },
-      get q(){ return "Are there " + w("capability", "many", "capabilities") + " beside the " + w("unitword", "many", "business units") + "?"; } },
+    { k:"shape",  key:"The organisation", label:"The shape",
+      q:"How is this client built?" },
     /* §404.4: no Words step. Every word it asked for is asked on the
-       Structure step now, beside the level or component it names. */
+       shape screen now, beside the level or component it names. */
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
-  var SHAPE_STEPS = ["cos", "units", "fns", "caps"];
+  var SHAPE_STEPS = ["shape"];
   /* §404: the components a level may carry, in the mockup's order, each with
      its fixed title (what it IS) — the client's word goes in the box beside
      it. The keys are SMPRules.STRUCT_COMPONENTS and the label keys both. */
@@ -62019,9 +65302,8 @@ var CLIENTSETUP = (function () {
     for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
     return "Not set";
   }
-  /* The three ways a function plans (§342), the two a capability may (§347). */
+  /* The three ways a function plans (§342). */
   var FORMATS = [["pillars","Pillars"], ["projects","Projects"], ["objectives","Objectives & actions"]];
-  var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
   /* The names most clients have, one click in (§351). */
   var COMMON_UNITS = ["Retail", "Online", "Wholesale", "Distribution",
                       "Corporate Sales", "Export", "Services"];
@@ -62093,7 +65375,13 @@ var CLIENTSETUP = (function () {
      server's `client` action makes, so a row reads the same in both hosts. */
   function liveShape(){
     var g = { companies:[], units:[], functions:[], capabilities:[], words:{} };
-    (COMPANY_KEYS || []).forEach(function (k) { g.companies.push({ name: COMPANIES[k].name }); });
+    /* §544: and which kind's layer it is drawn on, where the office has
+       said. Unsaid it is read from use, so this carries "" for every
+       division a client already holds and nothing is written by looking. */
+    (COMPANY_KEYS || []).forEach(function (k) {
+      var c = COMPANIES[k];
+      g.companies.push({ name: c.name, layer: c.layer === "bu" || c.layer === "fn" ? c.layer : "" });
+    });
     (UNIT_KEYS || []).forEach(function (k) {
       var u = UNITS[k];
       g.units.push({ key: k, name: u.name,
@@ -62125,13 +65413,13 @@ var CLIENTSETUP = (function () {
      row is on the register (§339 writes the creator's). */
   function progress(){
     var ff = (PEOPLE || []).some(function (p) { return p && (p.forefront || (p.extra && p.extra.forefront)); });
+    /* §544: the shape counts once the client holds a box of its own — a
+       unit where the units plan, a function where they are what there is.
+       Counted, never remembered (§129). */
     var tests = {
       client: true,
-      structure: true,
-      units:  (UNIT_KEYS || []).length > 0,
-      cos:    (COMPANY_KEYS || []).length > 0 || !SMPRules.midExists(GROUP, COMPANIES),
-      fns:    (FUNCTION_KEYS || []).length > 0 || !SMPRules.fnExists(GROUP),
-      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !SMPRules.capExists(GROUP),
+      shape:  (UNIT_KEYS || []).length > 0 || (FUNCTION_KEYS || []).length > 0 ||
+              (COMPANY_KEYS || []).length > 0,
       office: ff
     };
     var done = 0, todo = [];
@@ -62150,7 +65438,10 @@ var CLIENTSETUP = (function () {
     var key = OPTS.key || "";
     if (!S || S.key !== key) {
       S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
-            shape:liveShape(), shapeDirty:false, markState:undefined };
+            shape:liveShape(), shapeDirty:false, markState:undefined,
+            /* §544: what the shape screen has open — a level or a box —
+               and, per kind, which division's boxes its row is showing. */
+            sel:{ lvl:"top" }, under:{} };
     }
     if (S.at > STEPS.length - 1) S.at = 0;
     /* §436: a list nobody is editing is re-read off the graph, so a change
@@ -62197,7 +65488,10 @@ var CLIENTSETUP = (function () {
     var key = OPTS.key || "";
     if (!S || S.key !== key) {
       S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
-            shape:liveShape(), shapeDirty:false, markState:undefined };
+            shape:liveShape(), shapeDirty:false, markState:undefined,
+            /* §544: what the shape screen has open — a level or a box —
+               and, per kind, which division's boxes its row is showing. */
+            sel:{ lvl:"top" }, under:{} };
     }
     ensureReg("[data-cteam]", mountTeam);
     host.innerHTML = "";
@@ -62255,36 +65549,29 @@ var CLIENTSETUP = (function () {
       rb.appendChild(document.createTextNode("The client's own record — its name on the door, its mark, its modules and the office team — could not be read: " + S.regErr + " The pages below that live in the platform still work."));
       HOST.appendChild(rb);
     }
+    /* §421, §544: ONE NOTICE ON THE FROZEN SHAPE, because there is one
+       screen now. It was two — the list steps said the lists are read-only,
+       the Structure step said the switches are not — and both were about
+       this screen. Said together, in that order: what is set, and what is
+       still yours. */
     if (!canShape() && SHAPE_STEPS.indexOf(s.k) > -1) {
       var hb = el("div", "wzarched");
       hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
       hb.appendChild(el("b", null, "shape is set from here on"));
       hb.appendChild(document.createTextNode(
-        ". Set-up rewrites these lists, which would lose that work, so they are read-only here — " +
-        "rename or retire a row on its own Setup page instead, where the row keeps who runs it."));
+        ". Set-up rewrites these lists, which would lose that work, so ADDING a row is read-only here — " +
+        "rename or retire a row on its own Setup page instead, where the row keeps who runs it. " +
+        "Every name and switch on this screen can still be changed, and saves as you change it — " +
+        "a layer included, which only hides and keeps what is under it (§544.14)."));
       HOST.appendChild(hb);
     }
 
-    /* §421: the Structure step on a client with a plan says what is still
-       changeable, because the list steps' notice is not drawn here and a
-       step that says nothing about being frozen reads as freely editable. */
-    if (!canShape() && s.k === "structure") {
-      var sb = el("div", "wzarched");
-      sb.appendChild(document.createTextNode("This client has a plan in it, so its lists of " +
-        w("unitword", "many", "business units") + " and " + w("fnword", "many", "supporting functions") +
-        " are set. Every name and switch on this step can still be changed, and saves as you change it."));
-      HOST.appendChild(sb);
-    }
-
-    /* §418: the Structure step lays three sections side by side, which a
-       760px column cannot hold; that one step takes the page's width. */
-    var col = el("div", "wzcol" + (s.k === "structure" ? " wzwide" : ""));
+    /* §418, §544: the shape lays the tree and a level's three sections side
+       by side, which a 760px column cannot hold; that one step takes the
+       page's width. */
+    var col = el("div", "wzcol" + (s.k === "shape" ? " wzwide" : ""));
     col.appendChild(el("span", "lab", s.key));
     col.appendChild(el("h2", "wzq", s.q));
-    var why = s.k === "units"
-        ? "Add as many as this client has. Leave it empty and the platform opens blank — nothing is put here that nobody asked for."
-      : "";
-    if (why) col.appendChild(el("p", "wzwhy", why));
     col.appendChild(stepBody(s.k));
 
     var foot = el("div", "wzfoot");
@@ -62393,21 +65680,7 @@ var CLIENTSETUP = (function () {
   function stepBody(k){
     var box = el("div");
     if (k === "client") return clientStep(box);
-    if (k === "structure") return structureStep(box);
-    if (k === "units") return listStep(box, S.shape.units, "unit");
-    if (k === "cos") return companiesStep(box);
-    if (k === "caps") return capsStep(box);
-    if (k === "fns") {
-      /* §418: with the supporting-functions layer switched off on the
-         Structure step there is nothing to name here; it says so and points
-         back, as the second layer's step does (§61). Nothing is removed. */
-      if (!SMPRules.fnExists(GROUP)) {
-        box.appendChild(el("p", "wzwhy", "This client has no " + w("fnword", "many", "supporting functions").toLowerCase() +
-          " layer. Change that on the Structure step."));
-        return box;
-      }
-      return listStep(box, S.shape.functions, "fn");
-    }
+    if (k === "shape") return shapeStep(box);
     return officeStep(box);
   }
 
@@ -62777,13 +66050,6 @@ var CLIENTSETUP = (function () {
     }
     liveDone();
   }
-  function liveCapFn(id, fnName){
-    var c = (GROUP.capabilities || []).filter(function (x) { return x && x.id === id; })[0];
-    if (!c) return;
-    var fk = (FUNCTION_KEYS || []).filter(function (k) { return FUNCTIONS[k] && FUNCTIONS[k].name === fnName; })[0];
-    c.fn = fk || null;
-    liveDone();
-  }
   /* How a function or a capability plans: the shell's own switch, which asks
      first and hides and keeps what the old way held (§405). A function that
      carries a capability is refused there, and the refusal is SAID here —
@@ -62801,277 +66067,24 @@ var CLIENTSETUP = (function () {
 
   /* ── A list you add to: units and functions are one control ───────── */
   function focusLastName(){
+    /* §544: on the shape screen the new row's name box is in the panel, and
+       the panel is already drawn on the box that was just added. */
+    var one = HOST ? HOST.querySelector("[data-shname], [data-shconame]") : null;
+    if (one) { one.focus(); return; }
     var boxes = HOST ? HOST.querySelectorAll(".wzrow input.fld") : [];
     if (boxes.length) boxes[boxes.length - 1].focus();
   }
-  function addThenFocus(){ S.shapeDirty = true; S.focusNew = true; redraw(); }
-  function listStep(box, list, kind){
-    var shape = canShape();
-    if (!list.length) {
-      box.appendChild(el("p", "wzempty", kind === "unit" ? "No " + w("unitword", "many", "business units") + " yet." : "No " + w("fnword", "many", "supporting functions") + " yet."));
-    } else {
-      var rows = el("div", "wzrows");
-      list.forEach(function (row, n) {
-        var r = el("div", "wzrow");
-        var nm = el("input", "fld");
-        nm.type = "text"; nm.value = row.name;
-        if (!shape) nm.readOnly = true;
-        nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
-        r.appendChild(nm);
-        /* §438: a business unit says how it plans here too, exactly as a
-           function does (Islam: *"in the setup page for the functions it
-           shows how we plan already why we don't have it in the business
-           units as well"*). Same control, same words; a unit's default is
-           pillars. */
-        {
-          var tail = el("span", "wzrt");
-          tail.appendChild(el("span", "wzsub", "plans in"));
-          var sel = el("select", "fld");
-          FORMATS.forEach(function (f) {
-            var o = el("option", null, f[1]);
-            o.value = f[0];
-            if (row.format === f[0]) o.selected = true;
-            sel.appendChild(o);
-          });
-          sel.setAttribute("data-wzfmt", row.key || "");
-          sel.setAttribute("aria-label", "How " + (row.name || "this row") + " plans");
-          if (!shape) {
-            /* §436: A PLAN IN IT DOES NOT FREEZE HOW A FUNCTION PLANS (Islam:
-               *"it needs to be changable with a warning"*). The change is
-               written straight into that function through Setup's own switch
-               — the same warning, and the old way hidden and kept so
-               switching back brings it back (§405) — never through the list
-               rewrite that the freeze is there to stop. */
-            if (!row.key || !OPTS.switchWay) sel.disabled = true;
-            else sel.addEventListener("change", function () { liveFormat(kind === "unit" ? "unit" : "fn", row.key, sel); });
-          } else sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
-          tail.appendChild(sel);
-          r.appendChild(tail);
-        }
-        /* §404.4: which division it belongs to, optional, on a unit and on a
-           function alike (§391) — offered only where there are divisions to
-           name. The same choice lives on Setup › Business units and
-           Supporting functions, which read and write the same field. */
-        var divs = divisionNames();
-        if (divs.length) {
-          var dt = el("span", "wzrt");
-          dt.appendChild(el("span", "wzsub", "in"));
-          var ds = el("select", "fld");
-          ds.dataset.wzdiv = kind;
-          ds.setAttribute("aria-label", "Which " + w("division", "one", "company") + " " + (row.name || "this row") + " belongs to");
-          var none = el("option", null, "No " + w("division", "one", "company")); none.value = "";
-          ds.appendChild(none);
-          divs.forEach(function (d) {
-            var o = el("option", null, d); o.value = d;
-            if ((row.company || "") === d) o.selected = true;
-            ds.appendChild(o);
-          });
-          if (!shape) {
-            /* §436: which division a row belongs to moves nothing it holds,
-               so on a client with a plan it is written straight in, exactly
-               as Setup's own row does (Islam: *"it belongs to commercial
-               division but I can't change that"*). */
-            if (!row.key) ds.disabled = true;
-            else ds.addEventListener("change", function () { liveDivision(kind, row.key, ds.value); });
-          } else ds.addEventListener("change", function () { row.company = ds.value; S.shapeDirty = true; });
-          dt.appendChild(ds);
-          r.appendChild(dt);
-        }
-        if (shape) {
-          var x = el("button", "wzx", "×");
-          x.type = "button";
-          x.setAttribute("aria-label", "Remove " + row.name);
-          x.addEventListener("click", function () { list.splice(n, 1); S.shapeDirty = true; redraw(); });
-          r.appendChild(x);
-        }
-        rows.appendChild(r);
-      });
-      box.appendChild(rows);
-    }
-    if (shape) {
-      var common = kind === "unit" ? COMMON_UNITS : COMMON_FNS;
-      var left = common.filter(function (nm) { return !chipUsed(list, nm); });
-      if (left.length) {
-        var crow = el("div", "wzcommon");
-        left.forEach(function (nm) {
-          var cb = el("button", "wzcm");
-          cb.type = "button";
-          cb.setAttribute("aria-label", "Add " + nm);
-          cb.appendChild(el("span", "p", "+"));
-          cb.appendChild(document.createTextNode(nm));
-          cb.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit" ? { name:nm, format:"pillars", company:"" } : { name:nm, format:fnDefault(), company:"" }, nm));
-            addThenFocus();
-          });
-          crow.appendChild(cb);
-        });
-        box.appendChild(crow);
-      }
-      var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + w("unitword", "one", "business unit") : "+ Add a " + w("fnword", "one", "supporting function"));
-      add.type = "button";
-      add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", format:"pillars", company:"" } : { name:"", format:fnDefault(), company:"" });
-        addThenFocus();
-      });
-      box.appendChild(add);
-    }
-    /* §404.4: said once, under the list — the step's own heading line said
-       the functions' half again — and the units' line only where units DO
-       carry pillars, or it describes a plan this client does not make. */
-    var line = kind === "unit"
-      ? "A unit's plan type decides what its pages hold. Its code is made from the name and prefixes every row of its plan."
-      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it.";
-    if (line) box.appendChild(el("p", "wzwhy", line));
-    return box;
-  }
-  /* The divisions a row can be put in: the ones named on the Divisions step,
-     and none at all where the Structure step says there is no second layer. */
-  function divisionNames(){
-    if (!SMPRules.midExists(GROUP, COMPANIES)) return [];
-    return S.shape.companies.map(function (c) { return String(c.name || "").trim(); }).filter(Boolean);
-  }
-  /* Whether this client has capabilities (§404.4, §428): the step asks for
-     them only where the Structure step's Capabilities card says so. */
-  function capsCarried(){ return SMPRules.capExists(GROUP); }
-
-  function companiesStep(box){
-    /* §404.4: whether there IS a second layer is the Structure step's
-       question, so it is not asked again here — where there is none this
-       step says so and points back (§61, §45.2); where there is one, it names
-       them, as the units are named, in the client's own word (§396). Which
-       one a unit or a function belongs to is chosen on those two steps. */
-    if (!SMPRules.midExists(GROUP, COMPANIES)) {
-      box.appendChild(el("p", "wzwhy", "This client has no second layer — the " + w("unitword", "many", "business units") +
-        " sit straight under the top level. Change that on the Structure step."));
-      return box;
-    }
-    var shape = canShape();
-    if (!S.shape.companies.length) {
-      box.appendChild(el("p", "wzempty", "No " + w("division", "many", "companies") + " yet."));
-    } else {
-      var rows = el("div", "wzrows");
-      S.shape.companies.forEach(function (co, n) {
-        var r = el("div", "wzrow");
-        var nm = el("input", "fld");
-        nm.type = "text"; nm.value = co.name;
-        nm.setAttribute("placeholder", "The " + w("division", "one", "company") + "'s name");
-        if (!shape) nm.readOnly = true;
-        nm.addEventListener("input", function () {
-          /* a unit or function put in this one follows the rename */
-          var was = co.name; co.name = nm.value;
-          S.shape.units.concat(S.shape.functions).forEach(function (x) { if (was && x.company === was) x.company = nm.value; });
-          S.shapeDirty = true;
-        });
-        r.appendChild(nm);
-        if (shape) {
-          var x = el("button", "wzx", "×");
-          x.type = "button"; x.setAttribute("aria-label", "Remove " + co.name);
-          x.addEventListener("click", function () {
-            var gone = co.name;
-            S.shape.companies.splice(n, 1);
-            S.shape.units.concat(S.shape.functions).forEach(function (u) { if (u.company === gone) u.company = ""; });
-            S.shapeDirty = true; redraw();
-          });
-          r.appendChild(x);
-        }
-        rows.appendChild(r);
-      });
-      box.appendChild(rows);
-    }
-    if (shape) {
-      var add = el("button", "wzadd", "+ Add a " + w("division", "one", "company"));
-      add.type = "button";
-      add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); addThenFocus(); });
-      box.appendChild(add);
-    }
-    box.appendChild(el("p", "wzwhy", "A " + w("division", "one", "company") + " holds several " + w("unitword", "many", "business units") +
-      ", and can hold " + w("fnword", "many", "supporting functions") + " too. Which one each belongs to is chosen as they are named, on the next steps."));
-    return box;
-  }
-
-  /* A capability is a row you add, like the others (§347): a name, which
-     function carries it, and how it is planned — Setup › Capabilities' own
-     three questions. */
-  function capsStep(box){
-    /* §404.4: only where some level carries capabilities (the Structure
-       step's ticks); otherwise one line says so and points back. */
-    if (!capsCarried()) {
-      box.appendChild(el("p", "wzwhy", "This client does not use " + w("capability", "many", "capabilities") +
-        " — no level carries them. Tick them on the Structure step to add some."));
-      return box;
-    }
-    var shape = canShape();
-    if (!S.shape.capabilities.length) {
-      box.appendChild(el("p", "wzempty", "No " + w("capability", "many", "capabilities") + " yet."));
-    } else {
-      var rows = el("div", "wzrows");
-      S.shape.capabilities.forEach(function (cp, n) {
-        var r = el("div", "wzrow");
-        var nm = el("input", "fld");
-        nm.type = "text"; nm.value = cp.name;
-        nm.setAttribute("aria-label", W("capability", "one", "Capability") + " name");
-        if (!shape) nm.readOnly = true;
-        nm.addEventListener("input", function () { cp.name = nm.value; S.shapeDirty = true; });
-        r.appendChild(nm);
-        var tail = el("span", "wzrt");
-        tail.appendChild(el("span", "wzsub", "carried by"));
-        var who = el("select", "fld");
-        who.setAttribute("aria-label", "Which function carries " + (cp.name || "this capability"));
-        var none = el("option", null, "— unassigned —"); none.value = "";
-        who.appendChild(none);
-        S.shape.functions.forEach(function (f) {
-          if (!f.name) return;
-          var o = el("option", null, f.name); o.value = f.name;
-          if (cp.fn === f.name) o.selected = true;
-          who.appendChild(o);
-        });
-        if (!shape) {
-          /* §436: assigning a capability to a function moves nothing it
-             holds, so a plan in the client does not freeze it (Islam: *"I
-             can't set where they are assigned"*). */
-          if (!cp.id) who.disabled = true;
-          else who.addEventListener("change", function () { liveCapFn(cp.id, who.value); });
-        } else who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
-        tail.appendChild(who);
-        tail.appendChild(el("span", "wzsub", "plans in"));
-        var how = el("select", "fld");
-        how.setAttribute("aria-label", "How " + (cp.name || "this capability") + " is planned");
-        CAP_FORMATS.forEach(function (f) {
-          var o = el("option", null, f[1]); o.value = f[0];
-          if (cp.format === f[0]) o.selected = true;
-          how.appendChild(o);
-        });
-        if (!shape) {
-          if (!cp.id || !OPTS.switchWay) how.disabled = true;
-          else how.addEventListener("change", function () { liveFormat("cap", cp.id, how); });
-        } else how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
-        tail.appendChild(how);
-        r.appendChild(tail);
-        if (shape) {
-          var x = el("button", "wzx", "×");
-          x.type = "button";
-          x.setAttribute("aria-label", "Remove " + cp.name);
-          x.addEventListener("click", function () { S.shape.capabilities.splice(n, 1); S.shapeDirty = true; redraw(); });
-          r.appendChild(x);
-        }
-        rows.appendChild(r);
-      });
-      box.appendChild(rows);
-    }
-    if (shape) {
-      var add = el("button", "wzadd", "+ Add a " + w("capability", "one", "capability"));
-      add.type = "button";
-      add.addEventListener("click", function () {
-        S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
-        addThenFocus();
-      });
-      box.appendChild(add);
-    }
-    box.appendChild(el("p", "wzwhy",
-      "A capability appears on the strategic side of the navigation, beside the business units, " +
-      "with pages of its own. Its code is made from its name, and how it plans stays changeable until it has a plan in it."));
-    return box;
-  }
+  function addThenFocus(sel){ S.shapeDirty = true; S.focusNew = true; if (sel) S.sel = sel; redraw(); }
+  /* §544: listStep, companiesStep and capsStep were the four list steps —
+     the divisions, the units, the functions and the capabilities. Each
+     answer they held is asked on the shape screen now: a box's name, how it
+     plans and which division it is in, on the box (boxPanel); a division's
+     name, on the division (coPanel); the capabilities, on the top level's
+     own card and on Setup › Capabilities, which §428 already built and
+     which this does not touch. They are deleted rather than left unreached
+     — a second screen for one answer is the drift this merge removes
+     (§53.5). `divisionNames` went with them: each kind asks its OWN layer
+     now (layerNames, §544), not one list shared between them. */
 
   /* ── STRUCTURE (§404) ────────────────────────────────────────────
      Written straight into the live graph as `GROUP.structure`, one object,
@@ -63123,7 +66136,6 @@ var CLIENTSETUP = (function () {
     return out;
   }
   var CAP_BASE = null;
-  var BU_ASK = false;
   function structWrite(next){
     if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
@@ -63559,9 +66571,17 @@ var CLIENTSETUP = (function () {
       wb.appendChild(grp);
     });
   }
-  function structureStep(box){
+  /* §544 — ONE CARD AT A TIME, BESIDE THE TREE. These seven cards WERE the
+     Structure step: a stack down one page, seven of the flow's steps ago.
+     They are the same seven cards, not rewritten and not reduced — what
+     changed is that the shape screen (shapeStep) draws one of them at a
+     time, the one whose level you pressed in the tree. `only` is that
+     level's key; without it the whole stack is drawn, which is what the
+     console's own mount still asks for. */
+  function structureStep(box, only){
     var ro = !canShape();
     var lv = structNow();
+    var want = function (k) { return !only || only === k; };
     /* §468: a card's NAME is its header — bold, a size up, on a shaded band,
        with its On/Off on the right (Islam: *"the title of the group plans its
        own and the client has them is irrelevant ... make the main title
@@ -63574,83 +66594,60 @@ var CLIENTSETUP = (function () {
     var hd = function (c, sw) { c.querySelector(".sthd").appendChild(sw); };
     /* Two cards side by side in one row (§468): the company's pillars and its
        capabilities, and the bottom pair when both are off. */
-    var pair = function () { var w = el("div", "stpair"); box.appendChild(w); return w; };
-    /* §465: a switch shown in its state and not pressable here, the reason on
-       the hover (1b-ii); disabled, never merely dimmed (§220). */
-    var held = function (cur, why) {
-      var b = onOff(cur, function () {}); b.classList.add("dummy"); b.title = why;
-      [].slice.call(b.querySelectorAll("button")).forEach(function (x) { x.disabled = true; });
-      return b;
-    };
+    var pair = function () { if (only) return box; var w = el("div", "stpair"); box.appendChild(w); return w; };
     /* §468: inside the company plan a capability is a part of that plan, so
        it has no first or second section of its own and no Except for — only
        its name and its plan section (Islam: *"the capabilities has no first
        section and second section"*). What was set there is kept, not shown. */
-    var capSettings = function (c, inPlan) {
+    /* §544.13: `inPlan` is gone with the layer — a capability is in the
+       company's plan, so it is always a part of that plan and never a page
+       of its own with an Except for. */
+    var capSettings = function (c) {
       callBoxes(c, "capability", ro);
       structLevel(c, lv, "cap");
-      if (!inPlan) { exceptBox(c, "cap"); return; }
       var g = c.querySelector(".stsecs"), ss = g ? g.querySelectorAll(":scope > .stsec") : [];
       if (ss.length > 1) { for (var i = 0; i < ss.length - 1; i++) g.removeChild(ss[i]); g.classList.add("stsecs1"); }
     };
-    var capCard = function (c, onWhy, offLine, inPlan) {
-      hd(c, onOff(lv.cap.exists, function (v) {
-        var nx = structNow(); nx.cap.exists = v; structWrite(nx);
-      }, "cap|layer"));
-      if (lv.cap.exists) { if (onWhy) c.appendChild(el("p", "wzwhy", onWhy)); capSettings(c, inPlan); }
-      else c.appendChild(el("p", "sthid", offLine || "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
-    };
 
-    var top = card("Top level");
+    var top = want("top") ? card("Top level") : null;
+    if (top) {
     top.appendChild(el("p", "lab", "Called"));
     namePick(top, "topword", TOP_NAMES, "one", ro);
-    /* §448: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
-       button on the company level to say that we will plan on the company
-       level or we will plan on the unit level"*, then *"yes agreed"*.) It
-       replaces §447's On/Off on the business-units card, which described what
-       disappears rather than the decision being made. The store is the same
-       `structure.bu.exists`, so nothing moves for a client already set up:
-       absent is "on the business units". Choosing the company with units on
-       the register asks first, here, because it copies their plans across. */
-    var ph = el("div", "stsech stplanq"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
-    /* §465: the two answers are named for the level, Islam's own words. */
-    var plan = segButtons([[false, "Company level"], [true, "Units level"]],
-      lv.bu.exists, function (v) {
-        if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
-        if (!UNIT_KEYS.length) { var n0 = structNow(); n0.bu.exists = false; structWrite(n0); return; }
-        BU_ASK = true; redraw();
-      });
-    plan.classList.add("stonoff"); plan.setAttribute("data-stplan", "1");
-    ph.appendChild(plan);
-    top.appendChild(ph);
-    if (BU_ASK && lv.bu.exists) {
-      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
-      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
-        "'s plan moves onto the " + W("topword", "one", "company").toLowerCase() + "'s own page as directions, with every figure, and each one's own page is kept in the archive. " +
-        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Choosing the " +
-        W("unitword", "many", "business units").toLowerCase() + " again brings them back as they were."));
-      var go = el("button", "btn amber", "Move them and plan on the " + W("topword", "one", "company").toLowerCase()); go.type = "button"; go.setAttribute("data-buask-go", "1");
-      go.onclick = function () {
-        BU_ASK = false;
-        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
-        var nx = structNow(); nx.bu.exists = false;
-        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
-        structWrite(nx);
-      };
-      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
-      no.onclick = function () { BU_ASK = false; redraw(); };
-      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
-      top.appendChild(ask);
-    }
+    /* §544.4 — "WHERE IS THE STRATEGY PLANNED" IS GONE, and §448 with it.
+       Islam, of the shape screen: *"there's no question that now, if the plan
+       is on the company or in the business unit, when you go to the level on
+       the tree, you select: are there directions, are there pillars on the
+       company level, or are there directions or pillars or strategy on the
+       business unit level? You might even have both. What's the point of this
+       choice now?"*
+
+       None. Each level already answers it on its own card — the company's
+       plan is the Directions card's switch, the units' is the units' card's —
+       and BOTH CAN BE ON, which an either/or cannot say. It was a third
+       answer to a question already asked twice, and the one that could be
+       wrong. §448 replaced §447's On/Off on the business-units card with this
+       question; this puts that On/Off back, where it is symmetric with the
+       functions' (§418) and where the tree sends you.
+
+       AND OFF NOW MEANS OFF. The question did not only hide the units: it
+       COPIED every unit's plan onto the company page as directions and filed
+       the old pages (`buFoldIntoTop`). Islam, asked what switching off should
+       do now: *"just hide them, keep everything"* — which is spec 066 §2.2's
+       own words, *"nothing hides anything else"*, and the reversal of §447 that
+       spec called for. The fold is no longer reachable from the product; it
+       stays in config-data.js as the record of §447 and as the way three
+       checks make a company-level state, and is noted as debt. */
     structLevel(top, lv, "top", true);
+    }
 
     /* §465 — THE COMPANY'S OWN PLAN IS TWO CARDS (Islam, approving the
        plan-level mockup: *"ok build it"*). The top card keeps its first and
        second sections; its plan leaves for a Directions card, and the
        capabilities the company carries get a card beside it. The order is the
        same at both levels — what a card holds is what changes. */
-    var atCo = !lv.bu.exists;
     var topOne = W("topword", "one", "company"), topLow = topOne.toLowerCase();
+    var capWord = W("capability", "many", "Capabilities");
+    if (want("top")) {
     var row2 = pair();
     var dr = card(topOne + " " + W("pillar", "many", "Directions").toLowerCase(), row2);
     dr.setAttribute("data-stcard", "dir");
@@ -63695,35 +66692,70 @@ var CLIENTSETUP = (function () {
         structWrite(nx);
       });
       wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
-      planWays(dr, "top", "group", [topWayNow], ["pillar"]);
-    } else dr.appendChild(el("p", "sthid", atCo
-      ? "Off: the " + topLow + " plans nothing of its own."
-      : "Off: the plan is at units level."));
+      /* ── §540 · AND WHETHER THEY SHOW AS ONE LIST OR APART ──────────────
+         The row beside "plans in", for the same reason it sits beside it in
+         a unit's dialog: both answer *what does this box's plan look like*.
+         Only while it plans in pillars — projects have no second kind.
 
-    /* Capabilities live in ONE place at a time: in the company plan (this
-       card) or as a layer of their own (the last card). At company level they
-       are always the company's; at units level the office may move them here,
-       which greys the layer card. The settings travel with them, so whichever
-       card holds them carries data-stcard="cap" and the On/Off "cap|layer". */
-    var capTop = SMPRules.capAtTop(GROUP);
-    var capWord = W("capability", "many", "Capabilities");
+         TWO OPTIONS NAMED FROM THE CLIENT'S OWN WORDS, so El Abd reads
+         "Directions and Capabilities apart" and a client that calls them
+         something else reads its own. ABSENT IS ONE LIST (§50.6): the key is
+         deleted rather than written false, so a company set apart and set
+         back leaves the structure exactly as it found it.
+
+         WRITTEN STRAIGHT TO THE STRUCTURE, never through `switchPlanWay`:
+         nothing is hidden either way. The same pillars are drawn, in one tab
+         or in two, so there is nothing to warn about and nothing to keep. */
+      if (topWayNow === "pillars") {
+        var sr = el("div", "stsech");
+        var st = el("span", "wzrt");
+        st.appendChild(el("span", "wzsub", W("pillar", "many", "Directions") + " show as"));
+        var ssel = el("select", "fld");
+        [["one", "One list"],
+         ["split", W("pillar", "many", "Directions") + " and " + W("capability", "many", "Capabilities") + " apart"]
+        ].forEach(function (f) {
+          var o = el("option", null, f[1]); o.value = f[0];
+          if ((SMPRules.topSplit(GROUP) ? "split" : "one") === f[0]) o.selected = true;
+          ssel.appendChild(o);
+        });
+        ssel.setAttribute("data-wztopsplit", "1");
+        ssel.setAttribute("aria-label", "How the " + W("topword", "one", "company").toLowerCase() +
+          " shows its " + W("pillar", "many", "Directions").toLowerCase());
+        ssel.addEventListener("change", function () {
+          var nx = structNow(), t = nx.top;
+          t.plan = t.plan || {};
+          if (ssel.value === "split") t.plan.split = true;
+          else { delete t.plan.split; if (!Object.keys(t.plan).length) delete t.plan; }
+          structWrite(nx);
+        });
+        st.appendChild(ssel); sr.appendChild(st); dr.appendChild(sr);
+      }
+      planWays(dr, "top", "group", [topWayNow], ["pillar"]);
+    } else dr.appendChild(el("p", "sthid", "Off: the " + topLow + " plans nothing of its own."));
+
+    /* §544.13 — ONE CAPABILITIES CARD, AND IT ASKS WHETHER, NOT WHERE.
+       Islam: *"who can a capability belong to?"* — **the company only**;
+       *"where does it appear?"* — **inside its owner's plan, with the
+       directions**. So there is one place and nothing to choose between:
+       this card sits beside the Directions card in the company's plan, and
+       its switch is §428's "does this client have capabilities", which the
+       layer card used to carry.
+
+       WHAT WENT: the where-switch (`cap|top`, two answers written into
+       `structure.cap.at`) and the layer card it chose between. `cap.at` is
+       dead storage and is left where it lies (§405). */
     var cc = card(topOne + " " + capWord.toLowerCase(), row2);
-    if (atCo) {
-      cc.setAttribute("data-stcard", "cap");
-      capCard(cc, null, "Off: the " + topLow + " carries no " + capWord.toLowerCase() + ".", true);
-    } else {
-      cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
-      hd(cc, onOff(capTop, function (v) {
-        var nx = structNow();
-        if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
-        structWrite(nx);
-      }, "cap|top"));
-      if (capTop) capSettings(cc, true);
-      else cc.appendChild(el("p", "sthid", "Off: they are their own layer (below)."));
+    cc.setAttribute("data-stcard", "cap");
+    hd(cc, onOff(lv.cap.exists, function (v) {
+      var nx = structNow(); nx.cap.exists = v; structWrite(nx);
+    }, "cap|layer"));
+    if (lv.cap.exists) capSettings(cc);
+    else cc.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the " + topLow + " plan. Nothing entered is lost."));
     }
 
     /* §418: a layer the client does not have is switched off as a whole —
        the second layer as before, the supporting functions now too. */
+    if (want("mid")) {
     var mid = card("Second layer");
     hd(mid, onOff(lv.mid.exists, function (v) { var nx = structNow(); nx.mid.exists = v; structWrite(nx); }, "mid|layer"));
     if (lv.mid.exists) {
@@ -63732,9 +66764,11 @@ var CLIENTSETUP = (function () {
       structLevel(mid, lv, "mid");
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
+    }
 
     /* §464: Islam, "for the supporting functions name it functions" — the
        card names the layer; the client's own word is chosen inside it. */
+    if (want("fn")) {
     var fn = card("Functions");
     hd(fn, onOff(lv.fn.exists, function (v) {
       var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx);
@@ -63744,42 +66778,516 @@ var CLIENTSETUP = (function () {
       structLevel(fn, lv, "fn");
       exceptBox(fn, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
+    }
 
     /* §447/§448: the business-unit card has no switch of its own; whether it
        is used is answered on the top card ("Where the strategy is planned").
        Not used, it says so and keeps everything. */
-    /* §468: the bottom pair, the third layer and independent capabilities.
-       Each is a whole layer when on, so they stack; only when both are off
-       do they share a row, one line each. */
-    var bothOff = !lv.bu.exists && (capTop || !lv.cap.exists);
-    var row5 = bothOff ? pair() : box;
-    var bu = card("Third layer", row5);
+    /* §544.13: §468's bottom PAIR is a single card now — the independent
+       capabilities that shared the row with it have no layer to be. */
+    if (want("bu")) {
+    var bu = card("Third layer", box);
     bu.setAttribute("data-stcard", "bu");
-    /* §465: shown switched off at company level, answered by the top card. */
-    if (!lv.bu.exists) hd(bu, held(false, "Answered by Where the strategy is planned, on the top card."));
+    /* §544.4: its own switch, the functions' card's exactly (§418). Off
+       hides the layer and keeps every plan, figure and page behind it. */
+    hd(bu, onOff(lv.bu.exists, function (v) {
+      var nx = structNow(); if (v) delete nx.bu.exists; else nx.bu.exists = false; structWrite(nx);
+    }, "bu|layer"));
     if (lv.bu.exists) {
       callBoxes(bu, "unitword", ro);
       structLevel(bu, lv, "bu");
       exceptBox(bu, "bu");
-    } else bu.appendChild(el("p", "sthid", "Off: the " + topLow + " plans its own (above)."));
-
-    /* §428: CAPABILITIES AS A LAYER OF THEIR OWN, after the functions, with
-       the same three sections. §465: greyed whenever they are in the company
-       plan instead — always at company level, by choice at units level. */
-    var cp = card("Independent " + capWord.toLowerCase(), row5);
-    if (capTop) {
-      cp.setAttribute("data-stcard", "caplayer");
-      hd(cp, held(false, capWord + " are part of the company plan."));
-      cp.appendChild(el("p", "sthid", "Off: they are in the " + topLow + " plan (above)."));
-    } else {
-      cp.setAttribute("data-stcard", "cap");
-      capCard(cp, "As their own layer: each has its own plan, owner, custodian and page.");
+    } else bu.appendChild(el("p", "sthid", "Not shown in the navigation. Nothing entered is lost."));
     }
 
+    /* §544.13 — AND NO INDEPENDENT-CAPABILITIES CARD. §428 gave the
+       capabilities a layer of their own after the functions, with its own
+       plan, owner, custodian and page; §465 greyed it whenever they were in
+       the company plan instead. They are always in the company plan now, so
+       the card is always the greyed one — a control with nothing behind it
+       (§61), and it is read out rather than left drawn and dead. Its switch
+       (`cap|layer`) and its settings moved onto the company's capabilities
+       card above, which is where they were already drawn whenever the office
+       had said "in the company plan". */
 
     box.appendChild(el("p", "wzwhy",
       "These apply to every item at a layer. Where one item needs to differ, add it under Except for on that layer's card. " +
       "Switching something off hides it and keeps what was written. An empty name box uses the client's own word from Terminology."));
+    return box;
+  }
+
+
+  /* ══ THE SHAPE, ON ONE SCREEN (§544, spec 066 stage 4) ═══════════════════
+     Islam, having pressed the mockup: *"the shape is good, let's build
+     stage 4"*. Before that, on how a middle layer comes to exist: *"the main
+     layer is the bottom layer, which may be the business units or the
+     functions. Creating another layer in between these layers and the
+     company should be the thing that is the exception, or the creation"*,
+     and *"no not 1 list the business units has it's own layer above and the
+     functions has their own layer above"*.
+
+     FIVE STEPS BECOME ONE. Structure, the divisions, the units, the
+     functions and the capabilities were five screens that each held one
+     answer about the same tree, and you could not see the tree on any of
+     them. This is the tree: every box the client has, on the left, under the
+     layer it sits in; press one and its own answers open on the right. The
+     seven-step flow is now three — the client, the shape, the office (spec
+     066 §6).
+
+     NOTHING IS A NEW ANSWER. Every control here is the control that was on
+     one of those five steps, reading and writing exactly what it did: a
+     level's card is `structureStep`'s own card (`only`), a box's row is the
+     list step's row, and the shape is held in `S.shape` and committed by
+     `__smpShape` on Next or Done, as it always was. What is new is the
+     drawing, the layer per kind (§544) and the navigation tick (§544.2).
+
+     THE TREE READS THE FLOW'S ANSWERS, NEVER THE GLOBALS. A division added
+     here is in `S.shape` and will not be in `COMPANIES` until the shape is
+     committed, so the §544 rules are asked over maps built from `S.shape`
+     (shapeMaps) rather than over the live ones — the same rule, this
+     screen's answers. */
+
+  /* The flow's held shape, in the shape the §544 rules ask for. Keys are
+     positional and local to this screen; a division is matched to its boxes
+     by NAME, which is the only thing about a division the flow carries
+     (§360.3, __smpShape's own rule). */
+  function shapeMaps(){
+    var cos = {}, keys = [], us = {}, fns = {}, byName = {};
+    (S.shape.companies || []).forEach(function (c, i) {
+      var k = "c" + i; keys.push(k);
+      cos[k] = { name: c.name, layer: c.layer };
+      var nm = String(c.name || "").trim().toLowerCase();
+      if (nm && !byName[nm]) byName[nm] = k;
+    });
+    var put = function (list, map, pre) {
+      (list || []).forEach(function (r, i) {
+        map[pre + i] = { name: r.name, company: byName[String(r.company || "").trim().toLowerCase()] || null };
+      });
+    };
+    put(S.shape.units, us, "u"); put(S.shape.functions, fns, "f");
+    return { keys: keys, cos: cos, units: us, functions: fns, byName: byName };
+  }
+  function kindList(k){ return k === "bu" ? S.shape.units : S.shape.functions; }
+  function kindWord(k, form, fb){ return W(k === "bu" ? "unitword" : "fnword", form, fb); }
+  function kindOn(k){ return k === "bu" ? SMPRules.buExists(GROUP) : SMPRules.fnExists(GROUP); }
+  function layerOnFor(k, m){
+    return SMPRules.layerOn(GROUP, k, m.keys, m.cos, m.units, m.functions);
+  }
+  /* What this kind's layer is called. One word while the client has one
+     layer (§544's `layerWords`), its own the moment it has two. */
+  function layerWordOf(k, form){
+    var w2 = SMPRules.layerWords(GROUP, k);
+    var v = w2 && typeof w2[form] === "string" ? w2[form].trim() : "";
+    return v || W("division", form, form === "one" ? "Division" : "Divisions");
+  }
+  /* The divisions drawn on one kind's row, as names — the form every row in
+     `S.shape` carries. */
+  function layerNames(k, m){
+    return SMPRules.layerCompanies(k, m.keys, m.cos, m.units, m.functions)
+      .map(function (ck) { return String(m.cos[ck].name || "").trim(); }).filter(Boolean);
+  }
+  /* Which division's boxes the kind's row is showing. Absent, the first. */
+  function underOf(k, names){
+    var cur = (S.under || {})[k];
+    return names.indexOf(cur) >= 0 ? cur : (names[0] || "");
+  }
+
+  /* ── the tree ─────────────────────────────────────────────────────── */
+  function shSel(sel){ S.sel = sel; redraw(); }
+  function selLvlIs(id){ return !!(S.sel && S.sel.lvl === id); }
+  function selBoxIs(kind, at){ return !!(S.sel && S.sel.box === kind && S.sel.at === at); }
+
+  /* §544.2: the tick that puts a row in the navigation. A real true or
+     false, deleted again when it is pressed back to what the absence says,
+     so a client the office looked at and left alone stores nothing. */
+  function navTick(host, row){
+    var on = SMPRules.navPicked(GROUP, row), p = SMPRules.navRowParts(row);
+    var b = el("button", "shnav" + (on ? " on" : ""), "nav");
+    b.type = "button";
+    b.setAttribute("aria-pressed", String(on));
+    b.setAttribute("data-shnav", row);
+    b.title = "Show this row as a switch in the navigation";
+    b.setAttribute("aria-label", "Show this row in the navigation");
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var nx = structNow(), l = nx[p.kind], key = p.layer ? "layerNav" : "nav";
+      if (!on === SMPRules.navRowUnsaid(GROUP, row)) delete l[key]; else l[key] = !on;
+      structWrite(nx);
+    });
+    host.appendChild(b);
+    return b;
+  }
+  function shLvlRow(host, layer, label, lvlKey, count, navRow){
+    var r = el("div", "shlvl" + (selLvlIs(lvlKey) ? " sel" : ""));
+    r.appendChild(el("span", "shlay", "Layer " + layer));
+    var b = el("button", "shlvlb", label); b.type = "button";
+    b.setAttribute("data-shlvl", lvlKey);
+    b.addEventListener("click", function () { shSel({ lvl: lvlKey }); });
+    r.appendChild(b);
+    if (count != null) {
+      var cn = el("span", "shn", String(count));
+      cn.setAttribute("data-shcount", lvlKey);
+      r.appendChild(cn);
+    }
+    if (navRow) navTick(r, navRow);
+    host.appendChild(r);
+    return r;
+  }
+  function shBoxBtn(host, label, press, cls, n, id){
+    var b = el("button", "shb" + (cls ? " " + cls : ""), label || "—"); b.type = "button";
+    /* Addressable: "top", "co:3", "bu:0", "fn:7" — the kind and its place
+       in the flow's own list, which is what the panel is opened by. */
+    if (id) b.setAttribute("data-shbox", id);
+    if (n != null) b.appendChild(el("span", "shn", String(n)));
+    b.addEventListener("click", press);
+    host.appendChild(b);
+    return b;
+  }
+  /* NO DATA ATTRIBUTE ON THE ADD BUTTON, deliberately. The shell keeps the
+     cursor across a repaint by the focused control's first `data-` attribute
+     (§374's focusMark/putFocus), so an addressable Add takes the focus
+     straight back off the box it just made — measured: the new name box
+     gained focus and lost it in the same paint. The ROW carries the address
+     instead (`data-shrow`), which is what a check presses through. */
+  function shAdd(host, label, press){
+    var b = el("button", "shadd", label); b.type = "button";
+    b.addEventListener("click", press);
+    host.appendChild(b);
+    return b;
+  }
+  function shWhy(host, text){ host.appendChild(el("p", "shwhy", text)); }
+
+  function drawTree(host){
+    var m = shapeMaps(), shape = canShape();
+
+    /* Layer 1 — the client itself. */
+    shLvlRow(host, 1, W("topword", "many", "Group"), "top", null, null);
+    var trow = el("div", "shrow shtoprow");
+    /* The name on the door where the register has been read, and the
+       group's own where it has not — offline there is no register, and
+       the top box of the tree is the one box that must always be named. */
+    shBoxBtn(trow, (S.reg && S.reg.client && S.reg.client.name) ||
+      String((GROUP && GROUP.org) || "").trim() || "This client",
+      function () { shSel({ lvl: "top" }); }, "top" + (selLvlIs("top") ? " sel" : ""), null, "top");
+    host.appendChild(trow);
+
+    SMPRules.LAYER_KINDS.forEach(function (k) {
+      var list = kindList(k), on = kindOn(k), hasLayer = layerOnFor(k, m);
+      var names = hasLayer ? layerNames(k, m) : [];
+      var under = underOf(k, names);
+
+      /* the kind's OWN layer, where it has one */
+      if (hasLayer) {
+        var lrow = shLvlRow(host, 2, layerWordOf(k, "many"), k + "@g", names.length, k + "@g");
+        var side = el("span", "shunder");
+        side.appendChild(document.createTextNode("above the " + kindWord(k, "many", "boxes").toLowerCase() + " "));
+        /* §544.14 — NOT GATED ON `shape`, BECAUSE IT TAKES NOTHING AWAY.
+           Islam, of El Abd: *"layer 2 above the business units I want to
+           remove it but no option there to do that"*. There was none: this
+           link sat behind `canShape()`, which goes false the moment a client
+           holds a plan — so every client that has actually been used lost it.
+           It is HIDDEN, NEVER CLEARED (§405): every division and every
+           assignment stays and grouping again brings all of it back, which
+           makes it the same kind of act as the units' own On/Off that this
+           screen has always offered beside it. The banner's own promise —
+           *"every name and switch on this screen can still be changed"* —
+           covers it; what stays gated is ADDING a row, which is what would
+           lose work. */
+        var rm = el("button", "shlink", "remove this layer"); rm.type = "button";
+        rm.setAttribute("data-shungroup", k);
+        rm.title = "Hides the layer. Every " + W("division", "one", "division").toLowerCase() +
+          " and every box under it is kept, and grouping again brings it back.";
+        rm.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var nx = structNow(); nx[k].layer = false; structWrite(nx);
+        });
+        side.appendChild(rm);
+        lrow.appendChild(side);
+        var grow = el("div", "shrow");
+        grow.setAttribute("data-shrow", k + "@g");
+        names.forEach(function (nm) {
+          var at = S.shape.companies.map(function (c) { return String(c.name || "").trim(); }).indexOf(nm);
+          var kids = kindList(k).filter(function (r) { return String(r.company || "").trim() === nm; }).length;
+          shBoxBtn(grow, nm, function () {
+            S.under = S.under || {}; S.under[k] = nm;
+            shSel({ box: "co", at: at });
+          }, (selBoxIs("co", at) ? "sel" : "") + (nm === under ? " under" : ""), kids || null, "co:" + at);
+        });
+        if (shape) shAdd(grow, "+ add", function () {
+          S.shape.companies.push({ name: "", layer: k }); addThenFocus({ box: "co", at: S.shape.companies.length - 1 });
+        });
+        host.appendChild(grow);
+      }
+
+      /* and the kind itself */
+      var shown = hasLayer ? list.filter(function (r) { return String(r.company || "").trim() === under; }) : list;
+      var row = shLvlRow(host, hasLayer ? 3 : 2, kindWord(k, "many", k === "bu" ? "Business units" : "Functions"),
+        k, list.length, k);
+      if (hasLayer && under) row.appendChild(el("span", "shsub", "(" + shown.length + " under " + under + ")"));
+      /* §544.14: the way back, ungated for the same reason — a layer with
+         nothing under it yet hides nothing and loses nothing. A control you
+         can press one way and not the other is a trap (§61). */
+      if (!hasLayer) {
+        var side2 = el("span", "shunder");
+        var gp = el("button", "shlink", "group these under a layer…"); gp.type = "button";
+        gp.setAttribute("data-shgroup", k);
+        gp.title = "Puts a layer above them. Nothing is created and nothing moves until you " +
+          "put a box in one.";
+        gp.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var nx = structNow(); nx[k].layer = true; delete nx.mid.exists; structWrite(nx);
+        });
+        side2.appendChild(gp); row.appendChild(side2);
+      }
+      if (!on) { shWhy(host, "Off. Press " + kindWord(k, "many", "the row").toLowerCase() +
+        " above to switch it back on; nothing entered is lost."); return; }
+      var brow = el("div", "shrow");
+      brow.setAttribute("data-shrow", k);
+      shown.forEach(function (r) {
+        var at = list.indexOf(r);
+        shBoxBtn(brow, String(r.name || "").trim(), function () { shSel({ box: k, at: at }); },
+          selBoxIs(k, at) ? "sel" : "", null, k + ":" + at);
+      });
+      if (shape) shAdd(brow, "+ add" + (hasLayer && under ? " under " + under : ""), function () {
+        list.push(k === "bu" ? { name: "", format: "pillars", company: under }
+                             : { name: "", format: fnDefault(), company: under });
+        addThenFocus({ box: k, at: list.length - 1 });
+      });
+      host.appendChild(brow);
+      if (!list.length) shWhy(host, "None yet — add one, or leave the " +
+        kindWord(k, "many", "boxes").toLowerCase() + " out of this client altogether.");
+      /* §351: the names most clients have, one press in. They were under
+         the list steps; they belong to the row they add to. */
+      if (shape) {
+        var left = (k === "bu" ? COMMON_UNITS : COMMON_FNS).filter(function (nm) { return !chipUsed(list, nm); });
+        if (left.length) {
+          var crow = el("div", "shchips");
+          left.forEach(function (nm) {
+            var cb = el("button", "shchip"); cb.type = "button";
+            cb.setAttribute("aria-label", "Add " + nm);
+            cb.appendChild(el("span", "p", "+"));
+            cb.appendChild(document.createTextNode(nm));
+            cb.addEventListener("click", function () {
+              list.push(markFromChip(k === "bu" ? { name: nm, format: "pillars", company: under }
+                                                : { name: nm, format: fnDefault(), company: under }, nm));
+              addThenFocus({ box: k, at: list.length - 1 });
+            });
+            crow.appendChild(cb);
+          });
+          host.appendChild(crow);
+        }
+      }
+
+      /* the ones with no division yet (§544) */
+      if (hasLayer) {
+        var need = list.filter(function (r) { return names.indexOf(String(r.company || "").trim()) < 0; });
+        if (need.length) {
+          var nb = el("div", "shneeds");
+          nb.appendChild(el("p", "shneedh", need.length + " need a " + layerWordOf(k, "one")));
+          var nr = el("div", "shrow");
+          need.forEach(function (r) {
+            var at = list.indexOf(r);
+            shBoxBtn(nr, String(r.name || "").trim() || "—", function () { shSel({ box: k, at: at }); },
+              "orphan" + (selBoxIs(k, at) ? " sel" : ""), null, k + ":" + at);
+          });
+          nb.appendChild(nr); host.appendChild(nb);
+        }
+      }
+    });
+
+    /* §428, stage 3b: a capability is an internal pillar now, so the tree
+       has no row for one. A client that still holds capability RECORDS keeps
+       them, and keeps the page that manages them — said here rather than
+       left to be noticed (§61). */
+    var caps = (S.shape.capabilities || []).length;
+    if (caps) shWhy(host, caps + " " + W("capability", caps === 1 ? "one" : "many", "capabilities").toLowerCase() +
+      " are managed on Setup › " + W("capability", "many", "Capabilities") + ".");
+  }
+
+  /* ── the panel ────────────────────────────────────────────────────── */
+  /* A level opens the card that level has always had (structureStep's
+     `only`); the layers share the second layer's card, because there is one
+     second layer in the store and one set of switches on it. */
+  var LVL_CARD = { top: "top", "bu@g": "mid", "fn@g": "mid", bu: "bu", fn: "fn" };
+  function drawShapePanel(host){
+    var sel = S.sel || { lvl: "top" };
+    if (sel.lvl) {
+      var k = LVL_CARD[sel.lvl];
+      if (!k) { S.sel = { lvl: "top" }; k = "top"; }
+      host.setAttribute("data-shpanel", sel.lvl);
+      /* The layer's own name, where the client has two layers and one word
+         cannot serve both (§544). Above the card, because it names what the
+         card is about. */
+      if (sel.lvl.indexOf("@g") > 0) layerNameBoxes(host, sel.lvl.slice(0, -2));
+      structureStep(host, k);
+      return;
+    }
+    host.setAttribute("data-shpanel", sel.box + ":" + sel.at);
+    if (sel.box === "co") return coPanel(host, sel.at);
+    return boxPanel(host, sel.box, sel.at);
+  }
+  function layerNameBoxes(host, k){
+    var c = el("section", "stcard");
+    var h = el("div", "stsech sthd"); h.appendChild(el("span", "tag", "This layer's name"));
+    c.appendChild(h);
+    var w2 = SMPRules.layerWords(GROUP, k) || {};
+    var row = el("div", "strow");
+    [["one", "One"], ["many", "Many"]].forEach(function (f) {
+      var i = el("input", "fld"); i.type = "text";
+      i.value = typeof w2[f[0]] === "string" ? w2[f[0]] : "";
+      i.setAttribute("placeholder", W("division", f[0], f[0] === "one" ? "Division" : "Divisions"));
+      i.setAttribute("aria-label", "What this layer is called, " + f[1].toLowerCase());
+      i.setAttribute("data-shlw", k + "|" + f[0]);
+      i.addEventListener("change", function () {
+        var nx = structNow(), l = nx[k], v = i.value.trim();
+        var cur = Object.assign({}, l.layerWords || {});
+        if (v) cur[f[0]] = v; else delete cur[f[0]];
+        if (Object.keys(cur).length) l.layerWords = cur; else delete l.layerWords;
+        structWrite(nx);
+      });
+      var lb = el("label", "stnm"); lb.appendChild(el("span", "lab", f[1]));
+      lb.appendChild(i); row.appendChild(lb);
+    });
+    c.appendChild(row);
+    c.appendChild(el("p", "wzwhy", "Empty uses the client's own word for the second layer. " +
+      "Name it here when the " + W("unitword", "many", "business units").toLowerCase() + " and the " +
+      W("fnword", "many", "functions").toLowerCase() + " each have a layer of their own."));
+    host.appendChild(c);
+  }
+  /* A DIVISION'S OWN ROW — the Divisions step's row, which held its name
+     and nothing else. */
+  function coPanel(host, at){
+    var co = S.shape.companies[at];
+    if (!co) { S.sel = { lvl: "top" }; return drawShapePanel(host); }
+    var shape = canShape();
+    var c = el("section", "stcard");
+    var h = el("div", "stsech sthd"); h.appendChild(el("span", "tag", co.name || "New " + W("division", "one", "division").toLowerCase()));
+    c.appendChild(h);
+    var i = el("input", "fld"); i.type = "text"; i.value = co.name || "";
+    i.setAttribute("aria-label", "The " + w("division", "one", "division") + "'s name");
+    i.setAttribute("data-shconame", String(at));
+    if (!shape) i.readOnly = true;
+    i.addEventListener("input", function () {
+      var was = co.name;
+      co.name = i.value;
+      /* its boxes follow the rename, as the Divisions step's row did */
+      S.shape.units.concat(S.shape.functions).forEach(function (x) { if (was && x.company === was) x.company = i.value; });
+      if (S.under) SMPRules.LAYER_KINDS.forEach(function (k) { if (S.under[k] === was) S.under[k] = i.value; });
+      S.shapeDirty = true;
+    });
+    var nl = el("label", "stnm"); nl.appendChild(el("span", "lab", "Name")); nl.appendChild(i);
+    c.appendChild(nl);
+    if (shape) {
+      var x = el("button", "danger", "Remove this " + W("division", "one", "division").toLowerCase());
+      x.type = "button"; x.setAttribute("data-shremove", "co:" + at);
+      x.addEventListener("click", function () {
+        var gone = co.name;
+        S.shape.companies.splice(at, 1);
+        S.shape.units.concat(S.shape.functions).forEach(function (u) { if (u.company === gone) u.company = ""; });
+        S.shapeDirty = true; S.sel = { lvl: "top" }; redraw();
+      });
+      c.appendChild(x);
+    }
+    c.appendChild(el("p", "wzwhy", "What is in it keeps everything it holds. A " +
+      w("unitword", "one", "business unit") + " or " + w("fnword", "one", "function") +
+      " left without one sits straight under the " + W("topword", "one", "company").toLowerCase() + "."));
+    host.appendChild(c);
+  }
+  /* A BOX'S OWN ROW — the units' and functions' list row, unchanged: its
+     name, how it plans, and which division it is in (§438, §404.4). Its
+     code, its short name for the navigation and who heads it stay where
+     they are, on Setup › Business units and on the register (§53.5): one
+     answer in one place, and this screen is the shape. */
+  function boxPanel(host, k, at){
+    var list = kindList(k), row = list[at];
+    if (!row) { S.sel = { lvl: "top" }; return drawShapePanel(host); }
+    var shape = canShape(), m = shapeMaps();
+    var c = el("section", "stcard");
+    var h = el("div", "stsech sthd");
+    h.appendChild(el("span", "tag", String(row.name || "").trim() || "New " + kindWord(k, "one", "box").toLowerCase()));
+    c.appendChild(h);
+
+    var nm = el("input", "fld"); nm.type = "text"; nm.value = row.name || "";
+    nm.setAttribute("aria-label", "Name");
+    nm.setAttribute("data-shname", k + ":" + at);
+    if (!shape) nm.readOnly = true;
+    nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
+    var nl = el("label", "stnm"); nl.appendChild(el("span", "lab", "Name")); nl.appendChild(nm);
+    c.appendChild(nl);
+
+    /* §438: how it plans — the same control the list row carried, and the
+       same live switch on a client whose shape is frozen (§436). */
+    var fl = el("label", "stnm"); fl.appendChild(el("span", "lab", "Plans in"));
+    var sel = el("select", "fld");
+    FORMATS.forEach(function (f) {
+      var o = el("option", null, f[1]); o.value = f[0];
+      if (row.format === f[0]) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.setAttribute("data-wzfmt", row.key || "");
+    sel.setAttribute("aria-label", "How " + (row.name || "this row") + " plans");
+    if (!shape) {
+      if (!row.key || !OPTS.switchWay) sel.disabled = true;
+      else sel.addEventListener("change", function () { liveFormat(k === "bu" ? "unit" : "fn", row.key, sel); });
+    } else sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
+    fl.appendChild(sel); c.appendChild(fl);
+
+    /* §404.4, §391: WHICH DIVISION IT IS IN — any the client holds, which is
+       what this select has always offered, because there is ONE stored list
+       of divisions underneath (§544) and putting a box in one is what makes
+       that division this kind's. Offering only the kind's own layer's
+       divisions was tried first and is a dead end: Raya's functions use
+       none, so a function could no longer be put in a division at all, and
+       on a client whose shape is frozen there is no way to add one either
+       (§436, Islam: *"it belongs to commercial division but I can't change
+       that"*). The TREE still draws each kind's own layer; this is how a
+       division comes to be on it. */
+    var names = (S.shape.companies || []).map(function (c) { return String(c.name || "").trim(); }).filter(Boolean);
+    if (!SMPRules.midExists(GROUP, COMPANIES)) names = [];
+    if (names.length) {
+      var dl = el("label", "stnm");
+      dl.appendChild(el("span", "lab", "Its " + layerWordOf(k, "one").toLowerCase()));
+      var ds = el("select", "fld");
+      ds.dataset.wzdiv = k === "bu" ? "unit" : "fn";
+      ds.setAttribute("aria-label", "Which " + layerWordOf(k, "one").toLowerCase() + " " +
+        (row.name || "this row") + " belongs to");
+      var none = el("option", null, "— needs one —"); none.value = ""; ds.appendChild(none);
+      names.forEach(function (d) {
+        var o = el("option", null, d); o.value = d;
+        if ((row.company || "") === d) o.selected = true;
+        ds.appendChild(o);
+      });
+      if (!shape) {
+        if (!row.key) ds.disabled = true;
+        else ds.addEventListener("change", function () { liveDivision(k === "bu" ? "unit" : "fn", row.key, ds.value); });
+      } else ds.addEventListener("change", function () {
+        row.company = ds.value; S.shapeDirty = true;
+        S.under = S.under || {}; if (ds.value) S.under[k] = ds.value;
+        redraw();
+      });
+      dl.appendChild(ds); c.appendChild(dl);
+    }
+
+    if (shape) {
+      var x = el("button", "danger", "Remove this " + kindWord(k, "one", "box").toLowerCase());
+      x.type = "button"; x.setAttribute("data-shremove", k + ":" + at);
+      x.setAttribute("aria-label", "Remove " + row.name);
+      x.addEventListener("click", function () {
+        list.splice(at, 1); S.shapeDirty = true; S.sel = { lvl: "top" }; redraw();
+      });
+      c.appendChild(x);
+    }
+    c.appendChild(el("p", "wzwhy", k === "bu"
+      ? "A " + w("unitword", "one", "business unit") + "'s plan type decides what its pages hold. Its code is made from the name and prefixes every row of its plan."
+      : "A " + w("fnword", "one", "function") + "'s plan type decides what its pages hold, and it stays changeable until it has a plan in it."));
+    host.appendChild(c);
+  }
+
+  function shapeStep(box){
+    box.classList.add("wzshape");
+    var tree = el("div", "shtree"), panel = el("div", "shpanel");
+    drawTree(tree); drawShapePanel(panel);
+    box.appendChild(tree); box.appendChild(panel);
     return box;
   }
 
@@ -64286,6 +67794,617 @@ var CLIENTSETUP = (function () {
            at: function () { return S ? STEPS[S.at].k : null; } };
 })();
 
+/* ── keysheet.js ── */
+/* ══ WHAT THE KEYS DO (§539) ═══════════════════════════════════════════════
+   Usability audit, heuristic 7. Its headline finding is that the platform has
+   ONE keyboard idiom and it is the projector. Measured against the sources it
+   has FOUR — the projector, §528's reporting keys, §536's dropdown and
+   `arrange.js`'s row move — and the finding the audit does not make is the one
+   this file answers: NOTHING ON ANY SCREEN SAYS SO. There was no list of keys
+   anywhere in the product. §528's hints ride a hover and a per-control
+   `aria-keyshortcuts`, so the only way to discover Alt+Enter was to hover the
+   one button that carries it. Four idioms, no index.
+
+   THIS BINDS NO NEW SHORTCUT. Every key below already works; what is new is
+   that they are written down. Islam chose treatment A of the drawing
+   (`design-mockups/shortcuts-sheet/`): the whole product, with the sections
+   that work HERE marked — so a reporter learns the deck and the lists have
+   keys too, which is the thing nobody could find out.
+
+   EACH SECTION ASKS THE MODULE THAT OWNS IT whether it is live, through that
+   module's OWN marker, never through a rule copied here (§53.5): the reporting
+   boxes through `REP_BOXES` itself — the string shell.html names once and the
+   walks already read — the dropdown through `data-ss`, the row move through
+   `.grip`, the deck through `#deckroot.on`. A second copy of any of those is
+   the one somebody forgets the day a selector changes.
+
+   AND THE SHEET IS WHERE THE NEXT ONE GOES. If an accelerator is added later
+   for Submit, Save draft or moving between destinations, it appears here
+   rather than in another tooltip nobody hovers. */
+var KEYSHEET = (function(){
+
+  function has(sel){
+    try { return !!document.querySelector(sel); } catch (e) { return false; }
+  }
+
+  /* ── IS THIS SECTION LIVE WHERE I AM STANDING ─────────────────────────
+     Read at the moment the sheet opens, never cached: the answer changes with
+     the page, and a cached one would mark a reporter's keys live on Setup. */
+  var LIVE = {
+    /* Escape and Tab are the platform's, everywhere, always. */
+    anywhere: function(){ return true; },
+    /* searchsel marks every select it has enhanced (§45.5, §536). */
+    lists: function(){ return has('[data-ss="1"]'); },
+    /* shell.html's own REP_BOXES, read rather than copied (§104.7, §53.5). */
+    figures: function(){
+      return typeof REP_BOXES === "string" && has(REP_BOXES);
+    },
+    /* §546: live where any of the three controls is actually on screen. */
+    acts: function(){
+      return has("[data-submit]") || has("[data-repsave]") ||
+             has(".penbtn[data-page], .secpen[data-page], .editbtn[data-page]");
+    },
+    /* arrange.js draws a `.grip` on every row it can move (§266.10). */
+    rows: function(){ return has(".grip"); },
+    /* §552: a row worth walking is one with somewhere to walk to. Counted
+       rather than assumed — a tablist holding a single tab answers the arrows
+       and has nothing to say about it. */
+    tabs: function(){
+      var out = false;
+      Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function(l){
+        if (out) return;
+        var n = Array.prototype.filter.call(l.querySelectorAll('[role="tab"]'),
+          function(t){ return t.offsetParent !== null; }).length;
+        if (n >= 2) out = true;
+      });
+      return out;
+    },
+    /* present.js puts `on` on the deck's root while it is showing (§265). */
+    deck: function(){
+      var d = document.getElementById("deckroot");
+      return !!d && d.classList.contains("on");
+    }
+  };
+
+  /* ── THE SHEET ────────────────────────────────────────────────────────
+     Prose about behaviour, so it is prose: each line says what the key DOES
+     in the words the product uses for it, not the name of the function it
+     calls. `keys` is drawn as keycaps; `says` is drawn as an instruction,
+     because "type" is a thing you do and not a key you press. */
+  var SECTIONS = [
+    { id:"anywhere", name:"Anywhere", where:"",
+      rows:[
+        { keys:[["Esc"]], what:"Close what is open — a question, a panel, the chat corner" },
+        { keys:[["Tab"], ["Shift","Tab"]], what:"Move between controls" }
+      ] },
+    { id:"lists", name:"Any long list", where:"the box you type into to pick",
+      rows:[
+        { says:"type", what:"Narrow the list as you go" },
+        { keys:[["↓"], ["↑"]], what:"Move the mark, wrapping at the ends" },
+        { keys:[["Home"], ["End"]], what:"First or last of what is showing" },
+        { keys:[["Enter"]], what:"Take the marked row — or the first one showing" }
+      ] },
+    /* §546 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
+    { id:"acts", name:"Doing the thing", where:"a report, or a page you can edit",
+      rows:[
+        { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },
+        { keys:[["Alt","D"]], what:"Save draft" },
+        { keys:[["Alt","E"]], what:"The pen, on or off" },
+        { keys:[["Alt","G"]], what:"Go to another place — type a few letters" }
+      ] },
+    { id:"figures", name:"Entering figures", where:"Reporting",
+      rows:[
+        { keys:[["Enter"]], what:"The next figure" },
+        { keys:[["Shift","Enter"]], what:"The one before" },
+        { keys:[["Alt","Enter"]], what:"Jump to the next thing still owed" },
+        { keys:[["Alt","N"]], what:"The note for this row" },
+        { keys:[["Esc"]], what:"Put the box back as it was" }
+      ] },
+    /* §552 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+       sheet exists: the alternative is a fifth idiom nobody can discover. */
+    { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
+      rows:[
+        { keys:[["←"], ["→"]], what:"Move along the row, wrapping at the ends" },
+        { keys:[["Home"], ["End"]], what:"First or last tab on the row" },
+        { keys:[["Enter"]], what:"Open the one you have landed on" }
+      ] },
+    { id:"rows", name:"Moving a row", where:"wherever rows can be rearranged",
+      rows:[
+        { keys:[["↑"], ["←"]], what:"Up one" },
+        { keys:[["↓"], ["→"]], what:"Down one" }
+      ] },
+    { id:"deck", name:"Presenting", where:"the deck",
+      rows:[
+        { keys:[["→"], ["↓"], ["Space"]], what:"Next slide" },
+        { keys:[["←"], ["↑"]], what:"Back one" },
+        { keys:[["Home"], ["End"]], what:"First or last slide" },
+        { keys:[["F"]], what:"Fullscreen" },
+        { keys:[["W"]], what:"Fit to the window" },
+        { keys:[["P"]], what:"Pause the clock" },
+        { keys:[["Esc"]], what:"Leave fullscreen, then leave the deck" }
+      ] }
+  ];
+
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function capsHtml(combo){
+    /* One combo is a run of caps joined by +; the alternatives beside it are
+       joined by a thin "/", which is the product's own way of saying "either". */
+    return combo.map(function(k){ return '<kbd>' + esc(k) + '</kbd>'; }).join("+");
+  }
+
+  function rowHtml(r){
+    var left = r.says
+      ? '<span class="ks-typ">' + esc(r.says) + '</span>'
+      : r.keys.map(capsHtml).join('<span class="ks-or">/</span>');
+    return '<span class="ks-k">' + left + '</span>' +
+           '<span class="ks-v">' + esc(r.what) + '</span>';
+  }
+
+  function sectionHtml(s){
+    var live = LIVE[s.id] ? LIVE[s.id]() : false;
+    return '<h4 class="mini">' + esc(s.name) +
+      (s.where ? '<span class="ks-where">' + esc(s.where) + '</span>' : '') +
+      /* THE MARK IS A WORD AND NOT A COLOUR (§68.10's rule from the other
+         side): "here" is read by somebody who cannot tell the green from the
+         grey, and it is what the section means. */
+      (live ? '<span class="ks-here">here</span>' : '') + '</h4>' +
+      '<div class="ks-rows' + (live ? '' : ' ks-dim') + '">' +
+        s.rows.map(rowHtml).join("") + '</div>';
+  }
+
+  function bodyHtml(){
+    return SECTIONS.map(sectionHtml).join("") +
+      '<p class="ks-foot">Open this with <kbd>?</kbd> from anywhere you are not ' +
+      'typing, or from the <b>?</b> beside Light and Dark.</p>';
+  }
+
+  function open(){
+    if (typeof openModalHtml !== "function") return false;
+    openModalHtml("Keyboard",
+      "Everything the platform answers. The marked ones work on this screen.",
+      bodyHtml());
+    return true;
+  }
+
+  /* ── THE TWO WAYS IN ──────────────────────────────────────────────────
+     A key AND a button, because a sheet you can only reach by already knowing
+     the key to reach it is this section's own fault one level up. */
+  function typing(el){
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    var t = el.tagName;
+    return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+  }
+
+  function wire(){
+    var bar = document.getElementById("topacts");
+    if (bar && !document.getElementById("keysbtn")) {
+      var b = document.createElement("button");
+      b.id = "keysbtn";
+      b.type = "button";
+      b.className = "infobtn keysbtn";
+      b.textContent = "?";
+      b.setAttribute("aria-label", "Keyboard shortcuts");
+      b.title = "Keyboard shortcuts";
+      b.setAttribute("aria-keyshortcuts", "?");
+      b.addEventListener("click", open);
+      bar.appendChild(b);
+    }
+    document.addEventListener("keydown", function(e){
+      if (e.key !== "?") return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      /* NOT WHILE SOMEBODY IS TYPING. Most of this product is fields, and a
+         question mark is a character somebody means to write — in a note, in a
+         capability's name. The guard is the one §528's keys already use. */
+      if (typing(e.target)) return;
+      /* NOT OVER THE DECK, and this is a refusal rather than an oversight: the
+         modal is outside the fullscreen element, so in fullscreen it would
+         open where nobody can see it — a control that looks live and does
+         nothing, which is the thing §534 spent thirty conversions removing.
+         The deck's own keys are on the sheet for whoever reads it beforehand. */
+      var d = document.getElementById("deckroot");
+      if (d && d.classList.contains("on")) return;
+      if (open()) e.preventDefault();
+    });
+  }
+
+  return { wire: wire, open: open,
+           /* for the checks */
+           sections: function(){ return SECTIONS; },
+           live: function(){
+             var out = {};
+             SECTIONS.forEach(function(s){ out[s.id] = LIVE[s.id] ? LIVE[s.id]() : false; });
+             return out;
+           } };
+})();
+
+/* ── tabkeys.js ── */
+/* ══ A ROW OF TABS ANSWERS THE ARROWS (§552) ═══════════════════════════════
+   Usability audit, heuristic 7: *"no keyboard route between destinations, tabs
+   or sections"*. Measured, the product draws EIGHT `role="tablist"` groups —
+   the destinations, the tab row, the section row, the chat queue, the Copilot
+   side, the knowledge base, the Setup rail — and not one of them bound an
+   arrow key.
+
+   WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER. `role="tablist"` is not
+   decoration: it is a promise that Left and Right move along the row and that
+   Home and End reach its ends, and a screen reader announcing "tab, 2 of 5"
+   tells somebody to press keys that did nothing here. The row was always
+   OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was
+   locked out; it simply did not behave the way its own markup said.
+
+   SO THERE IS NOTHING TO INVENT. This binds no new idiom and asks nobody to
+   learn anything: arrows on a row of tabs is what every row of tabs does.
+
+   ── TWO DECISIONS, BOTH DELIBERATE ────────────────────────────────────
+
+   THE ARROWS MOVE FOCUS AND DO NOT PICK (manual activation, which the pattern
+   allows and this product needs). These tabs are DESTINATIONS: a row of them
+   is Mobile, Retail, Logistics, and picking on arrow would walk somebody
+   through five whole pages — five repaints, five reads — while they were
+   looking for the sixth. Enter and Space pick, which a button already does,
+   so nothing had to be bound for that either.
+
+   THE TAB PATH IS NOT CHANGED, and this departs from the pattern knowingly.
+   The textbook version gives the row a roving `tabindex` so Tab stops on the
+   row once and the arrows walk inside it. That is fewer stops — and it TAKES
+   AWAY a route that works today, for everyone who reaches a tab by pressing
+   Tab five times and has done so since the product shipped. Adding the arrows
+   costs nobody anything; removing the stops costs somebody something. If the
+   stops are to go, that is its own decision with its own drawing (rule 1b).
+
+   ONE HANDLER, NOT EIGHT (§53.5). The rows are built by six files and two more
+   will exist by Christmas; a key wired at each is eight places to forget. This
+   one is delegated from the document and finds the row from the tab that has
+   focus, so a tablist drawn tomorrow answers the arrows without being told. */
+var TABKEYS = (function(){
+
+  var STEP = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -1, ArrowDown: 1 };
+
+  /* WHAT IS ON THE ROW, as somebody looking at it would count: a tab the row
+     is not currently drawing is not somewhere the arrows can go. `offsetParent`
+     is null for anything display:none or inside something that is, which is how
+     the folded rows hide theirs. */
+  function tabsIn(list){
+    return Array.prototype.filter.call(
+      list.querySelectorAll('[role="tab"]'),
+      function(t){ return t.offsetParent !== null || t === document.activeElement; });
+  }
+
+  function go(list, from, where){
+    var all = tabsIn(list);
+    if (all.length < 2) return false;
+    var at = all.indexOf(from);
+    if (at < 0) return false;
+    var to;
+    if (where === "first") to = all[0];
+    else if (where === "last") to = all[all.length - 1];
+    /* WRAPPING, because §536's list wraps and two controls in one product
+       that disagree about what the end of a list means is worse than either
+       answer (§53.5 from the other side). */
+    else to = all[(at + where + all.length) % all.length];
+    if (!to || to === from) return false;
+    to.focus();
+    return true;
+  }
+
+  function onKey(e){
+    /* Already answered by somebody closer to it — `arrange.js` moves a row on
+       the same arrows, and the deck owns them outright. */
+    if (e.defaultPrevented) return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    var where = (e.key in STEP) ? STEP[e.key]
+              : e.key === "Home" ? "first"
+              : e.key === "End" ? "last" : null;
+    if (where === null) return;
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var tab = t.closest('[role="tab"]');
+    if (!tab) return;
+    var list = tab.closest('[role="tablist"]');
+    if (!list) return;
+    if (go(list, tab, where)) e.preventDefault();
+  }
+
+  function wire(){
+    document.addEventListener("keydown", onKey);
+  }
+
+  return { wire: wire,
+           /* for the checks */
+           tabsIn: tabsIn };
+})();
+
+/* ── actionkeys.js ── */
+/* ══ THREE ACTIONS, FROM THE KEYBOARD (§546) ═══════════════════════════════
+   Usability audit, heuristic 7: *"no accelerator for Submit, Save draft, or
+   the pen"*. §552 answered the navigation half of that finding with the arrows
+   every row of tabs already promised; this is the other half, and unlike the
+   arrows it had NO standard to follow — somebody had to pick the keys.
+
+   ISLAM PICKED THEM: Alt+S, Alt+D, Alt+E.
+
+   ALT IS THE PRODUCT'S OWN MODIFIER AND NOT A NEW ONE (§528 chose it for the
+   reporting walk), and the one thing wrong with it here was already solved
+   there: on a Mac, Option+letter types an accented character rather than
+   reporting the letter, so the match is on the PHYSICAL KEY (`e.code`) and
+   never on `e.key`. Copying that is the whole reason Alt was safe to reuse.
+
+   ── SUBMIT JUMPS, THE OTHER TWO ACT, AND THE LINE IS WHERE THE WORK GOES ──
+
+   Islam, asked directly whether one key should send a report: *"jump to the
+   button"*. So Alt+S puts the cursor ON Submit and the person presses Enter.
+   Two keys instead of one, and nothing reaches the office because somebody's
+   hand was in the wrong place.
+
+   Save draft and the pen ACT on the single press, and the rule behind the
+   difference is worth saying rather than leaving as an inconsistency:
+   SUBMIT LEAVES YOUR SCREEN AND THE OTHER TWO DO NOT. A draft is yours until
+   you submit it, and the pen only decides whether you can type on the page in
+   front of you. Neither is seen by anybody else, so neither is worth a second
+   press. Submit is read by the office the moment it lands.
+
+   AND JUMPING TO A HELD SUBMIT IS BETTER THAN PRESSING ONE. When the report
+   is not ready, §538 draws Submit held with its reason in a bubble that opens
+   ON FOCUS — so Alt+S on an unready report lands on the button AND opens the
+   sentence saying what is missing. The accelerator and the refusal were built
+   two sections apart and meet here without either being changed.
+
+   ONE PLACE, THREE ACTS, read from the product's own selectors (§53.5). The
+   pen's is `.penbtn[data-page], .secpen[data-page], .editbtn[data-page]` —
+   taken from the check that already walks it, which records that the first of
+   the three alone was not enough. */
+var ACTIONKEYS = (function(){
+
+  var ACTS = [
+    { code: "KeyS", say: "Alt+S", what: "Submit",
+      sel: "[data-submit]", go: "focus" },
+    { code: "KeyD", say: "Alt+D", what: "Save draft",
+      sel: "[data-repsave]", go: "press" },
+    { code: "KeyE", say: "Alt+E", what: "the pen",
+      sel: ".penbtn[data-page], .secpen[data-page], .editbtn[data-page]", go: "press" }
+  ];
+
+  /* WHAT IS ACTUALLY ON THE SCREEN. A control the page is not drawing is not
+     one a key can reach, and `offsetParent` is null for anything hidden or
+     inside something hidden — the same test §552 uses on a row of tabs. */
+  function live(sel){
+    var all = document.querySelectorAll(sel);
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].offsetParent !== null) return all[i];
+    }
+    return null;
+  }
+
+  function held(el){
+    return el.disabled === true || el.getAttribute("aria-disabled") === "true";
+  }
+
+  function fire(a){
+    var el = live(a.sel);
+    if (!el) return false;
+    if (a.go === "focus") {
+      /* Held or not: landing on it is the point, and on a held Submit the
+         reason opens with the focus (§538). */
+      el.focus();
+      return true;
+    }
+    /* A HELD BUTTON IS NOT PRESSED BY A KEY EITHER. The mouse cannot press it
+       and neither can this, or the accelerator becomes the one way round a
+       refusal the rest of the product enforces (§538). */
+    if (held(el)) { el.focus(); return true; }
+    el.click();
+    return true;
+  }
+
+  function typing(el){
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    var t = el.tagName;
+    return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+  }
+
+  /* THE HINT RIDES THE CONTROL, which is §528's rule and the reason the sheet
+     is not the only record: somebody who never opens the sheet still meets the
+     key on the button it belongs to. Said only where the control EXISTS, so a
+     key is never announced on a page that cannot answer it (§61). */
+  function mark(){
+    ACTS.forEach(function(a){
+      var el = live(a.sel);
+      if (el && el.getAttribute("aria-keyshortcuts") !== a.say) {
+        el.setAttribute("aria-keyshortcuts", a.say);
+        var t = el.getAttribute("title");
+        if (!t) el.setAttribute("title", a.what + " (" + a.say + ")");
+      }
+    });
+  }
+
+  function onKey(e){
+    if (e.defaultPrevented) return;
+    if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (typing(e.target)) return;
+    for (var i = 0; i < ACTS.length; i++) {
+      if (ACTS[i].code === e.code) {
+        if (fire(ACTS[i])) e.preventDefault();
+        return;
+      }
+    }
+  }
+
+  function wire(){ document.addEventListener("keydown", onKey); }
+
+  return { wire: wire, mark: mark,
+           /* for the checks */
+           acts: function(){ return ACTS; } };
+})();
+
+/* ── goto.js ── */
+/* ══ GOING TO A PLACE (§547) ═══════════════════════════════════════════════
+   Usability audit, heuristic 7, last piece. Alt+G opens a list of every place
+   you can reach, you type a few letters, and Enter takes you there. Islam
+   picked the letter, joining §546's Alt+S, Alt+D and Alt+E.
+
+   A KEY PER DESTINATION IS NOT POSSIBLE, and that is why this shape and not a
+   row of them: the places are each tenant's own units, capabilities,
+   functions and divisions. There is nothing fixed to bind.
+
+   ── ALMOST NONE OF THIS IS NEW, WHICH IS THE ARGUMENT FOR IT ──────────
+
+   THE LIST IS THE NAVIGATION'S OWN BUTTONS, read off the page. Measured
+   before this was written: every destination is in the DOM at once as a
+   `[data-u]` button, including the ones inside closed folds. So there is no
+   second idea of what the places are (§53.5) and a place added tomorrow
+   appears here without anybody being told.
+
+   PICKING A ROW PRESSES THE REAL BUTTON, which is exactly what the product's
+   own `[data-gounit]` jump already does. Everything a normal click does —
+   dropping out of edit mode, landing on the tab that place opens on — happens
+   here because it IS the same press. A second route to a destination is a
+   second place for that behaviour to drift.
+
+   AND THE LIST ITSELF IS `searchsel`'s, not a copy of it. The box, the rows,
+   the match-anywhere, and every key §536 gave it — arrows, Home, End, Enter,
+   Escape, `aria-activedescendant` — arrive by handing it a `<select>` and
+   calling `openOn`, the entry the register already uses to reopen a list
+   after a repaint. Writing a second popup here would be writing §536 again
+   and then maintaining both.
+
+   ONE THING `searchsel` HAD TO LEARN: it enhances a single select only past
+   five options, which is the right rule for a form field and the wrong one
+   here — a tenant with four places needs this list more than one with forty,
+   not less. `data-ss-always` is the opt-in, and it is one line there rather
+   than a second popup here.
+
+   THE HOST IS INERT. The select and the button `searchsel` builds for it are
+   plumbing, never controls: both are taken out of the tab order and out of
+   the accessibility tree, so a host left standing after the popup closes is
+   nothing anybody can reach. §536's own comment records what happens when a
+   hidden select keeps its furniture — the whole product became a keyboard
+   trap on its first control. */
+var GOTO = (function(){
+
+  var HOST = "gotohost";
+
+  /* THE LABEL IS THE BUTTON'S OWN WORDS, and only its first text node: the
+     count badge is a `<span>` inside the same button, so reading the button
+     whole gives "Distribution3 business units". */
+  function label(b){
+    var first = b.firstChild;
+    var t = (first && first.nodeType === 3) ? first.textContent : b.textContent;
+    return String(t || "").replace(/\s+/g, " ").trim();
+  }
+
+  function places(){
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("[data-u]"), function(b){
+      if (b.closest("#" + HOST)) return;           /* never our own plumbing */
+      if (b.offsetParent === null) return;         /* not drawn for this viewer */
+      if (!label(b)) return;
+      out.push(b);
+    });
+    return out;
+  }
+
+  /* THE POPUP IS `searchsel`'s AND LIVES ON <body>, so taking the host away
+     does not take it with it. Escape hid that: searchsel's own handler closes
+     the popup, so the two looked like one act until a check called close()
+     by itself and the next press found a list already open. Both halves, in
+     one place, because a half-close is how a control comes back wrong. */
+  function shut(){
+    if (typeof SEARCHSEL !== "undefined" && SEARCHSEL.close) SEARCHSEL.close();
+    var h = document.getElementById(HOST);
+    if (h) h.remove();
+  }
+
+  function open(){
+    if (typeof SEARCHSEL === "undefined" || !SEARCHSEL.openOn) return false;
+    var btns = places();
+    /* NOTHING TO CHOOSE IS NOT A LIST (§61). Somebody who reaches one place
+       is not shown a picker that can only take them where they already are. */
+    if (btns.length < 2) return false;
+    shut();
+
+    var host = document.createElement("div");
+    host.id = HOST;
+    var sel = document.createElement("select");
+    sel.className = "fld";
+    sel.dataset.ssAlways = "1";
+    sel.setAttribute("aria-label", "Go to a place");
+    btns.forEach(function(b, i){
+      var o = document.createElement("option");
+      /* THE KEY, NOT THE BUTTON. Held as an index into a list of ELEMENTS,
+         this pressed whichever button was on the page when the list opened —
+         and a repaint between opening and picking replaces them, so it was
+         pressing a node no longer in the document. It still navigated, because
+         a listener bound to a detached element still fires, which is exactly
+         the kind of working-by-luck that stops working. The live button is
+         found at the moment of the press, which is what `[data-gounit]` has
+         always done (§53.5). */
+      o.value = b.dataset.u;
+      o.text = label(b);
+      /* IT OPENS ON WHERE YOU ARE, marked and under the cursor — so Alt+G
+         then Escape costs nothing and the list reads as a map rather than a
+         blank box. The current place is the nav's own `aria-current` or the
+         selected tab, read from it rather than decided here. */
+      if (b.getAttribute("aria-current") === "true" ||
+          b.getAttribute("aria-selected") === "true") o.selected = true;
+      sel.appendChild(o);
+    });
+    host.appendChild(sel);
+    document.body.appendChild(host);
+
+    SEARCHSEL.wire();
+    sel.addEventListener("change", function(){
+      var key = sel.value;
+      shut();
+      var b = document.querySelector('[data-u="' + (window.CSS && CSS.escape
+        ? CSS.escape(key) : key.replace(/"/g, '\\"')) + '"]');
+      if (b) b.click();
+    });
+
+    /* The button searchsel just built is plumbing too (see the head of this
+       file): out of both trees, so a host left standing is unreachable. */
+    var btn = host.querySelector("button");
+    if (btn) { btn.tabIndex = -1; btn.setAttribute("aria-hidden", "true"); }
+
+    if (!SEARCHSEL.openOn(sel)) { shut(); return false; }
+    /* Escape closes the popup in searchsel's own handler; the host goes with
+       it rather than being left for the next open to find. */
+    document.addEventListener("keydown", function esc(e){
+      if (e.key !== "Escape") return;
+      document.removeEventListener("keydown", esc, true);
+      setTimeout(shut, 0);
+    }, true);
+    return true;
+  }
+
+  function typing(el){
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    var t = el.tagName;
+    return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+  }
+
+  function wire(){
+    document.addEventListener("keydown", function(e){
+      if (e.defaultPrevented) return;
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (e.code !== "KeyG") return;          /* the physical key (§546) */
+      if (typing(e.target)) return;
+      if (open()) e.preventDefault();
+    });
+  }
+
+  return { wire: wire, open: open, close: shut,
+           /* for the checks */
+           places: function(){ return places().map(label); } };
+})();
+
 /* ── sync.js ── */
 /* ── Persistence ──────────────────────────────────────────────────────────
    Served over http(s), the platform loads its state from /api/state and
@@ -64702,9 +68821,9 @@ var SYNC = (function () {
        through nobody's choice. Sending that would have every one of their
        saves judged as that stranger: a narrowing, which is the safe
        direction, and still a bootstrap tenant unable to set itself up.
-       Asked through isSMOSession() and the register, which together are
+       Asked through maySimulateSession() and the register, which together are
        exactly when the control that sets VIEWER is drawn at all. */
-    if (!isSMOSession()) return null;
+    if (!maySimulateSession()) return null;
     if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
     var v = typeof window !== "undefined" ? window.VIEWER : null;
     return v && v !== person.key ? v : null;
@@ -65079,9 +69198,9 @@ var SYNC = (function () {
      function's plan between them, and getting it wrong here would mean a
      project's rows could never be found. */
   function refusedRoots(target) {
-    var t = String(target || "group");
-    if (t.indexOf("fn:") === 0) {
-      var k = t.slice(3), out = [];
+    var t = String(target || "group"), r = boxRef(t);
+    if (r.kind === "fn") {
+      var k = r.key, out = [];
       if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
       if (typeof GROUP !== "undefined")
         (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
@@ -65172,7 +69291,7 @@ var SYNC = (function () {
         ? "<span><b>" + plural(lines.length, "line") + " refused:</b></span><ul>" +
           lines.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"
         : "") +
-      "<span>" +
+      '<span id="refused-acts">' +
       (undoable
         ? '<button type="button" class="refused-keep" id="refused-keep">Put back ' +
           (lines.length === 1 ? "that line" : "those lines") +
@@ -65189,15 +69308,21 @@ var SYNC = (function () {
       var missed = putBackRefused(changes);
       if (missed.length) {
         /* Said, never swallowed: a row the platform cannot find is a row it
-           cannot put back, and pretending otherwise re-posts the refusal. */
-        notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
-          "<span>" + plural(missed.length, "refused line") +
-          " could not be put back automatically \u2014 they are no longer on this " +
-          "page. Reload to take the stored version again.</span>" +
-          '<span><button type="button" class="refused-undo" id="refused-undo">' +
-          "Discard everything and reload</button></span>");
-        var u2 = document.getElementById("refused-undo");
-        if (u2) u2.addEventListener("click", function () { location.reload(); });
+           cannot put back, and pretending otherwise re-posts the refusal.
+           §534.5: WRITTEN AS A FUNCTION so the discard question can put this
+           band back — it replaces whatever row it is opened over, and the way
+           out has to restore the band it covered, not the one before it. */
+        var showMissed = function () {
+          notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
+            "<span>" + plural(missed.length, "refused line") +
+            " could not be put back automatically \u2014 they are no longer on this " +
+            "page. Reload to take the stored version again.</span>" +
+            '<span id="refused-acts"><button type="button" class="refused-undo" ' +
+            'id="refused-undo">Discard everything and reload</button></span>');
+          var u2 = document.getElementById("refused-undo");
+          if (u2) u2.addEventListener("click", function () { askDiscard(showMissed); });
+        };
+        showMissed();
         return;
       }
       refusedWhy = null; refusedRows = null; refusedBody = null;
@@ -65210,9 +69335,53 @@ var SYNC = (function () {
     });
     var u = document.getElementById("refused-undo");
     if (u) u.addEventListener("click", function () {
-      if (!confirm("Discard everything changed since the last successful save, " +
-                   "and load the stored version again?\n\nAnything you have typed " +
-                   "that was not saved will be lost.")) return;
+      askDiscard(function () {
+        showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
+      });
+    });
+  }
+
+  /* ── DISCARD ASKS IN THE BAND (§534.5) ──────────────────────────────────
+     The last browser dialog in the product, and the one the §534 sweep missed
+     because that count was taken over shell.html alone.
+
+     It is the same fault as the other twenty-nine, with one of its own on
+     top: a box opens OVER the band that has just explained why the save was
+     refused, so the sentence somebody needs in order to answer is the
+     sentence the question covers up. The band is already here and already
+     carries the buttons, so the question replaces them and the refusal above
+     it stays readable.
+
+     NOTHING IS CLEARED UNTIL THE SECOND PRESS. `keepClear()` throws away the
+     copy this tab kept, and it runs on the answer, never on the way in.
+
+     NO paint() AND NO GLOBAL STATE: this runs when the server has refused a
+     save, which is not a moment to make a repaint of the whole page part of
+     the way out. The band rewrites its own row, the way it builds itself. */
+  function askDiscard(back) {
+    var row = document.getElementById("refused-acts") ||
+              document.getElementById("refused");
+    /* No band on screen means no button was pressed on one; do nothing rather
+       than discard, which is the one answer that cannot be taken back. */
+    if (!row) return;
+    row.innerHTML =
+      "<span><strong>Discard everything and reload?</strong> Anything typed " +
+      "since the last successful save will be lost \u2014 including the lines " +
+      "the server refused.</span> " +
+      '<button type="button" class="refused-keep" id="discard-no">Keep editing</button> ' +
+      '<button type="button" class="refused-undo" id="discard-yes">Discard and reload</button>';
+    var no = document.getElementById("discard-no");
+    if (no) no.addEventListener("click", function () { if (back) back(); });
+    var yes = document.getElementById("discard-yes");
+    if (yes) yes.addEventListener("click", function () {
+      /* ── AND BOTH DISCARDS NOW DO THE SAME THING (§534.5) ──────────────
+         The second one — offered when the refused lines could not be put back
+         — reloaded WITHOUT clearing the copy this tab keeps, so the reload
+         handed the unsaved work straight back. Under a button reading
+         "Discard everything and reload" that was already wrong; with both of
+         them now carrying the same question, which says in words that what
+         was typed will be lost, it would be a sentence the product does not
+         keep. One answer, one act. */
       keepClear();
       location.reload();
     });
@@ -65325,7 +69494,7 @@ var SYNC = (function () {
         showRefusal(null);
         FAILSHOWN = "";
         lastSaved = now;
-        savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        savedAt = timeOf(new Date());
         keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
@@ -65390,7 +69559,41 @@ var SYNC = (function () {
      SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
-  function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE OFFICE IS TWO SEATS, NOT ONE (§554) ──────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* This asked for the Super user
+     alone, so the control was named after the seat rather than after the
+     question it answers — and the question is *may this session leave its
+     own view*, which both office seats now answer yes to.
+
+     RENAMED RATHER THAN WIDENED IN PLACE, because `isSMOSession` is read in
+     the one place a mistake is dangerous (`actingAs`, which stamps the save)
+     and a name that says "is the SMO" while meaning "is the office" is how
+     the next person comes to use it for a Super-user-only act. The fail-
+     closed shape above is untouched: still hidden until something proves it
+     should be shown.
+
+     WHO IS *IN* THE LIST is a second question and it is `maySimulatePerson`
+     below — an SMO team member may not look through the Super user, who is
+     the one person on a client's register holding more than they do. */
+  function maySimulateSession() {
+    return !!person && (person.role === "super" || person.role === "smoteam");
+  }
+  /* MAY THIS SESSION LOOK THROUGH *THIS* PERSON (§554). `p.role` is the seat
+     on the register row, which is what the server writes from the membership
+     — the same field `lib/rules.js actingFor` refuses on, so the control the
+     page draws and the save the server accepts cannot disagree (§42, §61).
+
+     NOBODY SIGNED IN LISTS EVERYBODY: the offline copy and the file:// demo
+     have no session at all, and they have always offered the whole cast.
+     That is not a gate failing open — there is no server to act against and
+     nothing to narrow. */
+  function maySimulatePerson(p) {
+    if (!person) return true;
+    if (!maySimulateSession()) return false;
+    if (person.role === "super") return true;
+    return !p || p.role !== "super";
+  }
   /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
      Islam, of the trail standing at full weight while he viewed as somebody:
      *"I think yes greyed is better not to get confused that the user has
@@ -65516,8 +69719,11 @@ var SYNC = (function () {
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
        for EVERYBODY and the switcher was hidden from the one person it is for
-       (§45.3). It is asked through isSMOSession() now, in one place. */
-    if (!isSMOSession()) {
+       (§45.3). It is asked through maySimulateSession() now, in one place —
+       and since §554 that is both office seats, so an SMO team member keeps
+       the control and gets a list with the Super user left out of it
+       (`maySimulatePerson`), rather than their own name in place of it. */
+    if (!maySimulateSession()) {
       sel.hidden = true;
       /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
          the whole mechanism, and it relied on SEARCHSEL noticing on the next
@@ -65835,20 +70041,24 @@ var SYNC = (function () {
        carries the switcher's own two guards (the seat that draws it, and the
        key being on the register), so a second test would be a second idea of
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
-       exactly as `isSMOSession` is below and for the same reason. */
+       exactly as `maySimulateSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
     /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
        — the shell calls this at the end of every paint. */
     markViewing: function () { markViewing(); },
     person: function () { return person; },
-    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
-       the viewer switcher too, and the note above isSMOSession() is explicit
-       that this question must have ONE answer: a control that is dangerous
-       when wrong must fail closed, and two files each testing `role ===
-       "super"` is exactly how one of them comes to test something else.
-       Exported rather than re-asked — §42's rule about one copy of a rule,
-       on the chrome. */
-    isSMOSession: function () { return isSMOSession(); },
+    /* WHO MAY LEAVE THEIR OWN VIEW, ASKED AND NEVER COPIED (§179, §554). The
+       welcome screen draws the viewer switcher too, and the note above
+       maySimulateSession() is explicit that this question must have ONE
+       answer: a control that is dangerous when wrong must fail closed, and
+       two files each testing the seat by hand is exactly how one of them
+       comes to test something else. Exported rather than re-asked — §42's
+       rule about one copy of a rule, on the chrome. */
+    maySimulateSession: function () { return maySimulateSession(); },
+    /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
+       switcher and the People register's row menu both fill their lists
+       from this, so neither offers a view the save would turn down (§61). */
+    maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
@@ -66361,10 +70571,12 @@ var SYNC = (function () {
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §465: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §544.13: the capabilities are a section of this tab, full stop. There is
+     no longer a "wherever the office put them" — a capability is the
+     company's, so the company's plan is where it shows (`capAtTop`). What is
+     left to ask is only whether this client has any and whether this viewer
+     reaches them. */
+  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -66379,12 +70591,51 @@ var SYNC = (function () {
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    /* §540: the external half, where the box is shown apart.
+                       `drawHalf` is a no-op on a joined box, which is every
+                       box in every client today — so this line changes the
+                       markup of nothing and is passed unconditionally rather
+                       than behind a branch that would have to ask the same
+                       question twice (§53.5). */
+                    render: function(){ return drawHalf("dir", function(){ return renderUnitPlan(topAsUnit()); }); },
                     /* §520: a part owner sees their own part and nothing
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
-                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                    /* §543: on a box shown apart the tab follows what this
+                       viewer reaches in THIS half — a capability's owner is
+                       offered no Directions tab at all, rather than one over
+                       an empty rail. Joined, it is the question it always
+                       asked. */
+                    when: function(){ return topPlanOn() &&
+                      (boxSplit(topAsUnit()) ? boxHasHalf(topAsUnit(), "dir")
+                                             : (!partOnly() || partMine())); } },
+                  /* ── §540 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
+                     The same renderer over the same list, filtered to the
+                     pillars marked Capability and labelled with the client's
+                     own word for them — which is how El Abd keeps the two
+                     tabs it reads today once its five capabilities stop being
+                     a record type of their own (spec 066, stage 3b).
+
+                     DRAWN ONLY WHILE IT HOLDS SOMETHING (§45.2, §520.2). The
+                     setting alone is not enough: a box set apart with nothing
+                     marked internal would grow a tab standing over an empty
+                     rail, and the empty state under it would be answering a
+                     question nobody asked. Today that is every box, which is
+                     why turning the setting on moves nobody until the data
+                     moves with it.
+
+                     IT SITS ABOVE `caps` AND TAKES ITS PLACE. While both
+                     could be drawn they are different things — this half is
+                     the company's own pillars, `caps` is the separate record
+                     type — and the order puts them where El Abd's eye already
+                     goes. `caps` hides itself once there is nothing left in
+                     it (`capsReachable()`), so the handover needs no flag. */
+                  { k:"plancap", ac:"g_found", label:L("capability", "bu"),
+                    render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
+                    /* §543: and `boxHasHalf` now answers for the viewer, so
+                       a direction owner is offered no Capabilities tab. */
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap"); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -66627,8 +70878,25 @@ var SYNC = (function () {
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
-                    when: function(t){ return planOn(t); } },
+                  /* §540: one pillar list, shown as one tab or as two. The
+                     wrapper is a no-op on a joined box — every box today — so
+                     a unit that never touches the setting draws exactly the
+                     tab it drew before. */
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
+                    render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
+                    /* §543: a split unit's external tab follows what the
+                       viewer reaches in it; a joined one keeps its empty
+                       state, which is the door to the first pillar (§61). */
+                    when: function(t){ var b = unitLike(t);
+                      return planOn(t) && (!boxSplit(b) || boxHasHalf(b, "dir")); } },
+                  /* §540: and the internal half, with the client's own word
+                     for a capability over it, while the box is shown apart
+                     AND holds one (§45.2). Raya's units carry both kinds in
+                     one list today and keep doing so; this is the row that
+                     lets one of them be asked to show them apart. */
+                  { k:"plancap", ac:"u_plan", label:L("capability"),
+                    render: function(x){ return drawHalf("cap", function(){ return renderUnitPlan(x); }); },
+                    when: function(t){ return planOn(t) && boxHasHalf(unitLike(t), "cap"); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -67481,16 +71749,31 @@ var SYNC = (function () {
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
      how many sides there are (§53.5). */
+  /* §544.2 — AND WHICH OF THEM IS ON THE ROW IS CHOSEN. Islam, of the shape
+     screen: *"this should be a choice what are the navigation switch… so it
+     needs to be chosen somehow not derived"*. Four rows can be a side — each
+     bottom kind, and each kind's own layer — and the shape screen ticks them.
+
+     EVERY TICK IS READ AS AN ABSENCE FIRST, and the absence is exactly what
+     this function answered before it existed (navRowUnsaid): the units
+     wherever they plan, the functions beside them, and the functions'
+     divisions in their place where the company plans. So no client's row
+     moves by upgrading, and the only thing that changes it is somebody
+     pressing a tick. */
+  function navPick(row){ return SMPRules.navPicked(GROUP, row); }
   function navSides(){
-    var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
-    if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
+    var out = [], us = myUnits(), fs = myFns();
+    if (us.length && navPick("bu@g")) out = out.concat(companyUnitSides(us, navPick("bu")));
+    if (us.length && navPick("bu")) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    /* §447: with the units off, capabilities are a section of the company
-       page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
-      keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
-    if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
+    /* §544.13 — AND NO CAPABILITIES SIDE AT ALL. Islam, asked where a
+       capability appears: *"inside its owner's plan, with the directions"*.
+       A capability is the company's, so it shows in the company's plan and
+       is reached from there (§520's rail) — never as a third kind of thing
+       on this row. The `cap:<id>` destination stays reachable for the
+       clients that still hold records; what goes is the side. */
+    if (fs.length && navPick("fn@g")) out = out.concat(companyFnSides(fs, navPick("fn")));
+    if (fs.length && navPick("fn")) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -67507,7 +71790,31 @@ var SYNC = (function () {
      linking no function this viewer reaches has nothing to list and no
      segment (&sect;61 from the other side: a segment that lists nothing is a
      control with nothing behind it). */
-  function companyFnSides(fs){
+  /* §544.2: THE SAME, FOR THE UNITS' OWN LAYER. Nobody has this row today —
+     Raya's two divisions have never been sides — so this draws nothing until
+     the tick is pressed; it is the segment builder the tick needs to have
+     something behind it (§61). `companyFnSides`'s own shape exactly: one
+     segment per division that holds a unit this viewer reaches, in the order
+     they are declared, and a last segment under the top level's word for the
+     units in none. */
+  /* `alsoWhole` says the kind's OWN row is ticked as well. Then the boxes in
+     no division already have a side, and the catch-all is not added a second
+     time: two sides would carry the same fold key and the row could not say
+     which of them is open. */
+  function companyUnitSides(us, alsoWhole){
+    var left = us.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = unitsOfCompany(ck).filter(function(k){ return us.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name, keys:mine });
+    });
+    if (alsoWhole) return out;
+    if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
+    if (left.length) out.push({ fold:"units", label:labelWord("topword", "group"), keys:left });
+    return out;
+  }
+  function companyFnSides(fs, alsoWhole){
     var left = fs.slice(), out = [];
     activeCompanyKeys().forEach(function(ck){
       var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
@@ -67516,6 +71823,9 @@ var SYNC = (function () {
       out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
         keys:mine.map(function(k){ return "fn:" + k; }) });
     });
+    /* §544.2, as above: the kind's own row ticked too means the catch-all
+       already has a side of its own. */
+    if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
     if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
@@ -67553,7 +71863,9 @@ var SYNC = (function () {
        says what the row beside it lists. */
     if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
-    return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
+    /* §544.13: the capabilities clause went with the capabilities side —
+       three kinds can no longer share this row because there are two. */
+    return myUnits().length > 1 && myFns().length > 1;
   }
 
   /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
@@ -67562,8 +71874,9 @@ var SYNC = (function () {
      in Setup shows in the navigation the day it is set rather than being
      stored and read by nothing. */
   function navLabelFor(k){
-    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
-    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    var r = boxRef(k);
+    if (r.kind === "cap") return navName(capOfTarget(k));
+    if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
   function unitTabs(){
@@ -68351,8 +72664,9 @@ var SYNC = (function () {
      arbitrary, and landing on the function is the honest answer there: the
      switch is one press away and both are in the list. */
   function capForBounded(at, reach){
-    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
-    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var ar = boxRef(at);
+    if (ar.kind !== "fn" || !boundedHere(at)) return null;
+    var fk = ar.key, own = fnOwnHolder(fk);
     var mineOf = function(c){
       return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
                         function(p){ return p.owner; });
@@ -68369,16 +72683,16 @@ var SYNC = (function () {
     return dests.length ? dests[0].k : null;
   }
 
-  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isFn(k){ return typeof k === "string" && boxRef(k).kind === "fn" && !!fnOf(k); }
   /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
      pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
-    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+    return typeof k === "string" && boxRef(k).kind === "cap" && !!capOfTarget(k);
   }
   function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+    return typeof k === "string" && boxRef(k).kind === "mid" && !!COMPANIES[boxRef(k).key];
   }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -69744,6 +74058,11 @@ var SYNC = (function () {
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
+    /* §554: and the three action keys say themselves on the buttons they
+       belong to, marked here for the same reason the boxes above are —
+       these controls are drawn by several renderers and a mark set at each
+       is several places to forget. */
+    if (typeof ACTIONKEYS !== "undefined") ACTIONKEYS.mark();
     /* AND THE KEYS, over that same list and in the same one place (§528).
        Not inside wire(): these boxes are built by eight renderers and a
        keydown wired at each of them is eight places to forget, which is the
@@ -71065,7 +75384,35 @@ var SYNC = (function () {
            §253.3 each came to be fixed on one surface and left broken on
            another. Two functions answering it was found and closed AT THE
            MERGE that brought both here (§281). */
-        openDeckFor(this.dataset.present);
+        /* ── IT OPENS THE SLIDES FIRST (§556) ──────────────────────
+           Islam: *"even for the users that have the present button it
+           takes them to the slides management and then they move to the
+           presentation, not 2 buttons"*. The first time anybody saw their
+           deck was in front of the room; now the press lands on the
+           slides, where Play is one more press and a slide that should
+           not be there can be taken out before it is projected.
+
+           ONLY WHERE THERE IS AN EDITOR TO LAND IN. `slidesOpen` is
+           `canSpeakFor` — the subject's own head or custodian, and the
+           office — so anybody else goes straight to the deck as before,
+           rather than pressing Present and getting nothing (§61). A list
+           of targets is a direction owner's several, and those open as a
+           flow of their own. */
+        var t = this.dataset.present, many = t.indexOf(",") >= 0;
+        if (many) {
+          var mine = t.split(",").filter(Boolean);
+          if (mine.every(function(x){ return canSpeakFor(x); })) slidesOpenFlow(mine);
+          else openDeckFor(t);
+        } else if (canSpeakFor(t)) {
+          slidesOpen(boxRef(t).kind === "dir" ? "dir"
+                   : boxRef(t).kind === "fn" ? "fn"
+                   : boxRef(t).kind === "cap" ? "cap" : "unit",
+                   boxRef(t).kind === "dir" ? t.slice(4)
+                   : boxRef(t).kind === "fn" || boxRef(t).kind === "cap" ? t.slice(t.indexOf(":") + 1)
+                   : t);
+        } else {
+          openDeckFor(t);
+        }
       });
     });
     /* The same deck, taken away as a PDF. Beside Present and through the same
@@ -71236,22 +75583,28 @@ var SYNC = (function () {
         /* The question replaces the menu in the same corner (§46.2), so the
            menu closes as the question opens or both would draw in one cell. */
         CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; FNMENU = null;
+        REFUSEDLATE = null;
         paint();
       });
     });
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = this.dataset.fndelyes;
-        if (grant("c_fns") !== "edit") {
-          alert("Functions are the SMO's. Nothing has been deleted.");
-          CLEARING = null; paint(); return;
-        }
+        /* ── §534.2: THE PANEL KEEPS THE REFUSAL ────────────────────────
+           Both of these raised a browser box and CLOSED the panel, so the
+           row being worked on went with the answer. The panel stays open and
+           redraws its own refusal — the shape it has always had for the same
+           sentence on the way in (fnPanels). Nothing is cleared, and
+           REFUSEDLATE lets it say the one thing that is different about
+           arriving a moment later.
+
+           The grant is read in both places on purpose (§48.2): the panel
+           decides what to offer, this decides what happens, and a screen that
+           has been open a while is not evidence of either. */
+        if (grant("c_fns") !== "edit") { REFUSEDLATE = "fn:" + fk; paint(); return; }
         var why = fnDeleteBlockers(fk);
-        if (why.length) {
-          alert("Not deleted \u2014 " +
-                why.map(function(w){ return w.full; }).join(". ") + ".");
-          CLEARING = null; paint(); return;
-        }
+        if (why.length) { REFUSEDLATE = "fn:" + fk; paint(); return; }
+        REFUSEDLATE = null;
         deleteFunction(fk);
         CLEARING = null;
         /* Deleting happens on Setup, so the deleted function is not what the
@@ -71267,19 +75620,32 @@ var SYNC = (function () {
        (§53.5): a second copy here is how the register's twins get made. A
        taken key is suffixed rather than refused, the same answer addUnit
        gives — two functions may genuinely share a name's letters. */
-    var addFn = document.getElementById("addfn");
-    if (addFn) addFn.addEventListener("click", function(){
-      var name = prompt("Name of the " + labelWord("fnword","group"));
-      if (!name || !name.trim()) return;
-      addFunction(name);
-      paint();
-    });
-    document.querySelectorAll("[data-capfn]").forEach(function(el){
-      el.addEventListener("change", function(){
-        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
-        paint();
+    /* §534.3: the name comes off the page's own field now, never a prompt()
+       — which a browser may suppress, leaving a control that looks live and
+       does nothing (§95's argument, and §69.22's precedent for the other
+       one). Typing is held in NEWFN so a repaint cannot take a half-typed
+       name with it, exactly as the BU list holds NEWMAINBU. */
+    var fnFld = document.getElementById("newfn");
+    if (fnFld) {
+      fnFld.addEventListener("input", function(){ NEWFN = fnFld.value; });
+      /* Enter adds, because the control this replaces took Enter and a field
+         beside an Add button that ignores it is a field that feels broken. */
+      fnFld.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addFnFromField(); }
       });
-    });
+    }
+    function addFnFromField(){
+      var name = String(NEWFN || "").trim();
+      if (!name) { var f = document.getElementById("newfn"); if (f) f.focus(); return; }
+      addFunction(name);
+      NEWFN = "";
+      paint();
+    }
+    var addFn = document.getElementById("addfn");
+    if (addFn) addFn.addEventListener("click", addFnFromField);
+    /* §544.13: the Held by picker is gone from Setup › Capabilities, so
+       nothing renders that column's select any more and the handler which
+       wrote a capability's function through it goes with it (§61). */
     /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
@@ -71292,6 +75658,15 @@ var SYNC = (function () {
     document.querySelectorAll("[data-capformat]").forEach(function(el){
       el.addEventListener("change", function(){
         if (grant("c_caps") !== "edit") return;
+        /* §538: the row that holds a plan is HELD rather than dead, so its
+           reason stays readable by pointer and by Tab — and a held `select`,
+           unlike a held button, can still be changed. So the refusal is here,
+           and it puts back the way the row was rather than leaving the box
+           showing a word the record does not carry. */
+        if (el.getAttribute("aria-disabled") === "true") {
+          el.value = el.getAttribute("data-capwas") || el.value;
+          return;
+        }
         /* §436: through the one switch, which warns before it hides. */
         switchPlanWay("cap", el.dataset.capformat, el.value, el);
       });
@@ -71350,23 +75725,58 @@ var SYNC = (function () {
          writing as they are left there is no unsaved state to protect, so
          there is nothing to hold: the button is live, behind the pen, which is
          where Islam asked for it. */
-      var gaps = 0;
-      activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
-      if (!confirm("Close " + REVIEW.name + "?" +
-          (gaps ? "\n\n" + gaps + " items are unreported and will close as unreported." : "") +
-          "\n\nThe figures become a record and the plan reopens to unit owners.")) return;
-      /* The snapshot. Everything a later cycle needs in order to say what a
-         score was last time. */
-      var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
-      activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
-      HISTORY.push(snap);
-      REVIEW.state = "closed";
-      /* The pen goes with the cycle it was editing (§273). Leaving it open
-         would put an "Edit this cycle" panel under a strip that has just
-         started offering "Open a new cycle...", with a Close button in it for
-         a cycle that is already closed. */
-      CYCLEEDIT = null;
-      paint();
+      var gaps = 0, asked = 0;
+      activeKeys().forEach(function(k){
+        var c = reportedCount(UNITS[k]); gaps += c.total - c.done; asked += c.total;
+      });
+      /* ── §534.3: REOPEN'S OWN SHAPE, FOR REOPEN'S OPPOSITE ───────────
+         The two controls sit in the same strip and did the same kind of
+         thing in two different mediums — Reopen in the platform's dialog
+         with its facts laid out, Close in the browser's box with its facts
+         run together. This is that dialog, with the same `.kv` rows.
+
+         AND IT SAYS CLOSING CAN BE UNDONE, which the box never did. Closing
+         files the figures and marks the cycle closed; it takes nothing away,
+         and Reopen is the control beside this one. A question that sounds
+         more final than the act is its own kind of wrong (§45.2). */
+      openModalHtml("Close " + esc(REVIEW.name) + "?", "",
+        '<div class="sendconfirm reopenconfirm">' +
+          '<div class="kv"><span class="k">Covers</span><span>' +
+            esc(cycleMeta()) + '</span></div>' +
+          '<div class="kv"><span class="k">Reported</span><span><b>' +
+            (asked - gaps) + '</b> of ' + asked +
+            (gaps ? ' \u2014 the other ' + gaps + ' close as unreported' : '') +
+            '</span></div>' +
+          '<div class="kv"><span class="k">What happens</span><span>The figures ' +
+            'become a record and the plan reopens to unit owners.</span></div>' +
+          '<div class="kv"><span class="k">The way back</span><span><b>Reopen</b> ' +
+            'stands in this strip once it is closed. The figures become live ' +
+            'again and the closing record is taken back.</span></div>' +
+          '<div class="cbtns"><button data-ccno="1">Cancel</button>' +
+          '<button class="danger" data-ccyes="1">Close ' + esc(REVIEW.name) +
+          '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var ccno = box.querySelector("[data-ccno]");
+      if (ccno) ccno.addEventListener("click", function(){ closeModal(); });
+      var ccyes = box.querySelector("[data-ccyes]");
+      if (ccyes) ccyes.addEventListener("click", function(){
+        closeModal();
+        /* The snapshot. Everything a later cycle needs in order to say what a
+           score was last time. Taken at the PRESS, never when the dialog was
+           drawn (§48.2) — a figure entered while it stood belongs in it. */
+        var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
+        activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
+        HISTORY.push(snap);
+        REVIEW.state = "closed";
+        /* The pen goes with the cycle it was editing (§273). Leaving it open
+           would put an "Edit this cycle" panel under a strip that has just
+           started offering "Open a new cycle...", with a Close button in it for
+           a cycle that is already closed. */
+        CYCLEEDIT = null;
+        paint();
+      });
     });
 
     /* ── EDITING THE OPEN CYCLE (§273, restructured by §273.4) ──────
@@ -71514,8 +75924,12 @@ var SYNC = (function () {
       /* A name is the one thing nothing can be derived from, and it is what
          every snapshot, delta and archived plan will be filed under. */
       if (!String(d.name || "").trim()) {
-        alert("Give the cycle a name — it is what its figures are filed under " +
-              "once it closes, and what the next cycle compares against.");
+        /* §534.2: THE REFUSAL GOES UNDER THE BOX, and the panel draws it from
+           `why` — so the sentence and the empty field are on screen together,
+           which a dialog over the form could never manage. Focus is taken
+           AFTER the repaint, or it lands on the node paint() is about to
+           replace. */
+        d.why = "name"; paint();
         var f = document.getElementById("nc-name"); if (f) f.focus();
         return;
       }
@@ -71530,8 +75944,11 @@ var SYNC = (function () {
          §307: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
          earlier, because the cycle's end IS the review point. */
       if (!String(d.to || "").trim()) {
-        alert("Pick the month this cycle covers to \u2014 it decides what every " +
-              "figure is measured against, and what is asked for at all.");
+        /* AND THIS ONE TAKES FOCUS TOO. The name's box moved the cursor and
+           this one did not — one form, two behaviours, for no reason beyond
+           which notice somebody wrote first. */
+        d.why = "to"; paint();
+        var t = document.querySelector(".newcycle .tobtn"); if (t) t.focus();
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -71545,25 +75962,57 @@ var SYNC = (function () {
          never the raw figures: a clear with nothing behind it would destroy
          the closed cycle's numbers. Same act an import performs on the plan
          it replaces, same Restore. */
-      var arch = archiveFigures("cleared when " + String(d.name).trim() + " opened");
-      if (!confirm("Open " + String(d.name).trim() + "?\n\n" +
-          (arch
-            ? arch.counts.reported + " reported figure" + (arch.counts.reported === 1 ? "" : "s") +
-              " and " + arch.counts.notes + " note" + (arch.counts.notes === 1 ? "" : "s") +
-              " from " + REVIEW.name + " are cleared so every unit is asked again.\n" +
-              "They are kept as an archive dated today and can be restored from Archived plans."
-            : "Nothing has been reported yet, so there is nothing to clear."))) {
-        if (arch) ARCHIVES.shift();
-        return;
-      }
-      clearForNewCycle();
-      REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
-                 due:d.due || "", state:"open", note:{}, submitted:{},
-                 cadence:REVIEW.cadence };
-      /* §307: nothing else to carry. The review point travelled as a field of
-         its own here; it is `to`, which the line above already wrote. */
-      NEWCYCLE = null;
-      paint();
+      /* ── §534.3: THE QUESTION IS IN FRONT OF THE ACT NOW ─────────────
+         It used to ARCHIVE, then ask, then undo the archive on Cancel —
+         the one place in the product where pressing Cancel had work to
+         reverse rather than nothing to do. It was safe only while the undo
+         ran; a reload while the browser's box stood left an archive of a
+         clear that never happened, filed under a cycle that never opened.
+
+         The counts come from the same snapshot the archive is made of, so
+         the dialog says exactly what the archive will hold, and NOTHING is
+         written until Yes. Both are taken again at the press (§48.2): a
+         figure entered while the dialog stood belongs in the archive. */
+      var counts = figuresSnapshotCounts(figuresSnapshot());
+      var empty = figuresAreEmpty(counts);
+      var nm = String(d.name).trim();
+      openModalHtml("Open " + esc(nm) + "?",
+        esc([d.from || "", d.to || ""].filter(function(x){ return x; }).join(" \u2013 ")),
+        '<div class="rmconfirm">' +
+          (empty
+            ? '<p>Nothing has been reported yet, so there is nothing to clear.</p>'
+            : '<p><b>' + plural(counts.reported, "reported figure") + '</b> and <b>' +
+              plural(counts.notes, "note") + '</b> from ' + esc(REVIEW.name) +
+              ' are cleared, so every unit is asked again.</p>') +
+          (empty ? '' :
+            '<p class="archline">They are kept as an archive dated today. ' +
+            '<b>Setup \u203a Import &amp; storage</b> holds the way back ' +
+            '\u2014 <b>Restore</b> on that row puts them into whatever plan ' +
+            'is standing then.</p>') +
+          '<div class="mrow"><button class="quiet" data-ncno="1">Cancel</button>' +
+          '<button class="danger" data-ncyes="1">Open ' + esc(nm) + '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var nno = box.querySelector("[data-ncno]");
+      if (nno) nno.addEventListener("click", function(){ closeModal(); });
+      var nyes = box.querySelector("[data-ncyes]");
+      if (nyes) nyes.addEventListener("click", function(){
+        closeModal();
+        /* Archived BEFORE cleared, because HISTORY keeps a score per unit and
+           never the raw figures: a clear with nothing behind it would destroy
+           the closed cycle's numbers. Same act an import performs on the plan
+           it replaces, same Restore. */
+        archiveFigures("cleared when " + nm + " opened");
+        clearForNewCycle();
+        REVIEW = { name:nm, from:d.from || "", to:d.to || "",
+                   due:d.due || "", state:"open", note:{}, submitted:{},
+                   cadence:REVIEW.cadence };
+        /* §307: nothing else to carry. The review point travelled as a field
+           of its own here; it is `to`, which the line above already wrote. */
+        NEWCYCLE = null;
+        paint();
+      });
     });
     /* ── §382: MY REPORTING'S THREE CONTROLS ──────────────────────────
        The FIGURE needs none of its own — the boxes are `repEntry`'s, so they
@@ -71773,8 +76222,19 @@ var SYNC = (function () {
        it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var t = b.dataset.submit, why = submitRefusal(t);
-        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        var t = b.dataset.submit;
+        /* ── §534.2: THE GATE SAYS NOTHING, BECAUSE THE PAGE ALREADY HAS ──
+           This was the THIRD telling of one refusal. The button is drawn
+           `aria-disabled` carrying the same list in a bubble that opens on
+           hover and on focus (§221, §163); the bar beneath it names the
+           places holding it and walks to the exact box (§279). The box was
+           the only one of the three that could not be read BEFORE pressing,
+           and the only one that could not take anybody to the thing it named.
+
+           `submitRefusal()` still stands here and still refuses: it is the
+           enforcement, and a page that has been open a while is not evidence
+           (§48.2). What is gone is its voice, not its gate. */
+        if (submitRefusal(t)) return;
         REVIEW.submitted[t] = true;
         /* Submitting supersedes a parked draft: two closed states at once
            would leave Reopen clearing one of them. */
@@ -72069,9 +76529,15 @@ var SYNC = (function () {
         CLEARING = b.dataset.clear; CLEARMENU = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
+    /* Keep closes the question and does nothing else — which is what Cancel
+       has to mean everywhere in this product (§534.1's lesson from the one
+       place it did not). */
+    document.querySelectorAll("[data-rmkeep]").forEach(function(b){
+      b.addEventListener("click", function(){ RMASK = null; paint(); });
+    });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
       b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null;
+        CLEARING = null; CLEARMENU = null; REFUSEDLATE = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
@@ -72151,7 +76617,7 @@ var SYNC = (function () {
           if (cc) capRemoveOpen(cc.id);
           return;
         }
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "trm", b.dataset.trm, "Remove " + esc(what) + "?")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
         paint();
@@ -72176,7 +76642,7 @@ var SYNC = (function () {
           ? 'the objective "' + (m.name || "") + '"' +
             (m.actual ? " and its reported " + m.actual : "")
           : null;
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "korm", b.dataset.korm, "Remove " + esc(what) + "?")) return;
         e.list.splice(i, 1);
         koSettle(e);
         fieldSaved();
@@ -72203,13 +76669,29 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpclear];
         if (!e) return;
-        if (!confirm("Clear this monthly plan? The twelve months are removed. " +
-                     "The annual target keeps the figure they added up to, and " +
-                     "the row goes back to being spread evenly across the year."))
-          return;
-        delete e.row[e.fld];
-        fieldSaved();
-        paint();
+        /* §534.3: GOES AND STAYS, which this act has always had and could
+           never lay out — the twelve numbers go and the annual target stays,
+           and the second half is the one somebody hesitates over, because
+           the row does not visibly change until you look at the benchmark. */
+        destroyConfirmOpen({
+          title: "Clear this monthly plan?",
+          sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
+          goes: "<b>The twelve months</b> somebody typed",
+          goesWhy: "The row goes back to being spread evenly across the year.",
+          stays: "The annual target",
+          /* §555: and it is TYPED AGAIN after this. With the months gone there
+             is nothing deriving the figure, so the box the plan had locked
+             goes back to being the office's to fill — said here because that
+             is the half somebody hesitates over. */
+          staysWhy: "It keeps the figure the months came to, and goes back to being typed by hand.",
+          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
+          yesWord: "Clear the twelve",
+          onYes: function(){
+            delete e.row[e.fld];
+            fieldSaved();
+            paint();
+          }
+        });
       });
     });
     document.querySelectorAll("[data-koadd]").forEach(function(b){
@@ -72325,7 +76807,10 @@ var SYNC = (function () {
       b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
     });
     document.querySelectorAll("[data-sec]").forEach(function(b){
-      b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
+      b.addEventListener("click", function(){
+        /* §555: a chosen section stays chosen — the landing only applies
+           until somebody says otherwise. */
+        GSEC = +b.dataset.sec; GSEC_PICKED = true; paint(); window.scrollTo(0,0); });
     });
     /* Cards or a table, per section (§16.6). A view preference — it changes
        how a section is laid out, never what anything is or in what order it
@@ -72619,6 +77104,19 @@ var SYNC = (function () {
        never had a season and one whose last season was removed must be
        byte-identical, or the difference is a change the authoriser has to
        judge that nobody made. */
+    /* §534.2: the refusal's own way out — a unit named in it opens that
+       unit's Drivers, which is the page the sentence sends you to. */
+    document.querySelectorAll("[data-goseas]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEASWHY = null;
+        /* Drivers is a SECTION of the unit's Strategy tab, not a tab of its
+           own (shell's nav): the address is the unit, that tab, and CURSEC —
+           setting `currentSub` to the section key alone is normalised away on
+           the next paint and lands on Strategy's first section instead. */
+        current = b.dataset.goseas; currentSub = "strategy"; CURSEC.strategy = "drivers";
+        paint(); window.scrollTo(0, 0);
+      });
+    });
     document.querySelectorAll("[data-seasrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var id = b.dataset.seasrm;
@@ -72626,17 +77124,16 @@ var SYNC = (function () {
         var se = SMPRules.seasonById(list, id);
         var used = SMPRules.seasonUsedBy(seasonsUnits(), id);
         if (used.length) {
-          alert('"' + (se && se.name ? se.name : "This season") + '" cannot be removed — ' +
-                (used.length === 1 ? 'a unit still has it as a period of its own: '
-                                   : used.length + ' units still have it as a period of their own: ') +
-                used.map(function(u){ return u.name; }).join(", ") +
-                '. Take it off their Drivers page first.');
+          /* §534.2: the refusal is a line under the row that refused, where
+             the units it names can be pressed. */
+          SEASWHY = id; paint();
           return;
         }
         var i = list.indexOf(se);
         if (i < 0) return;
         list.splice(i, 1);
         if (!list.length) delete GROUP[SMPRules.SEASONS];
+        SEASWHY = null;
         paint();
       });
     });
@@ -72659,7 +77156,12 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-mbdrop]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = this.dataset.mbdrop.split("|");
+        var val = this.dataset.mbdrop, p = val.split("|");
+        /* §534.4: it asked nothing at all, which the drawing named as a
+           difference to decide rather than leave. Islam: they should ask. */
+        if (rmAsk(this, "mbdrop", val,
+            "Stop " + esc(p[0]) + " pointing at " +
+            esc(roleWhereLabel(p.slice(1).join("|"))) + "?")) return;
         removeMainbuAt(p[0], p.slice(1).join("|"));
         paint();
       });
@@ -72669,16 +77171,31 @@ var SYNC = (function () {
         var was = inp.dataset.mbname, now = inp.value.trim();
         if (now && now !== was && !renameMainbu(was, now)) {
           /* Refused rather than silently merged: two departments becoming one
-             is a decision, and it is not one a typo gets to make. */
-          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
-                'renaming one into the other \u2014 move the people first.');
+             is a decision, and it is not one a typo gets to make.
+             §534.2: the refusal is a line under this box rather than a
+             browser's box over the page, and what was typed is kept with it —
+             the repaint below used to restore the old name, so the correction
+             had to be typed a second time to be read at all. */
+          MBWHY = { at: was, typed: now };
+        } else {
+          MBWHY = null;
         }
         paint();
       });
     });
     document.querySelectorAll("[data-mbdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        removeMainbu(b.dataset.mbdel);
+        /* §534.4: the same, one row out. It only asks when the row points at
+           something — a name typed by mistake and mapped to nothing is the
+           BU list's empty line, and the family lets those go on one press.
+           People are already handled: the control is not drawn at all while
+           anybody carries the name. */
+        var nm = b.dataset.mbdel;
+        var ats = mainbuAts(mainbuBy(nm));
+        if (ats.length && rmAsk(b, "mbdel", nm,
+            "Remove \u201c" + esc(nm) + "\u201d and " +
+            plural(ats.length, "mapping") + "?")) return;
+        removeMainbu(nm);
         paint();
       });
     });
@@ -72866,7 +77383,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-setpw]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: b.dataset.setpw, pw: "", err: "", done: null };
-        PMENU = null; PDEL = null;
+        PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -73157,36 +77674,29 @@ var SYNC = (function () {
         var p = personBy(key);
         if (!p) return;
         if (personActive(p)) {
-          var held = personRoles(p).length;
-          if (held && !confirm(p.name + " holds " + plural(held, "role") +
-              ". Retiring takes " + (held === 1 ? "it" : "them") +
-              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
-              p.name + "?")) return;
+          /* §534.3: the question opens in this row's own corner, the way the
+             delete question beside it in the same menu always has. It only
+             asks when there is something to take — somebody holding nothing
+             is retired by the press, because nothing is being decided. */
+          if (personRoles(p).length) { PRET = key; PMENU = null; paint(); return; }
           retirePerson(key);
         } else {
-          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4) ────────────────
+          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §534.1) ────────
              It used to hand the person back with nothing, so they returned as
              a Contributor of their unit and nobody was told. A seat somebody
              else has taken up meanwhile is named and NOT offered — restoring
-             one person must never quietly unseat another. */
-          var back = personHeldRoles(key), free = back.filter(function(r){ return !r.taken; });
-          var give = false;
-          if (back.length) {
-            var name = function(r){ return roleName(r.role) + " of " + roleWhereLabel(r.at); };
-            var taken = back.filter(function(r){ return r.taken; });
-            give = confirm(p.name + " held " + plural(back.length, "role") + " when they were retired.\n\n" +
-              (free.length
-                ? "Give back: " + free.map(name).join(", ") + "\n"
-                : "None can be given back.\n") +
-              (taken.length
-                ? "Held by somebody else now, so left alone: " +
-                  taken.map(function(r){ return name(r) + " (" + personName(r.taken) + ")"; }).join(", ") + "\n"
-                : "") +
-              "\nOK gives back what it can. Cancel brings " + p.name +
-              " back with no role \u2014 a Contributor of their unit.");
-            if (!give && !confirm("Bring " + p.name + " back with no role?")) return;
-          }
-          restorePerson(key, give && free.length > 0);
+             one person must never quietly unseat another.
+
+             THE ASKING IS A DIALOG NOW, because the question has three
+             answers and a yes/no box cannot carry three (§534.1). Opened
+             BEFORE the menu is cleared, so the dialog remembers the control
+             to put focus back on; the work happens in its handlers, so this
+             one returns. */
+          var back = personHeldRoles(key);
+          if (back.length) { restoreOpen(key); PMENU = null; paint(); return; }
+          /* Holding nothing, nothing is being decided, so nothing is asked —
+             the row simply becomes active again, as it always has. */
+          restorePerson(key, false);
         }
         /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
            after retiring somebody the panel stayed on screen now reading
@@ -73210,11 +77720,24 @@ var SYNC = (function () {
        unmounts the button the click is still inside (§47.2). */
     document.querySelectorAll("[data-pdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        PDEL = b.dataset.pdel; PMENU = null; paint();
+        PDEL = b.dataset.pdel; PMENU = null; PRET = null; REFUSEDLATE = null; paint();
+      });
+    });
+    document.querySelectorAll("[data-pret-no]").forEach(function(b){
+      b.addEventListener("click", function(){ PRET = null; paint(); });
+    });
+    document.querySelectorAll("[data-pret-yes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Resolved at press time (§48.2): the row is re-read rather than
+           trusted from the render that drew this. */
+        var key = b.dataset.pretYes;
+        if (personBy(key)) retirePerson(key);
+        PRET = null;
+        paint();
       });
     });
     document.querySelectorAll("[data-pdel-no]").forEach(function(b){
-      b.addEventListener("click", function(){ PDEL = null; paint(); });
+      b.addEventListener("click", function(){ PDEL = null; REFUSEDLATE = null; paint(); });
     });
     document.querySelectorAll("[data-pdel-yes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -73222,14 +77745,16 @@ var SYNC = (function () {
            This does not check them again — two copies of "may this be deleted"
            is exactly the drift the one function exists to prevent — it reads
            the ANSWER, and says so when the answer is no. */
-        var key = b.dataset.pdelYes, p = personBy(key), name = p ? p.name : key;
+        var key = b.dataset.pdelYes;
         var done = deletePerson(key);
+        /* §534.2: "Open the menu again to see what" was the platform asking
+           somebody to do its own work — it had just refused on the basis of
+           what points at them, so it knows. The panel stays open and names
+           it, in the shape it already uses on the way in (deletePanel). */
+        if (!done) { REFUSEDLATE = "p:" + key; paint(); return; }
+        REFUSEDLATE = null;
         PDEL = null;
         paint();
-        if (!done) {
-          alert(name + " could not be deleted \u2014 something has come to point at " +
-                "them since this was asked. Open the menu again to see what.");
-        }
       });
     });
 
@@ -73359,7 +77884,7 @@ var SYNC = (function () {
              definition of what may be held where; this only reads which of the
              two fields it points at. */
           var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
+            return boxRef(w.v).kind === "mid"; });
           var fld = atCo ? "Company" : "Unit";
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
@@ -74035,7 +78560,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: "bulk:" + b.dataset.pwbulk, pw: "", err: "", done: null };
-        PWMENU = false; PMENU = null; PDEL = null;
+        PWMENU = false; PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -74339,13 +78864,31 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-draftdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (!confirm("Delete this draft? It cannot be brought back.")) return;
         var id = b.dataset.draftdel;
-        SYNC.mailDraftDelete(id, function(){
-          var st = sendmsg();
-          if (String(st.draftId || "") === String(id)) st.draftId = null;
-          DRAFTLIST = null;
-          paint();
+        /* §534.3: the shape for an act with nothing behind it (§534). The
+           heading is the only thing that tells one draft from another — it
+           is what the table is sorted and read by — so it is what the
+           question names (§186). */
+        var d = (DRAFTLIST || []).filter(function(x){ return String(x.id) === String(id); })[0];
+        destroyConfirmOpen({
+          title: "Delete this draft?",
+          sub: d && d.updated_at
+            ? "Last saved " + String(d.updated_at).slice(0, 16).replace("T", " ") : "",
+          goes: "<b>" + esc((d && d.subject) || "(no heading yet)") + "</b>",
+          goesWhy: "The draft and everything typed into it.",
+          stays: "Every message already sent",
+          staysWhy: "A draft has never been sent, so nothing anybody has received changes.",
+          noway: "<b>There is no way back.</b> A draft is not archived \u2014 it is the " +
+                 "working copy, and this is the only one.",
+          yesWord: "Delete the draft",
+          onYes: function(){
+            SYNC.mailDraftDelete(id, function(){
+              var st = sendmsg();
+              if (String(st.draftId || "") === String(id)) st.draftId = null;
+              DRAFTLIST = null;
+              paint();
+            });
+          }
         });
       });
     });
@@ -74880,6 +79423,20 @@ var SYNC = (function () {
       root.querySelectorAll("select[data-uformat]").forEach(function(sel){
         sel.addEventListener("change", function(){
           switchPlanWay("unit", this.dataset.uformat, this.value, this);
+        });
+      });
+      /* §540: one list or apart. No warning and no switch-and-keep, because
+         nothing is hidden either way — the same rows are drawn, in one tab or
+         in two (unlike `data-uformat`, where the OTHER way's rows go quiet).
+         STORED AS AN ABSENCE: "one list" deletes the key rather than writing
+         `false`, so a box that is set apart and set back is byte for byte the
+         box it was before anybody pressed anything (§50.6). */
+      root.querySelectorAll("select[data-usplit]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var u = UNITS[this.dataset.usplit];
+          if (this.value === "split") u[SMPRules.PILLAR_SPLIT] = true;
+          else delete u[SMPRules.PILLAR_SPLIT];
+          paint();
         });
       });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){
@@ -75656,7 +80213,7 @@ var SYNC = (function () {
         var w = competeWritable(t); if (!w || !w.values[i]) return;
         var v = w.values[i];
         if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
-            !confirm("Remove this value? This cannot be undone here.")) return;
+            rmAsk(b, "cmprm", b.dataset.cmprm, "Remove this value?")) return;
         w.values.splice(i, 1);
         competeTidy(t);
         fieldSaved(); paint();
@@ -75669,7 +80226,7 @@ var SYNC = (function () {
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
         if (String(sw[q][i]).trim() &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "swrm", b.dataset.swrm, "Remove this line?")) return;
         sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
@@ -75721,8 +80278,9 @@ var SYNC = (function () {
         var a = b.dataset.drvsrm.split("|"), u = drvUnit(a[0]), c = drvCh(u);
         var sub = drvSubAt(u, +a[1]);
         if (!sub || c.subs.length < 2) return;
-        if (!confirm("Remove “" + (sub.name || "this route") +
-              "” and everything in it? This cannot be undone here.")) return;
+        if (rmAsk(b, "drvsrm", b.dataset.drvsrm,
+              "Remove “" + esc(sub.name || "this route") +
+              "” and everything in it?")) return;
         c.subs.splice(+a[1], 1);
         delete RAIL["drv:" + u.ukey];
         fieldSaved(); paint();
@@ -75758,8 +80316,9 @@ var SYNC = (function () {
         var sub = drvSubAt(u, +a[1]), p = sub && sub.periods[+a[2]];
         if (!p) return;
         if ((p.drivers || []).length &&
-            !confirm("Remove “" + (p.name || "this period") + "” and its " +
-              plural(p.drivers.length, "driver") + "? This cannot be undone here.")) return;
+            rmAsk(b, "drvprm", b.dataset.drvprm,
+              "Remove “" + esc(p.name || "this period") + "” and its " +
+              plural(p.drivers.length, "driver") + "?")) return;
         sub.periods.splice(+a[2], 1);
         fieldSaved(); paint();
       });
@@ -75795,8 +80354,8 @@ var SYNC = (function () {
         var hit = u && SMPRules.driverById(u, a[1]);
         if (!hit) return;
         if (String(hit.driver.name || "").trim() &&
-            !confirm("Remove “" + hit.driver.name +
-              "”? This cannot be undone here.")) return;
+            rmAsk(b, "drvrm", b.dataset.drvrm,
+              "Remove “" + esc(hit.driver.name) + "”?")) return;
         var list = hit.period.drivers, i = list.indexOf(hit.driver);
         if (i < 0) return;
         list.splice(i, 1);
@@ -75851,10 +80410,10 @@ var SYNC = (function () {
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -75893,12 +80452,12 @@ var SYNC = (function () {
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
         o.clauses.splice(i, 1);
         if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
@@ -75955,7 +80514,8 @@ var SYNC = (function () {
         if (!h || !h.list || !h.list[i]) return;
         if (!mayAuthor("k_found", h.target)) return;
         if (h.list[i].name &&
-            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+            rmAsk(b, "capkorm", b.dataset.capkorm,
+              "Remove " + esc(h.list[i].name) + "?")) return;
         h.list.splice(i, 1);
         fieldSaved(); paint();
       });
@@ -75968,15 +80528,9 @@ var SYNC = (function () {
         promoOpen(fk);
       });
     });
-    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = b.dataset.fncapadd;
-        if (!mayAuthor("k_found", "fn:" + fk)) return;
-        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
-        addCapability(fk);
-        fieldSaved(); paint();
-      });
-    });
+    /* §544.13: the "add a capability under this function" button is gone —
+       a capability is the company's, and nothing renders `[data-fncapadd]`
+       any more, so the handler that waited for it goes too (§61). */
     /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
        §318 put it here, inside a client's Setup. Islam moved it out:
        "the setup should happen on the external creatoin not inside ..
@@ -76535,10 +81089,11 @@ var SYNC = (function () {
          plan archives and replaces a whole unit's plan in memory before any
          save is attempted. Checked here rather than trusted from the page that
          drew the button (§48.2). */
-      if (grant("c_import") !== "edit") {
-        alert("Importing is the SMO's. Nothing has been applied.");
-        return;
-      }
+      /* §534.2: the page no longer offers a live Apply to somebody this will
+         refuse — the button is held and the reason is a line beside it. This
+         stays, unsaid: it is the gate, and the screen that drew the button is
+         not what authorises the act (§48.2). */
+      if (grant("c_import") !== "edit") return;
       var what, arch;
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
@@ -76613,21 +81168,63 @@ var SYNC = (function () {
         var path = b.dataset.viddel;
         var row = vidStoreRows().filter(function(r){ return r.path === path; })[0];
         if (!row) return;
-        if (!confirm("Delete this clip for good?\n\n" +
-              (row.name || path) + " — " + vidSize(row.bytes) + ", from " + row.where +
-              "\n\nThe slide stays where it is and will say the clip was removed. " +
-              "The bytes cannot be brought back.")) return;
-        vidStoreDrop([path]);
+        destroyConfirmOpen({
+          title: "Delete this clip for good?",
+          sub: row.where + (row.title ? " \u00b7 " + row.title : ""),
+          /* The file, its size and WHEN, which the table beside the button
+             carries and the browser's box did not: two site visits of the
+             same name are told apart by the date and by nothing else. */
+          goes: "<b>" + esc(row.name || path.split("/").pop()) + "</b> \u2014 " +
+                esc(vidSize(row.bytes)) +
+                (row.at ? ", uploaded " + esc(String(row.at).slice(0, 10)) : ""),
+          goesWhy: "The file itself. This is the only thing in the platform where " +
+                   "the bytes are destroyed rather than archived.",
+          stays: "The slide, in its place in the review",
+          staysWhy: "It will say the clip was removed. Nothing else about the review " +
+                    "changes, and no figure moves.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files. If the clip is needed again it has " +
+                 "to be uploaded again.",
+          yesWord: "Delete the clip",
+          onYes: function(){ vidStoreDrop([path]); }
+        });
       });
     });
     document.querySelectorAll("[data-viddelold]").forEach(function(b){
       b.addEventListener("click", function(){
-        var old = vidStoreRows().filter(function(r){ return !r.open; });
+        var all = vidStoreRows();
+        var old = all.filter(function(r){ return !r.open; });
         if (!old.length) return;
-        if (!confirm("Delete " + plural(old.length, "clip") + " for good, freeing " +
-              vidSize(vidStoreBytes(old)) + "?\n\nNothing on the review that is open " +
-              "now is touched. The bytes cannot be brought back.")) return;
-        vidStoreDrop(old.map(function(r){ return r.path; }));
+        var keep = all.filter(function(r){ return r.open; });
+        /* §186 AT TWELVE TIMES THE REACH. The single clip's question names
+           its file, its size and its review; this one named a COUNT, and a
+           count catches none of the mistakes a confirmation exists for — if
+           one of the twelve is something somebody wanted, nothing here said
+           so. The list is the question. */
+        destroyConfirmOpen({
+          title: "Delete " + plural(old.length, "clip") + " for good?",
+          sub: "Everything not on a slide in " + REVIEW.name,
+          lead: "These " + plural(old.length, "clip") + " are on slides in reviews that " +
+                "have closed. Deleting them frees <b>" + esc(vidSize(vidStoreBytes(old))) + "</b>.",
+          list: '<div class="scroll"><table><thead><tr><th>File</th><th>Review</th>' +
+            '<th class="cc">Size</th></tr></thead><tbody>' +
+            old.map(function(r){
+              return "<tr><td><b>" + esc(r.name || r.path.split("/").pop()) + "</b></td>" +
+                "<td>" + esc(r.where) + "</td>" +
+                '<td class="cc">' + esc(vidSize(r.bytes)) + "</td></tr>";
+            }).join("") + "</tbody></table></div>",
+          stays: keep.length
+            ? "The " + plural(keep.length, "clip") + " on slides in " + esc(REVIEW.name)
+            : "Every slide, in its place",
+          staysWhy: (keep.length
+            ? "The review that is open now is not touched. "
+            : "") + "Every slide in the closed reviews stays where it is and says its " +
+            "clip was removed.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files.",
+          yesWord: "Delete " + plural(old.length, "clip"),
+          onYes: function(){ vidStoreDrop(old.map(function(r){ return r.path; })); }
+        });
       });
     });
     document.querySelectorAll("[data-vidrefresh]").forEach(function(b){
@@ -76637,10 +81234,34 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var a = ARCHIVES.filter(function(x){ return x.id === b.dataset.forget; })[0];
         if (!a) return;
-        if (!confirm("Delete " + a.name + "'s archive of " + a.at +
-                     " for good? This is the one thing here that cannot be undone.")) return;
-        forgetArchive(a.id);
-        paint();
+        /* FORGET, NOT DELETE, on the button and in the question (Islam's
+           pick): the thing in front of you is already the record of
+           something cleared, and "delete the archive of the deletion" is a
+           sentence nobody can hold. The platform's own function has always
+           been called `forgetArchive`. */
+        var fig = a.kind === "figures";
+        destroyConfirmOpen({
+          title: "Forget this archive for good?",
+          sub: a.name + " \u00b7 archived " + a.at,
+          /* `archiveHeld()` is the row's own builder (§53.5) and is already
+             markup, so it is not escaped again. */
+          goes: "<b>" + archiveHeld(a) + "</b> from " + esc(a.name),
+          goesWhy: (a.by ? "Filed by " + esc(a.by) : "Filed") +
+                   (a.why ? " \u2014 " + esc(a.why) : "") +
+                   ". This archive is the only copy.",
+          stays: fig
+            ? esc(a.name) + "\u2019s closed score, and this cycle\u2019s figures"
+            : "The plan standing now",
+          staysWhy: fig
+            ? "The history keeps a score per unit. What it has never kept is the raw " +
+              "figures, which is what this archive holds."
+            : "This is the plan it replaced; what is live now is untouched.",
+          noway: "<b>There is no way back, and no way back to the plan either.</b> " +
+                 "<b>Restore</b> on this row is the undo for the change that filed it \u2014 " +
+                 "forgetting the archive takes that away too.",
+          yesWord: "Forget this archive",
+          onYes: function(){ forgetArchive(a.id); paint(); }
+        });
       });
     });
     /* The receipt's way back for a capability: its function's pages. */
@@ -77412,6 +82033,75 @@ var SYNC = (function () {
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
+  /* ── DELETING FOR GOOD: the three acts with nothing behind them (§534) ──
+     `rmConfirmOpen()`'s opposite number, and the reason it is a second
+     builder rather than a flag on the first: that one closes by saying the
+     plan is archived first and where the way back is, and these three have
+     no way back to offer. A flag would leave one function whose two halves
+     share nothing but their buttons.
+
+     THREE CALLERS, all on Setup › Import & storage: a clip's bytes, every
+     clip outside the open review, and a filed archive. Everything else in
+     the product that reads like a deletion archives first — an imported
+     plan, a pillar, a project, a retired person — so these are the whole of
+     the exception, and the mockup Islam signed off
+     (design-mockups/delete-for-good/) is their shape: what goes, what stays,
+     there is no way back, and the ACT on the button rather than "Okay".
+
+     WHAT STAYS IS NOT PADDING. It is the half the browser's box was worst at
+     and the half somebody hesitates over — the fear is rarely "will this
+     delete" and nearly always "what does it take with it". Two of the three
+     leave something standing that reads as if it should have gone with the
+     rest (a slide, a closed cycle's score), and saying so is the answer to
+     the question actually being asked.
+
+     RESOLVED AT PRESS TIME (§48.2), like every other dialog here: `onYes` is
+     a function, never a closure over a row read when the dialog was drawn.
+     `goes` and `stays` carry HTML, so every caller escapes its own values —
+     `archiveHeld()` is already markup and would be shown as its own source
+     otherwise. */
+  function destroyConfirmOpen(o){
+    var led =
+      (o.goes ? '<div class="lrow goes"><span class="mk">Goes</span><span class="tx">' +
+        o.goes + (o.goesWhy ? '<span class="sub">' + o.goesWhy + '</span>' : '') +
+        '</span></div>' : '') +
+      (o.stays ? '<div class="lrow stays"><span class="mk">Stays</span><span class="tx">' +
+        o.stays + (o.staysWhy ? '<span class="sub">' + o.staysWhy + '</span>' : '') +
+        '</span></div>' : '');
+    openModalHtml(esc(o.title), esc(o.sub || ""),
+      '<div class="rmconfirm">' +
+        (o.lead ? '<p>' + o.lead + '</p>' : '') +
+        (o.list || '') +
+        (led ? '<div class="ledger">' + led + '</div>' : '') +
+        '<p class="noway">' + o.noway + '</p>' +
+        '<div class="mrow"><button class="quiet" data-dstno="1">Cancel</button>' +
+        '<button class="danger" data-dstyes="1">' + esc(o.yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-dstno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-dstyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); o.onYes(); });
+  }
+  /* ── REMOVING A LINE: the gate the nine share (§534.4) ─────────────────
+     Returns true when it has just OPENED the question, so the handler that
+     called it returns and nothing is removed; false when the press came from
+     the strip's own Remove, so the handler carries on exactly as it did
+     behind the browser's box.
+
+     THE SAME HANDLER ANSWERS BOTH PRESSES. The strip's button carries the
+     same `data-` attribute the × does (rmStripInner), so it is picked up by
+     the selector that was already there, resolves the row from its dataset
+     at press time (§48.2), and the one thing that distinguishes it is
+     `rmnow`. No handler learns a second way in, and there is no second copy
+     of "what does this × remove" to drift. */
+  function rmAsk(btn, attr, val, say){
+    if (btn && btn.dataset && btn.dataset.rmnow) { RMASK = null; return false; }
+    RMASK = { t: attr + ":" + val, say: say };
+    paint();
+    return true;
+  }
   /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the
      two acts as two rows, each saying what it does, rather than as two
@@ -77449,11 +82139,26 @@ var SYNC = (function () {
        a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+    /* §544.13 — THE FUNCTION IS A DESTINATION ONLY WHERE THERE IS ONE. A
+       capability is the company's, so a new one has no holding function and
+       this list used to offer "the function itself" anyway: `fn:null`, with
+       the words "the function", and pressing it refused silently inside
+       `removeCapability` — a button that does nothing, which is the one
+       thing a control must never be (§61). Offered where `c.fn` resolves,
+       which is the records that still carry one, and left out where it does
+       not.
+
+       Islam, asked where a company capability's projects should go when
+       there is nowhere to move them: *"deleting is fine"*. So there is
+       nothing to build behind this — only the honest sentence about why
+       Keep them is not available, which `whyNot` now gives. */
+    var dests = (f ? [{ id: "fn:" + c.fn, label: fname + " itself", own: true }] : [])
       .concat(sibs.map(function(x){
         return { id: x.id, label: x.name || x.id, own: false }; }));
-    var keepable = np > 0;
-    var dest = dests.length === 1
+    var toFnOnly = dests.length === 1 && dests[0].own;
+    var keepable = np > 0 && dests.length > 0;
+    var dest = !dests.length ? ''
+      : dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
@@ -77466,7 +82171,7 @@ var SYNC = (function () {
        which is what this dialog has always said. */
     var fnHasKo = !!((f && f.keyObjectives) || []).length;
     var koNote = !nko ? ''
-      : (dests.length === 1
+      : (toFnOnly
           ? (fnHasKo
               ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
@@ -77475,7 +82180,17 @@ var SYNC = (function () {
           : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
             '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
-    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
+    /* §544.13: TWO REASONS NOW, AND THE SECOND ONE CAN HAPPEN. "It holds no
+       projects" was the only way Keep them could be unavailable while every
+       capability had a function to fall back on. A company capability with
+       projects and no sibling has nowhere to put them, and saying it holds
+       none would be a lie on the screen about the work it is about to take
+       (§96.2). Removing it removes them, which the row beside this says in
+       full and the archive line backs. */
+    var whyNot = !np
+      ? 'It holds no ' + L("project") + ', so there is nothing to move.'
+      : 'There is nowhere to move ' + (np === 1 ? 'it' : 'them') + ' to \u2014 this is the only ' +
+        L1("capability") + '. Removing it removes ' + (np === 1 ? 'the ' + L1("project") : 'the ' + L("project")) + ' too.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +
@@ -77526,6 +82241,98 @@ var SYNC = (function () {
     });
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
+  }
+  /* ── RESTORING A PERSON: three answers, so three controls (§534.1) ─────
+     The one place in the product where the browser's box had been made to
+     carry a question with three answers. OK gave back the roles it could,
+     CANCEL brought the person back with no role, and not restoring at all
+     was a SECOND box behind the Cancel.
+
+     Pressing Cancel to mean "yes, but differently" is the opposite of what
+     Cancel means everywhere else here, and the way out of the act sat behind
+     the thing it escapes — four presses, worst case, to do nothing. Worse:
+     Escape, or a browser that has decided to stop showing the box (§95),
+     landed on RESTORE WITH NO ROLE, which is a real change chosen by nobody.
+
+     THE RULE IS UNTOUCHED (§49.4): a seat somebody else holds now is named
+     and not offered. What changes is that each answer carries its own
+     sentence and its own button — the shape Islam signed off for the
+     capability (§325) and again here (design-mockups/restore-a-person/),
+     with the weight on GIVE THEM BACK because that is what somebody reaching
+     for Restore nearly always means.
+
+     NO RETIRED DATE IN THE HEAD. `retirePerson()` records what it took and
+     not when, so the mockup's "Retired 2 Feb 2026" would be a date this
+     platform does not hold — the sub carries the job title and the unit,
+     which it does.
+
+     RESOLVED AT PRESS TIME (§48.2): the answers re-read the person, because
+     the register behind has been repainted since the dialog opened. */
+  function restoreOpen(key){
+    var p = personBy(key); if (!p) return;
+    var back = personHeldRoles(key);
+    var free = back.filter(function(r){ return !r.taken; });
+    var one = back.length === 1;
+    var nm = function(r){
+      return "<b>" + esc(roleName(r.role)) + "</b> of " + esc(roleWhereLabel(r.at));
+    };
+    var say = !free.length
+      ? "Somebody else holds " + (one ? "it" : "them") + " now, so " +
+        (one ? "it cannot" : "none can") + " be given back."
+      : free.length === back.length
+      ? (one ? "It is still free." : "They are all still free.")
+      : plural(free.length, "is still free", "are still free") + ".";
+    var sub = [p.title || "", p.unit ? roleWhereLabel(p.unit) : ""]
+      .filter(function(x){ return x; }).join(" \u00b7 ");
+    openModalHtml(esc("Bring " + p.name + " back?"), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(p.name) + '</b> held ' + plural(back.length, "role") +
+          ' when they were retired. ' + say + '</p>' +
+        '<div class="rolelist">' +
+          back.map(function(r){
+            return r.taken
+              ? '<div class="r taken"><span class="mk">Taken</span><span class="tx">' +
+                  nm(r) + '<span class="sub">' + esc(personName(r.taken)) +
+                  ' holds it now, so it is left alone either way.</span></span></div>'
+              : '<div class="r back"><span class="mk">Free</span><span class="tx">' +
+                  nm(r) + '</span></div>';
+          }).join("") +
+        '</div>' +
+        (free.length
+          ? '<div class="pick safe"><div class="txt">' +
+              '<p class="t">Give back ' +
+                (free.length === back.length && one ? "their role"
+                  : "the " + plural(free.length, "free role")) + '</p>' +
+              '<p class="d">' + esc(p.name) + ' returns as ' +
+                free.map(nm).join(free.length === 2 ? " and " : ", ")
+                    .replace(/, ([^,]*)$/, " and $1") +
+                ', and their sign-in opens again.</p>' +
+            '</div><button class="go" data-rsgive="1">Give ' +
+              (one ? "it" : "them") + ' back</button></div>'
+          : '') +
+        '<div class="pick"><div class="txt">' +
+          '<p class="t">Bring them back with no role</p>' +
+          '<p class="d">A Contributor of their unit. Their sign-in opens' +
+            (free.length
+              ? ', and the ' + plural(free.length, "free role") +
+                ' stay' + (free.length === 1 ? "s" : "") + ' empty until somebody is named.'
+              : '. To give them a role, take it off whoever holds it first.') +
+          '</p></div><button class="keepbtn" data-rsnone="1">' +
+          (free.length ? "No role" : "Bring them back") + '</button></div>' +
+        '<div class="mrow"><button class="quiet" data-rsno="1">Cancel</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rsno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var give = box.querySelector("[data-rsgive]");
+    if (give) give.addEventListener("click", function(){
+      closeModal(); restorePerson(key, true); paint();
+    });
+    var none = box.querySelector("[data-rsnone]");
+    if (none) none.addEventListener("click", function(){
+      closeModal(); restorePerson(key, false); paint();
+    });
   }
   /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ───────
      Islam signed off the drawing with the cost on it: *"ok with the promirting
@@ -77698,7 +82505,7 @@ var SYNC = (function () {
     if (!it) return;
     var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
-    var scoresOf = String(ukey).indexOf("fn:") === 0
+    var scoresOf = boxRef(ukey).kind === "fn"
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),
@@ -77968,8 +82775,24 @@ var SYNC = (function () {
      the signature says when nothing has. */
   var sel = document.getElementById("asWho");
   var viewerSig = null;
+  /* ── AND NOT EVERY SEAT MAY LOOK THROUGH EVERY PERSON (§554) ─────
+     The SMO team holds this control now, and the one row it may not wear is
+     the Super user's — the only person on a client's register who holds more
+     than they do. Asked of sync.js rather than tested here, because the SAVE
+     refuses the same row (`lib/rules.js actingFor`) and a list that offered
+     it would be a control that un-happens when pressed (§61, §42).
+
+     THE SEAT IS IN THE SIGNATURE for the same reason the keys are: granting
+     somebody the Super user seat changes who may be looked through without
+     changing who is on the register, and a list keyed on names alone would
+     go on offering the row until the next person joined. */
+  function viewerPool(){
+    if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return PEOPLE;
+    return PEOPLE.filter(function(p){ return SYNC.maySimulatePerson(p); });
+  }
   function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    var pool = viewerPool();
+    var sig = pool.map(function(p){ return p.key + ":" + (p.role || ""); }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
       /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -77989,7 +82812,7 @@ var SYNC = (function () {
          The job title goes from the option and stays on the `title`: it is
          the thing you might want and never the thing you scan by. */
       var dn = displayNames();
-      sel.innerHTML = PEOPLE.map(function(p){
+      sel.innerHTML = pool.map(function(p){
         var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
@@ -78136,6 +82959,16 @@ var SYNC = (function () {
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
+  /* §539: the key and the "?" beside Light and Dark. Wired here beside the
+     theme because both are chrome that exists before any page is drawn. */
+  KEYSHEET.wire();
+  /* §552: the arrows every row of tabs already promises. One handler for
+     all eight rows, delegated, so a row drawn tomorrow answers them too. */
+  TABKEYS.wire();
+  /* §554: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  ACTIONKEYS.wire();
+  /* §547: Alt+G, the list of places. */
+  GOTO.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
      It no longer has anything to do with the first paint — the skeleton wears
      none of these tokens, deliberately, and where there is a server the only
@@ -78358,6 +83191,32 @@ var SYNC = (function () {
         (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
     }).join("") + "</div>";
   }
+  /* THE STAFF READING LINK (spec: Processes lifecycle, §542). A client's own
+     person on the People register, at a client that has published a process,
+     gets ONE link beside Sign out — not a menu: they have no module menu and
+     keep none. The words and the count are stamped on the document by the
+     server (lib/shell.ts, from lib/bar-extras.ts — the one place they are
+     decided, §53.5); this draws them and holds no copy of the rule. Absent
+     stamp, no link; and Forefront's own people have the module menu instead. */
+  function mountProcessesLink() {
+    var bar = document.querySelector(".top .top-in");
+    if (!bar) return;
+    var root = document.documentElement;
+    var cur = bar.querySelector("a.processes-read");
+    var say = null;
+    try { say = JSON.parse(root.getAttribute("data-processes-read") || "null"); } catch (e) { say = null; }
+    if (!say || !say.label || root.hasAttribute("data-console")) { if (cur) cur.parentNode.removeChild(cur); return; }
+    var html = esc(say.label) + (say.count ? '<span class="prn">' + esc(say.count) + "</span>" : "");
+    if (!cur) {
+      cur = document.createElement("a");
+      cur.className = "processes-read";
+      bar.insertBefore(cur, document.getElementById("topacts"));
+    }
+    var href = "/" + SLUG + "/processes/read";
+    if (cur.getAttribute("href") !== href) cur.setAttribute("href", href);
+    if (cur.innerHTML !== html) cur.innerHTML = html;
+  }
+  try { mountProcessesLink(); } catch (e) {}
   function mountTrail() {
     var root = document.documentElement;
     /* data-break="trail-for-staff" is checks/modules.mjs's falsification: a
@@ -78647,6 +83506,7 @@ var SYNC = (function () {
          to one that never simulated. */
       try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
+      try { mountProcessesLink(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {

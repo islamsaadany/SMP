@@ -95,9 +95,10 @@ var WELCOME = (function(){
   function ownTargets(row, rs){
     var out = [];
     function add(t){
-      if (!t || t === "group" || String(t).indexOf("co:") === 0) return;
-      var real = String(t).indexOf("fn:") === 0
-        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[String(t).slice(3)])
+      var r = boxRef(t);
+      if (!t || t === "group" || r.kind === "mid") return;
+      var real = r.kind === "fn"
+        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[r.key])
         : !!(typeof UNITS !== "undefined" && UNITS[t]);
       if (real && out.indexOf(t) < 0) out.push(t);
     }
@@ -125,7 +126,7 @@ var WELCOME = (function(){
     dismiss();
     setTimeout(function(){
       press('#units [data-u="' + t + '"]');
-      var fn = String(t).indexOf("fn:") === 0;
+      var fn = boxRef(t).kind === "fn";
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
       /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
@@ -446,7 +447,7 @@ var WELCOME = (function(){
     try { name = SMPRules.firstName(row); } catch(e){}
     if (!name) name = String(row.name || person.name || "").split(/\s+/)[0] || "";
 
-    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§534) ────────
+    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§558) ────────
        Islam's ask, of the chips under the name on this screen: a capability's
        owner and a direction's owner should read the ROLE and nothing after it.
        Each printed its place — the capability's own title for one, the top
@@ -621,7 +622,7 @@ var WELCOME = (function(){
       var home = targets[0] || null;
       if (home) {
         var nm = subjectName(home);
-        var isFn = String(home).indexOf("fn:") === 0;
+        var isFn = boxRef(home).kind === "fn";
         pageLink(nm + " — Strategy", isFn ? "" : "Plan · Foundation · SWOT",
           function(){ goPlace(home, "strategy"); });
         pageLink(nm + " — Performance", "", function(){ goPlace(home, "performance"); });

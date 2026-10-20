@@ -1,3 +1,4 @@
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { registerReady } from "@/ffp/lib/register-sync";
 import { prisma } from "@/ffp/lib/db/client";
 import { WorkspacePageHeader } from "../workspace-page-header";
@@ -18,6 +19,8 @@ import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/l
  */
 export default async function ValueChainPage(props: PageProps<"/[slug]/processes/value-chain">) {
   const { slug: workspaceId } = await props.params;
+  // The office's own: nothing below runs, reads or sends for anybody else (see ffp/lib/auth/require-office.ts).
+  await requireOffice(workspaceId);
   await registerReady(workspaceId);
 
   const [workspace, phases, processes, roles, steps, connections, activities, authorityAssignments] =

@@ -1,4 +1,4 @@
-"""A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§534).
+"""A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§558).
 
 Islam's ask, of the chips under the name on Home: a capability's owner and a
 direction's owner should read the ROLE and nothing after it, and — his second
@@ -33,7 +33,7 @@ WHAT IS ASSERTED, and why each is here:
   asked about. Asserted directly, because it is the half that must NOT move.
 
 · THE TOP LEVEL ANSWERS TO THE CLIENT'S WORD, AND STILL TO THE OLD ONE (§5).
-  §534's other half: `topword` has been a terminology row since §404 and these
+  §558's other half: `topword` has been a terminology row since §404 and these
   functions said "the group" as a literal. With the row set to "Company" the
   place reads "the company" — and `placeByLabel()` still resolves "the group",
   which is what keeps a people workbook downloaded before today landing (§65).
@@ -127,7 +127,7 @@ def fresh(browser, port):
 
 
 def jseval(pg, expr, miss="<not in this build>"):
-    """`topWord()` does not exist before §534, and a check run against that
+    """`topWord()` does not exist before §558, and a check run against that
     build has to go RED rather than die on a ReferenceError — a crash reports
     nothing about the shape of the fault, which is the whole point of running
     it there (§94.5)."""
@@ -165,15 +165,22 @@ def cap_seat(seat, person_key):
     return s
 
 
-def direction_seed(owner_name):
+def direction_seed(owner_name, also_fn_for=None):
     """A company that plans its own directions: the business units OFF, which
     is the only shape in which the top layer's pillars ARE directions (§505,
-    `ownsTopPillar`), and one direction this person owns by NAME (§130.1)."""
+    `ownsTopPillar`), and one direction this person owns by NAME (§130.1).
+
+    `also_fn_for` seats the same person as a supporting function's Strategy
+    custodian as well, which is what lets §6 read the direction and the
+    function off ONE person — the pair §558 swapped, rather than two facts
+    measured on two people and assumed to compose."""
     s = copy.deepcopy(BASE)
     s["group"].setdefault("structure", {})["bu"] = {"exists": False}
     s["group"]["items"] = [
         {"id": "dir1", "name": "One Trade", "owner": owner_name, "custodian": None,
          "measures": [], "tactics": []}]
+    if also_fn_for:
+        s["functions"][s["functionKeys"][0]]["custodian"] = also_fn_for
     return s
 
 
@@ -304,6 +311,83 @@ def main():
         ck("...and so does the client's own word, which is what it now writes",
            pg.evaluate("placeByLabel('the company').at") == "group",
            pg.evaluate("placeByLabel('the company')"))
+        ctx.close()
+
+        # ── 6 · THE ORDER THE ROLES COME OUT IN (§558) ────────────────────
+        print("§6 the list reads seat, unit, direction, capability, plan, function")
+        # ASSERTED AS A SEQUENCE THAT NEVER GOES BACKWARDS, not as fixed
+        # positions: a person holds whichever of the six they hold, so a check
+        # pinned to indexes would only ever describe one register row. The rank
+        # is Islam's sequence, and `custodian` is ranked by WHERE it is held —
+        # the same role word sits at a unit, a capability and a function.
+        #
+        # UNIT AND DIRECTION CANNOT CO-OCCUR and that is the rule, not a gap:
+        # `ownsTopPillar` is false whenever the business units exist (§505), so
+        # the pair is unreachable by construction. Both worlds are walked, so
+        # every pair that CAN co-occur is covered, and the chain joins through
+        # the capability block that appears in both.
+        def rank(r):
+            role, at = r.get("role"), str(r.get("at") or "")
+            if role in ("super", "smoteam", "gceo", "cceo"):
+                return 1
+            if role == "owner":
+                return 2
+            if role == "custodian":
+                return 4 if at.startswith("cap:") else 6 if at.startswith("fn:") else 2
+            if role == "dirowner":
+                return 3
+            if role == "capowner":
+                return 4
+            if role in ("powner", "plowner"):
+                return 5
+            if role == "fnhead":
+                return 6
+            return 7                      # the contributor floor, last by design
+
+        for label, state in (("business units on", cap_seat("head", CUST["key"])),
+                             ("business units off", direction_seed(CUST["name"]))):
+            PERSON = dict(CUST)
+            STATE = state
+            ctx, pg = fresh(browser, port)
+            people = pg.evaluate(
+                "PEOPLE.filter(function(p){return personActive(p);})"
+                ".map(function(p){return {key:p.key, roles:personRoles(p)};})")
+            ck("there is a register to walk (%s)" % label, bool(people), len(people or []))
+            backwards = []
+            spread = 0
+            for row in people or []:
+                rs = [rank(r) for r in row["roles"]]
+                spread = max(spread, len(set(rs)))
+                for i in range(1, len(rs)):
+                    if rs[i] < rs[i - 1]:
+                        backwards.append((row["key"], row["roles"]))
+                        break
+            ck("...and nobody's roles run backwards through the six (%s)" % label,
+               not backwards, backwards[:2])
+            # THE OTHER END (§94.2): "never goes backwards" is satisfied by a
+            # register where everybody holds one role, so the walk has to have
+            # actually crossed blocks.
+            ck("...on a register that crosses at least three of the blocks (%s)" % label,
+               spread >= 3, spread)
+            ctx.close()
+
+        # AND THE SWAP ITSELF, NAMED: the two blocks Islam moved. Read off one
+        # person who holds both, so this is the pair and not two separate facts.
+        PERSON = dict(CUST)
+        STATE = direction_seed(CUST["name"], also_fn_for=CUST["key"])
+        ctx, pg = fresh(browser, port)
+        held = pg.evaluate("personRoles(personBy('%s'))" % CUST["key"])
+        idx = {}
+        for i, r in enumerate(held):
+            if r["role"] == "dirowner":
+                idx.setdefault("dir", i)
+            if r["role"] == "fnhead" or (r["role"] == "custodian"
+                                         and str(r.get("at") or "").startswith("fn:")):
+                idx.setdefault("fn", i)
+        ck("one person holds both a direction role and a function role", len(idx) == 2, held)
+        ck("...and the direction comes first, which is the swap",
+           idx.get("dir", -1) < idx.get("fn", 99) if len(idx) == 2 else False,
+           (idx, held))
         ctx.close()
 
         browser.close()

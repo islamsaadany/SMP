@@ -1,0 +1,540 @@
+<title>Where a capability lives</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  /* Layout: a single reading column; each claim is one figure with the same
+     geometry in "today" and "the model", so the difference is the only thing
+     that moves. Tokens are the platform's own Forefront palette, read off
+     SMP-Project-Folder/src/_shared.css so the drawing looks like the product. */
+  :root {
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --bad:#B04434; --bad-bg:#F7E3E0;
+    --good:#2E7D5B;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --navy:#7FA3D8; --navy-ink:#14161A;
+      --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+      --bad:#D97066; --bad-bg:#33201E;
+      --good:#5FB68C;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#7FA3D8; --navy-ink:#14161A;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; --bad-bg:#33201E;
+    --good:#5FB68C;
+    color-scheme: dark;
+  }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:60rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.5rem 4rem; }
+
+  header { border-bottom:2px solid var(--navy); padding-bottom:1.1rem; margin-bottom:2rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--gold-deep); margin:0 0 .35rem; }
+  h1 { font-size:1.9rem; line-height:1.15; margin:0 0 .5rem; text-wrap:balance; font-weight:700; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+
+  h2 { font-size:1.2rem; margin:2.6rem 0 .3rem; font-weight:700; text-wrap:balance; }
+  h2 .n { color:var(--gold-deep); font-variant-numeric:tabular-nums; margin-right:.45rem; }
+  p { max-width:46rem; }
+  .lede { color:var(--ink-2); margin-top:.2rem; }
+
+  figure { margin:1.4rem 0 0; background:var(--surface); border:1px solid var(--line);
+           border-radius:12px; padding:1.1rem 1.1rem .85rem; }
+  figure .scroller { overflow-x:auto; }
+  svg { display:block; max-width:100%; height:auto; min-width:0; }
+  figcaption { margin-top:.7rem; padding-top:.7rem; border-top:1px solid var(--line-soft);
+               font-size:13px; color:var(--ink-2); }
+  figcaption b { color:var(--ink); }
+
+  .pair { display:grid; gap:1rem; grid-template-columns:1fr; margin-top:1.4rem; }
+  @media (min-width:52rem) { .pair { grid-template-columns:1fr 1fr; } }
+  .pair figure { margin:0; }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:var(--track);
+         text-transform:uppercase; padding:.2rem .5rem; border-radius:999px; margin-bottom:.6rem; }
+  .tag.now { background:var(--bad-bg); color:var(--bad); }
+  .tag.then { background:var(--gold-wash); color:var(--gold-deep); border:1px solid var(--gold-line); }
+
+  .quote { margin:1.2rem 0 0; padding:.75rem 1rem; background:var(--surface-2);
+           border-left:3px solid var(--navy); border-radius:0 8px 8px 0; color:var(--ink-2);
+           font-style:italic; max-width:46rem; }
+  .quote cite { display:block; font-style:normal; font-size:12px; color:var(--ink-3);
+                margin-top:.35rem; letter-spacing:.02em; }
+
+  .checks { list-style:none; padding:0; margin:1rem 0 0; max-width:46rem; }
+  .checks li { display:flex; gap:.7rem; padding:.6rem 0; border-top:1px solid var(--line-soft); }
+  .checks li:first-child { border-top:0; }
+  .checks .k { flex:0 0 1.6rem; font-weight:700; color:var(--gold-deep);
+               font-variant-numeric:tabular-nums; }
+  .checks .t { min-width:0; }
+
+  .ask { margin-top:2.6rem; background:var(--gold-wash); border:1px solid var(--gold-line);
+         border-radius:12px; padding:1.1rem 1.2rem; }
+  .ask h2 { margin-top:0; }
+  .ask p { margin-bottom:0; }
+
+  table { border-collapse:collapse; width:100%; font-size:13.5px; margin-top:.9rem; }
+  .tscroll { overflow-x:auto; }
+  th, td { text-align:left; padding:.5rem .7rem; border-bottom:1px solid var(--line-soft);
+           vertical-align:top; }
+  th { font-size:10px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+       color:var(--ink-3); border-bottom:1px solid var(--line); white-space:nowrap; }
+  td code { font-size:12.5px; background:var(--surface-2); padding:.1rem .3rem; border-radius:4px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Platform simplification · checking the model</p>
+    <h1>Where a capability lives</h1>
+    <p class="standfirst">The model after your correction, and what it means for each client.
+      You confirmed all five statements on 15 October and sent El Abd's and RHI's screens;
+      section 5 is now the migration those screens make possible. Nothing here is built yet.</p>
+  </header>
+
+  <h2><span class="n">1</span>The thing you corrected</h2>
+  <p class="lede">The same tree, drawn twice. Only one edge moves, and it is the whole argument.</p>
+
+  <div class="pair">
+    <figure>
+      <span class="tag now">Today</span>
+      <div class="scroller">
+      <svg viewBox="0 0 420 330" role="img" aria-label="Today: the company and business units carry pillars, while capabilities can only hang beneath a supporting function, with no route to a unit or the company.">
+        <defs>
+          <marker id="a1" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+          </marker>
+          <marker id="a1g" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L8 4 L0 8 z" fill="var(--bad)"/>
+          </marker>
+        </defs>
+
+        <!-- company -->
+        <rect x="20" y="16" width="180" height="54" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="110" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Company</text>
+        <text x="110" y="55" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">pillars — directions</text>
+
+        <!-- units -->
+        <line x1="110" y1="70" x2="110" y2="96" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="60" y1="96" x2="160" y2="96" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="60" y1="96" x2="60" y2="112" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="160" y1="96" x2="160" y2="112" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="16" y="112" width="88" height="50" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="60" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Unit</text>
+        <text x="60" y="148" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">pillars</text>
+        <rect x="116" y="112" width="88" height="50" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="160" y="132" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Unit</text>
+        <text x="160" y="148" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">pillars</text>
+
+        <!-- function -->
+        <rect x="242" y="16" width="160" height="54" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="322" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Function</text>
+        <text x="322" y="55" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">its own projects</text>
+
+        <!-- capability, chained to the function -->
+        <line x1="322" y1="70" x2="322" y2="112" stroke="var(--gold)" stroke-width="2" marker-end="url(#a1)" color="var(--gold)"/>
+        <text x="330" y="94" font-size="10.5" fill="var(--gold-deep)">the only way in</text>
+        <rect x="252" y="112" width="140" height="50" rx="7" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="2"/>
+        <text x="322" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="var(--gold-deep)">Capability</text>
+        <text x="322" y="148" text-anchor="middle" font-size="10.5" fill="var(--gold-deep)">its own page</text>
+
+        <!-- the missing edge -->
+        <path d="M252 137 C 215 137, 215 137, 206 137" stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="5 4" fill="none"/>
+        <line x1="222" y1="128" x2="236" y2="146" stroke="var(--bad)" stroke-width="2"/>
+        <line x1="236" y1="128" x2="222" y2="146" stroke="var(--bad)" stroke-width="2"/>
+        <text x="229" y="176" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--bad)">no route</text>
+
+        <!-- the recorded fault -->
+        <rect x="16" y="206" width="386" height="104" rx="8" fill="var(--bad-bg)" stroke="var(--bad)" stroke-width="1" opacity=".95"/>
+        <text x="32" y="228" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--bad)">RECORDED IN SEPTEMBER AS THE FAULT</text>
+        <text x="32" y="250" font-size="11.5" fill="var(--ink-2)">“A capability can only belong to a supporting</text>
+        <text x="32" y="266" font-size="11.5" fill="var(--ink-2)">function … a capability naming no function is</text>
+        <text x="32" y="282" font-size="11.5" fill="var(--ink-2)">drawn nowhere at all — not on a unit, not at</text>
+        <text x="32" y="298" font-size="11.5" fill="var(--ink-2)">the group.”</text>
+      </svg>
+      </div>
+      <figcaption>A capability can reach the plan <b>only</b> through a supporting function. There is
+        no field tying one to a unit or to the company, so the dashed edge cannot exist.</figcaption>
+    </figure>
+
+    <figure>
+      <span class="tag then">As you describe it</span>
+      <div class="scroller">
+      <svg viewBox="0 0 420 330" role="img" aria-label="The model: the company and each unit carry pillars that are external directions or internal capabilities; the supporting function keeps its own separate plan and merely owns a capability.">
+        <defs>
+          <marker id="a2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- company -->
+        <rect x="20" y="16" width="180" height="70" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="110" y="36" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Company</text>
+        <rect x="32" y="46" width="76" height="26" rx="5" fill="var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="70" y="63" text-anchor="middle" font-size="10" fill="currentColor">direction</text>
+        <rect x="116" y="46" width="72" height="26" rx="5" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+        <text x="152" y="63" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">capability</text>
+
+        <!-- units -->
+        <line x1="110" y1="86" x2="110" y2="104" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="60" y1="104" x2="160" y2="104" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="60" y1="104" x2="60" y2="118" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="160" y1="104" x2="160" y2="118" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="16" y="118" width="88" height="66" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="60" y="136" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Unit</text>
+        <rect x="24" y="144" width="72" height="15" rx="4" fill="var(--surface-2)" stroke="currentColor" stroke-width=".8"/>
+        <text x="60" y="155" text-anchor="middle" font-size="9" fill="currentColor">direction</text>
+        <rect x="24" y="163" width="72" height="15" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.2"/>
+        <text x="60" y="174" text-anchor="middle" font-size="9" font-weight="600" fill="var(--gold-deep)">capability</text>
+
+        <rect x="116" y="118" width="88" height="66" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="160" y="136" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Unit</text>
+        <rect x="124" y="144" width="72" height="15" rx="4" fill="var(--surface-2)" stroke="currentColor" stroke-width=".8"/>
+        <text x="160" y="155" text-anchor="middle" font-size="9" fill="currentColor">direction</text>
+        <rect x="124" y="163" width="72" height="15" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.2"/>
+        <text x="160" y="174" text-anchor="middle" font-size="9" font-weight="600" fill="var(--gold-deep)">capability</text>
+
+        <!-- function, standing apart -->
+        <rect x="258" y="16" width="144" height="70" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5" stroke-dasharray="0"/>
+        <text x="330" y="36" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Function</text>
+        <text x="330" y="54" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">its own plan —</text>
+        <text x="330" y="68" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">function-driven work</text>
+
+        <!-- owns, not contains -->
+        <path d="M300 86 C 300 118, 230 128, 200 152" stroke="var(--gold)" stroke-width="1.8" stroke-dasharray="5 4" fill="none" marker-end="url(#a2)" color="var(--gold)"/>
+        <text x="306" y="112" font-size="10.5" font-weight="700" fill="var(--gold-deep)">owns</text>
+        <text x="306" y="126" font-size="10" fill="var(--ink-3)">(a name on</text>
+        <text x="306" y="138" font-size="10" fill="var(--ink-3)">the row)</text>
+
+        <rect x="16" y="206" width="386" height="104" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1" opacity=".95"/>
+        <text x="32" y="228" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--gold-deep)">ONE SENTENCE</text>
+        <text x="32" y="250" font-size="11.5" fill="var(--ink-2)">A pillar lives on a thing that carries strategy —</text>
+        <text x="32" y="266" font-size="11.5" fill="var(--ink-2)">a unit, or the company. External is a direction,</text>
+        <text x="32" y="282" font-size="11.5" fill="var(--ink-2)">internal is a capability. The function's plan is a</text>
+        <text x="32" y="298" font-size="11.5" fill="var(--ink-2)">different thing and stays one.</text>
+      </svg>
+      </div>
+      <figcaption>The capability moves onto the unit or the company. The function keeps its own plan
+        and is left holding <b>one dashed line — ownership</b>, which is a name, not a place.</figcaption>
+    </figure>
+  </div>
+
+  <div class="quote">
+    “When we create a capability, the capability is not on the function. The capability is either on
+    a unit or it's on the company … It belongs to something bigger than the function, so they will
+    always stay two different things.”
+    <cite>Islam, 15 October 2026</cite>
+  </div>
+
+  <h2><span class="n">2</span>Layers are depth, not kinds</h2>
+  <p class="lede">The same word sits at a different depth in each client — and the platform has one
+    fixed word for each, so depth is implied rather than recorded.</p>
+
+  <figure>
+    <div class="scroller">
+    <svg viewBox="0 0 700 250" role="img" aria-label="Three client trees side by side: in El Abd functions sit at layer three beneath divisions, in RHI and Raya they sit at layer two beneath the company.">
+      <!-- rails -->
+      <text x="8" y="48" font-size="9" font-weight="700" letter-spacing="1.2" fill="var(--ink-3)">L1</text>
+      <text x="8" y="120" font-size="9" font-weight="700" letter-spacing="1.2" fill="var(--ink-3)">L2</text>
+      <text x="8" y="192" font-size="9" font-weight="700" letter-spacing="1.2" fill="var(--ink-3)">L3</text>
+      <line x1="30" y1="26" x2="30" y2="214" stroke="var(--line)" stroke-width="1"/>
+
+      <!-- EL ABD -->
+      <text x="44" y="18" font-size="10" font-weight="700" letter-spacing="1.3" fill="var(--ink-3)">EL ABD</text>
+      <rect x="44" y="28" width="166" height="38" rx="7" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+      <text x="127" y="44" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Company</text>
+      <text x="127" y="58" text-anchor="middle" font-size="9.5" fill="var(--gold-deep)">directions + capabilities</text>
+      <line x1="127" y1="66" x2="127" y2="78" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="72" y1="78" x2="182" y2="78" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="72" y1="78" x2="72" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="182" y1="78" x2="182" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <rect x="44" y="100" width="56" height="30" rx="6" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="72" y="119" text-anchor="middle" font-size="10" fill="currentColor">Division</text>
+      <rect x="154" y="100" width="56" height="30" rx="6" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="182" y="119" text-anchor="middle" font-size="10" fill="currentColor">Division</text>
+      <line x1="72" y1="130" x2="72" y2="172" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="182" y1="130" x2="182" y2="172" stroke="currentColor" stroke-width="1.3"/>
+      <rect x="44" y="172" width="56" height="30" rx="6" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="72" y="191" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">Function</text>
+      <rect x="154" y="172" width="56" height="30" rx="6" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="182" y="191" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">Function</text>
+
+      <!-- RHI -->
+      <text x="250" y="18" font-size="10" font-weight="700" letter-spacing="1.3" fill="var(--ink-3)">RHI</text>
+      <rect x="250" y="28" width="166" height="38" rx="7" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+      <text x="333" y="44" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Company</text>
+      <text x="333" y="58" text-anchor="middle" font-size="9.5" fill="var(--gold-deep)">15 pillars, one list</text>
+      <line x1="333" y1="66" x2="333" y2="84" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="278" y1="84" x2="388" y2="84" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="278" y1="84" x2="278" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="388" y1="84" x2="388" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <rect x="250" y="100" width="56" height="30" rx="6" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="278" y="119" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">Function</text>
+      <rect x="360" y="100" width="56" height="30" rx="6" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="388" y="119" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">Function</text>
+
+      <!-- RAYA -->
+      <text x="456" y="18" font-size="10" font-weight="700" letter-spacing="1.3" fill="var(--ink-3)">RAYA</text>
+      <rect x="456" y="28" width="166" height="38" rx="7" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.5"/>
+      <text x="539" y="44" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Company</text>
+      <text x="539" y="58" text-anchor="middle" font-size="9.5" fill="var(--ink-3)">no pillars of its own</text>
+      <line x1="539" y1="66" x2="539" y2="84" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="484" y1="84" x2="594" y2="84" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="484" y1="84" x2="484" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="594" y1="84" x2="594" y2="100" stroke="currentColor" stroke-width="1.3"/>
+      <rect x="456" y="100" width="56" height="30" rx="6" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="484" y="113" text-anchor="middle" font-size="10" fill="currentColor">Unit</text>
+      <text x="484" y="124" text-anchor="middle" font-size="8" fill="var(--gold-deep)">pillars</text>
+      <rect x="566" y="100" width="56" height="30" rx="6" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="594" y="119" text-anchor="middle" font-size="10" font-weight="600" fill="var(--gold-deep)">Function</text>
+
+      <text x="44" y="230" font-size="11" fill="var(--ink-3)">A function sits at L3 in El Abd and at L2 in the other two. Today the platform has five fixed words —</text>
+      <text x="44" y="244" font-size="11" fill="var(--ink-3)">top, mid, bu, fn, cap — so the depth is implied by the word rather than recorded as a parent.</text>
+    </svg>
+    </div>
+    <figcaption>This is why “a new level” is a code change today rather than a setting. In the box
+      model a layer is just <b>depth in the tree</b>; what varies is whether a box carries pillars
+      or is a function with its own plan. <b>And a capability is not a layer at all</b> — though the
+      platform currently lists <code>cap</code> as one of the five.</figcaption>
+  </figure>
+
+  <h2><span class="n">3</span>One field is doing two jobs</h2>
+  <p class="lede">This is why the fault is hard to see: nothing in the data distinguishes
+    <em>who owns a capability</em> from <em>where it sits</em>.</p>
+
+  <figure>
+    <div class="scroller">
+    <svg viewBox="0 0 700 210" role="img" aria-label="Today a capability's single function field decides its access, its list and its people; in the model, placement is a separate field and the function link means ownership only.">
+      <defs>
+        <marker id="a3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <text x="14" y="18" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--bad)">TODAY</text>
+      <rect x="14" y="30" width="132" height="42" rx="7" fill="var(--bad-bg)" stroke="var(--bad)" stroke-width="1.5"/>
+      <text x="80" y="48" text-anchor="middle" font-size="12" font-weight="700" fill="var(--bad)">one field</text>
+      <text x="80" y="63" text-anchor="middle" font-size="11" fill="var(--ink-2)">“which function”</text>
+
+      <line x1="146" y1="42" x2="206" y2="42" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+      <line x1="146" y1="51" x2="206" y2="51" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+      <line x1="146" y1="60" x2="206" y2="60" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+      <rect x="210" y="24" width="180" height="22" rx="5" fill="var(--surface)" stroke="currentColor" stroke-width="1"/>
+      <text x="300" y="39" text-anchor="middle" font-size="11" fill="currentColor">who may open it</text>
+      <rect x="210" y="51" width="180" height="22" rx="5" fill="var(--surface)" stroke="currentColor" stroke-width="1"/>
+      <text x="300" y="66" text-anchor="middle" font-size="11" fill="currentColor">which list it appears in</text>
+      <rect x="210" y="78" width="180" height="22" rx="5" fill="var(--surface)" stroke="currentColor" stroke-width="1"/>
+      <text x="300" y="93" text-anchor="middle" font-size="11" fill="currentColor">whose people can own it</text>
+
+      <line x1="430" y1="20" x2="430" y2="190" stroke="var(--line)" stroke-width="1.5"/>
+
+      <text x="452" y="18" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--gold-deep)">THE MODEL</text>
+      <rect x="452" y="30" width="132" height="42" rx="7" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.5"/>
+      <text x="518" y="48" text-anchor="middle" font-size="12" font-weight="700" fill="var(--gold-deep)">which box</text>
+      <text x="518" y="63" text-anchor="middle" font-size="11" fill="var(--ink-2)">unit, or company</text>
+      <line x1="584" y1="51" x2="624" y2="51" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+      <text x="632" y="48" font-size="11" fill="currentColor">where it</text>
+      <text x="632" y="61" font-size="11" fill="currentColor">lives</text>
+
+      <rect x="452" y="96" width="132" height="42" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+      <text x="518" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">who owns it</text>
+      <text x="518" y="129" text-anchor="middle" font-size="11" fill="var(--ink-3)">person · function · unit</text>
+      <line x1="584" y1="117" x2="624" y2="117" stroke="currentColor" stroke-width="1.4" marker-end="url(#a3)"/>
+      <text x="632" y="114" font-size="11" fill="currentColor">a name on</text>
+      <text x="632" y="127" font-size="11" fill="currentColor">the row</text>
+
+      <text x="14" y="130" font-size="11" fill="var(--ink-3)">Change the function and all three</text>
+      <text x="14" y="145" font-size="11" fill="var(--ink-3)">move together, whether you meant</text>
+      <text x="14" y="160" font-size="11" fill="var(--ink-3)">them to or not.</text>
+      <text x="452" y="162" font-size="11" fill="var(--ink-3)">Two fields, two questions. Changing</text>
+      <text x="452" y="177" font-size="11" fill="var(--ink-3)">the owner moves nothing else.</text>
+    </svg>
+    </div>
+    <figcaption>Splitting the one field in two is the change that makes the rest possible. It is also
+      the only new thing the data needs. <b>Two corrections to what I said earlier:</b> the function
+      link is already <em>optional</em> — Setup says “a function to hold it is optional”, and that
+      page counts the unassigned ones as the thing it exists to fix. And “drawn nowhere at all” was
+      September's truth, before capabilities gained a home at company level; El Abd's page shows
+      them all. Which sharpens the point rather than softening it: a capability at company level has
+      <b>no recorded placement whatsoever</b>. It appears there because of a client-wide switch, not
+      because the record says where it belongs.</figcaption>
+  </figure>
+
+  <h2><span class="n">4</span>Your three client shapes, once it is one list</h2>
+  <p class="lede">With every pillar carrying its own kind, all three are the same data drawn three
+    ways — a setting per box, not three builds.</p>
+
+  <figure>
+    <div class="scroller">
+    <svg viewBox="0 0 700 230" role="img" aria-label="Three display shapes over one list of pillars: joined in one list, split into directions and capabilities, and under each unit.">
+      <!-- joined -->
+      <text x="14" y="18" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--ink-3)">JOINED — RHI</text>
+      <rect x="14" y="28" width="196" height="150" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="112" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Company · one list</text>
+      <rect x="28" y="58" width="168" height="21" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width=".9"/>
+      <text x="38" y="73" font-size="10.5" fill="currentColor">Market reach</text>
+      <text x="186" y="73" text-anchor="end" font-size="9" fill="var(--ink-3)">external</text>
+      <rect x="28" y="84" width="168" height="21" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.1"/>
+      <text x="38" y="99" font-size="10.5" fill="var(--gold-deep)">Data maturity</text>
+      <text x="186" y="99" text-anchor="end" font-size="9" fill="var(--gold-deep)">internal</text>
+      <rect x="28" y="110" width="168" height="21" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width=".9"/>
+      <text x="38" y="125" font-size="10.5" fill="currentColor">Channel growth</text>
+      <text x="186" y="125" text-anchor="end" font-size="9" fill="var(--ink-3)">external</text>
+      <rect x="28" y="136" width="168" height="21" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.1"/>
+      <text x="38" y="151" font-size="10.5" fill="var(--gold-deep)">Talent depth</text>
+      <text x="186" y="151" text-anchor="end" font-size="9" fill="var(--gold-deep)">internal</text>
+
+      <!-- split -->
+      <text x="252" y="18" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--ink-3)">SPLIT — EL ABD</text>
+      <rect x="252" y="28" width="196" height="150" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="266" y="48" font-size="10" font-weight="700" letter-spacing="1.1" fill="currentColor">DIRECTIONS</text>
+      <rect x="266" y="54" width="168" height="21" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width=".9"/>
+      <text x="276" y="69" font-size="10.5" fill="currentColor">Market reach</text>
+      <rect x="266" y="79" width="168" height="21" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width=".9"/>
+      <text x="276" y="94" font-size="10.5" fill="currentColor">Channel growth</text>
+      <text x="266" y="120" font-size="10" font-weight="700" letter-spacing="1.1" fill="var(--gold-deep)">CAPABILITIES</text>
+      <rect x="266" y="126" width="168" height="21" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.1"/>
+      <text x="276" y="141" font-size="10.5" fill="var(--gold-deep)">Data maturity</text>
+      <rect x="266" y="151" width="168" height="21" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.1"/>
+      <text x="276" y="166" font-size="10.5" fill="var(--gold-deep)">Talent depth</text>
+
+      <!-- under the unit -->
+      <text x="490" y="18" font-size="10" font-weight="700" letter-spacing="1.4" fill="var(--ink-3)">UNDER THE UNIT — RAYA</text>
+      <rect x="490" y="28" width="196" height="150" rx="8" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.3"/>
+      <text x="588" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Mobile · one list</text>
+      <rect x="504" y="58" width="168" height="21" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width=".9"/>
+      <text x="514" y="73" font-size="10.5" fill="currentColor">Channel preference</text>
+      <rect x="504" y="84" width="168" height="21" rx="4" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width="1.1"/>
+      <text x="514" y="99" font-size="10.5" fill="var(--gold-deep)">Digital operations</text>
+      <text x="588" y="130" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">the company above holds</text>
+      <text x="588" y="145" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">no pillars of its own</text>
+
+      <text x="14" y="206" font-size="11" fill="var(--ink-3)">Same rows underneath all three. The only difference is whether the page sorts them by kind,</text>
+      <text x="14" y="221" font-size="11" fill="var(--ink-3)">and which box is holding them — one setting each, no migration between the three.</text>
+    </svg>
+    </div>
+    <figcaption>Confirmed against the real screens. <b>RHI</b> shows one list, 15 of them, with no
+      Capabilities tab at all. <b>El Abd</b> shows Directions and Capabilities as two tabs.
+      <b>Raya</b> holds its pillars under each unit. In both RHI and El Abd the word
+      <em>Directions</em> is the client's own name for <em>pillar</em>, set in Settings — the
+      platform ships that label as “Pillars”, and its note already reads
+      “a business unit's direction or capability focus areas”.</figcaption>
+  </figure>
+
+  <h2><span class="n">5</span>The naming is already a setting. The splitting is not.</h2>
+  <p class="lede">This is the cleanest way to see what is actually missing.</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th></th><th>What it is</th><th>Set where</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>The word</b></td>
+          <td>“Directions”, “Pillars”, “Focus areas” — whatever the client calls them</td>
+          <td style="color:var(--good)"><b>Settings, today.</b> RHI and El Abd both use it.</td>
+        </tr>
+        <tr>
+          <td><b>The kind</b></td>
+          <td>external or internal, carried on every pillar</td>
+          <td style="color:var(--good)"><b>On the row, today.</b> Raya's units already hold both.</td>
+        </tr>
+        <tr>
+          <td><b>Joined or split</b></td>
+          <td>one list, or two sections sorted by kind</td>
+          <td style="color:var(--bad)"><b>Nowhere.</b> El Abd's split is a second kind of record, not a setting.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Two of the three already work the way you describe. Only the third is a build — and it is only
+    a build because the two sides of El Abd's split are different shapes.</p>
+
+  <h2><span class="n">6</span>What step 2 does, client by client</h2>
+  <p class="lede">One client moves nothing, one moves a little, one gives something back. None of
+    them looks different afterwards.</p>
+
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Client</th><th>What it shows today</th><th>What step 2 does</th><th>What changes on screen</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>RHI</b></td>
+          <td>One list, 15 pillars, called <em>Directions</em>. No Capabilities tab.</td>
+          <td><b>Nothing moves.</b> The list is already one list. Any pillar that is really internal
+            is marked as such, and the box's setting is <em>joined</em> — which is what it does now.</td>
+          <td style="color:var(--good)">Nothing.</td>
+        </tr>
+        <tr>
+          <td><b>El&nbsp;Abd</b></td>
+          <td><em>Directions</em> and <em>Capabilities</em> as two tabs on the company's Strategy page.</td>
+          <td>The Capabilities tab's entries <b>become internal pillars in the same list</b> as the
+            directions, keeping their ids, figures and history. The two tabs then come from the
+            box's setting being <em>split</em>.</td>
+          <td style="color:var(--good)">Nothing — the split it has today is what the setting draws.</td>
+        </tr>
+        <tr>
+          <td><b>Raya</b></td>
+          <td>Pillars under each unit, both kinds in one list. <b>Its capabilities are already
+            removed</b> — your note, 15 October.</td>
+          <td><b>Nothing to do.</b> The give-back I described has already happened. The units are
+            untouched.</td>
+          <td style="color:var(--good)">Nothing.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>El Abd is the only client that moves at all</b>, and it is the one that proves the model:
+    once its capabilities are pillars, the thing that makes its page special becomes a setting any
+    client can turn on.</p>
+
+  <h2><span class="n">7</span>The five statements, confirmed</h2>
+  <p class="lede">Checked with you on 15 October: all five correct.</p>
+  <ul class="checks">
+    <li><span class="k">1</span><span class="t">A <b>pillar</b> lives on a unit or on the company. Nowhere else.</span></li>
+    <li><span class="k">2</span><span class="t">A pillar is <b>external</b> (a direction) or <b>internal</b> (a capability). Both plan in measures and tactics; either may plan in projects instead.</span></li>
+    <li><span class="k">3</span><span class="t">A <b>supporting function's plan is a separate thing</b>. It may measure its part while a capability is being worked on, but it never contains one.</span></li>
+    <li><span class="k">4</span><span class="t"><b>Who owns a capability</b> — a person, a function head, a unit head — says nothing about where it lives.</span></li>
+    <li><span class="k">5</span><span class="t"><b>Joined or split</b> is a setting on the box, not a different kind of client.</span></li>
+  </ul>
+
+  <div class="ask">
+    <h2 style="margin-bottom:.4rem"><span class="n">8</span>What is left to settle</h2>
+    <p>A capability is set up one of two ways, and your Capabilities page shows which in the
+      <b>Plans in</b> column.</p>
+    <p style="margin-top:.7rem"><b>It holds projects.</b> Say <em>Data Maturity</em> holds three
+      projects. It becomes <b>one pillar</b> called Data Maturity and those three projects become
+      its work. One row in, one row out — nothing to decide.</p>
+    <p style="margin-top:.7rem"><b>It holds pillars.</b> Say <em>Data Maturity</em> holds three
+      pillars inside it — Data Quality, Reporting, Analytics Skills — each with its own measures and
+      tactics. Now there is a problem: Data Maturity is becoming a pillar, and
+      <b>a pillar cannot contain pillars</b>. So one of two things has to happen:</p>
+    <ul class="checks" style="margin-top:.7rem">
+      <li><span class="k">a</span><span class="t">Data Maturity becomes one pillar, and the three
+        inside become its <b>tactics</b>. Simple — but they lose their own measures.</span></li>
+      <li><span class="k">b</span><span class="t">The three become <b>three internal pillars</b> of
+        their own. Nothing is lost — but the name “Data Maturity” stops labelling anything.</span></li>
+    </ul>
+    <p style="margin-top:.9rem"><b>It only matters if El Abd actually has one set up the second
+      way.</b> If they all hold projects, the question disappears and the migration can be
+      written.</p>
+  </div>
+</div>

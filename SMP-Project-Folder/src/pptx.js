@@ -403,7 +403,7 @@ function pptxCover(orgLine, name, subLine){
    which is the whole point of that reader existing (§61). */
 function pptxUnitSlides(u, kicker){
   var C = pptxColors(), slides = [];
-  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", u.name,
     "Strategy plan — as agreed, no reported figures · " + today));
 
@@ -501,7 +501,7 @@ function pptxUnitSlides(u, kicker){
    product is where a project's inside lives. */
 function pptxFnSlides(fk){
   var f = FUNCTIONS[fk], C = pptxColors(), slides = [];
-  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", f.name,
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){
@@ -655,17 +655,17 @@ function pptxPackage(slides, title, media){
 
 /* ── The one door the button calls ──────────────────────────────────── */
 function planPptxName(target){
-  var t = String(target || "");
-  var name = t.indexOf("fn:") === 0
-    ? (FUNCTIONS[t.slice(3)] || {}).name : (UNITS[t] || {}).name;
+  var t = String(target || ""), r = boxRef(t);
+  var name = r.kind === "fn"
+    ? (FUNCTIONS[r.key] || {}).name : (UNITS[t] || {}).name;
   return (name || "Plan") + " — Strategy plan.pptx";
 }
 
 function buildPlanPptx(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   var slides;
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
                                  : pptxFnSlides(fk);
   } else {

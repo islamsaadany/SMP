@@ -1534,11 +1534,17 @@ function companyPresentMenu(){
   if (!office && !mine.length) return "";
   var items;
   if (office) {
-    var slides = canSpeakFor("group")
-      ? '<button role="menuitem" data-picedit="unit" data-pickey="group">Manage slides' +
-          (pslidesOf("group").length ? ' <span class="pill kind">' + pslidesOf("group").length + '</span>' : '') +
-          '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-      : "";
+    /* ── ONE DOOR, NOT TWO (§556.1) ──────────────────────────────────
+       Islam, of the menu after §556: *"why do we still have manage
+       slides?"* Because the press above used to open the projector and
+       this opened the editor. It opens the editor now — the same screen,
+       the same slides, the same Play — so this is the second control onto
+       one act that §556 exists to remove (§24, §87).
+
+       NOTHING IS LOST WITH IT. Adding and arranging picture slides is
+       what that screen does; it is now reached by pressing Present, and
+       anybody who cannot edit a deck never saw this entry either. */
+    var slides = "";
     var dl = SMPRules.mayDownloadPlan(world(), viewer(), "group")
       ? '<button role="menuitem" data-dlpptx="group">Download the plan' +
         '<span class="dlsub">The plan as editable slides (.pptx) &mdash; no reported figures</span></button>'
@@ -1547,24 +1553,29 @@ function companyPresentMenu(){
       ? '<button role="menuitem" data-master="1">Master presentation' +
         '<span class="dlsub">Directions, capabilities and functions in order, with timers; the company last</span></button>'
       : "";
-    items = '<button role="menuitem" data-present="group">Present the whole company' +
-        '<span class="dlsub">The short company review: foundation, analysis, directions, performance</span></button>' +
+    /* ── ONE WAY IN (§556) ───────────────────────────────────────────
+       Islam: *"you should remove the one 'present the whole company'. The
+       first button should be master presentation, where it takes me to the
+       flow, and then when I say go it shows me the manage slides, and then
+       it takes me to the presentation when I say present"*.
+
+       "Present the whole company" opened the company's own review straight
+       onto the projector — a second door onto the same evening, beside a
+       flow that already carries the company last. The flow is the door
+       now, and it is first. */
+    items = master +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
-      slides + dl + master;
+      slides + dl;
   } else {
     var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
     items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +
         '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
       '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
         '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
-      mine.filter(function(p){ return canSpeakFor("dir:" + p.id); }).map(function(p){
-        var n = pslidesOf("dir:" + p.id).length;
-        return '<button role="menuitem" data-picedit="dir" data-pickey="' + esc(p.id) + '">Manage slides' +
-          (mine.length > 1 ? ' &middot; ' + esc(p.name) : '') +
-          (n ? ' <span class="pill kind">' + n + '</span>' : '') +
-          '<span class="dlsub">Add your own picture slides to your ' + esc(L1("pillar")) + '</span></button>';
-      }).join("");
+      /* §556.1: and no Manage slides beside it — Present IS the editor
+         now, and a direction owner's press lands on their own slides. */
+      "";
   }
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
@@ -1575,12 +1586,9 @@ function presentMenu(kind, key){
   /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
-  var slides = canSpeakFor(target)
-    ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
-        'Manage slides' + (pslidesOf(target).length
-          ? ' <span class="pill kind">' + pslidesOf(target).length + '</span>' : '') +
-        '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-    : "";
+  /* §556.1: Present opens the editor, so a second entry onto it is a
+     second control for one act. */
+  var slides = "";
   /* ONE ATTRIBUTE, CARRYING THE TARGET. It used to be `data-present="1"` for a
      unit and `data-present-fn="<key>"` for a function, and the unit handler
      read `UNITS[current]` — so a FUNCTION THAT PLANS IN PILLARS could not be
@@ -2797,29 +2805,6 @@ function whereNext(keys){
     /* §517: their own directions only — the code still read off the real
        position below, so it is the one every other page shows. */
     if (dpf) ditems = ditems.filter(dpf);
-    var dirs = ditems.map(function(p, di){
-      var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
-      var code = pillarCode(dtu, dtu.items.indexOf(p));
-      var mrows = SMPRules.shown(p.measures || []);
-      var pd = miniTable([L1("measure"), "Target", "Actual", "Progress"],
-        mrows.map(function(m){
-          var sc = measureScore(m);
-          return '<tr><td>' + esc(m.name) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
-            '<td class="num">' + figShown(m) + '</td>' +
-            '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Mean across <b>' + mrows.length + '</b> ' + L("measure") + ': <b>' + pct(pf) + '</b>.</p>';
-      var trows = SMPRules.shown(p.tactics || []);
-      var ed = miniTable([L1("tactic"), "Delivered"],
-        trows.map(function(t){
-          return '<tr><td>' + esc(t.name) + '</td><td class="num">' + pct(tacticProgress(t)) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Delivered <b>' + pct(ex) + '</b> against <b>' + pct(pl) + '</b> planned.</p>';
-      return '<div class="gwrap" data-oi="' + di + '" data-topdir="' + esc(p.id || "") + '">' +
-        splitCard(esc(code) + ' ' + esc(p.name || ""),
-          plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
-          pf, ex, pl, pd, ed, p.name || code) + '</div>';
-    }).join("");
     /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
        empties this list for a part owner who owns no direction — which
        before §520 could not happen, since the only part owner was a
@@ -2828,9 +2813,29 @@ function whereNext(keys){
        the "Nothing to show yet." note below could never fire (§45.2).
        Nobody else is reached: with no filter `ditems` is `itemsNow` and
        `topHasPlan()` has already said there is a plan. */
+    /* ── THE COMPANY READS LIKE A UNIT HERE TOO (§555) ─────────────
+       Islam, of a direction owner: *"he should see the performance of the
+       directions, like we see it in the business units format in Raya, as
+       if he has a business unit of two directions. He sees the two
+       directions on the left, and the performance is clear"* — and of his
+       own: *"for the super user or the SMO … it should show the
+       performance, like the business units and directions, on the left,
+       and the performance is clear in front of me"*.
+
+       This section was a grid of gauge cards, every direction's measures
+       and tactics at once. A unit's page has had the rail and the pane
+       since the beginning, and `unitPerfRail` takes the company box
+       exactly as it takes a unit — §416's not-yet-running rows, §517's
+       narrowing to a part owner's own and the execution line all come
+       with it (§53.5). `drawHalf` has already set the half, so the rail
+       asks for nothing new.
+
+       THE GAUGE GRID GOES. Keeping both would be two readings of one
+       thing, which is §87's twins — and the pane says everything a card
+       said, with room for the measures' own table. */
     return ditems.length
       ? { dir: true, t: halfWord(dtu), h: section("", halfWord(dtu), null,
-            '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') }
+            unitPerfRail(dtu)) }
       : null;
   };
   if (topHasPlan() && planOn("group") && topWay() !== "projects") {
@@ -2874,9 +2879,18 @@ function whereNext(keys){
      presented from here once it has a plan, through the one menu every
      subject uses (§53.5). No plan, no menu: the page is what it was. */
   var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
+  /* ── AND IT OPENS ON THEM, NOT ON THE AVERAGES (§555) ───────────────
+     The rail was one press away and the page opened on the overall figures
+     every time, which is why Islam could not find it. A LANDING, not an
+     override: once somebody chooses a section it stays chosen (§124). */
+  if (!GSEC_PICKED) {
+    var land = SECS.map(function(x, i){ return x.dir ? i : -1; })
+      .filter(function(i){ return i >= 0; })[0];
+    if (land != null) GSEC = land;
+  }
   return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
-var GROUP_SECTIONS = [], GSEC = 0;
+var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
 
 /* ── GROUP · Temple ───────────────────────────────────────────────
    A view, not a scoreboard: roof, aspiration, key objectives with targets
@@ -6882,7 +6896,11 @@ function renderReport(u, opt){
      `data-rep`, so the shell's one handler resolves the row and then the
      cell. The unit rides with it exactly as it does for a measure, so the
      figure is stored joined and every screen downstream reads it whole
-     (§199). */
+     (§199).
+     §557: AND THE UNIT SITS INSIDE THE BOX, as `repEntry` draws it. It was
+     written after the box closed, so `.unitsuf` (a flex block) fell out under
+     it as a grey strip the width of the cell — on El Abd's Reporting page,
+     a "%" bar beneath every category's figure. */
   var bdEntry = function(x){
     var t = SMPRules.bdTarget(x.obj, x.col);
     var unit = splitTarget(t).unit;
@@ -6896,8 +6914,8 @@ function renderReport(u, opt){
       '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + ' ' +
-      esc(String(x.col.name || "").trim() || "figure") + '"></span>' +
-      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '');
+      esc(String(x.col.name || "").trim() || "figure") + '">' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
@@ -7063,14 +7081,22 @@ function renderReport(u, opt){
     /* §343: the breakdown, between the measures it is part of and the
        tactics it is not — the same place it sits on the other two panes, or
        somebody entering figures meets the table in a different order from
-       the one they planned it in. The target sits BEHIND each box so nobody
-       has to remember it, and a row's note is asked once however many of its
-       figures are at risk. */
+       the one they planned it in. A row's note is asked once however many of
+       its figures are at risk.
+       §557: TARGET AND REPORTED, TWO COLUMNS PER BREAKDOWN COLUMN. Islam, of
+       El Abd's categories: *"needs to appear in the form of target and report
+       not 1 column"*. §343 stacked the box over `/ 13%` in one cell; the Key
+       Measures table on this same pane has always read *YTD Target* beside
+       *Reported*, so the breakdown now reads the same way — the column's own
+       name and direction head its target, *Reported* heads the box beside it,
+       one pair per column in the plan's order. The target is the plan's
+       figure, unprorated, exactly as before (`bdCellScore` passes no
+       compile). An unasked cell is a dash in both. */
     var bdTable = bds.length
       ? '<h4 class="mini">' + esc(SMPRules.bdName(p)) + '</h4>' +
         miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-            .concat(SMPRules.bdCols(p).map(function(c){
-              return { h:bdColHead(p, c), cls:"cc" }; }))
+            .concat([].concat.apply([], SMPRules.bdCols(p).map(function(c){
+              return [{ h:bdColHead(p, c), cls:"cc" }, { h:"Reported", cls:"cc" }]; })))
             .concat([{h:"Note", cls:""}]),
           SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
             .map(function(r, i){
@@ -7080,11 +7106,12 @@ function renderReport(u, opt){
               '<td>' + esc(r.name) + '</td>' +
               SMPRules.bdCols(p).map(function(c){
                 if (!SMPRules.bdAsked(r, c))
-                  return '<td class="cc"><span class="nobody">&mdash;</span></td>';
+                  return '<td class="num"><span class="nobody">&mdash;</span></td>' +
+                         '<td class="cc"><span class="nobody">&mdash;</span></td>';
                 var x = { id:r.id, obj:r, col:c, kind:"bdcell",
                           owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
-                return '<td class="cc">' + bdEntry(x) +
-                  '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
+                return '<td class="num">' + tgtShown(SMPRules.bdTarget(r, c)) + '</td>' +
+                  '<td class="cc">' + bdEntry(x) + '</td>';
               }).join("") +
               '<td class="notecol">' + noteCell(ri) + '</td></tr>';
           }).join(""))

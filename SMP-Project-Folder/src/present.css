@@ -462,36 +462,9 @@
      fault §225 recorded when the chat header grew its second button. The group
      carries the auto; the buttons carry the gap. */
   .sl-acts { margin-left:auto; display:flex; align-items:center; gap:10px; }
-  /* ── PLAY IS THE ACCENT AS A FILL (§38.4, §295) ───────────────────
-     Islam's pick from the mockup. It is the reason somebody is on this screen
-     once the arranging is done, so it takes the volume — and on a navy bar the
-     platform's own way of saying that is the accent FILLED with `--on-accent`
-     over it, which is what the deck's own lit pill does two surfaces away
-     (§266.9). Never gold TYPE: the accent carries a mark and cannot carry
-     words.
-
-     `--on-accent`, not a literal and not `--panel-ink`: it is the token
-     `brandTokens()` writes, so a tenant who rebrands gets an ink that can be
-     read on their own accent rather than one chosen for ours (§25).
-     Measured on the shipped palette: 5.34 light, 9.56 dark.
-
-     THE HOVER MOVES THE FILL RATHER THAN ADDING ONE (§94.8's rule for the
-     other solid button, and §154's reason). `--gold-deep` would have been the
-     obvious darker step and FAILS — 2.57:1 against this ink in light — so the
-     hover goes the other way, to `--panel-accent`, the accent as it reads on
-     this very panel: 7.68 light, 11.12 dark, both better than at rest. */
-  .sl-play { font:inherit; font-size:var(--fs-small); letter-spacing:.08em;
-             text-transform:uppercase; font-weight:700; cursor:pointer;
-             background:var(--gold); border:1px solid var(--gold);
-             color:var(--on-accent); border-radius:var(--r-pill);
-             padding:6px 18px; display:inline-flex; align-items:center; gap:8px; }
-  .sl-play:hover { background:var(--panel-accent); border-color:var(--panel-accent); }
-  .slidebar [data-slexit] { font:inherit; font-size:var(--fs-small);
-              letter-spacing:.08em; text-transform:uppercase; font-weight:700;
-              background:none; border:1px solid rgba(255,255,255,.35);
-              color:var(--panel-ink); border-radius:var(--r-pill);
-              padding:6px 16px; cursor:pointer; }
-  .slidebar [data-slexit]:hover { background:rgba(255,255,255,.14); }
+  /* The navy band's gold Play and outlined DONE (§295) are gone: §556.4
+     draws all four buttons as one `.sl-b` family, further down. The old
+     `[data-slexit]` rule outranked it and kept "Done" in capitals. */
   .slidebody { flex:1; min-height:0; display:flex; }
 
   /* The rail. Its own scroller, because the deck is long and the pane is not. */
@@ -566,10 +539,18 @@
   .slctl-off .editbtn { margin-left:auto; }
   /* Pinned, and above the list rather than below it: it is the first thing
      you came here to do. */
-  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
-            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
-            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
-  .sl-add .editbtn { width:100%; }
+  /* §556.3: at the foot of the rail, quiet — it is not what this screen
+     is for, and it was the loudest thing on it. */
+  /* FLUSH WITH THE BOTTOM EDGE. The list has 10px of padding, and sticky
+     `bottom:0` pins to the inside of it — so a 10px strip of scrolling
+     slides showed under the button (Islam: *"keep it at the very
+     bottom"*). Pinned into the padding, and spread across it sideways. */
+  .sl-add { position:sticky; bottom:-10px; z-index:2; background:var(--surface);
+    margin:0 -10px -10px; border-top:1px solid var(--line); padding:9px 10px 12px;
+    text-align:center; }
+  .sl-add .editbtn { width:100%; font-size:var(--fs-micro); font-weight:600;
+    border-style:dashed; color:var(--ink-3); }
+  .sl-add .editbtn:hover { color:var(--ink); }
   .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
 
   /* The pane: the slide above, its controls below. */
@@ -766,7 +747,12 @@
      On a light slide there is no plate at all — a navy mark on a near
      white ground needs nothing behind it, and a plate there would be a
      visible rectangle for no reason. */
-  .dcovermark { display:block; width:340px; height:auto; margin:0 0 26px; }
+  /* The same fault on the cover: 340px wide made a round logo 340px tall.
+     `align-self` because the cover is a flex column that stretches its
+     children across: with the width no longer fixed, the mark was pulled
+     to 340 wide at 150 tall and drawn as an oval. */
+  .dcovermark { display:block; width:auto; height:auto; align-self:flex-start;
+                object-fit:contain; max-width:340px; max-height:150px; margin:0 0 26px; }
   :root[data-theme="dark"] .dcovermark,
   :root[data-theme="dark"] .dfootmark {
     background:#fff; padding:10px 14px; border-radius:5px; box-sizing:content-box;
@@ -778,10 +764,17 @@
      footer that quietly lengthens the deck. The space is RESERVED as
      padding on the slide and the mark placed into it. */
   .dslide.hasmark { padding-bottom:104px; }
-  .dfoot { position:absolute; left:62px; right:62px; bottom:36px;
-           display:flex; align-items:center; padding-top:20px;
+  .dfoot { position:absolute; left:62px; right:62px; bottom:32px;
+           display:flex; align-items:center; padding-top:16px;
            border-top:1px solid var(--line-soft); }
-  .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
+  /* CAPPED BY HEIGHT AS WELL AS WIDTH. It was a 150px width and nothing
+     else, which suits a wide wordmark and nobody else: a ROUND logo (El
+     Abd's) came out 150px tall, standing 46px up out of the space reserved
+     for it and over the slide. Islam: *"the icon is very big with no
+     need."* 32 + 16 + 56 is the 104 reserved above, so it cannot rise —
+     and the reserve itself is unchanged, so no table fits one row fewer. */
+  .dfootmark { display:block; width:auto; height:auto;
+               max-width:132px; max-height:56px; object-fit:contain; opacity:.75; }
 
 /* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
    Islam's own concept from the Raya deck, in the platform's language: a row of
@@ -971,6 +964,144 @@
   .mflow .mfcount {
     flex:none; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums;
   }
+  /* ── §556.3: THE SLIDE VIEW, LAID OUT AS ISLAM'S OWN PAGE LAYS IT ──
+     A quiet bar, not a coloured band: who is presenting on the left, the
+     buttons on the right, Present the one filled one. */
+  .slidebar{ background:var(--surface); color:var(--ink);
+    border-bottom:1px solid var(--line); }
+  .sl-who{ display:flex; flex-direction:column; min-width:0; }
+  /* His `.brand`: a 40px mark, the name bold at 16px, the line under it 12px
+     and quiet, neither wrapping. */
+  .slidebar{ min-height:56px; }
+  .sl-logo{ width:40px; height:40px; object-fit:contain; flex:none; display:block; }
+  .slidebar .sl-title{ font-size:16px; font-weight:700; color:var(--ink);
+    letter-spacing:0; text-transform:none; line-height:1.25;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .slidebar .sl-sub{ font-size:12px; color:var(--ink-3); margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* His `.btn`, measure for measure: inline-flex, 7px gap, 9px radius,
+     7/12 padding, 13px at 600, a 16px icon stroked at 2 in currentColor,
+     and one filled button. */
+  .sl-b{ display:inline-flex; align-items:center; gap:7px; white-space:nowrap;
+    font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+    padding:7px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); }
+  .sl-b svg{ width:16px; height:16px; stroke:currentColor; fill:none;
+    stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  /* No case or tracking of its own: the bar it sits in sets both, and his
+     buttons read in plain sentence case — "Done", never "DONE". */
+  .sl-b{ text-transform:none; letter-spacing:0; }
+  .sl-b:hover{ border-color:var(--ink-3); }
+  .sl-b.go{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .sl-b.go:hover{ background:var(--ink-2); border-color:var(--ink-2); }
+  .sl-b.quiet{ border-color:transparent; background:none; color:var(--ink-3);
+    font-weight:500; }
+  .sl-b.quiet:hover{ color:var(--ink); }
+  .sl-b:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  @media (max-width:720px){ .sl-b .lbl{ display:none; } }
+
+  .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
+  .slprog{ height:3px; background:var(--line); flex:none; }
+  .slprog i{ display:block; height:100%; width:0; background:var(--panel); }
+  /* §556.12: no arrows at the stage's edges. Islam: *"these 2 buttons on
+     the right and left are useless"* — the pair under the stage and the
+     arrow keys already do it, and these sat over the slide itself. */
+  /* His `.controls`, measure for measure: a 58px row at 18px in, a 12px
+     gap, a 36px round step either side of a 52px tabular count, and the
+     slide's own name beside it at 600. */
+  .slfoot{ display:flex; align-items:center; gap:12px; flex:none;
+    height:58px; padding:0 18px; border-top:1px solid var(--line);
+    background:var(--surface); }
+  /* His chevrons, drawn rather than typed: a `‹` is a letter, and sits
+     thin and off-centre in a round button. */
+  .slnav svg{ width:18px; height:18px; stroke:currentColor; fill:none;
+    stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .slnav{ width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    font:400 18px/1 var(--sans); display:grid; place-items:center; }
+  .slnav:hover{ background:var(--zebra); }
+  .slnav:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .slct{ font-size:13px; font-weight:700; color:var(--ink);
+    min-width:52px; text-align:center; font-variant-numeric:tabular-nums; }
+  .slct span{ margin:0 1px; }
+  .slnm{ font-size:13px; font-weight:600; color:var(--ink-2); min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .slidelist .slrow{ grid-template-columns:18px 1fr; }
+  .sl-mine{ grid-column:2; font-size:var(--fs-micro); color:var(--gold); }
+  .slideroot.norail .slidelist{ display:none; }
+
+  /* ── §556.2: ALL SLIDES, AND THE KEYS ─────────────────────────────
+     The grid covers the rail and the stage together, because it IS the
+     deck — a panel beside them would be a third place to look. */
+  /* His grid: a solid page over everything (it was `var(--bg)`, a token
+     this platform does not have, so the slide behind showed through), a
+     heading with a way out, and every slide drawn small with its number
+     above it. */
+  .slgrid{ position:absolute; inset:0; z-index:3; overflow:auto;
+    background:var(--ground); padding:22px 24px 30px; }
+  .slghead{ display:flex; align-items:center; justify-content:space-between;
+    margin:0 0 14px; }
+  .slghead h3{ margin:0; font-size:20px; font-weight:700; color:var(--ink); }
+  .slglist{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:22px 20px; }
+  .slgcell{ text-align:left; cursor:pointer; background:none; border:0; padding:0;
+    font:inherit; color:var(--ink); display:flex; flex-direction:column; gap:7px;
+    min-width:0; }
+  .slgn{ font-size:13px; font-weight:600; color:var(--ink-3); }
+  .slgn em{ font-style:normal; font-size:11px; font-weight:700; margin-left:6px;
+    color:var(--ink-3); }
+  .slgthumb{ display:block; position:relative; width:100%; aspect-ratio:16/9;
+    overflow:hidden; border-radius:6px; border:1px solid var(--line);
+    background:var(--surface); box-shadow:var(--shadow-sm); }
+  .slgthumb-in{ display:block; position:relative; width:1600px; height:900px;
+    transform-origin:0 0; pointer-events:none; }
+  .slgcell:hover .slgthumb{ border-color:var(--ink-3); }
+  .slgcell.on .slgthumb{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold); }
+  .slgcell.on .slgn{ color:var(--ink); }
+  .slgcell:focus-visible{ outline:none; }
+  .slgcell:focus-visible .slgthumb{ box-shadow:0 0 0 3px var(--gold); }
+  .slgcell.off .slgthumb{ opacity:.35; filter:grayscale(1); }
+  /* §556.11: the parts of the flow, under the bar — the room's pills,
+     moved to where the presenter arranges. */
+  .slparts{ display:flex; gap:6px; flex:none; overflow-x:auto; padding:9px 16px;
+    background:var(--surface); border-bottom:1px solid var(--line); scrollbar-width:thin; }
+  .slpart{ font:700 11px/1 var(--sans); letter-spacing:.06em; padding:7px 10px; flex:none;
+    border-radius:var(--r-pill); border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); cursor:pointer; white-space:nowrap; }
+  .slpart:hover{ border-color:var(--ink-3); color:var(--ink); }
+  .slpart.on{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .slpart:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .slnm b{ color:var(--ink); font-weight:700; }
+  .slnm span{ color:var(--ink-3); }
+  .slksep{ display:inline-block; width:1px; height:12px; background:var(--line);
+    margin:0 8px; vertical-align:middle; }
+  .slkeys{ margin-left:auto; flex:none; font-size:12px; color:var(--ink-3);
+    white-space:nowrap; }
+  @media (max-width:860px){ .slkeys{ display:none; } }
+  /* His `.kbd`: 11px, a 2px bottom edge so it reads as a key, nothing more. */
+  .slkeys b{ font-size:11px; font-weight:600; color:var(--ink-3);
+    border:1px solid var(--line); border-bottom-width:2px; border-radius:5px;
+    padding:0 5px; }
+  .slidebody{ position:relative; }
+
+  /* §554.2: the kind chips sit on their own line under the head's one line,
+     so the search keeps the width it had and a client with six kinds does
+     not squeeze it to nothing. `order` rather than a second container: the
+     head is already the row these belong to. */
+  .mflow .mfhead { flex-wrap:wrap; }
+  .mflow .mfkinds {
+    order:1; flex:1 0 100%; display:flex; flex-wrap:wrap; gap:5px; padding-top:2px;
+  }
+  .mflow .mfchip {
+    font:inherit; font-size:11px; line-height:1; padding:5px 9px; cursor:pointer;
+    border:1px solid var(--line); border-radius:999px;
+    background:var(--surface); color:var(--ink-2);
+  }
+  .mflow .mfchip:hover { border-color:var(--ink-3); }
+  .mflow .mfchip.on {
+    border-color:var(--gold); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold);
+  }
+  .mflow .mfchip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   /* A column that has legitimately emptied says so, or it reads as a pane that
      failed to render (§45.2). Quiet, because neither state is a fault. */
   .mflow .mfempty {

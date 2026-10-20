@@ -150,8 +150,28 @@ with sync_playwright() as p:
     ck("the group's unit readings are empty, the directions are the headline",
        safe(pg, "()=>groupUnitsObjectives()===null && groupExec()===null") is True)
     safe(pg, "()=>{currentSub='performance'; paint()}"); pg.wait_for_timeout(250)
-    ck("Performance draws the directions card and no unit cards",
-       safe(pg, "()=>{var t=document.querySelector('#panel').textContent; return t.indexOf(L('pillar','bu')+' — performance')>-1 && t.indexOf(L('unitword','bu')+' — performance')<0}") is True)
+    # REWRITTEN TO THE NEW RULE (218, 555). It read the panel for the
+    # directions CARD, which was true while the page opened on the overall
+    # figures every time. It opens on the directions themselves now - the
+    # rail and the pane a unit's page has - so the claim is both ends: the
+    # landing IS that rail, and the overall section still carries the
+    # directions card and no unit card.
+    land = safe(pg, "()=>({sec: GROUP_SECTIONS[GSEC],"
+                    " rail: document.querySelectorAll('.ritem').length,"
+                    " pane: !!document.querySelector('.pane')})", {})
+    ck("Performance opens on the directions, in a rail (555)",
+       isinstance(land, dict) and land.get("sec") == safe(pg, "()=>L('pillar','bu')")
+       and (land.get("rail") or 0) > 0 and land.get("pane") is True, land)
+    # THE LANDING HAS TO BE STOOD DOWN FIRST, or the paint below puts it
+    # straight back - which is the landing working, and was read as the
+    # overall section having lost its card.
+    over = safe(pg, "()=>{ var was = GSEC; GSEC_PICKED = true; GSEC = 0; paint();"
+                    " var t = document.querySelector('#panel').textContent;"
+                    " var r = {dirs: t.indexOf(L('pillar','bu') + ' \u2014 performance') > -1,"
+                    "          units: t.indexOf(L('unitword','bu') + ' \u2014 performance') > -1};"
+                    " GSEC = was; GSEC_PICKED = false; paint(); return r; }", {})
+    ck("...and the overall section still has the directions card and no unit card",
+       isinstance(over, dict) and over.get("dirs") is True and over.get("units") is False, over)
     # capabilities section, made if the demo holds none (§255)
     safe(pg, "()=>{if(!GROUP.capabilities.length) return; GROUP.structure.cap=GROUP.structure.cap||{}; GROUP.structure.cap.exists=true}")
     if safe(pg, "()=>capsReachable().length>0 && SMPRules.capExists(GROUP)"):

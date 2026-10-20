@@ -1,0 +1,349 @@
+<title>One way in</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* A clickable walk through the one entry: menu → flow → slides → show.
+     The frame is a stand-in for the platform, not the platform. */
+  :root{
+    --ink:#16202c; --ink2:#48535f; --dim:#78828f;
+    --ground:#efece7; --card:#fff; --line:#dcd7cf; --rule:#e7e2da;
+    --navy:#17304f; --gold:#b08430; --go:#1f7a4d; --gone:#a8331f;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif: Georgia,"Times New Roman",serif;
+    --mono: ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ink:#e9e6e1; --ink2:#bcc3cb; --dim:#8b949f; --ground:#191b1f;
+    --card:#232629; --line:#383c42; --rule:#30343a;
+    --navy:#9db6d8; --gold:#d6a84a; --go:#6fcf9b; --gone:#e08573; color-scheme:dark; } }
+  :root[data-theme="dark"]{
+    --ink:#e9e6e1; --ink2:#bcc3cb; --dim:#8b949f; --ground:#191b1f;
+    --card:#232629; --line:#383c42; --rule:#30343a;
+    --navy:#9db6d8; --gold:#d6a84a; --go:#6fcf9b; --gone:#e08573; color-scheme:dark; }
+
+  body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);}
+  .wrap{max-width:1140px;margin:0 auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-block:28px 56px;}
+  h1{font:700 29px/1.15 var(--serif);margin:0 0 8px;text-wrap:balance;}
+  .lead{margin:0;color:var(--ink2);max-width:64ch;}
+  .lead b{color:var(--ink);}
+  .rule{height:3px;width:70px;background:var(--gold);margin:16px 0 22px;}
+
+  /* the step strip */
+  .steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  .steps button{font:600 12.5px/1 var(--sans);padding:9px 13px;cursor:pointer;
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:999px;}
+  .steps button .n{font:700 10px/1 var(--mono);color:var(--dim);margin-right:6px;}
+  .steps button[aria-pressed="true"]{border-color:var(--gold);color:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--gold);}
+  .steps button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* the frame */
+  .frame{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .chrome{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,var(--ground));}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none;}
+  .chrome .where{font:600 12px/1 var(--sans);color:var(--dim);letter-spacing:.04em;}
+  .body{padding:18px;min-height:360px;}
+  @media (max-width:640px){ .body{padding:12px;} }
+
+  .cap{display:flex;gap:10px;align-items:baseline;margin:14px 0 0;}
+  .cap .k{font:700 10px/1.6 var(--mono);letter-spacing:.12em;color:var(--gold);flex:none;}
+  .cap p{margin:0;color:var(--ink2);font-size:14px;}
+  .cap p b{color:var(--ink);}
+
+  /* ── screen 1: the menu ── */
+  .page-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .page-h h2{font:700 19px/1.2 var(--serif);margin:0;}
+  .menu{border:1px solid var(--line);border-radius:9px;background:var(--card);
+    width:min(340px,100%);overflow:hidden;}
+  .menu .mi{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--rule);
+    background:none;color:var(--ink);font:600 14px/1.3 var(--sans);padding:12px 14px;cursor:pointer;}
+  .menu .mi:last-child{border-bottom:0;}
+  .menu .mi span{display:block;font:400 12px/1.4 var(--sans);color:var(--dim);margin-top:3px;}
+  .menu .mi.first{box-shadow:inset 3px 0 0 var(--gold);}
+  .menu .mi:hover{background:color-mix(in srgb,var(--gold) 8%,transparent);}
+  .menu .mi.dead{color:var(--dim);text-decoration:line-through;cursor:not-allowed;}
+  .menu .mi.dead span{text-decoration:none;color:var(--gone);}
+
+  /* ── screen 2: the picker ── */
+  .pick{display:grid;grid-template-columns:1fr 1.25fr;gap:16px;}
+  @media (max-width:760px){ .pick{grid-template-columns:1fr;} }
+  .col h3{font:700 13px/1 var(--sans);margin:0 0 8px;}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+  .chips button{font:600 11px/1 var(--sans);padding:5px 9px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);}
+  .chips button[aria-pressed="true"]{border-color:var(--gold);color:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--gold);}
+  table.t{width:100%;border-collapse:collapse;font-size:13px;}
+  table.t th{text-align:left;font:700 10px/1 var(--sans);letter-spacing:.1em;
+    color:var(--dim);padding:0 8px 7px;border-bottom:1px solid var(--line);}
+  table.t td{padding:7px 8px;border-bottom:1px solid var(--rule);color:var(--ink2);}
+  table.t td.nm{color:var(--ink);font-weight:600;}
+  .kind{font:700 9.5px/1 var(--mono);letter-spacing:.06em;border:1px solid var(--line);
+    border-radius:4px;padding:3px 5px;color:var(--dim);}
+  .kind.cap{border-color:var(--gold);color:var(--gold);}
+  .scrolly{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:8px;}
+  .tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+  .lnk{background:none;border:0;color:var(--gold);font:600 12px/1 var(--sans);cursor:pointer;padding:0;}
+  .goline{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+  .btn{font:600 13px/1 var(--sans);padding:10px 16px;border-radius:7px;cursor:pointer;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);}
+  .btn.primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+  :root[data-theme="dark"] .btn.primary, @media (prefers-color-scheme: dark){}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* ── screen 3/4: the slide view ── */
+  .sv{border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .svbar{display:flex;align-items:center;gap:8px;padding:8px 12px;
+    border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--card) 88%,var(--ground));}
+  .svbar .ttl{font:700 13px/1 var(--sans);margin-right:auto;}
+  .svbar .b{font:600 12px/1 var(--sans);padding:7px 11px;border-radius:6px;cursor:pointer;
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);}
+  .svbar .b.on{border-color:var(--gold);color:var(--ink);}
+  .svbar .b.primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .svmain{display:grid;grid-template-columns:210px 1fr;min-height:300px;}
+  @media (max-width:640px){ .svmain{grid-template-columns:1fr;} .thumbs{display:none !important;} }
+  .thumbs{border-right:1px solid var(--line);overflow:auto;max-height:330px;padding:8px;}
+  .th{display:flex;gap:7px;align-items:center;width:100%;text-align:left;cursor:pointer;
+    border:1px solid transparent;border-radius:6px;padding:5px 6px;background:none;margin-bottom:3px;}
+  .th:hover{background:color-mix(in srgb,var(--gold) 7%,transparent);}
+  .th[aria-current="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,transparent);}
+  .th .no{font:700 9.5px/1 var(--mono);color:var(--dim);width:16px;flex:none;}
+  .th .mini{width:34px;height:20px;border:1px solid var(--line);border-radius:2px;flex:none;
+    background:linear-gradient(var(--rule) 0 0) no-repeat 3px 4px/16px 2px,
+               linear-gradient(var(--rule) 0 0) no-repeat 3px 9px/24px 2px,
+               linear-gradient(var(--rule) 0 0) no-repeat 3px 14px/20px 2px, var(--card);}
+  .th .nm{font:500 11px/1.25 var(--sans);color:var(--ink2);min-width:0;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .th.hid .nm{color:var(--dim);text-decoration:line-through;}
+  .th .eye{margin-left:auto;font:700 9px/1 var(--mono);color:var(--dim);flex:none;}
+  .stage{padding:16px;display:flex;flex-direction:column;min-width:0;}
+  .slide{border:1px solid var(--line);border-radius:6px;background:var(--card);
+    aspect-ratio:16/9;max-width:100%;padding:26px 28px;display:flex;flex-direction:column;
+    justify-content:flex-end;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+  .slide .eyebrow{font:700 9.5px/1 var(--mono);letter-spacing:.16em;color:var(--gold);}
+  .slide h4{font:700 clamp(15px,2.4vw,24px)/1.2 var(--serif);margin:9px 0 0;}
+  .slide p{margin:8px 0 0;color:var(--dim);font-size:12.5px;}
+  .slide .bars{display:flex;gap:6px;align-items:flex-end;height:46px;margin-top:14px;}
+  .slide .bars i{display:block;width:17px;background:var(--navy);opacity:.5;border-radius:2px;}
+  .ctl{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .ctl .c{font:600 12px/1 var(--mono);color:var(--dim);}
+  .keys{margin-left:auto;font-size:11.5px;color:var(--dim);}
+  .kbd{font:700 10px/1 var(--mono);border:1px solid var(--line);border-radius:3px;
+    padding:3px 5px;color:var(--ink2);}
+  .gridview{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px;padding:14px;}
+  .gcell{border:1px solid var(--line);border-radius:5px;padding:7px;cursor:pointer;background:var(--card);}
+  .gcell[aria-current="true"]{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);}
+  .gcell .no{font:700 9px/1 var(--mono);color:var(--dim);}
+  .gcell .nm{font:500 11px/1.25 var(--sans);color:var(--ink2);margin-top:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .gcell.hid .nm{color:var(--dim);text-decoration:line-through;}
+
+  /* ── screen 5: the show ── */
+  .show{background:#101418;border-radius:10px;padding:24px;display:flex;
+    flex-direction:column;align-items:center;gap:12px;}
+  .show .slide{background:#fff;color:#16202c;border-color:#2a3038;width:100%;}
+  .show .slide h4{color:#16202c;}
+  .show .bar{display:flex;gap:9px;align-items:center;color:#9aa3ad;font-size:11.5px;}
+  .show .pips{display:flex;gap:4px;}
+  .show .pips i{width:17px;height:4px;border-radius:2px;background:#39414a;display:block;}
+  .show .pips i.on{background:var(--gold);}
+
+  .took{margin-top:26px;border:1px solid var(--line);border-left:4px solid var(--gold);
+    border-radius:8px;background:var(--card);padding:16px 18px;}
+  .took h3{font:700 15px/1.3 var(--sans);margin:0 0 10px;}
+  .took ul{margin:0;padding-left:0;list-style:none;display:grid;
+    grid-template-columns:1fr 1fr;gap:7px 18px;}
+  @media (max-width:640px){ .took ul{grid-template-columns:1fr;} }
+  .took li{font-size:13.5px;color:var(--ink2);padding-left:16px;position:relative;}
+  .took li::before{content:"";position:absolute;left:0;top:.56em;width:6px;height:6px;
+    border-radius:50%;background:var(--gold);}
+  .took li b{color:var(--ink);}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <h1>One way in</h1>
+  <p class="lead">The whole path, clickable. <b>One entry</b> — Master presentation —
+    then the flow, then the slides, then the room. Press the steps, or the
+    buttons inside the frame.</p>
+  <div class="rule"></div>
+
+  <div class="steps" id="steps"></div>
+
+  <div class="frame">
+    <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="where" id="where"></span></div>
+    <div class="body" id="body"></div>
+  </div>
+  <div class="cap"><span class="k" id="capk"></span><p id="capt"></p></div>
+
+  <div class="took">
+    <h3>What comes from your Fouad page</h3>
+    <ul>
+      <li><b>Thumbnails down the left</b>, the slide big beside them — one screen, not two modes</li>
+      <li><b>Present as the one primary button</b>, top right, always in reach</li>
+      <li><b>A grid of all slides</b>, so a 49-slide flow is findable</li>
+      <li><b>Hide the slide you are looking at</b>, with a key, not a trip elsewhere</li>
+      <li><b>Blank the screen</b> mid-sentence — we have this, it moves into the same bar</li>
+      <li><b>The keys written on the screen</b>, so nobody has to be told them</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SLIDES = [
+    {n:"El Abd · cover", s:"flow"}, {n:"Directions", s:"flow"},
+    {n:"D001 Maximizing Current Stores", s:"D001"}, {n:"D001 Key Measures", s:"D001"},
+    {n:"D001 Categories", s:"D001"}, {n:"D001 Tactics", s:"D001"},
+    {n:"D002 Egypt Expansion", s:"D002"}, {n:"D002 Key Measures", s:"D002"},
+    {n:"Capabilities", s:"flow"}, {n:"C001 End-to-End Quality", s:"C001"},
+    {n:"C001 Key Measures", s:"C001"}, {n:"Overall performance", s:"flow"},
+    {n:"Where El Abd stands", s:"flow"}, {n:"Thank you", s:"flow"}
+  ];
+  var hidden = {4:true};
+  var at = 2, step = 0, grid = false;
+
+  var STEPS = [
+    {t:"The menu", w:"El Abd · Performance",
+     k:"ONE ENTRY", c:"<b>Present the whole company is gone.</b> The first item is Master presentation, and it is the way in for everybody — an owner pressing Present lands on the same screen with their own deck."},
+    {t:"The flow", w:"Master presentation",
+     k:"WHO, AND IN WHAT ORDER", c:"Filters on the left, a way back to empty on the right, minutes per subject. The button no longer starts the show — it opens the slides."},
+    {t:"The slides", w:"Master presentation · slides",
+     k:"ONE SCREEN", c:"Thumbnails left, the deck in front of you, Present in the corner. Hide what should not be there before the room sees it, not after."},
+    {t:"All slides", w:"Master presentation · slides · grid",
+     k:"FINDABLE", c:"Forty-nine slides in a flow is too many for a strip. The grid is how you jump, and it shows what is hidden."},
+    {t:"The room", w:"Presenting",
+     k:"UNCHANGED", c:"The show itself is what it already was — full screen, the strip of subjects, the timer, blank on a key. Leaving it brings you back to the slides."}
+  ];
+
+  var stepsEl = document.getElementById("steps"),
+      bodyEl  = document.getElementById("body"),
+      whereEl = document.getElementById("where"),
+      capkEl  = document.getElementById("capk"),
+      captEl  = document.getElementById("capt");
+
+  stepsEl.innerHTML = STEPS.map(function(s, i){
+    return '<button type="button" data-step="' + i + '"><span class="n">' +
+      (i+1) + '</span>' + s.t + '</button>';
+  }).join("");
+
+  function shown(){ return SLIDES.filter(function(_, i){ return !hidden[i]; }); }
+
+  function thumbs(){
+    return '<div class="thumbs">' + SLIDES.map(function(s, i){
+      return '<button class="th' + (hidden[i] ? ' hid' : '') + '" data-go="' + i +
+        '" aria-current="' + (i === at) + '"><span class="no">' + (i+1) +
+        '</span><span class="mini"></span><span class="nm">' + s.n + '</span>' +
+        (hidden[i] ? '<span class="eye">hidden</span>' : '') + '</button>';
+    }).join("") + '</div>';
+  }
+  function slide(cl){
+    var s = SLIDES[at] || SLIDES[0];
+    return '<div class="slide' + (cl || "") + '"><span class="eyebrow">' +
+      (s.s === "flow" ? "EL ABD" : s.s) + '</span><h4>' + s.n + '</h4>' +
+      '<p>Slide ' + (at+1) + ' of ' + SLIDES.length +
+      (hidden[at] ? ' &middot; hidden from the show' : '') + '</p>' +
+      '<div class="bars"><i style="height:62%"></i><i style="height:88%"></i>' +
+      '<i style="height:44%"></i><i style="height:70%"></i><i style="height:30%"></i></div></div>';
+  }
+
+  function draw(){
+    var s = STEPS[step];
+    whereEl.textContent = s.w;
+    capkEl.textContent = s.k;
+    captEl.innerHTML = s.c;
+    [].forEach.call(stepsEl.querySelectorAll("[data-step]"), function(b){
+      b.setAttribute("aria-pressed", String(+b.dataset.step === step));
+    });
+
+    if (step === 0) {
+      bodyEl.innerHTML =
+        '<div class="page-h"><div><h2>El Abd &middot; Performance</h2>' +
+          '<p style="margin:6px 0 0;color:var(--dim);font-size:13px">Directions &middot; five of them, on the left</p></div>' +
+          '<div class="menu">' +
+            '<button class="mi first" data-act="1">Master presentation' +
+              '<span>Pick who presents and in what order, then the slides</span></button>' +
+            '<button class="mi dead" disabled>Present the whole company' +
+              '<span>removed &mdash; the flow is the way in</span></button>' +
+            '<button class="mi">Download the presentation' +
+              '<span>The deck as a PDF &mdash; exactly what the projector shows</span></button>' +
+          '</div></div>';
+    } else if (step === 1) {
+      bodyEl.innerHTML =
+        '<div class="pick"><div class="col"><h3>Everyone who reports</h3>' +
+          '<div class="chips">' +
+            ['All','Sections','Directions','Capabilities','Functions','The company']
+              .map(function(c, i){ return '<button type="button" aria-pressed="' + (i===0) + '">' + c + '</button>'; }).join("") +
+          '</div><div class="scrolly"><table class="t"><thead><tr><th>Name</th><th>Kind</th></tr></thead><tbody>' +
+            [["Foundation — the company’s","SECTION"],["Retail","FUNC"],["External Sales","FUNC"],
+             ["E-Commerce","FUNC"],["Marketing","FUNC"],["Planning","FUNC"],["Procurement","FUNC"]]
+              .map(function(r){ return '<tr><td class="nm">' + r[0] + '</td><td><span class="kind">' + r[1] + '</span></td></tr>'; }).join("") +
+          '</tbody></table></div></div>' +
+        '<div class="col"><div class="tools"><h3 style="margin:0">The flow</h3>' +
+          '<button class="lnk" type="button">Take all out</button></div>' +
+          '<div class="scrolly"><table class="t"><thead><tr><th>#</th><th>Name</th><th>Kind</th><th>Min</th></tr></thead><tbody>' +
+            [["1","Maximizing Current Stores","DIR","15"],["2","Egypt Expansion","DIR","15"],
+             ["3","Growing FMCG","DIR","15"],["4","ELABD Corner","DIR","15"],
+             ["5","E-Commerce Growth","DIR","15"],["6","End-to-End Quality Mindset","CAP","10"],
+             ["7","ERP Enhancement","CAP","10"]]
+              .map(function(r){ return '<tr><td>' + r[0] + '</td><td class="nm">' + r[1] +
+                '</td><td><span class="kind' + (r[2]==="CAP"?" cap":"") + '">' + r[2] +
+                '</span></td><td>' + r[3] + '</td></tr>'; }).join("") +
+          '</tbody></table></div></div></div>' +
+        '<div class="goline"><button class="btn" type="button">Cancel</button>' +
+          '<button class="btn primary" type="button" data-act="2">Go to the slides</button></div>';
+    } else if (step === 2 || step === 3) {
+      bodyEl.innerHTML =
+        '<div class="sv"><div class="svbar"><span class="ttl">El Abd &middot; strategy review</span>' +
+          '<button class="b on" type="button">Slides</button>' +
+          '<button class="b' + (step === 3 ? ' on' : '') + '" type="button" data-act="' + (step === 3 ? 2 : 3) + '">Grid</button>' +
+          '<button class="b primary" type="button" data-act="4">Present</button></div>' +
+        (step === 3
+          ? '<div class="gridview">' + SLIDES.map(function(s, i){
+              return '<button class="gcell' + (hidden[i] ? ' hid' : '') + '" data-go="' + i +
+                '" aria-current="' + (i === at) + '"><span class="no">' + (i+1) +
+                '</span><div class="nm">' + s.n + '</div></button>'; }).join("") + '</div>'
+          : '<div class="svmain">' + thumbs() +
+            '<div class="stage">' + slide("") +
+            '<div class="ctl"><button class="btn" type="button" data-nudge="-1">&larr;</button>' +
+              '<span class="c">' + (at+1) + ' / ' + SLIDES.length + '</span>' +
+              '<button class="btn" type="button" data-nudge="1">&rarr;</button>' +
+              '<button class="btn" type="button" data-hide="1">' +
+                (hidden[at] ? "Show this slide" : "Hide this slide") + '</button>' +
+              '<span class="keys"><span class="kbd">&larr;</span> <span class="kbd">&rarr;</span> move &middot; ' +
+              '<span class="kbd">F</span> present &middot; <span class="kbd">G</span> grid &middot; ' +
+              '<span class="kbd">B</span> blank &middot; <span class="kbd">H</span> hide</span>' +
+            '</div></div></div>') +
+        '</div>';
+    } else {
+      var list = shown();
+      var pos = Math.max(0, list.indexOf(SLIDES[at]));
+      bodyEl.innerHTML =
+        '<div class="show">' + slide("") +
+          '<div class="bar"><div class="pips">' +
+            list.map(function(_, i){ return '<i class="' + (i === pos ? "on" : "") + '"></i>'; }).join("") +
+          '</div><span>' + (pos+1) + ' / ' + list.length + ' &middot; 2h 05m left &middot; ' +
+          SLIDES.filter(function(_, i){ return hidden[i]; }).length + ' hidden</span>' +
+          '<button class="btn" type="button" data-act="2" style="margin-left:10px">Back to the slides</button>' +
+        '</div></div>';
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-step],[data-act],[data-go],[data-nudge],[data-hide]");
+    if (!b) return;
+    if (b.dataset.step != null) step = +b.dataset.step;
+    else if (b.dataset.act != null) step = +b.dataset.act;
+    else if (b.dataset.go != null) { at = +b.dataset.go; if (step === 3) step = 2; }
+    else if (b.dataset.nudge != null) at = Math.min(SLIDES.length - 1, Math.max(0, at + +b.dataset.nudge));
+    else if (b.dataset.hide != null) { if (hidden[at]) delete hidden[at]; else hidden[at] = true; }
+    draw();
+  });
+  draw();
+})();
+</script>

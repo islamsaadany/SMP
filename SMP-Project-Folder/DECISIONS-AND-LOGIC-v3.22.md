@@ -67182,6 +67182,70 @@ each direction twice. The company's own review is the deck that mattered this
 week. The opening stays El Abd's compact pair (one Foundation, one Analysis)
 rather than a unit's eight slides, which was not asked for.
 
+## §553.10 — The running order is the order the company's review runs in (2026-10-19)
+
+Islam: *"I need to be able to set the arrangement of the directions and
+capabilties which appears first and which after"*, and then, of the shape put
+back to him: *"the company picker should pick the foundation of the company
+then I pick the directions arrangement and then the capabilities arranged.
+and the grouped directions comes before the directions automatically and the
+capability grouped comes before the capabilities automatically … is that
+ok?"* It is.
+
+**TWO PLACES ALREADY ORDERED THESE, AND ONE OF THEM RENUMBERS.** Measured
+before anything was built: the plan's own Arrange (Strategy › Directions ›
+Edit, drag by the handle) reorders them and the deck follows — and
+`pillarCode` counts position within a kind, so dragging Egypt Expansion to
+the top makes it **D001 on every surface in the platform**. An order for a
+room must not rewrite the codes the year is filed under.
+
+The other is the Master presentation's running order, which already lists
+every one of El Abd's five directions and five capabilities by name
+(`dir:<id>`), draggable, stored per client as an absence. So the company's
+review reads THAT. No second control, nothing to keep in step (§53.5).
+
+**THE ORDER ONLY, NEVER THE MEMBERSHIP.** A tick in that picker says who
+presents in the MASTER FLOW. It cannot also mean "and is therefore in the
+company's own deck", or unticking a direction would silently drop it from
+the company's review of its own plan (§96.2). What the order does not name
+keeps its place in the plan, after what it does.
+
+**AND THE ROLL-CALLS ARE NOT SUBJECTS.** "Directions" and "Capabilities" are
+drawn in front of their own group automatically, because they ARE the group
+— Islam's own word, *"automatically"*. The groups then lead in the order
+their first member does, so dragging a capability above every direction
+makes Capabilities the first group, score table and all. One list, one
+answer, no second setting for "which kind comes first".
+
+**MEASURED ON EL ABD'S REAL STATE:** nothing dragged — unchanged; E-Commerce
+dragged to the front — it leads the directions and **stays D005**; a
+capability dragged above every direction — Capabilities leads, roll-call,
+its five, then the directions, and the two score tables follow the same
+order; the order cleared — straight back to the plan's. And because the
+default is an absence (§50.6), **no client moves until somebody drags**: El
+Abd, Wander and the demo all read byte-identical to main.
+
+`direction-decks` §2c asserts all three ends, MAKING the split review the
+fixture does not have (§255), and reads the client's OWN words for the two
+groups rather than the English ones — the first draft looked for "Direction"
+in a fixture that calls a pillar a Pillar, found only the capabilities, and
+reported a correct build as one that had lost a slide (§395). Shown failing
+on main's build: the stored order moves nothing there.
+
+## §553.11 — The picker's Kind column knew two kinds out of five (2026-10-19)
+
+The last red in the deck-and-flow sweep, and red on `origin/main` too:
+`master-picker` built its expectation for the Kind column as
+`FUNC : BU`. That was the whole vocabulary until §334 added capabilities,
+§481 added the company and a direction, and §553 added the company's own
+Foundation — so a picker correctly showing CAP and SECTION read as a broken
+one.
+
+Rewritten to the five kinds, and still computed from the BOARD's own lists
+and the target's own prefix (§94.8) rather than from `masterKind`, which is
+the function that draws the column and so cannot be its own witness. Green
+on both builds afterwards, which is the shape of a check fault: the product
+was right the whole time.
 ## §555 — The target is what the months come to, from the first one typed (2026-10-19)
 Islam, of a key measure four months into its monthly plan whose Target box still read the `13#` he had typed: *"when I was adding the monthly the target should be a sum of the months calculated automatically not on an entry as well."*
 
@@ -67218,6 +67282,265 @@ Islam: *"I want to enable the smo team to have the drop down of view as for the 
 
 **CHECKS.** `smp-app/checks/view-as.mjs` — 33 green, **red four ways** (`viewas-any-seat`, `viewas-unknown-ok`, `viewas-keeps-seat`, and `viewas-team-takes-super`, the new one putting the escalation itself back). `scripts/test-authorize.js` — six new assertions on the save path, 1097 passing. `SMP-Project-Folder/src/checks/viewas-smoteam.py` — a new browser check that signs in as an SMO team member and presses the real controls: **green here, 7 red across §1–§4 on the build before**, which is where the leak above was measured. `checks/viewer-switch.py`, `checks/viewas-fresh.py`, `checks/role-picker.py` and `checks/seat-grant.py` all stay green.
 
+## §554.1 — The master flow is one presentation, so it opens like one (2026-10-19)
+
+Islam, having played it: *"we need a cover slide for the whole presentation
+as we are presenting elabd q3 strategy review and before the directions I
+find the grouped directions and same for the capabilities"*.
+
+The flow was each subject's deck back to back — nineteen covers and no cover
+for the thing itself, and the directions arriving one after another with
+nothing in front of them saying what the room was about to see. The company's
+own review has had that page since §553.6; the flow gets the SAME page,
+through the same builder.
+
+**LIFTED, NOT COPIED (§53.5).** `pillarCard`, `rollCallSlide` and
+`pillarGroups` came out of `deckSlides` unchanged, so the page the flow draws
+and the page the company's review draws are one page. Proved by measurement
+rather than by reading: with the three lifted out and nothing else altered,
+every deck of all three live clients is byte-identical.
+
+**INSERTED, NOT PLACED.** The cover and the two roll-calls are not subjects
+anybody ticks: the cover opens the flow because the flow is a presentation,
+and a group's page goes in front of the first of its members because that is
+what the page is for. Islam's word for it, twice, was *"automatically"*. A
+group with nobody in the flow gets no page (§45.2, §253).
+
+The divider that used to be built beside the roll-call stayed with the DECK,
+because the flow draws the roll-calls without it.
+
+## §554.2 — Three things the picker owed whoever uses it (2026-10-19)
+
+All three are Islam's, from one message after using it on El Abd.
+
+**IT STAYS WHERE IT WAS.** *"everytime I remove something from the right the
+list jumps it needs to stay still"*. Every press repaints the whole dialog,
+so both columns were scrolled back to the top under the finger — on a flow of
+nineteen, taking out the last row put the row you were working on off the
+screen. Each column's position is read before the repaint and put back after.
+
+**IT NARROWS BY KIND.** *"on the left list I need to have filters so I can
+choose from directions or capabilities or divisions to filter the functions
+so I can select properly or all"*. The chips are built from the kinds the
+client ACTUALLY has, so a client with no divisions is not offered a chip over
+nothing (§45.2), and they are asserted to add up to the whole list — a filter
+that hides a row nobody can reach another way is worse than no filter (§96.2).
+
+**AND IT EMPTIES.** *"there should be somewhere where I reset all and bring
+all selected flow to the left as if deselect all from the right pan"*.
+Nineteen presses, or one. Drawn only while there is something to take out
+(§61).
+
+**ONE WORD FOR WHAT A SUBJECT IS, AND IT FIXED WHAT THE COLUMN SAID.** The
+filter needed the kind as a bare word; `masterKind` spelled the same question
+out again as a chip. The chip is built FROM the word now, and the word is
+read from the pillar's own stored kind — which is how it came out that **a
+capability of El Abd's read DIR in the Kind column**, all five of them,
+because a capability is presented as `dir:<id>` exactly as a direction is.
+
+**A CORRECTION TO §553.11'S OWN RECORD.** It says the rewritten Kind claim was
+"green on both builds". `master-picker` did not read `SMP_BUILT` at all, so
+both runs were this build and the second proved nothing. It reads it now, and
+on main's build the six new claims here fail as they should — the scroll one
+reading 0 where it should read 200, which is the jump Islam reported. The
+Kind claim does pass on main's build, as that record said; it was the
+verification that was worthless, not the sentence.
+
+`master-picker` §9 holds the three, and `direction-decks` §3b the flow's
+cover and pages — the capability's Kind word among them, because the demo
+client has units and so its picker holds no `dir:` row for `master-picker` to
+see it on.
+
+## §554.3 — A flow's own pages are not people presenting (2026-10-19)
+
+§554.1 gave the master flow a cover and the two roll-calls, and the presenter
+counts SUBJECTS off `data-subject` — so each of those pages took a dot of its
+own, a pill reading **FL**, and turned "1 of 3" into "1 of 4". The
+contingency pack counted twenty-one subjects where twenty present.
+
+Caught by `master-presentation` and `contingency` rather than by looking at
+it, which is what they are for.
+
+Each page is stamped with what it INTRODUCES — the cover with the first
+subject of the flow, a group's page with the first of that group — and the
+flow's own entries are kept out of `DECK.targets` and `DECK.flow`. So the
+strip, the dots, the pills and the pack read exactly as they did before the
+pages existed, and each page rides inside the section it opens.
+
+**BOTH ATTRIBUTES, NOT ONE.** The first fix rewrote `data-subject` and the
+first dot went on reading `flow:cover`: a stop takes its name from
+`data-subject-name` and falls back to the target only when there is none.
+
+## §555 — The company's performance reads like a unit's (2026-10-19)
+
+Islam, of a direction owner: *"he should see the performance of the
+directions, like we see it in the business units format in Raya, as if he has
+a business unit of two directions. He sees the two directions on the left,
+and the performance is clear"* — and of his own view: *"for the super user or
+the SMO … it should show the performance, like the business units and
+directions, on the left, and the performance is clear in front of me"*.
+
+**TWO FAULTS, AND THE FIRST DRAFT FIXED NEITHER.** The page already had a
+Directions section and a Capabilities section, so the first thing written
+here was a SECOND pair beside them — added before the existing ones were
+looked at. Reverted. What the two sections actually drew was a grid of gauge
+cards, every direction's measures and tactics at once; and the page opened on
+the overall figures every time, so even that was one press away.
+
+So: **the sections draw `unitPerfRail`**, the rail and the pane a unit's page
+has had since the beginning. It takes the company box exactly as it takes a
+unit — §416's not-yet-running rows, §517's narrowing to a part owner's own,
+the execution line and the owner all come with it (§53.5). `drawHalf` has
+already set the half, so the rail asks for nothing new. The gauge grid is
+deleted rather than kept beside it: the pane says everything a card said, and
+two readings of one thing is §87's twins.
+
+**AND THE PAGE LANDS ON THEM.** A landing, not an override — once somebody
+chooses a section it stays chosen (§124).
+
+**A SECOND DEAD END WORTH RECORDING.** Before finding `drawHalf`, this change
+threaded an optional `half` argument through `halfWord`, `halfFilter`,
+`partFilter`, `partItems`, `unitRailSubj`, `unitRailKey`, `unitRailPick` and
+`unitPerfRail` so two rails could be drawn on one page. `drawHalf` already
+does exactly that, by setting `PILLAR_HALF` around the call — eight functions
+of new surface for a thing the codebase had. All of it reverted (§24).
+
+**MEASURED:** El Abd opens on its five directions, in a rail, with the pane
+in front; Capabilities is the tab beside it. **Wander now opens on its
+capabilities rather than the overall figures**, because those are its
+pillars — a real change to a live client's landing, stated rather than
+discovered. Raya is untouched: it has units, so it has no company-pillar
+section at all.
+
+## §556 — One way in: the flow, the slides, then the room (2026-10-19)
+
+Islam, after playing it: *"in the master presentation it takes me directly to
+the presentation, not the slides management, which I think is a better way in
+general to do — even for the users that have the present button, it takes
+them to the slides management and then they move to the presentation, not 2
+buttons"*, and then: *"you should remove the one 'present the whole company'.
+The first button should be master presentation, where it takes me to the
+flow, and then when I say go it shows me the manage slides, and then it takes
+me to the presentation when I say present."*
+
+**WHAT WAS WRONG WITH TWO DOORS.** The first time anybody saw their deck was
+in front of the room. "Present the whole company" was a second door onto the
+same evening, beside a flow that already carries the company last — and the
+flow's own button went straight to the projector, so the arrangement somebody
+had just made could not be looked at before it was shown.
+
+**THE SHAPE, AND IT IS HIS.** Master presentation is the first and only
+entry; the picker's button reads **Go to the slides**; that opens the slide
+view on the WHOLE FLOW; Play from there opens the show, and leaving the show
+comes back (§295, already true). A subject's own Present does the same with
+its own deck.
+
+**THE EDITOR HOLDS A FLOW, AND THE SUBJECT IS STILL A SUBJECT.** `SLED.flow`
+is the list; `SLED.target` stays the company. Each slide is stamped with
+whose it is as it is built, and the eye hides against THAT subject — so a
+direction's slide can be taken out from the flow view without the editor
+pretending to be about that direction. Islam drew the line himself: *"in the
+flow slide view I can hide and I can add final slides, but the addition on
+the sections as directions or capabilities should be from the direction or
+capability presentation itself"*, which is exactly what keeping `target` on
+the company gives.
+
+**AND NOBODY LOSES THE PROJECTOR.** The slide view is `canSpeakFor`, so
+anyone who cannot edit a deck still presses Present and gets the deck, as
+before — a control that opens nothing is worse than two controls (§61).
+
+**MEASURED, not reasoned:** on a unit, Present opens the editor on 31 rows
+and Play opens 31 slides with the way back reading *Back to slides*; on El
+Abd, the flow opens as 16 rows across three subjects, every row carrying its
+own subject, and hiding a direction's cover from there stores against that
+direction and drops it from the played deck.
+
+**FROM ISLAM'S OWN PAGE** (`Fouad_2026_2027_Customer_Story_Motion.html`, read
+rather than guessed at): thumbnails beside the stage, Present as the single
+primary button, a grid of all slides for a deck too long for a strip, hide on
+the slide you are looking at, blank, and the keys written across the bar. The
+mockup in `design-mockups/one-flow/` is the agreed shape; the thumbnails,
+grid and key line are the next slice, not this one.
+
+## §556.1 — One door, not two (2026-10-19)
+
+Islam, of the menu after §556: *"why do we still have manage slides?"*
+
+Because the press above it used to open the projector and this opened the
+editor. Since §556 the press opens the editor — the same screen, the same
+slides, the same Play — so this was the second control onto one act (§24,
+§87). It is gone from all three menus: the company's, a direction owner's,
+and a unit's or function's.
+
+Nothing goes with it. Adding and arranging picture slides is what that screen
+does, and it is reached by pressing Present; anybody who cannot edit a deck
+never saw the entry anyway (it was `canSpeakFor`) and still gets the deck.
+
+## §556.2 — The slide view, as Islam's own page has it (2026-10-19)
+
+*"the view here is not what we agreed on in the mockup"*, of the flow's slide
+view beside `design-mockups/one-flow/`. Three things were missing and one was
+wrong.
+
+**ALL SLIDES.** His Fouad page carries a grid, and a flow of forty-nine
+slides is past the point where scrolling a rail finds anything. It covers the
+rail and the stage together, because it IS the deck — a panel beside them
+would be a third place to look. It reads the same rows the rail reads
+(§53.5), and it says which are hidden, because that is what you open it to
+check. `G` opens it; `Esc` closes the grid before it closes the editor, since
+Escape from a grid means *put this away*.
+
+**THE KEYS, WRITTEN DOWN.** Along the bottom, as his page has them: move,
+all slides, present, done. Nobody should have to be told them.
+
+**PRESENT, NOT PLAY.** One word for one act, and it is the word on the button
+that got you here.
+
+**AND ADD, IN A FLOW, IS A FINAL SLIDE.** The selected row may be a
+direction's, and a picture dropped there would be the office writing into
+somebody else's deck from a screen that is not about them. In a flow the
+button reads *Add a final slide*, says where it lands, and lands at the end
+— which is the company's own ground, and exactly the line Islam drew: *"the
+addition on the sections as directions or capabilities should be from the
+direction or capability presentation itself"*.
+
+Measured: the flow's bar reads All slides · Present · Done; the grid draws 21
+cells for a four-subject flow and Escape closes it without closing the
+editor; and every deck of all three live clients is unchanged, because none
+of this touches what a deck holds.
+
+## §556.3 — The slide view, laid out as Islam's own page lays it out (2026-10-19)
+
+*"WHY ON EARTH YOU DIDN'T FOLLOW THE GUIDELINES IN THE HTML?!!!"* — fair.
+§556.2 bolted a grid and a line of keys onto our editor and left everything
+else where it was. He had handed over a working page and asked for its shape;
+what came back was our old chrome with two parts added.
+
+Read beside `Fouad_2026_2027_Customer_Story_Motion.html`, five things were
+wrong, and all five are now the way his page has them:
+
+- **A quiet header**, not a coloured band: who is presenting on the left, the
+  buttons on the right, **Present** the one filled button, Slides and Grid
+  beside it.
+- **The thumbnail IS the label.** A line of text under every preview said
+  what the preview already showed, and on a flow of forty-nine it pushed
+  three slides off the screen. The number sits outside; the name is on the
+  row's title and on the bar under the stage, where somebody reading it is
+  looking.
+- **One bar under the stage** carrying the counter, the slide's name and the
+  keys — his order, his three things.
+- **A progress rule over the stage and arrows at its edges.** The arrows call
+  the same stepper the keyboard calls (§53.5).
+- **Adding sits at the foot of the rail.** It was the loudest thing on a
+  screen whose job is to look at the deck. His page has no add at all; ours
+  needs one, and the foot is where it belongs.
+
+**AND THE PARAGRAPH UNDER THE STAGE IS GONE** — the same sentence under every
+one of forty-nine built slides, explaining a screen that now explains itself
+(§24, §15.1).
+
+`Slides` toggles the rail, `H` hides the slide in front of you by pressing the
+row's own eye (§53.5 — one act, one handler).
 ## §556 — El Abd reports its directions and capabilities on one rail (2026-10-19)
 Islam, of El Abd's company Reporting page as the SMO: *"shall we merge the directions and pillars for better usabiilty in one rail?"*, then *"that's for elabd mainly"* with a screenshot of the two blocks.
 
@@ -67243,3 +67566,21 @@ Islam, of El Abd's company Reporting page as the SMO: *"shall we merge the direc
 3. **Existing processes**: those that already name an approver start as Published (with a baseline version 1); the rest start as Draft.
 4. **Review interval**: 12 months from publishing by default, changeable per process.
 5. **Approver**: chosen from the People register, must have an email and a role there; the approval records name and role as they stood. The approver cannot be the person who sends it for review.
+
+## §557 — A breakdown reports as Target and Reported, two columns per column (2026-10-19)
+
+Islam, of El Abd's D001 *Maximizing Current Stores* on Reporting: *"the reporting in elabd target mix needs to appear in the form of target and report not 1 column"*. Mockup `design-mockups/elabd-breakdown-columns/2026-10-19_target-and-reported.html`, then *"go ahead"*.
+
+**WHAT IT WAS.** §343 drew each breakdown column as ONE cell on Reporting: the box, with `/ 13%` in `.subhd` stacked under it. The Key Measures table on the same pane has always read *YTD Target* beside *Reported*, so the one pane asked for figures two different ways.
+
+**WHAT IT IS.** Every breakdown column becomes a PAIR: the column's own name and direction (*Target Mix% ≥*) heading its target as a read-only figure (`td.num`, `tgtShown`), then *Reported* heading the box. One pair per column, in the plan's order; the note stays one per row at the end. An unasked cell (no target) is a dash in both halves. The target is the plan's figure, unprorated, exactly as before — `bdCellScore` passes no compile, and §344's *YTD Target* treatment was never this table's.
+
+**AND THE UNIT GOES BACK INSIDE THE BOX.** `bdEntry` closed `.entry` before writing `.unitsuf`, so the unit — a flex block on its own — fell out under the box as a grey strip the width of the cell: the `%` bar under every category on Islam's screenshot. `repEntry` has always written it inside; this one now does the same. Found while drawing the mockup and shown on it, so it was signed off with the rest rather than riding along unsaid.
+
+**WHERE.** Reporting's breakdown table only (`reportPillarPane`), which is the one builder for every unit, function, capability and company that has a breakdown. Strategy, Performance (`bdReadTable`'s `figure / target` pair), the deck and the workbooks are untouched. Nothing stored moves, nothing is scored differently, no tally or permission changes, and no save is judged differently, so nobody is signed out.
+
+**HEADER CHOSEN, SAID.** The target column is headed by the column's own name rather than a fixed *Target*: with one column, a fixed word would lose the only thing saying what the figures are, and El Abd's column is already called *Target Mix%*. With several columns *Reported* repeats, once per pair; the platform has no two-row header to group them under, and rule A13 says follow what the platform already does rather than invent one here.
+
+**VERIFIED.** `pillar-breakdown.py` green, and **red 4** on the build before (the head, the target's column, the stacking, the unit outside the box). Measured on Reporting with one column and with three at 1600, 1440, 1280, 1100 and 1000: no sideways scroll at any width, a row **88px → 55px**. A function that plans in pillars (Merchandising) probed through `renderFnReport`: the same head, so the unit and function sides agree by construction (A15). `capability-report-column`, `fn-report-gate`, `my-reporting`, `report-blockers`, `report-chrome`, `report-keys`, `report-note-wrap`, `report-saves`, `reported-note` green on both builds; `reporting-ytd-target` red 1 on both, the same line (*"...and the same cell"*), already recorded under §556. `qa.py` through `qa-run.py` — 33 viewers / 181 destinations / ERRORS none.
+
+**MERGED TO `main`** 2026-10-19, Islam: *"merge to main"*. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.48-report-one-rail` → **`smp-shell-v6.49-breakdown-target-reported`** as a commit `main` alone holds (§91); the name was confirmed free on every remote ref. Pages only: no save is judged differently, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`849fb0b159a9f53c`**, `/shell.js` **4,969,724** bytes; after it they should read **`ece8b4a15bfa4d03`** and **4,970,739**, and the served `shell.js` should carry the new `"Reported"` pair.

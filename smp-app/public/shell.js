@@ -28121,11 +28121,17 @@ function companyPresentMenu(){
   if (!office && !mine.length) return "";
   var items;
   if (office) {
-    var slides = canSpeakFor("group")
-      ? '<button role="menuitem" data-picedit="unit" data-pickey="group">Manage slides' +
-          (pslidesOf("group").length ? ' <span class="pill kind">' + pslidesOf("group").length + '</span>' : '') +
-          '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-      : "";
+    /* ── ONE DOOR, NOT TWO (§556.1) ──────────────────────────────────
+       Islam, of the menu after §556: *"why do we still have manage
+       slides?"* Because the press above used to open the projector and
+       this opened the editor. It opens the editor now — the same screen,
+       the same slides, the same Play — so this is the second control onto
+       one act that §556 exists to remove (§24, §87).
+
+       NOTHING IS LOST WITH IT. Adding and arranging picture slides is
+       what that screen does; it is now reached by pressing Present, and
+       anybody who cannot edit a deck never saw this entry either. */
+    var slides = "";
     var dl = SMPRules.mayDownloadPlan(world(), viewer(), "group")
       ? '<button role="menuitem" data-dlpptx="group">Download the plan' +
         '<span class="dlsub">The plan as editable slides (.pptx) &mdash; no reported figures</span></button>'
@@ -28134,24 +28140,29 @@ function companyPresentMenu(){
       ? '<button role="menuitem" data-master="1">Master presentation' +
         '<span class="dlsub">Directions, capabilities and functions in order, with timers; the company last</span></button>'
       : "";
-    items = '<button role="menuitem" data-present="group">Present the whole company' +
-        '<span class="dlsub">The short company review: foundation, analysis, directions, performance</span></button>' +
+    /* ── ONE WAY IN (§556) ───────────────────────────────────────────
+       Islam: *"you should remove the one 'present the whole company'. The
+       first button should be master presentation, where it takes me to the
+       flow, and then when I say go it shows me the manage slides, and then
+       it takes me to the presentation when I say present"*.
+
+       "Present the whole company" opened the company's own review straight
+       onto the projector — a second door onto the same evening, beside a
+       flow that already carries the company last. The flow is the door
+       now, and it is first. */
+    items = master +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
-      slides + dl + master;
+      slides + dl;
   } else {
     var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
     items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +
         '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
       '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
         '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
-      mine.filter(function(p){ return canSpeakFor("dir:" + p.id); }).map(function(p){
-        var n = pslidesOf("dir:" + p.id).length;
-        return '<button role="menuitem" data-picedit="dir" data-pickey="' + esc(p.id) + '">Manage slides' +
-          (mine.length > 1 ? ' &middot; ' + esc(p.name) : '') +
-          (n ? ' <span class="pill kind">' + n + '</span>' : '') +
-          '<span class="dlsub">Add your own picture slides to your ' + esc(L1("pillar")) + '</span></button>';
-      }).join("");
+      /* §556.1: and no Manage slides beside it — Present IS the editor
+         now, and a direction owner's press lands on their own slides. */
+      "";
   }
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
@@ -28162,12 +28173,9 @@ function presentMenu(kind, key){
   /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
-  var slides = canSpeakFor(target)
-    ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
-        'Manage slides' + (pslidesOf(target).length
-          ? ' <span class="pill kind">' + pslidesOf(target).length + '</span>' : '') +
-        '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-    : "";
+  /* §556.1: Present opens the editor, so a second entry onto it is a
+     second control for one act. */
+  var slides = "";
   /* ONE ATTRIBUTE, CARRYING THE TARGET. It used to be `data-present="1"` for a
      unit and `data-present-fn="<key>"` for a function, and the unit handler
      read `UNITS[current]` — so a FUNCTION THAT PLANS IN PILLARS could not be
@@ -29384,29 +29392,6 @@ function whereNext(keys){
     /* §517: their own directions only — the code still read off the real
        position below, so it is the one every other page shows. */
     if (dpf) ditems = ditems.filter(dpf);
-    var dirs = ditems.map(function(p, di){
-      var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
-      var code = pillarCode(dtu, dtu.items.indexOf(p));
-      var mrows = SMPRules.shown(p.measures || []);
-      var pd = miniTable([L1("measure"), "Target", "Actual", "Progress"],
-        mrows.map(function(m){
-          var sc = measureScore(m);
-          return '<tr><td>' + esc(m.name) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
-            '<td class="num">' + figShown(m) + '</td>' +
-            '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Mean across <b>' + mrows.length + '</b> ' + L("measure") + ': <b>' + pct(pf) + '</b>.</p>';
-      var trows = SMPRules.shown(p.tactics || []);
-      var ed = miniTable([L1("tactic"), "Delivered"],
-        trows.map(function(t){
-          return '<tr><td>' + esc(t.name) + '</td><td class="num">' + pct(tacticProgress(t)) + '</td></tr>';
-        }).join("")) +
-        '<p class="sub">Delivered <b>' + pct(ex) + '</b> against <b>' + pct(pl) + '</b> planned.</p>';
-      return '<div class="gwrap" data-oi="' + di + '" data-topdir="' + esc(p.id || "") + '">' +
-        splitCard(esc(code) + ' ' + esc(p.name || ""),
-          plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
-          pf, ex, pl, pd, ed, p.name || code) + '</div>';
-    }).join("");
     /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
        empties this list for a part owner who owns no direction — which
        before §520 could not happen, since the only part owner was a
@@ -29415,9 +29400,29 @@ function whereNext(keys){
        the "Nothing to show yet." note below could never fire (§45.2).
        Nobody else is reached: with no filter `ditems` is `itemsNow` and
        `topHasPlan()` has already said there is a plan. */
+    /* ── THE COMPANY READS LIKE A UNIT HERE TOO (§555) ─────────────
+       Islam, of a direction owner: *"he should see the performance of the
+       directions, like we see it in the business units format in Raya, as
+       if he has a business unit of two directions. He sees the two
+       directions on the left, and the performance is clear"* — and of his
+       own: *"for the super user or the SMO … it should show the
+       performance, like the business units and directions, on the left,
+       and the performance is clear in front of me"*.
+
+       This section was a grid of gauge cards, every direction's measures
+       and tactics at once. A unit's page has had the rail and the pane
+       since the beginning, and `unitPerfRail` takes the company box
+       exactly as it takes a unit — §416's not-yet-running rows, §517's
+       narrowing to a part owner's own and the execution line all come
+       with it (§53.5). `drawHalf` has already set the half, so the rail
+       asks for nothing new.
+
+       THE GAUGE GRID GOES. Keeping both would be two readings of one
+       thing, which is §87's twins — and the pane says everything a card
+       said, with room for the measures' own table. */
     return ditems.length
       ? { dir: true, t: halfWord(dtu), h: section("", halfWord(dtu), null,
-            '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') }
+            unitPerfRail(dtu)) }
       : null;
   };
   if (topHasPlan() && planOn("group") && topWay() !== "projects") {
@@ -29461,9 +29466,18 @@ function whereNext(keys){
      presented from here once it has a plan, through the one menu every
      subject uses (§53.5). No plan, no menu: the page is what it was. */
   var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
+  /* ── AND IT OPENS ON THEM, NOT ON THE AVERAGES (§555) ───────────────
+     The rail was one press away and the page opened on the overall figures
+     every time, which is why Islam could not find it. A LANDING, not an
+     override: once somebody chooses a section it stays chosen (§124). */
+  if (!GSEC_PICKED) {
+    var land = SECS.map(function(x, i){ return x.dir ? i : -1; })
+      .filter(function(i){ return i >= 0; })[0];
+    if (land != null) GSEC = land;
+  }
   return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
-var GROUP_SECTIONS = [], GSEC = 0;
+var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
 
 /* ── GROUP · Temple ───────────────────────────────────────────────
    A view, not a scoreboard: roof, aspiration, key objectives with targets
@@ -33469,7 +33483,11 @@ function renderReport(u, opt){
      `data-rep`, so the shell's one handler resolves the row and then the
      cell. The unit rides with it exactly as it does for a measure, so the
      figure is stored joined and every screen downstream reads it whole
-     (§199). */
+     (§199).
+     §557: AND THE UNIT SITS INSIDE THE BOX, as `repEntry` draws it. It was
+     written after the box closed, so `.unitsuf` (a flex block) fell out under
+     it as a grey strip the width of the cell — on El Abd's Reporting page,
+     a "%" bar beneath every category's figure. */
   var bdEntry = function(x){
     var t = SMPRules.bdTarget(x.obj, x.col);
     var unit = splitTarget(t).unit;
@@ -33483,8 +33501,8 @@ function renderReport(u, opt){
       '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + ' ' +
-      esc(String(x.col.name || "").trim() || "figure") + '"></span>' +
-      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '');
+      esc(String(x.col.name || "").trim() || "figure") + '">' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
@@ -33650,14 +33668,22 @@ function renderReport(u, opt){
     /* §343: the breakdown, between the measures it is part of and the
        tactics it is not — the same place it sits on the other two panes, or
        somebody entering figures meets the table in a different order from
-       the one they planned it in. The target sits BEHIND each box so nobody
-       has to remember it, and a row's note is asked once however many of its
-       figures are at risk. */
+       the one they planned it in. A row's note is asked once however many of
+       its figures are at risk.
+       §557: TARGET AND REPORTED, TWO COLUMNS PER BREAKDOWN COLUMN. Islam, of
+       El Abd's categories: *"needs to appear in the form of target and report
+       not 1 column"*. §343 stacked the box over `/ 13%` in one cell; the Key
+       Measures table on this same pane has always read *YTD Target* beside
+       *Reported*, so the breakdown now reads the same way — the column's own
+       name and direction head its target, *Reported* heads the box beside it,
+       one pair per column in the plan's order. The target is the plan's
+       figure, unprorated, exactly as before (`bdCellScore` passes no
+       compile). An unasked cell is a dash in both. */
     var bdTable = bds.length
       ? '<h4 class="mini">' + esc(SMPRules.bdName(p)) + '</h4>' +
         miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-            .concat(SMPRules.bdCols(p).map(function(c){
-              return { h:bdColHead(p, c), cls:"cc" }; }))
+            .concat([].concat.apply([], SMPRules.bdCols(p).map(function(c){
+              return [{ h:bdColHead(p, c), cls:"cc" }, { h:"Reported", cls:"cc" }]; })))
             .concat([{h:"Note", cls:""}]),
           SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
             .map(function(r, i){
@@ -33667,11 +33693,12 @@ function renderReport(u, opt){
               '<td>' + esc(r.name) + '</td>' +
               SMPRules.bdCols(p).map(function(c){
                 if (!SMPRules.bdAsked(r, c))
-                  return '<td class="cc"><span class="nobody">&mdash;</span></td>';
+                  return '<td class="num"><span class="nobody">&mdash;</span></td>' +
+                         '<td class="cc"><span class="nobody">&mdash;</span></td>';
                 var x = { id:r.id, obj:r, col:c, kind:"bdcell",
                           owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
-                return '<td class="cc">' + bdEntry(x) +
-                  '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
+                return '<td class="num">' + tgtShown(SMPRules.bdTarget(r, c)) + '</td>' +
+                  '<td class="cc">' + bdEntry(x) + '</td>';
               }).join("") +
               '<td class="notecol">' + noteCell(ri) + '</td></tr>';
           }).join(""))
@@ -48742,6 +48769,10 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || ""), r = boxRef(t);
+  /* §554.1: and a part of the FLOW that is not a box either — its cover,
+     and a group's roll-call in front of the first of its members. Answered
+     before `boxRef`, which would read an unknown prefix as a business unit. */
+  if (t.indexOf("flow:") === 0) return flowPartHtml(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
   if (r.kind === "dir") return dirDeckHtml(t);
   /* §553: and a part of the order that is not a box at all. */
@@ -48981,6 +49012,159 @@ function deckBoxName(u){
   return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
 }
 
+function pillarCard(u, p, i){
+  /* §542: on a box SHOWN APART, an internal pillar says what it is where
+     it has nothing else to say — exactly as a capability's own card does
+     below, so a client whose capabilities have become pillars reads the
+     roll-call it read when they were records. Its own sub-line still wins.
+
+     THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
+     six of the worked example's ten units carry a pillar marked Capability
+     in one joined list, and the first draft of this line put the word
+     "Capability" under every one of them on their decks. checks/
+     deck-figures.py caught it on the heading below; the same mistake was
+     here, one line up, and the same guard closes both. */
+  var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
+  return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
+    '<span class="pcard-n">' + esc(p.name) + '</span>' +
+    (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
+    /* §416: the years each direction runs in, and a later one says when. */
+    (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+    '</div>';
+}
+
+/* ── THE ROLL-CALL, FOR WHOEVER IS DRAWING IT (§554.1) ──────────────────
+   It was written inside `deckSlides`, which is the only place that needed
+   it until Islam asked for the same page in the MASTER flow: *"before the
+   directions I find the grouped directions and same for the capabilities"*.
+   Lifted out unchanged so the flow shows the same slide the company's own
+   review shows, and a change to one is a change to both (§53.5). */
+function groupSize(g){
+  return g.ix.length + (g.cards ? boardCapTargets().length : 0);
+}
+function rollCallSlide(u, g){
+  var n = groupSize(g);
+  if (!n) return "";
+  return '<section class="dslide"' +
+    anch(g.names, "After the " + g.plain + " names") +
+    '><h2>' + g.many + '</h2>' +
+    '<div class="pcards" style="--n:' + n +
+      ';--c:' + pillarCols(n) +
+      ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+    g.ix.map(function(x){ return pillarCard(u, x.p, x.i); }).join("") +
+    g.cards + '</div></section>';
+}
+
+/* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
+   Lifted out of `deckSlides` whole, so the master flow can draw the same
+   roll-calls the company's own review draws rather than a second pair
+   that looks like them (§53.5). `short` is the caller's: the company's
+   review splits its two kinds, a unit's deck does not. */
+function pillarGroups(u, short){
+var capCards = !short ? "" : boardCapTargets().map(function(t){
+  var c = capById(t.slice(4)), nm = placeLabel(t);
+  return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
+    '<span class="pcard-n">' + esc(nm) + '</span>' +
+    '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
+}).join("");
+/* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+   One group, as every deck has had, EXCEPT on the company's own review of
+   a plan that is shown apart: there the directions and the capabilities
+   are two things, and reading all ten under one heading called Directions
+   was not a wording slip — the standing slide below counted ten of them
+   and said "10 Directions, by their measures", five of which were
+   capabilities.
+
+   THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+   roll-call or the score table stays where its owner put it; the second
+   group's two slides are new ground and carry new anchors (§96.2).
+
+   A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+   directions and no capabilities reads exactly as it does today. */
+var groups;
+if (short && boxSplit(u)) {
+  var dirs = [], caps = [];
+  u.items.forEach(function(p, i){
+    (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+  });
+  /* ── THE RUNNING ORDER IS THE ORDER (§553.10) ──────────────────────
+     Islam: *"the company picker should pick the foundation of the company
+     then I pick the directions arrangement and then the capabilities
+     arranged. and the grouped directions comes before the directions
+     automatically and the capability grouped comes before the
+     capabilities automatically"*.
+
+     THE PICKER ALREADY HOLDS THEM. The Master presentation's running
+     order lists every direction and every capability by name, draggable,
+     stored per client as an absence (§50.6) — `dir:<id>` for each. So the
+     company's own review reads THAT, and there is no second control to
+     keep in step (§53.5). The alternative was the plan's own Arrange,
+     which works today and renumbers as it goes: drag Egypt Expansion to
+     the top and it becomes D001 on every surface in the platform. An
+     order for a room must not rewrite the codes the year is filed under.
+
+     THE ORDER ONLY, NEVER THE MEMBERSHIP. A tick in that picker says
+     who presents in the MASTER FLOW; it cannot mean "and is therefore in
+     the company's own deck", or unticking a direction would silently
+     drop it from the company's review of its own plan (§96.2). Anything
+     the order does not name keeps its place in the plan, after those it
+     does.
+
+     AND THE ROLL-CALLS ARE NOT IN THE PICKER. "Directions" and
+     "Capabilities" are drawn in front of their own group, automatically,
+     because they are the group — not a subject somebody places. */
+  var flow = masterOrder();
+  var at = function(x){
+    var k = flow.indexOf("dir:" + x.p.id);
+    return k < 0 ? flow.length + x.i : k;
+  };
+  var byFlow = function(a, b){ return at(a) - at(b); };
+  dirs.sort(byFlow); caps.sort(byFlow);
+  groups = [
+    { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+      one: L1("pillar"), head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: "" },
+    { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+      one: L1("capability"), head: L("capability","bu"),
+      names: "capnames",    score: "caps",    cards: capCards }
+  ].filter(function(g){ return g.ix.length || g.cards; });
+  /* AND THE GROUPS LEAD IN THE ORDER THEIR FIRST MEMBER DOES, so dragging
+     a capability above every direction makes Capabilities the first
+     group — one list, one answer, no second setting for "which kind
+     comes first" (§53.5). */
+  groups.sort(function(a, b){
+    return (a.ix.length ? at(a.ix[0]) : flow.length + 99) -
+           (b.ix.length ? at(b.ix[0]) : flow.length + 99);
+  });
+} else {
+  var bothKinds = !!capCards ||
+    (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+  groups = [{
+    ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+    /* §542: the one heading names both kinds whether the capabilities are
+       records beside the list or pillars inside a list SHOWN APART —
+       never because a joined list happens to hold a marked row (see the
+       sub-line above, and checks/deck-figures.py, which went red on
+       exactly that). */
+    many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+    /* The anchor's label is PLAIN TEXT, not the heading: the heading
+       carries `&amp;`, and a label is escaped on its way into the
+       attribute, so the rail would have read "Directions &amp;amp;
+       Capabilities". */
+    plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+    one: L1("pillar"),
+    /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+       named both kinds (§542); the table below has always been headed
+       with the pillar word alone, and widening it here would have moved
+       a live client's slide for nothing. */
+    head: L("pillar","bu"),
+    names: "pillarnames", score: "pillars", cards: capCards
+  }];
+}
+
+  return groups;
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -49212,110 +49396,25 @@ function deckSlides(u){
      takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
      from the whole list and must keep doing so when the list is shown in two
      halves; the row's own counter is separate and restarts per table. */
-  function pillarCard(p, i){
-    /* §542: on a box SHOWN APART, an internal pillar says what it is where
-       it has nothing else to say — exactly as a capability's own card does
-       below, so a client whose capabilities have become pillars reads the
-       roll-call it read when they were records. Its own sub-line still wins.
-
-       THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
-       six of the worked example's ten units carry a pillar marked Capability
-       in one joined list, and the first draft of this line put the word
-       "Capability" under every one of them on their decks. checks/
-       deck-figures.py caught it on the heading below; the same mistake was
-       here, one line up, and the same guard closes both. */
-    var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
-    return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
-      '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
-      /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
-      '</div>';
-  }
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  var capCards = !short ? "" : boardCapTargets().map(function(t){
-    var c = capById(t.slice(4)), nm = placeLabel(t);
-    return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
-      '<span class="pcard-n">' + esc(nm) + '</span>' +
-      '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
-  }).join("");
+  /* The divider belongs to the deck, not to the group reader: the master
+     flow draws the roll-calls without it (§554.1). */
   if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
-     One group, as every deck has had, EXCEPT on the company's own review of
-     a plan that is shown apart: there the directions and the capabilities
-     are two things, and reading all ten under one heading called Directions
-     was not a wording slip — the standing slide below counted ten of them
-     and said "10 Directions, by their measures", five of which were
-     capabilities.
-
-     THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
-     roll-call or the score table stays where its owner put it; the second
-     group's two slides are new ground and carry new anchors (§96.2).
-
-     A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
-     directions and no capabilities reads exactly as it does today. */
-  var groups;
-  if (short && boxSplit(u)) {
-    var dirs = [], caps = [];
-    u.items.forEach(function(p, i){
-      (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
-    });
-    groups = [
-      { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
-        one: L1("pillar"), head: L("pillar","bu"),
-        names: "pillarnames", score: "pillars", cards: "" },
-      { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
-        one: L1("capability"), head: L("capability","bu"),
-        names: "capnames",    score: "caps",    cards: capCards }
-    ].filter(function(g){ return g.ix.length || g.cards; });
-  } else {
-    var bothKinds = !!capCards ||
-      (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
-    groups = [{
-      ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
-      /* §542: the one heading names both kinds whether the capabilities are
-         records beside the list or pillars inside a list SHOWN APART —
-         never because a joined list happens to hold a marked row (see the
-         sub-line above, and checks/deck-figures.py, which went red on
-         exactly that). */
-      many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
-      /* The anchor's label is PLAIN TEXT, not the heading: the heading
-         carries `&amp;`, and a label is escaped on its way into the
-         attribute, so the rail would have read "Directions &amp;amp;
-         Capabilities". */
-      plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
-      one: L1("pillar"),
-      /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
-         named both kinds (§542); the table below has always been headed
-         with the pillar word alone, and widening it here would have moved
-         a live client's slide for nothing. */
-      head: L("pillar","bu"),
-      names: "pillarnames", score: "pillars", cards: capCards
-    }];
-  }
+  var groups = pillarGroups(u, short);
 
   if (pOn) groups.forEach(function(g){
-    var extra = g.cards ? boardCapTargets().length : 0;
-    var n = g.ix.length + extra;
-    if (!n) return;
-    S.push('<section class="dslide"' +
-      anch(g.names, "After the " + g.plain + " names") +
-      '><h2>' + g.many + '</h2>' +
-      '<div class="pcards" style="--n:' + n +
-        ';--c:' + pillarCols(n) +
-        ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
-      g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
-      g.cards + '</div></section>');
+    if (!groupSize(g)) return;
+    S.push(rollCallSlide(u, g));
     /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
        Islam, having been shown Raya's Mobile beside El Abd's review:
        *"yes I want elabd as a unit"*.
@@ -50437,7 +50536,12 @@ function deckBuild(target){
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
   deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
+  /* The company by its own name (§553.8's rule, reaching the strip under the
+     room): the slides it adds itself were labelled "the group" there, which
+     is the word Islam struck out — "there is nothing called elabd review as
+     a group". */
+  var org = String((GROUP && GROUP.org) || "").trim();
+  var name = (target === "group" && org) ? org : placeLabel(target);
   [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
     sl.dataset.subject = target;
     sl.dataset.subjectName = name;
@@ -50459,12 +50563,45 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
+     §554.1's cover and roll-calls are slides, not people presenting — and
+     the presenter counts SUBJECTS off `data-subject`, so each of them took
+     a dot of its own, a pill reading "FL", and turned "1 of 3" into
+     "1 of 4". Found by the checks rather than by looking, which is the
+     point of them.
+
+     EACH ONE IS STAMPED WITH WHAT IT INTRODUCES: the cover with the first
+     subject of the flow, a group's page with the first of that group. So
+     the strip, the dots and the pills read exactly as they did before the
+     pages existed, and the pages ride inside the section they open. */
+  var slides = [].slice.call(root.querySelectorAll(".deck .dslide"));
+  for (var i = slides.length - 1; i >= 0; i--) {
+    var sub = slides[i].dataset.subject || "";
+    if (sub.indexOf("flow:") !== 0) continue;
+    /* …and marked as the flow's own, so the clock can tell it is nobody's
+       time (§556.9): stamped with the first direction, the cover was
+       spending that direction's minutes before it had begun. */
+    slides[i].dataset.flowpart = "1";
+    var next = slides[i + 1];
+    if (next && next.dataset.subject) {
+      slides[i].dataset.subject = next.dataset.subject;
+      /* BOTH, because the strip names a stop from `subjectName` and falls
+         back to the target only when there is none — so rewriting the
+         subject alone left the first dot reading "flow:cover". */
+      if (next.dataset.subjectName) slides[i].dataset.subjectName = next.dataset.subjectName;
+      else slides[i].removeAttribute("data-subject-name");
+    } else {
+      slides[i].removeAttribute("data-subject");
+      slides[i].removeAttribute("data-subject-name");
+    }
+  }
   /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
      `.dslide` siblings and leaves it alone. */
-  DECK.targets = list.slice();
+  /* …and they are not in the list of who is presenting either (§554.3). */
+  DECK.targets = list.filter(function(t){ return String(t).indexOf("flow:") !== 0; });
   DECK.clock = null;
   clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
@@ -50486,7 +50623,9 @@ function openDeckWith(titleHtml, targets, from){
   var ex = root.querySelector("[data-dexit]");
   ex.textContent = back ? "Back to slides" : "Exit";
   ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
-  DECK.flow = list.length > 1 ? list : null;
+  /* §554.3: and the stops are the subjects, so the flow's own pages are
+     not in the list the strip is built from either. */
+  DECK.flow = DECK.targets.length > 1 ? DECK.targets : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
@@ -50625,11 +50764,66 @@ function contFlowTargets(){
   return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
 }
 
+/* ── THE FLOW IS ONE PRESENTATION, SO IT OPENS LIKE ONE (§554.1) ────────
+   Islam, having played it: *"we need a cover slide for the whole
+   presentation as we are presenting elabd q3 strategy review and before the
+   directions I find the grouped directions and same for the capabilities"*.
+
+   The master flow was each subject's deck, back to back — nineteen covers
+   and no cover for the thing itself, and the directions arriving one after
+   another with nothing in front of them saying what the room was about to
+   see. The company's own review has had that page since §553.6; this gives
+   the flow the SAME page, through the same builder, rather than a second
+   one that looks like it (§53.5).
+
+   INSERTED, NOT PLACED. The cover and the two roll-calls are not subjects
+   somebody ticks: the cover opens the flow because the flow is a
+   presentation, and a group's page goes in front of the first of its
+   members because that is what the page is for. Islam's word for it was
+   *"automatically"*, twice.
+
+   A GROUP WITH NOBODY IN THE FLOW GETS NO PAGE (§45.2, §253): tick three
+   directions and no capability and the Capabilities page is not drawn. */
+function flowCoverHtml(){
+  var u = topAsUnit();
+  return '<section class="dslide d-cover"' + anch("flowcover", "After the cover") +
+    sec("COVER", deckBoxName(u), true) + '>' +
+    (deckMark(u)
+      ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(deckBoxName(u)) + '">'
+      : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+function flowPartHtml(t){
+  if (t === "flow:cover") return flowCoverHtml();
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  for (var i = 0; i < gs.length; i++)
+    if ("flow:g" + gs[i].names === t) return rollCallSlide(u, gs[i]);
+  return "";
+}
+/* The flow, with its own cover in front and each group's page in front of
+   the first of its members. */
+function flowWithParts(list){
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  var owner = {};
+  gs.forEach(function(g){
+    g.ix.forEach(function(x){ owner["dir:" + x.p.id] = "flow:g" + g.names; });
+  });
+  var seen = {}, out = ["flow:cover"];
+  list.forEach(function(t){
+    var k = owner[t];
+    if (k && !seen[k]) { seen[k] = 1; out.push(k); }
+    out.push(t);
+  });
+  return out;
+}
+
 function flowToPdf(){
   var list = contFlowTargets();
   if (!list.length) return false;
   deckPrint(function(){
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+      flowWithParts(list));
   });
   return true;
 }
@@ -50874,24 +51068,69 @@ function masterCount(t){
    rewrites two counts; a repaint would replace the box being typed into. And
    a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
    again to a person who believes they are reading their results. */
-function masterKind(t){
+/* ── WHAT KIND A SUBJECT IS, IN ONE WORD (§554.2) ───────────────────────
+   `masterKind` above answers the same question in a chip; this answers it
+   as the bare word the filter groups by, and the chip is built FROM this
+   so a filter can never offer a word the column does not show (§53.5). */
+function masterKindWord(t){
   t = String(t);
-  /* §481: four kinds in the company's flow, said in the picker's own chips. */
   var k = boxRef(t).kind;
-  /* §553: without this a section part falls to the bottom line and the
-     picker calls the company's Foundation a BUSINESS UNIT. */
-  if (k === "sec") return '<span class="mfkind">SECTION</span>';
-  if (k === "dir") return '<span class="mfkind">DIR</span>';
-  if (k === "cap") return '<span class="mfkind fn">CAP</span>';
-  if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return k === "fn"
-    ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
+  if (k === "sec") return "SECTION";
+  if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
+  if (k === "cap") return "CAP";
+  if (t === "group" && companyReviewOn()) return "CO";
+  return k === "fn" ? "FUNC" : "BU";
+}
+var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",
+                    BU:"Business units", FUNC:"Functions", CO:"The company" };
+
+function masterKind(t){
+  /* ── ONE ANSWER, WORN AS A CHIP (§554.2) ──────────────────────────────
+     §481's four kinds were spelled out again here, and the filter above
+     would have been a fifth spelling — so the chip is built FROM
+     `masterKindWord` and the two cannot disagree by construction (§53.5).
+
+     IT ALSO FIXES WHAT THE COLUMN SAID. A capability of El Abd's is
+     presented as `dir:<id>` like a direction is, so every one of its five
+     read DIR in this column while the Capabilities tab, the roll-call and
+     the deck all called them capabilities (§542). */
+  var k = masterKindWord(t);
+  return '<span class="mfkind' + (k === "CAP" || k === "FUNC" ? " fn" : "") +
+    '">' + k + '</span>';
 }
 function masterPaint(){
   var box = document.getElementById("modal-b");
   if (!box || !MFLOW) return;
   var all = masterSubjects();
+  /* ── THE LISTS STAY WHERE THEY WERE (§554.2) ──────────────────────
+     Islam: *"everytime I remove something from the right the list jumps it
+     needs to stay still"*. Every press repaints the whole dialog, so both
+     columns were scrolled back to the top under the finger — on a flow of
+     nineteen, taking out the last one put the row you were working on off
+     the screen. Read before the repaint, put back after. */
+  var keepTop = [].map.call(box.querySelectorAll(".mflist"), function(e){ return e.scrollTop; });
   var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
+  /* ── AND THE LEFT COLUMN NARROWS BY KIND (§554.2) ─────────────────
+     Islam: *"on the left list I need to have filters so I can choose from
+     directions or capabilities or divisions to filter the functions so I
+     can select properly or all"*. The chips are built from the kinds the
+     client ACTUALLY has, in the picker's own order, so a client with no
+     divisions is not offered a Divisions chip over nothing (§45.2). */
+  var kinds = [];
+  all.forEach(function(t){
+    var k = masterKindWord(t);
+    if (kinds.indexOf(k) < 0) kinds.push(k);
+  });
+  if (MFLOW.kind && kinds.indexOf(MFLOW.kind) < 0) MFLOW.kind = "";
+  if (MFLOW.kind) rest = rest.filter(function(t){ return masterKindWord(t) === MFLOW.kind; });
+  var chips = kinds.length < 2 ? "" :
+    '<div class="mfkinds" role="group" aria-label="Narrow the list by kind">' +
+    [""].concat(kinds).map(function(k){
+      var lit = (MFLOW.kind || "") === k;
+      return '<button type="button" class="mfchip' + (lit ? " on" : "") +
+        '" data-mfkind="' + esc(k) + '" aria-pressed="' + (lit ? "true" : "false") + '">' +
+        esc(k ? (MFKIND_NAME[k] || k) : "All") + '</button>';
+    }).join("") + '</div>';
   var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
   /* Waiting to be picked. The row carries the name AND the code the deck's own
      pills show while presenting (§266.9), because both are what somebody would
@@ -50945,7 +51184,7 @@ function masterPaint(){
   };
   box.innerHTML = '<div class="mflow"><div class="mfcols">' +
     '<div class="mfcol"><div class="mfhead">' +
-      '<h4>Everyone who reports</h4>' +
+      '<h4>Everyone who reports</h4>' + chips +
       '<input class="mffind" data-mffind-box="1" autocomplete="off"' +
         ' placeholder="Search a unit or function…"' +
         ' aria-label="Search a unit or function" value="' + esc(MFLOW.q || "") + '">' +
@@ -50957,6 +51196,14 @@ function masterPaint(){
       '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
         'Everybody is in the flow.</p></div></div>' +
     '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
+      /* ── AND A WAY BACK TO AN EMPTY FLOW (§554.2) ─────────────────
+         Islam: *"there should be somewhere where I reset all and bring all
+         selected flow to the left as if deselect all from the right pan"*.
+         Nineteen presses, or one. Drawn only while there is something to
+         take out, so it is never a control over nothing (§61). */
+      (MFLOW.pick.length
+        ? '<button type="button" class="lnk" data-mfnone="1">Take all out</button>'
+        : '') +
       '<span class="mfcount" data-mfsum>' + masterSumLine(total) + '</span></div>' +
       '<div class="mflist"><table class="mftbl"><thead><tr>' +
         '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
@@ -50970,8 +51217,11 @@ function masterPaint(){
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
+      '>Go to the slides</button></div></div>';
   masterWire();
+  [].forEach.call(box.querySelectorAll(".mflist"), function(e, i){
+    if (keepTop[i] != null) e.scrollTop = keepTop[i];
+  });
   /* AFTER the wiring, and from HERE rather than from inside it: the count is
      the whole list's, which `masterWire()` does not hold — the first build
      passed it `all.length` from a scope that function cannot see, and every
@@ -51039,6 +51289,22 @@ function masterWire(){
   var box = document.getElementById("modal-b");
   if (!box) return;
   var find = box.querySelector("[data-mffind-box]");
+  /* §554.2: the kind chips and the way back to an empty flow. Both repaint
+     through `masterPaint`, which now keeps each column where it was. */
+  [].forEach.call(box.querySelectorAll("[data-mfkind]"), function(b){
+    b.addEventListener("click", function(){
+      MFLOW.kind = (MFLOW.kind || "") === this.dataset.mfkind ? "" : this.dataset.mfkind;
+      MFLOW.note = "";
+      masterPaint();
+    });
+  });
+  var none = box.querySelector("[data-mfnone]");
+  if (none) none.addEventListener("click", function(){
+    MFLOW.pick = [];
+    MFLOW.note = "";
+    masterWrite(MFLOW.pick);
+    masterPaint();
+  });
   [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
     b.addEventListener("click", function(){
       /* The search keeps the cursor when a tick was made from the search: the
@@ -51147,9 +51413,17 @@ function masterWire(){
       masterPaint();
       return;
     }
+    /* ── IT OPENS THE SLIDES, NOT THE SHOW (§556) ──────────────────
+       Islam: *"after we set the master presentation, we say 'here, manage
+       the slides' … and then it takes me to the presentation when I say
+       present"*. The first time anybody saw this deck was in front of the
+       room; now the flow lands on its own slides, where a slide that
+       should not be there can be taken out before it is projected. Play
+       is one press from there, and leaving the show comes back here
+       (§295). */
     var list = MFLOW.pick.slice();
     closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    slidesOpenFlow(list);
   });
 }
 
@@ -51177,6 +51451,20 @@ function masterMoved(order){
    the two with NO CONFLICT: the later one wins by hoisting, so the product
    would have run this copy and main's would have been dead (§146.2, §56.7).
    Removed rather than reconciled, because one question may have one answer. */
+/* ── FULL SCREEN, STRAIGHT AWAY (§556.11) ──────────────────────────────
+   The class first, so the bar is gone even where the browser refuses full
+   screen (a preview frame, a locked-down kiosk): the deck still fills what
+   it has, and Esc still comes back. */
+function deckGoFull(){
+  var root = document.getElementById("deckroot");
+  DECK.direct = true;
+  root.classList.add("fs");
+  try {
+    var p = root.requestFullscreen && root.requestFullscreen();
+    if (p && p.catch) p.catch(function(){});
+  } catch (e) { /* refused: the class above already did what it can */ }
+  deckScale();
+}
 function closeDeck(){
   var root = document.getElementById("deckroot");
   /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
@@ -51189,7 +51477,10 @@ function closeDeck(){
      inert behind it. Both, or neither. */
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
+  /* §556.11: which slide the room reached, so the slides come back on it. */
+  var reached = toEditor ? slidesWhich(DECK.slides, DECK.i) : null;
   DECK.from = "page";
+  DECK.direct = false;
   /* §340: the clock's own interval, stopped with the deck it was drawing. An
      interval left running is the leak §24 is about — it would go on writing
      into a node that has been replaced, twice a second, for the life of the
@@ -51208,7 +51499,7 @@ function closeDeck(){
      moment a deck closed over it. */
   if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
-  if (toEditor) slidesResume();
+  if (toEditor) slidesResume(reached);
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -51440,6 +51731,14 @@ var CLOCKTICK = null;
    §303 baseline run from this directory measures this build and says the
    failure is not yours (§334.13, walked into an hour before this comment). */
 function clockSubject(){
+  /* THE FLOW'S OWN PAGES RUN NO CLOCK (§556.9). Islam: *"it should reset
+     when we get to a new direction as we set in the start of the flow"* —
+     the cover and the group pages ride inside the first subject's section
+     (§554.3), so its time was running from the cover, and by its own first
+     slide it no longer read what the flow had set. A subject's time starts
+     on that subject's slides. */
+  var here = DECK.slides && DECK.slides[DECK.i];
+  if (here && here.dataset.flowpart) return null;
   if (DECK.flow && DECK.stops) {
     var k = deckStopAt(DECK.i);
     return k >= 0 ? DECK.stops[k].t : null;
@@ -51764,7 +52063,14 @@ function wireDeck(){
      inset and scales the deck to the box it is about to stop being. */
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
-    root.classList.toggle("fs", document.fullscreenElement === root);
+    /* §556.11: a deck the slides opened full screen has no windowed state
+       to fall back to — leaving full screen IS leaving the deck, or one Esc
+       lands on the bar Islam asked never to see. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+      closeDeck();
+      return;
+    }
+    root.classList.toggle("fs", document.fullscreenElement === root || !!DECK.direct);
     deckScale();
   });
   addEventListener("keydown", function(ev){
@@ -51822,6 +52128,13 @@ function wireDeck(){
        never gets here, because the contenteditable branch above returns
        first. */
     if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); clockToggle(); }
+    /* §556.11: T pauses and starts, R resets — listed on the slides, which
+       is where they are read now the room has no bar. BY THE KEY'S PLACE as
+       well as its letter: on an Arabic keyboard the T key sends "ف" and R
+       "ق", and Islam's "T is not working" was exactly that. */
+    var kc = ev.code || "";
+    if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
@@ -51855,9 +52168,12 @@ function wireDeck(){
    not put a picture in front of the board.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* The stage is 1600x900, so a picture longer than 1600px on its long edge is
-   detail nobody in the room can see, carried in every save for ever. */
-var PIC_MAX_EDGE   = 1600;
+/* The stage is AUTHORED at 1600x900 but SHOWN at the screen's size, and a
+   projector or a 4K panel draws it half as large again or more. Cut to 1600,
+   a full-slide picture was stretched on every big screen and its text went
+   soft — Islam: *"the uploaded pictures quality gets very low."* 2400 is
+   sharp at that size and still bounded, because it rides in every save. */
+var PIC_MAX_EDGE   = 2400;
 var PIC_MAX_SLIDES = 12;    /* per unit or function, per cycle */
 var PIC_PER_SLIDE  = 4;
 
@@ -52143,7 +52459,7 @@ function picIntake(file){
       reject(new Error("that is not a picture")); return;
     }
     imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
-      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var jpg = cv.toDataURL("image/jpeg", 0.92);
       var png = cv.toDataURL("image/png");
       resolve(png.length < jpg.length ? png : jpg);
     }, reject);
@@ -52350,7 +52666,14 @@ function videoUpload(file, target, onProgress){
    Nothing about what is STORED changed. Still a title, an anchor, an
    arrangement and the pictures (§50.2). */
 
-var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+/* `flow` is the master presentation's list of subjects, set only when the
+   editor was opened on one (§556). `target` is still a single subject —
+   the company's, for a flow — because adding and removing a picture
+   slide belongs to a subject and Islam put that plainly: *"in the flow
+   slide view I can hide and I can add final slides but the addition on
+   the sections as directions or capabilities should be from the
+   direction or capability presentation itself"*. */
+var SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
 
 /* Every section in the assembled deck gets an identity the rail can hold on
    to across a repaint: a picture slide by its own id, a generated slide by its
@@ -52402,18 +52725,53 @@ function slidesAssemble(){
   try {
     /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
        through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
-    insertPictureSlides(box, SLED.target, true);
-    /* The same order openDeckWith() uses, and the order matters both ways:
-       AFTER the picture slides so a custodian's own slide is footed too, and
-       BEFORE the fit pass so a slide it splits carries the footer into every
-       continuation (§52.9). */
-    if (boxRef(SLED.target).kind !== "fn" && UNITS[SLED.target]) {
-      deckFootMarks(box, UNITS[SLED.target]);
-    } else if (boxRef(SLED.target).kind === "dir") {
-      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
-      deckFootMarks(box, null);
+    /* ── ONE DECK, OR THE WHOLE FLOW (§556) ──────────────────────────
+       The editor built one subject's deck, which is why pressing Manage
+       slides from the company showed the company's review and not the
+       flow somebody had just arranged. A flow is the same build, once per
+       subject, with each slide stamped with whose it is — the stamp is
+       what lets the eye below hide a slide that belongs to somebody else
+       without the editor having to be about them. */
+    /* ── AND THE FLOW'S OWN PAGES, WHERE THE ROOM HAS THEM (§556.8) ──
+       The cover and each group's page were drawn by the room alone, so
+       the list here started at the first direction and the room started
+       somewhere else. Islam: *"where is the first cover page about elabd
+       review"*. The same `flowWithParts` the room reads, so the two
+       cannot disagree about what comes first. */
+    var subjects = SLED.flow ? flowWithParts(SLED.flow) : [SLED.target];
+    subjects.forEach(function(t){
+      var part = String(t).indexOf("flow:") === 0;
+      var frag = document.createElement("div");
+      frag.innerHTML = part ? flowPartHtml(t) : deckHtmlFor(t);
+      if (!part) insertPictureSlides(frag, t, true);
+      if (part) deckFootMarks(frag, null);
+      else if (boxRef(t).kind !== "fn" && UNITS[t]) deckFootMarks(frag, UNITS[t]);
+      else if (boxRef(t).kind === "dir") deckFootMarks(frag, null);
+      var tsubj = part ? null : deckSubject(t);
+      [].forEach.call(frag.querySelectorAll(".dslide"), function(el){
+        el.dataset.subject = t;
+        /* A flow page is nobody's to hide: the room reads hidden slides
+           per subject, and these belong to none. */
+        if (part) { el.dataset.flowpart = "1"; return; }
+        if (el.dataset.anchor && SMPRules.slideHidden(tsubj, el.dataset.anchor))
+          el.dataset.off = "1";
+      });
+      while (frag.firstChild) box.appendChild(frag.firstChild);
+    });
+    /* Each flow page is stamped with what it introduces, as the room does
+       (§554.3) — so it rides inside the section it opens rather than
+       counting as a subject of its own. */
+    var made = [].slice.call(box.querySelectorAll(".dslide"));
+    for (var mi = made.length - 1; mi >= 0; mi--) {
+      if (!made[mi].dataset.flowpart) continue;
+      var nx = made[mi + 1];
+      if (nx && nx.dataset.subject) made[mi].dataset.subject = nx.dataset.subject;
+      else made[mi].removeAttribute("data-subject");
     }
+    /* The footing happens per subject above, in the same order
+       openDeckWith() uses: AFTER the picture slides so a custodian's own
+       slide is footed too, and BEFORE the fit pass so a slide it splits
+       carries the footer into every continuation (§52.9). */
     deckFitPass(box);
     /* The keys are minted AFTER the fit pass, or a continuation slide it mints
        carries a clone of its parent's `data-ed` — two rows in the rail with one
@@ -52438,10 +52796,9 @@ function slidesAssemble(){
        INSIDE THE TRY, with §253.3's catch below it: a subject whose stored
        list cannot be read is a deck that could not be built, and the person
        gets that sentence rather than a blank rail. */
-    var subj = deckSubject(SLED.target);
-    [].forEach.call(box.querySelectorAll(".dslide[data-anchor]"), function(el){
-      if (SMPRules.slideHidden(subj, el.dataset.anchor)) el.dataset.off = "1";
-    });
+    /* The stamping happens per subject above, before the fit pass marks a
+       continuation — and a continuation inherits `data-off` from the clone
+       it is made of, so both parts of a hidden long table wear it. */
   } catch (e) {
     /* Kept, not rethrown: the editor is already open, and the person needs a
        sentence rather than a blank screen. `slidesPaint()` reads it. */
@@ -52460,6 +52817,17 @@ function slidesAssemble(){
    together: "RS03 Retail Operations ExcellenceKey measures". The parts are
    read separately and joined with a separator, which is what the slide itself
    shows visually. */
+/* ── THE SHORT NAME, FOR THE BAR UNDER THE STAGE (§556.4) ─────────────
+   Islam: *"the title of the slides as well is different"*. His page names
+   the slide you are on in two or three words — "Cover" — and ours was
+   printing the whole breadcrumb: "Maximizing Current Stores · D001 ·
+   Categories", every word of which is already on the slide in front of
+   you. The last part is what tells one slide from its neighbours. */
+function slidesShortLabel(el){
+  var full = slidesLabel(el), bits = full.split(" \u00b7 ");
+  var last = bits[bits.length - 1];
+  return (last && last.length > 1) ? last : full;
+}
 function slidesLabel(el){
   var h = el.querySelector("h1, h2");
   if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
@@ -52490,9 +52858,10 @@ function slidesOpen(kind, key){
              : kind === "cap" ? "cap:" + key
              : kind === "dir" ? "dir:" + key : key;
   if (!canSpeakFor(target)) return;
-  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"", flow:null };
   var root = document.getElementById("slideroot");
-  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-title").textContent = picTargetName(kind, key);
+  slidesLogo(root, deckMark(UNITS[target] || null));
   /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
      see it. Islam's own reason for asking: somebody who knows they have
      fifteen minutes builds a shorter deck.
@@ -52507,8 +52876,7 @@ function slidesOpen(kind, key){
      minutes" is wrong said to the person who set it. And nothing at all when
      no time is set — silence rather than a nought nobody chose (§35). */
   var mins = SMPRules.presentMins(GROUP, target);
-  root.querySelector(".sl-sub").textContent =
-    picTargetName(kind, key) + " · " + (REVIEW.name || "") +
+  root.querySelector(".sl-sub").textContent = (REVIEW.name || "") +
     (mins ? " · " + mins + " minutes to present" : "");
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -52516,6 +52884,54 @@ function slidesOpen(kind, key){
   if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
   slidesPaint();
   root.focus();
+}
+/* ── THE FLOW, OPENED AS SLIDES (§556) ─────────────────────────────────
+   Islam: *"after we set the master presentation, we say 'here, manage the
+   slides'. When we go, we see a view of managing the slides that we chose
+   as a flow, and maybe hide things or add something to have a proper
+   view"* — and, of the whole product: *"even for the users that have the
+   present button it takes them to the slides management and then they move
+   to the presentation, not 2 buttons"*.
+
+   THE SUBJECT IS THE COMPANY and the flow is what is DRAWN. Adding a slide
+   is a subject's act — his rule: the final slides are added here, a
+   direction's are added on the direction. So `target` stays the company
+   and `flow` is the list; `slidesAssemble` draws the list and the eye
+   hides against whichever subject the slide belongs to. */
+function slidesOpenFlow(list){
+  list = (list || []).filter(Boolean);
+  /* ── THE GATE IS THE FLOW'S, NOT THE COMPANY'S DECK (§556.3) ──────
+     This asked `canSpeakFor("group")`, which is "may you edit the
+     company's own review" — and with the business units ON the company
+     has no plan of its own, so it is FALSE for the very office that
+     arranges the flow. Pressing Go then did nothing at all (§61), which
+     `master-presentation` caught the moment the button changed.
+
+     `mayMasterPresent` is the rule that offers the Master presentation in
+     the first place, so it is the rule that opens what it leads to. */
+  if (!list.length || !SMPRules.mayMasterPresent(world(), viewer())) return;
+  SLED = { target:"group", kind:"unit", key:"group", sel:null, err:"", flow:list.slice() };
+  var root = document.getElementById("slideroot");
+  var org = String(GROUP.org || "").trim();
+  root.querySelector(".sl-title").textContent =
+    (org ? org + " \u00b7 " : "") + "Master presentation";
+  slidesLogo(root, groupLogo());
+  root.querySelector(".sl-sub").textContent =
+    plural(list.length, "subject") + " \u00b7 " + (REVIEW.name || "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
+}
+/* The mark on the left of the bar, as Islam's page carries it: the client's
+   round logo beside the name. None set, none drawn — an empty frame is not
+   a logo (§45.2). */
+function slidesLogo(root, src){
+  var im = root.querySelector(".sl-logo");
+  if (!im) return;
+  if (src) { im.src = src; im.hidden = false; } else { im.removeAttribute("src"); im.hidden = true; }
 }
 function picTargetName(kind, key){
   return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
@@ -52541,10 +52957,14 @@ function slidesSuspend(){
   root.inert = true;
   root.setAttribute("aria-hidden", "true");
 }
-function slidesResume(){
+function slidesResume(reached){
   var root = document.getElementById("slideroot");
   root.inert = false;
   root.removeAttribute("aria-hidden");
+  /* §556.11: back on the slide the room was showing, as his page does —
+     not on the one Present was pressed from twenty slides ago. */
+  var at = reached ? slidesFindIn(SLED.all || [], reached) : -1;
+  if (at >= 0) { SLED.sel = SLED.all[at].dataset.ed; slidesPaint(); }
   root.focus();
 }
 /* The deck for whatever this editor is editing, through the ONE resolver
@@ -52558,8 +52978,52 @@ function slidesPlay(){
      OF IT if the deck cannot be built — an editor nobody can click, with the
      reason in a console nobody has open (§32, §171). Standing down after the
      open means a throw costs the press and nothing else. */
-  openDeckFor(SLED.target, "editor");
+  var from = slidesSelEl();
+  if (SLED.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+                              flowWithParts(SLED.flow), "editor");
+  else openDeckFor(SLED.target, "editor");
+  /* ── STRAIGHT TO FULL SCREEN, AT THE SLIDE YOU ARE ON (§556.11) ─────
+     Islam: *"present should go to the full screen right away like the
+     html"* — his page's Present is the same deck, filling the screen, from
+     where you are. The bar is still there for a deck opened from anywhere
+     else; from here it never shows, and Esc comes straight back. */
+  var at = from ? slidesFindIn(DECK.slides, from) : -1;
+  if (at > 0) deckShow(at);
+  deckGoFull();
   slidesSuspend();
+}
+/* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
+   page, which picture — and which of its kind. Never by counting: the room
+   leaves out hidden slides and the two screens split long tables at their
+   own sizes, so the tenth slide here is not the tenth slide there. */
+function slidesKeyOf(el){
+  return [el.dataset.subject || "", el.dataset.anchor || "", el.dataset.ps || ""].join("|");
+}
+function slidesWhich(list, i){
+  while (i > 0 && list[i] && list[i].dataset.cont) i--;
+  var el = list[i];
+  if (!el) return null;
+  var key = slidesKeyOf(el), n = 0;
+  for (var j = 0; j < i; j++) if (!list[j].dataset.cont && slidesKeyOf(list[j]) === key) n++;
+  return { key:key, n:n };
+}
+function slidesFindIn(list, w){
+  if (!w) return -1;
+  var n = w.n;
+  for (var j = 0; j < list.length; j++) {
+    if (list[j].dataset.cont || slidesKeyOf(list[j]) !== w.key) continue;
+    if (!n) return j;
+    n--;
+  }
+  return -1;
+}
+/* The selected slide, or the next one the room will show if it is hidden. */
+function slidesSelEl(){
+  var all = SLED.all || [];
+  var i = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (i < 0) return null;
+  while (i < all.length - 1 && all[i].dataset.off) i++;
+  return slidesWhich(all, i);
 }
 
 function slidesClose(){
@@ -52569,7 +53033,7 @@ function slidesClose(){
   document.body.classList.remove("presenting");
   var wrap = document.querySelector(".wrap");
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
-  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
 }
 
@@ -52594,13 +53058,13 @@ function slidesPaint(){
         + "produces no deck, so there is nowhere to put a picture.") + '</p>';
     return;
   }
-  /* Keep the selection if it still exists; otherwise take the first picture
-     slide, and failing that the first slide. */
+  /* Keep the selection if it still exists; otherwise the FIRST SLIDE.
+     It took the first picture slide, from when this screen was only for
+     managing pictures. It is the deck now, and a deck opens on its cover —
+     Islam: *"why the presentation open on the added slide the default
+     should start from the first slide"*. */
   var keys = all.map(function(el){ return el.dataset.ed; });
-  if (keys.indexOf(SLED.sel) < 0) {
-    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
-    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
-  }
+  if (keys.indexOf(SLED.sel) < 0) SLED.sel = keys[0];
 
   /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
      rail, after all twenty-three rows — so the one control the whole mode
@@ -52609,24 +53073,42 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   var off = all.filter(function(el){ return el.dataset.off; });
-  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
-      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+  /* §556.3: and only where there is a subject to add to. With the business
+     units on, the company has no plan of its own — the flow can still be
+     arranged and presented, and a control that would write nowhere is not
+     drawn (§61). */
+  var mayAdd = canSpeakFor(SLED.target);
+  list.innerHTML =
     slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + (el.dataset.off ? " off" : "") +
-        '" data-slgo="' + esc(el.dataset.ed) + '">' +
+        '" data-slgo="' + esc(el.dataset.ed) + '" title="' + esc(slidesLabel(el)) + '">' +
+      /* §556.3: THE THUMBNAIL IS THE LABEL. A line of text under every
+         preview said what the preview already showed, and on a flow of
+         forty-nine it pushed three slides off the screen. The name is on
+         the row's title and on the bar under the stage, where somebody
+         reading it is looking. */
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
-      '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>' + esc(slidesMineWord(
-          pslideById(SLED.target, el.dataset.ps))) + '</em>' : '') + '</span>' +
+      (mine ? '<span class="sl-mine">' + esc(slidesMineWord(
+          pslideById(SLED.target, el.dataset.ps))) + '</span>' : '') +
       (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
       slidesEye(el, all) + '</div>';
-  }).join("");
+  }).join("") +
+  /* ── ADDING SITS AT THE FOOT (§556.3) ──────────────────────────────
+     It was the loudest thing on the screen, above the deck, on a screen
+     whose job is to look at the deck. Islam's own page has no add at all;
+     ours needs one, and the foot of the rail is where it belongs. */
+  (!mayAdd ? "" :
+    '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      (SLED.flow ? '+ Add a final slide' : '+ Add slide after') + '</button>' +
+      '<span class="picsub">' + (SLED.flow
+        ? "at the end of the flow \u2014 a " + esc(L1("pillar")).toLowerCase() +
+          "\u2019s own slides are added on its own page"
+        : (SLED.sel && SLED.sel.indexOf("ps:") === 0
+            ? "the one selected" : "the slide selected below")) + '</span></div>');
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -52657,7 +53139,161 @@ function slidesPaint(){
      selection already on screen does not jump. */
   var on = list.querySelector(".slrow.on");
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  slidesGridPaint(all);
+  slidesFootPaint(all);
   SLED.err = "";
+}
+
+/* ── ALL SLIDES, AND THE KEYS (§556.2) ─────────────────────────────────
+   Both from Islam's own page, which he handed over as the shape to copy:
+   a grid for a deck too long to scroll a rail through, and the keys
+   written along the bottom so nobody has to be told them. The grid reads
+   the SAME rows the rail reads, so it cannot show a different deck
+   (§53.5), and it says which are hidden because that is the thing you
+   open it to check. */
+function slidesGridPaint(all){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  SLED.all = all;
+  /* Drawn only while open: every cell is a whole slide, and a flow is two
+     hundred of them — built on every repaint behind a closed grid, they
+     would double the cost of every press for nobody. */
+  if (g.hidden) { g.innerHTML = ""; return; }
+  g.innerHTML =
+    '<div class="slghead"><h3>All slides</h3>' +
+      '<button class="sl-b" data-slgclose>Close (Esc)</button></div>' +
+    '<div class="slglist">' + all.map(function(el, i){
+      return '<button class="slgcell' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (el.dataset.off ? " off" : "") + '" data-slgcell="' + esc(el.dataset.ed) +
+        '" title="' + esc(slidesLabel(el)) + '">' +
+        '<span class="slgn">' + (i + 1) +
+          (el.dataset.off ? ' <em>Hidden</em>' : '') + '</span>' +
+        '<span class="slgthumb"><span class="slgthumb-in"></span></span></button>';
+    }).join("") + '</div>';
+  /* A REAL SLIDE IN EVERY CELL, like the rail (§51) and like his grid —
+     a list of titles on cards is not a picture of the deck. */
+  var holders = g.querySelectorAll(".slgthumb-in");
+  [].forEach.call(holders, function(h, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    h.appendChild(c);
+  });
+  slidesGridFit();
+  /* WIRED HERE, because the grid is drawn AFTER slidesWire() has run — the
+     first version's cells carried `data-slgo` and nothing listened. Picking
+     a slide closes the grid on it, as his does. */
+  [].forEach.call(g.querySelectorAll("[data-slgcell]"), function(b){
+    b.addEventListener("click", function(){
+      SLED.sel = b.dataset.slgcell;
+      g.hidden = true;
+      slidesPaint();
+    });
+  });
+  var x = g.querySelector("[data-slgclose]");
+  if (x) x.addEventListener("click", function(){ slidesGridToggle(false); });
+  var on = g.querySelector(".slgcell.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"center" });
+}
+/* Each cell is as wide as the grid gives it, so the slide inside is scaled
+   to that width rather than to a number guessed here. */
+function slidesGridFit(){
+  [].forEach.call(document.querySelectorAll("#slgrid .slgthumb"), function(t){
+    var w = t.clientWidth;
+    var inn = t.firstChild;
+    if (w && inn) inn.style.transform = "scale(" + (w / 1600) + ")";
+  });
+}
+/* The counter, the slide's name and the keys, on ONE bar under the stage
+   (§556.3) — Islam's own page carries exactly these three, in this order,
+   and the name is here rather than under every thumbnail. */
+function slidesFootPaint(all){
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) at = 0;
+  var ct = document.getElementById("slct");
+  if (ct) ct.innerHTML = (at + 1) + ' <span>/</span> ' + all.length;
+  var nm = document.getElementById("slnm");
+  if (nm) nm.innerHTML = slidesWhere(all, at);
+  var pr = document.getElementById("slprog");
+  if (pr) pr.style.width = all.length ? Math.round((at + 1) / all.length * 100) + "%" : "0";
+  var k = document.getElementById("slkeys");
+  /* §556.11: the room's own keys are listed HERE, because the room shows no
+     bar any more — in full screen there is nowhere else to read them. Said
+     in full, not as letters: "T timer" told Islam nothing. */
+  if (k) k.innerHTML =
+    '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
+    '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
+    '<span class="slksep"></span>while presenting: ' +
+    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+  slidesPartsPaint(all, at);
+}
+/* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────
+   Islam: the three things the room's bar carried — the jump to each part,
+   which part you are in, and its time — *"we can include them in the slide
+   management page we already have"*. The parts are read off the slides'
+   own stamps, as the room's stops are (§266), so the two count alike. */
+function slidesParts(all){
+  var out = [];
+  all.forEach(function(el, i){
+    var t = el.dataset.subject;
+    if (!t || el.dataset.flowpart) return;
+    if (out.length && out[out.length - 1].t === t) return;
+    var org = String(GROUP.org || "").trim();
+    var name = (t === "group" && org) ? org : placeLabel(t);
+    out.push({ t:t, name:name, code:deckCode(t, name), at:i });
+  });
+  return out;
+}
+function slidesPartAt(parts, i){
+  var k = -1;
+  parts.forEach(function(p, j){ if (p.at <= i) k = j; });
+  return k;
+}
+function slidesWhere(all, at){
+  var el = all[at];
+  if (!el) return "";
+  var off = el.dataset.off ? " \u00b7 hidden" : "";
+  if (!SLED.flow) return esc(slidesShortLabel(el)) + off;
+  if (el.dataset.flowpart) return '<b>' + esc(String(GROUP.org || "").trim()) + '</b> <span>\u00b7 ' +
+    esc(el.dataset.anchor === "flowcover" ? "Cover" : slidesShortLabel(el)) + '</span>';
+  var parts = slidesParts(all), k = slidesPartAt(parts, at), p = parts[k];
+  if (!p) return esc(slidesShortLabel(el)) + off;
+  var mins = SMPRules.presentMins(GROUP, p.t), short = slidesShortLabel(el);
+  return '<b>' + esc(p.name) + '</b> <span>\u00b7 part ' + (k + 1) + ' of ' + parts.length +
+    (mins ? ' \u00b7 ' + mins + ' minutes' : '') + '</span>' +
+    (short && short !== p.name ? ' \u00b7 ' + esc(short) : '') + off;
+}
+/* One button per part, under the bar; the part you are in filled. Only in a
+   flow: one subject's slides are one part, and a row of one is not a choice. */
+function slidesPartsPaint(all, at){
+  var row = document.getElementById("slparts");
+  if (!row) return;
+  var parts = SLED.flow ? slidesParts(all) : [];
+  row.hidden = parts.length < 2;
+  if (row.hidden) { row.innerHTML = ""; return; }
+  var k = all[at] && all[at].dataset.flowpart ? -1 : slidesPartAt(parts, at);
+  row.innerHTML = parts.map(function(p, j){
+    var mins = SMPRules.presentMins(GROUP, p.t);
+    return '<button class="slpart' + (j === k ? " on" : "") + '" data-slpart="' + p.at +
+      '" title="' + esc(p.name) + (mins ? " \u00b7 " + mins + " minutes" : "") + '">' +
+      esc(p.code) + '</button>';
+  }).join("");
+  /* Wired where drawn — the row is painted after slidesWire() (§556.7). */
+  [].forEach.call(row.querySelectorAll("[data-slpart]"), function(b){
+    b.addEventListener("click", function(){
+      var el = all[+b.dataset.slpart];
+      if (el) { SLED.sel = el.dataset.ed; slidesPaint(); }
+    });
+  });
+  var on = row.querySelector(".slpart.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" });
+}
+function slidesGridToggle(on){
+  var g = document.getElementById("slgrid");
+  if (!g) return;
+  g.hidden = on === undefined ? !g.hidden : !on;
+  var b = document.querySelector("[data-slgrid]");
+  if (b) b.classList.toggle("on", !g.hidden);
+  slidesGridPaint(SLED.all || []);
 }
 
 /* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
@@ -52690,9 +53326,13 @@ function slidesCanHide(el, all){
 function slidesEye(el, all){
   /* A picture slide has no anchor and is not hidden — it is REMOVED, by the
      control the pane already carries (§24: not a second way to do one act). */
-  if (!el.dataset.anchor || !inOffice()) return "";
+  if (!el.dataset.anchor || el.dataset.flowpart || !inOffice()) return "";
   var hid = !!el.dataset.off, can = slidesCanHide(el, all);
   return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
+    /* §556: whose slide this is. In a flow the editor is standing in the
+       company and the slide may be a direction's, so the anchor alone is
+       not an address. */
+    (el.dataset.subject ? ' data-slhidet="' + esc(el.dataset.subject) + '"' : '') +
     (can ? "" : ' aria-disabled="true"') +
     ' title="' + (hid ? "Show this slide in the review again"
                       : can ? "Hide this slide from the review"
@@ -52716,8 +53356,8 @@ function slidesHiddenLine(n){
    array that remembers the order it was written in reports a change to the
    server every time somebody hides two slides in the other sequence.
    The emptied key is DELETED (§50.6). */
-function slidesSetHidden(anchor, on){
-  var subj = deckSubject(SLED.target);
+function slidesSetHidden(anchor, on, target){
+  var subj = deckSubject(target || SLED.target);
   if (!subj || !anchor) return;
   var list = SMPRules.hiddenSlides(subj).slice(), i = list.indexOf(anchor);
   if (on && i < 0) list.push(anchor);
@@ -52752,9 +53392,13 @@ function slidesPaneHtml(cur, sl){
           '</div><p class="picsub">It is skipped when the deck is presented. Nothing ' +
           'else changes &mdash; the figures on it are still reported, still scored and ' +
           'still on the page.</p></div>'
-        : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
-          'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>');
+        /* ── AND NOTHING UNDER A SLIDE THAT IS FINE (§556.3) ──────────
+           A paragraph under the stage, on every one of forty-nine built
+           slides, saying the same sentence about all of them. The bar
+           under the stage now names the slide, and the add control at the
+           foot of the rail says where it lands — so this was explaining a
+           screen that explains itself (§24, §15.1). */
+        : "");
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -52989,7 +53633,16 @@ function slidesAdd(){
     return;
   }
   var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
-  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  /* ── IN A FLOW IT GOES AT THE END (§556.2) ───────────────────────────
+     Islam: *"in the flow slide view I can hide and I can add final slides
+     but the addition on the sections as directions or capabilities should
+     be from the direction or capability presentation itself"*. The
+     selected row may be a direction's, and a picture dropped there would
+     be the office writing into somebody else's deck from a screen that is
+     not about them. The end is the company's own ground. */
+  var after = SLED.flow
+    ? all.length - 1
+    : all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
   if (after < 0) after = all.length - 1;
   var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
   slidesPlace(made, all, after);
@@ -53101,8 +53754,9 @@ function slidesWire(){
         slidesPaint();
         return;
       }
-      var subj = deckSubject(SLED.target);
-      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide));
+      var t = b.dataset.slhidet || SLED.target;
+      var subj = deckSubject(t);
+      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide), t);
     });
   });
   root.querySelectorAll("[data-slshow]").forEach(function(b){
@@ -53389,7 +54043,20 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
-  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  var gb = root.querySelector("[data-slgrid]");
+  if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §556.3: the arrows at the stage's edge and under it are the same act as
+     the keyboard's, so they call the same stepper (§53.5). */
+  root.querySelectorAll("[data-slstep]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesStep(+b.dataset.slstep); });
+  });
+  var rb = root.querySelector("[data-slrail]");
+  if (rb) rb.addEventListener("click", function(){
+    var on = root.classList.toggle("norail");
+    rb.classList.toggle("on", !on);
+    slidesFitStage();
+  });
+  addEventListener("resize", function(){ if (root.classList.contains("on")) { slidesFitStage(); slidesGridFit(); } });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     /* ── THE DECK IN FRONT HAS THE KEYBOARD (§295) ──────────────────
@@ -53405,7 +54072,22 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    if (ev.key === "Escape") slidesClose();
+    if (ev.key === "Escape") {
+      /* §556.2: the grid closes first — Escape from a grid is "put this
+         away", not "leave the editor". */
+      var g = document.getElementById("slgrid");
+      if (g && !g.hidden) { slidesGridToggle(false); return; }
+      slidesClose();
+    }
+    if (ev.key === "g" || ev.key === "G") { slidesGridToggle(); return; }
+    if (ev.key === "p" || ev.key === "P") { slidesPlay(); return; }
+    /* §556.3: hide the slide you are looking at, which is where Islam's own
+       page puts it — the eye on the row does the same act for the row. */
+    if (ev.key === "h" || ev.key === "H") {
+      var cur = document.querySelector("#slidelist .slrow.on .slhide");
+      if (cur) cur.click();
+      return;
+    }
     /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
        Islam: "allow the arrows up and down so I can navigate the slides while
        adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —
@@ -74587,7 +75269,35 @@ var SYNC = (function () {
            §253.3 each came to be fixed on one surface and left broken on
            another. Two functions answering it was found and closed AT THE
            MERGE that brought both here (§281). */
-        openDeckFor(this.dataset.present);
+        /* ── IT OPENS THE SLIDES FIRST (§556) ──────────────────────
+           Islam: *"even for the users that have the present button it
+           takes them to the slides management and then they move to the
+           presentation, not 2 buttons"*. The first time anybody saw their
+           deck was in front of the room; now the press lands on the
+           slides, where Play is one more press and a slide that should
+           not be there can be taken out before it is projected.
+
+           ONLY WHERE THERE IS AN EDITOR TO LAND IN. `slidesOpen` is
+           `canSpeakFor` — the subject's own head or custodian, and the
+           office — so anybody else goes straight to the deck as before,
+           rather than pressing Present and getting nothing (§61). A list
+           of targets is a direction owner's several, and those open as a
+           flow of their own. */
+        var t = this.dataset.present, many = t.indexOf(",") >= 0;
+        if (many) {
+          var mine = t.split(",").filter(Boolean);
+          if (mine.every(function(x){ return canSpeakFor(x); })) slidesOpenFlow(mine);
+          else openDeckFor(t);
+        } else if (canSpeakFor(t)) {
+          slidesOpen(boxRef(t).kind === "dir" ? "dir"
+                   : boxRef(t).kind === "fn" ? "fn"
+                   : boxRef(t).kind === "cap" ? "cap" : "unit",
+                   boxRef(t).kind === "dir" ? t.slice(4)
+                   : boxRef(t).kind === "fn" || boxRef(t).kind === "cap" ? t.slice(t.indexOf(":") + 1)
+                   : t);
+        } else {
+          openDeckFor(t);
+        }
       });
     });
     /* The same deck, taken away as a PDF. Beside Present and through the same
@@ -75982,7 +76692,10 @@ var SYNC = (function () {
       b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
     });
     document.querySelectorAll("[data-sec]").forEach(function(b){
-      b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
+      b.addEventListener("click", function(){
+        /* §555: a chosen section stays chosen — the landing only applies
+           until somebody says otherwise. */
+        GSEC = +b.dataset.sec; GSEC_PICKED = true; paint(); window.scrollTo(0,0); });
     });
     /* Cards or a table, per section (§16.6). A view preference — it changes
        how a section is laid out, never what anything is or in what order it

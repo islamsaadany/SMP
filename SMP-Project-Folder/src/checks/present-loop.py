@@ -181,6 +181,15 @@ def loop(pg, label, kind, key):
     ok("the way out says where it lands",
        s.get("exitWord") == "Back to slides", s)
     ok("...and so does its hover", "Back to slides" in s.get("exitTitle", ""), s)
+    # §556.11: from the slides, Present is FULL SCREEN — the bar is there for
+    # a deck opened anywhere else, and here it never shows. Read off the
+    # bar's own computed style, not off the class that is meant to hide it.
+    fs = js(pg, """() => { const r = document.getElementById('deckroot');
+      const bar = r.querySelector('.deckbar'); const cs = getComputedStyle(bar);
+      return { fs: r.classList.contains('fs'), direct: !!DECK.direct,
+               barGone: cs.opacity === '0' && cs.pointerEvents === 'none' }; }""")
+    ok("Present from the slides opens full screen, with no bar (§556.11)",
+       fs.get("fs") is True and fs.get("direct") is True and fs.get("barGone") is True, fs)
 
     # §5 — one arrow key, one thing moves
     i0, sel0 = s.get("i"), before.get("sel")
@@ -193,6 +202,7 @@ def loop(pg, label, kind, key):
        {"was": sel0, "now": s.get("sel")})
 
     # §4 — Escape comes home
+    reached = js(pg, "() => { const w = slidesWhich(DECK.slides, DECK.i); return w && w.key + '#' + w.n; }")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(700)
     s = js(pg, STATE)
@@ -201,16 +211,24 @@ def loop(pg, label, kind, key):
        s.get("front") == "editor", s)
     ok("...which is live again", s.get("edInert") is False, s)
     ok("...with the page behind still held", s.get("presenting") is True, s)
-    ok("...and the same slide still selected", s.get("sel") == sel0,
-       {"was": sel0, "now": s.get("sel")})
+    # §556.11, rewritten from "the same slide still selected": Islam's page
+    # comes back on the slide the room reached, and so does this. Both ends
+    # read off their own screen — the room's slide before, the list's after.
+    now = js(pg, """() => { const i = (SLED.all||[]).map(e => e.dataset.ed).indexOf(SLED.sel);
+      const w = slidesWhich(SLED.all, i); return w && w.key + '#' + w.n; }""")
+    ok("...on the slide the room had reached, not the one Present left",
+       now is not None and now == reached and s.get("sel") != sel0,
+       {"reached": reached, "now": now, "was": sel0, "sel": s.get("sel")})
 
-    # and the deck's own button does it too, not only the key
+    # and leaving full screen does it too, not only the key — rewritten from
+    # pressing the bar's Back to slides, which this deck no longer shows.
     press(pg, "#slideroot [data-slplay]")
     pg.wait_for_timeout(800)
-    press(pg, "#deckroot [data-dexit]")
+    js(pg, "() => { if (document.fullscreenElement) document.exitFullscreen();"
+           " else dispatchEvent(new Event('fullscreenchange')); }")
     pg.wait_for_timeout(700)
     s = js(pg, STATE)
-    ok("Back to slides does the same as Escape",
+    ok("leaving full screen does the same as Escape (§556.11)",
        s.get("deckOn") is False and s.get("edOn") is True, s)
 
     js(pg, "() => slidesClose()")

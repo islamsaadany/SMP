@@ -420,7 +420,7 @@
    bytes changed, which is the whole trigger (§91). Proved held by no commit in
    any ref's history (§94.12) after fetching every ref; confirm once more
    immediately before the push (§94.16). */
-const SHELL = "smp-shell-v6.48-report-one-rail";
+const SHELL = "smp-shell-v6.49-breakdown-target-reported";
 const ASSETS = [
   "/",
   "/index.html",

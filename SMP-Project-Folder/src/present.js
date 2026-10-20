@@ -129,6 +129,10 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || ""), r = boxRef(t);
+  /* §554.1: and a part of the FLOW that is not a box either — its cover,
+     and a group's roll-call in front of the first of its members. Answered
+     before `boxRef`, which would read an unknown prefix as a business unit. */
+  if (t.indexOf("flow:") === 0) return flowPartHtml(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
   if (r.kind === "dir") return dirDeckHtml(t);
   /* §553: and a part of the order that is not a box at all. */
@@ -368,6 +372,159 @@ function deckBoxName(u){
   return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
 }
 
+function pillarCard(u, p, i){
+  /* §542: on a box SHOWN APART, an internal pillar says what it is where
+     it has nothing else to say — exactly as a capability's own card does
+     below, so a client whose capabilities have become pillars reads the
+     roll-call it read when they were records. Its own sub-line still wins.
+
+     THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
+     six of the worked example's ten units carry a pillar marked Capability
+     in one joined list, and the first draft of this line put the word
+     "Capability" under every one of them on their decks. checks/
+     deck-figures.py caught it on the heading below; the same mistake was
+     here, one line up, and the same guard closes both. */
+  var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
+  return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
+    '<span class="pcard-n">' + esc(p.name) + '</span>' +
+    (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
+    /* §416: the years each direction runs in, and a later one says when. */
+    (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+    '</div>';
+}
+
+/* ── THE ROLL-CALL, FOR WHOEVER IS DRAWING IT (§554.1) ──────────────────
+   It was written inside `deckSlides`, which is the only place that needed
+   it until Islam asked for the same page in the MASTER flow: *"before the
+   directions I find the grouped directions and same for the capabilities"*.
+   Lifted out unchanged so the flow shows the same slide the company's own
+   review shows, and a change to one is a change to both (§53.5). */
+function groupSize(g){
+  return g.ix.length + (g.cards ? boardCapTargets().length : 0);
+}
+function rollCallSlide(u, g){
+  var n = groupSize(g);
+  if (!n) return "";
+  return '<section class="dslide"' +
+    anch(g.names, "After the " + g.plain + " names") +
+    '><h2>' + g.many + '</h2>' +
+    '<div class="pcards" style="--n:' + n +
+      ';--c:' + pillarCols(n) +
+      ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+    g.ix.map(function(x){ return pillarCard(u, x.p, x.i); }).join("") +
+    g.cards + '</div></section>';
+}
+
+/* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
+   Lifted out of `deckSlides` whole, so the master flow can draw the same
+   roll-calls the company's own review draws rather than a second pair
+   that looks like them (§53.5). `short` is the caller's: the company's
+   review splits its two kinds, a unit's deck does not. */
+function pillarGroups(u, short){
+var capCards = !short ? "" : boardCapTargets().map(function(t){
+  var c = capById(t.slice(4)), nm = placeLabel(t);
+  return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
+    '<span class="pcard-n">' + esc(nm) + '</span>' +
+    '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
+}).join("");
+/* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+   One group, as every deck has had, EXCEPT on the company's own review of
+   a plan that is shown apart: there the directions and the capabilities
+   are two things, and reading all ten under one heading called Directions
+   was not a wording slip — the standing slide below counted ten of them
+   and said "10 Directions, by their measures", five of which were
+   capabilities.
+
+   THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+   roll-call or the score table stays where its owner put it; the second
+   group's two slides are new ground and carry new anchors (§96.2).
+
+   A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+   directions and no capabilities reads exactly as it does today. */
+var groups;
+if (short && boxSplit(u)) {
+  var dirs = [], caps = [];
+  u.items.forEach(function(p, i){
+    (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+  });
+  /* ── THE RUNNING ORDER IS THE ORDER (§553.10) ──────────────────────
+     Islam: *"the company picker should pick the foundation of the company
+     then I pick the directions arrangement and then the capabilities
+     arranged. and the grouped directions comes before the directions
+     automatically and the capability grouped comes before the
+     capabilities automatically"*.
+
+     THE PICKER ALREADY HOLDS THEM. The Master presentation's running
+     order lists every direction and every capability by name, draggable,
+     stored per client as an absence (§50.6) — `dir:<id>` for each. So the
+     company's own review reads THAT, and there is no second control to
+     keep in step (§53.5). The alternative was the plan's own Arrange,
+     which works today and renumbers as it goes: drag Egypt Expansion to
+     the top and it becomes D001 on every surface in the platform. An
+     order for a room must not rewrite the codes the year is filed under.
+
+     THE ORDER ONLY, NEVER THE MEMBERSHIP. A tick in that picker says
+     who presents in the MASTER FLOW; it cannot mean "and is therefore in
+     the company's own deck", or unticking a direction would silently
+     drop it from the company's review of its own plan (§96.2). Anything
+     the order does not name keeps its place in the plan, after those it
+     does.
+
+     AND THE ROLL-CALLS ARE NOT IN THE PICKER. "Directions" and
+     "Capabilities" are drawn in front of their own group, automatically,
+     because they are the group — not a subject somebody places. */
+  var flow = masterOrder();
+  var at = function(x){
+    var k = flow.indexOf("dir:" + x.p.id);
+    return k < 0 ? flow.length + x.i : k;
+  };
+  var byFlow = function(a, b){ return at(a) - at(b); };
+  dirs.sort(byFlow); caps.sort(byFlow);
+  groups = [
+    { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+      one: L1("pillar"), head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: "" },
+    { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+      one: L1("capability"), head: L("capability","bu"),
+      names: "capnames",    score: "caps",    cards: capCards }
+  ].filter(function(g){ return g.ix.length || g.cards; });
+  /* AND THE GROUPS LEAD IN THE ORDER THEIR FIRST MEMBER DOES, so dragging
+     a capability above every direction makes Capabilities the first
+     group — one list, one answer, no second setting for "which kind
+     comes first" (§53.5). */
+  groups.sort(function(a, b){
+    return (a.ix.length ? at(a.ix[0]) : flow.length + 99) -
+           (b.ix.length ? at(b.ix[0]) : flow.length + 99);
+  });
+} else {
+  var bothKinds = !!capCards ||
+    (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+  groups = [{
+    ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+    /* §542: the one heading names both kinds whether the capabilities are
+       records beside the list or pillars inside a list SHOWN APART —
+       never because a joined list happens to hold a marked row (see the
+       sub-line above, and checks/deck-figures.py, which went red on
+       exactly that). */
+    many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+    /* The anchor's label is PLAIN TEXT, not the heading: the heading
+       carries `&amp;`, and a label is escaped on its way into the
+       attribute, so the rail would have read "Directions &amp;amp;
+       Capabilities". */
+    plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+    one: L1("pillar"),
+    /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+       named both kinds (§542); the table below has always been headed
+       with the pillar word alone, and widening it here would have moved
+       a live client's slide for nothing. */
+    head: L("pillar","bu"),
+    names: "pillarnames", score: "pillars", cards: capCards
+  }];
+}
+
+  return groups;
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -599,110 +756,25 @@ function deckSlides(u){
      takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
      from the whole list and must keep doing so when the list is shown in two
      halves; the row's own counter is separate and restarts per table. */
-  function pillarCard(p, i){
-    /* §542: on a box SHOWN APART, an internal pillar says what it is where
-       it has nothing else to say — exactly as a capability's own card does
-       below, so a client whose capabilities have become pillars reads the
-       roll-call it read when they were records. Its own sub-line still wins.
-
-       THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
-       six of the worked example's ten units carry a pillar marked Capability
-       in one joined list, and the first draft of this line put the word
-       "Capability" under every one of them on their decks. checks/
-       deck-figures.py caught it on the heading below; the same mistake was
-       here, one line up, and the same guard closes both. */
-    var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
-    return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
-      '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
-      /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
-      '</div>';
-  }
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  var capCards = !short ? "" : boardCapTargets().map(function(t){
-    var c = capById(t.slice(4)), nm = placeLabel(t);
-    return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
-      '<span class="pcard-n">' + esc(nm) + '</span>' +
-      '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
-  }).join("");
+  /* The divider belongs to the deck, not to the group reader: the master
+     flow draws the roll-calls without it (§554.1). */
   if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
-     One group, as every deck has had, EXCEPT on the company's own review of
-     a plan that is shown apart: there the directions and the capabilities
-     are two things, and reading all ten under one heading called Directions
-     was not a wording slip — the standing slide below counted ten of them
-     and said "10 Directions, by their measures", five of which were
-     capabilities.
-
-     THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
-     roll-call or the score table stays where its owner put it; the second
-     group's two slides are new ground and carry new anchors (§96.2).
-
-     A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
-     directions and no capabilities reads exactly as it does today. */
-  var groups;
-  if (short && boxSplit(u)) {
-    var dirs = [], caps = [];
-    u.items.forEach(function(p, i){
-      (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
-    });
-    groups = [
-      { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
-        one: L1("pillar"), head: L("pillar","bu"),
-        names: "pillarnames", score: "pillars", cards: "" },
-      { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
-        one: L1("capability"), head: L("capability","bu"),
-        names: "capnames",    score: "caps",    cards: capCards }
-    ].filter(function(g){ return g.ix.length || g.cards; });
-  } else {
-    var bothKinds = !!capCards ||
-      (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
-    groups = [{
-      ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
-      /* §542: the one heading names both kinds whether the capabilities are
-         records beside the list or pillars inside a list SHOWN APART —
-         never because a joined list happens to hold a marked row (see the
-         sub-line above, and checks/deck-figures.py, which went red on
-         exactly that). */
-      many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
-      /* The anchor's label is PLAIN TEXT, not the heading: the heading
-         carries `&amp;`, and a label is escaped on its way into the
-         attribute, so the rail would have read "Directions &amp;amp;
-         Capabilities". */
-      plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
-      one: L1("pillar"),
-      /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
-         named both kinds (§542); the table below has always been headed
-         with the pillar word alone, and widening it here would have moved
-         a live client's slide for nothing. */
-      head: L("pillar","bu"),
-      names: "pillarnames", score: "pillars", cards: capCards
-    }];
-  }
+  var groups = pillarGroups(u, short);
 
   if (pOn) groups.forEach(function(g){
-    var extra = g.cards ? boardCapTargets().length : 0;
-    var n = g.ix.length + extra;
-    if (!n) return;
-    S.push('<section class="dslide"' +
-      anch(g.names, "After the " + g.plain + " names") +
-      '><h2>' + g.many + '</h2>' +
-      '<div class="pcards" style="--n:' + n +
-        ';--c:' + pillarCols(n) +
-        ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
-      g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
-      g.cards + '</div></section>');
+    if (!groupSize(g)) return;
+    S.push(rollCallSlide(u, g));
     /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
        Islam, having been shown Raya's Mobile beside El Abd's review:
        *"yes I want elabd as a unit"*.
@@ -1824,7 +1896,12 @@ function deckBuild(target){
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
   deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
+  /* The company by its own name (§553.8's rule, reaching the strip under the
+     room): the slides it adds itself were labelled "the group" there, which
+     is the word Islam struck out — "there is nothing called elabd review as
+     a group". */
+  var org = String((GROUP && GROUP.org) || "").trim();
+  var name = (target === "group" && org) ? org : placeLabel(target);
   [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
     sl.dataset.subject = target;
     sl.dataset.subjectName = name;
@@ -1846,12 +1923,45 @@ function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
+     §554.1's cover and roll-calls are slides, not people presenting — and
+     the presenter counts SUBJECTS off `data-subject`, so each of them took
+     a dot of its own, a pill reading "FL", and turned "1 of 3" into
+     "1 of 4". Found by the checks rather than by looking, which is the
+     point of them.
+
+     EACH ONE IS STAMPED WITH WHAT IT INTRODUCES: the cover with the first
+     subject of the flow, a group's page with the first of that group. So
+     the strip, the dots and the pills read exactly as they did before the
+     pages existed, and the pages ride inside the section they open. */
+  var slides = [].slice.call(root.querySelectorAll(".deck .dslide"));
+  for (var i = slides.length - 1; i >= 0; i--) {
+    var sub = slides[i].dataset.subject || "";
+    if (sub.indexOf("flow:") !== 0) continue;
+    /* …and marked as the flow's own, so the clock can tell it is nobody's
+       time (§556.9): stamped with the first direction, the cover was
+       spending that direction's minutes before it had begun. */
+    slides[i].dataset.flowpart = "1";
+    var next = slides[i + 1];
+    if (next && next.dataset.subject) {
+      slides[i].dataset.subject = next.dataset.subject;
+      /* BOTH, because the strip names a stop from `subjectName` and falls
+         back to the target only when there is none — so rewriting the
+         subject alone left the first dot reading "flow:cover". */
+      if (next.dataset.subjectName) slides[i].dataset.subjectName = next.dataset.subjectName;
+      else slides[i].removeAttribute("data-subject-name");
+    } else {
+      slides[i].removeAttribute("data-subject");
+      slides[i].removeAttribute("data-subject-name");
+    }
+  }
   /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
      `.dslide` siblings and leaves it alone. */
-  DECK.targets = list.slice();
+  /* …and they are not in the list of who is presenting either (§554.3). */
+  DECK.targets = list.filter(function(t){ return String(t).indexOf("flow:") !== 0; });
   DECK.clock = null;
   clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
@@ -1873,7 +1983,9 @@ function openDeckWith(titleHtml, targets, from){
   var ex = root.querySelector("[data-dexit]");
   ex.textContent = back ? "Back to slides" : "Exit";
   ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
-  DECK.flow = list.length > 1 ? list : null;
+  /* §554.3: and the stops are the subjects, so the flow's own pages are
+     not in the list the strip is built from either. */
+  DECK.flow = DECK.targets.length > 1 ? DECK.targets : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
@@ -2012,11 +2124,66 @@ function contFlowTargets(){
   return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
 }
 
+/* ── THE FLOW IS ONE PRESENTATION, SO IT OPENS LIKE ONE (§554.1) ────────
+   Islam, having played it: *"we need a cover slide for the whole
+   presentation as we are presenting elabd q3 strategy review and before the
+   directions I find the grouped directions and same for the capabilities"*.
+
+   The master flow was each subject's deck, back to back — nineteen covers
+   and no cover for the thing itself, and the directions arriving one after
+   another with nothing in front of them saying what the room was about to
+   see. The company's own review has had that page since §553.6; this gives
+   the flow the SAME page, through the same builder, rather than a second
+   one that looks like it (§53.5).
+
+   INSERTED, NOT PLACED. The cover and the two roll-calls are not subjects
+   somebody ticks: the cover opens the flow because the flow is a
+   presentation, and a group's page goes in front of the first of its
+   members because that is what the page is for. Islam's word for it was
+   *"automatically"*, twice.
+
+   A GROUP WITH NOBODY IN THE FLOW GETS NO PAGE (§45.2, §253): tick three
+   directions and no capability and the Capabilities page is not drawn. */
+function flowCoverHtml(){
+  var u = topAsUnit();
+  return '<section class="dslide d-cover"' + anch("flowcover", "After the cover") +
+    sec("COVER", deckBoxName(u), true) + '>' +
+    (deckMark(u)
+      ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(deckBoxName(u)) + '">'
+      : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+function flowPartHtml(t){
+  if (t === "flow:cover") return flowCoverHtml();
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  for (var i = 0; i < gs.length; i++)
+    if ("flow:g" + gs[i].names === t) return rollCallSlide(u, gs[i]);
+  return "";
+}
+/* The flow, with its own cover in front and each group's page in front of
+   the first of its members. */
+function flowWithParts(list){
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  var owner = {};
+  gs.forEach(function(g){
+    g.ix.forEach(function(x){ owner["dir:" + x.p.id] = "flow:g" + g.names; });
+  });
+  var seen = {}, out = ["flow:cover"];
+  list.forEach(function(t){
+    var k = owner[t];
+    if (k && !seen[k]) { seen[k] = 1; out.push(k); }
+    out.push(t);
+  });
+  return out;
+}
+
 function flowToPdf(){
   var list = contFlowTargets();
   if (!list.length) return false;
   deckPrint(function(){
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+      flowWithParts(list));
   });
   return true;
 }
@@ -2261,24 +2428,69 @@ function masterCount(t){
    rewrites two counts; a repaint would replace the box being typed into. And
    a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
    again to a person who believes they are reading their results. */
-function masterKind(t){
+/* ── WHAT KIND A SUBJECT IS, IN ONE WORD (§554.2) ───────────────────────
+   `masterKind` above answers the same question in a chip; this answers it
+   as the bare word the filter groups by, and the chip is built FROM this
+   so a filter can never offer a word the column does not show (§53.5). */
+function masterKindWord(t){
   t = String(t);
-  /* §481: four kinds in the company's flow, said in the picker's own chips. */
   var k = boxRef(t).kind;
-  /* §553: without this a section part falls to the bottom line and the
-     picker calls the company's Foundation a BUSINESS UNIT. */
-  if (k === "sec") return '<span class="mfkind">SECTION</span>';
-  if (k === "dir") return '<span class="mfkind">DIR</span>';
-  if (k === "cap") return '<span class="mfkind fn">CAP</span>';
-  if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return k === "fn"
-    ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
+  if (k === "sec") return "SECTION";
+  if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
+  if (k === "cap") return "CAP";
+  if (t === "group" && companyReviewOn()) return "CO";
+  return k === "fn" ? "FUNC" : "BU";
+}
+var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",
+                    BU:"Business units", FUNC:"Functions", CO:"The company" };
+
+function masterKind(t){
+  /* ── ONE ANSWER, WORN AS A CHIP (§554.2) ──────────────────────────────
+     §481's four kinds were spelled out again here, and the filter above
+     would have been a fifth spelling — so the chip is built FROM
+     `masterKindWord` and the two cannot disagree by construction (§53.5).
+
+     IT ALSO FIXES WHAT THE COLUMN SAID. A capability of El Abd's is
+     presented as `dir:<id>` like a direction is, so every one of its five
+     read DIR in this column while the Capabilities tab, the roll-call and
+     the deck all called them capabilities (§542). */
+  var k = masterKindWord(t);
+  return '<span class="mfkind' + (k === "CAP" || k === "FUNC" ? " fn" : "") +
+    '">' + k + '</span>';
 }
 function masterPaint(){
   var box = document.getElementById("modal-b");
   if (!box || !MFLOW) return;
   var all = masterSubjects();
+  /* ── THE LISTS STAY WHERE THEY WERE (§554.2) ──────────────────────
+     Islam: *"everytime I remove something from the right the list jumps it
+     needs to stay still"*. Every press repaints the whole dialog, so both
+     columns were scrolled back to the top under the finger — on a flow of
+     nineteen, taking out the last one put the row you were working on off
+     the screen. Read before the repaint, put back after. */
+  var keepTop = [].map.call(box.querySelectorAll(".mflist"), function(e){ return e.scrollTop; });
   var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
+  /* ── AND THE LEFT COLUMN NARROWS BY KIND (§554.2) ─────────────────
+     Islam: *"on the left list I need to have filters so I can choose from
+     directions or capabilities or divisions to filter the functions so I
+     can select properly or all"*. The chips are built from the kinds the
+     client ACTUALLY has, in the picker's own order, so a client with no
+     divisions is not offered a Divisions chip over nothing (§45.2). */
+  var kinds = [];
+  all.forEach(function(t){
+    var k = masterKindWord(t);
+    if (kinds.indexOf(k) < 0) kinds.push(k);
+  });
+  if (MFLOW.kind && kinds.indexOf(MFLOW.kind) < 0) MFLOW.kind = "";
+  if (MFLOW.kind) rest = rest.filter(function(t){ return masterKindWord(t) === MFLOW.kind; });
+  var chips = kinds.length < 2 ? "" :
+    '<div class="mfkinds" role="group" aria-label="Narrow the list by kind">' +
+    [""].concat(kinds).map(function(k){
+      var lit = (MFLOW.kind || "") === k;
+      return '<button type="button" class="mfchip' + (lit ? " on" : "") +
+        '" data-mfkind="' + esc(k) + '" aria-pressed="' + (lit ? "true" : "false") + '">' +
+        esc(k ? (MFKIND_NAME[k] || k) : "All") + '</button>';
+    }).join("") + '</div>';
   var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
   /* Waiting to be picked. The row carries the name AND the code the deck's own
      pills show while presenting (§266.9), because both are what somebody would
@@ -2332,7 +2544,7 @@ function masterPaint(){
   };
   box.innerHTML = '<div class="mflow"><div class="mfcols">' +
     '<div class="mfcol"><div class="mfhead">' +
-      '<h4>Everyone who reports</h4>' +
+      '<h4>Everyone who reports</h4>' + chips +
       '<input class="mffind" data-mffind-box="1" autocomplete="off"' +
         ' placeholder="Search a unit or function…"' +
         ' aria-label="Search a unit or function" value="' + esc(MFLOW.q || "") + '">' +
@@ -2344,6 +2556,14 @@ function masterPaint(){
       '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
         'Everybody is in the flow.</p></div></div>' +
     '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
+      /* ── AND A WAY BACK TO AN EMPTY FLOW (§554.2) ─────────────────
+         Islam: *"there should be somewhere where I reset all and bring all
+         selected flow to the left as if deselect all from the right pan"*.
+         Nineteen presses, or one. Drawn only while there is something to
+         take out, so it is never a control over nothing (§61). */
+      (MFLOW.pick.length
+        ? '<button type="button" class="lnk" data-mfnone="1">Take all out</button>'
+        : '') +
       '<span class="mfcount" data-mfsum>' + masterSumLine(total) + '</span></div>' +
       '<div class="mflist"><table class="mftbl"><thead><tr>' +
         '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
@@ -2357,8 +2577,11 @@ function masterPaint(){
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
+      '>Go to the slides</button></div></div>';
   masterWire();
+  [].forEach.call(box.querySelectorAll(".mflist"), function(e, i){
+    if (keepTop[i] != null) e.scrollTop = keepTop[i];
+  });
   /* AFTER the wiring, and from HERE rather than from inside it: the count is
      the whole list's, which `masterWire()` does not hold — the first build
      passed it `all.length` from a scope that function cannot see, and every
@@ -2426,6 +2649,22 @@ function masterWire(){
   var box = document.getElementById("modal-b");
   if (!box) return;
   var find = box.querySelector("[data-mffind-box]");
+  /* §554.2: the kind chips and the way back to an empty flow. Both repaint
+     through `masterPaint`, which now keeps each column where it was. */
+  [].forEach.call(box.querySelectorAll("[data-mfkind]"), function(b){
+    b.addEventListener("click", function(){
+      MFLOW.kind = (MFLOW.kind || "") === this.dataset.mfkind ? "" : this.dataset.mfkind;
+      MFLOW.note = "";
+      masterPaint();
+    });
+  });
+  var none = box.querySelector("[data-mfnone]");
+  if (none) none.addEventListener("click", function(){
+    MFLOW.pick = [];
+    MFLOW.note = "";
+    masterWrite(MFLOW.pick);
+    masterPaint();
+  });
   [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
     b.addEventListener("click", function(){
       /* The search keeps the cursor when a tick was made from the search: the
@@ -2534,9 +2773,17 @@ function masterWire(){
       masterPaint();
       return;
     }
+    /* ── IT OPENS THE SLIDES, NOT THE SHOW (§556) ──────────────────
+       Islam: *"after we set the master presentation, we say 'here, manage
+       the slides' … and then it takes me to the presentation when I say
+       present"*. The first time anybody saw this deck was in front of the
+       room; now the flow lands on its own slides, where a slide that
+       should not be there can be taken out before it is projected. Play
+       is one press from there, and leaving the show comes back here
+       (§295). */
     var list = MFLOW.pick.slice();
     closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    slidesOpenFlow(list);
   });
 }
 
@@ -2564,6 +2811,20 @@ function masterMoved(order){
    the two with NO CONFLICT: the later one wins by hoisting, so the product
    would have run this copy and main's would have been dead (§146.2, §56.7).
    Removed rather than reconciled, because one question may have one answer. */
+/* ── FULL SCREEN, STRAIGHT AWAY (§556.11) ──────────────────────────────
+   The class first, so the bar is gone even where the browser refuses full
+   screen (a preview frame, a locked-down kiosk): the deck still fills what
+   it has, and Esc still comes back. */
+function deckGoFull(){
+  var root = document.getElementById("deckroot");
+  DECK.direct = true;
+  root.classList.add("fs");
+  try {
+    var p = root.requestFullscreen && root.requestFullscreen();
+    if (p && p.catch) p.catch(function(){});
+  } catch (e) { /* refused: the class above already did what it can */ }
+  deckScale();
+}
 function closeDeck(){
   var root = document.getElementById("deckroot");
   /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
@@ -2576,7 +2837,10 @@ function closeDeck(){
      inert behind it. Both, or neither. */
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
+  /* §556.11: which slide the room reached, so the slides come back on it. */
+  var reached = toEditor ? slidesWhich(DECK.slides, DECK.i) : null;
   DECK.from = "page";
+  DECK.direct = false;
   /* §340: the clock's own interval, stopped with the deck it was drawing. An
      interval left running is the leak §24 is about — it would go on writing
      into a node that has been replaced, twice a second, for the life of the
@@ -2595,7 +2859,7 @@ function closeDeck(){
      moment a deck closed over it. */
   if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
-  if (toEditor) slidesResume();
+  if (toEditor) slidesResume(reached);
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -2827,6 +3091,14 @@ var CLOCKTICK = null;
    §303 baseline run from this directory measures this build and says the
    failure is not yours (§334.13, walked into an hour before this comment). */
 function clockSubject(){
+  /* THE FLOW'S OWN PAGES RUN NO CLOCK (§556.9). Islam: *"it should reset
+     when we get to a new direction as we set in the start of the flow"* —
+     the cover and the group pages ride inside the first subject's section
+     (§554.3), so its time was running from the cover, and by its own first
+     slide it no longer read what the flow had set. A subject's time starts
+     on that subject's slides. */
+  var here = DECK.slides && DECK.slides[DECK.i];
+  if (here && here.dataset.flowpart) return null;
   if (DECK.flow && DECK.stops) {
     var k = deckStopAt(DECK.i);
     return k >= 0 ? DECK.stops[k].t : null;
@@ -3151,7 +3423,14 @@ function wireDeck(){
      inset and scales the deck to the box it is about to stop being. */
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
-    root.classList.toggle("fs", document.fullscreenElement === root);
+    /* §556.11: a deck the slides opened full screen has no windowed state
+       to fall back to — leaving full screen IS leaving the deck, or one Esc
+       lands on the bar Islam asked never to see. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+      closeDeck();
+      return;
+    }
+    root.classList.toggle("fs", document.fullscreenElement === root || !!DECK.direct);
     deckScale();
   });
   addEventListener("keydown", function(ev){
@@ -3209,6 +3488,13 @@ function wireDeck(){
        never gets here, because the contenteditable branch above returns
        first. */
     if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); clockToggle(); }
+    /* §556.11: T pauses and starts, R resets — listed on the slides, which
+       is where they are read now the room has no bar. BY THE KEY'S PLACE as
+       well as its letter: on an Arabic keyboard the T key sends "ف" and R
+       "ق", and Islam's "T is not working" was exactly that. */
+    var kc = ev.code || "";
+    if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });

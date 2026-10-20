@@ -1,0 +1,325 @@
+<title>The slide view</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Islam's Fouad page, laid out with El Abd's flow in it: quiet header with
+     the title left and three buttons right, thumbnails that ARE their own
+     label, the stage with a progress rule and edge arrows, and one bar under
+     it carrying the counter, the slide's name and the keys. */
+  :root{
+    --ink:#241b16; --ink2:#5b4c43; --dim:#8d8079;
+    --page:#efe9e3; --bar:#fffdfb; --card:#fff; --line:#e2d8d0; --rule:#eee6df;
+    --accent:#b2355b; --accent-soft:#f7dde6; --dark:#2a211c;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --serif: Georgia,"Times New Roman",serif;
+    --mono: ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ink:#f0e9e4; --ink2:#c3b7af; --dim:#9a8d85; --page:#17130f; --bar:#201a16;
+    --card:#262019; --line:#3a312a; --rule:#332b25; --accent:#e4849f;
+    --accent-soft:#3a2129; --dark:#f0e9e4; color-scheme:dark; } }
+  :root[data-theme="dark"]{
+    --ink:#f0e9e4; --ink2:#c3b7af; --dim:#9a8d85; --page:#17130f; --bar:#201a16;
+    --card:#262019; --line:#3a312a; --rule:#332b25; --accent:#e4849f;
+    --accent-soft:#3a2129; --dark:#f0e9e4; color-scheme:dark; }
+
+  body{margin:0;background:var(--page);color:var(--ink);font:400 15px/1.5 var(--sans);}
+  .page{max-width:1240px;margin:0 auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-block:26px 48px;}
+  h1{font:700 27px/1.15 var(--serif);margin:0 0 7px;}
+  .lead{margin:0 0 18px;color:var(--ink2);max-width:62ch;}
+  .lead b{color:var(--ink);}
+
+  .app{background:var(--bar);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+
+  /* header */
+  .hd{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);}
+  .mark{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:var(--accent-soft);color:var(--accent);font:700 11px/1 var(--sans);}
+  .hd .who{min-width:0;display:flex;flex-direction:column;}
+  .hd .who .t,.hd .who .s{display:block;}
+  .hd .t{font:700 14px/1.2 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hd .s{font:400 11.5px/1.3 var(--sans);color:var(--dim);margin-top:2px;}
+  .hd .acts{margin-left:auto;display:flex;gap:7px;}
+  .hd button{display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    font:600 12.5px/1 var(--sans);padding:8px 12px;border-radius:7px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink2);}
+  .hd button svg{width:14px;height:14px;flex:none;}
+  .hd button.on{border-color:var(--accent);color:var(--ink);}
+  .hd button.go{background:var(--dark);border-color:var(--dark);
+    color:var(--bar);}
+  .hd button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media (max-width:620px){ .hd button .lbl{display:none;} }
+
+  /* body */
+  .main{display:grid;grid-template-columns:186px 1fr;min-height:430px;position:relative;}
+  @media (max-width:760px){ .main{grid-template-columns:1fr;} .rail{display:none;} }
+  .main.norail{grid-template-columns:1fr;}
+  .main.norail .rail{display:none;}
+  .rail{border-right:1px solid var(--line);display:flex;flex-direction:column;max-height:470px;}
+  .rail > div:first-child{overflow:auto;padding:10px;flex:1;min-height:0;}
+  .tb{display:block;width:100%;border:0;background:none;padding:0;margin:0 0 10px;cursor:pointer;
+    text-align:left;position:relative;}
+  .tb .num{position:absolute;left:-2px;top:-2px;font:700 10px/1 var(--mono);color:var(--dim);}
+  .tb .shot{margin-left:14px;border:1.5px solid var(--line);border-radius:4px;overflow:hidden;
+    background:var(--card);aspect-ratio:16/9;display:flex;flex-direction:column;
+    justify-content:center;padding:7px 8px;gap:3px;}
+  .tb[aria-current="true"] .shot{border-color:var(--accent);
+    box-shadow:0 0 0 2px var(--accent-soft);}
+  .tb .sh-t{font:700 7.5px/1.2 var(--sans);color:var(--ink);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .tb .sh-l{height:2px;background:var(--rule);border-radius:1px;}
+  .tb .sh-l.w2{width:72%}.tb .sh-l.w3{width:52%}
+  .tb.hid .shot{opacity:.38;filter:grayscale(1);}
+  .tb .eye{position:absolute;right:5px;top:5px;width:20px;height:20px;border-radius:5px;
+    border:1px solid var(--line);background:var(--bar);color:var(--dim);display:none;
+    align-items:center;justify-content:center;font-size:10px;cursor:pointer;}
+  .tb:hover .eye,.tb[aria-current="true"] .eye,.tb.hid .eye{display:flex;}
+  .railfoot{border-top:1px solid var(--line);padding:9px 10px;}
+  .railfoot button{width:100%;font:600 11.5px/1 var(--sans);padding:8px;cursor:pointer;
+    border:1px dashed var(--line);border-radius:6px;background:none;color:var(--dim);}
+  .railfoot p{margin:6px 2px 0;font-size:10.5px;color:var(--dim);line-height:1.35;}
+
+  /* stage */
+  .stagecol{display:flex;flex-direction:column;min-width:0;}
+  .prog{height:4px;background:var(--rule);flex:none;}
+  .prog i{display:block;height:100%;background:var(--dark);transition:width .18s;}
+  .stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;
+    padding:18px;min-width:0;}
+  .slide{width:100%;max-width:760px;aspect-ratio:16/9;background:var(--card);
+    border:1px solid var(--line);border-radius:7px;padding:5% 6%;
+    display:flex;flex-direction:column;justify-content:center;}
+  .slide .code{font:700 10px/1 var(--mono);letter-spacing:.14em;color:var(--accent);}
+  .slide h2{font:700 clamp(17px,3.1vw,33px)/1.1 var(--serif);margin:10px 0 0;}
+  .slide .ln{height:3px;width:52px;background:var(--accent);margin:12px 0 10px;}
+  .slide p{margin:0;color:var(--ink2);font-size:clamp(11px,1.3vw,14px);}
+  .slide .rows{margin-top:12px;display:flex;flex-direction:column;gap:5px;}
+  .slide .rows i{display:block;height:7px;background:var(--rule);border-radius:2px;}
+  .edge{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;
+    border-radius:50%;border:1px solid var(--line);background:var(--bar);color:var(--ink2);
+    display:grid;place-items:center;cursor:pointer;}
+  .edge.l{left:6px} .edge.r{right:6px}
+  .edge:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* under-stage bar */
+  .ft{display:flex;align-items:center;gap:9px;padding:8px 12px;border-top:1px solid var(--line);
+    flex-wrap:wrap;}
+  .ft .nav{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);
+    background:var(--card);color:var(--ink2);cursor:pointer;display:grid;place-items:center;}
+  .ft .ct{font:600 12.5px/1 var(--mono);color:var(--ink);}
+  .ft .nm{font:500 12.5px/1 var(--sans);color:var(--ink2);min-width:0;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .ft .keys{margin-left:auto;font-size:11px;color:var(--dim);}
+  .ft .keys b{font:700 9.5px/1 var(--mono);border:1px solid var(--line);border-radius:3px;
+    padding:3px 4px;color:var(--ink2);margin:0 1px;}
+  @media (max-width:760px){ .ft .keys{display:none;} }
+
+  /* grid */
+  .grid{position:absolute;inset:0;background:var(--bar);z-index:4;overflow:auto;padding:14px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;align-content:start;}
+  .gc{border:1.5px solid var(--line);border-radius:5px;background:var(--card);cursor:pointer;
+    padding:7px 8px;text-align:left;display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .gc[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);}
+  .gc .n{font:700 9px/1 var(--mono);color:var(--dim);}
+  .gc .t{font:600 11px/1.3 var(--sans);color:var(--ink2);
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .gc.hid .t{color:var(--dim);text-decoration:line-through;}
+
+  /* presenting */
+  .show{position:relative;background:#0e0b09;padding:26px;display:flex;
+    flex-direction:column;align-items:center;gap:13px;}
+  .show .slide{background:#fff;border-color:#2a2420;}
+  .show .slide h2,.show .slide .code{color:#241b16;}
+  .show .slide .code{color:#b2355b;}
+  .show .slide p{color:#5b4c43;}
+  .show .srow{display:flex;align-items:center;gap:9px;color:#b4a79f;font-size:11.5px;}
+  .show .pips{display:flex;gap:3px;}
+  .show .pips i{width:15px;height:4px;border-radius:2px;background:#3a322c;display:block;}
+  .show .pips i.on{background:#e4849f;}
+  .show button{font:600 11.5px/1 var(--sans);padding:7px 11px;border-radius:6px;cursor:pointer;
+    border:1px solid #3a322c;background:#1a1512;color:#e8ddd6;}
+
+  .diff{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:760px){ .diff{grid-template-columns:1fr;} }
+  .dcol{border:1px solid var(--line);border-radius:9px;background:var(--bar);padding:15px 17px;}
+  .dcol h3{font:700 14px/1.3 var(--sans);margin:0 0 9px;}
+  .dcol ul{margin:0;padding:0;list-style:none;}
+  .dcol li{font-size:13px;color:var(--ink2);padding-left:16px;position:relative;margin:5px 0;}
+  .dcol li::before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;
+    border-radius:50%;background:var(--accent);}
+  .dcol li b{color:var(--ink);}
+  .dcol.was li::before{background:var(--dim);}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="page">
+  <h1>The slide view</h1>
+  <p class="lead">Your Fouad page's layout, with El Abd's flow in it. <b>Click
+    the thumbnails, the arrows, Grid, the eye on a thumbnail, Present.</b></p>
+
+  <div class="app" id="app"></div>
+
+  <div class="diff">
+    <div class="dcol was">
+      <h3>What I built, and why it was wrong</h3>
+      <ul>
+        <li>A heavy coloured bar across the top instead of a quiet one</li>
+        <li><b>Add a final slide</b> as the loudest thing on the screen, above the deck</li>
+        <li>A text label under every thumbnail, saying what the thumbnail already shows</li>
+        <li>No counter, no slide name, no arrows, no progress</li>
+        <li>A paragraph of explanation under the stage</li>
+      </ul>
+    </div>
+    <div class="dcol">
+      <h3>What yours does</h3>
+      <ul>
+        <li>Quiet header: who is presenting on the left, three buttons on the right</li>
+        <li><b>Present is the one dark button</b>, Slides and Grid beside it</li>
+        <li>The thumbnail <b>is</b> the label — number outside, nothing underneath</li>
+        <li>One bar under the stage: <b>‹ 1 / 27 ›</b>, the slide's name, the keys</li>
+        <li>A progress rule across the top, arrows at the edges of the slide</li>
+        <li>Adding sits quietly at the foot of the rail, where it belongs</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var S = [
+    ["D001","Maximizing Current Stores","cover"],
+    ["D001","Key Measures","table"],
+    ["D001","Categories","table"],
+    ["D001","Tactics","table"],
+    ["D001","Where Maximizing Current Stores stands","figs"],
+    ["D002","Egypt Expansion","cover"],
+    ["D002","Key Measures","table"],
+    ["D002","Tactics","table"],
+    ["C001","End-to-End Quality Mindset","cover"],
+    ["C001","Key Measures","table"],
+    ["C001","Tactics","table"],
+    ["EL ABD","Foundation","text"],
+    ["EL ABD","Directions","cards"],
+    ["EL ABD","Directions — where we stand","table"],
+    ["EL ABD","Capabilities","cards"],
+    ["EL ABD","Overall performance","text"],
+    ["EL ABD","Where El Abd stands","figs"],
+    ["EL ABD","Thank you","cover"]
+  ];
+  var hid = {2:true}, at = 0, rail = true, grid = false, show = false;
+
+  function ico(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; }
+  var I = {
+    slides: '<rect x="3" y="4" width="7" height="16" rx="1.5"/><path d="M14 6h7M14 12h7M14 18h7"/>',
+    grid:   '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>' +
+            '<rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    play:   '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    left:   '<path d="M15 5l-7 7 7 7"/>', right: '<path d="M9 5l7 7-7 7"/>'
+  };
+
+  function body(s){
+    if (s[2] === "table") return '<div class="rows">' +
+      '<i style="width:100%"></i><i style="width:92%"></i><i style="width:96%"></i>' +
+      '<i style="width:88%"></i><i style="width:70%"></i></div>';
+    if (s[2] === "figs") return '<p style="font:700 clamp(18px,3.4vw,34px)/1 var(--serif);' +
+      'color:var(--accent);margin-top:6px">95%<span style="color:var(--dim);margin-left:16px">—</span></p>';
+    if (s[2] === "cards") return '<div class="rows" style="flex-direction:row;gap:6px">' +
+      '<i style="width:23%;height:26px"></i><i style="width:23%;height:26px"></i>' +
+      '<i style="width:23%;height:26px"></i><i style="width:23%;height:26px"></i></div>';
+    if (s[2] === "text") return '<div class="rows"><i style="width:84%"></i>' +
+      '<i style="width:76%"></i><i style="width:60%"></i></div>';
+    return "";
+  }
+  function slide(){
+    var s = S[at];
+    return '<div class="slide"><span class="code">' + s[0] + '</span>' +
+      '<h2>' + s[1] + '</h2><div class="ln"></div>' + body(s) + '</div>';
+  }
+  function thumbs(){
+    return '<div class="rail"><div>' + S.map(function(s, i){
+      return '<button class="tb' + (hid[i] ? ' hid' : '') + '" data-go="' + i +
+        '" aria-current="' + (i === at) + '"><span class="num">' + (i+1) + '</span>' +
+        '<span class="shot"><span class="sh-t">' + s[1] + '</span>' +
+        '<span class="sh-l"></span><span class="sh-l w2"></span><span class="sh-l w3"></span></span>' +
+        '<span class="eye" data-hide="' + i + '" role="button" title="Hide">' +
+        (hid[i] ? "✕" : "◉") + '</span></button>';
+    }).join("") + '</div><div class="railfoot"><button type="button">+ Add a final slide</button>' +
+      '<p>At the end of the flow. A direction’s own slides are added on its own page.</p>' +
+      '</div></div>';
+  }
+  function live(){ return S.filter(function(_, i){ return !hid[i]; }); }
+
+  function draw(){
+    var app = document.getElementById("app");
+    if (show) {
+      var L = live(), pos = Math.max(0, L.indexOf(S[at]));
+      app.innerHTML = '<div class="show">' + slide() +
+        '<div class="srow"><div class="pips">' + L.map(function(_, i){
+          return '<i class="' + (i === pos ? "on" : "") + '"></i>'; }).join("") + '</div>' +
+        '<span>' + (pos+1) + ' / ' + L.length + ' &middot; 2h 05m</span>' +
+        '<button type="button" data-back="1">Back to the slides</button></div></div>';
+      return;
+    }
+    app.innerHTML =
+      '<div class="hd"><span class="mark">EA</span>' +
+        '<span class="who"><span class="t">El Abd &middot; strategy review</span>' +
+        '<span class="s">Master presentation &middot; 10 subjects &middot; Q3 Review</span></span>' +
+        '<span class="acts">' +
+          '<button type="button" data-rail="1" class="' + (rail ? "on" : "") + '">' +
+            ico(I.slides) + '<span class="lbl">Slides</span></button>' +
+          '<button type="button" data-grid="1" class="' + (grid ? "on" : "") + '">' +
+            ico(I.grid) + '<span class="lbl">Grid</span></button>' +
+          '<button type="button" data-show="1" class="go">' + ico(I.play) +
+            '<span class="lbl">Present</span></button>' +
+        '</span></div>' +
+      '<div class="main' + (rail ? "" : " norail") + '">' +
+        (rail ? thumbs() : "") +
+        '<div class="stagecol"><div class="prog"><i style="width:' +
+          Math.round((at+1) / S.length * 100) + '%"></i></div>' +
+          '<div class="stage">' + slide() +
+            '<button class="edge l" type="button" data-nudge="-1">' + ico(I.left) + '</button>' +
+            '<button class="edge r" type="button" data-nudge="1">' + ico(I.right) + '</button>' +
+          '</div>' +
+          '<div class="ft"><button class="nav" type="button" data-nudge="-1">' + ico(I.left) + '</button>' +
+            '<span class="ct">' + (at+1) + ' / ' + S.length + '</span>' +
+            '<button class="nav" type="button" data-nudge="1">' + ico(I.right) + '</button>' +
+            '<span class="nm">' + S[at][1] + (hid[at] ? " &middot; hidden" : "") + '</span>' +
+            '<span class="keys">Click right / left side &middot; <b>&larr;</b> <b>&rarr;</b> &middot; ' +
+            '<b>F</b> full screen &middot; <b>G</b> grid &middot; <b>B</b> blank &middot; ' +
+            '<b>H</b> hide slide</span></div>' +
+        '</div>' +
+        (grid ? '<div class="grid">' + S.map(function(s, i){
+          return '<button class="gc' + (hid[i] ? ' hid' : '') + '" data-go="' + i +
+            '" aria-current="' + (i === at) + '"><span class="n">' + (i+1) +
+            '</span><span class="t">' + s[1] + '</span></button>'; }).join("") + '</div>' : '') +
+      '</div>';
+  }
+
+  document.addEventListener("click", function(e){
+    var h = e.target.closest("[data-hide]");
+    if (h) { e.stopPropagation(); var i = +h.dataset.hide;
+             if (hid[i]) delete hid[i]; else hid[i] = true; draw(); return; }
+    var b = e.target.closest("[data-go],[data-nudge],[data-grid],[data-rail],[data-show],[data-back]");
+    if (!b) return;
+    if (b.dataset.go != null) { at = +b.dataset.go; grid = false; }
+    else if (b.dataset.nudge != null) at = Math.min(S.length-1, Math.max(0, at + +b.dataset.nudge));
+    else if (b.dataset.grid != null) grid = !grid;
+    else if (b.dataset.rail != null) rail = !rail;
+    else if (b.dataset.show != null) show = true;
+    else if (b.dataset.back != null) show = false;
+    draw();
+  });
+  addEventListener("keydown", function(e){
+    if (e.key === "ArrowRight") at = Math.min(S.length-1, at+1);
+    else if (e.key === "ArrowLeft") at = Math.max(0, at-1);
+    else if (e.key === "g" || e.key === "G") grid = !grid;
+    else if (e.key === "h" || e.key === "H") { if (hid[at]) delete hid[at]; else hid[at] = true; }
+    else if (e.key === "Escape") { if (grid) grid = false; else if (show) show = false; else return; }
+    else return;
+    e.preventDefault(); draw();
+  });
+  draw();
+})();
+</script>

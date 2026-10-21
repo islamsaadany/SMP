@@ -2040,7 +2040,20 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing checks that the two agree. The target is derived from the first
      month now (`monthlySoFar`). The PRORATION half is untouched and is the
      part this paragraph was really about: a missing month is UNKNOWN, never
-     nought, so the year stays flat until all twelve are in. */
+     nought, so the year stays flat until all twelve are in.
+
+     §568 REVERSED THE OTHER HALF. Islam, of a row planned January to June
+     (2+2+2+2+2+3, so a target of 13 shops) reading 14 against 9 at 150% in
+     September: *"in a target that is already set on monthly level it's still
+     prorated arithmatic"*, and then *"the monthly plan overrides the
+     proration"*. Once §555 made the target WHAT THE MONTHS COME TO, an empty
+     month could no longer be unknown: the target already counts it as
+     nothing, so prorating that same target flat measured the row against a
+     year its own plan does not describe. A half-filled plan is in force now,
+     read exactly as the target is read — the row's compile rule over the
+     months that are set, blanks passed over, up to the review month
+     (`monthsCompiled`). What still keeps a plan out of force: no compile
+     rule, and a month holding something that is not a number. */
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   /* IS THIS MONTH SET. Blank first, THEN the number — see above. A value
@@ -2085,30 +2098,29 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       if (compileKey(COMPILES[i]) === c) return c;
     return "";
   }
+  /* §568: IN FORCE FROM THE FIRST MONTH, exactly when the target is derived
+     from the months (`monthlySoFar`), so the row's target and what is due on
+     it can never be read off two different plans. */
   function monthlyInForce(row) {
-    return !!(monthlyPlan(row) && monthlyCompile(row));
+    return monthlySoFar(row) != null;
   }
   /* WHAT THE ROW IS MEASURED AGAINST AFTER `months` OF THE YEAR. The one
      arithmetic every surface asks; `months` is 1..12 and comes from the
      review point, never from a tactic's own window — a monthly plan already
      states what each month is expected to carry, including the noughts for
      months a thing does not run in, so it is the more specific answer and
-     supersedes §250's share. */
+     supersedes §250's share.
+
+     §568: AND A HALF-FILLED PLAN ANSWERS TOO, blanks passed over. Months
+     planned only after the review point owe nothing yet (nought, which
+     `measureScore` already reads as "not due yet", §278). On a complete plan
+     this is byte-for-byte the arithmetic it was: Sum and Count add the months
+     passed, Average takes their mean, Latest the month being stood in. */
   function monthlyDue(row, months) {
-    var p = monthlyPlan(row), c = monthlyCompile(row);
-    if (!p || !c) return null;
     var n = Math.floor(Number(months));
     if (!(n >= 1)) return null;
     if (n > 12) n = 12;
-    if (c === "latest") return p[n - 1];
-    var t = 0;
-    for (var i = 0; i < n; i++) t += p[i];
-    if (c === "average") return t / n;
-    /* §276's own rounding, on the months rather than on the share: a count is
-       owed in whole ones, and the epsilon is not decoration — twelve typed
-       decimals can sum to 1.9999999999999998, and a floor taken on that owes
-       one fewer than the arithmetic means. */
-    return c === "count" ? Math.floor(t + 1e-9) : t;
+    return monthsCompiled(row, n);
   }
   /* THE YEAR'S TARGET, DERIVED. It is the same question asked of all twelve
      months, which is what makes the annual figure and the year-to-date one
@@ -2130,32 +2142,41 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      which is asserted rather than claimed, because the day the two disagree
      the target on the row stops agreeing with the months under it.
 
-     WHAT IT DOES NOT TOUCH IS PRORATION. `monthlyPlan` still refuses a
-     half-filled plan and `monthlyDue` still returns null for it, so a row is
-     measured flat across the year until all twelve are in exactly as §278
-     decided — the months that are missing are UNKNOWN, not nought, and
-     reading them as nought is the fault §278 was written around. What changes
-     is only which figure the target box holds while the plan is being made.
+     WHAT IT DID NOT TOUCH WAS PRORATION — §568 has since made a half-filled
+     plan the row's proration too, through the same walk below, so the target
+     and what is due on it are one reading of one plan.
 
      NULL WHERE THERE IS NOTHING TO SAY: no month set, no compile rule, or a
      month holding something that is not a number. The last of those is §278's
      own safe direction — a plan the platform cannot read leaves the target
      alone rather than deriving a figure from half of it. */
-  function monthlySoFar(row) {
+  function monthlySoFar(row) { return monthsCompiled(row, 12); }
+  /* THE ONE WALK (§568): the row's compile rule over months 1..`upto`, blanks
+     passed over. Null when the plan says nothing (no compile rule, no month
+     set ANYWHERE in the twelve, or a month present and unreadable — the last
+     checked across the whole year, so a bad December keeps March out of force
+     as well, which is §278's safe direction). Nought when months are set but
+     none falls in 1..`upto`: nothing is owed yet. */
+  function monthsCompiled(row, upto) {
     var a = row && row.monthly, c = monthlyCompile(row);
     if (!Array.isArray(a) || !c) return null;
-    var t = 0, n = 0, last = null, i, v;
+    var t = 0, n = 0, any = false, last = null, i, v;
     for (i = 0; i < 12 && i < a.length; i++) {
       if (a[i] == null || String(a[i]).trim() === "") continue;
       if (!monthSet(a[i])) return null;          /* present and unreadable */
+      any = true;
+      if (i >= upto) continue;
       v = Number(String(a[i]).replace(/,/g, ""));
       t += v; n++; last = v;
     }
-    if (!n) return null;
+    if (!any) return null;
+    if (!n) return 0;
     if (c === "latest") return last;
     if (c === "average") return t / n;
-    /* §276's rounding, on the months rather than on the share — and the same
-       epsilon, for the same reason `monthlyDue` carries it. */
+    /* §276's own rounding, on the months rather than on the share: a count is
+       owed in whole ones, and the epsilon is not decoration — twelve typed
+       decimals can sum to 1.9999999999999998, and a floor taken on that owes
+       one fewer than the arithmetic means. */
     return c === "count" ? Math.floor(t + 1e-9) : t;
   }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
@@ -15114,7 +15135,8 @@ function measureDue(m, share){
   if (!SMPRules.targetHasNumber(m.target)) return null;
   /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
      Twelve numbers in the target's own unit, compiled by the row's own
-     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
+     compile rule (SMPRules.monthlyDue) — from the first month set since
+     §568, an empty month counting as nothing planned. It supersedes the flat share and it
      supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
      its own window, and a monthly plan already states what every month is
      expected to carry — including the noughts for the months the thing does
@@ -20989,15 +21011,15 @@ var RECIPES = [
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no
        longer there sends them hunting (§214.3, and §160's rule that a recipe
-       is part of the change that moves it). */
+       is part of the change that moves it). §568: and the second half said
+       all twelve were owed, which §555 had already made half untrue. */
     a: "Open the plan with the pen, and press the small grid mark beside the " +
        "target. Twelve boxes open under the row \u2014 one for each month, in the " +
        "target's own unit." +
-       "|All twelve have to be filled in before it takes effect, and a month of " +
-       "nought is a real answer: leave a box empty and the row keeps being spread " +
-       "evenly across the year. Once it is complete the annual target becomes " +
-       "whatever the twelve months come to, and the box shows it rather than " +
-       "taking a figure of its own." },
+       "|It takes effect from the first month you fill in: the annual target " +
+       "becomes what the months set come to, and the box shows it rather than " +
+       "taking a figure of its own. A month of nought is a real answer, and a " +
+       "month left empty counts as nothing planned." },
   { id: "monthly-plan-ask", q: "How do I set a target month by month?",
     a: "The Strategy Office sets that. It is worth asking for where your year is " +
        "not flat \u2014 a season, a launch, a contract that starts in the second " +
@@ -25361,7 +25383,10 @@ function pptxTable(id, box, widths, head, rows, o){
     var pPr = o2.align ? { align: o2.align } : undefined;
     var body = o2.runs
       ? pptxPara(o2.runs.map(function(r){
-          return pptxRun(r.t, { sz:r.sz || SZ, b:!!r.b, i:!!r.i, color:r.color || C.ink });
+          /* §567: a `small` run takes the second line's size, as `.duehalf`
+             takes `.dsub`'s on the slide. */
+          return pptxRun(r.t, { sz: r.small ? Math.max(900, SZ - 200) : (r.sz || SZ),
+                                b:!!r.b, i:!!r.i, color:r.color || C.ink });
         }), pPr)
       : pptxPara(pptxRun(o2.miss ? "Missing" : (o2.t == null ? "" : o2.t), runOpts), pPr);
     /* A SECOND LINE IS A SECOND PARAGRAPH, never the same one. The deck's
@@ -25864,7 +25889,7 @@ function deckCellSpec(td){
     var c2 = td.cloneNode(true); c2.querySelector(".duehalf").remove();
     return { align:align, runs: [
       { t: deckPieces(c2) || "—", b:bold, color: color || C.ink },
-      { t: " " + deckTxt(due), i:true, color: C.quiet }
+      { t: " " + deckTxt(due), i:true, color: C.quiet, small:true }
     ] };
   }
 
@@ -27761,16 +27786,24 @@ function bdReadTable(p, mode){
            is drawn plain with its target behind it, which is the rule two
            tables up: coloured means a score, plain with a target behind it
            means a reported fact. */
-        if (!String(a).trim()) return '<td class="num"><span class="nobody">&mdash;</span></td>';
-        var sc = bdCellScore(r, c);
-        return '<td class="num"><span class="pair">' +
-          (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
-                      : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') +
-          (String(t).trim() ? ' <i>/ ' + tgtShown(t) + '</i>' : '') + '</span></td>';
+        /* §567: AND THE TWO ARE TWO COLUMNS, the target then the actual, as
+           §557 laid them out on Reporting (Islam: *"after splitting to 2
+           columns in both the performance and the slides"*). The colouring
+           rule above is unchanged; only the slash goes. */
+        var dash = '<td class="num"><span class="nobody">&mdash;</span></td>';
+        var sc = String(a).trim() ? bdCellScore(r, c) : null;
+        return (String(t).trim() ? '<td class="num">' + tgtShown(t) + '</td>' : dash) +
+          (!String(a).trim() ? dash : '<td class="num">' +
+            (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
+                        : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') + '</td>');
       }).join("") + '</tr>';
   }).join("");
   return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-      .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
+      .concat([].concat.apply([], cols.map(function(c){
+        var h = [{ h:bdColHead(p, c), cls:"cc" }];
+        if (mode !== "figures") return h;
+        return h.concat([{ h:"Actual", cls:"cc" }]);
+      }))),
     rows);
 }
 /* §343: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
@@ -31693,12 +31726,15 @@ function monthlyMsg(row, fld, tfld){
      Two different things, and the sentence says both — what the figure above
      now is, and that the row is still measured flat until the twelfth lands.
      §278's wording said only the second, on a build where the first was not
-     true yet. */
+     true yet.
+     §568: AND NOW THE YEAR IS TOO — the months set are the plan, so the
+     second half says what an empty month means instead (Islam's wording,
+     agreed before this was built). */
   if (n < 12)
     return '<span class="part">' + n + ' of 12 months set</span>' +
       ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
-      '</b> — the target, from the months set so far. Until all twelve are ' +
-      'filled, it is still spread evenly across the year.</span>';
+      '</b> — the target, from the months set so far. A month left empty ' +
+      'counts as nothing planned.</span>';
   /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
      is a flex row and these two are ONE flex item, so the gap falls between
      the message and the Clear button and nothing at all separated them — the
@@ -31722,8 +31758,8 @@ function monthlyAnnualText(row, fld, tfld){
 }
 /* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
    question the locked box and the refresh both ask, so the box and the figure
-   inside it can never disagree about which it is. NOT `monthlyInForce`, which
-   is about PRORATION and still waits for all twelve. */
+   inside it can never disagree about which it is. `monthlyInForce`, which is
+   about PRORATION, waited for all twelve until §568 and now answers the same. */
 function monthlyDerived(row, fld){
   return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
 }
@@ -49861,7 +49897,15 @@ function pillarSlidesOf(u, p, pi, named){
 
      ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
      `m` and the tactics slide's bare code, both of which stored picture
-     slides already name (§236.2, §50.3). */
+     slides already name (§236.2, §50.3).
+
+     §567: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
+     progress just keep the target and actual and color code the actual as
+     you did earlier but after splitting to 2 columns"* — §557's split on
+     Reporting, carried here and to Performance. The target heads with the
+     column's own name and direction, as there; the actual wears the band it
+     wore as one cell, and an indicator's stays plain. The plan download
+     (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
     SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
@@ -49871,14 +49915,11 @@ function pillarSlidesOf(u, p, pi, named){
           /* §564: the plan carries the target alone. */
           if (DECK_PLAN)
             return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
-          if (!String(a).trim())
-            return '<td class="num">' + (String(t).trim()
-              ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
-              : '<span class="dmuted">&mdash;</span>') + '</td>';
-          var sc = bdCellScore(r, c);
-          return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
-            esc(a) + (String(t).trim()
-              ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          var dash = '<td class="num"><span class="dmuted">&mdash;</span></td>';
+          var sc = String(a).trim() ? bdCellScore(r, c) : null;
+          return (String(t).trim() ? '<td class="num">' + esc(t) + '</td>' : dash) +
+            (!String(a).trim() ? dash
+              : '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' + esc(a) + '</td>');
         }).join("") +
         (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
                 : '<td class="dnote empty">&mdash;</td>') + '</tr>';
@@ -49890,8 +49931,10 @@ function pillarSlidesOf(u, p, pi, named){
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
     '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
     bdCols.map(function(c){
-      return '<th class="num">' + esc(bdColWord(p, c)) +
+      var h = '<th class="num">' + esc(bdColWord(p, c)) +
         (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      if (DECK_PLAN) return h;
+      return h + '<th class="num fig">Actual</th>';
     }).join("") +
     '<th class="fig">Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
 
@@ -49956,7 +49999,7 @@ function pillarSlidesOf(u, p, pi, named){
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
     return '<tr>' + lead +
       '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -49983,7 +50026,7 @@ function pillarSlidesOf(u, p, pi, named){
       return '<td class="cc">Not reported' +
         (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
     return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+      (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;

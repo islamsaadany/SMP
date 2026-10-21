@@ -7405,7 +7405,8 @@ function measureDue(m, share){
   if (!SMPRules.targetHasNumber(m.target)) return null;
   /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
      Twelve numbers in the target's own unit, compiled by the row's own
-     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
+     compile rule (SMPRules.monthlyDue) — from the first month set since
+     §568, an empty month counting as nothing planned. It supersedes the flat share and it
      supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
      its own window, and a monthly plan already states what every month is
      expected to carry — including the noughts for the months the thing does

@@ -294,15 +294,15 @@ var RECIPES = [
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no
        longer there sends them hunting (§214.3, and §160's rule that a recipe
-       is part of the change that moves it). */
+       is part of the change that moves it). §568: and the second half said
+       all twelve were owed, which §555 had already made half untrue. */
     a: "Open the plan with the pen, and press the small grid mark beside the " +
        "target. Twelve boxes open under the row \u2014 one for each month, in the " +
        "target's own unit." +
-       "|All twelve have to be filled in before it takes effect, and a month of " +
-       "nought is a real answer: leave a box empty and the row keeps being spread " +
-       "evenly across the year. Once it is complete the annual target becomes " +
-       "whatever the twelve months come to, and the box shows it rather than " +
-       "taking a figure of its own." },
+       "|It takes effect from the first month you fill in: the annual target " +
+       "becomes what the months set come to, and the box shows it rather than " +
+       "taking a figure of its own. A month of nought is a real answer, and a " +
+       "month left empty counts as nothing planned." },
   { id: "monthly-plan-ask", q: "How do I set a target month by month?",
     a: "The Strategy Office sets that. It is worth asking for where your year is " +
        "not flat \u2014 a season, a launch, a contract that starts in the second " +

@@ -1165,7 +1165,15 @@ function pillarSlidesOf(u, p, pi, named){
 
      ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
      `m` and the tactics slide's bare code, both of which stored picture
-     slides already name (§236.2, §50.3). */
+     slides already name (§236.2, §50.3).
+
+     §567: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
+     progress just keep the target and actual and color code the actual as
+     you did earlier but after splitting to 2 columns"* — §557's split on
+     Reporting, carried here and to Performance. The target heads with the
+     column's own name and direction, as there; the actual wears the band it
+     wore as one cell, and an indicator's stays plain. The plan download
+     (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
     SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
@@ -1175,14 +1183,11 @@ function pillarSlidesOf(u, p, pi, named){
           /* §564: the plan carries the target alone. */
           if (DECK_PLAN)
             return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
-          if (!String(a).trim())
-            return '<td class="num">' + (String(t).trim()
-              ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
-              : '<span class="dmuted">&mdash;</span>') + '</td>';
-          var sc = bdCellScore(r, c);
-          return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
-            esc(a) + (String(t).trim()
-              ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          var dash = '<td class="num"><span class="dmuted">&mdash;</span></td>';
+          var sc = String(a).trim() ? bdCellScore(r, c) : null;
+          return (String(t).trim() ? '<td class="num">' + esc(t) + '</td>' : dash) +
+            (!String(a).trim() ? dash
+              : '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' + esc(a) + '</td>');
         }).join("") +
         (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
                 : '<td class="dnote empty">&mdash;</td>') + '</tr>';
@@ -1194,8 +1199,10 @@ function pillarSlidesOf(u, p, pi, named){
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
     '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
     bdCols.map(function(c){
-      return '<th class="num">' + esc(bdColWord(p, c)) +
+      var h = '<th class="num">' + esc(bdColWord(p, c)) +
         (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      if (DECK_PLAN) return h;
+      return h + '<th class="num fig">Actual</th>';
     }).join("") +
     '<th class="fig">Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
 
@@ -1260,7 +1267,7 @@ function pillarSlidesOf(u, p, pi, named){
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
     return '<tr>' + lead +
       '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -1287,7 +1294,7 @@ function pillarSlidesOf(u, p, pi, named){
       return '<td class="cc">Not reported' +
         (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
     return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+      (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;

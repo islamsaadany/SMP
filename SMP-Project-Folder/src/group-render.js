@@ -1213,16 +1213,24 @@ function bdReadTable(p, mode){
            is drawn plain with its target behind it, which is the rule two
            tables up: coloured means a score, plain with a target behind it
            means a reported fact. */
-        if (!String(a).trim()) return '<td class="num"><span class="nobody">&mdash;</span></td>';
-        var sc = bdCellScore(r, c);
-        return '<td class="num"><span class="pair">' +
-          (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
-                      : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') +
-          (String(t).trim() ? ' <i>/ ' + tgtShown(t) + '</i>' : '') + '</span></td>';
+        /* §567: AND THE TWO ARE TWO COLUMNS, the target then the actual, as
+           §557 laid them out on Reporting (Islam: *"after splitting to 2
+           columns in both the performance and the slides"*). The colouring
+           rule above is unchanged; only the slash goes. */
+        var dash = '<td class="num"><span class="nobody">&mdash;</span></td>';
+        var sc = String(a).trim() ? bdCellScore(r, c) : null;
+        return (String(t).trim() ? '<td class="num">' + tgtShown(t) + '</td>' : dash) +
+          (!String(a).trim() ? dash : '<td class="num">' +
+            (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
+                        : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') + '</td>');
       }).join("") + '</tr>';
   }).join("");
   return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-      .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
+      .concat([].concat.apply([], cols.map(function(c){
+        var h = [{ h:bdColHead(p, c), cls:"cc" }];
+        if (mode !== "figures") return h;
+        return h.concat([{ h:"Actual", cls:"cc" }]);
+      }))),
     rows);
 }
 /* §343: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
@@ -5145,12 +5153,15 @@ function monthlyMsg(row, fld, tfld){
      Two different things, and the sentence says both — what the figure above
      now is, and that the row is still measured flat until the twelfth lands.
      §278's wording said only the second, on a build where the first was not
-     true yet. */
+     true yet.
+     §568: AND NOW THE YEAR IS TOO — the months set are the plan, so the
+     second half says what an empty month means instead (Islam's wording,
+     agreed before this was built). */
   if (n < 12)
     return '<span class="part">' + n + ' of 12 months set</span>' +
       ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
-      '</b> — the target, from the months set so far. Until all twelve are ' +
-      'filled, it is still spread evenly across the year.</span>';
+      '</b> — the target, from the months set so far. A month left empty ' +
+      'counts as nothing planned.</span>';
   /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
      is a flex row and these two are ONE flex item, so the gap falls between
      the message and the Clear button and nothing at all separated them — the
@@ -5174,8 +5185,8 @@ function monthlyAnnualText(row, fld, tfld){
 }
 /* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
    question the locked box and the refresh both ask, so the box and the figure
-   inside it can never disagree about which it is. NOT `monthlyInForce`, which
-   is about PRORATION and still waits for all twelve. */
+   inside it can never disagree about which it is. `monthlyInForce`, which is
+   about PRORATION, waited for all twelve until §568 and now answers the same. */
 function monthlyDerived(row, fld){
   return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
 }

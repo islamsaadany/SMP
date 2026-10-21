@@ -262,6 +262,11 @@ def main():
                len(two) >= 1, len(two))
             ok("and it is the quieter of the two",
                any('val="5E6E88"' in c for c in two), None)
+            # §567: AND THE SMALLER, as the slide draws it — the second run's
+            # size below the first's, read off the runs themselves.
+            szs = [[int(x) for x in re.findall(r'<a:rPr[^>]*\bsz="(\d+)"', c)] for c in two]
+            ok("and it is set smaller than the figure it stands beside (§567)",
+               any(len(s) == 2 and s[1] < s[0] for s in szs), szs[:3])
 
         # ── §5 ───────────────────────────────────────────────────────────
         print("\n§5 · a heading fits its own column")

@@ -13,10 +13,15 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE:
     nothing looks identical and discards every keystroke (§96) — which is
     exactly what shipped in the first build of this feature, where the boxes
     rendered as spans on Foundation because they named the wrong page.
-  · A TYPED 0 IS A REAL MONTH AND A BLANK IS NOT, asserted from BOTH sides.
-    `Number("")` is 0 and finite (§104.10), so a build that read blanks as
-    noughts would put a half-filled plan in force and cut the year's target —
+  · A TYPED 0 IS A REAL MONTH AND A BLANK IS PASSED OVER, asserted from BOTH
+    sides. `Number("")` is 0 and finite (§104.10), so a build that read blanks
+    as noughts would put a half-filled plan in force and cut the year's target —
     and it would pass every assertion about the complete case.
+  · §568: A HALF-FILLED PLAN IS IN FORCE. Islam: *"the monthly plan overrides
+    the proration"*. What is due is the row's compile rule over the months set
+    up to the review month — never the year spread evenly across the target
+    those same months derived. Rewritten to the new rule (§218), the old words
+    kept beside each assertion they replaced.
   · A row with no monthly plan is BYTE-IDENTICAL to before. The whole
     safety argument for shipping into an open cycle is that nothing moves
     until somebody fills twelve boxes in, and that is a measurement, not a
@@ -137,10 +142,21 @@ with sync_playwright() as p:
         annual: R.monthlyAnnual(m),
         latest6: R.monthlyDue({ monthly: plan, compile: "Latest" }, 6),
         avg4: R.monthlyDue({ monthly: plan, compile: "Average" }, 4),
-        /* A BLANK MONTH IS NOT A NOUGHT. This is the assertion the whole
-           feature turns on: with a naive Number() test this reads 82 and the
-           row goes in force on a plan somebody has only started. */
+        /* A BLANK MONTH ADDS NOTHING (§568). Until §568 this asserted the
+           plan was OUT OF FORCE (null) — the blank read as unknown. It is
+           passed over now: 1+2+4+5+6, the blank owing nothing. */
         oneBlank: R.monthlyDue({ monthly: [1,2,"",4,5,6,7,8,9,10,11,12], compile:"Sum" }, 6),
+        /* ...and passed over by every rule its own way: Average does not count
+           it, Latest stands on the last month set before it. */
+        blankAvg: R.monthlyDue({ monthly: [10,"",20,"","","","","","","","",""], compile:"Average" }, 4),
+        blankLatest: R.monthlyDue({ monthly: [10,"",20,"","","","","","","","",""], compile:"Latest" }, 2),
+        /* Islam's own row: 2+2+2+2+2+3 for January to June, a Count, read in
+           September. The whole of the target is owed by June; flat it read 9. */
+        islamSep: R.monthlyDue({ monthly: [2,2,2,2,2,3,"","","","","",""], compile:"Count" }, 9),
+        /* Months planned only after the review point owe nothing yet. */
+        laterOnly: R.monthlyDue({ monthly: ["","","","","","","",5,5,5,5,5], compile:"Sum" }, 6),
+        partInForce: R.monthlyInForce({ monthly: [2,2,"","","","","","","","","",""], compile:"Sum" }),
+        badInForce: R.monthlyInForce({ monthly: [2,2,"","","","","","","","","","TBD"], compile:"Sum" }),
         /* ...and a typed 0 IS one. */
         typedZero: R.monthlyDue({ monthly: [0,0,0,0,0,0,10,10,10,10,10,10], compile:"Sum" }, 6),
         zeroSet: R.monthSet(0), blankSet: R.monthSet(""), nullSet: R.monthSet(null),
@@ -179,8 +195,18 @@ with sync_playwright() as p:
     # ASKED BESIDE A CASE THAT MUST ANSWER. On a build with no monthly plan at
     # all every probe here throws and every `is None` assertion passes — §94.5's
     # own example, and this file's first falsification run did exactly that.
-    ck("A BLANK MONTH LEAVES THE PLAN OUT OF FORCE, never read as nought",
-       ar.get("oneBlank") is None and ar.get("sum6") == 96, ar)
+    # §568 REWROTE THIS ONE: it read "A BLANK MONTH LEAVES THE PLAN OUT OF
+    # FORCE, never read as nought" and held `oneBlank is None`.
+    ck("A BLANK MONTH ADDS NOTHING, and the plan stays in force (§568)",
+       ar.get("oneBlank") == 18 and ar.get("sum6") == 96, ar)
+    ck("...Average leaves it out of the mean, Latest stands on the month before it",
+       ar.get("blankAvg") == 15 and ar.get("blankLatest") == 10, ar)
+    ck("Islam's row: 13 shops planned by June are all owed in September, not 9",
+       ar.get("islamSep") == 13, ar)
+    ck("months planned only later owe nought yet, never the year spread flat",
+       ar.get("laterOnly") == 0, ar)
+    ck("a half-filled plan is in force; one holding a word is not",
+       ar.get("partInForce") is True and ar.get("badInForce") is False, ar)
     ck("A TYPED 0 IS A REAL MONTH", ar.get("typedZero") == 0 and ar.get("zeroSet") is True, ar)
     ck("...and blank and null are not", ar.get("blankSet") is False and
        ar.get("nullSet") is False, ar)
@@ -347,13 +373,17 @@ with sync_playwright() as p:
        four.get("target") == "61M EGP" and four.get("set") == 4, four)
     ck("...and the box is LOCKED on it, from the first month and not the twelfth",
        four.get("boxDisabled") is True and four.get("boxValue") == "61M EGP", four)
-    # THE HALF §278 DECIDED AND §555 DID NOT TOUCH: eight unknown months are
-    # not eight noughts, so the year is still spread evenly across 61M.
-    ck("...while the YEAR is still flat — a missing month is unknown, never nought",
-       four.get("inForce") is False and four.get("due") == "30.5M EGP", four)
-    ck("...and the drawer says both halves, the figure and the flat year",
+    # §568 REWROTE THIS PAIR. It read "...while the YEAR is still flat — a
+    # missing month is unknown, never nought" (`inForce is False`, due
+    # 30.5M EGP, half of 61M) and "...the drawer says both halves, the figure
+    # and the flat year" ("spread evenly"). Islam: *"the monthly plan
+    # overrides the proration"* — so at June the four months set are owed.
+    ck("...and the YEAR follows the same four months — owed in full by June (§568)",
+       four.get("inForce") is True and four.get("due") == "61M EGP", four)
+    ck("...and the drawer says the figure and what an empty month means",
        "4 of 12" in four.get("msg", "") and "61M EGP" in four.get("msg", "") and
-       "spread evenly" in four.get("msg", ""), four)
+       "counts as nothing planned" in four.get("msg", "") and
+       "spread evenly" not in four.get("msg", ""), four)
 
     typemonths(pg, PLAN)
     pg.wait_for_timeout(400)
@@ -402,8 +432,11 @@ with sync_playwright() as p:
                score: measureScore(m), locked: !!cell,
                msg: (document.querySelector('.mpmsg') || {}).textContent || "" };
     }""")
-    ck("one blank month puts the row back on flat proration",
-       off.get("due") == "142M EGP" and off.get("score") != 100, off)
+    # §568 REWROTE THIS ONE: it read "one blank month puts the row back on flat
+    # proration" and held due 142M EGP (half of 284M). The blank owes nothing:
+    # 15+14+16+17+18 by June, and 96M against that is ahead.
+    ck("one blank month owes nothing, and the rest of the plan stays in force",
+       off.get("due") == "80M EGP" and off.get("score") == 120, off)
     # §555 REWROTE THIS PAIR, AND THE OLD WORDS ARE KEPT SO THE CHANGE IS
     # LEGIBLE: they held `locked is False` and `target == "300M EGP"` — the
     # box went live again and kept the twelve's figure. It does not now. The
@@ -413,7 +446,7 @@ with sync_playwright() as p:
        off.get("locked") is True and off.get("target") == "284M EGP", off)
     ck("...and the drawer says how many are set and what they come to",
        "11 of 12" in off.get("msg", "") and "284M EGP" in off.get("msg", "") and
-       "spread evenly" in off.get("msg", ""), off)
+       "counts as nothing planned" in off.get("msg", ""), off)
     ck("a cleared month is stored as null, never as 0",
        off.get("stored") and off.get("stored")[2] is None, off)
 

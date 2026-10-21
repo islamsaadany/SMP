@@ -167,6 +167,37 @@ with sync_playwright() as p:
                or " M " not in r["target"] and " B " not in r["target"] and " K " not in r["target"],
                r["target"])
 
+    print("\n── 1b · §567 · the benchmark is the SMALLER half, on measures and tactics")
+    # Islam: *"the prorated target should be smaller not to take over the
+    # actual measure view in the measures or the tactics"*. Measured as PAINT
+    # in the opened deck, never as a class (§145.14): a build that kept the
+    # class and lost the rule passes any class test. Both tables, because the
+    # tactics' benchmark was a bare <i> and would have stayed full size.
+    sz = js(pg, """() => {
+      openDeck(UNITS[activeKeys()[0]]);
+      const px = el => parseFloat(getComputedStyle(el).fontSize);
+      const pick = rx => [...document.querySelectorAll('#deckroot .deck .dslide')]
+        .filter(s => rx.test(((s.querySelector('h2') || {}).textContent || '')));
+      const read = list => {
+        for (const s of list) for (const i of s.querySelectorAll('td.num i')) {
+          if (!/^\\s*\\//.test(i.textContent)) continue;     /* "/ due", not "· due at" */
+          return { due: px(i), fig: px(i.closest('td')), cls: i.className,
+                   txt: i.closest('td').textContent.trim() };
+        }
+        return null;
+      };
+      const out = { mea: read(pick(/Key measures/)), tac: read(pick(/Tactics/)) };
+      closeDeck();
+      return out;
+    }""")
+    for name, got in (("key measures", sz.get("mea")), ("tactics", sz.get("tac"))):
+        ok("the %s slide has a figure with a benchmark beside it" % name, bool(got), sz)
+        if got:
+            ok("  %s: the benchmark is set smaller than its figure (%s)" % (name, got["txt"]),
+               got["due"] < got["fig"] - 3, got)
+            ok("  %s: ...through the one quiet class, so the download reads it too" % name,
+               got["cls"] == "duehalf", got)
+
     print("\n── 4 · a tactic outside this cycle is not dimmed, and still says so")
     dim = js(pg, """() => {
       const u = UNITS[activeKeys()[0]];

@@ -39,6 +39,7 @@
      SMP_BREAK=bar-scrolls    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=count-line     node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
+     SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact

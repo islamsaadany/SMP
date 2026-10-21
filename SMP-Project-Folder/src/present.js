@@ -1131,10 +1131,11 @@ function pillarSlidesOf(u, p, pi, named){
 
   var mRows = SMPRules.shown(p.measures).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      /* §572: the name bold and the Progress larger (Islam, on Option B). */
+      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
-      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      '<td class="num final dprog ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
       (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
       '</tr>';
   }).join("");
@@ -1237,8 +1238,8 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
-      '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
+      '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
       '<td class="cc"' + rs + '>' + (DECK_PLAN && !["q1","q2","q3","q4"].some(function(q){ return t[q]; })
@@ -1247,7 +1248,7 @@ function pillarSlidesOf(u, p, pi, named){
          Delayed under it when late. On every row, the plan's too, so the cells
          line up with the head and `planStripFigs` takes it out as a `fig`. */
       '<td class="dstat ' + tacticBand(t) + '"' + rs + '>' +
-        esc(tacticStatusWord(t)) +
+        '<span class="dpill">' + esc(tacticStatusWord(t)) + '</span>' +
         (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
@@ -1274,9 +1275,8 @@ function pillarSlidesOf(u, p, pi, named){
        row shows it only against a partial, so 0% and 100% stand alone. */
     var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
-      '<td class="num"><b>' + esc(shown) + '</b>' +
-        (pair ? ' <i class="duehalf">/ ' + esc(pair) + '</i>' : '') + '</td>' +
-      '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
+      '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(pair ? esc(pair) : "") + '</td>' +
+      '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
   if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
@@ -1303,26 +1303,25 @@ function pillarSlidesOf(u, p, pi, named){
     if (shown == null)
       return '<td class="cc">Not reported' +
         (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(bench ? esc(bench) : "") + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
     if (!due) {
       out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '></td>' + note + '</tr>';
       xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
+        out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
       });
       return out + outPad(xs.length);
     }
     var r = tacticProgress(t);
     var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
+                         : '<td class="num final dprog ' + dBand(r) + '"' + rs + '>' + dPct(r);
     prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
     out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
     xs.forEach(function(x){
       var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
+      out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(e) + '</td>' +
         deckOutFig(t, e) + '</tr>';
     });
     return out + outPad(xs.length);

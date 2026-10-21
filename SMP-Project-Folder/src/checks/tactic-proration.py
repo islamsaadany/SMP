@@ -317,8 +317,10 @@ def main():
           var rows=[...document.querySelectorAll('tbody tr')]
             .filter(r=>/CK stores fitted/.test(r.textContent));
           if(!rows.length) return {found:false};
-          var r=rows[0], pair=r.querySelector('.pair');
-          return { found:true, pair: pair ? pair.textContent.trim() : null,
+          /* §572: the figure and what is due are one cell, the due a line
+             under the figure ("7#" then "due 10 #"), so the cell is read. */
+          var r=rows[0], pc=r.querySelector('.pair'), cell=pc ? pc.closest('td') : null;
+          return { found:true, pair: cell ? cell.textContent.replace(/\s+/g," ").trim() : null,
                    text: r.textContent.replace(/\\s+/g," ").trim() };
         }""")
         ck("the tactic is on the Performance pane", perf.get("found"), perf)

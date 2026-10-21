@@ -594,7 +594,9 @@ function measureRows(ms, opts){
                (SMPRules.isHidden(m) ? ' class="hiddenrow"'
                 : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
-               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
+               /* §572: on Performance the name is bold, as the slide's is. */
+               '<span class="idx-n">' + (i+1) + '</span></td><td>' +
+               (opts.unscored ? esc(m.name) : '<b class="mname">' + esc(m.name) + '</b>') + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
                /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
                   branch names the reported note (§255) and main reads the
@@ -624,11 +626,11 @@ function measureRows(ms, opts){
        loses its scale and a scaled one loses what it is measured against. */
     var dueLab = measureDueLabel(m);
     var actCell = (m.actual == null || m.actual === "") ? '&mdash;'
-      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b> <i>/ ' + esc(dueLab) + '</i></span>'
+      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b></span>' + pdueLine(esc(dueLab))
                : figShown(m);
     return head + '<td class="num">' + actCell + '</td>' +
            (scored
-             ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
+             ? '<td class="num final prog" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
              /* §276: a count with nothing owed yet has not been asked, which is
                 a different thing from a row that cannot be scored, and it wears
                 the tactics' own "not yet due" pill rather than the alarm one. */
@@ -902,8 +904,8 @@ function outFigCell(t, x){
   }
   var bp = benchBeside(o, share), sc = oneOutcomeScore(t, o);
   return '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-    (bp ? ' <i>/ ' + esc(bp) + '</i>' : '') +
-    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span></td>';
+    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span>' +
+    pdueLine(bp ? esc(bp) : '') + '</td>';
 }
 function outRowspan(n){ return n ? ' rowspan="' + (n + 1) + '"' : ''; }
 function outPad(n){ return n % 2 ? '<tr class="opad" hidden></tr>' : ''; }
@@ -984,9 +986,9 @@ function tacticRows(ts, unitKey){
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
-      : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-        (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
-        '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
+      : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b></span>' +
+        pdueLine(benchPair ? esc(benchPair) : '') + '</td>' +
+        '<td class="num final prog" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     /* §414: SEVERAL OUTCOMES. Each outcome's figure, its benchmark and its
        own score sit on its own line; Progress spans them and is the AVERAGE,
        saying so, because a number that is an average of two others and does
@@ -1000,7 +1002,7 @@ function tacticRows(ts, unitKey){
           (r == null ? '<span class="why">&mdash;</span>'
                      : pct(r) + '<span class="oavg">average of ' + lines.length + '</span>') + '</td>';
       subs = scoredExtras(t).map(function(x, k){
-        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + outcomeCell(x) + '</td>' +
+        return '<tr class="' + outSubCls(t) + '"><td class="outc">' + otag(x.id) + outcomeCell(x) + '</td>' +
           (due ? figs[k + 1] : '') + '</tr>';
       }).join('') + outPad(nEx);
     }
@@ -1023,7 +1025,7 @@ function tacticRows(ts, unitKey){
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
       repNote(t) + '</td>' +
-      '<td>' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      '<td class="outc">' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
       '<td' + rs + '>' + qs(t) + '</td><td class="cc"' + rs + '>' + status + '</td>' + tail + '</tr>' + subs;
   }).join("");
@@ -10891,7 +10893,20 @@ var REP_TGT_HEAD = "YTD Target";
    §252, so the deck gains no new vocabulary. */
 function figVsDue(m, share){
   var due = benchBeside(m, share);   /* §300 */
-  return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
+  return figShown(m) + dueLine(due ? tgtShown(due) : "");
+}
+/* §572: WHAT IS DUE SO FAR, UNDER THE FIGURE AND NAMED. Islam, of the
+   tactics slide: *"a variation as well for the prorated or YTD target in
+   grey"*, Option B, *"keep the due even it's 100%"*. A second line rather
+   than a slash beside the figure, saying what the grey number is. `.dsub`,
+   so the PowerPoint writes it as the second paragraph it already knows.
+   Takes HTML: the caller escapes, as it does for the figure beside it. */
+/* …and the page's own size of it, under a figure on Performance (§572). */
+function pdueLine(html){
+  return html ? '<span class="pdue">due ' + html + '</span>' : '';
+}
+function dueLine(html){
+  return html ? '<span class="dsub ddue">due ' + html + '</span>' : '';
 }
 
 function figShown(m){

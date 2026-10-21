@@ -106,8 +106,18 @@
   /* §571: a tactic's Status on the slide, the word in its band. */
   .dslide td.dstat { font-weight:600; white-space:nowrap; }
   .dslide td.dstat.kind, .dslide td.dstat.none { color:var(--none); font-weight:400; }
-  .dslide td.dstat .dlate { color:var(--bad); font-weight:700; letter-spacing:.06em;
-                            text-transform:uppercase; font-size:14px; }
+  /* §572: Option B — the word in a pill, as on Performance, and DELAYED as a
+     red dot and word under it, so the two can never read as one. */
+  .dslide td.dstat .dpill { display:inline-block; padding:5px 12px; border-radius:999px;
+                            font-size:18px; font-weight:600; }
+  .dslide td.dstat.attn .dpill { background:var(--attn-bg); color:var(--attn-tx); }
+  .dslide td.dstat.good .dpill { background:var(--good-bg); color:var(--good-tx); }
+  .dslide td.dstat.none .dpill { border:1.5px dashed var(--none); color:var(--ink-2); font-weight:500; }
+  .dslide td.dstat.kind .dpill { background:var(--surface-2); color:var(--ink-2); font-weight:500; }
+  .dslide td.dstat .dlate { display:flex; align-items:center; gap:6px; margin-top:8px; color:var(--bad);
+                            font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:13px; }
+  .dslide td.dstat .dlate::before { content:""; width:9px; height:9px; border-radius:50%;
+                                    background:var(--bad); flex:none; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
      them as classes because a cell carries its band as one. */
   .dslide .good, .dslide b.good { color:var(--good); }
@@ -119,6 +129,12 @@
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
   .dslide .lead { font-weight:500; }
+  /* §572: the key measures' and tactics' names bold, the outcome regular. */
+  .dslide .lead.strong { font-weight:700; }
+  .dslide td.outc b { font-weight:400; }
+  .dslide td.dprog { font-size:29px; }
+  .dslide.tight td.dprog { font-size:24px; }   /* the same step up on a slide the fit pass made dense */
+  .dslide .ddue { font:400 15px/1.2 var(--sans); color:var(--none); margin-top:6px; letter-spacing:.02em; }
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
   /* §271: a note may be several lines now, and a projector shows them the way
      the person who wrote them typed them — the deck reads the same stored

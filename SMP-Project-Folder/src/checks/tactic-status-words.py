@@ -74,13 +74,15 @@ D003 = r"""() => {
 }"""
 UNDO = """() => { const w = window.__d003, p = UNITS.mobile.items[1];
   REVIEW.to = w.to; p.tactics = w.tactics; p.name = w.name; paint(); return REVIEW.to === w.to; }"""
-WANT = [  # word, delayed, YTD actual as drawn
-    ("In progress", True,  "35% / 100%"),
-    ("Not started", True,  "0%"),
-    ("Not started", True,  "0%"),
-    ("In progress", True,  "90% / 100%"),
-    ("Completed",   False, "100%"),
-    ("In progress", False, "80% / 50%"),
+# §572: the figure and the line under it, read apart — "due X" is its own
+# line under the figure now (Option B), where it was "/ X" beside it.
+WANT = [  # word, delayed, YTD figure, the due line under it
+    ("In progress", True,  "35%",  "due 100%"),
+    ("Not started", True,  "0%",   ""),
+    ("Not started", True,  "0%",   ""),
+    ("In progress", True,  "90%",  "due 100%"),
+    ("Completed",   False, "100%", ""),
+    ("In progress", False, "80%",  "due 50%"),
 ]
 
 with sync_playwright() as pw:
@@ -191,22 +193,40 @@ with sync_playwright() as pw:
         if (!tr) return null;
         const pill = tr.querySelector('td.cc .pill'), mark = tr.querySelector('.latemark');
         const fig = pill ? pill.closest('td').nextElementSibling : null;
+        const pr = fig ? fig.nextElementSibling : null, oc = tr.querySelector('td.outc b');
+        const dot = mark ? getComputedStyle(mark, '::before') : null;
         return { word: pill ? pill.textContent.trim() : null, cls: pill ? pill.className : '',
                  late: !!mark, markInk: mark ? getComputedStyle(mark).color : null,
                  pillInk: pill ? getComputedStyle(pill).color : null,
-                 ytd: fig ? fig.textContent.replace(/\\s+/g, ' ').trim() : null };
+                 dot: dot ? dot.backgroundColor : null,
+                 ytd: fig && fig.querySelector('.pair') ? fig.querySelector('.pair').textContent.trim()
+                      : (fig ? fig.textContent.trim() : null),
+                 due: fig && fig.querySelector('.pdue') ? fig.querySelector('.pdue').textContent.trim() : '',
+                 prog: pr ? parseFloat(getComputedStyle(pr).fontSize) : null,
+                 fsz: fig ? parseFloat(getComputedStyle(fig).fontSize) : null,
+                 outc: oc ? getComputedStyle(oc).fontWeight : null };
       });
     }""")
     page = page if isinstance(page, list) else []
     ck("all six rows are on the page", len(page) == 6 and all(page), page)
-    for i, (word, late, ytd) in enumerate(WANT):
+    for i, (word, late, ytd, due) in enumerate(WANT):
         got = page[i] if i < len(page) and page[i] else {}
-        ck("  row %d: %s%s, YTD %s" % (i + 1, word, " + DELAYED" if late else "", ytd),
-           got.get("word") == word and got.get("late") is late and got.get("ytd") == ytd, got)
+        ck("  row %d: %s%s, YTD %s%s" % (i + 1, word, " + DELAYED" if late else "", ytd, (" / " + due) if due else ""),
+           got.get("word") == word and got.get("late") is late and got.get("ytd") == ytd and
+           got.get("due") == due, got)
     lates = [g for g in page if g and g.get("late")]
     ck("...the DELAYED mark is red, and the pill above it is NOT (it keeps its own band)",
        lates and all(g["markInk"] != g["pillInk"] for g in lates) and
        all("bad" not in g["cls"] for g in lates), lates)
+    # §572 (Option B on Performance): a red DOT before DELAYED, the outcome in
+    # regular weight, and the Progress a size up from the figure beside it.
+    ck("...with a red dot before it",
+       lates and all(g["dot"] and g["dot"] not in ("rgba(0, 0, 0, 0)", "transparent") for g in lates), lates)
+    ck("the outcome is regular weight under the bold tactic",
+       page and all(g and g.get("outc") in ("400", "normal") for g in page), [g and g.get("outc") for g in page])
+    ck("the Progress is a size up from the figure",
+       page and all(g and g.get("prog") and g.get("fsz") and g["prog"] > g["fsz"] for g in page),
+       [(g and g.get("prog"), g and g.get("fsz")) for g in page])
     try:
         slide = pg.evaluate("""(c) => {
       const d = document.createElement('div'); d.innerHTML = deckHtmlFor('mobile');
@@ -216,9 +236,12 @@ with sync_playwright() as pw:
       const si = head.indexOf('Status'), yi = head.indexOf('YTD actual');
       const rows = [].concat(...s.map(x => [...x.querySelectorAll('tbody tr')])).map(tr => {
         const td = [...tr.children];
-        return { word: si >= 0 && td[si] ? (td[si].firstChild ? td[si].firstChild.textContent.trim() : '') : null,
-                 late: si >= 0 && td[si] ? !!td[si].querySelector('.dlate') : null,
-                 ytd: yi >= 0 && td[yi] ? td[yi].textContent.replace(/\\s+/g, ' ').trim() : null };
+        const st = si >= 0 ? td[si] : null, y = yi >= 0 ? td[yi] : null;
+        return { word: st ? (st.querySelector('.dpill') || st.firstChild || {textContent:''}).textContent.trim() : null,
+                 pill: !!(st && st.querySelector('.dpill')),
+                 late: st ? !!st.querySelector('.dlate') : null,
+                 ytd: y ? (y.querySelector('b') || y).textContent.trim() : null,
+                 due: y && y.querySelector('.ddue') ? y.querySelector('.ddue').textContent.trim() : '' };
       });
       return { head, rows };
     }""", code if isinstance(code, str) else "")
@@ -228,10 +251,11 @@ with sync_playwright() as pw:
        slide and "Status" in slide["head"] and
        slide["head"].index("Status") == slide["head"].index("Quarters") + 1, slide and slide["head"])
     srows = (slide or {}).get("rows", [])
-    for i, (word, late, ytd) in enumerate(WANT):
+    for i, (word, late, ytd, due) in enumerate(WANT):
         got = srows[i] if i < len(srows) else {}
-        ck("  slide row %d: %s%s, YTD %s" % (i + 1, word, " + Delayed" if late else "", ytd),
-           got.get("word") == word and got.get("late") is late and got.get("ytd") == ytd, got)
+        ck("  slide row %d: %s%s, YTD %s%s" % (i + 1, word, " + Delayed" if late else "", ytd, (" / " + due) if due else ""),
+           got.get("word") == word and got.get("pill") is True and got.get("late") is late and
+           got.get("ytd") == ytd and got.get("due") == due, got)
     ck("...and D003 is put back", ev(pg, UNDO) is True)
 
     ck("no page error", not errs, errs)

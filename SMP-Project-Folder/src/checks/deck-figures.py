@@ -137,8 +137,10 @@ with sync_playwright() as p:
         const heads = [...s.querySelectorAll("thead th")].map(x => x.textContent.trim());
         const rows = [...s.querySelectorAll("tbody tr")].map((tr, i) => {
           const m = list[i]; const c = tr.querySelectorAll("td");
+          const dl = c[3] ? c[3].querySelector(".ddue") : null;
           return { target: c[2] ? c[2].textContent.trim() : "",
                    actual: c[3] ? c[3].textContent.trim() : "",
+                   dueLine: dl ? dl.textContent.trim() : null,
                    due: m ? measureDueLabel(m) : null,
                    fig: m ? String(m.actual == null ? "" : m.actual) : "" };
         });
@@ -158,31 +160,49 @@ with sync_playwright() as p:
         ok("the " + name + " table has a row with a benchmark to show",
            len(withdue) > 0, got["rows"][:2])
         for r in withdue[:3]:
-            ok("  %s: the figure carries / %s" % (name, r["due"]),
-               "/" in r["actual"] and r["due"].replace(" ", "") in r["actual"].replace(" ", ""),
-               r)
+            # §572 REWROTE THIS ONE: it read "the figure carries / X" and asked
+            # for the slash. What is due is a line of its own under the figure
+            # now, saying what it is (Islam's Option B, "keep the due").
+            ok("  %s: under the figure, due %s" % (name, r["due"]),
+               (r["dueLine"] or "").replace(" ", "") == ("due" + r["due"]).replace(" ", "") and
+               "/" not in r["actual"], r)
         for r in got["rows"][:3]:
             ok("  %s: the target reads tight (%s)" % (name, r["target"]),
                r["target"] == "" or r["target"] == "—"
                or " M " not in r["target"] and " B " not in r["target"] and " K " not in r["target"],
                r["target"])
 
-    print("\n── 1b · §568 · the benchmark is the SMALLER half, on measures and tactics")
-    # Islam: *"the prorated target should be smaller not to take over the
-    # actual measure view in the measures or the tactics"*. Measured as PAINT
-    # in the opened deck, never as a class (§145.14): a build that kept the
-    # class and lost the rule passes any class test. Both tables, because the
-    # tactics' benchmark was a bare <i> and would have stayed full size.
+    print("\n── 1b · §568, §572 · the due line is quiet and under the figure; names bold, Progress big")
+    # §568: *"the prorated target should be smaller not to take over the
+    # actual"*. §572 (Option B): a line of its own under the figure, "due X",
+    # the key measure and tactic names bold, the outcome regular, Progress a
+    # size up. Measured as PAINT in the opened deck, never as a class
+    # (§145.14): a build that kept the class and lost the rule passes any
+    # class test. Both slides, because they are drawn by different rows.
     sz = js(pg, """() => {
       openDeck(UNITS[activeKeys()[0]]);
-      const px = el => parseFloat(getComputedStyle(el).fontSize);
+      const cs = el => getComputedStyle(el), px = el => parseFloat(cs(el).fontSize);
       const pick = rx => [...document.querySelectorAll('#deckroot .deck .dslide')]
         .filter(s => rx.test(((s.querySelector('h2') || {}).textContent || '')));
       const read = list => {
-        for (const s of list) for (const i of s.querySelectorAll('td.num i')) {
-          if (!/^\\s*\\//.test(i.textContent)) continue;     /* "/ due", not "· due at" */
-          return { due: px(i), fig: px(i.closest('td')), cls: i.className,
-                   txt: i.closest('td').textContent.trim() };
+        for (const s of list) {
+          s.classList.add('on');
+          for (const d of s.querySelectorAll('td.num .ddue')) {
+            const td = d.closest('td'), b = td.querySelector('b') || td;
+            /* the figure is a text node on one row and an element on another,
+               so its box is read through a Range either way */
+            const rg = document.createRange(); rg.selectNode(td.firstChild);
+            const fig = { getBoundingClientRect: () => rg.getBoundingClientRect() };
+            const tr = td.closest('tr'), lead = tr.querySelector('td.lead');
+            const prog = tr.querySelector('td.dprog'), outc = tr.querySelector('td.outc b');
+            const out = { due: px(d), fig: px(td), below: d.getBoundingClientRect().top >= fig.getBoundingClientRect().bottom - 2,
+                     txt: d.textContent.trim(), ink: cs(d).color, figInk: cs(td).color,
+                     lead: lead ? cs(lead).fontWeight : null, outc: outc ? cs(outc).fontWeight : null,
+                     prog: prog ? px(prog) : null };
+            s.classList.remove('on');
+            return out;
+          }
+          s.classList.remove('on');
         }
         return null;
       };
@@ -191,12 +211,16 @@ with sync_playwright() as p:
       return out;
     }""")
     for name, got in (("key measures", sz.get("mea")), ("tactics", sz.get("tac"))):
-        ok("the %s slide has a figure with a benchmark beside it" % name, bool(got), sz)
+        ok("the %s slide has a figure with a due line under it" % name, bool(got), sz)
         if got:
-            ok("  %s: the benchmark is set smaller than its figure (%s)" % (name, got["txt"]),
-               got["due"] < got["fig"] - 3, got)
-            ok("  %s: ...through the one quiet class, so the download reads it too" % name,
-               got["cls"] == "duehalf", got)
+            ok("  %s: it says due, is smaller than its figure, and sits under it (%s)" % (name, got["txt"]),
+               got["txt"].startswith("due ") and got["due"] < got["fig"] - 3 and got["below"], got)
+            ok("  %s: ...in the quiet ink, not the figure's" % name, got["ink"] != got["figInk"], got)
+            ok("  %s: the name is bold" % name, got["lead"] in ("700", "bold"), got)
+            ok("  %s: the Progress is a size up from the figure" % name,
+               got["prog"] is not None and got["prog"] > got["fig"], got)
+    ok("the tactics slide's outcome is regular weight",
+       (sz.get("tac") or {}).get("outc") in ("400", "normal"), sz.get("tac"))
 
     print("\n── 4 · a tactic outside this cycle is not dimmed, and still says so")
     dim = js(pg, """() => {

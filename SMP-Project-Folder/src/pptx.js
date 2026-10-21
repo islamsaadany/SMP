@@ -182,7 +182,9 @@ function pptxTable(id, box, widths, head, rows, o){
        score table writes a pillar's name over a grey line naming its kind
        and owner; read as one string they arrive as one word, which is what
        "…Scale RAYA Smart CareDirection · · Mahmoud" was (§311). */
-    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200), color:C.quiet }), pPr);
+    /* §571: a second line may carry its own ink — a tactic's Delayed is red. */
+    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200),
+      color:o2.subColor || C.quiet, b:!!o2.subColor }), pPr);
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' + body +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
@@ -686,7 +688,8 @@ function deckCellSpec(td){
   if (sub) {
     var c3 = td.cloneNode(true); c3.querySelector(".dsub").remove();
     return { t: deckPieces(c3) || "—", sub: deckTxt(sub), align:align,
-             color: color, b: bold };
+             color: color, b: bold,
+             subColor: sub.classList.contains("dlate") ? C.band.bad : null };
   }
 
   var t = deckPieces(td) || "—";

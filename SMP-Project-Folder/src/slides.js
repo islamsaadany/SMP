@@ -901,7 +901,51 @@ function slidesClose(){
    so a slide that is wrong is wrong here too. */
 var SL_THUMB = 0.105;
 
+/* ── THE COLUMNS MENU (§571) ───────────────────────────────────────────
+   Islam: *"give me the option to hide the owner and collabs in the slides if
+   needed"*, *"one switch for everything"*. The People register's own Columns
+   menu (§53.5: no second control for one idea), in the slide view's bar
+   beside Grid, and the office's alone — the same person who hides a slide,
+   judged on the server as the same act (`deckHide`). The words are the
+   tactics slide's own headings. */
+var SLIDE_COL_WORDS = { owner: "Owner", collabs: "Collabs." };
+function slidesColsHtml(){
+  return '<div class="hmenu-h"><span>Tactics slides show</span></div>' +
+    SMPRules.SLIDE_COLS.map(function(k){
+      return '<label class="colrow"><input type="checkbox" data-slcol="' + k + '"' +
+        (SMPRules.slideColOn(GROUP, k) ? ' checked' : '') + '><span>' +
+        esc(SLIDE_COL_WORDS[k]) + '</span></label>';
+    }).join("") +
+    '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
+}
+function slidesColsSync(){
+  var w = document.getElementById("slcols");
+  if (!w) return;
+  w.hidden = !inOffice();
+  var p = document.getElementById("slcolspanel");
+  if (p && !p.hidden) p.innerHTML = slidesColsHtml();
+}
+function slidesColsOpen(on){
+  var w = document.getElementById("slcols"), p = document.getElementById("slcolspanel");
+  if (!w || !p) return;
+  p.hidden = !on;
+  w.classList.toggle("open", !!on);
+  w.querySelector("[data-slcols]").setAttribute("aria-expanded", on ? "true" : "false");
+  if (on) p.innerHTML = slidesColsHtml();
+}
+/* Stored as the names left out, sorted, and DELETED when none is (§50.6). */
+function slidesSetCol(k, on){
+  var list = (GROUP[SMPRules.SLIDE_COLS_OFF] || []).filter(function(x){
+    return SMPRules.SLIDE_COLS.indexOf(x) >= 0 && x !== k; });
+  if (!on) list.push(k);
+  list.sort();
+  if (list.length) GROUP[SMPRules.SLIDE_COLS_OFF] = list;
+  else delete GROUP[SMPRules.SLIDE_COLS_OFF];
+  slidesMark(); slidesPaint();
+}
+
 function slidesPaint(){
+  slidesColsSync();
   var box = slidesAssemble();
   var all = [].slice.call(box.querySelectorAll(".dslide"));
   if (!all.length) {
@@ -1908,6 +1952,25 @@ function wireSlides(){
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
   var gb = root.querySelector("[data-slgrid]");
   if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §571: the Columns menu. Its panel is redrawn in place on a tick, so the
+     menu stays open while both are set; a press anywhere else closes it. */
+  var cb = root.querySelector("[data-slcols]");
+  if (cb) cb.addEventListener("click", function(e){
+    e.stopPropagation();
+    slidesColsOpen(document.getElementById("slcolspanel").hidden);
+  });
+  var cp = document.getElementById("slcolspanel");
+  if (cp) {
+    cp.addEventListener("click", function(e){ e.stopPropagation(); });
+    cp.addEventListener("change", function(e){
+      var k = e.target && e.target.getAttribute("data-slcol");
+      if (k && inOffice()) slidesSetCol(k, e.target.checked);
+    });
+  }
+  root.addEventListener("click", function(){
+    var p = document.getElementById("slcolspanel");
+    if (p && !p.hidden) slidesColsOpen(false);
+  });
   /* §556.3: the arrows at the stage's edge and under it are the same act as
      the keyboard's, so they call the same stepper (§53.5). */
   root.querySelectorAll("[data-slstep]").forEach(function(b){
@@ -1936,6 +1999,9 @@ function wireSlides(){
       return;
     }
     if (ev.key === "Escape") {
+      /* §571: an open Columns menu closes first, for the grid's reason. */
+      var cpn = document.getElementById("slcolspanel");
+      if (cpn && !cpn.hidden) { slidesColsOpen(false); return; }
       /* §556.2: the grid closes first — Escape from a grid is "put this
          away", not "leave the editor". */
       var g = document.getElementById("slgrid");

@@ -691,6 +691,9 @@
   .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
   .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
   .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
+  /* §571: a tactic that is late says so under its status, in words. */
+  .latemark { display:block; margin-top:5px; font:700 10px/1 var(--sans);
+              letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
   .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
@@ -8724,6 +8727,11 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub td { background:none; }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .dslide td.final { font-weight:700; }
+  /* §571: a tactic's Status on the slide, the word in its band. */
+  .dslide td.dstat { font-weight:600; white-space:nowrap; }
+  .dslide td.dstat.kind, .dslide td.dstat.none { color:var(--none); font-weight:400; }
+  .dslide td.dstat .dlate { color:var(--bad); font-weight:700; letter-spacing:.06em;
+                            text-transform:uppercase; font-size:14px; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
      them as classes because a cell carries its band as one. */
   .dslide .good, .dslide b.good { color:var(--good); }

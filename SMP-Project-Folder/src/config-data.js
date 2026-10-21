@@ -7973,18 +7973,31 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    score beside it already says it is behind, and a second word for that
    would be a second, looser judgement of the same number.
 
-   §571: AND A TACTIC THAT HAS NOT STARTED WHEN IT SHOULD HAVE IS DELAYED TOO.
-   Islam, of *Core & New Category Bundling* — Q3 and Q4, reported at the end
-   of Q3 as Not started, reading **Not started** and 0%: *"should show
-   delayed right?"*; and of the rule put to him, *"yes build it"*. Not started
-   is a tactic still inside its FIRST quarter with nothing done; once that
-   whole quarter is behind the review month and its own report is still at
-   nought, it is Delayed. ONLY ON A REPORT: a row nobody has reported yet
-   keeps the word it had, because the reporter has not said it has not
-   started — the "Not reported" beside it is what the page knows. In progress
-   is untouched by this: the paragraph above still holds for a row under way. */
-var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
+   §571: DELAYED IS NOT A WORD OF ITS OWN ANY MORE — IT IS A MARK ON ONE.
+   Islam, of D003's tactics: a Q3–Q4 tactic reported Not started at the end
+   of Q3 read **Not started** — *"should show delayed right?"*; then, of rows
+   reading **Delayed** beside *In progress · 35%*, *"a confusion"*; then
+   *"for the delayed the real status is not started. same like the in
+   progress but they are both delayed … type delayed somewhere?"*. So the
+   word is what is actually happening (Completed · In progress · Not
+   started · Not due) and LATENESS is said beside it: *Delayed* under it,
+   in red (`tacticDelayed`), the word keeping its own colour — Islam: *"in
+   progress to stay with it's color and the same for not started not to
+   confuse the audience given that we have delayed in red below"*.
+
+   LATE is a tactic not complete whose whole window has passed, or one still
+   at nought once its FIRST quarter is behind the review month — on a report
+   only, because a row nobody has reported has not been said to be at
+   nought. The paragraph above still holds for a row under way inside its
+   window: behind it is not late. */
+var TACTIC_WORDS = { done: "Completed", wip: "In progress",
                      notdue: "Not due", todo: "Not started" };
+/* §571: the band each word is drawn in, read by the page's pill and the
+   slide's word alike so the two cannot colour one state two ways. A late
+   tactic keeps its word's band; only the Delayed under it is red. In
+   progress is the yellow band, not the orange one — Islam: *"the orange is
+   close to the red"*, and beside a red Delayed the two read as one. */
+var TACTIC_BANDS = { done: "good", wip: "attn", notdue: "kind", todo: "none" };
 function tacticComplete(t){
   if (!t) return false;
   if (t.status === "Done") return true;
@@ -8028,11 +8041,18 @@ function tacticStatusKey(t){
   if (!t) return "todo";
   if (tacticComplete(t)) return "done";
   if (!tacticDue(t)) return "notdue";
-  if (tacticShare(t) === 1) return "late";
-  if (!tacticAtNought(t)) return "wip";
-  return tacticAnswered(t) && tacticFirstQuarterOver(t) ? "late" : "todo";
+  return tacticAtNought(t) ? "todo" : "wip";
 }
 function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
+/* §571: IS THIS TACTIC LATE. Its whole window gone unfinished, or its first
+   quarter gone with its own report still at nought. */
+function tacticDelayed(t){
+  var k = tacticStatusKey(t);
+  if (k === "done" || k === "notdue") return false;
+  if (tacticShare(t) === 1) return true;
+  return k === "todo" && tacticAnswered(t) && tacticFirstQuarterOver(t);
+}
+function tacticBand(t){ return TACTIC_BANDS[tacticStatusKey(t)]; }
 
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────

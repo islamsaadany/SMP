@@ -1239,10 +1239,16 @@ function pillarSlidesOf(u, p, pi, named){
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
       '<td class="lead"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
       '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-      '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' +
-      '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+      (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
+      (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
       '<td class="cc"' + rs + '>' + (DECK_PLAN && !["q1","q2","q3","q4"].some(function(q){ return t[q]; })
-        ? PLAN_MISS : qs(t)) + '</td>';
+        ? PLAN_MISS : qs(t)) + '</td>' +
+      /* §571: the Status, as Performance draws it — the word in its band and
+         Delayed under it when late. On every row, the plan's too, so the cells
+         line up with the head and `planStripFigs` takes it out as a `fig`. */
+      '<td class="dstat ' + tacticBand(t) + '"' + rs + '>' +
+        esc(tacticStatusWord(t)) +
+        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
     if (xs.length) return deckOutRows(t, lead, note, xs, rs);
@@ -1252,8 +1258,7 @@ function pillarSlidesOf(u, p, pi, named){
        that also costs the owner and the quarters their legibility on a
        projector. */
     if (!tacticDue(t))
-      return '<tr>' + lead +
-        '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
+      return '<tr>' + lead + '<td colspan="2" class="cc"></td>' + note + '</tr>';
     /* What this row is measured against RIGHT NOW: an outcome answers with
        its own target, prorated where it compiles by Sum or Count (§276); everything else
        with the share of its plan that is due (§239). One function, so the
@@ -1265,9 +1270,12 @@ function pillarSlidesOf(u, p, pi, named){
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
+    /* §571: the benchmark beside the figure is the page's (§300) — a yes/no
+       row shows it only against a partial, so 0% and 100% stand alone. */
+    var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
       '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>' +
+        (pair ? ' <i class="duehalf">/ ' + esc(pair) + '</i>' : '') + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -1275,9 +1283,11 @@ function pillarSlidesOf(u, p, pi, named){
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-    '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
-    '<th>Collabs.</th>' +
-    '<th class="num">Quarters</th><th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
+    '<th>' + DW("outcomes", "one", p) + '</th>' +
+    (deckColOn("owner") ? '<th>Owner</th>' : '') +
+    (deckColOn("collabs") ? '<th>Collabs.</th>' : '') +
+    '<th class="num">Quarters</th><th class="fig">Status</th>' +
+    '<th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
     '<th class="fig">Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
 
   return S;
@@ -1299,7 +1309,7 @@ function pillarSlidesOf(u, p, pi, named){
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
     if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '></td>' + note + '</tr>';
       xs.forEach(function(x){
         out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
       });
@@ -1328,6 +1338,12 @@ function pillarSlidesOf(u, p, pi, named){
    ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN: the units off and the
    directions in pillars. Everywhere else the group deck is exactly what it
    was, asserted. */
+/* §571: ONE SWITCH FOR EVERY SLIDE — Owner and Collabs. on the tactics
+   slides, the office's, kept on the company (`SMPRules.slideColOn`). The plan
+   download keeps both: there an empty owner is a gap the plan still owes. */
+function deckColOn(k){
+  return DECK_PLAN || SMPRules.slideColOn(GROUP, k);
+}
 function companyReviewOn(){
   return !SMPRules.buExists(GROUP) && topWay() !== "projects";
 }

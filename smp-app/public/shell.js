@@ -3506,6 +3506,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function slideHidden(subject, anchor) {
     return !!anchor && hiddenSlides(subject).indexOf(anchor) >= 0;
   }
+  /* ── WHICH COLUMNS THE TACTICS SLIDES LEAVE OUT (§571) ────────────────
+     Islam: *"can you give me the option to hide the owner and collabs in the
+     slides if needed?"*, and *"one switch for everything"* — so it is the
+     COMPANY's, not a subject's: one answer for every tactics slide of every
+     deck, set by the office in the slide view's Columns menu, beside the eye
+     that hides a slide (`deckHide` on the server, the same gate).
+
+     STORED AS THE NAMES LEFT OUT, and as an ABSENCE when none is (§50.6), so
+     a client that never touches it is byte-identical. Reading never creates
+     it (§42). Only the two names here are honoured: a stale word in the list
+     hides nothing. */
+  var SLIDE_COLS_OFF = "slideColsOff";
+  var SLIDE_COLS = Object.freeze(["owner", "collabs"]);
+  function slideColOn(group, col) {
+    var v = group && group[SLIDE_COLS_OFF];
+    return !(Array.isArray(v) && v.indexOf(col) >= 0);
+  }
 
   /* ── THE MASTER PRESENTATION'S RUNNING ORDER (§266) ─────────────────
      Islam: *"give an option for the SMO from the presentation list to do
@@ -5644,6 +5661,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     webUrl: webUrl, webUrlFixed: webUrlFixed,
     isHidden: isHidden, shown: shown,
     HIDE_SLIDES: HIDE_SLIDES, hiddenSlides: hiddenSlides, slideHidden: slideHidden,
+    SLIDE_COLS_OFF: SLIDE_COLS_OFF, SLIDE_COLS: SLIDE_COLS, slideColOn: slideColOn,
     VIDEO_MAX_BYTES: VIDEO_MAX_BYTES, VIDEO_MAX_SECS: VIDEO_MAX_SECS,
     VIDEO_PER_SUBJECT: VIDEO_PER_SUBJECT, VIDEO_STORE: VIDEO_STORE,
     VIDEO_EMBED_HOSTS: VIDEO_EMBED_HOSTS, VIDEO_SERVICES: VIDEO_SERVICES,
@@ -15701,9 +15719,33 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    the tactic's own quarters, all of them behind the review month. A tactic
    halfway through its window and behind its benchmark is In progress; the
    score beside it already says it is behind, and a second word for that
-   would be a second, looser judgement of the same number. */
-var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
+   would be a second, looser judgement of the same number.
+
+   §571: DELAYED IS NOT A WORD OF ITS OWN ANY MORE — IT IS A MARK ON ONE.
+   Islam, of D003's tactics: a Q3–Q4 tactic reported Not started at the end
+   of Q3 read **Not started** — *"should show delayed right?"*; then, of rows
+   reading **Delayed** beside *In progress · 35%*, *"a confusion"*; then
+   *"for the delayed the real status is not started. same like the in
+   progress but they are both delayed … type delayed somewhere?"*. So the
+   word is what is actually happening (Completed · In progress · Not
+   started · Not due) and LATENESS is said beside it: *Delayed* under it,
+   in red (`tacticDelayed`), the word keeping its own colour — Islam: *"in
+   progress to stay with it's color and the same for not started not to
+   confuse the audience given that we have delayed in red below"*.
+
+   LATE is a tactic not complete whose whole window has passed, or one still
+   at nought once its FIRST quarter is behind the review month — on a report
+   only, because a row nobody has reported has not been said to be at
+   nought. The paragraph above still holds for a row under way inside its
+   window: behind it is not late. */
+var TACTIC_WORDS = { done: "Completed", wip: "In progress",
                      notdue: "Not due", todo: "Not started" };
+/* §571: the band each word is drawn in, read by the page's pill and the
+   slide's word alike so the two cannot colour one state two ways. A late
+   tactic keeps its word's band; only the Delayed under it is red. In
+   progress is the yellow band, not the orange one — Islam: *"the orange is
+   close to the red"*, and beside a red Delayed the two read as one. */
+var TACTIC_BANDS = { done: "good", wip: "attn", notdue: "kind", todo: "none" };
 function tacticComplete(t){
   if (!t) return false;
   if (t.status === "Done") return true;
@@ -15730,14 +15772,35 @@ function outcomeAtNought(o, t){
   }
   return !(t.actual > 0);
 }
+/* §571: IS THE FIRST QUARTER THIS TACTIC RUNS IN WHOLLY BEHIND THE REVIEW
+   MONTH. The same month arithmetic `tacticShare` counts with (a quarter's
+   last month is its third), and the same quarter fallback where the cycle's
+   year cannot be read, so the two can never disagree about where we are. */
+function tacticFirstQuarterOver(t){
+  var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
+  for (var i = 0; i < 4; i++) {
+    if (!q[i]) continue;
+    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    return y * 12 + i * 3 + 2 <= a;
+  }
+  return false;
+}
 function tacticStatusKey(t){
   if (!t) return "todo";
   if (tacticComplete(t)) return "done";
   if (!tacticDue(t)) return "notdue";
-  if (tacticShare(t) === 1) return "late";
   return tacticAtNought(t) ? "todo" : "wip";
 }
 function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
+/* §571: IS THIS TACTIC LATE. Its whole window gone unfinished, or its first
+   quarter gone with its own report still at nought. */
+function tacticDelayed(t){
+  var k = tacticStatusKey(t);
+  if (k === "done" || k === "notdue") return false;
+  if (tacticShare(t) === 1) return true;
+  return k === "todo" && tacticAnswered(t) && tacticFirstQuarterOver(t);
+}
+function tacticBand(t){ return TACTIC_BANDS[tacticStatusKey(t)]; }
 
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
@@ -25406,7 +25469,9 @@ function pptxTable(id, box, widths, head, rows, o){
        score table writes a pillar's name over a grey line naming its kind
        and owner; read as one string they arrive as one word, which is what
        "…Scale RAYA Smart CareDirection · · Mahmoud" was (§311). */
-    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200), color:C.quiet }), pPr);
+    /* §571: a second line may carry its own ink — a tactic's Delayed is red. */
+    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200),
+      color:o2.subColor || C.quiet, b:!!o2.subColor }), pPr);
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' + body +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
@@ -25910,7 +25975,8 @@ function deckCellSpec(td){
   if (sub) {
     var c3 = td.cloneNode(true); c3.querySelector(".dsub").remove();
     return { t: deckPieces(c3) || "—", sub: deckTxt(sub), align:align,
-             color: color, b: bold };
+             color: color, b: bold,
+             subColor: sub.classList.contains("dlate") ? C.band.bad : null };
   }
 
   var t = deckPieces(td) || "—";
@@ -27433,7 +27499,15 @@ function outcomeShown(t){
   if (!o || o.actual == null || o.actual === "") return null;
   /* §300: TEXT, not html — the caller escapes — and never joined with a unit,
      because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
-  if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
+  /* §571: AS A FIGURE — the Status beside it says the word, so YTD actual
+     says how far: Done 100%, Not started 0%, In progress its own per cent. */
+  if (SMPRules.isYesNo(o.target)) {
+    var st = SMPRules.ynState(o.actual);
+    if (st.status === "done") return "100%";
+    if (st.status === "todo") return "0%";
+    if (st.status === "wip" && st.pct != null) return st.pct + "%";
+    return SMPRules.ynShown(o.actual);
+  }
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
 }
 /* The target as it is written on the plan — the whole year's number, unit and
@@ -27547,9 +27621,9 @@ function tacticRows(ts, unitKey){
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     /* §419: the word is derived, never read off `t.status` (RHI's words). */
-    var sk = tacticStatusKey(t);
-    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
-                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
+    /* §571: the word, and Delayed under it when the tactic is late. */
+    var status = '<span class="pill ' + tacticBand(t) + '">' + esc(tacticStatusWord(t)) + '</span>' +
+                 (tacticDelayed(t) ? '<span class="latemark">Delayed</span>' : '');
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign
@@ -49985,10 +50059,16 @@ function pillarSlidesOf(u, p, pi, named){
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
       '<td class="lead"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
       '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-      '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' +
-      '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+      (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
+      (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
       '<td class="cc"' + rs + '>' + (DECK_PLAN && !["q1","q2","q3","q4"].some(function(q){ return t[q]; })
-        ? PLAN_MISS : qs(t)) + '</td>';
+        ? PLAN_MISS : qs(t)) + '</td>' +
+      /* §571: the Status, as Performance draws it — the word in its band and
+         Delayed under it when late. On every row, the plan's too, so the cells
+         line up with the head and `planStripFigs` takes it out as a `fig`. */
+      '<td class="dstat ' + tacticBand(t) + '"' + rs + '>' +
+        esc(tacticStatusWord(t)) +
+        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
     if (xs.length) return deckOutRows(t, lead, note, xs, rs);
@@ -49998,8 +50078,7 @@ function pillarSlidesOf(u, p, pi, named){
        that also costs the owner and the quarters their legibility on a
        projector. */
     if (!tacticDue(t))
-      return '<tr>' + lead +
-        '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
+      return '<tr>' + lead + '<td colspan="2" class="cc"></td>' + note + '</tr>';
     /* What this row is measured against RIGHT NOW: an outcome answers with
        its own target, prorated where it compiles by Sum or Count (§276); everything else
        with the share of its plan that is due (§239). One function, so the
@@ -50011,9 +50090,12 @@ function pillarSlidesOf(u, p, pi, named){
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
+    /* §571: the benchmark beside the figure is the page's (§300) — a yes/no
+       row shows it only against a partial, so 0% and 100% stand alone. */
+    var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
       '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i class="duehalf">/ ' + esc(bench) + '</i>' : '') + '</td>' +
+        (pair ? ' <i class="duehalf">/ ' + esc(pair) + '</i>' : '') + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -50021,9 +50103,11 @@ function pillarSlidesOf(u, p, pi, named){
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-    '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
-    '<th>Collabs.</th>' +
-    '<th class="num">Quarters</th><th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
+    '<th>' + DW("outcomes", "one", p) + '</th>' +
+    (deckColOn("owner") ? '<th>Owner</th>' : '') +
+    (deckColOn("collabs") ? '<th>Collabs.</th>' : '') +
+    '<th class="num">Quarters</th><th class="fig">Status</th>' +
+    '<th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
     '<th class="fig">Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
 
   return S;
@@ -50045,7 +50129,7 @@ function pillarSlidesOf(u, p, pi, named){
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
     if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '></td>' + note + '</tr>';
       xs.forEach(function(x){
         out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
       });
@@ -50074,6 +50158,12 @@ function pillarSlidesOf(u, p, pi, named){
    ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN: the units off and the
    directions in pillars. Everywhere else the group deck is exactly what it
    was, asserted. */
+/* §571: ONE SWITCH FOR EVERY SLIDE — Owner and Collabs. on the tactics
+   slides, the office's, kept on the company (`SMPRules.slideColOn`). The plan
+   download keeps both: there an empty owner is a gap the plan still owes. */
+function deckColOn(k){
+  return DECK_PLAN || SMPRules.slideColOn(GROUP, k);
+}
 function companyReviewOn(){
   return !SMPRules.buExists(GROUP) && topWay() !== "projects";
 }
@@ -53333,7 +53423,51 @@ function slidesClose(){
    so a slide that is wrong is wrong here too. */
 var SL_THUMB = 0.105;
 
+/* ── THE COLUMNS MENU (§571) ───────────────────────────────────────────
+   Islam: *"give me the option to hide the owner and collabs in the slides if
+   needed"*, *"one switch for everything"*. The People register's own Columns
+   menu (§53.5: no second control for one idea), in the slide view's bar
+   beside Grid, and the office's alone — the same person who hides a slide,
+   judged on the server as the same act (`deckHide`). The words are the
+   tactics slide's own headings. */
+var SLIDE_COL_WORDS = { owner: "Owner", collabs: "Collabs." };
+function slidesColsHtml(){
+  return '<div class="hmenu-h"><span>Tactics slides show</span></div>' +
+    SMPRules.SLIDE_COLS.map(function(k){
+      return '<label class="colrow"><input type="checkbox" data-slcol="' + k + '"' +
+        (SMPRules.slideColOn(GROUP, k) ? ' checked' : '') + '><span>' +
+        esc(SLIDE_COL_WORDS[k]) + '</span></label>';
+    }).join("") +
+    '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
+}
+function slidesColsSync(){
+  var w = document.getElementById("slcols");
+  if (!w) return;
+  w.hidden = !inOffice();
+  var p = document.getElementById("slcolspanel");
+  if (p && !p.hidden) p.innerHTML = slidesColsHtml();
+}
+function slidesColsOpen(on){
+  var w = document.getElementById("slcols"), p = document.getElementById("slcolspanel");
+  if (!w || !p) return;
+  p.hidden = !on;
+  w.classList.toggle("open", !!on);
+  w.querySelector("[data-slcols]").setAttribute("aria-expanded", on ? "true" : "false");
+  if (on) p.innerHTML = slidesColsHtml();
+}
+/* Stored as the names left out, sorted, and DELETED when none is (§50.6). */
+function slidesSetCol(k, on){
+  var list = (GROUP[SMPRules.SLIDE_COLS_OFF] || []).filter(function(x){
+    return SMPRules.SLIDE_COLS.indexOf(x) >= 0 && x !== k; });
+  if (!on) list.push(k);
+  list.sort();
+  if (list.length) GROUP[SMPRules.SLIDE_COLS_OFF] = list;
+  else delete GROUP[SMPRules.SLIDE_COLS_OFF];
+  slidesMark(); slidesPaint();
+}
+
 function slidesPaint(){
+  slidesColsSync();
   var box = slidesAssemble();
   var all = [].slice.call(box.querySelectorAll(".dslide"));
   if (!all.length) {
@@ -54340,6 +54474,25 @@ function wireSlides(){
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
   var gb = root.querySelector("[data-slgrid]");
   if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
+  /* §571: the Columns menu. Its panel is redrawn in place on a tick, so the
+     menu stays open while both are set; a press anywhere else closes it. */
+  var cb = root.querySelector("[data-slcols]");
+  if (cb) cb.addEventListener("click", function(e){
+    e.stopPropagation();
+    slidesColsOpen(document.getElementById("slcolspanel").hidden);
+  });
+  var cp = document.getElementById("slcolspanel");
+  if (cp) {
+    cp.addEventListener("click", function(e){ e.stopPropagation(); });
+    cp.addEventListener("change", function(e){
+      var k = e.target && e.target.getAttribute("data-slcol");
+      if (k && inOffice()) slidesSetCol(k, e.target.checked);
+    });
+  }
+  root.addEventListener("click", function(){
+    var p = document.getElementById("slcolspanel");
+    if (p && !p.hidden) slidesColsOpen(false);
+  });
   /* §556.3: the arrows at the stage's edge and under it are the same act as
      the keyboard's, so they call the same stepper (§53.5). */
   root.querySelectorAll("[data-slstep]").forEach(function(b){
@@ -54368,6 +54521,9 @@ function wireSlides(){
       return;
     }
     if (ev.key === "Escape") {
+      /* §571: an open Columns menu closes first, for the grid's reason. */
+      var cpn = document.getElementById("slcolspanel");
+      if (cpn && !cpn.hidden) { slidesColsOpen(false); return; }
       /* §556.2: the grid closes first — Escape from a grid is "put this
          away", not "leave the editor". */
       var g = document.getElementById("slgrid");

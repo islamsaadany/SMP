@@ -3134,6 +3134,39 @@ console.log("\n28 · the order of the navigation is the office's (§273)");
   }
 })();
 
+console.log("\n28b · which columns the tactics slides show is the office's (§571)");
+(function () {
+  /* Islam: "give me the option to hide the owner and collabs in the slides",
+     "one switch for everything" — the company's, set in the slide view beside
+     the eye that hides a slide, so judged as that eye is (`deckHide`). Both
+     ends (§94.2): the office may, a unit's custodian — who opens the same
+     view — may not, and clearing it is the same act. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const F = R.SLIDE_COLS_OFF;
+  check("§571: the field is named by the shared module", F === "slideColsOff", String(F));
+  if (!(UK && CUST && F)) return;
+  let r = fromStored(SEED, "smo", function (i) { i.group[F] = ["collabs", "owner"]; });
+  check("§571: the office hides the two columns", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, CUST, function (i) { i.group[F] = ["owner"]; });
+  check("§571 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§571: and the refusal sends them to Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")) && !/Setup/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§571: a change to it is classified `deckHide` and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  const set = clone(SEED); set.group[F] = ["owner"];
+  r = fromStored(set, CUST, function (i) { delete i.group[F]; });
+  check("§571 REFUSED: nor can they show them again", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[F]; });
+  check("§571: the office shows them again", r.ok, (r.refusals || []).join(" / "));
+})();
+
 console.log("\n29 · the master presentation's running order is the office's (§266)");
 (function () {
   /* Islam, asked before it was built: the SMO. The menu draws the entry for

@@ -103,6 +103,11 @@
   .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub td { background:none; }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .dslide td.final { font-weight:700; }
+  /* §571: a tactic's Status on the slide, the word in its band. */
+  .dslide td.dstat { font-weight:600; white-space:nowrap; }
+  .dslide td.dstat.kind, .dslide td.dstat.none { color:var(--none); font-weight:400; }
+  .dslide td.dstat .dlate { color:var(--bad); font-weight:700; letter-spacing:.06em;
+                            text-transform:uppercase; font-size:14px; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
      them as classes because a cell carries its band as one. */
   .dslide .good, .dslide b.good { color:var(--good); }

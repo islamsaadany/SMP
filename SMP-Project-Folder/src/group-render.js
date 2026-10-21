@@ -847,7 +847,15 @@ function outcomeShown(t){
   if (!o || o.actual == null || o.actual === "") return null;
   /* §300: TEXT, not html — the caller escapes — and never joined with a unit,
      because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
-  if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
+  /* §571: AS A FIGURE — the Status beside it says the word, so YTD actual
+     says how far: Done 100%, Not started 0%, In progress its own per cent. */
+  if (SMPRules.isYesNo(o.target)) {
+    var st = SMPRules.ynState(o.actual);
+    if (st.status === "done") return "100%";
+    if (st.status === "todo") return "0%";
+    if (st.status === "wip" && st.pct != null) return st.pct + "%";
+    return SMPRules.ynShown(o.actual);
+  }
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
 }
 /* The target as it is written on the plan — the whole year's number, unit and
@@ -961,9 +969,9 @@ function tacticRows(ts, unitKey){
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     /* §419: the word is derived, never read off `t.status` (RHI's words). */
-    var sk = tacticStatusKey(t);
-    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
-                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
+    /* §571: the word, and Delayed under it when the tactic is late. */
+    var status = '<span class="pill ' + tacticBand(t) + '">' + esc(tacticStatusWord(t)) + '</span>' +
+                 (tacticDelayed(t) ? '<span class="latemark">Delayed</span>' : '');
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign

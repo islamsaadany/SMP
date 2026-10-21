@@ -688,6 +688,9 @@
   .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
   .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
   .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
+  /* §571: a tactic that is late says so under its status, in words. */
+  .latemark { display:block; margin-top:5px; font:700 10px/1 var(--sans);
+              letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
   .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }

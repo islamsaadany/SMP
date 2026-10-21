@@ -2040,7 +2040,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      part this paragraph was really about: a missing month is UNKNOWN, never
      nought, so the year stays flat until all twelve are in.
 
-     §568 REVERSED THE OTHER HALF. Islam, of a row planned January to June
+     §569 REVERSED THE OTHER HALF. Islam, of a row planned January to June
      (2+2+2+2+2+3, so a target of 13 shops) reading 14 against 9 at 150% in
      September: *"in a target that is already set on monthly level it's still
      prorated arithmatic"*, and then *"the monthly plan overrides the
@@ -2096,7 +2096,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       if (compileKey(COMPILES[i]) === c) return c;
     return "";
   }
-  /* §568: IN FORCE FROM THE FIRST MONTH, exactly when the target is derived
+  /* §569: IN FORCE FROM THE FIRST MONTH, exactly when the target is derived
      from the months (`monthlySoFar`), so the row's target and what is due on
      it can never be read off two different plans. */
   function monthlyInForce(row) {
@@ -2109,7 +2109,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      months a thing does not run in, so it is the more specific answer and
      supersedes §250's share.
 
-     §568: AND A HALF-FILLED PLAN ANSWERS TOO, blanks passed over. Months
+     §569: AND A HALF-FILLED PLAN ANSWERS TOO, blanks passed over. Months
      planned only after the review point owe nothing yet (nought, which
      `measureScore` already reads as "not due yet", §278). On a complete plan
      this is byte-for-byte the arithmetic it was: Sum and Count add the months
@@ -2140,7 +2140,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      which is asserted rather than claimed, because the day the two disagree
      the target on the row stops agreeing with the months under it.
 
-     WHAT IT DID NOT TOUCH WAS PRORATION — §568 has since made a half-filled
+     WHAT IT DID NOT TOUCH WAS PRORATION — §569 has since made a half-filled
      plan the row's proration too, through the same walk below, so the target
      and what is due on it are one reading of one plan.
 
@@ -2149,7 +2149,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      own safe direction — a plan the platform cannot read leaves the target
      alone rather than deriving a figure from half of it. */
   function monthlySoFar(row) { return monthsCompiled(row, 12); }
-  /* THE ONE WALK (§568): the row's compile rule over months 1..`upto`, blanks
+  /* THE ONE WALK (§569): the row's compile rule over months 1..`upto`, blanks
      passed over. Null when the plan says nothing (no compile rule, no month
      set ANYWHERE in the twelve, or a month present and unreadable — the last
      checked across the whole year, so a bad December keeps March out of force

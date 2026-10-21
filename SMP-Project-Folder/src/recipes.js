@@ -294,7 +294,7 @@ var RECIPES = [
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no
        longer there sends them hunting (§214.3, and §160's rule that a recipe
-       is part of the change that moves it). §568: and the second half said
+       is part of the change that moves it). §569: and the second half said
        all twelve were owed, which §555 had already made half untrue. */
     a: "Open the plan with the pen, and press the small grid mark beside the " +
        "target. Twelve boxes open under the row \u2014 one for each month, in the " +

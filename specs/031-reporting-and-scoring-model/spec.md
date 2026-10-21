@@ -73,7 +73,7 @@ directions (§239).
 3. The target holds no number → **null** (§251 lets a unit be picked before the
    number, so `"%"` is a real intermediate state and is not scorable).
 4. **A monthly plan answers first** from the first month set, when the row has
-   a compile rule and the review point is readable (§278, §568) — it
+   a compile rule and the review point is readable (§278, §569) — it
    supersedes the flat share *and* a supplied one. The compile rule is applied
    to the months set up to the review month, blanks passed over; months set
    only later owe nought.
@@ -253,7 +253,7 @@ Latest takes the month being stood in.
   year by more than half.
 - **In force only when all twelve are set.** A half-filled plan is stored, says
   so in the warning ink, and the row is still spread evenly across the year —
-  the months that are missing are *unknown*, never nought. **Reversed by §568**
+  the months that are missing are *unknown*, never nought. **Reversed by §569**
   (Islam: *"the monthly plan overrides the proration"*): once §555 made the
   target what the months set come to, an empty month was already counted as
   nothing in the target, so a half-filled plan is in force from its first
@@ -351,7 +351,7 @@ re-entered once; a one-time heal was offered and not taken up.
 - **R4** A monthly plan supersedes both the flat share and a supplied one.
 - **R5** A typed 0 is a real month. A blank month is passed over: under `Sum`
   and `Count` it adds nothing, under `Average` it is not counted, under
-  `Latest` the last month set before it stands (§568).
+  `Latest` the last month set before it stands (§569).
 - **R6** `Count` floors with an epsilon; `Sum` does not floor at all.
 - **R7** A `Y/N` target scores 100/0/null and is never given a due figure.
 - **R8** A target holding a unit and no number is Missing everywhere — the

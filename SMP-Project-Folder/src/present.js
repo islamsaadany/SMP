@@ -1167,7 +1167,7 @@ function pillarSlidesOf(u, p, pi, named){
      `m` and the tactics slide's bare code, both of which stored picture
      slides already name (§236.2, §50.3).
 
-     §567: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
+     §568: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
      progress just keep the target and actual and color code the actual as
      you did earlier but after splitting to 2 columns"* — §557's split on
      Reporting, carried here and to Performance. The target heads with the

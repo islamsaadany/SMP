@@ -285,7 +285,7 @@ with sync_playwright() as pw:
     ok("the card counts the scored columns among its measures (§264)",
        nums and nums["measures"] == str(sc["rows"] + 2), {"card": nums, "sc": sc})
 
-    # §567: PERFORMANCE READS TARGET, THEN ACTUAL — two columns per column, as
+    # §568: PERFORMANCE READS TARGET, THEN ACTUAL — two columns per column, as
     # §557 laid Reporting out. Islam: *"color code the actual as you did
     # earlier but after splitting to 2 columns in both the performance and the
     # slides"*. The head is read as textContent: the page uppercases it in CSS
@@ -306,7 +306,7 @@ with sync_playwright() as pw:
                rows, bad: probe.style.color,
                t0: SMPRules.bdTarget(SMPRules.bdRows(p)[0], c0),
                a0: SMPRules.bdActual(SMPRules.bdRows(p)[0], c0) }; }""")
-    ok("Performance heads each column with its target, then Actual (§567)",
+    ok("Performance heads each column with its target, then Actual (§568)",
        perf.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
                             "Mix", "Actual"], perf.get("head"))
     r0 = (perf.get("rows") or [[]])[0]
@@ -435,14 +435,14 @@ with sync_playwright() as pw:
                anchor: sl[0].getAttribute('data-anchor'),
                note: sl[0].innerText.indexOf('Ramadan') > -1 }; }""")
     ok("the breakdown has one slide of its own", deck.get("slides") == 1, deck)
-    # §567 REWROTE THIS ONE: it read the head as one column per column
+    # §568 REWROTE THIS ONE: it read the head as one column per column
     # (`head[2]` scored, `head[4]` the indicator). Each is two now.
     ok("...its head is each column's target, then Actual, the direction on the scored only",
        deck.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
                             "Mix", "Actual", "Note"], deck.get("head"))
     ok("...only the scored cells are banded (one per row)",
        deck.get("banded") == 4, deck)
-    ok("...and the band is on the ACTUAL, never on its target or the indicator (§567)",
+    ok("...and the band is on the ACTUAL, never on its target or the indicator (§568)",
        deck.get("bandedAreActuals") is True, deck)
     ok("...with no target stacked under a figure any more",
        deck.get("slash") is False, deck)

@@ -167,7 +167,7 @@ with sync_playwright() as p:
                or " M " not in r["target"] and " B " not in r["target"] and " K " not in r["target"],
                r["target"])
 
-    print("\n── 1b · §567 · the benchmark is the SMALLER half, on measures and tactics")
+    print("\n── 1b · §568 · the benchmark is the SMALLER half, on measures and tactics")
     # Islam: *"the prorated target should be smaller not to take over the
     # actual measure view in the measures or the tactics"*. Measured as PAINT
     # in the opened deck, never as a class (§145.14): a build that kept the

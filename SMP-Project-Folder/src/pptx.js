@@ -172,7 +172,7 @@ function pptxTable(id, box, widths, head, rows, o){
     var pPr = o2.align ? { align: o2.align } : undefined;
     var body = o2.runs
       ? pptxPara(o2.runs.map(function(r){
-          /* §567: a `small` run takes the second line's size, as `.duehalf`
+          /* §568: a `small` run takes the second line's size, as `.duehalf`
              takes `.dsub`'s on the slide. */
           return pptxRun(r.t, { sz: r.small ? Math.max(900, SZ - 200) : (r.sz || SZ),
                                 b:!!r.b, i:!!r.i, color:r.color || C.ink });

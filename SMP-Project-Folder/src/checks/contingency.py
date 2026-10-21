@@ -721,7 +721,7 @@ with sync_playwright() as pw:
     # figure BESIDE what it is measured against, so that is what is asked:
     # a run holding both halves with a number in each. A deck that printed
     # only the target, or only the figure, carries no such pair at all.
-    # §567: READ PER CELL, NOT PER RUN. The benchmark is a run of its own now
+    # §568: READ PER CELL, NOT PER RUN. The benchmark is a run of its own now
     # on the tactics slides too (smaller, as `.duehalf` draws it), so
     # `5,400#` and ` / 6000 #` arrive as two runs in one cell — the pair is
     # the cell, and asking a single run to hold both went red on the feature

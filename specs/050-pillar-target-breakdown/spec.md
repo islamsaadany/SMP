@@ -108,8 +108,8 @@ row was removed are byte-identical.
 | Strategy › Plan, reading | the targets, one row per category |
 | Strategy › Plan, pen open | the name, a name box and a direction picker per column, `+` to add one, `×` to remove one, the targets, Add a row |
 | Reporting | two columns per breakdown column, the target and a *Reported* box beside it, as Key Measures reads (§557); **one note per row** |
-| Performance | two columns per breakdown column, the target and the *Actual* beside it, the scored actuals wearing their band and the indicator plain (§567) |
-| the review deck | one slide of its own, after that pillar's targets, laid out as Performance is (§567); the plan download keeps the target alone (§564) |
+| Performance | two columns per breakdown column, the target and the *Actual* beside it, the scored actuals wearing their band and the indicator plain (§568) |
+| the review deck | one slide of its own, after that pillar's targets, laid out as Performance is (§568); the plan download keeps the target alone (§564) |
 
 **DRAWN ONLY WHERE THERE IS ONE.** A pillar without a breakdown shows no
 table, no empty section and nothing said about it (Islam, on the mockup) —

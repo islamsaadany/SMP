@@ -1213,7 +1213,7 @@ function bdReadTable(p, mode){
            is drawn plain with its target behind it, which is the rule two
            tables up: coloured means a score, plain with a target behind it
            means a reported fact. */
-        /* §567: AND THE TWO ARE TWO COLUMNS, the target then the actual, as
+        /* §568: AND THE TWO ARE TWO COLUMNS, the target then the actual, as
            §557 laid them out on Reporting (Islam: *"after splitting to 2
            columns in both the performance and the slides"*). The colouring
            rule above is unchanged; only the slash goes. */
@@ -5154,7 +5154,7 @@ function monthlyMsg(row, fld, tfld){
      now is, and that the row is still measured flat until the twelfth lands.
      §278's wording said only the second, on a build where the first was not
      true yet.
-     §568: AND NOW THE YEAR IS TOO — the months set are the plan, so the
+     §569: AND NOW THE YEAR IS TOO — the months set are the plan, so the
      second half says what an empty month means instead (Islam's wording,
      agreed before this was built). */
   if (n < 12)
@@ -5186,7 +5186,7 @@ function monthlyAnnualText(row, fld, tfld){
 /* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
    question the locked box and the refresh both ask, so the box and the figure
    inside it can never disagree about which it is. `monthlyInForce`, which is
-   about PRORATION, waited for all twelve until §568 and now answers the same. */
+   about PRORATION, waited for all twelve until §569 and now answers the same. */
 function monthlyDerived(row, fld){
   return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
 }

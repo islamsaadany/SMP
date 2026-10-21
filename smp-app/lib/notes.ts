@@ -279,19 +279,21 @@ export async function deleteNote(c: Q, id: string): Promise<boolean> {
   return (r.rowCount || 0) > 0;
 }
 
-/* WHO A KEY IS: the register's name, address and place, read at draw time
-   and again at send time (§48). Somebody the register no longer holds keeps
-   their key on the note and reads as it, with no address. */
+/* WHO A KEY IS: the register's Name (§565 — never the employee file's full
+   name), address and place, read at draw time and again at send time (§48).
+   Somebody the register no longer holds keeps their key on the note and
+   reads as it, with no address. */
 export type Register = Map<string, { name: string; email: string; place: string; active: boolean }>;
 export async function registerOf(c: Q): Promise<Register> {
   const places = new Map((await placesFor(c)).map((p) => [p.at, p.label]));
+  const names = await namesOf(c);
   const r = await c.query(
     "SELECT key, COALESCE(NULLIF(name, ''), key) AS name, COALESCE(extra->>'email', '') AS email, unit_key, fn_key, " +
     "COALESCE(extra->>'active', 'true') <> 'false' AS active FROM people ORDER BY idx, key");
   const out: Register = new Map();
   for (const x of r.rows as any[]) {
     const at = x.unit_key ? str(x.unit_key) : x.fn_key ? "fn:" + str(x.fn_key) : "";
-    out.set(str(x.key), { name: str(x.name), email: emailOf(x.email), place: places.get(at) || "", active: !!x.active });
+    out.set(str(x.key), { name: names.get(str(x.key)) || str(x.name), email: emailOf(x.email), place: places.get(at) || "", active: !!x.active });
   }
   return out;
 }

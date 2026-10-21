@@ -472,7 +472,11 @@ export const APP_JS = `(function () {
       if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
     } else if (act === "add-to-topic") {
       var ar2 = lineOf("main");
-      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = boxOf(ar2); if (add3) { add3.focus(); add3.scrollIntoView({ block: "center" }); } }
+      /* PINNED, THE LINE IS ALREADY ON SCREEN (§565), and scrolling it to the
+         middle would carry the page away from the topic just pressed — so
+         it scrolls only where it is out of sight: on a phone, where the band
+         is not pinned. Measured BEFORE the focus, which scrolls by itself. */
+      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = boxOf(ar2); if (add3) { var bx = add3.getBoundingClientRect(), off = bx.top < 0 || bx.bottom > window.innerHeight; add3.focus(); if (off) add3.scrollIntoView({ block: "center" }); } }
     } else if (act === "carry") {
       /* CARRY TO NEXT WEEK (§532): one press, and the same action redraws
          inside the next card down. The server asks the stored row whether it

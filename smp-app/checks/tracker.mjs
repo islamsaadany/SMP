@@ -33,6 +33,9 @@
      SMP_BREAK=card-jumps     node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=details-always node checks/tracker.mjs   # must go red (§356.16)
      SMP_BREAK=wide-names     node checks/tracker.mjs   # must go red (§356.16)
+     SMP_BREAK=full-names     node checks/tracker.mjs   # must go red (§565)
+     SMP_BREAK=band-scrolls   node checks/tracker.mjs   # must go red (§565)
+     SMP_BREAK=narrow-rename  node checks/tracker.mjs   # must go red (§565)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -64,6 +67,7 @@ import {
   CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
   officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
 } from "../lib/tracker.ts";
+import { registerNames } from "../lib/people.ts";
 
 let ok = 0;
 const bad = [];
@@ -113,6 +117,22 @@ check("...a particle is not a name — Abd El Moniem is one word of it", sn(["Ab
 check("...two Ahmeds are told apart by their second word, and only those two", sn(["Ahmed Mostafa", "Ahmed Ali", "Noran Essam"]) === "Ahmed Mostafa|Ahmed Ali|Noran", sn(["Ahmed Mostafa", "Ahmed Ali", "Noran Essam"]));
 check("...and a pair still equal at two words gets the whole name", sn(["Ahmed Ali Hassan", "Ahmed Ali Youssef"]) === "Ahmed Ali Hassan|Ahmed Ali Youssef", sn(["Ahmed Ali Hassan", "Ahmed Ali Youssef"]));
 check("...a lone word is itself", sn(["Madonna"]) === "Madonna");
+/* THE REGISTER'S NAME, NEVER ITS FULL NAME (§565): what the SMO typed, else
+   the first two names; a clashing guess lengthened for the whole clash
+   together, the way the register's own column does it (displayNames). */
+const rn = (people) => Array.from(registerNames(people.map((p, i) => ({ key: "k" + i, ...p }))).values()).join("|");
+check("the Name is what was typed on the register, whatever the full name says",
+  rn([{ name: "Mohamed Essam Abdel Aziz", known: "Essam" }]) === "Essam", rn([{ name: "Mohamed Essam Abdel Aziz", known: "Essam" }]));
+check("...and with nothing typed it is the first two names, a particle kept with its name",
+  rn([{ name: "Noran Essam Abdel Aziz" }, { name: "Abd El Moniem Mohamed Abd El Moniem Mahmoud" }]) === "Noran Essam|Abd El Moniem Mohamed",
+  rn([{ name: "Noran Essam Abdel Aziz" }, { name: "Abd El Moniem Mohamed Abd El Moniem Mahmoud" }]));
+check("...two guesses that clash are lengthened together until they differ, and nobody else is",
+  rn([{ name: "Ahmed Mostafa Mohamed El Gebely" }, { name: "Ahmed Mostafa Mohamed Abou El Einen" }, { name: "Hend Adel Hassan" }]) ===
+    "Ahmed Mostafa Mohamed El Gebely|Ahmed Mostafa Mohamed Abou El Einen|Hend Adel",
+  rn([{ name: "Ahmed Mostafa Mohamed El Gebely" }, { name: "Ahmed Mostafa Mohamed Abou El Einen" }, { name: "Hend Adel Hassan" }]));
+check("...and a typed Name is never lengthened, even where it matches somebody's guess",
+  rn([{ name: "Ahmed Ali Hassan", known: "Ahmed Ali" }, { name: "Ahmed Ali Youssef" }]) === "Ahmed Ali|Ahmed Ali",
+  rn([{ name: "Ahmed Ali Hassan", known: "Ahmed Ali" }, { name: "Ahmed Ali Youssef" }]));
 /* LATE IS ONE SHORT WORD, the weeks riding on it (Islam: "carried 1 week is long"). */
 check("late reads Late, Late 1 w, Late 2 w — never 'carried'", lateWord(0) === "Late" && lateWord(1) === "Late 1 w" && lateWord(2) === "Late 2 w" && !/carried/.test(lateWord(3)));
 const lateRow = shape({ id: "l", title: "t", description: "", owner_key: "islam", due: "2026-09-03", first_due: "2026-09-03", status: "in_progress", created_by: "islam" });
@@ -360,15 +380,18 @@ try {
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-b", "RHI"]);
   /* THE REGISTER: two office rows and one of the client's own people on A;
      one office row on B. The seat lives on tenant_users, the name on people. */
-  const person = async (t, key, name, seat, idx) => {
+  const person = async (t, key, name, seat, idx, known) => {
     const [u] = await owner("INSERT INTO users (email, name, kind, is_admin, must_change, password_hash) VALUES ($1,$2,'client',false,false,'x') RETURNING id",
       [stamp + "-" + key + "@example.test", name]);
     /* The register row first: tenant_users.person_key carries an FK to people (§339). */
-    await owner("INSERT INTO people (tenant_id, key, idx, name) VALUES ($1,$2,$3,$4)", [t, key, idx, name]);
+    await owner("INSERT INTO people (tenant_id, key, idx, name, extra) VALUES ($1,$2,$3,$4,$5::jsonb)", [t, key, idx, name, JSON.stringify(known ? { known } : {})]);
     await owner("INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,$4)", [t, u.id, key, seat]);
   };
-  await person(A, "islam", "Islam Saadany", "super", 0);
-  await person(A, "noran", "Noran Essam", "smoteam", 1);
+  /* FULL NAMES LONGER THAN THE NAME (§565), so every heading and owner on
+     the page below proves which of the two it printed: Islam's Name is TYPED
+     (his guess would be "Islam Mohamed"), Noran's is the guess. */
+  await person(A, "islam", "Islam Mohamed Saadany", "super", 0, "Islam Saadany");
+  await person(A, "noran", "Noran Essam Abdel Aziz", "smoteam", 1);
   await person(A, "hend", "Hend Adel", "none", 2);
   await person(B, "omar", "Omar Khalil", "super", 0);
 
@@ -445,6 +468,10 @@ try {
   check("the title and the notes write, and the row carries no collaborators at all (§356.11)", d6.title === "Chase Finance" && d6.description === "Nineteen of 26 entered." && !("collaborators" in d6), JSON.stringify(d6));
   check("a name on the row is read from the register, never stored on the action",
     (await asTenant(A, (c) => namesOf(c))).get("noran") === "Noran Essam");
+  check("...and it is the register's Name, never the full name — typed where typed, the guess where not (§565)",
+    (await asTenant(A, (c) => namesOf(c))).get("islam") === "Islam Saadany" &&
+    (await asTenant(A, (c) => officeRows(c))).map((p) => p.name).join("|") === "Islam Saadany|Noran Essam",
+    JSON.stringify(await asTenant(A, (c) => officeRows(c))));
 
   /* ══ §6 · one client's list is not another's ═════════════════════════ */
   section("§6 · one client's list is not another's");
@@ -579,7 +606,7 @@ try {
   const byDue = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "dates" }, who: NORAN, today: TODAY });
   const byWeek = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "weeks" }, who: NORAN, today: TODAY });
   const byNone = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "none", dates: "weeks" }, who: NORAN, today: TODAY });
-  check("grouped by Owner the headings are the register's full names, in its order", heads(opened).join("|") === "Islam Saadany|Noran Essam", heads(opened).join("|"));
+  check("grouped by Owner the headings are the register's Names, never the full ones, in its order (§565)", heads(opened).join("|") === "Islam Saadany|Noran Essam", heads(opened).join("|"));
   check("...by Status it is the three words' own", heads(byStatus).every((h) => Object.values(STATUS_WORD).includes(h)) && heads(byStatus).length >= 1, heads(byStatus).join("|"));
   /* the rows §8 has made by now: two due this week's real Thursday, one on
      Sun 20 Sep 2026, one on 1 Oct 2026, and the undated */
@@ -718,6 +745,27 @@ try {
       else await owner("DELETE FROM org WHERE tenant_id=$1", [A]);
       await pg.reload(); await settle();
     }
+    /* §565 — THE BAND STAYS PUT. The list here is too short to scroll, so a
+       spacer goes under it for this measurement alone and the page is read
+       again after it, so nothing below meets it. BOTH ENDS (§94.2): scrolled
+       on a computer the band, the add line and the count are still at the
+       top with a row gone under them; on a phone the band has gone. */
+    await pg.evaluate("document.querySelector('.list').insertAdjacentHTML('beforeend', '<div style=\"height:2400px\"></div>')");
+    await pg.evaluate("window.scrollTo(0, 900)");
+    const pinAt = await pg.evaluate(`(() => {
+      const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
+      const m = r('.mast'), add = r('.addrow'), cnt = r('.counted'), first = r('.list .sec');
+      return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .tools .addrow'), mast: m && Math.round(m.top),
+        add: add && Math.round(add.bottom), cnt: cnt && Math.round(cnt.bottom), first: first && Math.round(first.top) };
+    })()`);
+    check("scrolled down, the band, the add line and the count stay at the top, and the rows go under them (§565)",
+      pinAt.y >= 800 && pinAt.pin && pinAt.mast >= 0 && pinAt.mast <= 24 && pinAt.add > 0 && pinAt.add < 400 && pinAt.cnt > pinAt.add && pinAt.first < pinAt.cnt, JSON.stringify(pinAt));
+    await pg.setViewportSize({ width: 390, height: 800 });
+    await pg.evaluate("window.scrollTo(0, 900)");
+    const phone = await pg.evaluate("({ y: Math.round(scrollY), mast: Math.round(document.querySelector('.mast').getBoundingClientRect().bottom) })");
+    check("...and on a phone it scrolls away as before, where pinned it would cover the screen", phone.y >= 800 && phone.mast < 0, JSON.stringify(phone));
+    await pg.setViewportSize({ width: 1280, height: 800 });
+    await pg.reload(); await settle();
     await pg.evaluate("window.__stay = 1");
     check("the mark is really planted, or 'it stayed' proves nothing", await stayed());
     /* THE TWO SETTINGS BEHIND THE DOTS (§356.14): Group by has left the
@@ -986,6 +1034,16 @@ try {
     check("a single click on the name opens no box", (await pg.locator(row + "input.ttl").count()) === 0);
     await pg.locator(row + ".t").dblclick();
     check("a double-click turns the name into a box in place", (await pg.locator(row + "input.ttl").count()) === 1);
+    /* THE BOX TAKES THE NAME'S WHOLE SPACE (§565): measured against the cell
+       the name sits in, not against a number, so the claim survives the
+       column being resized. Narrowed, it was an input's default — about a
+       third of the cell at this width. */
+    const boxW = await pg.evaluate((r) => {
+      const inp = document.querySelector(r + "input.ttl"), cell = document.querySelector(r + ".tn2");
+      return inp && cell ? { box: Math.round(inp.getBoundingClientRect().width), cell: Math.round(cell.getBoundingClientRect().width) } : null;
+    }, row);
+    check("...and the box is as wide as the space the name has, not an input's default (§565)",
+      !!boxW && boxW.cell > 300 && boxW.box >= boxW.cell - 2, JSON.stringify(boxW));
     await pg.locator(row + "input.ttl").fill("Book the big room for Thursday");
     await pg.locator(row + "input.ttl").press("Enter"); await settle();
     check("Enter renames it, in the database and on the row", (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" &&

@@ -463,7 +463,11 @@
    its figures. The built file's bytes changed, which is the whole trigger
    (§91). Proved held by no commit in any ref's history after fetching
    every ref (§94.16). */
-const SHELL = "smp-shell-v6.58-quiet-target-monthly";
+/* v6.59-strategy-button — §570: with no business units the first button is
+   called Strategy and the tab under it Plan. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.59-strategy-button";
 const ASSETS = [
   "/",
   "/index.html",

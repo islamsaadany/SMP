@@ -48,7 +48,9 @@ export async function serve(a: ServeArgs): Promise<Response> {
     return new Response(APP_JS.replace("/*%BRK%*/", brk() === "reload-on-add" ? "location.reload();" : "")
       /* The third break puts the blur timer back on the date box — the fault
          Islam hit (§356.14) — which must turn §10 red (§94.5). */
-      .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : ""),
+      .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : "")
+      /* §566: the views put back to pages — a press on a tab loads one. */
+      .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : ""),
       { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which

@@ -560,6 +560,48 @@ export const APP_JS = `(function () {
     else if (act === "topic") post({ act: "topic", id: id, topicId: c.value || null });
   });
 
+  /* THE BAND PINS AT THE TOP BAR'S FOOT (§566), measured rather than assumed:
+     the bar is every module's and its height is its own business, so the
+     offset is read off it now and again whenever it changes. */
+  var tb = document.querySelector(".tb");
+  function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
+  barFoot();
+  if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
+  else window.addEventListener("resize", barFoot);
+
+  /* THE VIEWS ARE FILTERS, NOT PAGES (§566). Islam: "they need to be filters
+     not other pages that take me to another loading page they should act
+     instantly". A press lights the tab at once and reads the list in place
+     through the read every other press uses (refetch, §53.5), so no page
+     loads; the address follows by pushState, so Back steps through the views.
+     The tab stays a link: a press with a modifier key, or a page whose script
+     did not run, still opens it as before. */
+  function viewOf(href) { return new URL(href, location.href).searchParams.get("view"); }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest(".cats a[href]");
+    if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    /*%TABS%*/
+    var v = viewOf(t.href);
+    if (!v) return;
+    e.preventDefault();
+    closePops(null);
+    if (v === (B.getAttribute("data-view") || "week")) return;
+    document.querySelectorAll(".cats a[href]").forEach(function (o) {
+      if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
+    });
+    B.setAttribute("data-view", v);
+    var u = new URL(location.href);
+    u.searchParams.set("view", v); u.searchParams.delete("open");
+    history.pushState(null, "", u);
+    refetch();
+  });
+  window.addEventListener("popstate", function () {
+    var v = new URLSearchParams(location.search).get("view") || "week";
+    if (v === (B.getAttribute("data-view") || "week")) return;
+    B.setAttribute("data-view", v);
+    refetch();
+  });
+
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter
      or leaving the box renames, Escape puts the name back. A single click
      does nothing, so a row can still be read without a box opening under

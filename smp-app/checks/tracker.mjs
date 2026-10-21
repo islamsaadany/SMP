@@ -36,6 +36,9 @@
      SMP_BREAK=full-names     node checks/tracker.mjs   # must go red (§565)
      SMP_BREAK=band-scrolls   node checks/tracker.mjs   # must go red (§565)
      SMP_BREAK=narrow-rename  node checks/tracker.mjs   # must go red (§565)
+     SMP_BREAK=bar-scrolls    node checks/tracker.mjs   # must go red (§566)
+     SMP_BREAK=count-line     node checks/tracker.mjs   # must go red (§566)
+     SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -745,29 +748,48 @@ try {
       else await owner("DELETE FROM org WHERE tenant_id=$1", [A]);
       await pg.reload(); await settle();
     }
-    /* §565 — THE BAND STAYS PUT. The list here is too short to scroll, so a
-       spacer goes under it for this measurement alone and the page is read
-       again after it, so nothing below meets it. BOTH ENDS (§94.2): scrolled
-       on a computer the band, the add line and the count are still at the
-       top with a row gone under them; on a phone the band has gone. */
+    /* §565, §566 — WHAT STAYS PUT RUNS FROM THE TOP BAR TO THE ADD LINE.
+       The list here is too short to scroll, so a spacer goes under it for
+       this measurement alone and the page is read again after it, so nothing
+       below meets it. BOTH ENDS (§94.2): scrolled on a computer the white top
+       bar is at the very top, the band sits at its foot with the add line
+       under it, and a row has gone under them; on a phone both have gone. */
     await pg.evaluate("document.querySelector('.list').insertAdjacentHTML('beforeend', '<div style=\"height:2400px\"></div>')");
     await pg.evaluate("window.scrollTo(0, 900)");
     const pinAt = await pg.evaluate(`(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
-      const m = r('.mast'), add = r('.addrow'), cnt = r('.counted'), first = r('.list .sec');
-      return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .tools .addrow'), mast: m && Math.round(m.top),
-        add: add && Math.round(add.bottom), cnt: cnt && Math.round(cnt.bottom), first: first && Math.round(first.top) };
+      const tb = r('.tb'), m = r('.mast'), add = r('.addrow'), pin = r('.pin'), first = r('.list .sec');
+      return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .tools .addrow'),
+        tb: tb && Math.round(tb.top), tbFoot: tb && Math.round(tb.bottom), mast: m && Math.round(m.top),
+        add: add && Math.round(add.bottom), pinFoot: pin && Math.round(pin.bottom), first: first && Math.round(first.top) };
     })()`);
-    check("scrolled down, the band, the add line and the count stay at the top, and the rows go under them (§565)",
-      pinAt.y >= 800 && pinAt.pin && pinAt.mast >= 0 && pinAt.mast <= 24 && pinAt.add > 0 && pinAt.add < 400 && pinAt.cnt > pinAt.add && pinAt.first < pinAt.cnt, JSON.stringify(pinAt));
+    check("scrolled down, the band and the add line stay at the top, and the rows go under them (§565)",
+      pinAt.y >= 800 && pinAt.pin && pinAt.add > pinAt.mast && pinAt.add < 450 && pinAt.first < pinAt.pinFoot, JSON.stringify(pinAt));
+    check("...with the platform's white top bar pinned above them and the band at its foot (§566)",
+      pinAt.tb === 0 && pinAt.tbFoot > 30 && pinAt.mast >= pinAt.tbFoot && pinAt.mast <= pinAt.tbFoot + 24, JSON.stringify(pinAt));
+    check("...and no count line under the add line: the navy band already counts (§566)", (await pg.locator(".counted").count()) === 0);
     await pg.setViewportSize({ width: 390, height: 800 });
     await pg.evaluate("window.scrollTo(0, 900)");
-    const phone = await pg.evaluate("({ y: Math.round(scrollY), mast: Math.round(document.querySelector('.mast').getBoundingClientRect().bottom) })");
-    check("...and on a phone it scrolls away as before, where pinned it would cover the screen", phone.y >= 800 && phone.mast < 0, JSON.stringify(phone));
+    const phone = await pg.evaluate("({ y: Math.round(scrollY), tb: Math.round(document.querySelector('.tb').getBoundingClientRect().bottom), mast: Math.round(document.querySelector('.mast').getBoundingClientRect().bottom) })");
+    check("...and on a phone the bar and the band scroll away as before, where pinned they would cover the screen", phone.y >= 800 && phone.mast < 0 && phone.tb < 0, JSON.stringify(phone));
     await pg.setViewportSize({ width: 1280, height: 800 });
     await pg.reload(); await settle();
     await pg.evaluate("window.__stay = 1");
     check("the mark is really planted, or 'it stayed' proves nothing", await stayed());
+    /* §566 — THE VIEWS ARE FILTERS, NOT PAGES: All pressed swaps the list in
+       place (the mark survives, so no page loaded), lights the tab, and puts
+       the view in the address; Back returns to This week the same way. The
+       list is told apart by the count's own words, which only This week's
+       carries "on this week". */
+    const tabOn = () => pg.evaluate("(document.querySelector('.cats a[aria-current=\"true\"]') || {}).textContent || ''");
+    await pg.locator('.cats a[href*="view=all"]').click(); await settle();
+    const allAt = { url: new URL(pg.url()).searchParams.get("view"), body: await pg.evaluate("document.body.getAttribute('data-view')"), tab: await tabOn(), count: await pg.locator("#count").textContent() };
+    check("a press on All filters the list in place, with no page loaded (§566)",
+      await stayed() && allAt.url === "all" && allAt.body === "all" && allAt.tab === "All" && /^\d+ actions?$/.test(allAt.count), JSON.stringify(allAt));
+    await pg.evaluate("history.back()"); await settle();
+    const backAt = { url: new URL(pg.url()).searchParams.get("view"), body: await pg.evaluate("document.body.getAttribute('data-view')"), tab: await tabOn(), count: await pg.locator("#count").textContent() };
+    check("...and Back returns to This week, in place too",
+      await stayed() && (backAt.url || "week") === "week" && backAt.body === "week" && backAt.tab === "This week" && / on this week$/.test(backAt.count), JSON.stringify(backAt));
     /* THE TWO SETTINGS BEHIND THE DOTS (§356.14): Group by has left the
        row; the menu is hidden until pressed, then names Owner and Weeks as
        what is in force. And the way back sits above the title. */

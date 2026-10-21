@@ -251,7 +251,12 @@ export const APP_JS = `(function () {
      next one — on whichever line was written, so a check walked down topic
      by topic never loses its place. The topic the line was picked or stood
      in rides on it; everything else the line holds is kept across the swap
-     exactly as the other lines' is. */
+     exactly as the other lines' is — EXCEPT THE WEEK AND THE OWNER PICKED ON
+     IT, which go back to the line's own (§567). Islam, of a line that kept
+     "Next week · Islam" after the add: *"reset after each add"*. Carried, the
+     next action went to the same person and week with nothing on the screen
+     saying so until it was posted (§96); the drawn line is the server's, so
+     forgetting the picks is all a reset takes. */
   function submitAdd(ar) {
     var box = boxOf(ar), nt = noteOf(ar);
     if (!ar || !box) return;
@@ -264,7 +269,7 @@ export const APP_JS = `(function () {
     var payload = { act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner };
     if (tid) payload.topicId = tid; else if (tname) payload.topicName = tname;
     var k = keep();
-    k.lines.forEach(function (st) { if (st.key === key) { st.add = ""; st.note = ""; st.noteOpen = false; } });
+    k.lines.forEach(function (st) { if (st.key === key) { st.add = ""; st.note = ""; st.noteOpen = false; st.picked = false; /*%PICKS%*/ } });
     k.focus = { line: key };
     post(payload, k, function (j) { if (!j) { box.disabled = false; if (nt) nt.disabled = false; box.focus(); } /*%BRK%*/ });
   }

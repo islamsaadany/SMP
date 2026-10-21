@@ -50,7 +50,9 @@ export async function serve(a: ServeArgs): Promise<Response> {
          Islam hit (§356.14) — which must turn §10 red (§94.5). */
       .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : "")
       /* §566: the views put back to pages — a press on a tab loads one. */
-      .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : ""),
+      .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : "")
+      /* §567: the add line's picks carried past the add again. */
+      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;"),
       { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which

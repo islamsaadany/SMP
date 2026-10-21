@@ -56,6 +56,7 @@ function brkCss(): string {
   if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
   if (b === "narrow-rename") return ".tn2.editing .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
+  if (b === "bar-scrolls") return ".tb{position:relative}.pin{top:0}";                        /* §566 put back: the top bar scrolls away */
   return "";
 }
 
@@ -88,9 +89,18 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
    foot; with one showing the band pins flush to the top. On a phone, or a
    window too short to spare it, it scrolls away as before: pinned, it would
    cover most of the screen. */
-.pin{position:sticky;top:0;z-index:20;display:flow-root;background:var(--ground)}
+/* ...AND THE PLATFORM'S WHITE TOP BAR PINS ABOVE IT (§566). Islam: *"the
+   freeze starts by the top bar and ends by the text box to add an action"*.
+   On this page only — the bar is every module's (lib/topbar.ts) and nobody
+   asked for the others. The band pins at the bar's foot, which the script
+   MEASURES into --tbh rather than this file assuming 41px (a sticky offset
+   written as a number is right until the thing above it changes height, the
+   smeared header the platform has already paid for); 41px is only the first
+   paint's guess. */
+.tb{position:sticky;top:0}
+.pin{position:sticky;top:var(--tbh,41px);z-index:20;display:flow-root;background:var(--ground)}
 .said:empty+#body>.pin{margin-top:-20px;padding-top:20px}
-@media (max-width:760px),(max-height:600px){.pin{position:static}}
+@media (max-width:760px),(max-height:600px){.pin{position:static}.tb{position:relative}}
 /* the masthead: the week, the name, the four counts, the views */
 .mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
 .mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
@@ -974,7 +984,11 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     '<button class="go" type="submit">Search</button>' +
     '<span class="cnt" id="count">' + esc(count) + "</span></form>";
   const tools = '<div class="tools' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div>" + (all.length ? find : "") + "</div>";
-  const counted = all.length ? '<div class="counted">' + esc(count) + "</div>" : "";
+  /* NO COUNT LINE UNDER THE ADD LINE (§566). Islam: *"remove the small 14
+     action line under the add action as it's already existing in the navy
+     large panel"*. It went with its search figure too, said and agreed. The
+     search form's own #count stays, hidden as it always was. */
+  const counted = all.length && brk() === "count-line" ? '<div class="counted">' + esc(count) + "</div>" : "";
   const none = !all.length
     ? '<div class="none"><b>Nothing on the list for ' + esc(p.tenantName) + ' yet.</b>The first line lands under you, due this week; pick another week on the line before Enter, or on the row after.</div>'
     : !shown.length

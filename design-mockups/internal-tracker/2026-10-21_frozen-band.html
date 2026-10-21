@@ -30,11 +30,28 @@ svg{display:block}
 .stage{height:560px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--ground)}
 .pg{padding:0 20px 48px}
 
-/* ── NEW: the band that stays put. The week, the counts, the views, the add
-   line, the search and the count line ride together. It paints the page's
-   own ground behind itself, so the rows slide UNDER it and never show
-   through its rounded corners or the gap above the add line. ── */
-.pin{position:sticky;top:0;z-index:20;background:var(--ground);padding-top:20px}
+/* ── NEW (round 2): the platform's white top bar pins too, so what stays put
+   runs from the top bar down to the add line. Its tokens are lib/topbar.ts's. ── */
+:root{--tb-surface:#FFFFFF;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA}
+.tb{position:sticky;top:0;z-index:30;background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink)}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbff{color:var(--tb-ink-2);font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;font-weight:600}
+.tbstep.cl{color:var(--tb-ink-2)}
+.tbstep svg{width:10px;height:10px;color:var(--tb-ink-3)}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;border-radius:50%;border:1px solid var(--tb-line)}
+.tbout{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px}
+
+/* ── the band that stays put, now pinned UNDER the top bar: the week, the
+   counts, the views, the add line and the search. It paints the page's own
+   ground behind itself, so the rows slide UNDER it and never show through
+   its rounded corners or the gap above the add line. ── */
+.pin{position:sticky;top:41px;z-index:20;background:var(--ground);padding-top:20px}
 
 /* the page's own furniture, as built */
 .mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
@@ -83,16 +100,23 @@ svg{display:block}
   .strip{gap:14px}.tile span{white-space:normal}
   /* NEW: on a phone the band scrolls away as it does today — pinned, it
      would take most of the screen. */
-  .pin{position:static}
+  .pin,.tb{position:static}
+  .tbff,.tbff+.tbsep{display:none}.tbin{padding:0 12px}
 }
 </style>
 
 <div class="doc">
 <h1>Internal Tracker: the band stays put</h1>
-<p class="lede">Scroll inside the frame below. <b>The navy band, the add line, the search and the count stay at the top</b>; the actions slide under them. Nothing in the band changes look.</p>
+<p class="lede">Scroll inside the frame below. <b>Everything from the white top bar down to the add line stays at the top</b>; the actions slide under it. The <b>&ldquo;14 actions on this week&rdquo; line is gone</b>, since the navy panel already gives the counts.</p>
 
 <p class="cap">The page, scrolled <span>(scroll inside the frame)</span></p>
 <div class="stage" tabindex="0" aria-label="The tracker page, scrollable">
+<header class="tb"><div class="tbin">
+  <nav class="tbtrail" aria-label="Where you are"><span class="tbff">Platform</span><span class="tbsep">&rsaquo;</span>
+    <span class="tbstep cl">Raya Trade<svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="tbsep">&rsaquo;</span>
+    <span class="tbstep">Internal Tracker<svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></nav>
+  <div class="tbacts"><span class="tbtheme"></span><span class="tbout">Sign out</span></div>
+</div></header>
 <div class="pg">
   <div class="pin">
     <header class="mast">
@@ -106,7 +130,6 @@ svg{display:block}
       <div class="write"><svg viewBox="0 0 16 16"><path d="M10.5 2.5l3 3L5 14H2v-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Write the next action and press Enter</div>
       <div class="find"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="s">Search</span><span class="go">Search</span></div>
     </div>
-    <div class="counted">14 actions on this week</div>
   </div>
 
   <div class="sh"><span class="ix">01</span><h3>Islam Saadany</h3><span class="meta">1 open</span></div>
@@ -125,5 +148,5 @@ svg{display:block}
 </div>
 </div>
 
-<div class="note"><b>Weekly check</b> pins the same way: the band and its topic count stay up, the topics scroll. <b>On a phone</b> the band scrolls away as it does today, because pinned it would cover most of the screen.</div>
+<div class="note"><b>The tabs</b> (This week, All, Mine, Undated, Weekly check) switch the list in place: the tab lights up the moment you press it and the list changes under the band, with no new page loading. <b>Weekly check</b> pins the same way and keeps its own line about the topics. <b>On a phone</b> nothing is pinned, as today, because it would cover most of the screen.</div>
 </div>

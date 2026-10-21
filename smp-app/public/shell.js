@@ -9649,6 +9649,19 @@ function topOwnName(){
   var org = String((GROUP && GROUP.org) || "").trim();
   return (org && !buExists()) ? org : "";
 }
+/* ── BUT ITS BUTTON IS CALLED STRATEGY, AND THE TAB UNDER IT PLAN (§569) ──
+   Islam, of El Abd's row: the company's name on the first button is
+   confusing, because every function beside it is the company too — and so
+   are "Company" and "Overall", which he turned down for the same reason.
+   What sets that button apart is that it holds the strategy the functions
+   deliver. Its own first tab was also called Strategy, so that one becomes
+   Plan: *Strategy › Plan › Directions*. With business units the button is
+   the client's top word and the tab keeps Strategy, exactly as before.
+   §556.13's name stays everywhere else the company is named as a PLACE —
+   placeLabel() (the rails, the board, Home's links) and the switch's
+   catch-all segment, which lists functions. */
+function topNavWord(){ return buExists() ? labelWord("topword", "group") : "Strategy"; }
+function topStrategyWord(){ return buExists() ? "Strategy" : "Plan"; }
 function placeLabel(at){
   /* A company with no business units by its own name (§556.13); otherwise
      the client's own word for the top level (§558). */
@@ -33301,7 +33314,7 @@ function reportBar(target){
       (e.rail ? ' data-rrail="' + esc(e.rail) + '" data-rcode="' +
                 esc(String(e.code == null ? "" : e.code)) + '"' : '') +
       ' title="' + esc(blockWords(e)) +
-      (e.plan ? ' — press to open Strategy' : ' — press to go') + '">' +
+      (e.plan ? ' — press to open ' + (t === "group" ? topStrategyWord() : "Strategy") : ' — press to go') + '">' +
       esc(e.label) + ' <b>' + e.count + '</b></button>';
   }).join("");
   /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure
@@ -46332,7 +46345,8 @@ function renderCaps(){
       (capsAreP
         ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
             L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
+            topStrategyWord() + ' \u203a ' + L("capability","bu") +
             ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
             ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
             capsAsPillars().map(function(r){
@@ -70737,7 +70751,7 @@ var SYNC = (function () {
   function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
-      get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
+      get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
       when: function(){ return topExtrasOn() === lead; },
       sections: function(){
           return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
@@ -72054,7 +72068,7 @@ var SYNC = (function () {
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topOwnName() || labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topNavWord() });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer — §569: with no business units the button is Strategy and the tab under it Plan */
     /* §448: planned on the company, a division is read under Strategy ›
        Performance rather than visited, so it leaves the navigation — unless
        the group is out of reach, when the divisions are all there is. */

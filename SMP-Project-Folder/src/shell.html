@@ -377,7 +377,7 @@
   function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
-      get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
+      get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
       when: function(){ return topExtrasOn() === lead; },
       sections: function(){
           return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
@@ -1694,7 +1694,7 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topOwnName() || labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topNavWord() });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer — §569: with no business units the button is Strategy and the tab under it Plan */
     /* §448: planned on the company, a division is read under Strategy ›
        Performance rather than visited, so it leaves the navigation — unless
        the group is out of reach, when the divisions are all there is. */

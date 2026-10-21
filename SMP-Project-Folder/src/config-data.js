@@ -1940,6 +1940,19 @@ function topOwnName(){
   var org = String((GROUP && GROUP.org) || "").trim();
   return (org && !buExists()) ? org : "";
 }
+/* ── BUT ITS BUTTON IS CALLED STRATEGY, AND THE TAB UNDER IT PLAN (§569) ──
+   Islam, of El Abd's row: the company's name on the first button is
+   confusing, because every function beside it is the company too — and so
+   are "Company" and "Overall", which he turned down for the same reason.
+   What sets that button apart is that it holds the strategy the functions
+   deliver. Its own first tab was also called Strategy, so that one becomes
+   Plan: *Strategy › Plan › Directions*. With business units the button is
+   the client's top word and the tab keeps Strategy, exactly as before.
+   §556.13's name stays everywhere else the company is named as a PLACE —
+   placeLabel() (the rails, the board, Home's links) and the switch's
+   catch-all segment, which lists functions. */
+function topNavWord(){ return buExists() ? labelWord("topword", "group") : "Strategy"; }
+function topStrategyWord(){ return buExists() ? "Strategy" : "Plan"; }
 function placeLabel(at){
   /* A company with no business units by its own name (§556.13); otherwise
      the client's own word for the top level (§558). */

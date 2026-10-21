@@ -8664,7 +8664,8 @@ function renderCaps(){
       (capsAreP
         ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
             L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
+            topStrategyWord() + ' \u203a ' + L("capability","bu") +
             ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
             ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
             capsAsPillars().map(function(r){

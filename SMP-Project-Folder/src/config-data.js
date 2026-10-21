@@ -7971,7 +7971,18 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    the tactic's own quarters, all of them behind the review month. A tactic
    halfway through its window and behind its benchmark is In progress; the
    score beside it already says it is behind, and a second word for that
-   would be a second, looser judgement of the same number. */
+   would be a second, looser judgement of the same number.
+
+   §571: AND A TACTIC THAT HAS NOT STARTED WHEN IT SHOULD HAVE IS DELAYED TOO.
+   Islam, of *Core & New Category Bundling* — Q3 and Q4, reported at the end
+   of Q3 as Not started, reading **Not started** and 0%: *"should show
+   delayed right?"*; and of the rule put to him, *"yes build it"*. Not started
+   is a tactic still inside its FIRST quarter with nothing done; once that
+   whole quarter is behind the review month and its own report is still at
+   nought, it is Delayed. ONLY ON A REPORT: a row nobody has reported yet
+   keeps the word it had, because the reporter has not said it has not
+   started — the "Not reported" beside it is what the page knows. In progress
+   is untouched by this: the paragraph above still holds for a row under way. */
 var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
                      notdue: "Not due", todo: "Not started" };
 function tacticComplete(t){
@@ -8000,12 +8011,26 @@ function outcomeAtNought(o, t){
   }
   return !(t.actual > 0);
 }
+/* §571: IS THE FIRST QUARTER THIS TACTIC RUNS IN WHOLLY BEHIND THE REVIEW
+   MONTH. The same month arithmetic `tacticShare` counts with (a quarter's
+   last month is its third), and the same quarter fallback where the cycle's
+   year cannot be read, so the two can never disagree about where we are. */
+function tacticFirstQuarterOver(t){
+  var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
+  for (var i = 0; i < 4; i++) {
+    if (!q[i]) continue;
+    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    return y * 12 + i * 3 + 2 <= a;
+  }
+  return false;
+}
 function tacticStatusKey(t){
   if (!t) return "todo";
   if (tacticComplete(t)) return "done";
   if (!tacticDue(t)) return "notdue";
   if (tacticShare(t) === 1) return "late";
-  return tacticAtNought(t) ? "todo" : "wip";
+  if (!tacticAtNought(t)) return "wip";
+  return tacticAnswered(t) && tacticFirstQuarterOver(t) ? "late" : "todo";
 }
 function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
 

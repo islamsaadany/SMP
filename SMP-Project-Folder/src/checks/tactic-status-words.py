@@ -13,6 +13,10 @@ What this asserts, both ends every time (§94.2):
   · Delayed needs the WHOLE window gone: a tactic halfway through and behind
     reads In progress, or Delayed would be a second, looser reading of the
     score beside it;
+  · §571: OR a report still at nought once the tactic's FIRST quarter is wholly
+    behind the review month (Islam: a Q3–Q4 tactic reported Not started at the
+    end of Q3 "should show delayed right?", then "yes build it"). Inside its
+    first quarter it is Not started; a row nobody has reported keeps its word;
   · what is STORED is untouched -- `t.status` still holds the old spelling
     after the page is drawn (§96.2), because a workbook and a closed cycle
     read it.
@@ -67,16 +71,52 @@ with sync_playwright() as pw:
         lateNone: at([1,1,0,0], null, 'Not started'),
         wip:     at([0,1,1,0], 20, 'WIP'),
         behind:  at([1,1,1,1], 5, 'WIP'),
-        todo:    at([0,1,1,0], 0, 'Not started'),
         todoNone: at([0,1,1,0], null, 'Not started'),
         stored:  t.status
       };
+    }""")
+    # §571 · THE START THAT DID NOT HAPPEN. Each case MADE at the review month it
+    # is about, and the month put back after, or every check after this one
+    # measures a cycle this one moved (§94.2).
+    s571 = ev(pg, """() => {
+      const t = JSON.parse(JSON.stringify(UNITS['mobile'].items[0].tactics[0]));
+      delete t.outcome; delete t.outTarget; delete t.outActual;
+      const was = REVIEW.to, y = String(cycleYear());
+      const at = (to, q, actual) => { REVIEW.to = to + ' ' + y;
+        t.q1 = q[0]; t.q2 = q[1]; t.q3 = q[2]; t.q4 = q[3]; t.actual = actual; t.status = 'Not started';
+        return tacticStatusWord(t); };
+      const out = {
+        /* Islam's own row: Q3 and Q4, reported at the end of Q3 at nought. */
+        islam:     at('Sep', [0,0,1,1], 0),
+        islamNone: at('Sep', [0,0,1,1], null),
+        islamWip:  at('Sep', [0,0,1,1], 20),
+        /* still inside the first quarter: not late yet */
+        inFirst:   at('Aug', [0,0,1,1], 0),
+        /* the same row as a yes/no outcome answered Not started, as his screen had it */
+        yn: (() => { REVIEW.to = 'Sep ' + y; const u = Object.assign({}, t,
+               { q1:0, q2:0, q3:1, q4:1, actual:null, outcome:'Varies products mix',
+                 outTarget:'Y/N', outActual:'Not started' });
+               return tacticStatusWord(u); })()
+      };
+      REVIEW.to = was;
+      out.back = REVIEW.to === was;
+      return out;
     }""")
     ck("Completed when it is done, whenever that is", r.get("done") == "Completed" and r.get("doneEarly") == "Completed", r)
     ck("Not due when its window has not begun", r.get("notdue") == "Not due", r)
     ck("Delayed when the whole window has passed unfinished", r.get("late") == "Delayed" and r.get("lateNone") == "Delayed", r)
     ck("In progress while the window is still running, behind or not", r.get("wip") == "In progress" and r.get("behind") == "In progress", r)
-    ck("Not started at 0%, reported or not", r.get("todo") == "Not started" and r.get("todoNone") == "Not started", r)
+    # §571 REWROTE THIS ONE: it read "Not started at 0%, reported or not" and
+    # held `at([0,1,1,0], 0)` at June as Not started — that row's first quarter,
+    # Q2, is over at June, so it is Delayed now (asserted in the §571 cases).
+    ck("Not started while nobody has reported, whatever the month", r.get("todoNone") == "Not started", r)
+    ck("§571 · Q3–Q4 reported at nought at the end of Q3 is Delayed",
+       s571.get("islam") == "Delayed" and s571.get("yn") == "Delayed", s571)
+    ck("...not before its first quarter is over (August reads Not started)",
+       s571.get("inFirst") == "Not started", s571)
+    ck("...not on a row nobody has reported, and not on one under way",
+       s571.get("islamNone") == "Not started" and s571.get("islamWip") == "In progress", s571)
+    ck("...and the review month is put back", s571.get("back") is True, s571)
 
     print("── 2 · the page says what the rule says, on every row")
     pg.click('#units [data-u="mobile"]')

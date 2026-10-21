@@ -199,6 +199,7 @@ with sync_playwright() as pw:
                  late: !!mark, markInk: mark ? getComputedStyle(mark).color : null,
                  pillInk: pill ? getComputedStyle(pill).color : null,
                  dot: dot ? dot.backgroundColor : null,
+                 markW: mark ? getComputedStyle(mark).fontWeight : null,
                  ytd: fig && fig.querySelector('.pair') ? fig.querySelector('.pair').textContent.trim()
                       : (fig ? fig.textContent.trim() : null),
                  due: fig && fig.querySelector('.pdue') ? fig.querySelector('.pdue').textContent.trim() : '',
@@ -220,6 +221,8 @@ with sync_playwright() as pw:
        all("bad" not in g["cls"] for g in lates), lates)
     # §572 (Option B on Performance): a red DOT before DELAYED, the outcome in
     # regular weight, and the Progress a size up from the figure beside it.
+    ck("§572.1: DELAYED is regular weight, never bold (Islam: \"not bold\")",
+       lates and all(g["markW"] in ("400", "normal") for g in lates), [g["markW"] for g in lates])
     ck("...with a red dot before it",
        lates and all(g["dot"] and g["dot"] not in ("rgba(0, 0, 0, 0)", "transparent") for g in lates), lates)
     ck("the outcome is regular weight under the bold tactic",

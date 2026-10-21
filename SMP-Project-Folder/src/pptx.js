@@ -184,7 +184,7 @@ function pptxTable(id, box, widths, head, rows, o){
        "…Scale RAYA Smart CareDirection · · Mahmoud" was (§311). */
     /* §571: a second line may carry its own ink — a tactic's Delayed is red. */
     if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200),
-      color:o2.subColor || C.quiet, b:!!o2.subColor }), pPr);
+      color:o2.subColor || C.quiet }), pPr);   /* §572.1: never bold */
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' + body +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +

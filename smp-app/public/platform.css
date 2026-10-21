@@ -693,7 +693,7 @@
   .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
   /* §571: a tactic that is late says so under its status, in words. */
   .latemark { display:flex; align-items:center; justify-content:center; gap:5px; margin-top:6px;
-              font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
+              font:400 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
   /* §572: a red dot before it, as the slide draws it. */
   .latemark::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--bad); flex:none; }
   /* §572: what is due, under the figure and named; the Progress a size up;
@@ -8745,8 +8745,10 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide td.dstat.good .dpill { background:var(--good-bg); color:var(--good-tx); }
   .dslide td.dstat.none .dpill { border:1.5px dashed var(--none); color:var(--ink-2); font-weight:500; }
   .dslide td.dstat.kind .dpill { background:var(--surface-2); color:var(--ink-2); font-weight:500; }
+  /* §572.1: regular weight, so the pill leads and the dot carries it
+     (Islam: "not bold"). */
   .dslide td.dstat .dlate { display:flex; align-items:center; gap:6px; margin-top:8px; color:var(--bad);
-                            font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:13px; }
+                            font-weight:400; letter-spacing:.1em; text-transform:uppercase; font-size:13px; }
   .dslide td.dstat .dlate::before { content:""; width:9px; height:9px; border-radius:50%;
                                     background:var(--bad); flex:none; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs

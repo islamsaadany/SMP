@@ -690,7 +690,7 @@
   .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
   /* §571: a tactic that is late says so under its status, in words. */
   .latemark { display:flex; align-items:center; justify-content:center; gap:5px; margin-top:6px;
-              font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
+              font:400 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
   /* §572: a red dot before it, as the slide draws it. */
   .latemark::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--bad); flex:none; }
   /* §572: what is due, under the figure and named; the Progress a size up;

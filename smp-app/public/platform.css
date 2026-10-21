@@ -9499,8 +9499,16 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 
 /* The quiet half of a figure cell — what it is measured against so far
    (§254). The same weight the tactics table has used since §252, so one
-   number does not read louder on one table than on another. */
-  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }
+   number does not read louder on one table than on another.
+   §568: AND SMALLER. Islam, of D001's slides: *"the prorated target should be
+   smaller not to take over the actual measure view in the measures or the
+   tactics"*. Three quarters of its figure, which at the deck's own 23px is
+   `.dsub`'s 17px — the size the mockup was signed off at. RELATIVE, NOT 17px:
+   the fit pass sets a dense table smaller (Mobile's tactics measured 19px),
+   and a fixed 17px there sat 2px under the figure, which is not smaller to
+   anybody in the room. The tactics table wears the class now too, where its
+   `<i>` was bare. */
+  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; font-size:.74em; }
 
   /* ══ THE MASTER PRESENTATION'S PICKER (§266) ═══════════════════════
      The dialog the office makes a running order in. It lives in the deck's

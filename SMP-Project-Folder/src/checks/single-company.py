@@ -65,14 +65,14 @@ with sync_playwright() as p:
     secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
-    # §569, the end that must NOT move: with units the top button is the
+    # §570, the end that must NOT move: with units the top button is the
     # client's top word and its own first tab keeps Strategy. Read as drawn,
     # first text node only, so the Reporting tab's dot is not its name.
     tabsNow = lambda: safe(pg, """()=>({top:[...document.querySelectorAll('#units [data-u="group"]')].map(b=>b.textContent.trim()),
       sub:[...document.querySelectorAll('#subtabs > button[role=tab]')].map(b=>{var f=b.firstChild; return String(f&&f.nodeType===3?f.textContent:b.textContent).trim()})})""", {}) or {}
     safe(pg, "()=>{current='group'; currentSub='strategy'; paint()}"); pg.wait_for_timeout(250)
     t0 = tabsNow()
-    ck("§569 with units: the top button is the client's top word", t0.get("top") == [safe(pg, "()=>labelWord('topword','group')")], t0)
+    ck("§570 with units: the top button is the client's top word", t0.get("top") == [safe(pg, "()=>labelWord('topword','group')")], t0)
     ck("…and its own first tab is still Strategy", (t0.get("sub") or [None])[0] == "Strategy", t0)
 
     # ── 1. The switch, on the units' own card (§544.4) ─────────────
@@ -155,11 +155,11 @@ with sync_playwright() as p:
     ck("the company Strategy tab holds the directions", "plan" in secs and "swot" in secs, secs)
     ck("…under the client's own word for them",
        safe(pg, "()=>SUBS.group.filter(d=>d.k==='strategy')[0].sections().filter(d=>d.k==='plan')[0].label===L('pillar','bu')") is True)
-    # §569: El Abd's row. The company's name on the first button read as one
+    # §570: El Abd's row. The company's name on the first button read as one
     # more place beside its own functions, so with no units it is called
     # Strategy, and the tab under it Plan so the two words do not repeat.
     t1 = tabsNow()
-    ck("§569 with no units the top button is called Strategy, not the company's name",
+    ck("§570 with no units the top button is called Strategy, not the company's name",
        t1.get("top") == ["Strategy"] and safe(pg, "()=>String(GROUP.org||'').trim()") not in ("", "Strategy"), [t1, safe(pg, "()=>GROUP.org")])
     ck("…and its own first tab is called Plan", (t1.get("sub") or [None])[0] == "Plan", t1)
     ck("…which is still the tab the page draws open", safe(pg, "()=>document.querySelector('#subtabs > button[aria-selected=true]').dataset.s") == "strategy")
@@ -326,13 +326,13 @@ with sync_playwright() as p:
         # a real group keeps the word. Worked out here from the two facts,
         # not by asking topOwnName(), the thing under test (§94.8).
         TW = safe(pg, "()=>{var o=String(GROUP.org||'').trim(); return (o && !SMPRules.buExists(GROUP)) ? o : labelWord('topword','group')}")
-        # §569: the BUTTON leaves that rule — Strategy with no units — and
+        # §570: the BUTTON leaves that rule — Strategy with no units — and
         # the catch-all segment below keeps it. Worked out from buExists, not
         # by asking topNavWord(), for §94.8's reason above.
         TB = safe(pg, "()=>SMPRules.buExists(GROUP) ? labelWord('topword','group') : 'Strategy'")
         n1 = navNow()
         ck("the navigation has no division dropdown", n1.get("dd") is False, n1)
-        ck("…its top button names the layer (§448.1, §569)", TB and TB in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TB)
+        ck("…its top button names the layer (§448.1, §570)", TB and TB in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TB)
         segs = [x["t"] for x in n1.get("segs") or []]
         ck("§464 the divisions are the switch, bare names, the top word last", segs == [dname, TW], segs)
         ck("…only divisions that hold a function", len(n1.get("segs") or []) > 1 and all(x["co"] for x in n1["segs"][:-1]) and n1["segs"][-1]["co"] is None, n1.get("segs"))

@@ -285,6 +285,39 @@ with sync_playwright() as pw:
     ok("the card counts the scored columns among its measures (§264)",
        nums and nums["measures"] == str(sc["rows"] + 2), {"card": nums, "sc": sc})
 
+    # §568: PERFORMANCE READS TARGET, THEN ACTUAL — two columns per column, as
+    # §557 laid Reporting out. Islam: *"color code the actual as you did
+    # earlier but after splitting to 2 columns in both the performance and the
+    # slides"*. The head is read as textContent: the page uppercases it in CSS
+    # and innerText would hand back the paint rather than the words.
+    perf = pg.evaluate("""()=>{
+      const hs = [...document.querySelectorAll('#panel h5.mini')]
+        .filter(h => h.textContent.trim() === 'Categories');
+      const h = hs[hs.length - 1]; if (!h) return { none: true };
+      const w = h.nextElementSibling, t = w && (w.matches('table') ? w : w.querySelector('table'));
+      if (!t) return { none: true };
+      const rows = [...t.querySelectorAll('tbody tr')].map(tr =>
+        [...tr.querySelectorAll('td')].map(td => {
+          const b = td.querySelector('b');
+          return { t: td.textContent.trim(), ink: b ? b.style.color : '' }; }));
+      const p = UNITS['mobile'].items[1], c0 = SMPRules.bdCols(p)[0];
+      const probe = document.createElement('b'); probe.style.color = bandInk(57);
+      return { head: [...t.querySelectorAll('thead th')].map(x => x.textContent.trim()),
+               rows, bad: probe.style.color,
+               t0: SMPRules.bdTarget(SMPRules.bdRows(p)[0], c0),
+               a0: SMPRules.bdActual(SMPRules.bdRows(p)[0], c0) }; }""")
+    ok("Performance heads each column with its target, then Actual (§568)",
+       perf.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
+                            "Mix", "Actual"], perf.get("head"))
+    r0 = (perf.get("rows") or [[]])[0]
+    ok("...the target and the figure sit in two cells, with no slash between them",
+       len(r0) == 8 and r0[2]["t"] == perf.get("t0") and r0[3]["t"] == perf.get("a0") and
+       not any("/" in c["t"] for row in perf.get("rows", []) for c in row), perf)
+    ok("...the actual still wears its band — Bakery's growth, 4 of 7, in the alarm ink",
+       len(r0) == 8 and r0[3]["ink"] and r0[3]["ink"] == perf.get("bad"), r0)
+    ok("...and the indicator's actual stays plain",
+       len(r0) == 8 and r0[7]["ink"] == "" and r0[7]["t"], r0)
+
     print("\n4 · the indicator scores nothing and never asks for a note")
     # THE COLUMN HAS TO BE FOUND FIRST (§113.8, §94.5). Without this, a build
     # that scores EVERY column leaves `c` undefined, `bdCellScore(r, undefined)`
@@ -394,14 +427,25 @@ with sync_playwright() as pw:
       return { slides: sl.length,
                head: [...sl[0].querySelectorAll('th')].map(t=>t.innerText.trim()),
                banded: sl[0].querySelectorAll('td.final').length,
+               bandedAreActuals: [...sl[0].querySelectorAll('tbody tr')].every(tr => {
+                 const td = [...tr.querySelectorAll('td')];
+                 return [3, 5].every(i => td[i] && td[i].classList.contains('final')) &&
+                        [2, 4, 6, 7].every(i => td[i] && !td[i].classList.contains('final')); }),
+               slash: [...sl[0].querySelectorAll('td.num')].some(td => td.textContent.indexOf('/') > -1),
                anchor: sl[0].getAttribute('data-anchor'),
                note: sl[0].innerText.indexOf('Ramadan') > -1 }; }""")
     ok("the breakdown has one slide of its own", deck.get("slides") == 1, deck)
-    ok("...its head carries the direction on the scored columns only",
-       deck.get("head") and deck["head"][2].endswith("≥") and
-       not deck["head"][4].endswith("≥"), deck.get("head"))
+    # §568 REWROTE THIS ONE: it read the head as one column per column
+    # (`head[2]` scored, `head[4]` the indicator). Each is two now.
+    ok("...its head is each column's target, then Actual, the direction on the scored only",
+       deck.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
+                            "Mix", "Actual", "Note"], deck.get("head"))
     ok("...only the scored cells are banded (one per row)",
        deck.get("banded") == 4, deck)
+    ok("...and the band is on the ACTUAL, never on its target or the indicator (§568)",
+       deck.get("bandedAreActuals") is True, deck)
+    ok("...with no target stacked under a figure any more",
+       deck.get("slash") is False, deck)
     ok("...and it carries its own anchor, clear of the measures slide's",
        deck.get("anchor", "").endswith("b"), deck.get("anchor"))
 

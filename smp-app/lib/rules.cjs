@@ -2038,7 +2038,20 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing checks that the two agree. The target is derived from the first
      month now (`monthlySoFar`). The PRORATION half is untouched and is the
      part this paragraph was really about: a missing month is UNKNOWN, never
-     nought, so the year stays flat until all twelve are in. */
+     nought, so the year stays flat until all twelve are in.
+
+     §569 REVERSED THE OTHER HALF. Islam, of a row planned January to June
+     (2+2+2+2+2+3, so a target of 13 shops) reading 14 against 9 at 150% in
+     September: *"in a target that is already set on monthly level it's still
+     prorated arithmatic"*, and then *"the monthly plan overrides the
+     proration"*. Once §555 made the target WHAT THE MONTHS COME TO, an empty
+     month could no longer be unknown: the target already counts it as
+     nothing, so prorating that same target flat measured the row against a
+     year its own plan does not describe. A half-filled plan is in force now,
+     read exactly as the target is read — the row's compile rule over the
+     months that are set, blanks passed over, up to the review month
+     (`monthsCompiled`). What still keeps a plan out of force: no compile
+     rule, and a month holding something that is not a number. */
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   /* IS THIS MONTH SET. Blank first, THEN the number — see above. A value
@@ -2083,30 +2096,29 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       if (compileKey(COMPILES[i]) === c) return c;
     return "";
   }
+  /* §569: IN FORCE FROM THE FIRST MONTH, exactly when the target is derived
+     from the months (`monthlySoFar`), so the row's target and what is due on
+     it can never be read off two different plans. */
   function monthlyInForce(row) {
-    return !!(monthlyPlan(row) && monthlyCompile(row));
+    return monthlySoFar(row) != null;
   }
   /* WHAT THE ROW IS MEASURED AGAINST AFTER `months` OF THE YEAR. The one
      arithmetic every surface asks; `months` is 1..12 and comes from the
      review point, never from a tactic's own window — a monthly plan already
      states what each month is expected to carry, including the noughts for
      months a thing does not run in, so it is the more specific answer and
-     supersedes §250's share. */
+     supersedes §250's share.
+
+     §569: AND A HALF-FILLED PLAN ANSWERS TOO, blanks passed over. Months
+     planned only after the review point owe nothing yet (nought, which
+     `measureScore` already reads as "not due yet", §278). On a complete plan
+     this is byte-for-byte the arithmetic it was: Sum and Count add the months
+     passed, Average takes their mean, Latest the month being stood in. */
   function monthlyDue(row, months) {
-    var p = monthlyPlan(row), c = monthlyCompile(row);
-    if (!p || !c) return null;
     var n = Math.floor(Number(months));
     if (!(n >= 1)) return null;
     if (n > 12) n = 12;
-    if (c === "latest") return p[n - 1];
-    var t = 0;
-    for (var i = 0; i < n; i++) t += p[i];
-    if (c === "average") return t / n;
-    /* §276's own rounding, on the months rather than on the share: a count is
-       owed in whole ones, and the epsilon is not decoration — twelve typed
-       decimals can sum to 1.9999999999999998, and a floor taken on that owes
-       one fewer than the arithmetic means. */
-    return c === "count" ? Math.floor(t + 1e-9) : t;
+    return monthsCompiled(row, n);
   }
   /* THE YEAR'S TARGET, DERIVED. It is the same question asked of all twelve
      months, which is what makes the annual figure and the year-to-date one
@@ -2128,32 +2140,41 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      which is asserted rather than claimed, because the day the two disagree
      the target on the row stops agreeing with the months under it.
 
-     WHAT IT DOES NOT TOUCH IS PRORATION. `monthlyPlan` still refuses a
-     half-filled plan and `monthlyDue` still returns null for it, so a row is
-     measured flat across the year until all twelve are in exactly as §278
-     decided — the months that are missing are UNKNOWN, not nought, and
-     reading them as nought is the fault §278 was written around. What changes
-     is only which figure the target box holds while the plan is being made.
+     WHAT IT DID NOT TOUCH WAS PRORATION — §569 has since made a half-filled
+     plan the row's proration too, through the same walk below, so the target
+     and what is due on it are one reading of one plan.
 
      NULL WHERE THERE IS NOTHING TO SAY: no month set, no compile rule, or a
      month holding something that is not a number. The last of those is §278's
      own safe direction — a plan the platform cannot read leaves the target
      alone rather than deriving a figure from half of it. */
-  function monthlySoFar(row) {
+  function monthlySoFar(row) { return monthsCompiled(row, 12); }
+  /* THE ONE WALK (§569): the row's compile rule over months 1..`upto`, blanks
+     passed over. Null when the plan says nothing (no compile rule, no month
+     set ANYWHERE in the twelve, or a month present and unreadable — the last
+     checked across the whole year, so a bad December keeps March out of force
+     as well, which is §278's safe direction). Nought when months are set but
+     none falls in 1..`upto`: nothing is owed yet. */
+  function monthsCompiled(row, upto) {
     var a = row && row.monthly, c = monthlyCompile(row);
     if (!Array.isArray(a) || !c) return null;
-    var t = 0, n = 0, last = null, i, v;
+    var t = 0, n = 0, any = false, last = null, i, v;
     for (i = 0; i < 12 && i < a.length; i++) {
       if (a[i] == null || String(a[i]).trim() === "") continue;
       if (!monthSet(a[i])) return null;          /* present and unreadable */
+      any = true;
+      if (i >= upto) continue;
       v = Number(String(a[i]).replace(/,/g, ""));
       t += v; n++; last = v;
     }
-    if (!n) return null;
+    if (!any) return null;
+    if (!n) return 0;
     if (c === "latest") return last;
     if (c === "average") return t / n;
-    /* §276's rounding, on the months rather than on the share — and the same
-       epsilon, for the same reason `monthlyDue` carries it. */
+    /* §276's own rounding, on the months rather than on the share: a count is
+       owed in whole ones, and the epsilon is not decoration — twelve typed
+       decimals can sum to 1.9999999999999998, and a floor taken on that owes
+       one fewer than the arithmetic means. */
     return c === "count" ? Math.floor(t + 1e-9) : t;
   }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and

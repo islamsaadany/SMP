@@ -172,7 +172,10 @@ function pptxTable(id, box, widths, head, rows, o){
     var pPr = o2.align ? { align: o2.align } : undefined;
     var body = o2.runs
       ? pptxPara(o2.runs.map(function(r){
-          return pptxRun(r.t, { sz:r.sz || SZ, b:!!r.b, i:!!r.i, color:r.color || C.ink });
+          /* §568: a `small` run takes the second line's size, as `.duehalf`
+             takes `.dsub`'s on the slide. */
+          return pptxRun(r.t, { sz: r.small ? Math.max(900, SZ - 200) : (r.sz || SZ),
+                                b:!!r.b, i:!!r.i, color:r.color || C.ink });
         }), pPr)
       : pptxPara(pptxRun(o2.miss ? "Missing" : (o2.t == null ? "" : o2.t), runOpts), pPr);
     /* A SECOND LINE IS A SECOND PARAGRAPH, never the same one. The deck's
@@ -675,7 +678,7 @@ function deckCellSpec(td){
     var c2 = td.cloneNode(true); c2.querySelector(".duehalf").remove();
     return { align:align, runs: [
       { t: deckPieces(c2) || "—", b:bold, color: color || C.ink },
-      { t: " " + deckTxt(due), i:true, color: C.quiet }
+      { t: " " + deckTxt(due), i:true, color: C.quiet, small:true }
     ] };
   }
 

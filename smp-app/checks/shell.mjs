@@ -2446,6 +2446,32 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForTimeout(500);
     const p2 = await phone();
     check(p2.onIn && /\bl\b/.test(p2.fade), "\u2026and pressing History brings it into view, faded at the other edge", JSON.stringify(p2));
+    /* \u00a7584.1 \u2014 THE NAME LINE: one line, Sign out in one piece, the role a
+       span of its own and hidden here (null, not false, on the build before:
+       it had no span, which must not read as "hidden"). Then a name made too
+       long for a 360px phone ends in "\u2026" with the whole line on a hover.
+       All four RED on the build before, measured. */
+    const nameLine = () => page.evaluate(() => {
+      const who = document.getElementById("who"), role = who.querySelector(".role");
+      return { whoH: Math.round(who.getBoundingClientRect().height), soH: Math.round(document.getElementById("signout").getBoundingClientRect().height),
+        text: who.textContent, title: who.title || "", cut: who.scrollWidth > who.clientWidth,
+        roleShown: role ? getComputedStyle(role).display !== "none" : null, pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth };
+    });
+    const n1 = await nameLine();
+    check(n1.whoH < 24 && n1.soH < 40 && n1.roleShown === false && n1.text === "Mohamed Essam \u00b7 Super user",
+      "on a phone the name line is one line, Sign out in one piece, the role left for a wider screen (\u00a7584.1)", JSON.stringify(n1));
+    const nameWas = (await owner.query("SELECT name FROM users WHERE email = 'office@forefront.example'")).rows[0].name;
+    await owner.query("UPDATE users SET name = 'Abdelrahman Mostafa El-Sayed Ibrahim' WHERE email = 'office@forefront.example'");
+    try {
+      await page.setViewportSize({ width: 360, height: 800 });
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
+      const n2 = await nameLine();
+      check(n2.cut && n2.whoH < 24 && n2.soH < 40 && n2.pageW <= n2.vw && /Abdelrahman Mostafa El-Sayed Ibrahim/.test(n2.title),
+        "\u2026and a name too long for a 360px phone ends in \u2026 on the one line, the whole of it on a hover", JSON.stringify(n2));
+    } finally {
+      await owner.query("UPDATE users SET name = $1 WHERE email = 'office@forefront.example'", [nameWas]);
+    }
   } finally {
     await page.setViewportSize({ width: 1440, height: 900 });
   }
@@ -2455,6 +2481,8 @@ await section("4 · Forefront's own pages", async () => {
   await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
   const p3 = await phone();
   check(!/\b[lr]\b/.test(p3.fade) && p3.navH < 50, "\u2026while on a computer screen every tab fits and neither fade shows", JSON.stringify(p3));
+  const roleWide = await page.evaluate(() => { const r = document.querySelector("#who .role"); return r ? getComputedStyle(r).display !== "none" : null; });
+  check(roleWide === true, "\u2026and the name line keeps the role there (\u00a7584.1)", roleWide);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

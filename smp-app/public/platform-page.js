@@ -3796,8 +3796,14 @@
     }
     /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
        after renaming the column is exactly the twins this rename avoided. */
-    document.getElementById("who").textContent =
-      ME.name + (ME.isAdmin ? " · Super user" : "");
+    /* the name, then the role as a span of its own so a phone can leave it
+       for a wider screen (§584.1); the whole line on a hover, for a name
+       that had to end in "…" */
+    var who = document.getElementById("who");
+    who.textContent = "";
+    who.appendChild(el("span", null, ME.name));
+    if (ME.isAdmin) who.appendChild(el("span", "role", " · Super user"));
+    who.title = who.textContent;
     document.body.classList.add("ready");
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a

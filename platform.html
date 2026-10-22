@@ -99,6 +99,22 @@
   .top .nm{ font-weight:600; font-size:14px }
   .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
     color:var(--ink-3); font-size:12.5px }
+  /* ── THE NAME LINE ON A PHONE (§584.1) ──────────────────────────────────
+     Islam: "fix the name line too", round 2 of design-mockups/
+     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the name and its
+     role broke onto two lines and Sign out onto two more (a 63px line). It
+     keeps one line now: Sign out never breaks, a name too long for what is
+     left ends in "…" with the whole of it on a hover, and on a phone the side
+     padding is the page's 12px and the role is left for a wider screen. The
+     words are unchanged — the role is a span of its own, hidden, so the line
+     still reads the name and the role to anybody who asks it. */
+  .top .right{ min-width:0 }
+  #who{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .top .btn{ flex:none; white-space:nowrap }
+  @media (max-width:560px){
+    .top{ padding:9px 12px }
+    #who .role{ display:none }
+  }
   .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
   .nav button{ background:transparent; border:0; color:var(--ff-quiet);
     font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
@@ -4739,8 +4755,14 @@
     }
     /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
        after renaming the column is exactly the twins this rename avoided. */
-    document.getElementById("who").textContent =
-      ME.name + (ME.isAdmin ? " · Super user" : "");
+    /* the name, then the role as a span of its own so a phone can leave it
+       for a wider screen (§584.1); the whole line on a hover, for a name
+       that had to end in "…" */
+    var who = document.getElementById("who");
+    who.textContent = "";
+    who.appendChild(el("span", null, ME.name));
+    if (ME.isAdmin) who.appendChild(el("span", "role", " · Super user"));
+    who.title = who.textContent;
     document.body.classList.add("ready");
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a

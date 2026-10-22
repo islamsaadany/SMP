@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.5).
+"""The guided tour, on a made-up direction (§574–§574.6).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -52,7 +52,7 @@ STATE = """()=>({on:!!DTOUR, i:DTOUR?DTOUR.i:-1, n:DTOUR?DTOUR.stops.length:0, s
   deck:document.getElementById('deckroot').classList.contains('on'),
   h:(document.querySelector('.dtcard h3')||{}).textContent||'',
   ring:(e=>e?+e.getAttribute('width'):0)(document.querySelector('.dtring'))})"""
-KIND = """()=>{var s=DECK.slides[DECK.i]; return s.dataset.split?s.dataset.split.slice(-1):(s.classList.contains('d-head')?'stand':(s.classList.contains('d-cover')?'cover':'?'))}"""
+KIND = """()=>{var s=DECK.slides[DECK.i]; return s.dataset.split?s.dataset.split.slice(-1):(s.classList.contains('d-head')?'stand':(s.classList.contains('d-purpose')?'purpose':(s.classList.contains('d-cover')?'cover':'?')))}"""
 DYN = """()=>{var x=exampleDirection();
   return {bands:x.p.measures.map(m=>band(measureScore(m))),
           states:x.p.tactics.map(t=>tacticStatusKey(t)+(tacticDelayed(t)?'+late':''))}}"""
@@ -79,6 +79,7 @@ with sync_playwright() as p:
        safe(pg, "()=>!document.querySelector('[data-mftour]') && !/Guided tour/.test(document.getElementById('modal-b').textContent)") is True)
     safe(pg, "()=>{closeModal(); openDeckWith('t', flowWithParts(['dir:group-P1','dir:group-P2'])); return true}"); pg.wait_for_timeout(600)
     ck("a real direction's deck has no tour button", safe(pg, "()=>!document.querySelector('#deckroot [data-dtourgo]')") is True)
+    ck("…and no purpose slide — it is the example's alone", safe(pg, "()=>!document.querySelector('#deckroot .d-purpose')") is True)
     real = safe(pg, "()=>({sw:SMPRules.slideColOn(GROUP,'owner'), th:[...document.querySelectorAll('#deckroot [data-split$=T] th')].some(t=>t.textContent.trim()==='Owner')})") or {}
     ck("a real deck still follows the office's Owner switch — the demo's rule is the demo's",
        real.get("sw") is True and real.get("th") is True, real)
@@ -102,6 +103,14 @@ with sync_playwright() as p:
     ths = safe(pg, "()=>[...document.querySelectorAll('#deckroot [data-split$=T] th')].map(t=>t.textContent.trim())") or []
     ck("its tactics slide has no Owner and no Collabs. column (Islam: hidden on the demo)",
        ths and "Owner" not in ths and "Collabs." not in ths, ths)
+    pur = safe(pg, """()=>{var s=document.querySelector('#deckroot .d-purpose'); if(!s) return null;
+      return {h2:s.querySelector('h2').textContent, items:[...s.querySelectorAll('.pitem')].map(i=>[i.querySelector('h3').textContent, i.querySelector('p').textContent.split(/\\s+/).length]),
+              size:parseFloat(getComputedStyle(s.querySelector('h3')).fontSize), last:s===DECK.slides[DECK.slides.length-1]}}""") or {}
+    ck("its last slide is What this platform is for, with the four objectives in order",
+       pur.get("h2") == "What this platform is for" and pur.get("last") is True and
+       [x[0] for x in (pur.get("items") or [])] == ["One source of truth", "Visibility", "Accountability", "History that stays"], pur)
+    ck("…the titles big (70px or more on the slide) and each line under them five words or fewer (Islam)",
+       pur.get("size", 0) >= 70 and all(x[1] <= 5 for x in (pur.get("items") or [[0, 99]])), pur)
     ck("…and it has no Thank you slide — the tour ends the deck",
        safe(pg, "()=>!document.querySelector('#deckroot .d-thanks')") is True)
 
@@ -118,15 +127,19 @@ with sync_playwright() as p:
             pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(220)
     run = lambda kd: [c for c, x in zip(clears, kinds) if x == kd]
     lit = [h for h in heads if h]
-    ck("it walks cover, key measures, tactics, then where it stands",
-       [x for i, x in enumerate(kinds) if i == 0 or kinds[i-1] != x] == ["cover", "M", "T", "stand"], kinds)
+    ck("it walks cover, key measures, tactics, where it stands, then what the platform is for",
+       [x for i, x in enumerate(kinds) if i == 0 or kinds[i-1] != x] == ["cover", "M", "T", "stand", "purpose"], kinds)
     for h in ["Annual target", "Actual", "Progress", "Note", "Quarters", "Status", "Delayed",
               "YTD actual and Progress", "Where it stands: Execution"]:
         ck("…with a stop for " + h, h in heads, heads)
     ck("the stop on the line under the two readings is gone (Islam: remove step 14)",
-       "Two different questions" not in lit and len(lit) == 15, lit)
-    ck("the last stop before the closing card is Execution",
-       len(lit) > 1 and lit[-2] == "Where it stands: Execution", lit[-3:])
+       "Two different questions" not in lit and len(lit) == 19, lit)
+    # §574.6: the example ends on what the platform is for, one objective at a time
+    four = ["One source of truth", "Visibility", "Accountability", "History that stays"]
+    ck("after Execution the tour lights the four objectives one by one, in order (Islam)",
+       "Where it stands: Execution" in lit and lit[lit.index("Where it stands: Execution") + 1:-1] == four, lit[-6:])
+    ck("…opening on the purpose slide whole and clear", run("purpose")[:1] == [True], run("purpose"))
+    ck("…and the closing card hands over to the review", lit[-1] == "Now, today's review", lit[-1:])
     # §574.2: each table opens and closes on the whole slide, clear
     for kd, word in [("M", "key measures"), ("T", "tactics")]:
         r = run(kd)
@@ -134,12 +147,12 @@ with sync_playwright() as p:
            len(r) >= 4 and r[0] is True and r[-1] is True and not any(r[1:-1]), r)
     cl = [x for x in seen if x.get("clear")]
     ck("a clear stop draws no card and no shade",
-       len(cl) == 4 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
+       len(cl) == 5 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
     ck("…and a lit stop draws both",
        all(x.get("card") and x.get("shade", 0) > 0 for x in seen if not x.get("clear")))
-    ck("the count is of the parts lit: 1 of 14 … 14 of 14",
-       [x.get("step") for x in seen if not x.get("clear")][0] == "1 of 14" and
-       "14 of 14" in [x.get("step") for x in seen], [x.get("step") for x in seen])
+    ck("the count is of the parts lit: 1 of 18 … 18 of 18",
+       [x.get("step") for x in seen if not x.get("clear")][0] == "1 of 18" and
+       "18 of 18" in [x.get("step") for x in seen], [x.get("step") for x in seen])
     # §574.3: after the Note, one key measure's whole line — the one furthest behind
     ni = lit.index("Note") if "Note" in lit else -1
     ck("after the Note, the key measures light one whole line: the off-track one (Islam)",

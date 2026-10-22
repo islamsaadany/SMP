@@ -52754,8 +52754,30 @@ function exampleDeckHtml(){
   DECK_EXAMPLE = true;
   try {
     return dirDeckOf(x.u, x.p, 0,
-      { aside:"An example to show how the slides read &middot; the figures are made up" });
+      { aside:"An example to show how the slides read &middot; the figures are made up" }) +
+      examplePurposeSlide();
   } finally { DECK_EXAMPLE = false; }
+}
+/* §574.6: AND THE EXAMPLE ENDS ON WHY. Islam: *"adding a final slide in the
+   demo, reminding the audience of the purpose … single source of truth
+   maintaining the history … the visibility"*; the fourth, accountability,
+   and the order and title were put to him and agreed, with *"make the titles
+   of the objectives big and reduce the paragraphs to be very very minimal"*.
+   The example's own slide, never a real deck's: it is about the platform,
+   not about a direction. The four in the order they tell one story — one
+   truth, everyone sees it, someone owns it, it is kept. */
+var EXAMPLE_PURPOSE = [
+  ["One source of truth", "Entered once, used everywhere"],
+  ["Visibility", "Every direction, one view"],
+  ["Accountability", "Every line owned and explained"],
+  ["History that stays", "Every cycle kept as reported"]
+];
+function examplePurposeSlide(){
+  return '<section class="dslide d-purpose"><h2>What this platform is for</h2><div class="pgrid">' +
+    EXAMPLE_PURPOSE.map(function(x, i){
+      return '<div class="pitem"><span class="pnum">' + (i + 1) + '</span>' +
+        '<h3>' + esc(x[0]) + '</h3><p>' + esc(x[1]) + '</p></div>';
+    }).join("") + '</div></section>';
 }
 /* The Presentation menu's Guided tour: the example, full screen, the tour
    already on its first stop — one press from the menu to the room. Asked
@@ -52833,6 +52855,7 @@ function deckTourStops(){
   var noun = deckTourNoun();
   var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
   var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isP = function(s){ return s.classList.contains("d-purpose"); };
   var eq = function(w){ return function(x){ return x === w; }; };
   /* §574.2: EACH TABLE OPENS AND CLOSES ON THE WHOLE SLIDE, CLEAR. Islam:
      *"start the key measure tour with the full view all clear first and then
@@ -52928,7 +52951,23 @@ function deckTourStops(){
       at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[1]]); },
       h:"Where it stands: Execution",
       b:"Whether the work is landing on time: what the " + T +
-        " have delivered against what was planned by now." }
+        " have delivered against what was planned by now." },
+
+    /* §574.6: the purpose, whole first and then one objective at a time,
+       each card one sentence tying it to what the room has just seen. */
+    clear(isP),
+    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[0]]); },
+      h:"One source of truth",
+      b:"The figures you just saw are the ones on Performance and in the reports, typed once by their owners." },
+    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[1]]); },
+      h:"Visibility",
+      b:"The same colours and the same DELAYED on every " + noun + ", for everyone who opens it." },
+    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[2]]); },
+      h:"Accountability",
+      b:"A line behind plan comes with its owner's note, as Delivery share did." },
+    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[3]]); },
+      h:"History that stays",
+      b:"Each cycle is kept as it was reported, so next quarter we compare against this one." }
   ];
 }
 function deckTourStart(){
@@ -52948,8 +52987,9 @@ function deckTourStart(){
   });
   if (!keep.length) { deckShow(0); return; }
   keep.push({ at:keep[keep.length - 1].at, end:true,
-    st:{ h:"That is how every " + deckTourNoun() + " reads",
-         b:"Every one in today's review follows this pattern. Finish takes you back to the platform." } });
+    /* §574.6: after the purpose slide the close hands over to the review. */
+    st:{ h:"Now, today's review",
+         b:"Every " + deckTourNoun() + " follows the pattern you just saw. Finish takes you back to the platform." } });
   DTOUR = { stops:keep, i:0 };
   root.insertAdjacentHTML("beforeend",
     '<div class="dtour" data-dtour>' +

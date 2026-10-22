@@ -10142,6 +10142,19 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 .dtour button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 @media print { .dtour { display:none !important; } }
 
+/* ── §574.6: THE EXAMPLE'S CLOSING SLIDE, WHAT THE PLATFORM IS FOR ────────
+   Four objectives two by two, as the stand slide sets its two readings
+   (`.headgrid`), each behind the gold rule the overview's objective wears
+   (`.dovs .objq`). The titles big and the line under each short (Islam):
+   the words are said by the presenter, the slide only names them. */
+.d-purpose h2 { margin-bottom:10px; }
+.d-purpose .pgrid { display:grid; grid-template-columns:1fr 1fr; gap:72px 80px; flex:1;
+                    align-content:center; }
+.d-purpose .pitem { border-left:6px solid var(--gold); padding:4px 0 6px 30px; }
+.d-purpose .pnum { display:block; font:600 22px/1 var(--mono); color:var(--gold-deep); margin-bottom:14px; }
+.d-purpose h3 { font:700 74px/1.04 var(--serif); margin:0; color:var(--ink); text-wrap:balance; }
+.d-purpose p { font-size:30px; line-height:1.3; color:var(--ink-2); margin:16px 0 0; }
+
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
 

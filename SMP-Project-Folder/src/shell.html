@@ -4477,6 +4477,10 @@
         if (el.dataset.note != null || el.dataset.cnote != null) {
           el.classList.add("lockhere");
           el.removeAttribute("tabindex");
+          /* §576.2: in the wanted note's own words (`noteBox`). A capability's
+             box is always drawn with the quiet "Note, if there is one", which
+             the bar above it contradicts. */
+          if (!el.value) el.placeholder = "Why, and what is being done";
         }
         return;
       }
@@ -4512,14 +4516,36 @@
   document.addEventListener("change", function(e){
     if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
   }, true);
+  /* §576.2: AND WHETHER THE COMMIT WAS A KEY. Tab or Enter is somebody
+     moving on through the report; a mouse press is somebody choosing where
+     to go, and that choice is left alone. */
+  var NOTELOCK_KEYED = false;
+  document.addEventListener("keydown", function(e){
+    NOTELOCK_KEYED = e.key === "Tab" || e.key === "Enter";
+  }, true);
+  document.addEventListener("mousedown", function(){ NOTELOCK_KEYED = false; }, true);
+  /* Is this control the locked row's own — its figure or its note? */
+  function noteLockOwn(el){
+    if (!NOTELOCK || !el || !el.matches || !el.matches(REP_BOXES)) return false;
+    var id = repBoxRow(el);
+    return id != null && !!NOTELOCK.ids[id];
+  }
   function noteLockFocus(kept){
-    var typed = NOTELOCK_TYPED;
+    var typed = NOTELOCK_TYPED, keyed = NOTELOCK_KEYED;
     NOTELOCK_TYPED = false;
     if (!NOTELOCK || !(kept || typed)) return;
     var go = function(){
       if (!NOTELOCK) return;
       var a = document.activeElement;
-      if (a && a !== document.body && !a.disabled) return;
+      /* §576.2: A TAB FROM A RED FIGURE ENDS IN THE NOTE, wherever the
+         browser's own step put it. The step is taken AFTER the commit's paint
+         and picks the next control it can still reach — on My reporting, with
+         every other line shut, that is Save draft, and the line below left it
+         there: measured, the cursor on Save draft in 2 Tabs of 12, and
+         note-lock.py's own Tab red 1 run in 4. Only a key does this; a press
+         somewhere live is still somebody doing something else. */
+      if (a && a !== document.body && !a.disabled &&
+          !(typed && keyed && !noteLockOwn(a))) return;
       var n = noteLockNote();
       if (n) n.focus();
     };

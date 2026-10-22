@@ -352,6 +352,9 @@ export function summary(all: Action[], today: string): Summary {
 export function mayChange(a: Action, who: Who): boolean {
   return who.seat === "super" || isMine(a, who);
 }
+/* What a refusal of that rule says — the Tracker's api and My work's tick
+   (§583) refuse with the one sentence. */
+export const ONLY_CHANGE = "Only its owner or the client's Super user can change this action.";
 
 /* THE SHORT NAME ON A ROW is the SPINE's answer now (lib/people.ts) — the
    register's own first-name rule, a clashing pair lengthened, and the whole

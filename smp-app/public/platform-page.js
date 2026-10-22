@@ -38,6 +38,7 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
+  var navwrap = document.getElementById("navwrap");
   /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
      address's hash, so a reload keeps it and a link can name one
      ("Switch client…" from a client is /platform#clients). */
@@ -132,7 +133,34 @@
       b.addEventListener("click", function () { go(t[0], true); });
       nav.appendChild(b);
     });
+    navCentre();
   }
+
+  /* ── THE TAB BAR ON A PHONE (§584) ─────────────────────────────────
+     Where the tabs do not fit, the bar scrolls inside itself: the tab that
+     is on is brought to the middle each time the bar is drawn (on arrival,
+     and after every press, since go() draws it again), and a fade is laid
+     over whichever edge still has tabs past it. Measured from the boxes the
+     browser drew, never from a width written here, so it holds whatever the
+     tabs' words and the screen. Where every tab fits, nothing scrolls and
+     neither fade shows. */
+  function navFades() {
+    /* a page served from before §584 has no wrapper: the bar still works,
+       it simply has no fade, rather than the whole console stopping */
+    if (!navwrap) return;
+    var max = nav.scrollWidth - nav.clientWidth;
+    navwrap.classList.toggle("l", max > 1 && nav.scrollLeft > 1);
+    navwrap.classList.toggle("r", max > 1 && nav.scrollLeft < max - 1);
+  }
+  function navCentre() {
+    var on = nav.querySelector("button.on");
+    if (on && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft += (on.getBoundingClientRect().left - nav.getBoundingClientRect().left) - (nav.clientWidth - on.offsetWidth) / 2;
+    }
+    navFades();
+  }
+  nav.addEventListener("scroll", navFades, { passive: true });
+  window.addEventListener("resize", navFades);
 
   /* ── A TAB SHOWS WHAT IT LAST SHOWED, THEN CATCHES UP (§400.2) ─────
      Islam: "when I switch between the tabs of the platform like my work and
@@ -1009,8 +1037,10 @@
      gets today: the page, and then the cards when they land. */
   function drawWaiting() {
     /* Opening on another tab (§400), the waiting page is that tab's title
-       and nothing it would have to take back (§94.10). */
-    if (TAB !== "clients") { title(TAB === "mywork" ? "My work" : ""); document.body.classList.add("ready"); return; }
+       and nothing it would have to take back (§94.10) — on My work, its
+       panel with the name and no counts yet (§583). */
+    if (TAB === "mywork") { mwMast(); document.body.classList.add("ready"); return; }
+    if (TAB !== "clients") { title(""); document.body.classList.add("ready"); return; }
     title("Clients");
     var grid = el("div", "cards");
     grid.setAttribute("aria-hidden", "true");
@@ -1038,11 +1068,132 @@
      stored, and every word ("Late 1 w", "This week", "In progress") is the
      Tracker's own, so an action reads the same in both places (§53.5).
      Pressing a row opens that client's Tracker. An admin may look at a
-     colleague's list; the server reads it as THEIR world. */
+     colleague's list; the server reads it as THEIR world.
+
+     IN THE INTERNAL TRACKER'S LOOK, AND A ROW CAN BE FINISHED HERE (§583).
+     Islam: "let's redesign mywork to be similar to the internal tracker
+     page", then, of the mockup, "add the done tick and status change too".
+     The tick and the status are the Tracker's own write, made through that
+     client's door and asked of the person LOOKING; the server says on every
+     row whether they may (canChange), so a control is drawn only where it
+     would be accepted (§61) and a row they may not change shows the fact.
+     A ROW TICKED STAYS WHERE THE HAND LEFT IT, green, and leaves the list
+     the next time My work is read — the Tracker's own rule for a row just
+     ticked (§497). What a row says after a press is the server's answer,
+     drawn by the same function that drew it first (§53.5). */
   var WORK = { who: "" };
+  var MW_HEAD = { late: "Late", week: "This week", later: "Next week and later" };
+  var MW_TICK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var MW_GO = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /* THE PANEL, drawn the moment the tab is — the name at once, the week and
+     the counts when the list lands — so the waiting page and the tab are one
+     shape and nothing is taken back (§94.10). */
+  function mwMast() {
+    var mast = el("header", "mwmast");
+    var top = el("div", "mwtop"), left = el("div");
+    var wk = el("div", "mwwk");
+    var name = el("div", "mwname");
+    name.appendChild(el("h1", null, "My work"));
+    left.appendChild(wk);
+    left.appendChild(name);
+    var strip = el("div", "mwstrip");
+    top.appendChild(left);
+    top.appendChild(strip);
+    mast.appendChild(top);
+    page.appendChild(mast);
+    return { wk: wk, name: name, strip: strip };
+  }
+
+  /* THE FOUR COUNTS, counted off flags the server set on each row (open,
+     late, due this week — lib/my-work.ts), so this page decides nothing
+     about a week. A row finished here is in none of them; it is counted
+     again only if it is unticked. */
+  function mwCount(strip, rows) {
+    var open = rows.filter(function (r) { return r.status !== "done"; });
+    var seen = {};
+    open.forEach(function (r) { seen[r.client] = true; });
+    var clients = Object.keys(seen).length;
+    strip.textContent = "";
+    [[open.length, "Open actions"],
+     [open.filter(function (r) { return r.late; }).length, "Late", "late"],
+     [open.filter(function (r) { return r.dueWeek; }).length, "Due this week"],
+     [clients, clients === 1 ? "Client" : "Clients"]].forEach(function (t) {
+      var d = el("div", t[2] && t[0] ? t[2] : null);
+      d.appendChild(el("b", null, String(t[0])));
+      d.appendChild(el("span", null, t[1]));
+      strip.appendChild(d);
+    });
+  }
+
+  /* A section's line: how many are open, and how many were finished here. */
+  function mwMeta(sec) {
+    var all = sec.querySelectorAll(".mwrow").length, done = sec.querySelectorAll(".mwrow.done").length;
+    sec.querySelector(".mwsh .meta").textContent = (all - done) + " open" + (done ? " · " + done + " done" : "");
+  }
+
+  /* ONE ROW, from the server's row and nothing else: the tick, the action,
+     its client, its week, its status, and the way into that client's
+     Tracker. `act(r, status, via, row)` is the press. */
+  function mwRow(r, statuses, act) {
+    var done = r.status === "done";
+    var row = el("div", "mwrow" + (done ? " done" : "") + (r.late ? " late" : ""));
+    row.setAttribute("data-client", r.client);
+    row.setAttribute("data-id", r.id);
+    row.setAttribute("data-status", r.status);
+    var tick = el("button", "mwtick");
+    tick.type = "button";
+    tick.setAttribute("role", "checkbox");
+    tick.setAttribute("aria-checked", String(done));
+    tick.setAttribute("aria-label", (done ? "Mark not done: " : "Mark done: ") + (r.title || ""));
+    if (done) tick.innerHTML = MW_TICK;
+    /* UNTICKING PUTS BACK WHAT THE ROW WAS when it was ticked here — the
+       signed-off mockup's own line — where the Tracker's tick, which has no
+       memory of it, puts Not started. */
+    if (r.canChange) tick.addEventListener("click", function () { act(r, done ? (r.was || "not_started") : "done", "tick", row); });
+    else tick.disabled = true;
+    row.appendChild(tick);
+    row.appendChild(el("span", "t", r.title || "(untitled)"));
+    var cl = el("span", "mwcl");
+    cl.title = r.clientName;
+    cl.appendChild(el("i", null, r.clientName));
+    row.appendChild(cl);
+    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
+    var st = el("span", "mwst" + (r.status === "in_progress" ? " prog" : done ? " done" : "") + (r.canChange ? " live" : ""));
+    if (r.canChange) {
+      var sel = el("select");
+      sel.setAttribute("aria-label", "Status: " + (r.title || ""));
+      statuses.forEach(function (s) {
+        var o = el("option", null, s.word);
+        o.value = s.key;
+        if (s.key === r.status) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", function () { act(r, sel.value, "status", row); });
+      st.appendChild(sel);
+    } else {
+      st.appendChild(el("span", null, r.statusWord));
+    }
+    row.appendChild(st);
+    var link = el("a", "mwgo");
+    link.href = "/" + r.client + "/tracker";
+    link.title = "Open " + r.clientName + "’s Tracker";
+    link.setAttribute("aria-label", link.title);
+    link.innerHTML = MW_GO;
+    row.appendChild(link);
+    row.addEventListener("click", function (e) {
+      if (e.target.closest(".mwtick, .mwst.live, .mwgo")) return;
+      location.assign("/" + r.client + "/tracker");
+    });
+    return row;
+  }
+
   function drawMyWork() {
-    var right = el("div");
-    title("My work", right);
+    var m = mwMast();
+    /* a refused or failed press is said here, under the panel, in words */
+    var said = el("p", "err mwsaid");
+    said.hidden = true;
+    page.appendChild(said);
     var body = el("div");
     page.appendChild(body);
     body.appendChild(el("p", "muted", "Reading your actions…"));
@@ -1050,8 +1201,9 @@
       if (TAB !== "mywork") return;
       body.textContent = "";
       if (!j.ok) { body.appendChild(el("p", "err", j.error || "Could not read the actions.")); return; }
+      m.wk.textContent = j.weekLine || "";
       if (j.people && j.people.length > 1) {
-        var pick = el("label", "wpick");
+        var pick = el("label", "mwwho");
         pick.appendChild(document.createTextNode("Show"));
         var sel = el("select");
         sel.setAttribute("data-workwho", "");
@@ -1063,55 +1215,77 @@
         });
         sel.addEventListener("change", function () { WORK.who = sel.value; go("mywork"); });
         pick.appendChild(sel);
-        right.className = "right"; right.appendChild(pick);
-        if (!right.parentNode) page.querySelector(".ptitle").appendChild(right);
+        m.name.appendChild(pick);
       }
-      var st = j.stats || {};
-      var tiles = el("div", "wstat");
-      [[st.open, "open actions"], [st.late, "late", "bad"], [st.dueWeek, "due this week"], [st.clients, st.clients === 1 ? "client" : "clients"]]
-        .forEach(function (t) {
-          var d = el("div", t[2] && t[0] ? t[2] : null);
-          d.appendChild(el("b", null, String(t[0] || 0)));
-          d.appendChild(document.createTextNode(t[1]));
-          tiles.appendChild(d);
-        });
-      body.appendChild(tiles);
+      var rows = j.rows || [];
+      var statuses = j.statuses || [];
+      mwCount(m.strip, rows);
       if (j.unanswered && j.unanswered.length) {
         body.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + " — nothing has been lost; try again shortly."));
       }
-      if (!j.rows.length) {
+      if (!rows.length) {
         body.appendChild(el("p", "muted", (j.who && !j.who.self ? j.who.name + " has" : "You have") +
           " no open actions in any client's Tracker."));
         return;
       }
-      var t = el("table", "work");
-      t.setAttribute("data-grid", "mywork");
-      var th = el("thead"), hr = el("tr");
-      ["Action", "Client", "Due", "Status"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
-      th.appendChild(hr); t.appendChild(th);
-      var tb = el("tbody");
-      var HEAD = { late: "Late", week: "This week", later: "Next week and later" };
-      var last = "";
-      j.rows.forEach(function (r) {
-        if (r.bucket !== last) {
-          last = r.bucket;
-          var g = el("tr", "grp"), gd = el("td", null, HEAD[r.bucket]);
-          gd.colSpan = 4; g.appendChild(gd); tb.appendChild(g);
-        }
-        var tr = el("tr", "wrow");
-        tr.tabIndex = 0;
-        tr.setAttribute("data-client", r.client);
-        tr.appendChild(el("td", "act", r.title || "(untitled)"));
-        var cl = el("td"); cl.appendChild(el("span", "cl", r.clientName)); tr.appendChild(cl);
-        tr.appendChild(el("td", r.late ? "late" : "when", r.when));
-        tr.appendChild(el("td", null, r.statusWord));
-        var open = function () { location.assign("/" + r.client + "/tracker"); };
-        tr.addEventListener("click", open);
-        tr.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
-        tb.appendChild(tr);
+
+      /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
+         (aria-busy) until the server's write lands, and is then drawn again
+         from the server's own answer in the same place. A refusal is said in
+         words under the panel and the row is left as it was. */
+      var act = function (r, status, via, row) {
+        if (row.getAttribute("aria-busy") === "true") return;
+        var ctl = row.querySelector(via === "tick" ? ".mwtick" : ".mwst select");
+        row.setAttribute("aria-busy", "true");
+        if (ctl) ctl.setAttribute("aria-busy", "true");
+        var undo = function (msg) {
+          row.removeAttribute("aria-busy");
+          if (ctl) ctl.removeAttribute("aria-busy");
+          if (via === "status" && ctl) ctl.value = r.status;
+          said.textContent = msg;
+          said.hidden = false;
+        };
+        post({ action: "workStatus", client: r.client, id: r.id, status: status }).then(function (a) {
+          if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
+          var nr = a.row;
+          /* what the row was before Done, for the untick */
+          nr.was = r.status === "done" ? r.was : r.status;
+          rows[rows.indexOf(r)] = nr;
+          var focused = ctl && document.activeElement === ctl;
+          var fresh = mwRow(nr, statuses, act);
+          row.parentNode.replaceChild(fresh, row);
+          mwMeta(fresh.parentNode);
+          mwCount(m.strip, rows);
+          said.hidden = true;
+          if (focused) {
+            var f = fresh.querySelector(via === "tick" ? ".mwtick" : ".mwst select");
+            if (f) f.focus();
+          }
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          undo("Could not reach the server. Nothing was changed — try again.");
+        });
+      };
+
+      var list = el("div");
+      list.setAttribute("data-grid", "mywork");
+      var n = 0;
+      ["late", "week", "later"].forEach(function (b) {
+        var mine = rows.filter(function (r) { return r.bucket === b; });
+        if (!mine.length) return;
+        n++;
+        var sec = el("section", "mwsec");
+        sec.setAttribute("data-bucket", b);
+        var sh = el("div", "mwsh");
+        sh.appendChild(el("span", "ix", (n < 10 ? "0" : "") + n));
+        sh.appendChild(el("h2", null, MW_HEAD[b]));
+        sh.appendChild(el("span", "meta"));
+        sec.appendChild(sh);
+        mine.forEach(function (r) { sec.appendChild(mwRow(r, statuses, act)); });
+        mwMeta(sec);
+        list.appendChild(sec);
       });
-      t.appendChild(tb);
-      body.appendChild(t);
+      body.appendChild(list);
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -3622,8 +3796,14 @@
     }
     /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
        after renaming the column is exactly the twins this rename avoided. */
-    document.getElementById("who").textContent =
-      ME.name + (ME.isAdmin ? " · Super user" : "");
+    /* the name, then the role as a span of its own so a phone can leave it
+       for a wider screen (§584.1); the whole line on a hover, for a name
+       that had to end in "…" */
+    var who = document.getElementById("who");
+    who.textContent = "";
+    who.appendChild(el("span", null, ME.name));
+    if (ME.isAdmin) who.appendChild(el("span", "role", " · Super user"));
+    who.title = who.textContent;
     document.body.classList.add("ready");
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a

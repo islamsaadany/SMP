@@ -1,0 +1,294 @@
+<title>My Work Ledger</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the console as built (white top line, navy tabs), with My work
+   redrawn in the Internal Tracker's own furniture: the navy panel with its
+   counts, numbered sections under a heavy rule, rows that start with the done
+   tick and end in the client, the week and the status. Tokens are the
+   console's own (smp-app/shell/platform.html); the panel's late ink is the
+   Tracker's (lib/branding.ts barInks). Type stays the console's system stack,
+   so the tab reads as part of the console rather than a module dropped in it.
+   Round 2 (Islam: "add the done tick and status change too"): the tick and
+   the status become controls, as on the Tracker's rows. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;--ff-hover:rgba(255,255,255,.1);--ff-late:#FF9B8F;
+  --amber:#F5A623;--amber-tx:#9C5D08;--good:#1B6E4E;--bad:#B23025;
+  --shadow:0 8px 26px rgba(20,28,43,.16);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-hover:rgba(255,255,255,.1);--ff-late:#FF9B8F;
+  --amber:#F5A623;--amber-tx:#F5A623;--good:#63BE96;--bad:#E8776B;
+  --shadow:0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-hover:rgba(255,255,255,.1);--ff-late:#FF9B8F;
+  --amber:#F5A623;--amber-tx:#F5A623;--good:#63BE96;--bad:#E8776B;
+  --shadow:0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+svg{display:block}
+[hidden]{display:none!important}
+
+/* ── the review page around the drawing ── */
+.doc{max-width:1120px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.doc>p.lede{max-width:74ch;color:var(--ink-2);margin:0}
+.doc>p.lede b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:24px 0 7px}
+.cap span{font-family:var(--font);letter-spacing:0;text-transform:none;font-weight:400}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--ink-2);margin:14px 0 0;max-width:80ch}
+.note p{margin:0}.note p+p{margin-top:6px}
+.note b{color:var(--ink)}
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground)}
+
+/* ── the console's chrome, as built ── */
+.top{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:9px 18px}
+.top .mk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-tx)}
+.top .nm{font-weight:600;font-size:14px}
+.top .right{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12.5px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font:600 13px/1.5 var(--font);cursor:pointer}
+.nav{background:var(--ff);display:flex;padding:0 10px;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav span{color:var(--ff-quiet);font:600 13.5px/1 var(--font);padding:13px 14px;border-bottom:3px solid transparent;white-space:nowrap}
+.nav span.on{color:var(--ff-ink);border-bottom-color:var(--amber)}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 40px}
+
+/* ── the Tracker's navy panel, in place of the page title and the four
+   white boxes. The week, the name, the same four counts. ── */
+.mast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:16px 20px 19px;margin:0 0 24px;box-shadow:inset 0 -3px 0 var(--amber)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.ttl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--ff-ink)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right}
+.tile b{display:block;font:600 22px/1 var(--font);color:var(--ff-ink)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px;white-space:nowrap}
+.tile.late b{color:var(--ff-late)}
+
+/* the Show picker (admins only) sits in the panel, drawn as the
+   Tracker's own "Group by" control */
+.pick{position:relative}
+.pick>button{display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:var(--ff-quiet);padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer}
+.pick>button b{color:var(--ff-ink);font-weight:600}
+.pick>button svg{width:12px;height:12px}
+.pick>button:hover,.pick>button[aria-expanded="true"],.pick>button:focus-visible{background:var(--ff-hover);color:var(--ff-ink);outline:none}
+.menu{position:absolute;top:32px;left:0;z-index:9;display:grid;min-width:170px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:4px}
+.menu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.menu button:hover,.menu button:focus-visible{background:var(--ground);outline:none}
+.menu button.on{font-weight:600}
+.menu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber-tx);margin-left:auto}
+
+/* ── the three groups as the Tracker's numbered sections ── */
+.sec{margin:0 0 28px}
+.sec:last-child{margin-bottom:0}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font:600 12px/1 var(--font);color:var(--amber-tx);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.sh h3{margin:0;font:600 17px/1.2 var(--font)}
+.sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+
+/* ── the row: the tick · the action · its client · the week · the status ·
+   the way into that client's Tracker. No column headings, as in the Tracker. ── */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.row:hover{background:var(--surface-2);box-shadow:-8px 0 0 var(--surface-2),8px 0 0 var(--surface-2)}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row.done .t{color:var(--ink-3)}
+
+/* NEW (round 2): THE DONE TICK, the Tracker's own. A late row's box is
+   ringed in the alarm; a ticked one fills green. */
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.tick:focus-visible{outline:2px solid var(--amber-tx);outline-offset:2px}
+.row.late .tick{border-color:var(--bad)}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+
+.cl{justify-self:end;display:inline-flex;align-items:center;gap:6px;max-width:160px;font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.cl i{font-style:normal;overflow:hidden;text-overflow:ellipsis}
+.cl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
+.row:hover .cl{background:var(--surface)}
+.when{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap}
+.when.late{color:var(--bad);font-weight:600}
+
+/* NEW (round 2): THE STATUS IS A CONTROL — the same word with its dash, in
+   the colour of what it says, and a caret; pressing it offers the three
+   states. The dash and caret are drawn in currentColor so they follow the
+   theme. */
+.stw{position:relative;display:inline-flex;align-items:center;color:var(--ink-3);border-radius:6px}
+.stw.prog{color:var(--amber-tx)}
+.stw.done{color:var(--good)}
+.stw::before{content:"";position:absolute;left:0;top:50%;width:12px;height:2px;margin-top:-1px;background:currentColor;pointer-events:none}
+.stw::after{content:"";position:absolute;right:5px;top:50%;margin-top:-2px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;pointer-events:none}
+.st{appearance:none;-webkit-appearance:none;height:26px;width:128px;margin:0;padding:0 18px 0 19px;border:0;border-radius:6px;background:transparent;color:inherit;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.st:hover,.st:focus-visible{background:var(--surface);outline:none}
+.row:not(:hover) .st:focus-visible{background:var(--surface-2)}
+.st option{text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);font-weight:400}
+
+.go{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--ink-3);justify-self:end}
+.go svg{width:14px;height:14px}
+.go:focus-visible{outline:2px solid var(--amber-tx);outline-offset:1px}
+.row:hover .go{color:var(--ink)}
+
+/* ── on a phone: the panel's counts sit under the name, and each row folds
+   onto two lines, as the Tracker's do ── */
+@media (max-width:760px){
+  .top{padding:9px 12px}.top .right #who{display:none}
+  .wrap{padding:16px 12px 32px}
+  .mast{padding:14px 16px 17px}
+  .strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .tile{text-align:left}.tile span{white-space:normal;line-height:1.3}
+  /* the status rides on the first line beside the action, as on the
+     Tracker's phone rows; the second line is the week and the client */
+  .row{grid-template-columns:20px auto minmax(0,1fr) auto 26px;grid-template-areas:"tick t t st go" ". when cl cl go";row-gap:7px;column-gap:10px}
+  .row .tick{grid-area:tick}.row .t{grid-area:t}.row .when{grid-area:when}.row .cl{grid-area:cl;justify-self:start;max-width:100%}.row .stw{grid-area:st;justify-self:end;align-self:start}.row .go{grid-area:go}
+  .st{width:auto}
+}
+</style>
+
+<div class="doc">
+<h1>My work, in the Internal Tracker&rsquo;s look</h1>
+<p class="lede"><b>The same actions, counts and groups as today</b>, drawn with the Tracker&rsquo;s furniture, and now with the Tracker&rsquo;s <b>done tick</b> and <b>status</b> on every row. The arrow, or pressing anywhere else on the row, still opens that client&rsquo;s Tracker.</p>
+
+<p class="cap">The console, on the My work tab <span>(tick a row or change a status to try it)</span></p>
+<div class="stage">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+    <span class="right"><span id="who">Islam Saadany &middot; Super user</span><button class="btn" type="button">Sign out</button></span></div>
+  <nav class="nav" aria-label="Console tabs"><span class="on">My work</span><span>Clients</span><span>Consultants</span><span>Who sees what</span><span>Memory</span><span>Frameworks</span><span>Copilot</span><span>History</span></nav>
+
+  <div class="wrap">
+    <header class="mast">
+      <div class="mrow">
+        <div>
+          <div class="wkof">This week &middot; 18 Oct &ndash; 22 Oct</div>
+          <div class="ttl"><h2 class="pt">My work</h2>
+            <div class="pick">
+              <button type="button" id="pickbtn" aria-haspopup="listbox" aria-expanded="false">Show <b id="pickname">Me</b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+              <div class="menu" id="pickmenu" role="listbox" aria-label="Show" hidden>
+                <button type="button" role="option" class="on" aria-selected="true">Me</button>
+                <button type="button" role="option" aria-selected="false">Mohamed Essam</button>
+                <button type="button" role="option" aria-selected="false">Omar Alaa</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strip">
+          <div class="tile"><b id="n-open">8</b><span>Open actions</span></div>
+          <div class="tile late"><b id="n-late">2</b><span>Late</span></div>
+          <div class="tile"><b id="n-week">2</b><span>Due this week</span></div>
+          <div class="tile"><b id="n-clients">3</b><span>Clients</span></div>
+        </div>
+      </div>
+    </header>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div class="note">
+  <p><b>Ticking a row, or choosing Done,</b> finishes the action in that client&rsquo;s Tracker, and the counts in the panel drop at once. The row stays where it is, green, until you next open My work; then it leaves the list, as a ticked row does in the Tracker. Unticking puts it back as it was.</p>
+  <p><b>On a colleague&rsquo;s list</b> (the Show picker), you can change only the rows on clients where you are Super user, the Tracker&rsquo;s own rule. Their other rows show the tick and the status without letting you press them.</p>
+</div>
+</div>
+
+<script>
+/* Example rows only. Today is Thu 22 Oct 2026; this week runs 18–22 Oct.
+   `week` marks a row counted in "Due this week" while it is open. */
+(function () {
+  var ROWS = [
+    { g: "late", t: "Send the revised Logistics unit plan for sign-off", c: "ElAbd Foods", when: "Late 1 w", late: true, s: "in_progress" },
+    { g: "late", t: "Collect the Q3 figures from the Finance function owner", c: "Raya Trade", when: "Late", late: true, s: "not_started" },
+    { g: "week", t: "Draft the Online unit’s foundation", c: "Meridian Group", when: "No date", s: "not_started" },
+    { g: "week", t: "Book the quarterly review with the CEO office", c: "ElAbd Foods", when: "This week", week: true, s: "done", was: "not_started" },
+    { g: "week", t: "Prepare the monthly report pack across units and functions", c: "Meridian Group", when: "This week", week: true, s: "not_started" },
+    { g: "week", t: "Confirm the IT project updates with the IT function owner", c: "Raya Trade", when: "This week", week: true, s: "in_progress" },
+    { g: "later", t: "Refine the transformation project’s milestones", c: "Raya Trade", when: "Next week", s: "not_started" },
+    { g: "later", t: "Run the strategy workshop for the Sales function", c: "Meridian Group", when: "W1 Nov", s: "not_started" },
+    { g: "later", t: "Review the KPI owners after the restructure", c: "ElAbd Foods", when: "W2 Nov", s: "in_progress" }
+  ];
+  var GROUPS = [["late", "Late"], ["week", "This week"], ["later", "Next week and later"]];
+  var WORD = { not_started: "Not started", in_progress: "In progress", done: "Done" };
+  var DONE_DAY = "Done Thu 22 Oct";
+  var TICK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var RIGHT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  var list = document.getElementById("list");
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+  function rowHtml(r, i) {
+    var done = r.s === "done", late = r.late && !done;
+    var opts = ["not_started", "in_progress", "done"].map(function (s) {
+      return '<option value="' + s + '"' + (s === r.s ? " selected" : "") + ">" + WORD[s] + "</option>";
+    }).join("");
+    return '<div class="row' + (done ? " done" : "") + (late ? " late" : "") + '" data-i="' + i + '">' +
+      '<button class="tick" type="button" role="checkbox" id="tick-' + i + '" aria-checked="' + done + '" aria-label="' + (done ? "Mark not done" : "Mark done") + '">' + (done ? TICK : "") + "</button>" +
+      '<span class="t">' + esc(r.t) + "</span>" +
+      '<span class="cl"><i>' + esc(r.c) + "</i></span>" +
+      '<span class="when' + (late ? " late" : "") + '">' + (done ? DONE_DAY : esc(r.when)) + "</span>" +
+      '<span class="stw' + (r.s === "in_progress" ? " prog" : done ? " done" : "") + '"><select class="st" id="st-' + i + '" aria-label="Status">' + opts + "</select></span>" +
+      '<span class="go" role="link" tabindex="0" aria-label="Open in ' + esc(r.c) + '’s Tracker" title="Open in ' + esc(r.c) + '’s Tracker">' + RIGHT + "</span>" +
+      "</div>";
+  }
+
+  function draw(focusId) {
+    var html = "";
+    GROUPS.forEach(function (g, n) {
+      var mine = [], open = 0, done = 0;
+      ROWS.forEach(function (r, i) { if (r.g === g[0]) { mine.push(rowHtml(r, i)); if (r.s === "done") done++; else open++; } });
+      if (!mine.length) return;
+      html += '<section class="sec"><div class="sh"><span class="ix">0' + (n + 1) + "</span><h3>" + g[1] + '</h3><span class="meta">' +
+        open + " open" + (done ? " &middot; " + done + " done" : "") + "</span></div>" + mine.join("") + "</section>";
+    });
+    list.innerHTML = html;
+    var open = ROWS.filter(function (r) { return r.s !== "done"; });
+    document.getElementById("n-open").textContent = open.length;
+    document.getElementById("n-late").textContent = open.filter(function (r) { return r.late; }).length;
+    document.getElementById("n-week").textContent = open.filter(function (r) { return r.week; }).length;
+    document.getElementById("n-clients").textContent = open.map(function (r) { return r.c; }).filter(function (c, i, a) { return a.indexOf(c) === i; }).length;
+    if (focusId) { var f = document.getElementById(focusId); if (f) f.focus(); }
+  }
+
+  /* Done keeps what the row was, so unticking puts it back as it was. */
+  function setStatus(i, s) {
+    var r = ROWS[i];
+    if (s === "done" && r.s !== "done") r.was = r.s;
+    r.s = s;
+  }
+  list.addEventListener("click", function (e) {
+    var tick = e.target.closest(".tick");
+    if (!tick) return;
+    var i = +tick.closest(".row").dataset.i, r = ROWS[i];
+    setStatus(i, r.s === "done" ? (r.was || "not_started") : "done");
+    draw("tick-" + i);
+  });
+  list.addEventListener("change", function (e) {
+    if (!e.target.matches(".st")) return;
+    var i = +e.target.closest(".row").dataset.i;
+    setStatus(i, e.target.value);
+    draw("st-" + i);
+  });
+  draw();
+})();
+
+/* The Show picker opens and closes; picking a name only changes the label —
+   the rows are an example and stay as they are. */
+(function () {
+  var btn = document.getElementById("pickbtn"), menu = document.getElementById("pickmenu"), name = document.getElementById("pickname");
+  function shut() { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var open = menu.hidden;
+    menu.hidden = !open; btn.setAttribute("aria-expanded", String(open));
+  });
+  Array.prototype.forEach.call(menu.querySelectorAll("button"), function (b) {
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(menu.querySelectorAll("button"), function (o) { o.classList.remove("on"); o.setAttribute("aria-selected", "false"); });
+      b.classList.add("on"); b.setAttribute("aria-selected", "true");
+      name.textContent = b.textContent; shut(); btn.focus();
+    });
+  });
+  document.addEventListener("click", shut);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") shut(); });
+})();
+</script>

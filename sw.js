@@ -506,7 +506,12 @@
    screens. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.71-two-screens";
+/* v6.73-note-lock-fixes — §576.2: a Tab from a red figure ends in its note,
+   and a capability's lock bar is not clipped and asks in the wanted note's
+   words. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.74-phone-tabs";
 const ASSETS = [
   "/",
   "/index.html",

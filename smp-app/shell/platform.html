@@ -39,6 +39,9 @@
        #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
        and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
     --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    /* My work's panel (§583): the Tracker's late red on the navy, 6.52:1, and
+       the wash a control under the pointer takes there */
+    --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
     --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
@@ -50,6 +53,7 @@
       --line:#333B4A; --line-soft:#2A313E;
       --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
       --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
       --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -67,6 +71,7 @@
     --line:#333B4A; --line-soft:#2A313E;
     --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
     --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
     --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -95,12 +100,49 @@
   .top .nm{ font-weight:600; font-size:14px }
   .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
     color:var(--ink-3); font-size:12.5px }
+  /* ── THE NAME LINE ON A PHONE (§584.1) ──────────────────────────────────
+     Islam: "fix the name line too", round 2 of design-mockups/
+     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the name and its
+     role broke onto two lines and Sign out onto two more (a 63px line). It
+     keeps one line now: Sign out never breaks, a name too long for what is
+     left ends in "…" with the whole of it on a hover, and on a phone the side
+     padding is the page's 12px and the role is left for a wider screen. The
+     words are unchanged — the role is a span of its own, hidden, so the line
+     still reads the name and the role to anybody who asks it. */
+  .top .right{ min-width:0 }
+  #who{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .top .btn{ flex:none; white-space:nowrap }
+  @media (max-width:560px){
+    .top{ padding:9px 12px }
+    #who .role{ display:none }
+  }
   .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
   .nav button{ background:transparent; border:0; color:var(--ff-quiet);
     font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
     border-bottom:3px solid transparent }
   .nav button:hover{ color:var(--ff-ink) }
   .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  /* ── THE TABS ON A PHONE (§584) ──────────────────────────────────────────
+     Islam: "fix the tab bar on phone too", from design-mockups/
+     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the eight tabs
+     broke their names onto three lines (a 74px bar) and the last four ran
+     past the screen, so the whole page was 620px wide and slid sideways.
+     Every tab keeps one line and THE BAR SCROLLS INSIDE ITSELF; the page
+     never does. Where all eight fit — any computer screen — nothing moves.
+     A BOX THAT SCROLLS SAYS SO (§108.6): with no scrollbar to show, a fade
+     lies over whichever edge still has tabs past it, set by drawNav and the
+     bar's own scroll (`l` / `r` on the wrapper), and the tab that is on is
+     brought to the middle each time the bar is drawn. */
+  .navwrap{ position:relative; background:var(--ff) }
+  .nav{ overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain }
+  .nav::-webkit-scrollbar{ display:none }
+  .nav button{ flex:none; white-space:nowrap }
+  .navwrap::before, .navwrap::after{ content:""; position:absolute; top:0; bottom:0; width:36px;
+    pointer-events:none; opacity:0; transition:opacity .15s }
+  .navwrap::before{ left:0; background:linear-gradient(to left, transparent, var(--ff) 85%) }
+  .navwrap::after{ right:0; background:linear-gradient(to right, transparent, var(--ff) 85%) }
+  .navwrap.l::before, .navwrap.r::after{ opacity:1 }
+  @media (prefers-reduced-motion:reduce){ .navwrap::before, .navwrap::after{ transition:none } }
   .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
 
   .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
@@ -131,15 +173,127 @@
   .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
   .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
 
-  /* ── MY WORK (§400) — the office's open Tracker actions, across clients.
-     Drawn out of this page's own table and tile vocabulary (§53.5); the late
-     word takes --bad, which is type here and measured as such (5.3 / 5.6). */
-  .wstat{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:16px }
-  .wstat > div{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 14px;
-    font-size:12.5px; color:var(--ink-3) }
-  .wstat b{ display:block; font-size:22px; line-height:1.2; color:var(--ink); font-weight:600 }
-  .wstat .bad b{ color:var(--bad) }
-  @media (max-width:640px){ .wstat{ grid-template-columns:repeat(2, minmax(0,1fr)) } }
+  /* ── MY WORK (§400), IN THE INTERNAL TRACKER'S LOOK (§583) ───────────────
+     Islam: "let's redesign mywork to be similar to the internal tracker
+     page", and of the second round of the mockup, "add the done tick and
+     status change too" — design-mockups/my-work/2026-10-22_tracker-look.html.
+     The Tracker's furniture (modules/tracker/page.ts) in THIS page's tokens,
+     so the tab is the console's and not a module dropped into it: the navy
+     panel with the week, the name and the four counts; numbered sections
+     under a heavy rule; a row of tick · action · client · week · status ·
+     the way into that client's Tracker. Every class is `mw`: `.row`, `.when`,
+     `.cl` and `.pt` already mean something on this page (§65.9).
+     THE FONT IS NEVER `inherit` INSIDE A `font` SHORTHAND (the Tracker's
+     §356.14): a shorthand ending in a keyword is dropped whole by the
+     browser, so these rules say size, weight and family one by one.
+     Measured on the panel (constitution XIII): the counts' quiet words 6.75
+     light / 6.43 dark, the week in amber 6.54 / 7.54, the late count's red
+     6.52 / 7.53 — all words, all past 4.5. */
+  .mwmast{ background:var(--ff); color:var(--ff-ink); border-radius:12px; padding:16px 20px 19px;
+    margin:0 0 24px; box-shadow:inset 0 -3px 0 var(--amber) }
+  .mwtop{ display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap }
+  .mwwk{ font-size:11px; font-weight:600; line-height:1; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--amber); margin:0 0 7px; min-height:11px }
+  .mwname{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .mwname h1{ margin:0; font-size:24px; font-weight:600; line-height:1.15; letter-spacing:-.01em; color:var(--ff-ink) }
+  /* The counts keep their room while the list is read, so the panel does
+     not grow under the eye when they land (the Tracker's §356.16). */
+  .mwstrip{ display:flex; gap:22px; align-items:flex-end; min-height:44px; font-variant-numeric:tabular-nums }
+  .mwstrip div{ text-align:right }
+  .mwstrip b{ display:block; font-size:22px; font-weight:600; line-height:1; color:var(--ff-ink) }
+  .mwstrip span{ display:block; font-size:10.5px; font-weight:600; line-height:1.6; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ff-quiet); margin-top:3px; white-space:nowrap }
+  .mwstrip .late b{ color:var(--ff-late) }
+  /* The admins' Show picker, drawn as the Tracker's Group-by control: the
+     word quiet, the name in the panel's ink, a caret after it. The options
+     open on the page's own surface, so they are given its ink. */
+  .mwwho{ position:relative; display:inline-flex; align-items:center; gap:2px; color:var(--ff-quiet);
+    font-size:13px; font-weight:500 }
+  .mwwho select{ appearance:none; -webkit-appearance:none; border:0; border-radius:7px; background:transparent;
+    color:var(--ff-ink); font-family:inherit; font-size:13px; font-weight:600; line-height:1.2; padding:6px 24px 6px 6px; cursor:pointer;
+    /* as wide as the name showing, as the Tracker's control is, rather than
+       the longest name on the list; a browser without it keeps the latter */
+    field-sizing:content }
+  .mwwho select:hover, .mwwho select:focus-visible{ background:var(--ff-hover); outline:none }
+  .mwwho option{ color:var(--ink); background:var(--surface); font-weight:400 }
+  .mwwho::after{ content:""; position:absolute; right:9px; top:50%; margin-top:-2px; pointer-events:none;
+    border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid currentColor }
+  .mwsaid{ margin:-8px 0 16px }
+  /* a section: its number, its heading, how many are open (and done) */
+  .mwsec{ margin:0 0 28px }
+  .mwsh{ display:flex; align-items:baseline; gap:12px; padding:0 0 8px; border-bottom:2px solid var(--ink) }
+  .mwsh .ix{ font-size:12px; font-weight:600; line-height:1; letter-spacing:.04em; color:var(--amber-tx); font-variant-numeric:tabular-nums }
+  .mwsh h2{ margin:0; font-size:17px; font-weight:600; line-height:1.2 }
+  .mwsh .meta{ font-size:13px; line-height:1; color:var(--ink-3) }
+  /* THE ROW. Pressing anywhere on it but its two controls opens that
+     client's Tracker, as the row did before; the arrow is the same door as
+     a real link, for the keyboard. The hover reaches 8px past the text on
+     either side without moving it (a shadow, not a margin). */
+  .mwrow{ display:grid; grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px; gap:12px; align-items:center;
+    padding:11px 0; border-bottom:1px solid var(--line-soft); cursor:pointer }
+  .mwrow:hover{ background:var(--surface-2); box-shadow:-8px 0 0 var(--surface-2), 8px 0 0 var(--surface-2) }
+  .mwrow .t{ min-width:0; font-size:15px; line-height:1.35; overflow-wrap:anywhere }
+  .mwrow.done .t{ color:var(--ink-3) }
+  /* the Tracker's tick: ringed in the alarm when late, green when done,
+     faded where the person looking may not press it */
+  .mwtick{ width:17px; height:17px; border:1.5px solid var(--line); border-radius:4px; display:grid; place-items:center;
+    color:var(--surface); background:var(--surface); cursor:pointer; padding:0 }
+  .mwtick svg{ width:11px; height:11px }
+  .mwtick:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:2px }
+  .mwrow.late .mwtick{ border-color:var(--bad) }
+  .mwrow.done .mwtick{ background:var(--good); border-color:var(--good) }
+  .mwtick:disabled{ cursor:default; opacity:.55 }
+  .mwcl{ justify-self:end; display:inline-flex; align-items:center; gap:6px; max-width:160px; font-size:12.5px; font-weight:500;
+    line-height:1; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:5px 10px; white-space:nowrap }
+  .mwcl i{ font-style:normal; overflow:hidden; text-overflow:ellipsis }
+  .mwcl::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--amber); flex:none }
+  .mwrow:hover .mwcl{ background:var(--surface) }
+  .mwwhen{ font-size:13px; font-weight:500; line-height:1.4; color:var(--ink-2); white-space:nowrap }
+  .mwwhen.late{ color:var(--bad); font-weight:600 }
+  /* THE STATUS IS A WORD WITH A DASH, in the colour of what it says, and a
+     control where the person may change it — one box either way, so the
+     column does not move between the two. The dash and caret are drawn in
+     currentColor, so they follow the theme with the word. */
+  .mwst{ position:relative; display:inline-flex; align-items:center; color:var(--ink-3); border-radius:6px }
+  .mwst.prog{ color:var(--amber-tx) }
+  .mwst.done{ color:var(--good) }
+  .mwst::before{ content:""; position:absolute; left:0; top:50%; width:12px; height:2px; margin-top:-1px; background:currentColor; pointer-events:none }
+  .mwst select, .mwst > span{ display:inline-block; height:26px; width:128px; margin:0; padding:0 18px 0 19px; border:0; border-radius:6px;
+    background:transparent; color:inherit; font-family:inherit; font-size:11px; font-weight:600; line-height:26px;
+    letter-spacing:.08em; text-transform:uppercase; white-space:nowrap }
+  .mwst select{ appearance:none; -webkit-appearance:none; cursor:pointer }
+  .mwst select:hover{ background:var(--surface) }
+  .mwst select:focus-visible{ background:var(--surface); outline:2px solid var(--amber-tx); outline-offset:0 }
+  .mwst option{ text-transform:none; letter-spacing:0; font-weight:400; color:var(--ink); background:var(--surface) }
+  .mwst.live::after{ content:""; position:absolute; right:5px; top:50%; margin-top:-2px; pointer-events:none;
+    border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid currentColor }
+  .mwtick[aria-busy="true"], .mwst select[aria-busy="true"]{ cursor:progress }
+  .mwgo{ width:26px; height:26px; border-radius:7px; display:grid; place-items:center; color:var(--ink-3); justify-self:end }
+  .mwgo svg{ width:14px; height:14px }
+  .mwgo:hover, .mwgo:focus-visible{ color:var(--ink); background:var(--surface); outline:none }
+  .mwgo:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:0 }
+  .mwrow:hover .mwgo{ color:var(--ink) }
+  /* On a phone the panel's counts sit under the name, and a row folds onto
+     two lines as the Tracker's does: the status beside the action, the week
+     and the client under it. */
+  @media (max-width:760px){
+    .mwmast{ padding:14px 16px 17px }
+    /* the counts line up along their numbers, a two-line label wrapping
+       under its own (§584 — §583 shipped them bottom-aligned, so a short
+       label's number sat a line lower than a long one's) */
+    .mwstrip{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; width:100%; align-items:start }
+    .mwstrip div{ text-align:left }
+    .mwstrip span{ white-space:normal; line-height:1.3 }
+    .mwrow{ grid-template-columns:20px auto minmax(0,1fr) auto 26px; grid-template-areas:"tick t t st go" ". when cl cl go";
+      row-gap:7px; column-gap:10px }
+    .mwrow .mwtick{ grid-area:tick } .mwrow .t{ grid-area:t } .mwrow .mwwhen{ grid-area:when }
+    .mwrow .mwcl{ grid-area:cl; justify-self:start; max-width:100% }
+    .mwrow .mwst{ grid-area:st; justify-self:end; align-self:start } .mwrow .mwgo{ grid-area:go }
+    .mwst select, .mwst > span{ width:auto }
+  }
+  /* THE TABLE BELOW WAS MY WORK'S AND IS HISTORY'S NOW (§583): the History
+     tab wears it (§53.5 — checks/console-record.mjs), so it stays as it was
+     when My work moved to the Tracker's rows. */
   table.work tr.grp td{ background:var(--surface-2); font-weight:600; font-size:11px; line-height:1.6; letter-spacing:.06em;
     text-transform:uppercase; color:var(--ink-2); padding:6px 12px }
   table.work td{ padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top }
@@ -156,9 +310,6 @@
   table.work td.late{ color:var(--bad); font-weight:600; white-space:nowrap }
   table.work td.when{ white-space:nowrap }
   table.work .cl{ color:var(--ink-2); white-space:nowrap }
-  .wpick{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-3) }
-  .wpick select{ border:1px solid var(--line); border-radius:8px; padding:5px 8px;
-    background:var(--surface); color:var(--ink); font:inherit }
   .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
     border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
   .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
@@ -794,7 +945,7 @@
   <span class="right"><span id="who"></span>
     <button class="btn" id="signout" type="button">Sign out</button></span>
 </div>
-<nav class="nav" id="nav"></nav>
+<div class="navwrap" id="navwrap"><nav class="nav" id="nav"></nav></div>
 <div class="wrap" id="page"></div>
 
 <!-- The debrief splitter (spec 045). Its own file, because node's own check

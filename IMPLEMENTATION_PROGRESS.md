@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-22 — A target by quarter as well as by month (§575): proposed, mockup published, waiting on Islam's sign-off.** A By month / By quarter switch in the drawer that opens from the mark beside a target, four boxes for the quarters, the figures carried across on switching, a quarter inside the review owed in proportion, and Q1 target to Q4 target columns in the workbook — all three answered by Islam before the mockup was drawn. Nothing built yet.
+**2026-10-22 — A target by quarter as well as by month (§575): built on the branch, waiting on Islam's word to merge.** The drawer that opens from the grid mark beside a target has a By month / By quarter switch; By quarter shows four boxes (Q1 to Q4, each naming its months). Switching carries the figures across and the target does not move. A review partway through a quarter owes that share of it (a cycle ending in August owes Q1, Q2 and two-thirds of Q3). Performance says *by quarter* under the annual target, and the workbook carries Q1 target to Q4 target after December — an upload with both months and quarters on one row is refused by name. Also fixed: the grid mark now lights as soon as a figure is typed, not only after leaving the pillar. Rows with no plan, or a monthly one, read exactly as before.
 
 **2026-10-22 — The guided tour opens on the cover clear before lighting it (§574.10), merged to `main` 2026-10-22 on Islam's word.** Pressing Guided tour now shows the made-up direction's cover as the room would see it; the next press lights it with the first card.
 

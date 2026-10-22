@@ -290,7 +290,8 @@ var RECIPES = [
      everybody else meets the result. A single "office" entry would leave a
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */
-  { id: "monthly-plan", q: "How do I set a target month by month?", who: "office",
+  /* §575: AND BY QUARTER — the same drawer, so the same answer says both. */
+  { id: "monthly-plan", q: "How do I set a target month by month or by quarter?", who: "office",
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no
        longer there sends them hunting (§214.3, and §160's rule that a recipe
@@ -298,12 +299,16 @@ var RECIPES = [
        all twelve were owed, which §555 had already made half untrue. */
     a: "Open the plan with the pen, and press the small grid mark beside the " +
        "target. Twelve boxes open under the row \u2014 one for each month, in the " +
-       "target's own unit." +
+       "target's own unit. Press <b>By quarter</b> at the right of the drawer for " +
+       "four boxes instead, Q1 to Q4." +
        "|It takes effect from the first month you fill in: the annual target " +
        "becomes what the months set come to, and the box shows it rather than " +
        "taking a figure of its own. A month of nought is a real answer, and a " +
-       "month left empty counts as nothing planned." },
-  { id: "monthly-plan-ask", q: "How do I set a target month by month?",
+       "month left empty counts as nothing planned." +
+       "|Switching between months and quarters carries the figures across: a " +
+       "quarter is its three months, and a quarter spread back over its months " +
+       "splits evenly. A review partway through a quarter owes that share of it." },
+  { id: "monthly-plan-ask", q: "How do I set a target month by month or by quarter?",
     a: "The Strategy Office sets that. It is worth asking for where your year is " +
        "not flat \u2014 a season, a launch, a contract that starts in the second " +
        "half \u2014 because without it every target is measured as if each month " +
@@ -320,10 +325,11 @@ var RECIPES = [
        "|The order is part of the plan, so it is saved with everything else and " +
        "every page that lists those objectives follows it." },
   { id: "monthly-why", q: "Why is my year-to-date target not half the year?",
-    a: "Because that measure carries a monthly plan: the office has said what each " +
-       "month is expected to carry, so what you are measured against is the months " +
-       "that have actually run rather than a flat share." +
-       "|Its annual target reads <b>by month</b> underneath on the Performance page. " +
+    a: "Because that measure carries a plan by month or by quarter: the office has " +
+       "said what each is expected to carry, so what you are measured against is " +
+       "what has actually run rather than a flat share." +
+       "|Its annual target reads <b>by month</b> or <b>by quarter</b> underneath on " +
+       "the Performance page. " +
        "Without one, a target is still spread evenly." },
   { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
     a: "A deliverable is something the project produces, while an outcome is a " +

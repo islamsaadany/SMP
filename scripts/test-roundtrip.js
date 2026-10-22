@@ -360,6 +360,33 @@ const CLIENT_ARG = (function () {
     const cOk = cMeas && !("monthly" in cMeas) && !("outMonthly" in cTac) && !("monthly" in cKo);
     console.log("  ...and clears again, key DELETED:", cOk ? "PASS" : "FAIL");
     if (!cOk) process.exitCode = 1;
+
+    /* §575: AND FOUR QUARTERS, the same road and the same nulls. */
+    const QF = [45, 51, 84, 120], QP = [45, null, null, 0];
+    cMeas.quarterly = QF.slice(); cKo.quarterly = QP.slice(); cTac.outQuarterly = QF.slice();
+    await io.writeState(client, mClean);
+    const qBack = await io.readState(client);
+    const qPil = (qBack.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const qMeas = qPil && (qPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const qTac = qPil && (qPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const qKo = (qBack.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const qOk = qMeas && qTac && qKo &&
+      same(qMeas.quarterly, QF) && same(qTac.outQuarterly, QF) && same(qKo.quarterly, QP);
+    console.log("quarterly plan round trip:", qOk ? "PASS" : "FAIL",
+      qOk ? "[measure, tactic outcome, key objective — nulls and a typed 0 kept]"
+          : JSON.stringify({ meas: qMeas && qMeas.quarterly, tac: qTac && qTac.outQuarterly,
+                             ko: qKo && qKo.quarterly }));
+    if (!qOk) process.exitCode = 1;
+    delete qMeas.quarterly; delete qTac.outQuarterly; delete qKo.quarterly;
+    await io.writeState(client, qBack);
+    const qClean = await io.readState(client);
+    const zPil = (qClean.units[mUnit].items || []).filter(function (p) { return p.id === mPil.id; })[0];
+    const zMeas = zPil && (zPil.measures || []).filter(function (x) { return x.id === mMeas.id; })[0];
+    const zTac = zPil && (zPil.tactics || []).filter(function (x) { return x.id === mTac.id; })[0];
+    const zKo = (qClean.units[mUnit].keyObjectives || []).filter(function (x) { return x.id === mKo.id; })[0];
+    const zOk = zMeas && !("quarterly" in zMeas) && !("outQuarterly" in zTac) && !("quarterly" in zKo);
+    console.log("  ...and clears again, key DELETED:", zOk ? "PASS" : "FAIL");
+    if (!zOk) process.exitCode = 1;
   } else {
     console.log("monthly plan round trip: SKIPPED — no measure/tactic/objective in the seed");
     process.exitCode = 1;

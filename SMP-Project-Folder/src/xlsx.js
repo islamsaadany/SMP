@@ -314,6 +314,42 @@ function monthNums(start){
   for (var i = 0; i < 12; i++) out.push(start + i);
   return out;
 }
+/* ── AND FOUR FOR THE QUARTERS (§575) ──────────────────────────────────
+   Q1 target to Q4 target — Islam's names — APPENDED after December for §65's
+   reason above, so nothing already in the file moves; on Tactics they are
+   prefixed "Outcome " like the outcome's months, because the sheet's own
+   Q1–Q4 already say which quarters the TACTIC runs in. A row carries months
+   or quarters and never both: a download writes only the one the row holds,
+   and an upload filling both is refused by name (`validatePlan`). The `plan*`
+   helpers are the sixteen together, so each sheet appends one block and the
+   months and quarters cannot be placed apart. */
+function quarterHead(prefix){
+  return SMPRules.QUARTER_NAMES.map(function(q){ return (prefix || "") + q + " target"; });
+}
+function quarterCells(row, fld){
+  var a = Array.isArray(row && row[fld]) ? row[fld] : [], out = [];
+  for (var i = 0; i < 4; i++) out.push(a[i] == null ? "" : a[i]);
+  return out;
+}
+function quarterRead(r, prefix){
+  var head = quarterHead(prefix), out = [], any = false;
+  for (var i = 0; i < 4; i++) {
+    var v = r[head[i]];
+    var s = v == null ? "" : String(v).trim();
+    if (s !== "") any = true;
+    out.push(s);
+  }
+  return any ? out.join("|") : "";
+}
+/* The read-me's one sentence on it, shared by both read-mes (§53.5). */
+var MONTHS_OR_QUARTERS = "A target can be planned month by month (Jan to Dec) or quarter by " +
+  "quarter (Q1 target to Q4 target), at the end of the sheet. Fill one or the other on a row, " +
+  "never both — a row with both is refused when you upload. Leave them empty and the " +
+  "target is spread evenly across the year.";
+function planHead(prefix){ return monthHead(prefix).concat(quarterHead(prefix)); }
+function planCells(row, mfld, qfld){ return monthCells(row, mfld).concat(quarterCells(row, qfld)); }
+function planWidths(w){ return monthWidths(w).concat([w + 3, w + 3, w + 3, w + 3]); }
+function planNums(start){ return monthNums(start).concat([12, 13, 14, 15].map(function(i){ return start + i; })); }
 
 var DIRS = ["\u2265", "\u2264"];
 /* §276: the workbook validates the list the pen offers, read from one place. */
@@ -463,6 +499,8 @@ function readme(kind, pickLabel, pickList){
                   "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
                   "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
+       /* \u00a7575: said here because an upload refuses the one way to get it wrong. */
+       ["Months or quarters", MONTHS_OR_QUARTERS],
        ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
        ["Blank rows", "Ignored."],
@@ -633,10 +671,10 @@ function planWorkbook(u){
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
        cells in silence. */
-    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9].concat(monthWidths(8)),
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9].concat(planWidths(8)),
       head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"]
-        .concat(monthHead("")),
-      numCols:[2, 5].concat(monthNums(7)),
+        .concat(planHead("")),
+      numCols:[2, 5].concat(planNums(7)),
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
                    { range:"E2:E60", list:COMPILES },
@@ -645,7 +683,7 @@ function planWorkbook(u){
         var a = splitTarget(m.target);
         return [m.name, m.dir, a.value, a.unit, m.compile,
                 m.weight == null ? "" : m.weight,
-                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(planCells(m, "monthly", "quarterly"));
       }) }
   ] : [
     /* §303: A UNIT'S OBJECTIVES CARRY A WEIGHT, and until now the file did
@@ -665,10 +703,10 @@ function planWorkbook(u){
        A VALIDATION RANGE IS A POSITION (§65): Weight takes H and Hidden moves
        H → I. Getting that wrong validates the wrong cells in silence, which
        is why the range moves in the same edit as the head. */
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 10, 9].concat(monthWidths(9)),
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 10, 9].concat(planWidths(9)),
       head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Weight %", "Hidden"]
-        .concat(monthHead("")),
-      numCols:[3, 4, 7].concat(monthNums(9)),
+        .concat(planHead("")),
+      numCols:[3, 4, 7].concat(planNums(9)),
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
                    { range:"G2:G60", list:COMPILES },
@@ -677,7 +715,7 @@ function planWorkbook(u){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
         return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
                 m.weight == null ? "" : m.weight,
-                SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly"));
+                SMPRules.isHidden(m) ? "Yes" : ""].concat(planCells(m, "monthly", "quarterly"));
       }) },
 
     { name:"SWOT", widths:[16, 78],
@@ -713,10 +751,10 @@ function planWorkbook(u){
         .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
     })(),
 
-    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(planWidths(8)),
       head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
-        .concat(monthHead("")),
-      numCols:[3].concat(monthNums(7)),
+        .concat(planHead("")),
+      numCols:[3].concat(planNums(7)),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"C2:C400", list:DIRS },
@@ -727,7 +765,7 @@ function planWorkbook(u){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
           acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile,
-                    SMPRules.isHidden(m) ? "Yes" : ""].concat(monthCells(m, "monthly")));
+                    SMPRules.isHidden(m) ? "Yes" : ""].concat(planCells(m, "monthly", "quarterly")));
         });
         return acc;
       }, []) },
@@ -750,15 +788,15 @@ function planWorkbook(u){
       u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
     return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(monthWidths(9)).concat(rq ? [40] : []),
+        .concat(planWidths(9)).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(monthHead("Outcome ")).concat(rq ? ["Requirements"] : []),
-      numCols:monthNums(14),
+        .concat(planHead("Outcome ")).concat(rq ? ["Requirements"] : []),
+      numCols:planNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
@@ -771,7 +809,7 @@ function planWorkbook(u){
             t.outDir || "", t.outTarget || "", t.outCompile || "",
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly"))
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(planCells(t, "outMonthly", "outQuarterly"))
             .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
@@ -1165,7 +1203,7 @@ function planFromWorkbook(u, sheets){
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
       value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
       weight:r["Weight %"],
-      monthly:monthRead(r, ""),
+      monthly:monthRead(r, ""), quarterly:quarterRead(r, ""),
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
@@ -1186,7 +1224,7 @@ function planFromWorkbook(u, sheets){
     rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
       parent_id:pid, name:r["Measure"], direction:r["Direction"],
       value:r["Target"], unit:r["Unit"], compile:r["Compile"],
-      monthly:monthRead(r, ""),
+      monthly:monthRead(r, ""), quarterly:quarterRead(r, ""),
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
   sheetObjects(sheets["Tactics"]).forEach(function(r){
@@ -1201,7 +1239,7 @@ function planFromWorkbook(u, sheets){
          tactics arrive measured the way they always were. */
       outDir:r["Outcome direction"] || "", outTarget:r["Outcome target"] || "",
       outCompile:r["Outcome compiled"] || "",
-      monthly:monthRead(r, "Outcome "),
+      monthly:monthRead(r, "Outcome "), quarterly:quarterRead(r, "Outcome "),
       owner:r["Owner"],
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
@@ -1247,7 +1285,7 @@ function planFromWorkbook(u, sheets){
   var out = rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes","group","hidden","monthly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group","hidden","monthly","quarterly"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
   /* NOT A ROW: every row here is a plan line the builder creates, and the
@@ -1363,6 +1401,7 @@ function capReadme(kind, capNames, picked, opts){
                   "names, separated by commas. Copy them from the Owners sheet: a name that is not " +
                   "on it is refused when you upload, the same as an owner."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["Months or quarters", MONTHS_OR_QUARTERS],
        [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
       .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
       .concat([

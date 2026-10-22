@@ -273,6 +273,30 @@ console.log("\n§215 · row-level changes");
           JSON.stringify(still).slice(0, 120));
   })();
 
+  /* — AND FOUR QUARTERS THE SAME WAY (§575) —
+     The switch writes `quarterly` and deletes `monthly` in ONE edit, so the
+     one row has to carry both halves: a differ that sent the new field and not
+     the removal would leave the server's copy holding both, and the rules then
+     read the months the screen has just thrown away. */
+  (function () {
+    const FOUR = [45, 51, null, 120];
+    const q = land(n => { n.units.mobile.items[0].measures[0].quarterly = FOUR.slice(); });
+    check("§575: a quarterly plan travels as ONE row edit, its null quarter intact",
+          !!q.changes.rows && !q.changes.set["units.mobile"] && q.ok &&
+          q.state.units.mobile.items[0].measures[0].quarterly[2] === null,
+          JSON.stringify(q.changes).slice(0, 120));
+    const months = clone(SEED);
+    months.units.mobile.items[0].measures[0].monthly = [15, 15, 15, 17, 17, 17, 28, 28, 28, 40, 40, 40];
+    const quarters = clone(months);
+    delete quarters.units.mobile.items[0].measures[0].monthly;
+    quarters.units.mobile.items[0].measures[0].quarterly = [45, 51, 84, 120];
+    const sw = D.applyChanges(clone(months), D.graphChanges(months, quarters));
+    const m = sw.ok ? sw.state.units.mobile.items[0].measures[0] : {};
+    check("§575: switching to quarters lands the four AND removes the twelve",
+          sw.ok && same(m.quarterly, [45, 51, 84, 120]) && !("monthly" in m),
+          sw.error || JSON.stringify(m).slice(0, 120));
+  })();
+
   /* — A ROW WITHOUT AN ID IS NOT ADDRESSABLE (§191) — */
   (function () {
     const b = plan(); delete b.units.mobile.items[0].measures[0].id;

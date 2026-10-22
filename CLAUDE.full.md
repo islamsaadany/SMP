@@ -9993,6 +9993,22 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # no text with the meaning on the hover AND the
                                 # aria-label, and exactly the row with a plan
                                 # lit — measured as PAINT, never as a class
+python3 checks/quarterly-plan.py # a target by quarter as well as by month
+                                # (§575): the arithmetic by name (a quarter spread
+                                # over its months, EXACT at a quarter end, each
+                                # compile rule its own way, a monthly row unchanged),
+                                # the By month | By quarter switch PRESSED and the
+                                # stored plan read back on a measure, a tactic
+                                # outcome, a unit's AND a function's objectives
+                                # (A15), the carry both ways deleting what it came
+                                # from, an empty plan switched storing nothing,
+                                # the mark lit with no repaint, Performance's *by
+                                # quarter* and August's 152M EGP, the workbook
+                                # round trip and the both-filled refusal, Clear,
+                                # and the fit at three widths. Red 60 on the build
+                                # before; every absence asked beside a case that
+                                # must answer (§94.5). Takes a built file as an
+                                # argument to run against another build
 python3 checks/tactic-outcome.py # a tactic is judged by what it produced
                                 # (§248, §249): the claim is not that the columns are
                                 # drawn but that nothing already reported changes

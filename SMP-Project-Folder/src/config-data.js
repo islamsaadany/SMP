@@ -7570,9 +7570,10 @@ function outcomeOf(t){
      (§248), so the twelve months ride across under the name the rules
      module reads — `outMonthly` on the tactic, `monthly` on the shape.
      Without this line the drawer would write a plan that nothing reads. */
+  /* \u00a7575: and its quarters, under the name the rules read beside the months. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual,
-           monthly: t.outMonthly };
+           monthly: t.outMonthly, quarterly: t.outQuarterly };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target

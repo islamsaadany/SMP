@@ -6471,7 +6471,18 @@
       b.addEventListener("click", function(){
         var k = b.dataset.mpopen;
         MONTHOPEN = (MONTHOPEN === k) ? null : k;
+        /* §575: the carried-across line belongs to the opening it was said in. */
+        MONTHCARRY = null;
         paint();
+      });
+    });
+    /* §575: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
+       carrying across is the drawer's own (`monthlySwitch`). */
+    document.querySelectorAll("[data-mpmode]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = MONTHREG[+b.dataset.mpreg];
+        if (!e || b.disabled) return;
+        if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });
     /* CLEARING IS A DELETION AND IS ASKED FOR ONCE. It throws away twelve
@@ -6486,10 +6497,12 @@
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
+        /* §575: the same act on four quarters, in their own words. */
+        var qq = !!e.q, pf = qq ? quarterlyFld(e.fld) : e.fld;
         destroyConfirmOpen({
-          title: "Clear this monthly plan?",
+          title: qq ? "Clear this quarterly plan?" : "Clear this monthly plan?",
           sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
-          goes: "<b>The twelve months</b> somebody typed",
+          goes: qq ? "<b>The four quarters</b> somebody typed" : "<b>The twelve months</b> somebody typed",
           goesWhy: "The row goes back to being spread evenly across the year.",
           stays: "The annual target",
           /* §555: and it is TYPED AGAIN after this. With the months gone there
@@ -6497,10 +6510,14 @@
              goes back to being the office's to fill — said here because that
              is the half somebody hesitates over. */
           staysWhy: "It keeps the figure the months came to, and goes back to being typed by hand.",
-          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
-          yesWord: "Clear the twelve",
+          noway: "<b>There is no way back.</b> The " + (qq ? "four" : "twelve") + " numbers are not archived.",
+          yesWord: qq ? "Clear the four" : "Clear the twelve",
           onYes: function(){
-            delete e.row[e.fld];
+            delete e.row[pf];
+            MONTHCARRY = null;
+            /* The drawer stays the way it was cleared in, rather than falling
+               back to months the moment nothing is typed. */
+            MONTHMODE[monthlyKey(e.row, e.fld)] = qq ? "q" : "m";
             fieldSaved();
             paint();
           }

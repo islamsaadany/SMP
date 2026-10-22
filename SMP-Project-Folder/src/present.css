@@ -374,6 +374,37 @@
   .dclock.over .dcw { color:var(--surface); }
   .dclock.paused:not(.near):not(.over) { color:var(--ink-2); }
   .dclock:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  /* ── §580: THE STAGES ─────────────────────────────────────────────────
+     Islam's, drawn in design-mockups/presenter-clock/ (round 3) and signed
+     off: a third bigger from five minutes, 1.6x on the light amber ground in
+     the last minute with a slow pulse, twice the size and pulsing once over,
+     twice as fast from four over. GROWN FROM ITS OWN CORNER, so it never
+     moves towards the slide's middle. The size eases (a jump in size is not
+     a colour a check samples); the colours still change at once, for the
+     reason the note above gives. HELD, IT STOPS: a pulsing clock that says
+     Paused is two messages at once. */
+  .dclock { transform-origin:100% 100%; transition:transform .6s ease; }
+  .dclock.near { transform:scale(1.3); }
+  .dclock.last { background:var(--attn-bg); transform:scale(1.6);
+                 animation:dclockPulse 2.8s ease-in-out infinite; --dglow:rgba(180,83,9,.45); }
+  .dclock.over { transform:scale(2); animation:dclockPulse 1.4s ease-in-out infinite; --dglow:rgba(176,68,52,.6); }
+  .dclock.over.fast { animation-duration:.7s; }
+  .dclock.paused { animation:none; }
+  @keyframes dclockPulse {
+    0%, 100% { box-shadow:0 0 0 0 var(--dglow); opacity:1; }
+    50% { box-shadow:0 0 0 .45em transparent; opacity:.6; }
+  }
+  /* The dark over the slide and under the clock: a quarter in the last
+     minute before five over, black from five over, eased in so the room
+     sees it come rather than a flash. */
+  .dveil { position:absolute; inset:0; z-index:1; background:#000; opacity:0;
+           pointer-events:none; transition:opacity 1.2s ease; }
+  .dveil.dim { opacity:.25; }
+  .dveil.dark { opacity:1; }
+  @media (prefers-reduced-motion: reduce) {
+    .dclock { animation:none !important; transition:none; }
+    .dveil { transition:none; }
+  }
   /* NO TRANSITION ON THE STATE CHANGE, deliberately. A fade was written here
      and removed on looking at it: turning amber is INFORMATION a presenter is
      meant to catch, and easing it in is the one thing that makes it easier to
@@ -1394,7 +1425,7 @@
     @page { size: 1600px 900px; margin: 0; }
     /* §340: a clock on a printed slide is a number from a moment that has
        passed. The contingency pack is a record, not a rehearsal (§305). */
-    #dclock { display:none !important; }
+    #dclock, .dveil { display:none !important; }
     html, body { background:#fff; }
     /* Only the deck prints. Everything else at body level is the platform. */
     body.presenting > *:not(#deckroot) { display:none !important; }

@@ -511,7 +511,11 @@
    words. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.74-phone-tabs";
+/* v6.75-clock-stages — §580: the presenter's clock as time runs out, the
+   slide a quarter dark from four over and black from five. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.75-clock-stages";
 const ASSETS = [
   "/",
   "/index.html",

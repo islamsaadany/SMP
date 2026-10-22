@@ -52750,8 +52750,25 @@ function deckStopAt(i){
    figures are top-right, so that corner is the one that is empty on every
    slide kind rather than on the one that was looked at. */
 
-/* Under two minutes it turns; the amber is a warning and the red is a fact. */
-var CLOCK_NEAR_MS = 2 * 60000;
+/* ── THE STAGES AS TIME RUNS OUT (§580) ────────────────────────────────
+   Islam: *"it should jump earlier … more than 5 min keep grey, until 1 min
+   the amber and grows"*; the last minute *"not red just bigger … and starts
+   pulsing but on a longer period"*; over time red, bigger and pulsing; and,
+   on round 2, *"the dimming … in the last minute of the 5 min and … lighter
+   and the box start pulsing … and then at the 5min the slide go dark"* —
+   "quarter is fine". So: grey; amber and 1.3x from five minutes left; on its
+   light amber ground, 1.6x and a slow pulse in the last minute; red, 2x and
+   pulsing once over; from four over the pulse twice as fast and the slide a
+   quarter dark; from five over the slide black with the clock still on it.
+
+   ONLY THE CLOCK MOVES, NEVER THE SLIDE: a flashing slide distracts the room
+   (said to him, and kept). T holds the time and lifts the dark at once; T
+   again brings back whatever stage it had reached; the next subject starts
+   its own time, so all of it clears with no one pressing anything. */
+var CLOCK_NEAR_MS = 5 * 60000;
+var CLOCK_LAST_MS = 60000;
+var CLOCK_DIM_MS = 4 * 60000;    /* over by this much: the slide dims */
+var CLOCK_DARK_MS = 5 * 60000;   /* over by this much: the slide goes black */
 var CLOCKTICK = null;
 
 /* Which subject is being presented RIGHT NOW. In a flow the stops ARE the
@@ -52853,9 +52870,21 @@ function clockPaint(){
     b.hidden = !c;
   });
   if (!el) return;
-  if (!c) { el.hidden = true; return; }
+  var veil = root.querySelector(".dveil");
+  if (!c) {
+    el.hidden = true;
+    if (veil) veil.classList.remove("dim", "dark");
+    return;
+  }
   el.hidden = false;
   var left = clockLeft(), held = !c.from, over = left < 0;
+  /* §580: the stage, and the dark that only a running clock draws. */
+  el.classList.toggle("last", !over && left <= CLOCK_LAST_MS);
+  el.classList.toggle("fast", left <= -CLOCK_DIM_MS);
+  if (veil) {
+    veil.classList.toggle("dark", !held && left <= -CLOCK_DARK_MS);
+    veil.classList.toggle("dim", !held && left <= -CLOCK_DIM_MS && left > -CLOCK_DARK_MS);
+  }
   /* THE COLOUR ALWAYS SAYS WHERE YOU ARE AND THE MARK SAYS IT IS HELD — two
      facts, two devices. Paused takes its own quiet grey only where there is
      nothing louder to say; a clock paused while OVER stays red, or holding it
@@ -52886,6 +52915,12 @@ function clockMount(root){
                  '<span class="dctime"></span>' +
                  '<span class="dcw" hidden>Paused</span>';
   el.addEventListener("click", clockToggle);
+  /* §580: the dark over the slide, under the clock — inside `.deck`, so it
+     covers the slide at whatever size the deck is drawn and never the bar. */
+  var veil = document.createElement("div");
+  veil.className = "dveil";
+  veil.setAttribute("aria-hidden", "true");
+  root.querySelector(".deck").appendChild(veil);
   root.querySelector(".deck").appendChild(el);
   /* TWICE A SECOND, not once: at one second the shown figure can be a whole
      second stale, which reads as a clock that skips. Cleared in `closeDeck()`
@@ -54017,7 +54052,12 @@ function roomStripText(){
       (a.built ? ' \u00b7 line ' + a.built[0] + ' of ' + a.built[1] : '') + '</span>' +
     (a.clock ? '<span class="rs-clk' + (a.clock.over ? ' over' : a.clock.near ? ' near' : '') +
       (a.clock.paused ? ' paused' : '') + '">' + esc(a.clock.text) +
-      (a.clock.paused ? ' \u00b7 paused' : '') + '</span>' : '') +
+      (a.clock.paused ? ' \u00b7 paused' : '') +
+      /* §580: the laptop is told when the room's slide is dimmed or dark,
+         and how to lift it: its own screen shows the slide view, not the
+         slide. */
+      (a.clock.dark === "dark" ? ' \u00b7 their screen is dark, T lifts it'
+       : a.clock.dark ? ' \u00b7 their slide is dimmed' : '') + '</span>' : '') +
     (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
 }
 function roomPaint(){
@@ -54206,7 +54246,8 @@ function roomReport(){
       n: DECK.i + 1, total: DECK.slides.length,
       label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
       built: s && s.classList.contains("building") ? [+s.dataset.bn, deckBuildUnits(s).length] : null,
-      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from } : null,
+      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from,
+                   dark: c.from && left <= -CLOCK_DARK_MS ? "dark" : c.from && left <= -CLOCK_DIM_MS ? "dimmed" : "" } : null,
       full: document.fullscreenElement === root }, roomOrigin());
   } catch (e) { /* the laptop has gone; the room carries on */ }
 }

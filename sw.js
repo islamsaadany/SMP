@@ -471,7 +471,11 @@
    number and in dark grey, dollars written in front, a shorter unit list.
    The built file's bytes changed, which is the whole trigger (§91). Proved
    held by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.63-figure-units";
+/* v6.64-guided-tour — §574–§574.3: Presentation → Guided tour, a made-up
+   direction walked part by part. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.64-guided-tour";
 const ASSETS = [
   "/",
   "/index.html",

@@ -49058,6 +49058,7 @@ function anch(key, label, where){
    few things only a plan carries are drawn here, and taking the figures
    out is the converter's (`planDeckBox` in pptx.js). It is never left on. */
 var DECK_PLAN = false;
+var DECK_EXAMPLE = false;   /* §574.2: drawing the guided tour's example */
 /* What the plan still OWES is named, in the platform's red, as the plan
    download always did (§119): a tactic's owner or quarters, the aspiration,
    an empty SWOT box. The review shows none of it — it is about the figures. */
@@ -50269,6 +50270,11 @@ function pillarSlidesOf(u, p, pi, named){
    slides, the office's, kept on the company (`SMPRules.slideColOn`). The plan
    download keeps both: there an empty owner is a gap the plan still owes. */
 function deckColOn(k){
+  /* §574.2: the guided tour's made-up direction draws neither, whatever the
+     office's switch says for the real slides (Islam: *"hide the owner and
+     collaborator columns from the demo slides"*). Set only while its deck
+     is drawn, as DECK_PLAN is for the plan. */
+  if (DECK_EXAMPLE && (k === "owner" || k === "collabs")) return false;
   return DECK_PLAN || SMPRules.slideColOn(GROUP, k);
 }
 function companyReviewOn(){
@@ -52745,8 +52751,11 @@ function exampleDirection(){
 }
 function exampleDeckHtml(){
   var x = exampleDirection();
-  return dirDeckOf(x.u, x.p, 0,
-    { aside:"An example to show how the slides read &middot; the figures are made up" });
+  DECK_EXAMPLE = true;
+  try {
+    return dirDeckOf(x.u, x.p, 0,
+      { aside:"An example to show how the slides read &middot; the figures are made up" });
+  } finally { DECK_EXAMPLE = false; }
 }
 /* The Presentation menu's Guided tour: the example, full screen, the tour
    already on its first stop — one press from the menu to the room. Asked
@@ -52798,6 +52807,16 @@ function deckTourBox(els){
   });
   return r;
 }
+/* The key measure furthest behind: the first in the lowest band the slide
+   paints, else the first carrying a note. */
+function deckTourRow(s){
+  var rows = [].slice.call(s.querySelectorAll("table tbody tr"));
+  var by = function(sel){
+    return rows.filter(function(r){ return r.querySelector(sel); })[0];
+  };
+  return by("td.dprog.bad") || by("td.dprog.warn") || by("td.dprog.attn") ||
+    by("td.dnote:not(.empty)") || null;
+}
 function deckTourNoun(){
   return esc(LTraw("group", "pillar", "one").toLowerCase());
 }
@@ -52807,6 +52826,13 @@ function deckTourStops(){
   var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
   var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
   var eq = function(w){ return function(x){ return x === w; }; };
+  /* §574.2: EACH TABLE OPENS AND CLOSES ON THE WHOLE SLIDE, CLEAR. Islam:
+     *"start the key measure tour with the full view all clear first and then
+     the tour appears … and finish after the note with the full view clear as
+     well showing everything. same for the tactics"*. A clear stop lights
+     nothing and draws no card: the room sees the slide as it is presented,
+     and the next press brings the spotlight in. */
+  var clear = function(on){ return { on:on, clear:true }; };
   return [
     { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
       at:function(s){ return deckTourBox([s.querySelector("h1"), s.querySelector(".coverrule")]
@@ -52815,6 +52841,7 @@ function deckTourStops(){
       b:"Every " + noun + " in today's review is presented the same way: its " + M +
         ", its " + T + ", and where it stands overall. This made-up one shows how to read them." },
 
+    clear(isM),
     { on:isM, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1; }); },
       h:M,
       b:"The results this " + noun + " committed to for the year, one to a row." },
@@ -52831,7 +52858,19 @@ function deckTourStops(){
     { on:isM, at:function(s){ return deckTourCol(s, eq("note")); },
       h:"Note",
       b:"The owner's word on the figure: why it is where it is, and what happens next." },
+    /* §574.3: AND ONE LINE READ ACROSS, as the tactics light their delayed
+       row — Islam: *"for the measures let's highlight a whole line like we
+       did in the tactics after the note part"*. The line furthest behind,
+       so the note has something to explain. */
+    { on:isM, at:function(s){ var r = deckTourRow(s); return r ? deckTourBox([r]) : null; },
+      h:function(s){
+        var r = deckTourRow(s), n = r && r.querySelector("td.lead");
+        return n ? esc(n.textContent.trim()) : "One line, read across"; },
+      b:"One line read across: the target, what was reported against what was due, " +
+        "the progress in its band, and the owner's note on why." },
+    clear(isM),
 
+    clear(isT),
     { on:isT, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1 || i === 2; }); },
       h:T,
       b:"The work that delivers the " + M + ": each " + T1 +
@@ -52844,17 +52883,19 @@ function deckTourStops(){
       b:"Where the work stands, as its owner reported it: " +
         [TACTIC_WORDS.done, TACTIC_WORDS.wip, TACTIC_WORDS.todo, TACTIC_WORDS.notdue]
           .map(esc).join(", ") + "." },
+    /* §574.2: YTD actual and Progress before Delayed (Islam). */
+    { on:isT, at:function(s){ return deckTourCol(s, function(x){
+        return x === "ytd actual" || x === "progress"; }); },
+      h:"YTD actual and Progress",
+      b:"What has been delivered so far against what was due by now, and the progress " +
+        "that makes, in the same colours as the " + M + "." },
     { on:isT, at:function(s){
         var late = s.querySelector(".dlate");
         return late ? deckTourBox([late.closest("tr")]) : null; },
       h:"Delayed",
       b:"A red <b>DELAYED</b> means this " + T1 + " has fallen behind its plan: its window " +
         "has passed unfinished, or its first quarter went by with nothing delivered." },
-    { on:isT, at:function(s){ return deckTourCol(s, function(x){
-        return x === "ytd actual" || x === "progress"; }); },
-      h:"YTD actual and Progress",
-      b:"What has been delivered so far against what was due by now, and the progress " +
-        "that makes, in the same colours as the " + M + "." },
+    clear(isT),
 
     { on:function(s){ return s.classList.contains("d-head"); },
       at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
@@ -52883,7 +52924,7 @@ function deckTourStart(){
     if (!s) return;
     var at = DECK.slides.indexOf(s);
     deckShow(at);
-    if (st.at(s)) keep.push({ at:at, s:s, st:st });
+    if (st.clear || st.at(s)) keep.push({ at:at, s:s, st:st });
   });
   if (!keep.length) { deckShow(0); return; }
   keep.push({ at:keep[keep.length - 1].at, end:true,
@@ -52939,9 +52980,13 @@ function deckTourDraw(){
   if (!dock) return;
   var x = DTOUR.stops[DTOUR.i], st = x.st;
   var card = dock.querySelector(".dtcard");
-  var last = DTOUR.stops.length - 1;
-  card.querySelector(".dtstep").textContent = x.end ? "Guided tour" : (DTOUR.i + 1) + " of " + last;
-  card.querySelector("h3").innerHTML = st.h;
+  dock.classList.toggle("dtclear", !!st.clear);
+  if (st.clear) return;
+  /* The count is of the parts lit — a clear view is not a step to count. */
+  var lit = DTOUR.stops.filter(function(y){ return !y.st.clear && !y.end; });
+  card.querySelector(".dtstep").textContent = x.end ? "Guided tour" :
+    (lit.indexOf(x) + 1) + " of " + lit.length;
+  card.querySelector("h3").innerHTML = typeof st.h === "function" ? st.h(x.s) : st.h;
   card.querySelector(".dtbody").innerHTML = st.b;
   card.querySelector("[data-dtback]").hidden = DTOUR.i === 0;
   card.querySelector("[data-dtnext]").textContent = x.end ? "Finish" : "Next";

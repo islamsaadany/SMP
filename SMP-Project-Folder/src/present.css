@@ -1440,6 +1440,11 @@
 .dtour { position:absolute; inset:0; z-index:5; cursor:pointer; }
 .dtour .dtsvg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .dtour .dtshade { fill:rgba(9,14,24,.66); }
+/* §574.2: a clear stop — the whole slide as presented, nothing over it. The
+   overlay stays, transparent, so the next press is still the tour's. */
+.dtour .dtshade, .dtour .dtring { transition:opacity .3s ease; }
+.dtour.dtclear .dtshade, .dtour.dtclear .dtring { opacity:0; }
+.dtour.dtclear .dtcard { display:none; }
 .dtour .dthole, .dtour .dtring { transition:x .35s ease, y .35s ease, width .35s ease, height .35s ease; }
 .dtour .dtring { fill:none; stroke:var(--gold); stroke-width:3;
                  filter:drop-shadow(0 0 8px rgba(201,162,77,.6)); }

@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574, §574.1).
+"""The guided tour, on a made-up direction (§574–§574.3).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -40,6 +40,10 @@ MAKE = """()=>{
   current='group'; currentSub='performance'; paint(); return true}"""
 
 STATE = """()=>({on:!!DTOUR, i:DTOUR?DTOUR.i:-1, n:DTOUR?DTOUR.stops.length:0, slide:DECK.i,
+  clear:!!document.querySelector('[data-dtour].dtclear'),
+  card:(e=>e?getComputedStyle(e).display!=='none':false)(document.querySelector('.dtcard')),
+  shade:(e=>e?+getComputedStyle(e).opacity:-1)(document.querySelector('.dtshade')),
+  step:(document.querySelector('.dtstep')||{}).textContent||'',
   deck:document.getElementById('deckroot').classList.contains('on'),
   h:(document.querySelector('.dtcard h3')||{}).textContent||'',
   ring:(e=>e?+e.getAttribute('width'):0)(document.querySelector('.dtring'))})"""
@@ -70,6 +74,9 @@ with sync_playwright() as p:
        safe(pg, "()=>!document.querySelector('[data-mftour]') && !/Guided tour/.test(document.getElementById('modal-b').textContent)") is True)
     safe(pg, "()=>{closeModal(); openDeckWith('t', flowWithParts(['dir:group-P1','dir:group-P2'])); return true}"); pg.wait_for_timeout(600)
     ck("a real direction's deck has no tour button", safe(pg, "()=>!document.querySelector('#deckroot [data-dtourgo]')") is True)
+    real = safe(pg, "()=>({sw:SMPRules.slideColOn(GROUP,'owner'), th:[...document.querySelectorAll('#deckroot [data-split$=T] th')].some(t=>t.textContent.trim()==='Owner')})") or {}
+    ck("a real deck still follows the office's Owner switch — the demo's rule is the demo's",
+       real.get("sw") is True and real.get("th") is True, real)
     pg.keyboard.press("g"); pg.wait_for_timeout(200)
     ck("…and G on a real deck starts nothing", safe(pg, "()=>!!DTOUR") is False)
     safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
@@ -87,25 +94,55 @@ with sync_playwright() as p:
     ck("its cover says it is an example with made-up figures", "the figures are made up" in cover, cover[:200])
     ck("…and it is coded EX001, never a D-code a real direction holds",
        safe(pg, "()=>[...document.querySelectorAll('#deckroot .dcode')].every(e=>e.textContent.trim()==='EX001')") is True)
+    ths = safe(pg, "()=>[...document.querySelectorAll('#deckroot [data-split$=T] th')].map(t=>t.textContent.trim())") or []
+    ck("its tactics slide has no Owner and no Collabs. column (Islam: hidden on the demo)",
+       ths and "Owner" not in ths and "Collabs." not in ths, ths)
     ck("…and it has no Thank you slide — the tour ends the deck",
        safe(pg, "()=>!document.querySelector('#deckroot .d-thanks')") is True)
 
     # ── 3. The stops, in order, with step 14 gone ──────────────────────
-    heads, kinds = [], []
+    heads, kinds, clears, seen = [], [], [], []
     for k in range(st.get("n", 0)):
         s = safe(pg, STATE) or {}
-        heads.append(s.get("h")); kinds.append(safe(pg, KIND))
+        pg.wait_for_timeout(350)
+        s = safe(pg, STATE) or {}
+        seen.append(s)
+        clears.append(s.get("clear"))
+        heads.append(None if s.get("clear") else s.get("h")); kinds.append(safe(pg, KIND))
         if k < st.get("n", 0) - 1:
             pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(220)
+    run = lambda kd: [c for c, x in zip(clears, kinds) if x == kd]
+    lit = [h for h in heads if h]
     ck("it walks cover, key measures, tactics, then where it stands",
        [x for i, x in enumerate(kinds) if i == 0 or kinds[i-1] != x] == ["cover", "M", "T", "stand"], kinds)
     for h in ["Annual target", "Actual", "Progress", "Note", "Quarters", "Status", "Delayed",
               "YTD actual and Progress", "Where it stands: Execution"]:
         ck("…with a stop for " + h, h in heads, heads)
     ck("the stop on the line under the two readings is gone (Islam: remove step 14)",
-       "Two different questions" not in heads and len(heads) == 14, heads)
+       "Two different questions" not in lit and len(lit) == 15, lit)
     ck("the last stop before the closing card is Execution",
-       len(heads) > 1 and heads[-2] == "Where it stands: Execution", heads[-3:])
+       len(lit) > 1 and lit[-2] == "Where it stands: Execution", lit[-3:])
+    # §574.2: each table opens and closes on the whole slide, clear
+    for kd, word in [("M", "key measures"), ("T", "tactics")]:
+        r = run(kd)
+        ck("the %s slide opens clear, walks its parts lit, and closes clear" % word,
+           len(r) >= 4 and r[0] is True and r[-1] is True and not any(r[1:-1]), r)
+    cl = [x for x in seen if x.get("clear")]
+    ck("a clear stop draws no card and no shade",
+       len(cl) == 4 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
+    ck("…and a lit stop draws both",
+       all(x.get("card") and x.get("shade", 0) > 0 for x in seen if not x.get("clear")))
+    ck("the count is of the parts lit: 1 of 14 … 14 of 14",
+       [x.get("step") for x in seen if not x.get("clear")][0] == "1 of 14" and
+       "14 of 14" in [x.get("step") for x in seen], [x.get("step") for x in seen])
+    # §574.3: after the Note, one key measure's whole line — the one furthest behind
+    ni = lit.index("Note") if "Note" in lit else -1
+    ck("after the Note, the key measures light one whole line: the off-track one (Islam)",
+       ni >= 0 and lit[ni + 1] == "Delivery share of sales", lit[ni:ni+2] if ni >= 0 else lit)
+    ck("…and that line is the last lit before the slide closes clear",
+       ni >= 0 and run("M")[-2] is False and run("M")[-1] is True, run("M"))
+    ck("YTD actual and Progress come before Delayed (Islam)",
+       "Delayed" in lit and lit.index("YTD actual and Progress") < lit.index("Delayed"), lit)
 
     # ── 4. Never stored ────────────────────────────────────────────────
     ck("the example reaches nothing stored — GROUP, the units and the review read as before",

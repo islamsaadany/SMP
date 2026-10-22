@@ -358,8 +358,9 @@ with sync_playwright() as p:
     for theme in ("light", "dark"):
         eva(pg, "(t)=>document.documentElement.setAttribute('data-theme', t)", theme)
         pg.wait_for_timeout(150)
-        for label, ms, want in (("calm", 5*60000, ""), ("near", 90000, "near"),
-                                ("over", -150000, "over")):
+        # §580: amber from five minutes left, its own ground in the last one.
+        for label, ms, want in (("calm", 6*60000, ""), ("near", 3*60000, "near"),
+                                ("last", 40000, "last"), ("over", -150000, "over")):
             s = state(ms)
             cls = str(val(s, "cls", ""))
             ok("%-5s %s says so in its class" % (theme, label),

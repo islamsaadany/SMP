@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-22 — A target by quarter as well as by month (§575): proposed, mockup published, waiting on Islam's sign-off.** A By month / By quarter switch in the drawer that opens from the mark beside a target, four boxes for the quarters, the figures carried across on switching, a quarter inside the review owed in proportion, and Q1 target to Q4 target columns in the workbook — all three answered by Islam before the mockup was drawn. Nothing built yet.
+
 **2026-10-22 — The guided tour opens on the cover clear before lighting it (§574.10), merged to `main` 2026-10-22 on Islam's word.** Pressing Guided tour now shows the made-up direction's cover as the room would see it; the next press lights it with the first card.
 
 **2026-10-22 — The guided tour ends on what the platform is for, and its cards are bigger again (§574.6–§574.9), merged to `main` 2026-10-22 on Islam's word.** A last slide in the example: One source of truth, Visibility, Accountability, History that stays, in big titles with a short line under each, brought in one per press with nothing dimmed (not toured); the closing card then reads Now, today's review, and is the biggest card in the tour; every card is a size up for the projector. Mockup: `design-mockups/guided-tour/2026-10-22_purpose-slide.html`.

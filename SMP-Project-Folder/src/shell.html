@@ -5901,11 +5901,11 @@
            figure the score does not read and nobody can see, and it would come
            back the moment somebody picked In progress again.
 
-           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
-           branch below sets `Done` from a score of 100 or more, which is right
-           for a figure against a target and wrong here: an outcome 60% through
-           a half-elapsed window scores 120, and reading that as Done would put
-           the word on a row whose own answer says In progress. */
+           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. An
+           outcome 60% through a half-elapsed window scores 120, and reading
+           that as Done would put the word on a row whose own answer says In
+           progress. §575 found the branch below doing exactly that to a
+           NUMBER, so it asks `tacticComplete` (the whole target) now too. */
         /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
@@ -5971,13 +5971,16 @@
           if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
-             its target is done. `tacticOutcomeScore` is the one reader of that
-             (§53.5) rather than a second comparison written here. */
+             its target is done. `tacticOutcomeScore` is the one reader of
+             whether it is scored (§53.5) rather than a second comparison here.
+             §575: and DONE IS THE WHOLE TARGET, asked of `tacticComplete` —
+             a score of 100 or more is against what is DUE, so 8 of 10 with 5
+             due scored 150 and was stored as Done beside "to be finalized Q4". */
           /* §414: with several outcomes the status follows all of them. */
           if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
-          else if (sc >= 100) hit.obj.status = "Done";
+          else if (tacticComplete(hit.obj)) hit.obj.status = "Done";
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }

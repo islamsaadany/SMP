@@ -4,6 +4,10 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-22 — A tactic counted in numbers says Completed only at its full target (§575).** A tactic running Q3–Q4 with a target of 10 had 5 due by the end of September; its owner reported 8, and the platform marked it Completed because 8 is ahead of the 5 due. It now says Completed only when the figure reaches the whole 10, so that row reads In progress with its 150%. Rows already saved the old way read right straight away; nobody re-enters anything. Yes/no outcomes, tactics with no outcome and "at most" targets read as before. Checked: a new check, green, and red ten ways on the build before; the neighbouring tactic checks green, two older failures the same on the build before. **On the branch, not merged** — the merge is your word.
+
+**2026-10-22 — A red figure gets its note before anything else (§576): drawn, waiting on your sign-off.** Agreed in chat; the mockup shows Mobile's Reporting page with a red figure locking every other box until its note is written. Mockup: `design-mockups/note-first/2026-10-22_note-before-anything-else.html`.
+
 **2026-10-22 — The guided tour opens on the cover clear before lighting it (§574.10), merged to `main` 2026-10-22 on Islam's word.** Pressing Guided tour now shows the made-up direction's cover as the room would see it; the next press lights it with the first card.
 
 **2026-10-22 — The guided tour ends on what the platform is for, and its cards are bigger again (§574.6–§574.9), merged to `main` 2026-10-22 on Islam's word.** A last slide in the example: One source of truth, Visibility, Accountability, History that stays, in big titles with a short line under each, brought in one per press with nothing dimmed (not toured); the closing card then reads Now, today's review, and is the biggest card in the tour; every card is a size up for the projector. Mockup: `design-mockups/guided-tour/2026-10-22_purpose-slide.html`.

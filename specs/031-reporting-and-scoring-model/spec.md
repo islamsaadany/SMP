@@ -233,6 +233,19 @@ first time either is corrected.
   one pillar 100 → not scored, another 83 → 65. **Adding an optional parameter
   is a change to every place that function is passed by name.**
 
+**§575 — Completed is the whole target, never the part due.** The score is
+against what is due by now, so it says *ahead*, not *finished*: D003's
+*Digitalizing Route to Market* (Q3–Q4, target 10, 5 due at the end of
+September) reported 8, scored 150 and read **Completed** beside its own note
+*"to be finalized Q4"*, because the reporting box stored `Done` from a score of
+100 or more. A tactic with outcomes is now complete only when **every outcome
+has reached its whole target** (`outcomeComplete`; a yes/no when it is Done),
+asked of the figures and never of the stored `t.status`, so rows saved the old
+way read right with nothing migrated. An *at most* outcome keeps its old
+reading (inside its target against what is due); a tactic with no outcome is
+unchanged (its figure is already a share of the whole). The score beside it does
+not move.
+
 ---
 
 ## 8 · A target with a shape of its own (§278)
@@ -359,6 +372,9 @@ re-entered once; a one-time heal was offered and not taken up.
 - **R9** The Focus board reads the raw stored figure, not the derived score.
 - **R10** `COMPILES` is the single list; the pen, the plan builder, the workbook
   and the upload all read it.
+- **R11** A tactic measured by outcomes is Completed only when every outcome
+  reaches its whole target, never when its score against what is due reaches
+  100 (§575).
 
 ---
 

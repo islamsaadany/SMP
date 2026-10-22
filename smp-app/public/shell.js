@@ -15520,11 +15520,12 @@ function setExtraFigure(t, id, v){
    reading surfaces draw these. */
 function scoredExtras(t){ return outcomeOf(t) ? tacticExtras(t) : []; }
 /* The word a tactic's status takes after a figure lands, with several
-   outcomes: Done once the average reaches the target, In progress once any
+   outcomes: Done once every outcome reaches its whole target (§575 — the
+   average reaching what is DUE is ahead, not done), In progress once any
    outcome has a figure. A single outcome keeps its own rule unchanged. */
 function statusFromOutcomes(t){
   var sc = tacticOutcomeScore(t), keep = t.status === "Blocked";
-  if (sc != null) return sc >= 100 ? "Done" : (keep ? "Blocked" : "WIP");
+  if (sc != null) return tacticComplete(t) ? "Done" : (keep ? "Blocked" : "WIP");
   var any = tacticOutcomes(t).some(function(x){
     return x.o.actual != null && x.o.actual !== ""; });
   return any ? (keep ? "Blocked" : "WIP") : "Not started";
@@ -15746,13 +15747,36 @@ var TACTIC_WORDS = { done: "Completed", wip: "In progress",
    progress is the yellow band, not the orange one — Islam: *"the orange is
    close to the red"*, and beside a red Delayed the two read as one. */
 var TACTIC_BANDS = { done: "good", wip: "attn", notdue: "kind", todo: "none" };
+/* ── COMPLETED IS THE WHOLE TARGET, NEVER THE PART DUE (§575) ──────────
+   Islam, of D003 *Digitalizing Route to Market*: Q3–Q4, 10 outlets' worth
+   of coverage, 8 reported at the end of Q3 against 5 due — 150%, and the
+   pill read **Completed** beside the reporter's own note *"to be finalized
+   Q4"*. Nobody picked the word: the reporting box stored `Done` from a score
+   of 100 or more, and that score is against the PRORATED target, so "ahead
+   of what is due" read as "finished".
+
+   SO A TACTIC WITH OUTCOMES IS ASKED OF ITS FIGURES, NEVER OF `t.status`.
+   The stored word is the box's old guess and stays as it is (§419: derived,
+   never stored), so a row saved as `Done` before this reads right the moment
+   it is drawn and nothing is migrated. Every outcome must be complete (§414),
+   and an "at most" outcome keeps the reading it always had — inside its
+   target, scored against what is due — because nobody has said when a
+   ceiling is finished. A tactic with no outcome is unchanged: its figure is
+   already a share of the whole tactic, so 100 is the whole of it. */
+function outcomeComplete(t, o){
+  if (!o) return false;
+  if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status === "done";
+  if (o.dir === "≤") { var s = oneOutcomeScore(t, o); return s != null && s >= 100; }
+  if (o.actual == null || o.actual === "") return false;
+  var whole = parseFloat(String(o.target).replace(/[^0-9.]/g, ""));
+  var a = parseFloat(String(o.actual).replace(/[^0-9.]/g, ""));
+  return !isNaN(whole) && !isNaN(a) && a >= whole;
+}
 function tacticComplete(t){
   if (!t) return false;
-  if (t.status === "Done") return true;
   var list = tacticOutcomes(t);
-  /* §414: complete only when EVERY outcome is a yes/no that is done. */
-  if (list.length) return list.every(function(x){
-    return SMPRules.isYesNo(x.o.target) && SMPRules.ynState(x.o.actual).status === "done"; });
+  if (list.length) return list.every(function(x){ return outcomeComplete(t, x.o); });
+  if (t.status === "Done") return true;
   return t.actual != null && t.actual >= 100;
 }
 function tacticAtNought(t){
@@ -77120,11 +77144,11 @@ var SYNC = (function () {
            figure the score does not read and nobody can see, and it would come
            back the moment somebody picked In progress again.
 
-           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
-           branch below sets `Done` from a score of 100 or more, which is right
-           for a figure against a target and wrong here: an outcome 60% through
-           a half-elapsed window scores 120, and reading that as Done would put
-           the word on a row whose own answer says In progress. */
+           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. An
+           outcome 60% through a half-elapsed window scores 120, and reading
+           that as Done would put the word on a row whose own answer says In
+           progress. §575 found the branch below doing exactly that to a
+           NUMBER, so it asks `tacticComplete` (the whole target) now too. */
         /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
@@ -77190,13 +77214,16 @@ var SYNC = (function () {
           if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
-             its target is done. `tacticOutcomeScore` is the one reader of that
-             (§53.5) rather than a second comparison written here. */
+             its target is done. `tacticOutcomeScore` is the one reader of
+             whether it is scored (§53.5) rather than a second comparison here.
+             §575: and DONE IS THE WHOLE TARGET, asked of `tacticComplete` —
+             a score of 100 or more is against what is DUE, so 8 of 10 with 5
+             due scored 150 and was stored as Done beside "to be finalized Q4". */
           /* §414: with several outcomes the status follows all of them. */
           if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
-          else if (sc >= 100) hit.obj.status = "Done";
+          else if (tacticComplete(hit.obj)) hit.obj.status = "Done";
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }

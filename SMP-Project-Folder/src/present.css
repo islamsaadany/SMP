@@ -1451,30 +1451,38 @@
 @media (prefers-reduced-motion: reduce) {
   .dtour .dthole, .dtour .dtring { transition:none; }
 }
-.dtour .dtcard { position:absolute; width:420px; max-width:calc(100vw - 24px); cursor:default;
+/* §574.4: THE CARD IS SIZED TO THE SCREEN, AS THE SLIDE UNDER IT IS. Islam:
+   *"make the cards text bigger for the projector"*. The deck scales the
+   slide to whatever screen it is on (`deckScale`), and a card in fixed
+   pixels read 16px on a 1920 projector — small against slide type set for a
+   room. One base size off the screen's width, everything in the card in `em`
+   of it: about 25px of body text at 1920, 18px on a 1366 laptop, never
+   under 17px nor over 26px. */
+.dtour .dtcard { position:absolute; font-size:clamp(17px, 1.3vw, 26px);
+                 width:24em; max-width:calc(100vw - 24px); cursor:default;
                  background:var(--surface); color:var(--ink); border:1px solid var(--line);
-                 border-radius:12px; box-shadow:0 18px 48px rgba(9,14,24,.45); }
+                 border-radius:.6em; box-shadow:0 18px 48px rgba(9,14,24,.45); }
 .dtour .dtcard.dtcentre { left:50% !important; top:50% !important; transform:translate(-50%,-50%); }
-.dtour .dttop { display:flex; align-items:center; padding:14px 18px 0; }
-.dtour .dtstep { font-size:12px; text-transform:uppercase; letter-spacing:.1em;
+.dtour .dttop { display:flex; align-items:center; padding:.75em .9em 0; }
+.dtour .dtstep { font-size:.6em; text-transform:uppercase; letter-spacing:.1em;
                  font-weight:700; color:var(--gold-deep); }
-.dtour .dtx { margin-left:auto; font:inherit; font-size:20px; line-height:1; background:none;
-              border:0; color:var(--ink-3); cursor:pointer; padding:2px 6px; border-radius:5px; }
+.dtour .dtx { margin-left:auto; font:inherit; font-size:1.1em; line-height:1; background:none;
+              border:0; color:var(--ink-3); cursor:pointer; padding:.1em .3em; border-radius:5px; }
 .dtour .dtx:hover { color:var(--ink); background:var(--surface-2); }
-.dtour .dtcard h3 { font-size:21px; line-height:1.25; margin:8px 18px 0; text-wrap:balance; }
-.dtour .dtbody { font-size:16px; line-height:1.5; color:var(--ink-2); margin:8px 18px 16px; }
-.dtour .dtbands { display:flex; flex-direction:column; gap:5px; margin-top:10px; }
-.dtour .dtbands span { display:flex; align-items:center; gap:9px; color:var(--ink); font-weight:600; }
-.dtour .dtbands i { width:12px; height:12px; border-radius:3px; flex:none; }
+.dtour .dtcard h3 { font-size:1.35em; line-height:1.2; margin:.3em .667em 0; text-wrap:balance; }
+.dtour .dtbody { font-size:1em; line-height:1.45; color:var(--ink-2); margin:.4em .9em .8em; }
+.dtour .dtbands { display:flex; flex-direction:column; gap:.3em; margin-top:.5em; }
+.dtour .dtbands span { display:flex; align-items:center; gap:.45em; color:var(--ink); font-weight:600; }
+.dtour .dtbands i { width:.6em; height:.6em; border-radius:3px; flex:none; }
 .dtour .dtbands em { font-style:normal; font-weight:400; color:var(--ink-3); }
-.dtour .dtfoot { display:flex; align-items:center; gap:12px; border-top:1px solid var(--line-soft, var(--line));
-                 padding:12px 18px; }
-.dtour .dtback { font:inherit; font-size:14px; font-weight:600; background:none; border:0;
+.dtour .dtfoot { display:flex; align-items:center; gap:.6em; border-top:1px solid var(--line-soft, var(--line));
+                 padding:.6em .9em; }
+.dtour .dtback { font:inherit; font-size:.85em; font-weight:600; background:none; border:0;
                  color:var(--ink-2); cursor:pointer; padding:0; }
 .dtour .dtback:hover { color:var(--ink); text-decoration:underline; }
-.dtour .dtnext { font:inherit; font-size:15px; font-weight:600; margin-left:auto; border:0;
-                 background:var(--panel); color:var(--panel-ink); border-radius:8px;
-                 padding:9px 22px; cursor:pointer; }
+.dtour .dtnext { font:inherit; font-size:.9em; font-weight:600; margin-left:auto; border:0;
+                 background:var(--panel); color:var(--panel-ink); border-radius:.45em;
+                 padding:.5em 1.3em; cursor:pointer; }
 .dtour .dtnext:hover { background:var(--panel-hover, var(--panel)); }
 .dtour button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 @media print { .dtour { display:none !important; } }

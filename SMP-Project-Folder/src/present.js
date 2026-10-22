@@ -3870,6 +3870,14 @@ function deckTourCol(s, test){
   var a = hit[0].getBoundingClientRect(), z = hit[hit.length - 1].getBoundingClientRect();
   return { left:a.left, top:a.top, right:z.right, bottom:tb.bottom };
 }
+/* The extent of an element's text, for `deckTourBox` — which takes a Range
+   as readily as an element, since both answer getBoundingClientRect. */
+function deckTourInk(e){
+  if (!e) return null;
+  var r = document.createRange();
+  r.selectNodeContents(e);
+  return r;
+}
 function deckTourBox(els){
   els = els.filter(Boolean);
   if (!els.length) return null;
@@ -3911,8 +3919,12 @@ function deckTourStops(){
   var clear = function(on){ return { on:on, clear:true }; };
   return [
     { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
-      at:function(s){ return deckTourBox([s.querySelector("h1"), s.querySelector(".coverrule")]
-                       .concat([].slice.call(s.querySelectorAll(".coversub")))); },
+      /* §574.4: the WORDS, not the blocks they sit in — a heading is as wide
+         as the slide, so lighting its box left the bigger card nowhere to
+         stand but on top of it. A Range measures the text itself. */
+      at:function(s){ return deckTourBox([s.querySelector(".dcovermark"), deckTourInk(s.querySelector(".eyebrow")),
+                       deckTourInk(s.querySelector("h1")), s.querySelector(".coverrule")]
+                       .concat([].slice.call(s.querySelectorAll(".coversub")).map(deckTourInk))); },
       h:"One " + noun + ", from cover to close",
       b:"Every " + noun + " in today's review is presented the same way: its " + M +
         ", its " + T + ", and where it stands overall. This made-up one shows how to read them." },

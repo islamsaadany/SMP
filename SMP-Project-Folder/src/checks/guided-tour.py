@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.3).
+"""The guided tour, on a made-up direction (§574–§574.4).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -196,6 +196,34 @@ with sync_playwright() as p:
         safe(pg, "()=>{exampleTourOpen(); return true}"); pg.wait_for_timeout(300)
         ck("…and the opener refuses them at the press (§48.2)",
            safe(pg, "()=>!document.getElementById('deckroot').classList.contains('on')") is True)
+
+    # ── 8. §574.4: sized for a projector, and never over the part it explains
+    FIT = """()=>{var c=document.querySelector('.dtcard'), d=document.querySelector('[data-dtour]');
+      if(!c||d.classList.contains('dtclear')) return null;
+      var r=c.getBoundingClientRect(), g=document.querySelector('.dtring');
+      var x=+g.getAttribute('x'), y=+g.getAttribute('y'), w=+g.getAttribute('width'), h=+g.getAttribute('height');
+      var ox=Math.max(0, Math.min(r.right, x+w)-Math.max(r.left, x)), oy=Math.max(0, Math.min(r.bottom, y+h)-Math.max(r.top, y));
+      return {h:c.querySelector('h3').textContent, body:parseFloat(getComputedStyle(c.querySelector('.dtbody')).fontSize),
+        inside:r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight, over:w?Math.round(ox*oy):0}}"""
+    for W, H, least in [(1920, 1080, 24), (1366, 768, 17)]:
+        q = b.new_page(viewport={"width": W, "height": H})
+        q.on("pageerror", lambda e: errs.append(str(e)))
+        q.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1')}catch(e){}")
+        q.goto("file://" + os.path.abspath(BUILT)); q.wait_for_timeout(800)
+        safe(q, "()=>{switchViewer('%s'); return true}" % office); safe(q, MAKE); q.wait_for_timeout(300)
+        safe(q, "()=>{REVIEW.to='2026-09'; exampleTourOpen(); return true}"); q.wait_for_timeout(800)
+        rows = []
+        for k in range(safe(q, "()=>DTOUR?DTOUR.stops.length:0") or 0):
+            q.wait_for_timeout(420)
+            m = safe(q, FIT)
+            if m: rows.append(m)
+            q.keyboard.press("ArrowRight")
+        ck("at %dx%d the card's text is at least %dpx (Islam: bigger for the projector)" % (W, H, least),
+           rows and min(r["body"] for r in rows) >= least, [r["body"] for r in rows][:2])
+        ck("…and on every lit stop the card stays on screen and off the part it explains",
+           rows and all(r["inside"] and r["over"] == 0 for r in rows),
+           [r for r in rows if not r["inside"] or r["over"]][:2])
+        q.close()
 
     ck("no page errors", not errs, errs[:3])
     b.close()

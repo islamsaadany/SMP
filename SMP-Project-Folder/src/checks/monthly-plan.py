@@ -284,8 +284,12 @@ with sync_playwright() as p:
        mk.get("w") == 24 and mk.get("h") == 22, mk)
     ck("...drawn as twelve cells, not a font character (§52)",
        mk.get("cells") == 12, mk)
+    # §577 REWROTE THE WORDS, NOT THE CLAIM: it asked for "month by month" in
+    # the name, and an empty row's mark now opens a drawer that plans by month
+    # OR by quarter, so it says both. Still no text on its face, still the same
+    # words on the hover and to a reader.
     ck("...carrying no text, and saying what it is on the hover AND to a reader",
-       mk.get("text") == "" and "month by month" in mk.get("name", "") and
+       mk.get("text") == "" and "by month or by quarter" in mk.get("name", "") and
        mk.get("title") == mk.get("name"), mk)
 
     # AND THE LIT STATE IS THE POINT OF PICKING IT: a row with a plan has to be
@@ -598,22 +602,29 @@ with sync_playwright() as p:
       const os = sheets.filter(s => s.name === "Objectives")[0];
       const M = ["Jan","Feb","Mar","Apr","May","Jun",
                  "Jul","Aug","Sep","Oct","Nov","Dec"];
+      /* §577 APPENDED FOUR QUARTERS AFTER DECEMBER, so the twelve are no
+         longer the LAST columns: they read `head.slice(-12)` and Hidden at
+         `length - 13`. REWRITTEN, never loosened (§218): the twelve still
+         follow Hidden directly and in order, and what follows them is
+         exactly the four §577 decided — a month moved into the middle, or
+         anything else appended between, is still red. */
+      const Q = ["Q1 target", "Q2 target", "Q3 target", "Q4 target"];
       const tail = (head, prefix) =>
-        head.slice(-12).join("|") === M.map(m => prefix + m).join("|");
+        head.slice(-16).join("|") === M.map(m => prefix + m).concat(Q.map(q => prefix + q)).join("|");
       return { tacTail: tail(ts.head, "Outcome "), objTail: tail(os.head, ""),
-               tacHiddenLast: ts.head[ts.head.length - 13] === "Hidden",
-               objHiddenLast: os.head[os.head.length - 13] === "Hidden",
+               tacHiddenLast: ts.head[ts.head.length - 17] === "Hidden",
+               objHiddenLast: os.head[os.head.length - 17] === "Hidden",
                tacQ1: ts.head.indexOf("Q1"), tacQ4: ts.head.indexOf("Q4"),
                tacHead: ts.head, objHead: os.head };
     }""")
-    ck("the Tactics sheet's twelve are the last columns, named for the outcome",
+    ck("the Tactics sheet's twelve follow Hidden, then the four quarters (§577), named for the outcome",
        tac.get("tacTail") is True and tac.get("tacHiddenLast") is True, tac.get("tacHead"))
     # Q1–Q4 keep their literal positions on purpose: a workbook written before
     # §278 is read by header NAME, but its VALIDATION ranges are positions
     # (§65), so this is the one place a number is the promise.
     ck("...and Q1–Q4 have NOT moved",
        tac.get("tacQ1") == 9 and tac.get("tacQ4") == 12, tac.get("tacHead"))
-    ck("the Objectives sheet appends its twelve after Hidden",
+    ck("the Objectives sheet appends its twelve after Hidden, then the four quarters",
        tac.get("objTail") is True and tac.get("objHiddenLast") is True, tac.get("objHead"))
 
     # ── 8 · Clear DELETES the key (§50.6) ──────────────────────────────

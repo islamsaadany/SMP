@@ -3510,6 +3510,15 @@
        It holds the TARGET rather than a boolean, so it can never open
        somebody else's report. */
     if (def && def.k === "report") REPORTING = current;
+    /* §576: AND WHETHER A RED FIGURE HOLDS THIS PAGE. Worked out ONCE per
+       paint, before the render, because two halves read it — the bar the
+       renderers draw in the "to finish" bar's place, and `noteLockApply()`
+       after the paint, which shuts every other box — and two answers to one
+       question inside one frame is how a bar comes to name a row whose boxes
+       are open (§53.5). */
+    NOTELOCK = (def && typeof noteLockOf === "function" &&
+                (def.k === "report" || def.k === MY_TAB.k))
+      ? noteLockOf(def.k === "report" ? REPORTING : null, def.k === MY_TAB.k) : null;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -3875,6 +3884,10 @@
        ones a bound field did not rebuild — a second listener on a survivor
        would step twice on one Enter (§24, §47.2). */
     if (typeof repKeys === "function") repKeys();
+    /* §576: AND WHILE A RED FIGURE HOLDS THE PAGE, every box but its row's
+       shuts — after the marks and the keys, because it reads the same
+       controls they annotate and only switches some of them off. */
+    noteLockApply();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -3915,6 +3928,7 @@
     putScrollsIn(document.getElementById("panel"), _keep.boxes);
     if (_keep.y) window.scrollTo(0, _keep.y);
     putFocus(_keep.focus);
+    noteLockFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
@@ -4435,6 +4449,105 @@
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
     "[data-cpct],[data-note],[data-cnote]";
+  /* ── §576: THE LOCK, APPLIED TO WHAT THE PAINT DREW ─────────────────
+     `NOTELOCK` (paint(), from `noteLockOf`) names the rows whose note is
+     owed; every reporting box that answers any OTHER row is switched off
+     here, along with the subject's own cycle note. In ONE place over the
+     same list the walk and the keys read (`REP_BOXES`), never at the eight
+     builders — a box kind added tomorrow is locked by being a box (§104.7).
+
+     `disabled`, not `aria-disabled`: the person must not be able to type, and
+     a shut box that still takes a keystroke is a lock in name only. The hover
+     says why. A locked row's note joins the tab path even where its builder
+     took it out (§528, and a capability's note always), because it is now the
+     one box the page is asking for. */
+  function repBoxRow(el){
+    var d = el.dataset;
+    return d.rep != null ? d.rep : d.crep != null ? d.crep : d.cpick != null ? d.cpick
+         : d.cpct != null ? d.cpct : d.note != null ? d.note : d.cnote;
+  }
+  function noteLockApply(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0];
+    var why = "Write the note on " +
+      (String((x.obj && x.obj.name) || "").trim() || "the red figure") + " first";
+    document.querySelectorAll(REP_BOXES + ",[data-unote]").forEach(function(el){
+      var id = el.dataset.unote != null ? null : repBoxRow(el);
+      if (id != null && NOTELOCK.ids[id]) {
+        if (el.dataset.note != null || el.dataset.cnote != null) {
+          el.classList.add("lockhere");
+          el.removeAttribute("tabindex");
+        }
+        return;
+      }
+      el.disabled = true;
+      el.setAttribute("title", why);
+      /* The figure's box wears its unit beside it; the wrapper is what reads
+         as the box, so it is the wrapper that greys. */
+      (el.closest(".entry") || el).classList.add("lockshut");
+    });
+  }
+  /* The first owed note that is ON THE SCREEN, in the bar's order. */
+  function noteLockNote(){
+    if (!NOTELOCK) return null;
+    var notes = [].slice.call(document.querySelectorAll("[data-note],[data-cnote]"));
+    for (var i = 0; i < NOTELOCK.rows.length; i++) {
+      var id = NOTELOCK.rows[i].noteId || NOTELOCK.rows[i].id;
+      for (var j = 0; j < notes.length; j++) if (repBoxRow(notes[j]) === id) return notes[j];
+    }
+    return null;
+  }
+  /* WHEN THE BOX SOMEBODY WAS IN HAS JUST SHUT, the cursor goes to the note.
+     That is the moment this exists for: a red figure typed and Tab pressed
+     lands in the NEXT row's box, which the commit's paint has just greyed, and
+     the browser drops a disabled box's focus on the body. Only then — a paint
+     that left the focus somewhere live (a rail button, the row's own figure)
+     is somebody doing something else, and the page does not take it away. */
+  /* A reporting box has just committed. Heard in the CAPTURE phase, so it is
+     set before the box's own handler runs the paint that reads it — the
+     focus the paint keeps (`_keep.focus`) is already gone by then on a Tab,
+     because Chromium fires `change` as the focus leaves. A page that merely
+     OPENS with a red row does not move anybody's cursor; typing does. */
+  var NOTELOCK_TYPED = false;
+  document.addEventListener("change", function(e){
+    if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
+  }, true);
+  function noteLockFocus(kept){
+    var typed = NOTELOCK_TYPED;
+    NOTELOCK_TYPED = false;
+    if (!NOTELOCK || !(kept || typed)) return;
+    var go = function(){
+      if (!NOTELOCK) return;
+      var a = document.activeElement;
+      if (a && a !== document.body && !a.disabled) return;
+      var n = noteLockNote();
+      if (n) n.focus();
+    };
+    go();
+    /* AND ONCE MORE AFTER THE BROWSER'S OWN STEP. A Tab commits the figure
+       (`change`, whose paint runs inside the keypress) and only THEN moves the
+       focus — to the box it had picked before the paint replaced it, which is
+       detached, so the focus falls on the body after this paint has already
+       returned. Measured on the build before §576 too: Tab out of a figure
+       has always left the cursor nowhere. Queued, it lands in the note. */
+    setTimeout(go, 0);
+  }
+  /* GO TO IT: the place the first owed note is in, opened the way the bar's
+     chips open one (`repGoTo`) — its rail, its capability on the company's
+     page, every band on My reporting — and then the note itself, lit. */
+  function noteGo(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0], pl = x.place || {};
+    if (NOTELOCK.mine) {
+      if (MYLINEF && MYLINEF !== x.target) MYLINEF = "";
+    } else {
+      if (REPORTING === "group" && String(x.subj || "").indexOf("cap:") === 0)
+        TOPCAP = String(x.subj).slice(4);
+      if (pl.rail) RAIL[pl.rail] = pl.code;
+    }
+    paint();
+    setTimeout(function(){ var n = noteLockNote(); if (n) gapLight(n); }, 0);
+  }
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -4503,6 +4616,8 @@
     }, 0);
   }
   function repWalk(){
+    /* §576: and Alt+Enter is the lock's Go to it while it holds. */
+    if (NOTELOCK) { noteGo(); return; }
     var chips = repChips(), i = -1, a;
     for (a = 0; a < chips.length; a++)
       if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
@@ -4607,6 +4722,9 @@
      there is genuinely nothing to point at and nothing is better than a guess
      at which row took its place. */
   function repStep(key, by){
+    /* §576: while a red figure holds the page, the next place is its note. */
+    var owed = noteLockNote();
+    if (owed) { gapLight(owed); return; }
     var els = repTypedBoxes(), i, here = null;
     for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
     if (here == null) return;
@@ -5904,11 +6022,11 @@
            figure the score does not read and nobody can see, and it would come
            back the moment somebody picked In progress again.
 
-           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
-           branch below sets `Done` from a score of 100 or more, which is right
-           for a figure against a target and wrong here: an outcome 60% through
-           a half-elapsed window scores 120, and reading that as Done would put
-           the word on a row whose own answer says In progress. */
+           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. An
+           outcome 60% through a half-elapsed window scores 120, and reading
+           that as Done would put the word on a row whose own answer says In
+           progress. §575 found the branch below doing exactly that to a
+           NUMBER, so it asks `tacticComplete` (the whole target) now too. */
         /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
@@ -5974,13 +6092,16 @@
           if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
-             its target is done. `tacticOutcomeScore` is the one reader of that
-             (§53.5) rather than a second comparison written here. */
+             its target is done. `tacticOutcomeScore` is the one reader of
+             whether it is scored (§53.5) rather than a second comparison here.
+             §575: and DONE IS THE WHOLE TARGET, asked of `tacticComplete` —
+             a score of 100 or more is against what is DUE, so 8 of 10 with 5
+             due scored 150 and was stored as Done beside "to be finalized Q4". */
           /* §414: with several outcomes the status follows all of them. */
           if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
-          else if (sc >= 100) hit.obj.status = "Done";
+          else if (tacticComplete(hit.obj)) hit.obj.status = "Done";
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }
@@ -6022,7 +6143,10 @@
            lost. The note is the half a reporter is REQUIRED to write when a
            figure is off track (§105's submit refusal), so losing it silently
            also made that refusal impossible to satisfy. */
-        var subj = unitLike(current);
+        /* §576: `data-repu` where the box names its row's subject — My
+           reporting's note, on a row from another unit (the figure's handler
+           has asked it this way since §345). */
+        var subj = unitLike(el.dataset.repu || current);
         if (!subj) return;
         var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
@@ -6474,7 +6598,18 @@
       b.addEventListener("click", function(){
         var k = b.dataset.mpopen;
         MONTHOPEN = (MONTHOPEN === k) ? null : k;
+        /* §577: the carried-across line belongs to the opening it was said in. */
+        MONTHCARRY = null;
         paint();
+      });
+    });
+    /* §577: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
+       carrying across is the drawer's own (`monthlySwitch`). */
+    document.querySelectorAll("[data-mpmode]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = MONTHREG[+b.dataset.mpreg];
+        if (!e || b.disabled) return;
+        if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });
     /* CLEARING IS A DELETION AND IS ASKED FOR ONCE. It throws away twelve
@@ -6489,10 +6624,12 @@
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
+        /* §577: the same act on four quarters, in their own words. */
+        var qq = !!e.q, pf = qq ? quarterlyFld(e.fld) : e.fld;
         destroyConfirmOpen({
-          title: "Clear this monthly plan?",
+          title: qq ? "Clear this quarterly plan?" : "Clear this monthly plan?",
           sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
-          goes: "<b>The twelve months</b> somebody typed",
+          goes: qq ? "<b>The four quarters</b> somebody typed" : "<b>The twelve months</b> somebody typed",
           goesWhy: "The row goes back to being spread evenly across the year.",
           stays: "The annual target",
           /* §555: and it is TYPED AGAIN after this. With the months gone there
@@ -6500,10 +6637,14 @@
              goes back to being the office's to fill — said here because that
              is the half somebody hesitates over. */
           staysWhy: "It keeps the figure the months came to, and goes back to being typed by hand.",
-          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
-          yesWord: "Clear the twelve",
+          noway: "<b>There is no way back.</b> The " + (qq ? "four" : "twelve") + " numbers are not archived.",
+          yesWord: qq ? "Clear the four" : "Clear the twelve",
           onYes: function(){
-            delete e.row[e.fld];
+            delete e.row[pf];
+            MONTHCARRY = null;
+            /* The drawer stays the way it was cleared in, rather than falling
+               back to months the moment nothing is typed. */
+            MONTHMODE[monthlyKey(e.row, e.fld)] = qq ? "q" : "m";
             fieldSaved();
             paint();
           }
@@ -9879,6 +10020,11 @@
         return;
       }
       if (ev.target.closest("[data-repnext]")) repWalk();
+    });
+    /* §576: the lock's own bar, drawn in that bar's place while a red figure
+       holds the page — one button, and it goes to the note that is owed. */
+    document.querySelectorAll("[data-notego]").forEach(function(b){
+      b.addEventListener("click", function(){ noteGo(); });
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

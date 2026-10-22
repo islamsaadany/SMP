@@ -5949,7 +5949,12 @@ function rowReads(x){
      year. The note rule and the Submit gate both hang off this. */
   return measureScore(x.obj);
 }
-function needsNote(x){
+/* §576: the half of the rule that is about the FIGURE — red, whether or not
+   anybody has explained it yet. My reporting asks it on its own, because it
+   draws the owner's note box on a red row and must keep drawing it once the
+   note is written (a box that vanished the moment it was used could not be
+   corrected). */
+function rowAtRisk(x){
   var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
@@ -5959,7 +5964,10 @@ function needsNote(x){
      asking for a note on every figure between 50 and 69 in their deployment.
      The ranges happen to coincide on the new defaults (bad is everything below
      70, which is what bad+warn covered before), so nobody's obligations move. */
-  return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
+  return k === "bad" || k === "warn";
+}
+function needsNote(x){
+  return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
@@ -5991,7 +5999,7 @@ function fnReportItems(subject){
     var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
     (!c.own || fnKoCounted(c.id) ? SMPRules.shown(kos) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
-                 place:koPlace });
+                 place:koPlace, cap:c });
     });
     /* §342: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
        the In-progress rule, Submit's refusal and §279's bar all learn the new
@@ -6001,7 +6009,7 @@ function fnReportItems(subject){
        a row answered early still counts). */
     SMPRules.shown(c.actions).forEach(function(a){
       out.push({ id:a.id, obj:a, kind:"action", group:c.name, sub:"",
-                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace });
+                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace, cap:c });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
@@ -6009,16 +6017,16 @@ function fnReportItems(subject){
                     rail:railKeyFor(c), code:p.id };
       SMPRules.shown(p.deliverables).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
-                   asked:dueThisCycle(d.due), owner:p.owner, place:place });
+                   asked:dueThisCycle(d.due), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.outcomes).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
-                   asked:outcomeDue(o), owner:p.owner, place:place });
+                   asked:outcomeDue(o), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.milestones).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
                    asked:dueThisCycle(m.finish), owner:m.owner || p.owner,
-                   place:place });
+                   place:place, cap:c, proj:p });
       });
     });
   });
@@ -6305,6 +6313,76 @@ function submitWhyShort(target){
     " at risk with no note");
   if (!lines.length) return "";
   return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
+}
+
+/* \u2500\u2500 A RED FIGURE GETS ITS NOTE BEFORE ANYTHING ELSE (\u00a7576) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Islam: *"when people enter a number \u2026 that is deviated and in red the note
+   becomes mandatory as agreed. to the level it blocks the rest of the entries
+   until the note is made."* \u00a7105's rule held Submit and nothing else, so a
+   reporter could type forty figures past a red one and meet the refusal at
+   the end. Agreed in chat, then drawn and approved: while a figure this
+   person may explain is red with no note, every other box on the page shuts;
+   that row's note and its own figure stay open (a typo is fixed where it was
+   made, and a figure moved out of the red lifts the lock by itself).
+
+   WHOSE NOTE IS ASKED THE WAY THE PAGE ASKS IT, never a second rule (\u00a753.5):
+   a unit-shaped report through `canEnterNote` \u2014 the very call `noteCell`
+   draws its box with \u2014 and a holder's rows through the gate each of its
+   renderers hands `capNoteBox`. A row whose note this person cannot write
+   locks nothing for them, or the page would shut with no way out. */
+function noteMayWrite(subject, x){
+  var t = holderSubject(String(subject || ""));
+  var u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return canEnterNote(u.ukey, x);
+  var c = x && x.cap;
+  if (!c) return false;
+  /* `projReportBody`: per row, through the project. */
+  if (x.kind === "deliverable" || x.kind === "outcome" || x.kind === "milestone")
+    return canReportFnRow(holderCodeOwner(c), x.proj, x.obj);
+  /* `fnObjReportBody`: per row, with no project. */
+  if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
+  /* `capReportBody`: a capability's own objectives belong to no project. */
+  return canReportFnWhole(holderCodeOwner(c));
+}
+/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
+   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
+   narrowing that section is drawn from). */
+function noteLockSubjects(target){
+  var t = String(target || ""), out = [t];
+  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
+      typeof capsHere === "function")
+    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
+  return out;
+}
+/* The lock for one page: the Reporting page of `target`, or My reporting
+   (`mine`). NULL when nothing is red, so every caller asks one truthy
+   question. A breakdown's cells share their row's note (\u00a7343), so its row is
+   one entry however many of its figures are red. A report already closed
+   (submitted or parked, \u00a7220) has no open box to shut. */
+function noteLockOf(target, mine){
+  if (!REVIEW || REVIEW.state !== "open") return null;
+  var rows = [], ids = {};
+  var take = function(x, subj){
+    var id = x.noteId || x.id;
+    if (ids[id]) return;
+    ids[id] = true;
+    rows.push(Object.assign({ subj: subj }, x));
+  };
+  if (mine) {
+    /* \u00a7576: on My reporting the owner writes the note on their own red rows
+       (Islam's call) \u2014 asked through the gate their figure is entered by. */
+    myLineRows().forEach(function(r){
+      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
+    });
+  } else if (target) {
+    noteLockSubjects(target).forEach(function(s){
+      if (reportClosed(s)) return;
+      subjectAsked(s).forEach(function(x){
+        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
+      });
+    });
+  }
+  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -7570,9 +7648,10 @@ function outcomeOf(t){
      (§248), so the twelve months ride across under the name the rules
      module reads — `outMonthly` on the tactic, `monthly` on the shape.
      Without this line the drawer would write a plan that nothing reads. */
+  /* §577: and its quarters, under the name the rules read beside the months. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual,
-           monthly: t.outMonthly };
+           monthly: t.outMonthly, quarterly: t.outQuarterly };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target
@@ -7772,11 +7851,12 @@ function setExtraFigure(t, id, v){
    reading surfaces draw these. */
 function scoredExtras(t){ return outcomeOf(t) ? tacticExtras(t) : []; }
 /* The word a tactic's status takes after a figure lands, with several
-   outcomes: Done once the average reaches the target, In progress once any
+   outcomes: Done once every outcome reaches its whole target (§575 — the
+   average reaching what is DUE is ahead, not done), In progress once any
    outcome has a figure. A single outcome keeps its own rule unchanged. */
 function statusFromOutcomes(t){
   var sc = tacticOutcomeScore(t), keep = t.status === "Blocked";
-  if (sc != null) return sc >= 100 ? "Done" : (keep ? "Blocked" : "WIP");
+  if (sc != null) return tacticComplete(t) ? "Done" : (keep ? "Blocked" : "WIP");
   var any = tacticOutcomes(t).some(function(x){
     return x.o.actual != null && x.o.actual !== ""; });
   return any ? (keep ? "Blocked" : "WIP") : "Not started";
@@ -7998,13 +8078,36 @@ var TACTIC_WORDS = { done: "Completed", wip: "In progress",
    progress is the yellow band, not the orange one — Islam: *"the orange is
    close to the red"*, and beside a red Delayed the two read as one. */
 var TACTIC_BANDS = { done: "good", wip: "attn", notdue: "kind", todo: "none" };
+/* ── COMPLETED IS THE WHOLE TARGET, NEVER THE PART DUE (§575) ──────────
+   Islam, of D003 *Digitalizing Route to Market*: Q3–Q4, 10 outlets' worth
+   of coverage, 8 reported at the end of Q3 against 5 due — 150%, and the
+   pill read **Completed** beside the reporter's own note *"to be finalized
+   Q4"*. Nobody picked the word: the reporting box stored `Done` from a score
+   of 100 or more, and that score is against the PRORATED target, so "ahead
+   of what is due" read as "finished".
+
+   SO A TACTIC WITH OUTCOMES IS ASKED OF ITS FIGURES, NEVER OF `t.status`.
+   The stored word is the box's old guess and stays as it is (§419: derived,
+   never stored), so a row saved as `Done` before this reads right the moment
+   it is drawn and nothing is migrated. Every outcome must be complete (§414),
+   and an "at most" outcome keeps the reading it always had — inside its
+   target, scored against what is due — because nobody has said when a
+   ceiling is finished. A tactic with no outcome is unchanged: its figure is
+   already a share of the whole tactic, so 100 is the whole of it. */
+function outcomeComplete(t, o){
+  if (!o) return false;
+  if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status === "done";
+  if (o.dir === "≤") { var s = oneOutcomeScore(t, o); return s != null && s >= 100; }
+  if (o.actual == null || o.actual === "") return false;
+  var whole = parseFloat(String(o.target).replace(/[^0-9.]/g, ""));
+  var a = parseFloat(String(o.actual).replace(/[^0-9.]/g, ""));
+  return !isNaN(whole) && !isNaN(a) && a >= whole;
+}
 function tacticComplete(t){
   if (!t) return false;
-  if (t.status === "Done") return true;
   var list = tacticOutcomes(t);
-  /* §414: complete only when EVERY outcome is a yes/no that is done. */
-  if (list.length) return list.every(function(x){
-    return SMPRules.isYesNo(x.o.target) && SMPRules.ynState(x.o.actual).status === "done"; });
+  if (list.length) return list.every(function(x){ return outcomeComplete(t, x.o); });
+  if (t.status === "Done") return true;
   return t.actual != null && t.actual >= 100;
 }
 function tacticAtNought(t){

@@ -488,7 +488,19 @@
    clear. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.67-tour-clear-cover";
+/* v6.68-tactic-completed — §575: a tactic counted in numbers says Completed
+   only at its whole target. The built file's bytes changed, which is the
+   whole trigger (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v6.69-quarterly-plan — §577: a target planned by quarter as well as by
+   month. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.70-note-lock — §576.1: a red figure gets its note before anything
+   else. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.70-note-lock";
 const ASSETS = [
   "/",
   "/index.html",

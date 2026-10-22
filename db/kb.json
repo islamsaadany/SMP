@@ -1222,14 +1222,14 @@
   {
    "id": "monthly-plan",
    "group": "Capabilities and projects",
-   "q": "How do I set a target month by month?",
-   "a": "Open the plan with the pen, and press the small grid mark beside the target. Twelve boxes open under the row — one for each month, in the target's own unit.|It takes effect from the first month you fill in: the annual target becomes what the months set come to, and the box shows it rather than taking a figure of its own. A month of nought is a real answer, and a month left empty counts as nothing planned.",
+   "q": "How do I set a target month by month or by quarter?",
+   "a": "Open the plan with the pen, and press the small grid mark beside the target. Twelve boxes open under the row — one for each month, in the target's own unit. Press <b>By quarter</b> at the right of the drawer for four boxes instead, Q1 to Q4.|It takes effect from the first month you fill in: the annual target becomes what the months set come to, and the box shows it rather than taking a figure of its own. A month of nought is a real answer, and a month left empty counts as nothing planned.|Switching between months and quarters carries the figures across: a quarter is its three months, and a quarter spread back over its months splits evenly. A review partway through a quarter owes that share of it.",
    "who": "office"
   },
   {
    "id": "monthly-plan-ask",
    "group": "Capabilities and projects",
-   "q": "How do I set a target month by month?",
+   "q": "How do I set a target month by month or by quarter?",
    "a": "The Strategy Office sets that. It is worth asking for where your year is not flat — a season, a launch, a contract that starts in the second half — because without it every target is measured as if each month carried the same share of it.",
    "who": "everyone"
   },
@@ -1244,7 +1244,7 @@
    "id": "monthly-why",
    "group": "Capabilities and projects",
    "q": "Why is my year-to-date target not half the year?",
-   "a": "Because that measure carries a monthly plan: the office has said what each month is expected to carry, so what you are measured against is the months that have actually run rather than a flat share.|Its annual target reads <b>by month</b> underneath on the Performance page. Without one, a target is still spread evenly.",
+   "a": "Because that measure carries a plan by month or by quarter: the office has said what each is expected to carry, so what you are measured against is what has actually run rather than a flat share.|Its annual target reads <b>by month</b> or <b>by quarter</b> underneath on the Performance page. Without one, a target is still spread evenly.",
    "who": "everyone"
   },
   {

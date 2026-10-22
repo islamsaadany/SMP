@@ -3306,6 +3306,31 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
                  .map(function (c) { return c.kind; });
   check("§278: it classifies as the unit's PLAN and nothing else",
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+
+  /* §577: FOUR QUARTERS ARE THE SAME ACT. `quarterly` is as new to the
+     authoriser as `monthly` was, and falls through the same way — asserted for
+     §278's reason: if it ever stopped, a unit head could reshape the target
+     they are judged against by quarter, and nothing would notice. */
+  const FOUR = [45, 51, 84, 120];
+  r = fromStored(SEED, "smo", function (i) {
+    i.units[UK].items[0].measures[0].quarterly = FOUR; });
+  check("§577: the office gives a measure a quarterly plan", r.ok,
+        (r.refusals || []).join(" / "));
+  r = fromStored(SEED, CUST, function (i) {
+    i.units[UK].items[0].measures[0].quarterly = FOUR; });
+  check("§577 REFUSED: the unit's own custodian cannot plan it by quarter",
+        !r.ok, "was ALLOWED");
+  const withQ = clone(SEED);
+  withQ.units[UK].items[0].measures[0].quarterly = FOUR;
+  r = fromStored(withQ, CUST, function (i) {
+    delete i.units[UK].items[0].measures[0].quarterly; });
+  check("§577 REFUSED: nor clear one", !r.ok, "was ALLOWED");
+  const incQ = clone(SEED);
+  incQ.units[UK].items[0].measures[0].quarterly = FOUR;
+  const kq = A.collect(SEED, incQ, A.worldOf ? A.worldOf(SEED) : SEED)
+              .map(function (c) { return c.kind; });
+  check("§577: it classifies as the unit's PLAN and nothing else",
+        kq.length === 1 && kq[0] === "unitPlan", kq.join(",") || "(nothing)");
 })();
 
 /* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
@@ -4566,6 +4591,40 @@ console.log("\n43 · my reporting (spec 062)");
     const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
     const inc = clone(shut); inc.units[uk].items[0].tactics[0].actual = "42";
     check("§382 REFUSED: a locked cycle takes nothing, owner or not",
+          !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
+  })();
+
+  /* — §576: THE NOTE ON AN OWNED LINE IS THE OWNER'S OR THE UNIT'S.
+       §382 said "the unit writes the note" and the server sent the note to
+       the owner with the figure, refusing the unit's custodian and head;
+       §576 gives the owner the note on their own red rows. Both ends, and
+       the figure beside it stays the owner's alone. — */
+  (function () {
+    const note = say(function (i) { at(i).note = "Why, and what is being done"; });
+    const nk = kindsOf(note);
+    check("§576: an owned line's note classifies as lineNote, never lineReporting",
+          nk.some(function (k) { return k.indexOf("lineNote:") === 0; }) &&
+          !nk.some(function (k) { return k.indexOf("lineReporting:") === 0; }),
+          nk.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§576: the owner writes it", verdict(note, owner.key).ok,
+          (verdict(note, owner.key).refusals || []).join(" / "));
+    const roles = base.unitRoles[uk] || {};
+    ["custodian", "head"].forEach(function (r) {
+      if (!roles[r]) return;
+      check("§576: ...and so does the unit's " + r, verdict(note, roles[r]).ok,
+            (verdict(note, roles[r]).refusals || []).join(" / "));
+    });
+    check("§576: ...and the office", verdict(note, "smo").ok,
+          (verdict(note, "smo").refusals || []).join(" / "));
+    check("§576 REFUSED: somebody with no reach into the unit does not",
+          !verdict(note, other.key).ok, "was ALLOWED");
+    const both = say(function (i) { at(i).note = "Why"; at(i).actual = "42"; });
+    if (roles.custodian)
+      check("§576 REFUSED: the custodian still may not enter the owner's FIGURE",
+            !verdict(both, roles.custodian).ok, "was ALLOWED");
+    const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
+    const inc = clone(shut); inc.units[uk].items[0].tactics[0].note = "Why";
+    check("§576 REFUSED: a locked cycle takes the note from the owner too",
           !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
   })();
 

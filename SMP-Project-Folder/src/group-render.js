@@ -1581,7 +1581,7 @@ function companyPresentMenu(){
        onto the projector — a second door onto the same evening, beside a
        flow that already carries the company last. The flow is the door
        now, and it is first. */
-    items = master +
+    items = master + exTourItem() +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
       slides + dl;
@@ -1703,7 +1703,18 @@ function presentMenu(kind, key){
     : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + '</div></details>';
+    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + exTourItem() +
+    '</div></details>';
+}
+/* §574: THE GUIDED TOUR, UNDER MASTER PRESENTATION in both menus that carry
+   it, and for the same people — Islam: *"from the options of presentation
+   drop down below the master presentation"*. It names no subject because it
+   tours none of them: the direction it walks is made up (present.js). */
+function exTourItem(){
+  return SMPRules.mayMasterPresent(world(), viewer())
+    ? '<button role="menuitem" data-extour="1">Guided tour' +
+      '<span class="dlsub">How to read the slides, on a made-up direction</span></button>'
+    : "";
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────

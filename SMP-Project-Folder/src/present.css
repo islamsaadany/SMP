@@ -1427,25 +1427,15 @@
   .d-compete table.cmptab td.cmpval { font-size:20px; }
   .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
 
-/* ── THE GUIDED TOUR OF ONE SUBJECT'S SLIDES (§574) ───────────────────────
+/* ── THE GUIDED TOUR, ON A MADE-UP DIRECTION (§574) ───────────────────────
    The onboarding tour's spotlight (tour.css) at projector size: the shade is
    painted by a masked rect so the lit part is never washed by a dim laid over
    it, and the ring is the accent. Inside `#deckroot`, so it is on the screen
    when the deck is full screen. Every colour a token (§25). */
-.mflow .mftour { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-                 margin-top:12px; font-size:12.5px; color:var(--ink-2); }
-.mflow .mftour label { font-weight:600; color:var(--ink); }
-.mflow .mftour select { font:inherit; border:1px solid var(--field-line, var(--line));
-                        border-radius:6px; padding:4px 8px; background:var(--surface);
-                        color:var(--ink); max-width:320px; }
-.mflow .mftourhint { color:var(--ink-3); }
-
-.dslide .dtourgo { position:absolute; top:28px; right:32px; z-index:2;
-                   font:600 17px/1 var(--sans); padding:11px 18px; border-radius:999px;
-                   border:1px solid var(--gold); background:var(--surface); color:var(--gold-deep);
-                   cursor:pointer; display:inline-flex; align-items:center; gap:9px; }
-.dslide .dtourgo:hover { background:var(--gold); color:var(--on-fill, #fff); }
-.dslide .dtourgo span { font-size:13px; }
+/* The example's cover says its figures are made up (B3), in the cover's own
+   sub-line size and the attention ink, so it reads as part of the slide and
+   is not missed. */
+.dslide .coversub.dexample { color:var(--attn-tx, var(--ink-3)); font-weight:600; }
 
 .dtour { position:absolute; inset:0; z-index:5; cursor:pointer; }
 .dtour .dtsvg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
@@ -1482,4 +1472,4 @@
                  padding:9px 22px; cursor:pointer; }
 .dtour .dtnext:hover { background:var(--panel-hover, var(--panel)); }
 .dtour button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-@media print { .dslide .dtourgo, .dtour { display:none !important; } }
+@media print { .dtour { display:none !important; } }

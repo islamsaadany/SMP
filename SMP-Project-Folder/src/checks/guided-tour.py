@@ -1,19 +1,21 @@
-"""The guided tour of one subject's slides (§574).
+"""The guided tour, on a made-up direction (§574, §574.1).
 
-Islam, before El Abd's Q3 review: an option in the master flow to present a
-demo direction, unit or function, and on clicking in the presentation a tour
-through that subject's slides that lights one part and dims the rest, with a
-card saying what the part is.
+Islam, before El Abd's Q3 review: a tour through a direction's slides that
+lights one part and dims the rest, with a card saying what it is — and then,
+on the first build: *"remove step 14 … start it … from the options of
+presentation drop down below the master presentation … on a dummy direction
+with multiple dynamics … a made up one not an actual one"*.
 
-It MAKES its state (§255): El Abd's shape — the company plans its own
-directions, the business units off — from the worked example's figures, one
-tactic made late so the Delayed stop has something to light. BOTH ENDS
-(§94.2): the picker offers the flow and nothing else; the button is on the
-picked direction's cover and on no other slide; a pick that is not in the
-flow draws nothing. And A15: a business unit's deck takes the same tour.
-SMP_BUILT points it at another build (§276).
+It MAKES its state (§255): El Abd's shape, the company planning its own
+directions with the business units off. BOTH ENDS (§94.2): the office gets
+the menu entry under Master presentation and somebody who may not open the
+flow does not; the flow's picker and a real direction's tour button are gone;
+the example is drawn and NEVER reaches the stored plan; its tactics show
+Completed, Delayed, on track and Not due at H1 and at Q3 alike, because which
+quarters do that is asked of the platform. SMP_BUILT points it at another
+build (§276).
 """
-import os
+import os, json
 from playwright.sync_api import sync_playwright
 
 BUILT = os.environ.get("SMP_BUILT") or os.path.join(os.path.dirname(__file__), "..", "strategy-management-platform.html")
@@ -35,89 +37,91 @@ MAKE = """()=>{
     (p.measures||[]).forEach(function(m,k){ m.id=id+'-M'+(k+1); });
     (p.tactics||[]).forEach(function(t,k){ t.id=id+'-T'+(k+1); });
     return p; });
-  var t=GROUP.items[0].tactics[2]; t.q1=1; t.q2=1; t.q3=0; t.q4=0;
   current='group'; currentSub='performance'; paint(); return true}"""
 
 STATE = """()=>({on:!!DTOUR, i:DTOUR?DTOUR.i:-1, n:DTOUR?DTOUR.stops.length:0, slide:DECK.i,
+  deck:document.getElementById('deckroot').classList.contains('on'),
   h:(document.querySelector('.dtcard h3')||{}).textContent||'',
   ring:(e=>e?+e.getAttribute('width'):0)(document.querySelector('.dtring'))})"""
+KIND = """()=>{var s=DECK.slides[DECK.i]; return s.dataset.split?s.dataset.split.slice(-1):(s.classList.contains('d-head')?'stand':(s.classList.contains('d-cover')?'cover':'?'))}"""
+DYN = """()=>{var x=exampleDirection();
+  return {bands:x.p.measures.map(m=>band(measureScore(m))),
+          states:x.p.tactics.map(t=>tacticStatusKey(t)+(tacticDelayed(t)?'+late':''))}}"""
+MENU = """()=>{var m=[...document.querySelectorAll('.dlmenu')].find(x=>x.querySelector('[data-master],[data-extour],[data-deckpdf]'));
+  return m?[...m.querySelectorAll('[role=menuitem]')].map(b=>b.childNodes[0].textContent.trim()):null}"""
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("SMP_CHROME") or None)
     pg = b.new_page(viewport={"width": 1600, "height": 900})
     errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1');localStorage.removeItem('smp.deck.tour')}catch(e){}")
+    pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1')}catch(e){}")
     pg.goto("file://" + os.path.abspath(BUILT)); pg.wait_for_timeout(800)
     office = safe(pg, "()=>(PEOPLE.find(p=>SMPRules.mayMasterPresent(world(), p))||{}).key")
-    safe(pg, "(k)=>{switchViewer(k); return true}".replace("(k)", "()").replace("switchViewer(k)", "switchViewer('%s')" % office)); pg.wait_for_timeout(400)
+    other = safe(pg, "()=>(PEOPLE.find(p=>!SMPRules.mayMasterPresent(world(), p) && p.unit==='mobile')||PEOPLE.find(p=>!SMPRules.mayMasterPresent(world(), p))||{}).key")
+    safe(pg, "()=>{switchViewer('%s'); return true}" % office); pg.wait_for_timeout(400)
     safe(pg, MAKE); pg.wait_for_timeout(400)
 
-    # ── 1. The picker: the flow, and only the flow ─────────────────────
+    # ── 1. The way in: the Presentation menu, under Master presentation ─
+    items = safe(pg, MENU) or []
+    ck("the office's Presentation menu reads Master presentation, then Guided tour",
+       items[:2] == ["Master presentation", "Guided tour"], items)
     safe(pg, "()=>{masterOpen(); MFLOW.pick=['dir:group-P1','dir:group-P2']; masterPaint(); return true}"); pg.wait_for_timeout(300)
-    opts = safe(pg, "()=>[...document.querySelectorAll('[data-mftour] option')].map(o=>o.value)") or []
-    ck("the Guided tour picker offers None and the flow's two directions, nothing else",
-       opts == ["", "dir:group-P1", "dir:group-P2"], opts)
-    try: pg.select_option("[data-mftour]", "dir:group-P1"); pg.wait_for_timeout(300)
-    except Exception as e: pass
-    ck("picking one is remembered", safe(pg, "()=>deckTourPick()") == "dir:group-P1", safe(pg, "()=>deckTourPick()"))
-    ck("…and the picker still shows it after the repaint",
-       safe(pg, "()=>document.querySelector('[data-mftour]').value") == "dir:group-P1")
-    safe(pg, "()=>{MFLOW.pick=['dir:group-P2']; masterPaint(); return true}"); pg.wait_for_timeout(200)
-    ck("a direction taken out of the flow is not offered, and the picker reads None",
-       safe(pg, "()=>document.querySelector('[data-mftour]').value") == "", safe(pg, "()=>document.querySelector('[data-mftour]').value"))
-    safe(pg, "()=>{MFLOW.pick=[]; masterPaint(); return true}"); pg.wait_for_timeout(200)
-    ck("an empty flow draws no picker (§61)", safe(pg, "()=>!document.querySelector('[data-mftour]')") is True)
-    safe(pg, "()=>{closeModal(); return true}")
-
-    # ── 2. The button: on the picked direction's cover, nowhere else ───
-    safe(pg, "()=>{openDeckWith('t', flowWithParts(['dir:group-P1','dir:group-P2'])); return true}"); pg.wait_for_timeout(700)
-    btn = safe(pg, """()=>{var b=[...document.querySelectorAll('#deckroot [data-dtourgo]')];
-      return b.map(x=>{var s=x.closest('.dslide'); return {sub:s.dataset.subject, cover:s.classList.contains('d-cover'), part:!!s.dataset.flowpart}})}""") or []
-    ck("one Guided tour button, on the picked direction's own cover — not the flow's cover",
-       len(btn) == 1 and btn[0] == {"sub": "dir:group-P1", "cover": True, "part": False}, btn)
-    safe(pg, "()=>{closeDeck(); openDeckWith('t', flowWithParts(['dir:group-P2'])); return true}"); pg.wait_for_timeout(600)
-    ck("a pick that is not in the flow draws no button", safe(pg, "()=>document.querySelectorAll('#deckroot [data-dtourgo]').length") == 0)
+    ck("the Master presentation carries no tour picker any more (Islam: the menu only)",
+       safe(pg, "()=>!document.querySelector('[data-mftour]') && !/Guided tour/.test(document.getElementById('modal-b').textContent)") is True)
+    safe(pg, "()=>{closeModal(); openDeckWith('t', flowWithParts(['dir:group-P1','dir:group-P2'])); return true}"); pg.wait_for_timeout(600)
+    ck("a real direction's deck has no tour button", safe(pg, "()=>!document.querySelector('#deckroot [data-dtourgo]')") is True)
     pg.keyboard.press("g"); pg.wait_for_timeout(200)
-    ck("…and G starts nothing", safe(pg, "()=>!!DTOUR") is False)
-    safe(pg, "()=>{closeDeck(); return true}")
+    ck("…and G on a real deck starts nothing", safe(pg, "()=>!!DTOUR") is False)
+    safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
 
-    # ── 3. The tour: the stops it makes, in order ──────────────────────
-    safe(pg, "()=>{openDeckWith('t', flowWithParts(['dir:group-P1','dir:group-P2'])); return true}"); pg.wait_for_timeout(700)
-    cover = safe(pg, "()=>DECK.slides.findIndex(s=>s.querySelector('[data-dtourgo]'))")
-    safe(pg, "(i)=>{deckShow(%d); return true}".replace("(i)", "()") % cover); pg.wait_for_timeout(200)
-    try: pg.click("[data-dtourgo]"); pg.wait_for_timeout(500)
-    except Exception: pass
+    # ── 2. The press: the example, full screen, the tour on its first stop
+    before = safe(pg, "()=>JSON.stringify([GROUP, UNITS, REVIEW])")
+    safe(pg, "()=>{document.querySelector('[data-extour]').click(); return true}"); pg.wait_for_timeout(900)
     st = safe(pg, STATE) or {}
-    ck("pressing the button starts the tour on its first stop, lit", st.get("on") and st.get("i") == 0 and st.get("ring", 0) > 0, st)
+    ck("pressing Guided tour opens the deck with the tour on stop 1, lit",
+       st.get("deck") and st.get("on") and st.get("i") == 0 and st.get("ring", 0) > 0, st)
+    ck("…full screen, as Present from the slides opens", safe(pg, "()=>document.getElementById('deckroot').classList.contains('fs')") is True)
+    ck("…on the made-up direction and nothing else",
+       safe(pg, "()=>DECK.targets.join()+'|'+DECK.slides.every(s=>s.dataset.subject==='example:tour')") == "example:tour|true")
+    cover = safe(pg, "()=>DECK.slides[0].textContent") or ""
+    ck("its cover says it is an example with made-up figures", "the figures are made up" in cover, cover[:200])
+    ck("…and it is coded EX001, never a D-code a real direction holds",
+       safe(pg, "()=>[...document.querySelectorAll('#deckroot .dcode')].every(e=>e.textContent.trim()==='EX001')") is True)
+    ck("…and it has no Thank you slide — the tour ends the deck",
+       safe(pg, "()=>!document.querySelector('#deckroot .d-thanks')") is True)
+
+    # ── 3. The stops, in order, with step 14 gone ──────────────────────
     heads, kinds = [], []
     for k in range(st.get("n", 0)):
         s = safe(pg, STATE) or {}
-        heads.append(s.get("h"))
-        kinds.append(safe(pg, "()=>{var s=DECK.slides[DECK.i]; return s.dataset.split?s.dataset.split.slice(-1):(s.classList.contains('d-head')?'stand':(s.classList.contains('d-cover')?'cover':'?'))}"))
+        heads.append(s.get("h")); kinds.append(safe(pg, KIND))
         if k < st.get("n", 0) - 1:
-            pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(250)
-    ck("it walks cover, key measures, tactics, then where it stands — in that order",
+            pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(220)
+    ck("it walks cover, key measures, tactics, then where it stands",
        [x for i, x in enumerate(kinds) if i == 0 or kinds[i-1] != x] == ["cover", "M", "T", "stand"], kinds)
-    for h in ["Annual target", "Actual", "Progress", "Note", "Quarters", "Status", "Delayed", "YTD actual and Progress", "Two different questions"]:
+    for h in ["Annual target", "Actual", "Progress", "Note", "Quarters", "Status", "Delayed",
+              "YTD actual and Progress", "Where it stands: Execution"]:
         ck("…with a stop for " + h, h in heads, heads)
-    ck("every stop but the closing card lights something",
-       all(x for x in kinds), kinds)
-    at = safe(pg, "()=>DECK.i")
-    pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(250)
-    ck("Next on the closing card ends the tour and leaves the deck where it is",
-       safe(pg, "()=>!!DTOUR") is False and safe(pg, "()=>DECK.i") == at and safe(pg, "()=>document.getElementById('deckroot').classList.contains('on')") is True)
+    ck("the stop on the line under the two readings is gone (Islam: remove step 14)",
+       "Two different questions" not in heads and len(heads) == 14, heads)
+    ck("the last stop before the closing card is Execution",
+       len(heads) > 1 and heads[-2] == "Where it stands: Execution", heads[-3:])
 
-    # ── 4. Keys and presses are the tour's while it runs ───────────────
-    pg.keyboard.press("g"); pg.wait_for_timeout(400)
-    s0 = safe(pg, STATE) or {}
-    ck("G starts it from anywhere in the deck", s0.get("on") is True, s0)
+    # ── 4. Never stored ────────────────────────────────────────────────
+    ck("the example reaches nothing stored — GROUP, the units and the review read as before",
+       safe(pg, "()=>JSON.stringify([GROUP, UNITS, REVIEW])") == before)
+
+    # ── 5. Keys and presses are the tour's; Finish closes the deck ──────
+    pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(300)
+    ck("Finish on the closing card closes the example and lands on the platform",
+       safe(pg, "()=>!DTOUR && !document.getElementById('deckroot').classList.contains('on')") is True)
+    safe(pg, "()=>{exampleTourOpen(); return true}"); pg.wait_for_timeout(700)
     pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(250)
     pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(250)
     s1 = safe(pg, STATE) or {}
     ck("→ moves the tour, not the deck past it", s1.get("i") == 2, s1)
     pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(250)
     ck("← steps back", (safe(pg, STATE) or {}).get("i") == 1)
-    safe(pg, "()=>{document.getElementById('deckroot').classList.add('fs'); return true}")
     sl = safe(pg, "()=>DECK.i")
     pg.mouse.click(24, 880); pg.wait_for_timeout(300)
     s2 = safe(pg, STATE) or {}
@@ -125,35 +129,36 @@ with sync_playwright() as p:
        s2.get("i") == 2 and s2.get("slide") == sl, {"before": sl, "after": s2})
     try: pg.click("[data-dtend]"); pg.wait_for_timeout(200)
     except Exception: pass
-    ck("the × ends the tour", safe(pg, "()=>!!DTOUR") is False and safe(pg, "()=>!document.querySelector('[data-dtour]')") is True)
-    pg.keyboard.press("g"); pg.wait_for_timeout(300); pg.keyboard.press("g"); pg.wait_for_timeout(200)
-    ck("G again ends it", safe(pg, "()=>!!DTOUR") is False)
-    safe(pg, "()=>{document.getElementById('deckroot').classList.remove('fs'); return true}")
-    pg.keyboard.press("g"); pg.wait_for_timeout(300)
-    safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
-    ck("closing the deck ends the tour with it", safe(pg, "()=>!!DTOUR") is False and safe(pg, "()=>!document.querySelector('[data-dtour]')") is True)
-
-    # ── 5. Never printed ───────────────────────────────────────────────
-    safe(pg, "()=>{openDeckWith('t', flowWithParts(['dir:group-P1'])); return true}"); pg.wait_for_timeout(600)
-    pg.emulate_media(media="print")
-    ck("the button is not on the PDF", safe(pg, "()=>getComputedStyle(document.querySelector('[data-dtourgo]')).display") == "none")
-    pg.emulate_media(media="screen")
-    safe(pg, "()=>{closeDeck(); return true}")
-
-    # ── 6. A15: a business unit's deck takes the same tour ─────────────
-    pg.goto("file://" + os.path.abspath(BUILT)); pg.wait_for_timeout(800)
-    safe(pg, "()=>{switchViewer('%s'); return true}" % office); pg.wait_for_timeout(300)
-    safe(pg, "()=>{deckTourPickWrite('mobile'); openDeckWith('t', ['mobile']); return true}"); pg.wait_for_timeout(800)
-    ck("a unit picked gets the button on its cover", safe(pg, "()=>{var b=document.querySelector('[data-dtourgo]'); return b?b.closest('.dslide').dataset.subject:null}") == "mobile")
+    ck("the × ends the tour and leaves the deck on its slide",
+       safe(pg, "()=>!DTOUR && !document.querySelector('[data-dtour]') && document.getElementById('deckroot').classList.contains('on')") is True)
     pg.keyboard.press("g"); pg.wait_for_timeout(400)
-    u = safe(pg, STATE) or {}
-    heads = []
-    for k in range(u.get("n", 0)):
-        heads.append((safe(pg, STATE) or {}).get("h"))
-        pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(200)
-    ck("…and the tour lights its key measures, tactics and where it stands",
-       all(h in heads for h in ["Progress", "Status", "Two different questions"]) and heads[0] == "One business unit, from cover to close", heads)
-    safe(pg, "()=>{closeDeck(); deckTourPickWrite(''); return true}")
+    ck("G starts it again", safe(pg, "()=>!!DTOUR && DTOUR.i===0") is True)
+    pg.keyboard.press("g"); pg.wait_for_timeout(200)
+    ck("…and G again ends it", safe(pg, "()=>!!DTOUR") is False)
+    pg.emulate_media(media="print")
+    pg.keyboard.press("g"); pg.wait_for_timeout(300)
+    ck("the tour is not on paper", safe(pg, "()=>getComputedStyle(document.querySelector('[data-dtour]')).display") == "none")
+    pg.emulate_media(media="screen")
+    safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
+    ck("closing the deck ends the tour with it", safe(pg, "()=>!DTOUR && !document.querySelector('[data-dtour]')") is True)
+
+    # ── 6. The dynamics, asked of the platform at H1 and at Q3 ─────────
+    for to, name in [(None, "the demo's own cycle"), ("2026-09", "Q3, El Abd's"), ("2026-08", "a review point mid-quarter")]:
+        if to: safe(pg, "()=>{REVIEW.to='%s'; return true}" % to)
+        d = safe(pg, DYN) or {}
+        ck("at %s the key measures span all three bands" % name,
+           sorted(set(d.get("bands") or [])) == ["attn", "bad", "good"], d)
+        ck("…and the tactics read Completed, Delayed, on track and Not due",
+           d.get("states") == ["done", "wip+late", "wip", "notdue"], d)
+
+    # ── 7. Somebody who may not open the flow gets no entry ─────────────
+    if other:
+        safe(pg, "()=>{switchViewer('%s'); paint(); return true}" % other); pg.wait_for_timeout(400)
+        ck("somebody who may not open the Master presentation has no Guided tour",
+           safe(pg, "()=>!document.querySelector('[data-extour]')") is True)
+        safe(pg, "()=>{exampleTourOpen(); return true}"); pg.wait_for_timeout(300)
+        ck("…and the opener refuses them at the press (§48.2)",
+           safe(pg, "()=>!document.getElementById('deckroot').classList.contains('on')") is True)
 
     ck("no page errors", not errs, errs[:3])
     b.close()

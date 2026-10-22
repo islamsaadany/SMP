@@ -5238,6 +5238,14 @@
         masterOpen();
       });
     });
+    /* §574: the guided tour, on its made-up direction — beside the master
+       presentation it sits under. */
+    document.querySelectorAll("[data-extour]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        exampleTourOpen();
+      });
+    });
     /* Picture slides — beside Present, because it is the deck they go into
        (§50.4). Wired here with the rest of the page's actions, in the function
        that rewrote the DOM they sit in (§29's rule: whoever rewrites the DOM

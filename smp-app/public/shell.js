@@ -3657,6 +3657,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !(Array.isArray(v) && v.indexOf(col) >= 0);
   }
 
+  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§579) ──────────────────────
+     Islam: *"give me an option … to present box by box like line by line in
+     the tables and number by number in the numbers slides"* — one switch,
+     the office's, set in the slide view beside Columns and judged as that
+     menu is (`deckHide`): it changes how a deck is shown and scores nothing.
+     The company's, like the columns, so it is the same on any laptop.
+     STORED AS `true` WHEN ON AND ABSENT WHEN OFF (§50.6): a client that
+     never touches it is byte-identical, and reading never creates it (§42). */
+  var SLIDE_BUILD = "slideBuild";
+  function slideBuildOn(group) {
+    return !!(group && group[SLIDE_BUILD] === true);
+  }
+
   /* ── THE MASTER PRESENTATION'S RUNNING ORDER (§266) ─────────────────
      Islam: *"give an option for the SMO from the presentation list to do
      master presentation which is a flow of presentations in a flow and he is
@@ -5797,6 +5810,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     isHidden: isHidden, shown: shown,
     HIDE_SLIDES: HIDE_SLIDES, hiddenSlides: hiddenSlides, slideHidden: slideHidden,
     SLIDE_COLS_OFF: SLIDE_COLS_OFF, SLIDE_COLS: SLIDE_COLS, slideColOn: slideColOn,
+    SLIDE_BUILD: SLIDE_BUILD, slideBuildOn: slideBuildOn,
     VIDEO_MAX_BYTES: VIDEO_MAX_BYTES, VIDEO_MAX_SECS: VIDEO_MAX_SECS,
     VIDEO_PER_SUBJECT: VIDEO_PER_SUBJECT, VIDEO_STORE: VIDEO_STORE,
     VIDEO_EMBED_HOSTS: VIDEO_EMBED_HOSTS, VIDEO_SERVICES: VIDEO_SERVICES,
@@ -49837,10 +49851,61 @@ function competeSlides(u){
    beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
    both callers build cells and hand them here. A change to the wording, the
    bands or the footer reaches both by construction. */
-function standCell(label, val, sub){
+function standCell(label, val, sub, detail){
   return '<div class="headcell"><span class="dlab">' + label + '</span>' +
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
-    '<span class="headsub">' + sub + '</span></div>';
+    '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
+}
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Islam: *"for the overall performance slide with the final 2 numbers we
+   need to give a detail below the 2 numbers to show where the numbers are
+   coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
+
+   EACH LINE IS READ BY THE FUNCTION THAT SCORED IT, never worked out again
+   here (§53.5): a key measure's figure is `measureScore`, a category
+   column's `bdColScore` — the two lists `pillarPerf` averages — and a
+   tactic's is `tacticReads` of `tacticPlanShare`, the two `pillarExec` and
+   `pillarPlan` average. So the lines cannot disagree with the number above
+   them. What the reading leaves out is said, quietly, under the list: a
+   tactic not due and one not reported are not zero, and a reader adding up
+   the lines needs to know why they are not there.
+
+   Directions only, on the deck that ends on them. Five lines, then "and N
+   more" — never "and 1 more", which would take the line it saves. */
+var STAND_DETAIL_MAX = 5;
+function standDetail(rows, note){
+  if (!rows.length && !note) return "";
+  var cut = rows.length > STAND_DETAIL_MAX + 1 ? STAND_DETAIL_MAX : rows.length;
+  return '<ul class="headdetail">' + rows.slice(0, cut).map(function(r){
+      return '<li><span class="hdn">' + esc(r.name) + '</span><span class="hdv">' + r.fig + '</span></li>';
+    }).join("") +
+    (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
+    (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
+}
+function dirMeasureDetail(p){
+  var rows = scorableMeasures(p).map(function(m){
+    var v = measureScore(m);
+    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+  });
+  if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
+    var v = bdColScore(p, c);
+    if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
+                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+  });
+  return standDetail(rows, "");
+}
+function dirExecDetail(p){
+  var rep = reportedTactics(p), due = dueTactics(p);
+  var rows = rep.map(function(t){
+    var r = tacticProgress(t);
+    return { name:t.name,
+             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+                 '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
+  });
+  var notDue = SMPRules.shown(p.tactics || []).length - due.length;
+  var unrep = due.length - rep.length;
+  var left = [notDue ? notDue + " not due" : "", unrep ? unrep + " not reported" : ""].filter(Boolean);
+  return standDetail(rows, left.length ? "Not counted: " + left.join(", ") : "");
 }
 function standSlideOf(name, cells, foot){
   cells = cells.filter(Boolean);
@@ -50921,9 +50986,10 @@ function dirDeckOf(u, p, i, ex){
     S.push(standSlideOf(esc(p.name),
       [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
           SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
-          ', by their targets'),
+          ', by their targets', dirMeasureDetail(p)),
         dirExec != null && standCell('Execution performance', dirExec,
-          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned',
+          dirExecDetail(p)) ],
       /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
          direction with nothing delivered draws no Execution cell, and a
          footnote explaining Execution would be the slide explaining a
@@ -51535,6 +51601,9 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
+  /* §581: what this deck was opened with, so updating its figures rebuilds
+     the same deck (`deckRebuild`) rather than guessing it back. */
+  DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
   /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
      §554.1's cover and roll-calls are slides, not people presenting — and
@@ -52826,6 +52895,9 @@ function clockMount(root){
 }
 
 function deckShow(n){
+  /* §579: a slide arrived at any way but a step forward is shown whole —
+     the dots, Home and End, the editor's own slide, a step back. */
+  DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
@@ -52930,8 +53002,11 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
-  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
+  /* §579: every way forward and back goes through `deckStep`, which
+     builds a slide line by line where the company has asked for it and is
+     `deckShow(DECK.i ± 1)` where it has not. */
+  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
+  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckStep(-1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
   /* §340. Both are in the bar, which in fullscreen is not on the screen — so
      pause has two more ways in (the `P` key and the clock itself) and reset
@@ -52992,7 +53067,7 @@ function wireDeck(){
     if (DECKSWIPED) { DECKSWIPED = false; return; }
     if (deckOwnControl(ev.target)) return;
     var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
-    deckShow(DECK.i + (back ? -1 : 1));
+    deckStep(back ? -1 : 1);
   });
 
   /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
@@ -53025,7 +53100,7 @@ function wireDeck(){
     var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
     if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
     DECKSWIPED = true;
-    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+    deckStep(dx < 0 ? 1 : -1);
   });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
@@ -53043,7 +53118,10 @@ function wireDeck(){
     /* §556.11: a deck the slides opened full screen has no windowed state
        to fall back to — leaving full screen IS leaving the deck, or one Esc
        lands on the bar Islam asked never to see. */
-    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+    /* §582: except in the room's window, where behind the deck is the
+       platform the room is not to see: there, leaving full screen keeps the
+       slides filling the window and asks for the click again. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
       closeDeck();
       return;
     }
@@ -53079,8 +53157,8 @@ function wireDeck(){
        return to has moved. */
     var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
     var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
-    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
+    if (fwd[ev.key]) { ev.preventDefault(); deckStep(1); }
+    if (back[ev.key]) { ev.preventDefault(); deckStep(-1); }
     if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
     if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
     /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
@@ -53096,7 +53174,9 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      else closeDeck();
+      /* §582: the room's window never closes its deck. Behind it is the
+         platform, and the room is not to see the platform. */
+      else if (!ROOM_MODE) closeDeck();
     }
     /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
        new one — `f` and `w` below have answered since §69.7 — and `p` was
@@ -53111,7 +53191,12 @@ function wireDeck(){
        "ق", and Islam's "T is not working" was exactly that. */
     var kc = ev.code || "";
     if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
-    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
+    /* §581: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+       we can make it R to be relevant to refresh … for the reset let's make
+       it Y"*). By the key's place as well as its letter, for §556.11's
+       Arabic keyboard: R sends "ق" and Y "غ". */
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); deckRefresh(false); }
+    if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
@@ -53422,6 +53507,8 @@ function deckTourStops(){
         "has passed unfinished, or its first quarter went by with nothing delivered." },
     clear(isT, markT),
 
+    /* §574.11: and "Where it stands" opens whole and clear too (Islam). */
+    { on:function(s){ return s.classList.contains("d-head"); }, clear:true },
     { on:function(s){ return s.classList.contains("d-head"); },
       at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
       h:"Where it stands: " + M,
@@ -53639,6 +53726,510 @@ addEventListener("keydown", function(ev){
 }, true);
 addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+
+/* ══ LINE BY LINE (§579) ═════════════════════════════════════════════════
+   Islam: *"give me an option … to present box by box like line by line in
+   the tables and number by number in the numbers slides"*; asked, the
+   switch in the slide view beside Columns, the office's and the company's
+   (`SMPRules.slideBuildOn`); the key measures, categories and tactics
+   tables, the projects' slides, and "Where it stands" — NOT the objectives
+   or the SWOT; and ← taking back one line at a time.
+
+   A STEP FORWARD ON A SLIDE THAT BUILDS shows its next line, and the step
+   after its last line turns the slide. The next slide arrives with only its
+   headings; a step back takes the last line away, and from a slide with
+   none showing goes to the one before, whole, whose lines the next steps
+   back take away in turn. The dots, Home and End land on whole slides
+   (`deckShow` clears every build).
+
+   A LINE IS A TABLE ROW, OR A TACTIC'S ROWS TOGETHER: an outcome's own line
+   carries no number cell, so it rides with the row above it, as
+   `deckFitPass` moves them (§414). A table carried onto a "continued" slide
+   is a table of its own and builds from its first row.
+
+   HELD BACK, NOT TAKEN OUT: a line waiting is transparent, so the table
+   does not move as it fills and its stripes stay where they will be. Never
+   on paper (present.css), never in the editor's rail (it assembles its own
+   copy), and never on the guided tour's example, which steps on its own. */
+function deckBuildOn(){
+  return SMPRules.slideBuildOn(GROUP) &&
+    (DECK.targets || []).indexOf(EXAMPLE_T) < 0;
+}
+function deckBuildUnits(s){
+  if (!s) return [];
+  if (s.classList.contains("d-head"))
+    return [].slice.call(s.querySelectorAll(".headgrid > .headcell"));
+  var cards = s.querySelector(".pcards");
+  if (cards) return [].slice.call(cards.children);
+  var tbl = s.querySelector("table");
+  if (!tbl || !(/[MBTD]$/.test(s.dataset.split || "") || tbl.classList.contains("dirs"))) return [];
+  var lines = [];
+  [].forEach.call(tbl.querySelectorAll("tbody > tr"), function(tr){
+    if (tr.querySelector("td.idx") || !lines.length) lines.push([tr]);
+    else lines[lines.length - 1].push(tr);
+  });
+  return lines;
+}
+function deckBuildShow(s, n){
+  var units = deckBuildUnits(s);
+  if (!units.length) return;
+  s.classList.add("building");
+  s.dataset.bn = n;
+  units.forEach(function(u, i){
+    [].concat(u).forEach(function(e){ e.classList.toggle("bhide", i >= n); });
+  });
+}
+function deckBuildClear(s){
+  if (!s || !s.classList.contains("building")) return;
+  s.classList.remove("building");
+  delete s.dataset.bn;
+  [].forEach.call(s.querySelectorAll(".bhide"), function(e){ e.classList.remove("bhide"); });
+}
+function deckStep(d){
+  var s = DECK.slides[DECK.i];
+  if (deckBuildOn() && s && s.classList.contains("building")) {
+    var n = +s.dataset.bn || 0, all = deckBuildUnits(s).length;
+    if (d > 0 && n < all) return deckBuildShow(s, n + 1);
+    if (d < 0 && n > 0) return deckBuildShow(s, n - 1);
+  }
+  var j = DECK.i + d;
+  if (j < 0 || j > DECK.slides.length - 1) return;
+  var was = s && s.dataset.subject;
+  deckShow(j);
+  /* §581: a flow moving on to the next subject brings that subject's
+     latest figures with it — quietly: a failed fetch carries on with what
+     is on the screen, and never interrupts the room. */
+  var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
+  if (DECK.flow && was && now && was !== now) deckRefresh(true);
+  /* Forward, the next slide arrives with its headings alone; back, the one
+     before arrives whole and the next step back takes its last line away. */
+  if (deckBuildOn()) {
+    var t = DECK.slides[DECK.i];
+    deckBuildShow(t, d > 0 ? 0 : deckBuildUnits(t).length);
+  }
+}
+
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§581) ════════════════════════
+   Islam: *"when I'm presenting through the master presentation or the
+   directions slides if I refresh can it keep the slides presented but update
+   the numbers if I changed something in the inputs?"* — of two ways put to
+   him, in place: `R` fetches the latest saved figures and redraws the deck
+   on the slide the room is looking at, still full screen; and the flow does
+   it by itself as it moves on to the next direction.
+
+   THE PLATFORM'S OWN QUIET REFRESH, never a second fetch (`SYNC.refresh`,
+   §433): it takes the server's answer only where nothing here would be lost,
+   so a change typed and not yet saved is never overwritten by it.
+
+   THE SAME DECK, REBUILT: opened again with what it was opened with
+   (`DECK.args`), the slide found again by what it is — its subject, its
+   page, which of its kind — never by its number (`slidesWhich`), because a
+   slide added or hidden in between moves every number after it. The clock
+   is carried across (a refresh is not a new subject's time), and a slide
+   half built line by line stays where it was.
+
+   SAID, BRIEFLY, on a press: a small line in the corner for two seconds —
+   updated, already up to date, or not updated and still showing what it
+   had. The automatic one says nothing. Never on the tour's made-up
+   example, which has no figures to fetch. */
+var DREFRESH_T = null;
+function deckRefreshSay(msg){
+  var root = document.getElementById("deckroot");
+  var el = root && root.querySelector(".drefresh");
+  if (!root) return;
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "drefresh"; el.setAttribute("role", "status");
+    root.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  if (DREFRESH_T) clearTimeout(DREFRESH_T);
+  DREFRESH_T = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+}
+function deckRefresh(quiet){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on") || !DECK.args) return;
+  if ((DECK.targets || []).indexOf(EXAMPLE_T) >= 0) return;
+  if (typeof SYNC === "undefined" || !SYNC.refresh) {
+    if (!quiet) deckRefreshSay("Figures not updated: no connection");
+    return;
+  }
+  SYNC.refresh(function(ok, changed){
+    if (!root.classList.contains("on")) return;
+    if (!ok) {
+      if (!quiet) deckRefreshSay("Figures not updated \u00b7 still showing the last ones");
+      return;
+    }
+    if (changed) deckRebuild();
+    if (!quiet) deckRefreshSay(changed ? "Figures updated" : "Figures already up to date");
+  });
+}
+function deckRebuild(){
+  if (!DECK.args) return;
+  var at = DECK.i, where = slidesWhich(DECK.slides, at);
+  var here = DECK.slides[at], bn = here && here.classList.contains("building") ? +here.dataset.bn : null;
+  var clock = DECK.clock;
+  openDeckWith(DECK.args[0], DECK.args[1], DECK.args[2]);
+  DECK.clock = clock;
+  var j = where ? slidesFindIn(DECK.slides, where) : -1;
+  deckShow(j >= 0 ? j : Math.min(at, DECK.slides.length - 1));
+  if (bn != null && deckBuildOn()) deckBuildShow(DECK.slides[DECK.i], bn);
+  clockPaint();
+}
+
+/* ══ PRESENTING ON TWO SCREENS (§582) ════════════════════════════════════
+   Islam: *"how about the presenter has a different view than the presented
+   on the screen"* — and, offered a PowerPoint-style presenter view: *"no
+   need for presenter notes … I need the typical view of the slides
+   management to scroll and see the shortcuts as normally the smo is viewing
+   this view and needs to be able to manage the platform without disrupting
+   the presentation but somehow can get back and do any shortcut action"*.
+   On the mockup: clicking a slide waits for Enter, the strip's buttons are
+   enough, the office only for now.
+
+   TWO WINDOWS OF THE SAME PLATFORM. Present from the slide view, with the
+   projector connected as a second screen, opens the platform again in a
+   window of its own on that screen (`?room=1`, the ROOM), which shows the
+   deck and nothing else; the laptop stays on the slide view and drives it.
+   The room builds the deck from its own copy of the state — the same server,
+   so the same slides — and the two find a slide by what it is
+   (`slidesWhich`), never by its number, which is what that function was
+   written for (§556.11).
+
+   THEY TALK BY MESSAGES BETWEEN THE TWO WINDOWS, and nothing else: the
+   laptop sends a step, a jump, a key (T, R, Y); the room says, twice a
+   second and after every change, which slide it shows, how far it is built
+   and what its clock reads. A clicker pressed while the projector window
+   has the focus drives the room directly, and the laptop follows it.
+
+   THE ROOM WRITES NOTHING. It is a screen, not a second editor: its saving
+   is switched off (`SYNC.save` and the leave flush answer nothing in a
+   room), so it can never send an older copy of the plan over the laptop's.
+
+   FULL SCREEN NEEDS A PRESS ON THE PROJECTOR: a browser will not take a
+   window full screen without one, so the room opens filling its screen and
+   asks for one click there. With one screen, Present works exactly as it
+   did. */
+var ROOM_MODE = (function(){
+  try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
+})();
+var ROOM = null;
+/* Sent only to the platform's own address; a file opened from disk has none
+   a browser will match ("file://" is not an origin), and there the two
+   windows know each other by `e.source` alone, which is checked anyway. */
+function roomOrigin(){ return /^https?:$/.test(location.protocol) ? location.origin : "*"; }
+function roomCanTwo(){
+  return !ROOM_MODE && typeof inOffice === "function" && inOffice() &&
+    !!(window.screen && window.screen.isExtended);
+}
+
+/* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
+function roomStart(open, which){
+  var u = new URL(location.href);
+  u.searchParams.set("room", "1");
+  u.hash = "";
+  /* OPENED AT ONCE, MOVED AFTER. A browser lets a page open a window only in
+     the moment of a press, and asking where the other screen is can wait on
+     a question to the person; so the window opens here, and is then moved
+     onto the other screen if the browser says where it is. */
+  var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
+  if (!w) return false;
+  ROOM = { win:w, open:open, which:which, at:null, last:null };
+  if (ROOMPOLL) clearInterval(ROOMPOLL);
+  ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
+  if (window.getScreenDetails) window.getScreenDetails().then(function(d){
+    var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
+    if (!other || w.closed) return;
+    try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
+  }, function(){ /* not allowed: it opens on this screen, to be dragged across */ });
+  roomPaint();
+  return true;
+}
+var ROOMPOLL = null;
+function roomSend(m){
+  if (!ROOM || ROOM.win.closed) return;
+  m.smpRoom = m.smpRoom || "cmd";
+  ROOM.win.postMessage(m, roomOrigin());
+}
+function roomEnd(closeIt){
+  if (!ROOM) return;
+  var w = ROOM.win;
+  ROOM = null;
+  if (ROOMPOLL) { clearInterval(ROOMPOLL); ROOMPOLL = null; }
+  if (closeIt && w && !w.closed) { try { w.postMessage({ smpRoom:"close" }, roomOrigin()); w.close(); } catch (e) {} }
+  roomPaint();
+  var sr = document.getElementById("slideroot");
+  if (sr && sr.classList.contains("on") && typeof slidesPaint === "function") slidesPaint();
+}
+/* The row of the slide view that the room is showing: its slide found by
+   what it is, then as many "continued" slides on as the room is. */
+function roomRow(){
+  if (!ROOM || !ROOM.at || !ROOM.at.which || typeof SLED === "undefined" || !SLED.all) return -1;
+  var i = slidesFindIn(SLED.all, ROOM.at.which);
+  if (i < 0) return -1;
+  var k = ROOM.at.cont || 0;
+  while (k > 0 && SLED.all[i + 1] && SLED.all[i + 1].dataset.cont) { i++; k--; }
+  return i;
+}
+function roomKeyAt(i){ return i >= 0 && SLED.all[i] ? SLED.all[i].dataset.ed : null; }
+/* What the room said. Where the slide view was on the room's slide, it
+   follows the room to its new one; where somebody was looking ahead, it
+   stays where they are looking. */
+addEventListener("message", function(e){
+  var m = e.data || {};
+  if (!m || typeof m !== "object" || !m.smpRoom) return;
+  if (ROOM_MODE) { if (e.source === window.opener) roomHear(m); return; }
+  if (!ROOM || e.source !== ROOM.win) return;
+  if (m.smpRoom === "ready") {
+    /* Where the room already was if it is the projector's window loading
+       again; otherwise the slide Present was pressed on. */
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which });
+    return;
+  }
+  if (m.smpRoom === "bye") { roomEnd(false); return; }
+  if (m.smpRoom !== "at") return;
+  var sr = document.getElementById("slideroot");
+  var editing = sr && sr.classList.contains("on") && typeof SLED !== "undefined" && SLED.all;
+  var wasFollowing = editing && ROOM.last != null && SLED.sel === ROOM.last;
+  ROOM.at = m;
+  if (editing) {
+    var key = roomKeyAt(roomRow());
+    if (key && key !== ROOM.last && (wasFollowing || ROOM.last == null)) {
+      ROOM.last = key;
+      SLED.sel = key;
+      slidesPaint();
+      return;
+    }
+    ROOM.last = key;
+  }
+  roomPaint();
+});
+
+/* The laptop's two surfaces: a strip in the slide view, under its bar, and
+   a strip at the top of every other page. Both written into nodes they own,
+   never by repainting the page (§63). */
+function roomStripText(){
+  var a = ROOM && ROOM.at;
+  if (!a || !a.on) return '<span>Opening the slides on the second screen\u2026</span>';
+  return '<span class="rs-where">' + esc(a.label || "") + '</span>' +
+    '<span class="rs-n">slide ' + a.n + ' of ' + a.total +
+      (a.built ? ' \u00b7 line ' + a.built[0] + ' of ' + a.built[1] : '') + '</span>' +
+    (a.clock ? '<span class="rs-clk' + (a.clock.over ? ' over' : a.clock.near ? ' near' : '') +
+      (a.clock.paused ? ' paused' : '') + '">' + esc(a.clock.text) +
+      (a.clock.paused ? ' \u00b7 paused' : '') + '</span>' : '') +
+    (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+}
+function roomPaint(){
+  var sr = document.getElementById("slideroot");
+  var editing = !!(sr && sr.classList.contains("on"));
+  /* In the slide view. */
+  var live = sr && sr.querySelector(".sl-live");
+  if (!ROOM || !editing) { if (live) live.remove(); }
+  else {
+    if (!live) {
+      live = document.createElement("div");
+      live.className = "sl-live";
+      var bar = sr.querySelector(".slidebar");
+      if (bar) bar.insertAdjacentElement("afterend", live);
+    }
+    roomFill(live, '<span class="rs-dot"></span><b>On the room\u2019s screen</b>' + roomStripText() +
+      '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
+      '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
+  }
+  if (sr) {
+    var row = editing && ROOM ? roomRow() : -1;
+    [].forEach.call(sr.querySelectorAll("#slidelist .slrow"), function(r, i){
+      r.classList.toggle("onscreen", i === row);
+    });
+    var pane = sr.querySelector("#slidepane");
+    var note = pane && pane.querySelector(".sl-notroom");
+    var away = editing && ROOM && ROOM.at && ROOM.at.on && row >= 0 && SLED.sel !== roomKeyAt(row);
+    /* The stage is fitted to the pane, so the pane is fitted again when the
+       note comes or goes, or the slide's foot falls off the bottom. */
+    if (!away) { if (note) { note.remove(); slidesFitStage(); } }
+    else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
+      '<div class="sl-notroom" role="status">Not on the room\u2019s screen \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
+    var play = sr.querySelector("[data-slplay]");
+    if (play) {
+      var lbl = play.querySelector(".lbl");
+      if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
+      play.title = ROOM && editing ? "Stop presenting on the second screen" : "Present (P)";
+    }
+    var keys = document.getElementById("slkeys");
+    /* The room's own keys are on the strip above; here, only what looking
+       through the slides adds, so the slide's name keeps its room. */
+    if (keys && ROOM && editing) keys.innerHTML =
+      '<b>\u2191</b> <b>\u2193</b> look &middot; <b>Enter</b> show it to the room &middot; ' +
+      '<b>Esc</b> back to what they see';
+  }
+  /* Everywhere else. */
+  var st = document.getElementById("roomstrip");
+  if (!ROOM || editing) {
+    if (st) st.remove();
+    document.body.classList.remove("roomon");
+    return;
+  }
+  if (!st) {
+    st = document.createElement("div");
+    st.id = "roomstrip"; st.className = "roomstrip"; st.setAttribute("role", "region");
+    st.setAttribute("aria-label", "Presenting on the second screen");
+    /* At the top of the pinned chrome, so it stays in view as the page
+       scrolls; the chrome's height is observed (§101.5), so everything
+       pinned beneath it moves down with it. */
+    var chrome = document.querySelector(".chrome");
+    if (chrome) chrome.insertBefore(st, chrome.firstChild);
+    else document.body.insertBefore(st, document.body.firstChild);
+    st.addEventListener("click", function(ev){
+      var b = ev.target.closest("[data-rs]");
+      if (!b) return;
+      var k = b.dataset.rs;
+      if (k === "back") roomBackToSlides();
+      else if (k === "prev") roomSend({ step:-1 });
+      else if (k === "next") roomSend({ step:1 });
+      else if (k === "t") roomSend({ key:"T" });
+    });
+  }
+  document.body.classList.add("roomon");
+  var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
+  roomFill(st, '<span class="rs-dot"></span><b>Presenting on the second screen</b>' + roomStripText() +
+    '<span class="rs-sp"></span>' +
+    '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
+    '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
+    '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
+}
+/* Written only when it reads differently: the room reports twice a second,
+   and a strip rewritten between a press and its release loses the click. */
+function roomFill(el, html){ if (el._rs !== html) { el.innerHTML = html; el._rs = html; } }
+/* R from the laptop: what was just typed here is saved FIRST, then the
+   room fetches, or it would fetch the figure from before the fix. */
+function roomUpdate(){
+  if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(function(){ roomSend({ key:"R" }); });
+  else roomSend({ key:"R" });
+}
+function roomBackToSlides(){
+  if (!ROOM) return;
+  var o = ROOM.open || {};
+  if (o.flow) slidesOpenFlow(o.flow);
+  else if (o.kind) slidesOpen(o.kind, o.key);
+  var key = roomKeyAt(roomRow());
+  if (key) { SLED.sel = key; ROOM.last = key; slidesPaint(); }
+  roomPaint();
+}
+/* The slide view's keys while the room is showing (slides.js asks first).
+   ← → move the ROOM; ↑ ↓ still walk the slide view, so looking ahead is
+   the keys it always was; Enter puts what you are looking at on the room's
+   screen; Escape comes back to what the room sees before it leaves the
+   view. Answers whether it took the key. */
+function roomEditorKey(ev){
+  if (!ROOM || slidesTyping(ev.target)) return false;
+  var kc = ev.code || "";
+  var fwd = { ArrowRight:1, PageDown:1, " ":1 }, back = { ArrowLeft:1, PageUp:1 };
+  if (fwd[ev.key]) { ev.preventDefault(); roomSend({ step:1 }); return true; }
+  if (back[ev.key]) { ev.preventDefault(); roomSend({ step:-1 }); return true; }
+  if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); roomSend({ key:"T" }); return true; }
+  if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); roomUpdate(); return true; }
+  if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); roomSend({ key:"Y" }); return true; }
+  if (ev.key === "p" || ev.key === "P") return true;
+  var row = roomRow(), rk = roomKeyAt(row);
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    var w = slidesSelEl();
+    if (w) { ROOM.last = SLED.sel; roomSend({ jump:w }); }
+    return true;
+  }
+  var g = document.getElementById("slgrid"), cp = document.getElementById("slcolspanel");
+  if (ev.key === "Escape" && rk && SLED.sel !== rk && !(g && !g.hidden) && !(cp && !cp.hidden)) {
+    ev.preventDefault();
+    SLED.sel = rk; ROOM.last = rk;
+    slidesPaint();
+    return true;
+  }
+  return false;
+}
+
+/* ── IN THE ROOM ──────────────────────────────────────────────────────── */
+function roomHear(m){
+  if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
+  if (m.smpRoom === "open") roomOpen(m.open || {}, m.which);
+  else if (m.step) deckStep(m.step);
+  else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
+  else if (m.key === "T") clockToggle();
+  else if (m.key === "R") deckRefresh(false);
+  else if (m.key === "Y") clockReset();
+  roomReport();
+}
+function roomOpen(open, which){
+  if (open.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), flowWithParts(open.flow), "page");
+  else if (open.target) openDeckFor(open.target, "page");
+  var j = which ? slidesFindIn(DECK.slides, which) : -1;
+  if (j > 0) deckShow(j);
+  /* Full screen asked for, and refused without a press on that screen; the
+     deck fills the window regardless, and the button below asks for the
+     press. */
+  deckGoFull();
+  roomFullAsk();
+  /* What this window booted on may be the copy the browser kept (§431): the
+     quiet refresh takes the server's own, and redraws only if it differs. */
+  deckRefresh(true);
+}
+function roomFullAsk(){
+  var root = document.getElementById("deckroot");
+  var ask = root.querySelector(".roomfull");
+  if (document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ask) return;
+  root.insertAdjacentHTML("beforeend",
+    '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
+  root.querySelector(".roomfull").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    try {
+      var p = root.requestFullscreen && root.requestFullscreen();
+      if (p && p.catch) p.catch(function(){});
+    } catch (e) {}
+  });
+}
+function roomReport(){
+  if (!ROOM_MODE || !window.opener) return;
+  var root = document.getElementById("deckroot");
+  var on = !!(root && root.classList.contains("on"));
+  var s = on && DECK.slides[DECK.i];
+  var cont = 0, k = DECK.i;
+  while (s && k > 0 && DECK.slides[k] && DECK.slides[k].dataset.cont) { cont++; k--; }
+  var c = DECK.clock, left = c ? clockLeft() : 0;
+  var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
+  var name = s ? (s.dataset.subjectName || "") : "";
+  try {
+    window.opener.postMessage({ smpRoom:"at", on:on,
+      which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
+      n: DECK.i + 1, total: DECK.slides.length,
+      label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
+      built: s && s.classList.contains("building") ? [+s.dataset.bn, deckBuildUnits(s).length] : null,
+      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from } : null,
+      full: document.fullscreenElement === root }, roomOrigin());
+  } catch (e) { /* the laptop has gone; the room carries on */ }
+}
+if (ROOM_MODE) {
+  document.documentElement.classList.add("smp-room");
+  /* Ready once the platform has drawn: asked rather than timed, so a slow
+     server is waited for and a fast one is not. */
+  (function wait(){
+    if (document.readyState === "complete" && typeof GROUP !== "undefined" && document.querySelector(".wrap")) {
+      try { window.opener && window.opener.postMessage({ smpRoom:"ready" }, roomOrigin()); } catch (e) {}
+      return;
+    }
+    setTimeout(wait, 150);
+  })();
+  setInterval(roomReport, 500);
+  addEventListener("fullscreenchange", function(){ roomFullAsk(); roomReport(); });
+  addEventListener("pagehide", function(){
+    try { window.opener && window.opener.postMessage({ smpRoom:"bye" }, roomOrigin()); } catch (e) {}
+  });
+  /* Every key the deck takes is reported at once, not on the next tick, so
+     the laptop never shows the slide before last. */
+  addEventListener("keyup", function(){ setTimeout(roomReport, 0); });
+}
 
 /* ── slides.js ── */
 /* ── PICTURE SLIDES (§50, backlog §16.12 built) ───────────────────────────
@@ -54474,6 +55065,14 @@ function slidesResume(reached){
    the fault §253.3 found on this very screen. */
 function slidesPlay(){
   if (!SLED.target) return;
+  /* §582: TWO SCREENS. With the projector connected as a second screen the
+     slides go to it in a window of their own and this view stays here to
+     drive them; pressed again, the same button stops. One screen, and
+     nothing below changes. */
+  if (ROOM) { roomEnd(true); return; }
+  if (roomCanTwo() && roomStart(SLED.flow ? { flow:SLED.flow.slice() }
+                                        : { target:SLED.target, kind:SLED.kind, key:SLED.key },
+                                slidesSelEl())) return;
   /* THE DECK OPENS FIRST, AND ONLY THEN IS THE EDITOR STOOD DOWN. The other
      order is one line shorter and leaves the mode INERT WITH NOTHING IN FRONT
      OF IT if the deck cannot be built — an editor nobody can click, with the
@@ -54536,6 +55135,9 @@ function slidesClose(){
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
   SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
+  /* §582: leaving while the room is still showing puts its strip on the
+     page you land on. */
+  roomPaint();
 }
 
 /* ── Painting ────────────────────────────────────────────────────────────
@@ -54562,6 +55164,14 @@ function slidesColsHtml(){
     '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
 }
 function slidesColsSync(){
+  /* §579: the line-by-line switch beside it, for the same office. */
+  var lb = document.querySelector("#slideroot [data-slbuild]");
+  if (lb) {
+    lb.hidden = !inOffice();
+    var on = SMPRules.slideBuildOn(GROUP);
+    lb.setAttribute("aria-pressed", on ? "true" : "false");
+    lb.classList.toggle("on", on);
+  }
   var w = document.getElementById("slcols");
   if (!w) return;
   w.hidden = !inOffice();
@@ -54584,6 +55194,13 @@ function slidesSetCol(k, on){
   list.sort();
   if (list.length) GROUP[SMPRules.SLIDE_COLS_OFF] = list;
   else delete GROUP[SMPRules.SLIDE_COLS_OFF];
+  slidesMark(); slidesPaint();
+}
+
+/* §579: on is `true`, off is absent (§50.6). */
+function slidesSetBuild(on){
+  if (on) GROUP[SMPRules.SLIDE_BUILD] = true;
+  else delete GROUP[SMPRules.SLIDE_BUILD];
   slidesMark(); slidesPaint();
 }
 
@@ -54689,6 +55306,7 @@ function slidesPaint(){
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
   slidesGridPaint(all);
   slidesFootPaint(all);
+  roomPaint();   /* §582: the room's strip and its row, on top */
   SLED.err = "";
 }
 
@@ -54771,7 +55389,9 @@ function slidesFootPaint(all){
     '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
     '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
     '<span class="slksep"></span>while presenting: ' +
-    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+    '<b>T</b> pause / start the timer &middot; <b>Y</b> reset the timer &middot; ' +
+    /* §581: R is the figures' now, the timer's reset moved to Y (Islam). */
+    '<b>R</b> update the figures';
   slidesPartsPaint(all, at);
 }
 /* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────
@@ -55602,6 +56222,10 @@ function wireSlides(){
     e.stopPropagation();
     slidesColsOpen(document.getElementById("slcolspanel").hidden);
   });
+  var lb = root.querySelector("[data-slbuild]");
+  if (lb) lb.addEventListener("click", function(){
+    if (inOffice()) slidesSetBuild(!SMPRules.slideBuildOn(GROUP));
+  });
   var cp = document.getElementById("slcolspanel");
   if (cp) {
     cp.addEventListener("click", function(e){ e.stopPropagation(); });
@@ -55641,6 +56265,9 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
+    /* §582: while the room's screen is showing, ← → and the timer's keys are
+       the room's, Enter shows it what you are looking at. */
+    if (roomEditorKey(ev)) return;
     if (ev.key === "Escape") {
       /* §571: an open Columns menu closes first, for the grid's reason. */
       var cpn = document.getElementById("slcolspanel");
@@ -70904,6 +71531,12 @@ var SYNC = (function () {
         save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
       }, 0);
     };
+    /* §582: THE ROOM'S WINDOW WRITES NOTHING. It is the projector's copy of
+       the platform, driven from the laptop and edited by nobody; a save from
+       it could only ever send an older copy of the plan over the one the
+       laptop is changing. First, and "clean" rather than "offline", so nothing
+       on that screen ever says it lost something. */
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) { if (done) done("clean"); return; }
     if (!live) return say("offline");
     /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
        Islam: *"the reporting then saving to draft keep saying saving and
@@ -71419,6 +72052,7 @@ var SYNC = (function () {
   function flushLeave() {
     commitFocus();
     if (!live || saving) return;
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) return;   /* §582 */
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved) return;

@@ -1058,6 +1058,10 @@
   .sl-b.quiet:hover{ color:var(--ink); }
   .sl-b:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:720px){ .sl-b .lbl{ display:none; } }
+  /* §579: a switch that is on says so — the accent edge on the quiet fill,
+     so "Line by line" reads as set without being the one filled button. */
+  .sl-b[aria-pressed="true"]{ border-color:var(--gold-deep); background:var(--surface-2);
+    box-shadow:inset 0 0 0 1px var(--gold-deep); }
 
   .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .slprog{ height:3px; background:var(--line); flex:none; }
@@ -1529,3 +1533,85 @@
 @media (prefers-reduced-motion: reduce) {
   .d-purpose.preveal .pitem { transition:none; transform:none; }
 }
+
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Under each reading on a direction's "Where it stands": its lines with
+   their own figures, in their bands, at a size the room can read, the name
+   cut short before the figure is. */
+.headdetail { list-style:none; margin:18px 0 0; padding:14px 0 0; border-top:1px solid var(--line);
+              display:flex; flex-direction:column; gap:6px; font-size:22px; }
+.headdetail li { display:flex; align-items:baseline; gap:18px; }
+.headdetail .hdn { flex:1; min-width:0; color:var(--ink-2); white-space:nowrap;
+                   overflow:hidden; text-overflow:ellipsis; }
+.headdetail .hdv { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.headdetail .hdf { font-weight:600; }
+.headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
+.headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+
+/* ── §579: LINE BY LINE ───────────────────────────────────────────────────
+   A line waiting is transparent, never removed, so nothing moves as the
+   slide fills. On paper every line is there. */
+.dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * {
+  transition:opacity .35s ease; }
+.dslide.building .bhide { opacity:0; }
+@media (prefers-reduced-motion: reduce) {
+  .dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * { transition:none; }
+}
+@media print { .dslide .bhide { opacity:1 !important; } }
+
+/* ── §581: THE FIGURES WERE UPDATED, SAID FOR TWO SECONDS ─────────────────
+   Bottom-left, where the bar's title sits when there is a bar, small and
+   quiet: it is for the presenter, on a screen the room is also reading. */
+.drefresh { position:absolute; left:24px; bottom:22px; z-index:4; pointer-events:none;
+            font:600 15px/1 var(--sans); padding:9px 14px; border-radius:999px;
+            background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+            box-shadow:0 6px 18px rgba(9,14,24,.25); opacity:0; transform:translateY(6px);
+            transition:opacity .25s ease, transform .25s ease; }
+.drefresh.show { opacity:1; transform:none; }
+@media print { .drefresh { display:none !important; } }
+
+/* ── PRESENTING ON TWO SCREENS (§582) ─────────────────────────────────────
+   The laptop's two strips, in the deck's own navy so they read as "this is
+   the room's" against the slide view's quiet bar; the ON SCREEN mark on the
+   rail row the room is showing; and, in the room's window, the one press a
+   browser needs before it will fill the projector. */
+.sl-live, .roomstrip { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:none;
+  padding:7px 18px; background:#0B1A33; color:#E9EEF6; font-size:13px; line-height:1.35; }
+.sl-live > b, .roomstrip > b { font-weight:700; color:#fff; }
+.rs-dot { width:9px; height:9px; border-radius:50%; flex:none; background:#34D399;
+  box-shadow:0 0 0 3px rgba(52,211,153,.25); }
+.rs-where { font-weight:600; color:#fff; max-width:34em; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rs-n { color:#A9B6C9; font-variant-numeric:tabular-nums; }
+.rs-clk { font-weight:700; font-variant-numeric:tabular-nums; padding:2px 8px; border-radius:6px;
+  background:rgba(255,255,255,.08); }
+.rs-clk.near { color:#FBBF24; }
+.rs-clk.over { color:#F87171; }
+.rs-clk.paused { color:#A9B6C9; }
+.rs-warn { color:#FBBF24; font-weight:600; }
+.rs-sp { flex:1; }
+.rs-keys { color:#A9B6C9; font-size:12px; }
+.rs-keys b { display:inline-block; min-width:1.5em; text-align:center; padding:1px 4px; margin:0 1px;
+  border:1px solid rgba(255,255,255,.28); border-radius:4px; color:#fff; font-weight:600; }
+.roomstrip button { font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  padding:4px 11px; border-radius:7px; border:1px solid rgba(255,255,255,.3);
+  background:transparent; color:#fff; }
+.roomstrip button:hover { border-color:#fff; }
+.roomstrip button.rs-go { background:#fff; border-color:#fff; color:#0B1A33; }
+.roomstrip button:focus-visible { outline:2px solid #FBBF24; outline-offset:2px; }
+.slrow.onscreen .sthumb { outline:2px solid #34D399; outline-offset:1px; }
+.slrow.onscreen::after { content:"On screen"; position:absolute; top:10px; left:38px;
+  font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  padding:2px 6px; border-radius:4px; background:#0B1A33; color:#fff; pointer-events:none; }
+.sl-notroom { flex:none; margin:10px 16px 0; padding:7px 12px; border-radius:8px; font-size:13px;
+  background:#FFF6E0; color:#5C4300; border:1px solid #E8C468; }
+.sl-notroom b { font-weight:700; }
+.roomfull { position:absolute; left:50%; bottom:7%; transform:translateX(-50%); z-index:5;
+  font:inherit; font-size:24px; font-weight:700; cursor:pointer; padding:16px 30px;
+  border-radius:12px; border:0; background:#fff; color:#0B1A33;
+  box-shadow:0 10px 30px rgba(0,0,0,.35); }
+/* The room's window shows the deck and nothing else, from the first frame:
+   the platform boots underneath it as it always does, unseen. */
+html.smp-room body { background:#0B1A33; }
+html.smp-room body > *:not(.deckroot) { visibility:hidden !important; }
+@media print { .sl-live, .roomstrip, .roomfull, .sl-notroom { display:none !important; } }

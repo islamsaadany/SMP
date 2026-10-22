@@ -500,7 +500,13 @@
    else. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.70-note-lock";
+/* v6.71-two-screens — §574.11, §578–§582: the guided tour's Where it
+   stands opens clear, the lines under a direction's two readings, line by
+   line, R updating the figures while presenting, and presenting on two
+   screens. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.71-two-screens";
 const ASSETS = [
   "/",
   "/index.html",

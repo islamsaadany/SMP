@@ -52860,6 +52860,7 @@ function deckTourStops(){
   var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
   var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
   var isP = function(s){ return s.classList.contains("d-purpose"); };
+  var reveal = function(n){ return { on:isP, clear:true, reveal:n }; };
   var eq = function(w){ return function(x){ return x === w; }; };
   /* §574.2: EACH TABLE OPENS AND CLOSES ON THE WHOLE SLIDE, CLEAR. Islam:
      *"start the key measure tour with the full view all clear first and then
@@ -52957,21 +52958,13 @@ function deckTourStops(){
       b:"Whether the work is landing on time: what the " + T +
         " have delivered against what was planned by now." },
 
-    /* §574.6: the purpose, whole first and then one objective at a time,
-       each card one sentence tying it to what the room has just seen. */
-    clear(isP),
-    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[0]]); },
-      h:"One source of truth",
-      b:"The figures you just saw, and every cycle before them, for the company and each " + noun + ", live in one place." },
-    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[1]]); },
-      h:"Visibility",
-      b:"Progress shown the same way to everyone, and each audience sees what is theirs." },
-    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[2]]); },
-      h:"Accountability",
-      b:"Each cycle we report against what we committed to, and decide what to fix and what to stop." },
-    { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[3]]); },
-      h:"History that stays",
-      b:"Each cycle is kept as it was reported, so next quarter we compare against this one." }
+    /* §574.6, §574.8: THE PURPOSE BUILDS UP, IT IS NOT TOURED. Islam: *"I
+       don't think the lighting up every objective is good in the demo. It's
+       not a tour — you can make them appear one by one … on a click"*. So
+       the slide opens on its title alone and each press brings in the next
+       objective, whole: nothing dimmed, no card, no ring. Ending the tour
+       anywhere shows all four (`deckTourUnmark`). */
+    reveal(0), reveal(1), reveal(2), reveal(3), reveal(4)
   ];
 }
 function deckTourStart(){
@@ -53048,6 +53041,7 @@ function deckTourDraw(){
   dock.classList.toggle("dtclear", !!st.clear);
   deckTourUnmark();
   dock.classList.toggle("dtmark", !!(st.clear && st.mark && deckTourMark(dock, x.s, st.mark)));
+  if (st.reveal != null) deckTourReveal(x.s, st.reveal);
   if (st.clear) return;
   /* The count is of the parts lit — a clear view is not a step to count. */
   var lit = DTOUR.stops.filter(function(y){ return !y.st.clear && !y.end; });
@@ -53112,6 +53106,19 @@ function deckTourMark(dock, s, words){
 function deckTourUnmark(){
   [].forEach.call(document.querySelectorAll("#deckroot .dtmarked"), function(e){
     e.classList.remove("dtmarked");
+  });
+  /* §574.8: and a purpose slide built part way shows whole again. Taken off
+     and put back in one task by `deckTourDraw`, so an objective already in
+     does not flicker; only the new one animates. */
+  [].forEach.call(document.querySelectorAll("#deckroot .preveal"), function(e){
+    e.classList.remove("preveal");
+  });
+}
+/* §574.8: the first `n` objectives in, the rest held back. */
+function deckTourReveal(s, n){
+  s.classList.add("preveal");
+  [].forEach.call(s.querySelectorAll(".pitem"), function(it, i){
+    it.classList.toggle("pshown", i < n);
   });
 }
 /* THE KEYBOARD IS THE TOUR'S WHILE IT RUNS — asked BEFORE the deck's own

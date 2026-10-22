@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.6).
+"""The guided tour, on a made-up direction (§574–§574.8).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -41,6 +41,8 @@ MAKE = """()=>{
 
 STATE = """()=>({on:!!DTOUR, i:DTOUR?DTOUR.i:-1, n:DTOUR?DTOUR.stops.length:0, slide:DECK.i,
   clear:!!document.querySelector('[data-dtour].dtclear'),
+  pshown:[...document.querySelectorAll('#deckroot .dslide.on.d-purpose .pitem')].filter(i=>i.classList.contains('pshown')||!i.closest('.preveal')).length,
+  ponslide:!!document.querySelector('#deckroot .dslide.on.d-purpose'),
   mark:!!document.querySelector('[data-dtour].dtmark'),
   label:(e=>e&&getComputedStyle(e).display!=='none'?e.innerText.replace(/\\s+/g,' ').trim():'')(document.querySelector('.dtlabel')),
   ringop:(e=>e?+getComputedStyle(e).opacity:-1)(document.querySelector('.dtring')),
@@ -138,12 +140,14 @@ with sync_playwright() as p:
               "YTD actual and Progress", "Where it stands: Execution"]:
         ck("…with a stop for " + h, h in heads, heads)
     ck("the stop on the line under the two readings is gone (Islam: remove step 14)",
-       "Two different questions" not in lit and len(lit) == 19, lit)
+       "Two different questions" not in lit and len(lit) == 15, lit)
     # §574.6: the example ends on what the platform is for, one objective at a time
     four = ["One source of truth", "Visibility", "Accountability", "History that stays"]
-    ck("after Execution the tour lights the four objectives one by one, in order (Islam)",
-       "Where it stands: Execution" in lit and lit[lit.index("Where it stands: Execution") + 1:-1] == four, lit[-6:])
-    ck("…opening on the purpose slide whole and clear", run("purpose")[:1] == [True], run("purpose"))
+    pp = [x for x in seen if x.get("ponslide")]
+    ck("after Execution the purpose slide builds up: its title alone, then one objective per press (Islam: not a tour)",
+       [x.get("pshown") for x in pp] == [0, 1, 2, 3, 4, 4] and lit[-2] == "Where it stands: Execution", [x.get("pshown") for x in pp])
+    ck("…nothing dimmed and no card while it builds", all(x.get("clear") and not x.get("card") and x.get("shade") == 0
+       for x in pp[:5]), pp[:2])
     ck("…and the closing card hands over to the review", lit[-1] == "Now, today's review", lit[-1:])
     # §574.2: each table opens and closes on the whole slide, clear
     for kd, word in [("M", "key measures"), ("T", "tactics")]:
@@ -152,12 +156,12 @@ with sync_playwright() as p:
            len(r) >= 4 and r[0] is True and r[-1] is True and not any(r[1:-1]), r)
     cl = [x for x in seen if x.get("clear")]
     ck("a clear stop draws no card and no shade",
-       len(cl) == 5 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
+       len(cl) == 9 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
     ck("…and a lit stop draws both",
        all(x.get("card") and x.get("shade", 0) > 0 for x in seen if not x.get("clear")))
-    ck("the count is of the parts lit: 1 of 18 … 18 of 18",
-       [x.get("step") for x in seen if not x.get("clear")][0] == "1 of 18" and
-       "18 of 18" in [x.get("step") for x in seen], [x.get("step") for x in seen])
+    ck("the count is of the parts lit: 1 of 14 … 14 of 14",
+       [x.get("step") for x in seen if not x.get("clear")][0] == "1 of 14" and
+       "14 of 14" in [x.get("step") for x in seen], [x.get("step") for x in seen])
     # §574.3: after the Note, one key measure's whole line — the one furthest behind
     ni = lit.index("Note") if "Note" in lit else -1
     ck("after the Note, the key measures light one whole line: the off-track one (Islam)",
@@ -209,6 +213,13 @@ with sync_playwright() as p:
     pg.keyboard.press("g"); pg.wait_for_timeout(300)
     ck("the tour is not on paper", safe(pg, "()=>getComputedStyle(document.querySelector('[data-dtour]')).display") == "none")
     pg.emulate_media(media="screen")
+    # §574.8: ended part way through the build, the purpose slide shows whole
+    safe(pg, "()=>{deckTourEnd(); deckTourStart(); var k=DTOUR.stops.findIndex(x=>x.st.reveal===2); deckTourGo(k); return true}"); pg.wait_for_timeout(500)
+    half = safe(pg, "()=>[...document.querySelectorAll('#deckroot .d-purpose .pitem')].filter(i=>+getComputedStyle(i).opacity>0.99).length")
+    pg.keyboard.press("g"); pg.wait_for_timeout(700)
+    whole = safe(pg, "()=>[...document.querySelectorAll('#deckroot .d-purpose .pitem')].filter(i=>+getComputedStyle(i).opacity>0.99).length")
+    ck("ending the tour half way through the purpose slide shows all four", half == 2 and whole == 4, {"half": half, "after": whole})
+    pg.keyboard.press("g"); pg.wait_for_timeout(300)
     safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
     ck("closing the deck ends the tour with it", safe(pg, "()=>!DTOUR && !document.querySelector('[data-dtour]')") is True)
     ck("…and leaves no slide marked", safe(pg, "()=>document.querySelectorAll('#deckroot .dtmarked').length") == 0)

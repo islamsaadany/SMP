@@ -515,7 +515,7 @@
    slide a quarter dark from four over and black from five. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.75-clock-stages";
+const SHELL = "smp-shell-v6.78-text-boxes";
 const ASSETS = [
   "/",
   "/index.html",

@@ -2483,6 +2483,40 @@ await section("4 · Forefront's own pages", async () => {
   check(!/\b[lr]\b/.test(p3.fade) && p3.navH < 50, "\u2026while on a computer screen every tab fits and neither fade shows", JSON.stringify(p3));
   const roleWide = await page.evaluate(() => { const r = document.querySelector("#who .role"); return r ? getComputedStyle(r).display !== "none" : null; });
   check(roleWide === true, "\u2026and the name line keeps the role there (\u00a7584.1)", roleWide);
+  /* \u00a7584.2 \u2014 THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
+     13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
+     a keyword), so the tabs drew at its own 13.33px regular \u2014 RED on the
+     build before, measured. Asked of the computed style, which is what the
+     browser actually used, never of the stylesheet's text. */
+  const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
+  check(tabFont === "13.5px 600", "\u2026and the tabs are in the weight their style asks for, semibold 13.5px (\u00a7584.2)", tabFont);
+  /* \u00a7584.3 \u2014 AND THE BUTTONS: `.btn` had the same dropped shorthand
+     (`font:600 13px/1.5 inherit`), so every console button drew at the
+     browser's 13.33px regular and 29px tall \u2014 RED on the build before,
+     measured. Sign out is the one button on every tab. */
+  const btnFont = await page.evaluate(() => { const b = document.getElementById("signout"), c = getComputedStyle(b);
+    return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height); });
+  check(btnFont === "13px 600 34", "\u2026and the console's buttons too, semibold 13px, Sign out among them (\u00a7584.3)", btnFont);
+  /* \u00a7584.4 \u2014 AND THE LAST THREE WITH THE SAME DROPPED SHORTHAND: the text
+     boxes (`.fld`), Frameworks' chips and client set-up's size band, each
+     at the browser's 13.33px regular on the build before \u2014 RED there,
+     measured (33, 29 and 44px tall). Asked of what the browser drew. */
+  const typeOf = (sel) => page.evaluate((s) => { const e = Array.from(document.querySelectorAll(s)).find((x) => x.offsetParent);
+    if (!e) return "none"; const c = getComputedStyle(e); return c.fontSize + " " + c.fontWeight + " " + Math.round(e.getBoundingClientRect().height); }, sel);
+  /* a blank page first: from /platform, an address differing only in its
+     hash is the same document and does not load the tab (measured: "none") */
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#frameworks", { waitUntil: "networkidle" });
+  await page.waitForSelector(".fwchip", { timeout: 8000 }).catch(() => {});
+  const fldT = await typeOf(".fld"), chipT = await typeOf(".fwchip");
+  check(fldT === "14px 400 39" && chipT === "12px 600 26", "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
+  await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
+  await page.locator(".ccard.add").first().click();
+  await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
+  const bandT = await typeOf(".wzband button");
+  check(bandT === "12.5px 600 48", "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

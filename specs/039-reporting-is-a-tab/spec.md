@@ -176,3 +176,38 @@ confirmation, since it says *Draft saved* in its own right.
   — recorded here because it is this section's assertion that went stale.
 - **The demo now opens six units read-only**, which is correct and is a change
   to what a first-time viewer sees.
+
+## 11 · §576 — a red figure gets its note before anything else
+
+Islam: *"when people enter a number … that is deviated and in red the note
+becomes mandatory as agreed. to the level it blocks the rest of the entries
+until the note is made."* Agreed in chat, drawn
+(`design-mockups/note-first/2026-10-22_note-before-anything-else.html`) and
+approved: *"build the note lock"*.
+
+- **When**: a row on this page is red (the bottom bands, §163) with no note,
+  and the person may write that row's note — asked the way the page draws the
+  box (`canEnterNote` on a unit-shaped report, the renderer's own gate on a
+  holder's). Worked out once per paint (`noteLockOf`), before the render.
+- **What**: every other reporting box on the page shuts (`disabled`, greyed,
+  a hover naming the row); that row's figure and note stay open; the note is
+  ringed and joins the tab path; the subject's cycle note shuts too. A bar in
+  the "to finish" bar's place names the first row (*"… is off track. Write its
+  note before entering anything else."*, *1 of n* where there are more) with
+  **Go to it**, which opens the row's pillar, project or capability and lands
+  in the note. Enter from the red figure and Alt+Enter both go to the note.
+  Typing a red figure moves the cursor to the note; merely opening a page that
+  holds one moves nobody's cursor.
+- **What lets it go**: the note written, or the figure moved out of the red.
+  A submitted or parked report has no open box to hold. Save draft and Close
+  still work.
+- **Where**: a unit's, a pillars function's, a projects function's and a
+  capability's Reporting page, a unit or function that plans in objectives and
+  actions, the company's (with the capabilities it reports), and My reporting
+  (spec 062 §9). Not *Figures I report*: the note there is the unit's, never
+  the set owner's, so nothing there is theirs to explain.
+- **Checked**: `checks/note-lock.py` (red 33 on the build before);
+  `checks/report-blockers.py` rewritten for it (§218: its note state is now
+  the lock's, asserted as 2b, and its bar is measured over a figure still to
+  enter); `checks/report-keys.py` explains the red row its §8 makes before §9
+  and §10 measure an unheld page.

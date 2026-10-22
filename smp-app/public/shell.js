@@ -13832,7 +13832,12 @@ function rowReads(x){
      year. The note rule and the Submit gate both hang off this. */
   return measureScore(x.obj);
 }
-function needsNote(x){
+/* §576: the half of the rule that is about the FIGURE — red, whether or not
+   anybody has explained it yet. My reporting asks it on its own, because it
+   draws the owner's note box on a red row and must keep drawing it once the
+   note is written (a box that vanished the moment it was used could not be
+   corrected). */
+function rowAtRisk(x){
   var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
@@ -13842,7 +13847,10 @@ function needsNote(x){
      asking for a note on every figure between 50 and 69 in their deployment.
      The ranges happen to coincide on the new defaults (bad is everything below
      70, which is what bad+warn covered before), so nobody's obligations move. */
-  return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
+  return k === "bad" || k === "warn";
+}
+function needsNote(x){
+  return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
@@ -13874,7 +13882,7 @@ function fnReportItems(subject){
     var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
     (!c.own || fnKoCounted(c.id) ? SMPRules.shown(kos) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
-                 place:koPlace });
+                 place:koPlace, cap:c });
     });
     /* §342: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
        the In-progress rule, Submit's refusal and §279's bar all learn the new
@@ -13884,7 +13892,7 @@ function fnReportItems(subject){
        a row answered early still counts). */
     SMPRules.shown(c.actions).forEach(function(a){
       out.push({ id:a.id, obj:a, kind:"action", group:c.name, sub:"",
-                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace });
+                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace, cap:c });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
@@ -13892,16 +13900,16 @@ function fnReportItems(subject){
                     rail:railKeyFor(c), code:p.id };
       SMPRules.shown(p.deliverables).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
-                   asked:dueThisCycle(d.due), owner:p.owner, place:place });
+                   asked:dueThisCycle(d.due), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.outcomes).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
-                   asked:outcomeDue(o), owner:p.owner, place:place });
+                   asked:outcomeDue(o), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.milestones).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
                    asked:dueThisCycle(m.finish), owner:m.owner || p.owner,
-                   place:place });
+                   place:place, cap:c, proj:p });
       });
     });
   });
@@ -14188,6 +14196,76 @@ function submitWhyShort(target){
     " at risk with no note");
   if (!lines.length) return "";
   return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
+}
+
+/* \u2500\u2500 A RED FIGURE GETS ITS NOTE BEFORE ANYTHING ELSE (\u00a7576) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Islam: *"when people enter a number \u2026 that is deviated and in red the note
+   becomes mandatory as agreed. to the level it blocks the rest of the entries
+   until the note is made."* \u00a7105's rule held Submit and nothing else, so a
+   reporter could type forty figures past a red one and meet the refusal at
+   the end. Agreed in chat, then drawn and approved: while a figure this
+   person may explain is red with no note, every other box on the page shuts;
+   that row's note and its own figure stay open (a typo is fixed where it was
+   made, and a figure moved out of the red lifts the lock by itself).
+
+   WHOSE NOTE IS ASKED THE WAY THE PAGE ASKS IT, never a second rule (\u00a753.5):
+   a unit-shaped report through `canEnterNote` \u2014 the very call `noteCell`
+   draws its box with \u2014 and a holder's rows through the gate each of its
+   renderers hands `capNoteBox`. A row whose note this person cannot write
+   locks nothing for them, or the page would shut with no way out. */
+function noteMayWrite(subject, x){
+  var t = holderSubject(String(subject || ""));
+  var u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return canEnterNote(u.ukey, x);
+  var c = x && x.cap;
+  if (!c) return false;
+  /* `projReportBody`: per row, through the project. */
+  if (x.kind === "deliverable" || x.kind === "outcome" || x.kind === "milestone")
+    return canReportFnRow(holderCodeOwner(c), x.proj, x.obj);
+  /* `fnObjReportBody`: per row, with no project. */
+  if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
+  /* `capReportBody`: a capability's own objectives belong to no project. */
+  return canReportFnWhole(holderCodeOwner(c));
+}
+/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
+   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
+   narrowing that section is drawn from). */
+function noteLockSubjects(target){
+  var t = String(target || ""), out = [t];
+  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
+      typeof capsHere === "function")
+    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
+  return out;
+}
+/* The lock for one page: the Reporting page of `target`, or My reporting
+   (`mine`). NULL when nothing is red, so every caller asks one truthy
+   question. A breakdown's cells share their row's note (\u00a7343), so its row is
+   one entry however many of its figures are red. A report already closed
+   (submitted or parked, \u00a7220) has no open box to shut. */
+function noteLockOf(target, mine){
+  if (!REVIEW || REVIEW.state !== "open") return null;
+  var rows = [], ids = {};
+  var take = function(x, subj){
+    var id = x.noteId || x.id;
+    if (ids[id]) return;
+    ids[id] = true;
+    rows.push(Object.assign({ subj: subj }, x));
+  };
+  if (mine) {
+    /* \u00a7576: on My reporting the owner writes the note on their own red rows
+       (Islam's call) \u2014 asked through the gate their figure is entered by. */
+    myLineRows().forEach(function(r){
+      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
+    });
+  } else if (target) {
+    noteLockSubjects(target).forEach(function(s){
+      if (reportClosed(s)) return;
+      subjectAsked(s).forEach(function(x){
+        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
+      });
+    });
+  }
+  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -30849,9 +30927,14 @@ function textOr(page, value, cls, setter){
    function, where `capNoteBox` passes `want:false` ALWAYS (§279's own recorded
    not-done), so EVERY note there leaves the tab path and the key is the only
    road to it — said here rather than discovered on that page. */
-function noteBox(hook, id, value, want){
+/* §576: `subj` is the subject the row belongs to, written as `data-repu` the
+   way `repEntry` writes it — My reporting draws rows from several units, so
+   the note's handler must resolve the row against ITS unit rather than the
+   page it is standing on (§345). Absent everywhere else, as before. */
+function noteBox(hook, id, value, want, subj){
   return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
+    '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
+    ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
     (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
@@ -33831,8 +33914,30 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
+/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
+   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
+   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
+   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
+   whoever is locked, not only for whoever may submit, because a bounded
+   reporter and a tactic's owner are locked too and are the people most in
+   need of being told why every box went grey. It names the FIRST row and
+   counts the rest, so the person is never handed a list to work out. */
+var NOTELOCK = null;
+function noteLockBar(){
+  var lk = NOTELOCK;
+  if (!lk) return "";
+  var x = lk.rows[0], n = lk.rows.length;
+  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
+  var band = bandOf(rowReads(x)).label || "Off track";
+  return '<div class="lockbar" data-notelock="1" role="status">' +
+    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
+    'Write its note before entering anything else.' +
+    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
+    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
+}
 function reportBar(target){
   var t = String(target || "");
+  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -36128,7 +36233,9 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
+     the others put it — above the tables. */
+  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 function renderFnProjects(fnKey){
@@ -44502,11 +44609,23 @@ function renderMyLines(){
   var blocks = order.filter(function(t){ return !MYLINEF || MYLINEF === t; }).map(function(t){
     var list = byT[t], n = list.filter(lineAnswered).length;
     var shut = lineLockShut(t);
+    /* §576: AND THE NOTE, ON THE OWNER'S OWN RED ROWS. Islam, agreeing the
+       lock: the owner who enters the figure writes why it is red — before,
+       the note was the unit's alone and an owner here could only wait.
+       `rowAtRisk`, not `needsNote`: the box stays once the note is written,
+       so it can still be corrected. Every other row reads its note, if it
+       has one, as the figure sets' page does (§16.7). */
+    var noteOf = function(r){
+      return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
+        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
+        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+    };
     var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">' + L1("tactic") + '</th><th style="width:26%">What it produced</th>' +
-        '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
-        '<th class="cc" style="width:16%">YTD actual</th>' +
-        '<th class="cc" style="width:10%">Progress</th>' +
+        '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
+        '<th class="num" style="width:12%">' + REP_TGT_HEAD + '</th>' +
+        '<th class="cc" style="width:14%">YTD actual</th>' +
+        '<th class="cc" style="width:9%">Progress</th>' +
+        '<th style="width:21%">Note</th>' +
       '</tr></thead><tbody>' + list.map(function(r){
         var oc = outcomeOf(r.obj);
         /* THE TARGET CELL IS THE REPORTING PAGE'S OWN, composed the same way
@@ -44543,7 +44662,7 @@ function renderMyLines(){
               ? '<span class="pill kind">Not reported</span>'
               : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
                 (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+            '</td><td class="notecol"' + rs + '>' + noteOf(r) + '</td></tr>' + subs;
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
@@ -44556,8 +44675,8 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    chips + blocks +
-    '<div class="note"><b>You enter the figure; the unit writes the note and submits.</b> ' +
+    noteLockBar() + chips + blocks +
+    '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
 /* THE LOCK IS THE REPORTING BAR'S OWN PAIR (§263, §309), not a second control:
@@ -61476,7 +61595,8 @@ var TRAIL = (function(){
                reportState:"Report", capPlan:"Plan", capReporting:"Reporting", gapFill:"Fill",
                gapConfirm:"Fill", arrange:"Order", setup:"Setup", access:"Access", cycle:"Cycle",
                group:"Group", focus:"Focus", claim:"Figure set", claimRequest:"Figure set",
-               sourceReporting:"Reporting", deckHide:"Slides", destroy:"Register",
+               sourceReporting:"Reporting", lineReporting:"Reporting", lineNote:"Reporting",
+               deckHide:"Slides", destroy:"Register",
                /* §266 joins this the day its kind was added, not later: the
                   authoriser's kinds and this map are two lists that must agree,
                   and `kindWord()` falls back to the RAW KEY — so a kind missing
@@ -75079,6 +75199,15 @@ var SYNC = (function () {
        It holds the TARGET rather than a boolean, so it can never open
        somebody else's report. */
     if (def && def.k === "report") REPORTING = current;
+    /* §576: AND WHETHER A RED FIGURE HOLDS THIS PAGE. Worked out ONCE per
+       paint, before the render, because two halves read it — the bar the
+       renderers draw in the "to finish" bar's place, and `noteLockApply()`
+       after the paint, which shuts every other box — and two answers to one
+       question inside one frame is how a bar comes to name a row whose boxes
+       are open (§53.5). */
+    NOTELOCK = (def && typeof noteLockOf === "function" &&
+                (def.k === "report" || def.k === MY_TAB.k))
+      ? noteLockOf(def.k === "report" ? REPORTING : null, def.k === MY_TAB.k) : null;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -75444,6 +75573,10 @@ var SYNC = (function () {
        ones a bound field did not rebuild — a second listener on a survivor
        would step twice on one Enter (§24, §47.2). */
     if (typeof repKeys === "function") repKeys();
+    /* §576: AND WHILE A RED FIGURE HOLDS THE PAGE, every box but its row's
+       shuts — after the marks and the keys, because it reads the same
+       controls they annotate and only switches some of them off. */
+    noteLockApply();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -75484,6 +75617,7 @@ var SYNC = (function () {
     putScrollsIn(document.getElementById("panel"), _keep.boxes);
     if (_keep.y) window.scrollTo(0, _keep.y);
     putFocus(_keep.focus);
+    noteLockFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
@@ -76004,6 +76138,105 @@ var SYNC = (function () {
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
     "[data-cpct],[data-note],[data-cnote]";
+  /* ── §576: THE LOCK, APPLIED TO WHAT THE PAINT DREW ─────────────────
+     `NOTELOCK` (paint(), from `noteLockOf`) names the rows whose note is
+     owed; every reporting box that answers any OTHER row is switched off
+     here, along with the subject's own cycle note. In ONE place over the
+     same list the walk and the keys read (`REP_BOXES`), never at the eight
+     builders — a box kind added tomorrow is locked by being a box (§104.7).
+
+     `disabled`, not `aria-disabled`: the person must not be able to type, and
+     a shut box that still takes a keystroke is a lock in name only. The hover
+     says why. A locked row's note joins the tab path even where its builder
+     took it out (§528, and a capability's note always), because it is now the
+     one box the page is asking for. */
+  function repBoxRow(el){
+    var d = el.dataset;
+    return d.rep != null ? d.rep : d.crep != null ? d.crep : d.cpick != null ? d.cpick
+         : d.cpct != null ? d.cpct : d.note != null ? d.note : d.cnote;
+  }
+  function noteLockApply(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0];
+    var why = "Write the note on " +
+      (String((x.obj && x.obj.name) || "").trim() || "the red figure") + " first";
+    document.querySelectorAll(REP_BOXES + ",[data-unote]").forEach(function(el){
+      var id = el.dataset.unote != null ? null : repBoxRow(el);
+      if (id != null && NOTELOCK.ids[id]) {
+        if (el.dataset.note != null || el.dataset.cnote != null) {
+          el.classList.add("lockhere");
+          el.removeAttribute("tabindex");
+        }
+        return;
+      }
+      el.disabled = true;
+      el.setAttribute("title", why);
+      /* The figure's box wears its unit beside it; the wrapper is what reads
+         as the box, so it is the wrapper that greys. */
+      (el.closest(".entry") || el).classList.add("lockshut");
+    });
+  }
+  /* The first owed note that is ON THE SCREEN, in the bar's order. */
+  function noteLockNote(){
+    if (!NOTELOCK) return null;
+    var notes = [].slice.call(document.querySelectorAll("[data-note],[data-cnote]"));
+    for (var i = 0; i < NOTELOCK.rows.length; i++) {
+      var id = NOTELOCK.rows[i].noteId || NOTELOCK.rows[i].id;
+      for (var j = 0; j < notes.length; j++) if (repBoxRow(notes[j]) === id) return notes[j];
+    }
+    return null;
+  }
+  /* WHEN THE BOX SOMEBODY WAS IN HAS JUST SHUT, the cursor goes to the note.
+     That is the moment this exists for: a red figure typed and Tab pressed
+     lands in the NEXT row's box, which the commit's paint has just greyed, and
+     the browser drops a disabled box's focus on the body. Only then — a paint
+     that left the focus somewhere live (a rail button, the row's own figure)
+     is somebody doing something else, and the page does not take it away. */
+  /* A reporting box has just committed. Heard in the CAPTURE phase, so it is
+     set before the box's own handler runs the paint that reads it — the
+     focus the paint keeps (`_keep.focus`) is already gone by then on a Tab,
+     because Chromium fires `change` as the focus leaves. A page that merely
+     OPENS with a red row does not move anybody's cursor; typing does. */
+  var NOTELOCK_TYPED = false;
+  document.addEventListener("change", function(e){
+    if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
+  }, true);
+  function noteLockFocus(kept){
+    var typed = NOTELOCK_TYPED;
+    NOTELOCK_TYPED = false;
+    if (!NOTELOCK || !(kept || typed)) return;
+    var go = function(){
+      if (!NOTELOCK) return;
+      var a = document.activeElement;
+      if (a && a !== document.body && !a.disabled) return;
+      var n = noteLockNote();
+      if (n) n.focus();
+    };
+    go();
+    /* AND ONCE MORE AFTER THE BROWSER'S OWN STEP. A Tab commits the figure
+       (`change`, whose paint runs inside the keypress) and only THEN moves the
+       focus — to the box it had picked before the paint replaced it, which is
+       detached, so the focus falls on the body after this paint has already
+       returned. Measured on the build before §576 too: Tab out of a figure
+       has always left the cursor nowhere. Queued, it lands in the note. */
+    setTimeout(go, 0);
+  }
+  /* GO TO IT: the place the first owed note is in, opened the way the bar's
+     chips open one (`repGoTo`) — its rail, its capability on the company's
+     page, every band on My reporting — and then the note itself, lit. */
+  function noteGo(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0], pl = x.place || {};
+    if (NOTELOCK.mine) {
+      if (MYLINEF && MYLINEF !== x.target) MYLINEF = "";
+    } else {
+      if (REPORTING === "group" && String(x.subj || "").indexOf("cap:") === 0)
+        TOPCAP = String(x.subj).slice(4);
+      if (pl.rail) RAIL[pl.rail] = pl.code;
+    }
+    paint();
+    setTimeout(function(){ var n = noteLockNote(); if (n) gapLight(n); }, 0);
+  }
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -76072,6 +76305,8 @@ var SYNC = (function () {
     }, 0);
   }
   function repWalk(){
+    /* §576: and Alt+Enter is the lock's Go to it while it holds. */
+    if (NOTELOCK) { noteGo(); return; }
     var chips = repChips(), i = -1, a;
     for (a = 0; a < chips.length; a++)
       if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
@@ -76176,6 +76411,9 @@ var SYNC = (function () {
      there is genuinely nothing to point at and nothing is better than a guess
      at which row took its place. */
   function repStep(key, by){
+    /* §576: while a red figure holds the page, the next place is its note. */
+    var owed = noteLockNote();
+    if (owed) { gapLight(owed); return; }
     var els = repTypedBoxes(), i, here = null;
     for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
     if (here == null) return;
@@ -77594,7 +77832,10 @@ var SYNC = (function () {
            lost. The note is the half a reporter is REQUIRED to write when a
            figure is off track (§105's submit refusal), so losing it silently
            also made that refusal impossible to satisfy. */
-        var subj = unitLike(current);
+        /* §576: `data-repu` where the box names its row's subject — My
+           reporting's note, on a row from another unit (the figure's handler
+           has asked it this way since §345). */
+        var subj = unitLike(el.dataset.repu || current);
         if (!subj) return;
         var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
@@ -81468,6 +81709,11 @@ var SYNC = (function () {
         return;
       }
       if (ev.target.closest("[data-repnext]")) repWalk();
+    });
+    /* §576: the lock's own bar, drawn in that bar's place while a red figure
+       holds the page — one button, and it goes to the note that is owed. */
+    document.querySelectorAll("[data-notego]").forEach(function(b){
+      b.addEventListener("click", function(){ noteGo(); });
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

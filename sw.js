@@ -496,7 +496,11 @@
    month. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.69-quarterly-plan";
+/* v6.70-note-lock — §576.1: a red figure gets its note before anything
+   else. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.70-note-lock";
 const ASSETS = [
   "/",
   "/index.html",

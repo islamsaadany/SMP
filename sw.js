@@ -506,7 +506,7 @@
    screens. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.71-two-screens";
+const SHELL = "smp-shell-v6.72-my-work-ledger";
 const ASSETS = [
   "/",
   "/index.html",

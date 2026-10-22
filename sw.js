@@ -484,7 +484,11 @@
    size up. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.66-tour-purpose";
+/* v6.67-tour-clear-cover — §574.10: the guided tour opens on its cover
+   clear. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.67-tour-clear-cover";
 const ASSETS = [
   "/",
   "/index.html",

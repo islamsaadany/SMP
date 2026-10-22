@@ -65302,6 +65302,17 @@ The product greys a control out in two ways. One leaves it alive — `aria-disab
 
 **THE LIVE READ WAS MADE, which §526 and §528 both had to report they could not.** `https://smp-orpin-tau.vercel.app/` answered 200 from this container. The witnesses before this merge's deployment: shell.js **4,745,497**, platform.css **799,429**, sw.js **4,192** with release stamp **7cc8f01e07f38c24**. After it they should read **4,749,817**, **800,775**, 4,192 and a moved stamp (§397) — recorded so the next reader can tell a deployment that landed from one that did not.
 
+## §538.2 — The console check catches up with Apply to plan held, not dead (2026-10-22)
+Islam: *"fix the Copilot test that keeps failing"*.
+
+**IT WAS THE CHECK, NOT THE PAGE.** `checks/shell.mjs`'s §524 line asked for Apply to plan to be `disabled` with a `title` until a Foundation is saved. §538 (2026-10-15, signed off) moved it on purpose to **held, not dead** — `aria-disabled` with its reason on a `data-tip` bubble that a pointer and Tab can reach, since a `disabled` control's sentence reaches nobody — and moved its press guard to read the hold. The page has drawn that ever since; the line was never rewritten, so it read **red on the right build at every run for a week** (the *one failed* every §583–§584.4 note carried, red on the tree before each time). Measured on the page before anything was written: `aria-disabled="true"`, not `disabled`, tip *Save the Foundation first*.
+
+**REWRITTEN, NOT LOOSENED (§218).** What the line is FOR — held, saying why, until something is saved — is asserted in §538's shape: held, not `disabled`, the tip naming the reason. **AND THE GUARD WITH IT (§94.2)**: a held button that still answered a press would pass a line that only reads the attribute. Before a save there is no deliverable, so even an unguarded press opens no dialog — it falls to `applyAsk`'s own *"Save the Foundation first."* line under the pane — so that line is what is watched for, beside the dialog. A new break, `apply-unguarded`, takes the guard out of the served `shell.js` (asserted to match exactly once, the bytes put back on the way out as the worker's breaks are) and is in `check:shell:red`.
+
+**AND ONE LINE THAT COULD NOT FAIL.** After the save, *Apply to plan is live* was read as `:not([disabled])` — true of a held button too since §538. It now asks for neither hold.
+
+**CHECKED.** `checks/shell.mjs` **403 ok, 0 failed** — the first wholly green run of the console check since §538. Under `apply-unguarded`, **402 ok, 1 failed**: exactly the guard line, reading the *Save the Foundation first.* line the unguarded press put up; `public/shell.js` byte-identical after (md5). No page changed.
+
 ## §531 — One address, one parse (spec 066 stage 3a, part 1 of 3)
 Islam, of the two questions he put to the box model (a capability and a direction are both pillars, one internal and one external; and what the four part-owner roles become): *"then we can go with the 2 steps in order"*. Step 1 of the split agreed with him is **code only, no data moves**, and this is its first part.
 

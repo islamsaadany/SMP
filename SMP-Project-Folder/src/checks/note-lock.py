@@ -334,6 +334,87 @@ with sync_playwright() as pw:
            isinstance(nope, dict) and nope.get("red") is True and nope.get("mobile") is None and
            nope.get("mine") is None, nope)
 
+        # ── 8 · §576.2: A TAB FROM A RED FIGURE ENDS IN THE NOTE ─────────
+        # Islam was told the cursor sometimes landed on Save draft. MEASURED,
+        # NOT ASSUMED: 2 Tabs in 12 on the live build, and this file's own
+        # "...and the cursor is in it" above red 1 run in 4 — a race, so a
+        # single Tab passes most of the time on the build that has it. The
+        # race is MADE here rather than waited for: the browser's own step,
+        # which lands after the commit's paint, is played by focusing Save
+        # draft in a microtask after the commit — exactly where Chromium put
+        # it in the failing runs. Every time, so a pass is a pass (§94.2).
+        print("── 8 · §576.2: a Tab from a red figure ends in the note, whatever the browser's step did")
+        RESET = """(id) => { const t = UNITS.mobile.items[0].tactics.filter(x => x.id === id)[0];
+          delete t.note; t.outActual = t.outTarget; t.actual = 100; paint(); return true; }"""
+        RACE = """() => { const go = () => {
+            const s = document.querySelector('[data-lineslock]'); if (s) s.focus(); };
+          document.addEventListener('change', () => queueMicrotask(go), { capture: true, once: true }); }"""
+        landed = []
+        for _ in range(3):
+            ev(pg, RESET, tid)
+            pg.wait_for_timeout(300)
+            ev(pg, RACE)
+            pg.click('[data-rep="%s"]' % tid)
+            pg.fill('[data-rep="%s"]' % tid, "1")
+            pg.keyboard.press("Tab")
+            pg.wait_for_timeout(450)
+            landed.append(ev(pg, """() => { const a = document.activeElement;
+                return a ? (a.dataset.note ? 'note' : a.dataset.lineslock != null ? 'save draft' : a.tagName) : null; }"""))
+        ck("the cursor is in the note after Tab, even with the browser's step on Save draft",
+           landed == ["note", "note", "note"], landed)
+        # AND THE OTHER END: a PRESS somewhere live is somebody choosing where
+        # to go, and the page leaves it there. Pressed and not released on
+        # Save draft — so nothing is saved — with the commit's paint let
+        # through (a real press holds it until the click lands, §30.1).
+        ev(pg, RESET, tid)
+        pg.wait_for_timeout(300)
+        pg.click('[data-rep="%s"]' % tid)
+        pg.fill('[data-rep="%s"]' % tid, "1")
+        sd = pg.query_selector('[data-lineslock]')
+        bx = sd.bounding_box() if sd else None
+        pressed = None
+        if bx:
+            pg.mouse.move(bx["x"] + bx["width"] / 2, bx["y"] + bx["height"] / 2)
+            pg.mouse.down()
+            pg.wait_for_timeout(900)
+            pressed = ev(pg, """() => { const a = document.activeElement;
+                return { at: a ? (a.dataset.note ? 'note' : a.dataset.lineslock != null ? 'save draft' : a.tagName) : null,
+                         locked: !!(typeof NOTELOCK !== 'undefined' && NOTELOCK) }; }""")
+            pg.mouse.move(5, 5)
+            pg.mouse.up()
+            pg.wait_for_timeout(300)
+        ck("...while a press on Save draft keeps the cursor where it was pressed",
+           isinstance(pressed, dict) and pressed.get("locked") is True and pressed.get("at") == "save draft",
+           pressed)
+        ev(pg, """(id) => { const t = UNITS.mobile.items[0].tactics.filter(x => x.id === id)[0];
+          t.note = 'Explained.'; paint(); }""", tid)
+
+    # ── 9 · §576.2: A CAPABILITY'S PAGE — the worked example's own lock ───
+    # cap6's "Quarterly reviews held" is red with no note on the shipped
+    # data, so its Reporting page opens locked. Two faults found by LOOKING at
+    # it: the pinned project band's strip of page ground painted over the
+    # bar's bottom edge, and the ringed note read "Note, if there is one"
+    # under a bar asking for it. Asked as PAINT (what is under the bar's own
+    # edge) and as the box's own words.
+    print("── 9 · §576.2: a capability's page, the worked example's own lock")
+    pg.select_option("#asWho", "smo")
+    pg.wait_for_timeout(500)
+    ev(pg, "() => { leaveModes(); current = 'cap:cap6'; paint(); }")
+    pg.wait_for_timeout(500)
+    ev(pg, "() => { const t = [...document.querySelectorAll('#subtabs [data-s]')].find(x => /Reporting/.test(x.textContent)); if (t) t.click(); }")
+    pg.wait_for_timeout(700)
+    cap = ev(pg, """() => { const b = document.querySelector('.lockbar'); if (!b) return { bar: null };
+        const r = b.getBoundingClientRect();
+        const pts = [r.left + 40, r.left + r.width / 2, r.right - 20].map(x => document.elementFromPoint(x, r.bottom - 1));
+        const n = document.querySelector('.lockhere');
+        return { bar: b.textContent.trim().slice(0, 40), edge: pts.map(e => !!(e && (e === b || b.contains(e)))),
+                 ph: n ? n.placeholder : null, ring: n ? (n.dataset.cnote || n.dataset.note) : null }; }""")
+    ck("cap6 opens locked over its own red row", (cap.get("bar") or "").startswith("Quarterly reviews held"), cap)
+    ck("...and the bar's whole bottom edge is the bar's, not the pinned band's strip",
+       cap.get("edge") == [True, True, True], cap)
+    ck("...and the ringed note asks in the wanted note's words",
+       cap.get("ring") and cap.get("ph") == "Why, and what is being done", cap)
+
     ck("no page error", not errs, errs[:3])
     b.close()
 

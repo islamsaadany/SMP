@@ -6670,6 +6670,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .lockbar .lockgo:hover{background:var(--bad-bg)}
   .lockbar .lockgo:focus-visible{outline:2px solid var(--bad);outline-offset:2px}
   .notefld.lockhere{outline:3px solid var(--bad);outline-offset:1px}
+  /* §576.2: A CAPABILITY'S PANE PINS ITS PROJECT BAND with a strip of page
+     ground 24px tall above it (`.pane > .pband::before`), and at the bar's
+     10px that strip painted over the bar's bottom edge — found by looking at
+     cap6, the one page the worked example opens locked. 26px because the
+     bar's own 10px collapses into it. Spaced where the bar meets that pane
+     and nowhere else, so no other page moves. */
+  .lockbar + .capbody{margin-top:26px}
   /* And the break survives being read (§271, §161.3): `pre-line` keeps the
      newlines somebody typed and wraps everything else. On the READ-ONLY note
      wherever it is printed — never on `.why` at large, which is the page's

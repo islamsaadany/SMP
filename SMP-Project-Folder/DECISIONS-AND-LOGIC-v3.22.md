@@ -68046,6 +68046,8 @@ Directions only, on the deck that ends on them; a unit's *Where the unit stands*
 
 **CHECKED** in the new `line-by-line`: the Key measures lines are exactly `scorableMeasures` with their `measureScore`s and average to the reading; the Execution lines exactly `reportedTactics`; the not-due count said; four extra measures show five and *and 4 more*; a unit's stand slide has no detail; the stand slide still fits its 900px. `review-pptx` green.
 
+**§578.1 (drawn, not built) — THE FIGURES NEXT TO THEIR NAMES.** Islam, with a screenshot of El Abd's *Where Maximizing Current Stores stands*: *"the space between the element and the number is so far that the number nearly hits the other side element"*. Each line's figure sits at the far edge of its half (the name takes the rest of the row), so the left half's figures end 69px from the right half's names on the 1600px slide. Drawn (`design-mockups/stand-detail/2026-10-22_figures-beside-names.html`) as real screenshots of the build with each change applied: A, each list narrowed to 600px (171px clear); B, recommended, the figures as a column right after the longest name in each list, 40px from it (369px clear on the demo direction). Waiting on his choice.
+
 ## §579 — Line by line
 
 Islam: *"for the slides presentation give me an option in the sliders per direction or in the master slide to present box by box like line by line in the tables and number by number in the numbers slides"*. Asked where the switch lives, which slides build and how back behaves; *"3 ok b) objectives & swot no, projects yes. c) yes"* — the recommended switch, those slides, ← one line at a time.

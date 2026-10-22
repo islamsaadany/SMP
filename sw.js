@@ -479,7 +479,12 @@
    sized for the projector, and its clear views naming the slide. The built
    file's bytes changed, which is the whole trigger (§91). Proved held by no
    commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.65-tour-cards-and-marker";
+/* v6.66-tour-purpose — §574.6–§574.9: the guided tour's closing slide on
+   what the platform is for, built one objective per press, and every card a
+   size up. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.66-tour-purpose";
 const ASSETS = [
   "/",
   "/index.html",

@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-22 — The lines under the two numbers on Where it stands sit beside their figures (§578.1), built on the branch, not live.** Each figure now follows its name, in a column just after the longest name, instead of at the far edge of its half; the left half always keeps a clear space before the right half, and a name too long for it is cut short.
+**2026-10-22 — The lines under the two numbers on Where it stands sit beside their figures (§578.1), merged to `main` 2026-10-22 on Islam's word.** Each figure now follows its name, in a column just after the longest name, instead of at the far edge of its half; the left half always keeps a clear space before the right half, and a name too long for it is cut short.
 
 **2026-10-22 — The console's text boxes, client set-up's size band and Frameworks' chips in their declared type (§584.4), merged to `main` 2026-10-22 on Islam's word.** Every text box, dropdown and notes box is 14px and 39px tall (was the browser's 13.33px, 33px), the size band in Add a client is semibold and 48px, and Frameworks' chips semibold 12px and 26px. No tab slides sideways and nothing runs past the screen, on a phone or a computer. That was the last of the console's dropped font rules. Mockup: `design-mockups/console-buttons/2026-10-22_text-boxes-and-chips.html`.
 

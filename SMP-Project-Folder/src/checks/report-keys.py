@@ -426,6 +426,14 @@ with sync_playwright() as p:
        "reachable (§61)",
        all(sorted(x.get("ks") or []) == sorted(["Alt+Enter", "Escape"]) for x in nb),
        [x.get("ks") for x in nb[:3]])
+    # §576: A RED FIGURE WITH NO NOTE NOW HOLDS THE PAGE — every other box
+    # shut until it is explained (Islam's rule, checks/note-lock.py) — so the
+    # row made above is explained here, or §9 and §10 would measure the walk
+    # and the keys on a page the lock has closed. The state is put back, never
+    # the assertions loosened (§94.2, §218).
+    js(pg, """(id)=>{var h=findById(unitLike('%s'), id);
+      if(h){ h.obj.note='Explained.'; paint(); } return !!h;}""" % UNIT, dct(risk).get("id"))
+    pg.wait_for_timeout(300)
 
     # 9 ── ALT+ENTER CONTINUES THE WALK
     #      REWRITTEN, never loosened (§218): the first version asserted that

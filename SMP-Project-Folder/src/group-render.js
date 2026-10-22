@@ -3936,9 +3936,14 @@ function textOr(page, value, cls, setter){
    function, where `capNoteBox` passes `want:false` ALWAYS (§279's own recorded
    not-done), so EVERY note there leaves the tab path and the key is the only
    road to it — said here rather than discovered on that page. */
-function noteBox(hook, id, value, want){
+/* §576: `subj` is the subject the row belongs to, written as `data-repu` the
+   way `repEntry` writes it — My reporting draws rows from several units, so
+   the note's handler must resolve the row against ITS unit rather than the
+   page it is standing on (§345). Absent everywhere else, as before. */
+function noteBox(hook, id, value, want, subj){
   return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
+    '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
+    ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
     (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
@@ -6788,8 +6793,30 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
+/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
+   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
+   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
+   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
+   whoever is locked, not only for whoever may submit, because a bounded
+   reporter and a tactic's owner are locked too and are the people most in
+   need of being told why every box went grey. It names the FIRST row and
+   counts the rest, so the person is never handed a list to work out. */
+var NOTELOCK = null;
+function noteLockBar(){
+  var lk = NOTELOCK;
+  if (!lk) return "";
+  var x = lk.rows[0], n = lk.rows.length;
+  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
+  var band = bandOf(rowReads(x)).label || "Off track";
+  return '<div class="lockbar" data-notelock="1" role="status">' +
+    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
+    'Write its note before entering anything else.' +
+    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
+    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
+}
 function reportBar(target){
   var t = String(target || "");
+  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -9085,7 +9112,9 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
+     the others put it — above the tables. */
+  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 function renderFnProjects(fnKey){

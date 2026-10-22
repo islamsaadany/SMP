@@ -6254,11 +6254,23 @@ function renderMyLines(){
   var blocks = order.filter(function(t){ return !MYLINEF || MYLINEF === t; }).map(function(t){
     var list = byT[t], n = list.filter(lineAnswered).length;
     var shut = lineLockShut(t);
+    /* §576: AND THE NOTE, ON THE OWNER'S OWN RED ROWS. Islam, agreeing the
+       lock: the owner who enters the figure writes why it is red — before,
+       the note was the unit's alone and an owner here could only wait.
+       `rowAtRisk`, not `needsNote`: the box stays once the note is written,
+       so it can still be corrected. Every other row reads its note, if it
+       has one, as the figure sets' page does (§16.7). */
+    var noteOf = function(r){
+      return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
+        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
+        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+    };
     var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">' + L1("tactic") + '</th><th style="width:26%">What it produced</th>' +
-        '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
-        '<th class="cc" style="width:16%">YTD actual</th>' +
-        '<th class="cc" style="width:10%">Progress</th>' +
+        '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
+        '<th class="num" style="width:12%">' + REP_TGT_HEAD + '</th>' +
+        '<th class="cc" style="width:14%">YTD actual</th>' +
+        '<th class="cc" style="width:9%">Progress</th>' +
+        '<th style="width:21%">Note</th>' +
       '</tr></thead><tbody>' + list.map(function(r){
         var oc = outcomeOf(r.obj);
         /* THE TARGET CELL IS THE REPORTING PAGE'S OWN, composed the same way
@@ -6295,7 +6307,7 @@ function renderMyLines(){
               ? '<span class="pill kind">Not reported</span>'
               : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
                 (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+            '</td><td class="notecol"' + rs + '>' + noteOf(r) + '</td></tr>' + subs;
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
@@ -6308,8 +6320,8 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    chips + blocks +
-    '<div class="note"><b>You enter the figure; the unit writes the note and submits.</b> ' +
+    noteLockBar() + chips + blocks +
+    '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
 /* THE LOCK IS THE REPORTING BAR'S OWN PAIR (§263, §309), not a second control:

@@ -38,6 +38,15 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE
   open Submit — a build that cleared the bar and left Submit shut is the
   dangerous one, and either half alone passes on it.
 
+§576 — A NOTE OWED IS NO LONGER THIS BAR'S. Islam: a red figure with no note
+blocks every other entry until the note is written, and the approved mockup
+puts the lock's own bar in this one's place. So the state this file was built
+from — one note owed, on a pillar the rail is not on — is now §576's, and
+section 2b asserts it there: the lock's bar instead of this one, the rail still
+naming the place, and Go to it landing on the note (§279's promise, kept by the
+new bar). The walk, the chips and the pair are asserted over the blocker this
+bar still owns: a figure still to enter (rewritten, never loosened — §218).
+
 PROVED ABLE TO FAIL: run against the previous build with
 `SMP_FILE=/path/to/old.html python3 checks/report-blockers.py` — 24 red, the
 first of them the reported symptom itself.
@@ -116,6 +125,13 @@ ONE_NOTE = """(u)=>{const un=UNITS[u],last=un.items[un.items.length-1],m=last.me
  m.note="";
  return {code:last.id, id:m.id};}"""
 
+# §576: the blocker this bar still owns — a figure still to enter, on the last
+# pillar, with every note in place. `val` is a figure at the target, which is
+# what section 6 answers it with.
+ONE_OWED = """(u)=>{const un=UNITS[u],last=un.items[un.items.length-1],m=last.measures[0];
+ m.actual=""; m.note=m.note||"On plan.";
+ return {code:last.id, id:m.id, val:String(parseFloat(String(m.target).replace(/,/g,""))||100)};}"""
+
 BAR = """()=>{const b=document.querySelector('[data-repband]');
  if(!b) return {none:true};
  return {count:(b.querySelector('.secmiss')||{}).textContent||"",
@@ -164,9 +180,43 @@ with sync_playwright() as p:
     ck("...and Submit is live", pg.evaluate(
         "()=>{const s=document.querySelector('.rc-submit'); return s? s.getAttribute('aria-disabled') : 'no button';}") is None)
 
-    # 2 ── HIS STATE: ONE NOTE OWED, IN A PILLAR THE RAIL IS NOT ON
-    print("\n2 · one figure at risk with no note — the state he reported")
-    made = js(pg, ONE_NOTE, UNIT)
+    # 2b ── HIS STATE, ONE NOTE OWED: §576's LOCK NOW, IN THIS BAR'S PLACE
+    print("\n2b · one figure at risk with no note — the lock's bar takes this one's place (§576)")
+    madeN = js(pg, ONE_NOTE, UNIT)
+    pg.evaluate("()=>paint()")
+    pg.wait_for_timeout(500)
+    pg.evaluate("()=>{const r=document.querySelectorAll('.rail .ritem');"
+                "if(r.length && !r[0].classList.contains('on')) r[0].click();}")
+    pg.wait_for_timeout(450)
+    lk = js(pg, """()=>({ bar:(document.querySelector('.lockbar')||{}).textContent||null,
+        repband:!!document.querySelector('[data-repband]'),
+        alarm:[...document.querySelectorAll('.rail .ritem .rsub .missing')].map(x=>x.textContent) })""")
+    ck("the lock's bar is drawn, naming the row",
+       isinstance(lk, dict) and (lk.get("bar") or "").find("Write its note before entering anything else.") > -1, lk)
+    ck("...in place of this bar, never beside it", isinstance(lk, dict) and lk.get("repband") is False, lk)
+    ck("...and the rail still names the place, and that a note is owed",
+       isinstance(lk, dict) and len(lk.get("alarm") or []) == 1 and "note" in (lk.get("alarm") or [""])[0], lk)
+    try:
+        pg.click("[data-notego]")
+    except Exception as e:
+        errs.append("notego: " + str(e))
+    pg.wait_for_timeout(700)
+    lit0 = js(pg, """()=>{const a=document.activeElement;
+        return a?{tag:a.tagName, note:a.getAttribute('data-note')||""}:null;}""")
+    ck("Go to it lands in that row's note, on its pillar",
+       isinstance(lit0, dict) and lit0.get("tag") == "TEXTAREA" and
+       lit0.get("note") == (madeN.get("id") if isinstance(madeN, dict) else None), (lit0, madeN))
+    pg.evaluate("""()=>{const l=document.activeElement;
+        if(!l||l.tagName!=='TEXTAREA') return; l.value='Supplier outage in July; recovery agreed.';
+        l.dispatchEvent(new Event('change',{bubbles:true}));}""")
+    pg.wait_for_timeout(500)
+    js(pg, FILL_ALL, UNIT)
+    pg.evaluate("()=>paint()")
+    pg.wait_for_timeout(400)
+
+    # 2 ── ONE FIGURE STILL TO ENTER, IN A PILLAR THE RAIL IS NOT ON
+    print("\n2 · one figure still to enter, on a pillar the rail is not on")
+    made = js(pg, ONE_OWED, UNIT)
     pg.evaluate("()=>paint()")
     pg.wait_for_timeout(500)
     pg.evaluate("()=>{const r=document.querySelectorAll('.rail .ritem');"
@@ -174,8 +224,8 @@ with sync_playwright() as p:
     pg.wait_for_timeout(450)
     blk = js(pg, "(u)=>{const b=submitBlockers(u);"
                  "return {notes:b.notes.length,pending:b.pending.length,owed:b.owed,gaps:b.gaps};}", UNIT)
-    ck("the gate is held by the note and by nothing else",
-       blk == {"notes": 1, "pending": 0, "owed": 0, "gaps": 0}, blk)
+    ck("the gate is held by that figure and by nothing else",
+       blk == {"notes": 0, "pending": 0, "owed": 1, "gaps": 0}, blk)
     r = js(pg, BAR)
     ck("a bar is drawn", isinstance(r, dict) and not r.get("none"), r)
     places = lst(js(pg, "(u)=>reportPlaces(u).filter(e=>e.count>0)"
@@ -214,8 +264,8 @@ with sync_playwright() as p:
     ck("...it is the pillar the map names",
        bool(places) and any(
            x["alarm"] and x["txt"].startswith(at(places, 0).get("label", "\u0000")) for x in rail), rail)
-    ck("...it says a note is what is owed",
-       any("note" in x["alarm"] for x in rail), rail)
+    ck("...it says a figure is what is owed",
+       any("still to enter" in x["alarm"] for x in rail), rail)
     ck("...and that row's tally is no longer green — asked of the marked row "
        "itself, or a build with no marks at all satisfies it (§113.8)",
        len([x for x in rail if x["alarm"] and not x["full"]]) == 1, rail)
@@ -239,13 +289,13 @@ with sync_playwright() as p:
     ck("the rail moved to the pillar that owes", pressed and after != before and
        after.startswith(at(places, 0).get("label", "\u0000")), (before, after))
     lit = js(pg, """()=>{const l=document.querySelector('.gaplit');
-        return l?{tag:l.tagName, note:l.getAttribute('data-note')||"",
+        return l?{tag:l.tagName, note:l.getAttribute('data-rep')||"",
                   place:l.getAttribute('data-rplace')||"",
                   walk:l.classList.contains('repwalk'),
                   focused:document.activeElement===l}:null;}""")
     ck("a control is lit", isinstance(lit, dict) and lit.get("tag"), lit)
-    ck("...it is the NOTE box, not the figure box",
-       isinstance(lit, dict) and lit.get("tag") == "TEXTAREA" and lit.get("note"), lit)
+    ck("...it is the FIGURE box, where what is owed is typed",
+       isinstance(lit, dict) and lit.get("tag") == "INPUT" and lit.get("note"), lit)
     ck("...of the very row the map says owes one",
        isinstance(lit, dict) and lit.get("note") ==
        (made.get("id") if isinstance(made, dict) else None), (lit, made))
@@ -256,9 +306,10 @@ with sync_playwright() as p:
 
     # 6 ── ANSWERING IT CLEARS THE BAR *AND* OPENS SUBMIT
     print("\n6 · answering the last thing clears the bar and opens Submit (the pair)")
-    pg.evaluate("""()=>{const l=document.querySelector('.gaplit');
-        if(!l) return; l.value='Supplier outage in July; recovery agreed.';
-        l.dispatchEvent(new Event('change',{bubbles:true}));}""")
+    pg.evaluate("""(v)=>{const l=document.querySelector('.gaplit');
+        if(!l) return; l.value=v;
+        l.dispatchEvent(new Event('change',{bubbles:true}));}""",
+                (made.get("val") if isinstance(made, dict) else "100"))
     pg.wait_for_timeout(700)
     r2 = js(pg, BAR)
     ck("the bar was there and is now gone — the pair, because 'gone' alone is "
@@ -267,8 +318,8 @@ with sync_playwright() as p:
        isinstance(r2, dict) and r2.get("none") is True, (r, r2))
     ck("...and Submit is live in the same breath", pg.evaluate(
         "()=>{const s=document.querySelector('.rc-submit'); return s? s.getAttribute('aria-disabled') : 'no button';}") is None)
-    ck("...and the note reached the stored row",
-       js(pg, "(a)=>{const h=findById(unitLike(a.u), a.id); return !!(h && h.obj.note);}",
+    ck("...and the figure reached the stored row",
+       js(pg, "(a)=>{const h=findById(unitLike(a.u), a.id); return !!(h && h.obj.actual);}",
           {"u": UNIT, "id": made.get("id")}) is True)
 
     # 7 ── A PLAN GAP IS COUNTED AND IS A DOOR, NEVER A WALK STOP
@@ -320,6 +371,9 @@ with sync_playwright() as p:
       const p=(h.projects||[]).filter(x=>(x.milestones||[]).length)[0];
       if(!p) return null;
       const m=p.milestones[0]; m.status='wip'; m.pct=null; m.note='';
+      /* §576: and nothing else red and unexplained, or the lock's bar takes
+         this one's place — a seeded red row is not what this section asks. */
+      subjectAsked(t).filter(needsNote).forEach(x=>{ x.obj.note='Explained.'; });
       paint(); return {holder:h.id, project:p.id, row:m.id};}"""
     subjects = js(pg, """()=>{
       const fk = FUNCTION_KEYS.filter(k=>fnOwnProjects(k).length)[0];
@@ -353,7 +407,7 @@ with sync_playwright() as p:
     # without this every assertion below passes over a page with nothing to
     # say (§94.2, and §113.8 — an absence over an empty bar is not an absence).
     open_report(pg, "super", UNIT)
-    made9 = js(pg, ONE_NOTE, UNIT)
+    made9 = js(pg, ONE_OWED, UNIT)
     pg.evaluate("()=>paint()")
     pg.wait_for_timeout(500)
     office = js(pg, BAR)
@@ -407,7 +461,7 @@ with sync_playwright() as p:
     for theme in ("light", "dark"):
         open_report(pg, "super", UNIT)
         js(pg, FILL_ALL, UNIT)
-        js(pg, ONE_NOTE, UNIT)
+        js(pg, ONE_OWED, UNIT)
         pg.evaluate("(t)=>{ if (window.THEME && THEME.set) THEME.set(t);"
                     " else document.documentElement.setAttribute('data-theme', t); }", theme)
         pg.evaluate("()=>paint()")

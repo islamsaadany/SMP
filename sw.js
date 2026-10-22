@@ -511,7 +511,7 @@
    words. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.73-note-lock-fixes";
+const SHELL = "smp-shell-v6.74-phone-tabs";
 const ASSETS = [
   "/",
   "/index.html",

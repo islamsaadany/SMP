@@ -1,4 +1,4 @@
-"""Presenting on two screens (§579).
+"""Presenting on two screens (§582).
 
 Islam: *"how about the presenter has a different view than the presented on
 the screen"* — not a presenter view with notes, but *"the typical view of

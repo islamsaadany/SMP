@@ -3167,7 +3167,7 @@ console.log("\n28b · which columns the tactics slides show is the office's (§5
   check("§571: the office shows them again", r.ok, (r.refusals || []).join(" / "));
 })();
 
-console.log("\n28b · whether the slides build line by line is the office's (§576)");
+console.log("\n28b · whether the slides build line by line is the office's (§579)");
 (function () {
   /* The Columns menu's neighbour, judged as it is: the office may, a unit's
      own custodian — who opens the same view — may not, either way. */
@@ -3178,23 +3178,23 @@ console.log("\n28b · whether the slides build line by line is the office's (§5
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
   const F = R.SLIDE_BUILD;
-  check("§576: the field is named by the shared module", F === "slideBuild", String(F));
-  check("§576: off when absent, on only when true",
+  check("§579: the field is named by the shared module", F === "slideBuild", String(F));
+  check("§579: off when absent, on only when true",
         R.slideBuildOn({}) === false && R.slideBuildOn({ slideBuild: true }) === true &&
         R.slideBuildOn({ slideBuild: "yes" }) === false, "");
   if (!(UK && CUST && F)) return;
   let r = fromStored(SEED, "smo", function (i) { i.group[F] = true; });
-  check("§576: the office turns it on", r.ok, (r.refusals || []).join(" / "));
+  check("§579: the office turns it on", r.ok, (r.refusals || []).join(" / "));
   const kinds = (r.changes || []).map(function (c) { return c.kind; });
-  check("§576: a change to it is classified `deckHide` and nothing else",
+  check("§579: a change to it is classified `deckHide` and nothing else",
         kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
   r = fromStored(SEED, CUST, function (i) { i.group[F] = true; });
-  check("§576 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§579 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
   const set = clone(SEED); set.group[F] = true;
   r = fromStored(set, CUST, function (i) { delete i.group[F]; });
-  check("§576 REFUSED: nor turn it off", !r.ok, "was ALLOWED");
+  check("§579 REFUSED: nor turn it off", !r.ok, "was ALLOWED");
   r = fromStored(set, "smo", function (i) { delete i.group[F]; });
-  check("§576: the office turns it off", r.ok, (r.refusals || []).join(" / "));
+  check("§579: the office turns it off", r.ok, (r.refusals || []).join(" / "));
 })();
 
 console.log("\n29 · the master presentation's running order is the office's (§266)");

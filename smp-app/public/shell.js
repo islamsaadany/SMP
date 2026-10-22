@@ -3524,7 +3524,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !(Array.isArray(v) && v.indexOf(col) >= 0);
   }
 
-  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§576) ──────────────────────
+  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§579) ──────────────────────
      Islam: *"give me an option … to present box by box like line by line in
      the tables and number by number in the numbers slides"* — one switch,
      the office's, set in the slide view beside Columns and judged as that
@@ -49384,7 +49384,7 @@ function standCell(label, val, sub, detail){
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
     '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
 }
-/* ── §575: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
    Islam: *"for the overall performance slide with the final 2 numbers we
    need to give a detail below the 2 numbers to show where the numbers are
    coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
@@ -51129,7 +51129,7 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
-  /* §578: what this deck was opened with, so updating its figures rebuilds
+  /* §581: what this deck was opened with, so updating its figures rebuilds
      the same deck (`deckRebuild`) rather than guessing it back. */
   DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
@@ -52423,7 +52423,7 @@ function clockMount(root){
 }
 
 function deckShow(n){
-  /* §576: a slide arrived at any way but a step forward is shown whole —
+  /* §579: a slide arrived at any way but a step forward is shown whole —
      the dots, Home and End, the editor's own slide, a step back. */
   DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
@@ -52530,7 +52530,7 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  /* §576: every way forward and back goes through `deckStep`, which
+  /* §579: every way forward and back goes through `deckStep`, which
      builds a slide line by line where the company has asked for it and is
      `deckShow(DECK.i ± 1)` where it has not. */
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
@@ -52646,7 +52646,7 @@ function wireDeck(){
     /* §556.11: a deck the slides opened full screen has no windowed state
        to fall back to — leaving full screen IS leaving the deck, or one Esc
        lands on the bar Islam asked never to see. */
-    /* §579: except in the room's window, where behind the deck is the
+    /* §582: except in the room's window, where behind the deck is the
        platform the room is not to see: there, leaving full screen keeps the
        slides filling the window and asks for the click again. */
     if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
@@ -52702,7 +52702,7 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      /* §579: the room's window never closes its deck. Behind it is the
+      /* §582: the room's window never closes its deck. Behind it is the
          platform, and the room is not to see the platform. */
       else if (!ROOM_MODE) closeDeck();
     }
@@ -52719,7 +52719,7 @@ function wireDeck(){
        "ق", and Islam's "T is not working" was exactly that. */
     var kc = ev.code || "";
     if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
-    /* §578: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+    /* §581: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
        we can make it R to be relevant to refresh … for the reset let's make
        it Y"*). By the key's place as well as its letter, for §556.11's
        Arabic keyboard: R sends "ق" and Y "غ". */
@@ -53255,7 +53255,7 @@ addEventListener("keydown", function(ev){
 addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 
-/* ══ LINE BY LINE (§576) ═════════════════════════════════════════════════
+/* ══ LINE BY LINE (§579) ═════════════════════════════════════════════════
    Islam: *"give me an option … to present box by box like line by line in
    the tables and number by number in the numbers slides"*; asked, the
    switch in the slide view beside Columns, the office's and the company's
@@ -53324,7 +53324,7 @@ function deckStep(d){
   if (j < 0 || j > DECK.slides.length - 1) return;
   var was = s && s.dataset.subject;
   deckShow(j);
-  /* §578: a flow moving on to the next subject brings that subject's
+  /* §581: a flow moving on to the next subject brings that subject's
      latest figures with it — quietly: a failed fetch carries on with what
      is on the screen, and never interrupts the room. */
   var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
@@ -53337,7 +53337,7 @@ function deckStep(d){
   }
 }
 
-/* ══ UPDATING THE FIGURES WHILE PRESENTING (§578) ════════════════════════
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§581) ════════════════════════
    Islam: *"when I'm presenting through the master presentation or the
    directions slides if I refresh can it keep the slides presented but update
    the numbers if I changed something in the inputs?"* — of two ways put to
@@ -53406,7 +53406,7 @@ function deckRebuild(){
   clockPaint();
 }
 
-/* ══ PRESENTING ON TWO SCREENS (§579) ════════════════════════════════════
+/* ══ PRESENTING ON TWO SCREENS (§582) ════════════════════════════════════
    Islam: *"how about the presenter has a different view than the presented
    on the screen"* — and, offered a PowerPoint-style presenter view: *"no
    need for presenter notes … I need the typical view of the slides
@@ -54593,7 +54593,7 @@ function slidesResume(reached){
    the fault §253.3 found on this very screen. */
 function slidesPlay(){
   if (!SLED.target) return;
-  /* §579: TWO SCREENS. With the projector connected as a second screen the
+  /* §582: TWO SCREENS. With the projector connected as a second screen the
      slides go to it in a window of their own and this view stays here to
      drive them; pressed again, the same button stops. One screen, and
      nothing below changes. */
@@ -54663,7 +54663,7 @@ function slidesClose(){
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
   SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
-  /* §579: leaving while the room is still showing puts its strip on the
+  /* §582: leaving while the room is still showing puts its strip on the
      page you land on. */
   roomPaint();
 }
@@ -54692,7 +54692,7 @@ function slidesColsHtml(){
     '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
 }
 function slidesColsSync(){
-  /* §576: the line-by-line switch beside it, for the same office. */
+  /* §579: the line-by-line switch beside it, for the same office. */
   var lb = document.querySelector("#slideroot [data-slbuild]");
   if (lb) {
     lb.hidden = !inOffice();
@@ -54725,7 +54725,7 @@ function slidesSetCol(k, on){
   slidesMark(); slidesPaint();
 }
 
-/* §576: on is `true`, off is absent (§50.6). */
+/* §579: on is `true`, off is absent (§50.6). */
 function slidesSetBuild(on){
   if (on) GROUP[SMPRules.SLIDE_BUILD] = true;
   else delete GROUP[SMPRules.SLIDE_BUILD];
@@ -54834,7 +54834,7 @@ function slidesPaint(){
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
   slidesGridPaint(all);
   slidesFootPaint(all);
-  roomPaint();   /* §579: the room's strip and its row, on top */
+  roomPaint();   /* §582: the room's strip and its row, on top */
   SLED.err = "";
 }
 
@@ -54918,7 +54918,7 @@ function slidesFootPaint(all){
     '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
     '<span class="slksep"></span>while presenting: ' +
     '<b>T</b> pause / start the timer &middot; <b>Y</b> reset the timer &middot; ' +
-    /* §578: R is the figures' now, the timer's reset moved to Y (Islam). */
+    /* §581: R is the figures' now, the timer's reset moved to Y (Islam). */
     '<b>R</b> update the figures';
   slidesPartsPaint(all, at);
 }
@@ -55793,7 +55793,7 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    /* §579: while the room's screen is showing, ← → and the timer's keys are
+    /* §582: while the room's screen is showing, ← → and the timer's keys are
        the room's, Enter shows it what you are looking at. */
     if (roomEditorKey(ev)) return;
     if (ev.key === "Escape") {
@@ -71058,7 +71058,7 @@ var SYNC = (function () {
         save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
       }, 0);
     };
-    /* §579: THE ROOM'S WINDOW WRITES NOTHING. It is the projector's copy of
+    /* §582: THE ROOM'S WINDOW WRITES NOTHING. It is the projector's copy of
        the platform, driven from the laptop and edited by nobody; a save from
        it could only ever send an older copy of the plan over the one the
        laptop is changing. First, and "clean" rather than "offline", so nothing
@@ -71579,7 +71579,7 @@ var SYNC = (function () {
   function flushLeave() {
     commitFocus();
     if (!live || saving) return;
-    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) return;   /* §579 */
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) return;   /* §582 */
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved) return;

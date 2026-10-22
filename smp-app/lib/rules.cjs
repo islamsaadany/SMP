@@ -3522,7 +3522,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !(Array.isArray(v) && v.indexOf(col) >= 0);
   }
 
-  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§576) ──────────────────────
+  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§579) ──────────────────────
      Islam: *"give me an option … to present box by box like line by line in
      the tables and number by number in the numbers slides"* — one switch,
      the office's, set in the slide view beside Columns and judged as that

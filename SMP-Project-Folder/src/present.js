@@ -446,7 +446,7 @@ function standCell(label, val, sub, detail){
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
     '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
 }
-/* ── §575: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
    Islam: *"for the overall performance slide with the final 2 numbers we
    need to give a detail below the 2 numbers to show where the numbers are
    coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
@@ -2191,7 +2191,7 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
-  /* §578: what this deck was opened with, so updating its figures rebuilds
+  /* §581: what this deck was opened with, so updating its figures rebuilds
      the same deck (`deckRebuild`) rather than guessing it back. */
   DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
@@ -3485,7 +3485,7 @@ function clockMount(root){
 }
 
 function deckShow(n){
-  /* §576: a slide arrived at any way but a step forward is shown whole —
+  /* §579: a slide arrived at any way but a step forward is shown whole —
      the dots, Home and End, the editor's own slide, a step back. */
   DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
@@ -3592,7 +3592,7 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  /* §576: every way forward and back goes through `deckStep`, which
+  /* §579: every way forward and back goes through `deckStep`, which
      builds a slide line by line where the company has asked for it and is
      `deckShow(DECK.i ± 1)` where it has not. */
   root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
@@ -3708,7 +3708,7 @@ function wireDeck(){
     /* §556.11: a deck the slides opened full screen has no windowed state
        to fall back to — leaving full screen IS leaving the deck, or one Esc
        lands on the bar Islam asked never to see. */
-    /* §579: except in the room's window, where behind the deck is the
+    /* §582: except in the room's window, where behind the deck is the
        platform the room is not to see: there, leaving full screen keeps the
        slides filling the window and asks for the click again. */
     if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
@@ -3764,7 +3764,7 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      /* §579: the room's window never closes its deck. Behind it is the
+      /* §582: the room's window never closes its deck. Behind it is the
          platform, and the room is not to see the platform. */
       else if (!ROOM_MODE) closeDeck();
     }
@@ -3781,7 +3781,7 @@ function wireDeck(){
        "ق", and Islam's "T is not working" was exactly that. */
     var kc = ev.code || "";
     if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
-    /* §578: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+    /* §581: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
        we can make it R to be relevant to refresh … for the reset let's make
        it Y"*). By the key's place as well as its letter, for §556.11's
        Arabic keyboard: R sends "ق" and Y "غ". */
@@ -4317,7 +4317,7 @@ addEventListener("keydown", function(ev){
 addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 
-/* ══ LINE BY LINE (§576) ═════════════════════════════════════════════════
+/* ══ LINE BY LINE (§579) ═════════════════════════════════════════════════
    Islam: *"give me an option … to present box by box like line by line in
    the tables and number by number in the numbers slides"*; asked, the
    switch in the slide view beside Columns, the office's and the company's
@@ -4386,7 +4386,7 @@ function deckStep(d){
   if (j < 0 || j > DECK.slides.length - 1) return;
   var was = s && s.dataset.subject;
   deckShow(j);
-  /* §578: a flow moving on to the next subject brings that subject's
+  /* §581: a flow moving on to the next subject brings that subject's
      latest figures with it — quietly: a failed fetch carries on with what
      is on the screen, and never interrupts the room. */
   var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
@@ -4399,7 +4399,7 @@ function deckStep(d){
   }
 }
 
-/* ══ UPDATING THE FIGURES WHILE PRESENTING (§578) ════════════════════════
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§581) ════════════════════════
    Islam: *"when I'm presenting through the master presentation or the
    directions slides if I refresh can it keep the slides presented but update
    the numbers if I changed something in the inputs?"* — of two ways put to
@@ -4468,7 +4468,7 @@ function deckRebuild(){
   clockPaint();
 }
 
-/* ══ PRESENTING ON TWO SCREENS (§579) ════════════════════════════════════
+/* ══ PRESENTING ON TWO SCREENS (§582) ════════════════════════════════════
    Islam: *"how about the presenter has a different view than the presented
    on the screen"* — and, offered a PowerPoint-style presenter view: *"no
    need for presenter notes … I need the typical view of the slides

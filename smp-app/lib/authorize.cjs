@@ -554,7 +554,7 @@ function collect(stored, incoming, w) {
      in gExtra below, or it is swept as unknown. */
   if (!same(sg[SLIDE_COLS_OFF], ig[SLIDE_COLS_OFF]))
     add("deckHide", null, "which columns the tactics slides show");
-  /* §576: and whether the slides build line by line — the same menu's
+  /* §579: and whether the slides build line by line — the same menu's
      neighbour, the same person, the same kind; named in gExtra below too. */
   if (!same(sg[SLIDE_BUILD], ig[SLIDE_BUILD]))
     add("deckHide", null, "whether the slides are presented line by line");

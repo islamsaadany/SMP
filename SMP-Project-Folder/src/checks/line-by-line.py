@@ -1,4 +1,4 @@
-"""Line by line, and where the two readings come from (§575, §576).
+"""Line by line, and where the two readings come from (§578, §579).
 
 Islam: *"give me an option … to present box by box like line by line in the
 tables and number by number in the numbers slides"* — asked: the switch in
@@ -140,7 +140,7 @@ with sync_playwright() as p:
        safe(pg, "()=>deckBuildOn()===false && document.querySelectorAll('#deckroot .bhide').length===0 && !!DTOUR") is True)
     safe(pg, "()=>{closeDeck(); delete GROUP.slideBuild; return true}"); pg.wait_for_timeout(200)
 
-    # ── 6. Where the two readings come from (§575) ────────────────────────
+    # ── 6. Where the two readings come from (§578) ────────────────────────
     d = safe(pg, """()=>{var x=dirPillar('dir:group-P1'), p=x.p; var box=document.createElement('div'); box.innerHTML=deckHtmlFor('dir:group-P1');
       var s=box.querySelector('.d-head'); var cells=s.querySelectorAll('.headcell');
       var km=[...cells[0].querySelectorAll('.headdetail li:not(.hdmore):not(.hdnote)')].map(li=>[li.querySelector('.hdn').textContent, li.querySelector('.hdf').textContent]);

@@ -296,7 +296,7 @@ with sync_playwright() as p:
        val(tap, "moved") is False, tap)
     eva(pg, "()=>document.getElementById('dclock').click()"); pg.wait_for_timeout(150)
 
-    # §556.11: T pauses and starts and Y (§578, was R) resets — the room has no bar from
+    # §556.11: T pauses and starts and Y (§581, was R) resets — the room has no bar from
     # the slides, so these are listed there. Pressed as an ARABIC keyboard
     # sends them ("ف" on the T key, "ق" on R), which is how Islam found T
     # dead: a handler that asks for the letter hears nothing.
@@ -307,18 +307,18 @@ with sync_playwright() as p:
     ok("T holds it, from an Arabic keyboard too (§556.11)", eva(pg, "()=>!DECK.clock.from") is True)
     arabic("KeyT", "\u0641")
     ok("...and T starts it again", eva(pg, "()=>!!DECK.clock.from") is True)
-    # §578: R is the figures' now (Islam), and the timer's reset moved to Y.
+    # §581: R is the figures' now (Islam), and the timer's reset moved to Y.
     eva(pg, "()=>{ DECK.clock.ran = 5*60000; DECK.clock.from = Date.now(); clockPaint(); }")
     before_r = eva(pg, "()=>Math.round(clockLeft()/1000)")
     arabic("KeyR", "\u0642")
     after_r = eva(pg, "()=>Math.round(clockLeft()/1000)")
-    ok("R no longer resets the timer (§578: R updates the figures)",
+    ok("R no longer resets the timer (§581: R updates the figures)",
        isinstance(before_r, (int, float)) and isinstance(after_r, (int, float)) and abs(after_r - before_r) < 30,
        {"before": before_r, "after": after_r})
     arabic("KeyY", "\u063a")
     left = eva(pg, "()=>Math.round(clockLeft()/1000)")
     full = eva(pg, "()=>DECK.clock.mins*60")
-    ok("Y puts the part's time back to the top, from an Arabic keyboard too (§578, was R)",
+    ok("Y puts the part's time back to the top, from an Arabic keyboard too (§581, was R)",
        isinstance(left, (int, float)) and isinstance(full, (int, float)) and full - 3 <= left <= full,
        {"left": left, "full": full})
 

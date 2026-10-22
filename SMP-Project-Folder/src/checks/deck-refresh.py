@@ -1,4 +1,4 @@
-"""Updating the figures while presenting (§578).
+"""Updating the figures while presenting (§581).
 
 Islam: *"if I refresh can it keep the slides presented but update the numbers
 if I changed something in the inputs?"* — in place: `R` fetches the latest

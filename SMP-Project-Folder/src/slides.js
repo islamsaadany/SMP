@@ -831,7 +831,7 @@ function slidesResume(reached){
    the fault §253.3 found on this very screen. */
 function slidesPlay(){
   if (!SLED.target) return;
-  /* §579: TWO SCREENS. With the projector connected as a second screen the
+  /* §582: TWO SCREENS. With the projector connected as a second screen the
      slides go to it in a window of their own and this view stays here to
      drive them; pressed again, the same button stops. One screen, and
      nothing below changes. */
@@ -901,7 +901,7 @@ function slidesClose(){
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
   SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
-  /* §579: leaving while the room is still showing puts its strip on the
+  /* §582: leaving while the room is still showing puts its strip on the
      page you land on. */
   roomPaint();
 }
@@ -930,7 +930,7 @@ function slidesColsHtml(){
     '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
 }
 function slidesColsSync(){
-  /* §576: the line-by-line switch beside it, for the same office. */
+  /* §579: the line-by-line switch beside it, for the same office. */
   var lb = document.querySelector("#slideroot [data-slbuild]");
   if (lb) {
     lb.hidden = !inOffice();
@@ -963,7 +963,7 @@ function slidesSetCol(k, on){
   slidesMark(); slidesPaint();
 }
 
-/* §576: on is `true`, off is absent (§50.6). */
+/* §579: on is `true`, off is absent (§50.6). */
 function slidesSetBuild(on){
   if (on) GROUP[SMPRules.SLIDE_BUILD] = true;
   else delete GROUP[SMPRules.SLIDE_BUILD];
@@ -1072,7 +1072,7 @@ function slidesPaint(){
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
   slidesGridPaint(all);
   slidesFootPaint(all);
-  roomPaint();   /* §579: the room's strip and its row, on top */
+  roomPaint();   /* §582: the room's strip and its row, on top */
   SLED.err = "";
 }
 
@@ -1156,7 +1156,7 @@ function slidesFootPaint(all){
     '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
     '<span class="slksep"></span>while presenting: ' +
     '<b>T</b> pause / start the timer &middot; <b>Y</b> reset the timer &middot; ' +
-    /* §578: R is the figures' now, the timer's reset moved to Y (Islam). */
+    /* §581: R is the figures' now, the timer's reset moved to Y (Islam). */
     '<b>R</b> update the figures';
   slidesPartsPaint(all, at);
 }
@@ -2031,7 +2031,7 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
-    /* §579: while the room's screen is showing, ← → and the timer's keys are
+    /* §582: while the room's screen is showing, ← → and the timer's keys are
        the room's, Enter shows it what you are looking at. */
     if (roomEditorKey(ev)) return;
     if (ev.key === "Escape") {

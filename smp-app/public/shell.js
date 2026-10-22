@@ -53069,13 +53069,26 @@ function deckTourDraw(){
      beside it — and failing all three, in the corner of the screen, never
      over the part it is explaining. */
   var W = innerWidth, H = innerHeight, gap = 18;
+  card.style.width = "";
   var cw = card.offsetWidth, ch = card.offsetHeight;
   var left, top;
   if (hy + hh + gap + ch <= H - 12) { top = hy + hh + gap; left = hx; }
   else if (hy - gap - ch >= 12) { top = hy - gap - ch; left = hx; }
   else if (hx + hw + gap + cw <= W - 12) { left = hx + hw + gap; top = hy; }
   else if (hx - gap - cw >= 12) { left = hx - gap - cw; top = hy; }
-  else { left = W - cw - 24; top = H - ch - 24; }
+  else {
+    /* §574.9: a NARROWER card beside the part before a full one over it.
+       The bigger card no longer fitted beside the cover's words, and the
+       corner it fell back to sat on their last line. Fifteen of its own
+       ems is the narrowest that still reads as a card. */
+    var room = W - 12 - (hx + hw + gap);
+    var fs = parseFloat(getComputedStyle(card).fontSize) || 16;
+    if (room >= 15 * fs) {
+      card.style.width = room + "px";
+      cw = room; ch = card.offsetHeight;
+      left = hx + hw + gap; top = hy;
+    } else { left = W - cw - 24; top = H - ch - 24; }
+  }
   card.style.left = Math.max(12, Math.min(left, W - cw - 12)) + "px";
   card.style.top = Math.max(12, Math.min(top, H - ch - 12)) + "px";
 }

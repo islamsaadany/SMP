@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.8).
+"""The guided tour, on a made-up direction (§574–§574.9).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -276,6 +276,12 @@ with sync_playwright() as p:
         ck("…and on every lit stop the card stays on screen and off the part it explains",
            rows and all(r["inside"] and r["over"] == 0 for r in rows),
            [r for r in rows if not r["inside"] or r["over"]][:2])
+        endb = [r["body"] for r in rows if r["h"] == "Now, today's review"]
+        if W == 1920:
+            ck("at 1920 every card's text is about 28px, and the closing card's 36px or more (Islam: make it obvious)",
+               min(r["body"] for r in rows) >= 27 and endb and endb[0] >= 36, {"cards": rows[0]["body"], "closing": endb})
+        ck("…and the closing card is at least a third bigger than the others",
+           endb and endb[0] >= 1.33 * min(r["body"] for r in rows if r["h"] != "Now, today's review"), endb)
         ck("…and on every clear view the label stays on screen and clear of the ringed title",
            len(labs) == 4 and all(l["inside"] and l["over"] == 0 for l in labs), labs)
         q.close()

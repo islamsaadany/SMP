@@ -53,6 +53,18 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
 .top .right{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12.5px}
 .btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:13px;font-weight:600;line-height:1.5}
 
+/* ── NEW (round 2): THE NAME LINE ON A PHONE stays one line: the side
+   padding matches the page's 12px, the role ("· Super user") is left for a
+   wider screen, Sign out never breaks, and a name too long for what is left
+   ends in "…" (the whole name on a hover). The frames here are phones, so
+   these rules are written for them rather than behind a screen-width query. */
+.phone .top{padding:9px 12px}
+.phone .top .right{min-width:0}
+.who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phone .role{display:none}
+.top .btn{flex:none;white-space:nowrap}
+.phone.narrow{width:360px}
+
 /* ── NEW: the tab bar keeps every tab on one line and scrolls sideways inside
    itself; the page never does. A fade at whichever edge has more tabs says
    it scrolls; the tab you are on is brought into view. ── */
@@ -83,7 +95,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
 </style>
 
 <div class="doc">
-<h1>The console's tab bar on a phone</h1>
+<h1>The console's tab bar and name line on a phone</h1>
 <p class="lede">Today the eight tabs don't fit a phone: names break onto two or three lines and the last four run off the screen, so the whole page slides sideways. <b>Proposed: the tabs stay on one line and the tab bar scrolls sideways on its own</b>, with a fade at the edge that has more tabs. The page itself never slides. On a computer screen nothing changes, because all eight tabs fit.</p>
 
 <div class="pair">
@@ -99,7 +111,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
     <p class="cap">Proposed <span>(swipe the tabs, or scroll sideways with a trackpad)</span></p>
     <div class="phone">
       <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
-        <span class="right"><span>Mohamed Essam &middot; Super user</span><button class="btn" type="button">Sign out</button></span></div>
+        <span class="right"><span class="who"><span class="wn">Mohamed Essam</span><span class="role"> &middot; Super user</span></span><button class="btn" type="button">Sign out</button></span></div>
       <div class="navwrap"><nav class="nav" aria-label="Console tabs">
         <button type="button" class="on">My work</button><button type="button">Clients</button><button type="button">Consultants</button><button type="button">Who sees what</button><button type="button">Memory</button><button type="button">Frameworks</button><button type="button">Copilot</button><button type="button">History</button>
       </nav></div>
@@ -122,11 +134,22 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
     <p class="cap">Proposed, opened on History <span>(the tab you're on is brought into view)</span></p>
     <div class="phone">
       <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
-        <span class="right"><span>Mohamed Essam &middot; Super user</span><button class="btn" type="button">Sign out</button></span></div>
+        <span class="right"><span class="who"><span class="wn">Mohamed Essam</span><span class="role"> &middot; Super user</span></span><button class="btn" type="button">Sign out</button></span></div>
       <div class="navwrap"><nav class="nav" aria-label="Console tabs">
         <button type="button">My work</button><button type="button">Clients</button><button type="button">Consultants</button><button type="button">Who sees what</button><button type="button">Memory</button><button type="button">Frameworks</button><button type="button">Copilot</button><button type="button" class="on">History</button>
       </nav></div>
       <div class="other"><h2>History</h2><input class="srch" type="search" placeholder="Search who, client or act" aria-label="Search the history"></div>
+    </div>
+  </div>
+  <div class="col">
+    <p class="cap">Proposed, a 360px phone and a long name <span>(the name ends in &hellip;)</span></p>
+    <div class="phone narrow">
+      <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+        <span class="right"><span class="who" title="Abdelrahman Mostafa El-Sayed &middot; Super user"><span class="wn">Abdelrahman Mostafa El-Sayed</span><span class="role"> &middot; Super user</span></span><button class="btn" type="button">Sign out</button></span></div>
+      <div class="navwrap"><nav class="nav" aria-label="Console tabs">
+        <button type="button" class="on">My work</button><button type="button">Clients</button><button type="button">Consultants</button><button type="button">Who sees what</button><button type="button">Memory</button><button type="button">Frameworks</button><button type="button">Copilot</button><button type="button">History</button>
+      </nav></div>
+      <div class="other"><h2>My work</h2></div>
     </div>
   </div>
 </div>
@@ -134,7 +157,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
 <div class="note">
   <p><b>Pressing a tab</b> opens it as today, and the tab bar slides so that tab sits in the middle.</p>
   <p><b>Also fixed:</b> on a phone the four counts in My work's panel now line up along their numbers. Today a two-line label pushes its number up, as the screenshot shows.</p>
-  <p><b>Not changed:</b> the line above the tabs (your name and Sign out), which also squeezes onto two lines on a phone.</p>
+  <p><b>New in round 2, the name line:</b> on a phone it stays on one line. Your name stays, &ldquo;&middot; Super user&rdquo; is left for a computer screen, Sign out never breaks in two, and a name too long for the space ends in &hellip; (the whole name shows when you point at it).</p>
 </div>
 </div>
 

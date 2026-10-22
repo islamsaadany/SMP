@@ -2420,6 +2420,42 @@ await section("4 · Forefront's own pages", async () => {
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);
   }
 
+  /* \u00a74b.1 \u2014 THE CONSOLE ON A PHONE (\u00a7584). At 400px the eight tabs broke
+     onto three lines and ran past the screen, so the page was 620px wide:
+     every line below was RED on the build before (10 of 12 at 400 and 360,
+     measured). Read off the boxes the browser drew, never off the stylesheet. */
+  const phone = () => page.evaluate(() => {
+    const nav = document.getElementById("nav"), on = nav.querySelector("button.on");
+    const nr = nav.getBoundingClientRect(), or = on ? on.getBoundingClientRect() : null;
+    return { pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth,
+      navH: nav.offsetHeight, heights: Array.from(nav.children).map((b) => b.offsetHeight),
+      fade: (nav.parentNode.className || ""), onIn: !!or && or.left >= nr.left - 1 && or.right <= nr.right + 1,
+      tops: Array.from(document.querySelectorAll(".mwstrip b")).map((b) => Math.round(b.getBoundingClientRect().top)) };
+  });
+  await page.setViewportSize({ width: 400, height: 800 });
+  try {
+    await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+    await page.waitForSelector(".mwstrip > div", { timeout: 8000 }).catch(() => {});
+    const p1 = await phone();
+    check(p1.pageW <= p1.vw && p1.navH < 50 && new Set(p1.heights).size === 1,
+      "on a phone the page does not slide sideways and the tabs keep one line (\u00a7584)", JSON.stringify({ pageW: p1.pageW, vw: p1.vw, navH: p1.navH, heights: p1.heights }));
+    check(/\br\b/.test(p1.fade) && !/\bl\b/.test(p1.fade) && p1.onIn,
+      "\u2026the bar scrolls inside itself, faded at the edge with tabs past it, the tab that is on in view", JSON.stringify(p1));
+    check(p1.tops.length === 4 && new Set(p1.tops).size === 1, "\u2026and My work's four counts line up along their numbers (\u00a7584)", JSON.stringify(p1.tops));
+    await page.locator("#nav button", { hasText: "History" }).click();
+    await page.waitForTimeout(500);
+    const p2 = await phone();
+    check(p2.onIn && /\bl\b/.test(p2.fade), "\u2026and pressing History brings it into view, faded at the other edge", JSON.stringify(p2));
+  } finally {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
+  /* AND WHERE EVERY TAB FITS NOTHING MOVES: no fade either side (\u00a794.2's
+     other end \u2014 a fade drawn always would pass every line above). */
+  await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+  await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
+  const p3 = await phone();
+  check(!/\b[lr]\b/.test(p3.fade) && p3.navH < 50, "\u2026while on a computer screen every tab fits and neither fade shows", JSON.stringify(p3));
+
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing
      leads anywhere. Both ends \u2014 the office's trail is asserted in \u00a73. */

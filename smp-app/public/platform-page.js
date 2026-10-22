@@ -38,6 +38,7 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
+  var navwrap = document.getElementById("navwrap");
   /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
      address's hash, so a reload keeps it and a link can name one
      ("Switch client…" from a client is /platform#clients). */
@@ -132,7 +133,34 @@
       b.addEventListener("click", function () { go(t[0], true); });
       nav.appendChild(b);
     });
+    navCentre();
   }
+
+  /* ── THE TAB BAR ON A PHONE (§584) ─────────────────────────────────
+     Where the tabs do not fit, the bar scrolls inside itself: the tab that
+     is on is brought to the middle each time the bar is drawn (on arrival,
+     and after every press, since go() draws it again), and a fade is laid
+     over whichever edge still has tabs past it. Measured from the boxes the
+     browser drew, never from a width written here, so it holds whatever the
+     tabs' words and the screen. Where every tab fits, nothing scrolls and
+     neither fade shows. */
+  function navFades() {
+    /* a page served from before §584 has no wrapper: the bar still works,
+       it simply has no fade, rather than the whole console stopping */
+    if (!navwrap) return;
+    var max = nav.scrollWidth - nav.clientWidth;
+    navwrap.classList.toggle("l", max > 1 && nav.scrollLeft > 1);
+    navwrap.classList.toggle("r", max > 1 && nav.scrollLeft < max - 1);
+  }
+  function navCentre() {
+    var on = nav.querySelector("button.on");
+    if (on && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft += (on.getBoundingClientRect().left - nav.getBoundingClientRect().left) - (nav.clientWidth - on.offsetWidth) / 2;
+    }
+    navFades();
+  }
+  nav.addEventListener("scroll", navFades, { passive: true });
+  window.addEventListener("resize", navFades);
 
   /* ── A TAB SHOWS WHAT IT LAST SHOWED, THEN CATCHES UP (§400.2) ─────
      Islam: "when I switch between the tabs of the platform like my work and

@@ -106,6 +106,27 @@
     border-bottom:3px solid transparent }
   .nav button:hover{ color:var(--ff-ink) }
   .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  /* ── THE TABS ON A PHONE (§584) ──────────────────────────────────────────
+     Islam: "fix the tab bar on phone too", from design-mockups/
+     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the eight tabs
+     broke their names onto three lines (a 74px bar) and the last four ran
+     past the screen, so the whole page was 620px wide and slid sideways.
+     Every tab keeps one line and THE BAR SCROLLS INSIDE ITSELF; the page
+     never does. Where all eight fit — any computer screen — nothing moves.
+     A BOX THAT SCROLLS SAYS SO (§108.6): with no scrollbar to show, a fade
+     lies over whichever edge still has tabs past it, set by drawNav and the
+     bar's own scroll (`l` / `r` on the wrapper), and the tab that is on is
+     brought to the middle each time the bar is drawn. */
+  .navwrap{ position:relative; background:var(--ff) }
+  .nav{ overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain }
+  .nav::-webkit-scrollbar{ display:none }
+  .nav button{ flex:none; white-space:nowrap }
+  .navwrap::before, .navwrap::after{ content:""; position:absolute; top:0; bottom:0; width:36px;
+    pointer-events:none; opacity:0; transition:opacity .15s }
+  .navwrap::before{ left:0; background:linear-gradient(to left, transparent, var(--ff) 85%) }
+  .navwrap::after{ right:0; background:linear-gradient(to right, transparent, var(--ff) 85%) }
+  .navwrap.l::before, .navwrap.r::after{ opacity:1 }
+  @media (prefers-reduced-motion:reduce){ .navwrap::before, .navwrap::after{ transition:none } }
   .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
 
   .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
@@ -241,7 +262,10 @@
      and the client under it. */
   @media (max-width:760px){
     .mwmast{ padding:14px 16px 17px }
-    .mwstrip{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; width:100% }
+    /* the counts line up along their numbers, a two-line label wrapping
+       under its own (§584 — §583 shipped them bottom-aligned, so a short
+       label's number sat a line lower than a long one's) */
+    .mwstrip{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; width:100%; align-items:start }
     .mwstrip div{ text-align:left }
     .mwstrip span{ white-space:normal; line-height:1.3 }
     .mwrow{ grid-template-columns:20px auto minmax(0,1fr) auto 26px; grid-template-areas:"tick t t st go" ". when cl cl go";
@@ -905,7 +929,7 @@
   <span class="right"><span id="who"></span>
     <button class="btn" id="signout" type="button">Sign out</button></span>
 </div>
-<nav class="nav" id="nav"></nav>
+<div class="navwrap" id="navwrap"><nav class="nav" id="nav"></nav></div>
 <div class="wrap" id="page"></div>
 
 <!-- The debrief splitter (spec 045). Its own file, because node's own check

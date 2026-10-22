@@ -340,8 +340,10 @@ with sync_playwright() as p:
        isinstance(now, (int, float)) and isinstance(mid, (int, float))
        and abs(now - mid) < 30, (mid, now))
     eva(pg, "()=>document.querySelector('[data-dreset]').click()"); pg.wait_for_timeout(200)
-    ok("and the bar's Reset does", str(eva(pg,
-       "()=>document.querySelector('#dclock .dctime').textContent")).startswith("14:"))
+    # As a figure, for the reason above: read in the same millisecond as the
+    # reset, the face says "15:00", and a prefix test of "14:" failed on it.
+    back = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    ok("and the bar's Reset does", isinstance(back, (int, float)) and abs(back - 900) <= 3, back)
 
     # ── 8 · the states, measured in both themes ──────────────────────────
     print("\n8 · what the room reads, in both palettes")

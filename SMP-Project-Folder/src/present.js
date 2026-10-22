@@ -3708,7 +3708,10 @@ function wireDeck(){
     /* §556.11: a deck the slides opened full screen has no windowed state
        to fall back to — leaving full screen IS leaving the deck, or one Esc
        lands on the bar Islam asked never to see. */
-    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+    /* §579: except in the room's window, where behind the deck is the
+       platform the room is not to see: there, leaving full screen keeps the
+       slides filling the window and asks for the click again. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
       closeDeck();
       return;
     }
@@ -3761,7 +3764,9 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      else closeDeck();
+      /* §579: the room's window never closes its deck. Behind it is the
+         platform, and the room is not to see the platform. */
+      else if (!ROOM_MODE) closeDeck();
     }
     /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
        new one — `f` and `w` below have answered since §69.7 — and `p` was
@@ -4461,4 +4466,357 @@ function deckRebuild(){
   deckShow(j >= 0 ? j : Math.min(at, DECK.slides.length - 1));
   if (bn != null && deckBuildOn()) deckBuildShow(DECK.slides[DECK.i], bn);
   clockPaint();
+}
+
+/* ══ PRESENTING ON TWO SCREENS (§579) ════════════════════════════════════
+   Islam: *"how about the presenter has a different view than the presented
+   on the screen"* — and, offered a PowerPoint-style presenter view: *"no
+   need for presenter notes … I need the typical view of the slides
+   management to scroll and see the shortcuts as normally the smo is viewing
+   this view and needs to be able to manage the platform without disrupting
+   the presentation but somehow can get back and do any shortcut action"*.
+   On the mockup: clicking a slide waits for Enter, the strip's buttons are
+   enough, the office only for now.
+
+   TWO WINDOWS OF THE SAME PLATFORM. Present from the slide view, with the
+   projector connected as a second screen, opens the platform again in a
+   window of its own on that screen (`?room=1`, the ROOM), which shows the
+   deck and nothing else; the laptop stays on the slide view and drives it.
+   The room builds the deck from its own copy of the state — the same server,
+   so the same slides — and the two find a slide by what it is
+   (`slidesWhich`), never by its number, which is what that function was
+   written for (§556.11).
+
+   THEY TALK BY MESSAGES BETWEEN THE TWO WINDOWS, and nothing else: the
+   laptop sends a step, a jump, a key (T, R, Y); the room says, twice a
+   second and after every change, which slide it shows, how far it is built
+   and what its clock reads. A clicker pressed while the projector window
+   has the focus drives the room directly, and the laptop follows it.
+
+   THE ROOM WRITES NOTHING. It is a screen, not a second editor: its saving
+   is switched off (`SYNC.save` and the leave flush answer nothing in a
+   room), so it can never send an older copy of the plan over the laptop's.
+
+   FULL SCREEN NEEDS A PRESS ON THE PROJECTOR: a browser will not take a
+   window full screen without one, so the room opens filling its screen and
+   asks for one click there. With one screen, Present works exactly as it
+   did. */
+var ROOM_MODE = (function(){
+  try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
+})();
+var ROOM = null;
+/* Sent only to the platform's own address; a file opened from disk has none
+   a browser will match ("file://" is not an origin), and there the two
+   windows know each other by `e.source` alone, which is checked anyway. */
+function roomOrigin(){ return /^https?:$/.test(location.protocol) ? location.origin : "*"; }
+function roomCanTwo(){
+  return !ROOM_MODE && typeof inOffice === "function" && inOffice() &&
+    !!(window.screen && window.screen.isExtended);
+}
+
+/* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
+function roomStart(open, which){
+  var u = new URL(location.href);
+  u.searchParams.set("room", "1");
+  u.hash = "";
+  /* OPENED AT ONCE, MOVED AFTER. A browser lets a page open a window only in
+     the moment of a press, and asking where the other screen is can wait on
+     a question to the person; so the window opens here, and is then moved
+     onto the other screen if the browser says where it is. */
+  var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
+  if (!w) return false;
+  ROOM = { win:w, open:open, which:which, at:null, last:null };
+  if (ROOMPOLL) clearInterval(ROOMPOLL);
+  ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
+  if (window.getScreenDetails) window.getScreenDetails().then(function(d){
+    var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
+    if (!other || w.closed) return;
+    try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
+  }, function(){ /* not allowed: it opens on this screen, to be dragged across */ });
+  roomPaint();
+  return true;
+}
+var ROOMPOLL = null;
+function roomSend(m){
+  if (!ROOM || ROOM.win.closed) return;
+  m.smpRoom = m.smpRoom || "cmd";
+  ROOM.win.postMessage(m, roomOrigin());
+}
+function roomEnd(closeIt){
+  if (!ROOM) return;
+  var w = ROOM.win;
+  ROOM = null;
+  if (ROOMPOLL) { clearInterval(ROOMPOLL); ROOMPOLL = null; }
+  if (closeIt && w && !w.closed) { try { w.postMessage({ smpRoom:"close" }, roomOrigin()); w.close(); } catch (e) {} }
+  roomPaint();
+  var sr = document.getElementById("slideroot");
+  if (sr && sr.classList.contains("on") && typeof slidesPaint === "function") slidesPaint();
+}
+/* The row of the slide view that the room is showing: its slide found by
+   what it is, then as many "continued" slides on as the room is. */
+function roomRow(){
+  if (!ROOM || !ROOM.at || !ROOM.at.which || typeof SLED === "undefined" || !SLED.all) return -1;
+  var i = slidesFindIn(SLED.all, ROOM.at.which);
+  if (i < 0) return -1;
+  var k = ROOM.at.cont || 0;
+  while (k > 0 && SLED.all[i + 1] && SLED.all[i + 1].dataset.cont) { i++; k--; }
+  return i;
+}
+function roomKeyAt(i){ return i >= 0 && SLED.all[i] ? SLED.all[i].dataset.ed : null; }
+/* What the room said. Where the slide view was on the room's slide, it
+   follows the room to its new one; where somebody was looking ahead, it
+   stays where they are looking. */
+addEventListener("message", function(e){
+  var m = e.data || {};
+  if (!m || typeof m !== "object" || !m.smpRoom) return;
+  if (ROOM_MODE) { if (e.source === window.opener) roomHear(m); return; }
+  if (!ROOM || e.source !== ROOM.win) return;
+  if (m.smpRoom === "ready") {
+    /* Where the room already was if it is the projector's window loading
+       again; otherwise the slide Present was pressed on. */
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which });
+    return;
+  }
+  if (m.smpRoom === "bye") { roomEnd(false); return; }
+  if (m.smpRoom !== "at") return;
+  var sr = document.getElementById("slideroot");
+  var editing = sr && sr.classList.contains("on") && typeof SLED !== "undefined" && SLED.all;
+  var wasFollowing = editing && ROOM.last != null && SLED.sel === ROOM.last;
+  ROOM.at = m;
+  if (editing) {
+    var key = roomKeyAt(roomRow());
+    if (key && key !== ROOM.last && (wasFollowing || ROOM.last == null)) {
+      ROOM.last = key;
+      SLED.sel = key;
+      slidesPaint();
+      return;
+    }
+    ROOM.last = key;
+  }
+  roomPaint();
+});
+
+/* The laptop's two surfaces: a strip in the slide view, under its bar, and
+   a strip at the top of every other page. Both written into nodes they own,
+   never by repainting the page (§63). */
+function roomStripText(){
+  var a = ROOM && ROOM.at;
+  if (!a || !a.on) return '<span>Opening the slides on the second screen\u2026</span>';
+  return '<span class="rs-where">' + esc(a.label || "") + '</span>' +
+    '<span class="rs-n">slide ' + a.n + ' of ' + a.total +
+      (a.built ? ' \u00b7 line ' + a.built[0] + ' of ' + a.built[1] : '') + '</span>' +
+    (a.clock ? '<span class="rs-clk' + (a.clock.over ? ' over' : a.clock.near ? ' near' : '') +
+      (a.clock.paused ? ' paused' : '') + '">' + esc(a.clock.text) +
+      (a.clock.paused ? ' \u00b7 paused' : '') + '</span>' : '') +
+    (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+}
+function roomPaint(){
+  var sr = document.getElementById("slideroot");
+  var editing = !!(sr && sr.classList.contains("on"));
+  /* In the slide view. */
+  var live = sr && sr.querySelector(".sl-live");
+  if (!ROOM || !editing) { if (live) live.remove(); }
+  else {
+    if (!live) {
+      live = document.createElement("div");
+      live.className = "sl-live";
+      var bar = sr.querySelector(".slidebar");
+      if (bar) bar.insertAdjacentElement("afterend", live);
+    }
+    roomFill(live, '<span class="rs-dot"></span><b>On the room\u2019s screen</b>' + roomStripText() +
+      '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
+      '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
+  }
+  if (sr) {
+    var row = editing && ROOM ? roomRow() : -1;
+    [].forEach.call(sr.querySelectorAll("#slidelist .slrow"), function(r, i){
+      r.classList.toggle("onscreen", i === row);
+    });
+    var pane = sr.querySelector("#slidepane");
+    var note = pane && pane.querySelector(".sl-notroom");
+    var away = editing && ROOM && ROOM.at && ROOM.at.on && row >= 0 && SLED.sel !== roomKeyAt(row);
+    /* The stage is fitted to the pane, so the pane is fitted again when the
+       note comes or goes, or the slide's foot falls off the bottom. */
+    if (!away) { if (note) { note.remove(); slidesFitStage(); } }
+    else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
+      '<div class="sl-notroom" role="status">Not on the room\u2019s screen \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
+    var play = sr.querySelector("[data-slplay]");
+    if (play) {
+      var lbl = play.querySelector(".lbl");
+      if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
+      play.title = ROOM && editing ? "Stop presenting on the second screen" : "Present (P)";
+    }
+    var keys = document.getElementById("slkeys");
+    /* The room's own keys are on the strip above; here, only what looking
+       through the slides adds, so the slide's name keeps its room. */
+    if (keys && ROOM && editing) keys.innerHTML =
+      '<b>\u2191</b> <b>\u2193</b> look &middot; <b>Enter</b> show it to the room &middot; ' +
+      '<b>Esc</b> back to what they see';
+  }
+  /* Everywhere else. */
+  var st = document.getElementById("roomstrip");
+  if (!ROOM || editing) {
+    if (st) st.remove();
+    document.body.classList.remove("roomon");
+    return;
+  }
+  if (!st) {
+    st = document.createElement("div");
+    st.id = "roomstrip"; st.className = "roomstrip"; st.setAttribute("role", "region");
+    st.setAttribute("aria-label", "Presenting on the second screen");
+    /* At the top of the pinned chrome, so it stays in view as the page
+       scrolls; the chrome's height is observed (§101.5), so everything
+       pinned beneath it moves down with it. */
+    var chrome = document.querySelector(".chrome");
+    if (chrome) chrome.insertBefore(st, chrome.firstChild);
+    else document.body.insertBefore(st, document.body.firstChild);
+    st.addEventListener("click", function(ev){
+      var b = ev.target.closest("[data-rs]");
+      if (!b) return;
+      var k = b.dataset.rs;
+      if (k === "back") roomBackToSlides();
+      else if (k === "prev") roomSend({ step:-1 });
+      else if (k === "next") roomSend({ step:1 });
+      else if (k === "t") roomSend({ key:"T" });
+    });
+  }
+  document.body.classList.add("roomon");
+  var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
+  roomFill(st, '<span class="rs-dot"></span><b>Presenting on the second screen</b>' + roomStripText() +
+    '<span class="rs-sp"></span>' +
+    '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
+    '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
+    '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
+}
+/* Written only when it reads differently: the room reports twice a second,
+   and a strip rewritten between a press and its release loses the click. */
+function roomFill(el, html){ if (el._rs !== html) { el.innerHTML = html; el._rs = html; } }
+/* R from the laptop: what was just typed here is saved FIRST, then the
+   room fetches, or it would fetch the figure from before the fix. */
+function roomUpdate(){
+  if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(function(){ roomSend({ key:"R" }); });
+  else roomSend({ key:"R" });
+}
+function roomBackToSlides(){
+  if (!ROOM) return;
+  var o = ROOM.open || {};
+  if (o.flow) slidesOpenFlow(o.flow);
+  else if (o.kind) slidesOpen(o.kind, o.key);
+  var key = roomKeyAt(roomRow());
+  if (key) { SLED.sel = key; ROOM.last = key; slidesPaint(); }
+  roomPaint();
+}
+/* The slide view's keys while the room is showing (slides.js asks first).
+   ← → move the ROOM; ↑ ↓ still walk the slide view, so looking ahead is
+   the keys it always was; Enter puts what you are looking at on the room's
+   screen; Escape comes back to what the room sees before it leaves the
+   view. Answers whether it took the key. */
+function roomEditorKey(ev){
+  if (!ROOM || slidesTyping(ev.target)) return false;
+  var kc = ev.code || "";
+  var fwd = { ArrowRight:1, PageDown:1, " ":1 }, back = { ArrowLeft:1, PageUp:1 };
+  if (fwd[ev.key]) { ev.preventDefault(); roomSend({ step:1 }); return true; }
+  if (back[ev.key]) { ev.preventDefault(); roomSend({ step:-1 }); return true; }
+  if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); roomSend({ key:"T" }); return true; }
+  if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); roomUpdate(); return true; }
+  if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); roomSend({ key:"Y" }); return true; }
+  if (ev.key === "p" || ev.key === "P") return true;
+  var row = roomRow(), rk = roomKeyAt(row);
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    var w = slidesSelEl();
+    if (w) { ROOM.last = SLED.sel; roomSend({ jump:w }); }
+    return true;
+  }
+  var g = document.getElementById("slgrid"), cp = document.getElementById("slcolspanel");
+  if (ev.key === "Escape" && rk && SLED.sel !== rk && !(g && !g.hidden) && !(cp && !cp.hidden)) {
+    ev.preventDefault();
+    SLED.sel = rk; ROOM.last = rk;
+    slidesPaint();
+    return true;
+  }
+  return false;
+}
+
+/* ── IN THE ROOM ──────────────────────────────────────────────────────── */
+function roomHear(m){
+  if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
+  if (m.smpRoom === "open") roomOpen(m.open || {}, m.which);
+  else if (m.step) deckStep(m.step);
+  else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
+  else if (m.key === "T") clockToggle();
+  else if (m.key === "R") deckRefresh(false);
+  else if (m.key === "Y") clockReset();
+  roomReport();
+}
+function roomOpen(open, which){
+  if (open.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), flowWithParts(open.flow), "page");
+  else if (open.target) openDeckFor(open.target, "page");
+  var j = which ? slidesFindIn(DECK.slides, which) : -1;
+  if (j > 0) deckShow(j);
+  /* Full screen asked for, and refused without a press on that screen; the
+     deck fills the window regardless, and the button below asks for the
+     press. */
+  deckGoFull();
+  roomFullAsk();
+  /* What this window booted on may be the copy the browser kept (§431): the
+     quiet refresh takes the server's own, and redraws only if it differs. */
+  deckRefresh(true);
+}
+function roomFullAsk(){
+  var root = document.getElementById("deckroot");
+  var ask = root.querySelector(".roomfull");
+  if (document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ask) return;
+  root.insertAdjacentHTML("beforeend",
+    '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
+  root.querySelector(".roomfull").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    try {
+      var p = root.requestFullscreen && root.requestFullscreen();
+      if (p && p.catch) p.catch(function(){});
+    } catch (e) {}
+  });
+}
+function roomReport(){
+  if (!ROOM_MODE || !window.opener) return;
+  var root = document.getElementById("deckroot");
+  var on = !!(root && root.classList.contains("on"));
+  var s = on && DECK.slides[DECK.i];
+  var cont = 0, k = DECK.i;
+  while (s && k > 0 && DECK.slides[k] && DECK.slides[k].dataset.cont) { cont++; k--; }
+  var c = DECK.clock, left = c ? clockLeft() : 0;
+  var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
+  var name = s ? (s.dataset.subjectName || "") : "";
+  try {
+    window.opener.postMessage({ smpRoom:"at", on:on,
+      which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
+      n: DECK.i + 1, total: DECK.slides.length,
+      label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
+      built: s && s.classList.contains("building") ? [+s.dataset.bn, deckBuildUnits(s).length] : null,
+      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from } : null,
+      full: document.fullscreenElement === root }, roomOrigin());
+  } catch (e) { /* the laptop has gone; the room carries on */ }
+}
+if (ROOM_MODE) {
+  document.documentElement.classList.add("smp-room");
+  /* Ready once the platform has drawn: asked rather than timed, so a slow
+     server is waited for and a fast one is not. */
+  (function wait(){
+    if (document.readyState === "complete" && typeof GROUP !== "undefined" && document.querySelector(".wrap")) {
+      try { window.opener && window.opener.postMessage({ smpRoom:"ready" }, roomOrigin()); } catch (e) {}
+      return;
+    }
+    setTimeout(wait, 150);
+  })();
+  setInterval(roomReport, 500);
+  addEventListener("fullscreenchange", function(){ roomFullAsk(); roomReport(); });
+  addEventListener("pagehide", function(){
+    try { window.opener && window.opener.postMessage({ smpRoom:"bye" }, roomOrigin()); } catch (e) {}
+  });
+  /* Every key the deck takes is reported at once, not on the next tick, so
+     the laptop never shows the slide before last. */
+  addEventListener("keyup", function(){ setTimeout(roomReport, 0); });
 }

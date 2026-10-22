@@ -1569,3 +1569,49 @@
             transition:opacity .25s ease, transform .25s ease; }
 .drefresh.show { opacity:1; transform:none; }
 @media print { .drefresh { display:none !important; } }
+
+/* ── PRESENTING ON TWO SCREENS (§579) ─────────────────────────────────────
+   The laptop's two strips, in the deck's own navy so they read as "this is
+   the room's" against the slide view's quiet bar; the ON SCREEN mark on the
+   rail row the room is showing; and, in the room's window, the one press a
+   browser needs before it will fill the projector. */
+.sl-live, .roomstrip { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:none;
+  padding:7px 18px; background:#0B1A33; color:#E9EEF6; font-size:13px; line-height:1.35; }
+.sl-live > b, .roomstrip > b { font-weight:700; color:#fff; }
+.rs-dot { width:9px; height:9px; border-radius:50%; flex:none; background:#34D399;
+  box-shadow:0 0 0 3px rgba(52,211,153,.25); }
+.rs-where { font-weight:600; color:#fff; max-width:34em; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rs-n { color:#A9B6C9; font-variant-numeric:tabular-nums; }
+.rs-clk { font-weight:700; font-variant-numeric:tabular-nums; padding:2px 8px; border-radius:6px;
+  background:rgba(255,255,255,.08); }
+.rs-clk.near { color:#FBBF24; }
+.rs-clk.over { color:#F87171; }
+.rs-clk.paused { color:#A9B6C9; }
+.rs-warn { color:#FBBF24; font-weight:600; }
+.rs-sp { flex:1; }
+.rs-keys { color:#A9B6C9; font-size:12px; }
+.rs-keys b { display:inline-block; min-width:1.5em; text-align:center; padding:1px 4px; margin:0 1px;
+  border:1px solid rgba(255,255,255,.28); border-radius:4px; color:#fff; font-weight:600; }
+.roomstrip button { font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  padding:4px 11px; border-radius:7px; border:1px solid rgba(255,255,255,.3);
+  background:transparent; color:#fff; }
+.roomstrip button:hover { border-color:#fff; }
+.roomstrip button.rs-go { background:#fff; border-color:#fff; color:#0B1A33; }
+.roomstrip button:focus-visible { outline:2px solid #FBBF24; outline-offset:2px; }
+.slrow.onscreen .sthumb { outline:2px solid #34D399; outline-offset:1px; }
+.slrow.onscreen::after { content:"On screen"; position:absolute; top:10px; left:38px;
+  font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  padding:2px 6px; border-radius:4px; background:#0B1A33; color:#fff; pointer-events:none; }
+.sl-notroom { flex:none; margin:10px 16px 0; padding:7px 12px; border-radius:8px; font-size:13px;
+  background:#FFF6E0; color:#5C4300; border:1px solid #E8C468; }
+.sl-notroom b { font-weight:700; }
+.roomfull { position:absolute; left:50%; bottom:7%; transform:translateX(-50%); z-index:5;
+  font:inherit; font-size:24px; font-weight:700; cursor:pointer; padding:16px 30px;
+  border-radius:12px; border:0; background:#fff; color:#0B1A33;
+  box-shadow:0 10px 30px rgba(0,0,0,.35); }
+/* The room's window shows the deck and nothing else, from the first frame:
+   the platform boots underneath it as it always does, unseen. */
+html.smp-room body { background:#0B1A33; }
+html.smp-room body > *:not(.deckroot) { visibility:hidden !important; }
+@media print { .sl-live, .roomstrip, .roomfull, .sl-notroom { display:none !important; } }

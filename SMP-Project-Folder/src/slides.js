@@ -831,6 +831,14 @@ function slidesResume(reached){
    the fault §253.3 found on this very screen. */
 function slidesPlay(){
   if (!SLED.target) return;
+  /* §579: TWO SCREENS. With the projector connected as a second screen the
+     slides go to it in a window of their own and this view stays here to
+     drive them; pressed again, the same button stops. One screen, and
+     nothing below changes. */
+  if (ROOM) { roomEnd(true); return; }
+  if (roomCanTwo() && roomStart(SLED.flow ? { flow:SLED.flow.slice() }
+                                        : { target:SLED.target, kind:SLED.kind, key:SLED.key },
+                                slidesSelEl())) return;
   /* THE DECK OPENS FIRST, AND ONLY THEN IS THE EDITOR STOOD DOWN. The other
      order is one line shorter and leaves the mode INERT WITH NOTHING IN FRONT
      OF IT if the deck cannot be built — an editor nobody can click, with the
@@ -893,6 +901,9 @@ function slidesClose(){
   if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
   SLED = { target:null, kind:null, key:null, sel:null, err:"", flow:null };
   paint();
+  /* §579: leaving while the room is still showing puts its strip on the
+     page you land on. */
+  roomPaint();
 }
 
 /* ── Painting ────────────────────────────────────────────────────────────
@@ -1061,6 +1072,7 @@ function slidesPaint(){
   if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
   slidesGridPaint(all);
   slidesFootPaint(all);
+  roomPaint();   /* §579: the room's strip and its row, on top */
   SLED.err = "";
 }
 
@@ -2019,6 +2031,9 @@ function wireSlides(){
       if (ev.key === "Escape") ev.target.blur();
       return;
     }
+    /* §579: while the room's screen is showing, ← → and the timer's keys are
+       the room's, Enter shows it what you are looking at. */
+    if (roomEditorKey(ev)) return;
     if (ev.key === "Escape") {
       /* §571: an open Columns menu closes first, for the grid's reason. */
       var cpn = document.getElementById("slcolspanel");

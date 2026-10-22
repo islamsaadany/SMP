@@ -1003,6 +1003,12 @@ var SYNC = (function () {
         save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
       }, 0);
     };
+    /* §579: THE ROOM'S WINDOW WRITES NOTHING. It is the projector's copy of
+       the platform, driven from the laptop and edited by nobody; a save from
+       it could only ever send an older copy of the plan over the one the
+       laptop is changing. First, and "clean" rather than "offline", so nothing
+       on that screen ever says it lost something. */
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) { if (done) done("clean"); return; }
     if (!live) return say("offline");
     /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
        Islam: *"the reporting then saving to draft keep saying saving and
@@ -1518,6 +1524,7 @@ var SYNC = (function () {
   function flushLeave() {
     commitFocus();
     if (!live || saving) return;
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) return;   /* §579 */
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved) return;

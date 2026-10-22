@@ -2497,6 +2497,26 @@ await section("4 · Forefront's own pages", async () => {
   const btnFont = await page.evaluate(() => { const b = document.getElementById("signout"), c = getComputedStyle(b);
     return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height); });
   check(btnFont === "13px 600 34", "\u2026and the console's buttons too, semibold 13px, Sign out among them (\u00a7584.3)", btnFont);
+  /* \u00a7584.4 \u2014 AND THE LAST THREE WITH THE SAME DROPPED SHORTHAND: the text
+     boxes (`.fld`), Frameworks' chips and client set-up's size band, each
+     at the browser's 13.33px regular on the build before \u2014 RED there,
+     measured (33, 29 and 44px tall). Asked of what the browser drew. */
+  const typeOf = (sel) => page.evaluate((s) => { const e = Array.from(document.querySelectorAll(s)).find((x) => x.offsetParent);
+    if (!e) return "none"; const c = getComputedStyle(e); return c.fontSize + " " + c.fontWeight + " " + Math.round(e.getBoundingClientRect().height); }, sel);
+  /* a blank page first: from /platform, an address differing only in its
+     hash is the same document and does not load the tab (measured: "none") */
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#frameworks", { waitUntil: "networkidle" });
+  await page.waitForSelector(".fwchip", { timeout: 8000 }).catch(() => {});
+  const fldT = await typeOf(".fld"), chipT = await typeOf(".fwchip");
+  check(fldT === "14px 400 39" && chipT === "12px 600 26", "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
+  await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
+  await page.locator(".ccard.add").first().click();
+  await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
+  const bandT = await typeOf(".wzband button");
+  check(bandT === "12.5px 600 48", "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

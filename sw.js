@@ -475,7 +475,11 @@
    direction walked part by part. The built file's bytes changed, which is
    the whole trigger (§91). Proved held by no commit in any ref's history
    after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.64-guided-tour";
+/* v6.65-tour-cards-and-marker — §574.4–§574.5: the guided tour's cards
+   sized for the projector, and its clear views naming the slide. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.65-tour-cards-and-marker";
 const ASSETS = [
   "/",
   "/index.html",

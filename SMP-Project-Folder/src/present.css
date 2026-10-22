@@ -1058,6 +1058,10 @@
   .sl-b.quiet:hover{ color:var(--ink); }
   .sl-b:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:720px){ .sl-b .lbl{ display:none; } }
+  /* §576: a switch that is on says so — the accent edge on the quiet fill,
+     so "Line by line" reads as set without being the one filled button. */
+  .sl-b[aria-pressed="true"]{ border-color:var(--gold-deep); background:var(--surface-2);
+    box-shadow:inset 0 0 0 1px var(--gold-deep); }
 
   .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .slprog{ height:3px; background:var(--line); flex:none; }
@@ -1529,3 +1533,28 @@
 @media (prefers-reduced-motion: reduce) {
   .d-purpose.preveal .pitem { transition:none; transform:none; }
 }
+
+/* ── §575: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Under each reading on a direction's "Where it stands": its lines with
+   their own figures, in their bands, at a size the room can read, the name
+   cut short before the figure is. */
+.headdetail { list-style:none; margin:18px 0 0; padding:14px 0 0; border-top:1px solid var(--line);
+              display:flex; flex-direction:column; gap:6px; font-size:22px; }
+.headdetail li { display:flex; align-items:baseline; gap:18px; }
+.headdetail .hdn { flex:1; min-width:0; color:var(--ink-2); white-space:nowrap;
+                   overflow:hidden; text-overflow:ellipsis; }
+.headdetail .hdv { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.headdetail .hdf { font-weight:600; }
+.headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
+.headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+
+/* ── §576: LINE BY LINE ───────────────────────────────────────────────────
+   A line waiting is transparent, never removed, so nothing moves as the
+   slide fills. On paper every line is there. */
+.dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * {
+  transition:opacity .35s ease; }
+.dslide.building .bhide { opacity:0; }
+@media (prefers-reduced-motion: reduce) {
+  .dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * { transition:none; }
+}
+@media print { .dslide .bhide { opacity:1 !important; } }

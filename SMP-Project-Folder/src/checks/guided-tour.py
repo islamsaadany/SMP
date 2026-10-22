@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.10).
+"""The guided tour, on a made-up direction (§574–§574.11).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -163,7 +163,7 @@ with sync_playwright() as p:
            len(r) >= 4 and r[0] is True and r[-1] is True and not any(r[1:-1]), r)
     cl = [x for x in seen if x.get("clear")]
     ck("a clear stop draws no card and no shade",
-       len(cl) == 10 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
+       len(cl) == 11 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
     ck("…and a lit stop draws both",
        all(x.get("card") and x.get("shade", 0) > 0 for x in seen if not x.get("clear")))
     ck("the count is of the parts lit: 1 of 14 … 14 of 14",
@@ -185,6 +185,8 @@ with sync_playwright() as p:
     ck("a lit stop draws no label and leaves no slide marked",
        all(not x.get("mark") and not x.get("label") and x.get("marked") == 0 for x in seen if not x.get("clear")),
        [x for x in seen if not x.get("clear") and (x.get("mark") or x.get("marked"))][:1])
+    ck("\"Where it stands\" opens whole and clear, then lights its two readings (Islam)",
+       run("stand")[:1] == [True] and run("stand")[1:] == [False, False], run("stand"))
     ck("YTD actual and Progress come before Delayed (Islam)",
        "Delayed" in lit and lit.index("YTD actual and Progress") < lit.index("Delayed"), lit)
 

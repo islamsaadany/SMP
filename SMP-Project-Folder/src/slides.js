@@ -919,6 +919,14 @@ function slidesColsHtml(){
     '<div class="hmenu-note">Every slide of the company, and the PowerPoint download.</div>';
 }
 function slidesColsSync(){
+  /* §576: the line-by-line switch beside it, for the same office. */
+  var lb = document.querySelector("#slideroot [data-slbuild]");
+  if (lb) {
+    lb.hidden = !inOffice();
+    var on = SMPRules.slideBuildOn(GROUP);
+    lb.setAttribute("aria-pressed", on ? "true" : "false");
+    lb.classList.toggle("on", on);
+  }
   var w = document.getElementById("slcols");
   if (!w) return;
   w.hidden = !inOffice();
@@ -941,6 +949,13 @@ function slidesSetCol(k, on){
   list.sort();
   if (list.length) GROUP[SMPRules.SLIDE_COLS_OFF] = list;
   else delete GROUP[SMPRules.SLIDE_COLS_OFF];
+  slidesMark(); slidesPaint();
+}
+
+/* §576: on is `true`, off is absent (§50.6). */
+function slidesSetBuild(on){
+  if (on) GROUP[SMPRules.SLIDE_BUILD] = true;
+  else delete GROUP[SMPRules.SLIDE_BUILD];
   slidesMark(); slidesPaint();
 }
 
@@ -1958,6 +1973,10 @@ function wireSlides(){
   if (cb) cb.addEventListener("click", function(e){
     e.stopPropagation();
     slidesColsOpen(document.getElementById("slcolspanel").hidden);
+  });
+  var lb = root.querySelector("[data-slbuild]");
+  if (lb) lb.addEventListener("click", function(){
+    if (inOffice()) slidesSetBuild(!SMPRules.slideBuildOn(GROUP));
   });
   var cp = document.getElementById("slcolspanel");
   if (cp) {

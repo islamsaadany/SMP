@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-22 — Line by line, and where a direction's two readings come from (§574.11, §575, §576), on the branch, not live — Islam asked for it built without going live.** A Line by line switch in the slide view beside Columns (the office's, for every deck of the company): when it is on, the key measures, categories, tactics and projects tables fill one row per press, and Where it stands one reading at a time; ← takes a line back. A direction's Where it stands now lists, under each reading, the lines it is worked out from, with what it leaves out. The guided tour's Where it stands opens clear. The presenter's clock is drawn as a mockup (§577), not built.
+
 **2026-10-22 — The guided tour opens on the cover clear before lighting it (§574.10), merged to `main` 2026-10-22 on Islam's word.** Pressing Guided tour now shows the made-up direction's cover as the room would see it; the next press lights it with the first card.
 
 **2026-10-22 — The guided tour ends on what the platform is for, and its cards are bigger again (§574.6–§574.9), merged to `main` 2026-10-22 on Islam's word.** A last slide in the example: One source of truth, Visibility, Accountability, History that stays, in big titles with a short line under each, brought in one per press with nothing dimmed (not toured); the closing card then reads Now, today's review, and is the biggest card in the tour; every card is a size up for the projector. Mockup: `design-mockups/guided-tour/2026-10-22_purpose-slide.html`.

@@ -441,10 +441,61 @@ function competeSlides(u){
    beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
    both callers build cells and hand them here. A change to the wording, the
    bands or the footer reaches both by construction. */
-function standCell(label, val, sub){
+function standCell(label, val, sub, detail){
   return '<div class="headcell"><span class="dlab">' + label + '</span>' +
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
-    '<span class="headsub">' + sub + '</span></div>';
+    '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
+}
+/* ── §575: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Islam: *"for the overall performance slide with the final 2 numbers we
+   need to give a detail below the 2 numbers to show where the numbers are
+   coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
+
+   EACH LINE IS READ BY THE FUNCTION THAT SCORED IT, never worked out again
+   here (§53.5): a key measure's figure is `measureScore`, a category
+   column's `bdColScore` — the two lists `pillarPerf` averages — and a
+   tactic's is `tacticReads` of `tacticPlanShare`, the two `pillarExec` and
+   `pillarPlan` average. So the lines cannot disagree with the number above
+   them. What the reading leaves out is said, quietly, under the list: a
+   tactic not due and one not reported are not zero, and a reader adding up
+   the lines needs to know why they are not there.
+
+   Directions only, on the deck that ends on them. Five lines, then "and N
+   more" — never "and 1 more", which would take the line it saves. */
+var STAND_DETAIL_MAX = 5;
+function standDetail(rows, note){
+  if (!rows.length && !note) return "";
+  var cut = rows.length > STAND_DETAIL_MAX + 1 ? STAND_DETAIL_MAX : rows.length;
+  return '<ul class="headdetail">' + rows.slice(0, cut).map(function(r){
+      return '<li><span class="hdn">' + esc(r.name) + '</span><span class="hdv">' + r.fig + '</span></li>';
+    }).join("") +
+    (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
+    (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
+}
+function dirMeasureDetail(p){
+  var rows = scorableMeasures(p).map(function(m){
+    var v = measureScore(m);
+    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+  });
+  if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
+    var v = bdColScore(p, c);
+    if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
+                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+  });
+  return standDetail(rows, "");
+}
+function dirExecDetail(p){
+  var rep = reportedTactics(p), due = dueTactics(p);
+  var rows = rep.map(function(t){
+    var r = tacticProgress(t);
+    return { name:t.name,
+             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+                 '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
+  });
+  var notDue = SMPRules.shown(p.tactics || []).length - due.length;
+  var unrep = due.length - rep.length;
+  var left = [notDue ? notDue + " not due" : "", unrep ? unrep + " not reported" : ""].filter(Boolean);
+  return standDetail(rows, left.length ? "Not counted: " + left.join(", ") : "");
 }
 function standSlideOf(name, cells, foot){
   cells = cells.filter(Boolean);
@@ -1525,9 +1576,10 @@ function dirDeckOf(u, p, i, ex){
     S.push(standSlideOf(esc(p.name),
       [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
           SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
-          ', by their targets'),
+          ', by their targets', dirMeasureDetail(p)),
         dirExec != null && standCell('Execution performance', dirExec,
-          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned',
+          dirExecDetail(p)) ],
       /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
          direction with nothing delivered draws no Execution cell, and a
          footnote explaining Execution would be the slide explaining a
@@ -3430,6 +3482,9 @@ function clockMount(root){
 }
 
 function deckShow(n){
+  /* §576: a slide arrived at any way but a step forward is shown whole —
+     the dots, Home and End, the editor's own slide, a step back. */
+  DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
@@ -3534,8 +3589,11 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
-  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
+  /* §576: every way forward and back goes through `deckStep`, which
+     builds a slide line by line where the company has asked for it and is
+     `deckShow(DECK.i ± 1)` where it has not. */
+  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
+  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckStep(-1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
   /* §340. Both are in the bar, which in fullscreen is not on the screen — so
      pause has two more ways in (the `P` key and the clock itself) and reset
@@ -3596,7 +3654,7 @@ function wireDeck(){
     if (DECKSWIPED) { DECKSWIPED = false; return; }
     if (deckOwnControl(ev.target)) return;
     var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
-    deckShow(DECK.i + (back ? -1 : 1));
+    deckStep(back ? -1 : 1);
   });
 
   /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
@@ -3629,7 +3687,7 @@ function wireDeck(){
     var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
     if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
     DECKSWIPED = true;
-    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+    deckStep(dx < 0 ? 1 : -1);
   });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
@@ -3683,8 +3741,8 @@ function wireDeck(){
        return to has moved. */
     var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
     var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
-    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
+    if (fwd[ev.key]) { ev.preventDefault(); deckStep(1); }
+    if (back[ev.key]) { ev.preventDefault(); deckStep(-1); }
     if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
     if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
     /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
@@ -4026,6 +4084,8 @@ function deckTourStops(){
         "has passed unfinished, or its first quarter went by with nothing delivered." },
     clear(isT, markT),
 
+    /* §574.11: and "Where it stands" opens whole and clear too (Islam). */
+    { on:function(s){ return s.classList.contains("d-head"); }, clear:true },
     { on:function(s){ return s.classList.contains("d-head"); },
       at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
       h:"Where it stands: " + M,
@@ -4243,3 +4303,79 @@ addEventListener("keydown", function(ev){
 }, true);
 addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+
+/* ══ LINE BY LINE (§576) ═════════════════════════════════════════════════
+   Islam: *"give me an option … to present box by box like line by line in
+   the tables and number by number in the numbers slides"*; asked, the
+   switch in the slide view beside Columns, the office's and the company's
+   (`SMPRules.slideBuildOn`); the key measures, categories and tactics
+   tables, the projects' slides, and "Where it stands" — NOT the objectives
+   or the SWOT; and ← taking back one line at a time.
+
+   A STEP FORWARD ON A SLIDE THAT BUILDS shows its next line, and the step
+   after its last line turns the slide. The next slide arrives with only its
+   headings; a step back takes the last line away, and from a slide with
+   none showing goes to the one before, whole, whose lines the next steps
+   back take away in turn. The dots, Home and End land on whole slides
+   (`deckShow` clears every build).
+
+   A LINE IS A TABLE ROW, OR A TACTIC'S ROWS TOGETHER: an outcome's own line
+   carries no number cell, so it rides with the row above it, as
+   `deckFitPass` moves them (§414). A table carried onto a "continued" slide
+   is a table of its own and builds from its first row.
+
+   HELD BACK, NOT TAKEN OUT: a line waiting is transparent, so the table
+   does not move as it fills and its stripes stay where they will be. Never
+   on paper (present.css), never in the editor's rail (it assembles its own
+   copy), and never on the guided tour's example, which steps on its own. */
+function deckBuildOn(){
+  return SMPRules.slideBuildOn(GROUP) &&
+    (DECK.targets || []).indexOf(EXAMPLE_T) < 0;
+}
+function deckBuildUnits(s){
+  if (!s) return [];
+  if (s.classList.contains("d-head"))
+    return [].slice.call(s.querySelectorAll(".headgrid > .headcell"));
+  var cards = s.querySelector(".pcards");
+  if (cards) return [].slice.call(cards.children);
+  var tbl = s.querySelector("table");
+  if (!tbl || !(/[MBTD]$/.test(s.dataset.split || "") || tbl.classList.contains("dirs"))) return [];
+  var lines = [];
+  [].forEach.call(tbl.querySelectorAll("tbody > tr"), function(tr){
+    if (tr.querySelector("td.idx") || !lines.length) lines.push([tr]);
+    else lines[lines.length - 1].push(tr);
+  });
+  return lines;
+}
+function deckBuildShow(s, n){
+  var units = deckBuildUnits(s);
+  if (!units.length) return;
+  s.classList.add("building");
+  s.dataset.bn = n;
+  units.forEach(function(u, i){
+    [].concat(u).forEach(function(e){ e.classList.toggle("bhide", i >= n); });
+  });
+}
+function deckBuildClear(s){
+  if (!s || !s.classList.contains("building")) return;
+  s.classList.remove("building");
+  delete s.dataset.bn;
+  [].forEach.call(s.querySelectorAll(".bhide"), function(e){ e.classList.remove("bhide"); });
+}
+function deckStep(d){
+  var s = DECK.slides[DECK.i];
+  if (deckBuildOn() && s && s.classList.contains("building")) {
+    var n = +s.dataset.bn || 0, all = deckBuildUnits(s).length;
+    if (d > 0 && n < all) return deckBuildShow(s, n + 1);
+    if (d < 0 && n > 0) return deckBuildShow(s, n - 1);
+  }
+  var j = DECK.i + d;
+  if (j < 0 || j > DECK.slides.length - 1) return;
+  deckShow(j);
+  /* Forward, the next slide arrives with its headings alone; back, the one
+     before arrives whole and the next step back takes its last line away. */
+  if (deckBuildOn()) {
+    var t = DECK.slides[DECK.i];
+    deckBuildShow(t, d > 0 ? 0 : deckBuildUnits(t).length);
+  }
+}

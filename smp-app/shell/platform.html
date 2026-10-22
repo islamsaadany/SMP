@@ -117,8 +117,16 @@
     #who .role{ display:none }
   }
   .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
+  /* THE TABS' TYPE IS SAID ONE PROPERTY AT A TIME (§584.2). It was
+     `font:600 13.5px/1 inherit`, and a shorthand ending in a keyword is not
+     CSS a browser reads, so the whole line was dropped and every tab drew in
+     the browser's own button type, 13.33px regular, since the console was
+     written (the Tracker found the same fault in itself, §356.14). Islam,
+     from design-mockups/console-tabs-phone/2026-10-22_tab-weight.html:
+     "yes build it". The bar is 1px shorter and the eight tabs 714 → 768px. */
   .nav button{ background:transparent; border:0; color:var(--ff-quiet);
-    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    font-family:inherit; font-size:13.5px; font-weight:600; line-height:1;
+    padding:13px 14px; cursor:pointer;
     border-bottom:3px solid transparent }
   .nav button:hover{ color:var(--ff-ink) }
   .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }

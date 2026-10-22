@@ -2483,6 +2483,13 @@ await section("4 · Forefront's own pages", async () => {
   check(!/\b[lr]\b/.test(p3.fade) && p3.navH < 50, "\u2026while on a computer screen every tab fits and neither fade shows", JSON.stringify(p3));
   const roleWide = await page.evaluate(() => { const r = document.querySelector("#who .role"); return r ? getComputedStyle(r).display !== "none" : null; });
   check(roleWide === true, "\u2026and the name line keeps the role there (\u00a7584.1)", roleWide);
+  /* \u00a7584.2 \u2014 THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
+     13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
+     a keyword), so the tabs drew at its own 13.33px regular \u2014 RED on the
+     build before, measured. Asked of the computed style, which is what the
+     browser actually used, never of the stylesheet's text. */
+  const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
+  check(tabFont === "13.5px 600", "\u2026and the tabs are in the weight their style asks for, semibold 13.5px (\u00a7584.2)", tabFont);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

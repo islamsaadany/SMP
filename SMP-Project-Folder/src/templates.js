@@ -29,7 +29,7 @@
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
                  "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
-                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly"];
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly","quarterly"];
 
 /* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
    The workbook writes twelve columns and the reader joins them into one
@@ -56,6 +56,13 @@ function monthsFromText(s) {
     out.push(SMPRules.monthSet(v) ? Number(v.replace(/,/g, "")) : v);
   }
   return any ? out : null;
+}
+/* §577: AND THE FOUR, read by the same rules — a blank cell is null and
+   never nought, a word is kept as typed, and a file that said nothing adds
+   no key at all. */
+function quartersFromText(s) {
+  var m = monthsFromText(String(s == null ? "" : s));
+  return m ? m.slice(0, 4) : null;
 }
 /* The progress template mirrors the plan template's shape rather than
    inventing a second vocabulary: same ids, same types, same direction and
@@ -476,6 +483,11 @@ function validatePlan(u, rows){
       if (["q1","q2","q3","q4"].every(function(q){ return !+r[q]; }))
         notices.push({ at:at, msg:"no quarters marked \u2014 will never be due" });
     }
+    /* §577: MONTHS OR QUARTERS, NEVER BOTH. Either alone is a complete plan
+       and the rules would read the months and quietly drop the quarters, so
+       a file carrying both is asked which it means rather than guessed at. */
+    if (monthsFromText(r.monthly) && quartersFromText(r.quarterly))
+      problems.push({ at:at, msg:"has both months and quarters filled \u2014 keep one" });
     if ((r.type === "MEASURE" || r.type === "NORTHSTAR") && !r.value)
       notices.push({ at:at, msg:"no target \u2014 recorded, not scored" });
   });
@@ -698,6 +710,8 @@ function createFromPlan(u, d){
          must be byte-identical. */
       var mMon = monthsFromText(x.monthly);
       if (mMon) mRow.monthly = mMon;
+      var mQ = quartersFromText(x.quarterly);
+      if (mQ) mRow.quarterly = mQ;
       /* §233: set only when the file says Yes — an absent key and a shown
          row must stay byte-identical (§50.6). */
       if (+x.hidden) mRow.hide = true;
@@ -721,6 +735,8 @@ function createFromPlan(u, d){
          the name the outcome's other four fields already use (§248). */
       var tMon = monthsFromText(x.monthly);
       if (tMon) tRow.outMonthly = tMon;
+      var tQ = quartersFromText(x.quarterly);
+      if (tQ) tRow.outQuarterly = tQ;
       if (+x.hidden) tRow.hide = true;
       /* §414: the extras the Outcomes sheet carried, set only where there are
          any so a tactic with one outcome is byte-identical (§50.6). */
@@ -767,6 +783,8 @@ function createFromPlan(u, d){
         ko.weight = Number(x.weight);
       var kMon = monthsFromText(x.monthly);
       if (kMon) ko.monthly = kMon;
+      var kQ = quartersFromText(x.quarterly);
+      if (kQ) ko.quarterly = kQ;
       if (+x.hidden) ko.hide = true;
       u.keyObjectives.push(ko);
       made++;

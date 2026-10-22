@@ -7815,14 +7815,17 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
 .askwin { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
    next door is the corner's switch, where they are not (§299). */
-.askseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+/* §577: the monthly drawer's By month | By quarter is the same two equally
+   likely choices, so it is declared here with this one rather than drawn a
+   second time (§53.5: one block for one control). */
+.askseg, .mpseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
           border-radius:var(--r-sm); overflow:hidden; }
-.askseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
+.askseg button, .mpseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
                  color:var(--ink-2); background:var(--surface); border:0;
                  padding:5px 11px; cursor:pointer; white-space:nowrap; }
-.askseg button + button { box-shadow:inset 1px 0 0 var(--line); }
-.askseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
-.askseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.askseg button + button, .mpseg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.askseg button[aria-pressed="true"], .mpseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
+.askseg button:focus-visible, .mpseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .asknone { padding:22px 16px; color:var(--ink-3); font-size:var(--fs-note); }
 .asknone.bad-note { color:var(--ink); background:var(--warn-bg);
                     border-left:3px solid var(--warn); }
@@ -8316,8 +8319,23 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   cursor:pointer;
 }
 .mpbtn:hover { border-color:var(--ink-3); color:var(--ink-2); }
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
+   The title line becomes a flex row so the switch can sit at its right end
+   (the switch's shape is `.askseg`'s, declared with it). Its own small caps
+   are not the switch's: the halves read in sentence case like every other
+   segmented pair. */
+.mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
+.mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
+.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+/* A quarter carries its months in its label, so its box is wider than a
+   month's — 112px, measured to sit four on one line down to 1100. */
+.mpm.mpq { width:112px; }
+.mpm.mpq input.fld { width:112px !important; }
+.mpm.mpq span i { font-style:normal; text-transform:none; letter-spacing:0; opacity:.8; }
+.mpfoot.mpnote { margin-top:6px; }
 @media (max-width: 700px) {
   .mpm, .mpm input.fld { width:64px !important; }
+  .mpm.mpq, .mpm.mpq input.fld { width:96px !important; }
 }
 
 /* ── SETUP · IMPORT & ARCHIVES (§304) ─────────────────────────────────

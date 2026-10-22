@@ -492,7 +492,11 @@
    only at its whole target. The built file's bytes changed, which is the
    whole trigger (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.68-tactic-completed";
+/* v6.69-quarterly-plan — §577: a target planned by quarter as well as by
+   month. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.69-quarterly-plan";
 const ASSETS = [
   "/",
   "/index.html",

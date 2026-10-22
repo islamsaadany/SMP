@@ -5088,7 +5088,39 @@ var MONTHOPEN = null;
    on every repaint beside `FIELDS` and `KOLISTS` (§96), because a button
    carrying an index from the last paint acts on the paint before it. */
 var MONTHREG = [];
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
+   Which way a row is planned is read off what it HOLDS (`SMPRules.planBy`),
+   so there is no stored switch to drift from the figures. The one thing the
+   data cannot say is which way an EMPTY plan is being started, so that pick
+   lives here for the session and never in a save: a row nobody typed into
+   and a row whose plan was cleared must stay byte-identical (§50.6).
+   `MONTHCARRY` is the line saying where carried-across figures came from;
+   it is drawn while that drawer stays open and dropped when it closes. */
+var MONTHMODE = {};
+var MONTHCARRY = null;
 function monthlyKey(row, fld){ return String(row && row.id) + "|" + fld; }
+/* The field the quarters live in, beside the months (§248's pairing again). */
+function quarterlyFld(fld){ return fld === "outMonthly" ? "outQuarterly" : "quarterly"; }
+/* "q" or "m" for the drawer. What the row holds decides; only a plan with
+   nothing typed either way falls back on the pick. */
+function monthlyMode(row, fld){
+  var sh = monthlyShape(row, fld);
+  if (SMPRules.planBy(sh) === "quarter") return "q";
+  if (monthlyTyped(sh.monthly)) return "m";
+  return MONTHMODE[monthlyKey(row, fld)] === "q" ? "q" : "m";
+}
+/* Anything typed at all, readable or not — a word in a box is still
+   something the switch must carry rather than lose. */
+function monthlyTyped(a){
+  return Array.isArray(a) && a.some(function(v){ return v != null && String(v).trim() !== ""; });
+}
+/* How many of how many are set, in the drawer's own words. */
+function monthlyCount(row, fld){
+  var sh = monthlyShape(row, fld);
+  return monthlyMode(row, fld) === "q"
+    ? { n: SMPRules.quarterlySet(sh), of: 4, one: "quarter", many: "quarters" }
+    : { n: SMPRules.monthlySet(sh), of: 12, one: "month", many: "months" };
+}
 /* WHAT THE RULES READ. A measure and a key objective ARE that shape already;
    a tactic's outcome is five fields on the tactic (§248). `outcomeOf` does
    this same mapping and is deliberately NOT asked here: it refuses an outcome
@@ -5097,7 +5129,7 @@ function monthlyKey(row, fld){ return String(row && row.id) + "|" + fld; }
    yet. */
 function monthlyShape(row, fld){
   return fld === "outMonthly"
-    ? { compile: row.outCompile, monthly: row.outMonthly }
+    ? { compile: row.outCompile, monthly: row.outMonthly, quarterly: row.outQuarterly }
     : row;
 }
 /* ── TWELVE CELLS, FOUR ACROSS AND THREE DOWN (§278.2) ─────────────
@@ -5132,20 +5164,31 @@ function monthlySvg(){
    somewhere). `aria-label` too, or the button has no accessible name at all
    once the text is gone. */
 function monthlyChip(row, fld){
-  var n = SMPRules.monthlySet(monthlyShape(row, fld)),
-      k = monthlyKey(row, fld), open = MONTHOPEN === k;
-  var word = n ? n + " of 12 months set — the target month by month"
-               : "Set this target month by month";
-  return '<button class="mpopen' + (n ? ' on' : '') + '" data-mpopen="' + esc(k) +
+  var k = monthlyKey(row, fld), open = MONTHOPEN === k, w = monthlyChipWord(row, fld);
+  return '<button class="mpopen' + (w.n ? ' on' : '') + '" data-mpopen="' + esc(k) +
     '" aria-expanded="' + (open ? 'true' : 'false') +
-    '" title="' + esc(word) + '" aria-label="' + esc(word) + '">' +
+    '" title="' + esc(w.word) + '" aria-label="' + esc(w.word) + '">' +
     monthlySvg() + '</button>';
+}
+/* §577: THE HOVER NAMES THE WAY THE ROW IS PLANNED, and its own builder
+   because `monthlyRefresh` rewrites it in place as the first figure lands —
+   the mark used to light only on the next repaint, so a plan somebody had
+   just started was not findable until they left the pillar and came back. */
+function monthlyChipWord(row, fld){
+  var c = monthlyCount(row, fld);
+  return { n: c.n, word: c.n
+    ? c.n + " of " + c.of + " " + c.many + " set — the target " + c.one + " by " + c.one
+    : "Set this target by month or by quarter" };
 }
 /* The sentence under the boxes. Its own builder because it is rewritten IN
    PLACE as somebody types — a repaint under a typing hand destroys the box
    being typed into (§71.2), which is why §145's counts refresh this way too. */
 function monthlyMsg(row, fld, tfld){
-  var sh = monthlyShape(row, fld), n = SMPRules.monthlySet(sh);
+  /* §577: ONE SENTENCE FOR BOTH WAYS OF PLANNING, its nouns read off the
+     drawer's mode — four of the same sentences again would be the drift
+     §53.5 exists to stop. */
+  var sh = monthlyShape(row, fld), cn = monthlyCount(row, fld), n = cn.n,
+      of = cn.of, one = cn.one, many = cn.many;
   /* TWO SPANS AND A SPACE. `.mpfoot` is a flex row with a gap, and these two
      are wrapped in ONE flex item — so the gap falls between the message and
      the Clear button, and nothing at all separated these: the footer read
@@ -5160,9 +5203,9 @@ function monthlyMsg(row, fld, tfld){
      row with no compile rule is stuck at month one rather than at month
      twelve, so the sentence that says why has to arrive there too. */
   if (!c)
-    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
+    return '<span class="part">' + n + ' of ' + of + ' ' + many + ' set — not in force yet</span>' +
       ' <span>This row has no compile rule, so the platform cannot tell what ' +
-      'the months add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
+      'the ' + many + ' add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
   /* §276's Count adds up like Sum and is then owed in whole ones, so it says
      the same word — the rounding is what the figure beside it shows. */
   var word = (c === "sum" || c === "count") ? "Adds up to"
@@ -5172,8 +5215,8 @@ function monthlyMsg(row, fld, tfld){
      taking typing the moment the first month lands (§61: the page says what
      happened rather than leaving somebody to find it). */
   if (!n)
-    return '<span class="part">No month set yet</span>' +
-      ' <span>Fill a month and the target above becomes what the months set ' +
+    return '<span class="part">No ' + one + ' set yet</span>' +
+      ' <span>Fill a ' + one + ' and the target above becomes what the ' + many + ' set ' +
       'come to — it is no longer typed by hand.</span>';
   /* §555: THE TARGET IS DERIVED FROM THE FIRST MONTH, AND THE YEAR IS NOT.
      Two different things, and the sentence says both — what the figure above
@@ -5183,10 +5226,10 @@ function monthlyMsg(row, fld, tfld){
      §569: AND NOW THE YEAR IS TOO — the months set are the plan, so the
      second half says what an empty month means instead (Islam's wording,
      agreed before this was built). */
-  if (n < 12)
-    return '<span class="part">' + n + ' of 12 months set</span>' +
+  if (n < of)
+    return '<span class="part">' + n + ' of ' + of + ' ' + many + ' set</span>' +
       ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
-      '</b> — the target, from the months set so far. A month left empty ' +
+      '</b> — the target, from the ' + many + ' set so far. A ' + one + ' left empty ' +
       'counts as nothing planned.</span>';
   /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
      is a flex row and these two are ONE flex item, so the gap falls between
@@ -5194,7 +5237,7 @@ function monthlyMsg(row, fld, tfld){
      complete case read "12 of 12 months setAdds up to 300M EGP". The very
      fault §278's own comment describes, two lines above, in the branch it was
      not written about. */
-  return '<b>12 of 12 months set</b> <span>' + word + ' <b>' +
+  return '<b>' + of + ' of ' + of + ' ' + many + ' set</b> <span>' + word + ' <b>' +
     esc(monthlyAnnualText(row, fld, tfld)) + '</b> — the annual target</span>';
 }
 /* The derived year, written the way the target is written — through the
@@ -5245,15 +5288,26 @@ function monthlyAfterCompile(row, fld){
    stored as null, and the LAST one cleared deletes the key (§50.6): a row
    that never had a monthly plan and one whose plan was cleared must be
    byte-identical, or every save carries a change nobody made. */
-function monthlyWrite(row, fld, tfld, i, v){
-  var a = Array.isArray(row[fld]) ? row[fld].slice() : [];
-  while (a.length < 12) a.push(null);
-  a.length = 12;
+/* §577: `q` WRITES A QUARTER — the same write into the four beside the
+   twelve, so a quarter is stored, cleared and derived from exactly as a
+   month is. */
+function monthlyWrite(row, fld, tfld, i, v, q){
+  var pf = q ? quarterlyFld(fld) : fld, len = q ? 4 : 12;
+  var a = Array.isArray(row[pf]) ? row[pf].slice() : [];
+  while (a.length < len) a.push(null);
+  a.length = len;
   var s = String(v == null ? "" : v).trim();
   a[i] = !s ? null : (SMPRules.monthSet(s) ? Number(s.replace(/,/g, "")) : s);
   var any = false;
-  for (var k = 0; k < 12; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
-  if (any) row[fld] = a; else delete row[fld];
+  for (var k = 0; k < len; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
+  if (any) row[pf] = a; else delete row[pf];
+  /* §577: a figure typed over a carried one makes "carried across" untrue of
+     it, so the line goes — in place, since this is a typing hand (§71.2). */
+  if (MONTHCARRY && MONTHCARRY.key === monthlyKey(row, fld)) {
+    MONTHCARRY = null;
+    var note = document.querySelector('tr.mprow .mpnote');
+    if (note) note.remove();
+  }
   /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE FIRST MONTH LANDS (§555, and
      §278's twelfth before it), and written into the target field itself
      rather than left to be worked out by every reader. That is what makes the
@@ -5300,7 +5354,15 @@ function monthlyRefresh(row, fld, tfld){
   var msg = document.querySelector('.mpmsg' + sel);
   if (msg) msg.innerHTML = monthlyMsg(row, fld, tfld);
   var clr = document.querySelector('.mpbtn' + sel);
-  if (clr) clr.hidden = !SMPRules.monthlySet(monthlyShape(row, fld));
+  if (clr) clr.hidden = !monthlyCount(row, fld).n;
+  /* §577: AND THE MARK, which lights the moment a figure lands rather than on
+     the next repaint (§278.2: lit "once anything has been typed"). */
+  var chip = document.querySelector('[data-mpopen="' + k.replace(/"/g, '\\"') + '"]');
+  if (chip) {
+    var w = monthlyChipWord(row, fld);
+    if (w.n) chip.classList.add("on"); else chip.classList.remove("on");
+    chip.title = w.word; chip.setAttribute("aria-label", w.word);
+  }
   var td = document.querySelector('td[data-mptgt="' + k.replace(/"/g, '\\"') + '"]');
   if (td) {
     var derived = monthlyDerived(row, fld);
@@ -5347,27 +5409,92 @@ function monthlyTgtAttrs(row, fld, partOnly){
    drew twelve read-only labels on Foundation — twelve boxes that looked like
    boxes and stored nothing (§96, found by driving it rather than by reading
    it). The four tables sit on three different pages; each says which. */
+/* §577: AND IT DRAWS THE QUARTERS TOO — four boxes where the twelve were,
+   each labelled with the months it covers so "Q3" never has to be worked
+   out, and 112px against a month's 72 to carry that label. Measured on the
+   mockup Islam signed off: the four sit on one line at 1600, 1280 and 1100,
+   and the switch costs the drawer 12px (147 to 159 at 1600). */
 function monthlyDrawer(row, fld, tfld, cols, title, page){
   var k = monthlyKey(row, fld), unit = unitOfTarget(row[tfld]),
-      a = Array.isArray(row[fld]) ? row[fld] : [], boxes = "";
-  for (var i = 0; i < 12; i++) {
-    boxes += '<label class="mpm"><span>' + SMPRules.MONTH_NAMES[i] + '</span>' +
+      q = monthlyMode(row, fld) === "q", pf = q ? quarterlyFld(fld) : fld,
+      a = Array.isArray(row[pf]) ? row[pf] : [], boxes = "", N = SMPRules.MONTH_NAMES;
+  for (var i = 0; i < (q ? 4 : 12); i++) {
+    boxes += '<label class="mpm' + (q ? ' mpq' : '') + '"><span>' +
+      (q ? SMPRules.QUARTER_NAMES[i] + ' <i>· ' + N[i * 3] + '–' + N[i * 3 + 2] + '</i>'
+         : N[i]) + '</span>' +
       inputOr(page || "plan", a[i] == null ? "" : String(a[i]), "mono",
-              (function(j){ return function(v){ monthlyWrite(row, fld, tfld, j, v); }; })(i)) +
+              (function(j){ return function(v){ monthlyWrite(row, fld, tfld, j, v, q); }; })(i)) +
       '</label>';
   }
+  var reg = MONTHREG.push({ row: row, fld: fld, tfld: tfld, q: q }) - 1;
+  var carry = MONTHCARRY && MONTHCARRY.key === k ? MONTHCARRY.text : "";
   return '<tr class="mprow"><td class="idx"></td><td colspan="' + Math.max(1, cols - 1) + '">' +
-    '<div class="mpwrap"><div class="mphead">Monthly plan' +
-    (title ? " — " + esc(title) : "") +
+    '<div class="mpwrap"><div class="mphead"><span>' + (q ? 'Quarterly plan' : 'Monthly plan') +
+    (title ? " — " + esc(title) : "") + '</span>' +
     (unit ? '<em>in ' + esc(unit) + ', the target’s own unit</em>'
           : '<em>in the target’s own unit</em>') +
+    monthlySeg(row, fld, q, reg) +
     '</div><div class="mpgrid">' + boxes + '</div>' +
     '<div class="mpfoot"><span class="mpmsg" data-mpkey="' + esc(k) + '">' +
     monthlyMsg(row, fld, tfld) + '</span>' +
-    '<button class="mpbtn" data-mpkey="' + esc(k) + '" data-mpclear="' +
-    (MONTHREG.push({ row: row, fld: fld, tfld: tfld }) - 1) + '"' +
-    (SMPRules.monthlySet(monthlyShape(row, fld)) ? "" : " hidden") +
-    '>Clear the monthly plan</button></div></div></td></tr>';
+    '<button class="mpbtn" data-mpkey="' + esc(k) + '" data-mpclear="' + reg + '"' +
+    (monthlyCount(row, fld).n ? "" : " hidden") +
+    '>Clear the ' + (q ? 'quarterly' : 'monthly') + ' plan</button></div>' +
+    (carry ? '<div class="mpfoot mpnote">' + esc(carry) + '</div>' : '') +
+    '</div></td></tr>';
+}
+/* ── THE SWITCH (§577) ────────────────────────────────────────────────
+   The two-way segmented pair the platform already uses (`.askseg`'s, declared
+   with it), the chosen half lit. On a row holding figures and no compile rule
+   the other half is DISABLED and says why: the figures cannot be carried
+   across without knowing whether a quarter is its months added up or the last
+   of them (§278: never guess a number nobody chose). An empty plan switches
+   freely — there is nothing to carry. */
+function monthlySeg(row, fld, q, reg){
+  var sh = monthlyShape(row, fld);
+  var stuck = (monthlyTyped(sh.monthly) || monthlyTyped(sh.quarterly)) &&
+              !SMPRules.monthlyCompile(sh);
+  var half = function(mode, word){
+    var on = (mode === "q") === q;
+    return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
+      '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
+      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      '>' + word + '</button>';
+  };
+  return '<span class="mpseg" role="group" aria-label="Plan this target">' +
+    half("m", "By month") + half("q", "By quarter") + '</span>';
+}
+/* PRESSING THE OTHER HALF. Carries what is typed into the other shape by the
+   row's own rule (`SMPRules.quartersFromMonths` / `monthsFromQuarters`, Islam's
+   (2a)), deletes what it came from so a row never holds both, and re-derives
+   the target through the same ending as a typed figure. Answers whether
+   anything changed; the caller saves and repaints, because this is a PRESS
+   and a repaint under it is safe (§71.2). */
+function monthlySwitch(e, mode){
+  var row = e.row, fld = e.fld, tfld = e.tfld, k = monthlyKey(row, fld),
+      qf = quarterlyFld(fld), sh = monthlyShape(row, fld);
+  if ((mode === "q") === (monthlyMode(row, fld) === "q")) return false;
+  MONTHMODE[k] = mode;
+  MONTHCARRY = null;
+  if (!monthlyTyped(sh.monthly) && !monthlyTyped(sh.quarterly)) return true;
+  var c = SMPRules.monthlyCompile(sh), toQ = mode === "q";
+  var moved = toQ ? SMPRules.quartersFromMonths(sh.monthly, sh.compile)
+                  : SMPRules.monthsFromQuarters(sh.quarterly, sh.compile);
+  if (!moved) return true;
+  if (toQ) { row[qf] = moved; delete row[fld]; }
+  else { row[fld] = moved; delete row[qf]; }
+  var spread = c === "sum" || c === "count";
+  MONTHCARRY = { key: k, text: toQ
+    ? "Carried across from the months: each quarter is " +
+      (spread ? "what its three months added up to."
+       : c === "average" ? "the average of its months." : "its last month set.")
+    : "Carried across from the quarters: " +
+      (spread ? "each quarter is spread evenly over its three months."
+              : "each month takes its quarter’s figure.") +
+      " Change any month to reshape it." };
+  var ann = monthlyAnnualText(row, fld, tfld);
+  if (ann) { row[tfld] = ann; gapLift(row, tfld); }
+  return true;
 }
 /* Drawn under the row only while its own chip is open. One at a time, because
    the drawer is 147px and two of them push the row being compared off the
@@ -5382,7 +5509,10 @@ function monthlyRowFor(row, fld, tfld, cols, title, page){
    cell whose meaning changed rather than under the row's name, where it would
    stack under a reporter's own note (§255). */
 function monthlyMark(row){
-  return SMPRules.monthlyInForce(row) ? '<span class="subhd">by month</span>' : '';
+  /* §577: "by quarter" where the quarters are what the row is read against. */
+  return SMPRules.monthlyInForce(row)
+    ? '<span class="subhd">by ' + (SMPRules.planBy(row) === "quarter" ? "quarter" : "month") + '</span>'
+    : '';
 }
 
 /* Is this row judged by a yes or a no? Asked by every surface that decides

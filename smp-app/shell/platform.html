@@ -158,8 +158,13 @@
   .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
   .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
 
+  /* THE BUTTONS' TYPE IS SAID ONE PROPERTY AT A TIME (§584.3), as the tabs'
+     is (§584.2): `font:600 13px/1.5 inherit` was dropped whole, so every
+     button drew in the browser's own 13.33px regular, 29px tall. Islam, from
+     design-mockups/console-buttons/2026-10-22_button-weight.html: "yes build
+     it and put it live". Each button is 34px now, and the top line with it. */
   .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
-    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+    border-radius:8px; padding:6px 12px; font-family:inherit; font-size:13px; font-weight:600; line-height:1.5; cursor:pointer }
   .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
   .btn:disabled{ opacity:.45; cursor:default }
   /* A HELD BUTTON LOOKS HELD (§358.12). Islam's A, picked from four drawn

@@ -2490,6 +2490,13 @@ await section("4 · Forefront's own pages", async () => {
      browser actually used, never of the stylesheet's text. */
   const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
   check(tabFont === "13.5px 600", "\u2026and the tabs are in the weight their style asks for, semibold 13.5px (\u00a7584.2)", tabFont);
+  /* \u00a7584.3 \u2014 AND THE BUTTONS: `.btn` had the same dropped shorthand
+     (`font:600 13px/1.5 inherit`), so every console button drew at the
+     browser's 13.33px regular and 29px tall \u2014 RED on the build before,
+     measured. Sign out is the one button on every tab. */
+  const btnFont = await page.evaluate(() => { const b = document.getElementById("signout"), c = getComputedStyle(b);
+    return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height); });
+  check(btnFont === "13px 600 34", "\u2026and the console's buttons too, semibold 13px, Sign out among them (\u00a7584.3)", btnFont);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

@@ -177,6 +177,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/tactic-status-slides/2026-10-21_cleaner-tactics-slide.html` | Two options for D003's tactics slide on the real deck (A: a solid red DELAYED tag and the due figure beside the actual; B: the status in a pill, a red dot and DELAYED under it, the due figure under the actual), drawn again without the due figure where it was 100%. Islam: *“option B but keep the due even it's 100%”*. **Option B approved** (§572) |
 | `../../design-mockups/tactic-status-slides/2026-10-21_option-b-everywhere.html` | Option B on the tactics and key measures slides and on Performance's two tables, today beside a build of it: bold names, regular outcome, the pill and red-dot Delayed, *due X* under the actual, a bigger Progress. Islam: *“yes build it”*. **Approved and BUILT** (§572) |
 | `../../design-mockups/tactic-status-slides/2026-10-21_delayed-not-bold.html` | The Status column on the tactics slide and on Performance, DELAYED bold as built beside regular weight. Islam: *“not bold, apply it and put it live”*. **Approved and BUILT** (§572.1) |
+| `../../design-mockups/tactic-status-slides/2026-10-22_delayed-centred-slide.html` | The slide's Status column, DELAYED as live (at the pill's left edge) beside centred under the pill, as Performance draws it. Islam: *“apply it and put it live”*. **Approved and BUILT** (§572.2) |
 
 ### Drawn, awaiting a decision
 

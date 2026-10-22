@@ -50082,9 +50082,11 @@ function pillarSlidesOf(u, p, pi, named){
       /* §571: the Status, as Performance draws it — the word in its band and
          Delayed under it when late. On every row, the plan's too, so the cells
          line up with the head and `planStripFigs` takes it out as a `fig`. */
-      '<td class="dstat ' + tacticBand(t) + '"' + rs + '>' +
+      /* §572.2: the pill and Delayed as one block, Delayed centred under the
+         pill as Performance's centred cell draws it (Islam). */
+      '<td class="dstat ' + tacticBand(t) + '"' + rs + '><span class="dstack">' +
         '<span class="dpill">' + esc(tacticStatusWord(t)) + '</span>' +
-        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</td>';
+        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</span></td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
     if (xs.length) return deckOutRows(t, lead, note, xs, rs);

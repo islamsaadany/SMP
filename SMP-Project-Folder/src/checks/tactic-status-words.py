@@ -259,6 +259,26 @@ with sync_playwright() as pw:
         ck("  slide row %d: %s%s, YTD %s%s" % (i + 1, word, " + Delayed" if late else "", ytd, (" / " + due) if due else ""),
            got.get("word") == word and got.get("pill") is True and got.get("late") is late and
            got.get("ytd") == ytd and got.get("due") == due, got)
+    # §572.2: on the slide DELAYED sits centred under the pill, as Performance's
+    # centred cell draws it — measured in the opened deck, as PAINT.
+    cen = ev(pg, """() => {
+      openDeck(UNITS.mobile);
+      const s = [...document.querySelectorAll('#deckroot .deck .dslide')].find(x => x.querySelector('td.dstat .dlate'));
+      if (!s) { closeDeck(); return null; }
+      s.classList.add('on');
+      const out = [...s.querySelectorAll('td.dstat')].filter(td => td.querySelector('.dlate')).map(td => {
+        /* the VISIBLE mark — its dot at the box's left edge to its word's
+           last letter — never the box: as a block the box spans the pill's
+           width while its dot and word sit at the left (the live fault). */
+        const p = td.querySelector('.dpill').getBoundingClientRect(), dl = td.querySelector('.dlate');
+        const rg = document.createRange(); rg.selectNodeContents(dl);
+        const left = dl.getBoundingClientRect().left, right = rg.getBoundingClientRect().right;
+        if (!p.width || right <= left) return 999;
+        return Math.abs((p.left + p.width / 2) - (left + right) / 2); });
+      s.classList.remove('on'); closeDeck();
+      return out; }""")
+    ck("§572.2: on the slide DELAYED is centred under its pill",
+       isinstance(cen, list) and cen and all(x < 2 for x in cen), cen)
     ck("...and D003 is put back", ev(pg, UNDO) is True)
 
     ck("no page error", not errs, errs)

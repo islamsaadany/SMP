@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.4).
+"""The guided tour, on a made-up direction (§574–§574.5).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -41,6 +41,11 @@ MAKE = """()=>{
 
 STATE = """()=>({on:!!DTOUR, i:DTOUR?DTOUR.i:-1, n:DTOUR?DTOUR.stops.length:0, slide:DECK.i,
   clear:!!document.querySelector('[data-dtour].dtclear'),
+  mark:!!document.querySelector('[data-dtour].dtmark'),
+  label:(e=>e&&getComputedStyle(e).display!=='none'?e.innerText.replace(/\\s+/g,' ').trim():'')(document.querySelector('.dtlabel')),
+  ringop:(e=>e?+getComputedStyle(e).opacity:-1)(document.querySelector('.dtring')),
+  marked:document.querySelectorAll('#deckroot .dslide.dtmarked').length,
+  gold:(e=>e?getComputedStyle(e).fontWeight:'')(document.querySelector('#deckroot .dslide.on .dwhich')),
   card:(e=>e?getComputedStyle(e).display!=='none':false)(document.querySelector('.dtcard')),
   shade:(e=>e?+getComputedStyle(e).opacity:-1)(document.querySelector('.dtshade')),
   step:(document.querySelector('.dtstep')||{}).textContent||'',
@@ -141,6 +146,16 @@ with sync_playwright() as p:
        ni >= 0 and lit[ni + 1] == "Delivery share of sales", lit[ni:ni+2] if ni >= 0 else lit)
     ck("…and that line is the last lit before the slide closes clear",
        ni >= 0 and run("M")[-2] is False and run("M")[-1] is True, run("M"))
+    # §574.5: the clear views say which slide, and what it is about
+    for kd, want in [("M", "KEY MEASURES The results we committed to"), ("T", "TACTICS The work that delivers them")]:
+        cv = [x for x, k in zip(seen, kinds) if k == kd and x.get("clear")]
+        ck("each clear view of the %s slide rings its title and names it: %s" % (kd, want),
+           len(cv) == 2 and all(x.get("mark") and x.get("ringop") == 1 and x.get("label", "").upper() == want.upper()
+                               and x.get("marked") == 1 and x.get("gold") == "700" for x in cv), cv)
+    ck("…and nothing is dimmed on them", all(x.get("shade") == 0 for x in seen if x.get("clear")))
+    ck("a lit stop draws no label and leaves no slide marked",
+       all(not x.get("mark") and not x.get("label") and x.get("marked") == 0 for x in seen if not x.get("clear")),
+       [x for x in seen if not x.get("clear") and (x.get("mark") or x.get("marked"))][:1])
     ck("YTD actual and Progress come before Delayed (Islam)",
        "Delayed" in lit and lit.index("YTD actual and Progress") < lit.index("Delayed"), lit)
 
@@ -178,6 +193,7 @@ with sync_playwright() as p:
     pg.emulate_media(media="screen")
     safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
     ck("closing the deck ends the tour with it", safe(pg, "()=>!DTOUR && !document.querySelector('[data-dtour]')") is True)
+    ck("…and leaves no slide marked", safe(pg, "()=>document.querySelectorAll('#deckroot .dtmarked').length") == 0)
 
     # ── 6. The dynamics, asked of the platform at H1 and at Q3 ─────────
     for to, name in [(None, "the demo's own cycle"), ("2026-09", "Q3, El Abd's"), ("2026-08", "a review point mid-quarter")]:
@@ -212,17 +228,27 @@ with sync_playwright() as p:
         q.goto("file://" + os.path.abspath(BUILT)); q.wait_for_timeout(800)
         safe(q, "()=>{switchViewer('%s'); return true}" % office); safe(q, MAKE); q.wait_for_timeout(300)
         safe(q, "()=>{REVIEW.to='2026-09'; exampleTourOpen(); return true}"); q.wait_for_timeout(800)
-        rows = []
+        rows, labs = [], []
+        LAB = """()=>{var d=document.querySelector('[data-dtour]'), l=d&&d.querySelector('.dtlabel');
+          if(!l||!d.classList.contains('dtmark')) return null;
+          var r=l.getBoundingClientRect(), g=d.querySelector('.dtring');
+          var x=+g.getAttribute('x'), y=+g.getAttribute('y'), w=+g.getAttribute('width'), h=+g.getAttribute('height');
+          var ox=Math.max(0, Math.min(r.right, x+w)-Math.max(r.left, x)), oy=Math.max(0, Math.min(r.bottom, y+h)-Math.max(r.top, y));
+          return {inside:r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight, over:Math.round(ox*oy)}}"""
         for k in range(safe(q, "()=>DTOUR?DTOUR.stops.length:0") or 0):
             q.wait_for_timeout(420)
             m = safe(q, FIT)
             if m: rows.append(m)
+            l = safe(q, LAB)
+            if l: labs.append(l)
             q.keyboard.press("ArrowRight")
         ck("at %dx%d the card's text is at least %dpx (Islam: bigger for the projector)" % (W, H, least),
            rows and min(r["body"] for r in rows) >= least, [r["body"] for r in rows][:2])
         ck("…and on every lit stop the card stays on screen and off the part it explains",
            rows and all(r["inside"] and r["over"] == 0 for r in rows),
            [r for r in rows if not r["inside"] or r["over"]][:2])
+        ck("…and on every clear view the label stays on screen and clear of the ringed title",
+           len(labs) == 4 and all(l["inside"] and l["over"] == 0 for l in labs), labs)
         q.close()
 
     ck("no page errors", not errs, errs[:3])

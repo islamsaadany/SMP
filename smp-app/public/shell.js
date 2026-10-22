@@ -52840,7 +52840,15 @@ function deckTourStops(){
      well showing everything. same for the tactics"*. A clear stop lights
      nothing and draws no card: the room sees the slide as it is presented,
      and the next press brings the spotlight in. */
-  var clear = function(on){ return { on:on, clear:true }; };
+  /* §574.5: AND THE CLEAR VIEW SAYS WHICH SLIDE IT IS, AND WHAT IT IS
+     ABOUT. Islam: *"in the whole slide in the key measures or the tactics
+     can we highlight somehow that we are in the measures and the tactics
+     slides so people can be aware of the difference?"* — shown two ways and
+     choosing both, on the clear views only: the slide's title ringed with
+     its name in gold, and a label in the corner naming the slide and the
+     difference, results against work. Nothing is dimmed. */
+  var clear = function(on, mark){ return { on:on, clear:true, mark:mark }; };
+  var markM = [M, "The results we committed to"], markT = [T, "The work that delivers them"];
   return [
     { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
       /* §574.4: the WORDS, not the blocks they sit in — a heading is as wide
@@ -52853,7 +52861,7 @@ function deckTourStops(){
       b:"Every " + noun + " in today's review is presented the same way: its " + M +
         ", its " + T + ", and where it stands overall. This made-up one shows how to read them." },
 
-    clear(isM),
+    clear(isM, markM),
     { on:isM, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1; }); },
       h:M,
       b:"The results this " + noun + " committed to for the year, one to a row." },
@@ -52880,9 +52888,9 @@ function deckTourStops(){
         return n ? esc(n.textContent.trim()) : "One line, read across"; },
       b:"One line read across: the target, what was reported against what was due, " +
         "the progress in its band, and the owner's note on why." },
-    clear(isM),
+    clear(isM, markM),
 
-    clear(isT),
+    clear(isT, markT),
     { on:isT, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1 || i === 2; }); },
       h:T,
       b:"The work that delivers the " + M + ": each " + T1 +
@@ -52907,7 +52915,7 @@ function deckTourStops(){
       h:"Delayed",
       b:"A red <b>DELAYED</b> means this " + T1 + " has fallen behind its plan: its window " +
         "has passed unfinished, or its first quarter went by with nothing delivered." },
-    clear(isT),
+    clear(isT, markT),
 
     { on:function(s){ return s.classList.contains("d-head"); },
       at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
@@ -52950,6 +52958,7 @@ function deckTourStart(){
         '<rect class="dthole" rx="10" fill="#000"/></mask></defs>' +
         '<rect class="dtshade" x="0" y="0" width="100%" height="100%" mask="url(#dtmask)"/>' +
         '<rect class="dtring" rx="10"/></svg>' +
+      '<div class="dtlabel" aria-live="polite"></div>' +
       '<div class="dtcard" role="dialog" aria-live="polite">' +
         '<div class="dttop"><span class="dtstep"></span>' +
           '<button type="button" class="dtx" data-dtend title="End the tour (G)" aria-label="End the tour">&times;</button></div>' +
@@ -52993,6 +53002,8 @@ function deckTourDraw(){
   var x = DTOUR.stops[DTOUR.i], st = x.st;
   var card = dock.querySelector(".dtcard");
   dock.classList.toggle("dtclear", !!st.clear);
+  deckTourUnmark();
+  dock.classList.toggle("dtmark", !!(st.clear && st.mark && deckTourMark(dock, x.s, st.mark)));
   if (st.clear) return;
   /* The count is of the parts lit — a clear view is not a step to count. */
   var lit = DTOUR.stops.filter(function(y){ return !y.st.clear && !y.end; });
@@ -53034,7 +53045,30 @@ function deckTourEnd(){
   var root = document.getElementById("deckroot");
   var dock = root && root.querySelector("[data-dtour]");
   if (dock) dock.remove();
+  deckTourUnmark();
   DTOUR = null;
+}
+/* §574.5: the clear view's mark — the title's words ringed, the slide's own
+   name in gold (a class on the slide, taken off as the stop is left), and
+   the label at the table's right edge, level with the title. */
+function deckTourMark(dock, s, words){
+  var h = s.querySelector(".dphdr h2"), t = s.querySelector("table");
+  if (!h || !t) return false;
+  var b = deckTourInk(h).getBoundingClientRect(), tb = t.getBoundingClientRect(), pad = 12;
+  var ring = dock.querySelector(".dtring");
+  ring.setAttribute("x", b.left - pad); ring.setAttribute("y", b.top - pad);
+  ring.setAttribute("width", b.width + pad * 2); ring.setAttribute("height", b.height + pad * 2);
+  var lab = dock.querySelector(".dtlabel");
+  lab.innerHTML = '<b>' + words[0] + '</b><span>' + esc(words[1]) + '</span>';
+  lab.style.right = Math.max(12, innerWidth - tb.right) + "px";
+  lab.style.top = (b.top + b.height / 2) + "px";
+  s.classList.add("dtmarked");
+  return true;
+}
+function deckTourUnmark(){
+  [].forEach.call(document.querySelectorAll("#deckroot .dtmarked"), function(e){
+    e.classList.remove("dtmarked");
+  });
 }
 /* THE KEYBOARD IS THE TOUR'S WHILE IT RUNS — asked BEFORE the deck's own
    listener (the capture phase), so Next lights the next part instead of

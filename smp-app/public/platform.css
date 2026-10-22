@@ -10083,8 +10083,23 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 /* §574.2: a clear stop — the whole slide as presented, nothing over it. The
    overlay stays, transparent, so the next press is still the tour's. */
 .dtour .dtshade, .dtour .dtring { transition:opacity .3s ease; }
-.dtour.dtclear .dtshade, .dtour.dtclear .dtring { opacity:0; }
+.dtour.dtclear .dtshade, .dtour.dtclear:not(.dtmark) .dtring { opacity:0; }
 .dtour.dtclear .dtcard { display:none; }
+/* §574.5: on a clear view, which slide this is — its title ringed and its
+   name in gold, and a label naming it and what it is about, results against
+   work. The label is in the card's own projector size, on the platform's
+   navy with the accent edge, and stands in the empty corner beside the
+   title, so it covers nothing. */
+.dtour .dtlabel { display:none; position:absolute; transform:translateY(-50%);
+                  font-size:clamp(17px, 1.3vw, 26px); line-height:1.2; text-align:right;
+                  background:var(--panel); color:var(--panel-ink); border:2px solid var(--gold);
+                  border-radius:.5em; padding:.45em 1em .5em; box-shadow:0 10px 30px rgba(9,14,24,.35);
+                  pointer-events:none; }
+.dtour.dtmark .dtlabel { display:block; }
+.dtour .dtlabel b { display:block; font-size:1.25em; font-weight:800; letter-spacing:.08em;
+                    text-transform:uppercase; }
+.dtour .dtlabel span { display:block; font-size:.8em; color:var(--panel-quiet); margin-top:.15em; }
+.dslide.dtmarked .dwhich { color:var(--gold-deep); font-weight:700; }
 .dtour .dthole, .dtour .dtring { transition:x .35s ease, y .35s ease, width .35s ease, height .35s ease; }
 .dtour .dtring { fill:none; stroke:var(--gold); stroke-width:3;
                  filter:drop-shadow(0 0 8px rgba(201,162,77,.6)); }

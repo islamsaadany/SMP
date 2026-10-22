@@ -467,7 +467,11 @@
    called Strategy and the tab under it Plan. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in
    any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.62-delayed-centred";
+/* v6.63-figure-units — §573: a figure's unit a little smaller than its
+   number and in dark grey, dollars written in front, a shorter unit list.
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.63-figure-units";
 const ASSETS = [
   "/",
   "/index.html",

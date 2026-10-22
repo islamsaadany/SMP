@@ -68182,3 +68182,5 @@ Islam, after §584.2 went live: *"fix the buttons too"*; of the mockup made from
 **NAMED, STILL NOT TOUCHED.** `.fld` (the text boxes), `.wzband button` and `.fwchip` carry the same dropped shorthand.
 
 **CHECKED.** `checks/shell.mjs` §4b.1 asks *Sign out*'s COMPUTED type and height — **13px 600 34**, red on the build before (13.3333px 400 29, at 1440 and 400). The whole check **399 ok, 1 failed**, §524's Copilot bar as before. Release stamp clear.
+
+**§584.3 MERGED TO `main`** 2026-10-22, Islam: *"yes build it and put it live"*. A clean fast-forward — `main` had not moved since §584.2 — so the tree pushed is the tree checked (399 ok, 1 failed, §524's as before). Then this note and the `SHELL` bump `smp-shell-v6.76-tab-weight` → **`smp-shell-v6.77-button-weight`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page only; no save changed, so no forced sign-out. Witnesses: `/sw.js` release **`1ed81d67f8ec6ba6`** before, **`d3c701d80dcd2e34`** after; `/shell.js` unchanged at **5,111,351**.

@@ -626,7 +626,7 @@ function measureRows(ms, opts){
        loses its scale and a scaled one loses what it is measured against. */
     var dueLab = measureDueLabel(m);
     var actCell = (m.actual == null || m.actual === "") ? '&mdash;'
-      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b></span>' + pdueLine(esc(dueLab))
+      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b></span>' + pdueLine(figHtml(dueLab))
                : figShown(m);
     return head + '<td class="num">' + actCell + '</td>' +
            (scored
@@ -900,12 +900,12 @@ function outFigCell(t, x){
   if (shown == null) {
     var b = measureDueLabel(o, share);
     return '<td class="cc"><span class="pill none">Not reported</span>' +
-      (b ? '<span class="why" style="margin:2px 0 0">due at ' + esc(b) + '</span>' : '') + '</td>';
+      (b ? '<span class="why" style="margin:2px 0 0">due at ' + figHtml(b) + '</span>' : '') + '</td>';
   }
   var bp = benchBeside(o, share), sc = oneOutcomeScore(t, o);
-  return '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
+  return '<td class="num"><span class="pair"><b>' + figHtml(shown) + '</b>' +
     (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span>' +
-    pdueLine(bp ? esc(bp) : '') + '</td>';
+    pdueLine(bp ? figHtml(bp) : '') + '</td>';
 }
 function outRowspan(n){ return n ? ' rowspan="' + (n + 1) + '"' : ''; }
 function outPad(n){ return n % 2 ? '<tr class="opad" hidden></tr>' : ''; }
@@ -941,7 +941,7 @@ function planOutRows(t, ed, tdCls){
         /* the same fold the first line has below 880 (§249) */
         '<span class="subhd narrowtgt">' + (emptyTgt ? '<span class="missing">Missing</span>'
           : SMPRules.isYesNo(x.outTarget) ? tgtShown(x.outTarget)
-          : esc(x.outDir || "\u2265") + ' ' + esc(x.outTarget)) + '</span>';
+          : esc(x.outDir || "\u2265") + ' ' + figHtml(x.outTarget)) + '</span>';
     var tgt = ed
       ? outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false)
       : (emptyTgt ? '<span class="missing">Missing</span>' : tgtShown(x.outTarget));
@@ -985,9 +985,9 @@ function tacticRows(ts, unitKey){
       ? '<td class="cc" colspan="2"></td>'
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
-        (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
-      : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b></span>' +
-        pdueLine(benchPair ? esc(benchPair) : '') + '</td>' +
+        (bench ? '<span class="why" style="margin:2px 0 0">due at ' + figHtml(bench) + '</span>' : '') + '</td>'
+      : '<td class="num"><span class="pair"><b>' + figHtml(shown) + '</b></span>' +
+        pdueLine(benchPair ? figHtml(benchPair) : '') + '</td>' +
         '<td class="num final prog" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     /* §414: SEVERAL OUTCOMES. Each outcome's figure, its benchmark and its
        own score sit on its own line; Progress spans them and is the AVERAGE,
@@ -1231,8 +1231,8 @@ function bdReadTable(p, mode){
         var sc = String(a).trim() ? bdCellScore(r, c) : null;
         return (String(t).trim() ? '<td class="num">' + tgtShown(t) + '</td>' : dash) +
           (!String(a).trim() ? dash : '<td class="num">' +
-            (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
-                        : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') + '</td>');
+            (sc == null ? '<b>' + figHtml(unitTight(a)) + '</b>'
+                        : '<b style="color:' + bandInk(sc) + '">' + figHtml(unitTight(a)) + '</b>') + '</td>');
       }).join("") + '</tr>';
   }).join("");
   return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
@@ -4882,7 +4882,7 @@ function koYearToggle(){
    the next bare number typed into the other horizon — "30 Maintain share",
    silently. The list is the vocabulary the picker offers (§199.4), so it is
    exactly the set of values this control can ever have written. */
-function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0; }
+function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0 || RETIRED_UNITS.indexOf(s) > -1; }
 function unitOfTarget(v){
   var s = String(v == null ? "" : v).trim();
   if (!s) return "";
@@ -5460,8 +5460,25 @@ function fillUnitCell(page, acKey, m, ctx){
 /* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
    half of the list that says what a row is COUNTED in rather than valued in,
    and it is the one entry saying the row carries no number at all. */
+/* §573: A SHORTER LIST, AND THE DOLLARS IN FULL. Islam: *"d, h and SQM can be
+   just # and maybe add a $ unit"* — for new rows only. SQM, d and h leave the
+   list and a new row counts with `#`, its name saying what it counts; a row
+   that already holds one keeps it (`RETIRED_UNITS`, and the rule below that
+   offers a stored value). The dollars gain a bare `USD` and `B USD` beside
+   K and M, reversing §239.5's "K and M only" at his word.
+
+   STORED AS USD, SHOWN AS $. The list keeps the spelling the plan already
+   holds (`6.2M USD`), so an existing dollar row is ON the list rather than
+   offered beside it, and a workbook still says what currency it is. The
+   picker labels them `$`, `$K`, `$M`, `$B` (`UNIT_LABELS`), and every figure
+   printed reads `$8M` (`figHtml`). */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
-                    "K USD", "M USD", "SQM", "d", "h"];
+                    "USD", "K USD", "M USD", "B USD"];
+/* Off the list, still read: a row holding one is not losing its unit. */
+var RETIRED_UNITS = ["SQM", "d", "h"];
+var UNIT_LABELS = { "USD": "$", "K USD": "$K", "M USD": "$M", "B USD": "$B" };
+/* The same name where the unit is read rather than picked. */
+function unitLabel(u){ return UNIT_LABELS[u] || u; }
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
    `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
@@ -5474,11 +5491,11 @@ var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
 /* A SCALED CURRENCY IS ONE TOKEN whichever currency it is, so the dollars
    join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
    convention the plan already uses for `6.2B EGP`. */
-var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1, "B USD":1 };
 function targetUnitOpts(cur){
   var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
-  return opts;
+  return opts.map(function(u){ return UNIT_LABELS[u] ? { v: u, label: unitLabel(u) } : u; });
 }
 
 function koView(list, isGroup, acKey){
@@ -5647,7 +5664,7 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + (pg
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(page, acKey, m) || esc(unitLabel(targetUnitOf(m))))) + '</td>' +
         '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target3y || ""))
           : gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
@@ -6902,9 +6919,9 @@ function repOutTarget(t, x){
   var o = outcomeOf(x);
   if (!o) return '<span class="nobody">&mdash;</span>';
   var bench = measureDueLabel(o, tacticShare(t)), whole = outcomeTargetShown(x);
-  return (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+  return (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
     (whole && whole !== bench && !SMPRules.isYesNo(x.outTarget)
-      ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
+      ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '');
 }
 
 /* §520.7, reshaped by §520.8: `opt.paneOnly` returns the key objectives and
@@ -6965,7 +6982,7 @@ function renderReport(u, opt){
     var has = String(cur).trim() !== "";
     var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
     if (!canEnterFigure(u.ukey, x)) {
-      return '<span class="mono">' + (has ? esc(unitTight(cur)) : "\u2014") + '</span>';
+      return '<span class="mono">' + (has ? figHtml(unitTight(cur)) : "\u2014") + '</span>';
     }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
@@ -7126,9 +7143,9 @@ function renderReport(u, opt){
                  and the whole it is a part of is the word "Yes / No" — "50% of
                  Yes / No" is not a sentence anybody reads, so the second line
                  is for a row whose target is a NUMBER. */
-              '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+              '<td class="num">' + (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
                 (whole && whole !== bench && !SMPRules.isYesNo(x.obj.outTarget)
-                  ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
+                  ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol"' + rs + '>' + noteCell(x) + '</td></tr>' + subs(true);
@@ -8258,7 +8275,7 @@ function projPerformanceBody(p, fk){
     var notDue = !dueThisCycle(when);
     var has = reportedAny(o, d);
     var got = d ? statusPill(o, "Delivered")
-                : (has ? esc(o.actual) : (notDue ? notDueCell() : '<span class="pill kind">&mdash;</span>'));
+                : (has ? figHtml(o.actual) : (notDue ? notDueCell() : '<span class="pill kind">&mdash;</span>'));
     var reads = d ? statusReads(o) : o.progress;
     /* "Finished" is a status for a deliverable and a REPORTED FIGURE for an
        outcome. Asking statusReads() of an outcome answers null, which read
@@ -8917,7 +8934,7 @@ function fnObjKoBlock(fk, ed){
       '<td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + (m.weight == null || m.weight === "" ? "&mdash;" : esc(m.weight) + "%") + '</td>' +
       '<td class="cc">' + esc(m.dir || "") + '</td>' +
-      '<td class="cc">' + esc(unitTight(m.target)) + '</td>' +
+      '<td class="cc">' + figHtml(unitTight(m.target)) + '</td>' +
       '<td class="cc">' + esc(m.compile || "") + '</td></tr>';
   }).join("");
   return '<h4 class="mini">' + L("keyobj") + '</h4>' +
@@ -10037,7 +10054,7 @@ function unitPlanBody(it, u, railed, bare){
            how many cells a row has; a row with nothing to offer gets the
            unit it already carries, read-only. */
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
-            || esc(targetUnitOf(m))) + '</td>'
+            || esc(unitLabel(targetUnitOf(m)))) + '</td>'
         : '') +
       /* §278: the way in to a monthly plan sits in the TARGET cell, because
          the monthly plan IS the target — under Compiled it read as a second
@@ -10207,7 +10224,7 @@ function unitPlanBody(it, u, railed, bare){
              /* §257: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
              : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
-             : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
+             : esc(t.outDir || "\u2265") + ' ' + figHtml(t.outTarget)) + '</span>' : '') +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
          its four facts a control of its own in one cell (Islam). §249 draws
@@ -10781,7 +10798,7 @@ function unitTight(v){
      something on the offered list — or of a scaled currency, which is the one
      shape the list deliberately does not enumerate — collapses. */
   var rep = u.match(/^(.+?)\s*\1$/);
-  if (rep && (TARGET_UNITS.indexOf(rep[1]) > -1 || /^[KMB]\s+\S+$/.test(rep[1])))
+  if (rep && (knownUnit(rep[1]) || /^[KMB]\s+\S+$/.test(rep[1])))
     u = rep[1];
   /* THE UNIT IS NEVER TOUCHED — only the gap between it and the number.
      The first draft closed the space INSIDE the unit and produced `8MEGP`,
@@ -10811,7 +10828,30 @@ function unitTight(v){
    somebody will be choosing between. Inside main's own reader rather than
    beside it, or the deck and the page spell one target two ways. */
 function tgtShown(v){
-  return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
+  return SMPRules.isYesNo(v) ? "Yes / No" : figHtml(unitTight(v));
+}
+/* ── A FIGURE AS IT IS READ (§573) ─────────────────────────────────────
+   Islam: *"make the units in general always smaller than the number"*, in
+   dark grey, and *"it should be $8m and $10b"* — written `$8M`, the scale
+   letter in capitals as money is written.
+
+   DISPLAY ONLY, like §254: what is stored stays number-first (`8M USD`) and a
+   box being typed into shows what was typed. The SCALE LETTER is part of the
+   amount, so it stays full size beside the number; only the unit is set
+   apart. A word carries its own space inside its span, so the text of the
+   cell is still `300 EGP` — the PowerPoint, a copy and a check all read it —
+   while a symbol (`%`, `#`) sits tight with the gap drawn by the stylesheet. */
+function figHtml(s){
+  s = String(s == null ? "" : s);
+  var sp = splitTarget(s);
+  if (!sp.unit) return esc(s);
+  var u = sp.unit, m = u.match(/^([KMB])(?:\s+(\S+))?$/);
+  var scale = m ? m[1] : "", cur = m ? (m[2] || "") : u;
+  if (cur === "USD" || cur === "$") return '<span class="fu pre">$</span>' + esc(sp.value + scale);
+  if (!cur) return esc(sp.value + scale);
+  return /^[A-Za-z]/.test(cur)
+    ? esc(sp.value + scale) + '<span class="fu w"> ' + esc(cur) + '</span>'
+    : esc(sp.value + scale) + '<span class="fu">' + esc(cur) + '</span>';
 }
 
 /* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344) ──
@@ -10874,7 +10914,7 @@ function repTargetCell(m){
      prorate all land here and are drawn exactly as they were. */
   if (bench == null || due == null || !isFinite(num) || Math.abs(due - num) < 1e-9)
     return whole;
-  return esc(bench) + '<span class="subhd">of ' + whole + '</span>';
+  return figHtml(bench) + '<span class="subhd">of ' + whole + '</span>';
 }
 /* ONE NAME FOR THE COLUMN, read by all four tables that carry it — a literal
    typed at four call sites is how two of them come to say different things
@@ -10915,7 +10955,7 @@ function figShown(m){
      for a figure with a unit on the end of it. One reader, `ynShown`. */
   if (SMPRules.isYesNo(m.target)) return esc(SMPRules.ynShown(m.actual));
   var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
-  return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
+  return full ? '<span title="' + esc(full) + '">' + figHtml(s) + '</span>' : figHtml(s);
 }
 function koReadBlock(list, emptyLine){
   if (!(list || []).length)
@@ -11011,7 +11051,7 @@ function capKoEdit(c, pgIn, acIn){
         '<td class="cc">' + (ed
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(pg, ac, m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(pg, ac, m) || esc(unitLabel(targetUnitOf(m))))) + '</td>' +
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */

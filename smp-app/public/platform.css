@@ -701,6 +701,15 @@
   .pdue { display:block; margin-top:3px; font:400 11.5px/1.3 var(--sans); color:var(--ink-3); }
   td.final.prog { font-size:17px; }
   td.outc b { font-weight:400; }
+  /* §573: the unit a little smaller than its number and in dark grey. A word
+     carries its own space (`.w`), so the figure still reads "300 EGP" when it
+     is copied or written into the PowerPoint; a dollar sign goes in front. */
+  .fu { font-size:.82em; font-family:var(--sans); font-weight:600; letter-spacing:.02em;
+        margin-left:.18em; color:var(--ink-2); }
+  .fu.w { margin-left:0; }
+  .fu.pre { margin-left:0; margin-right:.08em; }
+  /* inside a line that is already quiet, the unit takes the line's own ink */
+  .ddue .fu, .pdue .fu, .why .fu, .subhd .fu { color:inherit; font-weight:inherit; }
   .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
@@ -10058,7 +10067,7 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .d-compete table.cmptab td.cmpval { font-size:20px; }
   .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
 
-/* ── THE GUIDED TOUR OF ONE SUBJECT'S SLIDES (§573) ───────────────────────
+/* ── THE GUIDED TOUR OF ONE SUBJECT'S SLIDES (§574) ───────────────────────
    The onboarding tour's spotlight (tour.css) at projector size: the shade is
    painted by a masked rect so the lit part is never washed by a dim laid over
    it, and the ring is the accent. Inside `#deckroot`, so it is on the screen

@@ -1269,7 +1269,7 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = tacticBenchmark(t);
     if (!tacticAnswered(t))
       return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>' +
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
@@ -1277,7 +1277,7 @@ function pillarSlidesOf(u, p, pi, named){
        row shows it only against a partial, so 0% and 100% stand alone. */
     var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
-      '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(pair ? esc(pair) : "") + '</td>' +
+      '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
       '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -1304,8 +1304,8 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
     if (shown == null)
       return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(bench ? esc(bench) : "") + '</td>';
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(bench ? figHtml(bench) : "") + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
@@ -1840,7 +1840,7 @@ function deckSlidesFn(subject){
           '<td class="lead">' + esc(o.name) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
-          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
+          '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
           '<td class="num">' + got + '</td>' +
           '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
@@ -2190,7 +2190,7 @@ function openDeckWith(titleHtml, targets, from){
   document.body.classList.add("presenting");
   deckFitPass();
   deckIndex();
-  /* §573: the guided tour's button, on the cover of the subject picked for
+  /* §574: the guided tour's button, on the cover of the subject picked for
      it — after the index, which is what says which slides are whose. */
   deckTourEnd();
   deckTourMount();
@@ -2795,7 +2795,7 @@ function masterPaint(){
   masterFix(box, all.length);
 }
 
-/* ── §573: THE GUIDED TOUR, PICKED FROM THE FLOW ───────────────────────
+/* ── §574: THE GUIDED TOUR, PICKED FROM THE FLOW ───────────────────────
    One subject, from the ones in the flow — so the choices are what the
    client has, and a subject taken out of the flow takes the tour with it.
    Drawn only while there is a flow to pick from (§61). */
@@ -2988,7 +2988,7 @@ function masterWire(){
       row.scrollIntoView({ block: "nearest" });
     }
   }
-  /* §573: which subject the guided tour walks. */
+  /* §574: which subject the guided tour walks. */
   var tour = box.querySelector("[data-mftour]");
   if (tour) tour.addEventListener("change", function(){
     deckTourPickWrite(this.value);
@@ -3079,7 +3079,7 @@ function closeDeck(){
      tab. */
   if (CLOCKTICK) { clearInterval(CLOCKTICK); CLOCKTICK = null; }
   DECK.clock = null;
-  deckTourEnd();   /* §573 */
+  deckTourEnd();   /* §574 */
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
@@ -3733,7 +3733,7 @@ function wireDeck(){
   });
 }
 
-/* ══ A GUIDED TOUR OF ONE SUBJECT'S SLIDES (§573) ═══════════════════════
+/* ══ A GUIDED TOUR OF ONE SUBJECT'S SLIDES (§574) ═══════════════════════
    Islam, before El Abd's Q3 review: *"for the master slide I need an option
    in the flow to present a demo direction or a demo unit or a demo function
    based on what the client has … on clicking in on the presentation it takes

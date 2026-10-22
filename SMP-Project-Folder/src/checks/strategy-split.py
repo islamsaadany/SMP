@@ -82,10 +82,14 @@ def read_pptx(path):
         if n.endswith(".xml") or n.endswith(".rels"):
             ET.fromstring(z.read(n))  # raises on anything malformed
     slides = slidenames(z)
+    # §573: ONE LINE PER PARAGRAPH, its runs joined as PowerPoint shows them.
+    # A figure's unit is a run of its own now (`32` and a smaller `%`), and a
+    # line per run read it as two words.
+    A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
     for n in slides:
         root = ET.fromstring(z.read(n))
-        for t in root.iter("{http://schemas.openxmlformats.org/drawingml/2006/main}t"):
-            text.append(t.text or "")
+        for para in root.iter(A + "p"):
+            text.append("".join(t.text or "" for t in para.iter(A + "t")))
     # the package is consistent: every slide the presentation lists exists
     pres = z.read("ppt/presentation.xml").decode()
     return {"slides": len(slides), "text": "\n".join(text), "pres": pres}

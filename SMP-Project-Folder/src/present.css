@@ -1427,7 +1427,7 @@
   .d-compete table.cmptab td.cmpval { font-size:20px; }
   .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
 
-/* ── THE GUIDED TOUR OF ONE SUBJECT'S SLIDES (§573) ───────────────────────
+/* ── THE GUIDED TOUR OF ONE SUBJECT'S SLIDES (§574) ───────────────────────
    The onboarding tour's spotlight (tour.css) at projector size: the shade is
    painted by a masked rect so the lit part is never washed by a dim laid over
    it, and the ring is the accent. Inside `#deckroot`, so it is on the screen

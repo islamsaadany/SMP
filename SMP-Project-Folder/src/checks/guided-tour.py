@@ -1,4 +1,4 @@
-"""The guided tour of one subject's slides (§573).
+"""The guided tour of one subject's slides (§574).
 
 Islam, before El Abd's Q3 review: an option in the master flow to present a
 demo direction, unit or function, and on clicking in the presentation a tour

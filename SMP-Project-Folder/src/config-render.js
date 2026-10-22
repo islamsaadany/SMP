@@ -6287,9 +6287,9 @@ function renderMyLines(){
                                   : '<span class="missing">Missing</span>')
                               : '') + (xs.length ? '' : oc && oc.name ? esc(oc.name)
                                   : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
-          '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+          '<td class="num">' + (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
             (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
-              ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
+              ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '') + '</td>' +
           '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
           '<td class="cc"' + rs + '>' + (pr == null
               ? '<span class="pill kind">Not reported</span>'

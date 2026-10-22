@@ -1,4 +1,4 @@
-"""The guided tour, on a made-up direction (§574–§574.9).
+"""The guided tour, on a made-up direction (§574–§574.10).
 
 Islam, before El Abd's Q3 review: a tour through a direction's slides that
 lights one part and dims the rest, with a card saying what it is — and then,
@@ -93,8 +93,15 @@ with sync_playwright() as p:
     before = safe(pg, "()=>JSON.stringify([GROUP, UNITS, REVIEW])")
     safe(pg, "()=>{document.querySelector('[data-extour]').click(); return true}"); pg.wait_for_timeout(900)
     st = safe(pg, STATE) or {}
-    ck("pressing Guided tour opens the deck with the tour on stop 1, lit",
-       st.get("deck") and st.get("on") and st.get("i") == 0 and st.get("ring", 0) > 0, st)
+    ck("pressing Guided tour opens the deck with the tour on the cover, whole and clear (Islam)",
+       st.get("deck") and st.get("on") and st.get("i") == 0 and st.get("clear") and st.get("shade") == 0
+       and not st.get("card") and safe(pg, KIND) == "cover", st)
+    pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(450)
+    s0 = safe(pg, STATE) or {}
+    ck("…and the next press lights the cover with its card, 1 of 14",
+       s0.get("i") == 1 and not s0.get("clear") and s0.get("ring", 0) > 0 and s0.get("card")
+       and s0.get("step") == "1 of 14" and safe(pg, KIND) == "cover", s0)
+    pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(300)
     ck("…full screen, as Present from the slides opens", safe(pg, "()=>document.getElementById('deckroot').classList.contains('fs')") is True)
     ck("…on the made-up direction and nothing else",
        safe(pg, "()=>DECK.targets.join()+'|'+DECK.slides.every(s=>s.dataset.subject==='example:tour')") == "example:tour|true")
@@ -156,7 +163,7 @@ with sync_playwright() as p:
            len(r) >= 4 and r[0] is True and r[-1] is True and not any(r[1:-1]), r)
     cl = [x for x in seen if x.get("clear")]
     ck("a clear stop draws no card and no shade",
-       len(cl) == 9 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
+       len(cl) == 10 and all(not x.get("card") and x.get("shade") == 0 for x in cl), cl[:2])
     ck("…and a lit stop draws both",
        all(x.get("card") and x.get("shade", 0) > 0 for x in seen if not x.get("clear")))
     ck("the count is of the parts lit: 1 of 14 … 14 of 14",
@@ -196,12 +203,14 @@ with sync_playwright() as p:
     ck("→ moves the tour, not the deck past it", s1.get("i") == 2, s1)
     pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(250)
     ck("← steps back", (safe(pg, STATE) or {}).get("i") == 1)
-    sl = safe(pg, "()=>DECK.i")
+    want = safe(pg, "()=>DTOUR.stops[2].at")
     pg.mouse.click(24, 880); pg.wait_for_timeout(300)
     s2 = safe(pg, STATE) or {}
     ck("a press on the dim is Next, and the full-screen stage does not ALSO turn the slide",
-       s2.get("i") == 2 and s2.get("slide") == sl, {"before": sl, "after": s2})
-    try: pg.click("[data-dtend]"); pg.wait_for_timeout(200)
+       s2.get("i") == 2 and s2.get("slide") == want, {"want": want, "after": s2})
+    # a clear view draws no card and so no ×: the × is tried on a lit stop
+    pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(300)
+    try: pg.click("[data-dtend]", timeout=3000); pg.wait_for_timeout(200)
     except Exception: pass
     ck("the × ends the tour and leaves the deck on its slide",
        safe(pg, "()=>!DTOUR && !document.querySelector('[data-dtour]') && document.getElementById('deckroot').classList.contains('on')") is True)

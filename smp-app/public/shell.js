@@ -52878,6 +52878,11 @@ function deckTourStops(){
   var clear = function(on, mark){ return { on:on, clear:true, mark:mark }; };
   var markM = [M, "The results we committed to"], markT = [T, "The work that delivers them"];
   return [
+    /* §574.10: the cover too opens whole and clear before it is lit (Islam:
+       *"for the first cover page let's start with it a clear slide before
+       the highlighting"*) — so the tour begins on the slide as the room
+       would see it. */
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); }, clear:true },
     { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
       /* §574.4: the WORDS, not the blocks they sit in — a heading is as wide
          as the slide, so lighting its box left the bigger card nowhere to

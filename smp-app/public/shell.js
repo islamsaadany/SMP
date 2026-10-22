@@ -51025,6 +51025,10 @@ function openDeckWith(titleHtml, targets, from){
   document.body.classList.add("presenting");
   deckFitPass();
   deckIndex();
+  /* §573: the guided tour's button, on the cover of the subject picked for
+     it — after the index, which is what says which slides are whose. */
+  deckTourEnd();
+  deckTourMount();
   deckShow(0);
   deckScale();
   root.focus();
@@ -51608,6 +51612,7 @@ function masterPaint(){
       '<p class="mfempty"' + (MFLOW.pick.length ? ' hidden' : '') + '>' +
         'Nobody yet — tick a unit or function on the left.</p></div></div>' +
     '</div>' +
+    masterTourRow() +
     (MFLOW.note ? '<p class="mfnote" role="status">' + esc(MFLOW.note) + '</p>' : '') +
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
@@ -51623,6 +51628,27 @@ function masterPaint(){
      paint threw with the dialog still on screen (§130.3's fault, found by
      opening it). */
   masterFix(box, all.length);
+}
+
+/* ── §573: THE GUIDED TOUR, PICKED FROM THE FLOW ───────────────────────
+   One subject, from the ones in the flow — so the choices are what the
+   client has, and a subject taken out of the flow takes the tour with it.
+   Drawn only while there is a flow to pick from (§61). */
+function masterTourRow(){
+  if (!MFLOW.pick.length) return "";
+  var cur = deckTourPick();
+  if (MFLOW.pick.indexOf(cur) < 0) cur = "";
+  return '<div class="mftour"><label for="mftour-pick">Guided tour</label>' +
+    '<select id="mftour-pick" data-mftour>' +
+      '<option value="">None</option>' +
+      MFLOW.pick.map(function(t){
+        return '<option value="' + esc(t) + '"' + (t === cur ? ' selected' : '') + '>' +
+          esc(placeLabel(t)) + '</option>';
+      }).join("") +
+    '</select><span class="mftourhint">' +
+      (cur ? 'A button on its cover walks the room through its slides, part by part. G starts it too.'
+           : 'Pick one to walk the room through its slides, part by part.') +
+    '</span></div>';
 }
 
 /* ── ONE HEIGHT, WHATEVER THE SPLIT (§266.11) ─────────────────────────
@@ -51797,6 +51823,12 @@ function masterWire(){
       row.scrollIntoView({ block: "nearest" });
     }
   }
+  /* §573: which subject the guided tour walks. */
+  var tour = box.querySelector("[data-mftour]");
+  if (tour) tour.addEventListener("change", function(){
+    deckTourPickWrite(this.value);
+    masterPaint();
+  });
   var no = box.querySelector("[data-mfno]");
   if (no) no.addEventListener("click", function(){ closeModal(); });
   var go = box.querySelector("[data-mfgo]");
@@ -51882,6 +51914,7 @@ function closeDeck(){
      tab. */
   if (CLOCKTICK) { clearInterval(CLOCKTICK); CLOCKTICK = null; }
   DECK.clock = null;
+  deckTourEnd();   /* §573 */
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
@@ -52534,6 +52567,341 @@ function wireDeck(){
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
 }
+
+/* ══ A GUIDED TOUR OF ONE SUBJECT'S SLIDES (§573) ═══════════════════════
+   Islam, before El Abd's Q3 review: *"for the master slide I need an option
+   in the flow to present a demo direction or a demo unit or a demo function
+   based on what the client has … on clicking in on the presentation it takes
+   us in a tour through the slides of this direction … that highlights a part
+   and dim the rest with a tool tip to explain what this is"* — naming the key
+   measures slide, the tactics slide and the direction's overall performance.
+
+   ONE SUBJECT, PICKED IN THE MASTER PRESENTATION from the subjects already in
+   the flow, so the list is whatever the client has: a direction, a
+   capability, a business unit, a function. A SCREEN PREFERENCE (§25, §47.1):
+   it lives in this browser and writes nothing a save could carry, exactly as
+   the onboarding tour's answers do — so there is nothing for the authoriser
+   to classify and no migration.
+
+   THE ROOM PRESSES IT: a button on that subject's cover, which is the click
+   Islam asked for, and `G` anywhere in the deck, because in full screen a
+   clicker is all a presenter has. Never printed — the PDF is a record, not a
+   rehearsal (§305).
+
+   IT WALKS THE SLIDES THE DECK ALREADY HAS. Each stop names a KIND of slide
+   and the part of it to light; the first slide of that kind in the subject's
+   own run is the one shown. A part the slide does not carry — no categories,
+   no delayed tactic, no execution reading — is a stop that is not made
+   (§45.2), so one list of stops reads a direction, a unit and a function.
+
+   THE WORDS ARE THE CLIENT'S: `L()` for what they call measures and tactics,
+   and the bands read off `BANDS`, so a tenant that moved its floors is not
+   told 90 / 70 by a tooltip (§53.5).
+
+   DRAWN INSIDE `#deckroot`, never over the page: the deck goes full screen as
+   an ELEMENT, and anything outside that element is not on the screen at all.
+   The onboarding tour's spotlight (tour.css), at projector size. */
+var DTOUR = null;
+var DTOUR_KEY = "smp.deck.tour";
+function deckTourPick(){
+  try { return localStorage.getItem(DTOUR_KEY) || ""; } catch (e) { return ""; }
+}
+function deckTourPickWrite(t){
+  try {
+    if (t) localStorage.setItem(DTOUR_KEY, t);
+    else localStorage.removeItem(DTOUR_KEY);
+  } catch (e) { /* a blocked store forgets the pick; the deck is unchanged */ }
+}
+/* The subject's own run of slides — never the flow's cover or a group's
+   roll-call, which ride in front of it stamped with its name (§554.3). */
+function deckTourOwn(t){
+  return (DECK.slides || []).filter(function(s){
+    return s.dataset.subject === t && !s.dataset.flowpart;
+  });
+}
+function deckTourMount(){
+  var t = deckTourPick();
+  if (!t || (DECK.targets || []).indexOf(t) < 0) return;
+  var first = deckTourOwn(t)[0];
+  if (!first) return;
+  first.insertAdjacentHTML("beforeend",
+    '<button type="button" class="dtourgo" data-dtourgo title="Guided tour (G)">' +
+    '<span aria-hidden="true">&#9654;</span> Guided tour</button>');
+  first.querySelector("[data-dtourgo]").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    deckTourStart();
+  });
+}
+
+/* What this subject is called in a sentence: the client's word for it. */
+function deckTourNoun(t){
+  var k = masterKindWord(t);
+  /* The company plan's own word for one of its pillars — El Abd's
+     "Direction" — as the rail and the Strategy tab say it (§418). */
+  if (k === "DIR") return LTraw("group", "pillar", "one").toLowerCase();
+  return { CAP:"capability", BU:"business unit", FUNC:"function",
+           CO:"company", SECTION:"section" }[k] || "subject";
+}
+function deckTourBands(){
+  var bs = BANDS.bands;
+  return '<span class="dtbands">' + bs.map(function(x, i){
+    var rng = i === 0 ? x.floor + "% and above"
+      : i === bs.length - 1 ? "below " + bs[i-1].floor + "%"
+      : x.floor + "–" + (bs[i-1].floor - 1) + "%";
+    return '<span><i style="background:var(--' + esc(x.key) + ')"></i>' +
+      esc(x.label) + ' <em>' + rng + '</em></span>';
+  }).join("") + '</span>';
+}
+/* A table column, head to last row — so a column is lit whole, whatever a
+   tactic's several outcome lines do to the rows under it (§414). */
+function deckTourCol(s, test){
+  var ths = [].slice.call(s.querySelectorAll("table thead th"));
+  var hit = ths.filter(function(th, i){
+    return test(th.textContent.trim().toLowerCase(), i);
+  });
+  if (!hit.length) return null;
+  var tb = hit[0].closest("table").getBoundingClientRect();
+  var a = hit[0].getBoundingClientRect(), z = hit[hit.length - 1].getBoundingClientRect();
+  return { left:a.left, top:a.top, right:z.right, bottom:tb.bottom };
+}
+function deckTourBox(els){
+  els = els.filter(Boolean);
+  if (!els.length) return null;
+  var r = null;
+  els.forEach(function(e){
+    var b = e.getBoundingClientRect();
+    if (!b.width && !b.height) return;
+    r = r ? { left:Math.min(r.left, b.left), top:Math.min(r.top, b.top),
+              right:Math.max(r.right, b.right), bottom:Math.max(r.bottom, b.bottom) }
+          : { left:b.left, top:b.top, right:b.right, bottom:b.bottom };
+  });
+  return r;
+}
+function deckTourStops(t){
+  var M = L("measure"), T = L("tactic"), T1 = esc(labelWord("tactic", "group")).toLowerCase();
+  var noun = esc(deckTourNoun(t)), name = esc(placeLabel(t));
+  var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isB = function(s){ return /B$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var eq = function(w){ return function(x){ return x === w; }; };
+  return [
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
+      at:function(s){ return deckTourBox([s.querySelector("h1"), s.querySelector(".coverrule")]
+                       .concat([].slice.call(s.querySelectorAll(".coversub")))); },
+      h:"One " + noun + ", from cover to close",
+      b:"Every " + noun + " in today's review is presented the same way: its " + M +
+        ", its " + T + ", and where it stands overall. " + name + " is the example." },
+
+    { on:isM, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1; }); },
+      h:M,
+      b:"The results this " + noun + " committed to for the year, one to a row." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("annual target")); },
+      h:"Annual target",
+      b:"What the plan set for the whole year." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("actual")); },
+      h:"Actual",
+      b:"What was reported for this cycle. Under it, in grey, what was <b>due</b> by " +
+        "this point in the year, which is what the figure is judged against." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("progress")); },
+      h:"Progress",
+      b:"The actual against what was due, in the colour of its band:" + deckTourBands() },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("note")); },
+      h:"Note",
+      b:"The owner's word on the figure: why it is where it is, and what happens next." },
+
+    { on:isB, at:function(s){ return deckTourBox([s.querySelector("table")]); },
+      h:function(s){ var w = s.querySelector(".dwhich"); return w ? esc(w.textContent) : "Categories"; },
+      b:"The same targets broken down by category: each column's target beside its actual, " +
+        "the actual coloured by its band." },
+
+    { on:isT, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1 || i === 2; }); },
+      h:T,
+      b:"The work that delivers the " + M + ": each " + T1 +
+        " with the outcome it is measured by." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("quarters")); },
+      h:"Quarters",
+      b:"The quarters this work is planned to run in." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("status")); },
+      h:"Status",
+      b:"Where the work stands, as its owner reported it: " +
+        [TACTIC_WORDS.done, TACTIC_WORDS.wip, TACTIC_WORDS.todo].map(esc).join(", ") + "." },
+    { on:isT, at:function(s){
+        var late = s.querySelector(".dlate");
+        return late ? deckTourBox([late.closest("tr")]) : null; },
+      h:"Delayed",
+      b:"A red <b>DELAYED</b> means this " + T1 + " has fallen behind its plan: its window " +
+        "has passed unfinished, or its first quarter went by with nothing delivered." },
+    { on:isT, at:function(s){ return deckTourCol(s, function(x){
+        return x === "ytd actual" || x === "progress"; }); },
+      h:"YTD actual and Progress",
+      b:"What has been delivered so far against what was due by now, and the progress " +
+        "that makes, in the same colours as the " + M + "." },
+
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
+      h:"Where it stands: " + M,
+      b:"How the results are doing: every one of the " + M +
+        " against its target, in one figure." },
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[1]]); },
+      h:"Where it stands: Execution",
+      b:"Whether the work is landing on time: what the " + T +
+        " have delivered against what was planned by now." },
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelector(".headfoot")]); },
+      h:"Two different questions",
+      b:"Are we getting the results, and are we doing the work. A " + noun +
+        " can be ahead on one and behind on the other, and this is where it shows." }
+  ];
+}
+
+/* The stops this subject's slides can actually make, each tied to the
+   slide it is made on. Resolved ONCE at the start: the deck does not
+   change shape while it is being presented (`deckFitPass()` runs on open). */
+function deckTourResolve(t){
+  var own = deckTourOwn(t);
+  var out = [];
+  deckTourStops(t).forEach(function(st){
+    var s = own.filter(st.on)[0];
+    if (!s) return;
+    var at = DECK.slides.indexOf(s);
+    out.push({ at:at, s:s, st:st });
+  });
+  return out;
+}
+function deckTourStart(){
+  var root = document.getElementById("deckroot");
+  var t = deckTourPick();
+  if (!t || !root.classList.contains("on") || deckTourOwn(t).length === 0) return;
+  deckTourEnd();
+  /* Only the stops whose part is on the slide. Asked with the slide SHOWN,
+     because a slide behind `display:none` measures as nothing (§69). */
+  var all = deckTourResolve(t), keep = [];
+  all.forEach(function(x){
+    deckShow(x.at);
+    if (x.st.at(x.s)) keep.push(x);
+  });
+  if (!keep.length) { deckShow(0); return; }
+  var noun = esc(deckTourNoun(t));
+  keep.push({ at:keep[keep.length - 1].at, end:true,
+    st:{ h:"That is how every " + noun + " reads",
+         b:"The rest of today's review follows the same pattern." } });
+  DTOUR = { t:t, stops:keep, i:0 };
+  root.insertAdjacentHTML("beforeend",
+    '<div class="dtour" data-dtour>' +
+      '<svg class="dtsvg" aria-hidden="true"><defs><mask id="dtmask">' +
+        '<rect x="0" y="0" width="100%" height="100%" fill="#fff"/>' +
+        '<rect class="dthole" rx="10" fill="#000"/></mask></defs>' +
+        '<rect class="dtshade" x="0" y="0" width="100%" height="100%" mask="url(#dtmask)"/>' +
+        '<rect class="dtring" rx="10"/></svg>' +
+      '<div class="dtcard" role="dialog" aria-live="polite">' +
+        '<div class="dttop"><span class="dtstep"></span>' +
+          '<button type="button" class="dtx" data-dtend title="End the tour (G)" aria-label="End the tour">&times;</button></div>' +
+        '<h3></h3><div class="dtbody"></div>' +
+        '<div class="dtfoot"><button type="button" class="dtback" data-dtback>Back</button>' +
+          '<button type="button" class="dtnext" data-dtnext>Next</button></div>' +
+      '</div></div>');
+  var dock = root.querySelector("[data-dtour]");
+  /* EVERY PRESS ON THE TOUR IS THE TOUR'S. The deck advances on a click and
+     a swipe in full screen (§265, §280); left to bubble, one press would move
+     the tour AND the deck under it. A press on the dim is Next, which is
+     what a presenter's hand does. */
+  ["pointerdown", "pointerup"].forEach(function(n){
+    dock.addEventListener(n, function(ev){ ev.stopPropagation(); });
+  });
+  dock.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    if (ev.target.closest("[data-dtend]")) return deckTourEnd();
+    if (ev.target.closest("[data-dtback]")) return deckTourGo(DTOUR.i - 1);
+    if (ev.target.closest(".dtcard") && !ev.target.closest("[data-dtnext]")) return;
+    deckTourGo(DTOUR.i + 1);
+  });
+  deckTourGo(0);
+}
+function deckTourGo(n){
+  if (!DTOUR) return;
+  if (n < 0) n = 0;
+  if (n >= DTOUR.stops.length) { deckTourEnd(); return; }
+  DTOUR.i = n;
+  var x = DTOUR.stops[n];
+  if (DECK.i !== x.at) deckShow(x.at);
+  requestAnimationFrame(deckTourDraw);
+}
+function deckTourDraw(){
+  if (!DTOUR) return;
+  var root = document.getElementById("deckroot");
+  var dock = root.querySelector("[data-dtour]");
+  if (!dock) return;
+  var x = DTOUR.stops[DTOUR.i], st = x.st;
+  var card = dock.querySelector(".dtcard");
+  var last = DTOUR.stops.length - 1;
+  card.querySelector(".dtstep").textContent = x.end ? "Guided tour" : (DTOUR.i + 1) + " of " + last;
+  card.querySelector("h3").innerHTML = typeof st.h === "function" ? st.h(x.s) : st.h;
+  card.querySelector(".dtbody").innerHTML = st.b;
+  card.querySelector("[data-dtback]").hidden = DTOUR.i === 0;
+  card.querySelector("[data-dtnext]").textContent = x.end ? "Finish" : "Next";
+  var r = x.end ? null : st.at(x.s);
+  var hole = dock.querySelector(".dthole"), ring = dock.querySelector(".dtring");
+  card.classList.toggle("dtcentre", !r);
+  if (!r) {
+    [hole, ring].forEach(function(e){ e.setAttribute("width", 0); e.setAttribute("height", 0); });
+    card.style.left = card.style.top = "";
+    return;
+  }
+  var pad = 10;
+  var hx = r.left - pad, hy = r.top - pad, hw = r.right - r.left + pad * 2, hh = r.bottom - r.top + pad * 2;
+  [hole, ring].forEach(function(e){
+    e.setAttribute("x", hx); e.setAttribute("y", hy);
+    e.setAttribute("width", hw); e.setAttribute("height", hh);
+  });
+  /* The card where there is room: under the part, then over it, then
+     beside it — and failing all three, in the corner of the screen, never
+     over the part it is explaining. */
+  var W = innerWidth, H = innerHeight, gap = 18;
+  var cw = card.offsetWidth, ch = card.offsetHeight;
+  var left, top;
+  if (hy + hh + gap + ch <= H - 12) { top = hy + hh + gap; left = hx; }
+  else if (hy - gap - ch >= 12) { top = hy - gap - ch; left = hx; }
+  else if (hx + hw + gap + cw <= W - 12) { left = hx + hw + gap; top = hy; }
+  else if (hx - gap - cw >= 12) { left = hx - gap - cw; top = hy; }
+  else { left = W - cw - 24; top = H - ch - 24; }
+  card.style.left = Math.max(12, Math.min(left, W - cw - 12)) + "px";
+  card.style.top = Math.max(12, Math.min(top, H - ch - 12)) + "px";
+}
+function deckTourEnd(){
+  var root = document.getElementById("deckroot");
+  var dock = root && root.querySelector("[data-dtour]");
+  if (dock) dock.remove();
+  DTOUR = null;
+}
+/* THE KEYBOARD IS THE TOUR'S WHILE IT RUNS — asked BEFORE the deck's own
+   listener (the capture phase), so Next lights the next part instead of
+   turning the slide out from under it. Escape is left alone: in full screen
+   the browser takes it first, and leaving full screen is how a deck opened
+   from the slides is left (§556.11), so the tour ends on `G` or its ×. */
+addEventListener("keydown", function(ev){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on")) return;
+  var kc = ev.code || "";
+  var g = kc === "KeyG" || ev.key === "g" || ev.key === "G";
+  if (!DTOUR) {
+    if (g && !ev.target.isContentEditable && deckTourOwn(deckTourPick()).length &&
+        (DECK.targets || []).indexOf(deckTourPick()) >= 0) {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      deckTourStart();
+    }
+    return;
+  }
+  var fwd = { ArrowRight:1, ArrowDown:1, PageDown:1, " ":1 };
+  var back = { ArrowLeft:1, ArrowUp:1, PageUp:1 };
+  if (fwd[ev.key]) deckTourGo(DTOUR.i + 1);
+  else if (back[ev.key]) deckTourGo(DTOUR.i - 1);
+  else if (g || ev.key === "Escape") deckTourEnd();
+  else return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+}, true);
+addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
 
 /* ── slides.js ── */
 /* ── PICTURE SLIDES (§50, backlog §16.12 built) ───────────────────────────

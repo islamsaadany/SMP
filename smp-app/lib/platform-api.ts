@@ -9,7 +9,8 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark } from "./my-work.ts";
+import { myWork, tallyMark, setWorkStatus } from "./my-work.ts";
+import { isOffice, type Who } from "./tracker.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -17,7 +18,7 @@ import { join } from "node:path";
 import crypto from "node:crypto";
 import type { SessionUser } from "./auth.ts";
 import { hashPassword } from "./auth.ts";
-import type { Tenant } from "./door.ts";
+import { resolveTenant, seatAt, type Tenant, type Membership } from "./door.ts";
 import { withTenant } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
@@ -229,12 +230,34 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       whoAcc = other; whoWorld = await worldFor(pool, other.id);
     }
     const shown: ClientRow[] = FF.visibleClients(whoWorld, whoAcc, all);
-    const w = await myWork(shown, whoWorld.mine, whoAcc.email);
+    /* WHO MAY PRESS A ROW IS THE PERSON LOOKING (§583), on a colleague's list
+       too: the client must be one the console lets them open, and the door's
+       own answer for who they are there (door.ts seatAt) must be an office
+       seat — the Tracker's gate. The row then asks the Tracker's rule. */
+    const viewerOn = (t: { key: string }): Who | null => {
+      const row = shown.find((r) => r.key === t.key);
+      if (!row || !FF.mayOpenClient(world, account, row)) return null;
+      const s = seatAt(me, world.mine as Membership[], row.id);
+      return isOffice(s.seat) ? { seat: s.seat, personKey: s.personKey } : null;
+    };
+    const w = await myWork(shown, whoWorld.mine, whoAcc.email, { viewerOn });
     const people = account.is_admin
       ? (await pool.query("SELECT email, name FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows
       : [];
     return ok({ who: { email: whoAcc.email, name: whoAcc.name, self: whoAcc.id === account.id },
-      today: w.today, rows: w.rows, stats: w.stats, unanswered: w.unanswered, people });
+      today: w.today, weekLine: w.weekLine, statuses: w.statuses, rows: w.rows, unanswered: w.unanswered, people });
+  }
+
+  /* ── A ROW TICKED, OR ITS STATUS CHANGED, ON MY WORK (§583) ──────────
+     Through the client's own door first (door.ts resolveTenant) — the same
+     answer the Tracker's page is drawn under, so this can do nothing on a
+     client the Tracker itself would not open for this person — and then the
+     Tracker's own write (lib/my-work.ts setWorkStatus). */
+  if (action === "workStatus") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey }, String((body && body.id) || ""), body && body.status);
+    return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
   }
 
   /* ── Forefront's own people ── */

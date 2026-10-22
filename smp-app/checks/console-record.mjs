@@ -451,9 +451,10 @@ const srch = drawBody.slice(drawBody.indexOf("addEventListener(\"input\""));
 check(srch.length > 0 && !/redraw\(|go\(/.test(srch.slice(0, 1400)),
   "the search filters in place and never repaints");
 check(/dataset\.find =/.test(drawBody), "matching on a value worked out once per row rather than per keystroke");
-/* NO NEW CSS (§53.5): the table is My work's own treatment. */
+/* NO NEW CSS (§53.5): the table is the one My work wore, kept for this page
+   when My work moved to the Tracker's rows (§583). */
 check(/el\("table", "work"\)/.test(drawBody) && /el\("tr", "grp"\)/.test(drawBody),
-  "it wears My work's own table rather than a second answer to one question (§53.5)");
+  "it wears the console's one table, My work's until §583, rather than a second answer to one question (§53.5)");
 
 console.log("\n" + (fails ? fails + " FAILED" : oks + " assertions, all good") +
   (brk ? "   [break: " + brk + "]" : ""));

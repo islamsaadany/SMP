@@ -32,7 +32,7 @@ import { APP_JS } from "./script.ts";
 import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
-  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay,
+  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay, ONLY_CHANGE,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -128,7 +128,7 @@ type Q = Parameters<typeof oneAction>[0];
 type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
 const refused = (status: number, why: string): Out => out(status, { ok: false, why });
-const ONLY = "Only its owner or the client's Super user can change this action.";
+const ONLY = ONLY_CHANGE;
 
 /* ONE RULE FOR EVERY CHANGE (§356.11): with collaborators gone there is no
    longer a "somebody on it" — a `collab` act, from a tab on the build

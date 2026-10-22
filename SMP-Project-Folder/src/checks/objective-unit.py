@@ -35,11 +35,12 @@ WHAT IS ASSERTED:
 
 Run:  SMP_CHROME=/opt/pw-browsers/chromium python3 qa-run.py checks/objective-unit.py
 """
-import pathlib
+import os, pathlib
 from playwright.sync_api import sync_playwright
 
 HERE = pathlib.Path(__file__).resolve().parent
-FILE = HERE.parent / "strategy-management-platform.html"
+# §573: SMP_BUILT points it at another build, to watch it fail.
+FILE = pathlib.Path(os.environ.get("SMP_BUILT") or (HERE.parent / "strategy-management-platform.html"))
 bad = 0
 
 
@@ -236,7 +237,7 @@ with sync_playwright() as pw:
       const was = [m.target, m.target3y];
       const opts = [...sel.options].map(o => o.value);
       const showing = sel.value;
-      sel.value = "SQM"; sel.dispatchEvent(new Event('change', {bubbles:true}));
+      sel.value = "USD"; sel.dispatchEvent(new Event('change', {bubbles:true}));
       const now = [m.target, m.target3y];
       m.target = was[0]; m.target3y = was[1];
       return { heads: heads, opts: opts, showing: showing, was: was, now: now };
@@ -249,8 +250,10 @@ with sync_playwright() as pw:
        w.get("opts"))
     ck("...and # among them, committed to rather than a placeholder",
        "#" in (w.get("opts") or []), w.get("opts"))
+    # §573: SQM left the list, so the pick is a dollar row -- a bare `USD`
+    # takes a space, like `28 EGP`.
     ck("...and picking reaches the stored plan",
-       w.get("now") == ["1.6 SQM", "2.4 SQM"], w)
+       w.get("now") == ["1.6 USD", "2.4 USD"], w)
 
     print("\n── 7b · a unit the list does not offer is kept (§96.2, §114)")
     # §239.5 MOVED THIS ASSERTION'S EXAMPLE. It was keyed on "M USD", which
@@ -258,14 +261,27 @@ with sync_playwright() as pw:
     # Islam's instruction, so the assertion would have gone on passing while
     # guarding nothing (§51.11). It asks about a unit that is genuinely outside
     # now, and asserts the dollars are offered outright.
-    keep = pg.evaluate("() => targetUnitOpts('B USD')")
+    # §573 MOVED IT AGAIN: `B USD` is on the list now, and SQM, d and h left
+    # it -- so a row still holding SQM is exactly the case this guards.
+    # An option is a value, or a value with a label (`{v, label}`).
+    val = lambda o: o["v"] if isinstance(o, dict) else o
+    keep = [val(o) for o in pg.evaluate("() => targetUnitOpts('SQM')")]
     ck("a stored unit the list does not carry is still offered",
-       "B USD" in keep and keep.index("B USD") == 1, keep)
+       "SQM" in keep and keep.index("SQM") == 1, keep)
     ck("...and the standard list is still all there",
        all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
-    offered = pg.evaluate("() => targetUnitOpts('')")
+    offered_raw = pg.evaluate("() => targetUnitOpts('')")
+    offered = [val(o) for o in offered_raw]
     ck("the dollars are on the list to be CHOSEN, not merely kept (§239.5)",
        "K USD" in offered and "M USD" in offered, offered)
+    ck("§573: the list is the short one -- SQM, d and h are gone, all four dollars are on it",
+       offered == ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP", "USD", "K USD", "M USD", "B USD"],
+       offered)
+    ck("...and the picker names the dollars as they read: $, $K, $M, $B",
+       [o["label"] for o in offered_raw if isinstance(o, dict)] == ["$", "$K", "$M", "$B"],
+       offered_raw)
+    ck("...while a row already in SQM keeps reading its unit",
+       pg.evaluate("() => unitOfTarget('SQM')") == "SQM")
     ck("...and read as one token, like their Egyptian twins",
        pg.evaluate("""() => { const m = {target:"6.2B EGP"};
          setTargetUnit(m, "M USD"); return m.target; }""") == "6.2M USD")
@@ -382,7 +398,7 @@ with sync_playwright() as pw:
       const last = tbl.querySelector('tbody tr:last-child td[colspan]');
       let was = null, wrote = null;
       if (sel) { const m = UNITS.mobile.items[0].measures[0];
-        was = m.target; sel.value = "SQM";
+        was = m.target; sel.value = "USD";
         sel.dispatchEvent(new Event('change',{bubbles:true}));
         wrote = m.target; m.target = was; }
       return { heads: [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()),
@@ -397,7 +413,7 @@ with sync_playwright() as pw:
        str(pm.get("addSpan")) == str(pm.get("cells")), pm)
     ck("...offering exactly the same list as an objective's",
        pm.get("opts") == pg.evaluate("() => TARGET_UNITS"), pm.get("opts"))
-    ck("...and picking reaches the stored plan", pm.get("wrote") == "1 SQM", pm)
+    ck("...and picking reaches the stored plan", pm.get("wrote") == "1 USD", pm)
     pg.evaluate("() => { EDIT_PAGE['plan'] = false; paint(); }")
     pg.wait_for_timeout(300)
     hid = pg.evaluate("""() => {

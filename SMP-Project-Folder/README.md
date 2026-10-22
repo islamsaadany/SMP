@@ -178,6 +178,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/tactic-status-slides/2026-10-21_option-b-everywhere.html` | Option B on the tactics and key measures slides and on Performance's two tables, today beside a build of it: bold names, regular outcome, the pill and red-dot Delayed, *due X* under the actual, a bigger Progress. Islam: *“yes build it”*. **Approved and BUILT** (§572) |
 | `../../design-mockups/tactic-status-slides/2026-10-21_delayed-not-bold.html` | The Status column on the tactics slide and on Performance, DELAYED bold as built beside regular weight. Islam: *“not bold, apply it and put it live”*. **Approved and BUILT** (§572.1) |
 | `../../design-mockups/tactic-status-slides/2026-10-22_delayed-centred-slide.html` | The slide's Status column, DELAYED as live (at the pill's left edge) beside centred under the pill, as Performance draws it. Islam: *“apply it and put it live”*. **Approved and BUILT** (§572.2) |
+| `../../design-mockups/units/2026-10-22_concise-units.html` | Units on the key measures slide and Performance, as real screenshots today beside the proposal: the unit a little smaller than its number and in dark grey (the line's own grey inside *due*), K/M/B kept full size as part of the amount, dollars in front (`$2M`, `$800K`), and the unit list shortened (SQM, d and h off it for new rows; `$`, `$K`, `$M`, `$B` on it). Islam: *“ok for the units list”*, *“yes build it”*. **Approved and BUILT** (§573) |
 
 ### Drawn, awaiting a decision
 

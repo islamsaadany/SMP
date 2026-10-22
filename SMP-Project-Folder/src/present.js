@@ -1269,7 +1269,7 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = tacticBenchmark(t);
     if (!tacticAnswered(t))
       return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>' +
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
@@ -1277,7 +1277,7 @@ function pillarSlidesOf(u, p, pi, named){
        row shows it only against a partial, so 0% and 100% stand alone. */
     var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
-      '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(pair ? esc(pair) : "") + '</td>' +
+      '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
       '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
@@ -1304,8 +1304,8 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
     if (shown == null)
       return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' + dueLine(bench ? esc(bench) : "") + '</td>';
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(bench ? figHtml(bench) : "") + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
@@ -1840,7 +1840,7 @@ function deckSlidesFn(subject){
           '<td class="lead">' + esc(o.name) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
-          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
+          '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
           '<td class="num">' + got + '</td>' +
           '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +

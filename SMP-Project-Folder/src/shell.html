@@ -6471,12 +6471,12 @@
       b.addEventListener("click", function(){
         var k = b.dataset.mpopen;
         MONTHOPEN = (MONTHOPEN === k) ? null : k;
-        /* §575: the carried-across line belongs to the opening it was said in. */
+        /* §577: the carried-across line belongs to the opening it was said in. */
         MONTHCARRY = null;
         paint();
       });
     });
-    /* §575: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
+    /* §577: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
        carrying across is the drawer's own (`monthlySwitch`). */
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -6497,7 +6497,7 @@
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
-        /* §575: the same act on four quarters, in their own words. */
+        /* §577: the same act on four quarters, in their own words. */
         var qq = !!e.q, pf = qq ? quarterlyFld(e.fld) : e.fld;
         destroyConfirmOpen({
           title: qq ? "Clear this quarterly plan?" : "Clear this monthly plan?",

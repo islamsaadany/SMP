@@ -290,7 +290,7 @@ var RECIPES = [
      everybody else meets the result. A single "office" entry would leave a
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */
-  /* §575: AND BY QUARTER — the same drawer, so the same answer says both. */
+  /* §577: AND BY QUARTER — the same drawer, so the same answer says both. */
   { id: "monthly-plan", q: "How do I set a target month by month or by quarter?", who: "office",
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no

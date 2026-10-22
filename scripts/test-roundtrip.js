@@ -361,7 +361,7 @@ const CLIENT_ARG = (function () {
     console.log("  ...and clears again, key DELETED:", cOk ? "PASS" : "FAIL");
     if (!cOk) process.exitCode = 1;
 
-    /* §575: AND FOUR QUARTERS, the same road and the same nulls. */
+    /* §577: AND FOUR QUARTERS, the same road and the same nulls. */
     const QF = [45, 51, 84, 120], QP = [45, null, null, 0];
     cMeas.quarterly = QF.slice(); cKo.quarterly = QP.slice(); cTac.outQuarterly = QF.slice();
     await io.writeState(client, mClean);

@@ -7792,7 +7792,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
 .askwin { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
    next door is the corner's switch, where they are not (§299). */
-/* §575: the monthly drawer's By month | By quarter is the same two equally
+/* §577: the monthly drawer's By month | By quarter is the same two equally
    likely choices, so it is declared here with this one rather than drawn a
    second time (§53.5: one block for one control). */
 .askseg, .mpseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
@@ -8296,7 +8296,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   cursor:pointer;
 }
 .mpbtn:hover { border-color:var(--ink-3); color:var(--ink-2); }
-/* ── BY MONTH OR BY QUARTER (§575) ─────────────────────────────────────
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
    The title line becomes a flex row so the switch can sit at its right end
    (the switch's shape is `.askseg`'s, declared with it). Its own small caps
    are not the switch's: the halves read in sentence case like every other

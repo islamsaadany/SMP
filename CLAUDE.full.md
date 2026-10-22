@@ -9994,7 +9994,7 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # aria-label, and exactly the row with a plan
                                 # lit — measured as PAINT, never as a class
 python3 checks/quarterly-plan.py # a target by quarter as well as by month
-                                # (§575): the arithmetic by name (a quarter spread
+                                # (§577): the arithmetic by name (a quarter spread
                                 # over its months, EXACT at a quarter end, each
                                 # compile rule its own way, a monthly row unchanged),
                                 # the By month | By quarter switch PRESSED and the

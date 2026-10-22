@@ -3277,29 +3277,29 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
   check("§278: it classifies as the unit's PLAN and nothing else",
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 
-  /* §575: FOUR QUARTERS ARE THE SAME ACT. `quarterly` is as new to the
+  /* §577: FOUR QUARTERS ARE THE SAME ACT. `quarterly` is as new to the
      authoriser as `monthly` was, and falls through the same way — asserted for
      §278's reason: if it ever stopped, a unit head could reshape the target
      they are judged against by quarter, and nothing would notice. */
   const FOUR = [45, 51, 84, 120];
   r = fromStored(SEED, "smo", function (i) {
     i.units[UK].items[0].measures[0].quarterly = FOUR; });
-  check("§575: the office gives a measure a quarterly plan", r.ok,
+  check("§577: the office gives a measure a quarterly plan", r.ok,
         (r.refusals || []).join(" / "));
   r = fromStored(SEED, CUST, function (i) {
     i.units[UK].items[0].measures[0].quarterly = FOUR; });
-  check("§575 REFUSED: the unit's own custodian cannot plan it by quarter",
+  check("§577 REFUSED: the unit's own custodian cannot plan it by quarter",
         !r.ok, "was ALLOWED");
   const withQ = clone(SEED);
   withQ.units[UK].items[0].measures[0].quarterly = FOUR;
   r = fromStored(withQ, CUST, function (i) {
     delete i.units[UK].items[0].measures[0].quarterly; });
-  check("§575 REFUSED: nor clear one", !r.ok, "was ALLOWED");
+  check("§577 REFUSED: nor clear one", !r.ok, "was ALLOWED");
   const incQ = clone(SEED);
   incQ.units[UK].items[0].measures[0].quarterly = FOUR;
   const kq = A.collect(SEED, incQ, A.worldOf ? A.worldOf(SEED) : SEED)
               .map(function (c) { return c.kind; });
-  check("§575: it classifies as the unit's PLAN and nothing else",
+  check("§577: it classifies as the unit's PLAN and nothing else",
         kq.length === 1 && kq[0] === "unitPlan", kq.join(",") || "(nothing)");
 })();
 

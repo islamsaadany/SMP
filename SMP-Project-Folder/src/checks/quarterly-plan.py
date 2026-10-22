@@ -1,4 +1,4 @@
-"""A TARGET BY QUARTER AS WELL AS BY MONTH (§575).
+"""A TARGET BY QUARTER AS WELL AS BY MONTH (§577).
 
 Islam: *"for setting targets in the plans we have the option to plan it in
 months I need to have the option to plan it in quarters as well."* His three

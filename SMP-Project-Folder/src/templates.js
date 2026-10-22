@@ -57,7 +57,7 @@ function monthsFromText(s) {
   }
   return any ? out : null;
 }
-/* §575: AND THE FOUR, read by the same rules — a blank cell is null and
+/* §577: AND THE FOUR, read by the same rules — a blank cell is null and
    never nought, a word is kept as typed, and a file that said nothing adds
    no key at all. */
 function quartersFromText(s) {
@@ -483,7 +483,7 @@ function validatePlan(u, rows){
       if (["q1","q2","q3","q4"].every(function(q){ return !+r[q]; }))
         notices.push({ at:at, msg:"no quarters marked \u2014 will never be due" });
     }
-    /* §575: MONTHS OR QUARTERS, NEVER BOTH. Either alone is a complete plan
+    /* §577: MONTHS OR QUARTERS, NEVER BOTH. Either alone is a complete plan
        and the rules would read the months and quietly drop the quarters, so
        a file carrying both is asked which it means rather than guessed at. */
     if (monthsFromText(r.monthly) && quartersFromText(r.quarterly))

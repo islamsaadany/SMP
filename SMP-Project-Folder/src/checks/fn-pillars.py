@@ -386,11 +386,11 @@ with sync_playwright() as p:
     # every range. What §213 guarded — no Weight, a 3-year target — holds.
     MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    # §575 APPENDED Q1 target to Q4 target after December — the fourth
+    # §577 APPENDED Q1 target to Q4 target after December — the fourth
     # deliberate move of this literal, and it moves with the decision again.
     QUARTERS = ["Q1 target", "Q2 target", "Q3 target", "Q4 target"]
     ok("a UNIT's Objectives sheet is what it was, plus §233's Hidden, §278's "
-       "months, §303's Weight and §575's quarters",
+       "months, §303's Weight and §577's quarters",
        wb["unitObj"] == ["Objective", "Group", "Direction", "3-year target",
                          "This year target", "Unit", "Compile", "Weight %",
                          "Hidden"] + MONTHS + QUARTERS,

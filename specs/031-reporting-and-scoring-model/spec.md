@@ -4,7 +4,7 @@
 is a proposal.
 **Decisions:** §5 (the original model) · §35 · §199 · §239 (+.1 –.6) · §243 ·
 §248 · §249 (+.2 –.4) · §250 (+.1, .2) · §251 · §254.2 · §257 (+.2 –.3) ·
-§264 (+.1, .2) · §276 · §277 · §278 (+.2, .3) · §575
+§264 (+.1, .2) · §276 · §277 · §278 (+.2, .3) · §577
 **Constitution:** checked against v1.2.0 — Principles V (derived, never stored;
 null is never zero), VI (follow what the platform already does), IX (one copy of
 a rule, run on both sides) and XVI (a check that measures the wrong thing
@@ -47,7 +47,7 @@ Four kinds of row are scored by one arithmetic:
 Every one of the first three carries the same five facts, which is what lets one
 arithmetic serve them: a **direction** (`≥` or `≤`), a **target** (a number and
 a unit, in one string — §199), a **compile rule**, an **actual**, and — since
-§278 — an optional **monthly plan** of twelve numbers, or since §575 a
+§278 — an optional **monthly plan** of twelve numbers, or since §577 a
 **quarterly plan** of four.
 
 ---
@@ -77,7 +77,7 @@ directions (§239).
    a compile rule and the review point is readable (§278, §569) — it
    supersedes the flat share *and* a supplied one. The compile rule is applied
    to the months set up to the review month, blanks passed over; months set
-   only later owe nought. A **quarterly plan** answers the same way (§575),
+   only later owe nought. A **quarterly plan** answers the same way (§577),
    each quarter spread evenly over its three months: a review two months into
    Q3 owes Q1, Q2 and two-thirds of Q3.
 5. Otherwise: the target's number, prorated by the share **only if the compile
@@ -279,7 +279,7 @@ Latest takes the month being stood in.
 - **The workbook gains twelve columns, appended**, because a validation range is
   a POSITION (§65).
 
-### 8.1 · By quarter as well as by month (§575)
+### 8.1 · By quarter as well as by month (§577)
 
 *"I need to have the option to plan it in quarters as well."* Four numbers,
 Q1 to Q4, on the row as `quarterly` (a tactic's outcome: `outQuarterly`). A
@@ -378,7 +378,7 @@ re-entered once; a one-time heal was offered and not taken up.
 - **R4** A monthly plan supersedes both the flat share and a supplied one.
 - **R4a** A quarterly plan is read as its quarters spread evenly over their
   months, exact at a quarter end, and a row planned by month is unchanged by
-  it (§575).
+  it (§577).
 - **R5** A typed 0 is a real month. A blank month is passed over: under `Sum`
   and `Count` it adds nothing, under `Average` it is not counted, under
   `Latest` the last month set before it stands (§569).
@@ -408,7 +408,7 @@ re-entered once; a one-time heal was offered and not taken up.
 | Count compiles in whole ones | §276 | `checks/count-compile.py` |
 | A figure follows the unit | §277 | `checks/unit-follows.py` |
 | Monthly plan | §278 | `checks/monthly-plan.py`, `objectives-table.py` |
-| Quarterly plan | §575 | `checks/quarterly-plan.py` |
+| Quarterly plan | §577 | `checks/quarterly-plan.py` |
 
 ---
 

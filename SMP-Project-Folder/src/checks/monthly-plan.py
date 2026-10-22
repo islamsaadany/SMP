@@ -284,7 +284,7 @@ with sync_playwright() as p:
        mk.get("w") == 24 and mk.get("h") == 22, mk)
     ck("...drawn as twelve cells, not a font character (§52)",
        mk.get("cells") == 12, mk)
-    # §575 REWROTE THE WORDS, NOT THE CLAIM: it asked for "month by month" in
+    # §577 REWROTE THE WORDS, NOT THE CLAIM: it asked for "month by month" in
     # the name, and an empty row's mark now opens a drawer that plans by month
     # OR by quarter, so it says both. Still no text on its face, still the same
     # words on the hover and to a reader.
@@ -602,11 +602,11 @@ with sync_playwright() as p:
       const os = sheets.filter(s => s.name === "Objectives")[0];
       const M = ["Jan","Feb","Mar","Apr","May","Jun",
                  "Jul","Aug","Sep","Oct","Nov","Dec"];
-      /* §575 APPENDED FOUR QUARTERS AFTER DECEMBER, so the twelve are no
+      /* §577 APPENDED FOUR QUARTERS AFTER DECEMBER, so the twelve are no
          longer the LAST columns: they read `head.slice(-12)` and Hidden at
          `length - 13`. REWRITTEN, never loosened (§218): the twelve still
          follow Hidden directly and in order, and what follows them is
-         exactly the four §575 decided — a month moved into the middle, or
+         exactly the four §577 decided — a month moved into the middle, or
          anything else appended between, is still red. */
       const Q = ["Q1 target", "Q2 target", "Q3 target", "Q4 target"];
       const tail = (head, prefix) =>
@@ -617,7 +617,7 @@ with sync_playwright() as p:
                tacQ1: ts.head.indexOf("Q1"), tacQ4: ts.head.indexOf("Q4"),
                tacHead: ts.head, objHead: os.head };
     }""")
-    ck("the Tactics sheet's twelve follow Hidden, then the four quarters (§575), named for the outcome",
+    ck("the Tactics sheet's twelve follow Hidden, then the four quarters (§577), named for the outcome",
        tac.get("tacTail") is True and tac.get("tacHiddenLast") is True, tac.get("tacHead"))
     # Q1–Q4 keep their literal positions on purpose: a workbook written before
     # §278 is read by header NAME, but its VALIDATION ranges are positions

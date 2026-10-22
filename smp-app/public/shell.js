@@ -2159,7 +2159,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      none falls in 1..`upto`: nothing is owed yet. */
   function monthsCompiled(row, upto) {
     var a = row && row.monthly, c = monthlyCompile(row);
-    /* §575: A ROW PLANNED BY QUARTER answers here too, so the target, what is
+    /* §577: A ROW PLANNED BY QUARTER answers here too, so the target, what is
        due and the *in force* test stay one reading of one plan. */
     if (planBy(row) === "quarter") return quartersCompiled(row.quarterly, c, upto);
     if (!Array.isArray(a) || !c) return null;
@@ -2183,7 +2183,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return c === "count" ? Math.floor(t + 1e-9) : t;
   }
 
-  /* ── A TARGET BY QUARTER AS WELL AS BY MONTH (§575) ─────────────────
+  /* ── A TARGET BY QUARTER AS WELL AS BY MONTH (§577) ─────────────────
      Islam: *"for setting targets in the plans we have the option to plan it
      in months I need to have the option to plan it in quarters as well."*
 
@@ -2256,7 +2256,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (c === "average") return t / n;
     return c === "count" ? Math.floor(t + 1e-9) : t;
   }
-  /* ── SWITCHING CARRIES THE PLAN ACROSS (§575, Islam's (2a)) ──────────
+  /* ── SWITCHING CARRIES THE PLAN ACROSS (§577, Islam's (2a)) ──────────
      Months to quarters is exact and uses the row's own rule: Sum and Count
      add the three months, Average takes the mean of those set, Latest the
      last one set. Quarters to months spreads: Sum and Count split the
@@ -15453,7 +15453,7 @@ function outcomeOf(t){
      (§248), so the twelve months ride across under the name the rules
      module reads — `outMonthly` on the tactic, `monthly` on the shape.
      Without this line the drawer would write a plan that nothing reads. */
-  /* \u00a7575: and its quarters, under the name the rules read beside the months. */
+  /* §577: and its quarters, under the name the rules read beside the months. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual,
            monthly: t.outMonthly, quarterly: t.outQuarterly };
@@ -21219,7 +21219,7 @@ var RECIPES = [
      everybody else meets the result. A single "office" entry would leave a
      unit head reading a benchmark that is not half the year with nothing
      anywhere explaining it. */
-  /* §575: AND BY QUARTER — the same drawer, so the same answer says both. */
+  /* §577: AND BY QUARTER — the same drawer, so the same answer says both. */
   { id: "monthly-plan", q: "How do I set a target month by month or by quarter?", who: "office",
     /* §278.2 TURNED THE WORD INTO A MARK, and this sentence still named the
        word — a recipe that tells somebody to look for a button that is no
@@ -21521,7 +21521,7 @@ function monthsFromText(s) {
   }
   return any ? out : null;
 }
-/* §575: AND THE FOUR, read by the same rules — a blank cell is null and
+/* §577: AND THE FOUR, read by the same rules — a blank cell is null and
    never nought, a word is kept as typed, and a file that said nothing adds
    no key at all. */
 function quartersFromText(s) {
@@ -21947,7 +21947,7 @@ function validatePlan(u, rows){
       if (["q1","q2","q3","q4"].every(function(q){ return !+r[q]; }))
         notices.push({ at:at, msg:"no quarters marked \u2014 will never be due" });
     }
-    /* §575: MONTHS OR QUARTERS, NEVER BOTH. Either alone is a complete plan
+    /* §577: MONTHS OR QUARTERS, NEVER BOTH. Either alone is a complete plan
        and the rules would read the months and quietly drop the quarters, so
        a file carrying both is asked which it means rather than guessed at. */
     if (monthsFromText(r.monthly) && quartersFromText(r.quarterly))
@@ -23431,7 +23431,7 @@ function monthNums(start){
   for (var i = 0; i < 12; i++) out.push(start + i);
   return out;
 }
-/* ── AND FOUR FOR THE QUARTERS (§575) ──────────────────────────────────
+/* ── AND FOUR FOR THE QUARTERS (§577) ──────────────────────────────────
    Q1 target to Q4 target — Islam's names — APPENDED after December for §65's
    reason above, so nothing already in the file moves; on Tactics they are
    prefixed "Outcome " like the outcome's months, because the sheet's own
@@ -31972,7 +31972,7 @@ var MONTHOPEN = null;
    on every repaint beside `FIELDS` and `KOLISTS` (§96), because a button
    carrying an index from the last paint acts on the paint before it. */
 var MONTHREG = [];
-/* ── BY MONTH OR BY QUARTER (§575) ─────────────────────────────────────
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
    Which way a row is planned is read off what it HOLDS (`SMPRules.planBy`),
    so there is no stored switch to drift from the figures. The one thing the
    data cannot say is which way an EMPTY plan is being started, so that pick
@@ -32054,7 +32054,7 @@ function monthlyChip(row, fld){
     '" title="' + esc(w.word) + '" aria-label="' + esc(w.word) + '">' +
     monthlySvg() + '</button>';
 }
-/* §575: THE HOVER NAMES THE WAY THE ROW IS PLANNED, and its own builder
+/* §577: THE HOVER NAMES THE WAY THE ROW IS PLANNED, and its own builder
    because `monthlyRefresh` rewrites it in place as the first figure lands —
    the mark used to light only on the next repaint, so a plan somebody had
    just started was not findable until they left the pillar and came back. */
@@ -32068,7 +32068,7 @@ function monthlyChipWord(row, fld){
    PLACE as somebody types — a repaint under a typing hand destroys the box
    being typed into (§71.2), which is why §145's counts refresh this way too. */
 function monthlyMsg(row, fld, tfld){
-  /* §575: ONE SENTENCE FOR BOTH WAYS OF PLANNING, its nouns read off the
+  /* §577: ONE SENTENCE FOR BOTH WAYS OF PLANNING, its nouns read off the
      drawer's mode — four of the same sentences again would be the drift
      §53.5 exists to stop. */
   var sh = monthlyShape(row, fld), cn = monthlyCount(row, fld), n = cn.n,
@@ -32172,7 +32172,7 @@ function monthlyAfterCompile(row, fld){
    stored as null, and the LAST one cleared deletes the key (§50.6): a row
    that never had a monthly plan and one whose plan was cleared must be
    byte-identical, or every save carries a change nobody made. */
-/* §575: `q` WRITES A QUARTER — the same write into the four beside the
+/* §577: `q` WRITES A QUARTER — the same write into the four beside the
    twelve, so a quarter is stored, cleared and derived from exactly as a
    month is. */
 function monthlyWrite(row, fld, tfld, i, v, q){
@@ -32185,7 +32185,7 @@ function monthlyWrite(row, fld, tfld, i, v, q){
   var any = false;
   for (var k = 0; k < len; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
   if (any) row[pf] = a; else delete row[pf];
-  /* §575: a figure typed over a carried one makes "carried across" untrue of
+  /* §577: a figure typed over a carried one makes "carried across" untrue of
      it, so the line goes — in place, since this is a typing hand (§71.2). */
   if (MONTHCARRY && MONTHCARRY.key === monthlyKey(row, fld)) {
     MONTHCARRY = null;
@@ -32239,7 +32239,7 @@ function monthlyRefresh(row, fld, tfld){
   if (msg) msg.innerHTML = monthlyMsg(row, fld, tfld);
   var clr = document.querySelector('.mpbtn' + sel);
   if (clr) clr.hidden = !monthlyCount(row, fld).n;
-  /* §575: AND THE MARK, which lights the moment a figure lands rather than on
+  /* §577: AND THE MARK, which lights the moment a figure lands rather than on
      the next repaint (§278.2: lit "once anything has been typed"). */
   var chip = document.querySelector('[data-mpopen="' + k.replace(/"/g, '\\"') + '"]');
   if (chip) {
@@ -32293,7 +32293,7 @@ function monthlyTgtAttrs(row, fld, partOnly){
    drew twelve read-only labels on Foundation — twelve boxes that looked like
    boxes and stored nothing (§96, found by driving it rather than by reading
    it). The four tables sit on three different pages; each says which. */
-/* §575: AND IT DRAWS THE QUARTERS TOO — four boxes where the twelve were,
+/* §577: AND IT DRAWS THE QUARTERS TOO — four boxes where the twelve were,
    each labelled with the months it covers so "Q3" never has to be worked
    out, and 112px against a month's 72 to carry that label. Measured on the
    mockup Islam signed off: the four sit on one line at 1600, 1280 and 1100,
@@ -32327,7 +32327,7 @@ function monthlyDrawer(row, fld, tfld, cols, title, page){
     (carry ? '<div class="mpfoot mpnote">' + esc(carry) + '</div>' : '') +
     '</div></td></tr>';
 }
-/* ── THE SWITCH (§575) ────────────────────────────────────────────────
+/* ── THE SWITCH (§577) ────────────────────────────────────────────────
    The two-way segmented pair the platform already uses (`.askseg`'s, declared
    with it), the chosen half lit. On a row holding figures and no compile rule
    the other half is DISABLED and says why: the figures cannot be carried
@@ -32393,7 +32393,7 @@ function monthlyRowFor(row, fld, tfld, cols, title, page){
    cell whose meaning changed rather than under the row's name, where it would
    stack under a reporter's own note (§255). */
 function monthlyMark(row){
-  /* §575: "by quarter" where the quarters are what the row is read against. */
+  /* §577: "by quarter" where the quarters are what the row is read against. */
   return SMPRules.monthlyInForce(row)
     ? '<span class="subhd">by ' + (SMPRules.planBy(row) === "quarter" ? "quarter" : "month") + '</span>'
     : '';
@@ -78019,12 +78019,12 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var k = b.dataset.mpopen;
         MONTHOPEN = (MONTHOPEN === k) ? null : k;
-        /* §575: the carried-across line belongs to the opening it was said in. */
+        /* §577: the carried-across line belongs to the opening it was said in. */
         MONTHCARRY = null;
         paint();
       });
     });
-    /* §575: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
+    /* §577: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
        carrying across is the drawer's own (`monthlySwitch`). */
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -78045,7 +78045,7 @@ var SYNC = (function () {
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
-        /* §575: the same act on four quarters, in their own words. */
+        /* §577: the same act on four quarters, in their own words. */
         var qq = !!e.q, pf = qq ? quarterlyFld(e.fld) : e.fld;
         destroyConfirmOpen({
           title: qq ? "Clear this quarterly plan?" : "Clear this monthly plan?",

@@ -314,7 +314,7 @@ function monthNums(start){
   for (var i = 0; i < 12; i++) out.push(start + i);
   return out;
 }
-/* ── AND FOUR FOR THE QUARTERS (§575) ──────────────────────────────────
+/* ── AND FOUR FOR THE QUARTERS (§577) ──────────────────────────────────
    Q1 target to Q4 target — Islam's names — APPENDED after December for §65's
    reason above, so nothing already in the file moves; on Tactics they are
    prefixed "Outcome " like the outcome's months, because the sheet's own

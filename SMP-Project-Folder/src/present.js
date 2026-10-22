@@ -2191,6 +2191,9 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
+  /* §578: what this deck was opened with, so updating its figures rebuilds
+     the same deck (`deckRebuild`) rather than guessing it back. */
+  DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
   /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
      §554.1's cover and roll-calls are slides, not people presenting — and
@@ -3773,7 +3776,12 @@ function wireDeck(){
        "ق", and Islam's "T is not working" was exactly that. */
     var kc = ev.code || "";
     if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
-    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
+    /* §578: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+       we can make it R to be relevant to refresh … for the reset let's make
+       it Y"*). By the key's place as well as its letter, for §556.11's
+       Arabic keyboard: R sends "ق" and Y "غ". */
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); deckRefresh(false); }
+    if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
@@ -4371,11 +4379,86 @@ function deckStep(d){
   }
   var j = DECK.i + d;
   if (j < 0 || j > DECK.slides.length - 1) return;
+  var was = s && s.dataset.subject;
   deckShow(j);
+  /* §578: a flow moving on to the next subject brings that subject's
+     latest figures with it — quietly: a failed fetch carries on with what
+     is on the screen, and never interrupts the room. */
+  var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
+  if (DECK.flow && was && now && was !== now) deckRefresh(true);
   /* Forward, the next slide arrives with its headings alone; back, the one
      before arrives whole and the next step back takes its last line away. */
   if (deckBuildOn()) {
     var t = DECK.slides[DECK.i];
     deckBuildShow(t, d > 0 ? 0 : deckBuildUnits(t).length);
   }
+}
+
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§578) ════════════════════════
+   Islam: *"when I'm presenting through the master presentation or the
+   directions slides if I refresh can it keep the slides presented but update
+   the numbers if I changed something in the inputs?"* — of two ways put to
+   him, in place: `R` fetches the latest saved figures and redraws the deck
+   on the slide the room is looking at, still full screen; and the flow does
+   it by itself as it moves on to the next direction.
+
+   THE PLATFORM'S OWN QUIET REFRESH, never a second fetch (`SYNC.refresh`,
+   §433): it takes the server's answer only where nothing here would be lost,
+   so a change typed and not yet saved is never overwritten by it.
+
+   THE SAME DECK, REBUILT: opened again with what it was opened with
+   (`DECK.args`), the slide found again by what it is — its subject, its
+   page, which of its kind — never by its number (`slidesWhich`), because a
+   slide added or hidden in between moves every number after it. The clock
+   is carried across (a refresh is not a new subject's time), and a slide
+   half built line by line stays where it was.
+
+   SAID, BRIEFLY, on a press: a small line in the corner for two seconds —
+   updated, already up to date, or not updated and still showing what it
+   had. The automatic one says nothing. Never on the tour's made-up
+   example, which has no figures to fetch. */
+var DREFRESH_T = null;
+function deckRefreshSay(msg){
+  var root = document.getElementById("deckroot");
+  var el = root && root.querySelector(".drefresh");
+  if (!root) return;
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "drefresh"; el.setAttribute("role", "status");
+    root.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  if (DREFRESH_T) clearTimeout(DREFRESH_T);
+  DREFRESH_T = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+}
+function deckRefresh(quiet){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on") || !DECK.args) return;
+  if ((DECK.targets || []).indexOf(EXAMPLE_T) >= 0) return;
+  if (typeof SYNC === "undefined" || !SYNC.refresh) {
+    if (!quiet) deckRefreshSay("Figures not updated: no connection");
+    return;
+  }
+  SYNC.refresh(function(ok, changed){
+    if (!root.classList.contains("on")) return;
+    if (!ok) {
+      if (!quiet) deckRefreshSay("Figures not updated \u00b7 still showing the last ones");
+      return;
+    }
+    if (changed) deckRebuild();
+    if (!quiet) deckRefreshSay(changed ? "Figures updated" : "Figures already up to date");
+  });
+}
+function deckRebuild(){
+  if (!DECK.args) return;
+  var at = DECK.i, where = slidesWhich(DECK.slides, at);
+  var here = DECK.slides[at], bn = here && here.classList.contains("building") ? +here.dataset.bn : null;
+  var clock = DECK.clock;
+  openDeckWith(DECK.args[0], DECK.args[1], DECK.args[2]);
+  DECK.clock = clock;
+  var j = where ? slidesFindIn(DECK.slides, where) : -1;
+  deckShow(j >= 0 ? j : Math.min(at, DECK.slides.length - 1));
+  if (bn != null && deckBuildOn()) deckBuildShow(DECK.slides[DECK.i], bn);
+  clockPaint();
 }

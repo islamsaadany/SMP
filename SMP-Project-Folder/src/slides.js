@@ -1143,7 +1143,9 @@ function slidesFootPaint(all){
     '<b>\u2191</b> <b>\u2193</b> move &middot; <b>G</b> grid &middot; ' +
     '<b>P</b> present &middot; <b>H</b> hide &middot; <b>Esc</b> done' +
     '<span class="slksep"></span>while presenting: ' +
-    '<b>T</b> pause / start the timer &middot; <b>R</b> reset the timer';
+    '<b>T</b> pause / start the timer &middot; <b>Y</b> reset the timer &middot; ' +
+    /* §578: R is the figures' now, the timer's reset moved to Y (Islam). */
+    '<b>R</b> update the figures';
   slidesPartsPaint(all, at);
 }
 /* ── WHERE YOU ARE, AND THE PARTS (§556.11) ─────────────────────────────

@@ -340,7 +340,11 @@ def main():
         ck("the tactic is on the Reporting pane", rep.get("found"), rep)
         ck("...and its YTD Target is the window's, never the year's",
            bool(rep.get("ytd")) and not rep.get("year"), rep)
-        ck("...and it says what that is a part of", any("of 12 #" in c for c in rep.get("cells", [])),
+        # §573: a symbol is written tight against its number on every read
+        # cell now (`12#`, as `tgtShown` already wrote it), so the typed `12 #`
+        # reads `12#` here too. Either spelling is the same fact.
+        ck("...and it says what that is a part of",
+           any("of 12 #" in c or "of 12#" in c for c in rep.get("cells", [])),
            rep.get("cells"))
 
         # ── 7 · a tactic that has not started shows no target of nothing ──────

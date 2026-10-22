@@ -3842,10 +3842,14 @@ function exampleDeckHtml(){
    The example's own slide, never a real deck's: it is about the platform,
    not about a direction. The four in the order they tell one story — one
    truth, everyone sees it, someone owns it, it is kept. */
+/* §574.7: the lines under the titles are Islam's meanings, put back to him
+   short: one place for every actual, the company's and each direction's,
+   this cycle's and the ones before; progress seen at a glance by each
+   audience; doing what we said and stopping what does not work. */
 var EXAMPLE_PURPOSE = [
-  ["One source of truth", "Entered once, used everywhere"],
-  ["Visibility", "Every direction, one view"],
-  ["Accountability", "Every line owned and explained"],
+  ["One source of truth", "Every actual, past and present, one place"],
+  ["Visibility", "Progress at a glance, for the right audience"],
+  ["Accountability", "Doing what we said, stopping what doesn't work"],
   ["History that stays", "Every cycle kept as reported"]
 ];
 function examplePurposeSlide(){
@@ -4034,13 +4038,13 @@ function deckTourStops(){
     clear(isP),
     { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[0]]); },
       h:"One source of truth",
-      b:"The figures you just saw are the ones on Performance and in the reports, typed once by their owners." },
+      b:"The figures you just saw, and every cycle before them, for the company and each " + noun + ", live in one place." },
     { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[1]]); },
       h:"Visibility",
-      b:"The same colours and the same DELAYED on every " + noun + ", for everyone who opens it." },
+      b:"Progress shown the same way to everyone, and each audience sees what is theirs." },
     { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[2]]); },
       h:"Accountability",
-      b:"A line behind plan comes with its owner's note, as Delivery share did." },
+      b:"Each cycle we report against what we committed to, and decide what to fix and what to stop." },
     { on:isP, at:function(s){ return deckTourBox([s.querySelectorAll(".pitem")[3]]); },
       h:"History that stays",
       b:"Each cycle is kept as it was reported, so next quarter we compare against this one." }

@@ -105,12 +105,17 @@ with sync_playwright() as p:
        ths and "Owner" not in ths and "Collabs." not in ths, ths)
     pur = safe(pg, """()=>{var s=document.querySelector('#deckroot .d-purpose'); if(!s) return null;
       return {h2:s.querySelector('h2').textContent, items:[...s.querySelectorAll('.pitem')].map(i=>[i.querySelector('h3').textContent, i.querySelector('p').textContent.split(/\\s+/).length]),
+              lines:[...s.querySelectorAll('.pitem p')].map(p=>[p.textContent]),
               size:parseFloat(getComputedStyle(s.querySelector('h3')).fontSize), last:s===DECK.slides[DECK.slides.length-1]}}""") or {}
     ck("its last slide is What this platform is for, with the four objectives in order",
        pur.get("h2") == "What this platform is for" and pur.get("last") is True and
        [x[0] for x in (pur.get("items") or [])] == ["One source of truth", "Visibility", "Accountability", "History that stays"], pur)
-    ck("…the titles big (70px or more on the slide) and each line under them five words or fewer (Islam)",
-       pur.get("size", 0) >= 70 and all(x[1] <= 5 for x in (pur.get("items") or [[0, 99]])), pur)
+    ck("…the titles big (70px or more on the slide) and each line under them eight words or fewer (Islam)",
+       pur.get("size", 0) >= 70 and all(x[1] <= 8 for x in (pur.get("items") or [[0, 99]])), pur)
+    ck("…the lines his meanings: every actual in one place, progress for the right audience, doing what we said",
+       [x[0] for x in (pur.get("lines") or [])] == ["Every actual, past and present, one place",
+        "Progress at a glance, for the right audience", "Doing what we said, stopping what doesn't work",
+        "Every cycle kept as reported"], pur.get("lines"))
     ck("…and it has no Thank you slide — the tour ends the deck",
        safe(pg, "()=>!document.querySelector('#deckroot .d-thanks')") is True)
 

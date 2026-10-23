@@ -25,6 +25,7 @@ import { categoriesFor } from "../../lib/library-viewer.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopViewer } from "../../lib/topbar.ts";
 import { barFor } from "../../lib/branding.ts";
+import type { Rules } from "../../lib/shared-types.ts";
 
 /* THE MONTH IS THE PRODUCT'S OWN WORD, not the browser's (§53.5). The first
    build used `toLocaleDateString("en-GB")` and the check caught it: Node
@@ -32,7 +33,7 @@ import { barFor } from "../../lib/branding.ts";
    this product — the deck, a milestone, a cycle — is three letters, because
    they all come from SMPRules.MONTH_NAMES. A library writing "4 Sept 2026"
    beside a plan writing "Sep 26" is two vocabularies for one month. */
-const R = createRequire(import.meta.url)("../../lib/rules.cjs");
+const R = createRequire(import.meta.url)("../../lib/rules.cjs") as Rules;
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")

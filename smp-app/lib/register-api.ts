@@ -21,8 +21,9 @@ import { withTenant } from "./tenant.ts";
 import { appPool } from "./db.ts";
 import { hashPassword, passwordPolicy } from "./auth.ts";
 import type { Person } from "./state-api.ts";
+import type { Rules } from "./shared-types.ts";
 
-const R = createRequire(import.meta.url)("./rules.cjs");
+const R = createRequire(import.meta.url)("./rules.cjs") as Rules;
 
 export type RegAnswer = { code: number; body: unknown };
 const isOffice = (p: { role?: string }) => R.isOfficeRole(p.role || "");

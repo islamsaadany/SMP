@@ -27,10 +27,11 @@ import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { save } from "./save.ts";
 import type { Answer } from "./state-api.ts";
+import type { Rules, Differ } from "./shared-types.ts";
 
 const require = createRequire(import.meta.url);
-const R = require("./rules.cjs");
-const D = require("./graph-diff.cjs");
+const R = require("./rules.cjs") as Rules;
+const D = require("./graph-diff.cjs") as Differ;
 
 export type UnsavedActor = { key: string; name?: string; role?: string };
 

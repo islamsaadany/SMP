@@ -68424,3 +68424,48 @@ The carried copy, `smp-app/lib/authorize.cjs`, takes the change by the usual tra
 **STILL NOT DONE, AS §589 LISTED.** The Next app's own TypeScript still reaches the rules through `require("./rules.cjs")` as `any`, and the pages carry no type comments of their own.
 
 **§589 AND §590 MERGED TO `main`** 2026-10-23, Islam: *"fix the gap and put it live"*. `main` had moved under the branch twice. First came the deck work (§586), brought in before §589 was written. Then came §587, §588 and §588.1, which took both of this branch's numbers, so these two were renumbered from §587 and §588. Main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. **The page check did its job on the merge itself**: §588 had added one finding (`unsaved.js`, `label()` reusing its parameter name `l` for the split address after reading it). It was read, it is not a fault, and it was recorded, so the list is **98**. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses. `check:rules-types` 2 / 0 with all six breaks red, and `check:pages-types` 3 / 0 with all six red. `test-authorize` 1123 / 3 and `test:rules` 152 / 3, identical to `main` alone. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump**: no file a browser receives changed. The built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s, and the authoriser is server code. No forced sign-out, because no save is judged differently. Witnesses: `/sw.js` release **`e266d66d5fbfeea5`** and `/shell.js` **5,148,090** bytes before, and the same after. A release that touches only server code is the one case where the same stamp is correct (§397). The authoriser's change cannot be seen from a screen.
+
+## §592 — The new app's code sees the carried rule modules' own types (2026-10-23)
+Islam, after §589 and §590 went live: *"now do the same for the new app's code"*.
+
+**THE GAP.** The Next app loads four plain-JavaScript modules carried from the frozen product (§330): the shared rules, the change-list differ, the authoriser and the platform's own rules. Nine of its files load them, with `require` or `createRequire(...)()`, and `require` hands back `any`. So until now **no call from this app into a rule was checked at all**, under a `strict` tsconfig that everybody reading it would have assumed covered them. One file, `lib/door.ts`, described the platform rules by hand: a second copy of two of the module's keys, free to drift.
+
+**WHAT WAS DONE:**
+- **`lib/shared-types.ts` READS each module's types out of the module itself** (`typeof import("./rules.cjs")` and so on). The types are never written out a second time, so they move with the code. They are CLOSED with a mapped type (§589's reason: a JavaScript object is open to the checker).
+- **Every load is declared with one** (`as Rules`, `as Differ`, `as Authorizer`, `as PlatformRules`). `door.ts`'s hand-written copy is gone.
+- **`allowJs` is on in tsconfig.json, so the checker can read the modules.** `checkJs` stays off, so the modules themselves are not held to this app's strict settings. Turned on alone, `allowJs` changed nothing: the app's full typecheck stayed clean.
+
+**THE PRICE, AND A REVERSAL OF §585, STATED.** `allowJs` makes TypeScript read `rules.cjs`, and §585's `// @ts-check` on line 1 makes it CHECK a JavaScript file whatever `checkJs` says. So the app's strict checker read the whole rules file and reported **586 findings**, which would have failed `next build`. **The marker is removed.** It only ever told an editor to underline while somebody typed. `check:rules-types` passes `--checkJs` itself and never needed it, and it now asserts the marker's ABSENCE, with the reason. The cost is that an editor no longer underlines `lib/rules.js` as it is typed. Removing one comment line changes the served `shell.js`, so open tabs are offered the reload once, with nothing visible changed.
+
+**WHAT TYPING THEM FOUND: NO FAULT.** With all four modules typed and closed, the app's checker reported **seven** findings, then **three**. Each was read, and none is a fault:
+- **The differ's two answers could not be told apart.** `applyChanges` answers `{ok:false, error}` or `{ok:true, state}`, and `valueAt` answers `{has:false}` or `{has:true, value}`. Inferred from JavaScript, `ok` and `has` were any boolean on both shapes, so the save's `if (!applied.ok) return` did not tell the checker that `state` was there. **Said in the differ's own file:** a type comment on `bad`, `applyChanges`, `valueAt` and `none`.
+- **The save reads the acting person, and the rules say it can be missing.** `actingFor` answers `{person: me}` even when `me` is null. In `save()` it never is: `me` is the register's row or a fallback object. **Said where it is used:** `act.person!`, with a comment saying why.
+- **The platform's defaults are looked up by `EVERYONE`,** a string, rather than by the one literal key the object has. `door.ts`'s hand-written copy had covered this. **Said once, in the module itself:** a type comment on `ACCESS_DEFAULTS`.
+
+Every rule the app calls by name, in all four modules, exists.
+
+**NOTHING RUNS DIFFERENTLY.** Every change is a comment, a type, or a TypeScript `as`, `!` or `import type`, all erased at build.
+- With comments removed, all **355 / 8 / 36** exports of the rules, the differ and the platform rules are identical.
+- `test-authorize` 1123 / 3 and `test:rules` 152 / 3, the same six failures `main` already had. `test-platform-rules` 69 / 0 and `test-graph-diff` 165 / 0.
+- `npm run typecheck` is clean, and **`next build` passes, its TypeScript step included** (run here with the database step left out).
+- The pages' check still reads its 98, and the rules' check is 2 / 0.
+
+**THE CHECK** is `smp-app/checks/app-types.mjs`: `npm run check:app-types`, with `:red`. It asserts three things the app's own typecheck would never say out loud if they stopped being true:
+- every load of one of the four, in every `.ts`/`.tsx` (found by scanning, never by a list), carries its type — a new file loading the rules bare would otherwise be `any` again, silently;
+- tsconfig keeps `allowJs` on and `checkJs` off;
+- the app's checker reports nothing in the files that load them.
+
+`--red` breaks seven things IN PLACE and puts each file back byte for byte in a `finally`; copying the app would mean copying its generated Prisma and route types too. The seven:
+- a rule misspelt;
+- a rule one argument short;
+- a grant compared against a word that is not one;
+- the differ misspelt;
+- the authoriser misspelt;
+- a platform rule misspelt;
+- a load with its type taken off.
+
+**All seven are caught**, each only when the failure names the broken file. Before this, none of the six code faults could have been: `any` is never an error.
+
+**NOT DONE.** The app's other carried modules (the assistant, the mailer, `frozen.cjs`, `graph-io.cjs`, `chat-api.cjs`, `mail-api.cjs`) still carry hand-written `as {…}` shapes or none. They are not rule modules, and each is its own errand.
+
+Not merged; `main` stays untouched until Islam says.

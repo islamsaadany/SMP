@@ -20,6 +20,8 @@
     "check:rules-types:red": "node checks/rules-types.mjs --red",
     "check:pages-types": "node checks/pages-types.mjs",
     "check:pages-types:red": "node checks/pages-types.mjs --red",
+    "check:app-types": "node checks/app-types.mjs",
+    "check:app-types:red": "node checks/app-types.mjs --red",
     "dev:tenant": "node scripts/dev-tenant.mjs",
     "check:door": "node checks/door-landing.mjs",
     "check:door:red": "for b in demo-role-key other-role-key no-creator no-landing-stamp gate-open no-areas-stamp done-dropped; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",

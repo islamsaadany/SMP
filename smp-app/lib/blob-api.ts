@@ -36,8 +36,9 @@ import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import type { Person } from "./state-api.ts";
+import type { Rules } from "./shared-types.ts";
 
-const R = createRequire(import.meta.url)("./rules.cjs");
+const R = createRequire(import.meta.url)("./rules.cjs") as Rules;
 
 /* Loaded once, inside a try. A deployment that never installed the package or
    never set the token is not a reason for the chat, the deck or the save to

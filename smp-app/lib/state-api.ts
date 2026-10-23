@@ -20,8 +20,9 @@ import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { save, type SaveBody, type SaveResult } from "./save.ts";
 import { unsavedRead, unsavedWrite } from "./unsaved.ts";
+import type { Rules } from "./shared-types.ts";
 
-const R = createRequire(import.meta.url)("./rules.cjs");
+const R = createRequire(import.meta.url)("./rules.cjs") as Rules;
 
 export type Person = { key: string; name: string; role: string; email: string; kind: SessionUser["kind"]; mustChange: false; clientName: string; clientMark: string; cards: boolean };
 export type Answer = { code: number; body: Record<string, unknown> };

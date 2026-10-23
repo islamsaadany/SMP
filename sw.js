@@ -535,7 +535,13 @@
    presentation. The built file's bytes changed, which is the whole trigger
    (§91). Proved held by no commit in any ref's history after fetching
    every ref (§94.16). */
-const SHELL = "smp-shell-v6.83-box-split";
+/* v6.84-quiet-merge — §588 / §588.1: other people's saves arrive on the
+   screen without a reload (the caution's Reload is the fallback now), rows
+   added, removed or moved travel by id, row ids carry a tag of their own,
+   and a tab asks "what changed since N" instead of fetching the graph. The
+   built file's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.84-quiet-merge";
 const ASSETS = [
   "/",
   "/index.html",

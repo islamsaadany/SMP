@@ -613,7 +613,12 @@
    outline and the gutter kept under it. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.06-strip-card";
+/* v7.07-checks-cleared — §619: the checks already red on live cleared, the
+   Presentation button on white, the month/quarter switch held the platform's
+   way, and the Setup menu line "Planning & reporting". The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.07-checks-cleared";
 const ASSETS = [
   "/",
   "/index.html",

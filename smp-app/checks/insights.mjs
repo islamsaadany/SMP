@@ -454,7 +454,7 @@ try {
   check("the download address is this client's, this report's, and ours — never the store's",
     page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
   /* REWRITTEN, NEVER LOOSENED (§218): the count moved into the panel
-     (§601) and is said the Tracker's way, the number over its name — so the
+     (§605) and is said the Tracker's way, the number over its name — so the
      two are asked for together, as the sentence was. */
   check("the count says what is there",
     /<div class="tile"><b>2<\/b><span>Reports<\/span>/.test(page), (page.match(/<div class="tile">[\s\S]{0,60}/) || [""])[0]);

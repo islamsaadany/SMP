@@ -70,14 +70,14 @@ export function factLine(it: Item): string {
   if (day) bits.push("<span>" + esc(day) + "</span>");
   bits.push("<span>v" + it.version + "</span>");
   if (it.sizeLabel) bits.push("<span>" + esc(it.sizeLabel) + "</span>");
-  /* THE SEPARATOR IS ITS OWN ELEMENT (§601) so the module's page can lay the
+  /* THE SEPARATOR IS ITS OWN ELEMENT (§605) so the module's page can lay the
      parts out as the Tracker's row does — a tag, then the facts, spaced — and
      drop the dots; the platform's tab draws it exactly as it always read. */
   return bits.join('<span class="sep"> &middot; </span>');
 }
 
 
-/* THE LEDGER LOOK (§601), from design-mockups/modules-look/2026-10-23_one-look.html:
+/* THE LEDGER LOOK (§605), from design-mockups/modules-look/2026-10-23_one-look.html:
    the panel, the search line and the shared rules are lib/ledger.ts; what is
    here is the report's own row. The row's markup is the one the platform's
    tab draws too (libraryRows, §376), so only how it is laid out is this
@@ -256,7 +256,7 @@ export async function insightsDocument(
      is something to filter by. A library of five reports under no category at
      all has a search box and no filters, and that is the honest pair. */
   const anyReports = items.length > 0 || !!q || !!category;
-  /* THE COUNT IS THE PANEL'S NOW (§601), the number it always was — the
+  /* THE COUNT IS THE PANEL'S NOW (§605), the number it always was — the
      reports listed — said the way the Tracker says its own. */
   const tools = !anyReports ? "" :
     '<div class="tools">' +

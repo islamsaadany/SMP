@@ -38,7 +38,7 @@ const esc = (s: unknown) =>
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? one : many);
 
-/* THE LEDGER LOOK ON THE LIST (§601), from
+/* THE LEDGER LOOK ON THE LIST (§605), from
    design-mockups/modules-look/2026-10-23_one-look.html: the panel, the search
    line, the numbered months and the status word are lib/ledger.ts's, shared
    with Insights and Portfolio. One note's page keeps its own layout; what it
@@ -227,7 +227,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): string {
     const named = namedOf(n.attendees, L.reg, new Set(L.office.map((o) => o.key)));
     return named.map((a) => (a.key ? L.short.get(a.key) || a.name : a.name)).join(", ");
   };
-  /* A MONTH IS A NUMBERED SECTION (§601), its count beside its name; the
+  /* A MONTH IS A NUMBERED SECTION (§605), its count beside its name; the
      meetings in it are rows, newest first as they always were. */
   const months: { m: string; notes: Note[] }[] = [];
   for (const n of shown) {
@@ -242,7 +242,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): string {
       '<span class="t">' + esc(n.title || "Untitled meeting") +
       (nameOf(n) ? "<small>" + esc(nameOf(n)) + "</small>" : "") + "</span>" +
       '<span class="n" title="' + esc(plural(n.attendees.length, "attendee", "attendees")) + '">' + PERSON + n.attendees.length + "</span>" +
-      /* SAID AS A WORD, NEVER DRAWN AS A BUTTON (§601): the pill read as a
+      /* SAID AS A WORD, NEVER DRAWN AS A BUTTON (§605): the pill read as a
          control and pressing it only opened the meeting, as the whole row
          does (§61). Grey, green when sent, gold when an update went out. */
       '<span class="word sent ' + s.cls + '">' + esc(s.word) + "</span></a>";

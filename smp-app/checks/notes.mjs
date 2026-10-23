@@ -384,7 +384,7 @@ try {
   const NORAN = { personKey: "noran", seat: "smoteam" }, ISLAM = { personKey: "islam", seat: "super" }, RAMY = { personKey: "ramy", seat: "none" };
   const list = await call(A, NORAN, [], null);
   check("the office opens the list", list.status === 200 && /<title>Raya Trade &mdash; Meeting Notes<\/title>/.test(list.text), list.status + " " + (list.text.match(/<title>[^<]*/) || [""])[0]);
-  /* §601: what went out is a status word now rather than a pill — the same
+  /* §605: what went out is a status word now rather than a pill — the same
      claim, asked of the class the row draws (§218). */
   check("...newest first, under the month it happened in, with what went out", /September 2026/.test(list.text) && /Q3 review preparation/.test(list.text) && /class="word sent upd"/.test(list.text));
   check("...and nothing on it is inline script — the policy would silence it", !/<script>|onclick=/i.test(list.text) && /app\.js"><\/script>/.test(list.text));

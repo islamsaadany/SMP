@@ -282,7 +282,7 @@ function whenCell(s: Seen, today: string): string {
 }
 
 
-/* ══ THE LANDING IN THE LEDGER LOOK (§601) ═════════════════════════════
+/* ══ THE LANDING IN THE LEDGER LOOK (§605) ═════════════════════════════
    design-mockups/modules-look/2026-10-23_one-look.html. The panel, the
    numbered sections and the amber button are lib/ledger.ts's, laid AFTER
    this module's own stylesheet so its tokens and its few shared names win
@@ -337,7 +337,7 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
   const beh = seen.filter((s) => s.behind);
   const ow = seen.reduce((n, s) => n + s.owed.length, 0);
   /* A COUNT THAT WAS NOT READ IS A DASH, never a nought (§35). THE THREE
-     COUNTS ARE THE PANEL'S (§601), the Tracker's own; the line each white
+     COUNTS ARE THE PANEL'S (§605), the Tracker's own; the line each white
      box carried under its number rides on the count as its title, which
      Islam was asked about and the drawing shows. */
   const tiles: Tile[] = unread

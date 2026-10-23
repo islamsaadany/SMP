@@ -1,4 +1,4 @@
-/* ── THE LEDGER LOOK, FOR THE MODULES THAT FOLLOW THE TRACKER (§601) ─────
+/* ── THE LEDGER LOOK, FOR THE MODULES THAT FOLLOW THE TRACKER (§605) ─────
    Islam, from design-mockups/modules-look/2026-10-23_one-look.html: *"ok for
    insights, meeting notes and projects"*. The three pages wear the Internal
    Tracker's furniture (modules/tracker/page.ts, §497): the client's panel

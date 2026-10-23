@@ -38,7 +38,7 @@
 
      DATABASE_URL_UNPOOLED=postgres://owner@… SMP_CHROME=… npm run check:look
      SMP_BREAK=bar-ink npm run check:look   # must go red, on all five modules
-     npm run check:look:red                 # that, and §601's four ledger breaks  */
+     npm run check:look:red                 # that, and §605's four ledger breaks  */
 import pg from "pg";
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
@@ -486,7 +486,7 @@ try {
       await page.close();
     }
 
-    /* ══ THE LEDGER LOOK (§601) ═══════════════════════════════════════
+    /* ══ THE LEDGER LOOK (§605) ═══════════════════════════════════════
        Islam: *"ok for insights, meeting notes and projects"*, from
        design-mockups/modules-look/2026-10-23_one-look.html. What is claimed,
        each with the break that must turn it red (§94.5):
@@ -501,7 +501,7 @@ try {
          · Portfolio's four column names are one size (`next-look-big`).
        The panel's count is asserted to be the rows drawn, the rows non-zero
        first, so a page drawing nothing cannot agree with itself (§113.8). */
-    section("§ the ledger look — Insights, Meeting Notes and Portfolio's projects (§601)");
+    section("§ the ledger look — Insights, Meeting Notes and Portfolio's projects (§605)");
     const TAN = "#C8A27A";
     const hadOrg = await owner("SELECT 1 FROM org WHERE tenant_id = $1", [A]);
     if (hadOrg.length) await owner("UPDATE org SET extra = jsonb_set(extra, '{branding}', jsonb_build_object('bar', $2::text)) WHERE tenant_id = $1", [A, TAN]);

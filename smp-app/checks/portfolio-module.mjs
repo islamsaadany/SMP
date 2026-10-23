@@ -182,7 +182,7 @@ try {
   check("...and its 'waiting on somebody' is a dash rather than a nought (§35)",
     /class="n clear">\u2014</.test(seatPage.html), (seatPage.html.match(/class="n clear">[^<]*/g) || []).join(" | "));
   /* REWRITTEN, NEVER LOOSENED (§218): the count moved from a white box into
-     the panel (§601), so it is asked for there, number AND name together. */
+     the panel (§605), so it is asked for there, number AND name together. */
   check("the strip counts the projects it drew", /<div class="tile"[^>]*><b>2<\/b><span>Projects<\/span>/.test(seatPage.html),
     (seatPage.html.match(/<div class="tile"[^>]*><b>[^<]*<\/b><span>[^<]*/g) || []).join(" | "));
 
@@ -737,7 +737,7 @@ try {
   const unread = await get("not-a-tenant-id", [], SEAT);
   check("a list that could not be read says so, and does NOT say there are no projects",
     unread.status === 200 && /could not be read/.test(unread.html) && !/No projects yet/.test(unread.html));
-  /* REWRITTEN, NEVER LOOSENED (§218): the counts are the panel's now (§601),
+  /* REWRITTEN, NEVER LOOSENED (§218): the counts are the panel's now (§605),
      and all three are asked for — the white boxes' one-of-three would pass a
      panel that dashed one count and wrote nought in the other two. */
   check("...and its counts read a dash rather than a nought",

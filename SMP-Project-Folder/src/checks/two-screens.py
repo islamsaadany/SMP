@@ -176,9 +176,13 @@ with sync_playwright() as p:
     ck("a strip at the top of the page says what the room is seeing",
        "Presenting on the second screen" in strip and "slide " in strip and "Back to slides" in strip, strip)
     ck("…pinned with the page's own bars", safe(pg, "()=>!!document.querySelector('.chrome > #roomstrip')") is True)
+    # §582.2 reversed §582's "a page's keys stay its own" for the remote's
+    # keys (Islam); typing still never moves a slide — `remote-keys` holds
+    # the rest. Here: → from a page moves the room, and ← brings it back.
     ri = safe(room, "()=>DECK.i")
     pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(400)
-    ck("on a page the keys stay the page's own: → does not move the room", safe(room, "()=>DECK.i") == ri)
+    ck("on a page, → moves the room (§582.2)", safe(room, "()=>DECK.i") == ri + 1, (ri, safe(room, "()=>DECK.i")))
+    pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(400)
     pg.click("#roomstrip [data-rs='next']"); pg.wait_for_timeout(500)
     ck("the strip's → moves the room", safe(room, "()=>DECK.i") == ri + 1, (ri, safe(room, "()=>DECK.i")))
     pg.click("#roomstrip [data-rs='prev']"); pg.wait_for_timeout(500)

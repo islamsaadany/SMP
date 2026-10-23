@@ -541,7 +541,15 @@
    and a tab asks "what changed since N" instead of fetching the graph. The
    built file's bytes changed, which is the whole trigger (§91). Proved held
    by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.84-quiet-merge";
+/* v6.85-company-label — §591: the company labelled the company in the
+   Master presentation; a box of capabilities called that. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.86-remote-keys — §582.2: the remote works from any page while the
+   slides are up. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+const SHELL = "smp-shell-v6.86-remote-keys";
 const ASSETS = [
   "/",
   "/index.html",

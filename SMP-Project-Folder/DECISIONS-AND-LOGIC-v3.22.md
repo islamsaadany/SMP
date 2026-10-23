@@ -65313,6 +65313,8 @@ Islam: *"fix the Copilot test that keeps failing"*.
 
 **CHECKED.** `checks/shell.mjs` **403 ok, 0 failed** — the first wholly green run of the console check since §538. Under `apply-unguarded`, **402 ok, 1 failed**: exactly the guard line, reading the *Save the Foundation first.* line the unguarded press put up; `public/shell.js` byte-identical after (md5). No page changed.
 
+**§538.2 MERGED TO `main`** 2026-10-23, Islam: *"merge it"*. `main` had moved under the branch overnight (§578.1, the figures beside their names, `SHELL` v6.79), so it was merged INTO the branch, the progress lines kept in order and the built files regenerated from the merged sources, byte-identical to `main`'s; on that tree `checks/shell.mjs` read **403 ok, 0 failed**; then a clean fast-forward and this note as a commit `main` alone holds (§91). **NO `SHELL` BUMP AND THE SAME RELEASE STAMP, BOTH CORRECTLY**: the merge changes a check, `package.json`'s red list and the record, and no file a browser is served (asserted: nothing under `public/`, `shell/`, `lib/`, `app/`, `modules/`, `sw.js` or `platform.html` differs from `main`), so `/sw.js` reads **`7b31190177c959e9`** before and after and nobody is offered a reload for nothing (§397). No forced sign-out.
+
 ## §531 — One address, one parse (spec 066 stage 3a, part 1 of 3)
 Islam, of the two questions he put to the box model (a capability and a direction are both pillars, one internal and one external; and what the four part-owner roles become): *"then we can go with the 2 steps in order"*. Step 1 of the split agreed with him is **code only, no data moves**, and this is its first part.
 

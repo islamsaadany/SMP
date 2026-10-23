@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-22 — The Copilot line in the console check that kept failing (§538.2): fixed on the branch, waiting on Islam's word to merge.** The check asked for Apply to plan to be switched off before a save; since §538 it is held instead — still pressable, saying why in a bubble — and the check was never updated, so it failed on the right page every run. It now asks for the held shape and that a press does nothing; the console check reads 403 ok, 0 failed, and goes red with the guard taken out. No page changed.
+**2026-10-22 — The Copilot line in the console check that kept failing (§538.2), merged to `main` 2026-10-23 on Islam's word.** The check asked for Apply to plan to be switched off before a save; since §538 it is held instead — still pressable, saying why in a bubble — and the check was never updated, so it failed on the right page every run. It now asks for the held shape and that a press does nothing; the console check reads 403 ok, 0 failed, and goes red with the guard taken out. No page changed.
 
 **2026-10-22 — The lines under the two numbers on Where it stands sit beside their figures (§578.1), merged to `main` 2026-10-22 on Islam's word.** Each figure now follows its name, in a column just after the longest name, instead of at the far edge of its half; the left half always keeps a clear space before the right half, and a name too long for it is cut short.
 

@@ -68216,3 +68216,50 @@ Islam, after §584.3 went live: *"fix the text boxes and the two controls too"*;
 **CHECKED.** `checks/shell.mjs` §4b.1 asks the COMPUTED type and height of a text box and a chip on Frameworks and of the size band in Add a client — **14px 400 39**, **12px 600 26**, **12.5px 600 48** — all three red on the build before (13.3333px 400, at 33, 29 and 44px). Its first run read `none` for the first two: from `/platform`, an address differing only in its hash is the same document and does not load the tab, so the check measured My work — a fault of the CHECK, found by its own red and fixed with a blank page first (the reload §400.2's own kept copies rely on not happening). The whole check then **401 ok, 1 failed**, §524's Copilot bar as before. Release stamp clear.
 
 **§584.4 MERGED TO `main`** 2026-10-22, Islam: *"yes build it and put it live"*. A clean fast-forward — `main` had not moved since §584.3 — so the tree pushed is the tree checked (401 ok, 1 failed, §524's as before). Then this note and the `SHELL` bump `smp-shell-v6.77-button-weight` → **`smp-shell-v6.78-text-boxes`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page only; no save changed, so no forced sign-out. Witnesses: `/sw.js` release **`d3c701d80dcd2e34`** before, **`f72c410256af6679`** after; `/shell.js` unchanged at **5,111,351**.
+
+## §585 — The shared rules, read by TypeScript's checker: a trial on one file (2026-10-23)
+Islam asked whether the product would be better in TypeScript than in HTML. The answer given: yes for its logic, but not as a rewrite. Most of it already is TypeScript — the server and the newer modules (§20, §314) — and the console's ~88,000 lines of plain JavaScript are carried verbatim on purpose, so the settled screens cannot drift (§315.1). Recommended instead: turn TypeScript's checker on over the existing JavaScript with type comments, change no running line, and move a screen to the new stack only when it is being reworked anyway. Islam: *"go ahead, try step 1 on the shared rules"*.
+
+**MEASURED BEFORE ANYTHING WAS WRITTEN.** With the file untouched, the checker finds **nothing real** in `lib/rules.js`. Under the loose setting it reports two findings, both the browser global `self` that the file uses to find its own root. Under strict null checks it reports ten, and each one is the checker not following something the code guarantees: a variable filled inside a `forEach`, a year that a regex has already proved is digits, a frozen shared empty list. Measured earlier over the console's script files: **1,270** findings. About 900 are names declared by the shell's inline script, which the checker cannot see; that is setup, not bugs. The ~320 "this property does not exist" findings are where real ones would hide, and they were not read.
+
+**WHAT WAS WRITTEN** (`lib/rules.js` §4), as comments:
+- **The shapes the rules read:** a `Grant` (STATE_RANK's four words), a `Held` role (`{role, at}`), a `Person`, a `Place`, a `Company`, a `Capability`, and the `World` that W() builds.
+- **Type comments on the 28 functions of the authorisation core**, from W() and worldOf() through personRoles, grantFor, roleOwns and grantIn to mayIssuePasswordTo and actingFor.
+- **`// @ts-check` on line 1**, so an editor checks the file as it is typed.
+
+**THE WORLD IS CLOSED AND A ROW IS OPEN.** W()'s seventeen keys are named exactly. So a key that worldOf() passes and W() never names is now an error rather than §102's silent `undefined`, answered as the default. The same goes for a misspelt key in any of the 28 described functions. **It is not yet the whole of §102's trap.** A key added to the type and to W() but forgotten in worldOf() is still silent, because every input is optional. And the rules not yet described (47 more that take the world) are not read at all. A register row carries far more than the rules read, and the rest round-trips untouched (§187). So its type names what the rules ask and admits anything else.
+
+**ONE LINE OF CODE CHANGED SHAPE.** grantIn's `best` is now declared on a line of its own, with its type. Otherwise the checker reads `"none"` as any string.
+
+**THE RESULT, PLAINLY: IT FOUND NOTHING WRONG.** With the core described, two files check clean:
+- the rules file itself;
+- `lib/authorize.js`, the server's 2,483-line caller, which sees the types through its `require` without a comment of its own.
+
+Over every shared server file (`lib/*.js`, `api/*.js`) there are 15 more findings. Each one was read, and none is a fault: a date subtracted from a date, an `Error` given a `.code`, `[id].concat(vals)`, a test hook on `module.exports`. Strict null checks over the authoriser add 24 more, all one pattern (`var x = null`, filled in later). **So the check runs LOOSE.** Strict would mean days of quieting the checker, and it has found no fault.
+
+**WHAT IT BUYS IS THE NEXT FAULT, AND THAT IS PROVED.** Five faults were made deliberately in a copy:
+- a key the world does not hold (`w.unitkeys`);
+- worldOf() building with a key W() never names (exactly §102's trap);
+- a person handed where a held role is wanted;
+- a word that is not a grant;
+- the server calling grantIn one argument short.
+
+All five are **caught now, and none of them was caught on the file before this.**
+
+**NOTHING RUNS DIFFERENTLY.** Of the file's 355 exports, 354 are character-for-character the same function or value; grantIn differs only by the one split line.
+- `npm run test:rules` reads 129 passed / 3 failed, and `scripts/test-authorize.js` reads 1123 passed / 3 failed. Both counts are the same on `main` without this change, so those six failures are not this section's. They are recorded here and not touched.
+- The built file is byte-identical to the build, and the served copies were regenerated.
+- The served shell grows by **4,969 bytes** of comments, and the release stamp moves. So an open tab will be offered the reload when this ships, with nothing visible changed.
+
+**THE CHECK** is `smp-app/checks/rules-types.mjs`: `npm run check:rules-types`, and `:red` for the five breaks. It found a fault in itself before it was trusted. TypeScript 7 refuses to run on files named beside a `tsconfig.json`, and that refusal exits non-zero. So the first `--red` run reported all five breaks caught when the checker had run on none of them. It now:
+- ignores the app's config;
+- sets `--strict false` explicitly, because version 7 defaults to strict;
+- counts a break as red only when an error points INTO the broken file.
+
+It is not part of `npm run typecheck`. In a fresh container that command fails on generated framework and Prisma types before it reaches anything of this.
+
+**NOT DONE, SAID SO NOBODY ASSUMES IT.** Neither half of the product sees these types yet:
+- **The console** reaches the rules as a global, `SMPRules`, which the checker cannot see across the concatenated scripts.
+- **The Next app's TypeScript** reaches them through `require("./rules.cjs")`, which is `any` there, because its tsconfig reads no JavaScript.
+
+Either one is the next step, and each is Islam's call. Not merged; `main` stays untouched until Islam says.

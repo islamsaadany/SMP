@@ -66480,6 +66480,15 @@ was not seen. If El Abd or Wander ever needs its pre-move plan again, it is
 gone and `scripts/wander/move.sql` and `scripts/stage3-move-sql.js` are the
 only description of what changed.
 
+### §544.16 — The door check catches up with three set-up steps (2026-10-23)
+Islam, after §538.2: *"fix the door check failures too"*.
+
+**IT WAS THE CHECK, NOT THE FLOW — §538.2's fault, in another file.** `checks/door-landing.mjs` asked for the client set-up to count **seven** steps and to list them `client,structure,cos,units,fns,caps,office`. §544 made Structure, the divisions, the units, the functions and the capabilities **one screen, the shape**, so the flow has three — `client,shape,office`, which is what the page drew (`{"done":3,"total":3}`) — and the two lines were never rewritten, so they read red on the right build at every run since: the *2 failed* every note from §583 on carried, red on the tree before each time.
+
+**REWRITTEN, NEVER LOOSENED (§218).** Still an exact count and still the whole list in order, so a step added, lost or moved reads red again, as these did when §544 moved them. The flow's own header comment in `client-setup.js` still says *"Seven, as the mockup draws them"* above §544's *"THREE STEPS"*; left as it is, because that file is built into what browsers are served and a comment is not worth a release — said here so it is not mistaken for the rule.
+
+**CHECKED.** `checks/door-landing.mjs` **146 ok, 0 failed** — the first wholly green run since §544. `check:door:red` all seven breaks still red (`demo-role-key`, `other-role-key`, `no-creator`, `no-landing-stamp`, `gate-open`, `no-areas-stamp`, `done-dropped`). No page changed.
+
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
 

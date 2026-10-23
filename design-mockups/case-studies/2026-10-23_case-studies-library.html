@@ -1,0 +1,575 @@
+<title>Case Studies Library</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: stacked drawings of the console (the navy column on the left, the
+   page on the right) showing Case studies as a library: a front page with a
+   search and covers on shelves by industry; a case study laid out like a
+   published report with a facts panel beside it; insights as index cards;
+   the desk for work still running or being written; the draft as the report
+   with every part open to change. Colours and type are the console's own
+   tokens (smp-app/shell/platform.html). New pieces: the cover, the shelf,
+   the report header, the timeline strip, the file tile, the index card. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-deep:#0A1F4D;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;
+  --shelf:#DCE1EA;--shelf-edge:#C7CEDB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --lift:0 2px 4px rgba(20,28,43,.10),0 14px 30px rgba(20,28,43,.14);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
+  --shelf:#262D3A;--shelf-edge:#323B4B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --lift:0 2px 4px rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.45);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
+  --shelf:#262D3A;--shelf-edge:#323B4B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --lift:0 2px 4px rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.45);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font-family:inherit}
+a{color:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the review page ── */
+.doc{max-width:1240px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.lede{max-width:80ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flag{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:16px 0 0}
+.ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;line-height:1;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"],.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:42px 0 10px}
+.cap .n{font-size:12px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums}
+.cap h2{margin:0;font-size:17px;font-weight:600}
+.cap p{margin:0;flex-basis:100%;color:var(--ink-2);font-size:14px;max-width:84ch}
+.cap p b{color:var(--ink);font-weight:600}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;margin-top:44px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.note h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note ul,.note ol{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink);font-weight:600}
+
+/* ═══ THE CONSOLE FRAME (§601) ═══ */
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.app{display:flex;background:var(--ground);color:var(--ink);font-size:15px}
+.side{width:232px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:8px;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px;color:var(--ff-quiet)}
+.snav{padding:10px 10px 12px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;color:var(--ff-quiet);font-size:14px;font-weight:600;line-height:1;padding:10px;border-radius:8px;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 12px 14px 14px;border-top:1px solid var(--ff-rule)}
+.av0{width:30px;height:30px;border-radius:50%;flex:none;background:var(--ff-on);color:var(--ff-ink);font:700 11px/30px var(--mono);text-align:center}
+.swho{min-width:0;display:flex;flex-direction:column;gap:3px}
+.swho b{font-size:13px;font-weight:600;color:var(--ff-ink);line-height:1.1}
+.swho i{font-style:normal;font-size:11.5px;color:var(--ff-quiet);line-height:1.1}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtop{display:none}
+.pg{padding:24px 28px 44px;max-width:1080px;width:100%}
+
+/* shared controls, the console's */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;line-height:1.5;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:var(--gold)}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.btn.solid{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.btn svg.i{width:15px;height:15px}
+.link{font-size:13px;font-weight:600;color:var(--gold);text-decoration:none;white-space:nowrap}
+.link:hover{text-decoration:underline}
+
+/* ═══ THE LIBRARY'S FRONT PAGE ═══ */
+.ltop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px}
+.ltop h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}
+.ltop .count{font-size:14px;color:var(--ink-3)}
+.ltop .right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bigsearch{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:13px 16px;box-shadow:var(--shadow)}
+.bigsearch svg.i{color:var(--ink-3)}
+.bigsearch input{flex:1;min-width:0;border:0;background:transparent;font-size:16.5px;color:var(--ink);outline:none}
+.bigsearch input::placeholder{color:var(--ink-3)}
+.bigsearch .ask{display:inline-flex;align-items:center;gap:7px;border-left:1px solid var(--line);padding-left:14px;font-size:13.5px;font-weight:600;color:var(--gold);white-space:nowrap;background:none;border-top:0;border-right:0;border-bottom:0;cursor:pointer}
+.bigsearch .ask svg.i{width:15px;height:15px}
+/* the categories are the library's second row (spec 053's own rule) */
+.catrow{display:flex;gap:4px 22px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:18px 0 26px}
+.catrow a{padding:10px 0 11px;font-size:14px;font-weight:600;color:var(--ink-3);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.catrow a i{font-style:normal;font-weight:500;margin-left:5px;font-size:12.5px}
+.catrow a.on{color:var(--ink);border-bottom-color:var(--gold)}
+.catrow a:hover{color:var(--ink)}
+/* a shelf: its name, how many, and the covers standing on a board */
+.shelf{margin:0 0 34px}
+.shh{display:flex;align-items:baseline;gap:10px;margin:0 0 14px}
+.shh h2{margin:0;font-size:17px;font-weight:600}
+.shh .n{font-size:13px;color:var(--ink-3)}
+.shh .link{margin-left:auto}
+.books{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:22px 18px;padding:0 6px 16px;position:relative}
+.books::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9px;border-radius:3px;background:var(--shelf);box-shadow:inset 0 -2px 0 var(--shelf-edge)}
+/* the cover */
+.cover{display:flex;flex-direction:column;text-decoration:none;color:inherit;border-radius:6px 10px 10px 6px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease;position:relative;z-index:1}
+.cover:hover{transform:translateY(-4px);box-shadow:var(--lift)}
+.cover:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.cv{position:relative;background:linear-gradient(160deg,var(--ff) 0%,var(--ff-deep) 100%);color:var(--ff-ink);padding:14px 14px 15px 18px;min-height:178px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 -3px 0 var(--amber)}
+.cv::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:rgba(0,0,0,.18)}
+.logo{width:36px;height:36px;border-radius:9px;background:var(--surface);color:var(--ff-tx);font:700 12px/36px var(--mono);text-align:center;letter-spacing:.02em;flex:none}
+.cv .cind{margin-top:auto;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ff-quiet);line-height:1.4}
+.cv h3{margin:0;font-size:17px;font-weight:600;line-height:1.25;color:var(--ff-ink);text-wrap:balance}
+.cv .cyr{font-size:12px;font-weight:600;color:var(--amber);font-variant-numeric:tabular-nums}
+.cmeta{padding:10px 12px 12px 18px;display:flex;flex-direction:column;gap:2px}
+.cmeta b{font-size:14px;font-weight:600;line-height:1.3}
+.cmeta span{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.cover .newtag{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:2px 7px}
+/* the desk: work still running, or being written */
+.desk{border:1px dashed var(--line);border-radius:14px;padding:16px 18px;background:var(--surface)}
+.desk h2{margin:0 0 4px;font-size:16px;font-weight:600}
+.desk .sub{margin:0 0 12px;font-size:13px;color:var(--ink-3)}
+.drow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line-soft)}
+.spine{width:34px;height:44px;border-radius:3px 6px 6px 3px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);font:700 10px/1 var(--mono)}
+.spine.run{border-style:dashed}
+.drow .tx{min-width:0}
+.drow .tx b{display:block;font-size:14.5px;font-weight:600;color:var(--ink)}
+.drow .tx span{display:block;font-size:13px;color:var(--ink-3)}
+.state{font-size:12px;font-weight:600;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.state.write{color:var(--warn);background:var(--warn-bg)}
+.state.run{color:var(--ink-2);background:var(--surface-2)}
+.toplace{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13.5px;color:var(--ink-2)}
+
+/* ═══ A CASE STUDY, AS A REPORT ═══ */
+.crumb{font-size:13px;color:var(--ink-3);margin:0 0 14px;display:flex;gap:6px;flex-wrap:wrap}
+.crumb a{text-decoration:none;color:var(--gold);font-weight:600}
+.rhead{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px;align-items:start;padding:24px 26px 26px;background:linear-gradient(160deg,var(--ff) 0%,var(--ff-deep) 100%);color:var(--ff-ink);border-radius:14px;box-shadow:inset 0 -3px 0 var(--amber)}
+.rhead .logo{width:58px;height:58px;border-radius:12px;font-size:16px;line-height:58px}
+.rhead .eb{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:2px 0 8px}
+.rhead h1{margin:0;font-size:30px;font-weight:600;line-height:1.15;letter-spacing:-.015em;color:var(--ff-ink);text-wrap:balance}
+.rhead .cl{margin:8px 0 0;font-size:15px;color:var(--ff-quiet)}
+.rhead .cl b{color:var(--ff-ink);font-weight:600}
+.rhead .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.rhead .btn{background:transparent;border-color:var(--ff-rule);color:var(--ff-ink)}
+.rhead .btn:hover{border-color:var(--amber)}
+.rhead .btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--ff-on);color:var(--ff-ink)}
+.chip.done{background:var(--good-bg);color:var(--good)}
+.chip.run{background:var(--ff-on);color:var(--ff-quiet)}
+.chip.draft{background:var(--amber);color:var(--amber-ink)}
+.stand{margin:24px 0 0;font-size:19px;line-height:1.6;color:var(--ink);max-width:64ch;text-wrap:pretty}
+
+.rgrid{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:40px;margin-top:8px;align-items:start}
+.rsec{padding-top:20px;margin-top:26px;border-top:1px solid var(--line)}
+.rsec h2{margin:0 0 12px;font-size:18px;font-weight:600;display:flex;align-items:baseline;gap:10px}
+.rsec h2 .no{font-size:12px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums}
+.rsec h2 .ct{font-size:13px;font-weight:500;color:var(--ink-3)}
+.rsec p{margin:0;font-size:16px;line-height:1.7;max-width:66ch}
+/* the facts panel */
+.glance{position:sticky;top:16px;margin-top:26px;display:flex;flex-direction:column;gap:14px}
+.gbox{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px 16px}
+.gbox h3{margin:0 0 10px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.gbox dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 12px;font-size:13.5px}
+.gbox dt{color:var(--ink-3)}
+.gbox dd{margin:0;font-weight:600;text-align:right}
+.toc{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;counter-reset:t}
+.toc a{display:flex;gap:9px;align-items:baseline;padding:5px 6px;margin:0 -6px;border-radius:6px;font-size:13.5px;text-decoration:none;color:var(--ink-2)}
+.toc a:hover{background:var(--surface-2);color:var(--ink)}
+.toc a i{font-style:normal;font-size:11.5px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums;width:16px}
+.toc a.here{color:var(--ink);font-weight:600}
+/* the team: faces in two groups */
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:18px 30px}
+.people h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--ink-3)}
+.plist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.plist li{display:flex;gap:11px;align-items:center}
+.av{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font:700 11.5px/1 var(--mono);background:var(--ff);color:var(--ff-ink)}
+.av.them{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.plist b{display:block;font-size:14.5px;font-weight:600;line-height:1.3}
+.plist span{display:block;font-size:13px;color:var(--ink-3);line-height:1.35}
+/* the timeline strip: the months across, each stage a bar under them */
+.tl{--m:6;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 8px}
+.tlm,.tlbar{display:grid;grid-template-columns:repeat(var(--m),minmax(0,1fr))}
+.tlm span{font-size:11.5px;font-weight:600;color:var(--ink-3);padding:0 0 8px 6px;border-left:1px solid var(--line-soft)}
+.tls{padding:6px 0}
+.tls .lb{display:block;font-size:13.5px;margin:0 0 5px;color:var(--ink)}
+.tls .lb small{color:var(--ink-3);font-size:12px;margin-left:6px}
+.tlbar i{height:9px;border-radius:5px;background:var(--ff-tx)}
+.tlbar i.end{background:var(--amber)}
+/* the deliverables: a tile per document, its file to open */
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ftile{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:4px 12px 12px 12px;background:var(--surface);padding:13px 14px 12px;min-width:0}
+.ftop{display:flex;justify-content:space-between;align-items:center}
+.ftype{font:700 10.5px/1 var(--mono);letter-spacing:.06em;padding:4px 6px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.ftype.pdf{color:#A93B2F;background:#FBEDEB}.ftype.ppt{color:#A3521A;background:#FDF0E6}.ftype.xls{color:#1B6E4E;background:#E9F4EF}
+:root[data-theme="dark"] .ftype.pdf{color:#E8776B;background:#33211F}:root[data-theme="dark"] .ftype.ppt{color:#EDA06A;background:#33261C}:root[data-theme="dark"] .ftype.xls{color:#63BE96;background:#1B2C26}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ftype.pdf{color:#E8776B;background:#33211F}:root:not([data-theme="light"]) .ftype.ppt{color:#EDA06A;background:#33261C}:root:not([data-theme="light"]) .ftype.xls{color:#63BE96;background:#1B2C26}}
+.fmon{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ftile b{font-size:14.5px;font-weight:600;line-height:1.3}
+.ftile p{margin:0;font-size:13px;color:var(--ink-3);line-height:1.45}
+.ftile .open{margin-top:auto;padding-top:8px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--gold);text-decoration:none}
+.ftile .open svg.i{width:14px;height:14px}
+.ftile.missing{border-style:dashed;background:transparent}
+.ftile.missing .open{color:var(--warn);font-weight:500;font-style:italic}
+.ftile.attach{border:1.5px dashed var(--gold);background:var(--amber-wash)}
+.ftile.attach .open{color:var(--gold);font-style:normal;font-weight:600}
+/* who to ask */
+.askers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.asker{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px}
+.asker .t{min-width:0;flex:1}
+.asker b{display:block;font-size:14.5px;font-weight:600}
+.asker p{margin:2px 0 10px;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+/* insights as index cards */
+.icards{columns:2 250px;column-gap:14px}
+.icards.three{columns:3 240px}
+.icard{break-inside:avoid;margin:0 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px 13px;display:block;text-decoration:none;color:inherit}
+.icard:hover{border-color:var(--gold)}
+.kind{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.kind.hiccup{color:var(--warn)}.kind.practice{color:var(--good)}.kind.lesson{color:var(--ff-tx)}
+.icard h4{margin:6px 0 8px;font-size:15px;font-weight:600;line-height:1.38;text-wrap:pretty}
+.icard q{display:block;font-size:13.5px;line-height:1.5;color:var(--ink-2);quotes:"“" "”"}
+.icard .by{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px;font-size:12px;color:var(--ink-3)}
+.icard .by b{color:var(--ink-2);font-weight:600}
+.icard .by .loose{color:var(--warn);font-weight:600}
+.addline{display:flex;align-items:center;gap:10px;border:1px dashed var(--line);border-radius:10px;padding:11px 14px;margin:0 0 14px;color:var(--ink-3);font-size:14px;background:var(--surface)}
+.addline svg.i{width:16px;height:16px;color:var(--gold)}
+.addline input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:14.5px;outline:none}
+.addline input::placeholder{color:var(--ink-3)}
+/* the insights page's own filter chips */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px}
+.chips button{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.chips button.on{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.chips button i{font-style:normal;font-weight:500;opacity:.75;margin-left:4px}
+/* the draft: the report with every part open */
+.draftbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--amber-wash);border:1px solid var(--amber);border-radius:12px;padding:11px 14px;margin:0 0 16px;font-size:13.5px;color:var(--ink-2)}
+.draftbar b{color:var(--ink);font-weight:600}
+.draftbar .right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.ed{display:block;width:100%;border:1px dashed var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:10px 12px;font:inherit;resize:vertical;outline:none}
+.ed:hover{border-color:var(--ink-3)}
+.ed:focus-visible{border-style:solid;border-color:var(--gold)}
+.ed.stand{font-size:18px;line-height:1.6;margin-top:22px;max-width:none}
+.ed.empty{border-color:var(--warn);background:var(--warn-bg)}
+.ed.empty::placeholder{color:var(--warn)}
+.later{margin:0;font-size:15px;color:var(--ink-3);font-style:italic}
+
+/* ── narrow: the console's slim bar; everything to one column ── */
+@container (max-width:719px){
+  .side{display:none}
+  .mtop{display:flex;align-items:center;gap:10px;background:var(--ff);color:var(--ff-ink);padding:8px 12px;min-height:50px}
+  .mtop svg.i{width:20px;height:20px}
+  .mtop .mk2{font:700 12px/1 var(--mono);letter-spacing:.16em}
+  .mtop .here{margin-left:auto;font-size:13px;font-weight:600;color:var(--ff-quiet)}
+  .pg{padding:16px 12px 30px}
+  .ltop h1{font-size:22px}
+  .bigsearch{flex-wrap:wrap}
+  .bigsearch .ask{border-left:0;padding-left:0;flex-basis:100%}
+  .books{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;padding:0 2px 14px}
+  .cv{min-height:150px;padding:12px 10px 12px 14px}
+  .cv h3{font-size:15px}
+  .cmeta{padding-left:14px}
+  .rhead{grid-template-columns:auto minmax(0,1fr);padding:18px 16px 20px;gap:14px}
+  .rhead .acts{grid-column:1 / -1;justify-content:flex-start}
+  .rhead .logo{width:44px;height:44px;line-height:44px;font-size:13px}
+  .rhead h1{font-size:23px}
+  .stand,.ed.stand{font-size:17px}
+  .rgrid{grid-template-columns:1fr;gap:0}
+  .glance{position:static;order:-1}
+  .drow{grid-template-columns:34px minmax(0,1fr)}
+  .drow .state{grid-column:2;justify-self:start}
+}
+@media (prefers-reduced-motion:reduce){.cover{transition:none}.cover:hover{transform:none}}
+</style>
+
+<div class="doc">
+  <h1>Case studies, as a library</h1>
+  <p class="lede">A different way in. Finished case studies stand as <b>covers on shelves, one shelf per industry</b>, with a search at the front. Opening one reads like <b>a published report</b>: the story down the page, and the facts, the contents and the people beside it. Work still running or being written sits <b>on the desk</b> below the shelves until it is done. Insights become <b>index cards</b>.</p>
+  <span class="flag">Nothing here is built · every client detail, name and file is invented for the drawing</span>
+  <div class="ctrls"><div class="ctrl"><span>Theme</span>
+    <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div></div>
+
+  <!-- ═══ 1 · THE FRONT OF THE LIBRARY ═══ -->
+  <div class="cap" id="s1"><span class="n">1</span><h2>The front of the library</h2>
+    <p>The search looks through every case study. <b>Ask</b> beside it puts a question to the assistant instead. The industries are the row under it, as they are in the client's Insights library. <b>New</b> marks a case study finished in the last 30 days.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="ltop"><h1>Case studies</h1><span class="count">9 on the shelves</span>
+        <span class="right"><span class="seg" role="group" aria-label="Show"><button type="button" class="on">Case studies</button><button type="button">Insights</button></span>
+        <button type="button" class="btn amber"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Open a piece of work</button></span></div>
+      <label class="bigsearch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        <input id="q1" type="search" placeholder="Search by client, industry, or what we did">
+        <button type="button" class="ask"><svg class="i" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></svg>Ask a question instead</button></label>
+      <nav class="catrow"><a href="#s1" class="on">All<i>9</i></a><a href="#s1">Retail &amp; E-commerce<i>3</i></a><a href="#s1">Real Estate<i>2</i></a><a href="#s1">Manufacturing<i>2</i></a><a href="#s1">Food &amp; Beverage<i>1</i></a><a href="#s1">Transportation<i>1</i></a></nav>
+
+      <section class="shelf"><div class="shh"><h2>Newest</h2><span class="n">finished most recently</span></div>
+        <div class="books">
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RT</span><span class="newtag">New</span><span class="cind">Retail &amp; E-commerce</span><h3>Reporting set-up 2025</h3><span class="cyr">Jul – Dec 2025</span></div><div class="cmeta"><b>Raya Trade</b><span>5 deliverables · 6 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">WD</span><span class="cind">Real Estate &amp; Property</span><h3>Strategy build 2025</h3><span class="cyr">Jan – Jun 2025</span></div><div class="cmeta"><b>Wander</b><span>6 deliverables · 4 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RHI</span><span class="cind">Manufacturing</span><h3>Strategy refresh 2024</h3><span class="cyr">Feb – May 2024</span></div><div class="cmeta"><b>Reliance Heavy Industries</b><span>5 deliverables · 2 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RT</span><span class="cind">Retail &amp; E-commerce</span><h3>Group strategy 2024</h3><span class="cyr">Jan – Sep 2024</span></div><div class="cmeta"><b>Raya Trade</b><span>8 deliverables · 9 insights</span></div></a>
+        </div></section>
+
+      <section class="shelf"><div class="shh"><h2>Retail &amp; E-commerce</h2><span class="n">3</span><a class="link" href="#s1">See the shelf ›</a></div>
+        <div class="books">
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RT</span><span class="cind">Retail &amp; E-commerce</span><h3>Reporting set-up 2025</h3><span class="cyr">Jul – Dec 2025</span></div><div class="cmeta"><b>Raya Trade</b><span>5 deliverables · 6 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RT</span><span class="cind">Retail &amp; E-commerce</span><h3>Group strategy 2024</h3><span class="cyr">Jan – Sep 2024</span></div><div class="cmeta"><b>Raya Trade</b><span>8 deliverables · 9 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">RT</span><span class="cind">Retail &amp; E-commerce</span><h3>Channel strategy 2022</h3><span class="cyr">Mar – Aug 2022</span></div><div class="cmeta"><b>Raya Trade</b><span>4 deliverables · 3 insights</span></div></a>
+        </div></section>
+
+      <section class="shelf"><div class="shh"><h2>Real Estate &amp; Property</h2><span class="n">2</span><a class="link" href="#s1">See the shelf ›</a></div>
+        <div class="books">
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">WD</span><span class="cind">Real Estate &amp; Property</span><h3>Strategy build 2025</h3><span class="cyr">Jan – Jun 2025</span></div><div class="cmeta"><b>Wander</b><span>6 deliverables · 4 insights</span></div></a>
+          <a class="cover" href="#s2"><div class="cv"><span class="logo">WD</span><span class="cind">Real Estate &amp; Property</span><h3>Portfolio review 2023</h3><span class="cyr">Apr – Jul 2023</span></div><div class="cmeta"><b>Wander</b><span>3 deliverables · 2 insights</span></div></a>
+        </div></section>
+
+      <p class="cap" style="margin:-4px 0 26px"><span style="font-size:13px;color:var(--ink-3)">Manufacturing, Food &amp; Beverage and Transportation shelves follow below, the same way.</span></p>
+
+      <section class="desk"><h2>On the desk</h2><p class="sub">Not on the shelves yet: still running, or being written up.</p>
+        <div class="drow"><span class="spine">RT</span><span class="tx"><b>Reporting cycle 2026, first half</b><span>Raya Trade · Mohamed Essam is writing it · due Fri 30 Oct</span></span><span class="state write">Being written</span></div>
+        <div class="drow"><span class="spine">NL</span><span class="tx"><b>Operating model 2023</b><span>Nile Logistics · archived · Islam Saadany is writing it · due Fri 13 Nov</span></span><span class="state write">Being written</span></div>
+        <div class="drow"><span class="spine run">EA</span><span class="tx"><b>Capability review</b><span>El Abd Foods · since Aug 2026 · 3 insights so far</span></span><span class="state run">Running</span></div>
+        <div class="toplace"><b>12 insights</b> are not in a case study yet. <a class="link" href="#s3">Place them ›</a></div>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 2 · A CASE STUDY ═══ -->
+  <div class="cap" id="s2"><span class="n">2</span><h2>A case study</h2>
+    <p>Laid out like a report a new joiner can read in ten minutes. The cover becomes the header. <b>In short</b> is the opening paragraph, in large type. The facts and the contents stay beside the story as you scroll. The months are drawn as a strip, deliverables as files, and the people as faces.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="crumb"><a href="#s1">Case studies</a><span>›</span><a href="#s1">Real Estate &amp; Property</a><span>›</span><span>Strategy build 2025</span></div>
+      <header class="rhead">
+        <span class="logo">WD</span>
+        <div><div class="eb">Real Estate &amp; Property · Jan – Jun 2025</div><h1>Strategy build 2025</h1><p class="cl"><b>Wander</b> · written by Islam Saadany</p></div>
+        <div class="acts"><span class="chip done">Done</span></div>
+      </header>
+      <p class="stand">Wander asked us for a five-year strategy after two years of fast growth had left each business unit planning on its own. Over six months we built one group strategy with three business-unit plans under it, a scorecard of 24 measures, and the reporting routine. The board approved it in June 2025, and Wander ran its first quarterly review in September without us.</p>
+      <div class="rgrid">
+        <article>
+          <section class="rsec"><h2><span class="no">01</span>The client and why they came to us</h2>
+            <p>Wander develops and manages residential and holiday property. Growth had come project by project, and by 2024 each business unit set its own targets. The new CEO wanted one direction the board could hold the units to.</p></section>
+          <section class="rsec"><h2><span class="no">02</span>What we were asked to do</h2>
+            <p>Build the group strategy and the three business-unit plans under it, agree the measures the board would track, and set up quarterly reporting so the team could run it alone.</p></section>
+          <section class="rsec"><h2><span class="no">03</span>The team</h2>
+            <div class="people">
+              <div><h4>Forefront</h4><ul class="plist">
+                <li><span class="av">IS</span><span><b>Islam Saadany</b><span>Engagement lead</span></span></li>
+                <li><span class="av">ME</span><span><b>Mohamed Essam</b><span>Strategy consultant</span></span></li></ul></div>
+              <div><h4>Wander</h4><ul class="plist">
+                <li><span class="av them">KA</span><span><b>Karim A.</b><span>CEO, the sponsor</span></span></li>
+                <li><span class="av them">DM</span><span><b>Dina M.</b><span>Head of Strategy, owned it day to day</span></span></li>
+                <li><span class="av them">OS</span><span><b>Omar S.</b><span>CFO, owned the targets</span></span></li></ul></div>
+            </div></section>
+          <section class="rsec"><h2><span class="no">04</span>Timeline<span class="ct">6 months</span></h2>
+            <div class="tl" style="--m:6">
+              <div class="tlm"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+              <div class="tls"><span class="lb">Interviews and the current-state review</span><div class="tlbar"><i style="grid-column:1 / 2"></i></div></div>
+              <div class="tls"><span class="lb">Group direction and pillars <small>two board workshops</small></span><div class="tlbar"><i style="grid-column:2 / 4"></i></div></div>
+              <div class="tls"><span class="lb">Business-unit plans and the scorecard</span><div class="tlbar"><i style="grid-column:4 / 6"></i></div></div>
+              <div class="tls"><span class="lb">Board approval and handover</span><div class="tlbar"><i class="end" style="grid-column:6 / 7"></i></div></div>
+            </div></section>
+          <section class="rsec"><h2><span class="no">05</span>Deliverables<span class="ct">6</span></h2>
+            <div class="files">
+              <div class="ftile"><div class="ftop"><span class="ftype pdf">PDF</span><span class="fmon">Jan 2025</span></div><b>Current-state review</b><p>Findings from 22 interviews and three years of financials</p><a class="open" href="#s2" data-i="dl">Open the file</a></div>
+              <div class="ftile"><div class="ftop"><span class="ftype ppt">PPTX</span><span class="fmon">Mar 2025</span></div><b>Group strategy</b><p>Direction, four pillars and the five-year targets, as approved</p><a class="open" href="#s2" data-i="dl">Open the file</a></div>
+              <div class="ftile"><div class="ftop"><span class="ftype pdf">PDF</span><span class="fmon">May 2025</span></div><b>Business-unit plans</b><p>One plan per unit, under the group pillars</p><a class="open" href="#s2" data-i="dl">Open the file</a></div>
+              <div class="ftile"><div class="ftop"><span class="ftype xls">XLSX</span><span class="fmon">May 2025</span></div><b>Scorecard</b><p>24 measures, each with an owner and a target</p><a class="open" href="#s2" data-i="dl">Open the file</a></div>
+              <div class="ftile"><div class="ftop"><span class="ftype pdf">PDF</span><span class="fmon">Jun 2025</span></div><b>Board approval pack</b><p>The pack the board signed off on 18 June</p><a class="open" href="#s2" data-i="dl">Open the file</a></div>
+              <div class="ftile missing"><div class="ftop"><span class="ftype">—</span><span class="fmon">Jun 2025</span></div><b>Reporting playbook</b><p>How to run a quarterly review, step by step</p><span class="open">No file attached</span></div>
+            </div></section>
+          <section class="rsec"><h2><span class="no">06</span>What came of it</h2>
+            <p>The board approved the strategy on 18 June 2025. Wander ran its first quarterly review in September without us, and 21 of the 24 measures were reported on time.</p></section>
+          <section class="rsec"><h2><span class="no">07</span>Who to ask</h2>
+            <div class="askers">
+              <div class="asker"><span class="av">IS</span><div class="t"><b>Islam Saadany</b><p>The board workshops, and how the targets were agreed with the CFO</p><button type="button" class="btn">Ask Islam</button></div></div>
+              <div class="asker"><span class="av">ME</span><div class="t"><b>Mohamed Essam</b><p>The business-unit plans, and how the scorecard was built</p><button type="button" class="btn">Ask Mohamed</button></div></div>
+            </div></section>
+          <section class="rsec"><h2><span class="no">08</span>Insights from this work<span class="ct">4</span></h2>
+            <div class="icards">
+              <a class="icard" href="#s3"><span class="kind hiccup">Hiccup</span><h4>The weighting workshop ran twice because the CEO was not in the first one</h4><q>Do not run a weighting session without the person who signs off on the weights.</q><span class="by"><b>Islam Saadany</b> · Feb 2025</span></a>
+              <a class="icard" href="#s3"><span class="kind practice">Practice</span><h4>Interview the CFO before the first workshop, not after it</h4><q>The targets are the CFO's numbers. Start there.</q><span class="by"><b>Mohamed Essam</b> · Jan 2025</span></a>
+              <a class="icard" href="#s3"><span class="kind lesson">Lesson</span><h4>Unit heads accept group targets faster when they draft their own first</h4><span class="by"><b>Mohamed Essam</b> · Apr 2025</span></a>
+              <a class="icard" href="#s3"><span class="kind practice">Practice</span><h4>Hand the reporting playbook over a month before the end</h4><q>They ran the first review alone because they had practised it with us.</q><span class="by"><b>Islam Saadany</b> · Jun 2025</span></a>
+            </div></section>
+        </article>
+        <aside class="glance">
+          <div class="gbox"><h3>At a glance</h3><dl>
+            <dt>Client</dt><dd>Wander</dd><dt>Industry</dt><dd>Real Estate</dd><dt>Size</dt><dd>Mid-size</dd>
+            <dt>When</dt><dd>Jan – Jun 2025</dd><dt>Deliverables</dt><dd>6</dd><dt>Insights</dt><dd>4</dd>
+            <dt>Written</dt><dd>14 Jul 2025</dd></dl></div>
+          <div class="gbox"><h3>Contents</h3><ol class="toc">
+            <li><a href="#s2" class="here"><i>·</i>In short</a></li><li><a href="#s2"><i>01</i>The client and why</a></li><li><a href="#s2"><i>02</i>What we were asked</a></li><li><a href="#s2"><i>03</i>The team</a></li><li><a href="#s2"><i>04</i>Timeline</a></li><li><a href="#s2"><i>05</i>Deliverables</a></li><li><a href="#s2"><i>06</i>What came of it</a></li><li><a href="#s2"><i>07</i>Who to ask</a></li><li><a href="#s2"><i>08</i>Insights</a></li></ol></div>
+          <div class="gbox" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn">Ask Islam</button><button type="button" class="btn">Edit</button></div>
+        </aside>
+      </div>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 3 · INSIGHTS ═══ -->
+  <div class="cap" id="s3"><span class="n">3</span><h2>Insights, as index cards</h2>
+    <p>The second half of the library. Each card is one insight: its kind, its title, and what the next person should know, which is the line most worth reading. A card names its case study, or says it has none yet. The line at the top writes a new one.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="ltop"><h1>Case studies</h1><span class="count">26 insights</span>
+        <span class="right"><span class="seg" role="group" aria-label="Show"><button type="button">Case studies</button><button type="button" class="on">Insights</button></span>
+        <button type="button" class="btn">Write up a period</button></span></div>
+      <label class="bigsearch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        <input id="q3" type="search" placeholder="Search insights">
+        <button type="button" class="ask"><svg class="i" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></svg>Ask a question instead</button></label>
+      <nav class="catrow"><a href="#s3" class="on">All<i>26</i></a><a href="#s3">Retail &amp; E-commerce<i>15</i></a><a href="#s3">Real Estate<i>6</i></a><a href="#s3">Manufacturing<i>3</i></a><a href="#s3">Food &amp; Beverage<i>2</i></a></nav>
+      <div class="chips"><button type="button" class="on">Every kind</button><button type="button">Hiccups<i>9</i></button><button type="button">Practices<i>10</i></button><button type="button">Lessons<i>7</i></button><button type="button">Not in a case study yet<i>12</i></button></div>
+      <label class="addline"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg><input id="w3" type="text" placeholder="Write an insight: its title first, the rest when you open it"></label>
+      <div class="icards three">
+        <a class="icard" href="#s3"><span class="kind hiccup">Hiccup</span><h4>Unit heads reported late in the first cycle because the reminder went to their assistants</h4><q>Check who the reminders go to before the first cycle, not after it.</q><span class="by"><b>Raya Trade</b> · Reporting cycle 2026 · Mohamed · Mar 2026</span></a>
+        <a class="icard" href="#s3"><span class="kind practice">Practice</span><h4>Interview the CFO before the first workshop, not after it</h4><q>The targets are the CFO's numbers. Start there.</q><span class="by"><b>Wander</b> · Strategy build 2025 · Mohamed · Jan 2025</span></a>
+        <a class="icard" href="#s3"><span class="kind lesson">Lesson</span><h4>Agree which capabilities are strategic before scoring any of them</h4><q>We scored all 31 and spent the next session arguing about which mattered.</q><span class="by"><b>El Abd Foods</b> · Capability review · Mohamed · Oct 2026</span></a>
+        <a class="icard" href="#s3"><span class="kind hiccup">Hiccup</span><h4>Two units used different definitions of on-time delivery</h4><span class="by"><b>Raya Trade</b> · <span class="loose">not in a case study yet</span> · Islam · Sep 2025</span></a>
+        <a class="icard" href="#s3"><span class="kind hiccup">Hiccup</span><h4>The weighting workshop ran twice because the CEO was not in the first one</h4><q>Do not run a weighting session without the person who signs off on the weights.</q><span class="by"><b>Wander</b> · Strategy build 2025 · Islam · Feb 2025</span></a>
+        <a class="icard" href="#s3"><span class="kind practice">Practice</span><h4>Score each capability with the plant managers in the room, not from the reports</h4><span class="by"><b>El Abd Foods</b> · Capability review · Islam · Sep 2026</span></a>
+      </div>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 4 · WHILE THE WORK RUNS ═══ -->
+  <div class="cap" id="s4"><span class="n">4</span><h2>A piece of work while it runs</h2>
+    <p>Opened from the desk. The same report page, with the story still to come and the insights filling up as the work goes. <b>Ask for the write-up</b> shows for admins only, when the work ends.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="crumb"><a href="#s1">Case studies</a><span>›</span><a href="#s1">On the desk</a><span>›</span><span>Capability review</span></div>
+      <header class="rhead">
+        <span class="logo">EA</span>
+        <div><div class="eb">Food &amp; Beverage · since Aug 2026</div><h1>Capability review</h1><p class="cl"><b>El Abd Foods</b> · opened by Mohamed Essam</p></div>
+        <div class="acts"><span class="chip run">Running</span><button type="button" class="btn amber">Ask for the write-up</button></div>
+      </header>
+      <p class="stand later" style="font-size:16px">The story is written when the work ends.</p>
+      <section class="rsec"><h2>Insights so far<span class="ct">3</span></h2>
+        <label class="addline"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg><input id="w4" type="text" placeholder="Write an insight from this work"></label>
+        <div class="icards three">
+          <a class="icard" href="#s3"><span class="kind lesson">Lesson</span><h4>Agree which capabilities are strategic before scoring any of them</h4><span class="by"><b>Mohamed Essam</b> · Oct 2026</span></a>
+          <a class="icard" href="#s3"><span class="kind hiccup">Hiccup</span><h4>The maturity scale meant different things to sales and to operations</h4><span class="by"><b>Mohamed Essam</b> · Sep 2026</span></a>
+          <a class="icard" href="#s3"><span class="kind practice">Practice</span><h4>Score each capability with the plant managers in the room, not from the reports</h4><span class="by"><b>Islam Saadany</b> · Sep 2026</span></a>
+        </div></section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 5 · THE DRAFT ═══ -->
+  <div class="cap" id="s5"><span class="n">5</span><h2>The draft</h2>
+    <p>After the interview is pasted back, the writer sees the report exactly as a new joiner will, with every part open to change: dashed edges are editable, and a missing file is a gold tile to drop it on. The bar at the top says who can see it and what is still missing.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="draftbar"><span><b>Draft</b> · only you and the admins can see it · 7 of 8 sections filled · 2 files missing</span>
+        <span class="right"><button type="button" class="btn">Save the draft</button><button type="button" class="btn amber">Mark it done</button></span></div>
+      <header class="rhead">
+        <span class="logo">NL</span>
+        <div><div class="eb">Transportation · Mar – Nov 2023</div><h1>Operating model 2023</h1><p class="cl"><b>Nile Logistics</b> · archived · Islam Saadany is writing it</p></div>
+        <div class="acts"><span class="chip draft">Draft</span></div>
+      </header>
+      <textarea class="ed stand" id="e1" rows="3" aria-label="In short">Nile Logistics asked us to redesign how its three regional depots were run after two years of missed delivery targets. We moved planning to one central team, set five shared measures and ran the first two monthly reviews with them. On-time delivery went from 71% to 88% by the end of the year.</textarea>
+      <section class="rsec"><h2><span class="no">05</span>Deliverables<span class="ct">4 · 2 files missing</span></h2>
+        <div class="files">
+          <div class="ftile"><div class="ftop"><span class="ftype pdf">PDF</span><span class="fmon">Apr 2023</span></div><b>Depot diagnostic</b><p>Visits and figures from all three depots</p><a class="open" href="#s5" data-i="dl">depot-diagnostic.pdf</a></div>
+          <div class="ftile attach"><div class="ftop"><span class="ftype">—</span><span class="fmon">Jul 2023</span></div><b>Operating model design</b><p>Central planning team, roles and the weekly rhythm</p><span class="open" data-i="up">Drop the file here</span></div>
+          <div class="ftile"><div class="ftop"><span class="ftype xls">XLSX</span><span class="fmon">Aug 2023</span></div><b>Five shared measures</b><p>Definitions, owners and targets</p><a class="open" href="#s5" data-i="dl">shared-measures.xlsx</a></div>
+          <div class="ftile attach"><div class="ftop"><span class="ftype">—</span><span class="fmon">Oct 2023</span></div><b>Monthly review pack</b><p>The template the depots now report on</p><span class="open" data-i="up">Drop the file here</span></div>
+        </div></section>
+      <section class="rsec"><h2><span class="no">06</span>What came of it</h2>
+        <textarea class="ed empty" id="e6" rows="2" aria-label="What came of it" placeholder="Nothing came back for this. Type it in, or leave it empty and it will not be shown."></textarea></section>
+      <p style="margin:18px 0 0;font-size:13px;color:var(--ink-3)">The other sections, the team and the three insights from the interview follow the same way, each open to change.</p>
+    </div></div>
+  </div></div>
+
+  <div class="notes">
+    <div class="note"><h2>What is new here</h2><ul>
+      <li><b>Covers on shelves.</b> One shelf per industry, plus Newest. A cover shows the client's mark, the industry, the name of the work and its months.</li>
+      <li><b>The report page.</b> The story runs down the left. The facts, the contents and the buttons stay on the right as you read.</li>
+      <li><b>The desk.</b> Running and being-written work stays off the shelves until it is done, so the shelves hold only finished case studies.</li>
+    </ul></div>
+    <div class="note"><h2>What it costs</h2><ul>
+      <li><b>It is a new look on the console.</b> No other page has covers or shelves. The colours, buttons and type are still the console's own.</li>
+      <li><b>A cover needs the client's mark.</b> A past client added in three fields has none, so its cover shows its initials until a logo is added.</li>
+      <li><b>Covers take more room than rows.</b> About four to a shelf on a laptop and two on a phone.</li>
+    </ul></div>
+    <div class="note"><h2>Still to draw, once this direction is right</h2><ul>
+      <li>Opening a piece of work (admins).</li>
+      <li>The interview prompt and the paste, before the draft.</li>
+      <li>A past client on the Clients page, and the row on My work.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    cases:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    dl:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+    up:'<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')) + e.innerHTML; });
+
+  /* Today's column (§601), with Memory renamed Case studies in its own place */
+  var GROUPS = [
+    { h:"Work",      items:[["mywork","My work"],["clients","Clients"]] },
+    { h:"Team",      items:[["consultants","Consultants"],["access","Who sees what"]] },
+    { h:"Knowledge", items:[["cases","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]] },
+    { items:[["history","History"]] }
+  ];
+  var NAMES = {}; GROUPS.forEach(function(g){ g.items.forEach(function(t){ NAMES[t[0]] = t[1]; }); });
+  document.querySelectorAll('.app').forEach(function(a){
+    var on = a.getAttribute('data-on');
+    a.querySelector('.side').innerHTML =
+      '<div class="brand"><span class="bmk">FOREFRONT</span><span class="nm">Platform</span></div>' +
+      '<nav class="snav" aria-label="Main menu">' + GROUPS.map(function(g){
+        return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){
+          return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>';
+        }).join('') + '</div>';
+      }).join('') + '</nav>' +
+      '<div class="me"><span class="av0" aria-hidden="true">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
+    a.querySelector('.mtop').innerHTML = ic('menu') + '<span class="mk2">FOREFRONT</span><span class="here">' + NAMES[on] + '</span>';
+  });
+
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){
+    b.addEventListener('click', function(){ document.documentElement.setAttribute('data-theme', b.getAttribute('data-v')); press(b.getAttribute('data-v')); });
+  });
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (!document.documentElement.hasAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  press(dark ? 'dark' : 'light');
+})();
+</script>

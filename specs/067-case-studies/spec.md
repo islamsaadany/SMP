@@ -3,12 +3,14 @@
 **Status:** **clarified and DRAWN 2026-10-23, waiting on sign-off; nothing
 built.** Eleven decisions are Islam's, taken the same day as three rounds of
 questions (§3), and the name is his too: *"call it case studies"*.
-**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies-tracker-look.html`
-— eight drawings in the Internal Tracker's look (rule 1c, A17), waiting on
-sign-off. The first drawing, `2026-10-23_case-studies.html`, is kept as the
-record and was **rejected by Islam**: *"very poor design. check internal
-tracker and show me what we can adjust"* (§10.1). His three answers on it are
-in §10.
+**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies-library.html`
+— Case studies as **a library** (rule 1c, A17), five drawings, waiting on
+sign-off. Two earlier drawings are kept as the record and both were turned
+down by Islam: the first, `2026-10-23_case-studies.html`, as *"very poor
+design"*; the second, `2026-10-23_case-studies-tracker-look.html`, because
+*"that view is suitable for the tracker only. the view of the cases should be
+different … how would a library look like?"* (§10.1, §10.2). His three
+answers on the first are in §10.
 
 **Read with spec 045 (the consulting memory)**, which this changes rather than
 sits beside: a case study is the main thing and the memory's entries move
@@ -273,6 +275,40 @@ Insights and inside a case study, and — for an admin — opens a piece of work
 with its client, months and writer arriving beside the name, as the Tracker's
 topic, week and owner do. The list groups by state (*To write · Running ·
 Done*), and *Group by* offers client and industry.
+
+### 10.2 · Not the Tracker either: a library
+
+Islam, of the second drawing: *"I think that view is suitable for the tracker
+only. the view of the cases should be different change your perspective and
+think how would a library look like?"* The Tracker's ledger is for work that
+moves every week; a case study is finished work that people come to **read
+and browse**. So the third drawing is a library, and says where it is new:
+
+- **The front of the library**: one search across every case study, with
+  *Ask a question instead* beside it (the assistant); the industries as the
+  row under it — the rule spec 053 already set for the client's Insights
+  library, *a library's second row is its categories*; then **covers on
+  shelves**, a *Newest* shelf and one shelf per industry.
+- **A cover**: the client's mark, the industry, the name of the work and its
+  months on Forefront's navy; the client and the counts under it. *New* for a
+  case study finished in the last 30 days.
+- **The desk**: running and being-written work stays **off the shelves** until
+  it is done, so a shelf only ever holds finished case studies.
+- **A case study reads as a report**: the cover becomes the header, *In short*
+  is the opening paragraph in large type, the story runs down the left, and
+  *At a glance*, the contents and the buttons stay on the right. The timeline
+  is a strip of months with each stage as a bar; deliverables are file tiles;
+  the team and who to ask are faces.
+- **Insights are index cards**: kind, title, and *what the next person should
+  know* as the line most worth reading; the card names its case study or says
+  it has none yet.
+- **The draft is the report with every part open to change**: dashed edges
+  are editable, a missing file is a gold tile to drop it on.
+
+**Costs, stated on the drawing:** a look no other console page has; a past
+client added in three fields has no mark, so its cover shows initials until a
+logo is added; covers take more room than rows. **Not drawn yet, said so on
+it:** opening a piece of work, the interview step, a past client, My work.
 
 ### The three, as they were put
 

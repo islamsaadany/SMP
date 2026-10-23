@@ -67,6 +67,8 @@ const LOG_ROW_CAP = 200;
    as {full:true}, which tells them to fetch the graph. */
 const PEEK_CAP = 50;
 const SAVE_BYTES_CAP = 300 * 1024;
+/* §588.2: how long a numbered save is kept for other tabs to ask about. */
+const SAVES_KEPT_DAYS = 7;
 
 /* ── SAVES TAKE TURNS (2026-09-01 concurrency safety) ────────────────────────
    A save is a read-modify-write: read the stored graph, lay this client's
@@ -259,7 +261,11 @@ module.exports = async function handler(req, res) {
         const r = await client.query(
           "SELECT id, at, person_key, person_name, changes FROM saves WHERE id > $1 ORDER BY id ASC LIMIT " + (PEEK_CAP + 1), [after]);
         const page = r.rows.slice(0, PEEK_CAP);
+        /* §588.2: and the oldest entry still kept (the list is swept after a
+           week), so a tab holding an older number takes the graph instead. */
+        const oldest = (await client.query("SELECT min(id) AS id FROM saves")).rows[0].id;
         return send(res, 200, { ok: true, more: r.rows.length > PEEK_CAP,
+          oldest: oldest === null ? null : Number(oldest),
           seq: page.length ? Number(page[page.length - 1].id) : Number(after),
           changes: page.map(function (x) {
             return { seq: Number(x.id), by: x.person_name || x.person_key, byKey: x.person_key, at: x.at, changes: x.changes }; }) });
@@ -410,6 +416,9 @@ module.exports = async function handler(req, res) {
                 "INSERT INTO saves (person_key, person_name, changes) VALUES ($1, $2, $3::jsonb) RETURNING id",
                 [me.key, me.name || null, kept]);
               seq = Number(sv.rows[0].id);
+              /* §588.2: kept for a week — a tab only needs the entries since
+                 it was opened; what is older is swept on every save. */
+              await client.query("DELETE FROM saves WHERE at < now() - interval '" + SAVES_KEPT_DAYS + " days'");
             }
           }
         }

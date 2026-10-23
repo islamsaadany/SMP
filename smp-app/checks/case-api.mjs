@@ -240,6 +240,25 @@ await section("7 · insights inside a piece of work (spec 067 §5)", async () =>
   check(r.status === 200 && n0 === 0 && n1 === 2, "…and with titles both land, in the piece of work", JSON.stringify([n0, n1, r.j]));
 });
 
+await section("7b · Home's two cards (spec 068)", async () => {
+  let r = await cs(writer, { action: "home" });
+  const w = (r.j.writing || []).find((x) => x.id === caseId);
+  const f0 = w ? w.filled : -1;
+  check(r.status === 200 && w && f0 >= 0 && f0 < 8 && w.client.key === "raya-trade", "the writer's Home lists the write-up asked of them, with how many of its eight sections hold something", r.status + " " + JSON.stringify(w || r.j).slice(0, 300));
+  check((r.j.fresh || []).some((x) => x.id === pastId) && !(r.j.fresh || []).some((x) => x.state !== "done"), "…and the case study marked done is among the newly finished, with no draft among them", JSON.stringify((r.j.fresh || []).map((x) => x.name)));
+  await owner.query("UPDATE case_studies SET in_short = 'a', stages = '[{\"when\":\"Mar\",\"what\":\"x\"}]' WHERE id = $1", [caseId]);
+  r = await cs(writer, { action: "home" });
+  check(((r.j.writing || []).find((x) => x.id === caseId) || {}).filled === f0 + 2, "…and the count follows what is written: two sections more, two more", JSON.stringify([f0, ((r.j.writing || []).find((x) => x.id === caseId) || {}).filled]));
+  await owner.query("UPDATE case_studies SET in_short = '', stages = '[]' WHERE id = $1", [caseId]);
+  r = await cs(reader, { action: "home" });
+  check(r.status === 200 && !(r.j.writing || []).some((x) => x.id === caseId), "somebody else's write-up is not on my Home", JSON.stringify(r.j.writing));
+  const n0 = r.j.loose;
+  const extra = (await mem(reader, { action: "save", client: "raya-trade", title: "Loose for Home" })).j.id;
+  r = await cs(reader, { action: "home" });
+  check(r.j.loose === n0 + 1, "…and an insight of mine in no case study is counted for placing", JSON.stringify([n0, r.j.loose]));
+  await owner.query("DELETE FROM memory_entries WHERE id = $1", [extra]);
+});
+
 await section("8 · files: the store's absence answers in words", async () => {
   const d = (await owner.query("SELECT deliverables FROM case_studies WHERE id = $1", [pastId])).rows[0].deliverables[0];
   let r = await cs(reader, { action: "fileBegin", id: pastId, deliverable: d.id, name: "x.pdf", bytes: 10 });

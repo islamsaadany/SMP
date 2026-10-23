@@ -209,6 +209,29 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     return ok({ cases: rows.map(head), toPlace, canOpen: mayOpen(me), me: me.id });
   }
 
+  /* HOME'S TWO CARDS (spec 068): the write-ups this person is asked for, each
+     with how many of the eight sections hold something; the case studies
+     marked done in the last 30 days; and how many of their own insights are
+     in no case study yet. Done ones are read by everyone, so `fresh` needs no
+     rule; `writing` is the person's own by its WHERE. */
+  if (action === "home") {
+    const writing = (await pool.query(
+      "SELECT " + HEAD + ", (" +
+      "(cs.in_short <> '')::int + (cs.client_why <> '')::int + (cs.asked_to_do <> '')::int + " +
+      "(jsonb_array_length(cs.our_team) + jsonb_array_length(cs.their_team) > 0)::int + " +
+      "(jsonb_array_length(cs.stages) > 0)::int + (jsonb_array_length(cs.deliverables) > 0)::int + " +
+      "(cs.came_of_it <> '')::int + (jsonb_array_length(cs.who_to_ask) > 0)::int) AS filled " +
+      FROM + " WHERE cs.state = 'writing' AND " +
+      (brk() === "home-all" ? "$1::uuid IS NOT NULL" : "cs.writer_id = $1") +      /* RED: everybody's write-ups on my Home */
+      " ORDER BY cs.due NULLS LAST, cs.name", [me.id])).rows;
+    const fresh = (await pool.query(
+      "SELECT " + HEAD + " " + FROM + " WHERE cs.state = 'done' AND cs.done_at > now() - interval '30 days' " +
+      "ORDER BY cs.done_at DESC LIMIT 3")).rows;
+    const loose = (await pool.query(
+      "SELECT count(*)::int AS n FROM memory_entries WHERE case_id IS NULL AND author_id = $1", [me.id])).rows[0].n;
+    return ok({ writing: writing.map((r) => ({ ...head(r), filled: Number(r.filled) || 0 })), fresh: fresh.map(head), loose });
+  }
+
   if (action === "case") {
     const r = await rowFor(pool, body.id);
     if (!r) return no(404, GONE);

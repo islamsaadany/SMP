@@ -282,7 +282,11 @@ def main():
         }""")
         check("a client nobody may open draws no rows — there is no way in (§61)", shut["rows"] == 0, shut["rows"])
         check("…and still says so", "Listed only" in shut["text"], shut["text"][:80])
-        demo = pg.evaluate("""() => document.querySelectorAll('.apart .ccard .mrow').length""")
+        # the worked example sits under Demo since the Clients filter (spec
+        # 067's §602.6), so it is pressed rather than found in a band
+        pg.click('.clwhich button[data-which="demo"]')
+        pg.wait_for_timeout(200)
+        demo = pg.evaluate("""() => document.querySelectorAll('[data-grid="demo"] .ccard .mrow').length""")
         check("the worked example is opened the same way (§317 left it a card like any other)", demo == 1, demo)
 
         print("── 4 · Settings is still its own control")

@@ -163,8 +163,10 @@ with sync_playwright() as pw:
     pg = br.new_page(viewport={"width": 1440, "height": 900})
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.goto(BASE + "/platform")
-    check("the console opens on My work with its first answer", wait_for(pg, "Action answer1"), text(pg)[:120])
+    # the console opens on Home since spec 068, which reads `mywork` too; the
+    # kept copy walked here is My tasks', so the walk starts on it by address
+    pg.goto(BASE + "/platform#mywork")
+    check("the console opens on My tasks, by its address, with its first answer", wait_for(pg, "Action answer1"), text(pg)[:120])
     tab(pg, "clients")
     check("Clients arrives fresh the first time", wait_for(pg, "RHI answer"), text(pg)[:120])
 

@@ -68795,3 +68795,31 @@ Islam: *"can you refine the design of the other modules based on hte practice we
 **CHECKED.** `checks/module-look.mjs` gains a section that serves the three pages through their own `serve()` on a client whose colour is a light tan and asks, of each: the panel names the page and its count is the rows it drew, rows non-zero first (§113.8); the panel's ground IS the client's colour; every word and control is in Source Sans 3 and the face is loaded, not merely named; every word on the page reads on that tan; at 400px nothing runs past and the counts sit inside the panel; Portfolio's four column names are one size. Each claim has its break and each went red: `ledger-fixed-bar`, `ledger-inherit`, `ledger-phone-wide`, `next-look-big` (with `bar-ink`, `check:look:red` runs five). REWRITTEN, NEVER LOOSENED (§218): `checks/insights.mjs`' count and its two-person count read the panel's tile; `checks/notes.mjs` asks for the status word's class; `checks/portfolio-module.mjs` reads the strip's count from the panel, and the unread page's dashes on all THREE counts where it asked for one. Results: look 138 / 0, its five breaks red (`ledger-inherit` on Insights and Notes only: Portfolio's own `button{font:inherit}`, the form a browser does read, keeps its one button in the page's face under the break); insights 137 / 0; insights-tab 24 / 0; notes 171 / 0; modules 234 / 0; portfolio-module 207 / 1 — the one is *"a span that crosses a year says BOTH years"* on the plan page, which fails the same way without this change: it names *Sep 26 – Feb 27* against dates the fixture places relative to today, so it went stale when the month turned. Said, not touched here (rule 1b). Typecheck clean; the build leaves no committed file changed.
 
 **§605 AND §544.16 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch twice: first §599 and §600, then §601 (the console's left column) and §604 (slide column widths). §601 took this section's number, so it was renumbered §605 BEFORE the second merge (§264.3), and main was merged INTO the branch both times. The decision record keeps its sections in number order and the progress lines newest first; the record files were COMBINED, never picked (§318.7). The built file, `shell.js`, `client-setup.js` and `sw.js` were REGENERATED from the merged sources, never resolved by hand. On the merged tree: typecheck clean; `generated-in-step`, `release-stamp` and `built-in-step` all clear; `sw.js` parses; `check:look` 138 / 0, `insights` 137 / 0, `insights:tab` 24 / 0, `notes` 171 / 0, `modules` 234 / 0, `portfolio:module` 207 / 1 (the stale year-span line, as above and as on `main`). Then a clean fast-forward, and this note with the `SHELL` bump `smp-shell-v6.95-slide-widths` → **`smp-shell-v6.96-modules-look`** as a commit `main` alone holds (§91), the name held by no commit in any ref's history after fetching every ref (§94.16). The served worker carries only the notification half, so its release stamp moves with the built file rather than with this name. No forced sign-out: nothing stored moves, no migration, and no save is judged differently. Witnesses: `/sw.js` release **`2daf4a885ba00776`** and `/shell.js` **5,188,520** bytes before; after, **`9efc09704b914feb`** and **5,188,657**.
+
+## §614 — Home: the console opens on your clients, your tasks and case studies, and the console is compact (2026-10-23, spec 068)
+
+Islam asked for a dashboard to open on ("maybe we adjust my work to be the
+dashboard"), named it **Home**, and chose its shape over four drawings
+(`design-mockups/home/`): the greeting band in a serif ("Your SMP Home"), your
+clients on the left, your tasks on the right in ClientPlus's panel with
+Overdue and This week as tabs, and two case studies cards below. My work is
+renamed **My tasks** and stays as the whole list; "All tasks →" goes there.
+
+**Nothing on Home is its own answer** (§53.5). The clients are the `cards`
+answer the boot already reads (§369), narrowed to a seat; an admin sees their
+own clients too, by Islam's word, with the whole list under Clients. The
+tasks are `mywork`'s rows, so a row says what it says on My tasks and opens
+what it opens there. Home finishes nothing: the tick and the status stay on
+My tasks (§61). The case studies cards are one new read, `/api/cases` `home`:
+the write-ups asked of this person, counting which of the eight sections hold
+something; the ones marked done in the last 30 days; and how many of their
+own insights are in no case study. `SMP_BREAK=home-all` puts everybody's
+write-ups on everybody's Home, and checks/case-api.mjs §7b goes red.
+
+**Compact, across the console.** Islam: "why is client plus a bit smaller in
+view than this dashboard?", then "build it compact, for all console". One
+block at the end of the console's stylesheet narrows what came before:
+14px text, a 212px column with 13.5px tabs, the page across the whole window,
+smaller titles and tighter rows. The case study keeps its reading measure.
+checks/shell.mjs asserts the new widths; its old 232px and 14px tab lines
+were rewritten, not loosened (§218).

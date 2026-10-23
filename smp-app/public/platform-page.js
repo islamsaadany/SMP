@@ -43,13 +43,13 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
-     address's hash, so a reload keeps it and a link can name one
-     ("Switch client…" from a client is /platform#clients). */
-  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks", "copilot", "history"];
+  /* THE CONSOLE OPENS ON HOME (spec 068; it opened on My work, §400), and
+     the tab you are on is the address's hash, so a reload keeps it and a link
+     can name one ("Switch client…" from a client is /platform#clients). */
+  var TABS_KNOWN = ["home", "mywork", "clients", "consultants", "access", "memory", "frameworks", "copilot", "history"];
   var TAB = (function () {
     var h = String(location.hash || "").replace(/^#/, "");
-    return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";
+    return TABS_KNOWN.indexOf(h) >= 0 ? h : "home";
   })();
   var ME = null;
   /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
@@ -106,7 +106,11 @@
        column, and History has none: it stands alone at the foot. Said on
        each tab rather than in a second list, so a tab added here cannot be
        left out of the column by forgetting the other. */
-    var tabs = [["mywork", "My work", true, "Work"],
+    /* HOME IS FIRST AND MY WORK IS MY TASKS (spec 068): Islam, "change the
+       name of my work to my Tasks". The key stays `mywork`, so every address
+       and kept copy that names it still works. */
+    var tabs = [["home", "Home", true, "Work"],
+                ["mywork", "My tasks", true, "Work"],
                 ["clients", "Clients", true, "Work"],
                 ["consultants", "Consultants", ME.canConsultants, "Team"],
                 ["access", "Who sees what", ME.canAccess, "Team"],
@@ -169,6 +173,7 @@
      menu button opens the column over the page. */
   var NAV_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">';
   var NAV_ICON = {
+    home: NAV_SVG + '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>',
     mywork: NAV_SVG + '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>',
     clients: NAV_SVG + '<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/></svg>',
     consultants: NAV_SVG + '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/></svg>',
@@ -259,7 +264,7 @@
   var KEPT = {};
   var ONLIST = null;
   var REVAL = null;
-  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client", "history", "read", "case", "options"];
+  var READS = ["me", "cards", "mywork", "home", "consultants", "access", "list", "one", "library", "client", "history", "read", "case", "options"];
   function revalStop() {
     if (!REVAL) return;
     REVAL = null;
@@ -291,7 +296,7 @@
     /* THE CLIENTS PAGE OPENS ON ACTIVE, every visit (Islam: "default is
        active"); only a press inside the page moves it. */
     if (tab === "clients" && fromTabRow) CL.which = "active";
-    try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
+    try { history.replaceState(null, "", tab === "home" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "lib";
     FW.view = "list";
     CP.editing = null;
@@ -330,6 +335,7 @@
        scoped to it — case studies' are (spec 067), because a class name is
        one global namespace here (§65.9) and theirs are common words. */
     SHOWN.setAttribute("data-tab", TAB);
+    if (TAB === "home") return drawHome();
     if (TAB === "mywork") return drawMyWork();
     if (TAB === "clients") return drawClients();
     if (TAB === "consultants") return drawConsultants();
@@ -2298,6 +2304,7 @@
     /* Opening on another tab (§400), the waiting page is that tab's title
        and nothing it would have to take back (§94.10) — on My work, its
        panel with the name and no counts yet (§583). */
+    if (TAB === "home") { hoHello(); document.body.classList.add("ready"); return; }
     if (TAB === "mywork") { mwMast(); document.body.classList.add("ready"); return; }
     if (TAB !== "clients") { title(""); document.body.classList.add("ready"); return; }
     title("Clients");
@@ -2353,7 +2360,7 @@
     var top = el("div", "mwtop"), left = el("div");
     var wk = el("div", "mwwk");
     var name = el("div", "mwname");
-    name.appendChild(el("h1", null, "My work"));
+    name.appendChild(el("h1", null, "My tasks"));
     left.appendChild(wk);
     left.appendChild(name);
     var strip = el("div", "mwstrip");
@@ -2590,6 +2597,252 @@
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
     });
+  }
+
+  /* ── HOME (spec 068) ──────────────────────────────────────────────
+     Islam: "we need a user dashboard design when they open, maybe we adjust
+     my work to be the dashboard where it shows your tasks and it shows your
+     clients to open directly from there", then, of the drawings, "the
+     screen should split between the clients and the tasks, clients on the
+     left and tasks on the right … with overdue and this week in the same
+     place and all tasks takes the person to the tasks tab", "below 2 cards
+     the case studies", and "the admin also sees his clients".
+     NOTHING HERE IS ITS OWN ANSWER. The clients are the `cards` answer the
+     boot already holds, narrowed to a seat; the tasks are My tasks' own
+     `mywork` rows; the case studies are /api/cases `home`. So every word and
+     mark here is the one the page it opens says (§53.5). */
+  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
+  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
+
+  function hoHello() {
+    var band = el("header", "hohello");
+    var now = new Date(), h = now.getHours();
+    var date = "";
+    try { date = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }); } catch (e) { date = ""; }
+    band.appendChild(el("p", "hodate", date));
+    var first = ME && ME.name ? String(ME.name).trim().split(/\s+/)[0] : "";
+    band.appendChild(el("h1", null, (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "")));
+    band.appendChild(el("p", null, "Your SMP Home."));
+    page.appendChild(band);
+  }
+
+  function hoHead(host, eye, name, link, press) {
+    var h = el("div", "hosh");
+    var d = el("div");
+    d.appendChild(el("p", "hoeye", eye));
+    d.appendChild(el("h2", null, name));
+    h.appendChild(d);
+    if (link) {
+      var a = el("button", "holink", link);
+      a.type = "button";
+      a.addEventListener("click", press);
+      h.appendChild(a);
+    }
+    host.appendChild(h);
+  }
+
+  function hoClient(c) {
+    var row = el("div", "hocl");
+    row.setAttribute("data-client", c.key);
+    if (c.mark) { var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; row.appendChild(im); }
+    else row.appendChild(el("span", "cmark", initials(c.name)));
+    var who = el("span");
+    who.appendChild(el("b", null, c.name));
+    who.appendChild(el("span", "s", [c.industry, c.seat === "super" ? "Super user" : "SMO team"].filter(Boolean).join(" · ")));
+    row.appendChild(who);
+    var mods = el("span", "homods");
+    if (c.canOpen) (c.modules || []).forEach(function (m) {
+      var b = el("button", "homod");
+      b.type = "button";
+      b.setAttribute("data-module", m.key);
+      b.appendChild(document.createTextNode(m.label));
+      if (m.mark) {
+        var mk = el("i", m.alarm ? "alarm" : null, m.mark);
+        if (m.tip) mk.title = m.tip;
+        b.appendChild(mk);
+      }
+      b.addEventListener("click", function () { moduleGo(c, m); });
+      mods.appendChild(b);
+    });
+    row.appendChild(mods);
+    return row;
+  }
+
+  /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
+     Tracker, or the case study to write — and finishes nothing: the tick and
+     the status stay on My tasks, where the whole list is (§61). */
+  function hoTask(r, isCase) {
+    var b = el("button", "hotask" + (r.late ? " late" : ""));
+    b.type = "button";
+    if (isCase) {
+      b.setAttribute("data-case", r.id);
+      var bk = el("span", "bk");
+      bk.innerHTML = NAV_ICON.memory;
+      b.appendChild(bk);
+    } else {
+      b.setAttribute("data-client", r.client);
+      b.appendChild(el("span", "dot"));
+    }
+    var t = el("span", "t");
+    if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
+    else t.appendChild(document.createTextNode(r.title || "(untitled)"));
+    var m = el("span", "m");
+    m.appendChild(el("span", "c", r.clientName));
+    m.appendChild(document.createTextNode(" · " + (isCase ? "Case study" : r.statusWord || "")));
+    t.appendChild(m);
+    b.appendChild(t);
+    b.appendChild(el("span", "wh", r.when || ""));
+    b.addEventListener("click", function () {
+      if (isCase) { CS.jump = { id: r.id, view: "case", fresh: true }; go("memory"); }
+      else location.assign("/" + r.client + "/tracker");
+    });
+    return b;
+  }
+
+  function hoTasks(box, j) {
+    box.textContent = "";
+    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read your tasks.")); return; }
+    var open = (j.rows || []).filter(function (r) { return r.status !== "done"; });
+    var cases = j.cases || [];
+    var pick = function (b) {
+      return open.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 0, r]; })
+        .concat(cases.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 1, r]; }))
+        .sort(function (a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; });
+    };
+    var panes = [["late", "Overdue", HO_ALERT, "l", "No overdue tasks."], ["week", "This week", HO_CAL, "w", "Nothing due this week."]];
+    var lists = { late: pick("late"), week: pick("week") };
+    /* It opens on Overdue when anything is, otherwise on This week. */
+    var on = lists.late.length ? "late" : "week";
+    var ph = el("div", "hoph");
+    var tabs = el("div", "hotabs");
+    tabs.setAttribute("role", "tablist");
+    ph.appendChild(tabs);
+    var all = el("button", "holink", "All tasks →");
+    all.type = "button";
+    all.addEventListener("click", function () { go("mywork"); });
+    ph.appendChild(all);
+    box.appendChild(ph);
+    if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
+    var bodies = {};
+    panes.forEach(function (p) {
+      var t = el("button", p[3]);
+      t.type = "button";
+      t.setAttribute("role", "tab");
+      t.setAttribute("data-pane", p[0]);
+      t.setAttribute("aria-selected", String(p[0] === on));
+      t.innerHTML = p[2];
+      t.appendChild(document.createTextNode(p[1]));
+      t.appendChild(el("i", null, String(lists[p[0]].length)));
+      tabs.appendChild(t);
+      var pane = el("div", "hopane");
+      pane.setAttribute("role", "tabpanel");
+      pane.setAttribute("data-pane", p[0]);
+      pane.hidden = p[0] !== on;
+      if (!lists[p[0]].length) pane.appendChild(el("p", "honone", p[4]));
+      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1])); });
+      bodies[p[0]] = pane;
+      box.appendChild(pane);
+      t.addEventListener("click", function () {
+        tabs.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-selected", String(o === t)); });
+        Object.keys(bodies).forEach(function (k) { bodies[k].hidden = k !== p[0]; });
+      });
+    });
+  }
+
+  function hoCases(left, right, j) {
+    left.textContent = ""; right.textContent = "";
+    left.appendChild(el("p", "hobxh", "Your write-ups · in progress"));
+    right.appendChild(el("p", "hobxh", "Newly finished"));
+    if (!j || !j.ok) { left.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
+    if (!j.writing.length) left.appendChild(el("p", "honone", "No case study is waiting on you to write it."));
+    j.writing.forEach(function (c) {
+      var row = el("div", "hocase");
+      row.setAttribute("data-case", c.id);
+      var ring = el("span", "horing");
+      ring.style.setProperty("--p", String(Math.round(c.filled / 8 * 100)));
+      ring.appendChild(el("span", null, c.filled + "/8"));
+      row.appendChild(ring);
+      var t = el("span");
+      t.appendChild(el("b", null, c.name));
+      var s = el("span", "s", c.client.name + " · " + (c.filled ? c.filled + " of 8 sections" : "not started"));
+      if (c.due) {
+        var late = c.due < new Date().toISOString().slice(0, 10);
+        s.appendChild(document.createTextNode(" · "));
+        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(c.due + "T12:00:00")));
+      }
+      t.appendChild(s);
+      row.appendChild(t);
+      var b = el("button", c.filled ? "btn solid" : "btn", c.filled ? "Continue" : "Start");
+      b.type = "button";
+      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case", fresh: true }; go("memory"); });
+      row.appendChild(b);
+      left.appendChild(row);
+    });
+    if (j.loose) {
+      var f = el("button", "hofoot", nOf(j.loose, "insight") + " of yours to place in a case study →");
+      f.type = "button";
+      f.addEventListener("click", function () { MEM.filters.case = "none"; CS.jump = { view: "list" }; go("memory"); });
+      left.appendChild(f);
+    }
+    if (!j.fresh.length) right.appendChild(el("p", "honone", "Nothing finished in the last 30 days."));
+    j.fresh.forEach(function (c) {
+      var b = el("button", "hobook");
+      b.type = "button";
+      b.setAttribute("data-case", c.id);
+      b.appendChild(el("span", "hospine", initials(c.client.name)));
+      var t = el("span");
+      var nm = el("b", null, c.name);
+      nm.appendChild(el("span", "new", "New"));
+      t.appendChild(nm);
+      t.appendChild(el("span", "s", c.client.name + " · " + nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
+      b.appendChild(t);
+      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case" }; go("memory"); });
+      right.appendChild(b);
+    });
+  }
+
+  function drawHome() {
+    hoHello();
+    var top = el("div", "hotop");
+    var cs = el("section"), ts = el("section");
+    cs.setAttribute("data-home", "clients");
+    ts.setAttribute("data-home", "tasks");
+    hoHead(cs, "Where you have a seat", "Your clients");
+    hoHead(ts, "Overdue and this week", "Your tasks");
+    var cbox = el("div", "hobox hoclients"), tbox = el("div", "hobox");
+    cbox.appendChild(el("p", "honone", "Reading your clients…"));
+    tbox.appendChild(el("p", "honone", "Reading your tasks…"));
+    cs.appendChild(cbox); ts.appendChild(tbox);
+    top.appendChild(cs); top.appendChild(ts);
+    page.appendChild(top);
+    var sec = el("section", "hosec");
+    sec.setAttribute("data-home", "cases");
+    hoHead(sec, "What we have learned", "Case studies", "Go to Case studies →", function () { go("memory", true); });
+    var two = el("div", "hotwo"), left = el("div", "hobox"), right = el("div", "hobox");
+    left.setAttribute("data-home", "writing");
+    right.setAttribute("data-home", "fresh");
+    left.appendChild(el("p", "honone", "Reading…"));
+    two.appendChild(left); two.appendChild(right);
+    sec.appendChild(two);
+    page.appendChild(sec);
+
+    /* the boot's `cards`, once (§369), as the Clients tab takes it */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    var fail = function (box) { return function (e) {
+      if (String(e && e.message) === "sign in") return;
+      box.textContent = ""; box.appendChild(el("p", "honone", "Could not reach the server."));
+    }; };
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+      cbox.textContent = "";
+      if (!j || !j.ok) { cbox.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+      /* A SEAT, FOR AN ADMIN TOO (Islam: "the admin also sees his clients"):
+         the whole list is one press away under Clients. */
+      var mine = j.cards.filter(function (c) { return !!c.seat; });
+      if (!mine.length) cbox.appendChild(el("p", "honone", "You have no seat on any client yet."));
+      mine.forEach(function (c) { cbox.appendChild(hoClient(c)); });
+    }).catch(fail(cbox));
+    post({ action: "mywork" }).then(function (j) { hoTasks(tbox, j); }).catch(fail(tbox));
+    cpostCases({ action: "home" }).then(function (j) { hoCases(left, right, j); }).catch(fail(left));
   }
 
   function drawClients() {
@@ -5361,9 +5614,9 @@
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a
        later visit as a stale list (§48.2). */
-    if (TAB !== "clients") BOOTCARDS = null;
-    if (!ME.canConsultants && TAB === "consultants") TAB = "mywork";
-    if (!ME.canAccess && TAB === "access") TAB = "mywork";
+    if (TAB !== "clients" && TAB !== "home") BOOTCARDS = null;
+    if (!ME.canConsultants && TAB === "consultants") TAB = "home";
+    if (!ME.canAccess && TAB === "access") TAB = "home";
     go(TAB);
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;

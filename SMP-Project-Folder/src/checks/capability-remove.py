@@ -381,7 +381,7 @@ with sync_playwright() as p:
        (gone.get("arch") or 0) > (before2.get("arch") or 0), gone)
 
     print("\n\u00a77 \u00b7 the Temple is no longer a door")
-    # §606.1 REWROTE THIS SECTION (§218). §325 made the Temple's own table a
+    # §611.1 REWROTE THIS SECTION (§218). §325 made the Temple's own table a
     # SECOND door onto the same dialog, so that no copy of the control could
     # destroy a capability's projects without one. The Temple only shows now
     # (Islam: "the temple should eventually read from the other areas"), so

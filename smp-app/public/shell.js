@@ -30248,7 +30248,7 @@ var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
    A view, not a scoreboard: roof, aspiration, key objectives with targets
    only, themes as columns, capabilities as the base.
 
-   §606.1 — AND ONLY A VIEW. Islam: *"the temple should eventually read from
+   §611.1 — AND ONLY A VIEW. Islam: *"the temple should eventually read from
    the other areas not built on it's own"*, then, of the drawing, *"I'm ok
    with all"*. It had an Edit of its own over four tables (the aspiration,
    the objectives, the themes, the capabilities) writing the same objects
@@ -30402,11 +30402,11 @@ function foundationBody(o, tgt, gpg){
       '</div>' +
     '</div>' +
     koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
-    /* §606.1: the themes, on the top layer only — a company's page carries
+    /* §611.1: the themes, on the top layer only — a company's page carries
        none (§427) — and only while the Structure step has them on. */
     (tgt === "group" && on("theme") ? themesBox(gpg) : '') +
 
-    /* §606: with the pen open the list is the unit's own (§478) — a name and
+    /* §611: with the pen open the list is the unit's own (§478) — a name and
        a definition per value, × to remove, "+ Add a value" — because the
        old one could only rewrite the definition of a value already there, so
        a company that had none could never have one. Read mode is unchanged. */
@@ -30421,7 +30421,7 @@ function foundationBody(o, tgt, gpg){
     '</div>') + '</div>');
 }
 
-/* §606.1 — THE THEMES ARE WRITTEN ON THE FOUNDATION. Islam: *"I added themes
+/* §611.1 — THE THEMES ARE WRITTEN ON THE FOUNDATION. Islam: *"I added themes
    but no themes appeared in the foundation"*, and of the Temple, *"it should
    eventually read from the other areas not built on it's own"*; then, of the
    drawing (design-mockups/top-themes-temple/), *"I'm ok with all"*. The rows
@@ -33019,7 +33019,7 @@ function hidChip(row){
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
 /* `extra` is a class string from rmMark (" rmasking" or ""), so a row being
-   asked about is marked as well as hidden (§606.1: the objectives table took
+   asked about is marked as well as hidden (§611.1: the objectives table took
    the Temple's Remove, and the Temple's rows were marked). */
 function hidCls(row, extra){
   var c = (((SMPRules.isHidden(row) || asofGone(row)) ? "hiddenrow" : "") + (extra || "")).trim();
@@ -33058,7 +33058,7 @@ function koEdit(list, page, acKey, owner){
                                 : arranging("group", null, page);
   var sortA = arr ? ' class="sortable" data-item="tr" data-kind="kos" data-kolist="' +
     li + '"' : '';
-  /* §606.1: THE HEADING THE TEMPLE GROUPS AN OBJECTIVE UNDER (`m.group`, the
+  /* §611.1: THE HEADING THE TEMPLE GROUPS AN OBJECTIVE UNDER (`m.group`, the
      demo's "Market share"), written here now that the Temple's own tables are
      gone. Drawn on the top layer's table alone and only while its Temple is
      on — exactly the reach the Temple's Edit had, so a client with no Temple
@@ -33434,7 +33434,7 @@ function unitValuesBox(u, upg){
         : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
 }
-/* §606: THE CORE VALUES LIST WITH THE PEN OPEN — one builder for a unit's box
+/* §611: THE CORE VALUES LIST WITH THE PEN OPEN — one builder for a unit's box
    and the top layer's and a company's (§53.5), so the three cannot drift into
    three looks. `key` is the target the two buttons carry; `touch` runs after
    every write (a unit's stamps or lifts its gap mark, the top's has none). */
@@ -74084,7 +74084,7 @@ var SYNC = (function () {
      company's, so the company's plan is where it shows (`capAtTop`). What is
      left to ask is only whether this client has any and whether this viewer
      reaches them. */
-  /* §606: AND WHILE THERE ARE NONE YET, THE SECTION IS STILL THERE (§61).
+  /* §611: AND WHILE THERE ARE NONE YET, THE SECTION IS STILL THERE (§61).
      Islam: *"I added capabilities as well but nothing appeared to add the
      capabilities."* Its "+ Add" lives inside it, so a client that switched
      capabilities on and had none was offered no way to the first one here.
@@ -84059,7 +84059,7 @@ var SYNC = (function () {
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
        may, from the stored state at press time — never from the drawn one. */
-    /* §606: and the top layer's and a company's, which draw the same list
+    /* §611: and the top layer's and a company's, which draw the same list
        (valuesEditList). Theirs is the group's own strategy, so the press is
        re-asked exactly as a Who-we-are line's is, and there is no gap mark. */
     var topValuesOf = function(t){
@@ -84070,7 +84070,7 @@ var SYNC = (function () {
       if (!Array.isArray(o.values)) o.values = [];
       return o;
     };
-    /* §606.1: the top layer's themes, on its Foundation. Re-asked on the press
+    /* §611.1: the top layer's themes, on its Foundation. Re-asked on the press
        as every Foundation write is (§48.2); a theme a pillar carries is never
        removed, asked of the stored state at press time, never the drawn one.
        A new theme's code is one no other theme holds, so two adds in a row

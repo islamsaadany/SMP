@@ -295,7 +295,7 @@
   details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
 
-  /* ── Themes box on the top layer's Foundation (§606.1) ─── */
+  /* ── Themes box on the top layer's Foundation (§611.1) ─── */
   .themeband { margin-top:20px; }
   .themegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
   .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;

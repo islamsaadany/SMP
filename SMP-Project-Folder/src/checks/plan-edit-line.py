@@ -514,11 +514,11 @@ with sync_playwright() as pw:
         ck("the group's Strategy tab carries its pen on the section line, as a unit's does",
            gl["line"] == 1, gl)
         ck("...and none is left in the Foundation card", gl["card"] == 0, gl)
-        # §606.1 REWROTE THIS PAIR (§218): the Temple only shows now — what it
+        # §611.1 REWROTE THIS PAIR (§218): the Temple only shows now — what it
         # draws is written on the Foundation and in the Capabilities section —
         # so it carries no pen at all, neither its own bar nor a section line.
         # SAID RATHER THAN HIDDEN: the old claim ("keeps its Edit bar") was
-        # already red in this walk before §606.1 (§604 lists this check among
+        # already red in this walk before §611.1 (§604 lists this check among
         # those red identically on live) — the walk reaches the Temple in a
         # state where the old build drew no bar either — so this line passes
         # on both builds and proves nothing alone. The claim that goes red on

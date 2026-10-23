@@ -173,7 +173,7 @@ with sync_playwright() as p:
     ck("...and it is gone", emp.get("n") == before_n - 1, (before_n, emp))
 
     print("\n§7 · in a table the strip is a row: the objectives table")
-    # §606.1 REWROTE THIS SECTION, NEVER LOOSENED IT (§218). It asked the
+    # §611.1 REWROTE THIS SECTION, NEVER LOOSENED IT (§218). It asked the
     # Temple's own objectives table, which is gone: the Temple only shows now,
     # and the top layer's objectives are removed on its Foundation. The claims
     # are the same claims — a row of its own, spanning the table, naming the

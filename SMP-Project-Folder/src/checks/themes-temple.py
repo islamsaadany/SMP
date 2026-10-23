@@ -1,4 +1,4 @@
-"""THE THEMES ARE WRITTEN ON THE FOUNDATION, AND THE TEMPLE ONLY SHOWS (§606.1).
+"""THE THEMES ARE WRITTEN ON THE FOUNDATION, AND THE TEMPLE ONLY SHOWS (§611.1).
 
 Islam: *"I added themes but no themes appeared in the foundation"* and *"the
 temple should eventually read from the other areas not built on it's own"*;
@@ -28,7 +28,7 @@ its last section rather than in a sentence.
       section beside its own Capabilities tab.
 
 BOTH ENDS (§94.2) throughout. SMP_BUILT points it at another build
-(falsified from the SOURCES, §276): the build before §606.1 goes red.
+(falsified from the SOURCES, §276): the build before §611.1 goes red.
 """
 import copy, json, os, pathlib
 from playwright.sync_api import sync_playwright

@@ -1,4 +1,4 @@
-"""THE COMPANY'S CORE VALUES CAN BE WRITTEN, AND ITS CAPABILITIES CAN BE STARTED (§606).
+"""THE COMPANY'S CORE VALUES CAN BE WRITTEN, AND ITS CAPABILITIES CAN BE STARTED (§611).
 
 Islam, on the company level: *"the core values is not being able to be
 added"* and *"I added capabilities as well but nothing appeared to add the

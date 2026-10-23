@@ -54,11 +54,11 @@ page = """<title>Directions Stay in View</title>
   <figure>{{t_900}}<figcaption>900px wide: MB04 is cut off</figcaption></figure>
 
   <h2>2&nbsp;&middot;&nbsp;Proposed: only the strip stays</h2>
-  <p class="cap">The strip sticks under the top bar, on one line. The open direction is the highlighted one, so its title does not need to stay as well: it scrolls away with the plan. Any direction is one click away, wherever you are on the page.</p>
+  <p class="cap">The strip sticks under the top bar. The open direction is filled navy, the same as the <i>Plan</i> button above it, and the other directions are greyed. So its title does not need to stay as well: it scrolls away with the plan. Any direction is one click away, wherever you are on the page.</p>
   <figure>{{p_1100}}<figcaption>1100px wide, scrolled down</figcaption></figure>
 
-  <h2>3&nbsp;&middot;&nbsp;Squeezed, nothing is lost</h2>
-  <p class="cap">When the whole names don't fit, they shorten with &ldquo;&hellip;&rdquo;. The codes never shorten, and the open direction keeps its name longest. Pointing at a direction shows its full name. Every direction stays on the strip.</p>
+  <h2>3&nbsp;&middot;&nbsp;Squeezed, the names wrap</h2>
+  <p class="cap">When a name does not fit on one line it wraps onto a second, or a third on the narrowest window. Names are never cut, and every direction stays on the strip. Pointing at a greyed direction darkens it.</p>
   <div class="stack">
     <figure>{{p_900}}<figcaption>900px wide, MB01 open</figcaption></figure>
     <figure>{{p_760}}<figcaption>760px wide, MB04 open</figcaption></figure>
@@ -69,7 +69,7 @@ page = """<title>Directions Stay in View</title>
   <figure>{{p_edit}}<figcaption>1100px wide, editing, scrolled down to the tactics</figcaption></figure>
 
   <h2>5&nbsp;&middot;&nbsp;At the top of the page</h2>
-  <p class="cap">Before scrolling it is the same strip, now on one line instead of two, so the plan starts a little higher than today.</p>
+  <p class="cap">Before scrolling it is the same strip. When the names fit, the code sits beside the name on one line instead of above it, so the plan starts a little higher than today.</p>
   <figure>{{p_top}}<figcaption>1100px wide, top of the page</figcaption></figure>
 
   <h2>What changes</h2>
@@ -79,9 +79,9 @@ page = """<title>Directions Stay in View</title>
     <dt>The title</dt>
     <dd>On a narrow window it scrolls away with the plan, reading or editing. The same goes for a project's title on Capabilities.</dd>
     <dt>What it costs</dt>
-    <dd>Nothing in height. Scrolled down, you see about 10px more of the plan than today. At the top of the page, 22px more.</dd>
+    <dd>About the same room for the plan as today once you scroll: 4 to 10px more when the names take one or two lines, 13px less when one needs three. At the top of the page, up to 22px more.</dd>
     <dt>A unit with many directions</dt>
-    <dd>Up to ten fit on the strip even at the narrowest window, shortened to their codes. Past that, the strip scrolls sideways.</dd>
+    <dd>Up to ten fit on the strip even at the narrowest window. With that many, a long name that needs more than three lines ends in &ldquo;&hellip;&rdquo;, and pointing at it shows the whole name. Past ten, the strip scrolls sideways.</dd>
   </dl>
 </div>
 """
@@ -91,7 +91,7 @@ subs = {
   "t_900": img("today-900-top.png", 360, "Directions strip today at 900px, MB04 cut off"),
   "p_1100": img("proposed-1100-scrolled.png", 560, "Proposed: only the strip pinned, on one line"),
   "p_edit": img("proposed-1100-edit-scrolled.png", 560, "Proposed while editing: strip pinned with reorder handles"),
-  "p_900": img("proposed-900-scrolled.png", 520, "Proposed at 900px: names shortened"),
+  "p_900": img("proposed-900-scrolled.png", 520, "Proposed at 900px: names wrap to two lines"),
   "p_760": img("proposed-760-mb04-scrolled.png", 520, "Proposed at 760px with MB04 open"),
   "p_top": img("proposed-1100-top.png", 560, "Proposed, top of the page"),
 }

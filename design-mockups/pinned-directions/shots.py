@@ -17,18 +17,36 @@ PROPOSAL = r"""
     overflow:visible; display:flex; }
   .split:not(.setupsplit) > .rail:not(.setuprail)::before {
     display:block; left:-1px; right:-1px; height:calc(var(--rail-gap,22px) + 1px); }
-  /* 2. One line, every direction on it; the names give way, never the codes.
-     A grid inside each item so its smallest size is the code alone and its
-     natural size is code and whole name: the strip shares the room in
-     proportion and no direction is pushed off the end. */
+  /* 2. Every direction on the strip; when the room runs out the NAMES WRAP,
+     the codes never do. A grid inside each item so its smallest size is the
+     code alone and its natural size is code and whole name on one line: the
+     strip shares the room in proportion to the names, the open one included,
+     and no direction is pushed off the end. Past three lines a name ends in
+     an ellipsis, which only a unit with many directions ever reaches. */
   .split:not(.setupsplit) > .rail:not(.setuprail) { min-width:0; }
-  .rail:not(.setuprail) .sortable { flex:1 1 auto; min-width:0; overflow-x:auto; }
+  .rail:not(.setuprail) .sortable { flex:1 1 auto; min-width:0; overflow-x:auto;
+    border-radius:calc(var(--r) - 1px); }
   .rail:not(.setuprail) button.ritem { display:grid; grid-template-columns:auto minmax(0,max-content);
-    column-gap:8px; align-items:center; flex:1 1 auto; width:auto; height:var(--strip-h); padding:0 14px; }
-  .rail:not(.setuprail) button.ritem.on { flex-shrink:.3; }
+    column-gap:8px; align-items:center; flex:1 1 auto; width:auto; min-height:var(--strip-h);
+    padding:7px 14px 4px; text-align:left; }
   .rail:not(.setuprail) .ritem .rcode { grid-column:auto; margin:0; }
-  .rail:not(.setuprail) .ritem b { min-width:0; overflow:hidden; text-overflow:ellipsis;
-    white-space:nowrap; }
+  .rail:not(.setuprail) .ritem b { min-width:0; white-space:normal; overflow-wrap:break-word;
+    line-height:1.3; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+    overflow:hidden; }
+  /* The open one wears the house's own "selected": the section switch's
+     navy with white type (Foundation | SWOT | Plan), over the gold edge the
+     strip already had. The others step back to the quiet ink, and come up
+     to full ink under the pointer. */
+  .rail:not(.setuprail) button.ritem.on,
+  .rail:not(.setuprail) button.ritem.on:hover { background:var(--stone); color:var(--surface);
+    border-bottom-color:var(--gold); }
+  .rail:not(.setuprail) .ritem.on .rcode,
+  .rail:not(.setuprail) .ritem.on b { color:var(--surface); }
+  .rail:not(.setuprail) .ritem.on .grip i { background:var(--surface); }
+  .rail:not(.setuprail) .ritem:not(.on) .rcode,
+  .rail:not(.setuprail) .ritem:not(.on) b { color:var(--ink-3); font-weight:500; }
+  .rail:not(.setuprail) .ritem:not(.on):hover .rcode,
+  .rail:not(.setuprail) .ritem:not(.on):hover b { color:var(--ink); }
   /* While editing: the reorder handle joins the line, and Add sits at its end. */
   .rail.arranging:not(.setuprail) button.ritem {
     grid-template-columns:auto auto minmax(0,max-content); }

@@ -5,13 +5,18 @@ make save or apply buttons beside the areas of change?"* — then, of HR_ERP:
 *"it has a very strong logic on adjusting and saving to make sure things are
 applied well"*, and *"all Setup pages first"*. So this photographs the BUILT
 platform over a stub server (the demo seed, the office signed in), walks to
-Getting started and to Terminology the way somebody walks there, and draws
+Getting started and to Scoring bands the way somebody walks there, and draws
 HR_ERP's saving into the live page:
 
-  1. a colour changed: the page previews it, and the area says in amber that
-     it is not saved yet, beside Save and Discard changes;
-  2. the same area a moment after Save: Save greyed, a green "Saved";
-  3. a word changed on Terminology, the same line under its table;
+  1. a colour picked: the boxes show it and the page does NOT (Islam: "the
+     color shouldn't change before apply"), the area says in amber that it
+     is not applied yet, beside Apply and Discard;
+  2. the moment after Apply: the page wears it, a green "Applied", and Undo
+     for a few seconds ("a temp button that appears shortly after the
+     application so the user can get back"); Reset to the shipped palette
+     stays where it was;
+  3. a floor changed on Scoring bands, the same row under its table with
+     Save;
   4. leaving with that unsaved: the gold strip — Save and continue, Discard
      changes, Keep editing.
 
@@ -86,14 +91,16 @@ window.__mk = {
     return '<button type="button" style="font:600 var(--fs-small)/1.3 var(--sans);padding:7px 14px;border-radius:7px;' +
       'border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer">' + t + '</button>';
   },
-  row: function(state, words){
-    var line = state === 'dirty'
+  row: function(btn, state, words){
+    var dirty = state === 'dirty';
+    var line = dirty
       ? '<span style="display:inline-flex;align-items:center;gap:7px;font:600 var(--fs-small)/1.3 var(--sans);color:var(--attn-tx)">' +
           this.dot('--attn') + words + '</span>'
       : '<span style="display:inline-flex;align-items:center;gap:7px;font:600 var(--fs-small)/1.3 var(--sans);color:var(--good-tx)">' +
-          this.dot('--good') + 'Saved</span>';
+          this.dot('--good') + words + '</span>';
     return '<div class="mk-save" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-top:14px">' +
-      this.solid('Save', state !== 'dirty') + (state === 'dirty' ? this.plain('Discard changes') : '') + line + '</div>';
+      this.solid(btn, !dirty) + (dirty ? this.plain('Discard') : '') + line +
+      (state === 'applied' ? this.plain('Undo') : '') + '</div>';
   },
   strip: function(what, unsaved){
     var pane = document.querySelector('#panel') || document.body, r = pane.getBoundingClientRect();
@@ -145,51 +152,66 @@ with sync_playwright() as p:
     # "Saved" (which the preview below would otherwise trigger) is not drawn.
     pg.add_style_tag(content="#savetip{display:none !important}")
 
-    # 1 · a colour changed: previewed on the page, not saved yet
+    # 1 · a colour picked: the boxes show it, the page does not — not yet applied
     pg.evaluate("""()=>{
       const acc = '#1F6F8B';
-      branding().accent = acc; applyBrand();            /* the preview: the page wears it */
       const pick = document.querySelector('.csetup [data-brand=accent]');
       const hex = document.querySelector('.csetup [data-brandhex=accent]');
       pick.value = acc.toLowerCase(); hex.value = acc;
       const cfg = pick.closest('.cfg');
-      cfg.insertAdjacentHTML('afterend', __mk.row('dirty', '1 change not saved yet: the accent'));
+      cfg.insertAdjacentHTML('afterend', __mk.row('Apply', 'dirty', '1 change not applied yet: the accent'));
       cfg.scrollIntoView({block:'center'});
     }""")
     pg.wait_for_timeout(400)
-    shot(pg, "colours-unsaved.png")
+    shot(pg, "colours-unapplied.png")
 
-    # 2 · the moment after Save
+    # 2 · the moment after Apply: the page wears it, Undo for a few seconds
     pg.evaluate("""()=>{
+      branding().accent = '#1F6F8B'; applyBrand();
       const old = document.querySelector('.csetup .mk-save');
-      old.outerHTML = __mk.row('saved');
+      old.outerHTML = __mk.row('Apply', 'applied', 'Applied');
+      const row = document.querySelector('.csetup .mk-save');
+      if (!document.querySelector('.csetup [data-brandreset]'))
+        row.insertAdjacentHTML('afterend', '<div style="margin-top:12px"><button class="linkbu" type="button">Reset to the shipped palette</button></div>');
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "colours-saved.png")
+    shot(pg, "colours-applied.png")
 
-    # 3 · Terminology, one word changed (typed, never sent: nothing is written)
+    # 3 · Scoring bands, one floor changed (typed, never sent: nothing is written)
     pg.evaluate("()=>{ branding().accent = null; applyBrand(); }")
-    setup_go(pg, "labels")
+    setup_go(pg, "bands")
+    pg.evaluate("()=>{ EDITING.bands = true; paint(); }")   # the page's own Edit, pressed
+    pg.wait_for_timeout(500)
     pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
-      const boxes = document.querySelectorAll('input.lbl[data-scope=group]');
-      const box = boxes[boxes.length - 1];               /* the last row, so it and its Save share the view */
-      const was = box.value;
-      box.value = 'Legacy'; box.style.outline = '2px solid var(--attn)'; box.style.outlineOffset = '1px';
+      const box = document.querySelector('input.bfloor');
+      const name = (box.getAttribute('aria-label') || '').replace(/^Floor for /, '');
+      const was = parseFloat(box.value) || 0, now = Math.max(0, was - 5);
+      box.value = String(now);
+      box.style.outline = '2px solid var(--attn)'; box.style.outlineOffset = '1px';
+      /* the range column follows the box, as it would on screen */
+      const rows = box.closest('tbody').querySelectorAll('tr');
+      rows[0].children[2].querySelector('.mono').textContent = now + '% and above';
+      const r2 = rows[1] && rows[1].children[2].querySelector('.mono');
+      if (r2) r2.textContent = r2.textContent.replace(/to \d+%/, 'to ' + (now - 1) + '%');
+      /* Save and Discard take the place of the page's own Done */
+      document.querySelectorAll('button').forEach(b => { if (/^\s*done\s*$/i.test(b.textContent)) b.style.visibility = 'hidden'; });
       const cfg = box.closest('.cfg');
-      cfg.insertAdjacentHTML('afterend', __mk.row('dirty', '1 change not saved yet: the word for ' + was));
-      window.__mkWas = was;
-      document.querySelector('.mk-save').scrollIntoView({block:'center'});
+      const add = document.querySelector('[data-badd]');
+      const foot = (add && add.closest('.cfg-bar')) || cfg;
+      foot.insertAdjacentHTML('afterend', __mk.row('Save', 'dirty', '1 change not saved yet: the floor for ' + name));
+      window.__mkWas = name;
+      cfg.scrollIntoView({block:'center'});
     }""")
     pg.wait_for_timeout(400)
-    shot(pg, "terminology-unsaved.png")
+    shot(pg, "bands-unsaved.png")
 
     # 4 · trying to leave with it unsaved: the rail item pressed, the strip asks
     pg.evaluate("""()=>{
-      const it = document.querySelector('.setuprail [data-setupgo=bands]');
-      if (it) { it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
-      __mk.strip('Terminology', 'the word for ' + window.__mkWas);
+      const it = document.querySelector('.setuprail [data-setupgo=units]');
+      if (it) { it.scrollIntoView({block:'nearest'}); it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
+      __mk.strip('Scoring bands', 'the floor for ' + window.__mkWas);
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "terminology-leave.png")
+    shot(pg, "bands-leave.png")
     b.close()

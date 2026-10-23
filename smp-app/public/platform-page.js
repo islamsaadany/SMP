@@ -2,6 +2,11 @@
 (function () {
   "use strict";
 
+  /* §599: the column's width is set before anything is drawn, so a person
+     who keeps it to icons does not see it open and then close on arrival. */
+  var RAILKEY = "smp.console.rail";
+  try { if (localStorage.getItem(RAILKEY) === "1") document.documentElement.setAttribute("data-rail", "1"); } catch (e) { /* kept on this device only */ }
+
   /* ── One shape for every request (§71's rule: three callers with the same
      six lines is where a typo lives in exactly one of them). ───────── */
   function send(path, body) {
@@ -38,7 +43,6 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  var navwrap = document.getElementById("navwrap");
   /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
      address's hash, so a reload keeps it and a link can name one
      ("Switch client…" from a client is /platform#clients). */
@@ -98,23 +102,27 @@
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
-    var tabs = [["mywork", "My work", true],
-                ["clients", "Clients", true],
-                ["consultants", "Consultants", ME.canConsultants],
-                ["access", "Who sees what", ME.canAccess],
-                ["memory", "Memory", true],
+    /* THE FOURTH WORD IS THE HEADING THE TAB SITS UNDER (§599), in the
+       column, and History has none: it stands alone at the foot. Said on
+       each tab rather than in a second list, so a tab added here cannot be
+       left out of the column by forgetting the other. */
+    var tabs = [["mywork", "My work", true, "Work"],
+                ["clients", "Clients", true, "Work"],
+                ["consultants", "Consultants", ME.canConsultants, "Team"],
+                ["access", "Who sees what", ME.canAccess, "Team"],
+                ["memory", "Memory", true, "Knowledge"],
                 /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 052,
                    decision 1): every consultant reads the whole library, and
                    only an admin adds to it — which is a gate on the ACT, asked
                    on the server, never a gate on the tab. */
-                ["frameworks", "Frameworks", true],
+                ["frameworks", "Frameworks", true, "Knowledge"],
                 /* THE COPILOT'S SETTINGS LIVE HERE (§501): they are the same
                    for every client, so reaching them from inside one client's
                    platform said they were that client's. Ungated for the
                    frameworks' reason: every consultant reads the method, and
                    only a Forefront super user changes it — a gate on the ACT,
                    asked on the server. */
-                ["copilot", "Copilot", true],
+                ["copilot", "Copilot", true, "Knowledge"],
                 /* HISTORY IS LAST AND UNGATED (§487), and both halves are
                    decisions. Last, because it is where you go to look back
                    rather than to work — Islam's own placement, from the
@@ -124,43 +132,109 @@
                    about a client whose card this person is not shown is not
                    in the answer at all, so there is nothing for a tab gate
                    to protect. */
-                ["history", "History", true]];
+                ["history", "History", true, null]];
+    /* A heading is drawn over the run of tabs that name it, and only when
+       this account is shown one of them (§61): an office without Consultants
+       or Who sees what has no Team heading over nothing. */
+    var box = null, here = "";
     tabs.forEach(function (t) {
       if (!t[2]) return;
-      var b = el("button", TAB === t[0] ? "on" : null, t[1]);
+      if (!box || box.getAttribute("data-grp") !== String(t[3])) {
+        box = el("div", t[3] ? "sbgrp" : "sbgrp foot");
+        box.setAttribute("data-grp", String(t[3]));
+        if (t[3]) box.appendChild(el("span", "sbgl", t[3]));
+        nav.appendChild(box);
+      }
+      var b = el("button", TAB === t[0] ? "on" : null);
       b.type = "button";
       b.setAttribute("data-tab", t[0]);
-      b.addEventListener("click", function () { go(t[0], true); });
-      nav.appendChild(b);
+      b.setAttribute("data-tip", t[1]);
+      if (TAB === t[0]) { b.setAttribute("aria-current", "page"); here = t[1]; }
+      /* the icon is this page's own constant, never a typed word */
+      b.innerHTML = NAV_ICON[t[0]] || "";
+      b.appendChild(el("span", "lb", t[1]));
+      b.addEventListener("click", function () { menu(false); go(t[0], true); });
+      box.appendChild(b);
     });
-    navCentre();
+    document.getElementById("sbhere").textContent = here;
   }
 
-  /* ── THE TAB BAR ON A PHONE (§584) ─────────────────────────────────
-     Where the tabs do not fit, the bar scrolls inside itself: the tab that
-     is on is brought to the middle each time the bar is drawn (on arrival,
-     and after every press, since go() draws it again), and a fade is laid
-     over whichever edge still has tabs past it. Measured from the boxes the
-     browser drew, never from a width written here, so it holds whatever the
-     tabs' words and the screen. Where every tab fits, nothing scrolls and
-     neither fade shows. */
-  function navFades() {
-    /* a page served from before §584 has no wrapper: the bar still works,
-       it simply has no fade, rather than the whole console stopping */
-    if (!navwrap) return;
-    var max = nav.scrollWidth - nav.clientWidth;
-    navwrap.classList.toggle("l", max > 1 && nav.scrollLeft > 1);
-    navwrap.classList.toggle("r", max > 1 && nav.scrollLeft < max - 1);
+  /* ── THE COLUMN'S OWN CONTROLS (§599) ────────────────────────────────
+     Replacing §584's sideways tab bar: on a computer the « button keeps the
+     column to its icons (kept on this device), and the name a hidden label
+     stands for shows beside the icon on a hover or a key; on a phone the
+     menu button opens the column over the page. */
+  var NAV_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">';
+  var NAV_ICON = {
+    mywork: NAV_SVG + '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>',
+    clients: NAV_SVG + '<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/></svg>',
+    consultants: NAV_SVG + '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/></svg>',
+    access: NAV_SVG + '<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/></svg>',
+    memory: NAV_SVG + '<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>',
+    frameworks: NAV_SVG + '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+    copilot: NAV_SVG + '<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></svg>',
+    history: NAV_SVG + '<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/></svg>'
+  };
+  var ROOT = document.documentElement;
+  var side = document.getElementById("side");
+  var fold = document.getElementById("sbfold");
+  var opener = document.getElementById("sbopen");
+  var tip = document.getElementById("sbtip");
+  function railOn() {
+    return ROOT.getAttribute("data-rail") === "1" && window.matchMedia("(min-width:1000px)").matches;
   }
-  function navCentre() {
-    var on = nav.querySelector("button.on");
-    if (on && nav.scrollWidth > nav.clientWidth) {
-      nav.scrollLeft += (on.getBoundingClientRect().left - nav.getBoundingClientRect().left) - (nav.clientWidth - on.offsetWidth) / 2;
-    }
-    navFades();
+  function railSay() {
+    var words = ROOT.getAttribute("data-rail") === "1" ? "Show names" : "Show icons only";
+    fold.setAttribute("aria-label", words);
+    fold.setAttribute("data-tip", words);
   }
-  nav.addEventListener("scroll", navFades, { passive: true });
-  window.addEventListener("resize", navFades);
+  fold.addEventListener("click", function () {
+    var on = ROOT.getAttribute("data-rail") !== "1";
+    if (on) ROOT.setAttribute("data-rail", "1"); else ROOT.removeAttribute("data-rail");
+    try { localStorage.setItem(RAILKEY, on ? "1" : "0"); } catch (e) { /* kept on this device only */ }
+    railSay();
+    tipHide();
+  });
+  railSay();
+
+  /* A tab's name (and the person's, on the initials) shows only where the
+     column is icons wide, since the words are there to read otherwise; a
+     button that is only an icon names itself whenever it is pointed at.
+     Placed from the box the browser drew. */
+  function tipShow(t) {
+    if (t.closest("#nav, .sbav") && !railOn()) { tipHide(); return; }
+    var r = t.getBoundingClientRect();
+    tip.textContent = t.getAttribute("data-tip");
+    tip.style.left = Math.round(r.right + 10) + "px";
+    tip.style.top = Math.round(r.top + r.height / 2) + "px";
+    tip.classList.add("on");
+  }
+  function tipHide() { tip.classList.remove("on"); }
+  side.addEventListener("mouseover", function (e) {
+    var t = e.target.closest ? e.target.closest("[data-tip]") : null;
+    if (t) tipShow(t); else tipHide();
+  });
+  side.addEventListener("mouseleave", tipHide);
+  side.addEventListener("focusin", function (e) {
+    var t = e.target.closest ? e.target.closest("[data-tip]") : null, keyed = false;
+    try { keyed = !!t && t.matches(":focus-visible"); } catch (x) { keyed = false; }
+    if (keyed) tipShow(t); else tipHide();
+  });
+  side.addEventListener("focusout", tipHide);
+  side.addEventListener("click", tipHide);
+  nav.addEventListener("scroll", tipHide, { passive: true });
+
+  function menu(open) {
+    if (open) ROOT.setAttribute("data-menu", "1"); else ROOT.removeAttribute("data-menu");
+    opener.setAttribute("aria-expanded", String(!!open));
+    if (open) (nav.querySelector("button.on") || document.getElementById("sbclose")).focus();
+  }
+  opener.addEventListener("click", function () { menu(true); });
+  document.getElementById("sbclose").addEventListener("click", function () { menu(false); opener.focus(); });
+  document.getElementById("sbscrim").addEventListener("click", function () { menu(false); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && ROOT.getAttribute("data-menu") === "1") { menu(false); opener.focus(); }
+  });
 
   /* ── A TAB SHOWS WHAT IT LAST SHOWED, THEN CATCHES UP (§400.2) ─────
      Islam: "when I switch between the tabs of the platform like my work and
@@ -3799,11 +3873,23 @@
     /* the name, then the role as a span of its own so a phone can leave it
        for a wider screen (§584.1); the whole line on a hover, for a name
        that had to end in "…" */
+    /* §599: at the column's foot the role sits under the name, so its dot
+       is a span of its own that is not drawn — the line's words, and what
+       it reads as, are unchanged */
     var who = document.getElementById("who");
     who.textContent = "";
     who.appendChild(el("span", null, ME.name));
-    if (ME.isAdmin) who.appendChild(el("span", "role", " · Super user"));
+    if (ME.isAdmin) {
+      var role = el("span", "role");
+      role.appendChild(el("span", "sep", " · "));
+      role.appendChild(document.createTextNode("Super user"));
+      who.appendChild(role);
+    }
     who.title = who.textContent;
+    var av = document.getElementById("sbav");
+    av.textContent = initials(ME.name);
+    /* with the column icons wide, the initials name the person on a hover */
+    av.setAttribute("data-tip", who.textContent);
     document.body.classList.add("ready");
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a

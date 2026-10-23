@@ -27589,7 +27589,7 @@ function drillCard(title, val, opts){
   var body = val == null
     ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
     : '<div class="big">' + val + '<small>%</small>' + vs + delta + '</div>' +
-      '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
+      '<div class="track"><div class="fill" style="width:' + Math.max(0, Math.min(100, val)) + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
     '<span class="pill ' + (opts.plain ? "kind" : b) + '">' +
@@ -30057,11 +30057,28 @@ function whereNext(keys){
         }).join("")) +
         '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
       var ptitle = L("project", "bu") + " &mdash; performance";
+      /* §602: and its execution beside it — the same `capExec` a function's
+         own projects are read by: the milestones due so far, completed. */
+      var pe = th ? capExec(th) : { pct: null };
+      var pedrill = miniTable(["#", L1("project"), "Milestones done", "Execution"],
+        prs.map(function(p, i){
+          var m = projMilestones(p), v = th ? capExec({ projects: [p] }).pct : null;
+          return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(projCode("u:group", p) + " " + (p.name || "")) + '</td>' +
+            '<td class="num">' + m.done + ' of ' + m.total + '</td>' +
+            '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">The milestones due so far, completed, across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pe.pct) + '</b>.</p>';
+      var etitle = L("project", "bu") + " &mdash; execution";
       return drillCard(buExists() ? labelWord("topword", "group") + " " + ptitle : ptitle, pv, {
         primary: !buExists(),
         sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", each counting equally.",
         drill: pdrill, modalTitle: L("project", "bu") + " — performance",
         modalSub: "Each project scored and averaged equally"
+      }) +
+      drillCard((buExists() ? labelWord("topword", "group") + " " + etitle : etitle) + tip(TIP_EXEC()), pe.pct, {
+        sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", on their milestones due so far.",
+        drill: pedrill, modalTitle: L("project", "bu") + " — execution",
+        modalSub: "Milestones due so far, completed"
       });
     }
     var tu = topAsUnit(), items = itemsNow(tu);
@@ -30073,18 +30090,38 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    /* §602: EXECUTION BESIDE IT. Islam: *"the directions needs to have
+       performance and execution"*. The same `unitRatio` a unit's own
+       execution card reads (delivered as a share of planned), over the top
+       layer's own view — nothing new computed. */
+    var ex = unitRatio(tu);
+    var exdrill = miniTable(["#", L1("pillar"), "Delivered", "Planned", "Of plan"],
+      items.map(function(p, i){
+        var pr = pillarRatio(p);
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(pillarCode(tu, i) + " " + (p.name || "")) + '</td>' +
+          '<td class="num">' + pct(pillarExec(p)) + '</td><td class="num">' + pct(pillarPlan(p)) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(pr) + '">' + pct(pr) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Delivered <b>' + pct(unitExec(tu)) + '</b> against <b>' + pct(unitPlan(tu)) + '</b> planned across ' +
+      L("pillar") + ' (' + items.length + ') &mdash; <b>' + pct(ex) + '</b> of plan.</p>';
+    var exCard = function(title, sub){
+      return drillCard(title + tip(TIP_EXEC()), ex, { sub: sub, drill: exdrill,
+        modalTitle: title.replace(/&mdash;/g, "—"), modalSub: L1("tactic") + " delivery, as a share of plan" });
+    };
     /* §447: with the units off these ARE the company's directions and this is
        its headline — the equal average Islam chose (*"yes equally"*). */
     if (!buExists()) return drillCard(L("pillar", "bu") + " &mdash; performance", unitPillars(tu), {
       primary: true, sub: "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", each counting equally.",
       drill: drill, modalTitle: L("pillar", "bu") + " — performance",
       modalSub: "Each direction scored and averaged equally"
-    });
+    }) + exCard(L("pillar", "bu") + " &mdash; execution",
+      "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", on their " + L("tactic") + " delivered against plan.");
     return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
       sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
       drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
       modalSub: "The top layer’s own plan, kept apart from the units"
-    });
+    }) + exCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; execution",
+      "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), on their " + L("tactic") + " delivered against plan.");
   }
 
   var SECS = [];
@@ -30100,6 +30137,10 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
+        /* §602: with the company's own two cards beside the objectives, the
+           units' two start a row of their own under them — three pairs
+           stacked, never five cards wrapping wherever the width breaks. */
+        (buExists() && topPlanCard() ? '</div><div class="scores"><div class="scores-gap" aria-hidden="true"></div>' : "") +
         (!buExists() ? "" :
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
@@ -30123,7 +30164,9 @@ function whereNext(keys){
       /* §593: the functions' own row, under the units' two cards.
          §601: and on a company WITHOUT units too (El Abd) — there the
          functions are all it holds, so their row leads with no gap. */
-      fnReadingCards(boardFunctionKeys(), "", buExists() ? 1 + (topPlanCard() ? 1 : 0) : 0) +
+      /* §602: every pair sits under the objectives' column, so the
+         functions line up under the units' two, or the directions' two. */
+      fnReadingCards(boardFunctionKeys(), "", buExists() || topPlanCard() ? 1 : 0) +
       (buExists() ? whereNext(UNIT_KEYS) : "") + whereNextFns(boardFunctionKeys())) });
 
   /* §464: the divisions left this page for the navigation — planned on the

@@ -1,4 +1,4 @@
-"""A client that plans at both levels presents both (§588).
+"""A client that plans at both levels presents both (§591).
 
 Stage 4 lets a client have business units AND a company that plans its own
 directions or capabilities (§544, "both can be on"). The Master presentation

@@ -850,7 +850,7 @@ function deckSlides(u){
   var capsApart = boxSplit(u) &&
     u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
-  /* §588: AND A BOX SHOWN APART THAT HOLDS ONLY ONE KIND IS CALLED BY THAT
+  /* §591: AND A BOX SHOWN APART THAT HOLDS ONLY ONE KIND IS CALLED BY THAT
      KIND. Wander's company is all capabilities; since §587 its roll-call and
      score table say Capabilities, and this slide went on saying "4 Pillars"
      — two names for the same four things in one deck (§553.6's rule: a room
@@ -2743,7 +2743,7 @@ function masterKindWord(t){
   if (k === "sec") return "SECTION";
   if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
   if (k === "cap") return "CAP";
-  /* §588: THE COMPANY IS THE COMPANY ON EITHER SHAPE. With units on and the
+  /* §591: THE COMPANY IS THE COMPANY ON EITHER SHAPE. With units on and the
      company planning too (§544, "both can be on"), `boardUnitTargets` puts
      the company first among the units (§428) — and this chip called it a
      business unit. */

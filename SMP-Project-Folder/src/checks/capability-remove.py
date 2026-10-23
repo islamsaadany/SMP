@@ -380,40 +380,36 @@ with sync_playwright() as p:
     ck("...archived first, so it can be restored",
        (gone.get("arch") or 0) > (before2.get("arch") or 0), gone)
 
-    print("\n\u00a77 \u00b7 the second door \u2014 the Temple's own Remove")
+    print("\n\u00a77 \u00b7 the Temple is no longer a door")
+    # §606.1 REWROTE THIS SECTION (§218). §325 made the Temple's own table a
+    # SECOND door onto the same dialog, so that no copy of the control could
+    # destroy a capability's projects without one. The Temple only shows now
+    # (Islam: "the temple should eventually read from the other areas"), so
+    # the door is gone rather than kept in step — which is §325's own rule
+    # met from the other side: a capability is removed in one place. Asserted
+    # through the product's own navigation, never a flag (§266): the tab
+    # opens, draws the capabilities on its base, and offers no pen and no
+    # Remove anywhere on it.
     pg.reload(); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     boxes(pg)
     natives.clear()
-    # Reached through the product's own navigation and its own pen, never by
-    # assigning EDIT_PAGE \u2014 a control reached by setting a flag is a control
-    # nobody proved a person can reach (\u00a7266's own lesson).
     try:
         pg.click('[data-s="temple"]', timeout=3000); pg.wait_for_timeout(500)
-        pg.click('[data-page="temple"]', timeout=3000); pg.wait_for_timeout(500)
+        opened = True
     except Exception as e:
-        ck("the Temple's pen opens", False, str(e)[:80])
-    ck("the Temple's table draws a Remove per capability",
-       len(pg.query_selector_all('[data-trm^="cap|"]')) ==
-       len(ev(pg, "() => GROUP.capabilities.map(c => c.id)", [])))
-    was7 = ev(pg, "() => GROUP.capabilities.map(c => c.id)", [])
-    try:
-        pg.click('[data-trm="cap|3"]', timeout=3000); pg.wait_for_timeout(450)
-    except Exception as e:
-        ck("the Temple's Remove can be pressed", False, str(e)[:80])
-    temple = ev(pg, """() => {
-      const ov = document.querySelector('.overlay.on .rmconfirm');
-      if (!ov) return { none: true };
-      return { picks: ov.querySelectorAll('.pick').length,
-               keep: !!ov.querySelector('[data-capkeep]') }; }""")
-    ck("...and it opens the SAME dialog, not the browser's",
-       temple.get("picks") == 2 and temple.get("keep") is True, temple)
-    ck("...raising no browser dialog", not natives, natives)
-    ck("...and having removed nothing yet",
-       ev(pg, "() => GROUP.capabilities.map(c => c.id)", []) == was7)
-    try: pg.click('[data-rmno]', timeout=2000)
-    except Exception: pass
-    pg.wait_for_timeout(250)
+        opened = False
+        ck("the Temple opens", False, str(e)[:80])
+    if opened:
+        t7 = ev(pg, """() => ({ base: document.querySelectorAll('#panel .stylobate .encard').length,
+          pen: !!document.querySelector('#panel [data-page="temple"], #panel .pageact'),
+          rm: document.querySelectorAll('#panel .rmbtn, #panel [data-trm]').length,
+          caps: GROUP.capabilities.length })""", {})
+        ck("the Temple still draws the capabilities on its base",
+           t7.get("caps", 0) > 0 and t7.get("base", 0) >= t7.get("caps", 0), t7)
+        ck("...offers no pen of its own", t7.get("pen") is False, t7)
+        ck("...and no Remove anywhere on it", t7.get("rm") == 0, t7)
+        ck("...raising no browser dialog", not natives, natives)
 
     ck("no page errors", not errs, errs[:3])
     b.close()

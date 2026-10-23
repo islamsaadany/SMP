@@ -1225,6 +1225,16 @@ html[data-client-settings] .viewer { display:none; }
   details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
 
+  /* ── Themes box on the top layer's Foundation (§606.1) ─── */
+  .themeband { margin-top:20px; }
+  .themegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:12px 15px; }
+  .themecard b { font-family:var(--serif); font-size:16px; font-weight:600; }
+  .themecard .themenote { font-size:13.5px; color:var(--ink-2); }
+  .themeband input.themecode { width:5.5em; text-align:center; }
+  .themeband .why { display:inline; margin:0; }
+
   /* ── Temple entablature, fixed grid ───────────────────── */
   .entablature { grid-template-columns:repeat(3,1fr); gap:16px 26px; align-items:start; }
   @media (max-width:760px) { .entablature { grid-template-columns:repeat(2,1fr); } }

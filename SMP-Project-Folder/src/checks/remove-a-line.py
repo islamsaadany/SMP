@@ -172,20 +172,30 @@ with sync_playwright() as p:
     ck("no question is asked for a line holding nothing", emp.get("strips") == 0, emp)
     ck("...and it is gone", emp.get("n") == before_n - 1, (before_n, emp))
 
-    print("\n§7 · in a table the strip is a row, and the Temple is one")
+    print("\n§7 · in a table the strip is a row: the objectives table")
+    # §606.1 REWROTE THIS SECTION, NEVER LOOSENED IT (§218). It asked the
+    # Temple's own objectives table, which is gone: the Temple only shows now,
+    # and the top layer's objectives are removed on its Foundation. The claims
+    # are the same claims — a row of its own, spanning the table, naming the
+    # objective, the row above marked, Keep removing nothing — asked of the
+    # table that now holds the control. With the Temple on, that table carries
+    # the Heading column, so "spanning the table" is ten columns, read off the
+    # table's own head rather than written down.
     natives.clear()
     fx2 = ev(pg, """() => {
-      EDIT_PAGE['temple'] = true;
-      current = 'group'; currentSub = 'temple'; RMASK = null;
+      EDIT_PAGE['foundation'] = true;
+      current = 'group'; currentSub = 'strategy'; CURSEC.strategy = 'found'; RMASK = null;
       /* A key objective only asks when it carries something (the handler's own
          rule), so the fixture gives the first one a target to lose. */
       if (GROUP.keyObjectives[0]) GROUP.keyObjectives[0].target = GROUP.keyObjectives[0].target || "100";
       paint();
-      return { n: GROUP.keyObjectives.length,
+      const t = document.querySelector('#panel .koband table');
+      return { n: GROUP.keyObjectives.length, temple: templeOn('group'),
+               heads: t ? t.querySelectorAll('thead th').length : 0,
                first: GROUP.keyObjectives[0] ? GROUP.keyObjectives[0].name : null };
     }""")
     pg.wait_for_timeout(350)
-    hit = ev(pg, """() => { const b = document.querySelector('[data-trm="ko|0"]');
+    hit = ev(pg, """() => { const b = document.querySelector('#panel .koband [data-korm$="|0"]');
       if (!b) return false; b.click(); return true; }""", None, False)
     pg.wait_for_timeout(300)
     row = ev(pg, """() => {
@@ -194,11 +204,13 @@ with sync_playwright() as p:
       return { there: !!r, cols: td ? +td.getAttribute('colspan') : 0,
                say: r ? r.innerText.replace(/\\s+/g,' ').trim() : "",
                afterMarked: !!document.querySelector('tr.rmasking') }; }""", None, {})
-    ck("(fixture) the Temple draws its key objectives", fx2.get("n", 0) > 0, fx2)
+    ck("(fixture) the Foundation draws the top layer's key objectives, Temple on",
+       fx2.get("n", 0) > 0 and fx2.get("temple") is True, fx2)
     ck("the row's Remove is reachable", hit)
     ck("no browser dialog is raised", not natives, natives)
     ck("the strip is a row of its own", row.get("there"), row)
-    ck("...spanning the table", row.get("cols") == 8, row)
+    ck("...spanning the table, Heading column included",
+       row.get("cols") == fx2.get("heads") == 10, (row, fx2.get("heads")))
     ck("...naming the objective it would take",
        (fx2.get("first") or "") in row.get("say", ""), (fx2.get("first"), row.get("say")))
     ck("...and the row above it is marked", row.get("afterMarked"), row)
@@ -206,6 +218,9 @@ with sync_playwright() as p:
     pg.eval_on_selector("tr.rmaskrow [data-rmkeep]", "e => e.click()"); pg.wait_for_timeout(250)
     ck("Keep removes nothing here either",
        ev(pg, "() => GROUP.keyObjectives.length", None, -1) == n_before)
+    ev(pg, "() => { EDIT_PAGE['foundation'] = false; RMASK = null; paint(); }")
+    ck("and the Temple offers no Remove of its own any more",
+       ev(pg, "() => { currentSub = 'temple'; paint(); return !document.querySelector('#panel .rmbtn, #panel [data-page]'); }", None, False) is True)
 
     print("\n§8 · and the three that take more than the line still say so")
     natives.clear()

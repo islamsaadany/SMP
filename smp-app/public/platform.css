@@ -8057,6 +8057,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     align-items:center; gap:5px; list-style:none; }
   #subtabs .bandsmenu > summary:hover,
   .tabs .bandsmenu > summary:hover { color:var(--ink); border-color:var(--ink-3); }
+  /* §154's pairing, held in this row too. `.editbtn` is `background:none`,
+     and `--gold-deep` is right on white (4.99) but this row's ground is
+     `--surface-2`, where it measured 4.45 — under the line, found by
+     checks/state-contrast.py on Presentation's caret. So an outlined button
+     here stands on the surface, as the Bands pill beside it already does;
+     its hover keeps §154's wash and twin. */
+  #subtabs .tabacts .editbtn:not(.cta),
+  .tabs .tabacts .editbtn:not(.cta) { background:var(--surface); }
+  #subtabs .tabacts .editbtn:not(.cta):hover,
+  .tabs .tabacts .editbtn:not(.cta):hover { background:var(--attn-bg); color:var(--attn-tx); }
   .bandsmenu > summary::-webkit-details-marker { display:none; }
   /* The panel hangs BELOW the row, so the row may not clip it. The tab row has
      no reason to hide anything horizontally and this is the only thing that
@@ -8477,7 +8487,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
    segmented pair. */
 .mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
 .mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
-.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+.mpseg button:disabled, .mpseg button[aria-disabled="true"] { color:var(--ink-3); cursor:not-allowed; }
 /* A quarter carries its months in its label, so its box is wider than a
    month's — 112px, measured to sit four on one line down to 1100. */
 .mpm.mpq { width:112px; }

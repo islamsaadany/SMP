@@ -756,9 +756,10 @@
 
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
        one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
+       reporting right cannot disagree about who is named (§42, §53.5).
+       §544.13: whichever way the business units are switched — the
+       company's own plan is the company's, and the units are irrelevant to
+       it. */
     if (ownsTopPillar(w, p)) once("dirowner", "group");
 
     /* §412: a capability's own seats, read off the capability exactly as a
@@ -32854,7 +32855,10 @@ function monthlySeg(row, fld, q, reg){
     var on = (mode === "q") === q;
     return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
       '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
-      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      /* §538's house rule: HELD, not dead — `aria-disabled` keeps the
+         pointer and the focus, so the reason on it reaches somebody; the
+         handler declines the press. */
+      (!on && stuck ? ' aria-disabled="true" title="Set a compile rule first, so the figures can be carried across"' : '') +
       '>' + word + '</button>';
   };
   return '<span class="mpseg" role="group" aria-label="Plan this target">' +
@@ -80457,7 +80461,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });

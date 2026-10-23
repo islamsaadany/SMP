@@ -49,6 +49,10 @@
 .csetup .wzarched { border:1px solid var(--line); background:var(--surface-2); border-radius:var(--r-md);
                     padding:10px 13px; margin:0 0 16px; font-size:var(--fs-small); color:var(--ink-2); }
 .csetup .wzarched b { color:var(--ink); }
+/* §608: the shared-word warning that came over from Terminology — the
+   platform's own bad-note colours, because it asks for a change. */
+.csetup .wzarched.wzclash { border-color:var(--bad); background:var(--bad-bg); color:var(--bad-tx); }
+.csetup .wzarched.wzclash b { color:var(--bad-tx); }
 
 /* rows you add to */
 .csetup .wzrows { display:flex; flex-direction:column; gap:6px; }

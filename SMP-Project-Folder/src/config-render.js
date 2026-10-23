@@ -120,32 +120,15 @@ function sitsInWord(){
   });
 }
 
-/* ── Terminology ─────────────────────────────────────────────────────── */
-function renderLabels(){
-  var editable = grant("c_labels") === "edit";
-
-  var rows = LABELS.entries.map(function(e, i){
-    var d = labelDefault(e.key) || { one:e.internal, many:e.internal };
-    var one = labelWord(e.key, "group"), many = labelWord(e.key, "bu");
-    var box = function(which, val, what){
-      return editable
-        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) +
-          '" aria-label="' + esc(d.one) + ': ' + what + '" />'
-        : '<span>' + esc(val) + '</span>';
-    };
-    var differs = one !== d.one || many !== d.many;
-    var reset = editable && differs
-      ? '<button type="button" class="linkbu lblreset" data-lblreset="' + i + '">Reset</button>' : '';
-    return '<tr><td class="lbldesc">' + esc(e.note || "") + '</td>' +
-      '<td class="lbldef">' + esc(d.one) + '<br>' + esc(d.many) + '</td>' +
-      '<td>' + box("group", one, "the word for one") + '</td>' +
-      '<td><div class="lblmany">' + box("bu", many, "the word for many") + reset + '</div></td></tr>';
-  }).join("");
-
-  /* Two things sharing one word would render two different objects under one
-     name on the same screen. Caught here, not in a client demo. Asked of
-     each form separately: "Project" as one thing's single word and another's
-     plural is not a collision anybody reads. */
+/* ── TWO THINGS SHARING ONE WORD (§392 → §608) ──────────────────────────
+   Two different objects rendered under one name on the same screen. It was
+   Terminology's warning, and it went to the shape screen with the words
+   (§608): `labelClashes()` answers, client-setup.js draws it while there is
+   one. Asked of each form separately: "Project" as one thing's single word
+   and another's plural is not a collision anybody reads. In Setup the word
+   asked is the stored one — a layer's own name is not consulted there
+   (layerOverride), which is what the page always compared. */
+function labelClashes(){
   var seen = {}, clashes = [];
   LABELS.entries.forEach(function(e){
     [["group","one"],["bu","many"]].forEach(function(s){
@@ -154,23 +137,7 @@ function renderLabels(){
       seen[s[1] + "|" + v] = true;
     });
   });
-
-  var warn = clashes.length
-    ? '<div class="note bad-note"><b>Two things share a word.</b> <span class="mono">' + esc(clashes[0]) +
-      '</span> is used for two different things. Change one of them &mdash; ' +
-      'two different objects under one word on the same screen cannot be told apart by the reader.</div>'
-    /* The old wording said saving is blocked, and nothing ever blocked it
-       (§104.8's family: a sentence nothing compares with the code). It now
-       says what is true. */
-    : '';
-
-  return section("", "Terminology", null,
-      '<div class="cfg"><table class="lbltable"><thead><tr>' +
-      '<th style="width:38%">What it is</th>' +
-      '<th style="width:18%">Default</th>' +
-      '<th style="width:20%">Your word &middot; one</th>' +
-      '<th style="width:24%">Your word &middot; many</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
+  return clashes;
 }
 
 /* MONOCHROME, AND INSIDE THE BOX (Islam, 2026-08-22: "make the icons of view
@@ -281,6 +248,12 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      the whole plan, or their part. Pressing the eye or the pen turns it off
      (`data-dirclear`), so the three stay one choice to the person pressing. */
   var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
+  /* §608: what the asking box needs to say what this press would do — who
+     the row is, what the column reaches, what the cell holds now. */
+  var askAttr = opt.ask
+    ? ' data-askwho="' + esc(opt.ask.who) + '" data-askwhat="' + esc(opt.ask.what) +
+      '" data-askfrom="' + (opt.mixed ? "mixed" : halfOn ? "part" : esc(v)) + '"'
+    : '';
   var opts = states.map(function(o){
     var on = o === v && !(halfOn && o === "view");
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
@@ -295,7 +268,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '"' +
-      (halfOn ? ' data-dirclear="1"' : '') + '>' +
+      (halfOn ? ' data-dirclear="1"' : '') + askAttr + '>' +
       ICON[o] + '</button>';
   }).join("");
   /* Placed straight after the FIRST button, which is the eye (`states` always
@@ -305,7 +278,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       'data-dirscope="' + (halfOn ? "full" : "part") + '" title="' +
       (halfOn ? "Show them the full plan again" : "May read their part only — a direction owner sees their own directions and the Foundation") +
       '" aria-label="' + (halfOn ? "turn off their part only" : "their part only") +
-      '" aria-pressed="' + halfOn + '">' + ICON_HALFEYE + '</button>';
+      '" aria-pressed="' + halfOn + '"' + askAttr + '>' + ICON_HALFEYE + '</button>';
   });
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -344,10 +317,11 @@ function accessRowName(r){
   var w = String(labelWord(r.word, "group") || "").trim();
   return w ? w + r.suffix : r.name;
 }
-function matrixRoleCell(r){
-  /* §516: a merged row counts everybody holding ANY of the roles under it,
-     once each — a person who is both a BU owner and a function head is one
-     Owner, not two. */
+/* §516: a merged row counts everybody holding ANY of the roles under it,
+   once each — a person who is both a BU owner and a function head is one
+   Owner, not two. §608: lifted out of the cell so the asking box names the
+   same number the row does. */
+function matrixRoleHeads(r){
   var of = r.of || [r.key];
   var n = r.floor
     ? PEOPLE.filter(function(p){
@@ -355,14 +329,39 @@ function matrixRoleCell(r){
     : PEOPLE.filter(function(p){
         var ks = personRoleKeys(p);
         return of.some(function(k){ return ks.indexOf(k) > -1; }); }).length;
+  return n ? plural(n, "person").replace("persons", "people") : "nobody yet";
+}
+function matrixRoleCell(r){
   /* Two lines, never more. The role's description is a sentence, and a
      sentence in a 19% column wraps to eight lines and makes every row of a
      49-cell table a hundred pixels tall — the exact fault this page was
      rebuilt to remove. It is on hover instead. */
   return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(accessRowName(r)) + '</b>' +
-    '<span class="why">' +
-    (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-    '</span></td>';
+    '<span class="why">' + matrixRoleHeads(r) + '</span></td>';
+}
+/* ── WHAT A PRESS WOULD DO, IN WORDS (§608) ────────────────────────────
+   Islam: *"giving more or less needs the confirmation … with the impact of
+   the change"*. A cell carries who it is for (`who`), what it reaches
+   (`what`) and what it holds now; the press carries what it would hold. The
+   sentence is built from those four and nothing else, so it says exactly
+   what the write will do. Escaped here: the asking box prints it as HTML. */
+var ACC_WHAT = { top: "the group's and the divisions' own pages", plan: "their own plan",
+  rep: "their own reporting", other: "other units' and functions' pages",
+  cycle: "the reporting cycle pages", setup: "the Setup pages" };
+var ACC_RANK = { none: 0, view: 1, fill: 2, edit: 3 };
+var ACC_CAN = { view: "read", fill: "fill what’s empty in", edit: "read and change" };
+function accessImpact(from, to, what){
+  var w = esc(what), b = function(s){ return '<b>' + esc(s) + '</b>'; };
+  if (to === "none") return "Will no longer see " + w + ".";
+  if (!(from in ACC_RANK) || from === "none")
+    return "Will be able to " + b(ACC_CAN[to] || to) + " " + w + ".";
+  if (ACC_RANK[to] > ACC_RANK[from])
+    return "Will be able to " + b(ACC_CAN[to]) + " " + w + ", not only " +
+      (from === "view" ? "read it" : "fill what’s empty") + ".";
+  if (to === "view")
+    return "Will only be able to " + b("read") + " " + w + ", and no longer " +
+      (from === "edit" ? "change it" : "fill what’s empty") + ".";
+  return "Will only be able to " + b("fill what’s empty") + " in " + w + ", and no longer change the rest.";
 }
 
 /* ── A MODULE'S OWN ACCESS TABLE (§359.5, spec 056 §4.4, spec 046 §4.4) ──
@@ -412,7 +411,8 @@ function renderModuleAccess(){
         return stateCell(r.key, a.key, editable, null, {
           value: moduleGrantFor(r.key, a),
           states: (a.states || ["view"]).filter(function(x){ return x !== "none"; }),
-          attr: "data-mac", shipped: a.shipped || "none" });
+          attr: "data-mac", shipped: a.shipped || "none",
+          ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: a.label || a.key } });
       }).join("") + '</tr>';
   }).join("");
   return head + '<div class="cfg acgrid macgrid" data-macmod="' + esc(landingModule()) + '"><table><thead>' + th +
@@ -628,7 +628,8 @@ function renderAccess(){
         var m = accessMerged(r, c);
         if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
         var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
-        var opt = { attr: "data-acm", target: target, value: m.value };
+        var opt = { attr: "data-acm", target: target, value: m.value,
+                    ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: ACC_WHAT[c.key] || c.label } };
         if (c.key === "plan") opt.states = ["view", "fill", "edit"];
         if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
         if (m.mixed) {
@@ -644,7 +645,8 @@ function renderAccess(){
       (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
         ? stateCell(r.of[0], COPA.key, editable, null, {
             value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none" })
+            attr: "data-mac", shipped: COPA.shipped || "none",
+            ask: { who: accessRowName(r) + " · " + matrixRoleHeads(r), what: COPA.label || COPA.key } })
         : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
 
@@ -756,8 +758,12 @@ function renderFactorEditor(){
    legend, the colours and the status words can never drift apart. ── */
 function renderBands(){
   var can = grant("c_bands") === "edit";
-  var editable = can && EDITING.bands;
-  var b = BANDS.bands;
+  /* §608: an edit waiting for Apply keeps the table open, whatever cleared
+     the mode on the way past (leaveModes on a navigation the leave question
+     then held back). */
+  var editable = can && (EDITING.bands || !!BANDS_DRAFT);
+  var b = BANDS_DRAFT || BANDS.bands;
+  var waiting = bandsWaiting();
 
   /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§168). A band's `key`
      is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
@@ -788,7 +794,11 @@ function renderBands(){
         ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
         : '<span class="mono">' + x.floor + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
-      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td>' +
+      /* §608: HOW A FIGURE APPEARS TODAY, until Apply — the stored level in
+         this seat while the levels are the same ones. Once one is added or
+         removed the seats no longer pair, and the pill shows the new table. */
+      (function(a){ return '<td><span class="pill ' + a.key + '">' + esc(a.label) + '</span></td>'; })(
+        BANDS_DRAFT && BANDS_DRAFT.length === BANDS.bands.length ? BANDS.bands[i] : x) +
       (editable
         ? '<td class="cc">' + (b.length > 2
             ? '<button class="xbtn" data-bdel="' + i + '" type="button" title="Remove this level" ' +
@@ -801,14 +811,15 @@ function renderBands(){
   }).join("");
 
   /* Floors must descend, or a figure falls into two bands at once. */
-  var ok = true;
-  for (var i = 1; i < b.length; i++) if (b[i].floor >= b[i-1].floor) ok = false;
+  var ok = bandsOrdered(b);
 
   return section("", "Scoring bands",
       null,
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
-        (can
-          ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
+        /* §608: while something waits, Apply and Discard below take Done's
+           place — two ways out of one edit would be two answers to it. */
+        (can && !waiting.length
+          ? '<button class="editbtn" data-edit="bands">' + (editable ? "Done" : "Edit") + '</button>'
           : '') + '</div>' +
       '<div class="cfg"><table class="bandtbl"><thead><tr><th style="width:34%">Band</th>' +
         '<th class="cc" style="width:16%">Floor</th><th class="cc" style="width:26%">Range</th>' +
@@ -819,8 +830,13 @@ function renderBands(){
         ? '<div class="cfg-bar plain"><button class="addbtn" data-badd="1" type="button">' +
           '+ Add a level</button></div>'
         : '') +
-      (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Saving is blocked until the order is fixed.</div>') +
-      '<div class="note bad-note"><b>Changing a threshold rewrites history.</b> A quarter reported as on track becomes needs attention with no data having changed. Bands are per tenant and change rarely; the warning is what makes a change visible rather than silent.</div>');
+      (can ? applyRow("bands", waiting, BANDS_UNDO && BANDS_UNDO.until,
+                      ok ? null : "Floors must descend before this can be applied") : '') +
+      /* A status, kept: it says why Apply will not take the table (1b-ii). */
+      (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Apply is held until the order is fixed.</div>'));
+  /* §608: "Changing a threshold rewrites history" is not on the page any more.
+     It was true only of some edits and said on every visit; the asking box
+     says it at Apply, with the number of measures it moves (bandShift). */
 }
 
 /* ── Business units ─────────────────────────────────────────────────
@@ -1759,7 +1775,9 @@ function brandingBody(){
   var set = !!(b.accent || b.bar || b.palette || b.font);
 
   function swatch(key, label, value, note){
-    var shown = value || "";
+    /* §608: a picked colour waits in BRAND_PEND until Apply, so the boxes
+       show it and nothing else on the page does. */
+    var shown = (key in BRAND_PEND ? BRAND_PEND[key] : value) || "";
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
@@ -1823,31 +1841,49 @@ function brandingBody(){
      §313.36) and worn by the decks through groupLogo(). Deleted rather than
      hidden (§24); a stored GROUP.logo is left where it is and simply no
      longer read on a served page. */
+  /* §608: THE TWO NOTES UNDER THIS PAGE ARE GONE (Islam, of the Setup
+     pages: *"as we go we need to clean the setup pages from unnecessary
+     paragraphs"*). "Typeface" was a note to ourselves (§38.7) with nothing
+     on it to set, so its section went with it; "Branding is the tenant's"
+     carried one fact the page does not otherwise state, and it is the
+     heading's hover now (1b-ii). */
   return "" +
     section("", "The tenant’s colours",
       null,
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
       '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (mayEdit ? applyRow("brand", brandWaiting(), BRAND_UNDO && BRAND_UNDO.until) : '') +
       (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
-                        'Reset to the shipped palette</button></div>' : '')) +
+                        'Reset to the shipped palette</button></div>' : ''),
+      "Everyone in this client sees these colours once they are applied. Light and dark stay each person’s own.") +
 
     (derived ? section("", "What follows from them", null, derived) : "") +
 
     (checkRows ? section("", "Is it readable?",
       null,
-      checkRows) : "") +
-
-    section("", "Typeface", null,
-      '<div class="note"><b>The tenant’s face is set with the switch in the top bar for now</b> ' +
-      '(§38.7). Four are embedded so they can be compared in the real product; once one is ' +
-      'settled it moves here and the rest leave the file.</div>') +
-
-    section("", null, null,
-      '<div class="note"><b>Branding is the tenant’s, not the screen’s.</b> It is saved with ' +
-      'everything else and is what everyone here sees on opening. Light and dark stay personal — ' +
-      'that is about the room somebody is sitting in, not about the brand — and anyone who ' +
-      'prefers a different palette on their own screen may still pick one, without changing ' +
-      'what anybody else sees.</div>');
+      checkRows) : "");
+}
+/* ── THE ROW UNDER A COLOUR AREA (§608) ─────────────────────────────────
+   One drawing for every area in APPLY_AREAS. Something waiting: Apply,
+   Discard and an amber line naming what waits. Just applied: Apply greyed,
+   a green Applied and Undo, for UNDO_MS. Otherwise nothing at all — a row
+   with nothing to say is furniture (1b-ii). */
+function applyRow(kind, waiting, undoUntil, heldWhy){
+  var n = waiting.length;
+  /* `heldWhy`: the area cannot take what waits (bands out of order). Apply is
+     drawn greyed with the reason on it, beside the note that says it, rather
+     than pressed and silently refused (§42). */
+  if (n) return '<div class="applyrow" data-applyrow="' + kind + '">' +
+    '<button type="button" class="applybtn" data-applygo="' + kind + '"' +
+      (heldWhy ? ' disabled title="' + esc(heldWhy) + '"' : '') + '>Apply</button>' +
+    '<button type="button" class="applyno" data-applydrop="' + kind + '">Discard</button>' +
+    '<span class="applywait">' + n + (n === 1 ? ' change' : ' changes') + ' not applied yet: ' +
+      esc(waiting.join(", ")) + '</span></div>';
+  if (undoUntil && undoUntil > Date.now()) return '<div class="applyrow" data-applyrow="' + kind + '">' +
+    '<button type="button" class="applybtn" disabled>Apply</button>' +
+    '<span class="applydone">Applied</span>' +
+    '<button type="button" class="applyno" data-applyundo="' + kind + '">Undo</button></div>';
+  return '';
 }
 
 /* ── The register (§35) ─────────────────────────────────────────────
@@ -5150,12 +5186,12 @@ function renderKB(){
       { h: "One label, two places",
         p: 'A level can read differently at group and at business unit — what the group ' +
            'calls a ' + plW + ' a unit may call something else — and both ' +
-           'are set on the Labels page.' },
+           'are named on Client set-up › The shape, layer by layer.' },
       { h: "No collisions",
         p: 'Every display label at each level is unique, so no two entities can render ' +
-           'under the same word. A collision blocks saving until one of them changes: two ' +
-           'different objects under one word on the same screen is not something the ' +
-           'reader can recover from.' },
+           'under the same word. A collision is named on the shape screen until one of them ' +
+           'changes: two different objects under one word on the same screen is not something ' +
+           'the reader can recover from.' },
       { h: "Per tenant, not per strategy cycle",
         p: 'A cycle-scoped label would let 2026 and 2027 use different words for the same ' +
            'object, and no report spanning both could be read without a glossary.' },
@@ -5404,7 +5440,11 @@ function renderBandsExtra(){
   var can = grant("c_bands") === "edit";
   var rows =
     '<div class="cfg"><table><tbody>' +
-      '<tr><td style="width:46%">Reward begins at</td><td>' +
+      /* §608: the paragraph that sat under this table is this row's hover. */
+      '<tr><td style="width:46%">Reward begins at' + tip("At 100%, delivering the commitment earns. Set it " +
+        "higher and a measure can meet its target without clearing the reward line: a fourth standing, met " +
+        "but not earning, appears between short and earning. Either way the measure is scored against its own " +
+        "target exactly as before, so focus changes no score.") + '</td><td>' +
         (can && EDITING.bands
           ? inputOr2(CYCLE.rewardAt + "%", "Reward threshold", function(v){
               var n = parseFloat(String(v).replace(/[^0-9.]/g, ""));
@@ -5418,11 +5458,7 @@ function renderBandsExtra(){
             (CYCLE.locked ? "Locked" : "Open") + '</button>'
           : '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
             (CYCLE.locked ? "Locked" : "Open for marking") + '</span>') + '</td></tr>' +
-    '</tbody></table></div>' +
-    '<div class="note">At <b>100%</b> delivering the commitment earns. Set it higher and a ' +
-      'measure can meet its target without clearing the reward line \u2014 a fourth standing, ' +
-      '<i>met, not earning</i>, appears between short and earning. Either way the measure is ' +
-      'scored against its own target exactly as before: <b>focus changes no score</b>.</div>';
+    '</tbody></table></div>';
   return section("", "Focus and reward", null, rows);
 }
 

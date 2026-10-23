@@ -332,6 +332,8 @@ var CLIENTSETUP = (function () {
                     ["capability","Capabilities"], ["values","Values"], ["swot","SWOT"]];
   var TOP_NAMES = [["Group","Group"], ["Company","Company"], ["Holding","Holding"]];
   var MID_NAMES = [["Company","Companies"], ["Division","Divisions"], ["Sector","Sectors"]];
+  var SHAPE_TIP = "These apply to every item at a layer. Where one item needs to differ, add it under Except for on " +
+    "that layer's card. Switching something off hides it and keeps what was written. An empty name box uses the word shown in grey.";
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own, so a client
@@ -617,14 +619,28 @@ var CLIENTSETUP = (function () {
        still yours. */
     if (!canShape() && SHAPE_STEPS.indexOf(s.k) > -1) {
       var hb = el("div", "wzarched");
-      hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
-      hb.appendChild(el("b", null, "shape is set from here on"));
-      hb.appendChild(document.createTextNode(
-        ". Set-up rewrites these lists, which would lose that work, so ADDING a row is read-only here — " +
-        "rename or retire a row on its own Setup page instead, where the row keeps who runs it. " +
-        "Every name and switch on this screen can still be changed, and saves as you change it — " +
-        "a layer included, which only hides and keeps what is under it (§544.14)."));
+      /* §608: ONE LINE (Islam: *"clean the setup pages from unnecessary
+         paragraphs"*). The why — set-up rewrites a list, which would lose the
+         work — is the hover; the line says what stands and what is yours. */
+      hb.appendChild(document.createTextNode("This client has a plan, so "));
+      hb.appendChild(el("b", null, "rows can\u2019t be added here"));
+      hb.appendChild(document.createTextNode(". Names and switches still change. "));
+      hb.appendChild(tipEl("Set-up rebuilds a list, which would lose the work entered against a row, so adding is " +
+        "closed here. Rename or retire a row on its own Setup page instead, where it keeps who runs it. " +
+        "Switching a layer off only hides what is under it."));
       HOST.appendChild(hb);
+    }
+    /* §608: TWO THINGS SHARING ONE WORD, said where the words are named now
+       that Terminology has left Setup. A status, drawn only while it is true
+       (1b-ii); the answer is the page's (labelClashes), which the console's
+       copy of this file does not carry. */
+    var clash = s.k === "shape" && typeof labelClashes === "function" ? labelClashes() : [];
+    if (clash.length) {
+      var cw = el("div", "wzarched wzclash");
+      cw.appendChild(el("b", null, "Two things share a word: "));
+      cw.appendChild(document.createTextNode(clash[0] + " is used for two different things. Change one of them, " +
+        "or the reader cannot tell them apart on the same screen."));
+      HOST.appendChild(cw);
     }
 
     /* §418, §544: the shape lays the tree and a level's three sections side
@@ -632,7 +648,9 @@ var CLIENTSETUP = (function () {
        page's width. */
     var col = el("div", "wzcol" + (s.k === "shape" ? " wzwide" : ""));
     col.appendChild(el("span", "lab", s.key));
-    col.appendChild(el("h2", "wzq", s.q));
+    var q2 = el("h2", "wzq", s.q);
+    if (s.k === "shape") { q2.appendChild(document.createTextNode(" ")); q2.appendChild(tipEl(SHAPE_TIP)); }
+    col.appendChild(q2);
     col.appendChild(stepBody(s.k));
 
     var foot = el("div", "wzfoot");
@@ -753,15 +771,28 @@ var CLIENTSETUP = (function () {
       say(""); if (then) then(); return true;
     }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
   }
+  /* §608: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
+     clean the setup pages from unnecessary paragraphs"*). The fact stays,
+     on the platform's own "i" beside the label (`tip()`'s mark, 1b-ii). */
+  function tipEl(text){
+    var t = el("span", "tip", "i");
+    t.setAttribute("tabindex", "0");
+    t.setAttribute("data-tip", text);
+    return t;
+  }
+  function labTip(label, text){
+    var l = el("span", "lab", label);
+    if (text) { l.appendChild(document.createTextNode(" ")); l.appendChild(tipEl(text)); }
+    return l;
+  }
   function field(box, label, value, onChange, note, ro){
     var w = el("div");
-    w.appendChild(el("span", "lab", label));
+    w.appendChild(labTip(label, note));
     var i = el("input", "fld");
     i.type = "text"; i.value = value || "";
     wordCommit(i);
     if (onChange) i.addEventListener("change", function () { onChange(i.value); });
     w.appendChild(i);
-    if (note) w.appendChild(el("p", "note", note));
     box.appendChild(w);
     return i;
   }
@@ -853,16 +884,19 @@ var CLIENTSETUP = (function () {
       nw.appendChild(ta);
       rs.appendChild(nw);
     } else {
-      field(rs, "The client's name", (GROUP && GROUP.org) || "", null,
-        OPTS.live ? "" : "The client's own record — its name on the door, its industry and its mark — is kept by the served platform.", true);
+      field(rs, "The client's name", (GROUP && GROUP.org) || "", null, "", true);
+      /* §608: A STATUS, KEPT ON THE PAGE — it says why the box beside it cannot
+         be changed here, which is not a description (1b-ii), so it did not
+         become a hover with the notes that did. */
+      if (!OPTS.live) rs.appendChild(el("p", "note",
+        "The client's own record — its name on the door, its industry and its mark — is kept by the served platform."));
     }
     var aw = el("div");
-    aw.appendChild(el("span", "lab", "Its address here"));
+    aw.appendChild(labTip("Its address here", "Made from the name and set once, so a link that has been sent keeps working."));
     var a = el("input", "fld");
     a.value = S.key ? location.origin + "/" + S.key : location.origin + "/…";
     a.readOnly = true;
     aw.appendChild(a);
-    aw.appendChild(el("p", "note", "Made from the name and set once, so a link that has been sent keeps working."));
     rs.appendChild(aw);
     if (c) rs.appendChild(markBlock(c));
     box.appendChild(rs);
@@ -890,7 +924,9 @@ var CLIENTSETUP = (function () {
   function tellShell(v){ if (typeof SYNC !== "undefined" && SYNC.setClientMark) SYNC.setClientMark(v); }
   function markBlock(c){
     var mk = el("div", "wzmark");
-    mk.appendChild(el("span", "lab", "The client's mark"));
+    mk.appendChild(labTip("The client's mark", "Shown on the sign-in page this client's people use, and on the presentations: " +
+      "large on the cover and small in the footer of every slide, for any " + word("unitword", "business unit") +
+      " without a mark of its own and every " + word("fnword", "supporting function") + ". PNG only, with a transparent background."));
     var mrow = el("div", "markrow");
     var preview = el("img"); preview.alt = "";
     var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
@@ -934,10 +970,6 @@ var CLIENTSETUP = (function () {
       mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
     }
     mk.appendChild(mrow);
-    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at, " +
-      "and on the presentations: large on the cover and small in the footer of every slide, for any " +
-      word("unitword", "business unit") + " without a mark of its own and every " + word("fnword", "supporting function") +
-      ". PNG only, with a transparent background."));
     return mk;
   }
 
@@ -972,7 +1004,21 @@ var CLIENTSETUP = (function () {
           if (reg.canEdit) {
             var mb = el("button", "btn", on ? "Turn off" : "Turn on");
             mb.type = "button";
+            /* §608: TURNING ONE OFF ASKS FIRST, with what it takes away — the
+               note that used to sit under the list (Islam: *"unless we are
+               removing something that has data"*). Turning one on never asks. */
             mb.addEventListener("click", function () {
+              if (on && OPTS.ask) {
+                OPTS.ask(mb, { title: m.label + " \u00b7 Turn off",
+                  body: "<b>" + escH(reg.client && reg.client.name || "This client") + "</b> loses " + escH(m.label) +
+                    ": it leaves their card, the switcher inside the platform and its own address. " +
+                    "Nothing in it is deleted, and turning it on again brings it back.",
+                  yes: "Turn off", no: "Keep", go: change });
+                return;
+              }
+              change();
+            });
+            function change() {
               mb.disabled = true;
               post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
                 if (!r.ok) { mb.disabled = false; say(r.error || "Not changed.", true); return; }
@@ -1001,7 +1047,7 @@ var CLIENTSETUP = (function () {
                 }
                 paintRows();
               });
-            });
+            }
             msp.appendChild(mb);
           }
         }
@@ -1010,10 +1056,6 @@ var CLIENTSETUP = (function () {
       });
     }
     paintRows();
-    mods.appendChild(el("p", "note",
-      "Turning one on gives this client the module: it appears on their card, in the " +
-      "switcher inside the platform, and at its own address. Turning it off takes it away " +
-      "and deletes nothing."));
     box.appendChild(mods);
     return box;
   }
@@ -1034,17 +1076,33 @@ var CLIENTSETUP = (function () {
       wrap.textContent = "";
       var a = el("div", "wzend");
       a.appendChild(el("span", "wzendkey", "Archiving"));
-      a.appendChild(el("p", "wzendwhy",
-        "Archiving takes " + name + " off the clients page and closes their link — " +
-        "anybody who goes to it is turned away exactly as if this client had never existed. " +
-        "Nothing is lost, and you can bring them back from the console."));
       var row = el("div", "wzendrow");
       var go = el("button", "btn risk", "Archive this client");
       go.type = "button"; go.dataset.archive = "ask";
-      go.addEventListener("click", function () { ask(a); });
+      /* §608: the platform asks in its floating box, with what the paragraph
+         under this button used to say; the console's copy asks in place. */
+      go.addEventListener("click", function () {
+        if (!OPTS.ask) { ask(a); return; }
+        OPTS.ask(go, { title: "Archive " + name + "?",
+          body: "Their link stops working at once, this page included, and the card leaves the clients page. " +
+            "Anybody who goes to it is turned away as if this client had never existed. " +
+            "Everything they have is kept, and you can bring them back from the console.",
+          yes: "Archive " + name, no: "Keep", go: function () { archiveNow(go); } });
+      });
       row.appendChild(go);
       a.appendChild(row);
       wrap.appendChild(a);
+    }
+    function archiveNow(btn){
+      btn.disabled = true; btn.textContent = "Archiving…";
+      post({ action:"archiveClient", key:S.key, on:true }).then(function (j) {
+        if (!j.ok) { btn.disabled = false; btn.textContent = "Archive this client"; say(j.error || "Not archived.", true); return; }
+        location.assign(OPTS.console || "/platform");
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        btn.disabled = false; btn.textContent = "Archive this client";
+        say("Could not reach the server.", true);
+      });
     }
     function ask(box){
       box.textContent = "";
@@ -1240,7 +1298,7 @@ var CLIENTSETUP = (function () {
       var b = el("button", null, o[1]); b.type = "button";
       b.setAttribute("aria-pressed", String(cur === o[0]));
       if (ro) b.disabled = true;
-      b.addEventListener("click", function () { pick(o[0]); });
+      b.addEventListener("click", function () { pick(o[0], b); });
       band.appendChild(b);
     });
     return band;
@@ -1373,11 +1431,101 @@ var CLIENTSETUP = (function () {
     t.addEventListener("click", press);
     return t;
   }
+  /* §608 — END IN MIND, ITS OWN TICK, under the Winning Aspiration it lives
+     in (SMPRules.endInMindOn). Greyed and off while the aspiration is off —
+     `disabled`, with the reason on the hover (§220, 1b-ii). Unticking asks
+     first where somebody has written one. Stored as an absence. */
+  function eimRow(k, tgt, aspOn){
+    var on = SMPRules.endInMindOn(GROUP, tgt);
+    var r = el("div", "stpart" + (on ? "" : " off"));
+    r.setAttribute("data-steim", k);
+    var t = tickBtn(on, "Show End in Mind", k + "|eim", function (e) {
+      var write = function () {
+        var nx = structNow(), l = nx[k];
+        if (on) l.eim = { on: false }; else delete l.eim;
+        structWrite(nx);
+      };
+      if (!on) write();
+      else askHide(e.currentTarget, k, "endinmind", partWord(k, "endinmind"), write);
+    });
+    if (!aspOn) { t.disabled = true; t.title = "Shown inside the Winning Aspiration, so it is off while that is."; }
+    r.appendChild(t);
+    r.appendChild(nameBox(k, "endinmind", "one", "End in Mind, one"));
+    r.appendChild(nameBox(k, "endinmind", "many", "End in Mind, many"));
+    return r;
+  }
   function partHead(){
     var h = el("div", "stparth");
     h.appendChild(el("span")); h.appendChild(el("span", "lab", "One")); h.appendChild(el("span", "lab", "Many"));
     return h;
   }
+  /* ── WHAT A SWITCH WOULD HIDE (§608) ──────────────────────────────────
+     Islam, of Client set-up: *"it should act as per the adjustment unless we
+     are removing something that has data — the same check box should come
+     like the access"*. So a tick or a switch that would hide something
+     somebody WROTE asks first, in the shell's floating box (OPTS.ask),
+     naming whose and how many; anything else applies at once, as it always
+     has. Read off the live graph, which inside the platform is the truth of
+     the moment (§210). A part this table cannot read (a function's
+     description, the competitive discipline) applies at once, as before. */
+  function escH(t){
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function txt(v){ return !!String(v == null ? "" : v).trim(); }
+  function quadHas(o, q){ var w = o && o.swot; return !!(w && Array.isArray(w[q]) && w[q].length); }
+  var HOLDS = {
+    brief: function (o) { return (o.clauses || []).some(function (c) { return c && (txt(c[0]) || txt(c[1])); }); },
+    purpose: function (o) { return txt(o.mission); },
+    aspiration: function (o) { return txt(o.aspiration); },
+    endinmind: function (o) { return txt(o.endInMind); },
+    keyobj: function (o) { return (o.keyObjectives || []).length > 0; },
+    values: function (o) { return (o.values || []).length > 0; },
+    theme: function (o) { return o === GROUP && (GROUP.themes || []).length > 0; },
+    swot: function (o) { return ["s", "w", "o", "t"].some(function (q) { return quadHas(o, q); }); },
+    plan: function (o) { return ["items", "projects", "actions"].some(function (f) { return Array.isArray(o[f]) && o[f].length > 0; }); }
+  };
+  function layerSubjects(k){
+    if (k === "top") return [{ name: (GROUP && GROUP.org) || word("topword", "Group"), o: GROUP }];
+    if (k === "mid") return (COMPANY_KEYS || []).map(function (c) { return { name: COMPANIES[c].name, o: coFoundOf(c) }; });
+    if (k === "bu") return (UNIT_KEYS || []).map(function (u) { return { name: UNITS[u].name, o: UNITS[u] }; });
+    if (k === "fn") return (FUNCTION_KEYS || []).map(function (f) { return { name: FUNCTIONS[f].name, o: FUNCTIONS[f] }; });
+    if (k === "cap") return ((GROUP && GROUP.capabilities) || []).map(function (c) { return { name: c.name, o: c }; });
+    return [];
+  }
+  /* The names of the boxes on layer `k` holding something written for any of
+     `parts` (a part key, or a test of its own). */
+  function holdersOf(k, parts){
+    var tests = [].concat(parts).map(function (c) { return typeof c === "function" ? c : HOLDS[c]; })
+      .filter(Boolean);
+    if (!tests.length || typeof GROUP === "undefined") return [];
+    return layerSubjects(k).filter(function (x) {
+      return tests.some(function (t) { try { return t(x.o || {}); } catch (e) { return false; } });
+    }).map(function (x) { return String(x.name || "").trim(); }).filter(Boolean);
+  }
+  function namesSaid(n){
+    if (n.length === 1) return n[0];
+    if (n.length <= 3) return n.slice(0, -1).join(", ") + " and " + n[n.length - 1];
+    return n.slice(0, 2).join(", ") + " and " + (n.length - 2) + " more";
+  }
+  /* The layer in the client's own word — "Business units · End in Mind". */
+  function layerTitle(k){
+    if (k === "top") return "Top level";
+    var key = { mid: "division", bu: "unitword", fn: "fnword", cap: "capability" }[k];
+    return key ? W(key, "many", k) : "This layer";
+  }
+  function askHide(anchor, k, parts, what, go){
+    var held = holdersOf(k, parts);
+    if (!held.length || !OPTS.ask || !anchor) { go(); return; }
+    OPTS.ask(anchor, {
+      title: layerTitle(k) + " \u00b7 " + what,
+      body: "<b>" + escH(namesSaid(held)) + "</b> " + (held.length === 1 ? "has" : "have") +
+        " this written. Hiding it takes it off " + (held.length === 1 ? "its" : "their") +
+        " pages and presentations; the words are kept and come back when it is switched on again.",
+      yes: "Hide it", no: "Keep", go: go });
+  }
+  /* Everything a layer's boxes can hold, for a switch that hides the lot. */
+  var ALL_WRITTEN = ["brief", "purpose", "aspiration", "endinmind", "keyobj", "values", "theme", "swot", "plan"];
+  function partWord(k, c){ return lvWord(k, c, "one") || fallbackWord(c, "one") || PART_LABEL[c] || c; }
   function compToggle(k, c){
     var nx = structNow(), l = nx[k], i = l.on.indexOf(c);
     if (i >= 0) l.on.splice(i, 1); else l.on.push(c);
@@ -1387,7 +1535,7 @@ var CLIENTSETUP = (function () {
     });
     structWrite(nx);
   }
-  var PART_LABEL = { brief:"Brief", desc:"Description", purpose:"Purpose", aspiration:"Aspiration", keyobj:"North Star",
+  var PART_LABEL = { brief:"Brief", desc:"Description", purpose:"Purpose", aspiration:"Aspiration", endinmind:"End in Mind", keyobj:"North Star",
     theme:"Themes", values:"Values", pillar:"Pillar", measure:"Key measure", tactic:"Tactic",
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
   /* §436: WHICH FIRST-SECTION PARTS A LAYER'S CARD OFFERS. A function's
@@ -1414,11 +1562,15 @@ var CLIENTSETUP = (function () {
     var s1 = el("section", "stsec");
     var h1 = el("div", "stsech"); h1.appendChild(el("span", "stkind", "First section"));
     var fOn = SMPRules.foundOn(GROUP, tgt);
-    h1.appendChild(onOff(fOn, function (v) {
-      var nx = structNow(), l = nx[k]; l.found = l.found || {};
-      if (v) delete l.found.on; else l.found.on = false;
-      if (!Object.keys(l.found).length) delete l.found;
-      structWrite(nx);
+    h1.appendChild(onOff(fOn, function (v, b) {
+      var write = function () {
+        var nx = structNow(), l = nx[k]; l.found = l.found || {};
+        if (v) delete l.found.on; else l.found.on = false;
+        if (!Object.keys(l.found).length) delete l.found;
+        structWrite(nx);
+      };
+      if (v || !fOn) write();
+      else askHide(b, k, firstParts(k).concat(["endinmind"]), "First section", write);
     }, k + "|found"));
     s1.appendChild(h1);
     if (!fOn) s1.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
@@ -1430,11 +1582,16 @@ var CLIENTSETUP = (function () {
       firstParts(k).forEach(function (c) {
         var built = SMPRules.compBuilt(tgt, c), on = built && L.on.indexOf(c) >= 0;
         var r = el("div", "stpart" + (on ? "" : " off"));
-        r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function () { compToggle(k, c); }));
+        r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function (e) {
+          if (!on) { compToggle(k, c); return; }
+          askHide(e.currentTarget, k, c === "aspiration" ? [c, "endinmind"] : c, partWord(k, c),
+                  function () { compToggle(k, c); });
+        }));
         r.appendChild(nameBox(k, c, "one", PART_LABEL[c] + ", one"));
         r.appendChild(nameBox(k, c, "many", PART_LABEL[c] + ", many"));
         if (!built) dummy(r);
         s1.appendChild(r);
+        if (c === "aspiration" && SMPRules.endInMindOffered && SMPRules.endInMindOffered(tgt)) s1.appendChild(eimRow(k, tgt, on));
       });
     }
     secs.appendChild(s1);
@@ -1444,7 +1601,11 @@ var CLIENTSETUP = (function () {
     var s2 = el("section", "stsec");
     var h2 = el("div", "stsech"); h2.appendChild(el("span", "stkind", "Second section"));
     var sBuilt = SMPRules.compBuilt(tgt, "swot"), sOn = sBuilt && L.on.indexOf("swot") >= 0;
-    var sSw = onOff(sOn, function (v) { if (v !== sOn) compToggle(k, "swot"); }, k + "|swot");
+    var sSw = onOff(sOn, function (v, b) {
+      if (v === sOn) return;
+      if (v) compToggle(k, "swot");
+      else askHide(b, k, "swot", "Second section", function () { compToggle(k, "swot"); });
+    }, k + "|swot");
     if (!sBuilt) dummy(sSw);
     h2.appendChild(sSw);
     s2.appendChild(h2);
@@ -1458,12 +1619,17 @@ var CLIENTSETUP = (function () {
       SMPRules.SWOT_QUADS.forEach(function (q) {
         var on = qs.indexOf(q) >= 0, key = SMPRules.QUAD_KEYS[q];
         var r = el("div", "stpart stquad" + (on ? "" : " off"));
-        r.appendChild(tickBtn(on, "Show " + SMPRules.PART_DEFAULTS[key][1], k + "|" + q, function () {
-          var nx = structNow(), l = nx[k]; l.swot = l.swot || {};
-          var cur = SMPRules.swotQuads(GROUP, tgt).slice(), i = cur.indexOf(q);
-          if (i >= 0) { if (cur.length === 1) return; cur.splice(i, 1); } else cur.push(q);
-          l.swot.quads = SMPRules.SWOT_QUADS.filter(function (x) { return cur.indexOf(x) >= 0; });
-          structWrite(nx);
+        r.appendChild(tickBtn(on, "Show " + SMPRules.PART_DEFAULTS[key][1], k + "|" + q, function (e) {
+          var write = function () {
+            var nx = structNow(), l = nx[k]; l.swot = l.swot || {};
+            var cur = SMPRules.swotQuads(GROUP, tgt).slice(), i = cur.indexOf(q);
+            if (i >= 0) { if (cur.length === 1) return; cur.splice(i, 1); } else cur.push(q);
+            l.swot.quads = SMPRules.SWOT_QUADS.filter(function (x) { return cur.indexOf(x) >= 0; });
+            structWrite(nx);
+          };
+          if (!on) write();
+          else askHide(e.currentTarget, k, function (o) { return quadHas(o, q); },
+                       lvWord(k, key, "many") || SMPRules.PART_DEFAULTS[key][1], write);
         }));
         r.appendChild(nameBox(k, key, "many", SMPRules.PART_DEFAULTS[key][1]));
         s2.appendChild(r);
@@ -1496,11 +1662,15 @@ var CLIENTSETUP = (function () {
     /* §427: a company has no plan page, so its plan section is drawn off
        and greyed rather than offering names nothing reads. */
     var pBuilt = k !== "mid", pOn = pBuilt && SMPRules.planOn(GROUP, tgt);
-    var pSw = onOff(pOn, function (v) {
-      var nx = structNow(), l = nx[k]; l.plan = l.plan || {};
-      if (v) delete l.plan.on; else l.plan.on = false;
-      if (!Object.keys(l.plan).length) delete l.plan;
-      structWrite(nx);
+    var pSw = onOff(pOn, function (v, b) {
+      var write = function () {
+        var nx = structNow(), l = nx[k]; l.plan = l.plan || {};
+        if (v) delete l.plan.on; else l.plan.on = false;
+        if (!Object.keys(l.plan).length) delete l.plan;
+        structWrite(nx);
+      };
+      if (v || !pOn) write();
+      else askHide(b, k, "plan", "Plan section", write);
     }, k + "|plan");
     if (!pBuilt) dummy(pSw);
     h3.appendChild(pSw);
@@ -1516,8 +1686,12 @@ var CLIENTSETUP = (function () {
     /* §428: a capability plans in pillars or in projects (capFormat), so its
        card names those two ways only. */
     var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : k === "cap" ? ["pillars", "projects"] : ["pillars"];
-    if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name " +
-      (ways.length === 2 ? "both" : "all three") + " ways here."));
+    if (ways.length > 1) {
+      var k3 = h3.querySelector(".stkind");
+      k3.appendChild(document.createTextNode(" "));
+      k3.appendChild(tipEl("Each one picks how it plans on its own row. Name " +
+        (ways.length === 2 ? "both" : "all three") + " ways here."));
+    }
     planWays(s3, k, tgt, ways);
     secs.appendChild(s3);
     box.appendChild(secs);
@@ -1564,10 +1738,10 @@ var CLIENTSETUP = (function () {
         tp.appendChild(el("span", "wzwhy", "Not available on this layer yet."));
         box.appendChild(tp); return;
       }
-      tp.appendChild(el("span", "wzwhy", need.length
-        ? "Needs " + need.map(function (c) { return PART_LABEL[c] || c; }).join(", ") + " ticked."
-        : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
-          (SMPRules.capExists(GROUP) ? ", and the capabilities (base)." : ".")));
+      sw.title = "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
+        (SMPRules.capExists(GROUP) ? ", and the capabilities (base)." : ".");
+      if (need.length) tp.appendChild(el("span", "wzwhy",
+        "Needs " + need.map(function (c) { return PART_LABEL[c] || c; }).join(", ") + " ticked."));
       box.appendChild(tp);
     }
   }
@@ -1818,7 +1992,10 @@ var CLIENTSETUP = (function () {
        the second layer as before, the supporting functions now too. */
     if (want("mid")) {
     var mid = card("Second layer");
-    hd(mid, onOff(lv.mid.exists, function (v) { var nx = structNow(); nx.mid.exists = v; structWrite(nx); }, "mid|layer"));
+    hd(mid, onOff(lv.mid.exists, function (v, b) {
+      var write = function () { var nx = structNow(); nx.mid.exists = v; structWrite(nx); };
+      if (v || !lv.mid.exists) write(); else askHide(b, "mid", ALL_WRITTEN, "Off", write);
+    }, "mid|layer"));
     if (lv.mid.exists) {
       mid.appendChild(el("p", "lab", "Called"));
       namePick(mid, "division", MID_NAMES, "both", ro);
@@ -1831,8 +2008,9 @@ var CLIENTSETUP = (function () {
        card names the layer; the client's own word is chosen inside it. */
     if (want("fn")) {
     var fn = card("Functions");
-    hd(fn, onOff(lv.fn.exists, function (v) {
-      var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx);
+    hd(fn, onOff(lv.fn.exists, function (v, b) {
+      var write = function () { var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx); };
+      if (v || !lv.fn.exists) write(); else askHide(b, "fn", ALL_WRITTEN, "Off", write);
     }, "fn|layer"));
     if (lv.fn.exists) {
       callBoxes(fn, "fnword", ro);
@@ -1851,8 +2029,9 @@ var CLIENTSETUP = (function () {
     bu.setAttribute("data-stcard", "bu");
     /* §544.4: its own switch, the functions' card's exactly (§418). Off
        hides the layer and keeps every plan, figure and page behind it. */
-    hd(bu, onOff(lv.bu.exists, function (v) {
-      var nx = structNow(); if (v) delete nx.bu.exists; else nx.bu.exists = false; structWrite(nx);
+    hd(bu, onOff(lv.bu.exists, function (v, b) {
+      var write = function () { var nx = structNow(); if (v) delete nx.bu.exists; else nx.bu.exists = false; structWrite(nx); };
+      if (v || !lv.bu.exists) write(); else askHide(b, "bu", ALL_WRITTEN, "Off", write);
     }, "bu|layer"));
     if (lv.bu.exists) {
       callBoxes(bu, "unitword", ro);
@@ -1871,9 +2050,9 @@ var CLIENTSETUP = (function () {
        card above, which is where they were already drawn whenever the office
        had said "in the company plan". */
 
-    box.appendChild(el("p", "wzwhy",
-      "These apply to every item at a layer. Where one item needs to differ, add it under Except for on that layer's card. " +
-      "Switching something off hides it and keeps what was written. An empty name box uses the client's own word from Terminology."));
+    /* §608: the note that closed this box is the hover on the step's own
+       question now (render(), SHAPE_TIP) — and it no longer sends anybody to
+       Terminology, which left Setup. */
     return box;
   }
 
@@ -2060,7 +2239,9 @@ var CLIENTSETUP = (function () {
           " and every box under it is kept, and grouping again brings it back.";
         rm.addEventListener("click", function (e) {
           e.stopPropagation();
-          var nx = structNow(); nx[k].layer = false; structWrite(nx);
+          askHide(rm, "mid", ALL_WRITTEN, "Remove this layer", function () {
+            var nx = structNow(); nx[k].layer = false; structWrite(nx);
+          });
         });
         side.appendChild(rm);
         lrow.appendChild(side);
@@ -2162,7 +2343,7 @@ var CLIENTSETUP = (function () {
        left to be noticed (§61). */
     var caps = (S.shape.capabilities || []).length;
     if (caps) shWhy(host, caps + " " + W("capability", caps === 1 ? "one" : "many", "capabilities").toLowerCase() +
-      " are managed on Setup › " + W("capability", "many", "Capabilities") + ".");
+      (caps === 1 ? " is" : " are") + " managed on Setup › " + W("capability", "many", "Capabilities") + ".");
   }
 
   /* ── the panel ────────────────────────────────────────────────────── */
@@ -2852,5 +3033,9 @@ var CLIENTSETUP = (function () {
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
            /* for the checks: the step the flow stands on, never its DOM */
-           at: function () { return S ? STEPS[S.at].k : null; } };
+           at: function () { return S ? STEPS[S.at].k : null; },
+           /* §608: and for the shell's leave question, which puts the flow back
+              on the step a colour is waiting on — no commit, no redraw of its
+              own: the shell's paint that follows draws it. */
+           toStep: function (k) { if (S) S.at = stepIdx(k); } };
 })();

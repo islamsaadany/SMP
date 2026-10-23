@@ -291,7 +291,7 @@ function unitAimSlides(u, bare){
     (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + (u.aspiration || !DECK_PLAN ? esc(u.aspiration) : PLAN_MISS) + '</p></div>' +
-      (u.endInMind
+      (u.endInMind && eimOn(u.ukey)
         ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
     (aimRows
@@ -1515,7 +1515,7 @@ function companyReviewOn(){
 function companyFoundationSlides(){
   /* §557: what the company's structure switches on, and nothing it does not. */
   var aspOn = compOn("group", "aspiration");
-  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
+  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn && eimOn("group") ? String(GROUP.endInMind || "").trim() : "";
   var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
   var rows = (!compOn("group", "keyobj") ? [] : deckRows(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])).map(function(m, i){

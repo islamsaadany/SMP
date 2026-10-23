@@ -914,12 +914,14 @@
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
-      /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
-         calls a pillar, a theme, an aspiration — its vocabulary, and the one
-         contract every other screen reads its words from. "Labels" is what a
-         developer calls that; to everybody else it sounds like stickers on a
-         chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      /* §608: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
+         Client set-up › The shape names every word, layer by layer — End in
+         Mind, the one it did not, included — and an empty box there shows
+         the stored word as its fallback, which is all this page still did.
+         Deleted rather than hidden (§24). The stored map (LABELS) and the
+         grant key `c_labels` are untouched: the set-up flow still writes the
+         levels' words into LABELS (§417), and the authoriser still classifies
+         that write by its key. Its search words moved onto Getting started. */
 
       /* ── GETTING STARTED, THEN CLIENT SET-UP (§360, spec 057) ─────────
          Islam: *"the getting started with the client setup to stay at the
@@ -941,7 +943,7 @@
          fills from paint(), before wire() so the colour controls it draws
          are wired like any other. */
       { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Getting started", glyph:"◐",
-        find:"getting started set up setup client name mark logo colour color colours branding units companies functions capabilities words office team archive modules",
+        find:"getting started set up setup client name mark logo colour color colours branding units companies functions capabilities words office team archive modules terminology vocabulary wording rename naming end in mind",
         render:function(){
           var done = SMPRules.setupDone(GROUP);
           return cfgHead(done ? "Client set-up" : "Getting started", [], null, false, null) +
@@ -3020,6 +3022,235 @@
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
 
+  /* ══ THE ASKING BOX (§608) ═════════════════════════════════════════
+     Islam, of a Setup change that gives or takes access: *"giving more or
+     less needs the confirmation … with the impact of the change, and I
+     suggest it comes as a floating box not a bar"*; of the drawing, *"make
+     the floating boxes fit the content, not too extended"*; and of Client
+     set-up, *"it should act as per the adjustment unless we are removing
+     something that has data"*.
+
+     ONE BOX FOR EVERY SETUP CHANGE THAT ASKS FIRST. Nothing has changed while
+     it is open: the press that opened it only described itself, and `o.go` is
+     the write. Keep, Esc and a press anywhere else leave the page as it was.
+
+     SIZED TO WHAT IT SAYS (`width: max-content`, capped) and placed under what
+     was pressed with its arrow on it — above, where there is no room below.
+     In the BODY, never in #panel: paint() replaces the panel, and a box inside
+     it would go with the press that confirms it. It follows its control while
+     anything scrolls, and closes if a repaint takes the control away, which
+     reads as Keep — the safe answer.
+
+     `o.body` is HTML its caller built from escaped parts; the title and the
+     two words are escaped here. */
+  var ASK = null;
+  function askClose(){
+    if (!ASK) return;
+    var a = ASK; ASK = null;
+    if (a.box.parentNode) a.box.parentNode.removeChild(a.box);
+    document.removeEventListener("mousedown", a.away, true);
+    document.removeEventListener("keydown", a.key, true);
+    window.removeEventListener("scroll", a.move, true);
+    window.removeEventListener("resize", a.move);
+  }
+  function askPlace(){
+    if (!ASK) return;
+    var a = ASK, box = a.box;
+    if (!document.body.contains(a.anchor)) { askClose(); return; }
+    var r = a.anchor.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
+    var mid = r.left + r.width / 2;
+    var left = Math.max(16, Math.min(window.innerWidth - bw - 16, mid - 28));
+    var below = r.bottom + 10 + bh <= window.innerHeight - 8 || r.top - 10 - bh < 8;
+    box.classList.toggle("above", !below);
+    box.style.left = (left + window.pageXOffset) + "px";
+    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset) + "px";
+    box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
+  }
+  function askFirst(anchor, o){
+    askClose();
+    var box = document.createElement("div");
+    box.className = "askbox";
+    box.setAttribute("role", "alertdialog");
+    box.setAttribute("aria-label", o.title);
+    box.innerHTML = '<span class="askarrow" aria-hidden="true"></span>' +
+      '<div class="asktitle">' + esc(o.title) + '</div>' +
+      '<div class="askbody">' + o.body + '</div>' +
+      '<div class="askacts"><button type="button" class="askyes">' + esc(o.yes || "Change it") + '</button>' +
+      '<button type="button" class="askno">' + esc(o.no || "Keep as it was") + '</button></div>';
+    document.body.appendChild(box);
+    var a = ASK = { box: box, anchor: anchor };
+    a.away = function(e){ if (!box.contains(e.target)) askClose(); };
+    a.key = function(e){ if (e.key === "Escape") { e.stopPropagation(); askClose(); } };
+    a.move = function(){ askPlace(); };
+    document.addEventListener("mousedown", a.away, true);
+    document.addEventListener("keydown", a.key, true);
+    window.addEventListener("scroll", a.move, true);
+    window.addEventListener("resize", a.move);
+    box.querySelector(".askno").addEventListener("click", askClose);
+    box.querySelector(".askyes").addEventListener("click", function(){ askClose(); o.go(); });
+    askPlace();
+    /* The safe answer under the cursor: Enter keeps. */
+    try { box.querySelector(".askno").focus({ preventScroll: true }); } catch (e) {}
+  }
+  /* AND THE ANSWER IS SAID ON WHAT WAS PRESSED (§608): HR_ERP's rule for a
+     row of switches (Admin › Notifications) — *"shows Saved on that row"*.
+     The corner's word is a screen away from the cell. The save is asked for
+     by name, so this says what the SERVER answered rather than what was
+     drawn (§96); `find` looks the control up again because the repaint
+     replaced it. Offline there is nothing to say, and nothing is said. */
+  function askSaved(find, quietWhenOk){
+    if (typeof SYNC === "undefined" || !SYNC.isLive || !SYNC.isLive() || !SYNC.saveNow) return;
+    SYNC.saveNow(function(state){
+      var ok = state === "saved" || state === "clean";
+      if (!ok && state !== "failed" && state !== "refused") return;
+      /* A row that already says Applied needs no second word for success. */
+      if (ok && quietWhenOk) return;
+      var at = find();
+      if (!at) return;
+      var tag = document.createElement("span");
+      tag.className = "asksaved" + (ok ? "" : " bad");
+      tag.setAttribute("role", "status");
+      tag.textContent = ok ? "Saved" : "Not saved";
+      at.appendChild(tag);
+      setTimeout(function(){ if (tag.parentNode) tag.parentNode.removeChild(tag); }, ok ? 1800 : 5000);
+    });
+  }
+
+  /* ══ A COLOUR WAITS FOR APPLY — THE AREAS, THE UNDO, THE LEAVE QUESTION ══
+     (§608). Each area in APPLY_AREAS answers four things — what waits, Apply,
+     Discard, Undo — and remembers WHERE its wait began (`at`). Everything
+     else is written once here: the row's three buttons, the Undo window, and
+     the question asked on the way out.
+
+     LEAVING IS CAUGHT IN paint(), because every way off a page in this shell
+     ends in one: the rail, the units bar, a tab, Jump to, the set-up flow's
+     own steps, and Back (route.js's popstate). A paint whose place is not the
+     place the wait began puts the old place back, draws it, and asks — Apply
+     and continue, Discard changes, Keep editing — at the foot of the window,
+     where the agreed strip stood in the mockup. Closing the tab gets the
+     browser's own question (beforeunload): the only thing a page may show
+     then. */
+  function placeNow(){
+    return { d: current, s: currentSub || null, c: currentSub ? (CURSEC[currentSub] || null) : null,
+             step: currentSub === "start" && typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.at
+               ? CLIENTSETUP.at() : null };
+  }
+  function placeSame(a, b){ return a.d === b.d && a.s === b.s && a.step === b.step; }
+  function placeGo(p){
+    current = p.d; currentSub = p.s;
+    if (p.s && p.c) CURSEC[p.s] = p.c;
+    if (p.step && typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.toStep) CLIENTSETUP.toStep(p.step);
+  }
+  function applyWaiting(){
+    for (var k in APPLY_AREAS) if (APPLY_AREAS[k].waiting().length) return k;
+    return null;
+  }
+  /* Called after every change an area holds: the first one marks where the
+     wait began, and any change ends the Undo window of the Apply before it. */
+  function applyChanged(k){
+    var a = APPLY_AREAS[k];
+    if (!a.waiting().length) { a.at = null; a.discard(); }
+    else if (!a.at) a.at = placeNow();
+    a.undoEnd();
+    paint();
+  }
+  /* The Undo button lives for UNDO_MS and then goes without a repaint, which
+     would move somebody's cursor for the sake of a button they did not ask
+     for (§75). */
+  function applyUndoLater(k){
+    var a = APPLY_AREAS[k], stamp = a.undoStamp();
+    setTimeout(function(){
+      if (a.undoStamp() !== stamp) return;
+      a.undoEnd();
+      var row = document.querySelector('[data-applyrow="' + k + '"]');
+      if (row && !a.waiting().length) row.parentNode.removeChild(row);
+    }, UNDO_MS);
+  }
+  var LEAVE = null;
+  function leaveClose(){
+    if (LEAVE && LEAVE.parentNode) LEAVE.parentNode.removeChild(LEAVE);
+    LEAVE = null;
+  }
+  function leaveAsk(k, target){
+    leaveClose();
+    var a = APPLY_AREAS[k], strip = document.createElement("div");
+    strip.className = "leavestrip";
+    strip.setAttribute("role", "alertdialog");
+    strip.innerHTML = '<div class="lsay"><b>“' + esc(a.title) + '” has changes that aren’t applied:</b> ' +
+      esc(a.waiting().join(", ")) + '.</div><div class="lacts">' +
+      '<button type="button" class="askyes" data-leave="go">Apply and continue</button>' +
+      '<button type="button" class="askno" data-leave="drop">Discard changes</button>' +
+      '<button type="button" class="askno" data-leave="stay">Keep editing</button></div>';
+    document.body.appendChild(strip);
+    LEAVE = strip;
+    var on = function(){ leaveClose(); placeGo(target); leaveModes(); paint(); };
+    strip.querySelector('[data-leave="go"]').addEventListener("click", function(){ a.apply(this, on); });
+    strip.querySelector('[data-leave="drop"]').addEventListener("click", function(){ a.at = null; a.discard(); on(); });
+    strip.querySelector('[data-leave="stay"]').addEventListener("click", leaveClose);
+    try { strip.querySelector('[data-leave="stay"]').focus({ preventScroll: true }); } catch (e) {}
+  }
+  window.addEventListener("beforeunload", function(e){
+    if (!applyWaiting()) return;
+    e.preventDefault(); e.returnValue = "";
+  });
+
+  /* THE TENANT'S TWO COLOURS (§39 → §608). Reset to the shipped palette is a
+     colour change like any other, so it waits for Apply too. */
+  APPLY_AREAS.brand = {
+    title: "The tenant’s colours", at: null,
+    waiting: brandWaiting,
+    discard: function(){ BRAND_PEND = {}; },
+    undoEnd: function(){ BRAND_UNDO = null; },
+    undoStamp: function(){ return BRAND_UNDO; },
+    apply: function(btn, then){
+      var b = branding(), prev = { accent: b.accent, bar: b.bar, palette: b.palette, font: b.font };
+      if ("reset" in BRAND_PEND) GROUP.branding = {};
+      else brandPendKeys().forEach(function(k){ b[k] = BRAND_PEND[k]; });
+      BRAND_PEND = {}; this.at = null;
+      BRAND_UNDO = { prev: prev, until: Date.now() + UNDO_MS };
+      applyBrand(); leaveClose(); applyUndoLater("brand");
+      if (then) then(); else paint();
+      askSaved(function(){ return document.querySelector('[data-applyrow="brand"]'); }, true);
+    },
+    undo: function(){
+      if (!BRAND_UNDO) return;
+      var p = BRAND_UNDO.prev, b = branding();
+      for (var k in p) b[k] = p[k];
+      BRAND_UNDO = null;
+      applyBrand();
+    }
+  };
+  /* THE SCORING BANDS. A new floor or a removed level re-bands what is already
+     scored, so Apply asks first with the number it moves; a colour or a name
+     alone moves nothing and applies at once. */
+  APPLY_AREAS.bands = {
+    title: "Scoring bands", at: null,
+    waiting: bandsWaiting,
+    discard: function(){ BANDS_DRAFT = null; },
+    undoEnd: function(){ BANDS_UNDO = null; },
+    undoStamp: function(){ return BANDS_UNDO; },
+    apply: function(btn, then){
+      var area = this;
+      if (!BANDS_DRAFT || !bandsOrdered(BANDS_DRAFT)) return;
+      var go = function(){
+        BANDS_UNDO = { prev: JSON.parse(JSON.stringify(BANDS.bands)), until: Date.now() + UNDO_MS };
+        BANDS.bands = BANDS_DRAFT; BANDS_DRAFT = null; area.at = null; EDITING.bands = false;
+        leaveClose(); applyUndoLater("bands");
+        if (then) then(); else paint();
+        askSaved(function(){ return document.querySelector('[data-applyrow="bands"]'); }, true);
+      };
+      var sh = bandShift(BANDS_DRAFT);
+      if (!sh.moved || !btn) { go(); return; }
+      askFirst(btn, { title: "Scoring bands",
+        body: "<b>" + sh.moved + " of " + sh.of + "</b> scored measures would show a different band, though no figure has changed.",
+        yes: "Apply", go: go });
+    },
+    undo: function(){
+      if (!BANDS_UNDO) return;
+      BANDS.bands = BANDS_UNDO.prev; BANDS_UNDO = null;
+    }
+  };
+
   /* The tenant's branding, handed to THEME. One function, called on boot and
      after every change on the Branding page, so the applied colours and the
      page's own preview cannot drift apart (§39). */
@@ -3175,6 +3406,17 @@
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
+    /* §608: A PAINT SOMEWHERE ELSE WHILE A COLOUR WAITS IS A WAY OUT, and it
+       is held here — the one door every navigation passes. The old place is
+       put back before anything is drawn, so the page under the question is
+       the page with the colour on it, and the place asked for is kept for
+       Apply and continue / Discard changes. */
+    var waitK = applyWaiting();
+    if (waitK && APPLY_AREAS[waitK].at && current && !placeSame(APPLY_AREAS[waitK].at, placeNow())) {
+      var asked = placeNow();
+      placeGo(APPLY_AREAS[waitK].at);
+      setTimeout(function(){ leaveAsk(waitK, asked); }, 0);
+    }
     var _panel = document.getElementById("panel");
     var _keep = { y: window.pageYOffset || 0, boxes: scrollsIn(_panel), focus: focusMark() };
     /* WHAT THIS PAINT IS ABOUT, set before anything renders. Every grant() with
@@ -3604,6 +3846,10 @@
          flow on a client with a plan, goes through the one switch Setup's own
          rows use — its warning, and hide-and-keep (§405). */
       switchWay: function(kind, key, value, sel){ switchPlanWay(kind, key, value, sel); },
+      /* §608: the platform's floating box, for a press that would hide or take
+         away something written. The console passes none, and a press there
+         applies as it always did. */
+      ask: function(anchor, o){ askFirst(anchor, o); },
       /* §364: the team page draws a setup table, and a setup table's hover
          is MEASURED after it is on the screen (§88). paint() ends in
          clipTitles(), which is too early for a box the client's record fills
@@ -5194,24 +5440,7 @@
       });
     });
 
-    /* Labels */
-    document.querySelectorAll("input.lbl").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* An emptied box goes back to the default (§392), which is what the
-           Reset beside it does for both at once. */
-        var e = LABELS.entries[+inp.dataset.lbl], d = labelDefault(e.key);
-        var v = inp.value.trim();
-        e[inp.dataset.scope] = v || (d ? (inp.dataset.scope === "group" ? d.one : d.many) : e.internal);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-lblreset]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = LABELS.entries[+b.dataset.lblreset], d = labelDefault(e.key);
-        if (d) { e.group = d.one; e.bu = d.many; }
-        paint();
-      });
-    });
+    /* §608: Terminology's two handlers went with its page. */
     /* The "titles at this level" field went with LEVELS in 3.8. A title is
        information about a person, not a rung anyone is standing on. */
 
@@ -5223,21 +5452,39 @@
        already on that state keeps its absence (§50.6), so a tenant's stored
        map grows by exactly the answers somebody changed, and an untouched
        pair goes on following the shipped default. */
+    /* §608: EVERY PRESS HERE ASKS FIRST, giving or taking (Islam: *"giving
+       more or less needs the confirmation … with the impact"*). The press
+       only describes itself; the write below is unchanged and runs on Change
+       it, after which the cell says whether the server took it. */
+    function accessAsk(b, to, go, findCell){
+      var d = b.dataset;
+      askFirst(b, { title: d.askwho || "This role",
+        body: to === "part"
+          ? "Will only see <b>their own directions</b> and the Foundation, not the whole plan."
+          : to === "full" ? "Will see the <b>whole plan</b> again, not only their own directions."
+          : accessImpact(d.askfrom, to, d.askwhat || "this"),
+        go: function(){ go(); paint(); askSaved(findCell); } });
+    }
+    function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.acm.split("|"), st = p[1];
-        p[0].split(",").forEach(function(pair){
-          var ra = pair.split(":");
-          if (grantFor(ra[0], ra[1]) === st) return;
-          /* The row may not exist yet: a migrated tenant starts with an empty
-             map and every answer coming from the shipped default. Writing a
-             cell is the moment that role gets a row of its own. */
-          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        accessAsk(b, st, function(){
+          p[0].split(",").forEach(function(pair){
+            var ra = pair.split(":");
+            if (grantFor(ra[0], ra[1]) === st) return;
+            /* The row may not exist yet: a migrated tenant starts with an empty
+               map and every answer coming from the shipped default. Writing a
+               cell is the moment that role gets a row of its own. */
+            (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+          });
+          /* §517: the eye or the pen pressed while the half eye is lit is the
+             same one choice made the other way — the full plan again. */
+          if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        }, function(){
+          var x = document.querySelector('[data-acm^="' + p[0] + '|"]');
+          return x && x.closest("td");
         });
-        /* §517: the eye or the pen pressed while the half eye is lit is the
-           same one choice made the other way — the full plan again. */
-        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
-        paint();
       });
     });
     /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
@@ -5248,11 +5495,12 @@
        eye would light over a page they cannot open (§61). */
     document.querySelectorAll("[data-dirscope]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (b.dataset.dirscope === "part") {
-          GROUP[SMPRules.DIR_SCOPE] = "part";
-          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
-        } else delete GROUP[SMPRules.DIR_SCOPE];
-        paint();
+        accessAsk(b, b.dataset.dirscope, function(){
+          if (b.dataset.dirscope === "part") {
+            GROUP[SMPRules.DIR_SCOPE] = "part";
+            if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+          } else delete GROUP[SMPRules.DIR_SCOPE];
+        }, accessPartCell);
       });
     });
     /* A MODULE'S OWN CELL (§359.5): the same press through its own writer,
@@ -5262,8 +5510,10 @@
     document.querySelectorAll("[data-mac]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.mac.split("|");
-        setModuleGrant(p[0], p[1], p[2], p[3]);
-        paint();
+        accessAsk(b, p[2], function(){ setModuleGrant(p[0], p[1], p[2], p[3]); }, function(){
+          var x = document.querySelector('[data-mac^="' + p[0] + "|" + p[1] + '|"]');
+          return x && x.closest("td");
+        });
       });
     });
     wirePillars();
@@ -7001,16 +7251,19 @@
         }, 0);
       });
     });
+    /* §608: EVERY EDIT TO THE BANDS GOES TO THE DRAFT (bandsEdit) and waits
+       for Apply — the stored bands, which every figure reads, are untouched
+       until then. */
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
-        BANDS.bands[+inp.dataset.b].label = inp.value || "Unnamed"; paint();
+        bandsEdit()[+inp.dataset.b].label = inp.value || "Unnamed"; applyChanged("bands");
       });
     });
     document.querySelectorAll("input.bfloor").forEach(function(inp){
       inp.addEventListener("change", function(){
         var n = parseInt(inp.value, 10);
-        if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
-        paint();
+        if (!isNaN(n)) bandsEdit()[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
+        applyChanged("bands");
       });
     });
     /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§168). The colour
@@ -7019,15 +7272,15 @@
     document.querySelectorAll("[data-bcol]").forEach(function(el){
       el.addEventListener("click", function(){
         var p = el.dataset.bcol.split("|");
-        BANDS.bands[+p[0]].key = p[1];
-        paint();
+        bandsEdit()[+p[0]].key = p[1];
+        applyChanged("bands");
       });
     });
     document.querySelectorAll("[data-bdel]").forEach(function(el){
-      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel); paint(); });
+      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel, bandsEdit()); applyChanged("bands"); });
     });
     document.querySelectorAll("[data-badd]").forEach(function(el){
-      el.addEventListener("click", function(){ addBand(); paint(); });
+      el.addEventListener("click", function(){ addBand(bandsEdit()); applyChanged("bands"); });
     });
     /* A unit's company, and a company's two visibility flags. Both are
        configuration: they change who reaches what, never a figure. */
@@ -8567,32 +8820,56 @@
        so it repaints on `change` — once, when the picker closes — and the hex
        field on `change` too. A repaint per frame of a drag would rebuild the
        control being dragged, which is §30.1 again. */
+    /* §608: A PICK IS HELD, NOT WRITTEN. It goes into BRAND_PEND and the
+       page keeps its colours until Apply (APPLY_AREAS.brand). Picking the
+       colour that is already stored is no change, so it waits for nothing. */
+    function brandPend(k, v){
+      v = v || null;
+      if (!("reset" in BRAND_PEND) && v === (branding()[k] || null)) delete BRAND_PEND[k];
+      else BRAND_PEND[k] = v;
+      applyChanged("brand");
+    }
     document.querySelectorAll("[data-brand]").forEach(function(inp){
       inp.addEventListener("change", function(){
-        branding()[inp.dataset.brand] = inp.value.toUpperCase();
-        applyBrand(); paint();
+        brandPend(inp.dataset.brand, inp.value.toUpperCase());
       });
     });
     document.querySelectorAll("[data-brandhex]").forEach(function(inp){
       inp.addEventListener("change", function(){
-        var v = inp.value.trim();
+        var v = inp.value.trim(), k = inp.dataset.brandhex;
         /* An unreadable value is refused rather than stored: a half-typed hex
            would blank the colour and look like the platform had lost it. */
-        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
-        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
-        applyBrand(); paint();
+        if (v && !hexRgb(v)) { inp.value = (k in BRAND_PEND ? BRAND_PEND[k] : branding()[k]) || ""; return; }
+        brandPend(k, v ? rgbHex(hexRgb(v)) : null);
       });
     });
     document.querySelectorAll("[data-brandclear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        branding()[b.dataset.brandclear] = null;
-        applyBrand(); paint();
-      });
+      b.addEventListener("click", function(){ brandPend(b.dataset.brandclear, null); });
     });
     document.querySelectorAll("[data-brandreset]").forEach(function(b){
       b.addEventListener("click", function(){
-        GROUP.branding = {};
-        applyBrand(); paint();
+        BRAND_PEND = { reset: true, accent: null, bar: null };
+        applyChanged("brand");
+      });
+    });
+    /* THE ROW UNDER EVERY COLOUR AREA (§608): one set of three buttons for
+       all of them, the area named on the button. */
+    document.querySelectorAll("[data-applygo]").forEach(function(b){
+      b.addEventListener("click", function(){ var a = APPLY_AREAS[b.dataset.applygo]; if (a) a.apply(b); });
+    });
+    document.querySelectorAll("[data-applydrop]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = APPLY_AREAS[b.dataset.applydrop];
+        if (!a) return;
+        a.at = null; a.discard(); leaveClose(); paint();
+      });
+    });
+    document.querySelectorAll("[data-applyundo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.applyundo, a = APPLY_AREAS[k];
+        if (!a) return;
+        a.undo(); paint();
+        askSaved(function(){ var r = document.querySelector('[data-applyrow="' + k + '"]'); return r; }, true);
       });
     });
 

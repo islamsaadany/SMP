@@ -33,11 +33,22 @@ def ck(name, ok, detail=""):
 def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception: return dflt
+def answer(pg):
+    # §608: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(250); return True
+        el.click(); pg.wait_for_timeout(250); answer(pg); return True
     except Exception: return False
 
 TAGS = "()=>[...document.querySelectorAll('.stcard')].map(c=>c.getAttribute('data-stcard')||'-')"

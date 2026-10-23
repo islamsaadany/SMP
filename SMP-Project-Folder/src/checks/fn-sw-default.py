@@ -25,8 +25,19 @@ def ck(ok, what, detail=None):
 def js(pg, src, arg=None):
     try: return pg.evaluate(src, arg)
     except Exception as e: return {"__error": str(e)[:200]}
+def answer(pg):
+    # §608: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
-    try: pg.click(sel, timeout=4000); pg.wait_for_timeout(250); return True
+    try: pg.click(sel, timeout=4000); pg.wait_for_timeout(250); answer(pg); return True
     except Exception: return False
 
 SECS = """()=>FUNCTION_KEYS.map(k=>[k,allowed(SUBS.fn.filter(x=>x.k==='fnstrat')[0].sections('fn:'+k)||[],'fn:'+k).map(s=>s.k)])"""

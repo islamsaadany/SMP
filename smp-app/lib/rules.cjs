@@ -5310,6 +5310,28 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var b = levelBlock(group, structLevelOf(target), "found");
     return !(b && b.on === false);
   }
+  /* §608 — END IN MIND, A TICK OF ITS OWN. Islam: *"the end in mind should
+     have a check box as well, as it's an option"*, and *"ticked or unticked it
+     depends on where we are adding the element"*. It lives INSIDE the
+     aspiration — the line under the Winning Aspiration on the Foundation, the
+     temple and the "What we are aiming at" slide — so it is on only where the
+     aspiration is, and offered only where there is one: the top, a division
+     and a unit, never a function (§426: no aspiration) nor a capability (its
+     first section is its brief and North Star).
+     STORED AS AN ABSENCE (§50.6), in the first section's own shape:
+     `structure[level].eim = { on:false }` only once the office unticks it,
+     read as ON otherwise. On costs nothing: the line shows only once somebody
+     writes one, and it is never owed (GAP_FIELDS has no endInMind), so
+     ticking it adds no Missing anywhere and every client opens as it did. */
+  var EIM_LEVELS = ["top", "mid", "bu"];
+  function endInMindOffered(target) {
+    return EIM_LEVELS.indexOf(structLevelOf(target)) >= 0;
+  }
+  function endInMindOn(group, target) {
+    if (!endInMindOffered(target) || !compOn(group, target, "aspiration")) return false;
+    var b = levelBlock(group, structLevelOf(target), "eim");
+    return !(b && b.on === false);
+  }
   function foundTitle(group, target) {
     var lv = structLevelOf(target), b = levelBlock(group, lv, "found");
     var t = b && typeof b.title === "string" ? b.title.trim() : "";
@@ -5920,6 +5942,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
     PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    endInMindOffered: endInMindOffered, endInMindOn: endInMindOn,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,

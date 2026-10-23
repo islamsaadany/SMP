@@ -2946,8 +2946,8 @@ function templeTables(){
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
-      '<div class="trow"><label>' + L1("endinmind") + '</label>' +
-        fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>' +
+      (!eimOn("group") ? '' : '<div class="trow"><label>' + L1("endinmind") + '</label>' +
+        fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>') +
       '<div class="trow"><label>Horizon</label>' +
         inputOr("temple", GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</div>' +
     '</div>';
@@ -5983,7 +5983,9 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        \u2014 an empty labelled block asserts that something is missing when the
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
-    (endInMind || editing
+    /* §608: and only where the layer's End in Mind is ticked (the shape
+       screen), whatever is written — unticked hides it and keeps it. */
+    (eimOn(tgt) && (endInMind || editing)
       ? '<div class="endin"><span class="boxlab">' + L1("endinmind") + '</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +

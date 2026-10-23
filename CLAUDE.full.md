@@ -92,6 +92,31 @@ A drift between specs and code is a documentation bug — report it before silen
 - Existing pages keep theirs until Islam asks for a sweep; this rule governs
   what is BUILT from now on.
 
+### 1b-v. HOW A SETUP CHANGE IS MADE: AS YOU GO, ASKED FIRST, OR APPLIED (2026-10-23, §608)
+- **Islam: *"make this a general rule of colors elements"*, and of Setup:
+  *"it should act as per the adjustment unless we are removing something that
+  has data"*.** Three rules, for every Setup page built from now on:
+- **A change takes effect when it is made.** No Save button on a Setup page.
+  A page that already opens with its own Edit keeps it.
+- **ANYTHING THAT SETS A COLOUR WAITS FOR APPLY** — the tenant's colours, the
+  scoring bands, and any colour control built later. Nothing on the page
+  changes before Apply; the row under the area reads *Apply · Discard · N
+  changes not applied yet: …*; after Apply, *Applied · Undo* for about ten
+  seconds; Reset (where there is one) waits for Apply too. Leaving with a
+  colour picked but not applied asks *Apply and continue / Discard changes /
+  Keep editing*. One mechanism: a new colour area is one more entry in
+  `APPLY_AREAS` (config-data.js, wired in shell.html), never a second copy.
+- **THE FLOATING BOX ASKS FIRST, WITH THE IMPACT** (`askFirst`, shell.html):
+  before any change to who may see or do what, giving or taking; and before
+  anything is removed or switched off that holds something written. It
+  names who or what and how many, sits beside the control, is sized to its
+  sentence, and Keep is the safe default. A change that hides nothing
+  written applies at once — asking then is noise.
+- **AND THE SETUP PAGES LOSE THE PARAGRAPHS THEY DON'T NEED, AS EACH IS
+  TOUCHED** (1b-ii, now a sweep that travels with the work): a sentence with
+  a fact in it becomes a hover or goes into the asking box; one that only
+  explains goes; a status (what a switch did, what needs you) stays.
+
 ### 1c. CRITICAL: UI Changes Require Explicit Approval
 - **NEVER change any UI design, layout, styling, or visual element without explicit user approval.**
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**

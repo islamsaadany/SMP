@@ -38,6 +38,13 @@ def ck(w, ok, x=""):
 
 
 def bands(pg):
+    # §608: THE PEN EDITS A DRAFT and Apply stores it (the bands are a colour
+    # area). This reads what the TABLE holds — the draft while there is one —
+    # and §6b presses Apply and reads what was STORED (§96).
+    return pg.evaluate("()=>JSON.parse(JSON.stringify(BANDS_DRAFT || BANDS.bands))")
+
+
+def stored(pg):
     return pg.evaluate("()=>JSON.parse(JSON.stringify(BANDS.bands))")
 
 
@@ -139,8 +146,8 @@ with sync_playwright() as p:
     pg.keyboard.press("Tab")
     pg.wait_for_timeout(500)
     got = bands(pg)
-    ck("the name is stored", got[i]["label"] == "Slipping", got[i])
-    ck("the floor is stored", got[i]["floor"] == 45, got[i])
+    ck("the name is held for Apply", got[i]["label"] == "Slipping", got[i])
+    ck("the floor is held for Apply", got[i]["floor"] == 45, got[i])
     rng = pg.eval_on_selector_all(ROWS + " td:nth-child(3)", "n=>n.map(x=>x.textContent.trim())")
     ck("the range beside it is live", rng[i].startswith("45%"), rng)
     # AND THE ONE UNDER IT MOVED WITH IT: a floor is the boundary between two
@@ -172,6 +179,20 @@ with sync_playwright() as p:
     ck("...with the reason on the page",
        "at least two" in pg.eval_on_selector("#panel", "e=>e.innerHTML"))
 
+    # ── 6b · NOTHING WAS STORED UNTIL APPLY, AND APPLY STORES IT (§608) ──
+    print("\n6b · Apply")
+    ck("the stored scale is still the shipped one while the draft waits", stored(pg) == start, stored(pg))
+    pg.evaluate("()=>document.querySelector('[data-applygo=\"bands\"]').click()")
+    pg.wait_for_timeout(400)
+    asked = pg.evaluate("()=>(document.querySelector('.askbox')||{}).innerText||''")
+    ck("Apply asks first, with what the change re-bands", "would show a different band" in asked, asked)
+    pg.evaluate("()=>{const y=document.querySelector('.askbox .askyes'); if(y) y.click();}")
+    pg.wait_for_timeout(600)
+    ck("…and stores the two levels", [x["label"] for x in stored(pg)] == [x["label"] for x in two], stored(pg))
+    pg.evaluate("()=>document.querySelector('[data-applyundo=\"bands\"]').click()")
+    pg.wait_for_timeout(500)
+    ck("Undo puts the shipped scale back", stored(pg) == start, stored(pg))
+
     # ── 7 · THE TWO STALE NOTES ARE GONE, THE WARNING IS NOT ─────────────
     # BOTH ENDS (§90): a removal is the easiest thing to half-do, and the note
     # that matters sits in the same block as the two that went.
@@ -181,8 +202,11 @@ with sync_playwright() as p:
        "scoring.ts" not in txt)
     ck("the note naming thresholds the product no longer ships is gone",
        "70 and 50 match" not in txt)
-    ck("...but the warning that a change rewrites history stays",
-       "rewrites history" in txt)
+    # REVERSED AT §608, NOT LOOSENED: the warning is said at Apply now, with
+    # the number it moves (6b asserts the box), and the page no longer prints
+    # it on every visit — the agreed paragraph table.
+    ck("...and the history warning moved into Apply's box",
+       "rewrites history" not in txt and "would show a different band" in asked)
 
     # ── 8 · WITHOUT THE GRANT, NOTHING AT ALL ────────────────────────────
     # MEASURED RATHER THAN ASSUMED: `c_bands` is only ever `edit` or `none` in

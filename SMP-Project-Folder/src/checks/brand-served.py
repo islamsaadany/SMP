@@ -1,4 +1,4 @@
-"""THE COLOURS ON CLIENT SET-UP WRITE ON A SERVED PLATFORM (§600).
+"""THE COLOURS ON CLIENT SET-UP WRITE ON A SERVED PLATFORM (§600), ON APPLY (§608).
 
 qa-run: own-server — the fault only exists where there is a server. The
 first step of Client set-up draws the two colour controls and the shell's
@@ -18,9 +18,10 @@ WHAT IS ASSERTED IS THE PROBLEM (§94.8):
     the accent picker drawn BEFORE it is marked; after it lands the mark must
     be gone. Without this a build that never redrew would pass every line
     below and prove nothing (§113.8).
-  * THE PICKER, THE HEX FIELD AND CLEAR all write `branding()`, the colour
-    reaches the page's own token, and the field the redraw leaves reads it
-    back.
+  * THE PICKER, THE HEX FIELD AND CLEAR are wired: a pick is held and the
+    row under the colours says so (§608: nothing is written, worn or sent
+    before Apply); Apply writes `branding()` and the page wears it; Discard
+    leaves it as it was.
   * THE SAVE CARRIES IT. What the stub RECEIVED on /api/state is read, never
     what the page drew (§96).
 
@@ -142,28 +143,45 @@ with sync_playwright() as p:
        ev(pg, "()=>{const i=document.querySelector('.csetup [data-brand=accent]');"
               "return !!i && !i.__beforeRecord && !!document.querySelector('.csetup [data-doormark]');}", False))
 
-    print("\n2 · the controls the redraw left are wired")
+    print("\n2 · the controls the redraw left are wired — and a pick WAITS for Apply (§608)")
     before = ev(pg, "()=>branding().accent")
-    ck("…a picked accent WRITES the tenant's branding (§96)",
-       put(pg, ".csetup [data-brand=accent]", "#123456") == "set" and
-       (pg.wait_for_timeout(300) or ev(pg, "()=>branding().accent")) == "#123456",
-       (before, ev(pg, "()=>branding().accent")))
-    ck("…and the page wears it",
-       (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "")
-       .strip().upper() == "#123456",
-       ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')"))
-    ck("…and the hex field beside it reads it back",
+    gold0 = (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "").strip().upper()
+    picked = put(pg, ".csetup [data-brand=accent]", "#123456") == "set"
+    pg.wait_for_timeout(300)
+    ck("…a picked accent is HELD: the row under the colours says it waits (the wiring §600 restored)",
+       picked and "not applied yet" in (ev(pg, "()=>(document.querySelector('[data-applyrow=brand]')||{}).textContent", "") or ""),
+       ev(pg, "()=>(document.querySelector('[data-applyrow=brand]')||{}).textContent"))
+    ck("…and nothing is written before Apply (§608: the colour shouldn't change before apply)",
+       ev(pg, "()=>branding().accent") == before, ev(pg, "()=>branding().accent"))
+    ck("…nor worn by the page",
+       (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "").strip().upper() == gold0)
+    ck("…while the hex field beside it shows the pick",
        (ev(pg, "()=>(document.querySelector('.csetup [data-brandhex=accent]')||{}).value", "") or "").upper() == "#123456")
-    bar_set = (put(pg, ".csetup [data-brandhex=bar]", "#654321") == "set" and
-               (pg.wait_for_timeout(300) or ev(pg, "()=>branding().bar")) == "#654321")
-    ck("a typed bar colour WRITES too", bar_set, ev(pg, "()=>branding().bar"))
+    ck("…and nothing waiting reached the server", not any("#123456" in s for s in SAVES), "%d saves" % len(SAVES))
+    ev(pg, "()=>{const a=document.querySelector('[data-applygo=brand]'); if(a) a.click();}")
+    pg.wait_for_timeout(500)
+    ck("Apply WRITES the tenant's branding (§96)", ev(pg, "()=>branding().accent") == "#123456",
+       ev(pg, "()=>branding().accent"))
+    ck("…and the page wears it",
+       (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "").strip().upper() == "#123456")
+    ck("…and the row says Applied, with Undo",
+       ev(pg, "()=>{const r=document.querySelector('[data-applyrow=brand]'); return !!r && /Applied/.test(r.textContent) && !!r.querySelector('[data-applyundo]');}", False))
+    bar_set = put(pg, ".csetup [data-brandhex=bar]", "#654321") == "set"
+    pg.wait_for_timeout(300)
+    ev(pg, "()=>{const a=document.querySelector('[data-applygo=brand]'); if(a) a.click();}")
+    pg.wait_for_timeout(400)
+    bar_set = bar_set and ev(pg, "()=>branding().bar") == "#654321"
+    ck("a typed bar colour applies too", bar_set, ev(pg, "()=>branding().bar"))
     ev(pg, "()=>{const c=document.querySelector('.csetup [data-brandclear=bar]'); if(c) c.click();}")
     pg.wait_for_timeout(300)
-    # Only after a colour was set, or a Clear wired to nothing passes on an empty bar.
-    ck("…and Clear takes it off", bar_set and ev(pg, "()=>branding().bar", "probe") is None,
+    ck("…Clear waits like any other change", bar_set and ev(pg, "()=>branding().bar") == "#654321",
        ev(pg, "()=>branding().bar"))
+    ev(pg, "()=>{const a=document.querySelector('[data-applydrop=brand]'); if(a) a.click();}")
+    pg.wait_for_timeout(300)
+    ck("…and Discard leaves it as it was", bar_set and ev(pg, "()=>branding().bar") == "#654321"
+       and not ev(pg, "()=>!!document.querySelector('[data-applygo=brand]')", True))
 
-    print("\n3 · the autosave carries it — there is no save button to press")
+    print("\n3 · the save carries what was applied — there is no save button to press")
     pg.wait_for_timeout(3500)
     ck("a save reached the server carrying the new accent", any("#123456" in s for s in SAVES),
        "%d saves" % len(SAVES))

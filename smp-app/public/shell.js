@@ -30482,14 +30482,19 @@ function foundationBody(o, tgt, gpg){
     '</div>' +
     koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
 
+    /* §606: with the pen open the list is the unit's own (§478) — a name and
+       a definition per value, × to remove, "+ Add a value" — because the
+       old one could only rewrite the definition of a value already there, so
+       a company that had none could never have one. Read mode is unchanged. */
     (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (gpg ? valuesEditList(tgt, o.values || [], gpg, "", "", function(){}) :
     '<div class="valgrid">' +
       (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>');
+    '</div>') + '</div>');
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -33442,15 +33447,7 @@ function unitValuesBox(u, upg){
   var walk = !vals.length ? " gapwalk" : "";
   return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
     (how
-      ? '<div class="uvlist">' + vals.map(function(v, i){
-          return '<div class="uvrow">' +
-            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
-            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
-            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
-            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
-        }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
-        '">+ Add a value</button></div>'
+      ? valuesEditList(u.ukey, vals, pg, pend, walk, function(){ unitValuesTouch(u, how); })
       : vals.length
         ? '<div class="valgrid">' + vals.map(function(v){
             return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
@@ -33458,6 +33455,21 @@ function unitValuesBox(u, upg){
           }).join("") + '</div>'
         : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
+}
+/* §606: THE CORE VALUES LIST WITH THE PEN OPEN — one builder for a unit's box
+   and the top layer's and a company's (§53.5), so the three cannot drift into
+   three looks. `key` is the target the two buttons carry; `touch` runs after
+   every write (a unit's stamps or lifts its gap mark, the top's has none). */
+function valuesEditList(key, vals, pg, pend, walk, touch){
+  return '<div class="uvlist">' + vals.map(function(v, i){
+      return '<div class="uvrow">' +
+        inputOr(pg, v.name || "", pend, function(x){ v.name = x; touch(); }) +
+        fieldOr(pg, v.def || "", pend, function(x){ v.def = x; touch(); }) +
+        '<button class="xbtn" data-uvalrm="' + esc(key) + '|' + i +
+        '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
+    }).join("") + '</div>' +
+    '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(key) +
+    '">+ Add a value</button></div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -74094,7 +74106,27 @@ var SYNC = (function () {
      company's, so the company's plan is where it shows (`capAtTop`). What is
      left to ask is only whether this client has any and whether this viewer
      reaches them. */
-  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §606: AND WHILE THERE ARE NONE YET, THE SECTION IS STILL THERE (§61).
+     Islam: *"I added capabilities as well but nothing appeared to add the
+     capabilities."* Its "+ Add" lives inside it, so a client that switched
+     capabilities on and had none was offered no way to the first one here.
+     Empty, it is drawn for whoever sees the whole company — never for a part
+     owner, who reaches no capability that is not theirs (§517, §520) — and
+     never where the company's plan already holds its capabilities as pillars
+     (stage 3b): there `plancap` is the Capabilities tab, and two would stand.
+     AND ONLY ONCE THE OFFICE HAS SAID SO on the Structure step (the
+     capabilities card, or the top level's own ticks): unsaid, "capabilities
+     on" is §404's everything-on fallback rather than anybody's choice, and a
+     client set up before the step opens exactly as it did — the company
+     Foundation tab's own rule (§404). */
+  function topCapsOn(){
+    if (!SMPRules.capExists(GROUP)) return false;
+    if (capsReachable().length) return true;
+    var st = SMPRules.structureOf(GROUP);
+    var said = !!(st && ((st.cap && typeof st.cap.exists === "boolean") || (st.top && Array.isArray(st.top.on))));
+    return said && !GROUP.capabilities.length && !partOnly() &&
+      !(topAsUnit().items || []).some(function(p){ return SMPRules.pillarIsCap(p); });
+  }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
@@ -84104,9 +84136,23 @@ var SYNC = (function () {
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
        may, from the stored state at press time — never from the drawn one. */
+    /* §606: and the top layer's and a company's, which draw the same list
+       (valuesEditList). Theirs is the group's own strategy, so the press is
+       re-asked exactly as a Who-we-are line's is, and there is no gap mark. */
+    var topValuesOf = function(t){
+      var tr = boxRef(t);
+      if (t !== "group" && tr.kind !== "mid") return null;
+      if (!mayAuthor(foundKeyFor(t), null)) return false;
+      var o = t === "group" ? GROUP : coFoundWritable(tr.key);
+      if (!Array.isArray(o.values)) o.values = [];
+      return o;
+    };
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) { top.values.push({ name: "", def: "" }); fieldSaved(); paint(); return; }
         var o = unitLikeWritable(t);
         if (!o) return;
         var how = unitValuesWrite(o);
@@ -84120,6 +84166,12 @@ var SYNC = (function () {
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) {
+          if (!top.values[i]) return;
+          top.values.splice(i, 1); fieldSaved(); paint(); return;
+        }
         var o = unitLikeWritable(t);
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);

@@ -68660,3 +68660,26 @@ Islam: *"add the day view for the company plan and functions too."* §598 drew *
 
 **§598.1 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had not moved since §597 and §598 landed, so the branch fast-forwards; the proof above was run on this exact tree (`history-asof` 53/0, neighbours green, `test-authorize` 1129/3, `test:rules` 152/3, `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear). `sw.js` is `v6.91-day-view-everywhere`, past main's `v6.90`, because the built file's bytes changed (§91). No forced sign-out. The live read is reported rather than claimed (§54.5): production cannot be reached from this container.
 
+## §599 — The objects the pages build are closed for the checker (2026-10-23)
+Islam, of the limit §594 named: *"now close the open objects on the pages too"*.
+
+**THE LIMIT.** A page script that builds its own object as it loads — `var CLIENTSETUP = (function () { … return { … }; })();`, and SYNC, SEARCHSEL, TOUR and the rest — hands the checker an object written in JavaScript. The checker treats such an object as open, so `CLIENTSETUP.mountCreat(…)` read as `any` and nobody was told. §594 said that closing them would mean editing the pages.
+
+**IT DID NOT.** The check closes them in the COPY it reads, and nowhere else. Each such object is wrapped `__closed(…)`, an identity declared to return a mapped copy of the same keys, which is closed: the library names' answer from §589.
+- **The wraps sit on the same lines,** so every finding keeps its line.
+- **The pages are untouched,** so nothing a browser receives changes, and there is no reload.
+- **The objects are found by parsing (acorn, §596), at any depth, never from a list.** Both kinds are covered: objects built by a function that runs as the script loads, and plain `{ … }` objects that hold functions. An object holding only data stays open, because data gains keys as it runs.
+- **The wrapped copy must still parse,** and the check says so in its own words if it does not. Its first run with nested objects broke `copilot.js` by marking a pair at a time; it now makes each mark separately, latest first.
+- **The count is printed:** 31 objects on the strategy pages and 2 on the console.
+
+**WHAT IT FOUND: NOTHING.** With all 33 closed there was not one new finding on either page. Every call the pages make into an object they build themselves names a member that exists.
+
+**PROVED, BOTH WAYS.** Three planted faults: `SEARCHSEL.openOnn(…)` on the strategy pages, `MY_TAB.kk` (a plain object of behaviour), and the console's `CLIENTSETUP.mountCreat(…)`. **All three are caught** — and **none of them is caught with the closing step switched off,** measured in a throwaway copy of the check. `--red` now plants eighteen faults across both pages, all caught.
+
+**STILL OPEN, SAID:**
+- **An object holding only data.** Closing it would flag every key the code adds as it runs.
+- **Anything reached by a computed name** (`ROWFIND[t]`, `LIVE[k]`). No checker can spell-check a name that is only known at run time.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§599 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch twice: §597 and §598, which took this section's first number, so it was renumbered §599; then §598.1. Each time main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources, byte-identical to main's. On the merged tree, main's history and slide changes included: `pages-types` 10 / 0 (31 and 2 objects closed, and still no finding beyond the recorded ones), typecheck clean, `rules-types` 2 / 0, `app-types` 4 / 0, with red 18 / 18, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. No forced sign-out. Witnesses: `/sw.js` release **`49e60e384ee0e743`** and `/shell.js` **5,175,811** bytes before, and the same after.

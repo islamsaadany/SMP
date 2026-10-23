@@ -40,10 +40,11 @@
    splitter and an element's method misspelt, and the create piece reaching
    for the strategy page's GROUP; and on the console's PATHS, §467 itself
    (its guard taken out), the word lookup unguarded, a strategy name read as
-   the file loads, and the one declared doorway rewired. NOT caught, on either page: a misspelt
-   member of an object a page script builds itself (CLIENTSETUP.mountCreat)
-   — an object written in JavaScript is open, and only the library names
-   are declared closed.
+   the file loads, and the one declared doorway rewired. SINCE §599 THE OBJECTS THE PAGES BUILD ARE CLOSED TOO (closeObjects,
+   below): `CLIENTSETUP.mountCreat`, `SEARCHSEL.openOnn` and `MY_TAB.kk` are
+   findings, and --red asserts all three. Still open, on both pages: an
+   object holding only data, and anything reached by a computed name
+   (`ROWFIND[t]`), which no checker can spell-check.
 
      node checks/pages-types.mjs          # run from smp-app/
      node checks/pages-types.mjs --red    # every break must go red
@@ -77,6 +78,7 @@ const TSC = join(APP, "node_modules", "typescript", "bin", "tsc");
      `querySelector` as a bare Element, which has no `value` or `dataset`; the
      pages know what they looked up. Named one by one rather than opened with
      an index signature, so `el.datset` is still a finding (--red asserts it). */
+const CLOSER = `declare function __closed<T>(o: T): { [K in keyof T]: T[K] };\n`;
 const DOM = `interface Element {
   dataset: DOMStringMap; value: any; hidden: boolean | "until-found"; focus(options?: FocusOptions): void;
   style: any; click(): void; disabled: boolean; blur(): void; title: string; select(): void;
@@ -94,7 +96,7 @@ interface Event {
   pointerId: number; clientX: number; clientY: number; button: number;
 }
 `;
-const STRATEGY_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+const STRATEGY_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var SMPRules: Closed<typeof import("./rules.js")>;
 declare var SMPDiff: Closed<typeof import("./graph-diff.js")>;
 declare var SMPAudience: Closed<typeof import("./audience.js")>;
@@ -115,7 +117,7 @@ interface Screen { isExtended: boolean; }
 /* The console loads the debrief splitter, a module to the checker for the
    library files' reason, and nothing else of the frozen product's but the
    set-up flow — whose strategy-page names it does NOT have (§594). */
-const CONSOLE_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
 ` + DOM;
 
@@ -130,6 +132,10 @@ const STRATEGY_BREAKS = {
   "element-property-misspelt": ["shell-inline.js", "pop.dataset.ddpop", "pop.datset.ddpop"],
   "global-misspelt": ["present.js", 'var asp = aspOn ? String(GROUP.aspiration || "").trim() : ""',
                       'var asp = aspOn ? String(GRUOP.aspiration || "").trim() : ""'],
+  /* §599: a member of an object a page builds itself, misspelt */
+  "own-object-member-misspelt": ["shell-inline.js", "if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;", "if (!SEARCHSEL.openOnn(rsel)) PROLEPICK = null;"],
+  /* §599: a plain object of behaviour — a `{ … }` holding functions — read wrongly */
+  "plain-object-member-misspelt": ["shell-inline.js", ': null, def.k === MY_TAB.k) : null;', ': null, def.k === MY_TAB.kk) : null;'],
 };
 
 const CONSOLE_BREAKS = {
@@ -140,11 +146,53 @@ const CONSOLE_BREAKS = {
   "splitter-misspelt": ["console-inline.js", "var out = window.MemorySplit.split(text);", "var out = window.MemorySplit.splitt(text);"],
   "element-method-misspelt": ["console-inline.js", 'document.getElementById("signout").addEventListener("click"',
                               'document.getElementById("signout").addEventListner("click"'],
+  /* §599: the set-up flow's own object, misspelt where the console calls it */
+  "setup-object-misspelt": ["console-inline.js", 'CLIENTSETUP.mountCreate(host, { door: "/" });', 'CLIENTSETUP.mountCreat(host, { door: "/" });'],
   /* §467's class: the set-up flow's CREATE piece, which the console mounts,
      reaching for a strategy-page name the console does not have. */
   "setup-reaches-strategy-name": ["client-setup.js", 'var draft = { name:"", industry:"", size:"", notes:"" };',
                                   'var draft = { name:"", industry:"", size:"", notes:"", group: GROUP };'],
 };
+
+/* CLOSE WHAT THE PAGES BUILD (§599). A page script that builds its own
+   object as it loads — `var SYNC = (function () { … return { … }; })();` —
+   hands the checker an object written in JavaScript, which is open, so
+   `CLIENTSETUP.mountCreat(…)` read as `any`. In the COPY the checker reads,
+   and nowhere else, each such load is wrapped `__closed(…)` — an identity
+   declared to return a mapped copy of the same keys, which is closed (the
+   library names' answer, §589). The wrap sits on the same lines, so every
+   finding keeps its line; the pages themselves are not touched, so nothing
+   a browser receives changes. Found by parsing (acorn), never by a list, so
+   an object a page gains tomorrow is closed without an edit here. */
+function closeObjects(dir, files) {
+  const closed = [];
+  for (const f of files) {
+    if (!f.endsWith(".js")) continue;
+    const p = join(dir, f);
+    let src = readFileSync(p, "utf8");
+    const ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" });
+    const at = [];
+    walk.simple(ast, { VariableDeclarator(d) {
+      if (d.id.type !== "Identifier" || !d.init) return;
+      const built = d.init.type === "CallExpression" && /Function/.test(d.init.callee.type);
+      /* a plain `{ … }` that holds functions is an object of behaviour too;
+         one holding only data stays open, because data gains keys as it runs */
+      const behaviour = d.init.type === "ObjectExpression" && d.init.properties.some((q) => q.value && /Function/.test(q.value.type));
+      if (built || behaviour) { at.push(d.init); closed.push(f + ":" + d.id.name); }
+    } });
+    /* each mark on its own, latest first, so an object built inside another
+       one cannot shift the marks still to be made (§599's first run broke
+       copilot.js doing them a pair at a time) */
+    const marks = at.flatMap((e) => [[e.start, "__closed("], [e.end, ")"]]).sort((x, y) => y[0] - x[0]);
+    for (const [pos, text] of marks) src = src.slice(0, pos) + text + src.slice(pos);
+    /* the copy must still parse — a wrap misplaced is this step's fault,
+       said in its own words rather than as the checker's syntax errors */
+    try { acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" }); }
+    catch (e) { throw new Error("pages-types: closing the objects broke " + f + " — " + e.message); }
+    writeFileSync(p, src);
+  }
+  return closed;
+}
 
 /* The pages as the browser runs them, in a scratch directory. */
 function assembleStrategy() {
@@ -163,7 +211,8 @@ function assembleStrategy() {
   if (!m) throw new Error("pages-types: the shell's inline script was not found");
   writeFileSync(join(dir, "shell-inline.js"), m[1]);
   writeFileSync(join(dir, "globals.d.ts"), STRATEGY_GLOBALS);
-  return { dir, files: ["globals.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"] };
+  const files = ["globals.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"];
+  return { dir, files, closed: closeObjects(dir, files) };
 }
 
 /* THE CONSOLE (platform.html, served unchanged by lib/shell.ts): its script
@@ -187,7 +236,7 @@ function assembleConsole() {
   writeFileSync(join(dir, "console-inline.js"), m[1]);
   writeFileSync(join(dir, "globals.d.ts"), CONSOLE_GLOBALS);
   files.push("console-inline.js");
-  return { dir, files };
+  return { dir, files, closed: closeObjects(dir, files) };
 }
 
 /* ── THE CONSOLE'S PATHS INTO THE SET-UP FLOW (§596) ─────────────────────
@@ -339,7 +388,7 @@ const CONSOLE_PATH_BREAKS = {
   "the-467-crash": ["client-setup.js", '  if (typeof GROUP === "undefined") return { plans: 0, capabilities: 0, units: 0, functions: 0 };\n', ""],
   "word-lookup-unguarded": ["client-setup.js", 'return typeof labelWord === "function" ? labelWord(k, form === "one" ? "group" : "bu") : fb;',
                             'return labelWord(k, form === "one" ? "group" : "bu");'],
-  "read-as-the-file-loads": ["client-setup.js", "var CLIENTSETUP = (function () {", "var CS_AT_LOAD = UNITS;\nvar CLIENTSETUP = (function () {"],
+  "read-as-the-file-loads": ["client-setup.js", "function __smpHoldsNow() {", "var CS_AT_LOAD = UNITS;\nfunction __smpHoldsNow() {"],
   "doorway-rewired": ["client-setup.js", 'i.addEventListener("change", function () { if (!canShape()) redraw(); });',
                       'i.addEventListener("change", function () { if (!canShape()) HOST && render(); });'],
 };
@@ -437,6 +486,8 @@ for (const sub of Object.values(SUBJECTS)) {
     const total = [...rec.values()].reduce((n, c) => n + c, 0);
     check(sub.title + " read as one page: " + (asm.files.length - 1) + " scripts, its own among them",
       asm.files.length - 1 >= sub.minFiles && asm.files.includes(sub.own));
+    check(asm.closed.length + " objects the page builds itself, closed for the checker (§599)", asm.closed.length > 0,
+      "       none found — the closing step has stopped matching how the pages build their objects");
     const extra = beyond(list, rec);
     check("no finding beyond the " + total + " recorded ones, each read", !extra.length,
       extra.map((f) => "       " + f.file + ":" + f.line + "  " + f.code + "  " + f.message).join("\n"));

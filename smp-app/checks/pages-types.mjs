@@ -430,7 +430,7 @@ const CONSOLE_PATH_BREAKS = {
 };
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
-              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a confirmed fault (a capability's Core values written onto a throwaway view and lost) went with its fix (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
+              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",

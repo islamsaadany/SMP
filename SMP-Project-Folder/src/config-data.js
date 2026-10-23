@@ -7343,10 +7343,12 @@ function reviewAsOf(){
 /* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
    `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
    Four readers used to ask the raw field each in their own way, and on a cycle
-   opened in the product -- which never writes it -- with no year in its name
-   or end they split: the quarter pips said all four quarters had passed while
-   `tacticShare()` compared against `undefined`, called every tactic 0% due and
-   emptied the reporting page, the exact failure its own comment warns of. */
+   whose end cannot be read and which holds no quarter they split: the quarter
+   pips said all four quarters had passed while `tacticShare()` compared
+   against `undefined` and called every tactic 0% due, the failure its own
+   comment warns of. A cycle opened in the product cannot reach this -- the
+   form has asked for its end month since §307 -- so it is an older cycle
+   whose end was written in free text with no year anywhere. */
 function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
   return (q >= 1 && q <= 4) ? q : 4;

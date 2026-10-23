@@ -62,7 +62,7 @@ with sync_playwright() as p:
         if not title:
             missing.append(label)
             continue
-        # §614: a page may keep a fuller title than its menu line has room
+        # §619: a page may keep a fuller title than its menu line has room
         # for (Islam: "yes shorten it"). Then the title is the entry's own
         # `title`, and the menu line must be its opening words, so the two
         # still read as one name. Every other page: the rail's word exactly.
@@ -80,7 +80,7 @@ with sync_playwright() as p:
         if ck2 != 1:
             missing.append((label, "%d titles" % ck2))
     ck("every page draws exactly one title", not missing, missing)
-    ck("and it is the word the rail uses (or, §614, the fuller title that opens with it)", not wrong_name, wrong_name)
+    ck("and it is the word the rail uses (or, §619, the fuller title that opens with it)", not wrong_name, wrong_name)
     ck("no section heading repeats the page's name", not duplicated, duplicated)
 
     print("\n── 2 · a real section heading is NOT swallowed ──")

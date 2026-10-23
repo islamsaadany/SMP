@@ -50,6 +50,26 @@ FIRST = SEED["units"]["mobile"]["items"][0]["measures"][0]
 # and the first measure's target was changed AFTER the chosen day
 SERVED["units"]["mobile"]["items"][0]["measures"][0]["target"] = "1.5%"
 
+# ── §598.1: AND A FUNCTION, AND THE COMPANY ──────────────────────────────
+# finance plans in projects: its first project's first milestone left seat 0.
+FN_P = json.loads(json.dumps(SEED["functions"]["finance"]["projects"][0]))
+FN_MS = json.loads(json.dumps(FN_P["milestones"][0]))
+FN_N = len(FN_P["milestones"])
+SERVED["functions"]["finance"]["projects"][0]["milestones"].pop(0)
+# the demo company has no plan of its own: give the served copy one direction,
+# cloned from Mobile's first pillar under the company's own ids, with its
+# second measure removed and its first measure's target moved since the day.
+def reid(o, a, b):
+    return json.loads(json.dumps(o).replace(a, b))
+G_P = reid(SEED["units"]["mobile"]["items"][0], "mobile-P1", "group-P1")
+G_GONE = json.loads(json.dumps(G_P["measures"][1]))
+G_N = len(G_P["measures"])
+G_FIRST = G_P["measures"][0]
+G_SERVED = json.loads(json.dumps(G_P)); G_SERVED["measures"].pop(1); G_SERVED["measures"][0]["target"] = "7%"
+SERVED["group"]["items"] = [G_SERVED]
+# ...and the tab is offered only where the Structure switches the company's pillars on
+SERVED["group"].setdefault("structure", {}).setdefault("over", {}).setdefault("group", {})["pillar"] = True
+
 LOG = [
   {"id": 9, "at": _at(0, 9, 41), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": FIRST["id"], "to": "1.5%", "had": True, "from": FIRST.get("target"), "name": FIRST["name"], "field": "target"}]}},
@@ -64,6 +84,15 @@ LOG = [
                                     "to": {"in": PILLAR_ID, "list": "tactics", "at": 5, "of": 6, "row": {"id": "mobile-P1-T99", "name": "A new tactic"}}}]}},
   # a removal logged BEFORE §598: no rows at all
   {"id": 5, "at": _at(2, 7, 5), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan", "rows_": None},
+  # §598.1: a function's milestone that left its project, and the company's own plan
+  {"id": 4, "at": _at(0, 9, 30), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "capPlan", "target": "fn:finance", "what": "a project's milestones",
+   "rows_": {"count": 1, "moved": [{"id": FN_MS["id"], "name": FN_MS["name"], "field": "row", "had": True,
+                                    "from": {"in": FN_P["id"], "list": "milestones", "at": 0, "of": FN_N, "row": FN_MS}, "to": None}]}},
+  {"id": 3, "at": _at(0, 9, 20), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "group", "what": "the unit's plan",
+   "rows_": {"count": 1, "moved": [{"id": G_FIRST["id"], "to": "7%", "had": True, "from": G_FIRST.get("target"), "name": G_FIRST["name"], "field": "target"}]}},
+  {"id": 2, "at": _at(0, 9, 10), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "group", "what": "the unit's plan",
+   "rows_": {"count": 1, "moved": [{"id": G_GONE["id"], "name": G_GONE["name"], "field": "row", "had": True,
+                                    "from": {"in": G_P["id"], "list": "measures", "at": 1, "of": G_N, "row": G_GONE}, "to": None}]}},
 ]
 SEEN = {"asks": [], "posts": []}
 bad = 0
@@ -136,8 +165,10 @@ with sync_playwright() as p:
     pg.evaluate("()=>{const s=document.querySelector('[data-hist-f=\"when\"]'); if(s){s.value='week'; s.dispatchEvent(new Event('change',{bubbles:true}));}}")
     pg.wait_for_timeout(900)
     rs = rows(pg)
-    rem = [r for r in rs if r["fld"] == "Row" and "removed" in r["fromto"]]
-    ck("one line reads Row … → removed", len(rem) == 1, [r["fromto"] for r in rs])
+    rem = [r for r in rs if r["fld"] == "Row" and "removed" in r["fromto"] and GONE["name"] in r["text"] and "Mobile" in r["text"]]
+    ck("Mobile's removal reads Row … → removed", len(rem) == 1, [r["fromto"] for r in rs])
+    gl = [r for r in rs if r["fld"] == "Row" and G_GONE["name"] in r["text"] and "Mobile" not in r["text"]]
+    ck("the company's removal names its pillar's code (§598.1)", bool(gl) and ("C001" in gl[0]["fromto"] or "D001" in gl[0]["fromto"]) and "measure 2 of 4" in gl[0]["fromto"], gl and gl[0]["fromto"])
     ck("...naming the seat: the pillar's code, 'measure 2 of %d'" % N_MEASURES,
        bool(rem) and ("measure 2 of %d" % N_MEASURES) in rem[0]["fromto"] and "MB01" in rem[0]["fromto"], rem and rem[0]["fromto"])
     ck("...with a LIVE Restore", bool(rem) and rem[0]["live"], rem)
@@ -232,6 +263,73 @@ with sync_playwright() as p:
        pg.evaluate("()=>{const s=document.querySelector('.pband-hist'); return !!s && !!s.querySelector('[data-hist-open]') && !s.querySelector('[data-asof-pick]');}"),
        pg.evaluate("()=>(document.querySelector('.pband-hist')||{}).textContent||null"))
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(600)
+
+    # ── 5 · a function that plans in projects (§598.1) ──────────────────
+    print("\n5 · finance's projects page: As it stood on…")
+    pg.evaluate("()=>{const f=document.querySelector('#units [data-fold=\"fns\"]'); if(f) f.click();}"); pg.wait_for_timeout(400)
+    pg.evaluate("()=>{const b=document.querySelector('#units button[data-u=\"fn:finance\"]'); if(b) b.click();}"); pg.wait_for_timeout(1800)
+    pg.evaluate("()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>!x.classList.contains('secpen') && /^(Projects?|Plan)$/.test(x.textContent.trim())); if(b) b.click();}")
+    pg.wait_for_timeout(1200)
+    if pg.evaluate("()=>!!document.querySelector('.secpen.on')"):
+        pg.evaluate("()=>document.querySelector('.secpen.on').click()"); pg.wait_for_timeout(800)
+    ck("the milestone is not on today's page", not pg.evaluate("n=>[...document.querySelectorAll('.capbody table tbody tr')].some(tr=>tr.textContent.indexOf(n)>-1)", FN_MS["name"]))
+    ck("finance's band carries As it stood on…",
+       pg.evaluate("()=>{const s=document.querySelector('.pband-hist');return !!s && !!s.querySelector('[data-asof-pick]');}"),
+       pg.evaluate("()=>({line:(document.querySelector('.pband-hist')||{}).textContent||null, target:TARGET, sub:currentSub})"))
+    before_fn = pg.evaluate("()=>JSON.stringify(FUNCTIONS.finance)")
+    pg.evaluate("()=>{const b=document.querySelector('[data-asof-pick]'); if(b) b.click();}"); pg.wait_for_timeout(400)
+    if pg.evaluate("()=>!!document.querySelector('[data-asof-day]')"): pg.fill("[data-asof-day]", day)
+    press(pg, "[data-asof-go]"); pg.wait_for_timeout(1500)
+    ck("the banner names finance and the day",
+       pg.evaluate("()=>{const b=document.querySelector('[data-asof-bar]');return !!b && /as it stood on/.test(b.textContent) && /Finance/i.test(b.textContent);}"),
+       pg.evaluate("()=>(document.querySelector('[data-asof-bar]')||{}).textContent||null"))
+    ck("the pen is put away and mayAuthor answers no for finance",
+       pg.evaluate("()=>!document.querySelector('.secpen') && !mayAuthor('k_proj','fn:finance')"))
+    fdrawn = pg.evaluate("n=>{const tr=[...document.querySelectorAll('.capbody table tbody tr')].find(x=>x.textContent.indexOf(n)>-1); return tr ? {gone:tr.classList.contains('hiddenrow'), chip:(tr.querySelector('.hidchip')||{}).textContent||'', first: tr.parentNode.firstElementChild === tr} : null;}", FN_MS["name"])
+    ck("the removed milestone is drawn first in its table, greyed, wearing Removed since",
+       bool(fdrawn) and fdrawn["gone"] and fdrawn["chip"] == "Removed since" and fdrawn["first"], fdrawn)
+    ck("the LIVE function is untouched", pg.evaluate("()=>JSON.stringify(FUNCTIONS.finance)") == before_fn)
+    press(pg, "[data-asof-off]"); pg.wait_for_timeout(800)
+    ck("Back to today on finance: banner gone, pen back, milestone not drawn",
+       pg.evaluate("n=>!document.querySelector('[data-asof-bar]') && !!document.querySelector('.secpen') && ![...document.querySelectorAll('.capbody table tbody tr')].some(tr=>tr.textContent.indexOf(n)>-1)", FN_MS["name"]))
+    ck("...and the live function is still untouched", pg.evaluate("()=>JSON.stringify(FUNCTIONS.finance)") == before_fn)
+
+    # ── 6 · the company's own plan (§598.1) ─────────────────────────────
+    print("\n6 · the company's Plan page: As it stood on…")
+    pg.evaluate("()=>{const b=document.querySelector('#topsel [data-u=\"group\"], #units [data-u=\"group\"]'); if(b) b.click();}"); pg.wait_for_timeout(1800)
+    pg.evaluate("()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>!x.classList.contains('secpen') && /^(Plan|Pillars|Directions?|Strategic pillars)$/.test(x.textContent.trim())); if(b) b.click();}")
+    pg.wait_for_timeout(1200)
+    if pg.evaluate("()=>!!document.querySelector('.secpen.on')"):
+        pg.evaluate("()=>document.querySelector('.secpen.on').click()"); pg.wait_for_timeout(800)
+    ck("the company page is open on its plan, today's target reads 7%",
+       pg.evaluate("()=>current==='group' && currentSub==='strategy' && GROUP.items[0].measures[0].target==='7%'"),
+       pg.evaluate("()=>({current, currentSub})"))
+    ck("the company's band carries See history and As it stood on…",
+       pg.evaluate("()=>{const s=document.querySelector('.pband-hist');return !!s && !!s.querySelector('[data-hist-open]') && !!s.querySelector('[data-asof-pick]');}"),
+       pg.evaluate("()=>({line:(document.querySelector('.pband-hist')||{}).textContent||null, band:!!document.querySelector('.pane .pband')})"))
+    before_g = pg.evaluate("()=>JSON.stringify(GROUP.items)")
+    pg.evaluate("()=>{const b=document.querySelector('[data-asof-pick]'); if(b) b.click();}"); pg.wait_for_timeout(400)
+    if pg.evaluate("()=>!!document.querySelector('[data-asof-day]')"): pg.fill("[data-asof-day]", day)
+    n_asks = len(SEEN["asks"])
+    press(pg, "[data-asof-go]"); pg.wait_for_timeout(1500)
+    ask = SEEN["asks"][n_asks:] and SEEN["asks"][-1] or {}
+    ck("it asked the log for the company's changes", ask.get("target") == "group", ask)
+    ck("the banner names the day and 2 changes since",
+       pg.evaluate("()=>{const b=document.querySelector('[data-asof-bar]');return !!b && /2 changes have been made since/.test(b.textContent);}"),
+       pg.evaluate("()=>(document.querySelector('[data-asof-bar]')||{}).textContent||null"))
+    ck("the pen is put away and mayAuthor answers no for the company",
+       pg.evaluate("()=>!document.querySelector('.secpen') && !mayAuthor('g_found','group')"))
+    gdrawn = pg.evaluate("()=>[...document.querySelectorAll('.pane table tbody tr')].map(tr=>({t:tr.textContent.replace(/\\s+/g,' ').trim(), gone:tr.classList.contains('hiddenrow'), chip:(tr.querySelector('.hidchip')||{}).textContent||''}))")
+    ggone = [r for r in gdrawn if G_GONE["name"] in r["t"]]
+    ck("the removed measure is drawn second, greyed, wearing Removed since",
+       bool(ggone) and ggone[0]["gone"] and ggone[0]["chip"] == "Removed since" and gdrawn.index(ggone[0]) == 1, ggone and (gdrawn.index(ggone[0]), ggone[0]))
+    ck("the first measure's target reads as it did then (%s), not 7%%" % G_FIRST.get("target"),
+       bool(gdrawn) and G_FIRST.get("target", "").replace("%", "") in gdrawn[0]["t"] and "7%" not in gdrawn[0]["t"], gdrawn and gdrawn[0]["t"])
+    ck("the LIVE company plan is untouched", pg.evaluate("()=>JSON.stringify(GROUP.items)") == before_g)
+    press(pg, "[data-asof-off]"); pg.wait_for_timeout(800)
+    ck("Back to today on the company: banner gone, pen back, row not drawn",
+       pg.evaluate("n=>!document.querySelector('[data-asof-bar]') && !!document.querySelector('.secpen') && ![...document.querySelectorAll('.pane table tbody tr')].some(tr=>tr.textContent.indexOf(n)>-1)", G_GONE["name"]))
+    ck("...and the live company plan is still untouched", pg.evaluate("()=>JSON.stringify(GROUP.items)") == before_g)
 
     ck("no console errors", not errs, errs[:2])
     b.close()

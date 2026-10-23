@@ -31,7 +31,7 @@ Islam: *"if I remove a line fully do I get history of the plans somehow to check
 2. On History the line reads the seat (*MB01 · measure 2 of 5 → removed*) and **Restore puts the row back at that index**, with everything it held. A value on a removed row is held until the row is back. Rows removed before §598 keep the greyed button.
 3. On a unit's or pillars function's **Plan page**, after *See history*: **As it stood on…** (office only). The page draws a copy rebuilt from the log — newest first, each value before put back, rows re-seated or taken out — under a banner; read only by `mayAuthor()`'s own guard; rows removed since wear *Removed since*. The live graph is never touched. What cannot be replayed (a reorder, a pre-§598 entry, a capped entry) is counted in the banner.
 
-Not yet: the company's own plan, and a projects or objectives function. Proof: `checks/history-asof.py` (34 green, 21 red on the previous build), `test-authorize` +5. Mockups: `design-mockups/history/2026-10-23_removed-row-and-as-of-real.html`.
+**§598.1:** the day view reaches the company's own plan and every function (pillars, projects or objectives) through one render-time swap of the stored object (`asofWith()`); the company's strategy pages gain the *Last changed by … · See history* line. Proof: `checks/history-asof.py` (53 green; 21 then 12 red on the builds before), `test-authorize` +5. Mockups: `design-mockups/history/2026-10-23_removed-row-and-as-of-real.html`.
 
 ## Not done, and said
 

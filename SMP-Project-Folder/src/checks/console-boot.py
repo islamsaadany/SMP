@@ -244,7 +244,10 @@ with sync_playwright() as pw:
     for _ in range(40):
         time.sleep(0.05)
         st = pg.evaluate("""() => {
-          const bar = document.querySelector('.top'), wrap = document.getElementById('page');
+          /* §601: the chrome is the column on the left, not a top line —
+             REWRITTEN, never loosened (§218): the property is unchanged,
+             the console's own frame is on screen the whole time */
+          const bar = document.querySelector('.side'), wrap = document.getElementById('page');
           const box = wrap ? wrap.getBoundingClientRect() : null;
           let at = null;
           if (box) {

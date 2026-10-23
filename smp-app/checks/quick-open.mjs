@@ -43,7 +43,9 @@ const errs = [];
 page.on("pageerror", (e) => errs.push(e.message));
 
 /* the breaks, on the served bytes */
-if (brk) await page.route("**/shell.js", async (route) => {
+/* §606: shell.js is served at its stamped address (`?v=`), so the break
+   matches the file whatever follows its name */
+if (brk) await page.route(/\/shell\.js(\?|$)/, async (route) => {
   const r = await route.fetch(); let body = await r.text(); const orig = body;
   if (brk === "no-cache") body = body.replace("function cacheWrite(state, who) {", "function cacheWrite(state, who) { return;");
   if (brk === "late-baseline") body = body.replace(/lastSaved = serialize\(\);(\s*land\(function \(\) \{)/, "$1").replace("setInterval(save, 5000);", "lastSaved = serialize(); setInterval(save, 5000);");

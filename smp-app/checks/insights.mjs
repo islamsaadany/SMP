@@ -480,7 +480,8 @@ try {
      shell's `script-src 'self'` admits — so what is asserted is still that
      nothing INLINE needs to run, and that the one script is the bar's. */
   check("no inline script, so the shell's script-src has nothing to admit but the bar's file",
-    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => t === '<script src="/topbar.js"></script>') &&
+    /* §606: the bar's file by its stamped address (rewritten, never loosened) */
+    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /^<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>$/.test(t)) &&
     (page.match(/<script/gi) || []).length === 1 && !/\son[a-z]+=/i.test(page));
   check("the module switcher is its way back out",
     page.includes('href="/client-a/strategy"'), "no way back to Strategy");

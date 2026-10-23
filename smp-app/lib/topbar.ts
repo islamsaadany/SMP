@@ -34,6 +34,8 @@
    `[data-theme="dark"]`), and the script sets the attribute in the head,
    before the body paints, from the same `smp.theme` key Strategy reads — the
    same browser, so the same choice. */
+import { createHash } from "node:crypto";
+import { NAVSKEL_SCRIPT } from "./navskel.ts";
 import { barExtras, readingLink, type ProcessesRead } from "./bar-extras.ts";
 import type { ModuleKey } from "./modules.ts";
 import { MODULE_DEF, moduleMenu, clientHref, DEFAULT_MODULE } from "./modules.ts";
@@ -150,11 +152,6 @@ function viewerHtml(t: TopBar): string {
     "</select>" + (cur && cur.note ? '<span class="tbnote">' + esc(cur.note) + "</span>" : "") + "</div>";
 }
 
-/* The script is a file, never inline: the shell's policy is `script-src
-   'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render
-   perfectly and never run. Loaded in the HEAD so the theme lands before the
-   body paints. */
-export const TOPBAR_SCRIPT_TAG = '<script src="/topbar.js"></script>\n';
 
 const TOPBAR_CSS_RAW = `
 @font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}
@@ -365,4 +362,14 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })();
-`;
+` + NAVSKEL_SCRIPT;   /* §606: the press draws the next page's shape (lib/navskel.ts) */
+
+/* The script is a file, never inline: the shell's policy is `script-src
+   'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render
+   perfectly and never run. Loaded in the HEAD so the theme lands before the
+   body paints — which is why it must never cost a round trip (§606): its
+   address carries its own hash, the route caches that address for good, and
+   a change to the script changes the address. */
+export const TOPBAR_STAMP = createHash("sha256").update(TOPBAR_SCRIPT).digest("hex").slice(0, 12);
+export const TOPBAR_SRC = process.env.SMP_BREAK === "unversioned" ? "/topbar.js" : "/topbar.js?v=" + TOPBAR_STAMP;
+export const TOPBAR_SCRIPT_TAG = '<script src="' + TOPBAR_SRC + '"></script>\n';

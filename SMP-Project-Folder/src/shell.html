@@ -10361,7 +10361,13 @@
     /* §478: a unit's Core Values — add and remove, re-asked on the click
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
+       may, from the stored state at press time — never from the drawn one.
+       §603: PAST THE TOP LAYER AND A COMPANY (§611, below), THE LIST IS A
+       STORED UNIT'S, so that is the only other place either handler writes.
+       `unitLikeWritable()` would also hand back a capability's or a
+       function's view, rebuilt on every draw, where a value would be lost.
+       No page draws this box for either (they take the functions' Overview);
+       the type check found the door (§602) and this closes it. */
     /* §611: and the top layer's and a company's, which draw the same list
        (valuesEditList). Theirs is the group's own strategy, so the press is
        re-asked exactly as a Who-we-are line's is, and there is no gap mark. */
@@ -10404,7 +10410,7 @@
         var top = topValuesOf(t);
         if (top === false) return;
         if (top) { top.values.push({ name: "", def: "" }); fieldSaved(); paint(); return; }
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -10423,7 +10429,7 @@
           if (!top.values[i]) return;
           top.values.splice(i, 1); fieldSaved(); paint(); return;
         }
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);
         if (!how) return;

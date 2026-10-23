@@ -597,7 +597,12 @@
    are written on the Foundation and the Temple only shows. The built file's
    bytes changed (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.01-foundation-themes";
+/* v7.02-capability-parts — §602 and §603: the review and the plan described
+   for the page check; a capability offered only what its Structure card
+   offers; one answer for the quarter a cycle ends in. The built file's bytes
+   changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.02-capability-parts";
 const ASSETS = [
   "/",
   "/index.html",

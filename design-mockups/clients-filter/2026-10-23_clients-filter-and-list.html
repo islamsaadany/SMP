@@ -1,0 +1,275 @@
+<title>Clients Filter and List</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: three drawings of the console's Clients page, each a frame with the
+   navy column. One new row of controls above the cards: which clients
+   (Active / Ended / Demo), Mine, and cards or list. Tokens and the card are
+   the console's own (smp-app/shell/platform.html, platform-page.js cardFor). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1240px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:80ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flag{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:40px 0 10px}
+.cap .n{font-size:12px;font-weight:600;color:var(--gold)}
+.cap h2{margin:0;font-size:17px;font-weight:600}
+.cap p{margin:0;flex-basis:100%;color:var(--ink-2);font-size:14px;max-width:84ch}
+.cap p b{color:var(--ink);font-weight:600}
+.ctrls{display:flex;gap:8px;align-items:center;margin:16px 0 0;font-size:13px;color:var(--ink-2)}
+.seg2{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg2 button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg2 button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;margin-top:40px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.note h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink)}
+
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.app{display:flex}
+.side{width:232px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.brand{display:flex;gap:8px;align-items:center;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px}
+.snav{padding:10px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;padding:10px;border-radius:8px;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--ff-rule)}
+.av0{width:30px;height:30px;border-radius:50%;background:var(--ff-on);color:var(--ff-ink);font:700 11px/30px var(--mono);text-align:center}
+.swho b{display:block;font-size:13px;color:var(--ff-ink)}
+.swho i{font-style:normal;font-size:11.5px}
+.main{flex:1;min-width:0}
+.mtop{display:none}
+.pg{padding:22px 24px 36px}
+
+/* the page, the console's own */
+.ptitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.ptitle h1{font-size:20px;margin:0;font-weight:600}
+.ptitle .right{margin-left:auto}
+.fld{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 11px;font-size:14px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+/* NEW: the one row of controls — which clients, mine, and how drawn */
+.bar{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;margin:0 0 18px}
+.which{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.which button{border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink-2);font-size:13px;font-weight:600;padding:7px 13px;cursor:pointer;white-space:nowrap}
+.which button:last-child{border-right:0}
+.which button i{font-style:normal;font-weight:500;color:var(--ink-3);margin-left:6px;font-size:12px}
+.which button[aria-pressed="true"]{background:var(--ff);color:var(--ff-ink)}
+.which button[aria-pressed="true"] i{color:var(--ff-quiet)}
+.mine{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;user-select:none}
+.sw{width:32px;height:18px;border-radius:999px;background:var(--line);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.mine.on .sw{background:var(--ff)}
+.mine.on .sw::after{left:16px}
+.mine.on{color:var(--ink)}
+.view{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.view button{border:0;background:transparent;color:var(--ink-3);padding:6px 9px;display:grid;place-items:center;cursor:pointer}
+.view button + button{border-left:1px solid var(--line)}
+.view button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink)}
+.view svg.i{width:17px;height:17px}
+/* the cards, as today */
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.ccard{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.ctop{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 11px/30px var(--mono);text-align:center}
+.ccard h2{margin:0;font-size:16px;font-weight:600}
+.ind{margin:0;color:var(--ink-3);font-size:12.5px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 10.5px/1.5 var(--mono);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink-2);background:var(--surface-2);white-space:nowrap}
+.tag.seat{color:var(--ff-tx);border-color:var(--ff-tx);background:var(--surface)}
+.tag.demo{color:var(--gold);border-color:var(--amber);background:var(--surface)}
+.tag.arch{color:var(--ink-3);background:var(--surface)}
+.ccfg{position:absolute;top:11px;right:11px;width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--gold)}
+.ccfg svg{width:15px;height:15px}
+.mods{margin-top:auto;border-top:1px solid var(--line)}
+.mrow{display:flex;align-items:baseline;gap:8px;width:100%;padding:6px 14px;font-size:13px;text-align:left;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow:last-child{border-bottom:0}
+.mrow i{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.mrow i.alarm{color:var(--warn);font-weight:600}
+.mrow i.due{color:var(--ink-2);font-weight:600}
+.ccard.add{min-height:150px;align-items:center;justify-content:center;border-style:dashed;font-weight:600;color:var(--ink-3);box-shadow:none}
+.ccard.arch{box-shadow:none;border-style:dashed}
+.ccard.arch .cmark{background:var(--surface-2);color:var(--ink-3)}
+.ccard.demo{background:var(--amber-wash);border-color:var(--amber)}
+.bring{position:absolute;top:11px;right:11px;font-size:12px;font-weight:600;color:var(--gold);border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--surface)}
+/* NEW: the list — one line a client, the same facts as the card */
+.tbl{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th{text-align:left;font:600 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+.who{display:flex;gap:10px;align-items:center;font-weight:600}
+.who .cmark{width:26px;height:26px;line-height:26px;font-size:10px;flex:none}
+.muted{color:var(--ink-3)}
+.mlinks{display:flex;gap:6px;flex-wrap:wrap}
+.ml{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface);color:var(--ink);white-space:nowrap;cursor:pointer}
+.ml:hover{border-color:var(--gold)}
+.ml i{font-style:normal;font-weight:600;color:var(--warn);margin-left:5px}
+td.go{width:40px;text-align:right}
+.cog{display:inline-grid;place-items:center;width:26px;height:26px;border:1px solid var(--line);border-radius:6px;color:var(--gold)}
+.cog svg{width:15px;height:15px}
+.addline{margin-top:12px;display:flex;gap:10px}
+
+@container (max-width:719px){
+  .side{display:none}
+  .mtop{display:flex;align-items:center;gap:10px;background:var(--ff);color:var(--ff-ink);padding:8px 12px;min-height:50px}
+  .mtop .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em}
+  .mtop .here{margin-left:auto;font-size:13px;font-weight:600;color:var(--ff-quiet)}
+  .pg{padding:16px 12px 28px}
+  .ptitle .right{margin-left:0;width:100%}.ptitle .right .fld{width:100%}
+  .view{margin-left:0}
+}
+</style>
+
+<div class="doc">
+  <h1>Clients: Active, Ended, Demo, Mine, and a list view</h1>
+  <p class="lede">One new row above the clients. <b>Active · Ended · Demo</b> chooses which clients you see, and opens on <b>Active</b>, so past and archived clients are off the normal view. <b>Mine</b> narrows it to the clients you have a seat on. The two icons on the right switch between <b>cards</b> and a <b>list</b>, and the page remembers your choice on that device.</p>
+  <span class="flag">Nothing here is built · the clients and figures are invented for the drawing</span>
+  <div class="ctrls">Theme <span class="seg2" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+
+  <div class="cap"><span class="n">1</span><h2>Active, as cards: how the page opens</h2>
+    <p>Today's cards, unchanged. The worked example and the archived band are no longer underneath: each has its own choice in the row.</p></div>
+  <div class="frame"><div class="app" data-on="clients"><aside class="side"></aside><div class="main"><div class="mtop"></div><div class="pg">
+    <div class="ptitle"><h1>Clients</h1><span class="right"><input class="fld" id="s1" placeholder="Search clients" style="width:200px"></span></div>
+    <div class="bar">
+      <span class="which" role="group" aria-label="Which clients"><button type="button" aria-pressed="true">Active<i>5</i></button><button type="button" aria-pressed="false">Ended<i>3</i></button><button type="button" aria-pressed="false">Demo<i>1</i></button></span>
+      <span class="mine" role="switch" aria-checked="false" tabindex="0"><span class="sw"></span>Mine</span>
+      <span class="view" role="group" aria-label="View"><button type="button" aria-pressed="true" title="Cards" data-i="grid"></button><button type="button" aria-pressed="false" title="List" data-i="list"></button></span>
+    </div>
+    <div class="cards">
+      <div class="ccard"><div class="ctop"><span class="cmark">EA</span><h2>El Abd Foods</h2><p class="ind">Food &amp; Beverage</p><div class="tags"><span class="tag seat">Super user</span><span class="tag">5 units</span></div></div><span class="ccfg" data-cog></span>
+        <div class="mods"><button type="button" class="mrow">Strategy<i class="alarm">No plan</i></button><button type="button" class="mrow">Internal Tracker</button></div></div>
+      <div class="ccard"><div class="ctop"><span class="cmark">RHI</span><h2>Reliance Heavy Industries</h2><p class="ind">Manufacturing</p><div class="tags"><span class="tag">3 units</span></div></div><span class="ccfg" data-cog></span>
+        <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Processes</button></div></div>
+      <div class="ccard"><div class="ctop"><span class="cmark">RT</span><h2>Raya Trade</h2><p class="ind">Retail &amp; E-commerce</p><div class="tags"><span class="tag seat">Super user</span><span class="tag">10 units</span></div></div><span class="ccfg" data-cog></span>
+        <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Insights</button><button type="button" class="mrow">Internal Tracker<i class="due">3 open</i></button></div></div>
+      <div class="ccard"><div class="ctop"><span class="cmark">WD</span><h2>Wander</h2><p class="ind">Real Estate &amp; Property</p><div class="tags"><span class="tag seat">SMO team</span><span class="tag">3 units</span></div></div><span class="ccfg" data-cog></span>
+        <div class="mods"><button type="button" class="mrow">Strategy</button></div></div>
+      <div class="ccard"><div class="ctop"><span class="cmark">FF</span><h2>Forefront Consulting</h2><p class="ind">Technology &amp; Software</p><div class="tags"><span class="tag">3 units</span></div></div><span class="ccfg" data-cog></span>
+        <div class="mods"><button type="button" class="mrow">Strategy<i class="alarm">No plan</i></button></div></div>
+      <div class="ccard add">+ Add a client</div>
+    </div>
+  </div></div></div></div>
+
+  <div class="cap"><span class="n">2</span><h2>Active, Mine, as a list</h2>
+    <p>One line a client, with the same facts as the card: its industry, your seat, its units, and a button for each module it has, with that module's mark. Settings at the end of the line. <b>Mine</b> is on, so only the three clients you sit on show.</p></div>
+  <div class="frame"><div class="app" data-on="clients"><aside class="side"></aside><div class="main"><div class="mtop"></div><div class="pg">
+    <div class="ptitle"><h1>Clients</h1><span class="right"><input class="fld" id="s2" placeholder="Search clients" style="width:200px"></span></div>
+    <div class="bar">
+      <span class="which" role="group" aria-label="Which clients"><button type="button" aria-pressed="true">Active<i>3</i></button><button type="button" aria-pressed="false">Ended<i>1</i></button><button type="button" aria-pressed="false">Demo<i>1</i></button></span>
+      <span class="mine on" role="switch" aria-checked="true" tabindex="0"><span class="sw"></span>Mine</span>
+      <span class="view" role="group" aria-label="View"><button type="button" aria-pressed="false" title="Cards" data-i="grid"></button><button type="button" aria-pressed="true" title="List" data-i="list"></button></span>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Client</th><th>Industry</th><th>Your seat</th><th>Units</th><th>Open</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><span class="who"><span class="cmark">EA</span>El Abd Foods</span></td><td class="muted">Food &amp; Beverage</td><td>Super user</td><td>5</td><td><span class="mlinks"><span class="ml">Strategy<i>No plan</i></span><span class="ml">Internal Tracker</span></span></td><td class="go"><span class="cog" data-cog></span></td></tr>
+        <tr><td><span class="who"><span class="cmark">RT</span>Raya Trade</span></td><td class="muted">Retail &amp; E-commerce</td><td>Super user</td><td>10</td><td><span class="mlinks"><span class="ml">Strategy</span><span class="ml">Insights</span><span class="ml">Internal Tracker<i>3 open</i></span></span></td><td class="go"><span class="cog" data-cog></span></td></tr>
+        <tr><td><span class="who"><span class="cmark">WD</span>Wander</span></td><td class="muted">Real Estate &amp; Property</td><td>SMO team</td><td>3</td><td><span class="mlinks"><span class="ml">Strategy</span></span></td><td class="go"><span class="cog" data-cog></span></td></tr>
+      </tbody></table></div>
+    <div class="addline"><button type="button" class="btn">+ Add a client</button></div>
+  </div></div></div></div>
+
+  <div class="cap"><span class="n">3</span><h2>Ended</h2>
+    <p>Archived clients, and past clients added only for their case studies. <b>+ Add a past client</b> lives here and nowhere else. Bring back and Delete work as today. Cards or list, as you chose.</p></div>
+  <div class="frame"><div class="app" data-on="clients"><aside class="side"></aside><div class="main"><div class="mtop"></div><div class="pg">
+    <div class="ptitle"><h1>Clients</h1><span class="right"><input class="fld" id="s3" placeholder="Search clients" style="width:200px"></span></div>
+    <div class="bar">
+      <span class="which" role="group" aria-label="Which clients"><button type="button" aria-pressed="false">Active<i>5</i></button><button type="button" aria-pressed="true">Ended<i>3</i></button><button type="button" aria-pressed="false">Demo<i>1</i></button></span>
+      <span class="mine" role="switch" aria-checked="false" tabindex="0"><span class="sw"></span>Mine</span>
+      <span class="view" role="group" aria-label="View"><button type="button" aria-pressed="true" title="Cards" data-i="grid"></button><button type="button" aria-pressed="false" title="List" data-i="list"></button></span>
+    </div>
+    <div class="cards">
+      <div class="ccard arch"><div class="ctop"><span class="cmark">DF</span><h2>Delta Freight</h2><p class="ind">Transportation</p><div class="tags"><span class="tag arch">Archived 2 Mar 2026</span></div></div><span class="bring">Bring back</span>
+        <div class="mods"><button type="button" class="mrow">Case studies<i>1</i></button></div></div>
+      <div class="ccard arch"><div class="ctop"><span class="cmark">NL</span><h2>Nile Logistics</h2><p class="ind">Transportation</p><div class="tags"><span class="tag arch">Past client</span></div></div>
+        <div class="mods"><button type="button" class="mrow">Case studies<i class="due">1 being written</i></button></div></div>
+      <div class="ccard arch"><div class="ctop"><span class="cmark">OC</span><h2>Orion Cement</h2><p class="ind">Materials</p><div class="tags"><span class="tag arch">Archived 14 Jan 2026</span></div></div><span class="bring">Bring back</span></div>
+      <div class="ccard add">+ Add a past client</div>
+    </div>
+  </div></div></div></div>
+
+  <div class="notes">
+    <div class="note"><h2>What changes</h2><ul>
+      <li><b>The page opens on Active clients.</b> The worked example moves to Demo, and archived clients move to Ended.</li>
+      <li><b>Mine</b> shows only the clients you have a seat on. It works with each of the three choices.</li>
+      <li><b>Cards or list</b>, your choice, remembered on that device.</li>
+    </ul></div>
+    <div class="note"><h2>What it costs</h2><ul>
+      <li><b>Archived clients are one press away</b> instead of at the foot of the page.</li>
+      <li><b>A past client shows "Past client"</b> where an archived one shows its archive date, and has no Bring back: it never had a platform to return to.</li>
+      <li><b>The counts beside each choice follow Mine</b>, so they always match what pressing it shows.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    cases:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')); });
+  var COG = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
+  document.querySelectorAll('[data-cog]').forEach(function(e){ e.innerHTML = COG; });
+  var GROUPS = [{h:"Work",items:[["mywork","My work"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["cases","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll('.app').forEach(function(a){
+    var on = a.getAttribute('data-on');
+    a.querySelector('.side').innerHTML = '<div class="brand"><span class="bmk">FOREFRONT</span><span class="nm">Platform</span></div><nav class="snav">' +
+      GROUPS.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){
+        return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join('') + '</div>'; }).join('') +
+      '</nav><div class="me"><span class="av0">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
+    a.querySelector('.mtop').innerHTML = '<span class="bmk">FOREFRONT</span><span class="here">Clients</span>';
+  });
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener('click', function(){ document.documentElement.setAttribute('data-theme', b.getAttribute('data-v')); press(b.getAttribute('data-v')); }); });
+  press(document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+})();
+</script>

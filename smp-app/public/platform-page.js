@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  /* §599: the column's width is set before anything is drawn, so a person
+  /* §601: the column's width is set before anything is drawn, so a person
      who keeps it to icons does not see it open and then close on arrival. */
   var RAILKEY = "smp.console.rail";
   try { if (localStorage.getItem(RAILKEY) === "1") document.documentElement.setAttribute("data-rail", "1"); } catch (e) { /* kept on this device only */ }
@@ -102,7 +102,7 @@
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
-    /* THE FOURTH WORD IS THE HEADING THE TAB SITS UNDER (§599), in the
+    /* THE FOURTH WORD IS THE HEADING THE TAB SITS UNDER (§601), in the
        column, and History has none: it stands alone at the foot. Said on
        each tab rather than in a second list, so a tab added here cannot be
        left out of the column by forgetting the other. */
@@ -159,7 +159,7 @@
     document.getElementById("sbhere").textContent = here;
   }
 
-  /* ── THE COLUMN'S OWN CONTROLS (§599) ────────────────────────────────
+  /* ── THE COLUMN'S OWN CONTROLS (§601) ────────────────────────────────
      Replacing §584's sideways tab bar: on a computer the « button keeps the
      column to its icons (kept on this device), and the name a hidden label
      stands for shows beside the icon on a hover or a key; on a phone the
@@ -3873,7 +3873,7 @@
     /* the name, then the role as a span of its own so a phone can leave it
        for a wider screen (§584.1); the whole line on a hover, for a name
        that had to end in "…" */
-    /* §599: at the column's foot the role sits under the name, so its dot
+    /* §601: at the column's foot the role sits under the name, so its dot
        is a span of its own that is not drawn — the line's words, and what
        it reads as, are unchanged */
     var who = document.getElementById("who");

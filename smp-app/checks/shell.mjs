@@ -2456,7 +2456,7 @@ await section("4 · Forefront's own pages", async () => {
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);
   }
 
-  /* §4b.1 — THE CONSOLE'S CHROME IS A COLUMN ON THE LEFT (§599).
+  /* §4b.1 — THE CONSOLE'S CHROME IS A COLUMN ON THE LEFT (§601).
      REWRITTEN, NEVER LOOSENED (§218): §584's lines asserted a tab bar
      that scrolls sideways on a phone and a name line across the top, and
      both are gone by Islam's decision. What they were FOR is asserted of
@@ -2465,8 +2465,10 @@ await section("4 · Forefront's own pages", async () => {
      History; the name line keeps its words, and a long name ends in …
      with the whole of it on a hover. Read off the boxes the browser drew,
      never off the stylesheet. */
+  /* every probe answers on a page without the column too, so the build
+     before reads each line RED rather than the section dying (\u00a7215) */
   const chrome = () => page.evaluate(() => {
-    const nav = document.getElementById("nav"), side = document.getElementById("side"), on = nav.querySelector("button.on");
+    const nav = document.getElementById("nav"), side = document.getElementById("side") || nav, on = nav.querySelector("button.on");
     const sr = side.getBoundingClientRect(), or = on ? on.getBoundingClientRect() : null, mt = document.querySelector(".mtop");
     return { pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth,
       sideW: Math.round(sr.width), sideL: Math.round(sr.left), sideShown: getComputedStyle(side).visibility === "visible" && sr.right > 0,
@@ -2493,30 +2495,30 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector(".mwstrip > div", { timeout: 8000 }).catch(() => {});
     const p1 = await chrome();
     check(p1.pageW <= p1.vw && !p1.sideShown && p1.bar && p1.here === "My work",
-      "on a phone the page does not slide sideways, the column is put away, and the menu bar names the tab you are on (§599)", JSON.stringify(p1));
+      "on a phone the page does not slide sideways, the column is put away, and the menu bar names the tab you are on (§601)", JSON.stringify(p1));
     check(p1.tops.length === 4 && new Set(p1.tops).size === 1, "…and My work's four counts line up along their numbers (§584)", JSON.stringify(p1.tops));
-    await page.click("#sbopen");
+    await page.click("#sbopen", { timeout: 3000 }).catch(() => {});
     await page.waitForTimeout(400);
     const p2 = await chrome();
     check(p2.sideShown && p2.sideL === 0 && p2.menu === "1" && p2.heights.length === 8 && new Set(p2.heights).size === 1 && p2.onIn && p2.focus === "mywork" && p2.pageW <= p2.vw,
-      "…the menu button opens the column over the page, every tab on one line, the one you are on in view and in hand (§599)", JSON.stringify(p2));
+      "…the menu button opens the column over the page, every tab on one line, the one you are on in view and in hand (§601)", JSON.stringify(p2));
     check(JSON.stringify(p2.heads) === JSON.stringify(["Work", "Team", "Knowledge"]),
-      "…under the three headings, History alone at the foot (§599)", JSON.stringify(p2.heads));
+      "…under the three headings, History alone at the foot (§601)", JSON.stringify(p2.heads));
     const n1 = await nameLine();
     check(n1.nmH < 20 && n1.soH <= 34 && n1.roleShown === true && n1.roleUnder === true && n1.text === "Mohamed Essam · Super user",
-      "…its foot names the person on one line with the role under it, Sign out whole, the words unchanged (§599)", JSON.stringify(n1));
+      "…its foot names the person on one line with the role under it, Sign out whole, the words unchanged (§601)", JSON.stringify(n1));
     await page.locator("#nav button", { hasText: "History" }).click();
     await page.waitForTimeout(500);
     const p3 = await chrome();
     check(!p3.sideShown && p3.menu === null && p3.here === "History" && new URL(page.url()).hash === "#history",
-      "…and pressing History opens History and puts the column away (§599)", JSON.stringify(p3));
+      "…and pressing History opens History and puts the column away (§601)", JSON.stringify(p3));
     const nameWas = (await owner.query("SELECT name FROM users WHERE email = 'office@forefront.example'")).rows[0].name;
     await owner.query("UPDATE users SET name = 'Abdelrahman Mostafa El-Sayed Ibrahim' WHERE email = 'office@forefront.example'");
     try {
       await page.setViewportSize({ width: 360, height: 800 });
       await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
       await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
-      await page.click("#sbopen");
+      await page.click("#sbopen", { timeout: 3000 }).catch(() => {});
       await page.waitForTimeout(400);
       const n2 = await nameLine();
       check(n2.cut && n2.nmH < 20 && n2.pageW <= n2.vw && /Abdelrahman Mostafa El-Sayed Ibrahim/.test(n2.title),
@@ -2536,45 +2538,46 @@ await section("4 · Forefront's own pages", async () => {
   await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
   const d1 = await chrome();
   check(d1.sideShown && d1.sideW === 232 && d1.sideL === 0 && !d1.bar && d1.heights.length === 8 && new Set(d1.heights).size === 1 && d1.pageW <= d1.vw,
-    "on a computer the column stands beside the page, 232px, every tab on one line and no menu bar (§599)", JSON.stringify(d1));
+    "on a computer the column stands beside the page, 232px, every tab on one line and no menu bar (§601)", JSON.stringify(d1));
   const roleWide = (await nameLine()).roleShown;
   check(roleWide === true, "…and the name line keeps the role there (§584.1)", roleWide);
   const tipOf = (k) => page.evaluate((key) => {
     const t = document.getElementById("sbtip"), b = document.querySelector('#nav button[data-tab="' + key + '"]');
-    const tr = t.getBoundingClientRect(), br = b.getBoundingClientRect();
+    if (!t || !b) return { shown: false, text: null, words: b ? b.textContent : null, beside: false, labelW: b ? Math.round(b.getBoundingClientRect().width) : 0 };
+    const tr = t.getBoundingClientRect(), br = b.getBoundingClientRect(), lb = b.querySelector(".lb") || b;
     return { shown: getComputedStyle(t).display !== "none", text: t.textContent, words: b.textContent,
       beside: tr.left >= br.right && Math.abs((tr.top + tr.height / 2) - (br.top + br.height / 2)) < 2,
-      labelW: Math.round(b.querySelector(".lb").getBoundingClientRect().width) };
+      labelW: Math.round(lb.getBoundingClientRect().width) };
   }, k);
   await page.hover('#nav button[data-tab="frameworks"]');
   const h0 = await tipOf("frameworks");
-  check(!h0.shown && h0.labelW > 40, "…where a hover on a tab shows no label, its name being there to read (§599)", JSON.stringify(h0));
-  await page.click("#sbfold");
+  check(!h0.shown && h0.labelW > 40, "…where a hover on a tab shows no label, its name being there to read (§601)", JSON.stringify(h0));
+  await page.click("#sbfold", { timeout: 3000 }).catch(() => {});
   await page.hover('#nav button[data-tab="frameworks"]');
   const h1 = await tipOf("frameworks"), d2 = await chrome();
   check(d2.sideW === 64 && h1.labelW <= 1 && h1.words === "Frameworks",
-    "« keeps the column to its icons, 64px, each tab's name out of sight but still its words (§599)", JSON.stringify({ sideW: d2.sideW, h1 }));
+    "« keeps the column to its icons, 64px, each tab's name out of sight but still its words (§601)", JSON.stringify({ sideW: d2.sideW, h1 }));
   check(h1.shown && h1.text === "Frameworks" && h1.beside,
     "…and pointing at an icon shows the tab's name beside it (Islam: “make the names of the module appear on hovering when they are collapsed”)", JSON.stringify(h1));
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
   const d3 = await chrome();
-  check(d3.sideW === 64, "…kept on this device after a reload (§599)", JSON.stringify({ sideW: d3.sideW }));
-  await page.click("#sbfold");
+  check(d3.sideW === 64, "…kept on this device after a reload (§601)", JSON.stringify({ sideW: d3.sideW }));
+  await page.click("#sbfold", { timeout: 3000 }).catch(() => {});
   const d4 = await chrome();
-  check(d4.sideW === 232, "…and pressed again, the names come back (§599)", JSON.stringify({ sideW: d4.sideW }));
+  check(d4.sideW === 232, "…and pressed again, the names come back (§601)", JSON.stringify({ sideW: d4.sideW }));
   /* §84.2 — THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
      13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
      a keyword), so the tabs drew at its own 13.33px regular — RED on the
      build before, measured. Asked of the computed style, which is what the
      browser actually used, never of the stylesheet's text. The size is
-     §599's, from the signed-off mockup: 14px in the column. */
+     §601's, from the signed-off mockup: 14px in the column. */
   const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
-  check(tabFont === "14px 600", "…and the tabs are in the weight their style asks for, semibold 14px (§584.2, §599)", tabFont);
+  check(tabFont === "14px 600", "…and the tabs are in the weight their style asks for, semibold 14px (§584.2, §601)", tabFont);
   /* §584.3 — AND THE BUTTONS: `.btn` had the same dropped shorthand
      (`font:600 13px/1.5 inherit`), so every console button drew at the
      browser's 13.33px regular and 29px tall — RED on the build before,
-     measured. Sign out was the one button on every tab; since §599 it is
+     measured. Sign out was the one button on every tab; since §601 it is
      an icon at the column's foot, so Memory's own button is asked instead
      (Write up a period on an empty memory, Ask on a full one). */
   await page.goto("about:blank");

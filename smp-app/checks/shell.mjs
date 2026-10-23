@@ -55,6 +55,19 @@ const SWWAS = readFileSync(SWFILE, "utf8");
 process.on("exit", () => { try { writeFileSync(SWFILE, SWWAS); } catch {} });
 if (brk === "keep-caches") writeFileSync(SWFILE, SWWAS.replace(/caches\.keys\(\)[\s\S]*?\.then\(\(ks\) => Promise\.all\(ks\.map\(\(k\) => caches\.delete\(k\)\)\)\)/, "Promise.resolve()"));
 if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventListener("fetch", (e) => { if (e.request.method === "GET") e.respondWith(caches.open("smp-shell-again").then((c) => fetch(e.request).then((r) => { if (r.ok && r.type === "basic") c.put(e.request, r.clone()); return r; }))); });\n');
+/* §538's GUARD TAKEN OFF APPLY TO PLAN, in the bytes the browser is served
+   and put back on the way out, the worker's way above: a held Apply that
+   still answers a press must turn §6's "does nothing at all" red. The
+   break is asserted to MATCH exactly once before it is written (§344.1),
+   or a renamed guard would leave a break that breaks nothing. */
+const SHELLJS = join(import.meta.dirname, "..", "public", "shell.js");
+const GUARD = 'if (!b.disabled && b.getAttribute("aria-disabled") !== "true")\n      applyAsk(';
+if (brk === "apply-unguarded") {
+  const was = readFileSync(SHELLJS, "utf8");
+  if (was.split(GUARD).length !== 2) { console.log("FAIL  the apply-unguarded break did not match exactly once"); process.exit(1); }
+  process.on("exit", () => { try { writeFileSync(SHELLJS, was); } catch {} });
+  writeFileSync(SHELLJS, was.replace(GUARD, "if (true)\n      applyAsk("));
+}
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
 const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
@@ -1543,14 +1556,35 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent),
       fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent, finOn: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
       inMsgs: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), run: !!document.querySelector("[data-cop-savebar] [data-cop-fcheck]"),
-      apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { off: a.disabled, title: a.title } : null; })() }));
+      apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { held: a.getAttribute("aria-disabled"), dead: a.disabled, tip: a.getAttribute("data-tip") || "" } : null; })() }));
     check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0,
       "the check lists what agrees and what does not, and offers Go back to that part", JSON.stringify(ck));
     /* §524 — SAVING IS A BAR UNDER THE CARDS, never a button in the chat:
        Save as Foundation — Mobile v1 live, Run the check beside it, and
-       Apply to plan dimmed with its reason until a version is saved. */
-    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.off && /Save the Foundation first/.test(ck.apply.title),
-      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan dimmed until something is saved (§524)", JSON.stringify(ck));
+       Apply to plan held with its reason until a version is saved.
+       REWRITTEN, NOT LOOSENED (§218), FOR §538 (2026-10-15, signed off):
+       Apply to plan is HELD, NOT DEAD — `aria-disabled` with its reason on a
+       bubble a pointer and Tab can reach (`data-tip`), never `disabled`,
+       which reaches nobody — and §538 moved its guard to read the hold, so a
+       press on it opens nothing. This line asked for `disabled` and a
+       `title` and so had read red on the right build for a week, every run
+       since §538; what it is FOR — held, saying why, until saved — is what
+       is asserted, now including the guard (§94.2: a held button that still
+       works would pass a line that only reads the attribute). */
+    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.held === "true" && !ck.apply.dead && /Save the Foundation first/.test(ck.apply.tip),
+      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan held with its reason until something is saved (§524, §538)", JSON.stringify(ck));
+    /* THE PRESS IS ANSWERED BY THE GUARD, NOT BY THE EMPTY ID: before a save
+       there is no deliverable, so even an unguarded press opens no dialog —
+       it falls to applyAsk's own "Save the Foundation first." line under the
+       pane. So the line is what is watched for, beside the dialog, and a
+       build without §538's guard reads red here. */
+    await page.evaluate(() => document.querySelector("[data-cop-savebar] [data-cop-fapply]").click());
+    await page.waitForTimeout(300);
+    const heldPress = await page.evaluate(() => {
+      const t = document.getElementById("modal-t"), s = document.querySelector(".copsay");
+      return { dialog: t && t.checkVisibility() ? t.textContent : "", line: s ? s.textContent : "" };
+    });
+    check(!heldPress.dialog && !/Save the Foundation first/.test(heldPress.line), "…and pressing it while held does nothing at all (§538's guard)", JSON.stringify(heldPress));
 
     /* §512 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
        opens it with the change applied; a line naming none asks nothing and
@@ -1637,9 +1671,11 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(await page.waitForFunction(() => Array.from(document.querySelectorAll("[data-cop-deliv]")).some((b) => /Foundation — Mobile/.test(b.textContent)), null, { timeout: 5000 }).then(() => true, () => false),
       "…and it is on the rail under Deliverables");
     /* §524 — AFTER THE SAVE the bar says so, Save is dimmed (nothing has
-       changed since v1) and Apply to plan is live. */
+       changed since v1) and Apply to plan is live. LIVE MEANS NEITHER HOLD
+       (§538): since Apply is held by `aria-disabled`, `:not([disabled])` alone
+       was true of a held button too, so this line could not fail. */
     const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
-      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]:not([disabled])"),
+      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector('[data-cop-savebar] [data-cop-fapply]:not([disabled]):not([aria-disabled="true"])'),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
     check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§524)", JSON.stringify(sb));
     /* §525.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there

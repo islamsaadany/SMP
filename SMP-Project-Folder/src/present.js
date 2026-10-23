@@ -497,6 +497,64 @@ function dirExecDetail(p){
   var left = [notDue ? notDue + " not due" : "", unrep ? unrep + " not reported" : ""].filter(Boolean);
   return standDetail(rows, left.length ? "Not counted: " + left.join(", ") : "");
 }
+/* ── ONE TEMPLATE FOR EVERY BOX (§586, spec 066 §5) ──────────────────────
+   Islam agreed the last step of the simplification: *"one template for every
+   box, built from its sections in a fixed order"*. A unit's deck and a
+   function's were two builders of some four hundred lines each, and each
+   wrote its own cover, its own Overall performance block, its own notes and
+   its own Thank you — the same slides twice, which is how §553.2 found a
+   projects box ending on its last milestone with no reading at all.
+
+   THE ORDER IS WRITTEN ONCE, HERE: cover · Foundation · Analysis · the plan ·
+   Overall performance · notes · Thank you. What differs between boxes is the
+   PLAN part alone — pillars (`pillarsPlanPart`) or projects and actions
+   (`projectsPlanPart`) — because that is the one thing that really is
+   different about them; everything around it is these few slides.
+
+   `deckSlides` and `deckSlidesFn` are what is left of the two builders: each
+   reads its box and hands this the parts. Proved by drawing every deck on
+   every state held — 396 of them — before and after, byte for byte. */
+function coverSlide(title, mark, markAlt, subHtml){
+  return '<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", title, true) + '>' +
+    (mark
+        ? '<img class="dcovermark" src="' + esc(mark) + '" alt="' + esc(markAlt) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    subHtml + '</section>';
+}
+function thanksSlide(name){
+  return '<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
+    sec("END", "Thank you") +
+    '><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(name) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+/* §243: drawn only when a note is written — the caller asks. */
+function notesSlide(key, text){
+  return '<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
+    '><h2>Notes and achievements</h2>' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(key) + '">' +
+      esc(text) + '</div>' +
+    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
+    'platform, not in a deck that is already wrong.</p></section>';
+}
+/* THE CLOSING BLOCK (§254.4, §259.1, §553.2): its divider, the score tables,
+   then where the box stands. A box with no reading and no table has no
+   block at all (§45.2) — a divider over nothing is a blank slide. */
+function perfPart(sub, scores, stand){
+  if (!scores.length && !stand) return [];
+  return [sectSlide("sperf", "After the Overall performance divider", "Overall performance", sub, null)]
+    .concat(scores, stand ? [stand] : []);
+}
+function deckOf(b){
+  var note = cycleNote(b.noteKey);
+  return [coverSlide(b.name, b.mark, b.markAlt, b.coverSub)]
+    .concat(b.found, b.analysis, b.plan.slides,
+            perfPart(b.perfSub, b.plan.scores, b.stand),
+            note ? [notesSlide(b.noteKey, note)] : [],
+            [thanksSlide(b.name)]).join("");
+}
 function standSlideOf(name, cells, foot){
   cells = cells.filter(Boolean);
   return '<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
@@ -570,10 +628,21 @@ function rollCallSlide(u, g){
 /* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
    Lifted out of `deckSlides` whole, so the master flow can draw the same
    roll-calls the company's own review draws rather than a second pair
-   that looks like them (§53.5). `short` is the caller's: the company's
-   review splits its two kinds, a unit's deck does not. */
-function pillarGroups(u, short){
-var capCards = !short ? "" : boardCapTargets().map(function(t){
+   that looks like them (§53.5).
+
+   §587: THE BOX'S OWN SETTING SPLITS IT, never which kind of box it is.
+   This took a `short` flag that meant "the company's review, units off", and
+   split the two kinds only there — a special case for one kind of box,
+   while Setup already carries the one answer to the question (directions
+   and capabilities shown apart, `boxSplit`). So the setting decides, for the
+   company and for any unit or function that uses it.
+
+   `records` is the one thing that IS the company's alone: capability
+   RECORDS (Setup › Capabilities, §334) are the company's, so they ride as
+   cards on its roll-call where the company is the plan (units off) and in
+   the Master presentation's group pages. */
+function pillarGroups(u, records){
+var capCards = !records ? "" : boardCapTargets().map(function(t){
   var c = capById(t.slice(4)), nm = placeLabel(t);
   return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
     '<span class="pcard-n">' + esc(nm) + '</span>' +
@@ -594,7 +663,7 @@ var capCards = !short ? "" : boardCapTargets().map(function(t){
    A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
    directions and no capabilities reads exactly as it does today. */
 var groups;
-if (short && boxSplit(u)) {
+if (boxSplit(u)) {
   var dirs = [], caps = [];
   u.items.forEach(function(p, i){
     (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
@@ -678,27 +747,20 @@ if (short && boxSplit(u)) {
 }
 
 function deckSlides(u){
-  var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
-  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
-  var pOn = planOn(u);
   /* §481: the company's own review is SHORT when its plan is the whole plan
      (units off): foundation, analysis, the directions and capabilities, then
      their performance. Each direction's detail is its owner's own deck. */
-  var short = !!u.topLayer && companyReviewOn();
+  /* §587: the company's capability records ride on its roll-call where it
+     is the plan (see `pillarGroups`). */
+  var records = !!u.topLayer && companyReviewOn();
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
     (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
 
-  /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", deckBoxName(u), true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
+  /* 1 — the cover carries the unit and the cycle, and nothing else (drawn
+     by `deckOf`, below). */
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
   /* The near horizon is hidden on a unit's objectives (§51.16). This is the
@@ -785,7 +847,7 @@ function deckSlides(u){
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
   /* §553.6: the company's own review shows its directions and its
      capabilities apart, so the wording below has two groups to name. */
-  var capsApart = short && boxSplit(u) &&
+  var capsApart = boxSplit(u) &&
     u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
   /* §553.2: the cells are this box's; the slide is everyone's. */
@@ -858,8 +920,8 @@ function deckSlides(u){
                             : SMPRules.shown(u.keyObjectives);
   var foundCells = foundKOs.length ? [[foundKOs.length, L("keyobj","bu")]] : [];
   if (!u.fnKey && GROUP.horizon && foundKOs.length) foundCells.push([GROUP.horizon, "Horizon"]);
-  S = S.concat(foundationPart(u.ukey,
-    u.fnKey ? u.name : u.topLayer ? deckBoxName(u) : "this unit", foundCells, aimS, objS));
+  var found = foundationPart(u.ukey,
+    u.fnKey ? u.name : u.topLayer ? deckBoxName(u) : "this unit", foundCells, aimS, objS);
 
 /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§243) ──────────────
      Islam: *"the functions has no swot, remove from the slides."* Measured on
@@ -882,9 +944,10 @@ function deckSlides(u){
      has something on it (§253: a table with no rows is not a slide).
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
-  if (u.fnKey && compOn(u.ukey, "swot")) S = S.concat(swotPart(u.ukey, u.name, [fnSWSlide(FUNCTIONS[u.fnKey])]));
-  S = S.concat(u.topLayer ? swotPart("group", deckBoxName(u), companyAnalysisSlides(u)) : unitSwotSlides(u));
-  S = S.concat(competeSlides(u));
+  var analysis = [];
+  if (u.fnKey && compOn(u.ukey, "swot")) analysis = analysis.concat(swotPart(u.ukey, u.name, [fnSWSlide(FUNCTIONS[u.fnKey])]));
+  analysis = analysis.concat(u.topLayer ? swotPart("group", deckBoxName(u), companyAnalysisSlides(u)) : unitSwotSlides(u));
+  analysis = analysis.concat(competeSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -927,20 +990,113 @@ function deckSlides(u){
      goes on reading as the content slide it is. */
   /* The divider belongs to the deck, not to the group reader: the master
      flow draws the roll-calls without it (§554.1). */
-  if (pOn && u.items.length && !short)
+  var plan = pillarsPlanPart(u, records);
+
+
+  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
+     Islam: *"make the notes and achievements slide optional and they can add
+     it when they need"*, and of this shape: *"ok clear accepted."*
+
+     There is no switch to remember and nothing new stored: the note is
+     written on the reporting page as it always was, and the slide follows it.
+     A deck with nothing to say on it does not spend a slide saying so.
+
+     THE COST IS REAL AND WAS STATED BEFORE IT WAS ACCEPTED: this box is
+     editable in the room, so until now a note could be STARTED on the
+     projector. One that already exists can still be corrected there; one that
+     does not has no box to start it in, and is written where every other
+     figure in the review is written. */
+  /* (the note is `notesSlide`, drawn by `deckOf` when one is written) */
+
+  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
+     every measure and tactic reading under 70 into one closing table — a
+     second telling of numbers the deck has already shown pillar by pillar,
+     and the one slide in the review that reads as a list of failures rather
+     than as the unit's own account of its plan. The notes slide above is
+     where what is being done gets said, in the unit's words. Its anchor
+     ("attention") goes with it; a picture slide that named it lands at the
+     end rather than being dropped (§50.3). */
+
+  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
+     The score table, the three readings, the note, then Thank you.
+
+     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
+     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
+     recorded as a reversal rather than overwritten. It also means the deck's
+     last content slide is the unit's own words rather than its numbers, which
+     sits against *"where the units stands to be the last slide"*: both cannot
+     be true at once, and this is the one he answered most recently and most
+     specifically. Swapping the two is one line if he wants it back. */
+  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
+     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
+     three headline readings two slides before the slide whose whole job is
+     those three readings, and prints them without their bands or the change
+     on last cycle: the room reads them once flat and once properly and
+     cannot tell which is the real one (§87's twins, in figures). The stand
+     slide always draws, so there is always something behind this. */
+  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
+     Islam, of the company's own review: *"and then performance and the
+     overall performance etc."* It was the one deck with no divider in front
+     of its closing block — §481 made the review short by leaving things
+     out, and this went with them. What it announces was always there: the
+     score tables and the slide the whole deck ends on.
+
+     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
+     stand slide always draws, so this is never a divider over nothing. */
+  return deckOf({
+    name: deckBoxName(u), mark: deckMark(u), markAlt: u.name,
+    coverSub: '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p>',
+    found: found, analysis: analysis, plan: plan,
+    /* It announces what is BEHIND it, and §553.8 moved the two score
+       tables in front of it — so where they have already been read, this
+       says the one thing left (§253, §61). */
+    perfSub: "Where the " + L("pillar","bu") +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
+      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
+      " stands, and what the cycle is remembered for.",
+    stand: standSlide, noteKey: u.ukey
+  });
+}
+
+/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
+   Islam, looking at five in a row: *"the 5 pillars beside each other are very
+   small can we arrange them in the slide to fill better?"*
+
+   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
+   and the name lands at 27.6px, with the whole lower half of the slide empty —
+   the layout was spending width it did not have and leaving height it did.
+
+   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
+   two by two, which is what he meant and what a square arrangement of four
+   gives. Up to three stay in a row, because two rows for three is a shape
+   nobody would draw on purpose; above that it is the square-ish grid
+   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
+   in three rows, ten as four.
+
+   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
+   rather than a grid: five in three columns leaves two on the second row, and
+   a grid would push them left. */
+/* THE PLAN PART OF A PILLARS BOX (§586): its divider, each group's roll-call
+   and each pillar's own slides — and the score tables, which `deckOf` says
+   at the end (§254.4). */
+function pillarsPlanPart(u, records){
+  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
+  var S = [], pOn = planOn(u);
+  var apart = boxSplit(u);
+  if (pOn && u.items.length && !apart)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  var groups = pillarGroups(u, short);
+  var groups = pillarGroups(u, records);
 
   if (pOn) groups.forEach(function(g){
     if (!groupSize(g)) return;
     /* §557: Islam's *"before every part"* — the company's review shows its
        directions and its capabilities as two parts, so each opens with its
        own divider, as the one group of a unit's deck does above. */
-    if (short) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
+    if (apart) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
       "After the " + g.plain + " divider", (g.names === "capnames" ? "" : "Strategic ") + g.plain,
       "The " + groupSize(g) + " " + g.plain + " " + deckBoxName(u) + " committed to, and how each is going.", null));
     S.push(rollCallSlide(u, g));
@@ -1003,105 +1159,9 @@ function deckSlides(u){
      between there was nothing to keep it away from. §553.9 put the detail
      slides back, so that reason is gone and so is the exception. */
   var pillarScoreSlides = groups.map(groupScoreSlide).filter(Boolean);
-
-
-  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
-     Islam: *"make the notes and achievements slide optional and they can add
-     it when they need"*, and of this shape: *"ok clear accepted."*
-
-     There is no switch to remember and nothing new stored: the note is
-     written on the reporting page as it always was, and the slide follows it.
-     A deck with nothing to say on it does not spend a slide saying so.
-
-     THE COST IS REAL AND WAS STATED BEFORE IT WAS ACCEPTED: this box is
-     editable in the room, so until now a note could be STARTED on the
-     projector. One that already exists can still be corrected there; one that
-     does not has no box to start it in, and is written where every other
-     figure in the review is written. */
-  var unote = cycleNote(u.ukey);
-  var noteSlide = !unote ? "" : ('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
-      esc(unote) + '</div>' +
-    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
-    'platform, not in a deck that is already wrong.</p></section>');
-
-  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
-     every measure and tactic reading under 70 into one closing table — a
-     second telling of numbers the deck has already shown pillar by pillar,
-     and the one slide in the review that reads as a list of failures rather
-     than as the unit's own account of its plan. The notes slide above is
-     where what is being done gets said, in the unit's words. Its anchor
-     ("attention") goes with it; a picture slide that named it lands at the
-     end rather than being dropped (§50.3). */
-
-  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
-     The score table, the three readings, the note, then Thank you.
-
-     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
-     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
-     recorded as a reversal rather than overwritten. It also means the deck's
-     last content slide is the unit's own words rather than its numbers, which
-     sits against *"where the units stands to be the last slide"*: both cannot
-     be true at once, and this is the one he answered most recently and most
-     specifically. Swapping the two is one line if he wants it back. */
-  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
-     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
-     three headline readings two slides before the slide whose whole job is
-     those three readings, and prints them without their bands or the change
-     on last cycle: the room reads them once flat and once properly and
-     cannot tell which is the real one (§87's twins, in figures). The stand
-     slide always draws, so there is always something behind this. */
-  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
-     Islam, of the company's own review: *"and then performance and the
-     overall performance etc."* It was the one deck with no divider in front
-     of its closing block — §481 made the review short by leaving things
-     out, and this went with them. What it announces was always there: the
-     score tables and the slide the whole deck ends on.
-
-     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
-     stand slide always draws, so this is never a divider over nothing. */
-  S.push(sectSlide("sperf", "After the Overall performance divider",
-    "Overall performance",
-    /* It announces what is BEHIND it, and §553.8 moved the two score
-       tables in front of it — so where they have already been read, this
-       says the one thing left (§253, §61). */
-    "Where the " + L("pillar","bu") +
-      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
-      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
-      " stands, and what the cycle is remembered for.",
-    null));
-  if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
-  S.push(standSlide);
-  if (noteSlide) S.push(noteSlide);
-
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
-    '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(deckBoxName(u)) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  return S.join("");
+  return { slides: S, scores: pOn && u.items.length ? pillarScoreSlides : [] };
 }
 
-/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
-   Islam, looking at five in a row: *"the 5 pillars beside each other are very
-   small can we arrange them in the slide to fill better?"*
-
-   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
-   and the name lands at 27.6px, with the whole lower half of the slide empty —
-   the layout was spending width it did not have and leaving height it did.
-
-   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
-   two by two, which is what he meant and what a square arrangement of four
-   gives. Up to three stay in a row, because two rows for three is a shape
-   nobody would draw on purpose; above that it is the square-ish grid
-   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
-   in three rows, ten as four.
-
-   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
-   rather than a grid: five in three columns leaves two on the second row, and
-   a grid would push them left. */
 function pillarCols(n){
   return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
 }
@@ -1494,20 +1554,9 @@ function secDeckHtml(t){
      over an empty section is a blank slide with a heading on it. */
   if (!body.length) return "";
   var title = part.name;
-  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", title, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
-    esc(REVIEW.name) + '</p></section>'];
-  S = S.concat(body);
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
-    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(title) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-  return S.join("");
+  return [coverSlide(title, deckMark(u), u.name,
+      '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
+      esc(REVIEW.name) + '</p>')].concat(body, [thanksSlide(title)]).join("");
 }
 
 /* A direction's own deck: its cover naming who presents it, the direction's
@@ -1528,12 +1577,7 @@ function dirDeckOf(u, p, i, ex){
   var code = pillarCode(u, i);
   var who = [p.owner ? "Presented by " + esc(p.owner) : "",
              p.custodian ? "custodian " + esc(p.custodian) : ""].filter(Boolean).join(" &middot; ");
-  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", p.name, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
+  var S = [coverSlide(p.name, deckMark(u), u.name,
     /* AND IT CARRIES WHAT THE TITLE PAGE CARRIED (§96.2, §553.4). Dropping
        that slide would otherwise take the theme and the subtitle with it —
        neither is on the cover, and neither is anywhere else in this deck.
@@ -1545,7 +1589,7 @@ function dirDeckOf(u, p, i, ex){
       ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
     (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
     (who ? '<p class="coversub dwho">' + who + '</p>' : '') +
-    (ex ? '<p class="coversub dexample">' + ex.aside + '</p>' : '') + '</section>'];
+    (ex ? '<p class="coversub dexample">' + ex.aside + '</p>' : ''))];
   var on = !!ex || planOn(u);
   if (on) S = S.concat(pillarSlidesOf(u, p, i, true));
 
@@ -1591,10 +1635,7 @@ function dirDeckOf(u, p, i, ex){
         ? 'Execution measures whether that work is landing on time.' : '')));
   }
 
-  if (!ex) S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
-    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+  if (!ex) S.push(thanksSlide(p.name));
   return S.join("");
 }
 
@@ -1695,19 +1736,8 @@ function deckSlidesFn(subject){
      lists the work: Actions where a projects holder lists Projects, with no
      per-project sections behind it because there are none. */
   var objMode = plansInObjectives(target);
-  var S = [];
 
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", f.name, true) + '>' +
-    (groupLogo()
-        ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    /* §326: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
-       are its own is not presenting a capability review, and saying so on the
-       first slide in front of a room is Islam's complaint at its loudest. The
-       capability wording survives for a function that really carries one. */
-    '<p class="coversub">' + (realCaps.length
+  var coverSub = '<p class="coversub">' + (realCaps.length
       ? L1("capability") + ' review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         realCaps.length + ' ' + (realCaps.length === 1 ? L1("capability") : L("capability"))
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
@@ -1718,7 +1748,7 @@ function deckSlidesFn(subject){
           ? plural(SMPRules.shown(caps.reduce(function(a2, c){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
-              return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+              return n + ((c.projects || []).length); }, 0), "project"))) + '</p>';
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
@@ -1730,30 +1760,84 @@ function deckSlidesFn(subject){
      read. A unit presents its aspiration and its SWOT whichever way it
      plans (§405). */
   var structT = isUnit ? subjKey(target) : isCap ? target : "fn:" + fk;
-  var kSlide = function(c){
-    var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
-      return '<tr><td class="idx">' + (i+1) + '</td>' +
-        '<td class="lead">' + esc(m.name) + '</td>' +
-        '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-        '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-        '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
-        '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
-        (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-    }).join("");
-    return '<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
-      '><h2>' + L("keyobj") + (DECK_PLAN ? '' : ' &mdash; where we stand') +
-      '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Weight</th><th class="num">Annual target</th>' +
-      '<th class="num fig">Actual</th><th class="num fig">Score</th><th class="fig">Note</th></tr></thead>' +
-      '<tbody>' + kRows + '</tbody></table></section>';
-  };
   var ownKs = caps.filter(function(c){ return c.own && holderHasKOs(c); });
   var nKO = ownKs.reduce(function(n, c){ return n + SMPRules.shown(c.keyObjectives).length; }, 0);
-  S = S.concat(foundationPart(structT, f.name, nKO ? [[nKO, L("keyobj","bu")]] : [],
-    isUnit ? unitAimSlides(f, true) : [], ownKs.map(kSlide)));
-  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) S = S.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
-  if (isUnit) { S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
+  var found = foundationPart(structT, f.name, nKO ? [[nKO, L("keyobj","bu")]] : [],
+    isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
+  var analysis = [];
+  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
+  var plan = projectsPlanPart(target, f, caps, objMode);
+
+  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
+     deliverables, outcomes and milestone overruns instead of measures and
+     tactics — and removed for the same reason, on both sides of the switch
+     rather than on one (A15). */
+
+  /* §243: the same rule as a unit's deck — drawn only when a note is written.
+     One question, one answer on both decks (§53.5). */
+  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
+     milestone: no Overall performance divider, no standing, nothing that
+     answers the question the review is for. The pillars deck has said this
+     since §254.4 (Islam: *"where the units stands to be the last slide"*),
+     and there was never a decision that a projects box should not — it
+     simply fell between two builders.
+
+     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
+     because it has no pillars. Its objectives where it has them (§515.2's
+     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
+     cannot disagree), and its execution, which `capExec` counts the one way
+     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
+     a heading over three dashes (§45.2).
+
+     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
+     sperf, pillars, stand, notes, end. The first draft of this pushed it
+     after them, so a projects box alone would have ended notes, sperf,
+     stand — the same slides in a different order from every other box,
+     which is the drift this stage exists to remove, introduced by the
+     change meant to remove it. `checks/projects-box-stands.py` caught it. */
+  var exTally = capExec(f) || {}, exPct = exTally.pct;
+  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
+  var stand = (exPct != null || koHere != null) ? standSlideOf(esc(f.name),
+      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
+          'by their measures'),
+        exPct != null && standCell('Execution performance', exPct,
+          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
+      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
+      'Execution measures whether the work is landing on time.') : "";
+  return deckOf({
+    name: f.name, mark: groupLogo(), markAlt: GROUP.org, coverSub: coverSub,
+    found: found, analysis: analysis, plan: plan,
+    perfSub: "Where " + (plan.scores.length ? "the " + L("project").toLowerCase() + " stand, where " : "") +
+      esc(f.name) + " stands, and what the cycle is remembered for.",
+    stand: stand, noteKey: noteKey
+  });
+}
+
+function capKOSlide(c){
+  var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + '</td>' +
+      '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
+      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+  }).join("");
+  return '<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
+    '><h2>' + L("keyobj") + (DECK_PLAN ? '' : ' &mdash; where we stand') +
+    '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+    '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+    '<th class="num">Weight</th><th class="num">Annual target</th>' +
+    '<th class="num fig">Actual</th><th class="num fig">Score</th><th class="fig">Note</th></tr></thead>' +
+    '<tbody>' + kRows + '</tbody></table></section>';
+}
+
+/* THE PLAN PART OF A PROJECTS OR ACTIONS BOX (§586): its divider, each
+   capability it carries and each project's own slides — and the projects'
+   score tables, which `deckOf` says at the end (§557). */
+function projectsPlanPart(target, f, caps, objMode){
+  var S = [];
   /* The plan's divider: projects, or actions where the box plans that way. */
   var nWork = caps.reduce(function(n, c){
     return n + (objMode ? SMPRules.shown(c.actions).length : (c.projects || []).length); }, 0);
@@ -1799,7 +1883,7 @@ function deckSlidesFn(subject){
 
     /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
        objectives switched off (§437) draw no slide here either. */
-    if (!c.own && holderHasKOs(c)) S.push(kSlide(c));
+    if (!c.own && holderHasKOs(c)) S.push(capKOSlide(c));
     if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
@@ -1954,69 +2038,7 @@ function deckSlidesFn(subject){
         '<th class="fig">Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });
-
-  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
-     deliverables, outcomes and milestone overruns instead of measures and
-     tactics — and removed for the same reason, on both sides of the switch
-     rather than on one (A15). */
-
-  /* §243: the same rule as a unit's deck — drawn only when a note is written.
-     One question, one answer on both decks (§53.5). */
-  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
-     milestone: no Overall performance divider, no standing, nothing that
-     answers the question the review is for. The pillars deck has said this
-     since §254.4 (Islam: *"where the units stands to be the last slide"*),
-     and there was never a decision that a projects box should not — it
-     simply fell between two builders.
-
-     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
-     because it has no pillars. Its objectives where it has them (§515.2's
-     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
-     cannot disagree), and its execution, which `capExec` counts the one way
-     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
-     a heading over three dashes (§45.2).
-
-     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
-     sperf, pillars, stand, notes, end. The first draft of this pushed it
-     after them, so a projects box alone would have ended notes, sperf,
-     stand — the same slides in a different order from every other box,
-     which is the drift this stage exists to remove, introduced by the
-     change meant to remove it. `checks/projects-box-stands.py` caught it. */
-  var exTally = capExec(f) || {}, exPct = exTally.pct;
-  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
-  if (exPct != null || koHere != null || scoreTables.length) {
-    S.push(sectSlide("sperf", "After the Overall performance divider",
-      "Overall performance",
-      "Where " + (scoreTables.length ? "the " + L("project").toLowerCase() + " stand, where " : "") +
-        esc(f.name) + " stands, and what the cycle is remembered for.",
-      null));
-    S = S.concat(scoreTables);
-  }
-  if (exPct != null || koHere != null) {
-    S.push(standSlideOf(esc(f.name),
-      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
-          'by their measures'),
-        exPct != null && standCell('Execution performance', exPct,
-          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
-      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
-      'Execution measures whether the work is landing on time.'));
-  }
-
-  var fnote = cycleNote(noteKey);
-  if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(noteKey) + '">' +
-      esc(fnote) + '</div>' +
-    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
-    'platform, not in a deck that is already wrong.</p></section>');
-
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
-    '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  return S.join("");
+  return { slides: S, scores: scoreTables };
 }
 
 /* ── Opening, moving and closing ──────────────────────────────────────── */
@@ -4540,6 +4562,7 @@ var ROOM_MODE = (function(){
   try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
 })();
 var ROOM = null;
+var ROOM_WIN = false;   /* §582.1: this room is a window to share, not a projector */
 /* Sent only to the platform's own address; a file opened from disk has none
    a browser will match ("file://" is not an origin), and there the two
    windows know each other by `e.source` alone, which is checked anyway. */
@@ -4550,7 +4573,7 @@ function roomCanTwo(){
 }
 
 /* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
-function roomStart(open, which){
+function roomStart(open, which, mode){
   var u = new URL(location.href);
   u.searchParams.set("room", "1");
   u.hash = "";
@@ -4560,10 +4583,12 @@ function roomStart(open, which){
      onto the other screen if the browser says where it is. */
   var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
   if (!w) return false;
-  ROOM = { win:w, open:open, which:which, at:null, last:null };
+  /* §582.1: "window" is a window on THIS screen, to share in a meeting; it
+     is never moved, and it never asks for full screen. */
+  ROOM = { win:w, open:open, which:which, at:null, last:null, mode:mode === "window" ? "window" : "screen" };
   if (ROOMPOLL) clearInterval(ROOMPOLL);
   ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
-  if (window.getScreenDetails) window.getScreenDetails().then(function(d){
+  if (ROOM.mode === "screen" && window.getScreenDetails) window.getScreenDetails().then(function(d){
     var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
     if (!other || w.closed) return;
     try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
@@ -4609,7 +4634,7 @@ addEventListener("message", function(e){
   if (m.smpRoom === "ready") {
     /* Where the room already was if it is the projector's window loading
        again; otherwise the slide Present was pressed on. */
-    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which });
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which, mode:ROOM.mode });
     return;
   }
   if (m.smpRoom === "bye") { roomEnd(false); return; }
@@ -4648,7 +4673,9 @@ function roomStripText(){
          slide. */
       (a.clock.dark === "dark" ? ' \u00b7 their screen is dark, T lifts it'
        : a.clock.dark ? ' \u00b7 their slide is dimmed' : '') + '</span>' : '') +
-    (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+    (ROOM && ROOM.mode === "window"
+      ? (a.title ? '<span class="rs-tip">In your meeting, share the window called \u201c' + esc(a.title) + '\u201d</span>' : '')
+      : a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
 }
 function roomPaint(){
   var sr = document.getElementById("slideroot");
@@ -4663,7 +4690,7 @@ function roomPaint(){
       var bar = sr.querySelector(".slidebar");
       if (bar) bar.insertAdjacentElement("afterend", live);
     }
-    roomFill(live, '<span class="rs-dot"></span><b>On the room\u2019s screen</b>' + roomStripText() +
+    roomFill(live, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'In the slides window' : 'On the room\u2019s screen') + '</b>' + roomStripText() +
       '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
       '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
   }
@@ -4679,14 +4706,20 @@ function roomPaint(){
        note comes or goes, or the slide's foot falls off the bottom. */
     if (!away) { if (note) { note.remove(); slidesFitStage(); } }
     else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
-      '<div class="sl-notroom" role="status">Not on the room\u2019s screen \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<div class="sl-notroom" role="status">Not ' + (ROOM.mode === "window" ? 'in the slides window' : 'on the room\u2019s screen') +
+      ' \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
       '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
     var play = sr.querySelector("[data-slplay]");
     if (play) {
       var lbl = play.querySelector(".lbl");
       if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
-      play.title = ROOM && editing ? "Stop presenting on the second screen" : "Present (P)";
+      play.title = ROOM && editing ? (ROOM.mode === "window" ? "Stop presenting and close the slides window"
+                                                              : "Stop presenting on the second screen") : "Present (P)";
     }
+    /* §582.1: always there for the office, and gone while presenting —
+       Present has become Stop presenting beside it. */
+    var wb = sr.querySelector("[data-slwin]");
+    if (wb) wb.hidden = !inOffice() || !!(ROOM && editing);
     var keys = document.getElementById("slkeys");
     /* The room's own keys are on the strip above; here, only what looking
        through the slides adds, so the slide's name keeps its room. */
@@ -4723,7 +4756,7 @@ function roomPaint(){
   }
   document.body.classList.add("roomon");
   var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
-  roomFill(st, '<span class="rs-dot"></span><b>Presenting on the second screen</b>' + roomStripText() +
+  roomFill(st, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'Presenting in the slides window' : 'Presenting on the second screen') + '</b>' + roomStripText() +
     '<span class="rs-sp"></span>' +
     '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
     '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
@@ -4783,7 +4816,7 @@ function roomEditorKey(ev){
 /* ── IN THE ROOM ──────────────────────────────────────────────────────── */
 function roomHear(m){
   if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
-  if (m.smpRoom === "open") roomOpen(m.open || {}, m.which);
+  if (m.smpRoom === "open") { ROOM_WIN = m.mode === "window"; roomOpen(m.open || {}, m.which); }
   else if (m.step) deckStep(m.step);
   else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
   else if (m.key === "T") clockToggle();
@@ -4798,17 +4831,31 @@ function roomOpen(open, which){
   if (j > 0) deckShow(j);
   /* Full screen asked for, and refused without a press on that screen; the
      deck fills the window regardless, and the button below asks for the
-     press. */
-  deckGoFull();
+     press. A window to share asks for neither: it is shared as it is, and
+     may sit behind the slide view while it is (§582.1). */
+  if (ROOM_WIN) { DECK.direct = true; document.getElementById("deckroot").classList.add("fs"); deckScale(); }
+  else deckGoFull();
+  roomTitle(open);
   roomFullAsk();
   /* What this window booted on may be the copy the browser kept (§431): the
      quiet refresh takes the server's own, and redraws only if it differs. */
   deckRefresh(true);
 }
+/* §582.1: THE WINDOW'S NAME, which is what a meeting's list of windows
+   shows: "Slides · <client> · <what>". Said again on every report, because
+   the platform under the deck may name the tab as it paints. */
+var ROOM_TITLE = "";
+function roomTitle(open){
+  var org = String(GROUP.org || "").trim();
+  var what = open && open.flow ? "Master presentation"
+           : open && open.target ? placeLabel(open.target) : "";
+  ROOM_TITLE = ["Slides", org, what].filter(Boolean).join(" \u00b7 ");
+  document.title = ROOM_TITLE;
+}
 function roomFullAsk(){
   var root = document.getElementById("deckroot");
   var ask = root.querySelector(".roomfull");
-  if (document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ROOM_WIN || document.fullscreenElement === root) { if (ask) ask.remove(); return; }
   if (ask) return;
   root.insertAdjacentHTML("beforeend",
     '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
@@ -4830,8 +4877,9 @@ function roomReport(){
   var c = DECK.clock, left = c ? clockLeft() : 0;
   var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
   var name = s ? (s.dataset.subjectName || "") : "";
+  if (ROOM_TITLE && document.title !== ROOM_TITLE) document.title = ROOM_TITLE;
   try {
-    window.opener.postMessage({ smpRoom:"at", on:on,
+    window.opener.postMessage({ smpRoom:"at", on:on, title:ROOM_TITLE,
       which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
       n: DECK.i + 1, total: DECK.slides.length,
       label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),

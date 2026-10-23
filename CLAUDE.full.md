@@ -11103,6 +11103,25 @@ SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
                                 # band is a card grid too, so `.cards` reached
                                 # both — the client grid is NAMED now
                                 # (`data-grid="clients"`)
+node smp-app/checks/rules-types.mjs # THE SHARED RULES AGREE WITH THEIR OWN
+                                # TYPES (§585) — `npm run check:rules-types`,
+                                # no browser, no database. `lib/rules.js` §4
+                                # names the World, a Person and a held role in
+                                # comments; this runs TypeScript's checker over
+                                # it and `lib/authorize.js`, LOOSE (strict found
+                                # only `var x = null` noise). Edit the rules →
+                                # run this. A new key on the world goes in the
+                                # `World` typedef too: W() and worldOf() are
+                                # refused a key it does not name (forgetting
+                                # worldOf() itself is still silent). Only the
+                                # 28 functions marked World are read for a
+                                # misspelt key. `--red` makes five faults in a copy
+                                # and must catch all five (0 of 5 before §585).
+                                # It once reported five catches having checked
+                                # nothing — TypeScript 7 refuses named files
+                                # beside a tsconfig.json and the refusal exits
+                                # non-zero — so a break counts only when an
+                                # error points INTO the broken file
 DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
 DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
 ```

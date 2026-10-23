@@ -858,6 +858,16 @@ function slidesPlay(){
   deckGoFull();
   slidesSuspend();
 }
+/* §582.1: PRESENT IN A WINDOW. Islam, presenting from a Mac in an online
+   meeting with no second screen: the slides in a window of their own that
+   the meeting shares, this view staying here to drive them — "always there,
+   office only". The two-screen machinery, told it is a window. */
+function slidesPlayWindow(){
+  if (!SLED.target || ROOM || !inOffice()) return;
+  roomStart(SLED.flow ? { flow:SLED.flow.slice() }
+                      : { target:SLED.target, kind:SLED.kind, key:SLED.key },
+            slidesSelEl(), "window");
+}
 /* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
    page, which picture — and which of its kind. Never by counting: the room
    leaves out hidden slides and the two screens split long tables at their
@@ -1979,6 +1989,8 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
+  var wnb = root.querySelector("[data-slwin]");
+  if (wnb) wnb.addEventListener("click", slidesPlayWindow);
   var gb = root.querySelector("[data-slgrid]");
   if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
   /* §571: the Columns menu. Its panel is redrawn in place on a tick, so the

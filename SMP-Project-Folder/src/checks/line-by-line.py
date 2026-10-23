@@ -165,6 +165,31 @@ with sync_playwright() as p:
     fit = safe(pg, """()=>{openDeckFor('dir:group-P2'); var s=DECK.slides.find(x=>x.classList.contains('d-head')); deckShow(DECK.slides.indexOf(s));
       return s.scrollHeight<=s.clientHeight+1}""")
     ck("with the detail, \"Where it stands\" still fits its slide", fit is True, fit)
+    # §578.1: the figures right after the longest name, not at the half's edge.
+    GEO = """()=>{var s=DECK.slides[DECK.i]; return [...s.querySelectorAll('.headcell')].map(c=>{
+        var cr=c.getBoundingClientRect(), k=parseFloat(getComputedStyle(document.querySelector('#deckroot .deck')).transform.split('(')[1])||1;
+        var n=[...c.querySelectorAll('.headdetail .hdn')].map(e=>e.getBoundingClientRect()), v=[...c.querySelectorAll('.headdetail .hdv')].map(e=>e.getBoundingClientRect());
+        var nm=[...c.querySelectorAll('.headdetail .hdn')].map(e=>e.scrollWidth>e.clientWidth+1);
+        return {gap:Math.round((Math.min.apply(null,v.map(r=>r.left))-Math.max.apply(null,n.map(r=>r.right)))/k),
+                rights:[...new Set(v.map(r=>Math.round(r.right/k)))].length, slack:Math.round((cr.right-Math.max.apply(null,v.map(r=>r.right)))/k),
+                inside:v.every(r=>r.right<=cr.right+1), cut:nm.some(x=>x), note:(c.querySelector('.hdnote,.hdmore')||{getBoundingClientRect:()=>({width:0})}).getBoundingClientRect().width/k,
+                cols:Math.round((Math.max.apply(null,v.map(r=>r.right))-cr.left)/k)}})}"""
+    g = safe(pg, GEO) or []
+    ck("the figures sit 40px after the longest name in each half", len(g) == 2 and all(x["gap"] == 40 for x in g), g)
+    ck("…lined up on one right edge in each half", len(g) == 2 and all(x["rights"] == 1 for x in g), g)
+    ck("…and the left half's figures end well clear of the right half's names", len(g) == 2 and g[0]["slack"] >= 120, g)
+    long = safe(pg, """()=>{var p=dirPillar('dir:group-P2').p; p.measures[0].name='A key measure with a name far too long to sit on one line of half a slide beside its figure';
+      p.tactics.forEach(t=>{}); openDeckFor('dir:group-P2'); var s=DECK.slides.find(x=>x.classList.contains('d-head')); deckShow(DECK.slides.indexOf(s)); return true}""")
+    pg.wait_for_timeout(300)
+    g2 = safe(pg, GEO) or []
+    ck("a name too long for the half is cut short, its figure still on the slide", len(g2) == 2 and g2[0]["cut"] and g2[0]["inside"], g2)
+    ck("…and even then the left half's figures stop 110px short of its edge", len(g2) == 2 and g2[0]["slack"] >= 110, g2)
+    note = safe(pg, """()=>{var c=DECK.slides[DECK.i].querySelectorAll('.headcell')[1], n=c.querySelector('.hdnote');
+      if (!n) { n=document.createElement('li'); n.className='hdnote'; c.querySelector('.headdetail').appendChild(n); }
+      var before=Math.round(c.querySelector('.hdv').getBoundingClientRect().left);
+      n.textContent='Not counted: '+'a very long explanation of what was left out and why, '.repeat(3);
+      return [before, Math.round(c.querySelector('.hdv').getBoundingClientRect().left)]}""") or [0, 1]
+    ck("a long note under the list does not push the figures out", note[0] == note[1], note)
     safe(pg, "()=>{closeDeck(); return true}")
 
     # ── 7. Not the office: no switch ──────────────────────────────────────

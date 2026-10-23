@@ -515,7 +515,11 @@
    slide a quarter dark from four over and black from five. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.78-text-boxes";
+/* v6.79-stand-lines — §578.1: on a direction's Where it stands, the
+   figures under the two readings sit right after their names. The served
+   stylesheet's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.79-stand-lines";
 const ASSETS = [
   "/",
   "/index.html",

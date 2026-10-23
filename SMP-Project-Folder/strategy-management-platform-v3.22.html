@@ -10267,12 +10267,29 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
    Under each reading on a direction's "Where it stands": its lines with
    their own figures, in their bands, at a size the room can read, the name
    cut short before the figure is. */
+/* §578.1: THE FIGURES NEXT TO THEIR NAMES. Islam: *"the space between the
+   element and the number is so far that the number nearly hits the other
+   side element"* — each figure sat at the far edge of its half, 69px from
+   the next half's names. Now a two-column grid: the names, then the figures
+   as one column 40px after the LONGEST name, lined up on their right edge.
+   The name column may shrink, so a name too long for the half is still cut
+   before its figure is; the rule above stays the half's full width. */
 .headdetail { list-style:none; margin:18px 0 0; padding:14px 0 0; border-top:1px solid var(--line);
-              display:flex; flex-direction:column; gap:6px; font-size:22px; }
-.headdetail li { display:flex; align-items:baseline; gap:18px; }
-.headdetail .hdn { flex:1; min-width:0; color:var(--ink-2); white-space:nowrap;
+              display:grid; grid-template-columns:minmax(0, max-content) max-content;
+              justify-content:start; column-gap:40px; row-gap:6px; font-size:22px; }
+.headdetail li { display:contents; }
+.headdetail .hdn { min-width:0; color:var(--ink-2); white-space:nowrap;
                    overflow:hidden; text-overflow:ellipsis; }
-.headdetail .hdv { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.headdetail .hdv { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;
+                   text-align:right; }
+/* The left half keeps 110px clear on its right however long a name is, so
+   with the 70px gutter its figures never come within 180px of the right
+   half's names: a name that would push them there is cut first. The right
+   half has only the slide's edge beside it and keeps its whole width. */
+.headcell:not(:last-child) > .headdetail { padding-right:110px; }
+/* "and 3 more" and "Not counted: …" run under both columns and do not size
+   them: a long note must not push the figures back out to the edge. */
+.headdetail li.hdmore, .headdetail li.hdnote { display:block; grid-column:1 / -1; contain:inline-size; }
 .headdetail .hdf { font-weight:600; }
 .headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
 .headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }

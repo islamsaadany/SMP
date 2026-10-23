@@ -36537,7 +36537,15 @@ function renderFnObjReport(fk){
   return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
+/* §598.1: a function's projects or objectives page shows the plan as it
+   stood on a day the same way the unit's does — its holder is read off
+   FUNCTIONS[k] (or UNITS[k] for a unit's own projects) inside the swap. */
 function renderFnProjects(fnKey){
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderFnProjectsBody(fnKey); });
+  return renderFnProjectsBody(fnKey);
+}
+function renderFnProjectsBody(fnKey){
   /* §334: the argument the pillars branch below already makes, one kind of
      thing further out — this page draws a HOLDER's projects, and a capability
      is one. `plansInPillars()` answers for a function and a capability alike,
@@ -37938,8 +37946,11 @@ function unitWayOf(u){
    The pen is off by `mayAuthor()`'s own guard, so every table below draws
    its read-mode self. */
 function renderUnitPlan(u){
-  var asof = (typeof TRAIL !== "undefined" && TRAIL.asofFor) ? TRAIL.asofFor(u) : null;
-  if (asof) return TRAIL.asofBanner() + renderUnitPlanBody(asof);
+  /* §598.1: the swap is the store's, so the unit-shaped view is read again
+     inside it — unitLike() then answers with the copy, for a unit, a
+     pillars function and the company alike. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderUnitPlanBody(unitLike(TARGET) || u); });
   return renderUnitPlanBody(u);
 }
 function renderUnitPlanBody(u){
@@ -63024,7 +63035,11 @@ var TRAIL = (function(){
   /* ── THE UNIT'S OWN LINE, AND THE DOOR ─────────────────────────────── */
   function target(){
     var c = typeof current !== "undefined" ? current : null;
-    if (!c || c === "setup" || c === "manage" || c === "group") return null;
+    if (!c || c === "setup" || c === "manage") return null;
+    /* §598.1: the company's own strategy pages carry the line too — its plan
+       is logged against "group" like a unit's — and nothing else of the
+       group's does, so the Units and Functions tables stay as they were. */
+    if (c === "group") return (typeof currentSub !== "undefined" && currentSub === "strategy") ? "group" : null;
     if (boxRef(c).kind === "mid") return null;
     return typeof TARGET !== "undefined" ? TARGET : null;
   }
@@ -63085,6 +63100,13 @@ var TRAIL = (function(){
         return t === "group" ? GROUP : (typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null);
       if (t === "group") {
         (GROUP.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = m; });
+        /* §598.1: and the company's own plan — its directions and their rows
+           — through the same unit-shaped view the page draws (§53.5). */
+        if (!hit && typeof unitLikeWritable === "function" && typeof findById === "function") {
+          var gu = unitLikeWritable("group"), gf = gu ? findById(gu, id) : null;
+          if (gf && gf.swot) return { __swot: gf.swot };
+          if (gf && gf.obj) hit = gf.obj;
+        }
         return hit;
       }
       var u = typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null;
@@ -63188,7 +63210,7 @@ var TRAIL = (function(){
   function holderOf(t, id, root){
     if (root) {
       if (id == null) return root;
-      var f = typeof findById === "function" ? findById(root, id) : null;
+      var f = findIn(root, id);
       return f && f.obj && !f.swot ? f.obj : null;
     }
     if (id == null) {
@@ -63233,18 +63255,58 @@ var TRAIL = (function(){
      the order it replaced), an entry logged before its rows were kept, and
      an entry whose rows the log capped — the banner names how many, so a
      value or an order that differs is not read as the plan's. */
-  var ASOF = { on:false, target:null, day:null, unit:null, gone:{}, since:0, skipped:0, capped:false };
+  var ASOF = { on:false, target:null, day:null, store:null, key:null, unit:null, gone:{}, since:0, skipped:0, capped:false, drawing:false };
   var ASOF_CAP = 500;
   function asofActive(t){ return ASOF.on && (t === undefined || t === ASOF.target); }
-  function asofFor(u){
-    if (!ASOF.on || !u || !ASOF.unit) return null;
-    return (typeof TARGET !== "undefined" && TARGET === ASOF.target) ? ASOF.unit : null;
+  function asofHere(){
+    return ASOF.on && !ASOF.drawing && !!ASOF.unit && typeof TARGET !== "undefined" && TARGET === ASOF.target;
   }
   function asofGone(id){ return ASOF.on && !!ASOF.gone[String(id)]; }
+  /* ── §598.1: THREE KINDS OF SUBJECT, ONE SWAP ────────────────────────
+     Islam: *"add the day view for the company plan and functions too."*
+     What a page draws is read off a STORE by key — `UNITS[k]`, `FUNCTIONS[k]`,
+     or the company's own `GROUP.items` / `GROUP.topProjects` — through
+     unitLike(), the holders and the rest, which every painter asks afresh.
+     So the view swaps the stored object for the rebuilt copy for the length
+     of ONE synchronous render and puts it back in `finally`: the painters
+     need no second signature, and the differ, which runs after the paint,
+     never sees the swap. The copy is the stored shape itself — a unit, a
+     function (pillars, projects or objectives), or the company's two lists —
+     and the finders below walk any of them. */
   function asofSubject(t){
-    if (!t || t === "group") return null;
-    var u = typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null;
-    return u && Array.isArray(u.items) ? u : null;
+    if (!t) return null;
+    try {
+      var r = boxRef(t);
+      if (t === "group") {
+        if (typeof topWritable === "function") topWritable();   /* the lists exist (§598) */
+        return { store:"group", key:"group", name: (typeof topAsUnit === "function" ? topAsUnit().name : "") || "The company",
+                 obj: { items: GROUP.items || [], topProjects: GROUP.topProjects || [], swot: GROUP.swot || {} } };
+      }
+      if (r.kind === "fn") {
+        var f = typeof FUNCTIONS !== "undefined" ? FUNCTIONS[r.key] : null;
+        return f ? { store:"fn", key:r.key, name:f.name, obj:f } : null;
+      }
+      if (r.kind === "cap" || r.kind === "mid") return null;
+      var u = typeof UNITS !== "undefined" ? UNITS[t] : null;
+      return u ? { store:"unit", key:t, name:u.name, obj:u } : null;
+    } catch (e) { return null; }
+  }
+  function asofStored(){
+    var S = ASOF;
+    if (S.store === "unit") return UNITS[S.key];
+    if (S.store === "fn") return FUNCTIONS[S.key];
+    return { items: GROUP.items || [], topProjects: GROUP.topProjects || [], swot: GROUP.swot || {} };
+  }
+  function asofWith(draw){
+    if (!asofHere()) return draw();
+    var S = ASOF, put = [];
+    var swap = function(host, k, v){ put.push([host, k, host[k]]); host[k] = v; };
+    if (S.store === "unit") swap(UNITS, S.key, S.unit);
+    else if (S.store === "fn") swap(FUNCTIONS, S.key, S.unit);
+    else { swap(GROUP, "items", S.unit.items); swap(GROUP, "topProjects", S.unit.topProjects); }
+    S.drawing = true;
+    try { return asofBanner() + draw(); }
+    finally { S.drawing = false; put.reverse().forEach(function(x){ x[0][x[1]] = x[2]; }); }
   }
   /* `office` is already this module's flag for what the last read said;
      the viewer's own standing is asked of the product, under its own name. */
@@ -63274,14 +63336,15 @@ var TRAIL = (function(){
     var box = document.querySelector('[data-asof-pick-for]');
     var say = function(msg){ if (box) { var p = box.querySelector(".hist-err") || document.createElement("p"); p.className = "hist-empty hist-err"; p.textContent = msg; box.appendChild(p); } };
     if (!/^\d{4}-\d{2}-\d{2}$/.test(day || "")) return say("Pick a day first.");
-    var real = asofSubject(t);
-    if (!real) return say("Only a unit's or a pillars function's plan can be shown this way yet.");
+    var subj = asofSubject(t);
+    if (!subj) return say("This page has no plan of its own to show this way.");
     var end = new Date(day + "T00:00:00"); end.setDate(end.getDate() + 1);
     fetchLog({ target:t, when:"all", fromAt:end.toISOString(), limit:ASOF_CAP }, function(err, j){
       if (err) return say("History could not be read — " + (err.message || err));
       var entries = j.log || [];
-      var built = rebuild(real, entries);
-      ASOF.on = true; ASOF.target = t; ASOF.day = day; ASOF.unit = built.unit;
+      var built = rebuild(subj.obj, entries, t);
+      ASOF.on = true; ASOF.target = t; ASOF.day = day; ASOF.store = subj.store; ASOF.key = subj.key;
+      ASOF.unit = built.unit; ASOF.name = subj.name;
       ASOF.gone = built.gone; ASOF.since = entries.length; ASOF.skipped = built.skipped;
       ASOF.capped = entries.length >= ASOF_CAP;
       if (typeof EDIT_PAGE !== "undefined") EDIT_PAGE.plan = false;
@@ -63291,45 +63354,84 @@ var TRAIL = (function(){
     });
   }
   function asofOff(repaint){
-    ASOF.on = false; ASOF.target = null; ASOF.day = null; ASOF.unit = null; ASOF.gone = {};
-    ASOF.since = 0; ASOF.skipped = 0; ASOF.capped = false;
+    ASOF.on = false; ASOF.target = null; ASOF.day = null; ASOF.store = null; ASOF.key = null; ASOF.unit = null; ASOF.gone = {};
+    ASOF.since = 0; ASOF.skipped = 0; ASOF.capped = false; ASOF.drawing = false;
     document.body.classList.remove("asof");
     if (repaint && typeof paint === "function") paint();
   }
   var PLAN_KINDS = { unitPlan:1, unitReporting:1, unitFoundation:1, unitAnalysis:1, capPlan:1, capReporting:1, arrange:1, gapFill:1, gapConfirm:1, rowDone:1 };
-  function rebuild(real, entries){
+  function rebuild(real, entries, t){
     var copy = JSON.parse(JSON.stringify(real)), skipped = 0;
     entries.forEach(function(e){
       var moved = e.rows_ && e.rows_.moved && e.rows_.moved.length ? e.rows_.moved : null;
       if (!moved) { if (PLAN_KINDS[e.kind]) skipped++; return; }
       if (e.rows_.count > moved.length) skipped++;
-      moved.forEach(function(m){ undo(copy, e.target, m); });
+      moved.forEach(function(m){ undo(copy, t, m); });
     });
     var gone = {};
-    walkRows(copy, function(r){ if (r && r.id != null && !(typeof findById === "function" && findById(real, r.id))) gone[String(r.id)] = 1; });
+    walkIds(copy, function(r){ if (!rowIn(real, r.id)) gone[String(r.id)] = 1; });
     return { unit: copy, gone: gone, skipped: skipped };
   }
   function undo(copy, t, m){
     try {
       if (m.field === "row") { seatBack(t, m, copy); return; }
-      if (m.id === t || m.id === copy.ukey) { applyFrom(copy, m); return; }
-      var f = typeof findById === "function" ? findById(copy, m.id) : null;
+      if (m.id === t || m.id === copy.ukey || (t === "group" && m.id === "group")) { applyFrom(copy, m); return; }
+      var f = findIn(copy, m.id);
       if (!f) return;
       if (f.swot) { applyFrom({ __swot: f.swot }, m); return; }
       if (f.obj) applyFrom(f.obj, m);
     } catch (e) {}
   }
-  function walkRows(u, fn){
-    (u.keyObjectives || []).forEach(fn);
-    (u.items || []).forEach(function(p){
-      fn(p);
-      ["measures", "tactics"].forEach(function(k){ (p[k] || []).forEach(fn); });
-      if (p.breakdown && Array.isArray(p.breakdown.rows)) p.breakdown.rows.forEach(fn);
+  /* ONE ROW IN ANY SHAPE: the unit's own finder first, where the shape is a
+     unit's (it knows a SWOT line's id), then a walk of every list that holds
+     rows with ids — a function's projects and their three lists, the
+     company's directions, a unit's measures. Depth-capped: a plan is never
+     deeper than a project's milestone. */
+  function rowIn(root, id, depth){
+    depth = depth || 0;
+    if (!root || typeof root !== "object" || depth > 6) return null;
+    if (Array.isArray(root)) {
+      for (var i = 0; i < root.length; i++) {
+        var r = root[i];
+        if (r && typeof r === "object" && !Array.isArray(r) && String(r.id) === String(id)) return r;
+        var deep = rowIn(r, id, depth + 1); if (deep) return deep;
+      }
+      return null;
+    }
+    var keys = Object.keys(root);
+    for (var k = 0; k < keys.length; k++) {
+      var v = root[keys[k]];
+      if (Array.isArray(v) || (v && typeof v === "object" && keys[k] === "breakdown")) {
+        var hit = rowIn(v, id, depth + 1); if (hit) return hit;
+      }
+    }
+    return null;
+  }
+  function findIn(root, id){
+    if (root && Array.isArray(root.items) && root.ukey && typeof findById === "function") {
+      try { var f = findById(root, id); if (f) return f; } catch (e) {}
+    }
+    var o = rowIn(root, id);
+    return o ? { obj: o } : null;
+  }
+  function walkIds(root, fn, depth){
+    depth = depth || 0;
+    if (!root || typeof root !== "object" || depth > 6) return;
+    if (Array.isArray(root)) {
+      root.forEach(function(r){
+        if (r && typeof r === "object" && !Array.isArray(r) && r.id != null) fn(r);
+        walkIds(r, fn, depth + 1);
+      });
+      return;
+    }
+    Object.keys(root).forEach(function(k){
+      var v = root[k];
+      if (Array.isArray(v) || (v && typeof v === "object" && k === "breakdown")) walkIds(v, fn, depth + 1);
     });
   }
   function asofBanner(){
     if (!ASOF.on || !ASOF.unit) return '';
-    var n = ASOF.since, name = ASOF.unit.name || placeWord(ASOF.target);
+    var n = ASOF.since, name = ASOF.name || ASOF.unit.name || placeWord(ASOF.target);
     return '<div class="asof-bar" data-asof-bar><span><b>' + E(name) + '’s plan as it stood on ' + E(dayWord(ASOF.day)) + '.</b> Read only. ' +
       (n ? n + (n === 1 ? ' change has' : ' changes have') + ' been made since; the rows and figures below are what the plan held at the end of that day.'
          : 'Nothing has changed since; this is today’s plan.') +
@@ -63405,7 +63507,7 @@ var TRAIL = (function(){
   return { renderPage: renderPage, onPaint: onPaint, openFor: openFor, load: load,
            /* §598: the day view, read by the Plan page's painter and the
               authoring gate; seatBack is shared with the refused-save path */
-           asofActive: asofActive, asofFor: asofFor, asofGone: asofGone, asofBanner: asofBanner,
+           asofActive: asofActive, asofHere: asofHere, asofWith: asofWith, asofGone: asofGone, asofBanner: asofBanner,
            asofGo: asofGo, asofOff: asofOff, seatBack: seatBack, seatWord: seatWord,
            asof: function(){ return ASOF; },
            /* for the checks */

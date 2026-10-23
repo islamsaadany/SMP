@@ -561,7 +561,7 @@
    tab older than the list takes the graph once. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in any
    ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.91-demo-stakeholders-real";
+const SHELL = "smp-shell-v6.92-demo-stakeholders-real";
 const ASSETS = [
   "/",
   "/index.html",

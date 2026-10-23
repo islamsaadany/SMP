@@ -68287,3 +68287,66 @@ Islam, of the last step of the simplification (spec 066 §5): *"ok"*, to *"one s
 **PROVED UNCHANGED, NOT ASSUMED.** Every deck the platform can draw — every unit, function, capability, direction and company part, in the review and in the plan, plus the plan file's size — on the baked demo and five saved states (Raya, El Abd, the seed, two more): **396 decks, byte for byte identical** before and after, at each of the three steps (unit side, function side, part decks). The snapshot itself was run twice on the old build first, 0 differences, so it is repeatable.
 
 **AND IT STAYS ONE.** New `checks/one-template.py`: every unit's and function's deck runs in the template's order (and an El Abd-shaped company, directions and capabilities apart); and the cover, Thank you, notes and Overall performance divider are each written in ONE place in the source — 4, 4, 2 and 2 on the live build, which is the drift it exists to catch.
+
+## §587 — The strategy pages, read by TypeScript's checker (2026-10-23)
+Islam, after §585 went live: *"now do the same for the console's own files"*. **The word was mine, and it was wrong.** §585's last note used "the console" for the strategy pages — everything inside a client, which is `SMP-Project-Folder/src`. In this project the console is `platform.html` (§584). So the question was put back to Islam, with the size of each: the strategy pages are about 88,000 lines, the console page 3,826. He chose **the strategy pages**.
+
+**NOTHING IN THE PAGES IS EDITED.** No type comment and no `// @ts-check` were added. The pages are 32 scripts sharing one page, so an editor opening one file sees none of the others, and a per-file marker would only light up names it cannot find. Not a byte the browser receives changes: no rebuild, no release stamp, no `SHELL` bump at the merge. The whole of this section is a check.
+
+**HOW THE CHECKER IS MADE TO SEE ONE PAGE.** `smp-app/checks/pages-types.mjs` hands the checker a scratch copy of the pages, assembled the way the browser runs them:
+- build.py's own list, read out of build.py (§53.5);
+- the shell's inline script, as one more file;
+- theme.js and route.js.
+
+It then declares what the page has that the checker cannot see:
+- **The names the library files put on the page** (`SMPRules`, `SMPDiff`, `SMPAudience`, `MAIL`), as what those files export, and recipes.js's three. These are modules to the checker, because they also export for Node.
+- **Three helpers the shell puts on `window`** and then calls by their bare names.
+- **The element properties the pages read off a lookup** (`dataset`, `value`, `hidden`, `focus`…). The checker types every `querySelector` as a bare Element, which has none of them. They are named one by one, never opened with an index signature, so a misspelt one is still a finding.
+
+The declarations live in the check, never in `smp-app/`: a `.d.ts` there would widen the Next app's own DOM types.
+
+**WHAT IT FOUND: NO FAULT.**
+- **895 findings** with the pages assembled as one page. The 1,270 measured for §585 came from files read one at a time, before they could see each other.
+- **756 of them** were the element properties above (`dataset` 274, `value` 125, `closest` 98…). With those declared, **140**.
+- **All 140 were read.** The window helpers, recipes.js and seven findings caused by this check's own first element description (`hidden` typed narrower than the browser's own) account for 43 more, which leaves **97**. Every one of the 97 is the checker unable to follow ordinary JavaScript:
+  - spreadsheet sheet layouts built by joining mixed pieces with `concat` (26), and two date formats passed in a form the checker cannot follow;
+  - a number written into page text or an attribute, which the browser converts;
+  - a property added to a list (`out.horizon`);
+  - `isNaN` of a date, and a file reader's result;
+  - `(x || {}).pct`;
+  - a name declared twice with `var`, each time set before it is read;
+  - a list type guessed too narrowly from its first value.
+- **Two oddities, harmless and left alone:**
+  - The Foundation entry in a slide deck passes the unit to a function that takes nothing and reads the company anyway.
+  - Two dialogs hand their own body to the dropdown tidier. It ignores the body and tidies every dropdown on the page, and tidying one twice is guarded, so nothing goes wrong.
+
+**THE CHECK GOT ONE THING WRONG BEFORE IT WAS TRUSTED, AND --red FOUND IT.** A rule name misspelt in a page was not a finding. An object written in JavaScript is OPEN to the checker, so `SMPRules.mayDestory` simply read as `any`. Calling a real rule wrongly was caught; calling a rule that does not exist was not. The library names are now declared as a closed copy of the same keys (`Closed<T>`, a mapped type). With that, **every one of the roughly 900 places the pages name a shared rule names one that exists.** That count includes mentions in comments; every one the checker actually reads names a real rule.
+
+**AND THE SAME GAP IN §585, SAID.** The server's authoriser reaches the rules by `require`, which is open in the same way, so a misspelt rule name in `lib/authorize.js` is still not a finding. None of §585's five planted faults was one, so nothing §585 claimed is wrong, but it is a gap. Closing it needs a type comment on that `require` line, and it is not done.
+
+**THE CHECK.** It runs in about 3 seconds.
+- **The 97 findings are recorded** in `smp-app/checks/pages-types.known.json`, by file, code and message and never by line, so an edit above one does not move it.
+- **It fails on any finding beyond those 97.**
+- **It also fails on a recorded finding that has gone.** The list stays exact, or it stops meaning anything; this was proved by adding one to a count.
+- **`--write` records the current findings**, and only after every new one has been read.
+- **`--red` plants six faults in a copy:**
+  - a rule name misspelt;
+  - a rule called one argument short;
+  - the world and the viewer swapped in a call;
+  - a function from another file misspelt;
+  - a misspelt property on a page element;
+  - a misspelt global.
+
+  All six are caught, each only when a NEW finding lands in the file that was broken.
+
+`main` moved under the branch while this was built: the deck work, merged from another session as §586, touched `present.js`. It was brought in first, and the 97 and the six held unchanged on top of it.
+
+**WHAT IT COSTS FROM NOW ON, STATED BEFORE IT IS PAID.** An edit to the pages that the checker dislikes fails this check until somebody reads it, even a harmless one like writing a number into page text. They then either write it the way the checker follows, or record it with `--write`. That is the price of the protection, and it falls on whoever edits the pages next.
+
+**NOT DONE:**
+- **Type comments in the pages.** Nothing here tells the checker what a plan, a unit or a person looks like on the page side, so a misspelt field on one (`u.pillers`) is still not a finding. That is the next step, one file at a time, and it is Islam's call.
+- **An editor still shows nothing** while somebody types in the pages.
+- **The console page** (`platform.html`), which Islam did not choose.
+- **The Next app** still reaches the rules as `any`.
+
+Not merged; `main` stays untouched until Islam says.

@@ -1,0 +1,311 @@
+{
+ "note": "Read before recorded: none of these is a fault (§587). Rewrite with --write only after reading every new one.",
+ "findings": [
+  {
+   "file": "chat.js",
+   "code": "TS2345",
+   "message": "Argument of type 'Date' is not assignable to parameter of type 'number'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2339",
+   "message": "Property 'filter' does not exist on type 'string | string[]'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2339",
+   "message": "Property 'forEach' does not exist on type 'string | string[][]'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'custodian' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'fn' does not exist on type '{ name: string; def: string; keyObjectives: { name: string; dir: string; target: string; compile: string; actual: string; progress: number; weight: number; }[]; projects: ({ name: string; owner: string; ... 7 more ...; milestones: ({ ...; } | { ...; })[]; } | { ...; })[]; } | ... 4 more ... | {}'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'head' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2339",
+   "message": "Property 'trim' does not exist on type 'unknown'.",
+   "count": 3
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2345",
+   "message": "Argument of type '{ key: string; name: string; title: any; }' is not assignable to parameter of type '{ key: string; name: string; role: string; unit: string; title: string; fn?: undefined; company?: undefined; } | { key: string; name: string; unit: string; title: string; fn?: undefined; role?: undefined; company?: undefined; } | { ...; } | { ...; } | { ...; }'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2403",
+   "message": "Subsequent variable declarations must have the same type.  Variable 'already' must be of type 'boolean', but here has type 'any'.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2739",
+   "message": "Type '{ key: any; unit: string; why: string; }' is missing the following properties from type '{ key: string; unit: string; rev: number; prof: number; imp: number; growth: number; why: string; }': rev, prof, imp, growth",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2739",
+   "message": "Type '{}' is missing the following properties from type '{ mobile: string; retailstores: string; care: string; }': mobile, retailstores, care",
+   "count": 2
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2740",
+   "message": "Type '{}' is missing the following properties from type '{ retailstores: boolean; care: boolean; corporate: boolean; it: boolean; logistics: boolean; onlineshop: boolean; }': retailstores, care, corporate, it, and 2 more.",
+   "count": 1
+  },
+  {
+   "file": "config-data.js",
+   "code": "TS2769",
+   "message": "No overload matches this call.",
+   "count": 3
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2339",
+   "message": "Property 'discipline' does not exist on type 'Readonly<{ values: readonly any[]; }> | { discipline: any; values: any; }'.",
+   "count": 4
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2739",
+   "message": "Type '{ group: any; items: any[]; }' is missing the following properties from type '{ v: string; label: string; }': v, label",
+   "count": 1
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2739",
+   "message": "Type '{ group: string; items: { v: any; label: any; hint: any; }[]; }' is missing the following properties from type '{ v: string; label: string; }': v, label",
+   "count": 1
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2739",
+   "message": "Type '{ group: string; items: { v: string; label: any; }[]; }' is missing the following properties from type '{ v: string; label: string; }': v, label",
+   "count": 1
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2739",
+   "message": "Type '{ group: string; items: any; }' is missing the following properties from type '{ v: string; label: string; }': v, label",
+   "count": 1
+  },
+  {
+   "file": "group-render.js",
+   "code": "TS2739",
+   "message": "Type '{ group: string; items: any[]; }' is missing the following properties from type '{ v: string; label: string; }': v, label",
+   "count": 1
+  },
+  {
+   "file": "history.js",
+   "code": "TS2339",
+   "message": "Property 'some' does not exist on type 'string | any[]'.",
+   "count": 1
+  },
+  {
+   "file": "history.js",
+   "code": "TS2345",
+   "message": "Argument of type '{ name: string; def: string; keyObjectives: { name: string; dir: string; target: string; compile: string; actual: string; progress: number; weight: number; }[]; projects: ({ name: string; owner: string; ... 7 more ...; milestones: ({ ...; } | { ...; })[]; } | { ...; })[]; } | ... 4 more ... | { ...; }' is not assignable to parameter of type '({ id: string; fn: any; own: boolean; name: any; def: any; keyObjectives: any; actions: any; projects: any; } | { id: string; unit: any; own: boolean; name: any; def: string; keyObjectives: any; actions: any; projects: any; }) & ({ ...; } | ... 3 more ... | { ...; })'.",
+   "count": 2
+  },
+  {
+   "file": "present.js",
+   "code": "TS2322",
+   "message": "Type 'number' is not assignable to type 'string'.",
+   "count": 2
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'discipline' does not exist on type 'Readonly<{ values: readonly any[]; }> | { discipline: any; values: any; }'.",
+   "count": 3
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'done' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'due' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'pct' does not exist on type '{}'.",
+   "count": 1
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
+   "message": "Property 'smpDeckKey' does not exist on type 'KeyboardEvent'.",
+   "count": 1
+  },
+  {
+   "file": "present.js",
+   "code": "TS2345",
+   "message": "Argument of type 'number' is not assignable to parameter of type 'string'.",
+   "count": 6
+  },
+  {
+   "file": "present.js",
+   "code": "TS2554",
+   "message": "Expected 0 arguments, but got 1.",
+   "count": 1
+  },
+  {
+   "file": "route.js",
+   "code": "TS2630",
+   "message": "Cannot assign to 'paint' because it is a function.",
+   "count": 1
+  },
+  {
+   "file": "searchsel.js",
+   "code": "TS2339",
+   "message": "Property '_op' does not exist on type 'HTMLButtonElement'.",
+   "count": 1
+  },
+  {
+   "file": "searchsel.js",
+   "code": "TS2339",
+   "message": "Property '_q' does not exist on type 'HTMLButtonElement'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2322",
+   "message": "Type 'Document | Element' is not assignable to type 'Document'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2322",
+   "message": "Type 'number' is not assignable to type 'string'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'classList' does not exist on type 'ChildNode'.",
+   "count": 2
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2339",
+   "message": "Property 'horizon' does not exist on type 'any[]'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2345",
+   "message": "Argument of type '{ name: string; group: number; units: {}; }' is not assignable to parameter of type '{ name: string; group: number; units: { mobile: number; retailstores: number; b2becomm: number; consumerelectronics: number; onlineshop: number; corporate: number; care: number; it: number; logistics: number; nigeria: number; }; }'.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2551",
+   "message": "Property 'splice' does not exist on type 'readonly any[]'. Did you mean 'slice'?",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2554",
+   "message": "Expected 0 arguments, but got 1.",
+   "count": 2
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2739",
+   "message": "Type '{}' is missing the following properties from type '{ mobile: string; retailstores: string; care: string; }': mobile, retailstores, care",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2740",
+   "message": "Type '{}' is missing the following properties from type '{ retailstores: boolean; care: boolean; corporate: boolean; it: boolean; logistics: boolean; onlineshop: boolean; }': retailstores, care, corporate, it, and 2 more.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2740",
+   "message": "Type 'EventTarget' is missing the following properties from type 'Node': baseURI, childNodes, firstChild, isConnected, and 43 more.",
+   "count": 1
+  },
+  {
+   "file": "shell-inline.js",
+   "code": "TS2769",
+   "message": "No overload matches this call.",
+   "count": 1
+  },
+  {
+   "file": "slides.js",
+   "code": "TS2322",
+   "message": "Type 'string | ArrayBuffer' is not assignable to type 'string'.",
+   "count": 1
+  },
+  {
+   "file": "slides.js",
+   "code": "TS2339",
+   "message": "Property 'smpDeckKey' does not exist on type 'KeyboardEvent'.",
+   "count": 1
+  },
+  {
+   "file": "tour.js",
+   "code": "TS2345",
+   "message": "Argument of type 'number' is not assignable to parameter of type 'string'.",
+   "count": 1
+  },
+  {
+   "file": "xlsx.js",
+   "code": "TS2339",
+   "message": "Property 'horizon' does not exist on type 'any[]'.",
+   "count": 1
+  },
+  {
+   "file": "xlsx.js",
+   "code": "TS2345",
+   "message": "Argument of type 'any[]' is not assignable to parameter of type 'string'.",
+   "count": 3
+  },
+  {
+   "file": "xlsx.js",
+   "code": "TS2739",
+   "message": "Type '{ range: string; from: string; soft: boolean; }' is missing the following properties from type '{ range: string; list: string[]; error: string; }': list, error",
+   "count": 1
+  },
+  {
+   "file": "xlsx.js",
+   "code": "TS2741",
+   "message": "Property 'list' is missing in type '{ range: string; from: string; error: string; }' but required in type '{ range: string; list: string[]; error: string; }'.",
+   "count": 1
+  },
+  {
+   "file": "xlsx.js",
+   "code": "TS2769",
+   "message": "No overload matches this call.",
+   "count": 24
+  }
+ ]
+}

@@ -11122,6 +11122,21 @@ node smp-app/checks/rules-types.mjs # THE SHARED RULES AGREE WITH THEIR OWN
                                 # beside a tsconfig.json and the refusal exits
                                 # non-zero — so a break counts only when an
                                 # error points INTO the broken file
+node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
+                                # (§587) — `npm run check:pages-types`, no
+                                # browser, no database, nothing in src/ edited.
+                                # build.py's list + the shell's inline script +
+                                # theme.js + route.js, handed to the checker
+                                # with the library names (SMPRules…) declared
+                                # CLOSED (JS objects are open: a misspelt rule
+                                # read as `any` until --red caught it). 97
+                                # findings today, each read, none a fault, in
+                                # pages-types.known.json by file/code/message;
+                                # it fails on one beyond them OR one gone. Edit
+                                # the pages → run this; a new finding is READ,
+                                # then fixed or recorded with `--write` — never
+                                # written to turn it green unread. `--red`: six
+                                # faults, all caught
 DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
 DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
 ```

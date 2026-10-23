@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-23 — The technical list of numbered saves is kept for a week (§588.2), built on the branch; waiting on Islam's word to merge.** The list open tabs read to learn what changed is trimmed on every save to the last seven days; the History page is untouched. A tab older than the list fetches the plan once and carries on.
+**2026-10-23 — The technical list of numbered saves is kept for a week (§588.2), merged to `main` 2026-10-23 on Islam's word.** The list open tabs read to learn what changed is trimmed on every save to the last seven days; the History page is untouched. A tab older than the list fetches the plan once and carries on.
 
 **2026-10-23 — The console's routes into the client set-up screens are checked (§596), merged to `main` 2026-10-23 on Islam's word.** From the two places the console opens the set-up screens, every route the code can take is followed. Anything that needs a client's data must check first that the data is there. It found nothing unsafe today. Shown with a re-creation of the past Add a client crash: it catches it and names the exact route. One route is declared rather than worked out, with the reason written down; if that code changes, the check fails until someone looks again. Nothing on screen changes. It adds one small tool used only by the check.
 

@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-23 — Home's tick, and ElAbd's "No plan" corrected (§614.1, §616), on the branch, not merged.** On Home a task's box can now be ticked: it finishes the action in that client's Internal Tracker, exactly as on My tasks, and unticking puts it back. And a client whose plan is written on the company itself, as ElAbd's is, no longer shows "No plan" on its Strategy button, on Home or on Clients.
+**2026-10-23 — Home's tick, and ElAbd's "No plan" corrected (§614.1, §617), on the branch, not merged.** On Home a task's box can now be ticked: it finishes the action in that client's Internal Tracker, exactly as on My tasks, and unticking puts it back. And a client whose plan is written on the company itself, as ElAbd's is, no longer shows "No plan" on its Strategy button, on Home or on Clients.
 
 **2026-10-23 — Home, and the console made compact, merged to `main` 2026-10-23 on Islam's word (spec 068, §614).** The console now opens on Home. The band greets you by name and date ("Your SMP Home"). Below it are your clients on the left, with a button into each module, and your tasks on the right, with Overdue and This week as tabs and "All tasks" taking you to the full list. Under those are two case studies cards: your write-ups in progress, each with a ring of sections done, and the case studies finished in the last 30 days. My work is now called My tasks. The whole console is more compact: smaller text, a narrower column, and pages that use the full width of the window. Not built: ClientPlus's hours and recent activity.
 

@@ -4,7 +4,7 @@
 built.** Eleven decisions are Islam's, taken the same day as three rounds of
 questions (§3), and the name is his too: *"call it case studies"*.
 **Mockup:** `design-mockups/case-studies/2026-10-23_case-studies-library.html`
-— Case studies as **a library** (rule 1c, A17), five drawings, waiting on
+— Case studies as **a library** (rule 1c, A17), nine drawings, waiting on
 sign-off. Two earlier drawings are kept as the record and both were turned
 down by Islam: the first, `2026-10-23_case-studies.html`, as *"very poor
 design"*; the second, `2026-10-23_case-studies-tracker-look.html`, because
@@ -307,8 +307,19 @@ and browse**. So the third drawing is a library, and says where it is new:
 
 **Costs, stated on the drawing:** a look no other console page has; a past
 client added in three fields has no mark, so its cover shows initials until a
-logo is added; covers take more room than rows. **Not drawn yet, said so on
-it:** opening a piece of work, the interview step, a past client, My work.
+logo is added; covers take more room than rows.
+
+**And the way a past case study gets written**, drawn the same day on Islam's
+*"yes draw them"* (drawings 6–9): **adding a past client** on Clients — three
+fields, created archived, its card carrying *Case studies · 1 being written*;
+**opening a piece of work** — the form beside a live preview of *the cover it
+makes*, which says where it will stand (the desk, then its industry's shelf);
+**the writer's My work** — the console's row with a book mark where the tick
+is; **the interview** — the cover as header, *1 The interview · 2 The draft ·
+3 Marked done, on the shelf*, and the two steps side by side, the prompt to
+copy on the left and the paste on the right. The words on the desk say *Being
+written* where §4 says *to write*; the stored state is unchanged, the label
+is the drawing's.
 
 ### The three, as they were put
 

@@ -14,7 +14,7 @@
   --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
   --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
   --ff:#0F2C69;--ff-deep:#0A1F4D;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;
-  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8FA3C9;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8FA3C9;--ff-late:#FF9B8F;--bad:#B23025;
   --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
   --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;
   --shelf:#DCE1EA;--shelf-edge:#C7CEDB;
@@ -27,7 +27,7 @@
   --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
   --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
   --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;
-  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;--ff-late:#FF9B8F;--bad:#E8776B;
   --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
   --shelf:#262D3A;--shelf-edge:#323B4B;
@@ -39,7 +39,7 @@
   --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
   --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
   --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;
-  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;--ff-late:#FF9B8F;--bad:#E8776B;
   --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
   --shelf:#262D3A;--shelf-edge:#323B4B;
@@ -275,6 +275,102 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .ed.empty::placeholder{color:var(--warn)}
 .later{margin:0;font-size:15px;color:var(--ink-3);font-style:italic}
 
+
+/* ═══ FORMS, the console's: a label over a box ═══ */
+.lab{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.fld{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:9px 12px;font-size:14.5px;line-height:1.45}
+.fld:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.fpair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px;margin:0 0 16px}
+.fone{margin:0 0 16px}
+.fsec{margin:22px 0 14px;padding-top:18px;border-top:1px solid var(--line)}
+.fsec h3{margin:0;font-size:15px;font-weight:600}
+.pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;background:var(--surface);font-size:13.5px;font-weight:600}
+.pill .av{width:26px;height:26px;font-size:9.5px}
+.pill .x{color:var(--ink-3);font-weight:400}
+.factions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+/* opening a piece of work: the form beside the cover it will make */
+.opengrid{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:34px;align-items:start;margin-top:4px}
+.formcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:22px 24px;box-shadow:var(--shadow);min-width:0}
+.formcard h2{margin:0 0 18px;font-size:20px;font-weight:600}
+.preview{position:sticky;top:16px;display:flex;flex-direction:column;gap:10px}
+.preview .lab{margin:0}
+.preview .cover{pointer-events:none}
+.preview .where{margin:0;font-size:13px;color:var(--ink-3);line-height:1.45}
+.preview .where b{color:var(--ink);font-weight:600}
+/* the interview: where you are, then the two steps side by side */
+.steps{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 16px;font-size:13.5px;color:var(--ink-3)}
+.steps .st{display:inline-flex;align-items:center;gap:8px}
+.steps .st.on{color:var(--ink);font-weight:600}
+.dot{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;flex:none;font-size:12px;font-weight:700;border:1.5px solid var(--line);color:var(--ink-3);background:var(--surface)}
+.on .dot,.dot.on{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.steps .bar{width:34px;height:1.5px;background:var(--line)}
+.twostep{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+.stepcard{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:var(--shadow)}
+.stepcard h3{margin:0;font-size:16px;font-weight:600;display:flex;gap:10px;align-items:center;line-height:1.3}
+.prompt{margin:0;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:400 12.5px/1.6 var(--mono);color:var(--ink-2);white-space:pre-wrap;overflow:auto;max-height:360px}
+.paste{flex:1;min-height:300px;font:400 13px/1.6 var(--mono);resize:vertical}
+.stepacts{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.said{font-size:13px;color:var(--ink-3)}
+/* the Clients page, the console's own cards (§320.3, §323) */
+.ccards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.ccard{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow);min-width:0}
+.ccard.add{min-height:134px;align-items:center;justify-content:center;border-style:dashed;font-weight:600;color:var(--ink-3);box-shadow:none}
+.ccard.add.hot{color:var(--gold);border-color:var(--gold);background:var(--amber-wash)}
+.ccard.arch{box-shadow:none;border-style:dashed}
+.ctop{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 11px/30px var(--mono);text-align:center}
+.ccard.arch .cmark{background:var(--surface-2);color:var(--ink-3)}
+.ccard h2{margin:0;font-size:16px;font-weight:600}
+.ind{margin:0;color:var(--ink-3);font-size:12.5px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 10.5px/1.5 var(--mono);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink-2);background:var(--surface-2);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.tag.seat{color:var(--ff-tx);border-color:var(--ff-tx);background:var(--surface)}
+.tag.arch{color:var(--ink-3);background:var(--surface)}
+.mods{margin-top:auto;border-top:1px solid var(--line)}
+.mrow{display:flex;align-items:baseline;gap:8px;width:100%;padding:7px 14px;font-size:13px;text-align:left;color:inherit;background:none;border:0;cursor:pointer}
+.mrow i{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.mrow i.due{color:var(--warn);font-weight:600}
+.apart{margin-top:28px;padding-top:14px;border-top:1px solid var(--line)}
+.akey{display:block;margin-bottom:12px;font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.pastpanel{margin-top:18px;border:1px solid var(--gold);border-radius:14px;background:var(--surface);padding:18px 20px 16px;box-shadow:var(--shadow);max-width:760px}
+.pastpanel h2{margin:0 0 14px;font-size:17px;font-weight:600}
+.pastpanel .factions{margin-top:6px;padding-top:14px}
+/* My work, the console's own (§583) */
+.mwmast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:16px 20px 19px;margin:0 0 24px;box-shadow:inset 0 -3px 0 var(--amber)}
+.mwtop{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mwwk{font-size:11px;font-weight:600;line-height:1;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.mwname{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.mwname h1{margin:0;font-size:24px;font-weight:600;line-height:1.15;color:var(--ff-ink)}
+.mwname span{font-size:13px;font-weight:600;color:var(--ff-quiet)}
+.mwstrip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.mwstrip div{text-align:right}
+.mwstrip b{display:block;font-size:22px;font-weight:600;line-height:1;color:var(--ff-ink)}
+.mwstrip span{display:block;font-size:10.5px;font-weight:600;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px;white-space:nowrap}
+.mwstrip .late b{color:var(--ff-late)}
+.mwsec{margin:0 0 26px}
+.mwsh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.mwsh .ix{font-size:12px;font-weight:600;line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.mwsh h2{margin:0;font-size:17px;font-weight:600;line-height:1.2}
+.mwsh .meta{font-size:13px;line-height:1;color:var(--ink-3)}
+.mwrow{display:grid;grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.mwrow:hover{background:var(--surface-2);box-shadow:-8px 0 0 var(--surface-2),8px 0 0 var(--surface-2)}
+.mwrow .t{min-width:0;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.mwrow .t b{font-weight:600}
+.mwtick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);padding:0}
+.mwrow.late .mwtick{border-color:var(--bad)}
+.mwdoc{width:17px;height:17px;display:grid;place-items:center;color:var(--gold)}
+.mwdoc svg.i{width:17px;height:17px}
+.mwcl{justify-self:end;display:inline-flex;align-items:center;gap:6px;max-width:160px;font-size:12.5px;font-weight:500;line-height:1;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px;white-space:nowrap;overflow:hidden}
+.mwcl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
+.mwwhen{font-size:13px;font-weight:500;line-height:1.4;color:var(--ink-2);white-space:nowrap}
+.mwwhen.late{color:var(--bad);font-weight:600}
+.mwst{display:inline-flex;align-items:center;gap:7px;height:26px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.mwst::before{content:"";width:12px;height:2px;background:currentColor;flex:none}
+.mwst.prog{color:var(--gold)}
+.mwgo{width:26px;height:26px;display:grid;place-items:center;color:var(--ink-3);justify-self:end}
+.mwgo svg.i{width:14px;height:14px}
+
 /* ── narrow: the console's slim bar; everything to one column ── */
 @container (max-width:719px){
   .side{display:none}
@@ -299,6 +395,18 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
   .glance{position:static;order:-1}
   .drow{grid-template-columns:34px minmax(0,1fr)}
   .drow .state{grid-column:2;justify-self:start}
+  .opengrid{grid-template-columns:1fr;gap:18px}
+  .preview{position:static;order:-1;display:grid;grid-template-columns:150px minmax(0,1fr);align-items:end}
+  .preview .lab{grid-column:1 / -1}
+  .formcard{padding:16px 14px}
+  .twostep{grid-template-columns:1fr}
+  .paste{min-height:180px}
+  .mwmast{padding:14px 16px 17px}
+  .mwstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .mwstrip div{text-align:left}
+  .mwstrip span{white-space:normal;line-height:1.3}
+  .mwrow{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t st go" ". when cl go";row-gap:7px;column-gap:10px}
+  .mwrow > :first-child{grid-area:tick}.mwrow .t{grid-area:t}.mwrow .mwwhen{grid-area:when}.mwrow .mwcl{grid-area:cl;justify-self:start;max-width:100%}.mwrow .mwst{grid-area:st;justify-self:end}.mwrow .mwgo{grid-area:go}
 }
 @media (prefers-reduced-motion:reduce){.cover{transition:none}.cover:hover{transform:none}}
 </style>
@@ -506,6 +614,165 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
     </div></div>
   </div></div>
 
+
+  <!-- ═══ 6 · A PAST CLIENT ═══ -->
+  <div class="cap" id="s6"><span class="n">6</span><h2>Adding a past client</h2>
+    <p>The way a past case study starts: drawings 6 to 9, then the draft (drawing 5). On Clients, for admins only. Three fields, and the client is created <b>already archived</b>: no platform and no people. Its card then carries a <b>Case studies</b> row, your answer 3, which is the only thing on it that opens anything.</p></div>
+  <div class="frame"><div class="app" data-on="clients">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="ltop"><h1>Clients</h1><span class="right"><input class="fld" id="sc6" type="search" placeholder="Search clients" style="width:200px"></span></div>
+      <div class="ccards">
+        <div class="ccard"><div class="ctop"><span class="cmark">RT</span><h2>Raya Trade</h2><p class="ind">Retail &amp; E-commerce</p><div class="tags"><span class="tag seat">Super user</span><span class="tag">10 units</span></div></div>
+          <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Case studies<i>3</i></button></div></div>
+        <div class="ccard"><div class="ctop"><span class="cmark">WD</span><h2>Wander</h2><p class="ind">Real Estate &amp; Property</p><div class="tags"><span class="tag seat">Super user</span><span class="tag">3 units</span></div></div>
+          <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Case studies<i>2</i></button></div></div>
+        <div class="ccard add">+ Add a client</div>
+        <div class="ccard add hot">+ Add a past client</div>
+      </div>
+      <section class="pastpanel" aria-label="Add a past client">
+        <h2>Add a past client</h2>
+        <div class="fpair">
+          <div><label class="lab" for="p6n">Name</label><input class="fld" id="p6n" type="text" value="Nile Logistics"></div>
+          <div><label class="lab" for="p6i">Industry</label><select class="fld" id="p6i"><option>Transportation</option></select></div>
+          <div><label class="lab" for="p6s">Size</label><select class="fld" id="p6s"><option>Mid-size</option></select></div>
+        </div>
+        <div class="factions"><button type="button" class="btn">Cancel</button><button type="button" class="btn amber">Add it, archived</button></div>
+      </section>
+      <div class="apart"><span class="akey">Archived</span>
+        <div class="ccards">
+          <div class="ccard arch"><div class="ctop"><span class="cmark">NL</span><h2>Nile Logistics</h2><p class="ind">Transportation</p><div class="tags"><span class="tag arch">Archived 23 Oct 2026 · Islam Saadany</span></div></div>
+            <div class="mods"><button type="button" class="mrow">Case studies<i class="due">1 being written</i></button></div></div>
+        </div></div>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 7 · OPENING A PIECE OF WORK ═══ -->
+  <div class="cap" id="s7"><span class="n">7</span><h2>Opening a piece of work</h2>
+    <p>From <b>Open a piece of work</b> on the front of the library, admins only. Beside the form is the cover it will make, filling in as you type. For work starting now, fill in the top half and it goes on the desk as Running. For past work, also name the writer: it lands on their My work.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="crumb"><a href="#s1">Case studies</a><span>›</span><span>Open a piece of work</span></div>
+      <div class="opengrid">
+        <section class="formcard">
+          <h2>Open a piece of work</h2>
+          <div class="fpair">
+            <div><label class="lab" for="o7c">Client</label><select class="fld" id="o7c"><option>Nile Logistics (archived)</option><option>El Abd Foods</option><option>Raya Trade</option><option>Reliance Heavy Industries</option><option>Wander</option></select></div>
+            <div><label class="lab" for="o7n">Name of the work</label><input class="fld" id="o7n" type="text" value="Operating model 2023"></div>
+          </div>
+          <div class="fpair">
+            <div><label class="lab" for="o7a">Started</label><input class="fld" id="o7a" type="month" value="2023-03"></div>
+            <div><label class="lab" for="o7b">Ended</label><input class="fld" id="o7b" type="month" value="2023-11"></div>
+          </div>
+          <div class="fone"><span class="lab">Our team</span>
+            <div class="pills"><span class="pill"><span class="av">IS</span>Islam Saadany<span class="x">×</span></span><span class="pill"><span class="av">ME</span>Mohamed Essam<span class="x">×</span></span><button type="button" class="btn">+ Add a consultant</button></div></div>
+          <div class="fsec"><h3>Ask for the write-up</h3></div>
+          <div class="fpair">
+            <div><label class="lab" for="o7w">Who writes it</label><select class="fld" id="o7w"><option>Islam Saadany</option><option>Mohamed Essam</option><option>Nobody yet: the work is still running</option></select></div>
+            <div><label class="lab" for="o7d">Wanted by</label><input class="fld" id="o7d" type="date" value="2026-11-13"></div>
+          </div>
+          <div class="factions"><button type="button" class="btn">Cancel</button><button type="button" class="btn amber">Open it and ask Islam</button></div>
+        </section>
+        <aside class="preview"><span class="lab">The cover it makes</span>
+          <div class="cover"><div class="cv"><span class="logo">NL</span><span class="cind">Transportation</span><h3>Operating model 2023</h3><span class="cyr">Mar – Nov 2023</span></div><div class="cmeta"><b>Nile Logistics</b><span>Being written by Islam</span></div></div>
+          <p class="where">On <b>the desk</b> until it is marked done, then on the <b>Transportation</b> shelf.</p></aside>
+      </div>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 8 · ON MY WORK ═══ -->
+  <div class="cap" id="s8"><span class="n">8</span><h2>On the writer's My work</h2>
+    <p>My work as it is today, with one new kind of row. A write-up sits among the writer's Tracker actions by its due date, with a book mark where the tick is: it is finished on the case study, never from this list. Pressing it opens the interview (drawing 9).</p></div>
+  <div class="frame"><div class="app" data-on="mywork">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mwmast"><div class="mwtop">
+        <div><div class="mwwk">Week of 19 Oct 2026</div><div class="mwname"><h1>My work</h1><span>Islam Saadany</span></div></div>
+        <div class="mwstrip"><div><b>6</b><span>Open actions</span></div><div class="late"><b>1</b><span>Late</span></div><div><b>3</b><span>Due this week</span></div><div><b>4</b><span>Clients</span></div></div>
+      </div></header>
+      <section class="mwsec"><div class="mwsh"><span class="ix">01</span><h2>This week</h2><span class="meta">2</span></div>
+        <div class="mwrow"><button type="button" class="mwtick" aria-label="Done"></button><span class="t">Prepare the plant managers' scoring session</span><span class="mwcl">El Abd Foods</span><span class="mwwhen">Thu 22 Oct</span><span class="mwst">Not started</span><span class="mwgo" data-i="go"></span></div>
+        <div class="mwrow"><button type="button" class="mwtick" aria-label="Done"></button><span class="t">Review the unit heads' draft targets</span><span class="mwcl">Wander</span><span class="mwwhen">Sun 25 Oct</span><span class="mwst prog">In progress</span><span class="mwgo" data-i="go"></span></div>
+      </section>
+      <section class="mwsec"><div class="mwsh"><span class="ix">02</span><h2>Next week and later</h2><span class="meta">2</span></div>
+        <div class="mwrow"><span class="mwdoc" data-i="cases" title="A case study to write up"></span><span class="t">Write up the case study · <b>Operating model 2023</b></span><span class="mwcl">Nile Logistics</span><span class="mwwhen">Fri 13 Nov</span><span class="mwst prog">Case study</span><span class="mwgo" data-i="go"></span></div>
+        <div class="mwrow"><button type="button" class="mwtick" aria-label="Done"></button><span class="t">Send the Q3 scorecard to the Head of Strategy</span><span class="mwcl">Raya Trade</span><span class="mwwhen">Tue 17 Nov</span><span class="mwst">Not started</span><span class="mwgo" data-i="go"></span></div>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 9 · THE INTERVIEW ═══ -->
+  <div class="cap" id="s9"><span class="n">9</span><h2>The interview</h2>
+    <p>What the writer sees first. The cover is the header, as on every case study page. The two steps sit side by side: copy the prompt on the left, talk it through with any assistant, and paste the whole answer on the right. <b>Read it into the draft</b> opens the draft (drawing 5). <b>Type it in instead</b> skips straight there.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <div class="crumb"><a href="#s1">Case studies</a><span>›</span><a href="#s1">On the desk</a><span>›</span><span>Operating model 2023</span></div>
+      <header class="rhead">
+        <span class="logo">NL</span>
+        <div><div class="eb">Transportation · Mar – Nov 2023</div><h1>Operating model 2023</h1><p class="cl"><b>Nile Logistics</b> · archived · asked by Mohamed Essam · due Fri 13 Nov</p></div>
+        <div class="acts"><span class="chip draft">Being written</span><button type="button" class="btn">Type it in instead</button></div>
+      </header>
+      <div class="steps" aria-label="Where you are"><span class="st on"><span class="dot">1</span>The interview</span><span class="bar"></span><span class="st"><span class="dot">2</span>The draft</span><span class="bar"></span><span class="st"><span class="dot">3</span>Marked done, on the shelf</span></div>
+      <div class="twostep">
+        <section class="stepcard"><h3><span class="dot on">1</span>Copy the prompt, and talk it through with your assistant</h3>
+          <pre class="prompt" id="pr">I am writing up a case study for my consulting firm about a piece of work we finished. It will be read by consultants who have just joined and were not there.
+
+  Client:    Nile Logistics (Transportation)
+  The work:  Operating model 2023
+  When:      March 2023 to November 2023
+  Our team:  Islam Saadany, Mohamed Essam
+
+Interview me. Ask ONE question at a time and wait for my answer before asking the next one. Push back when my answer is vague, and do not move on until it would make sense to somebody who was not there.
+
+Ask me about, in this order:
+  · the client, and why they came to us
+  · what we were asked to do
+  · the client's people we worked with, and the role of each
+  · the main stages of the work, with the month of each
+  · every deliverable: its name, what it was, the month we handed it over
+  · what came of it
+  · for each of us on the team, what a new joiner should ask them about
+  · and last, one paragraph a new joiner should read first
+
+Then ask what went better than expected, what cost us time, what I know now that I did not at the start, and what I would warn the next consultant about. For each, ask what happened, what we did, what came of it, and what the next person should know.
+
+When I say I am done, write it back in exactly this shape and nothing else:
+
+=== IN SHORT
+=== THE CLIENT AND WHY THEY CAME TO US
+=== WHAT WE WERE ASKED TO DO
+=== THEIR TEAM            (one line each: name · role)
+=== TIMELINE              (one line each: month · stage)
+=== DELIVERABLES          (one line each: name · what it was · month)
+=== WHAT CAME OF IT
+=== WHO TO ASK            (one line each: name · what to ask them about)
+
+and then each insight as a block:
+
+===
+KIND: hiccup | practice | lesson
+TITLE: one line, the thing itself
+WHEN: the month
+WHAT HAPPENED: ...
+WHAT WE DID: ...
+WHAT CAME OF IT: ...
+WHAT THE NEXT PERSON SHOULD KNOW: ...
+===
+
+Use my words, not yours. If I only half answered something, leave that line out rather than filling it in.</pre>
+          <div class="stepacts"><button type="button" class="btn solid" id="copy">Copy the prompt</button><span class="said" id="copied"></span></div></section>
+        <section class="stepcard"><h3><span class="dot on">2</span>Paste the whole answer back</h3>
+          <textarea class="fld paste" id="paste9" aria-label="Paste the whole answer back">=== IN SHORT
+Nile Logistics asked us to redesign how its three regional depots were run after two years of missed delivery targets. We moved planning to one central team, set five shared measures and…
+=== THE CLIENT AND WHY THEY CAME TO US
+…</textarea>
+          <div class="stepacts"><button type="button" class="btn amber">Read it into the draft</button></div></section>
+      </div>
+    </div></div>
+  </div></div>
+
   <div class="notes">
     <div class="note"><h2>What is new here</h2><ul>
       <li><b>Covers on shelves.</b> One shelf per industry, plus Newest. A cover shows the client's mark, the industry, the name of the work and its months.</li>
@@ -517,11 +784,12 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <li><b>A cover needs the client's mark.</b> A past client added in three fields has none, so its cover shows its initials until a logo is added.</li>
       <li><b>Covers take more room than rows.</b> About four to a shelf on a laptop and two on a phone.</li>
     </ul></div>
-    <div class="note"><h2>Still to draw, once this direction is right</h2><ul>
-      <li>Opening a piece of work (admins).</li>
-      <li>The interview prompt and the paste, before the draft.</li>
-      <li>A past client on the Clients page, and the row on My work.</li>
-    </ul></div>
+    <div class="note"><h2>How a past case study gets written</h2><ol>
+      <li><b>An admin adds the past client</b> on Clients, in three fields (drawing 6).</li>
+      <li><b>An admin opens the piece of work</b> and names the writer (7).</li>
+      <li><b>It lands on the writer's My work</b> (8), and opens on the interview (9).</li>
+      <li><b>The answer becomes the draft</b> (5). Marked done, it moves from the desk to its shelf.</li>
+    </ol></div>
   </div>
 </div>
 
@@ -538,7 +806,8 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
     history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
     menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
     dl:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
-    up:'<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>'
+    up:'<path d="M12 16V5M7 10l5-5 5 5"/><path d="M5 19h14"/>',
+    go:'<path d="m9 6 6 6-6 6"/>'
   };
   function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
   document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')) + e.innerHTML; });
@@ -562,6 +831,13 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
       }).join('') + '</nav>' +
       '<div class="me"><span class="av0" aria-hidden="true">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
     a.querySelector('.mtop').innerHTML = ic('menu') + '<span class="mk2">FOREFRONT</span><span class="here">' + NAMES[on] + '</span>';
+  });
+
+  var copy = document.getElementById('copy'), said = document.getElementById('copied');
+  if (copy) copy.addEventListener('click', function(){
+    var pre = document.getElementById('pr');
+    function sel(){ var r = document.createRange(); r.selectNodeContents(pre); var g = getSelection(); g.removeAllRanges(); g.addRange(r); said.textContent = 'Selected. Copy it with your keyboard.'; }
+    try { navigator.clipboard.writeText(pre.textContent).then(function(){ said.textContent = 'Copied.'; }, sel); } catch (e) { sel(); }
   });
 
   function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }

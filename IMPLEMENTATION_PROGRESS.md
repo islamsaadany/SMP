@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-23 — The remote works from any page while presenting (§582.2), built on the branch, not live.** With the slides up on a second screen or in a window, Page Down / Page Up and → / ← move them from any page of the platform, and T holds or starts their timer. Typing in a box never moves a slide, the tab bar keeps its arrows, and ↑ ↓ keep scrolling the page. The strip on each page names the keys, and the keyboard sheet (?) lists them.
+**2026-10-23 — The remote works from any page while presenting (§582.2), merged to `main` 2026-10-23 on Islam's word.** With the slides up on a second screen or in a window, Page Down / Page Up and → / ← move them from any page of the platform, and T holds or starts their timer. Typing in a box never moves a slide, the tab bar keeps its arrows, and ↑ ↓ keep scrolling the page. The strip on each page names the keys, and the keyboard sheet (?) lists them.
 
 **2026-10-23 — The company is labelled the company in the Master presentation; a box of capabilities is called that (§591), merged to `main` 2026-10-23 on Islam's word.** From the simplification's final test. On a client with business units whose company also plans (Wander), the Master presentation listed the company as a business unit; it reads The company now. And Wander's closing slide, which said 4 Pillars over four capabilities, says Capabilities. Nothing else moves. Nobody is signed out.
 

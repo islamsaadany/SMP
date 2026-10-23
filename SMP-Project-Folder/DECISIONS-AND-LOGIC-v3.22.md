@@ -58079,3 +58079,21 @@ Islam: *"yes do step 1 and start with the plan page."* **Step 1 moves nothing on
 **`checks/design-standard.py` is a ratchet, not a target.** It counts, across every stylesheet and script `build.py` assembles (a `style="font-size:12px"` in a builder is the same fault as one in a `.css` file): literal font sizes, literal px corners, literal shadows, hex colours outside a `--token` line, and the number of DISTINCT literal font sizes. It fails when any count RISES against `design-standard-baseline.json`; `--update` lowers the baseline where a count fell and **refuses to raise one**, because a baseline the same command can raise is not a ratchet. The baseline today: **513 font-size literals, 207 corners, 61 shadows, 63 colours, 42 distinct sizes** (the 36 quoted in §411 was an earlier, narrower count of the CSS alone; this one includes the scripts and em sizes, and is the number that will be tracked). Proved able to fail by adding one off-standard rule: 3 red, and green again with it removed. No browser, no database.
 
 **The Plan page is drawn, not built** (rule 1c), in the running platform on Mobile's plan, today beside the standard, reading and editing and in dark, and published as an Artifact (`design-mockups/plan-page-standard/2026-09-24_plan-on-standard.html`). What it proposes: the pillar name as the page's largest words (22), codes and numbers in Source Sans with even-width figures, section headings in normal letters at 17 with the count quieter, table headings 11 and cells on the 8/16 spacing, corners 10 for cards and tables and 6 for controls (the page carries six roundings today, measured), the outcome column regular so the tactic name reads first, and every edit box 36 tall (today 30 to 36). **Two wording issues noticed and deliberately not drawn away**: "Capability" appears twice in edit mode, and the grey reorder line above the pillars — both content, aligned in chat first (2026-09-23 rule). Waiting on Islam's sign-off, including the outcome column in regular text.
+
+## §605 — the design standard, version 2: the Tracker's patterns, set down once (2026-10-23)
+
+Islam rejected the design-system mockups (*"they made everything not
+organized"*) and asked instead for SMP's own best practices, standardised
+everywhere, pointing at the Internal Tracker, My work and the console's left
+column. Answers given in chat before anything was drawn: **the client
+platform's navigation stays as it is** (the left column is the console's
+only); **one typeface, the client platform's — Source Sans 3**, so the
+console's monospace labels move to Source Sans capitals; **Plan and
+Performance stay as tables**. What version 2 adds over §411: the navy page
+header block with a gold foot (for work-list pages), sections as a gold
+number + name + count over a 2px rule, lists of work as Tracker rows, status
+as a dash and a word (reversing §411's "status is always a pill"), tags as a
+grey pill with a gold dot, and the last/this/next week bands. Spacing,
+corners, shadows, colour, buttons, fields, icons and empty states are §411's,
+unchanged. Written as `design-mockups/design-standard/2026-10-23_smp-design-standard-v2.html`;
+nothing built.

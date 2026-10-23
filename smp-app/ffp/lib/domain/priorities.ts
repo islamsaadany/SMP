@@ -156,3 +156,18 @@ export function mayApprovePlan(args: {
   if (norm(args.actorEmail) && norm(args.actorEmail) === norm(args.senderEmail)) return { ok: false, reason: "OWN_PLAN" };
   return { ok: true };
 }
+
+/** Main processes in code order, each followed by its own sub-processes; a sub whose main is not in the list stands as a main. */
+export function inTree<T extends { id: string; code: string; parentId: string | null }>(rows: T[]): { row: T; sub: boolean; hasSubs: boolean }[] {
+  const ids = new Set(rows.map((r) => r.id));
+  const byCode = (a: T, b: T) => a.code.localeCompare(b.code, undefined, { numeric: true });
+  const kids = new Map<string, T[]>();
+  for (const r of rows) if (r.parentId && ids.has(r.parentId)) (kids.get(r.parentId) ?? kids.set(r.parentId, []).get(r.parentId)!).push(r);
+  const out: { row: T; sub: boolean; hasSubs: boolean }[] = [];
+  for (const m of rows.filter((r) => !r.parentId || !ids.has(r.parentId)).sort(byCode)) {
+    const subs = (kids.get(m.id) ?? []).sort(byCode);
+    out.push({ row: m, sub: false, hasSubs: subs.length > 0 });
+    for (const c of subs) out.push({ row: c, sub: true, hasSubs: false });
+  }
+  return out;
+}

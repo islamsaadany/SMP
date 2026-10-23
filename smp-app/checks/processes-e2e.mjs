@@ -344,6 +344,16 @@ check(ap.status === "APPROVED" && !!ap.n && /Head of Finance/.test(ap.r) && ap.h
 const pr = await A.get("/" + S + "/processes/reports/priorities");
 const prt = await pr.text();
 check(pr.status() === 200 && /Approved by/.test(prt) && /Order to cash/.test(prt), "the one-page export shows the approval");
+const xl = await A.get("/api/ffp/export/priorities/" + S);
+const ExcelJS = (await import("exceljs")).default;
+const wbk = new ExcelJS.Workbook(); await wbk.xlsx.load(await xl.body());
+const sh = wbk.getWorksheet("Priorities");
+const hdr = sh.getRow(1).values.slice(1);
+const xr = []; sh.eachRow((r, n) => { if (n > 1) xr.push(r.values.slice(1)); });
+const oc = xr.find((r) => r[1] === "P1.1");
+check(xl.status() === 200 && hdr.includes("Why") && hdr.includes("Deep dive (of 6)") && xr.length === 5 && oc && oc[8] === 95 && oc[10] === "Wave 1", "the Excel download has one row per process with scores, decision and progress", JSON.stringify(oc));
+const xs = await T.get("/api/ffp/export/priorities/" + S);
+check(xs.status() === 403, "…and a client's own person cannot download it");
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=sign", { waitUntil: "networkidle" });
 await A.page.fill("input[aria-label='Why reopen']", "Client asked to add Credit & Collections");
 await A.page.click("button:text-is('Reopen')");

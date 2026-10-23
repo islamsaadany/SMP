@@ -80,6 +80,13 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
           ))}
         </nav>
 
+        {step !== "sign" && (
+          <div className="mb-3 flex justify-end">
+            <a href={`/api/ffp/export/priorities/${workspaceId}`} download className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
+              Download as Excel
+            </a>
+          </div>
+        )}
         {step === "score" && <ScoreTable workspaceId={workspaceId} rows={rows} weights={plan.weights} capacity={plan.capacity} editable={editable} lockedMessage={lockedMessage} />}
         {step === "rank" && <RankView workspaceId={workspaceId} rows={rows} selectedId={sel ?? null} editable={editable} />}
         {step === "plan" && <PlanBoard workspaceId={workspaceId} plan={plan} rows={rows} editable={editable} />}

@@ -102,6 +102,30 @@ window.__mk = {
       this.solid(btn, !dirty) + (dirty ? this.plain('Discard') : '') + line +
       (state === 'applied' ? this.plain('Undo') : '') + '</div>';
   },
+  pinned: function(btn, words){
+    var pane = document.querySelector('#panel') || document.body, r = pane.getBoundingClientRect();
+    var d = document.createElement('div');
+    d.className = 'mk-pinned';
+    d.setAttribute('style', 'position:fixed;z-index:9998;bottom:18px;left:' + (r.left + 24) + 'px;right:96px;' +
+      'display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:10px 14px;border-radius:10px;' +
+      'border:1px solid var(--line);background:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,.12)');
+    d.innerHTML = this.row(btn, 'dirty', words).replace('margin-top:14px', 'margin:0');
+    document.body.appendChild(d);
+  },
+  savedTag: function(){
+    return '<span class="mk-saved" style="display:inline-flex;align-items:center;gap:5px;margin-left:8px;' +
+      'font:600 11px/1 var(--sans);color:var(--good-tx);vertical-align:middle">' + this.dot('--good') + 'Saved</span>';
+  },
+  askRow: function(tr, text, yes){
+    var n = tr.children.length;
+    var row = document.createElement('tr');
+    row.className = 'mk-ask';
+    row.innerHTML = '<td colspan="' + n + '" style="padding:10px 14px;border:1px solid var(--attn);background:var(--attn-bg)">' +
+      '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;font:var(--fs-small)/1.45 var(--sans);color:var(--ink)">' +
+      '<div style="flex:1 1 320px;min-width:0">' + text + '</div>' +
+      '<div style="display:flex;gap:8px">' + this.solid(yes) + this.plain('Keep as it was') + '</div></div></td>';
+    tr.after(row);
+  },
   strip: function(what, unsaved){
     var pane = document.querySelector('#panel') || document.body, r = pane.getBoundingClientRect();
     var d = document.createElement('div');
@@ -201,51 +225,52 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     shot(pg, "bands-colour-unapplied.png")
 
-    # 4 · Roles & access: one cell changed, the Save row under the matrix (round 3)
+    # 4 · Roles & access, the click rule: turning a cell UP saves itself and says so on the cell
     setup_go(pg, "access")
     pg.evaluate(JS_PIECES)
-    cell = pg.evaluate("""()=>{
+    pg.evaluate("""()=>{
       const tr = [...document.querySelectorAll('#panel table tbody tr')]
-        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
-      const td = tr && tr.children[3];                      /* Their own · Reporting */
-      const b = td && td.querySelector('button');
+        .find(r => /^\\s*Contributor/.test(r.children[0].textContent));
+      const b = tr && tr.children[2].querySelector('[data-acm$="|edit"]');
       if (b) b.click();
-      return !!b;
     }""")
-    pg.wait_for_timeout(600)
+    pg.wait_for_timeout(700)
     pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
       const tr = [...document.querySelectorAll('#panel table tbody tr')]
-        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
-      const td = tr.children[3];
-      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
-      const cfg = td.closest('.cfg');
-      cfg.insertAdjacentHTML('afterend', __mk.row('Save', 'dirty', '1 change not saved yet: Owner \u00b7 their own reporting'));
+        .find(r => /^\\s*Contributor/.test(r.children[0].textContent));
+      const set = tr.children[2].querySelector('.stset');
+      set.insertAdjacentHTML('afterend', __mk.savedTag());
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "access-unsaved.png")
+    shot(pg, "access-on-saved.png")
 
-    # 5 · leaving Roles & access with it unsaved: the strip asks (agreed in round 2)
+    # 5 · the click rule's other half: turning a cell DOWN asks first, under its row
     pg.evaluate("""()=>{
-      const it = document.querySelector('.setuprail [data-setupgo=units]');
-      if (it) { it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
-      __mk.strip('Roles & access', 'Owner \u00b7 their own reporting');
+      document.querySelectorAll('.mk-saved').forEach(e => e.remove());
+      const tr = [...document.querySelectorAll('#panel table tbody tr')]
+        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
+      const td = tr.children[3];                            /* Their own · Reporting */
+      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
+      const who = (tr.children[0].querySelector('span, small, .why') || {}).textContent || '';
+      __mk.askRow(tr, '<span style="font-weight:700;color:var(--attn-tx)">Owner</span>' + (who ? ' (' + who + ')' : '') +
+        ' will only be able to <span style="font-weight:700">read</span> their own reporting, and no longer change it.', 'Change it');
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "access-leave.png")
-    pg.evaluate("()=>{ const s=document.querySelector('.mk-strip'); if(s) s.remove(); }")
+    shot(pg, "access-off-asks.png")
 
-    # 6 · the shape screen names End in Mind, under Winning Aspiration (Terminology goes)
+    # 6 · the shape screen: End in Mind, with its own tick, under Winning Aspiration
+    pg.evaluate("()=>{ document.querySelectorAll('.mk-ask').forEach(e => e.remove()); }")
     setup_go(pg, "start")
     pg.wait_for_timeout(800)
     pg.evaluate("()=>{const b=[...document.querySelectorAll('.csetup .wzstep')].find(x=>x.dataset.step==='shape'); if(b) b.click();}")
     pg.wait_for_timeout(1200)
+    pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
       const asp = [...document.querySelectorAll('.csetup .stpart')]
-        .find(r => /^Aspiration/.test((r.querySelector('input') || {}).getAttribute ? r.querySelector('input').getAttribute('aria-label') : ''));
+        .find(r => { const i = r.querySelector('input'); return i && /^Aspiration/.test(i.getAttribute('aria-label') || ''); });
       if (!asp) return;
       const row = asp.cloneNode(true);
-      const tick = row.firstElementChild; tick.replaceWith(document.createElement('span'));
       row.classList.remove('off');
       row.querySelectorAll('input').forEach(i => { i.value = ''; i.placeholder = 'End in Mind'; });
       row.style.outline = '2px dashed var(--attn)'; row.style.outlineOffset = '3px'; row.style.borderRadius = '6px';
@@ -253,5 +278,50 @@ with sync_playwright() as p:
       row.scrollIntoView({block:'center'});
     }""")
     pg.wait_for_timeout(400)
-    shot(pg, "shape-endinmind.png")
+    shot(pg, "shape-endinmind-tick.png")
+
+    # 7 · the typing rule: a name changed, the card's foot out of sight, its Save row pinned
+    pg.evaluate("""()=>{
+      const box = [...document.querySelectorAll('.csetup .stpart input')]
+        .find(i => /^Aspiration, one/.test(i.getAttribute('aria-label') || ''));
+      if (!box) return;
+      box.value = 'Vision';
+      box.style.outline = '2px solid var(--attn)'; box.style.outlineOffset = '1px';
+      box.scrollIntoView({block:'center'});
+      __mk.pinned('Save', '1 change not saved yet: the top level\u2019s word for Winning Aspiration');
+    }""")
+    pg.wait_for_timeout(400)
+    shot(pg, "shape-typed-pinned.png")
+    pg.evaluate("()=>{ document.querySelectorAll('.mk-pinned').forEach(e => e.remove()); }")
+
+    # 7b · leaving with that typed change unsaved: the agreed strip, in the pinned row's place
+    pg.evaluate("""()=>{
+      const it = document.querySelector('.setuprail [data-setupgo=units]');
+      if (it) { it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
+      __mk.strip('The shape', 'the top level\\u2019s word for Winning Aspiration');
+    }""")
+    pg.wait_for_timeout(300)
+    shot(pg, "shape-leave.png")
+    pg.evaluate("""()=>{ document.querySelectorAll('.mk-strip').forEach(e => e.remove());
+      const it = document.querySelector('.setuprail [data-setupgo=units]'); if (it) it.style.outline = ''; }""")
+
+    # 8 · where End in Mind shows once ticked: Mobile's Strategy page, the aspiration card
+    pg.evaluate("""()=>{ const u = document.querySelector('#units [data-u="mobile"]'); if (u) u.click(); }""")
+    pg.wait_for_timeout(900)
+    pg.evaluate("""()=>{ const t = document.querySelector('[data-s="strategy"]'); if (t) t.click(); }""")
+    pg.wait_for_timeout(900)
+    pg.evaluate("""()=>{
+      const go = [...document.querySelectorAll('button, a')].find(b => /^\\s*Foundation\\s*$/.test(b.textContent));
+      if (go) go.click();
+    }""")
+    pg.wait_for_timeout(900)
+    pg.evaluate("""()=>{
+      const lab = [...document.querySelectorAll('.endin .boxlab')][0];
+      if (!lab) return;
+      const box = lab.closest('.endin');
+      box.style.outline = '2px dashed var(--attn)'; box.style.outlineOffset = '4px'; box.style.borderRadius = '6px';
+      box.scrollIntoView({block:'center'});
+    }""")
+    pg.wait_for_timeout(400)
+    shot(pg, "mobile-endinmind.png")
     b.close()

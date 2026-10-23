@@ -1,4 +1,4 @@
-"""On a squeezed window the strip of directions stays and the title goes (§606).
+"""On a squeezed window the strip of directions stays and the title goes (§609).
 
 Islam, of a unit's Plan page below 1200px: *"the directions are not freezed,
 they might be squeezed a bit but stay"*; of the title pinned under them, *"is
@@ -33,7 +33,7 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
       band beside it is still pinned once scrolled.
 
 Point it at another build with SMP_BUILT to falsify it; it was run against
-the build before §606 (ui-versions/pinned-directions/) and fails there.
+the build before §609 (ui-versions/pinned-directions/) and fails there.
 
 Run: python3 qa-run.py checks/strip-stays.py
 """

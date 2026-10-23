@@ -230,9 +230,9 @@ with sync_playwright() as pw:
           return { w:Math.round(rr.width), h:Math.round(rr.height),
                    disp:getComputedStyle(r).display, pos:getComputedStyle(r).position,
                    cols:getComputedStyle(document.querySelector('.split')).gridTemplateColumns };}""")
-        # REWRITTEN (§218), FOR §606: this asserted `position:static`, which
+        # REWRITTEN (§218), FOR §609: this asserted `position:static`, which
         # was how the across strip was drawn, not what made it the strip —
-        # and §606 made it stick under the chrome on Islam's word. What this
+        # and §609 made it stick under the chrome on Islam's word. What this
         # control case guards is unchanged: across, one short row, and now
         # held while the plan scrolls.
         ck("%d: the unit's rail is still the across strip" % w,

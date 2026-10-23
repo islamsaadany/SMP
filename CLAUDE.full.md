@@ -10558,7 +10558,7 @@ python3 checks/perf-line.py     # the Performance line: Report, Presentation and
 python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides, and the
                                 # demo banner's invented-content line is gone (§162)
 python3 checks/strip-stays.py   # below 1200 the strip of directions STAYS and the title
-                                # under it goes (§606): scrolled, the strip where it stood
+                                # under it goes (§609): scrolled, the strip where it stood
                                 # and the band moved by the scroll (reading and editing);
                                 # one row with every direction inside it and no name cut
                                 # at 1100/900/760; the open item on the section switch's

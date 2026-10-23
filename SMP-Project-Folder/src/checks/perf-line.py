@@ -14,7 +14,7 @@ page. What is asserted is the promise, never the mechanism (§94.8).
      them, because it used to keep its own copy and that copy was already wrong.
   7  Nothing paints over what is pinned, at any width or scroll offset: the
      pane title beside a wide window's rail, the strip of directions on a
-     squeezed one, where the title now scrolls away (§606).
+     squeezed one, where the title now scrolls away (§609).
 
 AND THE COLOUR BANNER IS GONE — asserted as an absence beside its replacement,
 or a build that dropped both would pass (§94.2).
@@ -197,7 +197,7 @@ with sync_playwright() as p:
         print("  note    no chart legend on this page — not asserted here")
 
     # ── 7 · nothing over the pinned title, swept
-    # REWRITTEN, NOT DELETED (§218), FOR §606: below 1200px the title is no
+    # REWRITTEN, NOT DELETED (§218), FOR §609: below 1200px the title is no
     # longer pinned — the strip of directions is, and the title scrolls away
     # with the plan on purpose, so "nothing over the title" would assert the
     # behaviour Islam asked to remove. The promise is the same one, made of
@@ -228,7 +228,7 @@ with sync_playwright() as p:
             if r: found = (w, y, held, r); break
         if found: break
     ck("nothing paints over what is pinned — the title on a wide window, the strip"
-       " on a squeezed one (§606) — at any width or scroll", not found, found)
+       " on a squeezed one (§609) — at any width or scroll", not found, found)
 
     ck("no page errors while driving", not errs, errs[:2])
     b.close()

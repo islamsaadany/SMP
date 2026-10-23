@@ -1315,7 +1315,7 @@
      rather than assumed. */
   @media (max-width:1200px){
     .split:not(.setupsplit) { grid-template-columns:1fr; }
-    /* ── THE STRIP STAYS AND THE TITLE GOES (§606) ──────────────────────
+    /* ── THE STRIP STAYS AND THE TITLE GOES (§609) ──────────────────────
        Islam, of the Plan page on a squeezed window: *"the directions are not
        freezed, they might be squeezed a bit but stay"*; then, of the title
        pinned under them, *"is it a repetition?"* It is. Stacked, this rule
@@ -1374,7 +1374,7 @@
         radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) right bottom / var(--r) var(--r) no-repeat; }
     .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
-    /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§606). Islam:
+    /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
        *"the text needs to wrap"*. A flex row of the item's own parts in their
        own order — handle, code, name, years, Missing, score — so every rail
        that draws one (a unit's plan, its performance and its report, a
@@ -1411,7 +1411,7 @@
     .rail:not(.setuprail) .railadd { flex:none; align-self:center; padding:0 14px;
       white-space:nowrap; }
     .rail:not(.setuprail) .ritem .rsub { display:none; }
-    /* THE OPEN ONE WEARS THE SECTION SWITCH'S "SELECTED" (§606): the same
+    /* THE OPEN ONE WEARS THE SECTION SWITCH'S "SELECTED" (§609): the same
        `--stone` fill and `--surface` type as Plan in Foundation | SWOT | Plan,
        over the gold edge it always had. The others step back to `--ink-3` and
        come up to `--ink` under the pointer. Islam: *"the highlighting needs to
@@ -1437,7 +1437,7 @@
     .rail:not(.setuprail) .ritem:not(.on) b { color:var(--ink-3); }
     .rail:not(.setuprail) .ritem:not(.on):hover .rcode,
     .rail:not(.setuprail) .ritem:not(.on):hover b { color:var(--ink); }
-    /* AND THE TITLE UNDER IT SCROLLS WITH THE PLAN (§606), reading or
+    /* AND THE TITLE UNDER IT SCROLLS WITH THE PLAN (§609), reading or
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
        never marks it and its corner fill (§130.6) never paints. */

@@ -39,7 +39,10 @@ HEAD = GAP + """
   %s .rhead .rhl span { font-size:15px; letter-spacing:0; }
   %s .rhead .railterse { display:none; } }""" % (R, R, R, R)
 
-OPTIONS = {"a-gap": GAP, "b-lift": LIFT, "c-head": HEAD}
+# D · an outer line: the strip's own border in the navy of its open item,
+# so it reads as a separate thing; drawn with and without A's gap.
+LINE = """@media (max-width:1200px){ %s { border-color:var(--stone); } }""" % R
+OPTIONS = {"a-gap": GAP, "b-lift": LIFT, "c-head": HEAD, "d-line-gap": GAP + LINE, "d-line": LINE}
 
 
 def plan(b, w, sub=None, h=760):
@@ -63,7 +66,7 @@ def shoot(pg, name, y=520):
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
-    for key, css in [("today", "")] + list(OPTIONS.items()):
+    for key, css in [(k, v) for k, v in OPTIONS.items() if k.startswith("d-")]:
         for w, sub in ((1100, None), (1100, "performance"), (760, None)):
             pg = plan(b, w, sub)
             if css:

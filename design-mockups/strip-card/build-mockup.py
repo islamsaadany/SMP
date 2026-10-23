@@ -25,6 +25,15 @@ page = """<title>Strip as Its Own Card</title>
   <figure>{{a}}</figure>
   <figure style="margin-top:14px">{{a_perf}}</figure>
 
+  <h2>D&nbsp;&middot;&nbsp;An outer line, with the gap</h2>
+  <p class="cap">As A, with the strip's border drawn in the navy of the open direction, so the strip is outlined as a separate thing.</p>
+  <figure>{{dg}}</figure>
+  <figure style="margin-top:14px">{{dg_perf}}</figure>
+
+  <h2>E&nbsp;&middot;&nbsp;An outer line, without the gap</h2>
+  <p class="cap">The navy outline only. The plan still slides right up to the strip, but the line marks where the strip ends.</p>
+  <figure>{{d}}</figure>
+
   <h2>B&nbsp;&middot;&nbsp;A gap and a soft shadow</h2>
   <p class="cap">As A, with a light shadow under the strip so it looks lifted above the page.</p>
   <figure>{{b}}</figure>
@@ -38,6 +47,7 @@ page = """<title>Strip as Its Own Card</title>
 subs = {"today": img("today-plan-1100", 170, 350, "Today"), "a": img("a-gap-plan-1100", 170, 350, "Option A"),
         "a_perf": img("a-gap-performance-1100", 110, 330, "Option A on Performance"),
         "b": img("b-lift-plan-1100", 170, 350, "Option B"), "c": img("c-head-plan-1100", 170, 350, "Option C"),
+        "dg": img("d-line-gap-plan-1100", 170, 350, "Outline with gap"), "dg_perf": img("d-line-gap-performance-1100", 110, 330, "Outline with gap on Performance"), "d": img("d-line-plan-1100", 170, 350, "Outline without gap"),
         "c760": img("c-head-plan-760", 170, 370, "Option C at 760px")}
 for k, v in subs.items(): page = page.replace("{{%s}}" % k, v)
 (HERE / "2026-10-23_strip-as-own-card.html").write_text(page)

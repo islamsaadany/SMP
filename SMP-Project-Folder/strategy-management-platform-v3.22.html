@@ -2293,8 +2293,24 @@ html[data-client-settings] .viewer { display:none; }
     .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:1 1 auto; min-width:0;
       overflow-x:auto; }
     /* §53.7's ground above the pinned strip, across the full width now that
-       there is no gutter beside it to reach over. */
-    .split:not(.setupsplit) .rail::before { right:-1px; }
+       there is no gutter beside it to reach over — and ENDING ON THE BORDER'S
+       OUTER EDGE (§611). `bottom:100%` is measured from the padding box, so
+       the filler ran one pixel down over the strip's own top border and the
+       line was missing along the whole top: Islam, of the outlined strip, *"the
+       outer line is not around the whole thing is it broken?"* It was, and it
+       had been since §609 in the grey too. */
+    .split:not(.setupsplit) .rail::before { right:-1px; bottom:calc(100% + 1px); }
+    /* ── THE STRIP IS ITS OWN CARD (§611) ─────────────────────────────────
+       Islam: *"make the rail when it's in the top to be separate as if in a
+       separate card from the direction or capability data, just to be
+       appearing separately like the rail on the left"*; of five drawn
+       (design-mockups/strip-card/), *"go with D"*: an outer line in the open
+       item's own navy, and the gutter the side rail keeps kept UNDER the
+       strip while it is pinned, so the plan slides away into page ground
+       rather than up against the strip. The gutter is the corner layer below
+       reaching one `--split-gap` further down; at rest that band is the
+       split's own gap, already ground, so nothing at rest moves. */
+    .rail:not(.setuprail) { border-color:var(--stone); }
     /* ITS FOUR ROUNDED CORNERS TAKE THE PAGE'S GROUND (§130.3's fill, on the
        strip). Pinned, the plan's rows slide past behind them. At rest the
        strip stands on that same ground — unlike the band, which sits in the
@@ -2304,15 +2320,17 @@ html[data-client-settings] .viewer { display:none; }
        item's fill at either end. */
     .split:not(.setupsplit) .rail:not(.setuprail)::after {
       content:""; position:absolute; inset:-1px; pointer-events:none;
+      bottom:calc(-1px - var(--split-gap, 16px));
       background:
         radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
         radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
           var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat,
         radial-gradient(circle at 100% 0, transparent calc(var(--r) - .5px),
-          var(--ground) var(--r)) left bottom / var(--r) var(--r) no-repeat,
+          var(--ground) var(--r)) left 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
         radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
-          var(--ground) var(--r)) right bottom / var(--r) var(--r) no-repeat; }
+          var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
+        linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
     .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
     /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
        *"the text needs to wrap"*. A flex row of the item's own parts in their

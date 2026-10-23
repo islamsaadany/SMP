@@ -29,6 +29,8 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
       because a pseudo-element is invisible to every DOM probe (band-corner's
       rule). The screenshot is decoded by the browser's own canvas, so the
       suite still needs no image library.
+  6b · THE STRIP IS ITS OWN CARD (§611). Pinned, its navy outline is unbroken
+      on all four sides and a gutter of page ground lies under it.
   7 · ABOVE 1200 NOTHING MOVES (§94.2). The vertical rail is a list, and the
       band beside it is still pinned once scrolled.
 
@@ -145,6 +147,22 @@ def corners(pg, s, ground):
     return {k: px(*v) for k, v in pts.items()}
 
 
+def edges(pg, s):
+    """§611: the outline on all four sides, and the gutter under the strip."""
+    shot = pg.screenshot()
+    img = pg.evaluate(DECODE, base64.b64encode(shot).decode())
+    w = img["w"]
+    def px(x, y):
+        i = (int(y) * w + int(x)) * 4
+        return tuple(img["data"][i:i + 3])
+    mid = s["left"] + (s["right"] - s["left"]) * 0.7      # over a closed item
+    midy = s["top"] + (s["bottom"] - s["top"]) / 2
+    line = {"top": px(mid, s["top"]), "bottom": px(mid, s["bottom"] - 1),
+            "right": px(s["right"] - 1, midy), "left": px(s["left"], s["top"] + 12)}
+    gutter = [px(mid, s["bottom"] + d) for d in (3, 8, 13)]
+    return line, gutter
+
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("SMP_CHROME"))
 
@@ -184,6 +202,13 @@ with sync_playwright() as p:
             ok("1100 · pinned, the strip's four corners show the page's ground",
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in c.values()),
                {"ground": g, **c})
+            line, gutter = edges(pg, s)
+            st = rgb(tok["--stone"])
+            ok("1100 · pinned, the strip's outline runs round all four sides in the navy (§611)",
+               all(max(abs(a - b2) for a, b2 in zip(v, st)) <= 40 for v in line.values()),
+               {"stone": st, **line})
+            ok("1100 · pinned, the plan stops a gutter short of the strip — page ground under it (§611)",
+               all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in gutter), {"ground": g, "gutter": gutter})
         if pg._errs:
             ok("%d · no page errors" % w, False, pg._errs[:2])
         pg.close()

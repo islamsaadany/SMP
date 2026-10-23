@@ -5,6 +5,9 @@
 
 ## 2026-10-23
 
+### The strip of directions is its own card (§611) (built, on the branch)
+On a narrow window the strip has a navy outline all the way round, and a gap of page background stays under it while you scroll, so it reads apart from the plan as the side list does on a wide window. Its hidden top line is fixed.
+
 ### On a narrow window the strip of directions stays and the title scrolls away (§609) (built, merged to `main` 2026-10-23)
 Below 1200px wide, the strip of directions across a unit's Plan, Performance and Reporting pages (and a function's projects) sticks under the top bar when you scroll, and the open direction's title, which only repeated it, scrolls away with the plan. The open direction is filled navy like the Plan button, the others are greyed, and names wrap instead of being cut or pushed off the end; where the strip carries scores or counts, the name has its own line under them. Wide windows are unchanged. Mockup shown and approved first.
 

@@ -10557,6 +10557,16 @@ python3 checks/perf-line.py     # the Performance line: Report, Presentation and
                                 # hover AND focus, and nothing over the pinned title (§163)
 python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides, and the
                                 # demo banner's invented-content line is gone (§162)
+python3 checks/strip-stays.py   # below 1200 the strip of directions STAYS and the title
+                                # under it goes (§606): scrolled, the strip where it stood
+                                # and the band moved by the scroll (reading and editing);
+                                # one row with every direction inside it and no name cut
+                                # at 1100/900/760; the open item on the section switch's
+                                # navy, the others in the quiet ink, a score keeping its
+                                # own ground; the four corners the page's ground, read as
+                                # PAINT through the browser's canvas; and at 1440 the side
+                                # list and its pinned band untouched. 19 red on the build
+                                # before
 python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
                                 # "and it scrolls" — on a unit AND a function, with the
                                 # 620 floor still in force on a wide window (§158)

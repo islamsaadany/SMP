@@ -58,6 +58,8 @@ export type RailProcess = {
   code: string;
   name: string;
   stepCount: number;
+  /** Chosen for a deep dive (Priorities) — the picture marks it. */
+  deepDive?: boolean;
   /** Set when this process resumes from a step of another one. */
   branchFrom: { processId: string; stepId: string } | null;
   steps: RailStep[];
@@ -82,6 +84,7 @@ export type Bead = {
 };
 
 export type Rail = {
+  deepDive: boolean;
   processId: string;
   code: string;
   name: string;
@@ -319,6 +322,7 @@ export function buildMilestoneRails(
       ? Math.min(room, Math.max(RAIL_WIDTH, furthestBead + WRAP_EDGE))
       : Math.max(RAIL_WIDTH, furthestBead + RAIL_INSET);
     const rail: Rail = {
+      deepDive: !!process.deepDive,
       processId: process.id,
       code: process.code,
       name: process.name,

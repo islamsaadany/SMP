@@ -22,10 +22,11 @@ import type { PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState, writeChanges, UnaddressableChange } from "./state-io.ts";
+import type { Rules, Differ, Authorizer } from "./shared-types.ts";
 const require = createRequire(import.meta.url);
-const R = require("./rules.cjs");
-const D = require("./graph-diff.cjs");
-const { authorize } = require("./authorize.cjs");
+const R = require("./rules.cjs") as Rules;
+const D = require("./graph-diff.cjs") as Differ;
+const { authorize } = require("./authorize.cjs") as Authorizer;
 
 export const LOCK_NS = 420043;
 const LOG_ROW_CAP = 20;   /* api/state.js's cap on the rows a log line carries */
@@ -62,7 +63,10 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
     const act = R.actingFor(me, brk === "viewas-widens" ? undefined : body.viewAs, person.role, stored.people);
     if (act.refuse)
       return { code: 403 as const, body: { ok: false as const, refused: true as const, error: act.refuse, refusals: [act.refuse], refusedChanges: [], undoable: false, judgedAs: null } };
-    const acting = act.person;
+    /* §592: never missing here — `me` above always holds a person (the
+       register's row or the fallback), so actingFor answers that person,
+       the one acted through, or a refusal, which returned above. */
+    const acting = act.person!;
     /* §210: the changes are laid over what the database holds RIGHT NOW,
        under the lock — never over the tab's own baseline, which is the
        fault the whole contract exists to close (the `apply-on-base` break). */

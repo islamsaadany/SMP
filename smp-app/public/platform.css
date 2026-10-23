@@ -494,7 +494,7 @@
   .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
   .pband-hist b { font-weight:600; color:inherit; }
   .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-  /* ── §592: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
+  /* ── §598: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
      The control sits in the band's own line, after See history; while a
      day is shown it wears a field's edge so the page says which day it is
      reading. The banner is the attention family — a decision about what is
@@ -8838,7 +8838,7 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide td.idx { width:60px; color:var(--none); font-family:var(--mono); font-size:18px; text-align:right; }
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
-  /* ── §591: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
+  /* ── §597: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
      The plan page's own two signs (§233), at the deck's size: every cell of
      the row in the quiet ink at regular weight — a band colour, a bold
      figure or a coloured pill would say the row still counts, and it does

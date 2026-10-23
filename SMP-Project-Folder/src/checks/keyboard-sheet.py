@@ -91,8 +91,11 @@ with sync_playwright() as p:
                caps: document.querySelectorAll('#modal-b kbd').length };
     }""", {})
     ck("pressing ? opens it", shown.get("open") and shown.get("title") == "Keyboard", shown)
+    # §582.2 added the eighth: the remote's keys, from any page, while the
+    # slides are up in another window.
     ck("...with every section, not only the live ones (treatment A)",
-       shown.get("rows") == 7 and len(shown.get("secs") or []) == 7, shown)
+       shown.get("rows") == 8 and len(shown.get("secs") or []) == 8 and
+       "Slides in another window" in (shown.get("secs") or []), shown)
     ck("...and the deck's keys are on it even though the deck is shut",
        "Presenting" in (shown.get("secs") or []), shown.get("secs"))
     ck("...drawn as keycaps", (shown.get("caps") or 0) >= 20, shown)
@@ -190,16 +193,18 @@ with sync_playwright() as p:
              "F": '"f"', "W": '"w"', "P": '"p"', "N": 'KeyN', "Alt": "altKey",
              # §546's three, matched on the PHYSICAL key like §528's Alt+N
              "S": 'KeyS', "D": 'KeyD', "E": 'KeyE', "G": 'KeyG',
-             "Shift": "shiftKey", "Tab": "Tab", "Space": '" "'}
+             "Shift": "shiftKey", "Tab": "Tab", "Space": '" "',
+             # §581, §582.2: the deck's clock and figures, the remote's pages
+             "T": 'KeyT', "Y": 'KeyY', "R": 'KeyR', "PgDn": '"PageDown"', "PgUp": '"PageUp"'}
     missing = []
-    for sec in ("figures", "deck", "anywhere", "lists", "rows"):
+    for sec in ("figures", "deck", "anywhere", "lists", "rows", "room"):
         for k in set(said.get(sec) or []):
             frag = NAMED.get(k)
             if frag and frag not in code:
                 missing.append(sec + ":" + k)
     ck("every key the sheet names is one the build tests for", not missing, missing[:5])
-    ck("...and the sheet claims seven idioms, which is what the product has",
-       len(said) == 7, sorted(said.keys()))
+    ck("...and the sheet claims eight idioms, which is what the product has",
+       len(said) == 8, sorted(said.keys()))
     # NO NEW SHORTCUT: `?` is bound once, by the sheet, and nowhere else.
     qbind = len(re.findall(r'key !== "\?"|key === "\?"', code))
     ck("? is bound in exactly one place — the sheet itself", qbind == 1, qbind)

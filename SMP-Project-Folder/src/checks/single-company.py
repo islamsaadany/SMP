@@ -345,10 +345,12 @@ with sync_playwright() as p:
         ck("pressing a division opens its own page", safe(pg, "()=>current") == "co:" + DIV, safe(pg, "()=>current"))
         ck("…its functions beside the switch", n3.get("fns") == mine, [n3.get("fns"), mine])
         ck("…and its segment is marked as where you are", [x["here"] for x in (n3.get("segs") or [])] == [True, False], n3.get("segs"))
-        v = pg.evaluate("""(ck)=>({fns:document.querySelectorAll('#panel [data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
-                  perf:companyObjectives(ck), mix:companyMix(ck,'perf')})""", DIV)
+        # REWRITTEN TO THE NEW RULE (218, 593): a division's functions read on
+        # their own, each counted equally, never blended with its units.
+        v = pg.evaluate("""(ck)=>({fns:document.querySelectorAll('#panel .gname [data-go^="fn:"], #panel .gauges [data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
+                  fnPerf:fnsReading(companyFnKeys(ck)).perf, mine:(function(){ var a=companyFnKeys(ck).map(k=>fnMemberScores(k).perf).filter(v=>v!=null); return a.length? Math.round(a.reduce((x,y)=>x+y,0)/a.length): null; })()})""", DIV)
         ck("…the division's reading: one card per linked function, no unit", bool(v) and v["fns"] == 2 and v["units"] == 0, v)
-        ck("…its figure scored from those functions alone", bool(v) and v["perf"] == v["mix"], v)
+        ck("…its functions' figure is the plain average of what each shows", bool(v) and v["fnPerf"] == v["mine"], v)
         press(pg, '#units [data-u="%s"]' % (mine or ['-'])[0])
         ck("opening one of its functions keeps the division's list", navNow().get("fns") == mine and bool(mine) and safe(pg, "()=>current") == mine[0])
         row = safe(pg, "()=>{current='group'; currentSub='performance'; paint(); return [...document.querySelectorAll('#secrow-in [data-sec]')].map(b=>b.textContent)}", [])

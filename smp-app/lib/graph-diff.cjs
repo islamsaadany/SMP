@@ -466,7 +466,12 @@
      part paths too): one segment for a whole part, two for a keyed map's
      entry or a review field, three ONLY for a review per-target entry
      (§234). Anything else is refused rather than resolved. */
+  /* §592: the two answers written as two, so a TypeScript caller (smp-app's
+     save) can tell a refusal from a state by `ok` — inferred, `ok` was any
+     boolean on both and neither shape could be told apart. Comments only. */
+  /** @param {string} why @returns {{ ok: false, error: string }} */
   function bad(why) { return { ok: false, error: why }; }
+  /** @returns {{ ok: false, error: string } | { ok: true, state: any }} */
   function applyChanges(target, changes) {
     if (!changes || typeof changes !== "object")
       return { ok: false, error: "no changes to apply" };
@@ -725,8 +730,10 @@
   /* What a line's place holds in a graph, read leniently: anything that is
      not there answers { has:false } rather than throwing, because the graph a
      line is read against may have moved on since the line was written. */
+  /** §592, for applyChanges' reason: `has` tells the two answers apart.
+      @returns {{ has: false } | { has: true, value: any }} */
   function valueAt(state, line) {
-    var none = { has: false };
+    /** @type {{ has: false }} */ var none = { has: false };
     if (!state || !line || !line.change) return none;
     var ch = line.change;
     var p = ch.set ? Object.keys(ch.set)[0] : (ch.del && ch.del[0]);

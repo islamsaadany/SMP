@@ -126,6 +126,7 @@ function StaticRailRow({ rail }: { rail: Rail }) {
       <div className="flex items-baseline gap-2">
         <span className="font-mono text-[11px] font-bold text-[var(--accent)]">{rail.code}</span>
         <span className="truncate text-[13px] font-semibold text-slate-900">{rail.name}</span>
+        {rail.deepDive && <span className="flex-none rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-bold text-amber-800">Deep dive</span>}
         <span className="flex-none rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-semibold text-slate-600">
           {rail.stepCount} {rail.stepCount === 1 ? "step" : "steps"}
         </span>

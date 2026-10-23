@@ -11136,7 +11136,36 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # the pages → run this; a new finding is READ,
                                 # then fixed or recorded with `--write` — never
                                 # written to turn it green unread. `--red`: six
-                                # faults, all caught
+                                # faults, all caught. SINCE §594 IT ALSO READS
+                                # THE CONSOLE (platform.html + the scripts its
+                                # tags load), list console-types.known.json:
+                                # most of it is the set-up flow naming
+                                # STRATEGY-PAGE data the console lacks — a NEW
+                                # one there may throw on the console (§467):
+                                # show it is guarded before `--write`. AND
+                                # §596 WALKS THE CONSOLE'S PATHS into the
+                                # set-up flow (acorn): every strategy-page name
+                                # reachable from CLIENTSETUP.mountCreate /
+                                # mountArchived must sit under a typeof guard.
+                                # A route only data closes (canShape()) goes in
+                                # DOORWAYS with its reason; a doorway that
+                                # vanishes fails. Fifteen breaks, §467 itself
+                                # among them, all caught
+node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
+                                # — `npm run check:app-types`. A carried .cjs
+                                # loaded with `require` is `any`: load the
+                                # rules, the differ, the authoriser or the
+                                # platform rules ONLY as `require(...) as Rules`
+                                # (Differ, Authorizer, PlatformRules from
+                                # lib/shared-types.ts — read from the modules,
+                                # never written out). It scans every .ts/.tsx
+                                # for a bare load, keeps allowJs on / checkJs
+                                # off, and wants the app's checker silent where
+                                # they are used. NEVER put `// @ts-check` back
+                                # in lib/rules.js: allowJs then CHECKS it under
+                                # strict (586 findings, `next build` fails).
+                                # `--red`: seven breaks in place, restored in a
+                                # finally, all caught
 DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
 DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
 ```

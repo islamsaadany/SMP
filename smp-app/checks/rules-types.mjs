@@ -74,6 +74,11 @@ const check = (w, g, d) => { if (g) { ok++; console.log("  ok   " + w); } else {
 const r = tsc(LIB);
 check("the shared rules and the server's authoriser agree with the rules' own types",
   r.status === 0, (r.stdout + r.stderr).trim());
-check("the rules file asks for checking in an editor too",
-  readFileSync(join(LIB, "rules.js"), "utf8").startsWith("// @ts-check\n"));
+/* §592 REVERSES §585's `// @ts-check`: the app reads this file's types
+   (allowJs), and the marker makes TypeScript CHECK a JavaScript file
+   whatever checkJs says — so the app's strict checker read all of rules.cjs
+   and reported 586 findings. This check passes --checkJs itself, so it
+   never needed the marker; only an editor did. */
+check("the rules file carries no // @ts-check, which would hold it to the app's strict settings",
+  !/^\s*\/\/\s*@ts-check/m.test(readFileSync(join(LIB, "rules.js"), "utf8")));
 console.log(`\n${ok} ok, ${fails.length} failed`); process.exit(fails.length ? 1 : 0);

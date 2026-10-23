@@ -1,0 +1,217 @@
+import "server-only";
+import { prisma } from "@/ffp/lib/db/client";
+import {
+  DEFAULT_WEIGHTS,
+  deepDiveProgress,
+  rankProcesses,
+  suggestComplexity,
+  suggestRisk,
+  type Decision,
+  type PlanStatus,
+  type ScoreFacts,
+  type Weights,
+} from "@/ffp/lib/domain/priorities";
+
+export type PlanView = {
+  id: string | null;
+  weights: Weights;
+  capacity: number;
+  wave1Label: string;
+  wave2Label: string;
+  laterLabel: string;
+  status: PlanStatus;
+  approverPersonId: string | null;
+  approverName: string | null;
+  approverRole: string | null;
+  sentAt: Date | null;
+  sentByName: string | null;
+  sentByEmail: string | null;
+  returnReason: string | null;
+  approvedAt: Date | null;
+  approvedByName: string | null;
+  approvedByRole: string | null;
+  history: { at: string; by: string; what: string; reason?: string }[];
+  /** What was sent to the client, frozen. Null until it is sent. */
+  snapshot: PlanSnapshot | null;
+};
+
+export type PriorityRow = {
+  id: string;
+  code: string;
+  name: string;
+  department: string | null;
+  importance: number | null;
+  complexity: number | null;
+  risk: number | null;
+  why: string | null;
+  decision: Decision | null;
+  score: number | null;
+  rank: number | null;
+  suggestedComplexity: { score: number; reason: string } | null;
+  suggestedRisk: { score: number; reason: string } | null;
+  progress: { done: number; total: number; aspects: { label: string; done: boolean }[] };
+  lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
+};
+
+const DEFAULT_PLAN: PlanView = {
+  id: null,
+  weights: DEFAULT_WEIGHTS,
+  capacity: 4,
+  wave1Label: "Start now",
+  wave2Label: "Next",
+  laterLabel: "Review later",
+  status: "DRAFT",
+  approverPersonId: null,
+  approverName: null,
+  approverRole: null,
+  sentAt: null,
+  sentByName: null,
+  sentByEmail: null,
+  returnReason: null,
+  approvedAt: null,
+  approvedByName: null,
+  approvedByRole: null,
+  history: [],
+  snapshot: null,
+};
+
+export async function loadPlan(workspaceId: string): Promise<PlanView> {
+  const p = await prisma.priorityPlan.findUnique({ where: { workspaceId } });
+  if (!p) return DEFAULT_PLAN;
+  return {
+    id: p.id,
+    weights: { importance: p.weightImportance, risk: p.weightRisk, complexity: p.weightComplexity },
+    capacity: p.capacity,
+    wave1Label: p.wave1Label,
+    wave2Label: p.wave2Label,
+    laterLabel: p.laterLabel,
+    status: p.status,
+    approverPersonId: p.approverPersonId,
+    approverName: p.approverName,
+    approverRole: p.approverRole,
+    sentAt: p.sentAt,
+    sentByName: p.sentByName,
+    sentByEmail: p.sentByEmail,
+    returnReason: p.returnReason,
+    approvedAt: p.approvedAt,
+    approvedByName: p.approvedByName,
+    approvedByRole: p.approvedByRole,
+    history: (p.history as unknown as PlanView["history"]) ?? [],
+    snapshot: (p.snapshot as unknown as PlanSnapshot | null) ?? null,
+  };
+}
+
+/** Every process in the workspace with its scores, rank, starting suggestions and how far its deep dive has got. Ranked rows first. */
+export async function loadPriorityRows(workspaceId: string, weights: Weights): Promise<PriorityRow[]> {
+  const where = { workspaceId, archivedAt: null };
+  const [processes, steps, controls, authority] = await Promise.all([
+    prisma.process.findMany({
+      where,
+      orderBy: { code: "asc" },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        category: { select: { name: true } },
+        priorityImportance: true,
+        priorityComplexity: true,
+        priorityRisk: true,
+        priorityWhy: true,
+        deepDiveDecision: true,
+        sopVersion: true,
+        lifecycleStatus: true,
+        raciMatrixStatus: { select: { status: true } },
+      },
+    }),
+    prisma.processStep.findMany({
+      where: { process: where },
+      select: { processId: true, type: true, assignedRoleId: true, _count: { select: { links: true, handoffsOut: true, handoffsIn: true } } },
+    }),
+    prisma.processControl.findMany({ where: { process: where }, select: { processId: true, riskLevel: true, control: true } }),
+    prisma.authorityAssignment.groupBy({ by: ["processId"], where: { process: where }, _count: { _all: true } }),
+  ]);
+
+  const facts = new Map<string, ScoreFacts & { controlsLogged: number }>();
+  const get = (id: string) => {
+    let f = facts.get(id);
+    if (!f) facts.set(id, (f = { steps: 0, decisions: 0, crossProcess: 0, roles: 0, risksHigh: 0, risksMedium: 0, risksLow: 0, controlsLogged: 0 }));
+    return f;
+  };
+  const roleSets = new Map<string, Set<string>>();
+  for (const s of steps) {
+    const f = get(s.processId);
+    f.steps++;
+    if (s.type === "DECISION") f.decisions++;
+    f.crossProcess += s._count.links + s._count.handoffsOut + s._count.handoffsIn;
+    if (s.assignedRoleId) (roleSets.get(s.processId) ?? roleSets.set(s.processId, new Set()).get(s.processId)!).add(s.assignedRoleId);
+  }
+  for (const [id, set] of roleSets) get(id).roles = set.size;
+  for (const c of controls) {
+    const f = get(c.processId);
+    if (c.riskLevel === "high") f.risksHigh++;
+    else if (c.riskLevel === "medium") f.risksMedium++;
+    else f.risksLow++;
+    if (c.control && c.control.trim()) f.controlsLogged++;
+  }
+  const authorityBy = new Map(authority.map((a) => [a.processId, a._count._all]));
+
+  const base = processes.map((p) => {
+    const f = get(p.id);
+    return {
+      id: p.id,
+      code: p.code,
+      name: p.name,
+      department: p.category?.name ?? null,
+      importance: p.priorityImportance,
+      complexity: p.priorityComplexity,
+      risk: p.priorityRisk,
+      why: p.priorityWhy,
+      decision: p.deepDiveDecision as Decision | null,
+      suggestedComplexity: suggestComplexity(f),
+      suggestedRisk: suggestRisk(f),
+      progress: deepDiveProgress({
+        steps: f.steps,
+        raciFinal: p.raciMatrixStatus?.status === "FINAL",
+        authorityAssigned: authorityBy.get(p.id) ?? 0,
+        controlsLogged: f.controlsLogged,
+        sopVersion: p.sopVersion,
+        lifecycleStatus: p.lifecycleStatus,
+      }),
+      lifecycleStatus: p.lifecycleStatus,
+    };
+  });
+  return rankProcesses(base, weights).map(({ item, score, rank }) => ({ ...item, score, rank }));
+}
+
+export type PlanSnapshot = {
+  weights: Weights;
+  capacity: number;
+  labels: { WAVE_1: string; WAVE_2: string; LATER: string };
+  total: number;
+  rows: {
+    id: string;
+    code: string;
+    name: string;
+    department: string | null;
+    importance: number | null;
+    complexity: number | null;
+    risk: number | null;
+    score: number | null;
+    rank: number | null;
+    why: string | null;
+    decision: Decision | null;
+  }[];
+};
+
+/** What the client is shown and signs: the weights, the capacity, and every ranked or decided process as it stands. One builder, so the preview and what is sent cannot differ. */
+export function buildSnapshot(plan: PlanView, rows: PriorityRow[]): PlanSnapshot {
+  return {
+    weights: plan.weights,
+    capacity: plan.capacity,
+    labels: { WAVE_1: plan.wave1Label, WAVE_2: plan.wave2Label, LATER: plan.laterLabel },
+    total: rows.length,
+    rows: rows
+      .filter((r) => r.rank != null || r.decision != null)
+      .map((r) => ({ id: r.id, code: r.code, name: r.name, department: r.department, importance: r.importance, complexity: r.complexity, risk: r.risk, score: r.score, rank: r.rank, why: r.why, decision: r.decision })),
+  };
+}

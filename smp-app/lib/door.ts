@@ -17,14 +17,12 @@
 import { createRequire } from "node:module";
 import type { Pool, PoolClient } from "pg";
 import type { SessionUser } from "./auth.ts";
+import type { PlatformRules } from "./shared-types.ts";
 
 const require = createRequire(import.meta.url);
 /* the platform's own rules, the frozen module byte for byte — the key and the
    shipped defaults are read from it rather than spelt again here (§53.5) */
-const FF = require("./platform-rules.cjs") as {
-  EVERYONE: string;
-  ACCESS_DEFAULTS: Record<string, Record<string, string>>;
-};
+const FF = require("./platform-rules.cjs") as PlatformRules;
 
 type Q = Pool | PoolClient;
 

@@ -182,6 +182,7 @@ model Workspace {
   roles                 Role[]
   people                Person[]
   processes             Process[]
+  priorityPlan          PriorityPlan?
   phases                Phase[]
   governanceAspects     GovernanceAspect[]
   governanceAssessments GovernanceAssessment[]
@@ -359,6 +360,14 @@ model Process {
   retiredAt            DateTime?
   versions             ProcessVersion[]
   acknowledgements     ProcessAcknowledgement[]
+
+  /// Choosing which high-level processes to take deep (Priorities). The three scores are 1–5 and the
+  /// office's own judgement; the decision is where the process goes. Null until somebody says.
+  priorityImportance Int?
+  priorityComplexity Int?
+  priorityRisk       Int?
+  priorityWhy        String?
+  deepDiveDecision   DeepDiveDecision?
 
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -578,6 +587,54 @@ model StepConnection {
 /// predecessor of the `to` step, which lives in another process. Kept apart
 /// from StepConnection on purpose — that table is same-process only and the
 /// layout, arrange, readiness, print and export code all rely on it.
+enum DeepDiveDecision {
+  WAVE_1
+  WAVE_2
+  LATER
+  HIGH_LEVEL
+}
+
+enum PriorityPlanStatus {
+  DRAFT
+  SENT
+  APPROVED
+}
+
+/// One per workspace: how the scores are weighed, how many deep dives run at once, and the client's
+/// sign-off of the resulting shortlist. What was sent is frozen in `snapshot`, so the client approves
+/// exactly what they were shown; changing the plan after that is a reopening, with a reason, on record.
+model PriorityPlan {
+  id               String             @id @default(uuid())
+  workspaceId      String             @unique
+  weightImportance Int                @default(35)
+  weightRisk       Int                @default(40)
+  weightComplexity Int                @default(25)
+  capacity         Int                @default(4)
+  wave1Label       String             @default("Start now")
+  wave2Label       String             @default("Next")
+  laterLabel       String             @default("Review later")
+  status           PriorityPlanStatus @default(DRAFT)
+  approverPersonId String?
+  approverName     String?
+  approverRole     String?
+  sentAt           DateTime?
+  sentByName       String?
+  sentByEmail      String?
+  snapshot         Json?
+  returnReason     String?
+  approvedAt       DateTime?
+  approvedByName   String?
+  approvedByRole   String?
+  /// { at, by, what, reason? }[] — the plan's own record.
+  history          Json               @default("[]")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("priority_plans")
+}
+
 enum ProcessLifecycleStatus {
   DRAFT
   IN_REVIEW

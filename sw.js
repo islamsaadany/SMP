@@ -541,7 +541,23 @@
    and a tab asks "what changed since N" instead of fetching the graph. The
    built file's bytes changed, which is the whole trigger (§91). Proved held
    by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.86-plan-as-it-stood";
+/* v6.85-company-label — §591: the company labelled the company in the
+   Master presentation; a box of capabilities called that. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.86-remote-keys — §582.2: the remote works from any page while the
+   slides are up. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+/* v6.87-app-types — §592: the rules file loses its `// @ts-check` line and
+   the differ gains type comments; nothing runs differently. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.88-functions-row — §593: units and functions each get their own
+   score on the group and on a division. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.89-plan-as-it-stood";
 const ASSETS = [
   "/",
   "/index.html",

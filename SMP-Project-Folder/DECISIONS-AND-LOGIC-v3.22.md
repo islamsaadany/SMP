@@ -68150,6 +68150,17 @@ Islam: *"how about the presenter has a different view than the presented on the 
 
 **§582.1 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§586, one template for every box's presentation, which rewrote much of `present.js`), so `main` was merged INTO the branch — git joined the two with no conflict in the sources, and that was not taken on trust: on the merged tree `one-template` (main's own), `present-window`, `two-screens`, `deck-refresh`, `clock-stages`, `line-by-line`, `guided-tour`, `master-presentation`, `present-loop`, `presentation-timer` 65, `deck-pdf`, `deck-model`, `direction-slides`, `slide-columns`, `hide-slide` and `video-slides` all green; the progress lines kept in order and the built file and served copies regenerated, never resolved by hand; `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.81-one-template` → **`smp-shell-v6.82-present-window`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Slides and the slide view only; no save judged differently. Witnesses: `/sw.js` release **`0f84f2deea5eb9e7`**, `/shell.js` **5,116,453** before; after they should read **`a700e38c778e2ae1`** and **5,119,101**.
 
+**§582.2 — THE REMOTE, FROM ANY PAGE. A REVERSAL OF ONE §582 RULE.** Islam: *"when I'm on the platform trying to make edits and adjustments the navigation on the extended or the other window is lost so when we click right or left or up and down with a keyboard or a remote it doesn't work"*. A remote is a keyboard, and its keys go to whichever window is in front; §582 had kept a page's keys *the page's own — typing a figure never moves a slide*, and this is what that cost. Put to him: Page Down / Page Up (what most remotes send) and → / ← move the slides from any page while they are up; typing stays typing; a control that uses the keys keeps them; ↑ ↓ either scroll or move; T from a page or not. Answered *"keep for scrolling"* and *"yes T works, build it"*. No mockup: the one visible change is a line of keys on the strip already approved, and he went straight to build.
+
+- **WHAT IS TAKEN.** While `ROOM` is up and neither the slide view nor a deck is on this screen: Page Down and → step forward, Page Up and ← back, T holds or starts the slides' clock. Heard on the window and LAST, so every control has had its turn; anything already answered (`defaultPrevented` — the reorder handles, the search list) is left alone.
+- **WHAT IS NEVER TAKEN.** A box being typed in (input, text area, list box, anything editable), a player, and anything whose role says it uses the keys (the tab bar and its tabs, lists, menus, sliders, radio groups, grids); Alt, Ctrl and Cmd with any key, which are the platform's own shortcuts (§546); ↑ ↓, which keep scrolling. Typing a figure still never moves a slide — the half of §582's rule that was the point of it stays.
+- **SAID WHERE IT WORKS.** The strip on every page gains *PgDn → next · PgUp ← back · T timer*. The keyboard sheet gains an eighth section, *Slides in another window*, live while they are up; and its *Presenting* section finally lists T, Y and R, which §580/§581 should have added the day they arrived (B2: missed then, put right now).
+- **ONE LIMIT, SAID TO HIM.** Another app in front (Excel, Teams, mail) gets the keys; no web page can reach them there. Clicking back into the platform or the slides window brings them back.
+
+**CHECKED.** New `remote-keys`, 18 claims, the slides window real: on a page with the slides up, Page Down, Page Up, → and ← each move them one step; T holds and T again starts their clock; the strip names the keys; ↓ and ↑ leave the slides; Alt+→ leaves them; in a box → moves the cursor (caret measured), Page Down leaves the slides, a T typed is a letter and the clock untouched; on the tab bar → is the tab bar's; back in the slide view → moves the slides once, not twice; presenting stopped, Page Down is the page's again, nothing taken. **Red 6** on the build before. `two-screens`' *on a page the keys stay the page's own* rewritten to the reversal (→ moves the room), the reversal named in the check. `keyboard-sheet` told of the eighth section and of the keys it names (T, Y, R, PgDn, PgUp checked against the build). Neighbours green: `present-window`, `deck-refresh`, `clock-stages`, `master-presentation`, `line-by-line`, `report-keys`, `action-keys`, `dropdown-keys`, `tab-arrows`, `video-keys`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§582.2 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§587–§591: a box's own split setting, TypeScript's checker on the pages and the authoriser, the company labelled the company; and §588, other people's saves arriving without a reload, which rewrote much of `sync.js`), so `main` was merged INTO the branch, no source conflict, the progress lines kept in order and the built file and served copies regenerated, never resolved by hand. Read after the merge, not assumed: the room window's no-saving guard still stands first in `save()` and the leave flush, ahead of §588's new paths (which only read); `SYNC.refresh` keeps its contract. On the merged tree: `remote-keys`, `two-screens`, `present-window`, `deck-refresh`, `clock-stages`, `line-by-line`, `keyboard-sheet`, `master-presentation`, `guided-tour`, and main's `both-levels`, `one-template`, `safety-banners` green; `test-graph-diff.js` 165; `test-authorize.js` 1123 with the same 3 red as before (§447, §505, §520.6); main's `pages-types` (no finding beyond its 98 recorded) and `rules-types` green, run with the lockfile's TypeScript 7.0.2 and Node types installed into a scratch folder for the run, since this container has neither; `saves-since.mjs` not run (it needs a database); `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.85-company-label` → **`smp-shell-v6.86-remote-keys`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Keys while presenting only; no save judged differently. Witnesses: `/sw.js` release **`2b79d450b9f786e2`**, `/shell.js` **5,148,812** before; after they should read **`92f3825ab0b2b113`** and **5,152,482**.
+
 ## §583 — My work in the Internal Tracker's look, with the done tick and the status on the row (2026-10-22)
 Islam: *"let's redesign mywork to be similar to the internal tracker page creak a mockup"*; of the first round, which left the tick and the status out because My work only read, *"add the done tick and status change too"*; of the second, *"go ahead and build it"*.
 
@@ -68425,6 +68436,149 @@ The carried copy, `smp-app/lib/authorize.cjs`, takes the change by the usual tra
 
 **§589 AND §590 MERGED TO `main`** 2026-10-23, Islam: *"fix the gap and put it live"*. `main` had moved under the branch twice. First came the deck work (§586), brought in before §589 was written. Then came §587, §588 and §588.1, which took both of this branch's numbers, so these two were renumbered from §587 and §588. Main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. **The page check did its job on the merge itself**: §588 had added one finding (`unsaved.js`, `label()` reusing its parameter name `l` for the split address after reading it). It was read, it is not a fault, and it was recorded, so the list is **98**. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses. `check:rules-types` 2 / 0 with all six breaks red, and `check:pages-types` 3 / 0 with all six red. `test-authorize` 1123 / 3 and `test:rules` 152 / 3, identical to `main` alone. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump**: no file a browser receives changed. The built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s, and the authoriser is server code. No forced sign-out, because no save is judged differently. Witnesses: `/sw.js` release **`e266d66d5fbfeea5`** and `/shell.js` **5,148,090** bytes before, and the same after. A release that touches only server code is the one case where the same stamp is correct (§397). The authoriser's change cannot be seen from a screen.
 
+## §591 — The company is labelled the company in the Master presentation; a box of capabilities is called that (2026-10-23)
+Islam, on the final test of spec 066 (§587's report): *"do 1 and 2"*.
+
+**1 — THE COMPANY IN THE MASTER PRESENTATION, CORRECTED BEFORE IT WAS BUILT.** The report said a client with business units AND a company planning its own work (Wander Development) could not put the company's plan in the Master presentation. That was wrong, and it was found by the check written for the fix going green on the live build: `boardUnitTargets` already offers the company first among the units (§428). What WAS wrong is its label — `masterKindWord` called it a business unit (BU) unless the company was the whole plan. It is the company (CO) on either shape now. The first draft also appended it at the end, which would have listed it twice; taken out. Its place in the order does not move.
+
+**2 — A BOX SHOWN APART THAT HOLDS ONLY CAPABILITIES IS CALLED THAT.** Since §587 Wander's company roll-call and score table say Capabilities; the closing slide went on saying *"Pillars performance · 4 Pillars, by their measures"* and the Overall performance divider *"Where the Pillars stand"*. They say Capabilities now (`kindBU`), and the footnote with them. A box holding both kinds keeps §553.6's wording.
+
+**CHECKED.** Every deck against the live build: only Wander's company deck (and its plan) moves. New `checks/both-levels.py` (9 claims; the label and the wording red on the live build). `one-template`, `master-presentation` 50/0, `direction-decks`, `presentation-parts`, `deck-model`, `deck-figures`, `pillar-split` 46/0, `presentation-timer` 65/0, `built-in-step`, `no-twin-functions` green.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. Main had moved (§588/§588.1 and §589/§590 from other sessions), so this entry was renumbered §588 → **§591**, main merged in and the generated files rebuilt; re-measured against that live build: Wander's company deck moves and nothing else. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.84-quiet-merge` → **`v6.85-company-label`**. Pages only: no forced sign-out.
+
+## §592 — The new app's code sees the carried rule modules' own types (2026-10-23)
+Islam, after §589 and §590 went live: *"now do the same for the new app's code"*.
+
+**THE GAP.** The Next app loads four plain-JavaScript modules carried from the frozen product (§330): the shared rules, the change-list differ, the authoriser and the platform's own rules. Nine of its files load them, with `require` or `createRequire(...)()`, and `require` hands back `any`. So until now **no call from this app into a rule was checked at all**, under a `strict` tsconfig that everybody reading it would have assumed covered them. One file, `lib/door.ts`, described the platform rules by hand: a second copy of two of the module's keys, free to drift.
+
+**WHAT WAS DONE:**
+- **`lib/shared-types.ts` READS each module's types out of the module itself** (`typeof import("./rules.cjs")` and so on). The types are never written out a second time, so they move with the code. They are CLOSED with a mapped type (§589's reason: a JavaScript object is open to the checker).
+- **Every load is declared with one** (`as Rules`, `as Differ`, `as Authorizer`, `as PlatformRules`). `door.ts`'s hand-written copy is gone.
+- **`allowJs` is on in tsconfig.json, so the checker can read the modules.** `checkJs` stays off, so the modules themselves are not held to this app's strict settings. Turned on alone, `allowJs` changed nothing: the app's full typecheck stayed clean.
+
+**THE PRICE, AND A REVERSAL OF §585, STATED.** `allowJs` makes TypeScript read `rules.cjs`, and §585's `// @ts-check` on line 1 makes it CHECK a JavaScript file whatever `checkJs` says. So the app's strict checker read the whole rules file and reported **586 findings**, which would have failed `next build`. **The marker is removed.** It only ever told an editor to underline while somebody typed. `check:rules-types` passes `--checkJs` itself and never needed it, and it now asserts the marker's ABSENCE, with the reason. The cost is that an editor no longer underlines `lib/rules.js` as it is typed. Removing one comment line changes the served `shell.js`, so open tabs are offered the reload once, with nothing visible changed.
+
+**WHAT TYPING THEM FOUND: NO FAULT.** With all four modules typed and closed, the app's checker reported **seven** findings, then **three**. Each was read, and none is a fault:
+- **The differ's two answers could not be told apart.** `applyChanges` answers `{ok:false, error}` or `{ok:true, state}`, and `valueAt` answers `{has:false}` or `{has:true, value}`. Inferred from JavaScript, `ok` and `has` were any boolean on both shapes, so the save's `if (!applied.ok) return` did not tell the checker that `state` was there. **Said in the differ's own file:** a type comment on `bad`, `applyChanges`, `valueAt` and `none`.
+- **The save reads the acting person, and the rules say it can be missing.** `actingFor` answers `{person: me}` even when `me` is null. In `save()` it never is: `me` is the register's row or a fallback object. **Said where it is used:** `act.person!`, with a comment saying why.
+- **The platform's defaults are looked up by `EVERYONE`,** a string, rather than by the one literal key the object has. `door.ts`'s hand-written copy had covered this. **Said once, in the module itself:** a type comment on `ACCESS_DEFAULTS`.
+
+Every rule the app calls by name, in all four modules, exists.
+
+**NOTHING RUNS DIFFERENTLY.** Every change is a comment, a type, or a TypeScript `as`, `!` or `import type`, all erased at build.
+- With comments removed, all **355 / 8 / 36** exports of the rules, the differ and the platform rules are identical.
+- `test-authorize` 1123 / 3 and `test:rules` 152 / 3, the same six failures `main` already had. `test-platform-rules` 69 / 0 and `test-graph-diff` 165 / 0.
+- `npm run typecheck` is clean, and **`next build` passes, its TypeScript step included** (run here with the database step left out).
+- The pages' check still reads its 98, and the rules' check is 2 / 0.
+
+**THE CHECK** is `smp-app/checks/app-types.mjs`: `npm run check:app-types`, with `:red`. It asserts three things the app's own typecheck would never say out loud if they stopped being true:
+- every load of one of the four, in every `.ts`/`.tsx` (found by scanning, never by a list), carries its type — a new file loading the rules bare would otherwise be `any` again, silently;
+- tsconfig keeps `allowJs` on and `checkJs` off;
+- the app's checker reports nothing in the files that load them.
+
+`--red` breaks seven things IN PLACE and puts each file back byte for byte in a `finally`; copying the app would mean copying its generated Prisma and route types too. The seven:
+- a rule misspelt;
+- a rule one argument short;
+- a grant compared against a word that is not one;
+- the differ misspelt;
+- the authoriser misspelt;
+- a platform rule misspelt;
+- a load with its type taken off.
+
+**All seven are caught**, each only when the failure names the broken file. Before this, none of the six code faults could have been: `any` is never an error.
+
+**NOT DONE.** The app's other carried modules (the assistant, the mailer, `frozen.cjs`, `graph-io.cjs`, `chat-api.cjs`, `mail-api.cjs`) still carry hand-written `as {…}` shapes or none. They are not rule modules, and each is its own errand.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§592 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§582.2, the remote from any page, and §591, which took the number this branch had written into its comments, so they were renumbered §592). It was merged INTO the branch. The decision record keeps §591 before §592, and the progress lines keep newest first. The built file, `shell.js` and `sw.js` conflicted and were regenerated from the merged sources, never resolved by hand. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. The three type checks read 2 / 0, 3 / 0 (still 98) and 4 / 0, with red 6 / 6, 6 / 6 and 7 / 7. The tests are unchanged, and `qa.py` reads no errors for any viewer. Then this note and the `SHELL` bump `smp-shell-v6.86-remote-keys` → **`smp-shell-v6.87-app-types`**, as a commit `main` alone holds (§91), the name held by no commit on any remote ref. No save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`92f3825ab0b2b113`** and `/shell.js` **5,152,482** bytes before; after, they should read **`23aa60634dbc23b5`** and **5,153,015**.
+
+## §593 — Units and functions each get their own score, on the group and on a division (2026-10-23)
+Islam, on the simplification's final test: *"in case of business units they get their own score and the functions get their own score and we see both on the group"*; of how the functions count, *"stay equal"*; of divisions, *"yes same for divisions"*. Shown first as a picture on Raya's real group page.
+
+**WHY.** The group read its units alone and never its functions; a division blended its units and functions into one figure, the functions taking shares set on Setup (§391, his A at the time). One question, two answers — spec 066's finding.
+
+**WHAT.** Neither level blends now. The units' figures are the units' (weighted by size, unchanged), and the functions' are the functions' — `fnsReading`, the plain average of what each function's own page shows (`fnMemberScores`), a function with nothing to read left out rather than counted as nought:
+- **The group** (where it has units): a second row of two cards, *Functions — performance* and *Functions — execution*, under the units' two, each with a drill listing every function's figure; and a *Functions — where to look next* row of chips.
+- **A division**: its headline cards are its units' alone (`companyObjectives` / `companyRatio` over its units); its functions get the same two cards and keep their own section; a division of functions alone draws only that row.
+- **Setup**: the function's *Weight in its division* field and the Functions table's *Weight* column are gone (§24), with the handler that stored it. A weight left from §391 is ignored, and dropped when the function moves. `companyShares`, `companyMix` and `fnCoWeightSet` are deleted.
+
+**WHAT MOVES.** The group's units' figures do not move. A division that held functions now headlines on its units alone, with its functions beside it. A client with no units (El Abd) is unchanged: "in case of business units".
+
+**CHECKED.** `division-functions` rewritten to the new rule (§218), 24/0. `single-company`'s division claim rewritten; its one red (§449) is identical on the live build, as are `top-plan` 1, `setup-live-rows` 2 and `wave3` 9 (all pre-existing). `control-targets`, `role-picker`, `objectives-actions` 58/0, `structure`, `platform-cards` 30/0, `perf-line`, `built-in-step`, `no-twin-functions` green. Every deck on six states unchanged.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*, having seen the group and a division drawn by the build. Main had moved (§582.2, §592 from other sessions), so this entry was renumbered §592 → **§593**, main merged in and the generated files rebuilt; `division-functions` 24/0 on the merged tree. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.87-app-types` → **`v6.88-functions-row`**. No save is judged differently (a stored `coWeight` is simply no longer read), so no forced sign-out.
+
+## §594 — The console page, read by TypeScript's checker (2026-10-23)
+Islam, after §592 went live: *"now do the same for the console page"*. This is the console in this project's own sense: `platform.html`, the page with My work, the clients, Memory, Copilot, Frameworks and History.
+
+**NOTHING ON THE PAGE IS EDITED**, as with the strategy pages (§589). `checks/pages-types.mjs` now reads two pages, each as the browser runs it and each with its own recorded list.
+
+**HOW THE CONSOLE IS READ.** The page is served unchanged by `lib/shell.ts`. Its script tags are read off the page, never listed in the check. Each is mapped to the file `build-shell.mjs` copies to that address:
+- `/memory-split.js` is the debrief splitter. It is a module to the checker, so it is declared closed, like the library names (§589).
+- `/client-setup.js` is the set-up flow, which the console mounts for Add a client and for an archived client.
+
+The page's own inline script makes the third. A script tag the check does not know is a refusal, never a page quietly read without it.
+
+**WHAT IT FOUND.** 233 findings:
+- **The console's own script has two, both noise:** `isNaN` of a date, and date-format options the checker cannot follow.
+- **Three are the set-up flow's inference noise,** the same three the strategy pages record.
+- **The other 228 are the set-up flow naming STRATEGY-PAGE data** — `GROUP`, `UNITS`, `SMPRules`, `SYNC` and 19 more — which the console page does not have. On the console, any one of them reached unguarded would throw.
+
+**THE 228 WERE NOT TAKEN ON TRUST.** The calls from the console's two entry points (`mountCreate`, `mountArchived`) were traced through the flow:
+- **The traced paths are safe.** The word lookup asks `typeof labelWord === "function"` first. `__smpHoldsNow` answers zeros when `typeof GROUP === "undefined"`, which is §467's own fix. `isDone` asks `typeof SMPRules`. And `canShape()` is true on the console's create piece, so the field handler never redraws into the wizard.
+- **`client-setup-outside.py` drives both screens in a browser** against its stub, and reads **0 failures, no page errors**.
+
+What was not done is proving all 228 site by site. They are recorded with that said in the list's own note. **The protection is the point of listing them:** a NEW strategy-page name in the set-up flow is a new finding on the console, and the person who wrote it has to show it is guarded or unreachable there before it is recorded.
+
+**SAID PLAINLY, BECAUSE IT WOULD BE EASY TO CLAIM OTHERWISE: THIS WOULD NOT HAVE CAUGHT §467.** That fault added a new PATH, a change handler calling `canShape()`, to a name that was already there. The check counts names, not paths. A check that walked the console's calls into the flow and required a guard on every strategy-page name reached would have caught it. That is a separate piece of work, offered and not done.
+
+**AND A LIMIT, FOUND BY TESTING IT: a misspelt member of an object a page script builds itself is not caught,** on the console or on the strategy pages. `CLIENTSETUP.mountCreat(…)` reads as `any`, because an object written in JavaScript is open, and only the library names are declared closed. Closing the pages' own objects would mean editing their code, and that was not asked.
+
+**THE CHECK.** Run with no arguments, `pages-types.mjs` now reads both pages: 3 / 0 each, the strategy pages still at 98 and their list byte-identical. `--write` records both, each with its own note. `--red` plants eleven faults, all caught:
+- **the strategy pages' six;**
+- **five on the console:** a function, a variable, the splitter and an element's method misspelt, and the create piece reaching for `GROUP`. That last one is §467's class: the check flags it as a new name where the console mounts the flow.
+
+No new npm script: `check:pages-types` and `:red` cover both pages.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§594 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§593, units and functions scored apart, which took the number this branch had used, so it was renumbered §594). It was merged INTO the branch. The decision record keeps §593 before §594, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. `pages-types` 6 / 0, with 98 and 233 recorded, main's changes adding none; `rules-types` 2 / 0 and `app-types` 4 / 0. Red 11 / 11, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed, and the built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
+
+## §596 — The console's paths into the set-up flow, walked (2026-10-23)
+Islam, of the check §594 named and did not build: *"build the check that follows the console's paths"*.
+
+**WHY §594 WAS NOT ENOUGH.** §594 counts names. §467's crash came from a new PATH to an old name. §436 added a change handler to every set-up field (`if (!canShape()) redraw()`). `canShape()` asked `holdsNow()`, and `__smpHoldsNow` read `GROUP`, which the console does not have, so typing in Add a client threw. The name `GROUP` was already there, so a list of names could not have said anything. A browser check found it a week later.
+
+**WHAT IT DOES** (`consolePaths` in `checks/pages-types.mjs`, run as part of the console's subject).
+- **It starts where the console calls into the flow.** That is the `CLIENTSETUP` members the console's own script calls, plus any top-level name of the flow's file it uses, both read off the page (today `mountCreate` and `mountArchived`), together with whatever the file runs as it loads.
+- **It follows every function a reached one names:** called, passed as a callback, or stored. An inline callback is reached with the function it sits in, since an event can fire it. Names are resolved by scope, not by spelling.
+- **Every strategy-page name it can reach must be guarded.** The names are the ones the checker cannot find on the console (§594's list), so a name added tomorrow is covered without an edit. Guarded means only run when the strategy page is there:
+  - under a `typeof X !== "undefined"` or `=== "function"` test;
+  - after an early `if (typeof X === "undefined") return`;
+  - on the right of an `&&` that tests presence;
+  - or in a function reached only through such guarded calls.
+
+  The strategy page's names arrive together, so a test on any one of them guards all of them.
+- **The flow's own `return {…}` at the end of its wrapper is the API it hands the page.** Naming a function there is not calling it. The prototype got this wrong at first, and reached the whole wizard through `mount`.
+
+**ONE DOORWAY IS DECLARED, NOT INFERRED.** With everything else precise, exactly one route led from the console into the wizard: `wordCommit`'s `if (!canShape()) redraw()`, the very handler §467 was about. On the console `canShape()` is always true, because `S` is null on the create piece and `holdsNow()` reads zeros there (§467's fix). So `redraw()` never runs there. No `typeof` says so, and the analysis cannot know it. It is therefore declared in `DOORWAYS` with that reason, keyed by the function it sits in and the call it gates. **A declared doorway that no longer exists fails the check,** so the declaration cannot outlive the code it describes. `client-setup-outside.py` types in that form in a browser, with no page error.
+
+**WHAT IT FOUND: NOTHING OPEN.** From the console's two calls, 18 functions are reached, and none of them uses one of the 24 strategy-page names unguarded.
+
+**AND IT WOULD HAVE CAUGHT §467, PROVED.** `--red` takes §467's guard out of `__smpHoldsNow` in a copy. The check reports eight open uses, each with its route: *GROUP at client-setup.js:64, in __smpHoldsNow ← holdsNow ← canShape ← wordCommit ← field ← mountCreate ← the console calls CLIENTSETUP.mountCreate.* That is §467's path exactly, a week before a browser found it. Three more planted faults are caught as well: the word lookup unguarded, a strategy name read as the file loads, and the doorway rewired to call `render()` directly (115 open, and the declared doorway gone). `--red` now plants fifteen faults across both pages, all caught.
+
+**THE PARSER, AND WHAT IT COSTS.** TypeScript 7 has no JavaScript API apart from an `unstable` one that talks to its background engine. So the walk uses **acorn and acorn-walk**, the standard small JavaScript parser, with no dependencies of its own. They are added to `smp-app`'s devDependencies (two packages). They are used only by this check, and no page or server code imports them. The full check runs in under 2 seconds, and `--red` in about 9.
+
+**WHAT IT DOES NOT DO.**
+- **It does not run the code.** A doorway decided by data, like `canShape()`, is declared rather than proved, and each one costs a reason written down.
+- **It walks the set-up flow only.** It does not walk the console's own script, which runs only on the console and has nothing of the strategy page's to reach for.
+- **A call made through a computed name** (`obj[k]()`) is not followed. The flow has none on the reached paths today.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§596 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch: the deep-dive priorities for Processes, recorded as §595 in the progress file. That took this section's number, so it was renumbered §596. The merge into the branch was clean. The merged `package-lock.json` was proved by a clean `npm ci` from it: 448 packages, acorn 8.19.0. npm's `--package-lock-only` rewrite added 66 unrelated optional-dependency lines and was discarded rather than shipped. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean (after the route types were regenerated for main's new priorities pages). `pages-types` 8 / 0, `rules-types` 2 / 0 and `app-types` 4 / 0, with red 15 / 15, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. The release adds two devDependencies, which the deploy's install fetches and nothing at run time loads. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
 ## §597 — A hidden row stays on the slide, greyed, so the presenter can defend the removal (2026-10-23)
 Islam, of §233's eye: *"the eye in this case can leave things out and not counted as is .. but we need to keep them on the slides showing that they are removed so the presenter can validate the removel. would that work?"* — and of the mockup drawn for it: *"yes build it"*, with two answers taken in the same breath: **always on**, and **the row keeps its place**.
 
@@ -68438,7 +68592,7 @@ Islam, of §233's eye: *"the eye in this case can leave things out and not count
 
 **PROVED ABLE TO FAIL.** `checks/hide-element.py` §3 and §6 asserted the deck carried neither the row nor its name; both now assert the row IS there, in a `tr.hiddenrow` carrying the chip's words, with the sibling still present and PLAIN (so a deck that greyed everything could not pass, §113.8). Run against the previous frozen build, exactly those two lines go red and nothing else; against this build, all 21 green. Neighbours green: `review-pptx`, `deck-model`, `deck-figures`, `deck-outcome`, `deck-and-weights`, `hide-slide` 42/0, `slide-columns`, `line-by-line`, `table-fit`.
 
-**COSTS, STATED.** A hidden row takes a line on the slide again, so a long table may split one slide earlier than it did under §233. And anything hidden is back in front of the room: a row hidden because it should not be SEEN, rather than because it was dropped, wants the × instead — said in the mockup before the yes. **Screen only**: nothing stored moves, no migration, no rule about who may save what changes, so no forced sign-out (spec 029). The built file's bytes changed, so `sw.js` is bumped (§91) to `v6.85-hidden-row-on-slide`.
+**COSTS, STATED.** A hidden row takes a line on the slide again, so a long table may split one slide earlier than it did under §233. And anything hidden is back in front of the room: a row hidden because it should not be SEEN, rather than because it was dropped, wants the × instead — said in the mockup before the yes. **Screen only**: nothing stored moves, no migration, no rule about who may save what changes, so no forced sign-out (spec 029). The built file's bytes changed, so `sw.js` is bumped (§91); at the merge the stamp is `v6.89-plan-as-it-stood`, past main's `v6.88`.
 
 **RECORDED, NOT DONE — the question asked in the same message.** *"If I remove a line fully do I get history of the plans somehow to check what was it on a certain date the way Google Docs history works?"* Partly: Setup › History (§262) logs the removal — who, when, where — but a dropped row travels by id (§588's `listOp`), so the line has no Restore and the row's contents are not on it; archives exist only for a whole pillar or project, Clear plan and an import (§232, §49.2); and there is no view of the plan as it stood on a date. Two pieces named for alignment, neither built here: archive a removed row's contents so its History line gets a working Restore, and a date view on History that rebuilds the plan as of that day.
 
@@ -68455,4 +68609,6 @@ Islam, in the message that asked for §597: *"if I remove a line fully do I get 
 
 **PROVED ABLE TO FAIL.** `checks/history-asof.py` (own server, the same stub `history-page.py` runs, the removed row a REAL row of the seed taken out of the served copy): 34 green here; on the previous frozen build 21 red — the seat line, the live Restore, the held figure, the re-seat in the DATA, the save, the link, the picker, the banner, the greyed row — and it FAILS there rather than dying (§215). `test-authorize` gains five §598 lines. Neighbours green: `history-page`, `hide-element`, `safety-banners`, `refusal-keeps-work`; `test:rules` 152/3 as before; `generated-in-step` all clear after the re-carry.
 
-**Screen and log only**: no migration (`rows_` is JSONB and takes the shape), no rule about who may save what changes, so no forced sign-out (spec 029). `sw.js` bumped to `v6.86-plan-as-it-stood` (§91).
+**Screen and log only**: no migration (`rows_` is JSONB and takes the shape), no rule about who may save what changes, so no forced sign-out (spec 029). `sw.js` bumped at the merge to `v6.89-plan-as-it-stood`, past main's `v6.88` (§91).
+
+**§597 AND §598 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had moved under the branch: it took §591–§596 (the Master presentation's company label, the carried modules' types, a unit's and a function's own score, the console page check, deep-dive priorities, the console's paths), so these two were renumbered from §591 and §592 BEFORE the merge (§264.3), and main was merged INTO the branch. The decision record keeps its sections in number order and the progress lines newest first; the two record files were COMBINED, never picked (§318.7). The built file, the frozen copy and the served copies were REGENERATED from the merged sources (§91, §329). On the merged tree: `hide-element`, `history-asof`, `history-page`, `review-pptx`, `deck-model`, `hide-slide` 42/0, `slide-columns`, `refusal-keeps-work` green; `test-authorize` 1129/3 and `test:rules` 152/3, the same three as main; `test-graph-diff` 165/0; `built-in-step` all good; `generated-in-step` all clear once committed; `qa.py` ERRORS none. **`sw.js` is `v6.89-plan-as-it-stood`**, past main's `v6.88-functions-row` — one live `const SHELL`, `node --check` clean — because the built file's bytes changed (§91). No forced sign-out: nothing stored moves, no migration, and no save that worked before is judged differently (the log gains a shape; the gate is byte-for-byte what it was). **The live read is reported rather than claimed** (§54.5, §91.5): production cannot be reached from this container, so nobody here has seen the site serve this commit.

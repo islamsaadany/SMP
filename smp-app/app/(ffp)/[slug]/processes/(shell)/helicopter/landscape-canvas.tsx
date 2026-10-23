@@ -26,6 +26,8 @@ const LINK_COLOR = "#4f46e5"; // indigo-600 — matches the 🔗 step-link chips
 export type LandscapeProcessInput = LandscapeInput & {
   /** Code of the process this one branches from, for the card's own label. */
   branchFromCode: string | null;
+  /** In Wave 1 or Wave 2 of the deep-dive priorities. */
+  deepDive: boolean;
 };
 
 export function ProcessLandscapeCanvas({
@@ -57,6 +59,7 @@ export function ProcessLandscapeCanvas({
           name: node.process.name,
           stepCount: node.process.stepCount,
           parentCode: node.process.parentCode,
+          deepDive: source?.deepDive ?? false,
           branchFrom:
             node.process.branchFrom && source?.branchFromCode
               ? {

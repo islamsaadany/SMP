@@ -1,4 +1,3 @@
-// @ts-check
 /* THE RULES — who holds which role, and who may change what.
    ═══════════════════════════════════════════════════════════════════════
 

@@ -53,6 +53,7 @@ export const en = {
       org: "Org Directory",
       processes: "Processes",
       helicopter: "Helicopter View",
+      priorities: "Priorities",
       valueChain: "Value Chain",
       governance: "Governance",
       members: "Members",

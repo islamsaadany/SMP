@@ -12114,10 +12114,6 @@ function companyFnKeys(ck){
 }
 /* A weight the office typed, or null — never NaN and never a blank read as
    nought (§104.10: Number("") is 0, and nought is a real weight). */
-function fnCoWeightSet(fk){
-  var v = FUNCTIONS[fk] && FUNCTIONS[fk].coWeight;
-  return (typeof v === "number" && isFinite(v) && v >= 0) ? v : null;
-}
 /* WHAT ONE FUNCTION SCORES, READ OFF THE PAGE THAT FUNCTION DRAWS — its own
    Performance page's primary figure and its execution figure, per format, so
    a division can never print a different number for a function from the one
@@ -12150,67 +12146,45 @@ function fnMemberScores(fk){
   if (!h) return { perf:null, exec:null };
   return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
-/* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
-   The functions take their share first: a weight the office set is used as
-   given; a blank takes the AVERAGE of the weights that are set (§243's rule
-   for objectives); and with none set each function counts as one equal member
-   of the company. The units split what is left in proportion to the weights
-   they already carry at group level, so their relative sizes never move.
-   A company of functions alone divides the whole by their weights. */
-function companyShares(ck){
-  var units = companyUnitKeys(ck), fns = companyFnKeys(ck), out = [];
-  if (!fns.length) {
-    var uw0 = companyWeight(ck);
-    units.forEach(function(k){
-      out.push({ unit:k, w: uw0 ? (UNITS[k].weight || 0) / uw0 * 100 : 100 / units.length });
-    });
-    return out;
-  }
-  var set = fns.map(fnCoWeightSet).filter(function(v){ return v != null; });
-  var blank = set.length ? set.reduce(function(a, b){ return a + b; }, 0) / set.length
-                         : 100 / (units.length + fns.length);
-  var fw = fns.map(function(k){ var v = fnCoWeightSet(k); return v == null ? blank : v; });
-  var ftot = fw.reduce(function(a, b){ return a + b; }, 0);
-  /* More than the whole, or no units to share the rest: the functions are
-     scaled to 100 between them. Setup refuses a total over 100, so the first
-     case is a stored value from elsewhere, never a normal one. */
-  var scale = (!units.length || ftot > 100) ? (ftot ? 100 / ftot : 0) : 1;
-  var left = units.length ? Math.max(0, 100 - ftot * scale) : 0;
-  var uw = companyWeight(ck);
-  units.forEach(function(k){
-    out.push({ unit:k, w: uw ? (UNITS[k].weight || 0) / uw * left : left / units.length });
+/* ── THE FUNCTIONS' OWN READING, BESIDE THE UNITS' (§592) ─────────────────
+   Islam: *"in case of business units they get their own score and the
+   functions get their own score and we see both on the group"* — and of how
+   the functions count, *"stay equal"*; of the divisions, *"yes same for
+   divisions"*.
+
+   THIS REVERSES §391's MIX, and says so. A division read its units and its
+   functions as ONE figure, the functions taking a share set on Setup (his A
+   at the time) and the units the rest — while the group read its units
+   alone and never its functions. One question, two answers (spec 066's own
+   finding). Now neither level blends: the units' figures are the units'
+   (weighted by size, as always), and the functions' are the functions',
+   each counted equally, drawn beside them. No number a client already sees
+   moves except a division that held functions, whose headline becomes its
+   units' alone with its functions' drawn next to it.
+
+   Each function's figure is the one its own page shows (`fnMemberScores`),
+   so the group can never print a different number for a function from the
+   one that function shows about itself (§53.5). A function with nothing to
+   read is left out of the average, never counted as nought (§5.7). */
+function fnsReading(fks){
+  var p = [], e = [];
+  (fks || []).forEach(function(k){
+    var sc = fnMemberScores(k);
+    if (sc.perf != null) p.push(sc.perf);
+    if (sc.exec != null) e.push(sc.exec);
   });
-  fns.forEach(function(k, i){
-    out.push({ fn:k, w: ftot ? fw[i] * scale : 100 / fns.length, set: fnCoWeightSet(k) != null });
-  });
-  return out;
+  var avg = function(a){ return a.length ? Math.round(a.reduce(function(x, y){ return x + y; }, 0) / a.length) : null; };
+  return { perf: avg(p), exec: avg(e), n: (fks || []).length };
 }
-function companyMix(ck, which){
-  var acc = 0, tot = 0;
-  companyShares(ck).forEach(function(s){
-    var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                   : fnMemberScores(s.fn)[which];
-    if (v == null || !s.w) return;
-    acc += v * s.w; tot += s.w;
-  });
-  return tot ? Math.round(acc / tot) : null;
-}
-/* A COMPANY WITH NO FUNCTIONS COMPILES EXACTLY AS IT DID (§68), byte for
-   byte, through the same weightedOver() — asserted, because a rounding step
-   moved would change every company's figure on a day nothing about it did. */
-function companyObjectives(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "perf")
-                                  : weightedOver(companyUnitKeys(ck), unitObjectives);
-}
+/* A division's own figures are its units' — the group's rule over a smaller
+   list (§68, §515.2 P3). Its functions read beside them (`fnsReading`). */
+function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-/* §515.2 (P3): a division of units alone is the weighted average of its
-   units' own execution figures — the group's rule, over a smaller list. With
-   functions in it, companyMix() was already that rule (§391). */
-function companyRatio(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : weightedOver(companyUnitKeys(ck), unitRatio);
-}
+/* §515.2 (P3): a division is the weighted average of its units' own
+   execution figures — the group's rule, over a smaller list. Its functions
+   read beside it (§592). */
+function companyRatio(ck){ return weightedOver(companyUnitKeys(ck), unitRatio); }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
    forget it. */

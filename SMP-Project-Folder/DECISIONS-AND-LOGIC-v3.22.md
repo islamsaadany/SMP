@@ -68433,3 +68433,17 @@ Islam, on the final test of spec 066 (§587's report): *"do 1 and 2"*.
 **2 — A BOX SHOWN APART THAT HOLDS ONLY CAPABILITIES IS CALLED THAT.** Since §587 Wander's company roll-call and score table say Capabilities; the closing slide went on saying *"Pillars performance · 4 Pillars, by their measures"* and the Overall performance divider *"Where the Pillars stand"*. They say Capabilities now (`kindBU`), and the footnote with them. A box holding both kinds keeps §553.6's wording.
 
 **CHECKED.** Every deck against the live build: only Wander's company deck (and its plan) moves. New `checks/both-levels.py` (9 claims; the label and the wording red on the live build). `one-template`, `master-presentation` 50/0, `direction-decks`, `presentation-parts`, `deck-model`, `deck-figures`, `pillar-split` 46/0, `presentation-timer` 65/0, `built-in-step`, `no-twin-functions` green.
+
+## §592 — Units and functions each get their own score, on the group and on a division (2026-10-23)
+Islam, on the simplification's final test: *"in case of business units they get their own score and the functions get their own score and we see both on the group"*; of how the functions count, *"stay equal"*; of divisions, *"yes same for divisions"*. Shown first as a picture on Raya's real group page.
+
+**WHY.** The group read its units alone and never its functions; a division blended its units and functions into one figure, the functions taking shares set on Setup (§391, his A at the time). One question, two answers — spec 066's finding.
+
+**WHAT.** Neither level blends now. The units' figures are the units' (weighted by size, unchanged), and the functions' are the functions' — `fnsReading`, the plain average of what each function's own page shows (`fnMemberScores`), a function with nothing to read left out rather than counted as nought:
+- **The group** (where it has units): a second row of two cards, *Functions — performance* and *Functions — execution*, under the units' two, each with a drill listing every function's figure; and a *Functions — where to look next* row of chips.
+- **A division**: its headline cards are its units' alone (`companyObjectives` / `companyRatio` over its units); its functions get the same two cards and keep their own section; a division of functions alone draws only that row.
+- **Setup**: the function's *Weight in its division* field and the Functions table's *Weight* column are gone (§24), with the handler that stored it. A weight left from §391 is ignored, and dropped when the function moves. `companyShares`, `companyMix` and `fnCoWeightSet` are deleted.
+
+**WHAT MOVES.** The group's units' figures do not move. A division that held functions now headlines on its units alone, with its functions beside it. A client with no units (El Abd) is unchanged: "in case of business units".
+
+**CHECKED.** `division-functions` rewritten to the new rule (§218), 24/0. `single-company`'s division claim rewritten; its one red (§449) is identical on the live build, as are `top-plan` 1, `setup-live-rows` 2 and `wave3` 9 (all pre-existing). `control-targets`, `role-picker`, `objectives-actions` 58/0, `structure`, `platform-cards` 30/0, `perf-line`, `built-in-step`, `no-twin-functions` green. Every deck on six states unchanged.

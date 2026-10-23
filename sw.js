@@ -553,7 +553,11 @@
    the differ gains type comments; nothing runs differently. The built
    file's bytes changed, which is the whole trigger (§91). Proved held by
    no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.87-app-types";
+/* v6.88-functions-row — §593: units and functions each get their own
+   score on the group and on a division. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.88-functions-row";
 const ASSETS = [
   "/",
   "/index.html",

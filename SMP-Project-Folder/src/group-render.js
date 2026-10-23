@@ -1262,17 +1262,27 @@ function scoreSpread(rows, extra){
 /* Compact score pair. Three figures laid across rather than stacked, so the
    card is a band rather than a column. Both headline and status word come from
    the same band function, so they can never contradict each other. */
+/* §606: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
+   *"the main number should be bigger and the other go a bit smaller"*). The
+   `hero` class doubles the headline and quietens the three figures under it;
+   the unit Overview's cards, which share `.headline` and `.minirow`, keep
+   their size. "4 scored" is gone — Islam was *"not sure if it's useful
+   info"* — and the fact it carried is said the way a reader acts on it: how
+   many have NOT reported, beside the number they are missing from, and only
+   while there are some. Highest stays ink (it is never the worry); Lowest
+   keeps its band colour only when it is out of the top band, so colour on the
+   card means something to look at. */
 function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   var r = pl ? Math.round(ex / pl * 100) : null;
-  return '<div class="scores">' +
+  var unreported = nMeasures - nScored;
+  return '<div class="scores hero">' +
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b>' +
-          (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
-        '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
-          pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b style="color:' + bandInk(lo) + '">' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span>' +
+        (unreported > 0 ? '<span class="unrep">' + unreported + ' not reported yet</span>' : '') + '</div>' +
+      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b></div>' +
+        '<div><em>Highest</em><b>' + pct(hi) + '</b></div>' +
+        '<div><em>Lowest</em><b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' +
           pct(lo) + '</b></div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +

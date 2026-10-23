@@ -3204,7 +3204,7 @@ function closeDeck(){
   if (toEditor) slidesResume(reached);
 }
 
-/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§600) ──────────────────────
+/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§604) ──────────────────────
    Islam, of the tactics slide: *"the outcome column is too narrow can we make
    things more coherent to the content"*, and of the mockup, *"yes build it
    and apply to all slides"*.
@@ -3443,7 +3443,7 @@ function deckFitPass(deck){
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
-    /* §600: the columns are sized to what they hold FIRST, so a table that
+    /* §604: the columns are sized to what they hold FIRST, so a table that
        now fits is not squeezed or split, and sized again at the smaller type
        of a slide that still does not — before the split below, so a slide
        and its continuation carry the same widths (the clone takes them). */

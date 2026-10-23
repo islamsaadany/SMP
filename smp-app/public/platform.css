@@ -8872,7 +8872,7 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      supporting fact, set below the row's own size (§50). */
   .dslide td.collabs { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:22ch; }
   .dslide td.collabs .nobody { color:var(--none); }
-  /* §600: the Note no longer keeps a quarter of the slide (`width:24%`, here
+  /* §604: the Note no longer keeps a quarter of the slide (`width:24%`, here
      until now) — every slide table's columns are sized to what they hold by
      `deckColFit()`, the Note's among them. */
   .dirs td.dirname b { font:400 40px/1.2 var(--serif); display:block; }

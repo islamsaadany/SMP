@@ -1,4 +1,4 @@
-"""§600: EVERY SLIDE TABLE'S COLUMNS AS WIDE AS WHAT THEY HOLD.
+"""§604: EVERY SLIDE TABLE'S COLUMNS AS WIDE AS WHAT THEY HOLD.
 
 Islam, of the tactics slide: *"the outcome column is too narrow can we make
 things more coherent to the content"*; of the mockup

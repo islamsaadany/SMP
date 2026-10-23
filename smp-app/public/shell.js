@@ -26410,7 +26410,7 @@ function planDeckBox(target){
 function buildPlanPptx(target){
   var m = reviewPptxMark(target), kicker = placeLabel(target) || String(target || "");
   var out = [];
-  /* §600: measured after the figures are stripped, so the plan's own columns
+  /* §604: measured after the figures are stripped, so the plan's own columns
      share the room. */
   [].forEach.call(deckColFitBox(planDeckBox(target)).querySelectorAll(".dslide"), function(sl){
     out = out.concat(deckSlidePptx(sl, kicker, m && m.shape));
@@ -26654,7 +26654,7 @@ function deckColWidths(ths){
     var sh = th.classList.contains("num") ? 1 : 2;
     shares.push(sh); mins.push(m); total += sh; fixed += m;
   });
-  /* §600: THE SLIDE'S OWN WIDTHS, where the deck worked them out
+  /* §604: THE SLIDE'S OWN WIDTHS, where the deck worked them out
      (`deckColFit`, kept on the header as `data-fw`): each column takes the
      same share of the file's table that it has on the slide, and still never
      less than its heading needs. */
@@ -26992,7 +26992,7 @@ function reviewPptxMark(target){
 function reviewPptxSlides(target, mark){
   var box = document.createElement("div");
   box.innerHTML = deckHtmlFor(target);
-  deckColFitBox(box);   /* §600: the slide's widths, for `deckColWidths` */
+  deckColFitBox(box);   /* §604: the slide's widths, for `deckColWidths` */
   var kicker = placeLabel(target) || String(target || "");
   var out = [];
   [].forEach.call(box.querySelectorAll(".dslide"), function(sl){
@@ -52904,7 +52904,7 @@ function closeDeck(){
   if (toEditor) slidesResume(reached);
 }
 
-/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§600) ──────────────────────
+/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§604) ──────────────────────
    Islam, of the tactics slide: *"the outcome column is too narrow can we make
    things more coherent to the content"*, and of the mockup, *"yes build it
    and apply to all slides"*.
@@ -53143,7 +53143,7 @@ function deckFitPass(deck){
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
-    /* §600: the columns are sized to what they hold FIRST, so a table that
+    /* §604: the columns are sized to what they hold FIRST, so a table that
        now fits is not squeezed or split, and sized again at the smaller type
        of a slide that still does not — before the split below, so a slide
        and its continuation carry the same widths (the clone takes them). */

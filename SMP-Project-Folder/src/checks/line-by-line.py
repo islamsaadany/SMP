@@ -79,7 +79,7 @@ with sync_playwright() as p:
     safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
 
     # ── 3. On: a step is a line ───────────────────────────────────────────
-    # §600: the slides size their columns to what they hold now, and this
+    # §604: the slides size their columns to what they hold now, and this
     # direction's tactics fit on one slide -- so for this walk they are
     # doubled, or the continued-table case below has no continuation to walk.
     # Put back once the deck is built; the deck keeps its own copy.
@@ -100,7 +100,7 @@ with sync_playwright() as p:
     t = [x for x in walk if x.get("split", "").endswith("T") and not x.get("cont")]
     ck("…the tactics slide the same", t and [x["shown"] for x in t] == list(range(0, t[0]["all"] + 1)), [x.get("shown") for x in t])
     c = [x for x in walk if x.get("cont")]
-    # §600: each continuation slide on its own -- a long table may run onto
+    # §604: each continuation slide on its own -- a long table may run onto
     # more than one, and each builds from its own first row to its last.
     per = {}
     for x in c:

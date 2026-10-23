@@ -213,9 +213,20 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const archived = FF.archivedClients(world, account, all).filter((row: ClientRow) => !row.past).map((row: ClientRow) => ({
       key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark,
       at: row.archived_at, by: row.archived_by,
-      canConfig: FF.mayReadConfig(world, account, row)
+      canConfig: FF.mayReadConfig(world, account, row),
+      /* for the page's Mine (spec 067's Clients filter): a seat on it */
+      mine: world.mine.some((m) => m.client_key === row.key)
     }));
-    return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+    /* THE PAST CLIENTS, for the Clients page's Ended view and nowhere else
+       (Islam: "keep them out … but add a filter for active clients ended
+       clients and demo"). Every consultant reads their case studies, so
+       every consultant is shown them; nobody has a seat on one. */
+    const past = (await pool.query(
+      "SELECT t.key, t.name, t.industry, t.mark, t.archived_at, (SELECT count(*)::int FROM case_studies c WHERE c.about_tenant_id = t.id) AS cases " +
+      "FROM tenants t WHERE t.past ORDER BY t.name")).rows.map((r: any) => ({
+        key: r.key, name: r.name, industry: r.industry, mark: r.mark, at: r.archived_at, cases: r.cases }));
+    return ok({ cards, archived, past, canAddPast: account.is_admin,
+      canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 
   /* ── MY WORK (§400): the console's first tab ──────────────────────

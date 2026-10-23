@@ -939,6 +939,58 @@
   .asksrc button.tag:hover{ border-color:var(--amber-tx) }
   @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
 
+  /* ── THE CLIENTS FILTER (spec 067's drawing, clients-filter) ─────────
+     One row: which clients, Mine, cards or list. The list is the card's
+     facts on one line. `cl`-prefixed: a class is one global namespace (§65.9). */
+  .clbar{ display:flex; gap:10px 14px; align-items:center; flex-wrap:wrap; margin:0 0 18px }
+  .clwhich{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clwhich button{ border:0; border-right:1px solid var(--line); background:transparent; color:var(--ink-2); font-family:inherit;
+    font-size:13px; font-weight:600; padding:7px 13px; cursor:pointer; white-space:nowrap }
+  .clwhich button:last-child{ border-right:0 }
+  .clwhich button i{ font-style:normal; font-weight:500; color:var(--ink-3); margin-left:6px; font-size:12px }
+  .clwhich button[aria-pressed="true"]{ background:var(--ff); color:var(--ff-ink) }
+  .clwhich button[aria-pressed="true"] i{ color:var(--ff-quiet) }
+  .clwhich button:focus-visible, .clmine:focus-visible, .clview button:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  .clmine{ display:inline-flex; align-items:center; gap:8px; border:0; background:none; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--ink-2); cursor:pointer; padding:4px 2px; border-radius:6px }
+  .clmine .sw{ position:relative; width:32px; height:18px; border-radius:999px; background:var(--line); flex:none }
+  .clmine .sw::after{ content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--surface);
+    box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .15s }
+  .clmine.on{ color:var(--ink) }
+  .clmine.on .sw{ background:var(--ff) }
+  .clmine.on .sw::after{ left:16px }
+  .clview{ margin-left:auto; display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clview button{ border:0; background:transparent; color:var(--ink-3); padding:6px 9px; display:grid; place-items:center; cursor:pointer }
+  .clview button + button{ border-left:1px solid var(--line) }
+  .clview button[aria-pressed="true"]{ background:var(--surface-2); color:var(--ink) }
+  .clview svg{ width:17px; height:17px }
+  .cltable{ border:1px solid var(--line); border-radius:12px; background:var(--surface); overflow-x:auto }
+  .cltable table{ width:100%; border-collapse:collapse; min-width:720px }
+  .cltable th{ text-align:left; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); padding:11px 14px; border-bottom:1px solid var(--line); white-space:nowrap }
+  .cltable td{ padding:10px 14px; border-bottom:1px solid var(--line-soft); font-size:14px; vertical-align:middle }
+  .cltable tr:last-child td{ border-bottom:0 }
+  .cltable tbody tr:hover{ background:var(--surface-2) }
+  .cltable td.num{ font-variant-numeric:tabular-nums }
+  .clwho{ display:flex; gap:10px; align-items:center }
+  .clwho b{ font-weight:600 }
+  .clwho .cmark{ width:26px; height:26px; line-height:26px; font-size:10px; flex:none }
+  .clwho .cmark.arch{ background:var(--surface-2); color:var(--ink-3) }
+  .clmods{ display:flex; gap:6px; flex-wrap:wrap }
+  .clmod{ border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:var(--surface); color:var(--ink);
+    font-family:inherit; font-size:12.5px; font-weight:600; white-space:nowrap; cursor:pointer }
+  .clmod:hover{ border-color:var(--amber-tx) }
+  .clmod i{ font-style:normal; margin-left:5px; color:var(--ink-3) }
+  .clmod i.alarm{ color:var(--warn) }
+  .clmod i.due{ color:var(--ink-2) }
+  .clgo{ width:1%; white-space:nowrap; text-align:right }
+  .clgo > * + *{ margin-left:8px }
+  .clgo .ccfg{ position:static; display:inline-grid; vertical-align:middle }
+  .cladd{ margin-top:12px }
+  .clnone{ margin:12px 0 0 }
+  @media (max-width:700px){ .clview{ margin-left:0 } }
+  @media (prefers-reduced-motion:reduce){ .clmine .sw::after{ transition:none } }
+
   /* ── CASE STUDIES (spec 067) ─────────────────────────────────────────
      The library from the signed-off drawing (design-mockups/case-studies/
      2026-10-23_case-studies-library.html), in this page's own tokens and
@@ -1629,6 +1681,9 @@
     }
     ONLIST = null;
     TAB = tab;
+    /* THE CLIENTS PAGE OPENS ON ACTIVE, every visit (Islam: "default is
+       active"); only a press inside the page moves it. */
+    if (tab === "clients" && fromTabRow) CL.which = "active";
     try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "lib";
     FW.view = "list";
@@ -1734,7 +1789,7 @@
 
   function drawMemory() {
     /* A WRITE-UP PRESSED ON MY WORK lands here on its case study (spec 067). */
-    if (CS.jump) { MEM.view = CS.jump.view; MEM.caseId = CS.jump.id; CS.fresh = !!CS.jump.fresh; CS.jump = null; }
+    if (CS.jump) { MEM.view = CS.jump.view; MEM.caseId = CS.jump.id; CS.fresh = !!CS.jump.fresh; CS.pastFirst = !!CS.jump.past; CS.jump = null; }
     if (MEM.view === "lib") return drawCases();
     if (MEM.view === "case") return drawCase();
     if (MEM.view === "open") return drawCaseOpen();
@@ -2807,6 +2862,7 @@
       cs.appendChild(og);
     });
     var po = el("option", null, "A past client not on the platform…"); po.value = "__past"; cs.appendChild(po);
+    if (CS.pastFirst) { cs.value = "__past"; CS.pastFirst = false; }
     var nm = field(p1, "cs-o-name", "Name of the work", el("input", "fld"));
     nm.type = "text"; nm.placeholder = "Strategy build 2025";
 
@@ -3965,7 +4021,7 @@
        "demo" finds it. */
     search.addEventListener("input", function () {
       var q = search.value.trim().toLowerCase();
-      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
+      Array.prototype.forEach.call(page.querySelectorAll("[data-grid] [data-name]"), function (c) {
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
@@ -4008,60 +4064,302 @@
          — same card, same amber, same Demo tag, same door. */
       var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
       var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
-
-      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
-      if (j.canAdd) grid.appendChild(addCard());
-      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
-         includes the demo — so on a platform seeded with the worked example
-         and no clients, the sentence below never drew and the one person who
-         could add one was shown a single amber card and no way in: §61's
-         trap the empty state was written to close, by a road it did not
-         cover. */
+      var archived = j.archived || [], past = j.past || [];
+      /* AND THE COUNT IS A COUNT OF CLIENTS (it read j.cards.length once,
+         which counted the demo — §61's trap by another road). */
       if (!clients.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-
-      /* Drawn only when there is one (§61): a heading over an empty band is
-         furniture, and a platform with no demo seeded has nothing to say. */
-      if (demos.length) {
-        var apart = el("div", "apart");
-        apart.appendChild(el("span", "akey", "The worked example"));
-        var dgrid = el("div", "cards");
-        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
-        apart.appendChild(dgrid);
-        page.appendChild(apart);
-      }
-
-      /* ── ARCHIVED CLIENTS (§323) ────────────────────────────────────
-         The page's OWN band — the one the worked example sits in — rather
-         than a second answer to "a row under the grid" (§53.5).
-
-         A CLIENT THAT SIMPLY VANISHED COULD NEVER COME BACK: the only route
-         would be through a card that is no longer drawn (§61). That is the
-         whole reason this band exists, and it is also where Delete becomes
-         reachable, so being archived is a real step rather than a hidden
-         state.
-
-         Drawn only when there is one, like the band above it: a heading over
-         an empty band is furniture, and a platform with nothing archived has
-         nothing to say. The server has already decided WHO sees this — it
-         sends the list only to somebody who can bring one back, so there is
-         no second answer here (§42). */
-      if (j.archived && j.archived.length) {
-        var arch = el("div", "apart");
-        arch.appendChild(el("span", "akey", "Archived"));
-        var agrid = el("div", "cards");
-        agrid.dataset.grid = "archived";
-        j.archived.forEach(function (c) { agrid.appendChild(archCardFor(c)); });
-        arch.appendChild(agrid);
-        page.appendChild(arch);
-      }
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
     });
+  }
+
+
+  /* ── WHICH CLIENTS, MINE, AND CARDS OR A LIST (spec 067's Clients filter) ──
+     Islam: "keep them out in the console but add a filter for active clients
+     ended clients and demo so it filters what we are seeing and default is
+     active … and maybe we have a filter for mine", and "give me the list view
+     option with card view". Drawn first and signed off by that answer
+     (design-mockups/clients-filter/2026-10-23_clients-filter-and-list.html).
+
+     ONE ROW ABOVE THE CLIENTS. Active is how the page opens, every visit;
+     the worked example moved from its band to Demo, and the archived band to
+     Ended, beside the past clients added for their case studies. Mine is the
+     clients this person has a SEAT on — membership, never the admin's reach.
+     Cards or list is remembered on this device, the column's own way (§601).
+     The counts follow Mine, so a number always says what pressing it shows.
+
+     THE GRIDS KEEP THEIR NAMES — `clients`, `archived`, `demo` — whichever
+     view draws them, because the checks and the search address them. */
+  var CL = { which: "active", mine: false, view: "cards" };
+  try { if (localStorage.getItem("smp.clients.view") === "list") CL.view = "list"; } catch (e) { /* this device only */ }
+
+  function moduleGo(c, m) {
+    /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's own
+       page (spec 053; the flag is the server's, lib/modules.ts). */
+    if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
+    location.assign("/" + c.key + "/" + m.key);
+  }
+
+  function clFill(host, d) {
+    var bar = el("div", "clbar");
+    host.parentNode.insertBefore(bar, host);
+    var body = el("div");
+    host.parentNode.insertBefore(body, host);
+    host.parentNode.removeChild(host);
+    var mineOf = function (list, f) { return CL.mine ? list.filter(f) : list; };
+    var seat = function (c) { return !!c.seat; };
+    var draw = function () {
+      var act = mineOf(d.clients, seat), dem = mineOf(d.demos, seat);
+      var end = CL.mine ? d.archived.filter(function (c) { return c.mine; }) : d.archived.concat(d.past);
+      bar.textContent = ""; body.textContent = "";
+      /* A CHOICE WITH NOTHING BEHIND IT IS NOT OFFERED, and one that has
+         just emptied (the last archived client deleted) falls back to
+         Active rather than leaving the page on a choice it no longer draws. */
+      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) CL.which = "active";
+      if (CL.which === "demo" && !d.demos.length) CL.which = "active";
+      var which = el("span", "clwhich");
+      which.setAttribute("role", "group");
+      which.setAttribute("aria-label", "Which clients");
+      [["active", "Active", act.length], ["ended", "Ended", end.length], ["demo", "Demo", dem.length]].forEach(function (w) {
+        if (w[0] === "demo" && !d.demos.length) return;
+        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) return;
+        var b = el("button", null, w[1]);
+        b.type = "button";
+        b.setAttribute("data-which", w[0]);
+        b.setAttribute("aria-pressed", String(CL.which === w[0]));
+        b.appendChild(el("i", null, String(w[2])));
+        b.addEventListener("click", function () { CL.which = w[0]; draw(); });
+        which.appendChild(b);
+      });
+      bar.appendChild(which);
+      var mine = el("button", "clmine" + (CL.mine ? " on" : ""));
+      mine.type = "button";
+      mine.setAttribute("role", "switch");
+      mine.setAttribute("aria-checked", String(CL.mine));
+      mine.appendChild(el("span", "sw"));
+      mine.appendChild(document.createTextNode("Mine"));
+      mine.title = "Only the clients you have a seat on";
+      mine.addEventListener("click", function () { CL.mine = !CL.mine; draw(); });
+      bar.appendChild(mine);
+      var view = el("span", "clview");
+      view.setAttribute("role", "group");
+      view.setAttribute("aria-label", "View");
+      [["cards", "Cards", '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'],
+       ["list", "List", '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>']].forEach(function (v) {
+        var b = el("button");
+        b.type = "button";
+        b.title = v[1];
+        b.setAttribute("aria-label", v[1]);
+        b.setAttribute("data-view", v[0]);
+        b.setAttribute("aria-pressed", String(CL.view === v[0]));
+        b.innerHTML = NAV_SVG + v[2] + "</svg>";
+        b.addEventListener("click", function () {
+          CL.view = v[0];
+          try { localStorage.setItem("smp.clients.view", v[0]); } catch (e) { /* this device only */ }
+          draw();
+        });
+        view.appendChild(b);
+      });
+      bar.appendChild(view);
+
+      if (CL.which === "ended") body.appendChild(clEnded(end, d.canAddPast));
+      else if (CL.which === "demo") body.appendChild(clActive(dem, false, "demo"));
+      else body.appendChild(clActive(act, d.canAdd, "clients"));
+      /* a search typed before the switch still applies to what is drawn */
+      var s = page.querySelector(".ptitle .right input");
+      if (s && s.value) s.dispatchEvent(new Event("input"));
+    };
+    draw();
+  }
+
+  function clEmpty(text) { return el("p", "muted clnone", text); }
+
+  /* The live clients (and the demo), as the cards they always were or as a
+     list: one line a client with the same facts — its industry, your seat,
+     its units, a button per module with that module's mark, Settings. */
+  function clActive(list, canAdd, gridName) {
+    var box = el("div");
+    if (CL.view === "cards") {
+      var g = el("div", "cards");
+      g.dataset.grid = gridName;
+      list.forEach(function (c) { g.appendChild(cardFor(c)); });
+      if (canAdd) g.appendChild(addCard());
+      box.appendChild(g);
+      if (!list.length && !canAdd) box.appendChild(clEmpty(CL.mine ? "You have no seat on any client here." : "Nothing here."));
+      return box;
+    }
+    var wrap = el("div", "cltable");
+    var t = el("table");
+    t.dataset.grid = gridName;
+    var hr = el("tr");
+    ["Client", "Industry", "Your seat", "Units", "Open", ""].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    var th = el("thead"); th.appendChild(hr); t.appendChild(th);
+    var tb = el("tbody");
+    list.forEach(function (c) {
+      var r = el("tr", "crow");
+      r.dataset.client = c.key;
+      r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+      var who = el("td");
+      var w = el("span", "clwho");
+      if (c.mark) { var im = el("img", "cmark solo"); im.src = c.mark; im.alt = ""; w.appendChild(im); }
+      else w.appendChild(el("span", "cmark", initials(c.name)));
+      w.appendChild(el("b", null, c.name));
+      if (c.kind === "demo") w.appendChild(el("span", "tag demo", "Demo"));
+      who.appendChild(w); r.appendChild(who);
+      r.appendChild(el("td", "muted", c.industry || ""));
+      r.appendChild(el("td", null, c.seat ? (c.seat === "super" ? "Super user" : "SMO team") : ""));
+      r.appendChild(el("td", "num", c.units ? String(c.units) : ""));
+      var mods = el("td");
+      var ml = el("span", "clmods");
+      if (c.canOpen && c.modules) c.modules.forEach(function (m) {
+        var b = el("button", "clmod", m.label);
+        b.type = "button";
+        b.dataset.module = m.key;
+        if (m.mark) { var mk = el("i", m.alarm ? "alarm" : "due", m.mark); if (m.tip) mk.title = m.tip; b.appendChild(mk); }
+        b.addEventListener("click", function () { moduleGo(c, m); });
+        ml.appendChild(b);
+      });
+      else if (!c.canOpen) ml.appendChild(el("span", "muted", "Listed only"));
+      mods.appendChild(ml); r.appendChild(mods);
+      var cog = el("td", "clgo");
+      if (c.canConfig) {
+        var chip = settingsChip(c.name);
+        chip.setAttribute("role", "button"); chip.tabIndex = 0;
+        var open = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+        chip.addEventListener("click", open);
+        chip.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+        cog.appendChild(chip);
+      }
+      r.appendChild(cog);
+      tb.appendChild(r);
+    });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    box.appendChild(wrap);
+    if (!list.length) box.appendChild(clEmpty(CL.mine ? "You have no seat on any client here." : "Nothing here."));
+    if (canAdd) {
+      var add = el("div", "cladd");
+      var b2 = el("button", "btn", "+ Add a client");
+      b2.type = "button";
+      b2.addEventListener("click", function () { drawNewClient(); });
+      add.appendChild(b2);
+      box.appendChild(add);
+    }
+    return box;
+  }
+
+  /* ENDED: the archived clients, with Bring back and Settings as on their
+     card (§323), and the past clients added for their case studies — no
+     Bring back (there is no platform to return to), and a way into their
+     case studies. "+ Add a past client" lives here and nowhere else; it is
+     Open a piece of work with a past client chosen, because a past client
+     exists only to carry one (spec 067 §7). */
+  function clEnded(list, canAddPast) {
+    var box = el("div");
+    var addPast = function () { CS.jump = { view: "open", past: true }; go("memory"); };
+    var casesOf = function (c) { CS.q = c.name; CS.cat = ""; CS.jump = { view: "lib" }; go("memory"); };
+    if (CL.view === "cards") {
+      var g = el("div", "cards");
+      g.dataset.grid = "archived";
+      list.forEach(function (c) {
+        var card = c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
+        card.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+        g.appendChild(card);
+      });
+      if (canAddPast) {
+        var b = el("button", "ccard add", "+ Add a past client");
+        b.type = "button";
+        b.dataset.addPast = "1";
+        b.addEventListener("click", addPast);
+        g.appendChild(b);
+      }
+      box.appendChild(g);
+      if (!list.length && !canAddPast) box.appendChild(clEmpty(CL.mine ? "You had a seat on none of the ended clients." : "No ended clients."));
+      return box;
+    }
+    var wrap = el("div", "cltable");
+    var t = el("table");
+    t.dataset.grid = "archived";
+    var hr = el("tr");
+    ["Client", "Industry", "Ended", ""].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    var th = el("thead"); th.appendChild(hr); t.appendChild(th);
+    var tb = el("tbody");
+    list.forEach(function (c) {
+      var r = el("tr", "crow");
+      r.dataset.client = c.key;
+      r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+      var who = el("td"), w = el("span", "clwho");
+      w.appendChild(el("span", "cmark arch", initials(c.name)));
+      w.appendChild(el("b", null, c.name));
+      who.appendChild(w); r.appendChild(who);
+      r.appendChild(el("td", "muted", c.industry || ""));
+      var when = archDate(c.at);
+      r.appendChild(el("td", null, c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
+      var acts = el("td", "clgo");
+      if (c.cases != null) {
+        var cb = el("button", "clmod", "Case studies");
+        cb.type = "button";
+        cb.appendChild(el("i", null, String(c.cases)));
+        cb.addEventListener("click", function () { casesOf(c); });
+        acts.appendChild(cb);
+      } else if (c.canConfig) {
+        var bb = el("button", "clmod", "Bring back");
+        bb.type = "button";
+        bb.addEventListener("click", function () { bringBack(c.key, c.name); });
+        acts.appendChild(bb);
+        var cog = settingsChip(c.name);
+        cog.setAttribute("role", "button"); cog.tabIndex = 0;
+        var open = function (e) { e.preventDefault(); drawArchived(c.key); };
+        cog.addEventListener("click", open);
+        cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+        acts.appendChild(cog);
+      }
+      r.appendChild(acts);
+      tb.appendChild(r);
+    });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    box.appendChild(wrap);
+    if (!list.length) box.appendChild(clEmpty(CL.mine ? "You had a seat on none of the ended clients." : "No ended clients."));
+    if (canAddPast) {
+      var add = el("div", "cladd");
+      var b2 = el("button", "btn", "+ Add a past client");
+      b2.type = "button";
+      b2.addEventListener("click", addPast);
+      add.appendChild(b2);
+      box.appendChild(add);
+    }
+    return box;
+  }
+
+  /* A PAST CLIENT'S CARD: the archived card's quiet look, "Past client"
+     where the archive date would be, and one row — its case studies. */
+  function pastCardFor(c, casesOf) {
+    var b = el("div", "ccard arch past");
+    b.dataset.client = c.key;
+    b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    var top = el("div", "ctop");
+    top.appendChild(el("div", "cmark", initials(c.name)));
+    top.appendChild(el("h2", null, c.name));
+    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    foot.appendChild(el("span", "tag arch", "Past client"));
+    top.appendChild(foot);
+    b.appendChild(top);
+    var mods = el("div", "mods");
+    var r = el("button", "mrow", "Case studies");
+    r.type = "button";
+    r.appendChild(el("i", c.cases ? "due" : null, String(c.cases)));
+    r.addEventListener("click", function () { casesOf(c); });
+    mods.appendChild(r);
+    b.appendChild(mods);
+    return b;
   }
 
   /* ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a). Islam, of two behaviours
@@ -4140,10 +4438,7 @@
            this is the one module whose work is on our side, and landing a
            consultant on the page where they can do nothing would be §61 with
            the sign reversed. */
-        r.addEventListener("click", function () {
-          if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
-          location.assign("/" + c.key + "/" + m.key);
-        });
+        r.addEventListener("click", function () { moduleGo(c, m); });
         mods.appendChild(r);
       });
       b.appendChild(mods);
@@ -4254,6 +4549,8 @@
   function bringBack(key, name) {
     setArchived(key, false).then(function (j) {
       if (!j.ok) { say(j.error || "Could not bring " + name + " back.", true); return; }
+      /* back where it now is: among the Active clients */
+      CL.which = "active";
       /* `go("clients")`, NEVER `drawClients()` — the first build called the
          renderer directly and `drawClients` does not CLEAR the page, so it
          appended a whole second copy underneath the first and the Archived

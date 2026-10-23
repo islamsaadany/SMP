@@ -407,7 +407,11 @@ to be there"*); so **for now a past client is added only from Open a piece of
 work**. The Clients filter (Active / Ended / Demo, Mine, cards or list) that
 would also show it under Ended is drawn
 (`design-mockups/clients-filter/2026-10-23_clients-filter-and-list.html`) and
-**waits on his sign-off; not built**.
+was **built the same day on his word** (*"build the clients filter too"*):
+Active / Ended / Demo with counts, Mine (clients with a seat), cards or a list
+remembered on the device; Ended holds the archived clients and the past ones,
+and *+ Add a past client* there opens Open a piece of work with a past client
+chosen.
 
 **Not built, said:** the assistant reading case studies (§9) — *Ask a
 question instead* asks the insights, as the memory's assistant does today;

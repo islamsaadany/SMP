@@ -280,7 +280,55 @@ await section("7 · a phone", async () => {
   await shot(p, "8-phone-report");
 });
 
-await section("8 · nothing threw", async () => {
+await section("8 · the Clients page: Active, Ended, Demo, Mine, cards or list", async () => {
+  const p = boss;
+  const goClients = async () => { await p.click('.nav button[data-tab="clients"]'); await p.waitForTimeout(1200); };
+  await goClients();
+  const on = await p.$eval('.clwhich button[aria-pressed="true"]', (b) => b.dataset.which).catch(() => null);
+  check(on === "active", "the Clients page opens on Active (Islam: \"default is active\")", on);
+  check(!/Nile Logistics/.test(await p.textContent("#page")), "a past client is not among the Active ones", "");
+  await p.click('.clwhich button[data-which="ended"]'); await p.waitForTimeout(400);
+  const past = await p.$('[data-grid="archived"] .ccard[data-client="nile-logistics"]');
+  check(!!past && /Past client/i.test(await past.textContent()), "under Ended, the past client, marked Past client", past ? await past.textContent() : "");
+  check(past && !(await past.$(".cback")), "…with no Bring back: there is no platform to return to", "");
+  check(!!(await p.$('[data-grid="archived"] [data-add-past]')), "…and + Add a past client lives here", "");
+  if (past) {
+    await (await past.$(".mrow")).click(); await p.waitForTimeout(1200);
+    check((await p.inputValue("#cs-q").catch(() => "")) === "Nile Logistics" && !!(await p.$(".shelf .cover")),
+      "its Case studies row opens the library on its case studies", await p.inputValue("#cs-q").catch(() => ""));
+  }
+  await goClients();
+  await p.click('.clwhich button[data-which="ended"]'); await p.waitForTimeout(400);
+  await p.click('[data-grid="archived"] [data-add-past]'); await p.waitForTimeout(1200);
+  check((await p.inputValue("#cs-o-client").catch(() => "")) === "__past" && await p.isVisible("#cs-o-pname"),
+    "+ Add a past client opens Open a piece of work with a past client chosen", await p.inputValue("#cs-o-client").catch(() => ""));
+  /* MINE, BOTH ENDS: the admin has no seat here, the office's SMO has one */
+  await goClients();
+  const back = await p.$eval('.clwhich button[aria-pressed="true"]', (b) => b.dataset.which).catch(() => null);
+  check(back === "active", "coming back to Clients after Ended opens on Active again, every visit", back);
+  await p.click(".clmine"); await p.waitForTimeout(300);
+  check(/Active0/.test(await p.textContent(".clwhich")) && !(await p.$('[data-grid="clients"] .ccard[data-client="raya-trade"]')),
+    "Mine, for somebody with no seat anywhere, shows none — and its count says so first", await p.textContent(".clwhich"));
+  const smo = await as("office@forefront.example");
+  await smo.click('.nav button[data-tab="clients"]'); await smo.waitForTimeout(1200);
+  await smo.click(".clmine"); await smo.waitForTimeout(300);
+  check(!!(await smo.$('[data-grid="clients"] .ccard[data-client="raya-trade"]')), "CONTROL — Mine, for somebody with a seat, shows their client", await smo.textContent(".clwhich"));
+  /* CARDS OR LIST, remembered on this device */
+  await p.click(".clmine"); await p.waitForTimeout(200);
+  await p.click('.clview button[data-view="list"]'); await p.waitForTimeout(300);
+
+  const rowsNow = await p.$$eval('table[data-grid="clients"] tr.crow', (r) => r.map((x) => x.dataset.client));
+  check(rowsNow.includes("raya-trade"), "the list draws one line a client", JSON.stringify(rowsNow) + " " + (await p.textContent(".clwhich")));
+  check(!!(await p.$('tr.crow[data-client="raya-trade"] .clmod')), "…with a button per module", "");
+  await p.reload(); await p.waitForTimeout(1500);
+  await goClients();
+  check(!!(await p.$('table[data-grid="clients"]')), "…and the list is still the view after a reload", "");
+  await p.click('.clview button[data-view="cards"]'); await p.waitForTimeout(300);
+  check(!!(await p.$('.cards[data-grid="clients"]')), "CONTROL — and back to cards", "");
+  await shot(p, "9-clients");
+});
+
+await section("9 · nothing threw", async () => {
   check(errors.length === 0, "no page error anywhere in the walk (§118)", errors.join(" | "));
 });
 

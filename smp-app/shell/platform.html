@@ -940,6 +940,58 @@
   .asksrc button.tag:hover{ border-color:var(--amber-tx) }
   @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
 
+  /* ── THE CLIENTS FILTER (spec 067's drawing, clients-filter) ─────────
+     One row: which clients, Mine, cards or list. The list is the card's
+     facts on one line. `cl`-prefixed: a class is one global namespace (§65.9). */
+  .clbar{ display:flex; gap:10px 14px; align-items:center; flex-wrap:wrap; margin:0 0 18px }
+  .clwhich{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clwhich button{ border:0; border-right:1px solid var(--line); background:transparent; color:var(--ink-2); font-family:inherit;
+    font-size:13px; font-weight:600; padding:7px 13px; cursor:pointer; white-space:nowrap }
+  .clwhich button:last-child{ border-right:0 }
+  .clwhich button i{ font-style:normal; font-weight:500; color:var(--ink-3); margin-left:6px; font-size:12px }
+  .clwhich button[aria-pressed="true"]{ background:var(--ff); color:var(--ff-ink) }
+  .clwhich button[aria-pressed="true"] i{ color:var(--ff-quiet) }
+  .clwhich button:focus-visible, .clmine:focus-visible, .clview button:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  .clmine{ display:inline-flex; align-items:center; gap:8px; border:0; background:none; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--ink-2); cursor:pointer; padding:4px 2px; border-radius:6px }
+  .clmine .sw{ position:relative; width:32px; height:18px; border-radius:999px; background:var(--line); flex:none }
+  .clmine .sw::after{ content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--surface);
+    box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .15s }
+  .clmine.on{ color:var(--ink) }
+  .clmine.on .sw{ background:var(--ff) }
+  .clmine.on .sw::after{ left:16px }
+  .clview{ margin-left:auto; display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clview button{ border:0; background:transparent; color:var(--ink-3); padding:6px 9px; display:grid; place-items:center; cursor:pointer }
+  .clview button + button{ border-left:1px solid var(--line) }
+  .clview button[aria-pressed="true"]{ background:var(--surface-2); color:var(--ink) }
+  .clview svg{ width:17px; height:17px }
+  .cltable{ border:1px solid var(--line); border-radius:12px; background:var(--surface); overflow-x:auto }
+  .cltable table{ width:100%; border-collapse:collapse; min-width:720px }
+  .cltable th{ text-align:left; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); padding:11px 14px; border-bottom:1px solid var(--line); white-space:nowrap }
+  .cltable td{ padding:10px 14px; border-bottom:1px solid var(--line-soft); font-size:14px; vertical-align:middle }
+  .cltable tr:last-child td{ border-bottom:0 }
+  .cltable tbody tr:hover{ background:var(--surface-2) }
+  .cltable td.num{ font-variant-numeric:tabular-nums }
+  .clwho{ display:flex; gap:10px; align-items:center }
+  .clwho b{ font-weight:600 }
+  .clwho .cmark{ width:26px; height:26px; line-height:26px; font-size:10px; flex:none }
+  .clwho .cmark.arch{ background:var(--surface-2); color:var(--ink-3) }
+  .clmods{ display:flex; gap:6px; flex-wrap:wrap }
+  .clmod{ border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:var(--surface); color:var(--ink);
+    font-family:inherit; font-size:12.5px; font-weight:600; white-space:nowrap; cursor:pointer }
+  .clmod:hover{ border-color:var(--amber-tx) }
+  .clmod i{ font-style:normal; margin-left:5px; color:var(--ink-3) }
+  .clmod i.alarm{ color:var(--warn) }
+  .clmod i.due{ color:var(--ink-2) }
+  .clgo{ width:1%; white-space:nowrap; text-align:right }
+  .clgo > * + *{ margin-left:8px }
+  .clgo .ccfg{ position:static; display:inline-grid; vertical-align:middle }
+  .cladd{ margin-top:12px }
+  .clnone{ margin:12px 0 0 }
+  @media (max-width:700px){ .clview{ margin-left:0 } }
+  @media (prefers-reduced-motion:reduce){ .clmine .sw::after{ transition:none } }
+
   /* ── CASE STUDIES (spec 067) ─────────────────────────────────────────
      The library from the signed-off drawing (design-mockups/case-studies/
      2026-10-23_case-studies-library.html), in this page's own tokens and

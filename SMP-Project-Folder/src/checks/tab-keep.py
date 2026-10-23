@@ -96,7 +96,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             return
         # the new stack's copy is GENERATED from this one with the script moved
         # to a file — walking one copy proves one copy (§53.5, A15)
-        for name in ("platform-page.js", "memory-split.js", "client-setup.js"):
+        for name in ("platform-page.js", "memory-split.js", "case-split.js", "client-setup.js"):
             if p == "/" + name:
                 fp = os.path.join(REPO, "smp-app", "public", name)
                 if os.path.exists(fp):

@@ -541,7 +541,7 @@
    and a tab asks "what changed since N" instead of fetching the graph. The
    built file's bytes changed, which is the whole trigger (§91). Proved held
    by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.85-hidden-row-on-slide";
+const SHELL = "smp-shell-v6.86-plan-as-it-stood";
 const ASSETS = [
   "/",
   "/index.html",

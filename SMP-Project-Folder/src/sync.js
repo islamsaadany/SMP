@@ -848,6 +848,14 @@ var SYNC = (function () {
             return;
           }
         }
+        /* §592: a row that LEFT or ARRIVED is put back by its seat — the
+           removed row re-seated where it was, the added one taken out —
+           through the same door History's Restore uses (§53.5). */
+        if (r.field === "row") {
+          var why = (typeof TRAIL !== "undefined" && TRAIL.seatBack) ? TRAIL.seatBack(ch.target, r) : "no seat";
+          if (why) missed.push(r);
+          return;
+        }
         roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
         if (!row) { missed.push(r); return; }
         /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,

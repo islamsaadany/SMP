@@ -711,7 +711,43 @@ function collect(stored, incoming, w) {
 
 /* Append one row list to another, tolerating the null `splitRows` hands over
    when a plan change has no addressable row (§184). */
-function keep(into, rows) { (rows || []).forEach(function (r) { into.push(r); }); }
+/* §592: a structural row (field "row") is reported once per list, however
+   many field passes walk that list — the measures go through splitRows four
+   times, and a row that left would otherwise be logged four times. */
+function keep(into, rows) {
+  (rows || []).forEach(function (r) {
+    if (r && r.field === "row" && into.some(function (x) {
+      return x.field === "row" && String(x.id) === String(r.id) && x.had === r.had; })) return;
+    into.push(r);
+  });
+}
+
+/* ── §592: A ROW THAT LEFT, OR ARRIVED, IS LOGGED WITH ITS SEAT ────────
+   Islam: *"if I remove a line fully do I get history of the plans somehow?"*
+   Until this, a list whose ids differed reached `onPlan()` with NO rows, so
+   the log said "the unit's plan" and nothing about which row, and History
+   could put nothing back. The row's whole contents and its seat — which
+   holder, which list, which position — travel in the log entry instead:
+   a row that left as `from`, a row that arrived as `to`. The seat is what
+   lets Restore put it back where it was (his answer: *"old position"*),
+   and the contents are what let the Plan page be rebuilt as it stood on a
+   day. Reported only where the caller names the seat; a list with no seat
+   keeps the bare signal it always gave. */
+function structuralRows(sList, iList, seat) {
+  if (!seat) return null;
+  const sm = byId(sList), im = byId(iList), rows = [];
+  (sList || []).forEach(function (r, i) {
+    if (!r || im[String(r.id)]) return;
+    rows.push({ id: r.id, name: r.name || null, field: "row", had: true,
+                from: { in: seat.in == null ? null : seat.in, list: seat.list, at: i, of: (sList || []).length, row: r }, to: null });
+  });
+  (iList || []).forEach(function (r, i) {
+    if (!r || sm[String(r.id)]) return;
+    rows.push({ id: r.id, name: r.name || null, field: "row", had: false, from: null,
+                to: { in: seat.in == null ? null : seat.in, list: seat.list, at: i, of: (iList || []).length, row: r } });
+  });
+  return rows.length ? rows : null;
+}
 
 function uniq(a) {
   const seen = {}, out = [];
@@ -722,7 +758,7 @@ function uniq(a) {
 /* A list of rows with ids, split into what is reporting and what is plan.
    A change to WHICH rows exist is always plan: adding or removing a measure
    is authoring, not reporting. */
-function splitRows(sList, iList, fields, onReport, onPlan, onArrange) {
+function splitRows(sList, iList, fields, onReport, onPlan, onArrange, seat) {
   /* §191: FAIL CLOSED BEFORE ANYTHING ELSE IS ASKED. Without this the two
      maps below come back empty or collapsed and the loop finds nothing to
      classify, which reads as "no change" and is allowed. */
@@ -732,7 +768,9 @@ function splitRows(sList, iList, fields, onReport, onPlan, onArrange) {
   }
   if (!same(idsOf(sList), idsOf(iList))) {
     if (onArrange && reordered(sList, iList)) { onArrange(); return; }
-    onPlan(); return;
+    /* §592: the rows that left or arrived, with their seats, where the
+       caller named one. The GATE is unchanged — ids differing is plan. */
+    onPlan(structuralRows(sList, iList, seat)); return;
   }
   const sm = byId(sList), im = byId(iList);
   const moved = [];
@@ -1157,7 +1195,8 @@ function collectUnit(key, su, iu, add, w) {
   splitRows(su.keyObjectives, iu.keyObjectives, REPORT.unitKO.concat(SRC),
     function () {},
     function (rows) { add("unitPlan", key, "the unit's key objectives", rows); },
-    function () { add("arrange", key, "the order of the unit's key objectives"); });
+    function () { add("arrange", key, "the order of the unit's key objectives"); },
+    { in: null, list: "keyObjectives" });
 
   /* Pillars, and the measures and tactics under them. */
   /* §191: THE PILLAR LIST IS ASKED THE SAME QUESTION AS EVERY OTHER LIST.
@@ -1208,7 +1247,8 @@ function collectUnit(key, su, iu, add, w) {
           .concat(["note"]);
         splitRows(sb.rows, ib.rows, bdFields,
           function (rows) { rows.forEach(function (x) { moved.push(x); }); },
-          function (rows) { planMoved = true; keep(planRows, rows); });
+          function (rows) { planMoved = true; keep(planRows, rows); },
+          null, { in: a.id, list: "breakdown.rows" });
       })();
       splitRows(a.measures, b.measures, FIGURE,
         function (rows) { addFigures(w, key, su, rows, "reported figures", add); },
@@ -1221,10 +1261,12 @@ function collectUnit(key, su, iu, add, w) {
         function () {});
       splitRows(a.measures, b.measures, REPORT.measure.concat(SRC),
         function () {},
-        function (rows) { planMoved = true; keep(planRows, rows); });
+        function (rows) { planMoved = true; keep(planRows, rows); },
+        null, { in: a.id, list: "measures" });
       splitRows(a.tactics, b.tactics, REPORT.tactic,
         function (rows) { addOwnedTactics(w, key, a, rows, add, moved); },
-        function (rows) { planMoved = true; keep(planRows, rows); });
+        function (rows) { planMoved = true; keep(planRows, rows); },
+        null, { in: a.id, list: "tactics" });
     });
     if (moved.length) add("unitReporting", key, "reported figures", moved);
     if (planMoved) add("unitPlan", key, "the unit's plan", planRows.length ? planRows : null);
@@ -1245,7 +1287,8 @@ function collectUnit(key, su, iu, add, w) {
       splitRows(sac, iac, REPORT.action,
         function (rows) { add("capReporting", key, "action figures", rows); },
         function (rows) { add("capPlan", key, "the unit's actions", rows); },
-        function () { add("arrange", key, "the order of the unit's actions"); });
+        function () { add("arrange", key, "the order of the unit's actions"); },
+        { in: null, list: "actions" });
     }
   })();
 
@@ -1319,7 +1362,8 @@ function fnOwnWork(sf2, iff, target, add) {
     splitRows(sko, iko, REPORT.capKO,
       function (rows) { say("capReporting", target, "function key objective figures", rows); },
       function (rows) { say("capPlan", target, "a function's key objectives", rows); },
-      function () { say("arrange", target, "the order of a function's key objectives"); });
+      function () { say("arrange", target, "the order of a function's key objectives"); },
+      { in: null, list: "keyObjectives" });
   }
   if (!same(spr, ipr)) collectProjects(spr, ipr, target, say);
   /* §399: A FUNCTION'S S&W, whatever way it plans. The rule a unit's SWOT and
@@ -1343,7 +1387,8 @@ function fnOwnWork(sf2, iff, target, add) {
     splitRows(sac, iac, REPORT.action,
       function (rows) { say("capReporting", target, "action figures", rows); },
       function (rows) { say("capPlan", target, "a function's actions", rows); },
-      function () { say("arrange", target, "the order of a function's actions"); });
+      function () { say("arrange", target, "the order of a function's actions"); },
+      { in: null, list: "actions" });
   }
   return spoke;
 }
@@ -1504,13 +1549,16 @@ function collectProjects(aP, bP, target, add) {
       }
       splitRows(pa.deliverables, pb.deliverables, REPORT.deliverable,
         function (rows) { add("capReporting", target, "project deliverables", rows); },
-        function (rows) { add("capPlan", target, "a project's deliverables", rows); });
+        function (rows) { add("capPlan", target, "a project's deliverables", rows); },
+        null, { in: pa.id, list: "deliverables" });
       splitRows(pa.outcomes, pb.outcomes, REPORT.outcome,
         function (rows) { add("capReporting", target, "project outcome figures", rows); },
-        function (rows) { add("capPlan", target, "a project's outcomes", rows); });
+        function (rows) { add("capPlan", target, "a project's outcomes", rows); },
+        null, { in: pa.id, list: "outcomes" });
       splitRows(pa.milestones, pb.milestones, REPORT.milestone,
         function (rows) { add("capReporting", target, "project milestones", rows); },
-        function (rows) { add("capPlan", target, "a project's milestones", rows); });
+        function (rows) { add("capPlan", target, "a project's milestones", rows); },
+        null, { in: pa.id, list: "milestones" });
     });
   }
 }
@@ -1585,7 +1633,8 @@ function collectCapabilities(sList, iList, add, w) {
     splitRows(a.keyObjectives, b.keyObjectives, REPORT.capKO,
       function (rows) { add("capReporting", target, "capability key objective figures", rows); },
       function (rows) { add("capPlan", target, "a capability's key objectives", rows); },
-      function () { add("arrange", target, "the order of a capability's key objectives"); });
+      function () { add("arrange", target, "the order of a capability's key objectives"); },
+      { in: a.id, list: "keyObjectives" });
 
     collectProjects(a.projects, b.projects, target, add);
     /* §394: A CAPABILITY THAT PLANS IN PILLARS IS JUDGED AS A PILLARS FUNCTION

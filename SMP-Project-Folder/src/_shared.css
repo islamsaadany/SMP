@@ -491,6 +491,24 @@
   .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
   .pband-hist b { font-weight:600; color:inherit; }
   .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+  /* ── §592: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
+     The control sits in the band's own line, after See history; while a
+     day is shown it wears a field's edge so the page says which day it is
+     reading. The banner is the attention family — a decision about what is
+     shown, never a warning (§168) — and Back to today is its one act. The
+     pen is put away by mayAuthor() itself; the rule here only hides the
+     button that would open it. */
+  .pband-hist .linkbtn.asof-on { text-decoration:none; color:var(--ink); border:1px solid var(--gold-deep); border-radius:6px; padding:3px 8px; }
+  .pband-hist .linkbtn.asof-on b { font-weight:600; }
+  .asof-bar { display:flex; align-items:center; gap:14px; margin:0 0 14px; padding:10px 16px; border-radius:10px;
+              background:var(--attn-bg); color:var(--attn-tx); font-size:var(--fs-small); line-height:1.45; }
+  .asof-bar b { font-weight:700; color:inherit; }
+  .asof-bar .linkbtn { font:inherit; font-weight:600; color:inherit; background:none; border:0; padding:0; cursor:pointer;
+                       text-decoration:underline; text-underline-offset:2px; margin-left:auto; white-space:nowrap; }
+  .asof-pick { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .asof-pick .fld { width:auto; }
+  .asof-pick .hist-err { flex-basis:100%; }
+  body.asof .secpen { display:none; }
 
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
      A title is one line of prose however long it is, so this must read as a

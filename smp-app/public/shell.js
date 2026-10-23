@@ -15085,6 +15085,11 @@ function strategyAc(acKey, target){
 }
 function mayAuthor(acKey, target){
   var t = target === undefined ? TARGET : target;
+  /* §592: while the Plan page shows the plan as it stood on a day, nothing
+     on it can be authored — the view is read only by construction, not by
+     hiding controls one at a time. The guard asks the TARGET, so a page on
+     another subject is untouched. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
@@ -15098,6 +15103,8 @@ function mayFill(acKey, target){
      half and leaving the other is how the two came to disagree in the first
      place (§53.5). */
   var t = target === undefined ? TARGET : target;
+  /* §592: the same guard the pen gets — an old plan takes no fill either. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
@@ -33049,11 +33056,19 @@ function eyeBtn(row, page, acKey){
     '" data-hideac="' + esc(page) + '|' + esc(acKey) + '" aria-pressed="' + (on ? 'true' : 'false') +
     '" title="' + word + '" aria-label="' + word + '">' + eyeSvg(on) + '</button>';
 }
+/* \u00a7592: on the Plan page shown as it stood on a day, a row that has since
+   been removed wears the same quiet ink and a chip of its own \u2014 the reader
+   is told why it is not on today's plan. The same two helpers, so every
+   plan table takes it without being edited (\u00a753.5). */
+function asofGone(row){
+  return !!(row && typeof TRAIL !== "undefined" && TRAIL.asofGone && TRAIL.asofGone(row.id));
+}
 function hidChip(row){
+  if (asofGone(row)) return '<span class="hidchip">Removed since</span>';
   return SMPRules.isHidden(row)
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
-function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
+function hidCls(row){ return (SMPRules.isHidden(row) || asofGone(row)) ? ' class="hiddenrow"' : ''; }
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -37951,7 +37966,19 @@ function unitWayOf(u){
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }
+/* §592: THE PLAN AS IT STOOD ON A DAY. Islam: *"the history of the plans
+   should be on the plans page for the smo to see and review."* When the
+   office has picked a day, the page draws the copy History rebuilt from the
+   change log — the live graph is never touched, so nothing the differ
+   watches moves and nothing can be saved — under a banner naming the day.
+   The pen is off by `mayAuthor()`'s own guard, so every table below draws
+   its read-mode self. */
 function renderUnitPlan(u){
+  var asof = (typeof TRAIL !== "undefined" && TRAIL.asofFor) ? TRAIL.asofFor(u) : null;
+  if (asof) return TRAIL.asofBanner() + renderUnitPlanBody(asof);
+  return renderUnitPlanBody(u);
+}
+function renderUnitPlanBody(u){
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? fnObjPlan("u:" + u.ukey) : renderFnProjects("u:" + u.ukey);
   var sel = unitRailPick(u);
@@ -62682,7 +62709,34 @@ var TRAIL = (function(){
                 horizon:"Horizon", kind:"Measured as", hide:"Hidden", endInMind:"End in mind",
                 clauses:"Who we are", mission:"Mission", values:"Values", org:"Organisation",
                 asOfQuarter:"Review quarter", "swot.s":"Strengths", "swot.w":"Weaknesses",
-                "swot.o":"Opportunities", "swot.t":"Threats" };
+                "swot.o":"Opportunities", "swot.t":"Threats",
+                /* §592: the row itself, when one left or arrived */
+                row:"Row" };
+  /* §592: THE SEAT A ROW SAT IN, in words. The log carries which holder,
+     which list and which position (lib/authorize.js structuralRows); the
+     page says it the way the plan does: "MB01 · measure 2 of 5". */
+  var LIST_WORD = { measures:"measure", tactics:"tactic", keyObjectives:"objective",
+                    deliverables:"deliverable", outcomes:"outcome", milestones:"milestone",
+                    actions:"action", "breakdown.rows":"breakdown row" };
+  function holderWord(t, id){
+    if (id == null) return placeWord(t);
+    var h = locate(t, id);
+    if (!h) return "its place";
+    try {
+      var u = typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null;
+      if (u && u.items && typeof pillarCode === "function") {
+        var i = u.items.indexOf(h);
+        if (i > -1) return pillarCode(u, i);
+      }
+    } catch (e) {}
+    return h.name || String(id);
+  }
+  function seatWord(t, s){
+    if (!s || typeof s !== "object") return "";
+    var w = LIST_WORD[s.list] || "row";
+    return holderWord(t, s.in) + " · " + w + " " + (s.at + 1) + (s.of ? " of " + s.of : "");
+  }
+  function isSeat(v){ return !!(v && typeof v === "object" && !Array.isArray(v) && v.row && v.list); }
   function kindWord(k){ return KIND[k] || k; }
   function fieldWord(f){ return FIELD[f] || String(f || ""); }
   function placeWord(t){
@@ -62767,8 +62821,24 @@ var TRAIL = (function(){
         k === "claim" || k === "claimRequest" || k === "deckHide" || (k === "group" && !r.m))
       return "This is a setting, put back on its own page.";
     if (r.m.field === "name" && r.m.from == null) return "A row that was added is removed from the Plan page.";
+    /* §592: a row that left can be put back where it was — if the log kept
+       it (rows removed before §592 carry no contents) and it is not back
+       already. A row that arrived is removed from the Plan page, as before. */
+    if (r.m.field === "row") {
+      if (r.m.had === false || !r.m.from) return "A row that was added is removed from the Plan page.";
+      if (!isSeat(r.m.from)) return "This row was removed before the platform kept a removed row's contents.";
+      if (locate(r.e.target, r.m.id)) return "This row is back in the plan already.";
+      return null;
+    }
+    /* §592: a value on a row that is no longer in the plan waits for the row:
+       the removal's own line, above, puts it back with its figures. Asked
+       only of the kinds whose rows the plan holds, so a figure set's line or
+       a setting is never greyed by a finder that does not know it. */
+    if (ROW_KINDS[k] && r.m.id !== r.e.target && !locate(r.e.target, r.m.id))
+      return "That row is no longer in the plan. Put the row back first, from its own line.";
     return null;
   }
+  var ROW_KINDS = { unitPlan:1, unitReporting:1, capPlan:1, capReporting:1, rowDone:1 };
 
   function tableHtml(list, opts){
     opts = opts || {};
@@ -62792,6 +62862,18 @@ var TRAIL = (function(){
     list.forEach(function(r, i){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
+      /* §592: a row's own line reads its seat, not its contents — "MB01 ·
+         measure 2 of 5 → removed", or "— → MB01 · tactic 6 of 6" for one
+         that arrived. The contents are what Restore puts back. */
+      var fromTo = !m ? '<span class="hist-none">—</span>'
+        : m.field === "row"
+          ? (isSeat(m.from) ? E(seatWord(e.target, m.from)) : '<span class="hist-none">—</span>') +
+            ' <span class="hist-arr">→</span> ' +
+            (isSeat(m.to) ? E(seatWord(e.target, m.to)) : '<span class="hist-none">removed</span>')
+          : valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to);
+      var fromToWords = !m ? '' : m.field === "row"
+        ? (isSeat(m.from) ? seatWord(e.target, m.from) : "nothing") + ' → ' + (isSeat(m.to) ? seatWord(e.target, m.to) : "removed")
+        : plain(m.from) + ' → ' + plain(m.to);
       h += '<tr data-hist-row="' + i + '">' +
         '<td class="hist-t" title="' + E(dateStamp(e.at)) + '">' + E(dateWord(e.at)) + '</td>' +
         '<td class="hist-t">' + E(timeWord(e.at)) + '</td>' +
@@ -62800,7 +62882,7 @@ var TRAIL = (function(){
         '<td><span class="hist-chip">' + E(kindWord(e.kind)) + '</span></td>' +
         '<td class="hist-name hist-wrap" title="' + E(m ? m.id : "") + '">' + E(rowName) + '</td>' +
         '<td class="hist-fld">' + (m ? E(fieldWord(m.field)) : '') + '</td>' +
-        '<td class="hist-fromto hist-wrap" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
+        '<td class="hist-fromto hist-wrap" title="' + E(fromToWords) + '">' + fromTo + '</td>' +
         '<td class="hist-act">' + (why
           /* HELD, NOT DEAD (§538). It carried BOTH attributes, and `disabled`
              wins: the button took no pointer and no Tab, so the one sentence
@@ -62836,6 +62918,9 @@ var TRAIL = (function(){
     if (f.person) qs.push("person=" + encodeURIComponent(f.person));
     if (f.kind) qs.push("kind=" + encodeURIComponent(f.kind));
     var w = window_(f.when);
+    /* §592: the as-of view names its own instant — everything after the
+       end of the chosen day — rather than one of the page's windows. */
+    if (f.fromAt) w.from = f.fromAt;
     if (w.from) qs.push("from=" + encodeURIComponent(w.from));
     if (w.to) qs.push("to=" + encodeURIComponent(w.to));
     qs.push("limit=" + (f.limit || 200));
@@ -62952,7 +63037,8 @@ var TRAIL = (function(){
   function lineHtml(t, entry){
     return '<span class="pband-hist">Last changed by <b>' + E(whoWord(entry)) + '</b>, ' +
       E(whenWord(entry.at).replace(/^Today /, "today ").replace(/^Yesterday /, "yesterday ")) +
-      ' · <button type="button" class="linkbtn" data-hist-open="' + E(t) + '">See history</button></span>';
+      ' · <button type="button" class="linkbtn" data-hist-open="' + E(t) + '">See history</button>' +
+      asofLink(t) + '</span>';
   }
   function placeLine(t, entry){
     var band = document.querySelector(".pane > .pband, .pane .pband");
@@ -62964,7 +63050,11 @@ var TRAIL = (function(){
   }
   function onPaint(){
     if (!servable() || !live()) return;
-    var t = target(); if (!t) return;
+    var t = target();
+    /* §592: the day view belongs to one subject; walking to another page
+       lets it go, quietly — the page just painted did not use it. */
+    if (ASOF.on && t !== ASOF.target) asofOff(false);
+    if (!t) return;
     var c = lastCache[t];
     if (c && Date.now() - c.when < 60000) { if (c.entry) placeLine(t, c.entry); return; }
     fetchLog({ target:t, when:"all", limit:1 }, function(err, j){
@@ -63043,6 +63133,17 @@ var TRAIL = (function(){
   }
   function confirmHtml(r){
     var m = r.m, e = r.e;
+    /* §592: a row's own line puts the whole row back, in its old seat. */
+    if (m.field === "row" && isSeat(m.from))
+      return '<div class="hist-confirm">' +
+        '<p><strong>Put back ' + E(m.name || m.id) + ' on ' + E(placeWord(e.target)) + ', as ' +
+        E((LIST_WORD[m.from.list] || "row") + " " + (m.from.at + 1) + " of " + holderWord(e.target, m.from.in)) + '?</strong></p>' +
+        '<p>It was removed by ' + E(whoWord(e)) + ' ' + E(whenWord(e.at).toLowerCase()) +
+        ', with everything it held — its target, its settings, its hidden mark and the figures reported on it. ' +
+        'It returns to its old place with all of them. ' +
+        'Putting it back is an ordinary change: it is saved, authorised and logged like any other, so it can itself be put back.</p>' +
+        '<div class="hist-confirm-acts"><button type="button" class="btn ghost" data-hist-cancel>Cancel</button>' +
+        '<button type="button" class="btn" data-hist-ok>Put it back</button></div></div>';
     return '<div class="hist-confirm">' +
       '<p><strong>Put back the ' + E(fieldWord(m.field).toLowerCase()) + ' of ' + E(m.name || m.id) + ' on ' + E(placeWord(e.target)) + ' to ' +
       (m.from == null || m.from === "" ? 'nothing' : E(Array.isArray(m.from) ? m.from.join(", ") : String(m.from))) + '?</strong></p>' +
@@ -63051,18 +63152,196 @@ var TRAIL = (function(){
       '<div class="hist-confirm-acts"><button type="button" class="btn ghost" data-hist-cancel>Cancel</button>' +
       '<button type="button" class="btn" data-hist-ok>Put it back</button></div></div>';
   }
-  function restore(r){
-    var m = r.m, e = r.e;
-    var obj = locate(e.target, m.id);
-    if (!obj) return "That row is no longer in the plan, so there is nothing to put the value back into.";
+  /* ONE VALUE, PUT BACK INTO ONE ROW — shared by Restore and by the day
+     view's walk back through the log (§592), so the two cannot disagree
+     about what "the value before" means. */
+  function applyFrom(obj, m){
     if (obj.__swot) { obj.__swot.arr[obj.__swot.idx] = m.from == null ? "" : m.from; }
     else if (String(m.field).indexOf("swot.") === 0) {
       obj.swot = obj.swot || {};
       obj.swot[m.field.slice(5)] = m.from == null ? [] : JSON.parse(JSON.stringify(m.from));
     }
     else if (m.had === false || m.from === undefined) { delete obj[m.field]; }
-    else obj[m.field] = m.from;
+    else obj[m.field] = m.from == null ? m.from : JSON.parse(JSON.stringify(m.from));
+  }
+  function restore(r){
+    var m = r.m, e = r.e;
+    if (m.field === "row") return seatBack(e.target, m);
+    var obj = locate(e.target, m.id);
+    if (!obj) return "That row is no longer in the plan, so there is nothing to put the value back into.";
+    applyFrom(obj, m);
     return null;
+  }
+
+  /* ── §592: A ROW BACK IN ITS SEAT ──────────────────────────────────────
+     Islam: *"old position"*. The log entry names the holder (a pillar, a
+     project, a capability, or the subject itself), the list and the index
+     the row sat at. It goes back at that index — the rows after it move
+     down one, and a row added there since sits just after it — unless it is
+     there already. A row that ARRIVED (the refused-save path, sync.js) is
+     taken out by id. Returns the reason it could not, or null. Works on the
+     live graph and, through `root`, on the day view's copy. */
+  function listOf(holder, name, make){
+    var parts = String(name).split("."), h = holder;
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (!h[parts[i]] || typeof h[parts[i]] !== "object") { if (!make) return null; h[parts[i]] = {}; }
+      h = h[parts[i]];
+    }
+    var last = parts[parts.length - 1];
+    if (!Array.isArray(h[last])) { if (!make) return null; h[last] = []; }
+    return h[last];
+  }
+  function holderOf(t, id, root){
+    if (root) {
+      if (id == null) return root;
+      var f = typeof findById === "function" ? findById(root, id) : null;
+      return f && f.obj && !f.swot ? f.obj : null;
+    }
+    if (id == null) {
+      if (t === "group") return GROUP;
+      var u = typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null;
+      if (u) return u;
+      try { return typeof holderById === "function" ? holderById(t) : null; } catch (e) { return null; }
+    }
+    return locate(t, id);
+  }
+  function seatBack(t, m, root){
+    var seat = m.had === false ? m.to : m.from;
+    if (!isSeat(seat)) return "This row was removed before the platform kept a removed row's contents.";
+    var holder = holderOf(t, seat.in, root);
+    if (!holder) return "The " + (LIST_WORD[seat.list] ? "place" : "row") + " this row sat in is no longer in the plan.";
+    var list = listOf(holder, seat.list, true);
+    var id = String(seat.row.id), have = list.some(function(r){ return r && String(r.id) === id; });
+    if (m.had === false) {
+      if (!have) return null;
+      for (var i = list.length - 1; i >= 0; i--) if (list[i] && String(list[i].id) === id) list.splice(i, 1);
+      return null;
+    }
+    if (have) return "This row is back in the plan already.";
+    var at = Math.max(0, Math.min(list.length, +seat.at || 0));
+    list.splice(at, 0, JSON.parse(JSON.stringify(seat.row)));
+    return null;
+  }
+
+  /* ── §592: THE PLAN AS IT STOOD ON A DAY ───────────────────────────────
+     Islam: *"the history of the plans should be on the plans page for the
+     smo to see and review"*, and of the drawn pictures: *"yes build both"*.
+     A link beside See history, the office's; a day; and the Plan page
+     draws a COPY of the subject rebuilt by walking the log back from today
+     to the end of that day — each entry's "value before" put back, a row
+     that left re-seated, a row that arrived taken out — newest first. The
+     live graph is never touched: the copy is handed to the page's own
+     painter, mayAuthor() answers no for the subject while the view is on,
+     and the differ sees nothing move. Rows the copy holds that today's plan
+     does not are marked, so the reader is told why they cannot find them.
+
+     WHAT IT CANNOT REPLAY IS COUNTED AND SAID: a reorder (logged without
+     the order it replaced), an entry logged before its rows were kept, and
+     an entry whose rows the log capped — the banner names how many, so a
+     value or an order that differs is not read as the plan's. */
+  var ASOF = { on:false, target:null, day:null, unit:null, gone:{}, since:0, skipped:0, capped:false };
+  var ASOF_CAP = 500;
+  function asofActive(t){ return ASOF.on && (t === undefined || t === ASOF.target); }
+  function asofFor(u){
+    if (!ASOF.on || !u || !ASOF.unit) return null;
+    return (typeof TARGET !== "undefined" && TARGET === ASOF.target) ? ASOF.unit : null;
+  }
+  function asofGone(id){ return ASOF.on && !!ASOF.gone[String(id)]; }
+  function asofSubject(t){
+    if (!t || t === "group") return null;
+    var u = typeof unitLikeWritable === "function" ? unitLikeWritable(t) : null;
+    return u && Array.isArray(u.items) ? u : null;
+  }
+  /* `office` is already this module's flag for what the last read said;
+     the viewer's own standing is asked of the product, under its own name. */
+  function officeHere(){ try { return typeof inOffice === "function" && inOffice(); } catch (e) { return false; } }
+  function asofLink(t){
+    if (!officeHere() || !asofSubject(t)) return '';
+    if (ASOF.on && ASOF.target === t)
+      return ' · <button type="button" class="linkbtn asof-on" data-asof-pick="' + E(t) + '">As it stood on <b>' + E(dayWord(ASOF.day)) + '</b> ▾</button>';
+    return ' · <button type="button" class="linkbtn" data-asof-pick="' + E(t) + '">As it stood on…</button>';
+  }
+  function dayWord(day){
+    try { return typeof dateDay === "function" ? dateDay(new Date(day + "T12:00:00")) : day; } catch (e) { return day; }
+  }
+  function isoDay(d){ return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function pickHtml(t){
+    var now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+    var cur = ASOF.on && ASOF.target === t ? ASOF.day : isoDay(y);
+    return '<div class="asof-pick" data-asof-pick-for="' + E(t) + '">' +
+      '<input type="date" class="fld" data-asof-day max="' + isoDay(now) + '" value="' + E(cur) + '" aria-label="Day">' +
+      '<button type="button" class="bprim" data-asof-go="' + E(t) + '">Show the plan</button></div>';
+  }
+  function asofPick(t){
+    if (typeof openModalHtml !== "function") return;
+    openModalHtml("As it stood on…", "The plan as it was at the end of the chosen day. Read only.", pickHtml(t));
+  }
+  function asofGo(t, day){
+    var box = document.querySelector('[data-asof-pick-for]');
+    var say = function(msg){ if (box) { var p = box.querySelector(".hist-err") || document.createElement("p"); p.className = "hist-empty hist-err"; p.textContent = msg; box.appendChild(p); } };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day || "")) return say("Pick a day first.");
+    var real = asofSubject(t);
+    if (!real) return say("Only a unit's or a pillars function's plan can be shown this way yet.");
+    var end = new Date(day + "T00:00:00"); end.setDate(end.getDate() + 1);
+    fetchLog({ target:t, when:"all", fromAt:end.toISOString(), limit:ASOF_CAP }, function(err, j){
+      if (err) return say("History could not be read — " + (err.message || err));
+      var entries = j.log || [];
+      var built = rebuild(real, entries);
+      ASOF.on = true; ASOF.target = t; ASOF.day = day; ASOF.unit = built.unit;
+      ASOF.gone = built.gone; ASOF.since = entries.length; ASOF.skipped = built.skipped;
+      ASOF.capped = entries.length >= ASOF_CAP;
+      if (typeof EDIT_PAGE !== "undefined") EDIT_PAGE.plan = false;
+      document.body.classList.add("asof");
+      if (typeof closeModal === "function") closeModal();
+      if (typeof paint === "function") paint();
+    });
+  }
+  function asofOff(repaint){
+    ASOF.on = false; ASOF.target = null; ASOF.day = null; ASOF.unit = null; ASOF.gone = {};
+    ASOF.since = 0; ASOF.skipped = 0; ASOF.capped = false;
+    document.body.classList.remove("asof");
+    if (repaint && typeof paint === "function") paint();
+  }
+  var PLAN_KINDS = { unitPlan:1, unitReporting:1, unitFoundation:1, unitAnalysis:1, capPlan:1, capReporting:1, arrange:1, gapFill:1, gapConfirm:1, rowDone:1 };
+  function rebuild(real, entries){
+    var copy = JSON.parse(JSON.stringify(real)), skipped = 0;
+    entries.forEach(function(e){
+      var moved = e.rows_ && e.rows_.moved && e.rows_.moved.length ? e.rows_.moved : null;
+      if (!moved) { if (PLAN_KINDS[e.kind]) skipped++; return; }
+      if (e.rows_.count > moved.length) skipped++;
+      moved.forEach(function(m){ undo(copy, e.target, m); });
+    });
+    var gone = {};
+    walkRows(copy, function(r){ if (r && r.id != null && !(typeof findById === "function" && findById(real, r.id))) gone[String(r.id)] = 1; });
+    return { unit: copy, gone: gone, skipped: skipped };
+  }
+  function undo(copy, t, m){
+    try {
+      if (m.field === "row") { seatBack(t, m, copy); return; }
+      if (m.id === t || m.id === copy.ukey) { applyFrom(copy, m); return; }
+      var f = typeof findById === "function" ? findById(copy, m.id) : null;
+      if (!f) return;
+      if (f.swot) { applyFrom({ __swot: f.swot }, m); return; }
+      if (f.obj) applyFrom(f.obj, m);
+    } catch (e) {}
+  }
+  function walkRows(u, fn){
+    (u.keyObjectives || []).forEach(fn);
+    (u.items || []).forEach(function(p){
+      fn(p);
+      ["measures", "tactics"].forEach(function(k){ (p[k] || []).forEach(fn); });
+      if (p.breakdown && Array.isArray(p.breakdown.rows)) p.breakdown.rows.forEach(fn);
+    });
+  }
+  function asofBanner(){
+    if (!ASOF.on || !ASOF.unit) return '';
+    var n = ASOF.since, name = ASOF.unit.name || placeWord(ASOF.target);
+    return '<div class="asof-bar" data-asof-bar><span><b>' + E(name) + '’s plan as it stood on ' + E(dayWord(ASOF.day)) + '.</b> Read only. ' +
+      (n ? n + (n === 1 ? ' change has' : ' changes have') + ' been made since; the rows and figures below are what the plan held at the end of that day.'
+         : 'Nothing has changed since; this is today’s plan.') +
+      (ASOF.skipped ? ' ' + ASOF.skipped + ' of them could not be replayed (a reorder, or a change logged without its values), so an order or a value may differ.' : '') +
+      (ASOF.capped ? ' More than ' + ASOF_CAP + ' changes since that day: only the latest ' + ASOF_CAP + ' were replayed.' : '') +
+      '</span><button type="button" class="linkbtn" data-asof-off>Back to today</button></div>';
   }
 
   /* ── WIRING, DELEGATED ONCE ────────────────────────────────────────── */
@@ -63079,10 +63358,17 @@ var TRAIL = (function(){
     F.q = i.value; applySearch();       /* typing never repaints (§35) */
   });
   document.addEventListener("click", function(ev){
-    var b = ev.target && ev.target.closest && ev.target.closest("[data-hist-retry],[data-hist-open],[data-hist-restore],[data-hist-ok],[data-hist-cancel]");
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-hist-retry],[data-hist-open],[data-hist-restore],[data-hist-ok],[data-hist-cancel],[data-asof-pick],[data-asof-go],[data-asof-off]");
     if (!b) return;
     if (b.hasAttribute("data-hist-retry")) { load(true); return; }
     if (b.hasAttribute("data-hist-open")) { openFor(b.getAttribute("data-hist-open")); return; }
+    /* §592: the day view's three acts */
+    if (b.hasAttribute("data-asof-pick")) { asofPick(b.getAttribute("data-asof-pick")); return; }
+    if (b.hasAttribute("data-asof-go")) {
+      var inp = document.querySelector("[data-asof-day]");
+      asofGo(b.getAttribute("data-asof-go"), inp ? inp.value : ""); return;
+    }
+    if (b.hasAttribute("data-asof-off")) { asofOff(true); return; }
     if (b.hasAttribute("data-hist-restore")) {
       var list = flatten(rows), r = list[+b.getAttribute("data-hist-restore")];
       if (!r || !r.m) return;
@@ -63123,6 +63409,11 @@ var TRAIL = (function(){
   });
 
   return { renderPage: renderPage, onPaint: onPaint, openFor: openFor, load: load,
+           /* §592: the day view, read by the Plan page's painter and the
+              authoring gate; seatBack is shared with the refused-save path */
+           asofActive: asofActive, asofFor: asofFor, asofGone: asofGone, asofBanner: asofBanner,
+           asofGo: asofGo, asofOff: asofOff, seatBack: seatBack, seatWord: seatWord,
+           asof: function(){ return ASOF; },
            /* for the checks */
            filters: function(){ return F; }, rows: function(){ return rows; }, flatten: flatten,
            locate: locate, noRestore: noRestore, servable: servable,
@@ -71954,6 +72245,14 @@ var SYNC = (function () {
             row.swot[r.field.slice(5)] = r.from == null ? [] : JSON.parse(JSON.stringify(r.from));
             return;
           }
+        }
+        /* §592: a row that LEFT or ARRIVED is put back by its seat — the
+           removed row re-seated where it was, the added one taken out —
+           through the same door History's Restore uses (§53.5). */
+        if (r.field === "row") {
+          var why = (typeof TRAIL !== "undefined" && TRAIL.seatBack) ? TRAIL.seatBack(ch.target, r) : "no seat";
+          if (why) missed.push(r);
+          return;
         }
         roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
         if (!row) { missed.push(r); return; }

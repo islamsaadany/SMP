@@ -6919,6 +6919,11 @@ function strategyAc(acKey, target){
 }
 function mayAuthor(acKey, target){
   var t = target === undefined ? TARGET : target;
+  /* §592: while the Plan page shows the plan as it stood on a day, nothing
+     on it can be authored — the view is read only by construction, not by
+     hiding controls one at a time. The guard asks the TARGET, so a page on
+     another subject is untouched. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
@@ -6932,6 +6937,8 @@ function mayFill(acKey, target){
      half and leaving the other is how the two came to disagree in the first
      place (§53.5). */
   var t = target === undefined ? TARGET : target;
+  /* §592: the same guard the pen gets — an old plan takes no fill either. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},

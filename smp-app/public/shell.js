@@ -5947,7 +5947,22 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
    remaining exposure it leaves is stated rather than implied — two people
    editing THE SAME unit at the same time still resolve last-write-wins on
    that unit. Two people on different units, or on a unit and the register,
-   no longer touch each other at all, which is what was happening today. */
+   no longer touch each other at all, which is what was happening today.
+
+   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §585 CLOSES THE
+   LAST GAP: ADDING, REMOVING AND REORDERING ROWS ──────────────────────────
+   Until §585 a row added, removed or moved made the WHOLE part travel again
+   (`set["units.mobile"] = the unit`), which carried the adder's stale copy
+   of every other cell in that unit. Measured: the office adds a pillar while
+   a custodian fills a figure on the same unit, and whichever save lands
+   second with the whole unit puts the other's cell back as it was. Now a
+   structural change travels as a LIST OPERATION (`changes.lists`): which
+   rows to drop (by id), which to add (the whole new row, and the id it goes
+   after), and the id order when it moved. Applied by id onto the stored
+   list, so a cell somebody else filled meanwhile is never touched, and the
+   same operation applied twice lands once (a replay after a failed save,
+   §504, and the quiet merge, §585, both depend on that). The whole-part
+   path stays for what has no ids (§191), exactly as before. */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.SMPDiff = factory();
@@ -6124,24 +6139,68 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `here` is the path walked so far: alternating list name and row id, so
      ["capabilities","cap1","projects"] addresses a project inside cap1. The
      server validates against the SAME tree rather than walking freely. */
-  function walkRows(at, here, tree, a, b, out) {
+  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§585) ──
+     `ia` and `ib` are the two sides' id orders. What left is dropped by id;
+     what arrived is added whole, each new row naming the id it follows (null
+     for the first place) so a chain of new rows lands in order; and if the
+     surviving order still differs from `ib` once those are replayed, the
+     whole id order travels too. The replay here is the SAME rule `applyChanges`
+     uses to insert, so `order` is sent only when it is needed. */
+  function listOp(at, here, name, A, B, ia, ib) {
+    var ma = byId(A), mb = byId(B);
+    var drop = ia.filter(function (id) { return !mb[id]; });
+    var add = [];
+    for (var i = 0; i < B.length; i++) {
+      var id = String(B[i].id);
+      if (ma[id]) continue;
+      add.push({ row: B[i], after: i ? String(B[i - 1].id) : null });
+    }
+    var seq = ia.filter(function (id) { return !!mb[id]; });
+    add.forEach(function (x) { seq = insertAfter(seq, String(x.row.id), x.after); });
+    var op = { at: at, path: here, list: name };
+    if (drop.length) op.drop = drop;
+    if (add.length) op.add = add;
+    if (seq.join("\u0001") !== ib.join("\u0001")) op.order = ib;
+    return (op.drop || op.add || op.order) ? op : null;
+  }
+  /* Where a new row goes: first when it follows nothing, after the row it
+     names when that row is here, and last when that row has gone meanwhile
+     (somebody removed it between the two saves — the row still lands). */
+  function insertAfter(ids, id, after) {
+    var out = ids.slice();
+    if (after == null) { out.unshift(id); return out; }
+    var i = out.indexOf(after);
+    if (i < 0) out.push(id); else out.splice(i + 1, 0, id);
+    return out;
+  }
+
+  function walkRows(at, here, tree, a, b, out, lists) {
     if (!isMap(a) || !isMap(b)) return false;
     var skip = [];
     var names = Object.keys(tree);
     for (var i = 0; i < names.length; i++) {
       var name = names[i], la = a[name], lb = b[name];
       if (la === undefined && lb === undefined) continue;
-      if (!Array.isArray(la) || !Array.isArray(lb)) return false;
+      /* §585: a list that is not there yet counts as empty, so the first row
+         added to a pillar with no `tactics` key is still an add and not the
+         whole unit. Anything else that is not a list sends the part whole. */
+      if ((la !== undefined && !Array.isArray(la)) || (lb !== undefined && !Array.isArray(lb))) return false;
       skip.push(name);
-      if (same(la, lb)) continue;
-      if (!sameIds(la, lb)) return false;              /* structural — whole */
-      var ma = byId(la), mb = byId(lb), ids = Object.keys(ma);
+      var A = la || [], B = lb || [];
+      if (same(A, B)) continue;
+      var ia = idsOf(A), ib = idsOf(B);
+      if (!ia || !ib) return false;                    /* unnamed rows — whole (§191) */
+      if (!sameIds(A, B)) {
+        var op = listOp(at, here, name, A, B, ia, ib);
+        if (op) lists.push(op);
+      }
+      var ma = byId(A), mb = byId(B), ids = Object.keys(ma);
       for (var j = 0; j < ids.length; j++) {
         var ra = ma[ids[j]], rb = mb[ids[j]];
-        if (same(ra, rb)) continue;
+        if (!rb || same(ra, rb)) continue;             /* gone, or unchanged */
         var below = tree[name];
         if (Object.keys(below).length &&
-            !walkRows(at, here.concat([name, ids[j]]), below, ra, rb, out)) return false;
+            !walkRows(at, here.concat([name, ids[j]]), below, ra, rb, out, lists)) return false;
         var fd = fieldDiff(ra, rb, Object.keys(below));
         if (fd) out.push({ at: at, path: here.concat([name]), id: ids[j],
                            set: fd.set, del: fd.del });
@@ -6238,13 +6297,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function entryRows(at, part, a, b) {
     var tree = treeFor(part);
     if (!tree) return null;
-    var out = [];
-    if (!walkRows(at, [], tree, a, b, out)) return null;
-    return out.length ? out : null;
+    var out = [], lists = [];
+    if (!walkRows(at, [], tree, a, b, out, lists)) return null;
+    return (out.length || lists.length) ? { rows: out, lists: lists } : null;
   }
 
   function graphChanges(base, next) {
-    var set = {}, del = [], rows = [];
+    var set = {}, del = [], rows = [], lists = [];
     base = base || {}; next = next || {};
     var keys = {};
     Object.keys(base).forEach(function (k) { keys[k] = 1; });
@@ -6269,7 +6328,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
              so a shape this does not understand still saves correctly. */
           if (!(b[s] === undefined || n[s] === undefined)) {
             var r = entryRows(k + "." + s, k, b[s], n[s]);
-            if (r) { rows = rows.concat(r); return; }
+            if (r) { rows = rows.concat(r.rows); lists = lists.concat(r.lists); return; }
           }
           set[k + "." + s] = n[s];
         });
@@ -6287,12 +6346,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
          person's — the refusal naming a function they had never opened. */
       if (ROW_PARTS_FLAT.indexOf(k) > -1) {
         var fr = entryRows(k, k, b, n);
-        if (fr) { rows = rows.concat(fr); return; }
+        if (fr) { rows = rows.concat(fr.rows); lists = lists.concat(fr.lists); return; }
       }
       set[k] = n;
     });
     var out = { set: set, del: del };
     if (rows.length) out.rows = rows;
+    if (lists.length) out.lists = lists;
     return out;
   }
 
@@ -6390,6 +6450,55 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       plan.push({ row: holder, set: e.set, del: e.del || [] });
     }
 
+    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§585) ──────────────
+       The address is walked down the same tree, to the HOLDER of the list
+       (so the path has an even number of steps), and the list itself must be
+       one the tree names. What the operation does is checked for shape here
+       and applied below; a row it adds must carry an id, because everything
+       else in this file finds rows by id and a row with none could never be
+       edited, removed or merged afterwards (§191). */
+    var lists = Array.isArray(changes.lists) ? changes.lists : [];
+    var listPlan = [];
+    for (var L = 0; L < lists.length; L++) {
+      var op = lists[L];
+      if (!isMap(op) || typeof op.at !== "string" || typeof op.list !== "string")
+        return bad("a list change has no address");
+      var lpath = Array.isArray(op.path) ? op.path : null;
+      if (!lpath || lpath.length % 2) return bad("a list change path is malformed: " + (lpath || []).join("/"));
+      var lseg = op.at.split("."), lhost = null, lpart = lseg[0];
+      if (lseg.length === 2 && ROW_PARTS_MAP.indexOf(lpart) > -1 && lseg[1])
+        lhost = isMap(target[lpart]) ? target[lpart][lseg[1]] : null;
+      else if (lseg.length === 1 && ROW_PARTS_FLAT.indexOf(lpart) > -1)
+        lhost = target[lpart];
+      else return bad("a list change names a part this server does not address: " + op.at);
+      if (!isMap(lhost)) return bad("a list change names something that is not here: " + op.at);
+      var ltree = treeFor(lpart), lholder = lhost;
+      for (var lq = 0; lq < lpath.length; lq += 2) {
+        if (!ltree || !Object.prototype.hasOwnProperty.call(ltree, lpath[lq]))
+          return bad("a list change path this server does not apply: " + lpath.join("/"));
+        lholder = byId(lholder[lpath[lq]])[String(lpath[lq + 1])] || null;
+        if (!isMap(lholder)) return bad("a list change names a row that is not here: " + lpath[lq + 1]);
+        ltree = ltree[lpath[lq]];
+      }
+      if (!ltree || !Object.prototype.hasOwnProperty.call(ltree, op.list))
+        return bad("a list change names a list this server does not address: " + op.list);
+      if (lholder[op.list] !== undefined && !Array.isArray(lholder[op.list]))
+        return bad("a list change names something that is not a list: " + op.list);
+      var ladd = op.add === undefined ? [] : op.add, ldrop = op.drop === undefined ? [] : op.drop,
+          lorder = op.order === undefined ? null : op.order;
+      if (!Array.isArray(ladd) || !Array.isArray(ldrop) || (lorder !== null && !Array.isArray(lorder)))
+        return bad("a list change is not shaped like one");
+      for (var ai = 0; ai < ladd.length; ai++) {
+        var x = ladd[ai];
+        if (!isMap(x) || !isMap(x.row) || x.row.id === undefined || x.row.id === null || x.row.id === "")
+          return bad("a list change adds a row with no id");
+        if (x.after != null && typeof x.after !== "string" && typeof x.after !== "number")
+          return bad("a list change adds a row after something that is not an id");
+      }
+      if (!ladd.length && !ldrop.length && !lorder) return bad("a list change changes nothing: " + op.list);
+      listPlan.push({ holder: lholder, list: op.list, add: ladd, drop: ldrop, order: lorder });
+    }
+
     Object.keys(set).forEach(function (p) {
       var parts = p.split(".");
       if (parts.length === 1) { target[parts[0]] = set[p]; return; }
@@ -6400,6 +6509,39 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
          park writes review.parked.fn:cf into a review with no `parked`. */
       if (!isMap(target[parts[0]][parts[1]])) target[parts[0]][parts[1]] = {};
       target[parts[0]][parts[1]][parts[2]] = set[p];
+    });
+    /* §585: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
+       already gone is nothing to do; an added row whose id is already here
+       stays as it is (the add landed before — a replay must not double it);
+       a new row goes after the row it names, first when it names none, and
+       last when that row has gone meanwhile; an order names the rows it
+       knows, and rows it does not know (added by somebody else between the
+       two saves) keep their places after them rather than being lost. */
+    listPlan.forEach(function (e) {
+      var list = Array.isArray(e.holder[e.list]) ? e.holder[e.list].slice() : [];
+      if (e.drop.length) {
+        var gone = {};
+        e.drop.forEach(function (id) { gone[String(id)] = 1; });
+        list = list.filter(function (r) { return !(isMap(r) && gone[String(r.id)]); });
+      }
+      e.add.forEach(function (x) {
+        var id = String(x.row.id);
+        if (byId(list)[id]) return;
+        var row = JSON.parse(JSON.stringify(x.row));
+        var ids = list.map(function (r) { return isMap(r) ? String(r.id) : null; });
+        var i = x.after == null ? -1 : ids.indexOf(String(x.after));
+        if (x.after != null && i < 0) list.push(row); else list.splice(i + 1, 0, row);
+      });
+      if (e.order) {
+        var have = byId(list), placed = {}, next = [];
+        e.order.forEach(function (id) {
+          id = String(id);
+          if (have[id] && !placed[id]) { placed[id] = 1; next.push(have[id]); }
+        });
+        list.forEach(function (r) { if (!(isMap(r) && placed[String(r.id)])) next.push(r); });
+        list = next;
+      }
+      e.holder[e.list] = list;
     });
     plan.forEach(function (e) {
       Object.keys(e.set).forEach(function (k) { e.row[k] = e.set[k]; });
@@ -6423,7 +6565,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function countChanges(changes) {
     if (!changes) return 0;
     return Object.keys(changes.set || {}).length + ((changes.del || []).length) +
-           ((changes.rows || []).length);
+           ((changes.rows || []).length) + ((changes.lists || []).length);
   }
 
   /* ── ONE CHANGE LIST AS LINES (§504) ──
@@ -6459,6 +6601,29 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
                    mine: { has: false } });
       });
     });
+    /* §585: a list operation splits into one line per row it drops or adds,
+       and one for the order. `l:<at>|<path>|<list>|drop|<id>` names what
+       went, `…|add|<id>` what arrived (the row is the value), `…|order` the
+       new sequence — so two people removing the same row are the same line,
+       and a replay can ask "is it here now?" of each on its own. */
+    (Array.isArray(changes.lists) ? changes.lists : []).forEach(function (op) {
+      if (!isMap(op)) return;
+      var head = "l:" + op.at + "|" + (op.path || []).join("/") + "|" + op.list + "|";
+      var one = function (extra) {
+        var o = { at: op.at, path: op.path || [], list: op.list };
+        Object.keys(extra).forEach(function (k) { o[k] = extra[k]; });
+        return { lists: [o] };
+      };
+      (Array.isArray(op.drop) ? op.drop : []).forEach(function (id) {
+        out.push({ addr: head + "drop|" + id, change: one({ drop: [id] }), mine: { has: false } });
+      });
+      (Array.isArray(op.add) ? op.add : []).forEach(function (x) {
+        if (!isMap(x) || !isMap(x.row)) return;
+        out.push({ addr: head + "add|" + x.row.id, change: one({ add: [x] }), mine: { has: true, value: x.row } });
+      });
+      if (Array.isArray(op.order))
+        out.push({ addr: head + "order", change: one({ order: op.order }), mine: { has: true, value: op.order } });
+    });
     return out;
   }
 
@@ -6477,6 +6642,28 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
         h = h[parts[i]];
       }
       return { has: true, value: h };
+    }
+    /* §585: a list line answers with the row it names (add, drop) or with
+       the list's id order (order), read off whatever the graph holds now. */
+    var op = ch.lists && ch.lists[0];
+    if (op) {
+      var hseg = String(op.at).split("."), hh = null;
+      if (hseg.length === 2) hh = isMap(state[hseg[0]]) ? state[hseg[0]][hseg[1]] : null;
+      else hh = state[hseg[0]];
+      var hp = op.path || [];
+      for (var hq = 0; hq < hp.length; hq += 2) {
+        if (!isMap(hh)) return none;
+        hh = byId(hh[hp[hq]])[String(hp[hq + 1])] || null;
+      }
+      if (!isMap(hh) || !Array.isArray(hh[op.list])) return none;
+      var lst = hh[op.list];
+      if (Array.isArray(op.order))
+        return { has: true, value: lst.map(function (r) { return isMap(r) && r.id != null ? String(r.id) : null; }) };
+      var want = Array.isArray(op.drop) && op.drop.length ? op.drop[0]
+               : (Array.isArray(op.add) && op.add[0] && isMap(op.add[0].row) ? op.add[0].row.id : null);
+      if (want == null) return none;
+      var hit = byId(lst)[String(want)];
+      return hit ? { has: true, value: hit } : none;
     }
     var e = ch.rows && ch.rows[0];
     if (!e) return none;
@@ -17695,12 +17882,35 @@ FUNCTION_KEYS.forEach(function(k){
    AND NOT length + 1. After a row has been removed, `-P3` can still be held by
    the last of three — the same collision mintPersonKey() and mintClaimId()
    already scan for. */
+/* §585: AND NOT THE POSITION ALONE. Two people adding a row to the same list
+   in the same minute both counted the same length and minted the same id, so
+   on the merge the second row replaced the first (every row is found by id,
+   §48). A short random tag after the number keeps the id readable — `-P4`
+   still says where it was added — and makes two tabs' ids distinct without a
+   clock or a server round trip. The scan for a taken id stays, for the one
+   list and the one tab. */
 function mintRowId(list, prefix){
   var taken = {};
   (list || []).forEach(function(x){ if (x && x.id) taken[x.id] = 1; });
   var n = (list || []).length + 1;
-  while (taken[prefix + n]) n++;
-  return prefix + n;
+  var id;
+  do { id = prefix + n + "-" + mintTag(); n++; } while (taken[id]);
+  return id;
+}
+/* Four characters from the browser's own random source (0-9, a-z): about
+   1.7 million values, so two tabs minting into the same list at the same
+   moment all but never agree, and a stored id never grows past readable. */
+function mintTag(){
+  var chars = "0123456789abcdefghijklmnopqrstuvwxyz", out = "";
+  var buf = null;
+  try {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) { buf = new Uint8Array(4); crypto.getRandomValues(buf); }
+  } catch (e) { buf = null; }
+  for (var i = 0; i < 4; i++) {
+    var v = buf ? buf[i] : Math.floor(Math.random() * 256);
+    out += chars.charAt(v % 36);
+  }
+  return out;
 }
 
 /* A pillar arrives with every field a reader asks for, present and empty
@@ -62788,6 +62998,14 @@ var UNSAVED = (function(){
       var p = a.slice(2), parts = p.split(".");
       return { place: placeOf(p), what: field(parts[parts.length - 1]) };
     }
+    if (a.indexOf("l:") === 0) {
+      /* §585: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
+         row added, removed or moved, said as what happened to which list. */
+      var l = a.slice(2).split("|");
+      var verb = l[3] === "add" ? "added" : l[3] === "drop" ? "removed" : "reordered";
+      var ln = l[3] === "order" ? "" : rowName(l[4]);
+      return { place: placeOf(l[0]), what: (ln ? ln + " · " : "") + field(l[2]) + " " + verb };
+    }
     var r = a.slice(2).split("|");   /* r:<at>|<path>|<id>|<field> */
     var nm = rowName(r[2]);
     return { place: placeOf(r[0]), what: (nm ? nm + " · " : "") + field(r[3]) };
@@ -66373,6 +66591,15 @@ var COPILOT = (function(){
        nothing to send). A refusal or a failure stays on the page in its own
        banner (§171) and nothing reloads over it.
 
+       SINCE §585 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
+       on different pages shouldn't get this message … save things in the
+       same time without needing a refresh."* A landing by somebody else now
+       asks sync.js to take the server's copy in under this tab's own unsaved
+       lines (`SYNC.mergeIn`): different cells simply arrive on the screen,
+       the caret and the scroll stay, and nothing is drawn; the same cell is
+       a clash, and §504's own bar asks Keep mine / Keep theirs. The caution
+       below is drawn only where there is no merge to call.
+
    NEVER paint(), never over file:// (§94.11 — there is no server to be stale
    against), and every browser call is guarded: a missing service worker or a
    failed registration is not this feature's to complain about (§231.5). */
@@ -66505,6 +66732,45 @@ var SAFETY = (function(){
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }
 
+  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§585) ─────────────
+     A landing by somebody else asks sync.js to merge the server's copy
+     under this tab's own unsaved lines. "busy" means a hand is in a field
+     or a save is in flight: it is asked again on blur and on a short clock.
+     `since` moves on only once the merge has landed, so a landing is never
+     counted as seen before it is on the screen; a failure leaves `since`
+     where it was and the next peek asks again. A build with no merge to
+     call (a stub, an older sync.js) still gets the caution. */
+  var RETRY = 2500;
+  var want = null, merging = false, retryTimer = null;
+  function landed(last, t) {
+    want = { at: last.at, by: last.by, t: t };
+    tryMerge();
+  }
+  function tryMerge() {
+    if (!want || merging) return;
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var w = want;
+    if (typeof SYNC === "undefined" || !SYNC.mergeIn) {
+      want = null; lastAt = w.at; since = w.at; edited(w.by, w.at, w.t); return;
+    }
+    merging = true;
+    SYNC.mergeIn(function (how) {
+      merging = false;
+      if (how === "merged") {
+        /* The fetch was made after every landing reported so far, so the
+           newest of them is what the screen now holds. */
+        var newest = (want || w).at; want = null; lastAt = newest; since = newest; return;
+      }
+      if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
+      want = null;                        /* failed, or off: the next peek asks again */
+    });
+  }
+  document.addEventListener("focusout", function () {
+    if (!want || merging) return;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = setTimeout(tryMerge, 250);
+  });
+
   /* THE CLOCK IS THE SERVER'S. `since` began as the browser's own time at
      load, and a laptop clock running a few minutes behind would have every
      save from those minutes announced as news. So the first ask carries
@@ -66531,7 +66797,9 @@ var SAFETY = (function(){
         var last = j.changed[j.changed.length - 1];
         /* Remember the newest we have SEEN so the same landing is not
            announced twice, and the next peek only asks about what is newer. */
-        if (last.at && last.at !== lastAt) { lastAt = last.at; since = last.at; edited(last.by, last.at, t); }
+        /* §585: taken in rather than announced; `since` and `lastAt` move on
+           when the merge has landed (or at once, on the caution fallback). */
+        if (last.at && last.at !== lastAt) landed(last, t);
       })
       .catch(function(){ clearTimeout(late); });
   }
@@ -66570,6 +66838,8 @@ var SAFETY = (function(){
     onPaint: onPaint,
     hide: hide,
     shownFor: function(){ return shownFor; },
+    /* §585, for the check: a landing reported and not yet on the screen. */
+    pending: function(){ return !!want; },
     synced: function(){ return synced; },
     isArmed: function(){ return armed; },
     shown: function(){ return shown; }
@@ -70875,8 +71145,13 @@ var SYNC = (function () {
     };
   }
 
-  function serialize() {
-    var s = JSON.parse(JSON.stringify(graph()));
+  /* The graph in the shape a save compares and sends (§585 lifts this out of
+     serialize() so the quiet merge can put a FETCHED graph in the same shape
+     before it is compared — a baseline taken from the raw fetch would differ
+     from the screen's own serialization in exactly these two places and
+     every later save would carry the difference as a change). */
+  function normalized(g) {
+    var s = JSON.parse(JSON.stringify(g));
     s.unitKeys.forEach(function (k) { if (s.units[k]) s.units[k].weight = 0; });
     /* A branding that sets NOTHING is not a branding. branding() fills the
        four keys with nulls the first time anything asks, so an untouched
@@ -70888,8 +71163,9 @@ var SYNC = (function () {
        Same rule as `weight` above: what is not the tenant's own is not sent. */
     var b = s.group && s.group.branding;
     if (b && Object.keys(b).every(function (k) { return b[k] == null; })) delete s.group.branding;
-    return JSON.stringify(s);
+    return s;
   }
+  function serialize() { return JSON.stringify(normalized(graph())); }
 
   /* The globals are rebound, not patched: every function in the platform
      resolves these names at call time, so reassignment reaches everything.
@@ -71174,6 +71450,12 @@ var SYNC = (function () {
       });
     } catch (e) { return []; }
   }
+  /* Two readings of a line's place agree when both are absent, or both are
+     there with the same value — the one comparison §504's replay and §585's
+     merge both make, written once. */
+  function lineSame(a, b) {
+    return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
+  }
   function keepSig(lines) { try { return JSON.stringify((lines || []).map(function (l) { return [l.addr, l.mine]; })); } catch (e) { return ""; } }
   function keepFailed(kind) {
     var who = person && person.key;
@@ -71281,9 +71563,7 @@ var SYNC = (function () {
     var k = keepRead();
     if (!k || !person || k.who !== person.key || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return;
     var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
-    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = function (a, b) {
-      return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
-    };
+    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = lineSame;
     k.lines.forEach(function (l) {
       var now = SMPDiff.valueAt(cur, l);
       if (same(now, l.mine)) return;
@@ -72141,11 +72421,7 @@ var SYNC = (function () {
        a field (a bound field writes on blur into the object it was drawn
        from, and hydrate replaces that object, §35), the answer is dropped
        and the page keeps what it has. The next crossing asks again. */
-    var busy = function () {
-      if (serialize() !== lastSaved) return true;
-      var a = document.activeElement;
-      return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
-    };
+    var busy = function () { return serialize() !== lastSaved || handInField(); };
     if (quiet && busy()) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
@@ -72162,6 +72438,93 @@ var SYNC = (function () {
         done(true, lastSaved !== before);
       })
       .catch(function () { done(false); });
+  }
+
+  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§585) ──────────────
+     Islam: *"is there a way or a mechanism where people save things in the
+     same time without needing a refresh and keeping data when they are
+     working on different cells?"*
+
+     §258 told a tab that somebody else had landed a change on its page and
+     offered Reload. The server was already merging cell by cell (§210,
+     §215), so the storage was never at risk — only the SCREEN was stale,
+     and the one way to freshen it threw the page away. This takes the
+     server's graph and lays this tab's own unsaved lines back over it, line
+     by line, with the §504 machinery that already does exactly that for a
+     kept save: a line whose place still holds what it held when it was
+     typed is kept; a line whose place THEY changed too is a clash, and the
+     person decides on §504's own bar (Keep mine / Keep theirs) — the screen
+     shows theirs until they do. Everything they did not touch is theirs
+     now, and the baseline is theirs too, so the next save carries only this
+     tab's lines (§210's diff, against the new base).
+
+     NEVER WHILE A HAND IS IN A FIELD: a bound field writes on blur into the
+     object it was drawn from (§35), and hydrate replaces that object — so a
+     merge mid-word would lose the word. The caller is told "busy" and asks
+     again on blur. Never while a save is in flight either, for the reason
+     §433 states: the baseline would be replaced under it. The repaint that
+     follows keeps the scroll and the caret (paint's own focusMark). */
+  function handInField() {
+    var a = document.activeElement;
+    return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
+  }
+  function mergeIn(done) {
+    done = done || function () {};
+    if (!live || !lastSaved || typeof SMPDiff === "undefined" || !SMPDiff.splitLines || !SMPDiff.applyChanges) return done("off");
+    if (saving || handInField()) return done("busy");
+    fetch(withClient("/api/state"), { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        /* A save or a hand that arrived during the fetch: the answer is
+           dropped rather than applied under them, and the caller asks again. */
+        if (!live || saving || handInField()) return done("busy");
+        var before = lastSaved;
+        var B = JSON.parse(before), M = JSON.parse(serialize());
+        var mine = SMPDiff.splitLines(SMPDiff.graphChanges(B, M)).map(function (l) {
+          l.base = SMPDiff.valueAt(B, l); return l;
+        });
+        /* Theirs, in the tab's own shape — through the same door a boot goes
+           through (§53.5), so a missing list or a stored null reads exactly
+           as it would after a reload, and the baseline matches the screen. */
+        hydrate(data.state);
+        var theirs = JSON.stringify(normalized(graph()));
+        var merged = JSON.parse(theirs), clash = [], kept = 0;
+        mine.forEach(function (l) {
+          var now = SMPDiff.valueAt(merged, l);
+          if (lineSame(now, l.mine)) return;                   /* landed already */
+          if (lineSame(now, l.base)) {
+            var r = SMPDiff.applyChanges(merged, l.change);
+            if (r && r.ok) { merged = r.state; kept++; } else clash.push(l);
+          } else clash.push(l);
+        });
+        hydrate(merged);
+        lastSaved = theirs;
+        if (clash.length) keepClash(clash);
+        /* The repaint ends in afterPaint, which saves the kept lines against
+           the new baseline; before the page has a painter, save directly. */
+        if (repaint) repaint(); else if (serialize() !== lastSaved) save();
+        try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
+        done("merged", { changed: theirs !== before, kept: kept, clash: clash.length });
+      })
+      .catch(function (e) { done(e && e.message === "sign in" ? "off" : "failed"); });
+  }
+  /* The lines theirs and mine both changed, put where §504 keeps a clash so
+     its bar and its two buttons answer them — the record is this person's
+     and this client's, exactly as a kept save's is. */
+  function keepClash(lines) {
+    var who = person && person.key;
+    if (!who) return;
+    var old = keepRead();
+    if (old && old.who !== who) old = null;
+    keepWrite({ who: who, viewAs: actingAs() || null, at: Date.now(), kind: "merge", error: "",
+                lines: (old && old.lines) || [], reports: (old && old.reports) || [],
+                clash: ((old && old.clash) || []).concat(lines) });
+    keepClashBar();
   }
 
   return {
@@ -72203,6 +72566,11 @@ var SYNC = (function () {
     /* The quiet refresh after a crossing (§433): the same fetch, dropped
        rather than applied if anything on the page would be lost. */
     refresh: function (done) { rebase(done, true); },
+    /* §585: the server's copy, with this tab's own unsaved lines laid back
+       over it and no reload. The only caller is safety.js, when somebody
+       else has landed a change; it answers "merged", "busy", "failed" or
+       "off", and "busy" is asked again. */
+    mergeIn: function (done) { mergeIn(done); },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`

@@ -44,7 +44,7 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
      else is a change list: an array, a string or a number applied "cleanly"
      as nothing at all is a save that reports success and wrote nothing */
   const ch: any = body && body.changes;
-  if (!ch || typeof ch !== "object" || Array.isArray(ch) || !(ch.set || ch.del || ch.rows))
+  if (!ch || typeof ch !== "object" || Array.isArray(ch) || !(ch.set || ch.del || ch.rows || ch.lists))
     return { code: 400, body: { ok: false, error: "The save carried no change list." } };
 
   /* THE CHECK'S BREAKS (constitution XVI, checks/state-api.mjs): each one

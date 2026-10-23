@@ -42,7 +42,22 @@
    remaining exposure it leaves is stated rather than implied — two people
    editing THE SAME unit at the same time still resolve last-write-wins on
    that unit. Two people on different units, or on a unit and the register,
-   no longer touch each other at all, which is what was happening today. */
+   no longer touch each other at all, which is what was happening today.
+
+   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §585 CLOSES THE
+   LAST GAP: ADDING, REMOVING AND REORDERING ROWS ──────────────────────────
+   Until §585 a row added, removed or moved made the WHOLE part travel again
+   (`set["units.mobile"] = the unit`), which carried the adder's stale copy
+   of every other cell in that unit. Measured: the office adds a pillar while
+   a custodian fills a figure on the same unit, and whichever save lands
+   second with the whole unit puts the other's cell back as it was. Now a
+   structural change travels as a LIST OPERATION (`changes.lists`): which
+   rows to drop (by id), which to add (the whole new row, and the id it goes
+   after), and the id order when it moved. Applied by id onto the stored
+   list, so a cell somebody else filled meanwhile is never touched, and the
+   same operation applied twice lands once (a replay after a failed save,
+   §504, and the quiet merge, §585, both depend on that). The whole-part
+   path stays for what has no ids (§191), exactly as before. */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.SMPDiff = factory();
@@ -219,24 +234,68 @@
      `here` is the path walked so far: alternating list name and row id, so
      ["capabilities","cap1","projects"] addresses a project inside cap1. The
      server validates against the SAME tree rather than walking freely. */
-  function walkRows(at, here, tree, a, b, out) {
+  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§585) ──
+     `ia` and `ib` are the two sides' id orders. What left is dropped by id;
+     what arrived is added whole, each new row naming the id it follows (null
+     for the first place) so a chain of new rows lands in order; and if the
+     surviving order still differs from `ib` once those are replayed, the
+     whole id order travels too. The replay here is the SAME rule `applyChanges`
+     uses to insert, so `order` is sent only when it is needed. */
+  function listOp(at, here, name, A, B, ia, ib) {
+    var ma = byId(A), mb = byId(B);
+    var drop = ia.filter(function (id) { return !mb[id]; });
+    var add = [];
+    for (var i = 0; i < B.length; i++) {
+      var id = String(B[i].id);
+      if (ma[id]) continue;
+      add.push({ row: B[i], after: i ? String(B[i - 1].id) : null });
+    }
+    var seq = ia.filter(function (id) { return !!mb[id]; });
+    add.forEach(function (x) { seq = insertAfter(seq, String(x.row.id), x.after); });
+    var op = { at: at, path: here, list: name };
+    if (drop.length) op.drop = drop;
+    if (add.length) op.add = add;
+    if (seq.join("\u0001") !== ib.join("\u0001")) op.order = ib;
+    return (op.drop || op.add || op.order) ? op : null;
+  }
+  /* Where a new row goes: first when it follows nothing, after the row it
+     names when that row is here, and last when that row has gone meanwhile
+     (somebody removed it between the two saves — the row still lands). */
+  function insertAfter(ids, id, after) {
+    var out = ids.slice();
+    if (after == null) { out.unshift(id); return out; }
+    var i = out.indexOf(after);
+    if (i < 0) out.push(id); else out.splice(i + 1, 0, id);
+    return out;
+  }
+
+  function walkRows(at, here, tree, a, b, out, lists) {
     if (!isMap(a) || !isMap(b)) return false;
     var skip = [];
     var names = Object.keys(tree);
     for (var i = 0; i < names.length; i++) {
       var name = names[i], la = a[name], lb = b[name];
       if (la === undefined && lb === undefined) continue;
-      if (!Array.isArray(la) || !Array.isArray(lb)) return false;
+      /* §585: a list that is not there yet counts as empty, so the first row
+         added to a pillar with no `tactics` key is still an add and not the
+         whole unit. Anything else that is not a list sends the part whole. */
+      if ((la !== undefined && !Array.isArray(la)) || (lb !== undefined && !Array.isArray(lb))) return false;
       skip.push(name);
-      if (same(la, lb)) continue;
-      if (!sameIds(la, lb)) return false;              /* structural — whole */
-      var ma = byId(la), mb = byId(lb), ids = Object.keys(ma);
+      var A = la || [], B = lb || [];
+      if (same(A, B)) continue;
+      var ia = idsOf(A), ib = idsOf(B);
+      if (!ia || !ib) return false;                    /* unnamed rows — whole (§191) */
+      if (!sameIds(A, B)) {
+        var op = listOp(at, here, name, A, B, ia, ib);
+        if (op) lists.push(op);
+      }
+      var ma = byId(A), mb = byId(B), ids = Object.keys(ma);
       for (var j = 0; j < ids.length; j++) {
         var ra = ma[ids[j]], rb = mb[ids[j]];
-        if (same(ra, rb)) continue;
+        if (!rb || same(ra, rb)) continue;             /* gone, or unchanged */
         var below = tree[name];
         if (Object.keys(below).length &&
-            !walkRows(at, here.concat([name, ids[j]]), below, ra, rb, out)) return false;
+            !walkRows(at, here.concat([name, ids[j]]), below, ra, rb, out, lists)) return false;
         var fd = fieldDiff(ra, rb, Object.keys(below));
         if (fd) out.push({ at: at, path: here.concat([name]), id: ids[j],
                            set: fd.set, del: fd.del });
@@ -333,13 +392,13 @@
   function entryRows(at, part, a, b) {
     var tree = treeFor(part);
     if (!tree) return null;
-    var out = [];
-    if (!walkRows(at, [], tree, a, b, out)) return null;
-    return out.length ? out : null;
+    var out = [], lists = [];
+    if (!walkRows(at, [], tree, a, b, out, lists)) return null;
+    return (out.length || lists.length) ? { rows: out, lists: lists } : null;
   }
 
   function graphChanges(base, next) {
-    var set = {}, del = [], rows = [];
+    var set = {}, del = [], rows = [], lists = [];
     base = base || {}; next = next || {};
     var keys = {};
     Object.keys(base).forEach(function (k) { keys[k] = 1; });
@@ -364,7 +423,7 @@
              so a shape this does not understand still saves correctly. */
           if (!(b[s] === undefined || n[s] === undefined)) {
             var r = entryRows(k + "." + s, k, b[s], n[s]);
-            if (r) { rows = rows.concat(r); return; }
+            if (r) { rows = rows.concat(r.rows); lists = lists.concat(r.lists); return; }
           }
           set[k + "." + s] = n[s];
         });
@@ -382,12 +441,13 @@
          person's — the refusal naming a function they had never opened. */
       if (ROW_PARTS_FLAT.indexOf(k) > -1) {
         var fr = entryRows(k, k, b, n);
-        if (fr) { rows = rows.concat(fr); return; }
+        if (fr) { rows = rows.concat(fr.rows); lists = lists.concat(fr.lists); return; }
       }
       set[k] = n;
     });
     var out = { set: set, del: del };
     if (rows.length) out.rows = rows;
+    if (lists.length) out.lists = lists;
     return out;
   }
 
@@ -485,6 +545,55 @@
       plan.push({ row: holder, set: e.set, del: e.del || [] });
     }
 
+    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§585) ──────────────
+       The address is walked down the same tree, to the HOLDER of the list
+       (so the path has an even number of steps), and the list itself must be
+       one the tree names. What the operation does is checked for shape here
+       and applied below; a row it adds must carry an id, because everything
+       else in this file finds rows by id and a row with none could never be
+       edited, removed or merged afterwards (§191). */
+    var lists = Array.isArray(changes.lists) ? changes.lists : [];
+    var listPlan = [];
+    for (var L = 0; L < lists.length; L++) {
+      var op = lists[L];
+      if (!isMap(op) || typeof op.at !== "string" || typeof op.list !== "string")
+        return bad("a list change has no address");
+      var lpath = Array.isArray(op.path) ? op.path : null;
+      if (!lpath || lpath.length % 2) return bad("a list change path is malformed: " + (lpath || []).join("/"));
+      var lseg = op.at.split("."), lhost = null, lpart = lseg[0];
+      if (lseg.length === 2 && ROW_PARTS_MAP.indexOf(lpart) > -1 && lseg[1])
+        lhost = isMap(target[lpart]) ? target[lpart][lseg[1]] : null;
+      else if (lseg.length === 1 && ROW_PARTS_FLAT.indexOf(lpart) > -1)
+        lhost = target[lpart];
+      else return bad("a list change names a part this server does not address: " + op.at);
+      if (!isMap(lhost)) return bad("a list change names something that is not here: " + op.at);
+      var ltree = treeFor(lpart), lholder = lhost;
+      for (var lq = 0; lq < lpath.length; lq += 2) {
+        if (!ltree || !Object.prototype.hasOwnProperty.call(ltree, lpath[lq]))
+          return bad("a list change path this server does not apply: " + lpath.join("/"));
+        lholder = byId(lholder[lpath[lq]])[String(lpath[lq + 1])] || null;
+        if (!isMap(lholder)) return bad("a list change names a row that is not here: " + lpath[lq + 1]);
+        ltree = ltree[lpath[lq]];
+      }
+      if (!ltree || !Object.prototype.hasOwnProperty.call(ltree, op.list))
+        return bad("a list change names a list this server does not address: " + op.list);
+      if (lholder[op.list] !== undefined && !Array.isArray(lholder[op.list]))
+        return bad("a list change names something that is not a list: " + op.list);
+      var ladd = op.add === undefined ? [] : op.add, ldrop = op.drop === undefined ? [] : op.drop,
+          lorder = op.order === undefined ? null : op.order;
+      if (!Array.isArray(ladd) || !Array.isArray(ldrop) || (lorder !== null && !Array.isArray(lorder)))
+        return bad("a list change is not shaped like one");
+      for (var ai = 0; ai < ladd.length; ai++) {
+        var x = ladd[ai];
+        if (!isMap(x) || !isMap(x.row) || x.row.id === undefined || x.row.id === null || x.row.id === "")
+          return bad("a list change adds a row with no id");
+        if (x.after != null && typeof x.after !== "string" && typeof x.after !== "number")
+          return bad("a list change adds a row after something that is not an id");
+      }
+      if (!ladd.length && !ldrop.length && !lorder) return bad("a list change changes nothing: " + op.list);
+      listPlan.push({ holder: lholder, list: op.list, add: ladd, drop: ldrop, order: lorder });
+    }
+
     Object.keys(set).forEach(function (p) {
       var parts = p.split(".");
       if (parts.length === 1) { target[parts[0]] = set[p]; return; }
@@ -495,6 +604,39 @@
          park writes review.parked.fn:cf into a review with no `parked`. */
       if (!isMap(target[parts[0]][parts[1]])) target[parts[0]][parts[1]] = {};
       target[parts[0]][parts[1]][parts[2]] = set[p];
+    });
+    /* §585: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
+       already gone is nothing to do; an added row whose id is already here
+       stays as it is (the add landed before — a replay must not double it);
+       a new row goes after the row it names, first when it names none, and
+       last when that row has gone meanwhile; an order names the rows it
+       knows, and rows it does not know (added by somebody else between the
+       two saves) keep their places after them rather than being lost. */
+    listPlan.forEach(function (e) {
+      var list = Array.isArray(e.holder[e.list]) ? e.holder[e.list].slice() : [];
+      if (e.drop.length) {
+        var gone = {};
+        e.drop.forEach(function (id) { gone[String(id)] = 1; });
+        list = list.filter(function (r) { return !(isMap(r) && gone[String(r.id)]); });
+      }
+      e.add.forEach(function (x) {
+        var id = String(x.row.id);
+        if (byId(list)[id]) return;
+        var row = JSON.parse(JSON.stringify(x.row));
+        var ids = list.map(function (r) { return isMap(r) ? String(r.id) : null; });
+        var i = x.after == null ? -1 : ids.indexOf(String(x.after));
+        if (x.after != null && i < 0) list.push(row); else list.splice(i + 1, 0, row);
+      });
+      if (e.order) {
+        var have = byId(list), placed = {}, next = [];
+        e.order.forEach(function (id) {
+          id = String(id);
+          if (have[id] && !placed[id]) { placed[id] = 1; next.push(have[id]); }
+        });
+        list.forEach(function (r) { if (!(isMap(r) && placed[String(r.id)])) next.push(r); });
+        list = next;
+      }
+      e.holder[e.list] = list;
     });
     plan.forEach(function (e) {
       Object.keys(e.set).forEach(function (k) { e.row[k] = e.set[k]; });
@@ -518,7 +660,7 @@
   function countChanges(changes) {
     if (!changes) return 0;
     return Object.keys(changes.set || {}).length + ((changes.del || []).length) +
-           ((changes.rows || []).length);
+           ((changes.rows || []).length) + ((changes.lists || []).length);
   }
 
   /* ── ONE CHANGE LIST AS LINES (§504) ──
@@ -554,6 +696,29 @@
                    mine: { has: false } });
       });
     });
+    /* §585: a list operation splits into one line per row it drops or adds,
+       and one for the order. `l:<at>|<path>|<list>|drop|<id>` names what
+       went, `…|add|<id>` what arrived (the row is the value), `…|order` the
+       new sequence — so two people removing the same row are the same line,
+       and a replay can ask "is it here now?" of each on its own. */
+    (Array.isArray(changes.lists) ? changes.lists : []).forEach(function (op) {
+      if (!isMap(op)) return;
+      var head = "l:" + op.at + "|" + (op.path || []).join("/") + "|" + op.list + "|";
+      var one = function (extra) {
+        var o = { at: op.at, path: op.path || [], list: op.list };
+        Object.keys(extra).forEach(function (k) { o[k] = extra[k]; });
+        return { lists: [o] };
+      };
+      (Array.isArray(op.drop) ? op.drop : []).forEach(function (id) {
+        out.push({ addr: head + "drop|" + id, change: one({ drop: [id] }), mine: { has: false } });
+      });
+      (Array.isArray(op.add) ? op.add : []).forEach(function (x) {
+        if (!isMap(x) || !isMap(x.row)) return;
+        out.push({ addr: head + "add|" + x.row.id, change: one({ add: [x] }), mine: { has: true, value: x.row } });
+      });
+      if (Array.isArray(op.order))
+        out.push({ addr: head + "order", change: one({ order: op.order }), mine: { has: true, value: op.order } });
+    });
     return out;
   }
 
@@ -572,6 +737,28 @@
         h = h[parts[i]];
       }
       return { has: true, value: h };
+    }
+    /* §585: a list line answers with the row it names (add, drop) or with
+       the list's id order (order), read off whatever the graph holds now. */
+    var op = ch.lists && ch.lists[0];
+    if (op) {
+      var hseg = String(op.at).split("."), hh = null;
+      if (hseg.length === 2) hh = isMap(state[hseg[0]]) ? state[hseg[0]][hseg[1]] : null;
+      else hh = state[hseg[0]];
+      var hp = op.path || [];
+      for (var hq = 0; hq < hp.length; hq += 2) {
+        if (!isMap(hh)) return none;
+        hh = byId(hh[hp[hq]])[String(hp[hq + 1])] || null;
+      }
+      if (!isMap(hh) || !Array.isArray(hh[op.list])) return none;
+      var lst = hh[op.list];
+      if (Array.isArray(op.order))
+        return { has: true, value: lst.map(function (r) { return isMap(r) && r.id != null ? String(r.id) : null; }) };
+      var want = Array.isArray(op.drop) && op.drop.length ? op.drop[0]
+               : (Array.isArray(op.add) && op.add[0] && isMap(op.add[0].row) ? op.add[0].row.id : null);
+      if (want == null) return none;
+      var hit = byId(lst)[String(want)];
+      return hit ? { has: true, value: hit } : none;
     }
     var e = ch.rows && ch.rows[0];
     if (!e) return none;

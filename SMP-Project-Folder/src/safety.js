@@ -39,6 +39,15 @@
        nothing to send). A refusal or a failure stays on the page in its own
        banner (§171) and nothing reloads over it.
 
+       SINCE §585 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
+       on different pages shouldn't get this message … save things in the
+       same time without needing a refresh."* A landing by somebody else now
+       asks sync.js to take the server's copy in under this tab's own unsaved
+       lines (`SYNC.mergeIn`): different cells simply arrive on the screen,
+       the caret and the scroll stay, and nothing is drawn; the same cell is
+       a clash, and §504's own bar asks Keep mine / Keep theirs. The caution
+       below is drawn only where there is no merge to call.
+
    NEVER paint(), never over file:// (§94.11 — there is no server to be stale
    against), and every browser call is guarded: a missing service worker or a
    failed registration is not this feature's to complain about (§231.5). */
@@ -171,6 +180,45 @@ var SAFETY = (function(){
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }
 
+  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§585) ─────────────
+     A landing by somebody else asks sync.js to merge the server's copy
+     under this tab's own unsaved lines. "busy" means a hand is in a field
+     or a save is in flight: it is asked again on blur and on a short clock.
+     `since` moves on only once the merge has landed, so a landing is never
+     counted as seen before it is on the screen; a failure leaves `since`
+     where it was and the next peek asks again. A build with no merge to
+     call (a stub, an older sync.js) still gets the caution. */
+  var RETRY = 2500;
+  var want = null, merging = false, retryTimer = null;
+  function landed(last, t) {
+    want = { at: last.at, by: last.by, t: t };
+    tryMerge();
+  }
+  function tryMerge() {
+    if (!want || merging) return;
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var w = want;
+    if (typeof SYNC === "undefined" || !SYNC.mergeIn) {
+      want = null; lastAt = w.at; since = w.at; edited(w.by, w.at, w.t); return;
+    }
+    merging = true;
+    SYNC.mergeIn(function (how) {
+      merging = false;
+      if (how === "merged") {
+        /* The fetch was made after every landing reported so far, so the
+           newest of them is what the screen now holds. */
+        var newest = (want || w).at; want = null; lastAt = newest; since = newest; return;
+      }
+      if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
+      want = null;                        /* failed, or off: the next peek asks again */
+    });
+  }
+  document.addEventListener("focusout", function () {
+    if (!want || merging) return;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = setTimeout(tryMerge, 250);
+  });
+
   /* THE CLOCK IS THE SERVER'S. `since` began as the browser's own time at
      load, and a laptop clock running a few minutes behind would have every
      save from those minutes announced as news. So the first ask carries
@@ -197,7 +245,9 @@ var SAFETY = (function(){
         var last = j.changed[j.changed.length - 1];
         /* Remember the newest we have SEEN so the same landing is not
            announced twice, and the next peek only asks about what is newer. */
-        if (last.at && last.at !== lastAt) { lastAt = last.at; since = last.at; edited(last.by, last.at, t); }
+        /* §585: taken in rather than announced; `since` and `lastAt` move on
+           when the merge has landed (or at once, on the caution fallback). */
+        if (last.at && last.at !== lastAt) landed(last, t);
       })
       .catch(function(){ clearTimeout(late); });
   }
@@ -236,6 +286,8 @@ var SAFETY = (function(){
     onPaint: onPaint,
     hide: hide,
     shownFor: function(){ return shownFor; },
+    /* §585, for the check: a landing reported and not yet on the screen. */
+    pending: function(){ return !!want; },
     synced: function(){ return synced; },
     isArmed: function(){ return armed; },
     shown: function(){ return shown; }

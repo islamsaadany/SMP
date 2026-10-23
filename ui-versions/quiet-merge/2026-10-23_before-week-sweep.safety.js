@@ -1,0 +1,375 @@
+/* ══ SAVE-SAFETY BANNERS (§258) ═════════════════════════════════════════════
+   Islam, after a reporting round in which people lost work twice over:
+   "can we have some sort of mid page warning like the error and network issue
+   in case the person is saving with someone opening the same thing … or any
+   other case that might impact the loss of data with clear action so we can
+   know what to do?"
+
+   TWO CAUTIONS, ONE FAMILY. Both ride the banner slot the refusal already uses
+   (#refused, §32/§171) and wear the ATTENTION ground, never the alarm red:
+   nothing has gone wrong yet, and telling somebody to act is not telling them
+   they failed (§168, §190).
+
+   1 · A NEWER VERSION IS READY. The live incident was a tab still running the
+       build from before a save-protocol fix shipped — it posted the whole plan,
+       was refused naming a function it never opened, and every field reverted
+       (§216/§234, and migration 040's reason). The service worker is the one
+       thing that changes on every content deploy (§91: SHELL is bumped when the
+       built bytes change), and sw.js claims its clients on activate — so an
+       OPEN tab learns of a deploy through `controllerchange`. This asks the
+       registration to look for a new worker on a clock and on coming back to
+       the tab, and when one takes over it says so and offers Reload. A stale
+       tab is told BEFORE it can lose a save.
+
+       ONLY WHEN THERE WAS A CONTROLLER BEFORE. `controllerchange` also fires
+       on the very first install, when nobody is stale — warning then would
+       greet every new browser with "reload" (§61's empty hand, reversed).
+
+   2 · SOMEBODY ELSE UPDATED THIS PAGE. Different fields already merge (§210
+       lays each person's change over the stored graph), so the one real risk
+       is two people typing over the SAME number — and the person about to
+       lose is the one who cannot see it coming. The server already writes
+       every landed change to `change_log` with who and when (§42), so this
+       asks, lightly and only while the tab is visible, "did anyone else land a
+       change on the page I am on since I loaded it?" and names them.
+
+       "RELOAD & KEEP MINE" IS §210 DOING THE WORK. It flushes this tab's own
+       pending change FIRST — the server lays it over their update — and
+       reloads only when the flush landed (`saved`, or `clean` when there was
+       nothing to send). A refusal or a failure stays on the page in its own
+       banner (§171) and nothing reloads over it.
+
+       SINCE §588 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
+       on different pages shouldn't get this message … save things in the
+       same time without needing a refresh."* A landing by somebody else now
+       asks sync.js to take the server's copy in under this tab's own unsaved
+       lines (`SYNC.mergeIn`): different cells simply arrive on the screen,
+       the caret and the scroll stay, and nothing is drawn; the same cell is
+       a clash, and §504's own bar asks Keep mine / Keep theirs. The caution
+       below is drawn only where there is no merge to call.
+
+   NEVER paint(), never over file:// (§94.11 — there is no server to be stale
+   against), and every browser call is guarded: a missing service worker or a
+   failed registration is not this feature's to complain about (§231.5). */
+var SAFETY = (function(){
+  var UPDATE_EVERY = 60000;   /* ask the worker for a newer build */
+  var PEEK_EVERY   = 20000;   /* ask about other people's saves while somebody is working here */
+  /* §588.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
+     Islam: *"without impacting the speed of the platform"*. A tab left open
+     on a desk asks a third as often; the first key or click brings the
+     short clock back. Activity is read off the document, never off a list
+     of controls (§104.7). */
+  var PEEK_IDLE    = 60000;
+  var IDLE_AFTER   = 3 * 60000;
+  var lastActive = Date.now(), lastPeek = 0;
+  function every(){ return Date.now() - lastActive > IDLE_AFTER ? PEEK_IDLE : PEEK_EVERY; }
+  function onClock(){
+    if (Date.now() - lastPeek < every() - 500) return;
+    lastPeek = Date.now(); peek();
+  }
+  ["keydown", "pointerdown", "input"].forEach(function (ev) {
+    document.addEventListener(ev, function(){ lastActive = Date.now(); }, true);
+  });
+
+  var el = null, shown = null, since = null, armed = false, peekTimer = null,
+      updTimer = null, lastAt = null, shownFor = null;
+
+  function servable(){ return location.protocol !== "file:"; }
+  function live(){ return typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive(); }
+  function E(s){ return typeof esc === "function" ? esc(s) : String(s == null ? "" : s); }
+
+  /* THE SLOT: a sibling of #refused, so both cautions and the refusal stack in
+     the one place the chrome already keeps for "something about saving". */
+  function mount(){
+    if (el || !servable() || !document.body) return;
+    el = document.createElement("div");
+    el.className = "banner safety";
+    el.id = "safety";
+    el.hidden = true;
+    var ref = document.getElementById("refused");
+    if (ref && ref.parentNode) ref.parentNode.insertBefore(el, ref.nextSibling);
+    else document.body.insertBefore(el, document.body.firstChild);
+  }
+
+  function hide(){ if (el) { el.hidden = true; el.innerHTML = ""; } shown = null; shownFor = null; }
+
+  function draw(kind, html){
+    mount(); if (!el) return;
+    shown = kind;
+    el.innerHTML = html;
+    el.hidden = false;
+    var r = el.querySelector("[data-safety-reload]");
+    if (r) r.addEventListener("click", function(){ saveThenReload(r, "Reload"); });
+    var k = el.querySelector("[data-safety-keep]");
+    if (k) k.addEventListener("click", function(){ saveThenReload(k, "Reload & keep mine"); });
+    var d = el.querySelector("[data-safety-dismiss]");
+    if (d) d.addEventListener("click", hide);
+  }
+
+  /* BOTH BUTTONS SAVE FIRST AND RELOAD ONLY ON THE SERVER'S WORD (§258.2).
+     Islam: *"the message of the reload should instruct them to save their
+     work before pressing reload"* — and measured first: on the §258.1 build a
+     field still being typed in DID reach the server when Reload was pressed
+     (the click blurs it, the change writes, the leading-edge save posts), but
+     the tab reloaded before the answer came back, so nothing on the page ever
+     knew whether it landed. A press that navigates away from a save in flight
+     is a promise nobody checked. So: commit the field under the cursor, ask
+     sync.js to save now, and reload on `saved` (or `clean` — nothing to send).
+     A refusal or a failure keeps the page: §171's banner is already saying
+     why, and reloading over it would throw the explanation away — and, for a
+     failure, the work. The button says what it is doing while it waits. */
+  function saveThenReload(btn, label){
+    try {
+      var a = document.activeElement;
+      if (a && a !== document.body && typeof a.blur === "function") a.blur();
+    } catch (e) {}
+    btn.disabled = true; btn.textContent = "Saving…";
+    var done = function(how){
+      if (how === "saved" || how === "clean") { btn.textContent = "Saved — reloading…"; location.reload(); return; }
+      btn.disabled = false; btn.textContent = label;
+    };
+    if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(done); else done("clean");
+  }
+
+  var ICON_RELOAD = '<svg class="safety-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+  var ICON_PEOPLE = '<svg class="safety-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15 19a4.5 4.5 0 0 1 6.5-4"/></svg>';
+
+  /* ── 1 · A NEWER VERSION IS READY ────────────────────────────────────── */
+  function newVersion(){
+    if (shown === "version") return;
+    draw("version", ICON_RELOAD +
+      '<div class="safety-msg"><strong>A newer version of the platform is ready</strong>' +
+      '<span>Finish what you are typing, then press Reload — it saves your work first and then opens the new version.</span></div>' +
+      '<div class="safety-acts"><button type="button" class="safety-btn" data-safety-reload>Reload</button></div>');
+  }
+
+  function armWorker(){
+    if (armed || !servable() || !("serviceWorker" in navigator)) return;
+    armed = true;
+    var had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", function(){
+      if (had) newVersion();
+      had = true;
+    });
+    var reg = null;
+    var check = function(){ if (reg && reg.update) reg.update().catch(function(){}); };
+    navigator.serviceWorker.getRegistration().then(function(r){
+      reg = r || null;
+      if (!reg) return;
+      updTimer = setInterval(check, UPDATE_EVERY);
+      document.addEventListener("visibilitychange", function(){
+        if (document.visibilityState === "visible") check();
+      });
+    }).catch(function(){});
+  }
+
+  /* ── 2 · SOMEBODY ELSE UPDATED THIS PAGE ─────────────────────────────── */
+  /* THE PAGE, OR NOTHING. The shell maps a Setup page onto the group's key
+     (`TARGET = "group"` while `current` is setup), so asking by TARGET alone
+     had a Setup screen told about group-level saves it had nothing to do
+     with (§258.1). Setup is asked about nothing: its own changes are logged
+     against no target, and nobody edits it alongside somebody else. */
+  function target(){
+    var c = typeof current !== "undefined" ? current : null;
+    if (!c || c === "setup" || c === "manage") return null;
+    var t = typeof TARGET !== "undefined" ? TARGET : null;
+    return t && t !== "setup" && t !== "manage" ? t : null;
+  }
+  function pageName(t){
+    try { if (typeof placeLabel === "function") return placeLabel(t); } catch (e) {}
+    return t === "group" ? "the group" : String(t || "").replace(/^fn:/, "");
+  }
+
+  function edited(by, when, t){
+    if (shown === "version") return;          /* the reload already covers it */
+    t = t || target();
+    if (shown === "edited" && shownFor === t) return;
+    var who = by ? E(by) : "Somebody";
+    shownFor = t;
+    /* Said to the console as well: the first live report of this caution was
+       one nobody could trace afterwards (§258.1). */
+    try { console.info("[safety] " + (by || "somebody") + " landed a change on " + t + " at " + when); } catch (e) {}
+    draw("edited", ICON_PEOPLE +
+      '<div class="safety-msg"><strong>' + who + ' updated ' + E(pageName(t)) + ' while you were working</strong>' +
+      '<span>Finish what you are typing, then press Reload &amp; keep mine — it saves your work first, then brings in their update with yours on top.</span></div>' +
+      '<div class="safety-acts"><button type="button" class="safety-btn" data-safety-keep>Reload &amp; keep mine</button>' +
+      '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
+  }
+
+  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§588) ─────────────
+     A landing by somebody else asks sync.js to merge the server's copy
+     under this tab's own unsaved lines. "busy" means a hand is in a field
+     or a save is in flight: it is asked again on blur and on a short clock.
+     `since` moves on only once the merge has landed, so a landing is never
+     counted as seen before it is on the screen; a failure leaves `since`
+     where it was and the next peek asks again. A build with no merge to
+     call (a stub, an older sync.js) still gets the caution. */
+  var RETRY = 2500;
+  var want = null, merging = false, retryTimer = null;
+  function landed(last, t) {
+    want = { at: last.at, by: last.by, t: t };
+    tryMerge();
+  }
+  function tryMerge() {
+    if (!want || merging) return;
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var w = want;
+    if (typeof SYNC === "undefined" || !SYNC.mergeIn) {
+      want = null; lastAt = w.at; since = w.at; edited(w.by, w.at, w.t); return;
+    }
+    merging = true;
+    SYNC.mergeIn(function (how) {
+      merging = false;
+      if (how === "merged") {
+        /* The fetch was made after every landing reported so far, so the
+           newest of them is what the screen now holds. */
+        var newest = (want || w).at; want = null;
+        if (newest) { lastAt = newest; since = newest; }   /* null when §588.1's path asked for the graph */
+        return;
+      }
+      if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
+      want = null;                        /* failed, or off: the next peek asks again */
+    });
+  }
+  document.addEventListener("focusout", function () {
+    if ((!want && !wantSeq) || merging) return;
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = setTimeout(function(){ tryMergeSeq(); tryMerge(); }, 250);
+  });
+
+  /* THE CLOCK IS THE SERVER'S. `since` began as the browser's own time at
+     load, and a laptop clock running a few minutes behind would have every
+     save from those minutes announced as news. So the first ask carries
+     `sync=1`, ignores whatever it is told about changes, and adopts the
+     server's `now` as the moment this tab loaded; only from then on are
+     landings compared (§258.1). A tab that never syncs never asks. */
+  var synced = false;
+  function seqMode(){ return typeof SYNC !== "undefined" && !!SYNC.seq && !!SYNC.applyRemote && SYNC.seq() !== null; }
+  function peek(){
+    if (!servable() || !live() || document.visibilityState !== "visible") return;
+    /* §588.1: a server that numbers its saves is asked the lighter way, on
+       every page; the per-target ask below is kept for one that does not. */
+    if (seqMode()) return peekSeq();
+    var t = target(); if (!t) return;
+    if (!synced && !since) since = new Date().toISOString();
+    var ctl = ("AbortController" in window) ? new AbortController() : null;
+    var late = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
+    var first = !synced;
+    fetch("/api/state?since=" + encodeURIComponent(since) + "&target=" + encodeURIComponent(t) +
+          (first ? "&sync=1" : ""),
+          { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        clearTimeout(late);
+        if (!j || !j.ok) return;
+        if (first) { if (j.now) { since = j.now; synced = true; } return; }
+        if (!j.changed || !j.changed.length) return;
+        var last = j.changed[j.changed.length - 1];
+        /* Remember the newest we have SEEN so the same landing is not
+           announced twice, and the next peek only asks about what is newer. */
+        /* §588: taken in rather than announced; `since` and `lastAt` move on
+           when the merge has landed (or at once, on the caution fallback). */
+        if (last.at && last.at !== lastAt) landed(last, t);
+      })
+      .catch(function(){ clearTimeout(late); });
+  }
+
+  /* ── 2c · THE LIGHTER ASK (§588.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
+     When the server numbers its saves (the full read came with `seq`), the
+     tab asks for everything after the number it holds — on any page, Setup
+     included, because the answer is the change itself and applying it is
+     what §588 does anyway — and is answered with a few hundred bytes, or an
+     empty list that cost one indexed read. "full" (a list too large to
+     carry, or one this copy cannot apply) falls back to §588's whole-graph
+     merge; "busy" is asked again on blur and on a short clock; the number
+     moves on only once the answer is on the screen, so nothing is counted
+     as seen before it is. */
+  var wantSeq = null, asking = false;
+  function peekSeq(){
+    if (asking || wantSeq) return;
+    var cur = SYNC.seq();
+    var ctl = ("AbortController" in window) ? new AbortController() : null;
+    var late = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
+    asking = true;
+    fetch(SYNC.withClient("/api/state?after=" + encodeURIComponent(cur)),
+          { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        clearTimeout(late); asking = false;
+        if (!j || !j.ok || !Array.isArray(j.changes)) return;
+        if (!j.changes.length) { if (typeof j.seq === "number") SYNC.setSeq(j.seq); return; }
+        wantSeq = { list: j.changes, seq: j.seq, more: !!j.more };
+        tryMergeSeq();
+      })
+      .catch(function(){ clearTimeout(late); asking = false; });
+  }
+  function tryMergeSeq(){
+    if (!wantSeq || merging) return;
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var w = wantSeq;
+    merging = true;
+    SYNC.applyRemote(w.list, function (how) {
+      merging = false;
+      if (how === "merged" || how === "same") {
+        wantSeq = null;
+        if (typeof w.seq === "number") SYNC.setSeq(w.seq);
+        try { if (how === "merged") console.info("[safety] took in " + w.list.length + " save" + (w.list.length === 1 ? "" : "s") + ", up to #" + w.seq); } catch (e) {}
+        if (w.more) peekSeq();
+        return;
+      }
+      if (how === "busy") { retryTimer = setTimeout(tryMergeSeq, RETRY); return; }
+      if (how === "full") {
+        /* the whole graph through §588's merge, which adopts the number the
+           fetched copy carries */
+        wantSeq = null; want = { at: null, by: null, t: null }; tryMerge(); return;
+      }
+      wantSeq = null;                     /* failed, or off: the next ask starts from the same number */
+    });
+  }
+
+  /* CALLED AT THE END OF EVERY paint(): the edit caution is about ONE page,
+     and a person who has moved to another tab is no longer on it. It goes
+     with the page it was about (§258.1 — Islam met it on Units, about a save
+     on Marketing, with nothing on it saying so). The version caution stays:
+     a stale build is stale on every page. */
+  function onPaint(){
+    if (shown === "edited" && shownFor !== target()) hide();
+  }
+
+  function start(){
+    if (!servable()) return;
+    mount();
+    armWorker();
+    /* The first ask is the clock sync; it waits for hydration (`live()`),
+       which is why it is retried on the clock rather than fired once. */
+    /* The clock ticks often and asks on its own cadence (§588.1: twenty
+       seconds while somebody is working here, a minute once nobody is). */
+    if (!peekTimer) peekTimer = setInterval(onClock, 5000);
+    setTimeout(function(){ lastPeek = Date.now(); peek(); }, 1500);
+    document.addEventListener("visibilitychange", function(){
+      if (document.visibilityState === "visible") peek();
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+
+  return {
+    /* Exposed for the check: the same function `controllerchange` calls, and
+       the fact that the listener is armed — a stub cannot install a worker. */
+    newVersion: newVersion,
+    edited: edited,
+    peek: peek,
+    onPaint: onPaint,
+    hide: hide,
+    shownFor: function(){ return shownFor; },
+    /* §588, for the check: a landing reported and not yet on the screen;
+       §588.1: the clock's current cadence, and a way to stamp activity. */
+    pending: function(){ return !!(want || wantSeq); },
+    every: every,
+    active: function(at){ lastActive = typeof at === "number" ? at : Date.now(); },
+    synced: function(){ return synced; },
+    isArmed: function(){ return armed; },
+    shown: function(){ return shown; }
+  };
+})();

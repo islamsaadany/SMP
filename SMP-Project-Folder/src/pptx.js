@@ -698,17 +698,31 @@ function deckBandColor(el){
    its own columns the same way and arrives here already right. */
 function deckCellSpec(td){
   var C = pptxColors();
+  /* §597: A HIDDEN ROW IS WRITTEN WHOLE AND QUIET. The deck keeps it on the
+     slide greyed (`tr.hiddenrow`), so the file does the same: every run in
+     the row takes the quiet ink at regular weight — no band, no red Missing,
+     no bold — and the name carries the words the chip says, as a smaller
+     run after it, so a reader of the .pptx is told what the room was told. */
+  var row = td.parentNode;
+  var hid = !!(row && row.classList && row.classList.contains("hiddenrow"));
   var qs = td.querySelector(".qs");
-  if (qs) return { t: deckQuarters(qs), align:"ctr" };
+  if (qs) return hid ? { t: deckQuarters(qs), align:"ctr", color:C.quiet }
+                     : { t: deckQuarters(qs), align:"ctr" };
   var isNum = td.classList.contains("num"), isIdx = td.classList.contains("idx");
   var align = (isNum || isIdx) ? "r" : null;
+  var chip = td.querySelector(".hidchip");
+  if (chip) {
+    var c0 = td.cloneNode(true); c0.querySelector(".hidchip").remove();
+    return { align:align, runs: [{ t: deckPieces(c0, true) || "—", color:C.quiet },
+                                 { t: " · " + deckTxt(chip), i:true, small:true, color:C.quiet }] };
+  }
   /* THE GAP MARK FOLLOWS ITS COLUMN, like every other value in it. Written
      right-aligned outright it sat hard right in the prose columns — a tactic
      with no outcome read as a figure (§119, found by looking at the page). */
-  if (td.querySelector(".missing")) return { miss:true, align:align };
+  if (td.querySelector(".missing") && !hid) return { miss:true, align:align };
 
-  var color = deckBandColor(td) || (isIdx ? C.quiet : null);
-  var bold  = td.classList.contains("final");
+  var color = hid ? C.quiet : (deckBandColor(td) || (isIdx ? C.quiet : null));
+  var bold  = !hid && td.classList.contains("final");
 
   var due = td.querySelector(".duehalf");
   if (due) {
@@ -728,7 +742,7 @@ function deckCellSpec(td){
     var c3 = td.cloneNode(true); c3.querySelector(".dsub").remove();
     return withUnits({ sub: deckTxt(sub), align:align,
              color: color, b: bold,
-             subColor: sub.classList.contains("dlate") ? C.band.bad : null }, deckPieces(c3, true) || "—");
+             subColor: (!hid && sub.classList.contains("dlate")) ? C.band.bad : null }, deckPieces(c3, true) || "—");
   }
 
   return withUnits({ align:align, color:color, b:bold }, deckPieces(td, true) || "—");

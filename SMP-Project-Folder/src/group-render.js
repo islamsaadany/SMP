@@ -5722,11 +5722,19 @@ function eyeBtn(row, page, acKey){
     '" data-hideac="' + esc(page) + '|' + esc(acKey) + '" aria-pressed="' + (on ? 'true' : 'false') +
     '" title="' + word + '" aria-label="' + word + '">' + eyeSvg(on) + '</button>';
 }
+/* \u00a7592: on the Plan page shown as it stood on a day, a row that has since
+   been removed wears the same quiet ink and a chip of its own \u2014 the reader
+   is told why it is not on today's plan. The same two helpers, so every
+   plan table takes it without being edited (\u00a753.5). */
+function asofGone(row){
+  return !!(row && typeof TRAIL !== "undefined" && TRAIL.asofGone && TRAIL.asofGone(row.id));
+}
 function hidChip(row){
+  if (asofGone(row)) return '<span class="hidchip">Removed since</span>';
   return SMPRules.isHidden(row)
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
-function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
+function hidCls(row){ return (SMPRules.isHidden(row) || asofGone(row)) ? ' class="hiddenrow"' : ''; }
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -10624,7 +10632,19 @@ function unitWayOf(u){
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }
+/* §598: THE PLAN AS IT STOOD ON A DAY. Islam: *"the history of the plans
+   should be on the plans page for the smo to see and review."* When the
+   office has picked a day, the page draws the copy History rebuilt from the
+   change log — the live graph is never touched, so nothing the differ
+   watches moves and nothing can be saved — under a banner naming the day.
+   The pen is off by `mayAuthor()`'s own guard, so every table below draws
+   its read-mode self. */
 function renderUnitPlan(u){
+  var asof = (typeof TRAIL !== "undefined" && TRAIL.asofFor) ? TRAIL.asofFor(u) : null;
+  if (asof) return TRAIL.asofBanner() + renderUnitPlanBody(asof);
+  return renderUnitPlanBody(u);
+}
+function renderUnitPlanBody(u){
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? fnObjPlan("u:" + u.ukey) : renderFnProjects("u:" + u.ukey);
   var sel = unitRailPick(u);

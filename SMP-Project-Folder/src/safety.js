@@ -297,6 +297,13 @@ var SAFETY = (function(){
       .then(function(j){
         clearTimeout(late); asking = false;
         if (!j || !j.ok || !Array.isArray(j.changes)) return;
+        /* §588.2: the list is kept for a week. A number older than the oldest
+           entry kept means saves may have been swept between — take the graph
+           through §588's merge, which adopts the number the fetched copy
+           carries. An older server sends no `oldest`, and is believed. */
+        if (j.oldest !== undefined && (j.oldest === null ? cur > 0 : cur < j.oldest - 1)) {
+          want = { at: null, by: null, t: null }; tryMerge(); return;
+        }
         if (!j.changes.length) { if (typeof j.seq === "number") SYNC.setSeq(j.seq); return; }
         wantSeq = { list: j.changes, seq: j.seq, more: !!j.more };
         tryMergeSeq();

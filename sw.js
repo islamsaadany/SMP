@@ -531,7 +531,11 @@
    meeting. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.82-present-window";
+/* v6.83-box-split — §587: the box's own split setting splits its
+   presentation. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+const SHELL = "smp-shell-v6.83-box-split";
 const ASSETS = [
   "/",
   "/index.html",

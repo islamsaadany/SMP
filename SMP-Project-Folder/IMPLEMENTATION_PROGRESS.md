@@ -5,7 +5,7 @@
 
 ## 2026-10-23
 
-### The strip of directions is its own card (§618) (built, on the branch)
+### The strip of directions is its own card (§618) (built, merged to `main` 2026-10-23)
 On a narrow window the strip has a navy outline all the way round, and a gap of page background stays under it while you scroll, so it reads apart from the plan as the side list does on a wide window. Its hidden top line is fixed.
 ### A theme's note runs to several lines (§613) (built, merged to `main` 2026-10-23)
 On the company level's Foundation, a theme's Note is a box that grows, where Enter starts a new line; the theme cards and the Temple's columns show the note with its line breaks.

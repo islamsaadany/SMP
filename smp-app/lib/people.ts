@@ -17,9 +17,10 @@
    platform prints one spelling of a person wherever it prints them. */
 import { createRequire } from "node:module";
 import type { Pool, PoolClient } from "pg";
+import type { Rules } from "./shared-types.ts";
 
 const need = createRequire(import.meta.url);
-const R = need("./rules.cjs");
+const R = need("./rules.cjs") as Rules;
 
 type Q = { query: Pool["query"] | PoolClient["query"] };
 const str = (v: unknown) => (v == null ? "" : String(v));

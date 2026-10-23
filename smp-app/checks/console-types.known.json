@@ -1,0 +1,179 @@
+{
+ "note": "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",
+ "findings": [
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'activeKeys'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'addBusinessUnit'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'addCapability'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'addCompany'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'boxRef'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'brandingBody'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'capsOfFunction'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'COMPANIES'.",
+   "count": 17
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'COMPANY_KEYS'.",
+   "count": 4
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'FUNCTION_KEYS'.",
+   "count": 8
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'GROUP'.",
+   "count": 46
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'LABELS'.",
+   "count": 4
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'labelWord'.",
+   "count": 6
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'LTraw'.",
+   "count": 4
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'PEOPLE'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'setCompOver'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'SMPRules'.",
+   "count": 65
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'SYNC'.",
+   "count": 14
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'syncWeights'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'UNIT_KEYS'.",
+   "count": 6
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'UNIT_ROLES'.",
+   "count": 4
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
+   "message": "Cannot find name 'UNITS'.",
+   "count": 16
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2339",
+   "message": "Property 'filter' does not exist on type 'string | string[]'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2339",
+   "message": "Property 'forEach' does not exist on type 'string | string[][]'.",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2552",
+   "message": "Cannot find name 'addFunction'. Did you mean 'Function'?",
+   "count": 1
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2552",
+   "message": "Cannot find name 'FUNCTIONS'. Did you mean 'Function'?",
+   "count": 20
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2552",
+   "message": "Cannot find name 'GROUP'. Did you mean 'grp'?",
+   "count": 1
+  },
+  {
+   "file": "console-inline.js",
+   "code": "TS2345",
+   "message": "Argument of type 'Date' is not assignable to parameter of type 'number'.",
+   "count": 1
+  },
+  {
+   "file": "console-inline.js",
+   "code": "TS2769",
+   "message": "No overload matches this call.",
+   "count": 1
+  }
+ ]
+}

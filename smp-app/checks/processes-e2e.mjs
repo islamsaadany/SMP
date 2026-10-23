@@ -219,7 +219,7 @@ const tally = await body(A.page);
 check(/1 of 2 have confirmed/.test(tally) && /Still to read:/.test(tally), "the office sees 1 of 2 have confirmed, and who is outstanding", (tally.match(/Read and acknowledged.{0,120}/) || [""])[0]);
 
 /* ── 3 · the gate: a client's own person opens nothing else of Processes ── */
-const office = ["processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/org", "processes/value-chain", "processes/helicopter"];
+const office = ["processes/priorities", "processes/reports/priorities", "processes", "processes/processes", "processes/processes/" + P2, "processes/processes/" + P2 + "/map", "processes/processes/" + P2 + "/raci", "processes/processes/" + P2 + "/review", "processes/governance", "processes/reports", "processes/reports/sop", "processes/export", "processes/org", "processes/value-chain", "processes/helicopter"];
 for (const p of office) {
   const res = await T.get("/" + S + "/" + p);
   const t = await res.text();
@@ -236,6 +236,92 @@ const draft = await T.get("/" + S + "/processes/read/" + P1);
 check(draft.status() === 404, "a draft is not readable by staff, even by its address", draft.status());
 const anon = await (await browser.newContext()).request.get(BASE + "/" + S + "/processes/read", { maxRedirects: 0 });
 check(anon.status() >= 300 && anon.status() < 400 && /sign-in/.test(anon.headers().location || ""), "a signed-out visitor is sent to sign in", anon.status() + " " + anon.headers().location);
+
+/* ── 3b · Priorities: choosing which processes to take deep, and the client's sign-off ── */
+const extra = [["P3.1", "Inventory & Stock Count"], ["P4.1", "Credit & Collections"], ["P5.1", "Hire to Retire"]];
+for (const [c, n] of extra) await proc(c, n);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+check(await A.page.isVisible("nav[aria-label='Steps']") && (await A.page.$$("tbody tr")).length === 5, "Priorities lists every high-level process");
+const dot = (name, k, n) => A.page.click(`button[aria-label='${k} ${n} of 5 for ${name}']`);
+const scoreOf = async (name) => A.page.$$eval("tbody tr", (rows, nm) => { const r = rows.find((x) => x.textContent.includes(nm)); return r ? (r.querySelector("td.tabular-nums")?.textContent ?? "") : "?"; }, name);
+const waitScore = (name, v) => A.page.waitForFunction(([nm, val]) => { const r = [...document.querySelectorAll("tbody tr")].find((x) => x.textContent.includes(nm)); return r && r.querySelector("td.tabular-nums")?.textContent === val; }, [name, v], { timeout: 20000 });
+await dot("Order to cash", "importance", 5); await dot("Order to cash", "complexity", 4); await dot("Order to cash", "risk", 5);
+await waitScore("Order to cash", "95");
+check((await scoreOf("Order to cash")) === "95", "scoring three dots gives the weighted score out of 100 (95)");
+await dot("Supplier onboarding", "importance", 3); await dot("Supplier onboarding", "complexity", 2); await dot("Supplier onboarding", "risk", 3);
+await waitScore("Supplier onboarding", "55");
+check((await scoreOf("Supplier onboarding")) === "55", "a second process scores 55");
+check((await scoreOf("Inventory & Stock Count")) === "—", "a process not yet scored has no score and no rank");
+await dot("Inventory & Stock Count", "importance", 4);
+await A.page.waitForSelector("text=suggested", { timeout: 20000 }).catch(() => {});
+check(/suggested \d: \d+ steps/.test(await body(A.page)), "complexity is offered from the map as a suggestion, with its reason");
+await A.page.click("button:text-is('Fill the empty complexity and risk from the map')");
+await A.page.waitForSelector("[role=status]:has-text('Filled')", { timeout: 20000 });
+check(true, "the suggestions are accepted only when asked for");
+const imp = await q(ffp, 'select "priorityImportance" i, "priorityComplexity" c, "priorityRisk" r from processes where code=$1 and "workspaceId"=$2', ["P3.1", S]);
+check(imp[0].i === 4 && imp[0].c != null && imp[0].r == null, "…importance stays the office's own, and a risk nobody logged is not invented", JSON.stringify(imp));
+await A.page.selectOption("select[aria-label='Decision for Order to cash']", "WAVE_1");
+await A.page.selectOption("select[aria-label='Decision for Supplier onboarding']", "WAVE_2");
+await A.page.waitForFunction(() => document.querySelector("select[aria-label='Decision for Supplier onboarding']")?.value === "WAVE_2");
+await A.page.waitForTimeout(600);
+const dec = Object.fromEntries((await q(ffp, 'select code, "deepDiveDecision" d from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r.d]));
+check(dec["P1.1"] === "WAVE_1" && dec["P2.4"] === "WAVE_2", "decisions are saved", JSON.stringify(dec));
+await A.page.click("button:text-is('Suggest waves from the ranking')");
+await A.page.waitForSelector("[role=status]:has-text('Set')", { timeout: 20000 });
+const dec2 = Object.fromEntries((await q(ffp, 'select code, "deepDiveDecision" d from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r.d]));
+check(dec2["P1.1"] === "WAVE_1" && dec2["P2.4"] === "WAVE_2", "suggesting waves never changes a decision somebody made");
+check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored processes undecided", JSON.stringify(dec2));
+
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=rank", { waitUntil: "networkidle" });
+check((await A.page.$$("svg circle")).length === 3 && /Not scored yet/.test(await body(A.page)), "the chart plots the scored processes and names the rest");
+await A.page.click("svg a >> nth=0"); await A.page.waitForURL(/sel=/, { timeout: 20000 });
+check(/selected/i.test(await body(A.page)), "a circle opens that process beside the chart");
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
+const w1 = await A.page.$$eval("section[aria-label='Wave 1'] article", (a) => a.map((x) => x.textContent));
+check(w1.length === 1 && /Order to cash/.test(w1[0]) && /Deep dive \d of 6/.test(w1[0]), "the plan puts the process in its wave with its deep-dive progress", JSON.stringify(w1));
+check(/Team capacity: 4 deep dives at a time\. Wave 1 holds 1 — fits/.test(await body(A.page)), "…and says whether Wave 1 fits the team");
+
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+const lst = await body(A.page);
+check(/Order to cash.*Deep dive.*Wave 1 · rank 1/.test(lst) && /High-level/.test(lst), "the process list shows Depth and Priority");
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P1, { waitUntil: "networkidle" });
+check(/Wave 1 · rank 1 · deep dive \d of 6/.test(await body(A.page)), "the process page says why it is being worked on and how far it has got");
+await A.page.goto(BASE + "/" + S + "/processes/helicopter", { waitUntil: "networkidle" });
+await A.page.waitForSelector("text=Deep dive", { timeout: 25000 }).catch(() => {});
+check(/Deep dive/.test(await body(A.page)), "the Helicopter View marks what is being taken deep");
+
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=sign", { waitUntil: "networkidle" });
+const doc = await body(A.page);
+check(/Deep-dive priorities — /.test(doc) && /Wave 1/.test(doc) && /Order to cash/.test(doc) && /Draft/.test(doc) && !/suggested/i.test(doc.split("Who signs")[0]), "the sign-off page is the client's page: weights, waves and reasons, nothing from the working view");
+await A.page.selectOption("select[aria-label='Who signs for the client']", people.fn_fin);
+await A.page.click("button:text-is('Send to client for approval')");
+await A.page.waitForFunction(() => /Waiting for/.test(document.body.innerText), null, { timeout: 20000 });
+const pl = (await q(ffp, 'select status, "approverName" a, "approverRole" r, snapshot from priority_plans where "workspaceId"=$1', [S]))[0];
+check(pl.status === "SENT" && !!pl.a && /Head of Finance/.test(pl.r) && pl.snapshot.rows.length >= 2, "sent: the approver's name and role and what was sent are recorded", JSON.stringify([pl.status, pl.a, pl.r]));
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=score", { waitUntil: "networkidle" });
+check((await A.page.isDisabled("button[aria-label='importance 3 of 5 for Order to cash']")) && /with the client/.test(await body(A.page)), "once sent, scores and decisions are locked");
+
+await B.page.goto(BASE + "/" + S + "/processes/read", { waitUntil: "networkidle" });
+check(/Deep-dive priorities/.test(await body(B.page)) && /Waiting for your approval/.test(await body(B.page)), "the named approver is told, on their reading list");
+check(/1 to approve/.test((await B.page.locator("a.tbread").first().innerText().catch(() => "")) || ""), "…and on the top bar");
+await B.page.goto(BASE + "/" + S + "/processes/read/priorities", { waitUntil: "networkidle" });
+await waitFor(B.page, "button:text-is('Approve')", "the approver's Approve button on the plan");
+const bp = await body(B.page);
+check(/Wave 1/.test(bp) && /Order to cash/.test(bp) && /35%/.test(bp) && !/suggested/i.test(bp), "they see exactly what was sent");
+check((await T.get("/" + S + "/processes/read/priorities")).status() === 404, "nobody else on the register can open it");
+await B.page.click("button:text-is('Approve')");
+await B.page.waitForFunction(() => /\/processes\/read$/.test(location.pathname), null, { timeout: 20000 });
+const ap = (await q(ffp, 'select status, "approvedByName" n, "approvedByRole" r, history from priority_plans where "workspaceId"=$1', [S]))[0];
+check(ap.status === "APPROVED" && !!ap.n && /Head of Finance/.test(ap.r) && ap.history.length >= 2, "approved: who, in which role, and the record", JSON.stringify([ap.status, ap.n]));
+const pr = await A.get("/" + S + "/processes/reports/priorities");
+const prt = await pr.text();
+check(pr.status() === 200 && /Approved by/.test(prt) && /Order to cash/.test(prt), "the one-page export shows the approval");
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=sign", { waitUntil: "networkidle" });
+await A.page.fill("input[aria-label='Why reopen']", "Client asked to add Credit & Collections");
+await A.page.click("button:text-is('Reopen')");
+await A.page.waitForFunction(() => document.querySelector("button")?.textContent !== undefined && !/Changing it from here needs a reason/.test(document.body.innerText), null, { timeout: 20000 });
+const ro = (await q(ffp, 'select status, history from priority_plans where "workspaceId"=$1', [S]))[0];
+check(ro.status === "DRAFT" && ro.history.some((h) => /Reopened/.test(h.what) && /Credit & Collections/.test(h.reason || "")), "reopening takes a reason and keeps it on record", JSON.stringify(ro.history.slice(-1)));
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

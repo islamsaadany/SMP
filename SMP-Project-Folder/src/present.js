@@ -850,6 +850,14 @@ function deckSlides(u){
   var capsApart = boxSplit(u) &&
     u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
+  /* §591: AND A BOX SHOWN APART THAT HOLDS ONLY ONE KIND IS CALLED BY THAT
+     KIND. Wander's company is all capabilities; since §587 its roll-call and
+     score table say Capabilities, and this slide went on saying "4 Pillars"
+     — two names for the same four things in one deck (§553.6's rule: a room
+     can check a name). */
+  var onlyCaps = boxSplit(u) && u.items.length > 0 &&
+    u.items.every(function(p){ return SMPRules.pillarIsCap(p); });
+  var kindBU = onlyCaps ? L("capability","bu") : L("pillar","bu");
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
     (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
@@ -868,17 +876,17 @@ function deckSlides(u){
          cell would also break a grid that goes to three. */
       standCell(capsApart
           ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
-          : L("pillar","bu") + ' performance', pl,
+          : kindBU + ' performance', pl,
         capsApart
           ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("pillar","bu")) + ' and ' +
             itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("capability","bu")) + ', by their measures'
-          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+          : itemsNow(u).length + ' ' + esc(kindBU) + ', by their measures'),
       standCell('Execution performance', ex,
         dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    esc(kindBU) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
     ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.');
 
@@ -1050,7 +1058,7 @@ function deckSlides(u){
     /* It announces what is BEHIND it, and §553.8 moved the two score
        tables in front of it — so where they have already been read, this
        says the one thing left (§253, §61). */
-    perfSub: "Where the " + L("pillar","bu") +
+    perfSub: "Where the " + kindBU +
       (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
       (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
       " stands, and what the cycle is remembered for.",
@@ -2735,7 +2743,11 @@ function masterKindWord(t){
   if (k === "sec") return "SECTION";
   if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
   if (k === "cap") return "CAP";
-  if (t === "group" && companyReviewOn()) return "CO";
+  /* §591: THE COMPANY IS THE COMPANY ON EITHER SHAPE. With units on and the
+     company planning too (§544, "both can be on"), `boardUnitTargets` puts
+     the company first among the units (§428) — and this chip called it a
+     business unit. */
+  if (t === "group") return "CO";
   return k === "fn" ? "FUNC" : "BU";
 }
 var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",
@@ -4760,6 +4772,9 @@ function roomPaint(){
     '<span class="rs-sp"></span>' +
     '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
     '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    /* §582.2: the keys that reach the slides from here, said where they work. */
+    '<span class="rs-keys"><b>PgDn</b><b>\u2192</b> next \u00b7 <b>PgUp</b><b>\u2190</b> back' +
+      (ROOM.at && ROOM.at.clock ? ' \u00b7 <b>T</b> timer' : '') + '</span>' +
     (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
     '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
 }
@@ -4812,6 +4827,45 @@ function roomEditorKey(ev){
   }
   return false;
 }
+
+/* ── THE REMOTE, FROM ANY PAGE (§582.2) ─────────────────────────────────
+   Islam: *"when I'm on the platform trying to make edits … the navigation on
+   the extended or the other window is lost so when we click right or left …
+   with a keyboard or a remote it doesn't work"* — a remote is a keyboard,
+   and its keys go to whichever window is in front; §582 had kept a page's
+   keys the page's own so typing could never move a slide. Now, while the
+   slides are up and somebody is on any other page of the platform: Page
+   Down / Page Up (what most remotes send) and → / ← move them, and T holds
+   or starts their timer — *"keep [↑ ↓] for scrolling"*, *"yes T works"*.
+
+   TYPING STAYS TYPING, AND A CONTROL KEEPS ITS KEYS: nothing is taken from
+   a box being typed in, a list or menu, the tab bar, a slider, a player, or
+   anything that has already answered the key (`defaultPrevented` — the
+   reorder handles, the search list). Heard on the WINDOW and last, so all of
+   those have had their turn. Alt, Ctrl and Cmd belong to the platform's own
+   shortcuts and are never taken. The slide view and a deck on this screen
+   have their own keys (§582) and are left to them. */
+var ROOM_KEEP_ROLES = /^(tab|tablist|slider|listbox|option|menu|menubar|menuitem|menuitemradio|menuitemcheckbox|radio|radiogroup|spinbutton|grid|gridcell|tree|treeitem|treegrid|combobox|scrollbar)$/;
+function roomKeysOwn(el){
+  for (var e = el; e && e.nodeType === 1; e = e.parentElement) {
+    var t = e.tagName;
+    if (e.isContentEditable || t === "INPUT" || t === "TEXTAREA" || t === "SELECT" ||
+        t === "VIDEO" || t === "AUDIO") return true;
+    if (ROOM_KEEP_ROLES.test(e.getAttribute("role") || "")) return true;
+  }
+  return false;
+}
+addEventListener("keydown", function(ev){
+  if (!ROOM || ROOM_MODE || ev.defaultPrevented) return;
+  if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+  var sr = document.getElementById("slideroot"), dr = document.getElementById("deckroot");
+  if ((sr && sr.classList.contains("on")) || (dr && dr.classList.contains("on"))) return;
+  if (roomKeysOwn(ev.target)) return;
+  var k = ev.key, kc = ev.code || "";
+  if (k === "PageDown" || k === "ArrowRight") { ev.preventDefault(); roomSend({ step:1 }); }
+  else if (k === "PageUp" || k === "ArrowLeft") { ev.preventDefault(); roomSend({ step:-1 }); }
+  else if (kc === "KeyT" || k === "t" || k === "T") { ev.preventDefault(); roomSend({ key:"T" }); }
+});
 
 /* ── IN THE ROOM ──────────────────────────────────────────────────────── */
 function roomHear(m){

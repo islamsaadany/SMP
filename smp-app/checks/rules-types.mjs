@@ -8,8 +8,10 @@
    passes everything, so --red makes each fault below in a copy and asserts
    the checker refuses it — a key the world does not hold, a key the world
    is built with that W() never names (§102's trap), a person handed where a
-   role is wanted, a word that is not a grant, and the server calling a rule
-   one argument short.
+   role is wanted, a word that is not a grant, the server calling a rule
+   one argument short, and the server calling a rule that does not exist
+   (missed until §590 closed the authoriser's `R` — an object written in
+   JavaScript is open to the checker).
 
      node checks/rules-types.mjs          # run from smp-app/
      node checks/rules-types.mjs --red    # every break must go red */
@@ -33,6 +35,7 @@ const BREAKS = {
   "not-a-grant": ["rules.js", 'if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";',
                   'if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "nothing";'],
   "caller-short": ["authorize.js", 'return R.grantIn(w, person, area, target) === "edit";', 'return R.grantIn(w, person, area) === "edit";'],
+  "caller-misspelt": ["authorize.js", "const smo = R.isSMO(w, person);", "const smo = R.isSMOO(w, person);"],
 };
 
 function tsc(dir) {
@@ -71,6 +74,11 @@ const check = (w, g, d) => { if (g) { ok++; console.log("  ok   " + w); } else {
 const r = tsc(LIB);
 check("the shared rules and the server's authoriser agree with the rules' own types",
   r.status === 0, (r.stdout + r.stderr).trim());
-check("the rules file asks for checking in an editor too",
-  readFileSync(join(LIB, "rules.js"), "utf8").startsWith("// @ts-check\n"));
+/* §592 REVERSES §585's `// @ts-check`: the app reads this file's types
+   (allowJs), and the marker makes TypeScript CHECK a JavaScript file
+   whatever checkJs says — so the app's strict checker read all of rules.cjs
+   and reported 586 findings. This check passes --checkJs itself, so it
+   never needed the marker; only an editor did. */
+check("the rules file carries no // @ts-check, which would hold it to the app's strict settings",
+  !/^\s*\/\/\s*@ts-check/m.test(readFileSync(join(LIB, "rules.js"), "utf8")));
 console.log(`\n${ok} ok, ${fails.length} failed`); process.exit(fails.length ? 1 : 0);

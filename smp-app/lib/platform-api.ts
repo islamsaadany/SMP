@@ -28,12 +28,13 @@ import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } fro
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
+import type { PlatformRules } from "./shared-types.ts";
 
 const require = createRequire(import.meta.url);
 /* the worked example the product generates (scripts/extract-state.js), at the
    repository's root beside the frozen sources it is made from */
 const SEED = join(process.cwd(), "..", "db", "seed-state.json");
-const FF = require("./platform-rules.cjs");
+const FF = require("./platform-rules.cjs") as PlatformRules;
 const frozen = require("./frozen.cjs") as {
   cleared: (g: unknown) => unknown;
   bare: (g: unknown) => any;

@@ -17,7 +17,6 @@ PROPOSAL = r"""
     overflow:visible; display:flex; }
   .split:not(.setupsplit) > .rail:not(.setuprail)::before {
     display:block; left:-1px; right:-1px; height:calc(var(--rail-gap,22px) + 1px); }
-  /* the four rounded corners take the page's ground, as the band's do */
   /* 2. One line, every direction on it; the names give way, never the codes.
      A grid inside each item so its smallest size is the code alone and its
      natural size is code and whole name: the strip shares the room in
@@ -30,11 +29,17 @@ PROPOSAL = r"""
   .rail:not(.setuprail) .ritem .rcode { grid-column:auto; margin:0; }
   .rail:not(.setuprail) .ritem b { min-width:0; overflow:hidden; text-overflow:ellipsis;
     white-space:nowrap; }
-  /* 3. The open direction's band pins right under the strip. */
-  .split:not(.setupsplit) > .pane > .pband {
-    top:calc(var(--chrome-h,118px) + var(--rail-gap,22px) + var(--strip-h) + 2px
-             + var(--split-gap,16px) + 1px); }
-  .split:not(.setupsplit) > .pane > .pband::before { height:calc(var(--split-gap,16px) + 2px); }
+  /* While editing: the reorder handle joins the line, and Add sits at its end. */
+  .rail.arranging:not(.setuprail) button.ritem {
+    grid-template-columns:auto auto minmax(0,max-content); }
+  .rail:not(.setuprail) .railadd { flex:none; align-self:center; padding:0 14px;
+    white-space:nowrap; }
+  /* 3. The open direction's title scrolls with the plan, reading or editing:
+     the strip already names it, and Done editing is in the top bar. */
+  .split:not(.setupsplit) > .pane > .pband,
+  .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+  .split:not(.setupsplit) > .pane > .pband::before,
+  .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
 }
 """
 # Corner fill for the pinned strip, drawn the way the band's is (radial tiles).
@@ -67,9 +72,10 @@ def scroll(pg, y):
     pg.wait_for_timeout(150)
 
 def measure(pg):
-    return pg.evaluate("""() => { const r=document.querySelector('.split > .rail'), b=document.querySelector('.pane > .pband');
-      const s=r.querySelector('.sortable');
-      return {rail:Math.round(r.getBoundingClientRect().top*10)/10, band:Math.round(b.getBoundingClientRect().top*10)/10,
+    return pg.evaluate("""() => { const r=document.querySelector('.split > .rail'), b=document.querySelector('.pane > .pband, .pane > .ptitle.edhead');
+      const s=r.querySelector('.sortable'), R=x=>Math.round(x*10)/10;
+      return {rail:R(r.getBoundingClientRect().top), band:R(b.getBoundingClientRect().top),
+              rowsFrom:R(Math.max(0, r.getBoundingClientRect().bottom, b.getBoundingClientRect().top > 150 && b.getBoundingClientRect().top < 400 ? b.getBoundingClientRect().bottom : 0)),
               railH:Math.round(r.getBoundingClientRect().height*10)/10,
               overflow:s.scrollWidth - s.clientWidth,
               names:[...r.querySelectorAll('.ritem b')].map(x=>x.scrollWidth>x.clientWidth?'cut':'whole')} }""")
@@ -95,10 +101,18 @@ with sync_playwright() as p:
         scroll(pg, 400); print("proposed", w, "scroll700", measure(pg))
         pg.screenshot(path=str(OUT / f"proposed-{w}-scrolled.png"))
         pg.close()
-    # Proposed, 1100: MB04 open, to show the open one keeps its name longest.
+    # Proposed, 760: MB04 open, to show the open one keeps its name longest.
     pg = plan(b, 760); propose(pg)
     pg.click('.rail .ritem[data-oi="3"]'); pg.wait_for_timeout(600)
     scroll(pg, 700); print("proposed 760 MB04 scrolled", measure(pg))
     pg.screenshot(path=str(OUT / "proposed-760-mb04-scrolled.png"))
+    pg.close()
+    # Proposed, 1100, editing: top of the page and scrolled into the measures.
+    pg = plan(b, 1100); propose(pg)
+    pg.click('.secpen'); pg.wait_for_timeout(800)
+    print("proposed 1100 edit top", measure(pg))
+    pg.screenshot(path=str(OUT / "proposed-1100-edit-top.png"))
+    scroll(pg, 700); print("proposed 1100 edit scrolled", measure(pg))
+    pg.screenshot(path=str(OUT / "proposed-1100-edit-scrolled.png"))
     pg.close()
     b.close()

@@ -53,8 +53,8 @@ page = """<title>Directions Stay in View</title>
   <p class="cap" style="margin-top:14px">And on a narrower window the last direction runs off the end of the strip.</p>
   <figure>{{t_900}}<figcaption>900px wide: MB04 is cut off</figcaption></figure>
 
-  <h2>2&nbsp;&middot;&nbsp;Proposed: the strip sticks</h2>
-  <p class="cap">The strip sticks under the top bar, on one line, with the open direction's title right under it. Any direction is one click away, wherever you are on the page.</p>
+  <h2>2&nbsp;&middot;&nbsp;Proposed: only the strip stays</h2>
+  <p class="cap">The strip sticks under the top bar, on one line. The open direction is the highlighted one, so its title does not need to stay as well: it scrolls away with the plan. Any direction is one click away, wherever you are on the page.</p>
   <figure>{{p_1100}}<figcaption>1100px wide, scrolled down</figcaption></figure>
 
   <h2>3&nbsp;&middot;&nbsp;Squeezed, nothing is lost</h2>
@@ -64,16 +64,22 @@ page = """<title>Directions Stay in View</title>
     <figure>{{p_760}}<figcaption>760px wide, MB04 open</figcaption></figure>
   </div>
 
-  <h2>4&nbsp;&middot;&nbsp;At the top of the page</h2>
+  <h2>4&nbsp;&middot;&nbsp;While editing</h2>
+  <p class="cap">The same strip, with the reorder handles on the line and <i>+ Add a Pillar</i> at its end. <i>Done editing</i> is already in the top bar, so the title scrolls away here too.</p>
+  <figure>{{p_edit}}<figcaption>1100px wide, editing, scrolled down to the tactics</figcaption></figure>
+
+  <h2>5&nbsp;&middot;&nbsp;At the top of the page</h2>
   <p class="cap">Before scrolling it is the same strip, now on one line instead of two, so the plan starts a little higher than today.</p>
   <figure>{{p_top}}<figcaption>1100px wide, top of the page</figcaption></figure>
 
   <h2>What changes</h2>
   <dl class="decis">
-    <dt>Only the strip on a narrow window</dt>
-    <dd>Above 1200px the side list stays exactly as it is. The title, the tables and everything else on the page are untouched.</dd>
+    <dt>Only on a narrow window</dt>
+    <dd>Above 1200px the side list stays exactly as it is, with the title held at the top beside it, as today.</dd>
+    <dt>The title</dt>
+    <dd>On a narrow window it scrolls away with the plan, reading or editing. The same goes for a project's title on Capabilities.</dd>
     <dt>What it costs</dt>
-    <dd>Scrolled down, the strip takes about 60px of the window that shows plan rows today. At the top of the page it takes 22px less than today.</dd>
+    <dd>Nothing in height. Scrolled down, you see about 10px more of the plan than today. At the top of the page, 22px more.</dd>
     <dt>A unit with many directions</dt>
     <dd>Up to ten fit on the strip even at the narrowest window, shortened to their codes. Past that, the strip scrolls sideways.</dd>
   </dl>
@@ -83,7 +89,8 @@ subs = {
   "t_top": img("today-1100-top.png", 560, "Plan page today, top"),
   "t_scr": img("today-1100-scrolled.png", 560, "Plan page today, scrolled: no directions strip"),
   "t_900": img("today-900-top.png", 360, "Directions strip today at 900px, MB04 cut off"),
-  "p_1100": img("proposed-1100-scrolled.png", 560, "Proposed: strip pinned on one line above the title"),
+  "p_1100": img("proposed-1100-scrolled.png", 560, "Proposed: only the strip pinned, on one line"),
+  "p_edit": img("proposed-1100-edit-scrolled.png", 560, "Proposed while editing: strip pinned with reorder handles"),
   "p_900": img("proposed-900-scrolled.png", 520, "Proposed at 900px: names shortened"),
   "p_760": img("proposed-760-mb04-scrolled.png", 520, "Proposed at 760px with MB04 open"),
   "p_top": img("proposed-1100-top.png", 560, "Proposed, top of the page"),

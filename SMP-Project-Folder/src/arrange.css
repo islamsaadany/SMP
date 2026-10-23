@@ -584,7 +584,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      already announced by its heading; the line was doing the job twice. */
   .section { margin-top:26px; padding-top:0; border-top:0; }
   .section:first-of-type { margin-top:14px; }
-  /* §606: A RAIL OPENING THE PAGE SITS ONE GAP UNDER THE CHROME, NOT TWO.
+  /* §610: A RAIL OPENING THE PAGE SITS ONE GAP UNDER THE CHROME, NOT TWO.
      The Directions page wrapped its rail in a headless section (§561.1 took
      the heading away), so the section's 14px stacked on the view's 22px and
      the rail stood 36px down where the Strategy page's stands 22px — Islam:
@@ -949,7 +949,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  /* §606: the pillar pane's score pair, headline first (`scorePair`). */
+  /* §610: the pillar pane's score pair, headline first (`scorePair`). */
   .scores.hero .card.tight { padding:18px 20px 16px; }
   .scores.hero .card.tight .score-h { margin-bottom:10px; }
   .scores.hero .headline { align-items:center; gap:14px; }

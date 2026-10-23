@@ -1262,7 +1262,7 @@ function scoreSpread(rows, extra){
 /* Compact score pair. Three figures laid across rather than stacked, so the
    card is a band rather than a column. Both headline and status word come from
    the same band function, so they can never contradict each other. */
-/* §606: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
+/* §610: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
    *"the main number should be bigger and the other go a bit smaller"*). The
    `hero` class doubles the headline and quietens the three figures under it;
    the unit Overview's cards, which share `.headline` and `.minirow`, keep

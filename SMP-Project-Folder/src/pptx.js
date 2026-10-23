@@ -529,7 +529,9 @@ function planDeckBox(target){
 function buildPlanPptx(target){
   var m = reviewPptxMark(target), kicker = placeLabel(target) || String(target || "");
   var out = [];
-  [].forEach.call(planDeckBox(target).querySelectorAll(".dslide"), function(sl){
+  /* §600: measured after the figures are stripped, so the plan's own columns
+     share the room. */
+  [].forEach.call(deckColFitBox(planDeckBox(target)).querySelectorAll(".dslide"), function(sl){
     out = out.concat(deckSlidePptx(sl, kicker, m && m.shape));
   });
   return pptxPackage(out, planPptxName(target).replace(/\.pptx$/, ""), m && m.media);
@@ -771,6 +773,20 @@ function deckColWidths(ths){
     var sh = th.classList.contains("num") ? 1 : 2;
     shares.push(sh); mins.push(m); total += sh; fixed += m;
   });
+  /* §600: THE SLIDE'S OWN WIDTHS, where the deck worked them out
+     (`deckColFit`, kept on the header as `data-fw`): each column takes the
+     same share of the file's table that it has on the slide, and still never
+     less than its heading needs. */
+  var fw = ths.map(function(th){ return Number(th.getAttribute("data-fw")) || 0; });
+  if (fw.every(function(x){ return x > 0; })) {
+    var sum = fw.reduce(function(n, x){ return n + x; }, 0);
+    var w = fw.map(function(x, i){ return Math.max(mins[i], Math.round(PPTX_CW * x / sum)); });
+    var over = w.reduce(function(n, x){ return n + x; }, 0) - PPTX_CW;
+    var give = w.reduce(function(n, x, i){ return n + (x - mins[i]); }, 0);
+    if (over > 0 && give > 0)
+      w = w.map(function(x, i){ return Math.round(x - over * (x - mins[i]) / give); });
+    if (over <= give) return w;
+  }
   var room = PPTX_CW - fixed;
   /* A table whose headings alone overflow the slide keeps its proportions
      rather than running off the edge — the minima are scaled to fit and the
@@ -1095,6 +1111,7 @@ function reviewPptxMark(target){
 function reviewPptxSlides(target, mark){
   var box = document.createElement("div");
   box.innerHTML = deckHtmlFor(target);
+  deckColFitBox(box);   /* §600: the slide's widths, for `deckColWidths` */
   var kicker = placeLabel(target) || String(target || "");
   var out = [];
   [].forEach.call(box.querySelectorAll(".dslide"), function(sl){

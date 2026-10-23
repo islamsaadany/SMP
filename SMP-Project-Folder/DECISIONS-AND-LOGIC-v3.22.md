@@ -68545,3 +68545,35 @@ No new npm script: `check:pages-types` and `:red` cover both pages.
 Not merged; `main` stays untouched until Islam says.
 
 **§594 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§593, units and functions scored apart, which took the number this branch had used, so it was renumbered §594). It was merged INTO the branch. The decision record keeps §593 before §594, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. `pages-types` 6 / 0, with 98 and 233 recorded, main's changes adding none; `rules-types` 2 / 0 and `app-types` 4 / 0. Red 11 / 11, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed, and the built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
+
+## §595 — The console's paths into the set-up flow, walked (2026-10-23)
+Islam, of the check §594 named and did not build: *"build the check that follows the console's paths"*.
+
+**WHY §594 WAS NOT ENOUGH.** §594 counts names. §467's crash came from a new PATH to an old name. §436 added a change handler to every set-up field (`if (!canShape()) redraw()`). `canShape()` asked `holdsNow()`, and `__smpHoldsNow` read `GROUP`, which the console does not have, so typing in Add a client threw. The name `GROUP` was already there, so a list of names could not have said anything. A browser check found it a week later.
+
+**WHAT IT DOES** (`consolePaths` in `checks/pages-types.mjs`, run as part of the console's subject).
+- **It starts where the console calls into the flow.** That is the `CLIENTSETUP` members the console's own script calls, plus any top-level name of the flow's file it uses, both read off the page (today `mountCreate` and `mountArchived`), together with whatever the file runs as it loads.
+- **It follows every function a reached one names:** called, passed as a callback, or stored. An inline callback is reached with the function it sits in, since an event can fire it. Names are resolved by scope, not by spelling.
+- **Every strategy-page name it can reach must be guarded.** The names are the ones the checker cannot find on the console (§594's list), so a name added tomorrow is covered without an edit. Guarded means only run when the strategy page is there:
+  - under a `typeof X !== "undefined"` or `=== "function"` test;
+  - after an early `if (typeof X === "undefined") return`;
+  - on the right of an `&&` that tests presence;
+  - or in a function reached only through such guarded calls.
+
+  The strategy page's names arrive together, so a test on any one of them guards all of them.
+- **The flow's own `return {…}` at the end of its wrapper is the API it hands the page.** Naming a function there is not calling it. The prototype got this wrong at first, and reached the whole wizard through `mount`.
+
+**ONE DOORWAY IS DECLARED, NOT INFERRED.** With everything else precise, exactly one route led from the console into the wizard: `wordCommit`'s `if (!canShape()) redraw()`, the very handler §467 was about. On the console `canShape()` is always true, because `S` is null on the create piece and `holdsNow()` reads zeros there (§467's fix). So `redraw()` never runs there. No `typeof` says so, and the analysis cannot know it. It is therefore declared in `DOORWAYS` with that reason, keyed by the function it sits in and the call it gates. **A declared doorway that no longer exists fails the check,** so the declaration cannot outlive the code it describes. `client-setup-outside.py` types in that form in a browser, with no page error.
+
+**WHAT IT FOUND: NOTHING OPEN.** From the console's two calls, 18 functions are reached, and none of them uses one of the 24 strategy-page names unguarded.
+
+**AND IT WOULD HAVE CAUGHT §467, PROVED.** `--red` takes §467's guard out of `__smpHoldsNow` in a copy. The check reports eight open uses, each with its route: *GROUP at client-setup.js:64, in __smpHoldsNow ← holdsNow ← canShape ← wordCommit ← field ← mountCreate ← the console calls CLIENTSETUP.mountCreate.* That is §467's path exactly, a week before a browser found it. Three more planted faults are caught as well: the word lookup unguarded, a strategy name read as the file loads, and the doorway rewired to call `render()` directly (115 open, and the declared doorway gone). `--red` now plants fifteen faults across both pages, all caught.
+
+**THE PARSER, AND WHAT IT COSTS.** TypeScript 7 has no JavaScript API apart from an `unstable` one that talks to its background engine. So the walk uses **acorn and acorn-walk**, the standard small JavaScript parser, with no dependencies of its own. They are added to `smp-app`'s devDependencies (two packages). They are used only by this check, and no page or server code imports them. The full check runs in under 2 seconds, and `--red` in about 9.
+
+**WHAT IT DOES NOT DO.**
+- **It does not run the code.** A doorway decided by data, like `canShape()`, is declared rather than proved, and each one costs a reason written down.
+- **It walks the set-up flow only.** It does not walk the console's own script, which runs only on the console and has nothing of the strategy page's to reach for.
+- **A call made through a computed name** (`obj[k]()`) is not followed. The flow has none on the reached paths today.
+
+Not merged; `main` stays untouched until Islam says.

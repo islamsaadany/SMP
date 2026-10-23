@@ -68546,7 +68546,7 @@ Not merged; `main` stays untouched until Islam says.
 
 **§594 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§593, units and functions scored apart, which took the number this branch had used, so it was renumbered §594). It was merged INTO the branch. The decision record keeps §593 before §594, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. `pages-types` 6 / 0, with 98 and 233 recorded, main's changes adding none; `rules-types` 2 / 0 and `app-types` 4 / 0. Red 11 / 11, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed, and the built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
 
-## §595 — The console's paths into the set-up flow, walked (2026-10-23)
+## §596 — The console's paths into the set-up flow, walked (2026-10-23)
 Islam, of the check §594 named and did not build: *"build the check that follows the console's paths"*.
 
 **WHY §594 WAS NOT ENOUGH.** §594 counts names. §467's crash came from a new PATH to an old name. §436 added a change handler to every set-up field (`if (!canShape()) redraw()`). `canShape()` asked `holdsNow()`, and `__smpHoldsNow` read `GROUP`, which the console does not have, so typing in Add a client threw. The name `GROUP` was already there, so a list of names could not have said anything. A browser check found it a week later.

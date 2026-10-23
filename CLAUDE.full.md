@@ -11143,7 +11143,7 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # STRATEGY-PAGE data the console lacks — a NEW
                                 # one there may throw on the console (§467):
                                 # show it is guarded before `--write`. AND
-                                # §595 WALKS THE CONSOLE'S PATHS into the
+                                # §596 WALKS THE CONSOLE'S PATHS into the
                                 # set-up flow (acorn): every strategy-page name
                                 # reachable from CLIENTSETUP.mountCreate /
                                 # mountArchived must sit under a typeof guard.

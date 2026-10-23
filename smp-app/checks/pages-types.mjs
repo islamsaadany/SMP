@@ -1,4 +1,4 @@
-/* THE STRATEGY PAGES AND THE CONSOLE, READ BY TYPESCRIPT'S CHECKER (§589, §594, §595) — no browser, no
+/* THE STRATEGY PAGES AND THE CONSOLE, READ BY TYPESCRIPT'S CHECKER (§589, §594, §596) — no browser, no
    database, and nothing in the pages is edited. §585 described the shared
    rules; this lets the pages see that description. They are plain scripts
    sharing one page, so the checker is handed them the way the browser runs
@@ -24,7 +24,7 @@
    console's findings are the set-up flow naming STRATEGY-PAGE data the
    console does not have. Each is guarded or never reached there today, and
    that is the point of listing them: a NEW one is a name the console may
-   reach and throw on. AND SINCE §595 THE CONSOLE'S PATHS ARE WALKED (see
+   reach and throw on. AND SINCE §596 THE CONSOLE'S PATHS ARE WALKED (see
    consolePaths below): from the console's own calls into the set-up flow,
    every strategy-page name reachable must be guarded — which a list of
    names could never say, because §467's crash was a new path to an old one.
@@ -190,7 +190,7 @@ function assembleConsole() {
   return { dir, files };
 }
 
-/* ── THE CONSOLE'S PATHS INTO THE SET-UP FLOW (§595) ─────────────────────
+/* ── THE CONSOLE'S PATHS INTO THE SET-UP FLOW (§596) ─────────────────────
    §594 counts NAMES, and §467's crash was a new PATH to an old one: typing in
    Add a client ran a change handler that asked canShape(), which reached
    GROUP on a page that has none. So this walks the calls. It starts where

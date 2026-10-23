@@ -18,8 +18,10 @@ Both ends throughout (§94.2), and the DATA is read back after every press
   - reporting stops asking (reportItems), the gap count stops counting
     (gapMap), and the reporting pane stops drawing the row;
   - read mode says so — the chip, on a row still showing its figure;
-  - the deck carries neither the row nor its name, on the unit AND the
-    function side of the switch (§53.5);
+  - the deck KEEPS the row in its seat, greyed and chipped, on the unit AND
+    the function side of the switch (§53.5) — §591 reversed §233's "left
+    out" on Islam's word, 2026-10-23, so the presenter can defend the
+    removal while the score still leaves the row out;
   - the workbook writes Yes in the Hidden column and the reader brings it
     back — the round trip keeps the mark, or a re-upload silently shows
     everything again (§22).
@@ -116,7 +118,13 @@ with sync_playwright() as p:
     ck("...and its blanks are not gaps",
        blank_gap["without"] == blank_gap["withHide"] + 1, blank_gap)
 
-    # ── 3 · read mode says so, deck says nothing ────────────────────────
+    # ── 3 · read mode says so, and so does the deck (§591) ──────────────
+    # §233 asserted the deck carried neither the row nor its name. §591
+    # reverses that half on Islam's word (2026-10-23): the row STAYS on the
+    # slide, in its seat, greyed and chipped, so the presenter can defend
+    # the removal — while the score (asserted above, as agreement over the
+    # shown rows) is unchanged. The sibling's presence is still asserted so
+    # a deck that drew nothing could not pass (§113.8).
     press(pg, '#secrow-in .secpen[data-page="plan"]')
     pg.wait_for_timeout(500)
     read = pg.evaluate("""(id) => {
@@ -124,16 +132,23 @@ with sync_playwright() as p:
       const name = UNITS.mobile.items[0].measures.filter(x => x.id === id)[0].name;
       const deck = deckSlides(UNITS.mobile).join ? deckSlides(UNITS.mobile).join("") : String(deckSlides(UNITS.mobile));
       const sib = UNITS.mobile.items[0].measures.filter(x => x.id !== id)[0].name;
+      /* the row the name sits in: from its own <tr to its </tr> */
+      const at = deck.indexOf(name);
+      const tr = at < 0 ? "" : deck.slice(deck.lastIndexOf("<tr", at), deck.indexOf("</tr>", at));
+      const sat = deck.indexOf(sib);
+      const str = sat < 0 ? "" : deck.slice(deck.lastIndexOf("<tr", sat), deck.indexOf("</tr>", sat));
       return { chip: chip ? chip.textContent : null,
-               deckHasIt: deck.indexOf(name) > -1,
-               deckHasSib: deck.indexOf(sib) > -1,
+               deckHasIt: at > -1,
+               deckHasSib: sat > -1,
+               rowMarked: tr.indexOf('class="hiddenrow"') > -1 && tr.indexOf("Hidden — not counted") > -1,
+               sibClean: str.indexOf("hiddenrow") < 0 && str.indexOf("hidchip") < 0,
                rep: (function(){
                  // the reporting pane must not draw the row
                  return null; })() };
     }""", before["id"])
     ck("read mode wears the chip", read["chip"] == "Hidden — not counted", read)
-    ck("the deck does not carry the row — and does carry its sibling",
-       not read["deckHasIt"] and read["deckHasSib"], read)
+    ck("the deck KEEPS the row, greyed and chipped — and carries its sibling plain",
+       read["deckHasIt"] and read["rowMarked"] and read["deckHasSib"] and read["sibClean"], read)
 
     # ── 4 · the workbook round trip keeps the mark ──────────────────────
     wb = pg.evaluate("""(id) => {
@@ -208,13 +223,16 @@ with sync_playwright() as p:
       const c = holderById("fn:finance");
       const m = c.projects[0].milestones.filter(x => x.id === spec.id)[0];
       const deck = String(deckSlidesFn("finance"));
+      const at = deck.indexOf(m.name);
+      const tr = at < 0 ? "" : deck.slice(deck.lastIndexOf("<tr", at), deck.indexOf("</tr>", at));
       return { hide: m.hide === true, total: capExec(c).total,
-               deckHasIt: deck.indexOf(m.name) > -1,
+               deckHasIt: at > -1,
+               deckMarked: tr.indexOf('class="hiddenrow"') > -1 && tr.indexOf("Hidden — not counted") > -1,
                asked: fnReportItems("finance").some(x => x.id === spec.id) };
     }""", fn)
-    ck("the milestone hides, leaves the exec counts, the deck and the asks",
+    ck("the milestone hides, leaves the exec counts and the asks — and stays on the slide, marked (§591)",
        fna["hide"] and fna["total"] == fn["total"] - 1
-       and not fna["deckHasIt"] and not fna["asked"], (fn, fna))
+       and fna["deckHasIt"] and fna["deckMarked"] and not fna["asked"], (fn, fna))
     # put it back — the demo data must leave as it arrived (§94.2)
     press(pg, '.eyebtn[data-hiderow="%s"]' % fn["id"]); pg.wait_for_timeout(400)
     ck("...and shows again clean",

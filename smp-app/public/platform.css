@@ -8820,6 +8820,22 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide td.idx { width:60px; color:var(--none); font-family:var(--mono); font-size:18px; text-align:right; }
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
+  /* ── §591: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
+     The plan page's own two signs (§233), at the deck's size: every cell of
+     the row in the quiet ink at regular weight — a band colour, a bold
+     figure or a coloured pill would say the row still counts, and it does
+     not — and the chip after the name. Ink only, never display:none:
+     keeping the row on the slide is the whole of this feature. */
+  .dslide tr.hiddenrow td, .dslide tr.hiddenrow td.final, .dslide tr.hiddenrow td.lead,
+  .dslide tr.hiddenrow td.lead.strong, .dslide tr.hiddenrow td b,
+  .dslide tr.hiddenrow td.good, .dslide tr.hiddenrow td.attn, .dslide tr.hiddenrow td.warn,
+  .dslide tr.hiddenrow td.bad, .dslide tr.hiddenrow .good, .dslide tr.hiddenrow .attn,
+  .dslide tr.hiddenrow .warn, .dslide tr.hiddenrow .bad, .dslide tr.hiddenrow .missing,
+  .dslide tr.hiddenrow td.dstat .dlate { color:var(--ink-3); font-weight:400; }
+  .dslide tr.hiddenrow td.dstat .dpill { background:none; border:1.5px dashed var(--none); color:var(--ink-3); }
+  .dslide tr.hiddenrow td.dstat .dlate::before { background:var(--none); }
+  .dslide tr.hiddenrow .qs i.on { background:var(--surface-2); border-color:var(--none); color:var(--ink-3); }
+  .dslide .hidchip { font-size:13px; padding:6px 10px; margin-left:12px; vertical-align:middle; }
   .dslide .lead { font-weight:500; }
   /* §572: the key measures' and tactics' names bold, the outcome regular. */
   .dslide .lead.strong { font-weight:700; }

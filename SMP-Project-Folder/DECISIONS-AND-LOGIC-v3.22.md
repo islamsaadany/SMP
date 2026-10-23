@@ -68666,3 +68666,34 @@ Islam, of the limit §594 named: *"now close the open objects on the pages too"*
 Not merged; `main` stays untouched until Islam says.
 
 **§599 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch twice: §597 and §598, which took this section's first number, so it was renumbered §599; then §598.1. Each time main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources, byte-identical to main's. On the merged tree, main's history and slide changes included: `pages-types` 10 / 0 (31 and 2 objects closed, and still no finding beyond the recorded ones), typecheck clean, `rules-types` 2 / 0, `app-types` 4 / 0, with red 18 / 18, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. No forced sign-out. Witnesses: `/sw.js` release **`49e60e384ee0e743`** and `/shell.js` **5,175,811** bytes before, and the same after.
+
+## §601 — The data described: the review and the plan, first (2026-10-23)
+Islam asked to close the data-only objects too. Measured first: closing them gave **about 260 findings, and every one read was the checker guessing a field does not exist because the worked example's starting value does not have it.** None was a fault. So the choice went back to Islam in plain words, with each option's cost. He chose the third: *describe the data* — write down once which fields the data can have — starting with the plan and the review, and report before going further.
+
+**THE DESCRIPTION IS `lib/state.d.ts`: types only, never sent to a browser, never run.** The state graph is open by design (§52, §213): the server keeps a field it does not know in a row's `extra`, which lets a field be added without a migration and keeps a misspelt one for ever, unannounced. The file is the list of fields that exist. The page check labels the pages' own data with it in the copy it reads, the same way §599 closes objects, so **the pages are untouched**:
+- `REVIEW` is labelled `SMP.Review`;
+- `UNITS` is labelled `{ [key]: SMP.Unit }`.
+
+Every label must find exactly one declaration, or the check stops.
+
+**WRITTEN BY ASKING THE CHECKER, NOT FROM MEMORY.** Each type started small. Every field the pages read or write that it did not name came back as a finding, and each one was READ before it went in, so a misspelling could not be written in as a field:
+- **The review:** 17 fields. That is the server's columns plus `slides` (pictures and clips per target), `parked`, `done` and `lines` (stamps), `taken`, `reviewDay`, `reviewAt` and `remindAt`, with the shapes of `PictureSlide`, `Picture` and `Video`.
+- **The plan:** `Unit`, `Swot`, `Figure` (shared by `KeyObjective` and `Measure`), `Pillar` and `Tactic`. This is the server's columns (`lib/state-io.js`) plus everything found in use: a unit's `ukey` and `weight` (in memory only, dropped on save), `format`, `drivers`, `values` and `compete`; a pillar's `by` (its carrier, §59); a tactic's `outTarget`, `outDir` and `outCompile`; a figure's `src`, `hide` and `driver`.
+- `capKey` is described as **absent** on a unit (`capKey?: undefined`). Only a capability's unit-like view carries it, and saying so is the precise answer.
+
+Unlabelled, the plan alone gave 365 findings. With the description finished, 29 remain, and they are the GROUP object and the unit-like views, which are not described yet (next below). **Five old findings went away,** because they were the checker guessing the review's shape from its sample.
+
+**WHAT IT FOUND: TWO REAL FAULTS, NEITHER FIXED, BOTH FOR ISLAM.**
+1. **A capability that plans in pillars loses an added value.** Its Foundation shows *Core values* by default: `values` is in the function level's default list, and only a function *target* is barred from it (`STRUCT_NEVER_FN`, `compOffered`). While editing it offers *+ Add a value*. The handler writes `o.values` on `unitLikeWritable(t)`, which for a capability is `capAsUnit()`: a fresh view with no `values` on it. So the new list lives on the view and is gone at the next paint. **Measured in the page,** with a capability made to plan in pillars: values on, the card drawn, the button drawn while editing, and after the add the view holds 1 value, the capability none, and a fresh view none. The checker pointed at it: six `values` findings on `Unit | <view>`. They are recorded with that said in the list's own note, until it is fixed. **The company level has the same mechanics** — `topAsUnit()` carries no `values` either, while GROUP has its own — but whether the unit-style Foundation is ever drawn for the company in practice was **not confirmed**.
+2. **A cycle opened in the product has no `endsQuarter`,** which is deliberate: nothing writes it since §47.8, and it is kept only as a floor. **But the three readers of the floor disagree when a cycle's year cannot be read.** `quarterPast()` falls back to Q4, so every quarter has passed. `tacticShare()` and `tacticFirstQuarterOver()` compare against `undefined`, so nothing is due yet. Same screen, two answers: §53.5 in the fallback. Found by reading what the description had to say about the field, not by the checker. Loose settings do not flag a comparison with `undefined`.
+
+**PROVED.** Two more planted faults: a misspelt review field (`REVIEW.parkd`) and a misspelt pillar field (`p.byy`). Both are caught. With the labels taken off and the list as it was before §601, **neither is caught**: measured in a throwaway copy of the check. `--red` plants twenty faults across both pages, all caught.
+
+**WHAT IT COSTS FROM NOW ON.** A new field on the review or the plan goes into `lib/state.d.ts` in the same edit as the code that first writes it, or the check fails and says which field.
+
+**NOT DONE.**
+- **GROUP**, the company's own plan and every client setting, and **the unit-like views**: the next slice, and where the 29 go.
+- **`FUNCTIONS`, `PEOPLE` and the capabilities.**
+- **The server and the Next app reading `lib/state.d.ts` themselves.**
+
+Not merged; `main` stays untouched until Islam says.

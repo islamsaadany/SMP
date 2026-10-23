@@ -499,7 +499,7 @@ function standDetail(rows, note){
     (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
     (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
 }
-/* §612: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
+/* §616: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
    the slides"*, of §610). The headline was already the slide; what follows it
    gets quieter: a line's figure keeps its band colour only when it is out of
    the top band (`hdFig`), so colour under the number means something to look

@@ -596,7 +596,7 @@
    direction slide's "where it stands" read like §610's cards. The built
    file's bytes changed (§91). Proved held by no commit in any ref's
    history (§94.16). */
-const SHELL = "smp-shell-v7.01-cards-overview-slides";
+const SHELL = "smp-shell-v7.05-cards-overview-slides";
 const ASSETS = [
   "/",
   "/index.html",

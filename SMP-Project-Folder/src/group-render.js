@@ -1265,7 +1265,7 @@ function scoreSpread(rows, extra){
 /* §610: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
    *"the main number should be bigger and the other go a bit smaller"*). The
    `hero` class doubles the headline and quietens the three figures under it
-   (§612: the unit Overview's own three cards wear it too). "4 scored" is gone — Islam was *"not sure if it's useful
+   (§616: the unit Overview's own three cards wear it too). "4 scored" is gone — Islam was *"not sure if it's useful
    info"* — and the fact it carried is said the way a reader acts on it: how
    many have NOT reported, beside the number they are missing from, and only
    while there are some. Highest stays ink (it is never the worry); Lowest
@@ -3433,7 +3433,7 @@ function renderUnitPerformance(u){
      solid fill, and the page keeps the row. See `group-extra.css`. */
   return perfActs(presentMenu("unit", u.ukey)) +
 
-    /* §612: and the Overview's own cards read the same way (Islam, of the
+    /* §616: and the Overview's own cards read the same way (Islam, of the
        three above the rail: *"why not done the same in the cards above?"*). */
     '<div class="scores hero">' +
       /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
@@ -9183,7 +9183,7 @@ function fnObjPlan(fk){
 function fnObjCards(fk){
   var ko = fnObjScore(fk), ac = fnActionsTally(fk);
   var objs = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
-  /* §612: the same two cards as a unit's, so the same headline. */
+  /* §616: the same two cards as a unit's, so the same headline. */
   return '<div class="scores hero">' +
     '<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Objectives performance <span class="rank">primary</span></h4>' +

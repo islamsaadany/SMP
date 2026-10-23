@@ -949,7 +949,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  /* §610: the pillar pane's score pair, headline first (`scorePair`); §612:
+  /* §610: the pillar pane's score pair, headline first (`scorePair`); §616:
      and the unit Overview's cards above the rail. */
   .scores.hero .card.tight { padding:18px 20px 16px; }
   .scores.hero .card.tight .score-h { margin-bottom:10px; }

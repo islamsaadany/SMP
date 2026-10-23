@@ -1583,7 +1583,7 @@ var ROWDLG_SPECS = {
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
         /* §391: WHERE IT BELONGS. Beside how it plans, because both answer
-           "what is this function part of". §592: and no weight there — a
+           "what is this function part of". §593: and no weight there — a
            division's functions count equally, beside its units. */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
@@ -8197,7 +8197,7 @@ function capFormatCell(c, editable){
 /* ── WHERE A FUNCTION BELONGS (§391) ─────────────────────────────────────
    Read on the row and set in the dialog. The group is the ABSENCE of a
    company (§50.6), so a function nobody placed reads exactly as every
-   function did before. §592 took the weight beside it away: a division's
+   function did before. §593 took the weight beside it away: a division's
    functions now count equally, read beside its units, never mixed in. */
 function fnCompanyCell(fk, f, editable){
   var at = fnCompanyOf(fk) || "";

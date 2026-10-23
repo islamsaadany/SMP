@@ -1,6 +1,6 @@
-"""A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND READS BESIDE ITS UNITS (§391, §592).
+"""A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND READS BESIDE ITS UNITS (§391, §593).
 
-REWRITTEN TO THE NEW RULE (§218, §592). Islam, on the simplification's final
+REWRITTEN TO THE NEW RULE (§218, §593). Islam, on the simplification's final
 test: *"in case of business units they get their own score and the functions
 get their own score and we see both on the group"*, *"stay equal"*, *"yes same
 for divisions"*. So a division no longer blends: its headline is its units'
@@ -73,7 +73,7 @@ with sync_playwright() as p:
 
     have = js(pg, "typeof fnsReading === 'function' && typeof companyFnKeys === 'function'", False)
     ck("the division readers exist", have)
-    ck("the blended mix is gone (§592)", js(pg, "typeof companyShares === 'undefined' && typeof companyMix === 'undefined'", False))
+    ck("the blended mix is gone (§593)", js(pg, "typeof companyShares === 'undefined' && typeof companyMix === 'undefined'", False))
 
     print("\n§1  a division's own figures are its units', with or without functions")
     for ck_ in ("distribution", "b2c"):
@@ -137,7 +137,7 @@ with sync_playwright() as p:
     try:
         pg.click('[data-fnmenu="hr"]'); pg.wait_for_timeout(150)
         pg.click('[data-rowdlg="fns|hr"]'); pg.wait_for_timeout(300)
-        ck("the dialog offers no weight any more (§592)", js(pg, "!document.querySelector('[data-fncow]')", False))
+        ck("the dialog offers no weight any more (§593)", js(pg, "!document.querySelector('[data-fncow]')", False))
         pg.select_option('[data-fnco="hr"]', "distribution"); pg.wait_for_timeout(300)
         ck("choosing a company stores it", js(pg, "FUNCTIONS.hr.company", None) == "distribution")
         js(pg, "FUNCTIONS.hr.coWeight = 15")

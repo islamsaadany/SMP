@@ -9500,7 +9500,7 @@
           var f = FUNCTIONS[this.dataset.fnco];
           if (!f) return;
           if (this.value) f.company = this.value; else delete f.company;
-          /* §592: functions count equally, so there is no weight to keep —
+          /* §593: functions count equally, so there is no weight to keep —
              one left from §391 is dropped the moment the function moves. */
           delete f.coWeight;
           paint();

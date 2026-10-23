@@ -68150,6 +68150,17 @@ Islam: *"how about the presenter has a different view than the presented on the 
 
 **§582.1 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§586, one template for every box's presentation, which rewrote much of `present.js`), so `main` was merged INTO the branch — git joined the two with no conflict in the sources, and that was not taken on trust: on the merged tree `one-template` (main's own), `present-window`, `two-screens`, `deck-refresh`, `clock-stages`, `line-by-line`, `guided-tour`, `master-presentation`, `present-loop`, `presentation-timer` 65, `deck-pdf`, `deck-model`, `direction-slides`, `slide-columns`, `hide-slide` and `video-slides` all green; the progress lines kept in order and the built file and served copies regenerated, never resolved by hand; `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.81-one-template` → **`smp-shell-v6.82-present-window`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Slides and the slide view only; no save judged differently. Witnesses: `/sw.js` release **`0f84f2deea5eb9e7`**, `/shell.js` **5,116,453** before; after they should read **`a700e38c778e2ae1`** and **5,119,101**.
 
+**§582.2 — THE REMOTE, FROM ANY PAGE. A REVERSAL OF ONE §582 RULE.** Islam: *"when I'm on the platform trying to make edits and adjustments the navigation on the extended or the other window is lost so when we click right or left or up and down with a keyboard or a remote it doesn't work"*. A remote is a keyboard, and its keys go to whichever window is in front; §582 had kept a page's keys *the page's own — typing a figure never moves a slide*, and this is what that cost. Put to him: Page Down / Page Up (what most remotes send) and → / ← move the slides from any page while they are up; typing stays typing; a control that uses the keys keeps them; ↑ ↓ either scroll or move; T from a page or not. Answered *"keep for scrolling"* and *"yes T works, build it"*. No mockup: the one visible change is a line of keys on the strip already approved, and he went straight to build.
+
+- **WHAT IS TAKEN.** While `ROOM` is up and neither the slide view nor a deck is on this screen: Page Down and → step forward, Page Up and ← back, T holds or starts the slides' clock. Heard on the window and LAST, so every control has had its turn; anything already answered (`defaultPrevented` — the reorder handles, the search list) is left alone.
+- **WHAT IS NEVER TAKEN.** A box being typed in (input, text area, list box, anything editable), a player, and anything whose role says it uses the keys (the tab bar and its tabs, lists, menus, sliders, radio groups, grids); Alt, Ctrl and Cmd with any key, which are the platform's own shortcuts (§546); ↑ ↓, which keep scrolling. Typing a figure still never moves a slide — the half of §582's rule that was the point of it stays.
+- **SAID WHERE IT WORKS.** The strip on every page gains *PgDn → next · PgUp ← back · T timer*. The keyboard sheet gains an eighth section, *Slides in another window*, live while they are up; and its *Presenting* section finally lists T, Y and R, which §580/§581 should have added the day they arrived (B2: missed then, put right now).
+- **ONE LIMIT, SAID TO HIM.** Another app in front (Excel, Teams, mail) gets the keys; no web page can reach them there. Clicking back into the platform or the slides window brings them back.
+
+**CHECKED.** New `remote-keys`, 18 claims, the slides window real: on a page with the slides up, Page Down, Page Up, → and ← each move them one step; T holds and T again starts their clock; the strip names the keys; ↓ and ↑ leave the slides; Alt+→ leaves them; in a box → moves the cursor (caret measured), Page Down leaves the slides, a T typed is a letter and the clock untouched; on the tab bar → is the tab bar's; back in the slide view → moves the slides once, not twice; presenting stopped, Page Down is the page's again, nothing taken. **Red 6** on the build before. `two-screens`' *on a page the keys stay the page's own* rewritten to the reversal (→ moves the room), the reversal named in the check. `keyboard-sheet` told of the eighth section and of the keys it names (T, Y, R, PgDn, PgUp checked against the build). Neighbours green: `present-window`, `deck-refresh`, `clock-stages`, `master-presentation`, `line-by-line`, `report-keys`, `action-keys`, `dropdown-keys`, `tab-arrows`, `video-keys`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§582.2 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§587–§591: a box's own split setting, TypeScript's checker on the pages and the authoriser, the company labelled the company; and §588, other people's saves arriving without a reload, which rewrote much of `sync.js`), so `main` was merged INTO the branch, no source conflict, the progress lines kept in order and the built file and served copies regenerated, never resolved by hand. Read after the merge, not assumed: the room window's no-saving guard still stands first in `save()` and the leave flush, ahead of §588's new paths (which only read); `SYNC.refresh` keeps its contract. On the merged tree: `remote-keys`, `two-screens`, `present-window`, `deck-refresh`, `clock-stages`, `line-by-line`, `keyboard-sheet`, `master-presentation`, `guided-tour`, and main's `both-levels`, `one-template`, `safety-banners` green; `test-graph-diff.js` 165; `test-authorize.js` 1123 with the same 3 red as before (§447, §505, §520.6); main's `pages-types` (no finding beyond its 98 recorded) and `rules-types` green, run with the lockfile's TypeScript 7.0.2 and Node types installed into a scratch folder for the run, since this container has neither; `saves-since.mjs` not run (it needs a database); `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.85-company-label` → **`smp-shell-v6.86-remote-keys`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Keys while presenting only; no save judged differently. Witnesses: `/sw.js` release **`2b79d450b9f786e2`**, `/shell.js` **5,148,812** before; after they should read **`92f3825ab0b2b113`** and **5,152,482**.
+
 ## §583 — My work in the Internal Tracker's look, with the done tick and the status on the row (2026-10-22)
 Islam: *"let's redesign mywork to be similar to the internal tracker page creak a mockup"*; of the first round, which left the tick and the status out because My work only read, *"add the done tick and status change too"*; of the second, *"go ahead and build it"*.
 
@@ -68434,7 +68445,56 @@ Islam, on the final test of spec 066 (§587's report): *"do 1 and 2"*.
 
 **CHECKED.** Every deck against the live build: only Wander's company deck (and its plan) moves. New `checks/both-levels.py` (9 claims; the label and the wording red on the live build). `one-template`, `master-presentation` 50/0, `direction-decks`, `presentation-parts`, `deck-model`, `deck-figures`, `pillar-split` 46/0, `presentation-timer` 65/0, `built-in-step`, `no-twin-functions` green.
 
-## §592 — Units and functions each get their own score, on the group and on a division (2026-10-23)
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. Main had moved (§588/§588.1 and §589/§590 from other sessions), so this entry was renumbered §588 → **§591**, main merged in and the generated files rebuilt; re-measured against that live build: Wander's company deck moves and nothing else. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.84-quiet-merge` → **`v6.85-company-label`**. Pages only: no forced sign-out.
+
+## §592 — The new app's code sees the carried rule modules' own types (2026-10-23)
+Islam, after §589 and §590 went live: *"now do the same for the new app's code"*.
+
+**THE GAP.** The Next app loads four plain-JavaScript modules carried from the frozen product (§330): the shared rules, the change-list differ, the authoriser and the platform's own rules. Nine of its files load them, with `require` or `createRequire(...)()`, and `require` hands back `any`. So until now **no call from this app into a rule was checked at all**, under a `strict` tsconfig that everybody reading it would have assumed covered them. One file, `lib/door.ts`, described the platform rules by hand: a second copy of two of the module's keys, free to drift.
+
+**WHAT WAS DONE:**
+- **`lib/shared-types.ts` READS each module's types out of the module itself** (`typeof import("./rules.cjs")` and so on). The types are never written out a second time, so they move with the code. They are CLOSED with a mapped type (§589's reason: a JavaScript object is open to the checker).
+- **Every load is declared with one** (`as Rules`, `as Differ`, `as Authorizer`, `as PlatformRules`). `door.ts`'s hand-written copy is gone.
+- **`allowJs` is on in tsconfig.json, so the checker can read the modules.** `checkJs` stays off, so the modules themselves are not held to this app's strict settings. Turned on alone, `allowJs` changed nothing: the app's full typecheck stayed clean.
+
+**THE PRICE, AND A REVERSAL OF §585, STATED.** `allowJs` makes TypeScript read `rules.cjs`, and §585's `// @ts-check` on line 1 makes it CHECK a JavaScript file whatever `checkJs` says. So the app's strict checker read the whole rules file and reported **586 findings**, which would have failed `next build`. **The marker is removed.** It only ever told an editor to underline while somebody typed. `check:rules-types` passes `--checkJs` itself and never needed it, and it now asserts the marker's ABSENCE, with the reason. The cost is that an editor no longer underlines `lib/rules.js` as it is typed. Removing one comment line changes the served `shell.js`, so open tabs are offered the reload once, with nothing visible changed.
+
+**WHAT TYPING THEM FOUND: NO FAULT.** With all four modules typed and closed, the app's checker reported **seven** findings, then **three**. Each was read, and none is a fault:
+- **The differ's two answers could not be told apart.** `applyChanges` answers `{ok:false, error}` or `{ok:true, state}`, and `valueAt` answers `{has:false}` or `{has:true, value}`. Inferred from JavaScript, `ok` and `has` were any boolean on both shapes, so the save's `if (!applied.ok) return` did not tell the checker that `state` was there. **Said in the differ's own file:** a type comment on `bad`, `applyChanges`, `valueAt` and `none`.
+- **The save reads the acting person, and the rules say it can be missing.** `actingFor` answers `{person: me}` even when `me` is null. In `save()` it never is: `me` is the register's row or a fallback object. **Said where it is used:** `act.person!`, with a comment saying why.
+- **The platform's defaults are looked up by `EVERYONE`,** a string, rather than by the one literal key the object has. `door.ts`'s hand-written copy had covered this. **Said once, in the module itself:** a type comment on `ACCESS_DEFAULTS`.
+
+Every rule the app calls by name, in all four modules, exists.
+
+**NOTHING RUNS DIFFERENTLY.** Every change is a comment, a type, or a TypeScript `as`, `!` or `import type`, all erased at build.
+- With comments removed, all **355 / 8 / 36** exports of the rules, the differ and the platform rules are identical.
+- `test-authorize` 1123 / 3 and `test:rules` 152 / 3, the same six failures `main` already had. `test-platform-rules` 69 / 0 and `test-graph-diff` 165 / 0.
+- `npm run typecheck` is clean, and **`next build` passes, its TypeScript step included** (run here with the database step left out).
+- The pages' check still reads its 98, and the rules' check is 2 / 0.
+
+**THE CHECK** is `smp-app/checks/app-types.mjs`: `npm run check:app-types`, with `:red`. It asserts three things the app's own typecheck would never say out loud if they stopped being true:
+- every load of one of the four, in every `.ts`/`.tsx` (found by scanning, never by a list), carries its type — a new file loading the rules bare would otherwise be `any` again, silently;
+- tsconfig keeps `allowJs` on and `checkJs` off;
+- the app's checker reports nothing in the files that load them.
+
+`--red` breaks seven things IN PLACE and puts each file back byte for byte in a `finally`; copying the app would mean copying its generated Prisma and route types too. The seven:
+- a rule misspelt;
+- a rule one argument short;
+- a grant compared against a word that is not one;
+- the differ misspelt;
+- the authoriser misspelt;
+- a platform rule misspelt;
+- a load with its type taken off.
+
+**All seven are caught**, each only when the failure names the broken file. Before this, none of the six code faults could have been: `any` is never an error.
+
+**NOT DONE.** The app's other carried modules (the assistant, the mailer, `frozen.cjs`, `graph-io.cjs`, `chat-api.cjs`, `mail-api.cjs`) still carry hand-written `as {…}` shapes or none. They are not rule modules, and each is its own errand.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§592 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§582.2, the remote from any page, and §591, which took the number this branch had written into its comments, so they were renumbered §592). It was merged INTO the branch. The decision record keeps §591 before §592, and the progress lines keep newest first. The built file, `shell.js` and `sw.js` conflicted and were regenerated from the merged sources, never resolved by hand. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. The three type checks read 2 / 0, 3 / 0 (still 98) and 4 / 0, with red 6 / 6, 6 / 6 and 7 / 7. The tests are unchanged, and `qa.py` reads no errors for any viewer. Then this note and the `SHELL` bump `smp-shell-v6.86-remote-keys` → **`smp-shell-v6.87-app-types`**, as a commit `main` alone holds (§91), the name held by no commit on any remote ref. No save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`92f3825ab0b2b113`** and `/shell.js` **5,152,482** bytes before; after, they should read **`23aa60634dbc23b5`** and **5,153,015**.
+
+## §593 — Units and functions each get their own score, on the group and on a division (2026-10-23)
 Islam, on the simplification's final test: *"in case of business units they get their own score and the functions get their own score and we see both on the group"*; of how the functions count, *"stay equal"*; of divisions, *"yes same for divisions"*. Shown first as a picture on Raya's real group page.
 
 **WHY.** The group read its units alone and never its functions; a division blended its units and functions into one figure, the functions taking shares set on Setup (§391, his A at the time). One question, two answers — spec 066's finding.

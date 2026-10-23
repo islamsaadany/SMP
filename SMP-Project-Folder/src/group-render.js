@@ -2318,7 +2318,7 @@ function unitCards(keys){
   }).join("");
 }
 
-/* ── THE FUNCTIONS' TWO CARDS, ON THE GROUP AND ON A DIVISION (§592) ─────
+/* ── THE FUNCTIONS' TWO CARDS, ON THE GROUP AND ON A DIVISION (§593) ─────
    Islam: *"the functions get their own score and we see both"*, each
    function counted equally (*"stay equal"*). `lead` is how many cards the
    row above draws before its units' two, so these sit under those two —
@@ -2392,7 +2392,7 @@ function renderCompanyPerformance(coKey){
     ' holds nothing yet.</b> A unit belongs to a company on ' +
     '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
     '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §592: A DIVISION'S FUNCTIONS READ BESIDE ITS UNITS, NEVER MIXED IN
+  /* §593: A DIVISION'S FUNCTIONS READ BESIDE ITS UNITS, NEVER MIXED IN
      (reversing §391's one blended figure). The units' cards are exactly a
      units-only division's; the functions get their own row under them and
      their own section. A division of functions alone has only that row. */
@@ -2471,13 +2471,13 @@ function renderCompanyPerformance(coKey){
       '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck); }).join("") + '</div>') : "");
 }
 
-/* ── A FUNCTION'S CARD ON ITS DIVISION (§391, §592) ─────────────────────
+/* ── A FUNCTION'S CARD ON ITS DIVISION (§391, §593) ─────────────────────
    Each function in a division drawn with the card a unit wears, in the
-   division's own Functions section. Since §592 it carries no share: the
+   division's own Functions section. Since §593 it carries no share: the
    functions count equally and read beside the units, never mixed in. */
 function fnCompanyCard(fk, ck){
   var f = FUNCTIONS[fk], sc = fnMemberScores(fk);
-  /* §592: counted equally, so there is no share to state. */
+  /* §593: counted equally, so there is no share to state. */
   var sub = L1("fnword");
   var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
   if (fnPlansInPillars(f)) {
@@ -2788,7 +2788,7 @@ function whereNext(keys){
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' +
-      /* §592: the functions' own row, under the units' two cards. Only where
+      /* §593: the functions' own row, under the units' two cards. Only where
          the group HAS units — "in case of business units". */
       (buExists() ? fnReadingCards(boardFunctionKeys(), "", 1 + (topPlanCard() ? 1 : 0)) : "") +
       (buExists() ? whereNext(UNIT_KEYS) + whereNextFns(boardFunctionKeys()) : "")) });

@@ -345,7 +345,7 @@ with sync_playwright() as p:
         ck("pressing a division opens its own page", safe(pg, "()=>current") == "co:" + DIV, safe(pg, "()=>current"))
         ck("…its functions beside the switch", n3.get("fns") == mine, [n3.get("fns"), mine])
         ck("…and its segment is marked as where you are", [x["here"] for x in (n3.get("segs") or [])] == [True, False], n3.get("segs"))
-        # REWRITTEN TO THE NEW RULE (218, 592): a division's functions read on
+        # REWRITTEN TO THE NEW RULE (218, 593): a division's functions read on
         # their own, each counted equally, never blended with its units.
         v = pg.evaluate("""(ck)=>({fns:document.querySelectorAll('#panel .gname [data-go^="fn:"], #panel .gauges [data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
                   fnPerf:fnsReading(companyFnKeys(ck)).perf, mine:(function(){ var a=companyFnKeys(ck).map(k=>fnMemberScores(k).perf).filter(v=>v!=null); return a.length? Math.round(a.reduce((x,y)=>x+y,0)/a.length): null; })()})""", DIV)

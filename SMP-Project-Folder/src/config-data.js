@@ -12146,7 +12146,7 @@ function fnMemberScores(fk){
   if (!h) return { perf:null, exec:null };
   return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
-/* ── THE FUNCTIONS' OWN READING, BESIDE THE UNITS' (§592) ─────────────────
+/* ── THE FUNCTIONS' OWN READING, BESIDE THE UNITS' (§593) ─────────────────
    Islam: *"in case of business units they get their own score and the
    functions get their own score and we see both on the group"* — and of how
    the functions count, *"stay equal"*; of the divisions, *"yes same for
@@ -12183,7 +12183,7 @@ function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
 /* §515.2 (P3): a division is the weighted average of its units' own
    execution figures — the group's rule, over a smaller list. Its functions
-   read beside it (§592). */
+   read beside it (§593). */
 function companyRatio(ck){ return weightedOver(companyUnitKeys(ck), unitRatio); }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately

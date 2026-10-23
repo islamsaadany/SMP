@@ -323,14 +323,23 @@ with sync_playwright() as p:
       if(!t) return {err:'no table'};
       var r=t.querySelector('tbody tr');
       var pair=r.querySelector('.pair');
+      var due=r.querySelector('.pdue');
+      var tt=UNITS.mobile.items[0].tactics[0], bp=benchBeside(outcomeOf(tt), tacticShare(tt));
+      var tmp=document.createElement('span'); tmp.innerHTML=bp?figHtml(bp):'';
       return {outcome:r.children[2].textContent.trim(),
               pair:pair?pair.textContent.replace(/\\s+/g,' ').trim():null,
+              due:due?due.textContent.replace(/\\s+/g,' ').trim():null,
+              wantDue:bp?('due '+tmp.textContent.replace(/\\s+/g,' ').trim()):null,
               name:r.children[1].textContent.trim().slice(0,30),
               boldName:!!r.children[1].querySelector('b.tacname')};
       }catch(e){ return {err:String(e)}; } }""")
     ck("the outcome is on the line", row.get("outcome")=="Stores opened", row)
-    ck("the figure is shown against the outcome's own benchmark",
-       row.get("pair") and "8#" in row["pair"] and "/" in row["pair"], row)
+    # §572 moved the benchmark from beside the figure ("8# / 6#") to a named
+    # second line under it ("due 6#"), Islam's Option B. Rewritten to that,
+    # never loosened (§218): the figure is the outcome's own, and the line
+    # under it is the outcome's own benchmark, read by the page's reader.
+    ck("the figure is shown against the outcome's own benchmark, on its due line (§572)",
+       row.get("pair") == "8#" and row.get("wantDue") and row.get("due") == row.get("wantDue"), row)
     ck("the tactic's name is bold, so the description reads apart", row.get("boldName"), row)
     ck("no page error", not errs, errs[:2])
     pg.close()

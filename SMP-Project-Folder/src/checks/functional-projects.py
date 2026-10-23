@@ -239,12 +239,20 @@ def main():
         # another side is lit: the destinations are drawn one side at a time,
         # so asking for the button with Functions showing answers "not there"
         # on a build that draws it perfectly (§51.11's shape, in a probe).
-        pg.evaluate("()=>{const b=document.querySelector('#units [data-fold=\"caps\"]');"
-                    " if (b) b.click();}")
-        pg.wait_for_timeout(260)
-        dest = ev(pg, "(id)=>!!document.querySelector('#units [data-u=\"cap:'+id+'\"]')",
+        # §544.13 REWROTE WHERE IT IS REACHED, never loosened (§218): a
+        # capability is the company's and is reached from the company's plan,
+        # so the row has NO capabilities side — but the `cap:<id>` destination
+        # stays for the clients that still hold records. So both ends: no side
+        # on the row, and the destination still opens on the box's own
+        # projects, the ones that left the function.
+        side = ev(pg, "()=>!!document.querySelector('#units [data-fold=\"caps\"]')")
+        ok(side is False, "…there is no capabilities side on the row (§544.13)", side)
+        dest = ev(pg, """(id)=>{ current='cap:'+id; currentSub='fnperf'; paint();
+            return { at: TARGET, rail: [...document.querySelectorAll('.rail [data-rail]')].map(b=>b.dataset.rail) }; }""",
                   MADE[0] if MADE else "")
-        ok(dest is True, "…and is reachable as a destination of its own", dest)
+        ok(isinstance(dest, dict) and dest.get("at") == "cap:" + (MADE[0] if MADE else "") and
+           bool(BOXED) and dest.get("rail") == BOXED,
+           "…and is reachable as a destination of its own, drawing the box's own projects", [dest, BOXED])
         go_fn(pg, "finance")
 
         codes_before = start.get("finCodes")

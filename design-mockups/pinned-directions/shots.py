@@ -1,0 +1,104 @@
+# Mockup shots: the direction strip stays in view on a narrow window.
+# Drives the REAL built platform and adds the proposal's CSS to the live page.
+# Not a check; lives beside the mockup it makes.
+import pathlib
+from playwright.sync_api import sync_playwright
+FILE = pathlib.Path("/home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html")
+OUT = pathlib.Path(__file__).parent / "shots"
+INIT = "try{sessionStorage.setItem('smp.welcome.done','1');sessionStorage.setItem('smp.welcome.seen','1');sessionStorage.setItem('smp.tour.later','1');localStorage.setItem('smp.tour.never','1')}catch(e){}"
+
+# The proposal. Only below 1200px, where the rail already goes across.
+PROPOSAL = r"""
+@media (max-width:1200px){
+  :root { --strip-h:42px; }
+  /* 1. The strip pins under the chrome, exactly where it sits at rest. */
+  .split:not(.setupsplit) > .rail:not(.setuprail) {
+    position:sticky; top:calc(var(--chrome-h,118px) + var(--rail-gap,22px)); z-index:5;
+    overflow:visible; display:flex; }
+  .split:not(.setupsplit) > .rail:not(.setuprail)::before {
+    display:block; left:-1px; right:-1px; height:calc(var(--rail-gap,22px) + 1px); }
+  /* the four rounded corners take the page's ground, as the band's do */
+  /* 2. One line, every direction on it; the names give way, never the codes.
+     A grid inside each item so its smallest size is the code alone and its
+     natural size is code and whole name: the strip shares the room in
+     proportion and no direction is pushed off the end. */
+  .split:not(.setupsplit) > .rail:not(.setuprail) { min-width:0; }
+  .rail:not(.setuprail) .sortable { flex:1 1 auto; min-width:0; overflow-x:auto; }
+  .rail:not(.setuprail) button.ritem { display:grid; grid-template-columns:auto minmax(0,max-content);
+    column-gap:8px; align-items:center; flex:1 1 auto; width:auto; height:var(--strip-h); padding:0 14px; }
+  .rail:not(.setuprail) button.ritem.on { flex-shrink:.3; }
+  .rail:not(.setuprail) .ritem .rcode { grid-column:auto; margin:0; }
+  .rail:not(.setuprail) .ritem b { min-width:0; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  /* 3. The open direction's band pins right under the strip. */
+  .split:not(.setupsplit) > .pane > .pband {
+    top:calc(var(--chrome-h,118px) + var(--rail-gap,22px) + var(--strip-h) + 2px
+             + var(--split-gap,16px) + 1px); }
+  .split:not(.setupsplit) > .pane > .pband::before { height:calc(var(--split-gap,16px) + 2px); }
+}
+"""
+# Corner fill for the pinned strip, drawn the way the band's is (radial tiles).
+CORNERS = r"""
+@media (max-width:1200px){
+  .split:not(.setupsplit) > .rail:not(.setuprail).pinnedx::after { content:""; position:absolute; pointer-events:none; left:-1px; right:-1px; top:-1px; bottom:-1px; z-index:1;
+    background:
+      radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px), var(--ground) var(--r)) left top / calc(var(--r) + 1px) var(--r) no-repeat,
+      radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px), var(--ground) var(--r)) right top / calc(var(--r) + 1px) var(--r) no-repeat,
+      radial-gradient(circle at 100% 0, transparent calc(var(--r) - .5px), var(--ground) var(--r)) left bottom / calc(var(--r) + 1px) var(--r) no-repeat,
+      radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px), var(--ground) var(--r)) right bottom / calc(var(--r) + 1px) var(--r) no-repeat; }
+}
+"""
+
+def plan(b, w, h=760):
+    pg = b.new_page(viewport={"width": w, "height": h}, device_scale_factor=2)
+    pg.add_init_script(INIT)
+    pg.goto("file://" + str(FILE)); pg.wait_for_timeout(1500)
+    pg.click('[role=tab][data-u="mobile"]'); pg.wait_for_timeout(600)
+    pg.click('[role=tab][data-sub2="plan"]'); pg.wait_for_timeout(700)
+    return pg
+
+def propose(pg):
+    pg.add_style_tag(content=PROPOSAL + CORNERS); pg.wait_for_timeout(300)
+
+def scroll(pg, y):
+    pg.mouse.wheel(0, y); pg.wait_for_timeout(700)
+    pg.evaluate("""() => { const r=document.querySelector('.split:not(.setupsplit) > .rail');
+      if (r) r.classList.toggle('pinnedx', window.scrollY > 0); }""")
+    pg.wait_for_timeout(150)
+
+def measure(pg):
+    return pg.evaluate("""() => { const r=document.querySelector('.split > .rail'), b=document.querySelector('.pane > .pband');
+      const s=r.querySelector('.sortable');
+      return {rail:Math.round(r.getBoundingClientRect().top*10)/10, band:Math.round(b.getBoundingClientRect().top*10)/10,
+              railH:Math.round(r.getBoundingClientRect().height*10)/10,
+              overflow:s.scrollWidth - s.clientWidth,
+              names:[...r.querySelectorAll('.ritem b')].map(x=>x.scrollWidth>x.clientWidth?'cut':'whole')} }""")
+
+with sync_playwright() as p:
+    b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium-1243/chrome-linux64/chrome")
+    # Today, 1100 wide: top of the page, then scrolled.
+    pg = plan(b, 1100)
+    pg.screenshot(path=str(OUT / "today-1100-top.png"))
+    scroll(pg, 700); print("today 1100 scrolled", measure(pg))
+    pg.screenshot(path=str(OUT / "today-1100-scrolled.png"))
+    pg.close()
+    # Today, 900 wide: the last direction is cut off the end.
+    pg = plan(b, 900); print("today 900 top", measure(pg))
+    pg.screenshot(path=str(OUT / "today-900-top.png"), clip={"x":0,"y":0,"width":900,"height":360})
+    pg.close()
+    # Proposed: at rest and scrolled, at three widths.
+    for w in (1100, 900, 760):
+        pg = plan(b, w); propose(pg)
+        print("proposed", w, "top", measure(pg))
+        pg.screenshot(path=str(OUT / f"proposed-{w}-top.png"))
+        scroll(pg, 300); print("proposed", w, "scroll300", measure(pg))
+        scroll(pg, 400); print("proposed", w, "scroll700", measure(pg))
+        pg.screenshot(path=str(OUT / f"proposed-{w}-scrolled.png"))
+        pg.close()
+    # Proposed, 1100: MB04 open, to show the open one keeps its name longest.
+    pg = plan(b, 760); propose(pg)
+    pg.click('.rail .ritem[data-oi="3"]'); pg.wait_for_timeout(600)
+    scroll(pg, 700); print("proposed 760 MB04 scrolled", measure(pg))
+    pg.screenshot(path=str(OUT / "proposed-760-mb04-scrolled.png"))
+    pg.close()
+    b.close()

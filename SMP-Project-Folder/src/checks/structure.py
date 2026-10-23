@@ -282,8 +282,9 @@ with sync_playwright() as p:
     ck("each layer draws three sections, the top two (its plan is the Directions card, §465)",
        each(secn, "") == ["2,1", "3", "3", "3"], each(secn, ""))
     comp = "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).sort().join(',')"
-    ck("…and How we compete is a section on the top and units cards and no other",
-       each(comp, "") == ["top", "", "bu", ""], each(comp, ""))
+    # §608: and on the functions' card, where it is now a setting (off until ticked).
+    ck("…and How we compete is a section on the top, units and functions cards and no other",
+       each(comp, "") == ["top", "", "bu", "fn"], each(comp, ""))
     lvl("top")
     # §428: the fifth card is the capabilities', and its plan names two ways, never three.
     ck("the capabilities card names pillars and projects only",

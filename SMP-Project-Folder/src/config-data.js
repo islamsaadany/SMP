@@ -5249,15 +5249,10 @@ function canReport(unitKey){
     if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
-    return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer()) ||
-           /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer()) ||
-           /* §520.6: and a capability's owner or custodian enters their own
-              capability's figures here, exactly as a direction's owner does —
-              the capability's rows ask `cap:<id>` for themselves, so this
-              opens the page and nothing else. */
-           SMPRules.ownsTopCapability(world(), viewer());
+    /* §595: whoever reports all of it, or holds a seat on any part of it —
+       a direction, a capability, or (planning in projects) a project. The
+       one rule the server asks; which rows they type on is each part's. */
+    return SMPRules.mayReportTopOrPart(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -9423,7 +9418,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){

@@ -181,7 +181,10 @@ try {
     (seatPage.html.match(/class="(?:noplan|pc)">[^<]*/g) || []).join(" | "));
   check("...and its 'waiting on somebody' is a dash rather than a nought (§35)",
     /class="n clear">\u2014</.test(seatPage.html), (seatPage.html.match(/class="n clear">[^<]*/g) || []).join(" | "));
-  check("the strip counts the projects it drew", /class="v">2</.test(seatPage.html));
+  /* REWRITTEN, NEVER LOOSENED (§218): the count moved from a white box into
+     the panel (§601), so it is asked for there, number AND name together. */
+  check("the strip counts the projects it drew", /<div class="tile"[^>]*><b>2<\/b><span>Projects<\/span>/.test(seatPage.html),
+    (seatPage.html.match(/<div class="tile"[^>]*><b>[^<]*<\/b><span>[^<]*/g) || []).join(" | "));
 
   /* ══ §4 · a project's address ══════════════════════════════════════ */
   section("§4 · the address, and what it may not be used to discover");
@@ -734,8 +737,12 @@ try {
   const unread = await get("not-a-tenant-id", [], SEAT);
   check("a list that could not be read says so, and does NOT say there are no projects",
     unread.status === 200 && /could not be read/.test(unread.html) && !/No projects yet/.test(unread.html));
+  /* REWRITTEN, NEVER LOOSENED (§218): the counts are the panel's now (§601),
+     and all three are asked for — the white boxes' one-of-three would pass a
+     panel that dashed one count and wrote nought in the other two. */
   check("...and its counts read a dash rather than a nought",
-    /class="v">\u2014</.test(unread.html), (unread.html.match(/class="v">[^<]*/g) || []).join(" | "));
+    (unread.html.match(/<div class="tile"[^>]*><b>\u2014<\/b>/g) || []).length === 3 && !/<div class="tile"[^>]*><b>0<\/b>/.test(unread.html),
+    (unread.html.match(/<div class="tile"[^>]*><b>[^<]*/g) || []).join(" | "));
 
   /* ══ §11 · WRITING THE PLAN (§15, §443) ════════════════════════════ */
   /* A PROJECT OF ITS OWN, so nothing here moves what §8–§10 measured

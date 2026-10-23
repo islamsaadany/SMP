@@ -49,7 +49,7 @@
     "check:modules": "node checks/modules.mjs",
     "check:modules:red": "for b in any-module open-address static-hello trail-for-staff no-server wrong-server module-own-colour gate-open mark-always; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:look": "node --experimental-strip-types checks/module-look.mjs",
-    "check:look:red": "SMP_BREAK=bar-ink node --experimental-strip-types checks/module-look.mjs >/dev/null 2>&1 && { echo \"NOT RED: bar-ink\"; exit 1; }; echo \"red: bar-ink\"",
+    "check:look:red": "for b in bar-ink ledger-inherit ledger-fixed-bar ledger-phone-wide next-look-big; do SMP_BREAK=$b node --experimental-strip-types checks/module-look.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:store": "node --experimental-strip-types checks/store-seam.mjs",
     "check:raci": "node --experimental-strip-types checks/raci-autofill.mjs",
     "check:raci:red": "node --experimental-strip-types checks/raci-autofill.mjs --red",

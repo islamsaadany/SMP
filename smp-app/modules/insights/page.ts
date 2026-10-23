@@ -25,6 +25,7 @@ import { categoriesFor } from "../../lib/library-viewer.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopViewer } from "../../lib/topbar.ts";
 import { barFor } from "../../lib/branding.ts";
+import { ledgerCss, mastHtml, LENS } from "../../lib/ledger.ts";
 import type { Rules } from "../../lib/shared-types.ts";
 
 /* THE MONTH IS THE PRODUCT'S OWN WORD, not the browser's (§53.5). The first
@@ -45,7 +46,6 @@ const esc = (s: unknown) =>
    recorded and left. `barFor` is that note done: one rule for what counts as a
    colour, one read of one column, and a database that will not answer gives
    the shipped navy rather than no page at all. */
-const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? one : many);
 
 /* A DATE A PERSON READS. Built from the STRING's own parts, so no timezone
    can move the day (lib/library.ts dayOut has the same care, one layer down),
@@ -67,42 +67,35 @@ export function factLine(it: Item): string {
   const bits: string[] = [];
   if (it.categories.length) bits.push("<b>" + it.categories.map(esc).join(" &middot; ") + "</b>");
   const day = readableDay(it.reportDate);
-  if (day) bits.push(esc(day));
-  bits.push("v" + it.version);
-  if (it.sizeLabel) bits.push(esc(it.sizeLabel));
-  return bits.join(" &middot; ");
+  if (day) bits.push("<span>" + esc(day) + "</span>");
+  bits.push("<span>v" + it.version + "</span>");
+  if (it.sizeLabel) bits.push("<span>" + esc(it.sizeLabel) + "</span>");
+  /* THE SEPARATOR IS ITS OWN ELEMENT (§601) so the module's page can lay the
+     parts out as the Tracker's row does — a tag, then the facts, spaced — and
+     drop the dots; the platform's tab draws it exactly as it always read. */
+  return bits.join('<span class="sep"> &middot; </span>');
 }
 
 
+/* THE LEDGER LOOK (§601), from design-mockups/modules-look/2026-10-23_one-look.html:
+   the panel, the search line and the shared rules are lib/ledger.ts; what is
+   here is the report's own row. The row's markup is the one the platform's
+   tab draws too (libraryRows, §376), so only how it is laid out is this
+   page's: the category is a tag, the separators make way for space, and the
+   list opens under the Tracker's heavy rule. */
 const CSS = `
-*{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--gold:#9C5D08}
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--gold:#F5A623}}
-body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-.pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
-h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
-.cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
-.cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 inherit;padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
-.cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
-.cats a:hover,.cats a:focus-visible{color:var(--ink);outline:none}
-.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
-.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
-.tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
-.go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 inherit;cursor:pointer;flex:none}
-.cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
-.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
-.item{display:flex;gap:16px;align-items:flex-start;padding:14px 2px;border-bottom:1px solid var(--line)}
-.item .body{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:4px}
-.item h3{margin:0;font-size:15.5px;font-weight:600;line-height:1.35}
-.item p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-3)}
-.item .facts{font:400 12px/1.5 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);overflow-wrap:anywhere}
-.item .facts b{font-weight:600;color:var(--ink)}
-.dl{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 13px;font:600 13px/1.5 inherit;text-decoration:none;display:inline-block}
+.list{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.item{display:flex;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line-2)}
+.item .body{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:3px}
+.item h3{margin:0;font:600 15px/1.35 var(--font)}
+.item p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.item .facts{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-top:3px;font:400 13px/1.4 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.item .facts .sep{display:none}
+.item .facts b{font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px}
+.dl{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font:600 13px/1.5 var(--font);text-decoration:none}
 .dl:hover,.dl:focus-visible{border-color:var(--gold);outline:none}
-.nofile{flex:none;font-size:12.5px;color:var(--ink-3)}
-.none{padding:40px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
-.none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
-@media (max-width:560px){.item{flex-direction:column;gap:9px}}
+.nofile{flex:none;font-size:13px;color:var(--ink-3)}
+@media (max-width:560px){.item{flex-direction:column;align-items:flex-start;gap:8px}}
 `;
 
 /* ── THE ROWS, AND THE ROWS ALONE (§376) ──────────────────────────────
@@ -263,14 +256,17 @@ export async function insightsDocument(
      is something to filter by. A library of five reports under no category at
      all has a search box and no filters, and that is the honest pair. */
   const anyReports = items.length > 0 || !!q || !!category;
+  /* THE COUNT IS THE PANEL'S NOW (§601), the number it always was — the
+     reports listed — said the way the Tracker says its own. */
   const tools = !anyReports ? "" :
     '<div class="tools">' +
-    '<form method="get" action="' + esc(here) + '" role="search">' +
+    '<form class="find" method="get" action="' + esc(here) + '" role="search">' + LENS +
     (category ? '<input type="hidden" name="category" value="' + esc(category) + '">' : "") +
-    '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search reports&hellip;" aria-label="Search reports">' +
+    '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search reports" aria-label="Search reports">' +
     '<button class="go" type="submit">Search</button>' +
-    "</form>" +
-    '<span class="cnt">' + esc(plural(items.length, "report", "reports")) + "</span></div>";
+    "</form></div>";
+  const mast = mastHtml({ esc, eyebrow: named, title: MODULE_DEF.insights.label, views: cats,
+    tiles: anyReports ? [{ n: items.length, label: items.length === 1 ? "Report" : "Reports" }] : [] });
 
   const list = libraryRows(slug, items, read, q, category, tenantName);
 
@@ -279,9 +275,8 @@ export async function insightsDocument(
     "<title>" + esc(named) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + "</style>\n</head>\n<body>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CSS) + "</style>\n</head>\n<body>\n" +
     topBarHtml({ slug, tenantName: named, module: "insights", have, consultant: !!top.consultant, viewer: top.viewer }) + "\n" +
-    '<main class="pg">\n<h2 class="pt">' + esc(MODULE_DEF.insights.label) + "</h2>\n" +
-    cats + tools + list +
+    '<main class="pg">\n' + mast + "\n" + tools + list +
     "\n</main>\n</body>\n</html>\n";
 }

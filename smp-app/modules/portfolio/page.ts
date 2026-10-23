@@ -20,7 +20,8 @@
    list cannot disagree with the pages behind it (§5.2). */
 import { barFor } from "../../lib/branding.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
-import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG } from "../../lib/topbar.ts";
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss } from "../../lib/topbar.ts";
+import { ledgerCss, mastHtml, sectionHead, type Tile } from "../../lib/ledger.ts";
 import {
   type Row, type Cadence, ROLE_WORD, type Role,
   rollUp, overall, owed, waitingSignOff, overdue, nobodyOn, behind, nextCheckpoint,
@@ -280,10 +281,45 @@ function whenCell(s: Seen, today: string): string {
     '<div class="s">' + esc(awayIn(when, today)) + " · " + esc(how) + "</div>";
 }
 
-function cell(k: string, v: string | number, lab: string, sub: string): string {
-  return '<div class="cell ' + k + '"><p class="k">' + esc(lab) + "</p>" +
-    '<div class="v">' + esc(String(v)) + '</div><div class="w">' + esc(sub) + "</div></div>";
+
+/* ══ THE LANDING IN THE LEDGER LOOK (§601) ═════════════════════════════
+   design-mockups/modules-look/2026-10-23_one-look.html. The panel, the
+   numbered sections and the amber button are lib/ledger.ts's, laid AFTER
+   this module's own stylesheet so its tokens and its few shared names win
+   on this one page; the charter, the plan, Progress and Analytics keep the
+   module's own look, which nobody has been asked about.
+   The tables stay tables — every cell is the function the checks read —
+   and lose their navy heading band, their zebra and their box: quiet
+   column names under the section's heavy rule, as the Tracker's rows sit.
+   The Next look heading drew at 12.5px beside its 10px neighbours because
+   the column's own rule reached its heading cell too; the heading rule here
+   is more particular, so it no longer does. On a phone each row folds:
+   the project across the top, its three facts under it, each named. */
+const LANDING_CSS = `
+.ldg .mast .strip{margin:0}
+.ldg .box{background:none;border:0;border-radius:0;overflow:visible;margin:0}
+.ldg table{width:100%;border-collapse:collapse}
+.ldg thead th{background:none;color:var(--ink-3);font:600 10.5px/1.4 var(--font);letter-spacing:.1em;text-transform:uppercase;padding:9px 12px 7px 0;border-bottom:1px solid var(--line-2);white-space:nowrap}
+.ldg tbody td{border-top:0;border-bottom:1px solid var(--line-2);padding:11px 12px 11px 0;font-size:13.5px}
+.ldg tbody tr:nth-child(even) td{background:none}
+.ldg tbody tr:hover td{background:var(--surface-2)}
+.ldg .pname{font:600 15px/1.35 var(--font)}
+.ldg .pbrief{font-size:13px;margin-top:2px}
+.ldg .noplan{font-size:13px}
+.ldg .figs .word{font:400 12px/1.5 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.ldg .figs .word::before{content:none}
+.ldg .when .none{padding:0;font-size:13px;max-width:none}
+.ldg .empty{text-align:left;padding:16px 2px 4px;font-size:14px}
+@media (max-width:560px){
+  .ldg thead{display:none}
+  .ldg table,.ldg tbody,.ldg td{display:block;width:auto}
+  .ldg tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;padding:11px 0;border-bottom:1px solid var(--line-2)}
+  .ldg tbody td{border:0;padding:0;min-width:0}
+  .ldg tbody td:first-child{grid-column:1/-1}
+  .ldg tbody tr:hover td{background:none}
+  .ldg td[data-l]::before{content:attr(data-l);display:block;font:600 10px/1.4 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
 }
+`;
 
 export type LandingArgs = {
   consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
@@ -300,27 +336,28 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
   const seen = a.seen || [];
   const beh = seen.filter((s) => s.behind);
   const ow = seen.reduce((n, s) => n + s.owed.length, 0);
-  /* A COUNT THAT WAS NOT READ IS A DASH, never a nought (§35). */
-  const strip = unread
-    ? cell("", "\u2014", "Projects", "Not read just now") +
-      cell("", "\u2014", "Behind", "Not read just now") +
-      cell("", "\u2014", "Waiting on somebody", "Not read just now")
-    : cell("", seen.length, "Projects",
-      a.office ? "Every project on this client" : "The ones that name you") +
-    cell("late", beh.length, "Behind",
-      beh.length ? beh.map((s) => s.project.name).join(", ") : "Nothing is past a date") +
-    cell("owed", ow, "Waiting on somebody",
-      ow ? seen.filter((s) => s.owed.length).map((s) => s.project.name).join(", ")
-         : "Nothing is owed across these");
+  /* A COUNT THAT WAS NOT READ IS A DASH, never a nought (§35). THE THREE
+     COUNTS ARE THE PANEL'S (§601), the Tracker's own; the line each white
+     box carried under its number rides on the count as its title, which
+     Islam was asked about and the drawing shows. */
+  const tiles: Tile[] = unread
+    ? [{ n: "\u2014", label: "Projects", title: "Not read just now" },
+       { n: "\u2014", label: "Behind", title: "Not read just now" },
+       { n: "\u2014", label: "Waiting on somebody", title: "Not read just now" }]
+    : [{ n: seen.length, label: "Projects", title: a.office ? "Every project on this client" : "The ones that name you" },
+       { n: beh.length, label: "Behind", late: beh.length > 0,
+         title: beh.length ? beh.map((s) => s.project.name).join(", ") : "Nothing is past a date" },
+       { n: ow, label: "Waiting on somebody",
+         title: ow ? seen.filter((s) => s.owed.length).map((s) => s.project.name).join(", ") : "Nothing is owed across these" }];
 
   const rows = seen.map((s) =>
     '<tr' + (s.mine ? ' class="mine"' : "") + ">" +
     '<td><div class="pname"><a href="' + esc(clientHref(a.slug, "portfolio", s.project.id)) + '">' +
       esc(s.project.name) + "</a></div>" +
       (s.project.brief ? '<div class="pbrief">' + esc(s.project.brief) + "</div>" : "") + "</td>" +
-    '<td class="far">' + farCell(s) + "</td>" +
-    '<td class="owe">' + oweCell(s) + "</td>" +
-    '<td class="when">' + whenCell(s, a.today) + "</td></tr>").join("");
+    '<td class="far" data-l="How far along">' + farCell(s) + "</td>" +
+    '<td class="owe" data-l="Waiting on">' + oweCell(s) + "</td>" +
+    '<td class="when" data-l="Next look">' + whenCell(s, a.today) + "</td></tr>").join("");
 
   /* THE EMPTY LIST IS AN ANSWER, never a blank table (§45.2), and it says
      what to do next only to somebody who may do it (§61). */
@@ -339,18 +376,19 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
           : "No project names you yet. Somebody in the office adds you to one.") +
       "</p></div>";
 
-  const body = '<main class="wrap">\n' +
-    '<div class="phead"><div><p class="crumb"><a href="' + esc(clientHref(a.slug, null, "")) + '">' +
-      esc(a.tenantName) + "</a> &middot; Portfolio</p><h1>Projects</h1></div>" +
-    (a.mayStart ? '<button class="start" id="start">Start a project</button>' : "") + "</div>\n" +
-    '<div class="strip">' + strip + "</div>\n" +
-    '<p class="sect">The projects</p>\n' + list +
+  const body = '<main class="pg ldg">\n' +
+    mastHtml({ esc, eyebrow: a.tenantName + " \u00b7 Portfolio", title: "Projects", tiles }) + "\n" +
+    (a.mayStart ? '<div class="tools"><span class="sp"></span><button class="btn amber" id="start" type="button">Start a project</button></div>\n' : "") +
+    '<section class="sec">' + sectionHead(esc, 1, "The projects", unread ? "" : String(seen.length)) + list + "</section>\n" +
     (unread ? "" : commitmentsBlock(seen, a.today)) +
     (a.mayStart ? startDialog() : "") +
     "</main>\n";
 
   return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
-    api: clientHref(a.slug, "portfolio", "api"), body });
+    api: clientHref(a.slug, "portfolio", "api"), body,
+    /* `next-look-big` puts back the heading that drew larger than its
+       neighbours, which checks/module-look.mjs must see (§94.5). */
+    css: themedCss(ledgerCss(bar)) + LANDING_CSS + (brk() === "next-look-big" ? ".ldg thead th.when{font-size:12.5px}" : "") });
 }
 
 /* ── WHAT IS OWED NEXT, ACROSS EVERY PROJECT (§9.13b) ──────────────────
@@ -396,24 +434,24 @@ function commitmentsBlock(seen: Seen[], today: string): string {
 
   if (!list.length) {
     const next = all.length ? all[0] : null;
-    return '<p class="sect">What is owed next</p><div class="box"><p class="empty">' +
+    return '<section class="sec">' + sectionHead(esc, 2, "What is owed next") + '<div class="box"><p class="empty">' +
       (next && next.r.end
         ? "Nothing is owed in the next " + plural(SOON, "day") + ". The next is <b>" +
           esc(String(next.r.name)) + "</b> on " + esc(stamp(String(next.r.end))) + "."
         : "No commitments are set on these projects yet.") +
-      "</p></div>";
+      "</p></div></section>";
   }
   const rows = list.map((c) =>
     '<tr' + (c.s.mine ? ' class="mine"' : "") + ">" +
     '<td class="cdue' + (c.r.end && daysTo(c.r.end, today) < 0 ? " past" : "") + '">' +
       esc(c.r.end ? stamp(c.r.end) : "—") + "</td>" +
-    '<td><div class="cname">' + esc(String(c.r.name)) + "</div>" +
+    '<td data-l="Commitment"><div class="cname">' + esc(String(c.r.name)) + "</div>" +
       '<div class="cproj">' + esc(c.s.project.name) + "</div></td>" +
-    '<td class="cwhat"><span class="cb ' + state(c.r) + '">' + esc(word(c.r)) + "</span></td></tr>").join("");
-  return '<p class="sect">What is owed next <span>&mdash; late, waiting on a sign-off, ' +
-    "or due inside " + plural(SOON, "day") + "</span></p>" +
+    '<td class="cwhat" data-l="In the way"><span class="cb ' + state(c.r) + '">' + esc(word(c.r)) + "</span></td></tr>").join("");
+  return '<section class="sec">' + sectionHead(esc, 2, "What is owed next",
+    "Late, waiting on a sign-off, or due inside " + plural(SOON, "day")) +
     '<div class="box"><table><thead><tr><th class="cdue">Due</th><th>Commitment</th>' +
-    '<th class="cwhat">What is in the way</th></tr></thead><tbody>' + rows + "</tbody></table></div>";
+    '<th class="cwhat">What is in the way</th></tr></thead><tbody>' + rows + "</tbody></table></div></section>";
 }
 
 function startDialog(): string {

@@ -37,7 +37,8 @@
    rather than asserted about, so the cost stays visible in every run.
 
      DATABASE_URL_UNPOOLED=postgres://owner@… SMP_CHROME=… npm run check:look
-     SMP_BREAK=bar-ink npm run check:look   # must go red, on all five modules  */
+     SMP_BREAK=bar-ink npm run check:look   # must go red, on all five modules
+     npm run check:look:red                 # that, and §601's four ledger breaks  */
 import pg from "pg";
 import { createServer } from "node:http";
 import { readFileSync, existsSync } from "node:fs";
@@ -482,6 +483,91 @@ try {
 
       check("...and the page raised nothing", errs.length === 0, errs.slice(0, 2).join(" | "));
       check("...and every file it asks for answers", missing.length === 0, missing.slice(0, 3).join(" | "));
+      await page.close();
+    }
+
+    /* ══ THE LEDGER LOOK (§601) ═══════════════════════════════════════
+       Islam: *"ok for insights, meeting notes and projects"*, from
+       design-mockups/modules-look/2026-10-23_one-look.html. What is claimed,
+       each with the break that must turn it red (§94.5):
+         · the panel wears THIS client's colour and every word on the page
+           reads — asked on a light tan, the colour that found §498's fixed
+           inks (`ledger-fixed-bar` paints the shipped navy instead);
+         · every word and every control draws in the Tracker's face, and the
+           face is LOADED rather than merely named (`ledger-inherit` puts back
+           the font line a browser drops, §356.14);
+         · on a 400px phone nothing runs past the screen and the counts sit
+           inside the panel (`ledger-phone-wide`);
+         · Portfolio's four column names are one size (`next-look-big`).
+       The panel's count is asserted to be the rows drawn, the rows non-zero
+       first, so a page drawing nothing cannot agree with itself (§113.8). */
+    section("§ the ledger look — Insights, Meeting Notes and Portfolio's projects (§601)");
+    const TAN = "#C8A27A";
+    const hadOrg = await owner("SELECT 1 FROM org WHERE tenant_id = $1", [A]);
+    if (hadOrg.length) await owner("UPDATE org SET extra = jsonb_set(extra, '{branding}', jsonb_build_object('bar', $2::text)) WHERE tenant_id = $1", [A, TAN]);
+    else await owner("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Raya Trade', jsonb_build_object('branding', jsonb_build_object('bar', $2::text)))", [A, TAN]);
+    const LEDGER = [
+      { what: "Insights", url: "/x/insights", title: "Insights", rows: "main .item" },
+      { what: "Meeting Notes", url: "/x/notes", title: "Meetings", rows: "main .nrow" },
+      { what: "Portfolio's projects", url: "/x/portfolio", title: "Projects", rows: "main section.sec:first-of-type tbody tr" },
+    ];
+    const READ = `(a) => {
+      const mast = document.querySelector("main .mast");
+      const probe = document.createElement("div"); probe.style.background = a.tan; document.body.appendChild(probe);
+      const want = getComputedStyle(probe).backgroundColor; probe.remove();
+      const off = [];
+      for (const el of document.querySelectorAll("main *")) {
+        if (!el.getClientRects().length) continue;
+        const own = Array.from(el.childNodes).some((n) => n.nodeType === 3 && n.textContent.trim());
+        const ctl = el.matches("button, input, select, textarea");
+        if (!own && !ctl) continue;
+        const cs = getComputedStyle(el);
+        const fam = cs.fontFamily.split(",")[0].replace(/["']/g, "").trim();
+        if (fam !== "Source Sans 3" || (ctl && cs.fontSize === "13.3333px"))
+          off.push(el.tagName.toLowerCase() + "." + String(el.className).split(" ")[0] + " " + fam + " " + cs.fontSize);
+      }
+      const th = Array.from(document.querySelectorAll("main section.sec:first-of-type thead th")).map((t) => getComputedStyle(t).fontSize);
+      return { bg: mast ? getComputedStyle(mast).backgroundColor : null, want,
+        title: mast && mast.querySelector("h2.pt") ? mast.querySelector("h2.pt").textContent.trim() : null,
+        tile: mast && mast.querySelector(".tile b") ? mast.querySelector(".tile b").textContent.trim() : null,
+        rows: document.querySelectorAll(a.rows).length, off, th,
+        loaded: Array.from(document.fonts).some((f) => f.family.replace(/["']/g, "") === "Source Sans 3" && f.status === "loaded") };
+    }`;
+    const PHONE = `() => {
+      const mast = document.querySelector("main .mast");
+      const mr = mast ? mast.getBoundingClientRect() : null;
+      const outside = !mr ? -1 : Array.from(mast.querySelectorAll(".tile")).filter((t) => {
+        const r = t.getBoundingClientRect(); return r.right > mr.right + 0.5 || r.left < mr.left - 0.5; }).length;
+      return { over: document.documentElement.scrollWidth - document.documentElement.clientWidth, outside };
+    }`;
+    for (const L of LEDGER) {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+      const r = await probe(L.what + ": the ledger look read", async () => {
+        await page.goto(base + L.url, { waitUntil: "load" });
+        await page.evaluate(call("() => document.fonts.ready.then(() => 1)"));
+        await page.waitForTimeout(200);
+        return await page.evaluate(call(READ, { tan: TAN, rows: L.rows }));
+      });
+      if (r) {
+        check(L.what + ": the panel names the page and counts the rows it drew",
+          r.title === L.title && r.rows > 0 && r.tile === String(r.rows), JSON.stringify({ title: r.title, tile: r.tile, rows: r.rows }));
+        check(L.what + ": the panel wears this client's own colour", !!r.bg && r.bg === r.want, r.bg + " against " + r.want);
+        check(L.what + ": every word and control draws in the Tracker's face, and the face is loaded",
+          r.loaded && r.off.length === 0, (r.loaded ? "" : "Source Sans 3 not loaded · ") + r.off.join(" | "));
+        if (L.url === "/x/portfolio")
+          check(L.what + ": the four column names are one size", r.th.length === 4 && new Set(r.th).size === 1, r.th.join(" "));
+        const found = await probe(L.what + ": contrast on the client's colour", async () => page.evaluate(CONTRAST));
+        if (Array.isArray(found))
+          check(L.what + ": every word on it reads on a light client colour too", found.length === 0,
+            found.slice(0, 3).map((f) => f.ratio + " < " + f.need + "  " + f.sel + "  “" + String(f.text).slice(0, 30) + "”").join(" | "));
+      }
+      const ph = await probe(L.what + ": read on a phone", async () => {
+        await page.setViewportSize({ width: 400, height: 900 });
+        await page.waitForTimeout(150);
+        return await page.evaluate(call(PHONE));
+      });
+      if (ph) check(L.what + ": on a 400px phone nothing runs past the screen, and the counts sit inside the panel",
+        typeof ph.over === "number" && ph.over <= 1 && ph.outside === 0, JSON.stringify(ph));
       await page.close();
     }
 

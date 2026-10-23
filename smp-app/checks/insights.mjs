@@ -453,8 +453,11 @@ try {
     page.includes("No file yet"));
   check("the download address is this client's, this report's, and ours — never the store's",
     page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
+  /* REWRITTEN, NEVER LOOSENED (§218): the count moved into the panel
+     (§601) and is said the Tracker's way, the number over its name — so the
+     two are asked for together, as the sentence was. */
   check("the count says what is there",
-    page.includes("2 reports"));
+    /<div class="tile"><b>2<\/b><span>Reports<\/span>/.test(page), (page.match(/<div class="tile">[\s\S]{0,60}/) || [""])[0]);
   /* §385, AND IT IS A REWRITE RATHER THAN A LOOSENING (§218, §214.3). This
      asked for `CATEGORIES.every(...)` — every category the MODULE offers, on
      every page — which was true only while the row was a fixed list, and went
@@ -638,7 +641,7 @@ try {
     pgHoda.includes("FX Cost Exposure") && !pgKarim.includes("FX Cost Exposure"));
   /* A COUNT THAT DISAGREES WITH ITS OWN LIST IS A BUG REPORT WAITING TO
      HAPPEN (§108.1's shape), so it is asserted rather than assumed. */
-  const countOn = (p) => (p.match(/>(\d+) reports?</) || [])[1];
+  const countOn = (p) => (p.match(/<div class="tile"><b>(\d+)<\/b><span>Reports?</) || [])[1];
   const rowsOn = (p) => (p.match(/class="item"/g) || []).length;
   check("the count follows what that person can see, on both pages",
     Number(countOn(pgHoda)) === rowsOn(pgHoda) && Number(countOn(pgKarim)) === rowsOn(pgKarim) &&

@@ -519,7 +519,11 @@
    figures under the two readings sit right after their names. The served
    stylesheet's bytes changed, which is the whole trigger (§91). Proved held
    by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.79-stand-lines";
+/* v6.80-rules-types — §585: the shared rules carry type comments that
+   TypeScript's checker reads; nothing runs differently. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.80-rules-types";
 const ASSETS = [
   "/",
   "/index.html",

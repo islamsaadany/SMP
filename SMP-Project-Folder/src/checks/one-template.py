@@ -70,6 +70,17 @@ with sync_playwright() as p:
     pg.evaluate(MAKE); pg.wait_for_timeout(300)
     a = pg.evaluate(ANCHORS, "group")
     ck("…and a company that plans on its own, its directions and capabilities apart", not order_ok(a) and "scaps" in a, (order_ok(a), a))
+    # §587: THE SETTING SPLITS A BOX, never which kind of box it is. A unit
+    # shown apart reads its directions and capabilities as two parts, each
+    # behind its own divider, exactly as the company does; set back, one.
+    sp = pg.evaluate("""()=>{var k=Object.keys(UNITS).find(k=>!unitWayOf(UNITS[k]) && UNITS[k].items.some(p=>SMPRules.pillarIsCap(p)) && UNITS[k].items.some(p=>!SMPRules.pillarIsCap(p)));
+      if(!k) return null; var u=UNITS[k], A=t=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor(t); return [...d.querySelectorAll('.dslide')].map(s=>s.dataset.anchor||'')};
+      var one=A(k); u.pillarSplit=true; var two=A(k); delete u.pillarSplit; var back=A(k); return {k:k, one:one, two:two, back:back}}""")
+    ck("a unit with directions and capabilities exists to test the split", sp is not None)
+    if sp:
+        ck("a unit shown apart presents its directions and capabilities as two parts",
+           "scaps" in sp["two"] and "capnames" in sp["two"] and "pillarnames" in sp["two"], sp["two"][:20])
+        ck("…and set back, one list again", "scaps" not in sp["back"] and sp["back"] == sp["one"], (sp["one"][:12], sp["back"][:12]))
     ck("no page errors", not errs, errs[:3])
     b.close()
 

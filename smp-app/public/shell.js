@@ -54054,6 +54054,7 @@ var ROOM_MODE = (function(){
   try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
 })();
 var ROOM = null;
+var ROOM_WIN = false;   /* §582.1: this room is a window to share, not a projector */
 /* Sent only to the platform's own address; a file opened from disk has none
    a browser will match ("file://" is not an origin), and there the two
    windows know each other by `e.source` alone, which is checked anyway. */
@@ -54064,7 +54065,7 @@ function roomCanTwo(){
 }
 
 /* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
-function roomStart(open, which){
+function roomStart(open, which, mode){
   var u = new URL(location.href);
   u.searchParams.set("room", "1");
   u.hash = "";
@@ -54074,10 +54075,12 @@ function roomStart(open, which){
      onto the other screen if the browser says where it is. */
   var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
   if (!w) return false;
-  ROOM = { win:w, open:open, which:which, at:null, last:null };
+  /* §582.1: "window" is a window on THIS screen, to share in a meeting; it
+     is never moved, and it never asks for full screen. */
+  ROOM = { win:w, open:open, which:which, at:null, last:null, mode:mode === "window" ? "window" : "screen" };
   if (ROOMPOLL) clearInterval(ROOMPOLL);
   ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
-  if (window.getScreenDetails) window.getScreenDetails().then(function(d){
+  if (ROOM.mode === "screen" && window.getScreenDetails) window.getScreenDetails().then(function(d){
     var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
     if (!other || w.closed) return;
     try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
@@ -54123,7 +54126,7 @@ addEventListener("message", function(e){
   if (m.smpRoom === "ready") {
     /* Where the room already was if it is the projector's window loading
        again; otherwise the slide Present was pressed on. */
-    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which });
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which, mode:ROOM.mode });
     return;
   }
   if (m.smpRoom === "bye") { roomEnd(false); return; }
@@ -54162,7 +54165,9 @@ function roomStripText(){
          slide. */
       (a.clock.dark === "dark" ? ' \u00b7 their screen is dark, T lifts it'
        : a.clock.dark ? ' \u00b7 their slide is dimmed' : '') + '</span>' : '') +
-    (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+    (ROOM && ROOM.mode === "window"
+      ? (a.title ? '<span class="rs-tip">In your meeting, share the window called \u201c' + esc(a.title) + '\u201d</span>' : '')
+      : a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
 }
 function roomPaint(){
   var sr = document.getElementById("slideroot");
@@ -54177,7 +54182,7 @@ function roomPaint(){
       var bar = sr.querySelector(".slidebar");
       if (bar) bar.insertAdjacentElement("afterend", live);
     }
-    roomFill(live, '<span class="rs-dot"></span><b>On the room\u2019s screen</b>' + roomStripText() +
+    roomFill(live, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'In the slides window' : 'On the room\u2019s screen') + '</b>' + roomStripText() +
       '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
       '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
   }
@@ -54193,14 +54198,20 @@ function roomPaint(){
        note comes or goes, or the slide's foot falls off the bottom. */
     if (!away) { if (note) { note.remove(); slidesFitStage(); } }
     else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
-      '<div class="sl-notroom" role="status">Not on the room\u2019s screen \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<div class="sl-notroom" role="status">Not ' + (ROOM.mode === "window" ? 'in the slides window' : 'on the room\u2019s screen') +
+      ' \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
       '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
     var play = sr.querySelector("[data-slplay]");
     if (play) {
       var lbl = play.querySelector(".lbl");
       if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
-      play.title = ROOM && editing ? "Stop presenting on the second screen" : "Present (P)";
+      play.title = ROOM && editing ? (ROOM.mode === "window" ? "Stop presenting and close the slides window"
+                                                              : "Stop presenting on the second screen") : "Present (P)";
     }
+    /* §582.1: always there for the office, and gone while presenting —
+       Present has become Stop presenting beside it. */
+    var wb = sr.querySelector("[data-slwin]");
+    if (wb) wb.hidden = !inOffice() || !!(ROOM && editing);
     var keys = document.getElementById("slkeys");
     /* The room's own keys are on the strip above; here, only what looking
        through the slides adds, so the slide's name keeps its room. */
@@ -54237,7 +54248,7 @@ function roomPaint(){
   }
   document.body.classList.add("roomon");
   var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
-  roomFill(st, '<span class="rs-dot"></span><b>Presenting on the second screen</b>' + roomStripText() +
+  roomFill(st, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'Presenting in the slides window' : 'Presenting on the second screen') + '</b>' + roomStripText() +
     '<span class="rs-sp"></span>' +
     '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
     '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
@@ -54297,7 +54308,7 @@ function roomEditorKey(ev){
 /* ── IN THE ROOM ──────────────────────────────────────────────────────── */
 function roomHear(m){
   if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
-  if (m.smpRoom === "open") roomOpen(m.open || {}, m.which);
+  if (m.smpRoom === "open") { ROOM_WIN = m.mode === "window"; roomOpen(m.open || {}, m.which); }
   else if (m.step) deckStep(m.step);
   else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
   else if (m.key === "T") clockToggle();
@@ -54312,17 +54323,31 @@ function roomOpen(open, which){
   if (j > 0) deckShow(j);
   /* Full screen asked for, and refused without a press on that screen; the
      deck fills the window regardless, and the button below asks for the
-     press. */
-  deckGoFull();
+     press. A window to share asks for neither: it is shared as it is, and
+     may sit behind the slide view while it is (§582.1). */
+  if (ROOM_WIN) { DECK.direct = true; document.getElementById("deckroot").classList.add("fs"); deckScale(); }
+  else deckGoFull();
+  roomTitle(open);
   roomFullAsk();
   /* What this window booted on may be the copy the browser kept (§431): the
      quiet refresh takes the server's own, and redraws only if it differs. */
   deckRefresh(true);
 }
+/* §582.1: THE WINDOW'S NAME, which is what a meeting's list of windows
+   shows: "Slides · <client> · <what>". Said again on every report, because
+   the platform under the deck may name the tab as it paints. */
+var ROOM_TITLE = "";
+function roomTitle(open){
+  var org = String(GROUP.org || "").trim();
+  var what = open && open.flow ? "Master presentation"
+           : open && open.target ? placeLabel(open.target) : "";
+  ROOM_TITLE = ["Slides", org, what].filter(Boolean).join(" \u00b7 ");
+  document.title = ROOM_TITLE;
+}
 function roomFullAsk(){
   var root = document.getElementById("deckroot");
   var ask = root.querySelector(".roomfull");
-  if (document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ROOM_WIN || document.fullscreenElement === root) { if (ask) ask.remove(); return; }
   if (ask) return;
   root.insertAdjacentHTML("beforeend",
     '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
@@ -54344,8 +54369,9 @@ function roomReport(){
   var c = DECK.clock, left = c ? clockLeft() : 0;
   var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
   var name = s ? (s.dataset.subjectName || "") : "";
+  if (ROOM_TITLE && document.title !== ROOM_TITLE) document.title = ROOM_TITLE;
   try {
-    window.opener.postMessage({ smpRoom:"at", on:on,
+    window.opener.postMessage({ smpRoom:"at", on:on, title:ROOM_TITLE,
       which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
       n: DECK.i + 1, total: DECK.slides.length,
       label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
@@ -55236,6 +55262,16 @@ function slidesPlay(){
   if (at > 0) deckShow(at);
   deckGoFull();
   slidesSuspend();
+}
+/* §582.1: PRESENT IN A WINDOW. Islam, presenting from a Mac in an online
+   meeting with no second screen: the slides in a window of their own that
+   the meeting shares, this view staying here to drive them — "always there,
+   office only". The two-screen machinery, told it is a window. */
+function slidesPlayWindow(){
+  if (!SLED.target || ROOM || !inOffice()) return;
+  roomStart(SLED.flow ? { flow:SLED.flow.slice() }
+                      : { target:SLED.target, kind:SLED.kind, key:SLED.key },
+            slidesSelEl(), "window");
 }
 /* WHICH SLIDE THIS IS, said so the other screen can find it: whose, which
    page, which picture — and which of its kind. Never by counting: the room
@@ -56358,6 +56394,8 @@ function wireSlides(){
   videoKeepKeys(root);
   root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
   root.querySelector("[data-slplay]").addEventListener("click", slidesPlay);
+  var wnb = root.querySelector("[data-slwin]");
+  if (wnb) wnb.addEventListener("click", slidesPlayWindow);
   var gb = root.querySelector("[data-slgrid]");
   if (gb) gb.addEventListener("click", function(){ slidesGridToggle(); });
   /* §571: the Columns menu. Its panel is redrawn in place on a tick, so the

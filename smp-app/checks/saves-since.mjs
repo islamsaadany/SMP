@@ -7,6 +7,7 @@
    no `next build`. Prints one line per property (§215) and ends RED/GREEN.
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node checks/saves-since.mjs
      … --break=no-save-number   (RED: a save lands and is never numbered — every other tab stays stale, silently)
+     … --break=no-sweep         (RED: the list is never swept — it grows for ever, §588.2)
    The break is read by lib/save.ts from SMP_BREAK (constitution XVI); the
    script passes it on. */
 const brkArg = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
@@ -93,9 +94,22 @@ check(onlyLists.code === 200, "a body that is only a list operation is a save, n
 const a5 = await readAnswer(r, new URLSearchParams("after=" + (n3 + 1)));
 check(a5.body.changes.length === 2 && a5.body.changes[0].changes.lists && a5.body.changes[1].changes.lists, "...and both travel on as list operations", JSON.stringify(a5.body).slice(0, 200));
 
-console.log("\n6 · the number is per tenant");
+console.log("\n6 · the list is kept for a week (§588.2)");
+{
+  const old = (await owner.query("INSERT INTO saves (tenant_id, at, person_key, changes) VALUES ($1, now() - interval '8 days', 'old', '{}'::jsonb) RETURNING id", [tenantId])).rows[0].id;
+  const there = async () => (await owner.query("SELECT count(*)::int AS n FROM saves WHERE id = $1", [old])).rows[0].n;
+  check(await there() === 1, "an entry eight days old is in the list");
+  const s7 = await save(tenantId, actor(smo, "super"), { changes: rowEdit("units.mobile", { aspiration: "Seventh" }) });
+  check(s7.code === 200, "a save lands", s7.code);
+  check(await there() === 0, "...and the week-old entry is gone with it");
+  const a6 = await readAnswer(r, new URLSearchParams("after=0"));
+  check(a6.body.oldest === n1, "the read names the oldest entry still kept", JSON.stringify({ oldest: a6.body.oldest, n1 }));
+  check(a6.body.changes.length === 7 && a6.body.changes.every((x) => x.seq >= n1), "...and answers only kept entries", a6.body.changes.length);
+}
+
+console.log("\n7 · the number is per tenant");
 const seqRows = await owner.query("SELECT count(*)::int AS n FROM saves WHERE tenant_id = $1", [tenantId]);
-check(seqRows.rows[0].n === 6, "six saves recorded for the tenant", seqRows.rows[0].n);
+check(seqRows.rows[0].n === 7, "seven saves recorded for the tenant", seqRows.rows[0].n);
 
 await owner.end();
 console.log("\n" + oks + " ok, " + fails + " failed — " + (fails ? "RED" : "GREEN"));

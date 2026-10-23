@@ -1,4 +1,4 @@
-/* THE STRATEGY PAGES AND THE CONSOLE, READ BY TYPESCRIPT'S CHECKER (§589, §594) — no browser, no
+/* THE STRATEGY PAGES AND THE CONSOLE, READ BY TYPESCRIPT'S CHECKER (§589, §594, §596) — no browser, no
    database, and nothing in the pages is edited. §585 described the shared
    rules; this lets the pages see that description. They are plain scripts
    sharing one page, so the checker is handed them the way the browser runs
@@ -24,7 +24,10 @@
    console's findings are the set-up flow naming STRATEGY-PAGE data the
    console does not have. Each is guarded or never reached there today, and
    that is the point of listing them: a NEW one is a name the console may
-   reach and throw on, which is how §467's crash came about.
+   reach and throw on. AND SINCE §596 THE CONSOLE'S PATHS ARE WALKED (see
+   consolePaths below): from the console's own calls into the set-up flow,
+   every strategy-page name reachable must be guarded — which a list of
+   names could never say, because §467's crash was a new path to an old one.
 
    A NEW FINDING IS READ BEFORE IT IS RECORDED. Fix it if it is real; if it
    is noise, `--write` records it — never to make a red check green unread.
@@ -35,7 +38,9 @@
    function from another file misspelt, a misspelt property on a page
    element, a misspelt global. On the console: a function, a variable, the
    splitter and an element's method misspelt, and the create piece reaching
-   for the strategy page's GROUP. NOT caught, on either page: a misspelt
+   for the strategy page's GROUP; and on the console's PATHS, §467 itself
+   (its guard taken out), the word lookup unguarded, a strategy name read as
+   the file loads, and the one declared doorway rewired. NOT caught, on either page: a misspelt
    member of an object a page script builds itself (CLIENTSETUP.mountCreat)
    — an object written in JavaScript is open, and only the library names
    are declared closed.
@@ -48,6 +53,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join, basename } from "node:path";
 import { tmpdir } from "node:os";
+import * as acorn from "acorn";
+import * as walk from "acorn-walk";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const APP = join(here, "..");
@@ -183,13 +190,166 @@ function assembleConsole() {
   return { dir, files };
 }
 
+/* ── THE CONSOLE'S PATHS INTO THE SET-UP FLOW (§596) ─────────────────────
+   §594 counts NAMES, and §467's crash was a new PATH to an old one: typing in
+   Add a client ran a change handler that asked canShape(), which reached
+   GROUP on a page that has none. So this walks the calls. It starts where
+   the console calls into the flow (CLIENTSETUP's members its own script
+   calls, and any top-level name of the flow's file it uses, read off the
+   page), plus whatever the file runs as it loads, and follows every function
+   a reached one names — called, passed as a callback, stored. Inline
+   callbacks are reached with the function they sit in, since an event can
+   fire them.
+
+   EVERY STRATEGY-PAGE NAME IT CAN REACH MUST BE GUARDED. The names are the
+   ones the checker cannot find on the console (§594's list, so a name
+   added tomorrow is in it without an edit here). Guarded means only run
+   when the strategy page is there: under `typeof X !== "undefined"` (or
+   `=== "function"`), after an early `if (typeof X === "undefined") return`,
+   on the right of an `&&` that tests presence, or in a function that is
+   only ever reached through such guarded calls. The strategy page's names
+   arrive together, so a test on any one of them guards all of them.
+
+   A DOORWAY THE CONSOLE NEVER PASSES, WHERE NO typeof SAYS SO, IS DECLARED
+   BELOW WITH ITS REASON. It is matched by the function it sits in and the
+   call it gates, and a doorway that no longer exists fails the check, so
+   a declaration cannot outlive the code it describes. */
+const DOORWAYS = [
+  { in: "wordCommit", call: "redraw",
+    why: "`if (!canShape()) redraw()` — canShape() is true on the console: S is null on the create piece, and holdsNow() reads zeros there (§467). redraw() would draw the whole set-up flow into the console's HOST." },
+];
+function consolePaths(dir, list) {
+  const STRATEGY = new Set(list.filter((f) => f.file === "client-setup.js" && /^TS(2304|2552)$/.test(f.code))
+    .map((f) => (/name '([^']+)'/.exec(f.message) || [])[1]).filter(Boolean));
+  const src = readFileSync(join(dir, "client-setup.js"), "utf8");
+  const page = readFileSync(join(dir, "console-inline.js"), "utf8");
+  const ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "script", locations: true });
+  const isFn = (n) => n && /^(FunctionDeclaration|FunctionExpression|ArrowFunctionExpression)$/.test(n.type);
+  const parent = new Map();
+  (function link(n, p) {
+    if (!n || typeof n.type !== "string") return;
+    parent.set(n, p);
+    for (const v of Object.values(n)) {
+      if (Array.isArray(v)) v.forEach((c) => c && typeof c.type === "string" && link(c, n));
+      else if (v && typeof v.type === "string") link(v, n);
+    }
+  })(ast, null);
+  const scopeOf = (n) => { let p = parent.get(n); while (p && !isFn(p) && p.type !== "Program") p = parent.get(p); return p; };
+  const decls = new Map();
+  walk.full(ast, (n) => {
+    let name = null, fn = null;
+    if (n.type === "FunctionDeclaration" && n.id) { name = n.id.name; fn = n; }
+    if (n.type === "VariableDeclarator" && n.id.type === "Identifier" && isFn(n.init)) { name = n.id.name; fn = n.init; }
+    if (!name) return;
+    const s = scopeOf(n);
+    if (!decls.has(s)) decls.set(s, new Map());
+    decls.get(s).set(name, fn);
+  });
+  const resolve = (id) => {
+    for (let s = scopeOf(id); s; s = s.type === "Program" ? null : scopeOf(s))
+      if (decls.has(s) && decls.get(s).has(id.name)) return decls.get(s).get(id.name);
+    return null;
+  };
+  const nameOf = (f) => f.id ? f.id.name : parent.get(f).type === "VariableDeclarator" ? parent.get(f).id.name : "(anonymous)";
+  const isRef = (id) => { const p = parent.get(id);
+    if (p.type === "MemberExpression" && p.property === id && !p.computed) return false;
+    if (p.type === "Property" && p.key === id && !p.computed && !p.shorthand) return false;
+    if ((p.type === "FunctionDeclaration" || p.type === "FunctionExpression") && p.id === id) return false;
+    if (p.type === "VariableDeclarator" && p.id === id) return false;
+    return true; };
+  const typeofOf = (n) => n && n.type === "UnaryExpression" && n.operator === "typeof" && n.argument.type === "Identifier" && STRATEGY.has(n.argument.name);
+  /* what an expression being TRUE says about the strategy page */
+  function says(n) {
+    if (!n) return null;
+    if (n.type === "UnaryExpression" && n.operator === "!") { const t = says(n.argument); return t === "present" ? "absent" : t === "absent" ? "present" : null; }
+    if (n.type === "BinaryExpression" && /^[!=]==?$/.test(n.operator)) {
+      const [t, lit] = typeofOf(n.left) ? [n.left, n.right] : typeofOf(n.right) ? [n.right, n.left] : [null, null];
+      if (!t || lit.type !== "Literal") return null;
+      const eq = n.operator[0] === "=";
+      if (lit.value === "undefined") return eq ? "absent" : "present";
+      return eq ? "present" : null;
+    }
+    if (n.type === "LogicalExpression" && n.operator === "&&") return says(n.left) === "present" || says(n.right) === "present" ? "present" : null;
+    if (n.type === "LogicalExpression" && n.operator === "||") return says(n.left) === "absent" || says(n.right) === "absent" ? "absent" : null;
+    return null;
+  }
+  const exits = (s) => s && (s.type === "ReturnStatement" || s.type === "ThrowStatement" ||
+    (s.type === "BlockStatement" && s.body.length > 0 && exits(s.body[s.body.length - 1])));
+  function guarded(n, top) {
+    for (let c = n, p = parent.get(c); p && c !== top; c = p, p = parent.get(p)) {
+      if ((p.type === "ConditionalExpression" || p.type === "IfStatement") &&
+          ((c === p.consequent && says(p.test) === "present") || (c === p.alternate && says(p.test) === "absent"))) return true;
+      if (p.type === "LogicalExpression" && c === p.right &&
+          ((p.operator === "&&" && says(p.left) === "present") || (p.operator === "||" && says(p.left) === "absent"))) return true;
+      if (p.type === "BlockStatement" || p.type === "Program")
+        for (const s of p.body.slice(0, p.body.indexOf(c)))
+          if (s.type === "IfStatement" && says(s.test) === "absent" && exits(s.consequent)) return true;
+    }
+    return false;
+  }
+  /* reachability, each function in a guarded context or not (open wins) */
+  const ctx = new Map(), via = new Map(), queue = [];
+  const reach = (fn, g, from) => { if (!fn || (ctx.has(fn) && (ctx.get(fn) === false || g))) return; ctx.set(fn, g); via.set(fn, from); queue.push(fn); };
+  const iifes = [];
+  walk.simple(ast, { CallExpression(n) { if (n.callee.type === "FunctionExpression" && scopeOf(n).type === "Program") iifes.push(n.callee); } });
+  const top = decls.get(ast) || new Map();
+  const entries = [];
+  for (const m of page.matchAll(/CLIENTSETUP\.(\w+)\s*\(/g)) if (!entries.includes(m[1])) entries.push(m[1]);
+  for (const name of top.keys()) if (new RegExp("\\b" + name.replace(/\$/g, "\\$") + "\\b").test(page)) entries.push(name);
+  const api = iifes.map((f) => decls.get(f)).filter(Boolean);
+  for (const e of entries) {
+    if (top.has(e)) reach(top.get(e), false, "the console uses " + e);
+    for (const m of api) if (m.has(e)) reach(m.get(e), false, "the console calls CLIENTSETUP." + e);
+  }
+  const open = [], used = new Set();
+  function scan(body, g, owner) {
+    walk.fullAncestor(body, (n) => {
+      if (n.type !== "Identifier" || !isRef(n)) return;
+      for (let a = parent.get(n); a && a !== body; a = parent.get(a))
+        if (a.type === "FunctionDeclaration" || (a.type === "FunctionExpression" && parent.get(a).type === "VariableDeclarator") || iifes.includes(a)) return;
+      const g2 = g || guarded(n, body);
+      if (STRATEGY.has(n.name) && !(parent.get(n).type === "UnaryExpression" && parent.get(n).operator === "typeof") && !g2)
+        open.push({ name: n.name, line: n.loc.start.line, fn: owner });
+      const door = DOORWAYS.find((d) => d.in === owner && d.call === n.name);
+      if (door) { used.add(door); return; }
+      const f = resolve(n);
+      if (f && f !== parent.get(body)) reach(f, g2, owner + " (line " + n.loc.start.line + ")");
+    });
+  }
+  /* load time: the file's own statements and each IIFE's, less the IIFE's
+     `return {…}` — the API it hands the page, named there and not called */
+  for (const r of [ast, ...iifes]) {
+    const body = r === ast ? r.body : r.body.body;
+    for (const s of body) if (s.type !== "FunctionDeclaration" && !(r !== ast && s.type === "ReturnStatement")) scan(s, false, "(as the file loads)");
+  }
+  while (queue.length) { const f = queue.shift(); scan(f.body, ctx.get(f), nameOf(f)); }
+  const chain = (fname) => { const out = []; for (let f = [...ctx.keys()].find((k) => nameOf(k) === fname), i = 0; f && i < 12; i++) { out.push(nameOf(f)); const v = via.get(f) || ""; const nx = [...ctx.keys()].find((k) => nameOf(k) === v.split(" ")[0] && k !== f); if (!nx) { out.push(v); break; } f = nx; } return out.join(" ← "); };
+  const seen = new Set();
+  return {
+    entries, reached: ctx.size, names: STRATEGY.size,
+    open: open.filter((u) => { const k = u.fn + u.line + u.name; return seen.has(k) ? false : seen.add(k); })
+      .map((u) => u.name + " at client-setup.js:" + u.line + ", in " + chain(u.fn)),
+    stale: DOORWAYS.filter((d) => !used.has(d)).map((d) => d.in + " → " + d.call),
+  };
+}
+
+/* Each must leave a strategy-page name open on the console's paths, or a
+   declared doorway gone. The first is §467 itself, its guard taken out. */
+const CONSOLE_PATH_BREAKS = {
+  "the-467-crash": ["client-setup.js", '  if (typeof GROUP === "undefined") return { plans: 0, capabilities: 0, units: 0, functions: 0 };\n', ""],
+  "word-lookup-unguarded": ["client-setup.js", 'return typeof labelWord === "function" ? labelWord(k, form === "one" ? "group" : "bu") : fb;',
+                            'return labelWord(k, form === "one" ? "group" : "bu");'],
+  "read-as-the-file-loads": ["client-setup.js", "var CLIENTSETUP = (function () {", "var CS_AT_LOAD = UNITS;\nvar CLIENTSETUP = (function () {"],
+  "doorway-rewired": ["client-setup.js", 'i.addEventListener("change", function () { if (!canShape()) redraw(); });',
+                      'i.addEventListener("change", function () { if (!canShape()) HOST && render(); });'],
+};
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
               note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",
-             assemble: assembleConsole, breaks: CONSOLE_BREAKS, minFiles: 2, own: "console-inline.js" },
+             assemble: assembleConsole, breaks: CONSOLE_BREAKS, pathBreaks: CONSOLE_PATH_BREAKS, minFiles: 2, own: "console-inline.js" },
 };
 
 /* LOOSE, as §585's check is: TypeScript 7 defaults to strict with no
@@ -252,6 +412,17 @@ if (process.argv.includes("--red")) {
         else console.log("red: " + sub.title + " / " + n + " (" + [...new Set(hit.map((f) => f.code))].join(", ") + ")");
       } finally { rmSync(asm.dir, { recursive: true, force: true }); }
     }
+    for (const [n, [file, a, b]] of Object.entries(sub.pathBreaks || {})) {
+      const asm = sub.assemble();
+      try {
+        const src = readFileSync(join(asm.dir, file), "utf8");
+        if (src.split(a).length !== 2) { console.log("BREAK DID NOT MATCH ONCE: " + sub.title + " / " + n); bad++; continue; }
+        writeFileSync(join(asm.dir, file), src.replace(a, b));
+        const p = consolePaths(asm.dir, findings(asm));
+        if (!p.open.length && !p.stale.length) { console.log("NOT RED: " + sub.title + " / paths / " + n); bad++; }
+        else console.log("red: " + sub.title + " / paths / " + n + " (" + (p.open.length ? p.open.length + " open" : "") + (p.stale.length ? (p.open.length ? ", " : "") + "a doorway gone" : "") + ")");
+      } finally { rmSync(asm.dir, { recursive: true, force: true }); }
+    }
   }
   process.exit(bad ? 1 : 0);
 }
@@ -272,6 +443,14 @@ for (const sub of Object.values(SUBJECTS)) {
     const gone = [...rec].filter(([k, n]) => (now.get(k) || 0) < n).map(([k]) => k.split("\u0000").join("  "));
     check("every recorded finding is still there, so the list stays exact", !gone.length,
       gone.map((g) => "       " + g).join("\n") + "\n       — fixed or moved: run with --write to record the shorter list");
+    if (sub.pathBreaks) {
+      const p = consolePaths(asm.dir, list);
+      check("from the console's calls into the set-up flow (" + p.entries.join(", ") + "), " + p.reached +
+        " functions reached, and none uses one of the " + p.names + " strategy-page names unguarded", p.reached > 5 && !p.open.length,
+        p.open.map((o) => "       " + o).join("\n"));
+      check("every doorway declared as never passed on the console is still in the code", !p.stale.length,
+        p.stale.map((d) => "       " + d + " — gone: re-read what the console reaches, then update DOORWAYS").join("\n"));
+    }
   } finally { rmSync(asm.dir, { recursive: true, force: true }); }
 }
 console.log(`\n${ok} ok, ${fails.length} failed`); process.exit(fails.length ? 1 : 0);

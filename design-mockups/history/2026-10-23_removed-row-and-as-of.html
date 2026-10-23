@@ -1,0 +1,113 @@
+<title>History Restore and As-Of</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: the History page's own frame from the 2026-09-03 mockup, with two
+     additions drawn in place — a removed row's Restore, and an As-of view. */
+  :root{ --navy:#13233b; --navy-2:#1c3350; --gold:#c6a24a; --gold-deep:#a5822f; --ground:#eaeef4; --surface:#fff; --surface-2:#f4f7fb;
+    --ink:#1a2634; --ink-2:#586576; --ink-3:#8592a3; --line:#d5dce6; --zebra:#f7f9fc; --warn-bg:#fff6e4; --warn-ink:#6f4e0c; --warn-line:#e6b45a;
+    --attn-bg:#F7EFD6; --attn-tx:#7A5D1C; --good:#2E7D5B; --bad:#B04434;
+    --shadow:0 1px 2px rgba(19,35,59,.06),0 6px 18px rgba(19,35,59,.08); --sans:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c; --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735; --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648; --zebra:#19232f; --warn-bg:#2c2411; --warn-ink:#f2ce76; --warn-line:#6a5222; --attn-bg:#3A3220; --attn-tx:#E3C77A; --good:#5FB68C; --bad:#D97066; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); color-scheme:dark; } }
+  :root[data-theme="dark"]{ --navy:#0e1a2b; --navy-2:#16273f; --gold:#d3b25e; --gold-deep:#b7913c; --ground:#0d141e; --surface:#161f2c; --surface-2:#1b2735; --ink:#e7edf4; --ink-2:#9fadbe; --ink-3:#6f7d8f; --line:#293648; --zebra:#19232f; --warn-bg:#2c2411; --warn-ink:#f2ce76; --warn-line:#6a5222; --attn-bg:#3A3220; --attn-tx:#E3C77A; --good:#5FB68C; --bad:#D97066; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); color-scheme:dark; }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.45;-webkit-font-smoothing:antialiased;
+       padding-block:36px 72px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));}
+  .wrap{max-width:1180px;margin:0 auto}
+  .kicker{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 10px}
+  h1{font-size:28px;line-height:1.12;margin:0 0 8px;text-wrap:balance} .sub{color:var(--ink-2);margin:0 0 26px;max-width:70ch;font-size:15px} .sub b{color:var(--ink)}
+  h2{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);background:var(--surface)}
+  .chrome{background:var(--navy);color:#eef2f8;display:flex;align-items:center;gap:14px;padding:0 16px;height:44px;font-size:13px;overflow:hidden}
+  .chrome .b{font-weight:600;white-space:nowrap} .chrome .tabs{display:flex;gap:2px;margin-left:8px} .chrome .tabs span{padding:5px 10px;border-radius:6px;color:#b9c6d8;font-size:12.5px;white-space:nowrap} .chrome .tabs span.on{background:rgba(255,255,255,.1);color:#fff}
+  .pane{padding:0}
+  .phead{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+  .phead h3{font-size:15px;margin:0 14px 0 0}
+  .ctl{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--ink-2);background:var(--surface);white-space:nowrap} .ctl.on{color:var(--ink);border-color:var(--gold-deep)} .ctl.q{width:190px;color:var(--ink-3)}
+  .ctl.new{border-style:dashed;border-color:var(--gold-deep);color:var(--ink)}
+  .phead .sp{flex:1} .phead .count{font-size:12px;color:var(--ink-3)}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px} th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#eef2f8;background:var(--navy);padding:8px 12px;white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle} tr:nth-child(even) td{background:var(--zebra)}
+  td.t{color:var(--ink-3);font-variant-numeric:tabular-nums} td.name{max-width:260px;overflow:hidden;text-overflow:ellipsis} td.fld{color:var(--ink-2)}
+  .chip{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--ink-2)}
+  .fromto{font-family:var(--mono);font-size:12px} .arr{color:var(--gold-deep);margin:0 6px} .none{color:var(--ink-3)}
+  td.act{text-align:right} .rst{font:inherit;font-size:11.5px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--ink-2);border-radius:6px;padding:4px 10px;cursor:pointer} .rst.held{opacity:.45;cursor:default}
+  tr.lit td{outline:2px solid var(--gold-deep);outline-offset:-2px}
+  .confirm{margin:14px 18px 18px;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:12px 14px;font-size:13px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .confirm b{font-weight:700} .confirm .sp{flex:1} .btn{font:inherit;font-size:12px;font-weight:700;border-radius:6px;padding:6px 12px;border:1px solid var(--gold-deep);background:var(--gold-deep);color:#fff} .btn.ghost{background:transparent;color:inherit;border-color:currentColor}
+  /* the as-of view */
+  .asof{margin:0;border-bottom:1px solid var(--line);background:var(--attn-bg);color:var(--attn-tx);padding:10px 18px;font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .asof b{font-weight:700} .asof .sp{flex:1} .asof a{color:inherit;font-weight:600;text-decoration:none;border-bottom:1px solid currentColor;white-space:nowrap}
+  .plan{padding:14px 18px 18px} .plan h4{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 6px} .plan h4:first-child{margin-top:0}
+  .plan table{font-size:13px} .plan td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .plan tr.gone td{color:var(--ink-3)} .since{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--attn-tx);background:var(--attn-bg);border-radius:99px;padding:3px 7px;margin-left:8px;vertical-align:middle}
+  ul.notes{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px;max-width:72ch} ul.notes li{margin:6px 0} ul.notes b{color:var(--ink)}
+</style>
+<div class="wrap">
+  <p class="kicker">SMP · Mockup · 23 October 2026</p>
+  <h1>Two additions to Setup › History</h1>
+  <p class="sub">Your three answers from today: a removed row comes back <b>in its old position</b>; the plan as it stood on a date is shown <b>on screen</b>, read only; and that view lives <b>on the Plan page</b>, where the office reviews a plan, not in Setup › History.</p>
+
+  <h2>1 · A removed row has a Restore, and it works</h2>
+  <div class="frame">
+    <div class="chrome"><span class="b">Strategy Management Platform</span><span class="tabs"><span>Group ▾</span><span>Units</span><span>Mobile</span><span class="on">Setup</span></span></div>
+    <div class="pane">
+      <div class="phead"><h3>History</h3><span class="ctl q">Search a row or a person…</span><span class="ctl">Everyone ▾</span><span class="ctl on">Mobile ▾</span><span class="ctl">Every kind ▾</span><span class="ctl">This week ▾</span><span class="ctl new">As it stood on… ▾</span><span class="sp"></span><span class="count">5 changes</span></div>
+      <div class="scroll"><table>
+        <thead><tr><th>Date</th><th>Time</th><th>Who</th><th>Kind</th><th>Row</th><th>Field</th><th>From → To</th><th>Restore</th></tr></thead>
+        <tbody>
+          <tr><td class="t">Today</td><td class="t">09:41</td><td>Mohamed Essam</td><td><span class="chip">Plan</span></td><td class="name">Data duplicate rate</td><td class="fld">Target</td><td class="fromto">1% <span class="arr">→</span> 1.5%</td><td class="act"><button class="rst">Restore</button></td></tr>
+          <tr class="lit"><td class="t">Today</td><td class="t">09:40</td><td>Mohamed Essam</td><td><span class="chip">Plan</span></td><td class="name">Legacy churn index</td><td class="fld">Row</td><td class="fromto">MB01 · measure 2 of 4 <span class="arr">→</span> <span class="none">removed</span></td><td class="act"><button class="rst">Restore</button></td></tr>
+          <tr><td class="t">Yesterday</td><td class="t">16:02</td><td>Mennah Farouk</td><td><span class="chip">Reporting</span></td><td class="name">Legacy churn index</td><td class="fld">Actual</td><td class="fromto">61 <span class="arr">→</span> 64</td><td class="act"><button class="rst held" title="That row is no longer in the plan. Put the row back first, from its own line above.">Restore</button></td></tr>
+          <tr><td class="t">Yesterday</td><td class="t">11:20</td><td>Mohamed Essam</td><td><span class="chip">Plan</span></td><td class="name">Pilot chatbot in two branches</td><td class="fld">Name</td><td class="fromto"><span class="none">—</span> <span class="arr">→</span> Pilot chatbot in two branches</td><td class="act"><button class="rst held" title="A row that was added is removed from the Plan page.">Restore</button></td></tr>
+          <tr><td class="t">Mon 20 Oct</td><td class="t">14:05</td><td>Mohamed Essam</td><td><span class="chip">Plan</span></td><td class="name">E-store revenue</td><td class="fld">Compile rule</td><td class="fromto">Sum <span class="arr">→</span> Latest</td><td class="act"><button class="rst">Restore</button></td></tr>
+        </tbody>
+      </table></div>
+      <div class="confirm"><span><b>Put back Legacy churn index on Mobile, as measure 2 of MB01?</b><br>It was removed by Mohamed Essam today at 09:40, with its target 70, its compile rule Average, its hidden mark and the figures reported this cycle (64 in Q3). It returns to its old place with all of them. Putting it back is an ordinary change: it is saved, authorised and logged like any other, so it can itself be put back.</span><span class="sp"></span><button class="btn ghost">Cancel</button><button class="btn">Put it back</button></div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>What the line shows.</b> The row's name, the field <b>Row</b>, and where it sat: the pillar, its kind and its position. The row's whole contents travel with the removal from now on, which is what makes Restore possible. Rows removed before this is built have no contents saved and keep today's greyed button.</li>
+    <li><b>Old position.</b> It comes back as measure 2, the rows after it move down one. If a row has since been added in that place, it comes back just before it.</li>
+    <li><b>Its own history comes with it.</b> Reported figures and notes keyed on the row are not deleted when a row is removed, so they are there again when it returns. Until then, a changed value on the removed row cannot be restored on its own: the button says to put the row back first.</li>
+    <li><b>Applies to the six row kinds.</b> An objective, a measure, a tactic, a deliverable, an outcome, a milestone. A whole pillar or project keeps its own way back, the archive.</li>
+  </ul>
+
+  <h2>2 · The plan as it stood on a date — on the Plan page itself</h2>
+  <div class="frame">
+    <div class="chrome"><span class="b">Strategy Management Platform</span><span class="tabs"><span>Group ▾</span><span>Units</span><span class="on">Mobile</span><span>Retail</span><span>Setup</span></span></div>
+    <div class="pane">
+      <div class="phead"><h3>Mobile</h3><span class="ctl">Overview</span><span class="ctl on">Plan</span><span class="ctl">Performance</span><span class="ctl">Reporting</span><span class="sp"></span><span class="count">Last changed by Mennah Farouk, today 09:41 · <u>See history</u></span><span class="ctl new on">As it stood on 15 Sep 2026 ▾</span></div>
+      <div class="asof"><span><b>Mobile's plan as it stood on 15 September 2026.</b> Read only. 11 changes have been made since; the rows and figures below are what the plan held at the end of that day.</span><span class="sp"></span><a href="#">Back to today</a></div>
+      <div class="plan">
+        <h4>MB01 · Digital &amp; Data-Driven Operations — Key measures</h4>
+        <div class="scroll"><table>
+          <thead><tr><th>#</th><th>Measure</th><th>Dir.</th><th>Target</th><th>Compiled</th><th>Actual then</th></tr></thead>
+          <tbody>
+            <tr><td class="t">1</td><td>Data duplicate rate</td><td>≤</td><td class="n">1%</td><td>Latest</td><td class="n">1.4%</td></tr>
+            <tr class="gone"><td class="t">2</td><td>Legacy churn index<span class="since">Removed since</span></td><td>≥</td><td class="n">70</td><td>Average</td><td class="n">61</td></tr>
+            <tr><td class="t">3</td><td>Automated transactions share</td><td>≥</td><td class="n">60%</td><td>Latest</td><td class="n">38%</td></tr>
+            <tr><td class="t">4</td><td>Data quality audit score</td><td>≥</td><td class="n">85</td><td>Latest</td><td class="n">67</td></tr>
+          </tbody>
+        </table></div>
+        <h4>MB01 — Tactics</h4>
+        <div class="scroll"><table>
+          <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Status then</th></tr></thead>
+          <tbody>
+            <tr><td class="t">1</td><td>Migrate billing to the new core</td><td>Ahmed</td><td class="n">Q1 Q2</td><td>Done</td></tr>
+            <tr><td class="t">2</td><td>Roll out self-service portal</td><td>Mona</td><td class="n">Q2 Q3</td><td>In progress</td></tr>
+            <tr><td class="t">3</td><td>Retire the paper onboarding form</td><td>Ahmed</td><td class="n">Q1</td><td>Done</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>Where it lives.</b> On the Plan page of a unit, a function or the company, beside the <i>Last changed by … · See history</i> line that is already there: one control, <b>As it stood on…</b>. The office sees it; nobody else does. The pen is put away while an old plan is shown.</li>
+    <li><b>What it shows.</b> The same Plan page, with every value as it was at the end of the chosen day: rows, targets, owners, quarters, and the figures reported by then. Nothing on it can be edited, the banner says which day it is and how many changes have been made since, and <i>Back to today</i> returns to the live plan.</li>
+    <li><b>Setup › History stays the list of changes.</b> It keeps the filters and the Restore buttons, including the new one for a removed row (part 1). Reviewing an old plan happens where the plan is; putting one value back happens where the change is.</li>
+    <li><b>Rows that are gone wear a chip.</b> A row removed between that day and today reads <i>Removed since</i>, greyed, so the reader is told why they cannot find it on today's plan. That is the one mark added; nothing else on the old plan is annotated.</li>
+    <li><b>How it is built.</b> From the change log, walking back from today to the chosen day. It reaches as far back as the log does: a day before the log began shows the plan as the log first knew it, and the banner says so.</li>
+    <li><b>Office only.</b> The control is drawn for the office alone, like the pen's eye. A unit head keeps the See history door and the change list for their own unit, as today.</li>
+  </ul>
+</div>

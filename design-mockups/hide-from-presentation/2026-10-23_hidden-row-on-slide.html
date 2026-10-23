@@ -1,0 +1,195 @@
+<title>Hidden Row on the Slide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Layout: a short page of two review-deck slides at half size, each with
+     one hidden row kept in place. The platform's own tokens, verbatim from
+     the §233 mockup and present.css, so the slide wears exactly what it will
+     wear in the deck. */
+  :root{
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --stone:#16325C; --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --zebra:#F6F8FB; --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --none:#8B939F;
+    --attn-bg:#F7EFD6; --attn-tx:#7A5D1C; --good-bg:#E3F2EA; --good-tx:#1F5E42;
+    --good:#2E7D5B; --attn:#B8860B; --bad:#B04434;
+    --panel:#16325C; --panel-ink:#FFFFFF; --stage:#0B1A33;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:"Source Sans 3",-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#20252D;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#7E8794;
+      --attn-bg:#3A3220; --attn-tx:#E3C77A; --good-bg:#1E3A2C; --good-tx:#8FD4B0;
+      --good:#5FB68C; --attn:#D9B23C; --bad:#D97066;
+      --panel:#0E1014; --stage:#07101F; color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#20252D;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#7E8794;
+    --attn-bg:#3A3220; --attn-tx:#E3C77A; --good-bg:#1E3A2C; --good-tx:#8FD4B0;
+    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066;
+    --panel:#0E1014; --stage:#07101F; color-scheme:dark;
+  }
+  html,body{margin:0}
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans);
+       padding-block:34px 60px;
+       padding-left:max(16px, env(safe-area-inset-left, 0px));
+       padding-right:max(16px, env(safe-area-inset-right, 0px));}
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font:650 21px/1.3 var(--sans); letter-spacing:-.012em; margin:0 0 4px; text-wrap:balance;}
+  .sub{color:var(--ink-3); font-size:13px; margin:0 0 30px; max-width:78ch;}
+  h2{font:600 11px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+     color:var(--gold-deep); margin:38px 0 12px;}
+  .notew{font-size:12.5px; color:var(--ink-3); margin:10px 0 0; max-width:78ch;}
+
+  /* ── The deck, at half its authored size (1600×900 → 800×450) ───────── */
+  .stage{background:var(--stage); border-radius:10px; padding:18px; overflow-x:auto;}
+  .dslide{width:800px; min-height:420px; margin:0 auto; background:var(--surface); border-radius:3px;
+          padding:26px 31px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;}
+  .eyebrow{font:700 8.5px/1 var(--sans); letter-spacing:.16em; text-transform:uppercase; color:var(--gold-deep);}
+  .phead{display:flex; align-items:flex-start; justify-content:space-between; gap:16px;}
+  .phead h3{font:700 23px/1.15 var(--sans); margin:3px 0 0; letter-spacing:-.01em;}
+  .phead h3 .dcode{color:var(--ink-3); font:400 14px/1 var(--mono); margin-right:8px;}
+  .phead h3 .kind{display:block; font:700 12px/1.2 var(--sans); color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase; margin-top:6px;}
+  .pscore{text-align:right; flex:none;}
+  .pscore i{display:block; font:700 7px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-style:normal;}
+  .pscore b{display:block; font:700 30px/1.1 var(--sans); color:var(--good); margin-top:3px;}
+  .pscore small{display:block; font:400 9px/1.3 var(--sans); color:var(--ink-3); margin-top:3px;}
+
+  table{width:100%; border-collapse:collapse; font-family:var(--sans);}
+  thead th{background:var(--panel); color:var(--panel-ink); font:700 7px/1 var(--sans); letter-spacing:.09em;
+           text-transform:uppercase; text-align:left; padding:8px 9px; white-space:nowrap;}
+  td{padding:10px 9px; font-size:11.5px; vertical-align:middle; border-bottom:1px solid var(--line-soft);}
+  tbody tr:last-child td{border-bottom:0;}
+  tbody tr:nth-child(even) td{background:var(--zebra);}
+  th.num,td.num{text-align:right;} th.cc,td.cc{text-align:center;}
+  td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  td.idx,th.idx{width:30px; text-align:right;} td.idx{color:var(--none); font:400 9px/1 var(--mono);}
+  td.lead{font-weight:700;}
+  td.final{font-weight:700;} td.dprog{font-size:14.5px;}
+  .good{color:var(--good);} .attn{color:var(--attn);} .bad{color:var(--bad);} .none{color:var(--none);}
+  td.dnote{font-size:9px; color:var(--ink-2); line-height:1.42; max-width:30ch;}
+  td.dnote.empty{color:var(--none);}
+  th:last-child{width:24%;}
+  .dpill{display:inline-block; padding:3px 7px; border-radius:999px; font-size:9px; font-weight:600;}
+  .dpill.good{background:var(--good-bg); color:var(--good-tx);}
+  .dpill.attn{background:var(--attn-bg); color:var(--attn-tx);}
+  .dpill.none{border:1px dashed var(--none); color:var(--ink-2); font-weight:500;}
+  td.outc{font-size:10px; color:var(--ink-2);}
+  .q{display:inline-block; width:12px; height:12px; border-radius:3px; border:1px solid var(--line); margin:0 1px; vertical-align:middle;}
+  .q.on{background:var(--stone); border-color:var(--stone);}
+
+  /* ── THE CHANGE: a hidden row is kept, in place, and says so ─────────
+     The same two things the plan page has worn since §233: grey ink on
+     every cell of the row, and the chip after the name. Nothing is struck
+     through — the figures stay legible — and nothing moves: the row keeps
+     its number and its seat, because it was part of the plan. */
+  tr.hiddenrow td, tr.hiddenrow td.lead, tr.hiddenrow td.final, tr.hiddenrow td.dprog,
+  tr.hiddenrow td .good, tr.hiddenrow td .bad{color:var(--ink-3); font-weight:400;}
+  tr.hiddenrow .dpill{background:none; border:1px dashed var(--none); color:var(--ink-3);}
+  tr.hiddenrow .q.on{background:var(--none); border-color:var(--none);}
+  .hidchip{display:inline-block; font:600 7px/1 var(--sans); letter-spacing:.07em;
+           text-transform:uppercase; color:var(--attn-tx); background:var(--attn-bg);
+           border-radius:99px; padding:3px 6px; margin-left:7px; white-space:nowrap; vertical-align:middle;}
+
+  .decis{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .decis dt{font:600 13px/1.4 var(--sans); margin:10px 0 2px;}
+  .decis dt:first-child{margin-top:0;}
+  .decis dd{margin:0; font-size:13px; color:var(--ink-2); max-width:80ch;}
+  @media (max-width:600px){ .phead{flex-direction:column;} .pscore{text-align:left;} }
+</style>
+
+<div class="wrap">
+  <h1>A hidden row stays on the slide</h1>
+  <p class="sub">The eye works as it does today: the row is <b>not counted</b> and reporting
+    stops asking for it. What changes is the presentation. Instead of leaving the row out,
+    the slide <b>keeps it in its place</b>, greyed, with the same <i>Hidden — not counted</i>
+    chip the plan page already wears, so the presenter can show that it was set aside on
+    purpose. Always on, for every deck, and for the PowerPoint download too.</p>
+
+  <h2>1 · A key measures slide — row 2 hidden, the score computed without it</h2>
+  <div class="stage"><section class="dslide">
+    <div class="eyebrow">Mobile · Strategy review</div>
+    <div class="phead">
+      <h3><span class="dcode">MB01</span>Digital &amp; Data-Driven Operations<span class="kind">Key measures</span></h3>
+      <div class="pscore"><i>Key measures</i><b>71%</b><small>over 3 counted rows</small></div>
+    </div>
+    <table>
+      <thead><tr><th class="idx">#</th><th>Measure</th><th class="num">Annual target</th>
+        <th class="num">Actual</th><th class="num">Progress</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td class="lead">Data duplicate rate</td>
+          <td class="num">≤ 1%</td><td class="num">1.4%</td>
+          <td class="num final dprog attn">72%</td><td class="dnote">Clean-up of the legacy CRM runs to Q3.</td></tr>
+        <tr class="hiddenrow"><td class="idx">2</td>
+          <td class="lead">Legacy churn index<span class="hidchip">Hidden — not counted</span></td>
+          <td class="num">≥ 70</td><td class="num">64</td>
+          <td class="num final dprog">91%</td><td class="dnote">Retired with the legacy platform in June.</td></tr>
+        <tr><td class="idx">3</td><td class="lead">Automated transactions share</td>
+          <td class="num">≥ 60%</td><td class="num">38%</td>
+          <td class="num final dprog bad">63%</td><td class="dnote empty">—</td></tr>
+        <tr><td class="idx">4</td><td class="lead">Data quality audit score</td>
+          <td class="num">≥ 85</td><td class="num">67</td>
+          <td class="num final dprog attn">79%</td><td class="dnote empty">—</td></tr>
+      </tbody>
+    </table>
+  </section></div>
+  <p class="notew">The row keeps its number and its seat. Its figures stay readable but weigh
+    nothing: the 71% at the top is the average of rows 1, 3 and 4, exactly as the plan page
+    computes it. The note the office wrote on the row is the presenter's defence.</p>
+
+  <h2>2 · A tactics slide — row 3 hidden</h2>
+  <div class="stage"><section class="dslide">
+    <div class="eyebrow">Mobile · Strategy review</div>
+    <div class="phead">
+      <h3><span class="dcode">MB01</span>Digital &amp; Data-Driven Operations<span class="kind">Tactics</span></h3>
+      <div class="pscore"><i>Delivered</i><b>83%</b><small>over 3 counted rows</small></div>
+    </div>
+    <table>
+      <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th>
+        <th class="cc">Quarters</th><th>Status</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td class="lead">Migrate billing to the new core</td>
+          <td class="outc">Billing live on new core</td><td>Ahmed</td>
+          <td class="cc"><span class="q on"></span><span class="q on"></span><span class="q"></span><span class="q"></span></td>
+          <td><span class="dpill good">Done</span></td><td class="dnote empty">—</td></tr>
+        <tr><td class="idx">2</td><td class="lead">Roll out self-service portal</td>
+          <td class="outc">12 stores onboarded</td><td>Mona</td>
+          <td class="cc"><span class="q"></span><span class="q on"></span><span class="q on"></span><span class="q"></span></td>
+          <td><span class="dpill attn">In progress</span></td><td class="dnote">8 of 12 by end of Q3.</td></tr>
+        <tr class="hiddenrow"><td class="idx">3</td>
+          <td class="lead">Pilot chatbot in two branches<span class="hidchip">Hidden — not counted</span></td>
+          <td class="outc">2 branches live</td><td>Khaled</td>
+          <td class="cc"><span class="q"></span><span class="q on"></span><span class="q"></span><span class="q"></span></td>
+          <td><span class="dpill none">Not started</span></td><td class="dnote">Paused: vendor contract moved to next year.</td></tr>
+        <tr><td class="idx">4</td><td class="lead">Retire the paper onboarding form</td>
+          <td class="outc">Form withdrawn</td><td>Ahmed</td>
+          <td class="cc"><span class="q on"></span><span class="q"></span><span class="q"></span><span class="q"></span></td>
+          <td><span class="dpill good">Done</span></td><td class="dnote empty">—</td></tr>
+      </tbody>
+    </table>
+  </section></div>
+  <p class="notew">Same treatment on every row kind that can be hidden: an objective, a measure,
+    a tactic, a deliverable, an outcome, a milestone. The status pill loses its colour on a
+    hidden row, so the Delivered figure above is never contradicted by a coloured pill it does
+    not include.</p>
+
+  <h2>3 · What this changes, and what it does not</h2>
+  <div class="decis"><dl>
+    <dt>Changes</dt>
+    <dd>The review deck, Present mode, the deck PDF and the PowerPoint download keep a hidden row
+      where it sits, greyed, with the chip after its name. In the PowerPoint the whole row is
+      written in grey with the words <i>Hidden — not counted</i> after the name.</dd>
+    <dt>Does not change</dt>
+    <dd>Scoring, reporting, Submit, the gap count, the plan page, the Performance tables and the
+      workbook's Hidden column are untouched. The eye still hides and shows with one press.</dd>
+    <dt>Cost, stated</dt>
+    <dd>A hidden row now takes a line on the slide again, so a long table may split one slide
+      earlier than it does today. And anything hidden is back in front of the room: a row hidden
+      because it should not be seen, rather than because it was dropped, needs the × instead.</dd>
+  </dl></div>
+</div>

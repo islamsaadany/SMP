@@ -68579,3 +68579,25 @@ Islam, of the check §594 named and did not build: *"build the check that follow
 Not merged; `main` stays untouched until Islam says.
 
 **§596 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch: the deep-dive priorities for Processes, recorded as §595 in the progress file. That took this section's number, so it was renumbered §596. The merge into the branch was clean. The merged `package-lock.json` was proved by a clean `npm ci` from it: 448 packages, acorn 8.19.0. npm's `--package-lock-only` rewrite added 66 unrelated optional-dependency lines and was discarded rather than shipped. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean (after the route types were regenerated for main's new priorities pages). `pages-types` 8 / 0, `rules-types` 2 / 0 and `app-types` 4 / 0, with red 15 / 15, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. The release adds two devDependencies, which the deploy's install fetches and nothing at run time loads. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
+
+## §599 — The objects the pages build are closed for the checker (2026-10-23)
+Islam, of the limit §594 named: *"now close the open objects on the pages too"*.
+
+**THE LIMIT.** A page script that builds its own object as it loads — `var CLIENTSETUP = (function () { … return { … }; })();`, and SYNC, SEARCHSEL, TOUR and the rest — hands the checker an object written in JavaScript. The checker treats such an object as open, so `CLIENTSETUP.mountCreat(…)` read as `any` and nobody was told. §594 said that closing them would mean editing the pages.
+
+**IT DID NOT.** The check closes them in the COPY it reads, and nowhere else. Each such object is wrapped `__closed(…)`, an identity declared to return a mapped copy of the same keys, which is closed: the library names' answer from §589.
+- **The wraps sit on the same lines,** so every finding keeps its line.
+- **The pages are untouched,** so nothing a browser receives changes, and there is no reload.
+- **The objects are found by parsing (acorn, §596), at any depth, never from a list.** Both kinds are covered: objects built by a function that runs as the script loads, and plain `{ … }` objects that hold functions. An object holding only data stays open, because data gains keys as it runs.
+- **The wrapped copy must still parse,** and the check says so in its own words if it does not. Its first run with nested objects broke `copilot.js` by marking a pair at a time; it now makes each mark separately, latest first.
+- **The count is printed:** 31 objects on the strategy pages and 2 on the console.
+
+**WHAT IT FOUND: NOTHING.** With all 33 closed there was not one new finding on either page. Every call the pages make into an object they build themselves names a member that exists.
+
+**PROVED, BOTH WAYS.** Three planted faults: `SEARCHSEL.openOnn(…)` on the strategy pages, `MY_TAB.kk` (a plain object of behaviour), and the console's `CLIENTSETUP.mountCreat(…)`. **All three are caught** — and **none of them is caught with the closing step switched off,** measured in a throwaway copy of the check. `--red` now plants eighteen faults across both pages, all caught.
+
+**STILL OPEN, SAID:**
+- **An object holding only data.** Closing it would flag every key the code adds as it runs.
+- **Anything reached by a computed name** (`ROWFIND[t]`, `LIVE[k]`). No checker can spell-check a name that is only known at run time.
+
+Not merged; `main` stays untouched until Islam says.

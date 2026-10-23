@@ -11150,7 +11150,13 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # A route only data closes (canShape()) goes in
                                 # DOORWAYS with its reason; a doorway that
                                 # vanishes fails. Fifteen breaks, §467 itself
-                                # among them, all caught
+                                # among them, all caught. §599: the objects a
+                                # page BUILDS (IIFE-built, or a `{…}` holding
+                                # functions) are wrapped `__closed(…)` in the
+                                # checked COPY only, so a misspelt member is a
+                                # finding; data-only objects and computed
+                                # names (`ROWFIND[t]`) stay open. Eighteen
+                                # breaks now
 node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
                                 # — `npm run check:app-types`. A carried .cjs
                                 # loaded with `require` is `any`: load the

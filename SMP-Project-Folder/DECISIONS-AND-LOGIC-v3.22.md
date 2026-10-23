@@ -68643,6 +68643,42 @@ Islam: *"add the day view for the company plan and functions too."* §598 drew *
 
 **§598.1 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had not moved since §597 and §598 landed, so the branch fast-forwards; the proof above was run on this exact tree (`history-asof` 53/0, neighbours green, `test-authorize` 1129/3, `test:rules` 152/3, `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear). `sw.js` is `v6.91-day-view-everywhere`, past main's `v6.90`, because the built file's bytes changed (§91). No forced sign-out. The live read is reported rather than claimed (§54.5): production cannot be reached from this container.
 
+## §599 — The objects the pages build are closed for the checker (2026-10-23)
+Islam, of the limit §594 named: *"now close the open objects on the pages too"*.
+
+**THE LIMIT.** A page script that builds its own object as it loads — `var CLIENTSETUP = (function () { … return { … }; })();`, and SYNC, SEARCHSEL, TOUR and the rest — hands the checker an object written in JavaScript. The checker treats such an object as open, so `CLIENTSETUP.mountCreat(…)` read as `any` and nobody was told. §594 said that closing them would mean editing the pages.
+
+**IT DID NOT.** The check closes them in the COPY it reads, and nowhere else. Each such object is wrapped `__closed(…)`, an identity declared to return a mapped copy of the same keys, which is closed: the library names' answer from §589.
+- **The wraps sit on the same lines,** so every finding keeps its line.
+- **The pages are untouched,** so nothing a browser receives changes, and there is no reload.
+- **The objects are found by parsing (acorn, §596), at any depth, never from a list.** Both kinds are covered: objects built by a function that runs as the script loads, and plain `{ … }` objects that hold functions. An object holding only data stays open, because data gains keys as it runs.
+- **The wrapped copy must still parse,** and the check says so in its own words if it does not. Its first run with nested objects broke `copilot.js` by marking a pair at a time; it now makes each mark separately, latest first.
+- **The count is printed:** 31 objects on the strategy pages and 2 on the console.
+
+**WHAT IT FOUND: NOTHING.** With all 33 closed there was not one new finding on either page. Every call the pages make into an object they build themselves names a member that exists.
+
+**PROVED, BOTH WAYS.** Three planted faults: `SEARCHSEL.openOnn(…)` on the strategy pages, `MY_TAB.kk` (a plain object of behaviour), and the console's `CLIENTSETUP.mountCreat(…)`. **All three are caught** — and **none of them is caught with the closing step switched off,** measured in a throwaway copy of the check. `--red` now plants eighteen faults across both pages, all caught.
+
+**STILL OPEN, SAID:**
+- **An object holding only data.** Closing it would flag every key the code adds as it runs.
+- **Anything reached by a computed name** (`ROWFIND[t]`, `LIVE[k]`). No checker can spell-check a name that is only known at run time.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§599 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch twice: §597 and §598, which took this section's first number, so it was renumbered §599; then §598.1. Each time main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources, byte-identical to main's. On the merged tree, main's history and slide changes included: `pages-types` 10 / 0 (31 and 2 objects closed, and still no finding beyond the recorded ones), typecheck clean, `rules-types` 2 / 0, `app-types` 4 / 0, with red 18 / 18, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. No forced sign-out. Witnesses: `/sw.js` release **`49e60e384ee0e743`** and `/shell.js` **5,175,811** bytes before, and the same after.
+
+## §600 — The colours on Client set-up's first step write on a served platform (2026-10-23)
+Islam, with a screenshot of *The tenant's colours* on Client set-up: *"when I change something in the clients setting like color it doesn't change and I have no save button somewhere."* Told the cause and the fix in plain words first, he answered *"go ahead"*.
+
+**THE FAULT.** The first step draws the two colour controls through `brandingBody()`, and the shell's `wire()` binds them — which is why paint() mounts the flow BEFORE wire() (§360). But `mount()` asked for the client's record with `ensureReg("[data-csetup]", mount)`, so when the record landed a moment later the flow mounted ITSELF again: `render()` rebuilt the step, the pickers and hex fields with it, and nothing called `wire()`. On a served platform, on the first visit to the page in a tab, every colour picked or typed went nowhere — the picker showed the new colour, `branding()` never heard of it, the page kept its palette and nothing was saved. Any later repaint (a step pressed, another page and back) wired them again, which is why it read as intermittent. **The missing save button is not a fault**: branding is part of the graph and autosaves like everything else (§39); it never received the change.
+
+**THE FIX.** When the record lands, the flow asks the shell to repaint (`opts.repaint`, the paint() it already passes) instead of mounting itself, so the redraw goes through `wire()` like every other. The console passes no repaint and draws no colours, so it mounts again as before. The Forefront team page's own `ensureReg` is untouched: its controls are wired by client-setup.js itself.
+
+**WHY NO CHECK SAW IT.** `checks/client-setup.py` §3 presses the same control and asserts it writes — over file://, where `ensureReg` returns before asking (no server, no slug), so there is no late redraw to lose the wiring. **`checks/brand-served.py`** (own server, the record answered after 0.8s) asserts the late redraw HAPPENED — the picker drawn before the record is marked and must be gone after, or a build that never redrew would pass the rest (§113.8) — then that the picker, the hex field and Clear write `branding()`, that the page wears the accent (`--gold`), that the hex field reads it back, and that the save the stub RECEIVED carries it (§96). 11/0 here; on the previous frozen build 6 red — exactly the writes and the save. Neighbours green: `client-setup`, `client-setup-outside`, `forefront-team`, `deck-dividers`; `pages-types` 10/0. **`team-page` reads 3 red** (the address-clipping widths) **identically on the previous frozen build** — main's, on a page whose own `ensureReg` this does not touch; recorded, not fixed (§303). `multi-client` needs a database and was not run here.
+
+**Screen only**: nothing stored moves, no migration, no rule about who may save what changes, so no forced sign-out (spec 029). The built file's bytes changed, so `sw.js` is bumped to `v6.92-brand-wired` (§91); the frozen file and the served copies regenerated (§329).
+
+**§600 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had not moved since the branch was cut from it, so the branch fast-forwards; the proof above was run on this exact tree (`brand-served` 11/0 and 6 red on the previous frozen build, `client-setup`, `client-setup-outside`, `forefront-team`, `deck-dividers` green, `pages-types` 10/0, `generated-in-step` all clear, `qa.py` ERRORS none; `team-page`'s 3 red are main's, recorded). `sw.js` is `v6.92-brand-wired`, past main's `v6.91`, because the built file's bytes changed (§91). No forced sign-out. The live read is reported rather than claimed (§54.5): production cannot be reached from this container.
 
 ## §601 — The console's tabs in a column on the left (2026-10-23)
 Islam, of the console's Clients page: *"I'd like to change this to a left side navigation like a typical concept. show me a mockup"*; of the mockup (`design-mockups/left-nav/2026-10-23_left-sidebar.html`): *"yes build it, keep the headings and the « button, but make the names of the module appear on hovering when they are collapsed"*.

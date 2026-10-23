@@ -68640,3 +68640,6 @@ Islam: *"add the day view for the company plan and functions too."* §598 drew *
 **Screen only**: no log shape changes, no migration, no forced sign-out. `sw.js` bumped to `v6.91-day-view-everywhere` (§91).
 
 **ONE RED THAT IS MAIN'S, LEFT AS MAIN'S** (§303): `single-company.py` reads *§449 before: the group still opens on Performance* red on this build and identically red on the previous frozen build, on a page this change does not touch; recorded, not fixed.
+
+**§598.1 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had not moved since §597 and §598 landed, so the branch fast-forwards; the proof above was run on this exact tree (`history-asof` 53/0, neighbours green, `test-authorize` 1129/3, `test:rules` 152/3, `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear). `sw.js` is `v6.91-day-view-everywhere`, past main's `v6.90`, because the built file's bytes changed (§91). No forced sign-out. The live read is reported rather than claimed (§54.5): production cannot be reached from this container.
+

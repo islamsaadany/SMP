@@ -592,7 +592,11 @@
    execution card beside its directions, and How we compete as a setting on
    functions. The built file's bytes changed (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.00-company-reading";
+/* v7.01-cards-overview-slides — §612: the unit Overview's cards and the
+   direction slide's "where it stands" read like §610's cards. The built
+   file's bytes changed (§91). Proved held by no commit in any ref's
+   history (§94.16). */
+const SHELL = "smp-shell-v7.01-cards-overview-slides";
 const ASSETS = [
   "/",
   "/index.html",

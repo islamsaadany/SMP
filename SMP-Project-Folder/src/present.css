@@ -1613,6 +1613,10 @@
 .headdetail .hdf { font-weight:600; }
 .headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
 .headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+/* §612: the lines under the headline speak more quietly than it does —
+   smaller, and a figure in the top band in ink rather than in colour. */
+.headdetail { font-size:20px; }
+.dslide .headdetail .hdf.quiet { color:var(--ink-2); font-weight:500; }
 
 /* ── §579: LINE BY LINE ───────────────────────────────────────────────────
    A line waiting is transparent, never removed, so nothing moves as the

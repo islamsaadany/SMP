@@ -126,6 +126,33 @@ window.__mk = {
       '<div style="display:flex;gap:8px">' + this.solid(yes) + this.plain('Keep as it was') + '</div></div></td>';
     tr.after(row);
   },
+  floatBox: function(anchor, title, text, yes, no){
+    var r = anchor.getBoundingClientRect(), W = 380;
+    var left = Math.max(16, Math.min(window.innerWidth - W - 16, r.left + r.width / 2 - 48));
+    var top = r.bottom + 12 + window.pageYOffset;
+    var d = document.createElement('div');
+    d.className = 'mk-float';
+    d.setAttribute('style', 'position:absolute;z-index:9999;top:' + top + 'px;left:' + (left + window.pageXOffset) + 'px;width:' + W + 'px;' +
+      'box-sizing:border-box;padding:14px 16px;border-radius:10px;border:1px solid var(--attn);background:var(--surface);' +
+      'box-shadow:0 12px 32px rgba(0,0,0,.18);font:var(--fs-small)/1.5 var(--sans);color:var(--ink)');
+    var ax = r.left + r.width / 2 - left - 7;
+    d.innerHTML = '<span style="position:absolute;top:-8px;left:' + ax + 'px;width:14px;height:14px;transform:rotate(45deg);' +
+      'background:var(--surface);border-left:1px solid var(--attn);border-top:1px solid var(--attn)"></span>' +
+      '<div style="font-weight:700;color:var(--attn-tx);margin-bottom:4px">' + title + '</div>' +
+      '<div style="margin-bottom:12px">' + text + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px">' + this.solid(yes) + this.plain(no) + '</div>';
+    document.body.appendChild(d);
+  },
+  tip: function(anchor, text){
+    var r = anchor.getBoundingClientRect();
+    var d = document.createElement('div');
+    d.className = 'mk-tip';
+    d.setAttribute('style', 'position:absolute;z-index:9999;top:' + (r.bottom + 8 + window.pageYOffset) + 'px;left:' + (r.left + window.pageXOffset) + 'px;' +
+      'max-width:420px;padding:8px 11px;border-radius:7px;background:var(--ink);color:var(--surface);' +
+      'font:12px/1.45 var(--sans);box-shadow:0 6px 18px rgba(0,0,0,.2)');
+    d.textContent = text;
+    document.body.appendChild(d);
+  },
   strip: function(what, unsaved){
     var pane = document.querySelector('#panel') || document.body, r = pane.getBoundingClientRect();
     var d = document.createElement('div');
@@ -225,46 +252,64 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     shot(pg, "bands-colour-unapplied.png")
 
-    # 4 · Roles & access, the click rule: turning a cell UP saves itself and says so on the cell
+    # 4 · Roles & access: giving MORE asks first too, in a floating box with the impact (round 5)
     setup_go(pg, "access")
     pg.evaluate(JS_PIECES)
+    def access_row(name):
+        return "[...document.querySelectorAll('#panel table tbody tr')].find(r => /^\\s*" + name + "/.test(r.children[0].textContent))"
     pg.evaluate("""()=>{
-      const tr = [...document.querySelectorAll('#panel table tbody tr')]
-        .find(r => /^\\s*Contributor/.test(r.children[0].textContent));
+      const tr = """ + access_row("Custodian") + """;
+      const td = tr.children[2];                            /* Their own · Plan */
+      const pen = td.querySelector('[data-acm$="|edit"]') || td.querySelectorAll('button')[td.querySelectorAll('button').length - 1];
+      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
+      const who = (tr.children[0].querySelector('span, small, .why') || {}).textContent || '';
+      __mk.floatBox(pen, 'Custodian' + (who ? ' \u00b7 ' + who : ''),
+        'Will be able to <span style="font-weight:700">change</span> their own plan, not only read it.',
+        'Change it', 'Keep as it was');
+    }""")
+    pg.wait_for_timeout(300)
+    shot(pg, "access-more-asks.png")
+
+    # 5 · taking AWAY asks the same way
+    pg.evaluate("""()=>{
+      document.querySelectorAll('.mk-float').forEach(e => e.remove());
+      document.querySelectorAll('#panel td').forEach(td => td.style.outline = '');
+      const tr = """ + access_row("Owner") + """;
+      const td = tr.children[3];                            /* Their own · Reporting */
+      const eye = td.querySelector('button');
+      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
+      const who = (tr.children[0].querySelector('span, small, .why') || {}).textContent || '';
+      __mk.floatBox(eye, 'Owner' + (who ? ' \u00b7 ' + who : ''),
+        'Will only be able to <span style="font-weight:700">read</span> their own reporting, and no longer change it.',
+        'Change it', 'Keep as it was');
+    }""")
+    pg.wait_for_timeout(300)
+    shot(pg, "access-less-asks.png")
+
+    # 6 · after Change it: saved, and said on the cell
+    pg.evaluate("""()=>{
+      document.querySelectorAll('.mk-float').forEach(e => e.remove());
+      document.querySelectorAll('#panel td').forEach(td => td.style.outline = '');
+      const tr = """ + access_row("Custodian") + """;
       const b = tr && tr.children[2].querySelector('[data-acm$="|edit"]');
       if (b) b.click();
     }""")
     pg.wait_for_timeout(700)
     pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
-      const tr = [...document.querySelectorAll('#panel table tbody tr')]
-        .find(r => /^\\s*Contributor/.test(r.children[0].textContent));
-      const set = tr.children[2].querySelector('.stset');
-      set.insertAdjacentHTML('afterend', __mk.savedTag());
+      const tr = """ + access_row("Custodian") + """;
+      tr.children[2].querySelector('.stset').insertAdjacentHTML('afterend', __mk.savedTag());
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "access-on-saved.png")
+    shot(pg, "access-saved.png")
 
-    # 5 · the click rule's other half: turning a cell DOWN asks first, under its row
-    pg.evaluate("""()=>{
-      document.querySelectorAll('.mk-saved').forEach(e => e.remove());
-      const tr = [...document.querySelectorAll('#panel table tbody tr')]
-        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
-      const td = tr.children[3];                            /* Their own · Reporting */
-      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
-      const who = (tr.children[0].querySelector('span, small, .why') || {}).textContent || '';
-      __mk.askRow(tr, '<span style="font-weight:700;color:var(--attn-tx)">Owner</span>' + (who ? ' (' + who + ')' : '') +
-        ' will only be able to <span style="font-weight:700">read</span> their own reporting, and no longer change it.', 'Change it');
-    }""")
-    pg.wait_for_timeout(300)
-    shot(pg, "access-off-asks.png")
-
-    # 6 · the shape screen: End in Mind, with its own tick, under Winning Aspiration
-    pg.evaluate("()=>{ document.querySelectorAll('.mk-ask').forEach(e => e.remove()); }")
+    # 7 · Client set-up: no Save; unticking a part that HOLDS DATA asks in the same box
     setup_go(pg, "start")
     pg.wait_for_timeout(800)
     pg.evaluate("()=>{const b=[...document.querySelectorAll('.csetup .wzstep')].find(x=>x.dataset.step==='shape'); if(b) b.click();}")
     pg.wait_for_timeout(1200)
+    pg.evaluate("()=>{const b=document.querySelector('.csetup [data-shlvl=\"bu\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(1000)
     pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
       const asp = [...document.querySelectorAll('.csetup .stpart')]
@@ -273,39 +318,19 @@ with sync_playwright() as p:
       const row = asp.cloneNode(true);
       row.classList.remove('off');
       row.querySelectorAll('input').forEach(i => { i.value = ''; i.placeholder = 'End in Mind'; });
-      row.style.outline = '2px dashed var(--attn)'; row.style.outlineOffset = '3px'; row.style.borderRadius = '6px';
       asp.after(row);
       row.scrollIntoView({block:'center'});
+      const tick = row.firstElementChild;
+      tick.style.outline = '2px solid var(--attn)'; tick.style.outlineOffset = '2px'; tick.style.borderRadius = '4px';
+      __mk.floatBox(tick, 'Business units \u00b7 End in Mind',
+        '<span style="font-weight:700">Mobile</span> has one written. Unticking hides it on Mobile\u2019s Strategy page and in its presentation. ' +
+        'The words are kept and come back when you tick it again.', 'Untick', 'Keep');
     }""")
     pg.wait_for_timeout(400)
-    shot(pg, "shape-endinmind-tick.png")
+    shot(pg, "shape-untick-asks.png")
+    pg.evaluate("()=>{ document.querySelectorAll('.mk-float').forEach(e => e.remove()); }")
 
-    # 7 · the typing rule: a name changed, the card's foot out of sight, its Save row pinned
-    pg.evaluate("""()=>{
-      const box = [...document.querySelectorAll('.csetup .stpart input')]
-        .find(i => /^Aspiration, one/.test(i.getAttribute('aria-label') || ''));
-      if (!box) return;
-      box.value = 'Vision';
-      box.style.outline = '2px solid var(--attn)'; box.style.outlineOffset = '1px';
-      box.scrollIntoView({block:'center'});
-      __mk.pinned('Save', '1 change not saved yet: the top level\u2019s word for Winning Aspiration');
-    }""")
-    pg.wait_for_timeout(400)
-    shot(pg, "shape-typed-pinned.png")
-    pg.evaluate("()=>{ document.querySelectorAll('.mk-pinned').forEach(e => e.remove()); }")
-
-    # 7b · leaving with that typed change unsaved: the agreed strip, in the pinned row's place
-    pg.evaluate("""()=>{
-      const it = document.querySelector('.setuprail [data-setupgo=units]');
-      if (it) { it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
-      __mk.strip('The shape', 'the top level\\u2019s word for Winning Aspiration');
-    }""")
-    pg.wait_for_timeout(300)
-    shot(pg, "shape-leave.png")
-    pg.evaluate("""()=>{ document.querySelectorAll('.mk-strip').forEach(e => e.remove());
-      const it = document.querySelector('.setuprail [data-setupgo=units]'); if (it) it.style.outline = ''; }""")
-
-    # 8 · where End in Mind shows once ticked: Mobile's Strategy page, the aspiration card
+    # 8 · where End in Mind shows when ticked: Mobile's Strategy page, the aspiration card
     pg.evaluate("""()=>{ const u = document.querySelector('#units [data-u="mobile"]'); if (u) u.click(); }""")
     pg.wait_for_timeout(900)
     pg.evaluate("""()=>{ const t = document.querySelector('[data-s="strategy"]'); if (t) t.click(); }""")
@@ -324,4 +349,53 @@ with sync_playwright() as p:
     }""")
     pg.wait_for_timeout(400)
     shot(pg, "mobile-endinmind.png")
+
+    # 9 · Getting started with the paragraphs taken out; one fact shown on its hover
+    pg.click('button[title="Setup"]')
+    pg.wait_for_timeout(400)
+    setup_go(pg, "start")
+    pg.wait_for_timeout(1200)
+    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=client]'); if(b) b.click();}")
+    pg.wait_for_timeout(1000)
+    pg.evaluate(JS_PIECES)
+    gone = pg.evaluate("""()=>{
+      const out = [/^What the platform is named after/, /^Made from the name/, /^Shown on /, /^The tenant.s face is set/,
+                   /^Branding is the tenant/, /^Turning one on gives this client/, /^Archiving takes/];
+      let n = 0;
+      document.querySelectorAll('#panel p, #panel .note, #panel .wzendwhy').forEach(e => {
+        const t = e.textContent.trim();
+        if (out.some(r => r.test(t))) { e.style.display = 'none'; n++; }
+      });
+      /* a heading left with nothing under it goes with its note (the Typeface block) */
+      [...document.querySelectorAll('#panel h2, #panel h3')].forEach(h => {
+        if (/^Typeface$/.test(h.textContent.trim())) { const sec = h.closest('section, .sec, div'); if (sec) sec.style.display = 'none'; }
+      });
+      window.scrollTo(0, 0);
+      const lab = [...document.querySelectorAll('.csetup .lab')].find(l => /mark/i.test(l.textContent));
+      if (lab) { lab.style.textDecoration = 'underline dotted'; __mk.tip(lab,
+        'Shown on the sign-in page and on the presentations: large on the cover, small in every slide\u2019s footer. PNG with a transparent background.'); }
+      return n;
+    }""")
+    print("paragraphs taken out:", gone)
+    pg.wait_for_timeout(400)
+    shot(pg, "client-clean.png")
+    pg.evaluate("()=>{ document.querySelectorAll('.mk-tip').forEach(e => e.remove()); }")
+
+    # 10 · the shape step cleaned the same way: the notice one line, the how-to lines on hovers
+    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();}")
+    pg.wait_for_timeout(1200)
+    pg.evaluate("()=>{const b=document.querySelector('.csetup [data-shlvl=\"top\"]') || document.querySelector('.csetup .shtoprow button'); if(b) b.click();}")
+    pg.wait_for_timeout(900)
+    pg.evaluate(JS_PIECES)
+    gone2 = pg.evaluate("""()=>{
+      let n = 0;
+      const notice = [...document.querySelectorAll('.csetup .wzarched')].find(e => /shape is set from here on/.test(e.textContent));
+      if (notice) { notice.textContent = 'This client has a plan, so rows can\u2019t be added here. Names and switches still change.'; n++; }
+      document.querySelectorAll('.csetup .wzwhy').forEach(e => { e.style.display = 'none'; n++; });
+      window.scrollTo(0, 0);
+      return n;
+    }""")
+    print("shape lines taken out or shortened:", gone2)
+    pg.wait_for_timeout(400)
+    shot(pg, "shape-clean.png")
     b.close()

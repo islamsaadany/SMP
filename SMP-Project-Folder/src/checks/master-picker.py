@@ -47,11 +47,17 @@ table and no grip, so an undegraded probe would throw and report nothing — whi
 Run: python3 checks/master-picker.py   (or via qa-run.py for the bundled
 Chromium)
 """
+import os
 import pathlib
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
+# SMP_BUILT points it at another build (§276). It did not read it, and a
+# run meant to show a new claim FAILING on the build it changed from
+# silently re-ran against this one and passed — which is a check that
+# cannot be shown to fail at all (§113.8).
+FILE = pathlib.Path(os.environ["SMP_BUILT"]) if os.environ.get("SMP_BUILT") \
+  else ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 CHROME = "/opt/pw-browsers/chromium"
 
 ok = bad = 0
@@ -284,7 +290,27 @@ with sync_playwright() as p:
       const want = MFLOW.pick.slice();
       return {
         kinds: rows.map(r => r.querySelector('.mfkind').textContent.trim()),
-        wantKinds: want.map(t => fns.indexOf(t) >= 0 ? 'FUNC' : 'BU'),
+        /* FIVE KINDS, NOT TWO (§218). This read `FUNC : BU`, which was the
+           whole vocabulary until §334 added capabilities, §481 the company
+           and a direction, and §553 the company's own Foundation — so a
+           correct picker showing CAP and SECTION read as a broken one.
+           Still computed from the BOARD's own lists and the target's own
+           prefix (§94.8), never from `masterKind`, which is the thing the
+           column is drawn by and so cannot be its own witness. */
+        wantKinds: want.map(function(t){
+          if (t.indexOf('sec:') === 0) return 'SECTION';
+          /* §554.2: a capability of the company's is presented as `dir:<id>`
+             like a direction is, and the column said DIR for all ten. The
+             pillar's own kind is what tells them apart — read here from the
+             stored row, never from `masterKindWord`, which is what draws it. */
+          if (t.indexOf('dir:') === 0) {
+            var d = dirPillar(t);
+            return (d && SMPRules.pillarIsCap(d.p)) ? 'CAP' : 'DIR';
+          }
+          if (boardCapTargets().indexOf(t) >= 0) return 'CAP';
+          if (t === 'group') return companyReviewOn() ? 'CO' : 'BU';
+          return fns.indexOf(t) >= 0 ? 'FUNC' : 'BU';
+        }),
         slides: rows.map(r => +r.querySelector('.c-n').textContent.trim()),
         wantSlides: want.map(t => masterCount(t)),
         names: rows.map(r => r.querySelector('.c-nm').textContent.trim()),
@@ -535,6 +561,96 @@ with sync_playwright() as p:
     }""", None, {})
     check("closing takes the extra width off the shared overlay",
           get(closed, "marked") is False, closed)
+
+    # ── §554.2 · the three things Islam asked the picker for ─────────
+    # *"everytime I remove something from the right the list jumps it needs
+    # to stay still"*, *"on the left list I need to have filters so I can
+    # choose from directions or capabilities or divisions … or all"*, and
+    # *"there should be somewhere where I reset all and bring all selected
+    # flow to the left"*.
+    print("\n9 · the picker stays still, narrows, and empties (§554.2)")
+    # THE WINDOW HAS TO BE SHORT ENOUGH FOR THE LIST TO SCROLL, or the
+    # claim below is true of a list that never moved (§113.8). Asserted,
+    # not assumed: `scrollable` is part of the condition.
+    # THE LIST HAS TO SCROLL FOR THE CLAIM TO MEAN ANYTHING, and how tall
+    # it is depends on the window and on how many subjects the client has —
+    # neither of which this claim is about. A rule in the STYLESHEET, so it
+    # survives the repaint the claim is testing; `scrollable` is asserted
+    # with the rest, so a rule that stopped working fails the check rather
+    # than quietly making it vacuous (§113.8).
+    ev(pg, """() => { const st = document.createElement('style');
+      st.textContent = '.mflow .mflist{max-height:200px}';
+      document.head.appendChild(st); return true; }""")
+    kept = ev(pg, """() => {
+      masterOpen();
+      MFLOW.pick = masterSubjects().slice(); masterPaint();
+      const flow = document.querySelectorAll('.mflist')[1];
+      flow.scrollTop = 200;
+      const before = flow.scrollTop;
+      /* READ BEFORE THE PRESS. The repaint replaces the element, and a
+         detached one reports scrollHeight and clientHeight as 0 — so asking
+         it afterwards said "not scrollable" about a list that had just
+         scrolled 200px (§50.3's detached-render trick, in a check). */
+      const scrollable = flow.scrollHeight > flow.clientHeight;
+      const xs = document.querySelectorAll('[data-mfflow] .mfx');
+      xs[xs.length - 1].click();
+      const after = document.querySelectorAll('.mflist')[1].scrollTop;
+      return {before: before, after: after, scrollable: scrollable};
+    }""", None, {})
+    # IT CAN FAIL (§113.8): the list has to be scrollable for the claim to
+    # mean anything, and `before` has to be where it was put.
+    check("taking one out leaves the flow where it was scrolled to",
+          get(kept, "scrollable") is True and get(kept, "before") == 200
+          and get(kept, "after") == 200, kept)
+
+    narrow = ev(pg, """() => {
+      MFLOW.pick = []; MFLOW.kind = ""; masterPaint();
+      const chips = [...document.querySelectorAll('[data-mfkind]')].map(b => b.dataset.mfkind);
+      const rows = () => [...document.querySelectorAll('[data-mfrest] .c-k')]
+        .map(c => c.textContent.trim());
+      const all = rows();
+      const out = {chips: chips, all: all.length, each: {}};
+      chips.filter(Boolean).forEach(k => {
+        const b = document.querySelector('[data-mfkind="' + k + '"]');
+        b.click();
+        const r = rows();
+        out.each[k] = {n: r.length, only: [...new Set(r)]};
+        b.click();
+      });
+      out.back = rows().length;
+      return out;
+    }""", None, {})
+    check("a chip for every kind the client has, and All",
+          sorted(get(narrow, "chips") or []) == sorted(list(set(get(narrow, "chips") or []))) 
+          and "" in (get(narrow, "chips") or [])
+          and len(get(narrow, "chips") or []) > 2, narrow)
+    each = get(narrow, "each") or {}
+    check("…each one shows that kind and nothing else",
+          bool(each) and all(v.get("only") == [k] and v.get("n") > 0
+                             for k, v in each.items()),
+          each)
+    check("…and they add up to the whole list, so none is unreachable (§96.2)",
+          sum(v.get("n", 0) for v in each.values()) == get(narrow, "all"),
+          {"sum": sum(v.get("n", 0) for v in each.values()), "all": get(narrow, "all")})
+    check("…and All puts them back",
+          get(narrow, "back") == get(narrow, "all"), narrow)
+
+    empty = ev(pg, """() => {
+      MFLOW.pick = masterSubjects().slice(); MFLOW.kind = ""; masterPaint();
+      const had = !!document.querySelector('[data-mfnone]');
+      document.querySelector('[data-mfnone]').click();
+      return {had: had, pick: MFLOW.pick.length,
+              left: document.querySelectorAll('[data-mfrest]').length,
+              stillThere: !!document.querySelector('[data-mfnone]'),
+              all: masterSubjects().length};
+    }""", None, {})
+    check("Take all out empties the flow and every row comes back",
+          get(empty, "had") is True and get(empty, "pick") == 0
+          and get(empty, "left") == get(empty, "all"), empty)
+    # A CONTROL WITH NOTHING BEHIND IT IS NOT DRAWN (§61).
+    check("…and it is gone once there is nothing to take out",
+          get(empty, "stillThere") is False, empty)
+    ev(pg, "() => { closeModal(); }")
 
     check("no page errors", not errs, errs)
     b.close()

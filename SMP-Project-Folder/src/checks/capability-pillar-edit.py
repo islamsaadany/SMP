@@ -53,8 +53,15 @@ ROW = """(a)=>{ var c = GROUP.capabilities.filter(function(x){ return x.id===a[0
   return { n: l.length, row: r ? { q1:!!r.q1, q2:!!r.q2, q3:!!r.q3, q4:!!r.q4, hide:!!r.hide } : null }; }"""
 
 def open_plan(pg, target):
-    press(pg, '[data-fold="%s"]' % ("caps" if target.startswith("cap:") else "units"))
-    press(pg, '[data-u="%s"]' % target)
+    # §544.13: a capability has no side on the row — it is the company's and
+    # is reached from the company's plan (§520's rail). Its pages are still
+    # its own and still answer to `cap:<id>`, so this goes there the way the
+    # rail does rather than pressing a fold that no longer exists.
+    if target.startswith("cap:"):
+        js(pg, "(d)=>{ if (!capsReachable().some(function(c){ return 'cap:'+c.id === d; })) return false; if (current !== d) leaveModes(); current = d; currentSub = entrySub(current); paint(); window.scrollTo(0,0); return true; }", target); pg.wait_for_timeout(300)
+    else:
+        press(pg, '[data-fold="units"]')
+        press(pg, '[data-u="%s"]' % target)
     js(pg, """()=>{ var b=[...document.querySelectorAll('[data-sub2]')]
       .filter(function(e){ return /^(Plan|Pillars)$/.test(e.textContent.trim()); })[0];
       b && b.click(); }""")

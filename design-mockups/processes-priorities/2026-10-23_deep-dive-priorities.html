@@ -1,0 +1,218 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deep-dive Priorities</title>
+<style>
+:root{--bg:#F3F5F9;--surf:#fff;--surf2:#EFF2F6;--ink:#1B2430;--ink2:#414A58;--ink3:#5F6B7C;--line:#D6DCE5;--navy:#16325C;--navy-ink:#fff;--navy-q:#B9C6DC;--gold:#B8862B;--gold-bg:#FBF3E0;--good:#1E7A4D;--good-bg:#E4F3EA;--warn:#8A5A00;--warn-bg:#FBF0D6;--bad:#A4332A;--bad-bg:#F8E4E1;--info:#1F5FA8;--info-bg:#E2EDF9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--navy-ink:#fff;--navy-q:#9DB0CF;--gold:#E0B25A;--gold-bg:#3A2F17;--good:#6FD0A0;--good-bg:#173626;--warn:#EBC36A;--warn-bg:#3A2F17;--bad:#F0968D;--bad-bg:#3C1F1C;--info:#8DBBEF;--info-bg:#18304C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--navy-ink:#fff;--navy-q:#9DB0CF;--gold:#E0B25A;--gold-bg:#3A2F17;--good:#6FD0A0;--good-bg:#173626;--warn:#EBC36A;--warn-bg:#3A2F17;--bad:#F0968D;--bad-bg:#3C1F1C;--info:#8DBBEF;--info-bg:#18304C;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:14.5px;line-height:1.45;padding-inline:16px;padding-block:0 40px}
+*{box-sizing:border-box}
+.app{max-width:1180px;margin:0 auto}
+.top{background:var(--navy);color:var(--navy-ink);border-radius:0 0 10px 10px;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.top b{font-size:15px}.top .q{color:var(--navy-q);font-size:13px}
+.mods{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.mods span{font-size:12.5px;padding:3px 9px;border-radius:5px;color:var(--navy-q)}
+.mods span.on{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
+.nav{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0 12px;border-bottom:1px solid var(--line)}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);font:inherit;font-weight:600;padding:8px 14px;cursor:pointer}
+.nav button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.nav .who{margin-left:auto;align-self:center;font-size:12px;color:var(--ink3)}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--surf2);color:var(--ink2);margin-left:5px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:14px;margin:0 0 8px}
+.h{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin:0 0 6px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px}
+th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--surf2)}
+tr.clk{cursor:pointer}tr.clk:hover td{outline:0;background:var(--gold-bg)}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.good{background:var(--good-bg);color:var(--good)}.warn{background:var(--warn-bg);color:var(--warn)}.bad{background:var(--bad-bg);color:var(--bad)}.info{background:var(--info-bg);color:var(--info)}.grey{background:var(--surf2);color:var(--ink2)}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:5px 12px;border-radius:6px;cursor:pointer}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#16120A}
+.crumb{font-size:12.5px;color:var(--ink3);margin-bottom:6px}.crumb a{color:var(--info);cursor:pointer}
+.ph{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.ph h2{margin:0}
+.links{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.links a{font-size:12.5px;border:1px solid var(--line);background:var(--surf);color:var(--info);padding:2px 9px;border-radius:99px;cursor:pointer;font-weight:600}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin:12px 0}
+.tabs button{font:inherit;font-weight:600;padding:6px 14px;background:var(--surf2);color:var(--ink2);border:1px solid var(--line);border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button.on{background:var(--surf);color:var(--ink);border-bottom-color:var(--surf);box-shadow:inset 0 3px 0 var(--gold)}
+.pane{display:none}.pane.on{display:block}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 12px}
+.st{padding:5px 11px;border-radius:6px;background:var(--surf2);color:var(--ink2);font-weight:600;font-size:13px}
+.st.on{background:var(--navy);color:#fff}.st.done{background:var(--good-bg);color:var(--good)}
+.bar2{height:8px;background:var(--surf2);border-radius:5px;overflow:hidden;min-width:90px}.bar2 i{display:block;height:100%;background:var(--good)}
+.bar2.w i{background:var(--gold)}.bar2.b i{background:var(--bad)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.sub button{font:inherit;font-size:13px;font-weight:600;padding:4px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surf);color:var(--ink2);cursor:pointer}
+.sub button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px 14px}.stat b{font-size:24px;display:block}.stat span{font-size:12.5px;color:var(--ink3)}
+.rd{max-width:760px;margin:0 auto}
+.rd .step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.rd .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.ack{position:sticky;bottom:10px;background:var(--surf);border:1px solid var(--gold);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+.note{border-left:3px solid var(--gold);background:var(--gold-bg);padding:8px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px}
+
+.steps{display:flex;gap:0;margin:0 0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surf)}
+.steps button{flex:1;font:inherit;text-align:left;border:0;border-right:1px solid var(--line);background:none;padding:10px 14px;cursor:pointer;color:var(--ink2)}
+.steps button:last-child{border-right:0}
+.steps button b{display:block;font-size:13.5px;color:var(--ink)}.steps button small{font-size:12px;color:var(--ink3)}
+.steps button.on{background:var(--surf2);box-shadow:inset 0 3px 0 var(--gold)}
+.dots{display:inline-flex;gap:3px}.dots i{width:12px;height:12px;border-radius:50%;background:var(--surf2);border:1px solid var(--line);cursor:pointer}.dots i.f{background:var(--navy);border-color:var(--navy)}
+.dots.r i.f{background:var(--bad);border-color:var(--bad)}.dots.c i.f{background:var(--gold);border-color:var(--gold)}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+select.d{font:inherit;font-size:13px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surf);color:var(--ink)}
+.wts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 18px;margin:8px 0 2px}
+.wts label{font-size:12.5px;color:var(--ink2);display:block}.wts label b{float:right;color:var(--ink)}
+.wts input[type=range]{width:100%;accent-color:var(--gold)}
+.split{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:14px}@media(max-width:860px){.split{grid-template-columns:1fr}}
+svg text{font-family:inherit;fill:var(--ink2)}
+.q1{fill:var(--gold-bg)}.q0{fill:var(--surf2)}
+.bub{cursor:pointer;stroke:var(--surf);stroke-width:2}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:12px;align-items:start}
+.col{background:var(--surf2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.col h3{display:flex;justify-content:space-between;align-items:center}
+.pc{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:8px}
+.pc b{display:block}.pc small{color:var(--ink3);font-size:12px}
+.seg{display:flex;gap:3px;margin:7px 0 3px}.seg i{flex:1;height:7px;border-radius:3px;background:var(--line)}.seg i.f{background:var(--good)}
+.cap{font-size:12.5px;padding:6px 10px;border-radius:8px;margin-bottom:10px}
+.sign{max-width:760px;margin:0 auto}
+.sign table{min-width:0}
+.sig{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+.sig div{min-width:200px}.sig span{display:block;border-bottom:1px solid var(--ink3);height:26px}.sig small{color:var(--ink3);font-size:12px}
+.rail{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surf);margin-bottom:12px}
+.rail aside{background:var(--surf2);border-right:1px solid var(--line);padding:8px 0}
+.rail aside div{padding:6px 14px;font-size:13px;color:var(--ink2)}.rail aside div.on{background:var(--surf);font-weight:700;color:var(--ink);box-shadow:inset 3px 0 0 var(--gold)}
+.rail main{padding:12px 14px}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold)}
+.hint{font-size:12.5px;color:var(--ink3)}
+</style>
+<div class="app">
+<div class="top"><b>Raya Trade</b><span class="q">Processes</span><div class="mods"><span>Strategy</span><span class="on">Processes</span><span>Tracker</span><span>Insights</span><button class="btn" id="tgl" style="padding:1px 9px;font-size:12px">Light / dark</button></div></div>
+
+<div class="nav" id="nav">
+<button data-v="list">Processes</button>
+<button data-v="pri" class="on">Priorities<span class="tag">New</span></button>
+<button data-v="else">Where it shows up</button>
+<span class="who">Strategy Office only — the client sees the sign-off page</span>
+</div>
+
+<!-- PRIORITIES -->
+<div class="view on" id="v-pri">
+<div class="ph"><h2>Deep-dive priorities</h2><span class="pill info">14 high-level processes</span><span class="hint">Which ones do we take deep next — full steps, RACI, controls and an SOP?</span></div>
+<div class="steps" id="steps">
+<button data-s="score" class="on"><b>1 · Score</b><small>Importance, complexity, risk</small></button>
+<button data-s="rank"><b>2 · Rank</b><small>See them side by side</small></button>
+<button data-s="plan"><b>3 · Plan</b><small>Waves, owners, progress</small></button>
+<button data-s="sign"><b>4 · Sign-off</b><small>One page for the client</small></button>
+</div>
+
+<!-- 1 SCORE -->
+<div class="pane on" id="s-score">
+<div class="card"><h3>What counts, and how much (agree this with the client first)</h3>
+<div class="wts" id="wts"></div>
+<p class="hint" style="margin:8px 0 0">Click the dots to score 1 to 5. The score out of 100 and the rank move as you change them or the weights.</p></div>
+<div class="card"><div class="tw"><table><thead><tr><th>Rank</th><th>Process</th><th>Department</th><th>Importance</th><th>Complexity</th><th>Risk</th><th>Score</th><th>Why (one line)</th><th>Decision</th></tr></thead><tbody id="tb"></tbody></table></div>
+<div class="note">Office-only working view. A suggested starting score from the process map, the interactions and the risks already logged is offered per process — you accept or change it; it is never printed in anything the client receives.</div></div>
+</div>
+
+<!-- 2 RANK -->
+<div class="pane" id="s-rank">
+<div class="split">
+<div class="card"><h3>Importance across, risk up — bigger circle means more complex</h3><div id="chart"></div>
+<p class="hint">Top right is where to start: important and risky. Click a circle to see why and change its decision.</p></div>
+<div><div class="card" id="detail"></div>
+<div class="card"><h3>Ranked</h3><div id="rk"></div></div></div>
+</div></div>
+
+<!-- 3 PLAN -->
+<div class="pane" id="s-plan">
+<div class="cap warn" id="cap"></div>
+<div class="board" id="board"></div>
+<p class="hint" style="margin-top:10px">Each card shows how far the deep dive is: Map · RACI · Authority · Controls · SOP · Approved. It fills in by itself as the work is done on the process, and opens the process page.</p>
+</div>
+
+<!-- 4 SIGN -->
+<div class="pane" id="s-sign"><div class="sign card">
+<div class="ph"><h2>Deep-dive priorities — Raya Trade</h2><span class="pill grey" id="sgst">Draft</span></div>
+<p style="margin:0 0 10px">From 14 high-level processes we propose to go deep, in this order. Chosen on three things, weighted as shown.</p>
+<div class="stats" id="sgw"></div>
+<h3>Wave 1 — start now</h3><table><tbody id="sg1"></tbody></table>
+<h3 style="margin-top:14px">Wave 2 — next</h3><table><tbody id="sg2"></tbody></table>
+<h3 style="margin-top:14px">Later or stays high-level</h3><p class="hint" id="sg3"></p>
+<div class="sig"><div><span></span><small>Approved for Raya Trade — name, role, date</small></div><div><span></span><small>Strategy Office — name, date</small></div></div>
+<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn gold" id="send">Send to client for approval</button><button class="btn">Export one page</button><button class="btn">Print</button></div>
+<p class="hint" style="margin-top:8px">Approving it sets the deep-dive plan. Changing it later after approval needs a reason and is kept on record.</p>
+</div></div>
+</div>
+
+<!-- PROCESSES LIST -->
+<div class="view" id="v-list"><div class="card"><div class="ph"><h2>All processes</h2><span class="pill info">14 processes</span><button class="btn gold" style="margin-left:auto">+ New process</button></div>
+<div class="tw"><table><thead><tr><th>Code</th><th>Process</th><th>Department</th><th>Depth</th><th>Priority</th><th>Stage</th></tr></thead><tbody id="lt"></tbody></table></div>
+<p class="hint" style="margin-top:8px">New: a Priority column. Every process starts as <b>High-level</b>; the ones chosen move to <b>Deep dive</b>.</p></div></div>
+
+<!-- ELSEWHERE -->
+<div class="view" id="v-else">
+<div class="card"><h3>In the side rail</h3><div class="rail"><aside><div>Dashboard</div><div>Org Directory</div><div>Processes</div><div class="on">Priorities <span class="tag">New</span></div><div>Helicopter View</div><div>Value Chain</div><div>Governance</div><div>Export Report</div></aside><main><b>Priorities</b> sits between Processes and the Helicopter View: you map first, then choose where to go deep.</main></div></div>
+<div class="card"><h3>On a process</h3><div class="ph"><h2 style="margin:0">Order-to-Cash</h2><span class="pill grey">SOP-014</span><span class="chip">Wave 1 · rank 1</span><span class="pill info">Deep dive 4 of 6</span></div>
+<p class="hint">The page header says why this process is being worked on and how far it is. The Lifecycle, Risks &amp; controls and other tabs are where the deep dive happens.</p></div>
+<div class="card"><h3>On the Helicopter View</h3><p class="hint" style="margin:0">Chosen processes get a gold ring on the picture, so the conversation with the client shows what we are going deep on and what stays at the top level.</p></div>
+</div>
+</div>
+
+<script>
+var P=[
+["Order-to-Cash","SOP-014","Finance",5,4,5,"Revenue leaks if credit and invoicing slip"],
+["Procure-to-Pay","SOP-021","Supply Chain",5,4,4,"Largest spend; three approval levels"],
+["Inventory & Stock Count","SOP-018","Supply Chain",4,4,5,"Shrinkage and write-offs in 40 stores"],
+["Credit & Collections","SOP-024","Finance",4,3,5,"Overdue balances rising"],
+["Record-to-Report","SOP-002","Finance",4,4,4,"Month-end close takes 9 days"],
+["Warranty & Returns","SOP-027","Customer Care",3,4,4,"Cost and reputation, inconsistent practice"],
+["Logistics & Last-mile","SOP-033","Supply Chain",4,5,3,"Many hand-offs, many partners"],
+["Pricing & Promotions","SOP-006","Commercial",5,3,3,"Margin impact, but works today"],
+["New Store Opening","SOP-009","Retail",4,5,3,"Complex but only a few a year"],
+["Vendor Onboarding","SOP-012","Supply Chain",3,2,4,"Compliance exposure"],
+["Hire-to-Retire","SOP-040","HR",3,3,3,"Steady, well understood"],
+["Customer Complaints","SOP-031","Customer Care",3,2,3,"Low volume"],
+["IT Service Management","SOP-050","IT",2,3,3,"Internal only"],
+["Loyalty Programme","SOP-044","Commercial",2,2,1,"Small and stable"]];
+var W={i:35,r:40,c:25},DEC={},PRO={"SOP-014":4,"SOP-021":2,"SOP-018":1};
+var DECS=["Wave 1","Wave 2","Later","Stays high-level"];
+function sc(p){return Math.round((W.i*p[3]+W.r*p[5]+W.c*p[4])/(5*(W.i+W.r+W.c))*100)}
+function ranked(){return P.slice().sort(function(a,b){return sc(b)-sc(a)})}
+function auto(){var r=ranked();r.forEach(function(p,i){if(DEC[p[1]]===undefined||DEC[p[1]]==="__a")DEC[p[1]]=i<4?0:i<8?1:i<11?2:3;});}
+P.forEach(function(p){DEC[p[1]]="__a"});
+function dots(p,idx,cls){var h='<span class="dots '+cls+'">';for(var k=1;k<=5;k++)h+='<i class="'+(k<=p[idx]?'f':'')+'" data-p="'+p[1]+'" data-k="'+idx+'" data-v="'+k+'"></i>';return h+'</span>'}
+function drawW(){var n=[["i","Importance to the business"],["r","Risk if it goes wrong"],["c","Complexity"]],h="";n.forEach(function(x){h+='<label>'+x[1]+' <b>'+W[x[0]]+'%</b><input type="range" min="0" max="80" value="'+W[x[0]]+'" data-w="'+x[0]+'"></label>'});document.getElementById("wts").innerHTML=h}
+function drawT(){auto();var r=ranked(),h="";r.forEach(function(p,i){var d=DEC[p[1]];h+='<tr><td><b>'+(i+1)+'</b></td><td><b>'+p[0]+'</b><br><small class="hint">'+p[1]+'</small></td><td>'+p[2]+'</td><td>'+dots(p,3,"")+'</td><td>'+dots(p,4,"c")+'</td><td>'+dots(p,5,"r")+'</td><td class="score">'+sc(p)+'</td><td>'+p[6]+'</td><td><select class="d" data-d="'+p[1]+'">'+DECS.map(function(x,k){return '<option value="'+k+'"'+(k==d?' selected':'')+'>'+x+'</option>'}).join("")+'</select></td></tr>'});document.getElementById("tb").innerHTML=h}
+var SEL=null;
+function drawChart(){var w=560,h=400,l=46,b=36,t=14,r=14,pw=w-l-r,ph=h-t-b,s='<svg viewBox="0 0 '+w+' '+h+'" width="100%" role="img" aria-label="Importance against risk">';
+s+='<rect class="q0" x="'+l+'" y="'+t+'" width="'+pw+'" height="'+ph+'" rx="6"/><rect class="q1" x="'+(l+pw/2)+'" y="'+t+'" width="'+pw/2+'" height="'+ph/2+'" rx="6"/>';
+s+='<text x="'+(l+pw-8)+'" y="'+(t+18)+'" text-anchor="end" font-size="12" font-weight="700">Start here</text><text x="'+(l+8)+'" y="'+(t+18)+'" font-size="12">Risky, less central</text><text x="'+(l+pw-8)+'" y="'+(t+ph-8)+'" text-anchor="end" font-size="12">Central, lower risk</text><text x="'+(l+8)+'" y="'+(t+ph-8)+'" font-size="12">Leave high-level</text>';
+for(var k=1;k<=5;k++){var x=l+(k-.5)/5*pw,y=t+ph-(k-.5)/5*ph;s+='<text x="'+x+'" y="'+(h-18)+'" text-anchor="middle" font-size="11">'+k+'</text><text x="'+(l-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="11">'+k+'</text>'}
+s+='<text x="'+(l+pw/2)+'" y="'+(h-3)+'" text-anchor="middle" font-size="12" font-weight="600">Importance</text><text transform="translate(12 '+(t+ph/2)+') rotate(-90)" text-anchor="middle" font-size="12" font-weight="600">Risk</text>';
+var cols=["var(--navy)","var(--gold)","var(--ink3)","var(--line)"],seen={};
+P.forEach(function(p){var k=p[3]+"-"+p[5];seen[k]=(seen[k]||0)+1;var off=(seen[k]-1)*16;var x=l+(p[3]-.5)/5*pw+off-6,y=t+ph-(p[5]-.5)/5*ph-off*.6,rad=7+p[4]*2.6;s+='<circle class="bub" data-b="'+p[1]+'" cx="'+x+'" cy="'+y+'" r="'+rad+'" fill="'+cols[DEC[p[1]]]+'" opacity="'+(SEL===p[1]?1:.86)+'"'+(SEL===p[1]?' stroke="var(--ink)"':"")+'/>'});
+s+='</svg><div class="hint" style="margin-top:6px"><span class="pill info" style="background:var(--navy);color:#fff">Wave 1</span> <span class="pill warn" style="background:var(--gold);color:#16120A">Wave 2</span> <span class="pill grey">Later</span> <span class="pill grey" style="opacity:.6">Stays high-level</span></div>';document.getElementById("chart").innerHTML=s}
+function drawDetail(){var p=P.filter(function(x){return x[1]===SEL})[0]||ranked()[0];SEL=p[1];var d=DEC[p[1]];document.getElementById("detail").innerHTML='<div class="h">Selected</div><h2 style="margin:0 0 4px">'+p[0]+'</h2><div class="hint">'+p[1]+' · '+p[2]+'</div><div class="stats" style="margin:10px 0"><div class="stat"><b>'+p[3]+'</b><span>Importance</span></div><div class="stat"><b>'+p[5]+'</b><span>Risk</span></div><div class="stat"><b>'+p[4]+'</b><span>Complexity</span></div><div class="stat"><b>'+sc(p)+'</b><span>Score</span></div></div><p style="margin:0 0 8px">'+p[6]+'.</p><label class="hint">Decision <select class="d" data-d="'+p[1]+'">'+DECS.map(function(x,k){return '<option value="'+k+'"'+(k==d?' selected':'')+'>'+x+'</option>'}).join("")+'</select></label>'}
+function drawRk(){var h="";ranked().forEach(function(p,i){h+='<div class="row"><span><b>'+(i+1)+'</b> &nbsp;'+p[0]+'</span><span><span class="score">'+sc(p)+'</span> <span class="pill '+(DEC[p[1]]==0?'info':DEC[p[1]]==1?'warn':'grey')+'">'+DECS[DEC[p[1]]]+'</span></span></div>'});document.getElementById("rk").innerHTML=h}
+function card(p){var n=PRO[p[1]]||0,seg="";for(var k=0;k<6;k++)seg+='<i class="'+(k<n?'f':'')+'"></i>';var own={"Finance":"Hend Mourad","Supply Chain":"Karim Fouad","Customer Care":"Nour Samir","Retail":"Amr Hassan","Commercial":"Dina Anwar","HR":"Mona Yassin","IT":"Tarek Adel"}[p[2]];return '<div class="pc"><b>'+p[0]+'</b><small>'+p[1]+' · '+p[2]+' · owner '+own+'</small><div class="seg">'+seg+'</div><small>Deep dive '+n+' of 6 · <a style="color:var(--info);cursor:pointer;font-weight:600">Open process →</a></small></div>'}
+function drawBoard(){var cap=4,r=ranked(),by=[[],[],[],[]];r.forEach(function(p){by[DEC[p[1]]].push(p)});var meta=[["Wave 1 — now","by end of November"],["Wave 2 — next","Q1 2027"],["Later","review in 6 months"],["Stays high-level","no deep dive planned"]],h="";by.forEach(function(a,i){h+='<div class="col"><h3>'+meta[i][0]+' <span class="pill grey">'+a.length+'</span></h3><small class="hint">'+meta[i][1]+'</small>'+a.map(card).join("")+'</div>'});document.getElementById("board").innerHTML=h;var c=document.getElementById("cap");c.className="cap "+(by[0].length>cap?"bad":"good");c.innerHTML="<b>Team capacity: "+cap+" deep dives at a time.</b> Wave 1 holds "+by[0].length+(by[0].length>cap?" — too many to run together; move one to Wave 2.":" — fits.")}
+function drawSign(){var r=ranked(),by=[[],[],[],[]];r.forEach(function(p){by[DEC[p[1]]].push(p)});document.getElementById("sgw").innerHTML='<div class="stat"><b>'+W.i+'%</b><span>Importance</span></div><div class="stat"><b>'+W.r+'%</b><span>Risk</span></div><div class="stat"><b>'+W.c+'%</b><span>Complexity</span></div>';function rows(a){return a.map(function(p){return '<tr><td><b>'+(r.indexOf(p)+1)+'</b></td><td><b>'+p[0]+'</b></td><td>'+p[2]+'</td><td>'+p[6]+'</td></tr>'}).join("")}document.getElementById("sg1").innerHTML=rows(by[0]);document.getElementById("sg2").innerHTML=rows(by[1]);document.getElementById("sg3").textContent=by[2].concat(by[3]).map(function(p){return p[0]}).join(" · ")}
+function drawList(){var r=ranked(),h="";P.forEach(function(p){var d=DEC[p[1]],deep=d<2;h+='<tr><td>'+p[1]+'</td><td><b>'+p[0]+'</b></td><td>'+p[2]+'</td><td><span class="pill '+(deep?'info':'grey')+'">'+(deep?'Deep dive':'High-level')+'</span></td><td>'+(d<2?'<span class="chip">'+DECS[d]+' · rank '+(r.indexOf(p)+1)+'</span>':'—')+'</td><td><span class="pill grey">Draft</span></td></tr>'});document.getElementById("lt").innerHTML=h}
+function all(){drawW();drawT();drawChart();drawDetail();drawRk();drawBoard();drawSign();drawList()}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset&&t.dataset.k){var p=P.filter(function(x){return x[1]===t.dataset.p})[0];p[+t.dataset.k]=+t.dataset.v;Object.keys(DEC).forEach(function(k){if(DEC[k]<4&&!MAN[k])DEC[k]="__a"});all()}
+if(t.dataset&&t.dataset.b){SEL=t.dataset.b;drawChart();drawDetail()}
+var nv=t.closest&&t.closest("#nav button");if(nv){[].forEach.call(document.querySelectorAll("#nav button"),function(b){b.classList.toggle("on",b===nv)});[].forEach.call(document.querySelectorAll(".view"),function(v){v.classList.toggle("on",v.id==="v-"+nv.dataset.v)})}
+var sb=t.closest&&t.closest("#steps button");if(sb){[].forEach.call(document.querySelectorAll("#steps button"),function(b){b.classList.toggle("on",b===sb)});[].forEach.call(document.querySelectorAll(".pane"),function(v){v.classList.toggle("on",v.id==="s-"+sb.dataset.s)})}
+if(t.id==="send"){document.getElementById("sgst").className="pill warn";document.getElementById("sgst").textContent="Sent — waiting for the client";t.disabled=true}
+if(t.id==="tgl"){var r=document.documentElement,d=r.getAttribute("data-theme")==="dark"||(!r.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);r.setAttribute("data-theme",d?"light":"dark")}});
+var MAN={};
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset.w){W[t.dataset.w]=+t.value;Object.keys(DEC).forEach(function(k){if(!MAN[k])DEC[k]="__a"});all()}
+if(t.dataset.d){DEC[t.dataset.d]=+t.value;MAN[t.dataset.d]=1;all()}});
+document.addEventListener("input",function(e){var t=e.target;if(t.dataset.w){W[t.dataset.w]=+t.value;t.previousSibling;t.parentNode.querySelector("b").textContent=t.value+"%";Object.keys(DEC).forEach(function(k){if(!MAN[k])DEC[k]="__a"});drawT();drawChart();drawDetail();drawRk();drawBoard();drawSign();drawList()}});
+all();
+</script></html>

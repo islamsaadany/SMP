@@ -80,17 +80,20 @@ with sync_playwright() as p:
        safe(pg, "()=>[unitPillars(UNITS.mobile), unitExec(UNITS.mobile), reportItems(UNITS.mobile).length]") == base,
        [base, safe(pg, "()=>[unitPillars(UNITS.mobile), unitExec(UNITS.mobile), reportItems(UNITS.mobile).length]")])
 
-    print("\n2 · the switch, pressed on the Structure step")
+    print("\n2 · the switch, pressed on the shape screen's units card")
     okp = False
     try:
         pg.click('[data-md="setup"]', timeout=4000); pg.wait_for_timeout(250)
         try: pg.click('.ritem[data-setupgo="start"]', timeout=3000)
         except Exception: pg.click('[data-setupgo="start"]', timeout=3000)
         pg.wait_for_timeout(250)
-        pg.click('.wzstep[data-step="structure"]', timeout=4000); pg.wait_for_timeout(250)
+        # §544: the Structure step is the shape screen, and the units' card
+        # opens from the tree — one level at a time.
+        pg.click('.wzstep[data-step="shape"]', timeout=4000); pg.wait_for_timeout(250)
+        pg.click('[data-shlvl="bu"]', timeout=4000); pg.wait_for_timeout(250)
         okp = True
     except Exception as e: okp = str(e)[:120]
-    ok("the Structure step opens", okp is True, okp)
+    ok("the shape screen's units card opens", okp is True, okp)
     # §420: each layer has its own switch, in its plan section; the old
     # client-wide card is gone. Ticked on the business units' layer here.
     chip = safe(pg, "()=>{var c=document.querySelector('[data-stdetail=\"bu|years\"]'); var r=c&&c.closest('[data-stdetrow]'); return c?[c.getAttribute('aria-pressed'), r?r.textContent:'']:null}")
@@ -178,8 +181,13 @@ with sync_playwright() as p:
     ok("the review deck gives the not-running direction no title slide",
        dk and ("data-anchor=\"p%sd\"" % code) not in dk, code)
     ok("but the running one keeps its", dk and ("data-anchor=\"p%sd\"" % safe(pg, "()=>pillarCode(UNITS.mobile,0)")) in dk)
-    px = safe(pg, "()=>pptxUnitSlides(UNITS.mobile,'M').join('')")
+    # REWRITTEN TO THE NEW RULE (218, 564): the plan download is the deck
+    # without its figures, and in the plan every direction draws, the one not
+    # running yet included, with its years on its title page.
+    px = safe(pg, """()=>{var out=[]; [].forEach.call(planDeckBox('mobile').querySelectorAll('.dslide'), function(sl){ out=out.concat(deckSlidePptx(sl,'M',null)); }); return out.join('')}""")
     ok("the plan download names the years", px and "Y2–3" in px)
+    ok("…and carries the direction that is not running yet",
+       px and (safe(pg, "()=>UNITS.mobile.items[1].name") or "@").replace("&", "&amp;") in px)
     rt = safe(pg, """async ()=>{ try {
         var u = UNITS.mobile, wb = planWorkbook(u);
         var sh = wb.filter(x=>x.name==='Pillars')[0];

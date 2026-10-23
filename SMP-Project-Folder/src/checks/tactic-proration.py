@@ -317,8 +317,10 @@ def main():
           var rows=[...document.querySelectorAll('tbody tr')]
             .filter(r=>/CK stores fitted/.test(r.textContent));
           if(!rows.length) return {found:false};
-          var r=rows[0], pair=r.querySelector('.pair');
-          return { found:true, pair: pair ? pair.textContent.trim() : null,
+          /* §572: the figure and what is due are one cell, the due a line
+             under the figure ("7#" then "due 10 #"), so the cell is read. */
+          var r=rows[0], pc=r.querySelector('.pair'), cell=pc ? pc.closest('td') : null;
+          return { found:true, pair: cell ? cell.textContent.replace(/\s+/g," ").trim() : null,
                    text: r.textContent.replace(/\\s+/g," ").trim() };
         }""")
         ck("the tactic is on the Performance pane", perf.get("found"), perf)
@@ -338,7 +340,11 @@ def main():
         ck("the tactic is on the Reporting pane", rep.get("found"), rep)
         ck("...and its YTD Target is the window's, never the year's",
            bool(rep.get("ytd")) and not rep.get("year"), rep)
-        ck("...and it says what that is a part of", any("of 12 #" in c for c in rep.get("cells", [])),
+        # §573: a symbol is written tight against its number on every read
+        # cell now (`12#`, as `tgtShown` already wrote it), so the typed `12 #`
+        # reads `12#` here too. Either spelling is the same fact.
+        ck("...and it says what that is a part of",
+           any("of 12 #" in c or "of 12#" in c for c in rep.get("cells", [])),
            rep.get("cells"))
 
         # ── 7 · a tactic that has not started shows no target of nothing ──────

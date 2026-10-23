@@ -51,11 +51,16 @@ with sync_playwright() as p:
 
     print("\n2 · the Structure step: pressed")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="structure"]')
-    ck("the set-up flow's Structure step opens", ok)
+        and press(pg, '.wzstep[data-step="shape"]')
+    ck("the set-up flow's shape screen opens", ok)
+    # §544: a level's card opens from the tree, one at a time.
+    def lvl(k):
+        return press(pg, '[data-shlvl="%s"]' % k)
     ck("the top and the units carry a How we compete switch",
-       all(safe(pg, "(k)=>!!document.querySelector('[data-stsec=\"'+k+'|compete\"]')", k) for k in ("top", "bu")))
-    ck("…the functions do not", safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|compete\"]')") is False)
+       all(lvl(k) and safe(pg, "(k)=>!!document.querySelector('[data-stsec=\"'+k+'|compete\"]')", k) for k in ("top", "bu")))
+    ck("…the functions do not",
+       lvl("fn") and safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|compete\"]')") is False)
+    lvl("bu")
     ck("off, it says nothing is lost",
        "Nothing entered is lost" in (safe(pg, "()=>{var s=document.querySelector('[data-stcompete=\"bu\"]');return s?s.textContent:''}") or ""))
     press(pg, '[data-stsec="bu|compete"] button:nth-child(1)')

@@ -3,6 +3,7 @@ import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { prisma } from "@/ffp/lib/db/client";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { mixHex, readableInkOn } from "@/ffp/lib/domain/color-contrast";
+import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { WorkspaceAccessProvider } from "./workspace-access";
 import { WorkspaceSidebar } from "./workspace-sidebar";
 
@@ -14,6 +15,9 @@ export default async function WorkspaceLayout(
   props: LayoutProps<"/[slug]/processes">
 ) {
   const { slug: workspaceId } = await props.params;
+
+  // The office's own: a client's own person is sent to their reading page (see ../require-office.ts).
+  await requireOffice(workspaceId);
 
   const access = await requireWorkspaceAccess(workspaceId, "VIEWER");
   if (!access.ok) {

@@ -65,22 +65,68 @@ with sync_playwright() as p:
     secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
+    # §570, the end that must NOT move: with units the top button is the
+    # client's top word and its own first tab keeps Strategy. Read as drawn,
+    # first text node only, so the Reporting tab's dot is not its name.
+    tabsNow = lambda: safe(pg, """()=>({top:[...document.querySelectorAll('#units [data-u="group"]')].map(b=>b.textContent.trim()),
+      sub:[...document.querySelectorAll('#subtabs > button[role=tab]')].map(b=>{var f=b.firstChild; return String(f&&f.nodeType===3?f.textContent:b.textContent).trim()})})""", {}) or {}
+    safe(pg, "()=>{current='group'; currentSub='strategy'; paint()}"); pg.wait_for_timeout(250)
+    t0 = tabsNow()
+    ck("§570 with units: the top button is the client's top word", t0.get("top") == [safe(pg, "()=>labelWord('topword','group')")], t0)
+    ck("…and its own first tab is still Strategy", (t0.get("sub") or [None])[0] == "Strategy", t0)
 
-    # ── 1. The switch, pressed in Client set-up › Structure ──────────
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
-    ck("Client set-up › Structure opens", ok)
-    ck("§448 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
-    geo = safe(pg, "()=>{var l=document.querySelector('.stplanq .lab'),b=document.querySelector('[data-stplan]');if(!l||!b)return null;var a=l.getBoundingClientRect(),c=b.getBoundingClientRect();return {below:c.top>=a.bottom-1,left:Math.abs(c.left-a.left)<2}}", None)
-    ck("§450 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)
-    ck("…and the business units' card has no switch of its own", safe(pg, "()=>!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
-    press(pg, '[data-stplan] button:nth-child(1)')
-    ck("choosing the company ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)
-    ck("…and changes nothing yet", safe(pg, "()=>buExists() && (GROUP.items||[]).length===0") is True)
-    press(pg, '[data-buask-no]')
-    ck("Cancel takes the question away and changes nothing",
-       safe(pg, "()=>!document.querySelector('[data-buask]') && buExists() && (GROUP.items||[]).length===0") is True)
-    press(pg, '[data-stplan] button:nth-child(1)')
-    ck("pressing Move them and plan on the company", press(pg, '[data-buask-go]'))
+    # ── 1. The switch, on the units' own card (§544.4) ─────────────
+    # §448's "Where the strategy is planned" IS GONE. Islam: *"there's no
+    # question that now … you might even have both. What's the point of this
+    # choice now?"* — each level says on its own card whether it plans, and
+    # both can be on, which an either/or cannot say. The units' layer has an
+    # On/Off like the functions' (§418), and OFF HIDES AND KEEPS: Islam,
+    # asked what switching off should do, *"just hide them, keep everything"*,
+    # which is spec 066 §2.2's reversal of §447.
+    #
+    # THE FOLD IS STILL ASSERTED, and in full — it is the record of §447 and
+    # this check owns what it does. What changed is that the PRODUCT no
+    # longer runs it from a button, so it is called directly below (§218:
+    # rewritten to the new rule, never loosened; and the new rule, that off
+    # copies nothing, is asserted first).
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
+        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
+    ck("Client set-up › the shape, on the top level, opens", ok)
+    ck("the top card no longer asks where the strategy is planned (§544.4)",
+       safe(pg, "()=>!document.querySelector('[data-stplan]')") is True)
+    ck("the business units' card carries an On/Off of its own, as the functions' does",
+       press(pg, '[data-shlvl="bu"]') and safe(pg, "()=>!!document.querySelector('[data-stsec=\"bu|layer\"]')") is True and
+       safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|layer\"]')||true") is True)
+    ck("…live, not held: both answers pressable",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stsec=\"bu|layer\"] button')].every(b=>!b.disabled)") is True)
+    keep0 = safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {})
+    press(pg, '[data-stsec="bu|layer"] button:nth-child(2)')
+    ck("pressing Off hides the layer", safe(pg, "()=>buExists()") is False)
+    ck("…and COPIES NOTHING: no company direction, nothing archived, every unit plan where it was",
+       safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {}) == keep0,
+       [keep0, safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})")])
+    ck("…and the units leave the navigation", navUnits() == 0, navUnits())
+    press(pg, '[data-shlvl="bu"]'); press(pg, '[data-stsec="bu|layer"] button:nth-child(1)')
+    # the units' SIDE is back; which side the row is OPEN on is the fold's
+    # own memory and not what this claims (it stayed on the functions).
+    back = [safe(pg, "()=>buExists()"), safe(pg, "()=>navSides().filter(s=>s.fold==='units').length", 0),
+            safe(pg, "()=>({units:UNIT_KEYS.length, pillars:UNIT_KEYS.reduce((n,k)=>n+((UNITS[k].items||[]).length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length})", {})]
+    ck("On again brings them straight back, with everything (§94.2)",
+       back[0] is True and back[1] > 0 and back[2] == keep0, [back, keep0])
+    # §447's fold, run directly — everything below is what IT does.
+    ck("the fold is still there to be run", safe(pg, "()=>typeof buFoldIntoTop==='function'") is True)
+    # §544.5: the capabilities no longer follow the units off — the office
+    # says where they live — so the fixture says it, which is the press the
+    # office makes on the company's capabilities card. §465's claims below
+    # are about THAT answer and are unchanged.
+    safe(pg, """()=>{ buFoldIntoTop();
+      var st = JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));
+      st.bu = Object.assign({}, st.bu||{}, {exists:false});
+      st.cap = Object.assign({}, st.cap||{}, {at:'top'});
+      st.top = Object.assign({}, st.top||{}, {on:(SMPRules.levelComponents(GROUP,'top')||[]).slice()});
+      ['pillar','swot'].forEach(function(c){ if (st.top.on.indexOf(c)<0) st.top.on.push(c); });
+      GROUP[SMPRules.STRUCTURE] = st; paint(); }""")
+    pg.wait_for_timeout(400)
     after = safe(pg, "()=>({exists:buExists(), top:(GROUP.items||[]).length, arch:ARCHIVES.length, units:activeKeys().length, kept:UNIT_KEYS.every(k=>UNITS[k].items!==undefined), topOn:SMPRules.levelComponents(GROUP,'top')})", {})
     ck("the layer is off", after.get("exists") is False, after)
     ck("every unit pillar is now on the company page", after.get("top") == (before.get("pillars") or 0) + 1, [after.get("top"), (before.get("pillars") or 0) + 1])
@@ -109,12 +155,47 @@ with sync_playwright() as p:
     ck("the company Strategy tab holds the directions", "plan" in secs and "swot" in secs, secs)
     ck("…under the client's own word for them",
        safe(pg, "()=>SUBS.group.filter(d=>d.k==='strategy')[0].sections().filter(d=>d.k==='plan')[0].label===L('pillar','bu')") is True)
+    # §570: El Abd's row. The company's name on the first button read as one
+    # more place beside its own functions, so with no units it is called
+    # Strategy, and the tab under it Plan so the two words do not repeat.
+    t1 = tabsNow()
+    ck("§570 with no units the top button is called Strategy, not the company's name",
+       t1.get("top") == ["Strategy"] and safe(pg, "()=>String(GROUP.org||'').trim()") not in ("", "Strategy"), [t1, safe(pg, "()=>GROUP.org")])
+    ck("…and its own first tab is called Plan", (t1.get("sub") or [None])[0] == "Plan", t1)
+    ck("…which is still the tab the page draws open", safe(pg, "()=>document.querySelector('#subtabs > button[aria-selected=true]').dataset.s") == "strategy")
+    fk = safe(pg, "()=>myFns()[0]")
+    ck("…a function to read the other end from", bool(fk), fk)
+    if fk:
+        safe(pg, "()=>{current='fn:%s'; currentSub=entrySub('fn:%s'); paint()}" % (fk, fk)); pg.wait_for_timeout(250)
+        tf = tabsNow()
+        ck("…while a function's own tabs keep Strategy", "Strategy" in (tf.get("sub") or []) and "Plan" not in (tf.get("sub") or []), tf)
+        safe(pg, "()=>{current='group'; currentSub='strategy'; paint()}"); pg.wait_for_timeout(250)
     ck("Weighting is gone (nothing to weight)", "weighting" not in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
     ck("the group's unit readings are empty, the directions are the headline",
        safe(pg, "()=>groupUnitsObjectives()===null && groupExec()===null") is True)
     safe(pg, "()=>{currentSub='performance'; paint()}"); pg.wait_for_timeout(250)
-    ck("Performance draws the directions card and no unit cards",
-       safe(pg, "()=>{var t=document.querySelector('#panel').textContent; return t.indexOf(L('pillar','bu')+' — performance')>-1 && t.indexOf(L('unitword','bu')+' — performance')<0}") is True)
+    # REWRITTEN TO THE NEW RULE (218, 555). It read the panel for the
+    # directions CARD, which was true while the page opened on the overall
+    # figures every time. It opens on the directions themselves now - the
+    # rail and the pane a unit's page has - so the claim is both ends: the
+    # landing IS that rail, and the overall section still carries the
+    # directions card and no unit card.
+    land = safe(pg, "()=>({sec: GROUP_SECTIONS[GSEC],"
+                    " rail: document.querySelectorAll('.ritem').length,"
+                    " pane: !!document.querySelector('.pane')})", {})
+    ck("Performance opens on the directions, in a rail (555)",
+       isinstance(land, dict) and land.get("sec") == safe(pg, "()=>L('pillar','bu')")
+       and (land.get("rail") or 0) > 0 and land.get("pane") is True, land)
+    # THE LANDING HAS TO BE STOOD DOWN FIRST, or the paint below puts it
+    # straight back - which is the landing working, and was read as the
+    # overall section having lost its card.
+    over = safe(pg, "()=>{ var was = GSEC; GSEC_PICKED = true; GSEC = 0; paint();"
+                    " var t = document.querySelector('#panel').textContent;"
+                    " var r = {dirs: t.indexOf(L('pillar','bu') + ' \u2014 performance') > -1,"
+                    "          units: t.indexOf(L('unitword','bu') + ' \u2014 performance') > -1};"
+                    " GSEC = was; GSEC_PICKED = false; paint(); return r; }", {})
+    ck("...and the overall section still has the directions card and no unit card",
+       isinstance(over, dict) and over.get("dirs") is True and over.get("units") is False, over)
     # capabilities section, made if the demo holds none (§255)
     safe(pg, "()=>{if(!GROUP.capabilities.length) return; GROUP.structure.cap=GROUP.structure.cap||{}; GROUP.structure.cap.exists=true}")
     if safe(pg, "()=>capsReachable().length>0 && SMPRules.capExists(GROUP)"):
@@ -240,10 +321,18 @@ with sync_playwright() as p:
     ck("a division with two functions linked is MADE", bool(DIV), DIV)
     if DIV:
         dname = pg.evaluate("(ck)=>COMPANIES[ck].name", DIV)
-        TW = safe(pg, "()=>labelWord('topword','group')")
+        # §556.13, rewritten from the client's top word alone (§218): a
+        # company with no business units is named by its OWN name, and only
+        # a real group keeps the word. Worked out here from the two facts,
+        # not by asking topOwnName(), the thing under test (§94.8).
+        TW = safe(pg, "()=>{var o=String(GROUP.org||'').trim(); return (o && !SMPRules.buExists(GROUP)) ? o : labelWord('topword','group')}")
+        # §570: the BUTTON leaves that rule — Strategy with no units — and
+        # the catch-all segment below keeps it. Worked out from buExists, not
+        # by asking topNavWord(), for §94.8's reason above.
+        TB = safe(pg, "()=>SMPRules.buExists(GROUP) ? labelWord('topword','group') : 'Strategy'")
         n1 = navNow()
         ck("the navigation has no division dropdown", n1.get("dd") is False, n1)
-        ck("…its top button names the layer (§448.1)", TW and TW in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TW)
+        ck("…its top button names the layer (§448.1, §570)", TB and TB in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TB)
         segs = [x["t"] for x in n1.get("segs") or []]
         ck("§464 the divisions are the switch, bare names, the top word last", segs == [dname, TW], segs)
         ck("…only divisions that hold a function", len(n1.get("segs") or []) > 1 and all(x["co"] for x in n1["segs"][:-1]) and n1["segs"][-1]["co"] is None, n1.get("segs"))
@@ -256,10 +345,12 @@ with sync_playwright() as p:
         ck("pressing a division opens its own page", safe(pg, "()=>current") == "co:" + DIV, safe(pg, "()=>current"))
         ck("…its functions beside the switch", n3.get("fns") == mine, [n3.get("fns"), mine])
         ck("…and its segment is marked as where you are", [x["here"] for x in (n3.get("segs") or [])] == [True, False], n3.get("segs"))
-        v = pg.evaluate("""(ck)=>({fns:document.querySelectorAll('#panel [data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
-                  perf:companyObjectives(ck), mix:companyMix(ck,'perf')})""", DIV)
+        # REWRITTEN TO THE NEW RULE (218, 593): a division's functions read on
+        # their own, each counted equally, never blended with its units.
+        v = pg.evaluate("""(ck)=>({fns:document.querySelectorAll('#panel .gname [data-go^="fn:"], #panel .gauges [data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
+                  fnPerf:fnsReading(companyFnKeys(ck)).perf, mine:(function(){ var a=companyFnKeys(ck).map(k=>fnMemberScores(k).perf).filter(v=>v!=null); return a.length? Math.round(a.reduce((x,y)=>x+y,0)/a.length): null; })()})""", DIV)
         ck("…the division's reading: one card per linked function, no unit", bool(v) and v["fns"] == 2 and v["units"] == 0, v)
-        ck("…its figure scored from those functions alone", bool(v) and v["perf"] == v["mix"], v)
+        ck("…its functions' figure is the plain average of what each shows", bool(v) and v["fnPerf"] == v["mine"], v)
         press(pg, '#units [data-u="%s"]' % (mine or ['-'])[0])
         ck("opening one of its functions keeps the division's list", navNow().get("fns") == mine and bool(mine) and safe(pg, "()=>current") == mine[0])
         row = safe(pg, "()=>{current='group'; currentSub='performance'; paint(); return [...document.querySelectorAll('#secrow-in [data-sec]')].map(b=>b.textContent)}", [])

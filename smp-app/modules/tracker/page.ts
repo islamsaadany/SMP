@@ -55,6 +55,8 @@ function brkCss(): string {
   if (b === "details-always") return ".addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:visible}";
   if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
+  if (b === "narrow-rename") return ".tn2.editing .t{flex:0 1 auto}";                       /* §565 put back: the box sized by an input's default */
+  if (b === "bar-scrolls") return ".tb{position:relative}.pin{top:0}";                        /* §566 put back: the top bar scrolls away */
   return "";
 }
 
@@ -75,6 +77,30 @@ const CSS = `
   --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
+/* THE BAND STAYS PUT (§565, design-mockups/internal-tracker/2026-10-21_frozen-band.html).
+   Islam: *"make this part freezed on scrolling down"* — the masthead, the add
+   line, the search and the count ride together at the top while the list
+   scrolls under them. It paints the page's ground behind itself, the .pg's
+   own 20px above it included, so a row never shows through the band's
+   rounded corners or the gap over the add line; flow-root keeps the last
+   line's margin inside that ground rather than letting it collapse out
+   under the rows. The 20px is taken back only while no refusal is showing
+   above it (#said), or the band's ground would paint over that sentence's
+   foot; with one showing the band pins flush to the top. On a phone, or a
+   window too short to spare it, it scrolls away as before: pinned, it would
+   cover most of the screen. */
+/* ...AND THE PLATFORM'S WHITE TOP BAR PINS ABOVE IT (§566). Islam: *"the
+   freeze starts by the top bar and ends by the text box to add an action"*.
+   On this page only — the bar is every module's (lib/topbar.ts) and nobody
+   asked for the others. The band pins at the bar's foot, which the script
+   MEASURES into --tbh rather than this file assuming 41px (a sticky offset
+   written as a number is right until the thing above it changes height, the
+   smeared header the platform has already paid for); 41px is only the first
+   paint's guess. */
+.tb{position:sticky;top:0}
+.pin{position:sticky;top:var(--tbh,41px);z-index:20;display:flow-root;background:var(--ground)}
+.said:empty+#body>.pin{margin-top:-20px;padding-top:20px}
+@media (max-width:760px),(max-height:600px){.pin{position:static}.tb{position:relative}}
 /* the masthead: the week, the name, the four counts, the views */
 .mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
 .mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
@@ -227,6 +253,13 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .row:hover .tc.add,.tcwrap.on .tc.add,.tcwrap:focus-visible .tc.add{border-color:var(--line);color:var(--ink)}
 .tcwrap.ro{cursor:default}.tcwrap.ro .tc{border-color:transparent}
 .tcwrap .topics{top:30px;right:0}
+/* THE RENAME BOX TAKES THE NAME'S WHOLE SPACE (§565). Islam: *"give the text
+   space we already have space to write in"*. The name is a flex item sized
+   by its words, so the box inside it was sized by an input's default — about
+   twenty letters, the rest of a long name scrolled out of sight with the
+   whole column empty beside it. While it is a box, the name grows to the
+   topic's column. */
+.tn2.editing .t{flex:1 1 auto}
 .row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
 .row.done .t{color:var(--ink-3)}
 .tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
@@ -889,7 +922,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
       : '<div class="none"><b>No topics yet for ' + esc(p.tenantName) + ".</b>" +
         "The check is read one topic at a time, so it needs a topic first. Make one on any action's topic tag, or behind the &middot;&middot;&middot; above.</div>";
     return {
-      body: masthead(p, today, all, sum, L) + '<div class="counted ck">' + ck.countHtml + "</div>" +
+      body: pinned(masthead(p, today, all, sum, L) + '<div class="counted ck">' + ck.countHtml + "</div>") +
         '<div class="list">' + ck.html + "</div>" + nothing,
       count: ck.count, open: L.open,
     };
@@ -951,13 +984,23 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     '<button class="go" type="submit">Search</button>' +
     '<span class="cnt" id="count">' + esc(count) + "</span></form>";
   const tools = '<div class="tools' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div>" + (all.length ? find : "") + "</div>";
-  const counted = all.length ? '<div class="counted">' + esc(count) + "</div>" : "";
+  /* NO COUNT LINE UNDER THE ADD LINE (§566). Islam: *"remove the small 14
+     action line under the add action as it's already existing in the navy
+     large panel"*. It went with its search figure too, said and agreed. The
+     search form's own #count stays, hidden as it always was. */
+  const counted = all.length && brk() === "count-line" ? '<div class="counted">' + esc(count) + "</div>" : "";
   const none = !all.length
     ? '<div class="none"><b>Nothing on the list for ' + esc(p.tenantName) + ' yet.</b>The first line lands under you, due this week; pick another week on the line before Enter, or on the row after.</div>'
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: masthead(p, today, all, sum, L) + tools + counted + '<div class="list">' + secs + "</div>" + none, count, open: L.open };
+  return { body: pinned(masthead(p, today, all, sum, L) + tools + counted) + '<div class="list">' + secs + "</div>" + none, count, open: L.open };
+}
+
+/* What stays at the top while the list scrolls (§565): one wrapper, so the
+   band, the add line and the count cannot be pinned apart. */
+function pinned(html: string): string {
+  return brk() === "band-scrolls" ? html : '<div class="pin">' + html + "</div>";
 }
 
 /* A press's answer: the list read again under the tenant and drawn by the

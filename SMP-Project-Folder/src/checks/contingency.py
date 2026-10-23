@@ -721,11 +721,17 @@ with sync_playwright() as pw:
     # figure BESIDE what it is measured against, so that is what is asked:
     # a run holding both halves with a number in each. A deck that printed
     # only the target, or only the figure, carries no such pair at all.
-    runs = [r for r in words.split(" | ")]
-    vsdue = [r.strip() for r in runs if " / " in r
-             and re.search(r"\d", r.split(" / ", 1)[0])
-             and re.search(r"\d", r.split(" / ", 1)[1])]
-    ck("a figure reported against its benchmark is in it, not just the target",
+    # §568: READ PER CELL, NOT PER RUN — and §572: what is due is a line of
+    # its own under the figure now ("due 6000 #", Islam's Option B), so the
+    # pair is a cell whose first paragraph is a figure and whose second says
+    # due and a figure. Asked as the thing, never one spelling of it (§366).
+    cellps = [[ "".join(re.findall(r"<a:t>([^<]*)</a:t>", p_))
+                for p_ in re.findall(r"<a:p>(.*?)</a:p>", tc, re.S)]
+              for n in names
+              for tc in re.findall(r"<a:tc>(.*?)</a:tc>", z.read(n).decode("utf8"), re.S)]
+    vsdue = [" / ".join(ps) for ps in cellps if len(ps) == 2 and re.search(r"\d", ps[0])
+             and ps[1].startswith("due ") and re.search(r"\d", ps[1])]
+    ck("a figure reported against what is due is in it, not just the target",
        len(vsdue) > 0, vsdue[:4])
     ck("a quarter mark reads as quarters, not as the digits 1234",
        "1234" not in words and re.search(r"\bQ[1-4]\b", words) is not None)

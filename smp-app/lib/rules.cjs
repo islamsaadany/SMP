@@ -207,11 +207,22 @@
      callers that read `kind` are the list of what that migration has to visit
      (spec 066 §8). Until then every answer here is the answer that was given
      before, which is what `scripts/test-box-ref.js` holds it to. */
+  /* §553 — AND `sec:` IS THE FIFTH, for a part of the running order that is
+     not a box at all. Islam, of the presentation: *"we choose to present the
+     foundation and then the swot if needed and then every direction and
+     capability in the sequence selected"* — so the company's own Foundation
+     and its SWOT are parts you PLACE, like a direction, and a part needs a
+     target to be placed BY.
+     IT IS LISTED HERE RATHER THAN HANDLED BEFORE `boxRef`, because the
+     fallthrough below reads an unknown target as a BUSINESS UNIT: `sec:found`
+     would have become a unit of that name on every page that asks who the
+     target is (§531 — the prefixes are read once, in one place). */
   var BOX_PREFIX = [
     { prefix: "co:",  kind: "mid" },
     { prefix: "fn:",  kind: "fn"  },
     { prefix: "cap:", kind: "cap" },
-    { prefix: "dir:", kind: "dir" }
+    { prefix: "dir:", kind: "dir" },
+    { prefix: "sec:", kind: "sec" }
   ];
   /* The strings a missing target arrives as. `String(undefined)` is how a page
      that lost its `current` reaches the authoriser, and it must not read as a
@@ -233,6 +244,10 @@
   }
   function boxOf(at, kind, key, named) {
     return { at: at, kind: kind, key: key, named: named,
+             /* §553: a `sec:` part is the COMPANY'S own Foundation or SWOT, so
+                it answers for the top box the way `group` does — anything
+                asking who it belongs to gets the right answer without a
+                second rule (§42). */
              area: (kind === "fn" || kind === "cap") ? "fn" : "unit" };
   }
 
@@ -538,6 +553,58 @@
 
   /* ── 4 · The world, and the roles a person holds in it ────────── */
 
+  /* ── THE SHAPES, WRITTEN WHERE A CHECKER CAN READ THEM (§585) ─────
+     Islam, of the console being plain JavaScript: *"go ahead, try step 1 on
+     the shared rules"*. These are COMMENTS: nothing below runs, nothing a
+     browser or the server does changes, and this is still the one file both
+     sides load (§42). TypeScript's checker reads them (`npm run
+     check:rules-types` in smp-app) and refuses a rule that asks the world for
+     a key it does not hold, or hands a person where a role is wanted.
+
+     THE WORLD IS CLOSED AND A ROW IS OPEN, on purpose. W() names every key
+     a rule may read, so the type names them too: W() or worldOf() handed a
+     key the type does not name, or a function whose `w` is marked World
+     reading one, is an error instead of §102's silent undefined answered as
+     the default. Not yet the whole trap: a key named here and in W() but
+     forgotten in worldOf() is still silent, because every input is optional,
+     and a rule whose `w` is not marked is not read. A person, a unit or a function carries
+     far more than the rules read, and the rest round-trips untouched (§187),
+     so their types name what the rules ask and admit anything else. */
+  /**
+   * @typedef {"none"|"view"|"fill"|"edit"} Grant
+   * @typedef {{ role: string, at: string }} Held  a role, and the place it is
+   *   held at: a unit's key, `fn:<key>`, `co:<key>`, `cap:<id>` or "group"
+   * @typedef {{ key: string, role?: string|null, active?: boolean,
+   *   company?: string, unit?: string, fn?: string, at?: string,
+   *   forefront?: boolean, ffrow?: boolean, [field: string]: any }} Person
+   * @typedef {{ company?: string, format?: string, head?: string,
+   *   custodian?: string, projects?: any[], items?: any[],
+   *   [field: string]: any }} Place  a business unit or a supporting function
+   * @typedef {{ seeGroup?: boolean, seeOthers?: boolean,
+   *   [field: string]: any }} Company
+   * @typedef {{ id: string, fn?: string, head?: string, custodian?: string,
+   *   projects?: any[], [field: string]: any }} Capability
+   * @typedef {object} World
+   * @property {string[]} unitKeys
+   * @property {Object<string, Place>} units
+   * @property {Object<string, { head?: string, custodian?: string }>} unitRoles
+   * @property {any[]} sets
+   * @property {any[]} claims
+   * @property {string[]} functionKeys
+   * @property {Object<string, Place>} functions
+   * @property {Object<string, Company>} companies
+   * @property {Object<string, Object<string, Grant>>} access
+   * @property {boolean} focusOff
+   * @property {boolean} naming
+   * @property {boolean} lineOwners
+   * @property {Capability[]} capabilities
+   * @property {Person[]} people
+   * @property {any[]} topItems
+   * @property {any[]} topProjects
+   * @property {{ structure?: any, dirScope?: any }|null} group
+   */
+
+  /** @param {Partial<World>|null} [o] @returns {World} */
   function W(o) {
     o = o || {};
     return {
@@ -583,6 +650,7 @@
     };
   }
   /* A world built straight off a state graph — the shape the server holds. */
+  /** @param {any} state  a state graph, as the server holds it @returns {World} */
   function worldOf(state) {
     state = state || {};
     return W({ unitKeys: state.unitKeys, units: state.units, unitRoles: state.unitRoles,
@@ -611,8 +679,10 @@
                group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
   }
 
+  /** @param {Person|null|undefined} p */
   function personActive(p) { return !!p && p.active !== false; }
 
+  /** @param {World} w @param {string} ck @returns {string[]} */
   function unitsOfCompany(w, ck) {
     return w.unitKeys.filter(function (k) { return (w.units[k] || {}).company === ck; });
   }
@@ -620,6 +690,7 @@
   /* Every role a person holds, with what each is attached to. Derived, never
      stored: seat roles from the person, responsibility roles from whatever
      points at them. */
+  /** @param {World} w @param {Person|null|undefined} p @returns {Held[]} */
   function personRoles(w, p) {
     if (!p) return [];
     if (!personActive(p)) return [];   /* a retired person holds nothing */
@@ -651,11 +722,43 @@
       if (r.head === p.key)      out.push({ role:"owner",     at:k });
       if (r.custodian === p.key) out.push({ role:"custodian", at:k });
     });
-    w.functionKeys.forEach(function (k) {
-      var f = w.functions[k] || {};
-      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
-      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
-    });
+    /* ── THE ORDER THESE SIX BLOCKS RUN IN IS THE ORDER THEY READ IN (§558) ──
+       Islam, having been shown what the strip actually printed: the sequence
+       should be **seat, unit, direction, capability, project & pillar,
+       function**. It was seat, unit, FUNCTION, capability, project & pillar,
+       DIRECTION — those two exactly swapped, everything else already his
+       order — because each block was appended where its own section happened
+       to add it (§505 put the direction last simply by being newest) and
+       nothing had ever asked what order the LIST should read in.
+
+       IT IS A PRESENTATION ORDER AND IT CHANGES NO PERMISSION. Every consumer
+       asks this list with `.some()`, `.filter()` or `.map()`; nothing reads
+       `[0]` or takes a first-match, so no grant, no reach and no refusal moves
+       with it. Measured before the change rather than assumed.
+
+       WHERE IT BITES IS THE HOME STRIP, which draws the first three roles and
+       no more (`welcome.js`): the direction being last meant a person holding
+       four roles did not see Direction owner pushed to the end, they did not
+       see it at all. Which is the whole reason the order was worth his asking
+       about and not a tidiness.
+
+       `seen`/`once` are hoisted to here because the direction block below is
+       the first caller now; the project and pillar blocks further down share
+       the same two, so one role at one place is still entered once (§147.7). */
+    var seen = {};
+    var once = function (role, at) {
+      if (seen[role + "|" + at]) return;
+      seen[role + "|" + at] = 1;
+      out.push({ role: role, at: at });
+    };
+
+    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
+       one rule that lets them report (`ownsTopPillar`), so the role and the
+       reporting right cannot disagree about who is named (§42, §53.5) — and
+       it is false whenever the business units are on, because then the top
+       layer's pillars are not directions anybody reports. */
+    if (ownsTopPillar(w, p)) once("dirowner", "group");
+
     /* §412: a capability's own seats, read off the capability exactly as a
        unit's are read off the unit (§33) -- one fact, one place. */
     (w.capabilities || []).forEach(function (c) {
@@ -672,12 +775,8 @@
        one): the Owner is picked from the register in the office's own pen, so
        the naming is already a deliberate act about a known person. One entry
        per place, however many projects or pillars there name them. */
-    var seen = {};
-    var once = function (role, at) {
-      if (seen[role + "|" + at]) return;
-      seen[role + "|" + at] = 1;
-      out.push({ role: role, at: at });
-    };
+    /* `seen`/`once` are declared above, with the direction block that is now
+       their first caller (§558). */
     var owns = function (row) { return namedOn({ owner: row && row.owner }, p); };
     (w.capabilities || []).forEach(function (c) {
       if (!c || !c.fn) return;
@@ -724,12 +823,19 @@
       if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
-    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
-       one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
-    if (ownsTopPillar(w, p)) once("dirowner", "group");
+    /* A SUPPORTING FUNCTION'S OWN SEATS — LAST OF THE SIX (§558). The head
+       and the Strategy custodian of a function, unmoved in what they derive
+       and moved only in where they come in the list: Islam put the function
+       below the direction, the capability and the plan's own owners. It stays
+       ABOVE the floor below, which is reached only on `!out.length` — a
+       function head arriving after that test would be read as holding nothing
+       and handed a Contributor's floor instead (§387's own trap, from the
+       other end). */
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
+      if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
+    });
     /* §384 DERIVED A `towner` HERE AND §387 TOOK IT OUT — the whole role went
        with the Roles & access row (see ROLES above). A tactic's owner is
        `namedInUnit` by the floor below, exactly as they were before §384, and
@@ -770,6 +876,7 @@
     });
     return out;
   }
+  /** @param {World} w @param {Person|null|undefined} p @returns {string[]} */
   function personRoleKeys(w, p) {
     return personRoles(w, p).map(function (r) { return r.role; });
   }
@@ -800,10 +907,12 @@
      user's now (mayMarkFocus and the server's focus case both say so). The
      list names AREAS, never roles, for the same reason as above. */
   var OFFICE_ONLY_AREAS = ["a_setup", "a_cycle"];
+  /** @param {string} roleKey @param {string} areaKey */
   function neverOffered(roleKey, areaKey) {
     return OFFICE_ONLY_AREAS.indexOf(areaKey) > -1 && !isOfficeRole(roleKey);
   }
 
+  /** @param {World} w @param {string} roleKey @param {string} areaKey @returns {Grant} */
   function grantFor(w, roleKey, areaKey) {
     if (neverOffered(roleKey, areaKey)) return "none";
     var row = w.access[roleKey];
@@ -836,6 +945,7 @@
      (both columns ship at edit); a tenant that had NARROWED the other-columns
      widens for its SMO team, which is the direction intended. */
   var OWNS_EVERY_PLACE = ["super", "gceo", "smoteam"];
+  /** @param {string} roleKey */
   function ownsEveryPlace(roleKey) { return OWNS_EVERY_PLACE.indexOf(roleKey) > -1; }
 
   /* ── A CAPABILITY'S ACCESS IS ITS HOLDER'S (§334) ────────────────────
@@ -858,6 +968,7 @@
      IT IS IDEMPOTENT ON PURPOSE: `companyAllows` calls `roleOwns`, so the
      mapping runs twice on one question and a `fn:` target has to map to
      itself. */
+  /** @param {World|null|undefined} w @param {string|null|undefined} target @returns {string} */
   function capHolderTarget(w, target) {
     var s = String(target || ""), r = boxRef(s);
     if (r.kind !== "cap") return s;
@@ -867,6 +978,7 @@
     return "group";
   }
 
+  /** @param {World} w @param {Held} r @param {string} target */
   function roleOwns(w, r, target) {
     /* §412: a seat held AT the capability owns it and nothing else. Asked
        before the capability resolves to its holder, or the seat would be
@@ -895,6 +1007,7 @@
   }
 
   /* The company's own two flags (§23) can only ever NARROW. */
+  /** @param {World} w @param {Held} r @param {string} target */
   function companyAllows(w, r, target) {
     if (r.role !== "cceo") return true;
     target = capHolderTarget(w, target);
@@ -905,6 +1018,7 @@
     return !!co.seeOthers;
   }
 
+  /** @param {string} area @param {World} w @param {Held} r @param {string} target @returns {string} */
   function areaFor(area, w, r, target) {
     /* THE STRATEGY PAGES RESOLVE TO THEIR OWN HALF (§117). An OTHER unit or
        function has no split column — reading somebody else's strategy rides
@@ -946,6 +1060,7 @@
      lines, and a floor invisible to it would let a person holding NOTHING,
      given edit on the matrix, edit their whole unit's plan — wider than a
      Contributor, which is the opposite of a floor. */
+  /** @param {World} w @param {Person|null|undefined} person @returns {Held[]} */
   function rolesOrFloor(w, person) {
     var rs = personRoles(w, person);
     if (rs.length) return rs;
@@ -1032,9 +1147,11 @@
       note:"Not a role — what somebody on the register who holds no role may open." }
   ];
 
+  /** @param {World} w @param {Person|null|undefined} person @param {string} area @param {string} target @returns {Grant} */
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
-    var rs = rolesOrFloor(w, person), best = "none";
+    var rs = rolesOrFloor(w, person);
+    /** @type {Grant} */ var best = "none";
     for (var i = 0; i < rs.length; i++) {
       if (!companyAllows(w, rs[i], target)) continue;
       var g = grantFor(w, rs[i].role, areaFor(area, w, rs[i], target));
@@ -1042,10 +1159,12 @@
     }
     return best;
   }
+  /** @param {World} w @param {Person|null|undefined} person @param {string} pageKey @param {string} target @returns {Grant} */
   function grantAtPage(w, person, pageKey, target) {
     return grantIn(w, person, PAGE_AREA[pageKey], target);
   }
 
+  /** @param {World} w @param {Person|null|undefined} person */
   function isSMO(w, person) { return personRoleKeys(w, person).indexOf("super") > -1; }
 
   /* ── THE THREE THINGS THE SMO TEAM DOES NOT GET (§89) ─────────────
@@ -1064,6 +1183,7 @@
      so anybody who can is a Super user whether or not the row says so. The
      page stays readable to them — knowing what everyone may do is part of
      running the office. */
+  /** @param {World} w @param {Person|null|undefined} person */
   function mayEditAccess(w, person) { return isSMO(w, person); }
 
   /* ── A SEAT IS NOT AN ORDINARY ROLE (§186) ────────────────────────
@@ -1089,6 +1209,7 @@
      (§33) rather than something a unit points at, and handing one out is a
      decision about the organisation rather than about a plan. */
   var SEAT_ROLES = ["super", "smoteam", "gceo", "cceo"];
+  /** @param {string} k */
   function isSeatRole(k) { return SEAT_ROLES.indexOf(k) > -1; }
 
   /* A SEAT SITTING SOMEWHERE ELSE (§186). A seat is held over the group (or,
@@ -1101,6 +1222,7 @@
      than "holds a seat and something else": the bootstrap SMO holds
      super@group AND heads the SMO function (§118), so a rule about holding
      two roles would nag about the one row that is certainly correct. */
+  /** @param {World} w @param {Person} p @param {string} at @returns {Held|null} */
   function seatOutOfPlace(w, p, at) {
     var wrong = null;
     personRoles(w, p).forEach(function (r) {
@@ -1115,6 +1237,7 @@
      are not, and a mistake there is not recoverable from inside the product.
      Merging is NOT destruction and is deliberately absent: it hands every
      pointer over before it removes a row, and refuses if it cannot (§87.4). */
+  /** @param {World} w @param {Person|null|undefined} person */
   function mayDestroy(w, person) { return isSMO(w, person); }
 
   /* 3 · WHOSE PASSWORD MAY BE RESET (Islam: "for the passwords ok for the
@@ -1161,14 +1284,20 @@
      both, §313.30) and is read as minted anyway: the mark is a claim about
      where the row came from, and the safe reading of a half-written one is
      the stricter. */
+  /** @param {Person|null|undefined} p */
   function isForefrontRow(p) { return !!(p && p.forefront); }
+  /** @param {Person|null|undefined} p */
   function isMintedRow(p) { return !!(p && p.ffrow); }
 
+  /** @param {string} k */
   function isSuperRole(k) { return k === "super"; }
+  /** @param {string} k */
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
+  /** @param {World} w @param {Person|null|undefined} person */
   function isOffice(w, person) {
     return personRoleKeys(w, person).some(isOfficeRole);
   }
+  /** @param {World} w @param {Person|null|undefined} actor @param {Person} target */
   function mayIssuePasswordTo(w, actor, target) {
     if (isSMO(w, actor)) return true;
     if (personRoleKeys(w, actor).indexOf("smoteam") < 0) return false;
@@ -1565,15 +1694,34 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      a session that cannot simulate buys nothing and is judged as itself.
      An unknown key is REFUSED rather than treated as somebody with no roles:
      "no roles" is a narrowing that hides a mistake instead of reporting it. */
+  /* ── AND THE SMO TEAM ACTS THROUGH ONE TOO (§554) ─────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* The team holds Setup, the
+     register and the cycle (§516.2) — they set the narrowings, so they are
+     the people who need the mirror to check one in.
+
+     WITH A CEILING, because this hands the ACTOR over and everything
+     downstream judges by what that actor holds: a team member acting through
+     the Super user's row would be writing as the one person on the register
+     who holds more than they do, which is a way up rather than a simulation.
+     The Super user may act through anybody; the SMO team through anybody but
+     the Super user. `them.role` is the SEAT on the register row — the same
+     field `personRoles` reads a seat from (§187), and the one the server
+     writes from the membership (lib/state-api.ts officeRow) — never a role
+     read out of the incoming state, which is the thing being written. */
+  /** @param {Person|null|undefined} me @param {unknown} viewAs @param {string|null|undefined} seatRole @param {Person[]|null|undefined} people
+      @returns {{ person?: Person|null, refuse?: string, simulated?: boolean }} */
   function actingFor(me, viewAs, seatRole, people) {
     var want = typeof viewAs === "string" ? viewAs.trim() : "";
     if (!me || !want || want === me.key) return { person: me };
-    if (seatRole !== "super")
+    if (seatRole !== "super" && seatRole !== "smoteam")
       return { refuse: "Only the SMO can act through somebody else's view." };
     var them = null;
     (people || []).forEach(function (p) { if (p && p.key === want) them = p; });
     if (!them)
       return { refuse: "The register does not hold the person this view belongs to." };
+    if (seatRole !== "super" && them.role === "super")
+      return { refuse: "The SMO team cannot act through the Super user's view." };
     return { person: them, simulated: true };
   }
 
@@ -1960,9 +2108,31 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      A HALF-FILLED PLAN IS STORED AND NOT USED. Twelve boxes are filled over
      more than one sitting, so what has been typed is kept; what it must not
-     do is quietly become the target. Until the twelfth is set the row is
+     do is quietly shape the year. Until the twelfth is set the row is
      prorated flat exactly as it is today, and the page says so in words
-     rather than leaving somebody to wonder why nothing happened (§61). */
+     rather than leaving somebody to wonder why nothing happened (§61).
+
+     §555 REVERSED ONE HALF OF THAT SENTENCE AND LEFT THE OTHER STANDING.
+     This paragraph used to end "what it must not do is quietly become the
+     TARGET", and that was wrong for the reason Islam gave: with the target
+     typed as well as the months, the same figure is authored twice and
+     nothing checks that the two agree. The target is derived from the first
+     month now (`monthlySoFar`). The PRORATION half is untouched and is the
+     part this paragraph was really about: a missing month is UNKNOWN, never
+     nought, so the year stays flat until all twelve are in.
+
+     §569 REVERSED THE OTHER HALF. Islam, of a row planned January to June
+     (2+2+2+2+2+3, so a target of 13 shops) reading 14 against 9 at 150% in
+     September: *"in a target that is already set on monthly level it's still
+     prorated arithmatic"*, and then *"the monthly plan overrides the
+     proration"*. Once §555 made the target WHAT THE MONTHS COME TO, an empty
+     month could no longer be unknown: the target already counts it as
+     nothing, so prorating that same target flat measured the row against a
+     year its own plan does not describe. A half-filled plan is in force now,
+     read exactly as the target is read — the row's compile rule over the
+     months that are set, blanks passed over, up to the review month
+     (`monthsCompiled`). What still keeps a plan out of force: no compile
+     rule, and a month holding something that is not a number. */
   var MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   /* IS THIS MONTH SET. Blank first, THEN the number — see above. A value
@@ -2007,24 +2177,83 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       if (compileKey(COMPILES[i]) === c) return c;
     return "";
   }
+  /* §569: IN FORCE FROM THE FIRST MONTH, exactly when the target is derived
+     from the months (`monthlySoFar`), so the row's target and what is due on
+     it can never be read off two different plans. */
   function monthlyInForce(row) {
-    return !!(monthlyPlan(row) && monthlyCompile(row));
+    return monthlySoFar(row) != null;
   }
   /* WHAT THE ROW IS MEASURED AGAINST AFTER `months` OF THE YEAR. The one
      arithmetic every surface asks; `months` is 1..12 and comes from the
      review point, never from a tactic's own window — a monthly plan already
      states what each month is expected to carry, including the noughts for
      months a thing does not run in, so it is the more specific answer and
-     supersedes §250's share. */
+     supersedes §250's share.
+
+     §569: AND A HALF-FILLED PLAN ANSWERS TOO, blanks passed over. Months
+     planned only after the review point owe nothing yet (nought, which
+     `measureScore` already reads as "not due yet", §278). On a complete plan
+     this is byte-for-byte the arithmetic it was: Sum and Count add the months
+     passed, Average takes their mean, Latest the month being stood in. */
   function monthlyDue(row, months) {
-    var p = monthlyPlan(row), c = monthlyCompile(row);
-    if (!p || !c) return null;
     var n = Math.floor(Number(months));
     if (!(n >= 1)) return null;
     if (n > 12) n = 12;
-    if (c === "latest") return p[n - 1];
-    var t = 0;
-    for (var i = 0; i < n; i++) t += p[i];
+    return monthsCompiled(row, n);
+  }
+  /* THE YEAR'S TARGET, DERIVED. It is the same question asked of all twelve
+     months, which is what makes the annual figure and the year-to-date one
+     impossible to disagree: one function, one compile rule, one plan. */
+  function monthlyAnnual(row) { return monthlyDue(row, 12); }
+  /* ── WHAT THE MONTHS SET SO FAR COME TO (§555) ─────────────────────
+     Islam, of a row four months into its plan whose target still read the
+     figure he had typed: *"when I was adding the monthly the target should be
+     a sum of the months calculated automatically not on an entry as well."*
+
+     §278 derived the annual target only when the TWELFTH month landed, so
+     until then the office typed the target AND the months — the same figure
+     authored twice, and nothing checking that the two agreed. This answers
+     the partial question instead: the row's own compile rule applied to the
+     months that ARE set, blanks passed over.
+
+     IT IS NOT A SECOND ARITHMETIC. On a complete plan it returns exactly what
+     `monthlyAnnual` returns — twelve summed, averaged, or the last of them —
+     which is asserted rather than claimed, because the day the two disagree
+     the target on the row stops agreeing with the months under it.
+
+     WHAT IT DID NOT TOUCH WAS PRORATION — §569 has since made a half-filled
+     plan the row's proration too, through the same walk below, so the target
+     and what is due on it are one reading of one plan.
+
+     NULL WHERE THERE IS NOTHING TO SAY: no month set, no compile rule, or a
+     month holding something that is not a number. The last of those is §278's
+     own safe direction — a plan the platform cannot read leaves the target
+     alone rather than deriving a figure from half of it. */
+  function monthlySoFar(row) { return monthsCompiled(row, 12); }
+  /* THE ONE WALK (§569): the row's compile rule over months 1..`upto`, blanks
+     passed over. Null when the plan says nothing (no compile rule, no month
+     set ANYWHERE in the twelve, or a month present and unreadable — the last
+     checked across the whole year, so a bad December keeps March out of force
+     as well, which is §278's safe direction). Nought when months are set but
+     none falls in 1..`upto`: nothing is owed yet. */
+  function monthsCompiled(row, upto) {
+    var a = row && row.monthly, c = monthlyCompile(row);
+    /* §577: A ROW PLANNED BY QUARTER answers here too, so the target, what is
+       due and the *in force* test stay one reading of one plan. */
+    if (planBy(row) === "quarter") return quartersCompiled(row.quarterly, c, upto);
+    if (!Array.isArray(a) || !c) return null;
+    var t = 0, n = 0, any = false, last = null, i, v;
+    for (i = 0; i < 12 && i < a.length; i++) {
+      if (a[i] == null || String(a[i]).trim() === "") continue;
+      if (!monthSet(a[i])) return null;          /* present and unreadable */
+      any = true;
+      if (i >= upto) continue;
+      v = Number(String(a[i]).replace(/,/g, ""));
+      t += v; n++; last = v;
+    }
+    if (!any) return null;
+    if (!n) return 0;
+    if (c === "latest") return last;
     if (c === "average") return t / n;
     /* §276's own rounding, on the months rather than on the share: a count is
        owed in whole ones, and the epsilon is not decoration — twelve typed
@@ -2032,10 +2261,136 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        one fewer than the arithmetic means. */
     return c === "count" ? Math.floor(t + 1e-9) : t;
   }
-  /* THE YEAR'S TARGET, DERIVED. It is the same question asked of all twelve
-     months, which is what makes the annual figure and the year-to-date one
-     impossible to disagree: one function, one compile rule, one plan. */
-  function monthlyAnnual(row) { return monthlyDue(row, 12); }
+
+  /* ── A TARGET BY QUARTER AS WELL AS BY MONTH (§577) ─────────────────
+     Islam: *"for setting targets in the plans we have the option to plan it
+     in months I need to have the option to plan it in quarters as well."*
+
+     FOUR NUMBERS IN THE TARGET'S OWN UNIT, Q1 first, on the row as
+     `quarterly` (a tactic's outcome: `outQuarterly`, beside `outMonthly`,
+     §248). A row holds months OR quarters: the drawer's switch carries one
+     into the other and deletes what it came from, and an upload carrying
+     both is refused by name. Should a row ever arrive holding both, the
+     MONTHS are read — they are the finer plan, and the one that existed
+     first.
+
+     A QUARTER INSIDE THE REVIEW IS OWED IN PROPORTION — Islam's (1a), taken
+     before the mockup was drawn: each quarter is spread evenly over its
+     three months, so August, two months into Q3, owes Q1 and Q2 and
+     two-thirds of Q3. At every quarter end that is simply the quarters that
+     have passed, which is what (1b) — a quarter owed only once it is over —
+     would also have said; (1b) was refused because between quarter ends it
+     makes a row two months into a big quarter look ahead of plan.
+
+     SO A QUARTERLY PLAN IS A MONTHLY ONE THE PLATFORM DERIVES, and it is
+     read by the same rules in the same order: Sum adds what has passed,
+     Count does and is then owed in whole ones (§276), Average weighs each
+     quarter by the months of it that have passed, Latest stands on the
+     quarter being stood in. Blank quarters are passed over and a quarter
+     holding something that is not a number keeps the plan out of force —
+     §569's and §278's rules, unchanged. It is computed on the quarters
+     rather than on twelve derived months so a quarter end is EXACT: 50
+     split three ways and added back is 50.00000000000001 in floating
+     point, and that would print. */
+  var QUARTER_NAMES = ["Q1", "Q2", "Q3", "Q4"];
+  /* Anything typed at all, readable or not — what decides which way a row is
+     planned, so a quarter holding a word still opens the drawer on the
+     quarters where the word can be seen and corrected. */
+  function anyTyped(a, n) {
+    if (!Array.isArray(a)) return false;
+    for (var i = 0; i < n && i < a.length; i++)
+      if (a[i] != null && String(a[i]).trim() !== "") return true;
+    return false;
+  }
+  function quarterlySet(row) {
+    var a = row && row.quarterly, n = 0;
+    if (!Array.isArray(a)) return 0;
+    for (var i = 0; i < 4 && i < a.length; i++) if (monthSet(a[i])) n++;
+    return n;
+  }
+  /* WHICH WAY THIS ROW IS PLANNED: "quarter" only where quarters are typed
+     and months are not (the months win a tie, above). The drawer, the mark
+     under the annual target and the arithmetic all ask this one question. */
+  function planBy(row) {
+    return !anyTyped(row && row.monthly, 12) && anyTyped(row && row.quarterly, 4)
+      ? "quarter" : "month";
+  }
+  function quartersCompiled(a, c, upto) {
+    if (!Array.isArray(a) || !c) return null;
+    var t = 0, n = 0, any = false, seen = false, last = null, q, k, v;
+    for (q = 0; q < 4 && q < a.length; q++) {
+      if (a[q] == null || String(a[q]).trim() === "") continue;
+      if (!monthSet(a[q])) return null;          /* present and unreadable */
+      any = true;
+      k = Math.max(0, Math.min(3, upto - q * 3)); /* its months passed, 0..3 */
+      if (!k) continue;
+      v = Number(String(a[q]).replace(/,/g, ""));
+      seen = true; last = v;
+      if (c === "average") { t += v * k; n += k; }
+      else t += k === 3 ? v : v * k / 3;
+    }
+    if (!any) return null;
+    if (!seen) return 0;
+    if (c === "latest") return last;
+    if (c === "average") return t / n;
+    return c === "count" ? Math.floor(t + 1e-9) : t;
+  }
+  /* ── SWITCHING CARRIES THE PLAN ACROSS (§577, Islam's (2a)) ──────────
+     Months to quarters is exact and uses the row's own rule: Sum and Count
+     add the three months, Average takes the mean of those set, Latest the
+     last one set. Quarters to months spreads: Sum and Count split the
+     quarter in three in the quarter's own precision, the remainder on the
+     later months, so the three always add back to it exactly (50 → 16, 17,
+     17); Average and Latest give each month the quarter's figure. The shape
+     inside a quarter does not survive a round trip, and the drawer says so.
+
+     NULL WITHOUT A COMPILE RULE: without one the platform cannot tell whether
+     a quarter is its months added up or the last of them, and guessing would
+     put a number nobody chose on the page (§278). An empty quarter stays
+     empty both ways; a value that is not a number travels as typed, so the
+     plan stays out of force exactly as it was (§96.2). */
+  function carryRule(compile) { return monthlyCompile({ compile: compile }); }
+  function carryNum(x) { return Math.round(x * 1e6) / 1e6; }
+  function quartersFromMonths(months, compile) {
+    var c = carryRule(compile);
+    if (!c || !anyTyped(months, 12)) return null;
+    var out = [], q, i, v, set, bad;
+    for (q = 0; q < 4; q++) {
+      set = []; bad = null;
+      for (i = q * 3; i < q * 3 + 3; i++) {
+        v = months[i];
+        if (v == null || String(v).trim() === "") continue;
+        if (!monthSet(v)) { if (bad == null) bad = v; continue; }
+        set.push(Number(String(v).replace(/,/g, "")));
+      }
+      if (bad != null) { out.push(bad); continue; }
+      if (!set.length) { out.push(null); continue; }
+      var s = 0;
+      set.forEach(function(x){ s += x; });
+      out.push(c === "latest" ? set[set.length - 1]
+             : c === "average" ? carryNum(s / set.length) : carryNum(s));
+    }
+    return out;
+  }
+  function splitThree(v) {
+    var d = (String(v).split(".")[1] || "").length, scale = Math.pow(10, Math.min(d, 6));
+    var u = Math.round(v * scale), b = Math.floor(u / 3), r = u - b * 3;
+    return [b / scale, (b + (r >= 2 ? 1 : 0)) / scale, (b + (r >= 1 ? 1 : 0)) / scale];
+  }
+  function monthsFromQuarters(quarters, compile) {
+    var c = carryRule(compile);
+    if (!c || !anyTyped(quarters, 4)) return null;
+    var out = [], q, v;
+    for (q = 0; q < 4; q++) {
+      v = quarters[q];
+      if (v == null || String(v).trim() === "") { out.push(null, null, null); continue; }
+      if (!monthSet(v)) { out.push(null, null, v); continue; }
+      v = Number(String(v).replace(/,/g, ""));
+      if (c === "average" || c === "latest") out.push(v, v, v);
+      else out.push.apply(out, splitThree(v));
+    }
+    return out;
+  }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
      the server all ask. A gap is a place holding nothing the platform can
      USE, which for a date includes a value it cannot read: a milestone due
@@ -3363,6 +3718,36 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function slideHidden(subject, anchor) {
     return !!anchor && hiddenSlides(subject).indexOf(anchor) >= 0;
   }
+  /* ── WHICH COLUMNS THE TACTICS SLIDES LEAVE OUT (§571) ────────────────
+     Islam: *"can you give me the option to hide the owner and collabs in the
+     slides if needed?"*, and *"one switch for everything"* — so it is the
+     COMPANY's, not a subject's: one answer for every tactics slide of every
+     deck, set by the office in the slide view's Columns menu, beside the eye
+     that hides a slide (`deckHide` on the server, the same gate).
+
+     STORED AS THE NAMES LEFT OUT, and as an ABSENCE when none is (§50.6), so
+     a client that never touches it is byte-identical. Reading never creates
+     it (§42). Only the two names here are honoured: a stale word in the list
+     hides nothing. */
+  var SLIDE_COLS_OFF = "slideColsOff";
+  var SLIDE_COLS = Object.freeze(["owner", "collabs"]);
+  function slideColOn(group, col) {
+    var v = group && group[SLIDE_COLS_OFF];
+    return !(Array.isArray(v) && v.indexOf(col) >= 0);
+  }
+
+  /* ── WHETHER THE SLIDES BUILD LINE BY LINE (§579) ──────────────────────
+     Islam: *"give me an option … to present box by box like line by line in
+     the tables and number by number in the numbers slides"* — one switch,
+     the office's, set in the slide view beside Columns and judged as that
+     menu is (`deckHide`): it changes how a deck is shown and scores nothing.
+     The company's, like the columns, so it is the same on any laptop.
+     STORED AS `true` WHEN ON AND ABSENT WHEN OFF (§50.6): a client that
+     never touches it is byte-identical, and reading never creates it (§42). */
+  var SLIDE_BUILD = "slideBuild";
+  function slideBuildOn(group) {
+    return !!(group && group[SLIDE_BUILD] === true);
+  }
 
   /* ── THE MASTER PRESENTATION'S RUNNING ORDER (§266) ─────────────────
      Islam: *"give an option for the SMO from the presentation list to do
@@ -3513,6 +3898,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      read by the dialog that draws the buttons AND by the check that presses
      them, so a fourth number tomorrow is one edit. */
   var PRESENT_MIN_CHOICES = Object.freeze([10, 15, 20]);
+
+  /* ── HOW MANY SLIDES A SUBJECT MAY ADD (§562) ─────────────────────────
+     Islam: *"a direction owner can add max of 2 slides and the units owner
+     can add 4 max"*, and agreed the rest: a capability is a direction's
+     size, a function a unit's, the company's closing slides 4. PER SUBJECT,
+     WHOEVER ADDS — the office included — so every part of the evening is
+     the same length. Read by the add and by the check, so the numbers are
+     written once. A subject already holding more keeps them; only a new
+     add is refused. */
+  function slidesMax(target) {
+    var t = String(target || "");
+    return (t.indexOf("dir:") === 0 || t.indexOf("cap:") === 0) ? 2 : 4;
+  }
 
   /* ── THE CONTINGENCY FILES (spec 030) ────────────────────────────────
      Islam: *"if the platform all is down we need to have a substitue action.
@@ -4228,18 +4626,50 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (c && typeof c.exists === "boolean") return c.exists;
     return levelComponents(group, "top").indexOf("capability") >= 0;
   }
-  /* §465 — WHERE THE CAPABILITIES LIVE. One place at a time (Islam,
-     approving the plan-level mockup): as a section of the company's own
-     Strategy tab, or as a layer of their own with a side in the navigation.
-     Planned at company level they are always the company's (§447); at units
-     level they are a layer unless the office moved them into the company
-     plan, which `structure.cap.at = "top"` records. Stored as an absence, so
-     a client that never chose — Raya Trade — keeps them a layer. */
-  function capAtTop(group) {
-    if (!buExists(group)) return true;
-    var s = structureOf(group), c = s && s.cap;
-    return !!(c && c.at === "top");
-  }
+  /* §544.13 — A CAPABILITY IS THE COMPANY'S. Islam, 2026-10-18, asked the
+     three questions plainly and answered them plainly:
+
+       · *who can a capability belong to?* — **the company only**;
+       · *where does it appear?* — **inside its owner's plan, with the
+         directions**;
+       · *someone owns one — can they always open it and report it?* —
+         **yes, always**.
+
+     And, of the setup screen: *"no — remove it"*, of the route that put a
+     capability under a supporting function.
+
+     SO THERE IS NOTHING LEFT TO ASK HERE. §465 made this a choice between a
+     section of the company plan and a layer of its own; §544.5 took the
+     business units out of deciding it; this takes the question away. A
+     capability lives in the company's plan because that is the only place a
+     capability lives. `structure.cap.at` is dead storage: it is neither read
+     nor written any more, and the clients that hold one are left holding it
+     (§405 — hidden, never cleared).
+
+     WHAT HE SAID FIRST, AND WHY A PATCH WOULD NOT DO. *"It's not about
+     switching units off. Leave the capability completely alone. Everything
+     should follow the rules. Does the capability belong to the business
+     units or not? If it doesn't belong and it belongs to the company, they
+     should be irrelevant. It's not about fixing this. It's about fixing the
+     whole structure."* Measuring found the units written into the capability
+     question in FOUR places, each added for its own reason: here, in
+     `ownsTopPillar`, in `ownsTopCapability`, and in the company Reporting
+     page's capabilities section. One rule now answers all four.
+
+     THIS REVERSES §7.1, which he approved on 2026-10-07 (*"ok for your
+     recommendation"*): a capability held by a function was to become an
+     internal pillar of that function. Asked again against the live shapes he
+     chose **"on the company"**, so a function-held record folds to the
+     company like any other. Recorded as a reversal, not overwritten
+     (Principle II).
+
+     NOTHING MOVES FOR ANYBODY (§50.6's purpose, if not its mechanism). El
+     Abd's, Wander's and Raya's capability records are all gone — folded at
+     stage 3b, or removed by Islam himself; Meridian still holds two and is
+     *"not live and not a priority"*. The only shape this changes on screen
+     is the demo sample compiled into the build, which is code, not a
+     client. */
+  function capAtTop() { return true; }
   /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
      fifth answer says, with ONE exception: a supporting function's own S&W
      (§399). That section is newer than the clients it would appear on, so
@@ -4476,6 +4906,166 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), b = s && s.bu;
     return !(b && b.exists === false);
   }
+
+  /* ── §544 · EACH BOTTOM KIND CARRIES ITS OWN LAYER ABOVE IT ────────────
+     Spec 066 stage 4. Islam, from the signed-off mockup: *"no not 1 list
+     the business units has it's own layer above and the functions has their
+     own layer above"*, and on how one comes to exist: *"the main layer is
+     the bottom layer, which may be the business units or the functions.
+     Creating another layer in between these layers and the company should be
+     the thing that is the exception, or the creation."*
+
+     SO A MIDDLE LAYER IS NOT DECLARED AND THEN POINTED AT. It is created by
+     the kind that needs one, it belongs to that kind, and it has its own
+     name. A client can have none, one, or two — the units grouped under
+     Sectors while the functions are grouped under Divisions, and neither
+     knows about the other.
+
+     WHICH IS A CHANGE TO WHAT THE SET-UP SCREEN DRAWS AND NOT TO WHAT IS
+     STORED. There is one list of divisions underneath, as there has been
+     since §391 — `COMPANIES`, with a unit or a function naming one — and
+     this says which kind's row each one is drawn on. Measured before it was
+     written: Raya's two divisions are named by 6 units and 0 functions, El
+     Abd's three by 22 functions and 0 live units. Neither client mixes them,
+     so each one's existing list simply becomes that kind's own layer, and
+     nobody's navigation, page or figure moves.
+
+     READ FROM USE, SAID ONLY WHERE USE CANNOT ANSWER (§50.6). A division
+     belongs to the kinds whose boxes name it. One that nothing names yet
+     belongs to the kind that made it (`layer` on the company record, written
+     by the shape screen as it is added) and, failing even that, to every
+     kind that has a layer — which is where a division made on Setup ›
+     Companies before any of this lands, and it is drawn rather than hidden
+     (§61). A division named by BOTH kinds is on both rows, because that is
+     what it is; nothing here splits one in two behind the office's back. */
+  var LAYER_KINDS = ["bu", "fn"];
+  /* Who names this division. The two lists are handed in rather than read
+     off globals, so the server, a check and the browser all ask one
+     function (§53.5); an inactive box still counts, because retiring one
+     does not hand its division to the other kind. */
+  function coUsedBy(coKey, units, functions) {
+    var used = { bu: false, fn: false };
+    var scan = function (map, k) {
+      Object.keys(map || {}).forEach(function (x) {
+        if (map[x] && map[x].company === coKey) used[k] = true;
+      });
+    };
+    scan(units, "bu"); scan(functions, "fn");
+    return used;
+  }
+  /* Whether this division is drawn on THIS kind's layer row. */
+  function coOnLayer(co, coKey, kind, units, functions) {
+    var used = coUsedBy(coKey, units, functions);
+    if (used.bu || used.fn) return !!used[kind];
+    var said = co && (co.layer === "bu" || co.layer === "fn") ? co.layer : "";
+    return said ? said === kind : true;
+  }
+  /* The divisions on one kind's layer, in the order they are declared. */
+  function layerCompanies(kind, companyKeys, companies, units, functions) {
+    return (companyKeys || []).filter(function (k) {
+      return coOnLayer((companies || {})[k], k, kind, units, functions);
+    });
+  }
+  /* WHETHER A KIND HAS A LAYER AT ALL. Said on its own level (`layer`, a
+     real true or false, which is how the shape screen records "group these
+     under a layer" and "remove this layer"); unsaid, it has one exactly
+     when a division is drawn on its row — so a client set up before stage 4
+     reads today's shape and nothing moves. `midExists` still answers for
+     the pair: an office that switched the second layer off has switched
+     both of them off, and that answer is not overridden from underneath. */
+  function layerOn(group, kind, companyKeys, companies, units, functions) {
+    if (!midExists(group, companies)) return false;
+    var s = structureOf(group), l = s && s[kind];
+    if (l && typeof l.layer === "boolean") return l.layer;
+    /* A DIVISION NOBODY HAS PUT ANYTHING IN DOES NOT GIVE A KIND A LAYER.
+       Asked the other way round at first, off `layerCompanies`, and it read
+       El Abd as having a layer above its business units: one division with
+       no function in it yet belongs to both rows, which is right for drawing
+       it and wrong for deciding that a client with no units at all has a
+       layer above them. So the question here is USE — a division this kind
+       actually names — with one exception, a list where nothing has been
+       assigned yet: those are drawn on both rows rather than nowhere (§61). */
+    var usedAnywhere = false, usedHere = false;
+    (companyKeys || []).forEach(function (k) {
+      var u = coUsedBy(k, units, functions);
+      if (u.bu || u.fn) usedAnywhere = true;
+      if (u[kind]) usedHere = true;
+    });
+    if (usedHere) return true;
+    return !usedAnywhere && (companyKeys || []).length > 0;
+  }
+  /* A kind's boxes that have no division yet while its layer is on — the
+     "N need a Division" flag on the shape screen. Not an error and not a
+     refusal: a box with no division sits straight under the top, exactly as
+     it does today, and this only says so out loud. */
+  function layerOrphans(kind, boxKeys, boxes, companyKeys, companies, units, functions) {
+    var on = layerCompanies(kind, companyKeys, companies, units, functions);
+    return (boxKeys || []).filter(function (k) {
+      var b = (boxes || {})[k], co = b && b.company;
+      return !co || on.indexOf(co) < 0;
+    });
+  }
+
+  /* THE LAYER'S OWN NAME. One word for the second layer is what every
+     client holds and what every other screen reads (`division`, §404.4), and
+     while a client has one layer that is the right answer everywhere — the
+     word on the shape screen, on Setup › Companies and in the navigation is
+     one word in one place (§53.5). A client with TWO layers is the case that
+     needs a name each, and only then: `structure[kind].layerWords`, read
+     here and falling back to the client's own word, so nothing is stored
+     and nothing reads differently until a second layer exists. */
+  function layerWords(group, kind) {
+    var s = structureOf(group), l = s && s[kind], w = l && l.layerWords;
+    return w && typeof w === "object" ? w : null;
+  }
+
+  /* ── §544.2 · WHAT IS IN THE NAVIGATION IS CHOSEN, NOT DERIVED ─────────
+     Islam, of a first draft that worked out the row from the shape: *"this
+     should be a choice what are the navigation switch… so it needs to be
+     chosen somehow not derived"*. He is right that a rule read off two
+     clients is a rule invented from two clients: a third with units,
+     functions AND divisions could reasonably want any of them on the row,
+     and a derivation decides that for them.
+
+     SO EVERY ROW ON THE SHAPE SCREEN CARRIES A TICK, and the sides of the
+     navigation are the rows that are ticked. Four rows can be: each bottom
+     kind, and each kind's layer.
+
+     AND THE ANSWER IS STORED AS AN ABSENCE, read as what `navSides()`
+     answers today, so every existing client opens with exactly the row it
+     has:
+       bu    ticked while the units are the level that plans (buExists) —
+             they are a side whenever they exist;
+       fn    ticked while there are functions AND the units plan, which is
+             the only shape in which the functions have a side of their own;
+       fn@g  ticked when the company plans, because then the functions'
+             divisions take that side rather than making anybody press
+             "Functions" before they can reach anything (§464);
+       bu@g  never, today: Raya's two divisions are reachable from a unit's
+             page and have never been on the row.
+     Pressing a tick writes a real true or false; pressing it back to what
+     the absence says deletes it again, so a client the office looked at and
+     left alone stores nothing (§50.6). */
+  var NAV_ROWS = ["bu", "fn", "bu@g", "fn@g"];
+  function navRowParts(row) {
+    var i = String(row || "").indexOf("@g");
+    return i > 0 ? { kind: String(row).slice(0, i), layer: true }
+                 : { kind: String(row || ""), layer: false };
+  }
+  /* What the row answers when nobody has said. */
+  function navRowUnsaid(group, row) {
+    var p = navRowParts(row);
+    if (p.kind !== "bu" && p.kind !== "fn") return false;
+    if (p.layer) return p.kind === "fn" && !buExists(group);
+    if (p.kind === "bu") return buExists(group);
+    return fnExists(group) && buExists(group);
+  }
+  function navPicked(group, row) {
+    var p = navRowParts(row), s = structureOf(group), l = s && s[p.kind];
+    var v = l && (p.layer ? l.layerNav : l.nav);
+    if (typeof v === "boolean") return v;
+    return navRowUnsaid(group, row);
+  }
   /* §447: a direction's owner reports their own direction on the company
      page. A RULE beside mayReportTop, for the same reason: it is one answer
      whatever a tenant sets, and only while the units are off, because that
@@ -4487,8 +5077,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      already. Both are register NAMES, never keys (§130.1), matched the one
      way a plan's Owner column is matched (`namedOn`). `pillarCust` is
      optional so a caller that predates it still answers about the owner. */
+  /* §544.13 — AND THE BUSINESS UNITS DO NOT GATE IT. This opened
+     `if (!person || buExists(w.group)) return false`, because §447's shape
+     was the only one in which the top layer's pillars ARE the directions.
+     Under §2.2 a company plans whether or not it has units, so the units
+     answer nothing here: what admits a direction's owner is a direction with
+     their name on it, which is what the rest of this function asks. */
   function ownsTopPillar(w, person, pillarOwner, pillarCust) {
-    if (!person || buExists(w.group)) return false;
+    if (!person) return false;
     var seat = function (name) { return !!name && namedOn({ owner: name }, person); };
     if (pillarOwner != null || pillarCust != null) return seat(pillarOwner) || seat(pillarCust);
     return (w.topItems || []).some(function (p) {
@@ -4605,8 +5201,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      asked here and nowhere else. Which rows they may TYPE on is the
      capability's own question (`cap:<id>`, §334), on the screen and on the
      server, so this opens the page and narrows nothing by itself. */
+  /* §544.13 — AND THE BUSINESS UNITS DO NOT GATE IT EITHER. Islam, asked
+     *"someone owns one capability — should they always be able to open it
+     and report on it?"*: **"yes, always"**. A capability is the company's
+     (`capAtTop`), so the company's Reporting page is the one page its owner
+     needs, units or no units; this used to refuse them the moment the client
+     had a unit, which is the same mistake in a second place. */
   function ownsTopCapability(w, person) {
-    if (!person || !w || buExists(w.group)) return false;
+    if (!person || !w) return false;
     return (w.capabilities || []).some(function (c) {
       return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
     });
@@ -5265,6 +5867,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     monthlyStarted: monthlyStarted, monthlyPlan: monthlyPlan,
     monthlyCompile: monthlyCompile, monthlyInForce: monthlyInForce,
     monthlyDue: monthlyDue, monthlyAnnual: monthlyAnnual,
+    monthlySoFar: monthlySoFar,
+    QUARTER_NAMES: QUARTER_NAMES, quarterlySet: quarterlySet, planBy: planBy,
+    quartersFromMonths: quartersFromMonths, monthsFromQuarters: monthsFromQuarters,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, mayFillPage: mayFillPage,
@@ -5283,6 +5888,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     webUrl: webUrl, webUrlFixed: webUrlFixed,
     isHidden: isHidden, shown: shown,
     HIDE_SLIDES: HIDE_SLIDES, hiddenSlides: hiddenSlides, slideHidden: slideHidden,
+    SLIDE_COLS_OFF: SLIDE_COLS_OFF, SLIDE_COLS: SLIDE_COLS, slideColOn: slideColOn,
+    SLIDE_BUILD: SLIDE_BUILD, slideBuildOn: slideBuildOn,
     VIDEO_MAX_BYTES: VIDEO_MAX_BYTES, VIDEO_MAX_SECS: VIDEO_MAX_SECS,
     VIDEO_PER_SUBJECT: VIDEO_PER_SUBJECT, VIDEO_STORE: VIDEO_STORE,
     VIDEO_EMBED_HOSTS: VIDEO_EMBED_HOSTS, VIDEO_SERVICES: VIDEO_SERVICES,
@@ -5307,7 +5914,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
+    fnExists: fnExists, buExists: buExists,
+    LAYER_KINDS: LAYER_KINDS, coUsedBy: coUsedBy, coOnLayer: coOnLayer,
+    layerCompanies: layerCompanies, layerOn: layerOn, layerOrphans: layerOrphans, layerWords: layerWords,
+    NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
     PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
@@ -5315,7 +5925,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OVERVIEW_AREAS: OVERVIEW_AREAS,
     PART_DEFAULTS: PART_DEFAULTS, QUAD_KEYS: QUAD_KEYS,
     SEC_FOUND_PARTS: SEC_FOUND_PARTS, PLAN_PARTS: PLAN_PARTS,
-    presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
+    presentMins: presentMins,
+    slidesMax: slidesMax, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,
     REMIND_HOURS: REMIND_HOURS, mayTakeContingency: mayTakeContingency,

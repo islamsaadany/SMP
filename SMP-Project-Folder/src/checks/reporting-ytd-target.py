@@ -129,8 +129,13 @@ READ = """(nm) => {
       const name = tds[1].innerText.trim().split('\\n')[0];
       const cell = tds[col];
       const sub = cell.querySelector('.subhd');
+      /* §573: the head is everything BEFORE the "of" line, read as text. It
+         was the cell's first node, which was the whole figure until the unit
+         became an element of its own (`29` and a small `%`). */
+      const before = cell.cloneNode(true);
+      before.querySelectorAll('.subhd').forEach(x => x.remove());
       rows[name] = { text: cell.innerText.replace(/\\s+/g, ' ').trim(),
-                     head: (sub ? cell.firstChild && cell.firstChild.textContent
+                     head: (sub ? before.textContent
                                 : cell.innerText).toString().trim(),
                      of: sub ? sub.innerText.trim() : null,
                      html: cell.innerHTML,
@@ -180,6 +185,7 @@ with sync_playwright() as p:
     made = ev(pg, """(share) => {
       const pil = UNITS.mobile.items.find(p => p.code === '03');
       const by  = n => pil.measures.find(m => m.name.indexOf(n) === 0);
+      const shownText = h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent; };
       /* 1 · ISLAM'S OWN CASE: a % for the year, built by month, Latest. */
       const sh = by('Samsung market share');
       sh.target = '30%'; sh.compile = 'Latest'; sh.monthly = share.slice();
@@ -224,8 +230,13 @@ with sync_playwright() as p:
                   spelling calls a correct build broken — which is the fault
                   this file's own docstring warns about, walked into while
                   writing it. */
-               cntWhole: tgtShown(by('ZZ shops opened').target),
-               cnt2Bench: measureDueLabel(by('ZZ stores opened')),
+               /* §573: and READ AS TEXT, because the figure is written as
+                  markup now (the unit an element of its own) — and a symbol
+                  is written tight, so `6 #` reads `6#` on the page. */
+               cntWhole: shownText(tgtShown(by('ZZ shops opened').target)),
+               cnt2Bench: shownText(typeof figHtml === 'function'
+                 ? figHtml(measureDueLabel(by('ZZ stores opened')))
+                 : measureDueLabel(by('ZZ stores opened'))),
                pillarsFn: pf, pillarsMeasure: fm ? fm.name : null,
                pillarsBench: fm ? measureDueLabel(fm) : null };
     }""", SHARE)

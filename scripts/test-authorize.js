@@ -1278,6 +1278,52 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
+/* ── §598: A ROW THAT LEFT OR ARRIVED IS LOGGED WITH ITS SEAT ──────────────
+   Islam: "if I remove a line fully do I get history of the plans somehow?"
+   The structural change used to reach the log with no rows; it carries the
+   row's contents and its seat now, so History can put it back where it was
+   and the Plan page can be rebuilt as it stood on a day. The GATE is
+   unchanged: still `unitPlan`, still the office's. */
+(function () {
+  const inc = clone(SEED);
+  const p = inc.units[UNIT].items[0];
+  const gone = p.measures.splice(1, 1)[0];
+  const v = A.authorize(SEED, inc, personOf(SEED, "smo"));
+  const ch = v.changes.filter(function (c) { return c.kind === "unitPlan"; })[0];
+  const row = ch && (ch.rows || []).filter(function (r) { return r.field === "row"; })[0];
+  check("§598: a removed measure is logged as one `row` entry", !!row && ch.rows.length === 1,
+        JSON.stringify(ch && ch.rows));
+  check("§598: ...carrying the row whole, and its seat (holder, list, index, length)",
+        !!row && row.had === true && row.to === null && row.from && row.from.in === p.id &&
+        row.from.list === "measures" && row.from.at === 1 && row.from.of === p.measures.length + 1 &&
+        row.from.row && row.from.row.id === gone.id && row.from.row.name === gone.name,
+        JSON.stringify(row && row.from && { in: row.from.in, list: row.from.list, at: row.from.at, of: row.from.of }));
+  check("§598: ...and the save is still the office's: allowed as the SMO", v.ok, v.refusals.join(" / "));
+  const inc2 = clone(SEED);
+  inc2.units[UNIT].items[0].tactics.push({ id: UNIT + "-P1-T999", name: "A new tactic" });
+  const v2 = A.authorize(SEED, inc2, personOf(SEED, "smo"));
+  const ch2 = v2.changes.filter(function (c) { return c.kind === "unitPlan"; })[0];
+  const row2 = ch2 && (ch2.rows || []).filter(function (r) { return r.field === "row"; })[0];
+  check("§598: an added tactic is logged as a `row` entry with `to` and no `from`",
+        !!row2 && row2.had === false && row2.from === null && row2.to && row2.to.list === "tactics" &&
+        row2.to.at === inc2.units[UNIT].items[0].tactics.length - 1 && row2.to.row.id === UNIT + "-P1-T999",
+        JSON.stringify(row2));
+  const inc3 = clone(SEED);
+  const ms = inc3.units[UNIT].items[0].measures; ms.push(ms.shift());
+  const v3 = A.authorize(SEED, inc3, personOf(SEED, "smo"));
+  /* A measure list carries no `onArrange`, so its reorder has classified as
+     `unitPlan` since §101 — unchanged here; what §598 adds is that no row
+     is reported as having left or arrived when only the order moved. */
+  check("§598: a reorder is classified as it was, never as a row that left",
+        v3.changes.some(function (c) { return c.kind === "unitPlan"; }) &&
+        !v3.changes.some(function (c) { return (c.rows || []).some(function (r) { return r.field === "row"; }); }),
+        JSON.stringify(v3.changes.map(function (c) { return c.kind; })));
+  const v4 = A.authorize(SEED, inc, personOf(SEED, headKey));
+  check("§598: ...and refused for a unit head, naming the row that left",
+        !v4.ok && v4.refused && v4.refused.some(function (r) { return (r.rows || []).some(function (x) { return x.field === "row"; }); }),
+        JSON.stringify((v4.refused || []).map(function (r) { return r.kind; })));
+})();
+
 /* ── AND A CAPABILITY'S OBJECTIVES REORDER THE SAME WAY (§278.3) ──
    That walk had no reorder callback at all, so moving one of these rows fell
    through to `capPlan` — the office's — while the identical act on a UNIT's
@@ -2514,6 +2560,31 @@ console.log("\n21 · viewing as somebody is judged as somebody (§185)");
   check("§185: the refusal is a sentence somebody can act on",
         /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
                                         "custodian", people).refuse));
+
+  /* ── §554: THE SMO TEAM ACTS THROUGH ONE TOO, UP TO ITS OWN SEAT ───
+     Islam asked for the team to hold the switcher. The widening and its
+     ceiling are asserted together, because a build that refused the team
+     everything satisfies every "it does not widen" line above, and a build
+     with no ceiling satisfies every "it works" line here (§94.2). */
+  const team = R.actingFor(smo, "t185_hala", "smoteam", people);
+  check("§554: an SMO team seat may act through a client's own person",
+        team.person && team.person.key === "t185_hala" && team.simulated === true,
+        JSON.stringify(team));
+  check("§554: ...and it is judged as HER, exactly as the office's is",
+        !A.authorize(base, edit(), team.person).ok);
+  /* The register row carries the seat (§187), so the one row above them is
+     recognisable without asking anything else. */
+  const superRow = personOf(base, "smo");
+  check("§554: the Super user's row IS the seat this reads",
+        !!superRow && superRow.role === "super", JSON.stringify(superRow));
+  const upward = R.actingFor(personOf(base, "t185_hala"), "smo", "smoteam", people);
+  check("§554: an SMO team seat may NOT act through the Super user — a " +
+        "simulation may only ever narrow",
+        !!upward.refuse, JSON.stringify(upward));
+  check("§554: ...and the refusal says which rule it is",
+        /SMO team cannot act through the Super user/.test(upward.refuse || ""));
+  check("§554: a client's own person still cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
 })();
 
 console.log("\n22 · a seat is granted, never derived (§187)");
@@ -3109,6 +3180,69 @@ console.log("\n28 · the order of the navigation is the office's (§273)");
   }
 })();
 
+console.log("\n28b · which columns the tactics slides show is the office's (§571)");
+(function () {
+  /* Islam: "give me the option to hide the owner and collabs in the slides",
+     "one switch for everything" — the company's, set in the slide view beside
+     the eye that hides a slide, so judged as that eye is (`deckHide`). Both
+     ends (§94.2): the office may, a unit's custodian — who opens the same
+     view — may not, and clearing it is the same act. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const F = R.SLIDE_COLS_OFF;
+  check("§571: the field is named by the shared module", F === "slideColsOff", String(F));
+  if (!(UK && CUST && F)) return;
+  let r = fromStored(SEED, "smo", function (i) { i.group[F] = ["collabs", "owner"]; });
+  check("§571: the office hides the two columns", r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(SEED, CUST, function (i) { i.group[F] = ["owner"]; });
+  check("§571 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§571: and the refusal sends them to Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")) && !/Setup/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§571: a change to it is classified `deckHide` and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  const set = clone(SEED); set.group[F] = ["owner"];
+  r = fromStored(set, CUST, function (i) { delete i.group[F]; });
+  check("§571 REFUSED: nor can they show them again", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[F]; });
+  check("§571: the office shows them again", r.ok, (r.refusals || []).join(" / "));
+})();
+
+console.log("\n28b · whether the slides build line by line is the office's (§579)");
+(function () {
+  /* The Columns menu's neighbour, judged as it is: the office may, a unit's
+     own custodian — who opens the same view — may not, either way. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const F = R.SLIDE_BUILD;
+  check("§579: the field is named by the shared module", F === "slideBuild", String(F));
+  check("§579: off when absent, on only when true",
+        R.slideBuildOn({}) === false && R.slideBuildOn({ slideBuild: true }) === true &&
+        R.slideBuildOn({ slideBuild: "yes" }) === false, "");
+  if (!(UK && CUST && F)) return;
+  let r = fromStored(SEED, "smo", function (i) { i.group[F] = true; });
+  check("§579: the office turns it on", r.ok, (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("§579: a change to it is classified `deckHide` and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  r = fromStored(SEED, CUST, function (i) { i.group[F] = true; });
+  check("§579 REFUSED: a unit's own custodian cannot", !r.ok, "was ALLOWED");
+  const set = clone(SEED); set.group[F] = true;
+  r = fromStored(set, CUST, function (i) { delete i.group[F]; });
+  check("§579 REFUSED: nor turn it off", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[F]; });
+  check("§579: the office turns it off", r.ok, (r.refusals || []).join(" / "));
+})();
+
 console.log("\n29 · the master presentation's running order is the office's (§266)");
 (function () {
   /* Islam, asked before it was built: the SMO. The menu draws the entry for
@@ -3218,6 +3352,31 @@ console.log("\n30 · a monthly plan is part of the plan (§278)");
                  .map(function (c) { return c.kind; });
   check("§278: it classifies as the unit's PLAN and nothing else",
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
+
+  /* §577: FOUR QUARTERS ARE THE SAME ACT. `quarterly` is as new to the
+     authoriser as `monthly` was, and falls through the same way — asserted for
+     §278's reason: if it ever stopped, a unit head could reshape the target
+     they are judged against by quarter, and nothing would notice. */
+  const FOUR = [45, 51, 84, 120];
+  r = fromStored(SEED, "smo", function (i) {
+    i.units[UK].items[0].measures[0].quarterly = FOUR; });
+  check("§577: the office gives a measure a quarterly plan", r.ok,
+        (r.refusals || []).join(" / "));
+  r = fromStored(SEED, CUST, function (i) {
+    i.units[UK].items[0].measures[0].quarterly = FOUR; });
+  check("§577 REFUSED: the unit's own custodian cannot plan it by quarter",
+        !r.ok, "was ALLOWED");
+  const withQ = clone(SEED);
+  withQ.units[UK].items[0].measures[0].quarterly = FOUR;
+  r = fromStored(withQ, CUST, function (i) {
+    delete i.units[UK].items[0].measures[0].quarterly; });
+  check("§577 REFUSED: nor clear one", !r.ok, "was ALLOWED");
+  const incQ = clone(SEED);
+  incQ.units[UK].items[0].measures[0].quarterly = FOUR;
+  const kq = A.collect(SEED, incQ, A.worldOf ? A.worldOf(SEED) : SEED)
+              .map(function (c) { return c.kind; });
+  check("§577: it classifies as the unit's PLAN and nothing else",
+        kq.length === 1 && kq[0] === "unitPlan", kq.join(",") || "(nothing)");
 })();
 
 /* ══ 31 · A ROW'S TYPE, AND THE FACT THAT NOTHING HERE MOVED (§292) ══
@@ -4478,6 +4637,40 @@ console.log("\n43 · my reporting (spec 062)");
     const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
     const inc = clone(shut); inc.units[uk].items[0].tactics[0].actual = "42";
     check("§382 REFUSED: a locked cycle takes nothing, owner or not",
+          !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
+  })();
+
+  /* — §576: THE NOTE ON AN OWNED LINE IS THE OWNER'S OR THE UNIT'S.
+       §382 said "the unit writes the note" and the server sent the note to
+       the owner with the figure, refusing the unit's custodian and head;
+       §576 gives the owner the note on their own red rows. Both ends, and
+       the figure beside it stays the owner's alone. — */
+  (function () {
+    const note = say(function (i) { at(i).note = "Why, and what is being done"; });
+    const nk = kindsOf(note);
+    check("§576: an owned line's note classifies as lineNote, never lineReporting",
+          nk.some(function (k) { return k.indexOf("lineNote:") === 0; }) &&
+          !nk.some(function (k) { return k.indexOf("lineReporting:") === 0; }),
+          nk.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§576: the owner writes it", verdict(note, owner.key).ok,
+          (verdict(note, owner.key).refusals || []).join(" / "));
+    const roles = base.unitRoles[uk] || {};
+    ["custodian", "head"].forEach(function (r) {
+      if (!roles[r]) return;
+      check("§576: ...and so does the unit's " + r, verdict(note, roles[r]).ok,
+            (verdict(note, roles[r]).refusals || []).join(" / "));
+    });
+    check("§576: ...and the office", verdict(note, "smo").ok,
+          (verdict(note, "smo").refusals || []).join(" / "));
+    check("§576 REFUSED: somebody with no reach into the unit does not",
+          !verdict(note, other.key).ok, "was ALLOWED");
+    const both = say(function (i) { at(i).note = "Why"; at(i).actual = "42"; });
+    if (roles.custodian)
+      check("§576 REFUSED: the custodian still may not enter the owner's FIGURE",
+            !verdict(both, roles.custodian).ok, "was ALLOWED");
+    const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
+    const inc = clone(shut); inc.units[uk].items[0].tactics[0].note = "Why";
+    check("§576 REFUSED: a locked cycle takes the note from the owner too",
           !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
   })();
 

@@ -22,18 +22,24 @@ import type { PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState, writeChanges, UnaddressableChange } from "./state-io.ts";
+import type { Rules, Differ, Authorizer } from "./shared-types.ts";
 const require = createRequire(import.meta.url);
-const R = require("./rules.cjs");
-const D = require("./graph-diff.cjs");
-const { authorize } = require("./authorize.cjs");
+const R = require("./rules.cjs") as Rules;
+const D = require("./graph-diff.cjs") as Differ;
+const { authorize } = require("./authorize.cjs") as Authorizer;
 
 export const LOCK_NS = 420043;
 const LOG_ROW_CAP = 20;   /* api/state.js's cap on the rows a log line carries */
+/* §588.1: a change list larger than this is not carried to other tabs — a
+   plan import is thousands of rows — they are told to fetch the graph. */
+export const SAVE_BYTES_CAP = 300 * 1024;
+/* §588.2: how long a numbered save is kept for other tabs to ask about. */
+export const SAVES_KEPT_DAYS = 7;
 
 export type Actor = { key: string; name?: string; role?: string; email?: string };
 export type SaveBody = { base?: unknown; changes?: unknown; viewAs?: string; state?: unknown };
 export type SaveResult =
-  | { code: 200; body: { ok: true; wrote: "rows"; rows: number; tables: string[]; at: string } }
+  | { code: 200; body: { ok: true; wrote: "rows"; rows: number; tables: string[]; at: string; seq: number } }
   | { code: 400; body: { ok: false; error: string; table?: string } }
   | { code: 403; body: { ok: false; refused: true; error: string; refusals: string[]; refusedChanges: unknown[]; undoable: boolean; judgedAs: { key: string; name: string } | null } };
 
@@ -44,7 +50,7 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
      else is a change list: an array, a string or a number applied "cleanly"
      as nothing at all is a save that reports success and wrote nothing */
   const ch: any = body && body.changes;
-  if (!ch || typeof ch !== "object" || Array.isArray(ch) || !(ch.set || ch.del || ch.rows))
+  if (!ch || typeof ch !== "object" || Array.isArray(ch) || !(ch.set || ch.del || ch.rows || ch.lists))
     return { code: 400, body: { ok: false, error: "The save carried no change list." } };
 
   /* THE CHECK'S BREAKS (constitution XVI, checks/state-api.mjs): each one
@@ -59,7 +65,10 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
     const act = R.actingFor(me, brk === "viewas-widens" ? undefined : body.viewAs, person.role, stored.people);
     if (act.refuse)
       return { code: 403 as const, body: { ok: false as const, refused: true as const, error: act.refuse, refusals: [act.refuse], refusedChanges: [], undoable: false, judgedAs: null } };
-    const acting = act.person;
+    /* §592: never missing here — `me` above always holds a person (the
+       register's row or the fallback), so actingFor answers that person,
+       the one acted through, or a refusal, which returned above. */
+    const acting = act.person!;
     /* §210: the changes are laid over what the database holds RIGHT NOW,
        under the lock — never over the tab's own baseline, which is the
        fault the whole contract exists to close (the `apply-on-base` break). */
@@ -101,7 +110,29 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
       });
       await c.query("INSERT INTO change_log (person_key, person_name, email, kind, target, what, rows_) VALUES " + vals.join(","), params);
     }
-    return { code: 200 as const, body: { ok: true as const, wrote: "rows" as const, rows: report.rows, tables: report.tables, at: new Date().toISOString() } };
+    /* §588.1: THE SAVE ITSELF, NUMBERED — inside the transaction, under the
+       lock, so the numbers run in the order the saves landed and a number is
+       never handed out for a save that rolled back. The change list is
+       stored as it was sent (the server applied exactly this), so a tab can
+       apply it onto its own copy with the same differ. A list too large to
+       carry is recorded as {full:true}: the tab fetches the graph instead. */
+    const sent = JSON.stringify(body.changes);
+    const kept = sent.length > SAVE_BYTES_CAP ? JSON.stringify({ full: true, bytes: sent.length }) : sent;
+    /* `no-save-number` (checks/saves-since.mjs): a save that lands and is
+       never numbered — every other tab stays stale for ever and nothing
+       says so. Never set on a deployment. */
+    const seq = brk === "no-save-number" ? 0
+      : Number((await c.query("INSERT INTO saves (person_key, person_name, changes) VALUES ($1, $2, $3::jsonb) RETURNING id",
+          [me.key, me.name || null, kept])).rows[0].id);
+    /* §588.2: THE LIST IS KEPT FOR A WEEK. A tab only ever needs the entries
+       since it was opened, so what is older is swept on the way out of every
+       save — one bounded delete, under the tenant's own policy, on a table
+       that never holds more than a week. A tab whose number is older than
+       the oldest entry kept is told so by the read (`oldest`) and takes the
+       graph instead. `no-sweep` (checks/saves-since.mjs): the list grows for
+       ever. Never set on a deployment. */
+    if (brk !== "no-sweep") await c.query("DELETE FROM saves WHERE at < now() - interval '" + SAVES_KEPT_DAYS + " days'");
+    return { code: 200 as const, body: { ok: true as const, wrote: "rows" as const, rows: report.rows, tables: report.tables, at: new Date().toISOString(), seq } };
   }).catch((e: any) => {
     if (e && e.unaddressable) return { code: 400 as const, body: { ok: false as const, error: e.message, table: e.table } };
     throw e;

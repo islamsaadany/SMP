@@ -59,6 +59,23 @@ A drift between specs and code is a documentation bug — report it before silen
   and the section numbers on purpose. The rule is about what is said to a
   person, not about what is written down for the next one.
 
+### 1b-iv. SHORT, NOT JUST PLAIN (2026-10-19)
+- **Islam, of a reply he had just been handed: *"I DIDN'T UNDERSTAND ANYTHING
+  FROM THAT."*** Rule 1b-iii above said plain words and said nothing about
+  LENGTH, so the reply obeyed it line by line and was still unreadable — four
+  headings and a list, about work he had asked one question about.
+- **Answer the question that was asked. Stop there.** A few sentences. If it
+  needs headings, it is too long.
+- **Never put these in front of him**: file names, line counts, commit codes,
+  § numbers, check names, git words (branch, merge, fast-forward, force-push).
+  They are the record's vocabulary, not his. Say *the dropdown works for the
+  SMO team* — not which file it is in.
+- **Bad news is one sentence, not an essay.** "I got that wrong — the file has
+  other people's work in it too" is the whole thing. The explaining goes in the
+  commit message where it belongs.
+- **He will ask if he wants more.** Offering less is the safe mistake;
+  burying the answer is not.
+
 ### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
 - **Islam: *"remove the grey descriptions and stop adding descriptions to
   pages."*** A heading names the thing; a paragraph under it in grey saying the
@@ -9976,6 +9993,22 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # no text with the meaning on the hover AND the
                                 # aria-label, and exactly the row with a plan
                                 # lit — measured as PAINT, never as a class
+python3 checks/quarterly-plan.py # a target by quarter as well as by month
+                                # (§577): the arithmetic by name (a quarter spread
+                                # over its months, EXACT at a quarter end, each
+                                # compile rule its own way, a monthly row unchanged),
+                                # the By month | By quarter switch PRESSED and the
+                                # stored plan read back on a measure, a tactic
+                                # outcome, a unit's AND a function's objectives
+                                # (A15), the carry both ways deleting what it came
+                                # from, an empty plan switched storing nothing,
+                                # the mark lit with no repaint, Performance's *by
+                                # quarter* and August's 152M EGP, the workbook
+                                # round trip and the both-filled refusal, Clear,
+                                # and the fit at three widths. Red 60 on the build
+                                # before; every absence asked beside a case that
+                                # must answer (§94.5). Takes a built file as an
+                                # argument to run against another build
 python3 checks/tactic-outcome.py # a tactic is judged by what it produced
                                 # (§248, §249): the claim is not that the columns are
                                 # drawn but that nothing already reported changes
@@ -11070,6 +11103,69 @@ SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
                                 # band is a card grid too, so `.cards` reached
                                 # both — the client grid is NAMED now
                                 # (`data-grid="clients"`)
+node smp-app/checks/rules-types.mjs # THE SHARED RULES AGREE WITH THEIR OWN
+                                # TYPES (§585) — `npm run check:rules-types`,
+                                # no browser, no database. `lib/rules.js` §4
+                                # names the World, a Person and a held role in
+                                # comments; this runs TypeScript's checker over
+                                # it and `lib/authorize.js`, LOOSE (strict found
+                                # only `var x = null` noise). Edit the rules →
+                                # run this. A new key on the world goes in the
+                                # `World` typedef too: W() and worldOf() are
+                                # refused a key it does not name (forgetting
+                                # worldOf() itself is still silent). Only the
+                                # 28 functions marked World are read for a
+                                # misspelt key. `--red` makes five faults in a copy
+                                # and must catch all five (0 of 5 before §585).
+                                # It once reported five catches having checked
+                                # nothing — TypeScript 7 refuses named files
+                                # beside a tsconfig.json and the refusal exits
+                                # non-zero — so a break counts only when an
+                                # error points INTO the broken file
+node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
+                                # (§589) — `npm run check:pages-types`, no
+                                # browser, no database, nothing in src/ edited.
+                                # build.py's list + the shell's inline script +
+                                # theme.js + route.js, handed to the checker
+                                # with the library names (SMPRules…) declared
+                                # CLOSED (JS objects are open: a misspelt rule
+                                # read as `any` until --red caught it). 98
+                                # findings today, each read, none a fault, in
+                                # pages-types.known.json by file/code/message;
+                                # it fails on one beyond them OR one gone. Edit
+                                # the pages → run this; a new finding is READ,
+                                # then fixed or recorded with `--write` — never
+                                # written to turn it green unread. `--red`: six
+                                # faults, all caught. SINCE §594 IT ALSO READS
+                                # THE CONSOLE (platform.html + the scripts its
+                                # tags load), list console-types.known.json:
+                                # most of it is the set-up flow naming
+                                # STRATEGY-PAGE data the console lacks — a NEW
+                                # one there may throw on the console (§467):
+                                # show it is guarded before `--write`. AND
+                                # §596 WALKS THE CONSOLE'S PATHS into the
+                                # set-up flow (acorn): every strategy-page name
+                                # reachable from CLIENTSETUP.mountCreate /
+                                # mountArchived must sit under a typeof guard.
+                                # A route only data closes (canShape()) goes in
+                                # DOORWAYS with its reason; a doorway that
+                                # vanishes fails. Fifteen breaks, §467 itself
+                                # among them, all caught
+node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
+                                # — `npm run check:app-types`. A carried .cjs
+                                # loaded with `require` is `any`: load the
+                                # rules, the differ, the authoriser or the
+                                # platform rules ONLY as `require(...) as Rules`
+                                # (Differ, Authorizer, PlatformRules from
+                                # lib/shared-types.ts — read from the modules,
+                                # never written out). It scans every .ts/.tsx
+                                # for a bare load, keeps allowJs on / checkJs
+                                # off, and wants the app's checker silent where
+                                # they are used. NEVER put `// @ts-check` back
+                                # in lib/rules.js: allowJs then CHECKS it under
+                                # strict (586 findings, `next build` fails).
+                                # `--red`: seven breaks in place, restored in a
+                                # finally, all caught
 DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
 DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
 ```

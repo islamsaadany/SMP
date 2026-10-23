@@ -13,10 +13,15 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE:
     nothing looks identical and discards every keystroke (§96) — which is
     exactly what shipped in the first build of this feature, where the boxes
     rendered as spans on Foundation because they named the wrong page.
-  · A TYPED 0 IS A REAL MONTH AND A BLANK IS NOT, asserted from BOTH sides.
-    `Number("")` is 0 and finite (§104.10), so a build that read blanks as
-    noughts would put a half-filled plan in force and cut the year's target —
+  · A TYPED 0 IS A REAL MONTH AND A BLANK IS PASSED OVER, asserted from BOTH
+    sides. `Number("")` is 0 and finite (§104.10), so a build that read blanks
+    as noughts would put a half-filled plan in force and cut the year's target —
     and it would pass every assertion about the complete case.
+  · §569: A HALF-FILLED PLAN IS IN FORCE. Islam: *"the monthly plan overrides
+    the proration"*. What is due is the row's compile rule over the months set
+    up to the review month — never the year spread evenly across the target
+    those same months derived. Rewritten to the new rule (§218), the old words
+    kept beside each assertion they replaced.
   · A row with no monthly plan is BYTE-IDENTICAL to before. The whole
     safety argument for shipping into an open cycle is that nothing moves
     until somebody fills twelve boxes in, and that is a measurement, not a
@@ -129,15 +134,29 @@ with sync_playwright() as p:
     # ── 1 · the arithmetic, asked of the rule itself ────────────────────
     ar = ev(pg, """(plan) => {
       const R = SMPRules, m = { monthly: plan, compile: "Sum" };
+      /* Jan–Apr typed and the rest still empty — a plan somebody is four
+         months into, which is the state §555 is about. */
+      const part4 = plan.slice(0, 4).concat(["", "", "", "", "", "", "", ""]);
       return {
         sum6:  R.monthlyDue(m, 6),
         annual: R.monthlyAnnual(m),
         latest6: R.monthlyDue({ monthly: plan, compile: "Latest" }, 6),
         avg4: R.monthlyDue({ monthly: plan, compile: "Average" }, 4),
-        /* A BLANK MONTH IS NOT A NOUGHT. This is the assertion the whole
-           feature turns on: with a naive Number() test this reads 82 and the
-           row goes in force on a plan somebody has only started. */
+        /* A BLANK MONTH ADDS NOTHING (§569). Until §569 this asserted the
+           plan was OUT OF FORCE (null) — the blank read as unknown. It is
+           passed over now: 1+2+4+5+6, the blank owing nothing. */
         oneBlank: R.monthlyDue({ monthly: [1,2,"",4,5,6,7,8,9,10,11,12], compile:"Sum" }, 6),
+        /* ...and passed over by every rule its own way: Average does not count
+           it, Latest stands on the last month set before it. */
+        blankAvg: R.monthlyDue({ monthly: [10,"",20,"","","","","","","","",""], compile:"Average" }, 4),
+        blankLatest: R.monthlyDue({ monthly: [10,"",20,"","","","","","","","",""], compile:"Latest" }, 2),
+        /* Islam's own row: 2+2+2+2+2+3 for January to June, a Count, read in
+           September. The whole of the target is owed by June; flat it read 9. */
+        islamSep: R.monthlyDue({ monthly: [2,2,2,2,2,3,"","","","","",""], compile:"Count" }, 9),
+        /* Months planned only after the review point owe nothing yet. */
+        laterOnly: R.monthlyDue({ monthly: ["","","","","","","",5,5,5,5,5], compile:"Sum" }, 6),
+        partInForce: R.monthlyInForce({ monthly: [2,2,"","","","","","","","","",""], compile:"Sum" }),
+        badInForce: R.monthlyInForce({ monthly: [2,2,"","","","","","","","","","TBD"], compile:"Sum" }),
         /* ...and a typed 0 IS one. */
         typedZero: R.monthlyDue({ monthly: [0,0,0,0,0,0,10,10,10,10,10,10], compile:"Sum" }, 6),
         zeroSet: R.monthSet(0), blankSet: R.monthSet(""), nullSet: R.monthSet(null),
@@ -145,7 +164,28 @@ with sync_playwright() as p:
            to, so the row is not in force rather than guessed at. */
         noCompile: R.monthlyDue({ monthly: plan }, 6),
         inForceNoCompile: R.monthlyInForce({ monthly: plan }),
-        eleven: R.monthlySet({ monthly: plan.slice(0, 11) })
+        eleven: R.monthlySet({ monthly: plan.slice(0, 11) }),
+        /* §555: WHAT THE MONTHS SET SO FAR COME TO. Asked of the rule
+           itself, every way it can be answered and every way it must
+           refuse — the screen assertions below drive only the Sum case. */
+        soFar4: R.monthlySoFar({ monthly: part4, compile: "Sum" }),
+        soFarAll: R.monthlySoFar(m),
+        soFarAvg: R.monthlySoFar({ monthly: part4, compile: "Average" }),
+        soFarLatest: R.monthlySoFar({ monthly: part4, compile: "Latest" }),
+        soFarCount: R.monthlySoFar({ monthly: [1.4, 1.4, "", "", "", "", "", "", "", "", "", ""],
+                                     compile: "Count" }),
+        /* A TYPED 0 AND A FIGURE OF NONE ARE DIFFERENT ANSWERS, which is the
+           whole of §278's blank test wearing this section's hat: 0 is a
+           target the office set and null is "there is nothing to derive". */
+        soFarZero: R.monthlySoFar({ monthly: [0, "", "", "", "", "", "", "", "", "", "", ""],
+                                    compile: "Sum" }),
+        soFarNone: R.monthlySoFar({ monthly: ["", "", "", "", "", "", "", "", "", "", "", ""],
+                                    compile: "Sum" }),
+        soFarNoCompile: R.monthlySoFar({ monthly: plan }),
+        /* A month holding something the platform cannot read leaves the
+           target ALONE rather than deriving a figure from the rest. */
+        soFarBad: R.monthlySoFar({ monthly: [1, 2, "TBD", "", "", "", "", "", "", "", "", ""],
+                                   compile: "Sum" })
       };
     }""", PLAN)
     ck("Sum adds the months that have passed", ar.get("sum6") == 96, ar)
@@ -155,13 +195,38 @@ with sync_playwright() as p:
     # ASKED BESIDE A CASE THAT MUST ANSWER. On a build with no monthly plan at
     # all every probe here throws and every `is None` assertion passes — §94.5's
     # own example, and this file's first falsification run did exactly that.
-    ck("A BLANK MONTH LEAVES THE PLAN OUT OF FORCE, never read as nought",
-       ar.get("oneBlank") is None and ar.get("sum6") == 96, ar)
+    # §569 REWROTE THIS ONE: it read "A BLANK MONTH LEAVES THE PLAN OUT OF
+    # FORCE, never read as nought" and held `oneBlank is None`.
+    ck("A BLANK MONTH ADDS NOTHING, and the plan stays in force (§569)",
+       ar.get("oneBlank") == 18 and ar.get("sum6") == 96, ar)
+    ck("...Average leaves it out of the mean, Latest stands on the month before it",
+       ar.get("blankAvg") == 15 and ar.get("blankLatest") == 10, ar)
+    ck("Islam's row: 13 shops planned by June are all owed in September, not 9",
+       ar.get("islamSep") == 13, ar)
+    ck("months planned only later owe nought yet, never the year spread flat",
+       ar.get("laterOnly") == 0, ar)
+    ck("a half-filled plan is in force; one holding a word is not",
+       ar.get("partInForce") is True and ar.get("badInForce") is False, ar)
     ck("A TYPED 0 IS A REAL MONTH", ar.get("typedZero") == 0 and ar.get("zeroSet") is True, ar)
     ck("...and blank and null are not", ar.get("blankSet") is False and
        ar.get("nullSet") is False, ar)
     ck("no compile rule: not in force, never guessed",
        ar.get("noCompile") is None and ar.get("inForceNoCompile") is False, ar)
+    # ── §555 · the target is the months, from the first one typed ───────
+    ck("four months set come to their own figure (§555)",
+       ar.get("soFar4") == 61, ar)
+    # ONE FIGURE AND NOT TWO. The moment these two disagree the target on a
+    # row stops agreeing with the months under it, and nothing else would say
+    # so — the screen reads one of them and the scoring the other.
+    ck("...and on a COMPLETE plan it is the same figure as the annual target",
+       ar.get("soFarAll") == 300 and ar.get("soFarAll") == ar.get("annual"), ar)
+    ck("...each compile rule answers its own way, part-filled",
+       ar.get("soFarAvg") == 15.25 and ar.get("soFarLatest") == 16 and
+       ar.get("soFarCount") == 2, ar)
+    ck("A TYPED 0 DERIVES 0, where nothing typed derives nothing",
+       ar.get("soFarZero") == 0 and ar.get("soFarNone") is None, ar)
+    ck("...and no compile rule, or a month that is not a number, derives nothing",
+       ar.get("soFarNoCompile") is None and ar.get("soFarBad") is None, ar)
 
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(250)
@@ -219,8 +284,12 @@ with sync_playwright() as p:
        mk.get("w") == 24 and mk.get("h") == 22, mk)
     ck("...drawn as twelve cells, not a font character (§52)",
        mk.get("cells") == 12, mk)
+    # §577 REWROTE THE WORDS, NOT THE CLAIM: it asked for "month by month" in
+    # the name, and an empty row's mark now opens a drawer that plans by month
+    # OR by quarter, so it says both. Still no text on its face, still the same
+    # words on the hover and to a reader.
     ck("...carrying no text, and saying what it is on the hover AND to a reader",
-       mk.get("text") == "" and "month by month" in mk.get("name", "") and
+       mk.get("text") == "" and "by month or by quarter" in mk.get("name", "") and
        mk.get("title") == mk.get("name"), mk)
 
     # AND THE LIT STATE IS THE POINT OF PICKING IT: a row with a plan has to be
@@ -285,6 +354,41 @@ with sync_playwright() as p:
         rows: document.querySelectorAll('tr.mprow').length,
         boxes: document.querySelectorAll('tr.mprow .mpm input').length })""") ==
        {"rows": 1, "boxes": 12})
+    # ── 4a · §555 · FOUR MONTHS IN, THE TARGET IS ALREADY THEIRS ───────
+    # Islam: *"when I was adding the monthly the target should be a sum of the
+    # months calculated automatically not on an entry as well."* Driven
+    # through the real boxes rather than asked of the rule, because the fault
+    # he met was a LIVE TARGET BOX beside a part-filled plan — the figure and
+    # the lock are two different builders and only one of them changed.
+    typemonths(pg, PLAN[:4] + [""] * 8)
+    pg.wait_for_timeout(400)
+    four = ev(pg, """() => {
+      const m = UNITS.mobile.items.find(x => x.code === '03')
+                .measures.find(x => x.name.indexOf('Accessory') === 0);
+      const cell = document.querySelector('td[data-mptgt][data-mplock="1"]');
+      return { target: m.target, set: SMPRules.monthlySet(m),
+               inForce: SMPRules.monthlyInForce(m),
+               boxValue: cell ? cell.querySelector('input').value : null,
+               boxDisabled: cell ? cell.querySelector('input').disabled : null,
+               due: measureDueLabel(m),
+               msg: (document.querySelector('.mpmsg') || {}).textContent || "" };
+    }""")
+    ck("four months typed: the target is what those four come to, keeping its unit",
+       four.get("target") == "61M EGP" and four.get("set") == 4, four)
+    ck("...and the box is LOCKED on it, from the first month and not the twelfth",
+       four.get("boxDisabled") is True and four.get("boxValue") == "61M EGP", four)
+    # §569 REWROTE THIS PAIR. It read "...while the YEAR is still flat — a
+    # missing month is unknown, never nought" (`inForce is False`, due
+    # 30.5M EGP, half of 61M) and "...the drawer says both halves, the figure
+    # and the flat year" ("spread evenly"). Islam: *"the monthly plan
+    # overrides the proration"* — so at June the four months set are owed.
+    ck("...and the YEAR follows the same four months — owed in full by June (§569)",
+       four.get("inForce") is True and four.get("due") == "61M EGP", four)
+    ck("...and the drawer says the figure and what an empty month means",
+       "4 of 12" in four.get("msg", "") and "61M EGP" in four.get("msg", "") and
+       "counts as nothing planned" in four.get("msg", "") and
+       "spread evenly" not in four.get("msg", ""), four)
+
     typemonths(pg, PLAN)
     pg.wait_for_timeout(400)
     on = ev(pg, """() => {
@@ -332,12 +436,21 @@ with sync_playwright() as p:
                score: measureScore(m), locked: !!cell,
                msg: (document.querySelector('.mpmsg') || {}).textContent || "" };
     }""")
-    ck("one blank month puts the row back on flat proration",
-       off.get("due") == "150M EGP" and off.get("score") == 64, off)
-    ck("...the box is live again, and the last derived year is kept",
-       off.get("locked") is False and off.get("target") == "300M EGP", off)
-    ck("...and the drawer says how many are set and that it is not in force",
-       "11 of 12" in off.get("msg", "") and "not in force" in off.get("msg", ""), off)
+    # §569 REWROTE THIS ONE: it read "one blank month puts the row back on flat
+    # proration" and held due 142M EGP (half of 284M). The blank owes nothing:
+    # 15+14+16+17+18 by June, and 96M against that is ahead.
+    ck("one blank month owes nothing, and the rest of the plan stays in force",
+       off.get("due") == "80M EGP" and off.get("score") == 120, off)
+    # §555 REWROTE THIS PAIR, AND THE OLD WORDS ARE KEPT SO THE CHANGE IS
+    # LEGIBLE: they held `locked is False` and `target == "300M EGP"` — the
+    # box went live again and kept the twelve's figure. It does not now. The
+    # eleven that are left derive the target (284M), and the box stays locked,
+    # because the plan is still there. The year is flat across THAT figure.
+    ck("...the box stays locked and the eleven that are left derive the target",
+       off.get("locked") is True and off.get("target") == "284M EGP", off)
+    ck("...and the drawer says how many are set and what they come to",
+       "11 of 12" in off.get("msg", "") and "284M EGP" in off.get("msg", "") and
+       "counts as nothing planned" in off.get("msg", ""), off)
     ck("a cleared month is stored as null, never as 0",
        off.get("stored") and off.get("stored")[2] is None, off)
 
@@ -353,6 +466,57 @@ with sync_playwright() as p:
     ck("A TYPED 0 IS A REAL MONTH: in force, and the year is 16 lighter",
        z.get("stored") and z.get("stored")[2] == 0 and
        z.get("target") == "284M EGP" and z.get("due") == "80M EGP", z)
+
+    # ── 5b · §555 · THE COMPILE RULE IS THE OTHER HALF OF THE ARITHMETIC ─
+    # Picked AFTER the months are typed, which is an ordinary way round: the
+    # platform cannot say what the months come to until it knows whether the
+    # year is their sum or the last of them. Driven through the real select,
+    # and read back WITHOUT a repaint — the field listener writes without one
+    # (§71.2), so a row that only came right on the next paint would show a
+    # locked box holding a figure the drawer beside it contradicts.
+    norule = ev(pg, """() => {
+      const m = UNITS.mobile.items.find(x => x.code === '03')
+                .measures.find(x => x.name.indexOf('Accessory') === 0);
+      m.target = "999M EGP"; delete m.compile; paint();
+      /* THE ROW'S OWN CELL, never the first one on the page: every measure
+         carries a `data-mptgt` and only this one carries the plan, so a bare
+         querySelector would have measured the row above it. */
+      const rows = [...document.querySelectorAll('.pane table tbody tr')];
+      const r = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
+                                 return a && a.value.indexOf('Accessory') === 0; });
+      const cell = r && r.querySelector('td[data-mptgt]');
+      return { lock: cell ? cell.getAttribute('data-mplock') : null,
+               disabled: cell ? cell.querySelector('input').disabled : null,
+               msg: (document.querySelector('.mpmsg') || {}).textContent || "" };
+    }""")
+    ck("no compile rule: the box is the office's and the drawer says why",
+       norule.get("lock") == "0" and norule.get("disabled") is False and
+       "no compile rule" in norule.get("msg", ""), norule)
+    setrule = ev(pg, """() => {
+      const rows = [...document.querySelectorAll('.pane table tbody tr')];
+      const r = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
+                                 return a && a.value.indexOf('Accessory') === 0; });
+      const sel = r && [...r.querySelectorAll('select.fld')]
+        .find(s => [...s.options].some(o => o.value === 'Sum'));
+      if (!sel) return { none: true };
+      sel.value = 'Sum';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      const m = UNITS.mobile.items.find(x => x.code === '03')
+                .measures.find(x => x.name.indexOf('Accessory') === 0);
+      const cell = r.querySelector('td[data-mptgt]');
+      return { compile: m.compile, target: m.target,
+               lock: cell ? cell.getAttribute('data-mplock') : null,
+               boxValue: cell ? cell.querySelector('input').value : null,
+               disabled: cell ? cell.querySelector('input').disabled : null,
+               msg: (document.querySelector('.mpmsg') || {}).textContent || "" };
+    }""")
+    ck("picking the rule derives the target there and then, with no repaint",
+       setrule.get("compile") == "Sum" and setrule.get("target") == "284M EGP", setrule)
+    ck("...and the box locks on it rather than keeping the figure it held",
+       setrule.get("lock") == "1" and setrule.get("disabled") is True and
+       setrule.get("boxValue") == "284M EGP", setrule)
+    ck("...and the drawer's sentence agrees with the box above it",
+       "284M EGP" in setrule.get("msg", ""), setrule)
 
     # ── 6 · the reading side ───────────────────────────────────────────
     typemonths(pg, PLAN)
@@ -438,22 +602,29 @@ with sync_playwright() as p:
       const os = sheets.filter(s => s.name === "Objectives")[0];
       const M = ["Jan","Feb","Mar","Apr","May","Jun",
                  "Jul","Aug","Sep","Oct","Nov","Dec"];
+      /* §577 APPENDED FOUR QUARTERS AFTER DECEMBER, so the twelve are no
+         longer the LAST columns: they read `head.slice(-12)` and Hidden at
+         `length - 13`. REWRITTEN, never loosened (§218): the twelve still
+         follow Hidden directly and in order, and what follows them is
+         exactly the four §577 decided — a month moved into the middle, or
+         anything else appended between, is still red. */
+      const Q = ["Q1 target", "Q2 target", "Q3 target", "Q4 target"];
       const tail = (head, prefix) =>
-        head.slice(-12).join("|") === M.map(m => prefix + m).join("|");
+        head.slice(-16).join("|") === M.map(m => prefix + m).concat(Q.map(q => prefix + q)).join("|");
       return { tacTail: tail(ts.head, "Outcome "), objTail: tail(os.head, ""),
-               tacHiddenLast: ts.head[ts.head.length - 13] === "Hidden",
-               objHiddenLast: os.head[os.head.length - 13] === "Hidden",
+               tacHiddenLast: ts.head[ts.head.length - 17] === "Hidden",
+               objHiddenLast: os.head[os.head.length - 17] === "Hidden",
                tacQ1: ts.head.indexOf("Q1"), tacQ4: ts.head.indexOf("Q4"),
                tacHead: ts.head, objHead: os.head };
     }""")
-    ck("the Tactics sheet's twelve are the last columns, named for the outcome",
+    ck("the Tactics sheet's twelve follow Hidden, then the four quarters (§577), named for the outcome",
        tac.get("tacTail") is True and tac.get("tacHiddenLast") is True, tac.get("tacHead"))
     # Q1–Q4 keep their literal positions on purpose: a workbook written before
     # §278 is read by header NAME, but its VALIDATION ranges are positions
     # (§65), so this is the one place a number is the promise.
     ck("...and Q1–Q4 have NOT moved",
        tac.get("tacQ1") == 9 and tac.get("tacQ4") == 12, tac.get("tacHead"))
-    ck("the Objectives sheet appends its twelve after Hidden",
+    ck("the Objectives sheet appends its twelve after Hidden, then the four quarters",
        tac.get("objTail") is True and tac.get("objHiddenLast") is True, tac.get("objHead"))
 
     # ── 8 · Clear DELETES the key (§50.6) ──────────────────────────────
@@ -478,12 +649,18 @@ with sync_playwright() as p:
       const m = UNITS.mobile.items.find(x => x.code === '03')
                 .measures.find(x => x.name.indexOf('Accessory') === 0);
       return { key: "monthly" in m, target: m.target,
-               due: measureDueLabel(m), score: measureScore(m) };
+               due: measureDueLabel(m), score: measureScore(m),
+               locked: !!document.querySelector('td[data-mptgt][data-mplock="1"]') };
     }""")
     ck("cleared: the key is DELETED, not an array of nulls",
        cleared.get("key") is False, cleared)
     ck("...the row is flat again and keeps the figure the twelve derived",
        cleared.get("due") == "150M EGP" and cleared.get("target") == "300M EGP", cleared)
+    # §555's other end: with no months there is nothing deriving the figure,
+    # so the box goes back to being the office's to type. Asserted because a
+    # lock that outlives the plan is a target nobody on the tenant can correct.
+    ck("...and the target box is the office's to type again",
+       cleared.get("locked") is False, cleared)
 
     # ── 9 · the other three surfaces draw one too (Islam's "all four") ──
     surf = ev(pg, """() => {
@@ -524,6 +701,29 @@ with sync_playwright() as p:
        tout.get("outTarget") == "6#" and tout.get("boxValue") == "6", tout)
     ck("...and the six months that have run are what it is measured against",
        tout.get("due") == "3#", tout)
+    # §555 ON THE SURFACE THAT IS NOT A `gapCell`. An outcome's compile rule is
+    # a `selectOr` with its own setter (§248), so the hook had to be written
+    # there by hand — a different wire from the other three, and a silent one
+    # if it is wrong: the box locks either way and only the FIGURE is off.
+    trule = ev(pg, """() => {
+      const t = UNITS.mobile.items.find(p => p.code === '03').tactics[0];
+      t.outTarget = "99#"; delete t.outCompile; paint();
+      const rows = [...document.querySelectorAll('.pane table tbody tr')];
+      const tr = rows.find(x => { const a = x.querySelector('td:nth-child(2) textarea');
+                                  return a && a.value === t.name; });
+      const sel = tr && [...tr.querySelectorAll('select')]
+        .find(s => [...s.options].some(o => o.value === 'Sum'));
+      if (!sel) return { none: true };
+      sel.value = 'Sum';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      const cell = tr.querySelector('td[data-mptgt]');
+      return { outCompile: t.outCompile, outTarget: t.outTarget,
+               lock: cell ? cell.getAttribute('data-mplock') : null,
+               boxValue: cell ? cell.querySelector('input').value : null };
+    }""")
+    ck("picking an outcome's rule derives its target too, with no repaint",
+       trule.get("outCompile") == "Sum" and trule.get("outTarget") == "6#" and
+       trule.get("lock") == "1" and trule.get("boxValue") == "6", trule)
 
     # a unit's key objectives, on Foundation — the surface the first build
     # drew twelve read-only spans on (§96).

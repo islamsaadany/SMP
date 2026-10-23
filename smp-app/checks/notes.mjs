@@ -248,6 +248,12 @@ try {
   const named = N.namedOf([{ key: "ramy" }, { key: "hala" }, { name: "Karim Fawzy", email: "karim@partner.test" }, { key: "gone" }], reg, new Set(officeA.map((p) => p.key)));
   check("a keyed attendee is rendered from the register at draw time (§48)", named[0].name === "Ramy Behairy" && named[0].place === "Mobile");
   check("...one with no address is still an attendee, marked", named[1].name === "Hala Mostafa" && named[1].email === "");
+  /* §565 — THE REGISTER'S NAME, NEVER THE FULL ONE: typed on Hala's row for
+     this claim alone and taken off again, so nothing below reads it. */
+  await owner("UPDATE people SET extra = extra || '{\"known\":\"Hala M.\"}'::jsonb WHERE tenant_id = $1 AND key = 'hala'", [A]);
+  check("a person is named by the Name typed on the register, never the full name (§565)",
+    (await asTenant(A, (c) => N.registerOf(c))).get("hala").name === "Hala M.", (await asTenant(A, (c) => N.registerOf(c))).get("hala").name);
+  await owner("UPDATE people SET extra = extra - 'known' WHERE tenant_id = $1 AND key = 'hala'", [A]);
   check("...a casual one says it is for this meeting only", named[2].casual && named[2].place === "this meeting only" && named[2].key === null);
   check("...and somebody the register no longer holds reads as their key, with no address (§35)", named[3].name === "gone" && named[3].email === "");
 

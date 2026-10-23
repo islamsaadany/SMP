@@ -253,6 +253,21 @@ with sync_playwright() as p:
     ok("from the top, not from where the last one left off",
        isinstance(ran, (int, float)) and 0 <= ran < 4000, (ran, f2))
 
+    # §556.9: the flow's own cover and group pages are nobody's time. With
+    # the cover in front, the first subject's clock must not be running on
+    # it, and must start fresh on that subject's own first slide.
+    eva(pg, "()=>{ closeDeck(); openDeckWith('<b>Master</b>', flowWithParts(['mobile','retailstores'])); deckShow(0); }")
+    pg.wait_for_timeout(500)
+    c0 = eva(pg, "()=>({part: DECK.slides[0].dataset.flowpart || null, clock: !!DECK.clock, "
+                 "shown: !document.getElementById('dclock').hidden})")
+    ok("the flow's cover runs no clock (§556.9)",
+       val(c0, "part") == "1" and val(c0, "clock") is False and val(c0, "shown") is False, c0)
+    eva(pg, "()=>{ var i = DECK.slides.findIndex(s => !s.dataset.flowpart); deckShow(i); }")
+    pg.wait_for_timeout(300)
+    c1 = eva(pg, "()=>({m: DECK.clock && DECK.clock.mins, ran: DECK.clock ? DECK.clock.mins*60000 - clockLeft() : null})")
+    ok("...and the first subject's time starts fresh on its own first slide",
+       val(c1, "m") == 15 and isinstance(val(c1, "ran"), (int, float)) and 0 <= val(c1, "ran") < 4000, c1)
+
     # ── 7 · pause: three ways in. Reset: one ─────────────────────────────
     print("\n7 · three ways to pause, one way to reset")
     eva(pg, "()=>{ closeDeck(); openDeck(UNITS['mobile']); }"); pg.wait_for_timeout(500)
@@ -281,6 +296,32 @@ with sync_playwright() as p:
        val(tap, "moved") is False, tap)
     eva(pg, "()=>document.getElementById('dclock').click()"); pg.wait_for_timeout(150)
 
+    # §556.11: T pauses and starts and Y (§581, was R) resets — the room has no bar from
+    # the slides, so these are listed there. Pressed as an ARABIC keyboard
+    # sends them ("ف" on the T key, "ق" on R), which is how Islam found T
+    # dead: a handler that asks for the letter hears nothing.
+    def arabic(code, ch):
+        eva(pg, "([c,k])=>document.dispatchEvent(new KeyboardEvent('keydown',{code:c,key:k,bubbles:true}))", [code, ch])
+        pg.wait_for_timeout(150)
+    arabic("KeyT", "\u0641")
+    ok("T holds it, from an Arabic keyboard too (§556.11)", eva(pg, "()=>!DECK.clock.from") is True)
+    arabic("KeyT", "\u0641")
+    ok("...and T starts it again", eva(pg, "()=>!!DECK.clock.from") is True)
+    # §581: R is the figures' now (Islam), and the timer's reset moved to Y.
+    eva(pg, "()=>{ DECK.clock.ran = 5*60000; DECK.clock.from = Date.now(); clockPaint(); }")
+    before_r = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    arabic("KeyR", "\u0642")
+    after_r = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    ok("R no longer resets the timer (§581: R updates the figures)",
+       isinstance(before_r, (int, float)) and isinstance(after_r, (int, float)) and abs(after_r - before_r) < 30,
+       {"before": before_r, "after": after_r})
+    arabic("KeyY", "\u063a")
+    left = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    full = eva(pg, "()=>DECK.clock.mins*60")
+    ok("Y puts the part's time back to the top, from an Arabic keyboard too (§581, was R)",
+       isinstance(left, (int, float)) and isinstance(full, (int, float)) and full - 3 <= left <= full,
+       {"left": left, "full": full})
+
     # RESET IS THE BAR'S ALONE. Asserted as an absence on the other two, or a
     # build that put it on the key would pass every assertion above (§94.2).
     eva(pg, """()=>{ DECK.clock.ran = 5*60000; DECK.clock.from = Date.now(); clockPaint(); }""")
@@ -299,8 +340,10 @@ with sync_playwright() as p:
        isinstance(now, (int, float)) and isinstance(mid, (int, float))
        and abs(now - mid) < 30, (mid, now))
     eva(pg, "()=>document.querySelector('[data-dreset]').click()"); pg.wait_for_timeout(200)
-    ok("and the bar's Reset does", str(eva(pg,
-       "()=>document.querySelector('#dclock .dctime').textContent")).startswith("14:"))
+    # As a figure, for the reason above: read in the same millisecond as the
+    # reset, the face says "15:00", and a prefix test of "14:" failed on it.
+    back = eva(pg, "()=>Math.round(clockLeft()/1000)")
+    ok("and the bar's Reset does", isinstance(back, (int, float)) and abs(back - 900) <= 3, back)
 
     # ── 8 · the states, measured in both themes ──────────────────────────
     print("\n8 · what the room reads, in both palettes")
@@ -315,8 +358,9 @@ with sync_playwright() as p:
     for theme in ("light", "dark"):
         eva(pg, "(t)=>document.documentElement.setAttribute('data-theme', t)", theme)
         pg.wait_for_timeout(150)
-        for label, ms, want in (("calm", 5*60000, ""), ("near", 90000, "near"),
-                                ("over", -150000, "over")):
+        # §580: amber from five minutes left, its own ground in the last one.
+        for label, ms, want in (("calm", 6*60000, ""), ("near", 3*60000, "near"),
+                                ("last", 40000, "last"), ("over", -150000, "over")):
             s = state(ms)
             cls = str(val(s, "cls", ""))
             ok("%-5s %s says so in its class" % (theme, label),

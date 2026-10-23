@@ -87,6 +87,38 @@ function navWord(key, short){
   var d = labelDefault(key);
   return d && labelWord(key, "bu") === d.many ? short : L(key);
 }
+/* ── WHAT THE REGISTER CALLS WHERE SOMEBODY SITS (§563) ──────────────────
+   Islam, of El Abd: *"in elabd people belong to functions not units how to
+   fix this?"* The data was right — El Abd's units were deleted (§535.8), so
+   every person there sits in a function — and the WORD was wrong: the
+   register headed that column "Unit" for every client, and its dialog said
+   "Unit or function" over a dropdown with no unit in it.
+
+   THE WORD FOLLOWS WHAT THE CLIENT HAS SWITCHED ON: units only reads "Unit",
+   functions only "Function", both (Raya, RHI) "Unit or function" — asked of
+   the Structure switches, so the column says what the client is, not what a
+   switched-off layer happens to still store. Both off has nowhere to sit but
+   the top, and keeps the two-word form the dialog always said.
+
+   THE SHORT WORD UNLESS THE CLIENT TYPED ITS OWN, `navWord`'s rule one form
+   over: the default "Business unit" / "Supporting Function" would be the
+   longest heading on the register, and §65 already cut it to "Unit". A word
+   the client typed in Terminology is used as typed; the second word of the
+   pair is lowered as client-setup's sentence words are (§398), an acronym
+   left alone. RAW TEXT — every caller escapes it where it lands. */
+function sitsInWord(){
+  var own = function(key, short){
+    var d = labelDefault(key), v = labelWord(key, "group");
+    return d && v === d.one ? short : v;
+  };
+  var unit = own("unitword", "Unit"), fn = own("fnword", "Function");
+  var u = SMPRules.buExists(GROUP), f = SMPRules.fnExists(GROUP);
+  if (u && !f) return unit;
+  if (f && !u) return fn;
+  return unit + " or " + fn.replace(/\S+/g, function(x){
+    return x.slice(1) === x.slice(1).toLowerCase() ? x.charAt(0).toLowerCase() + x.slice(1) : x;
+  });
+}
 
 /* ── Terminology ─────────────────────────────────────────────────────── */
 function renderLabels(){
@@ -1550,13 +1582,11 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §391: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
-           plans, because both answer "what is this function part of". */
+        /* §391: WHERE IT BELONGS. Beside how it plans, because both answer
+           "what is this function part of". §593: and no weight there — a
+           division's functions count equally, beside its units. */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
-        pdField("Weight in its " + L1("division"), fnCoWeightCell(k, f, true)) +
-        (FNCOW_SAID && FNCOW_SAID.k === k
-          ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
         pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
         pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
@@ -2433,7 +2463,7 @@ function renderPeople(){
         if (!fits) {
           var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
-                 (atCo ? "Company" : "Unit") + " first";
+                 (atCo ? "Company" : sitsInWord()) + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
           hint = "a seat \u2014 asks before it lands";
         } else {
@@ -2570,8 +2600,12 @@ function renderPeople(){
        from 39px to 51, which is the fault §116.4 records three times in this
        one section. So they are two values rather than one string, and the
        cell takes the field alone. */
-    var F = function(label, html, wide, note){
-      out.push({ label:label, html:html, wide:!!wide, note:note || "" });
+    /* `show` IS WHAT THE EYE READS WHEN IT IS NOT THE LABEL (§563). The label
+       is also a KEY — the register's cell (`pcell`/`cellField`) and the
+       attention outline (`ATTN_FIELD`) find a field by it — so a field whose
+       name is the client's word keeps a fixed label and draws its word. */
+    var F = function(label, html, wide, note, show){
+      out.push({ label:label, html:html, wide:!!wide, note:note || "", show:show || "" });
     };
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
@@ -2624,7 +2658,8 @@ function renderPeople(){
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
     /* "Unit or function", because that is what it holds now — the companies
-       moved to the field below it (§135.6). */
+       moved to the field below it (§135.6). It still is, as the KEY; what is
+       drawn is the client's word for it (§563), so El Abd reads "Function". */
     F("Unit or function", '<select class="fld" data-pat="' + esc(p.key) + '">' +
         '<option value="">&mdash; nowhere yet &mdash;</option>' +
         personAtChoices().map(function(o){
@@ -2633,7 +2668,7 @@ function renderPeople(){
         }).join("") + '</select>', false,
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
-      saidWhereNote(p, true));
+      saidWhereNote(p, true), sitsInWord());
     /* ── AND THE COMPANY, WHICH IS SOMETIMES THE UNIT'S ANSWER (§135.6) ──
        Read-only wherever the unit above has already answered it, writable
        where nothing else has — so a person in Mobile reads "Distribution" and
@@ -2724,7 +2759,7 @@ function renderPeople(){
       var req = need[f.label], refused = !!(req && miss[f.label]);
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
         (mine.length ? ' attn' : '') + (refused ? ' reqmiss' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) +
+        '<div class="pdfl">' + esc(f.show || f.label) +
           (req ? '<span class="reqmark" aria-hidden="true">*</span>' : '') + '</div>' +
         f.html + f.note +
         (refused ? '<div class="reqsay">' + esc(req.say) + '</div>' : '') +
@@ -2904,7 +2939,22 @@ function renderPeople(){
     if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
-    if (personActive(p)) {
+    /* ── AND THIS ENTRY IS A SIMULATION, SO IT OBEYS THE SIMULATION'S RULE
+       (§554) ───────────────────────────────────────────────────────────
+       It was gated on nothing but the row being active, which was true while
+       the whole page was the Super user's. Setup is the office's since
+       §516.2, so an SMO team member already reached this menu and already
+       got the entry — and pressing it CHANGED WHAT WAS DRAWN while their
+       saves went on being judged as themselves, because `actingAs()` would
+       not stamp a view the chrome had not drawn a switcher for. That is
+       §185's fault, open on the one path that never asked.
+
+       Asked of sync.js, the same answer the top bar's list and the server's
+       refusal use (§42): the office may look through the register, and the
+       SMO team through all of it but the Super user. Absent rather than
+       disabled on a row they may not wear — a disabled control invites a
+       press and has nowhere to put "because of who THEY are". */
+    if (personActive(p) && maySimulatePerson(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
     /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
@@ -3278,7 +3328,7 @@ function renderPeople(){
       (showCol("company") ? pcell(p, "Company", (function(){
           var ck = personCompany(p);
           var why = personCompanyDerived(p)
-            ? ' title="Comes from the unit. Change the Unit to move them."' : '';
+            ? ' title="Comes from the unit. Change the ' + esc(sitsInWord()) + ' to move them."' : '';
           return ck
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
@@ -3559,8 +3609,11 @@ function renderPeople(){
               '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
               '<button class="linkbu" data-colnone="1">None</button></span></div>' +
             PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
+              /* The Unit column's name is the client's (§563), so the chooser
+                 asks the same word its heading does. */
               return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
+                (showCol(c.k) ? " checked" : "") + '><span>' +
+                esc(c.k === "bu" ? sitsInWord() : c.label) + '</span></label>';
             }).join("") +
             '<div class="hmenu-note">Person is always shown &mdash; a register ' +
             'with the names hidden is not a register.</div>' +
@@ -3823,7 +3876,7 @@ function renderPeople(){
            column the read rows sized. So the COLUMN carries the floor, and the
            select is capped to sit inside it. */
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
-        (showCol("bu")       ? th("Unit", "wcol")        : '') +
+        (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
@@ -3985,7 +4038,7 @@ function mergeStepHtml(){
             (p.empId ? esc(p.empId) : "\u2014") + '</span></div>' +
           '<div class="mgf"><span>Email</span><span>' +
             (p.email ? esc(p.email) : "\u2014") + '</span></div>' +
-          '<div class="mgf"><span>Unit</span><span>' +
+          '<div class="mgf"><span>' + esc(sitsInWord()) + '</span><span>' +
             esc(roleWhereLabel2(personAt(p)) || "\u2014") + '</span></div>' +
           '<div class="mgf"><span>Roles</span><span>' +
             (held.length ? esc(held.map(function(r){ return roleName(r.role); }).join(", "))
@@ -6199,11 +6252,23 @@ function renderMyLines(){
   var blocks = order.filter(function(t){ return !MYLINEF || MYLINEF === t; }).map(function(t){
     var list = byT[t], n = list.filter(lineAnswered).length;
     var shut = lineLockShut(t);
+    /* §576: AND THE NOTE, ON THE OWNER'S OWN RED ROWS. Islam, agreeing the
+       lock: the owner who enters the figure writes why it is red — before,
+       the note was the unit's alone and an owner here could only wait.
+       `rowAtRisk`, not `needsNote`: the box stays once the note is written,
+       so it can still be corrected. Every other row reads its note, if it
+       has one, as the figure sets' page does (§16.7). */
+    var noteOf = function(r){
+      return rowAtRisk(r) && canEnterLine(r.target, r, "mine")
+        ? noteBox("note", r.id, r.obj.note, needsNote(r), r.target)
+        : (r.obj.note ? noteRead(r.obj.note, true) : '<span class="nobody">&mdash;</span>');
+    };
     var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">' + L1("tactic") + '</th><th style="width:26%">What it produced</th>' +
-        '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
-        '<th class="cc" style="width:16%">YTD actual</th>' +
-        '<th class="cc" style="width:10%">Progress</th>' +
+        '<th style="width:26%">' + L1("tactic") + '</th><th style="width:18%">What it produced</th>' +
+        '<th class="num" style="width:12%">' + REP_TGT_HEAD + '</th>' +
+        '<th class="cc" style="width:14%">YTD actual</th>' +
+        '<th class="cc" style="width:9%">Progress</th>' +
+        '<th style="width:21%">Note</th>' +
       '</tr></thead><tbody>' + list.map(function(r){
         var oc = outcomeOf(r.obj);
         /* THE TARGET CELL IS THE REPORTING PAGE'S OWN, composed the same way
@@ -6232,15 +6297,15 @@ function renderMyLines(){
                                   : '<span class="missing">Missing</span>')
                               : '') + (xs.length ? '' : oc && oc.name ? esc(oc.name)
                                   : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
-          '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+          '<td class="num">' + (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
             (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
-              ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
+              ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '') + '</td>' +
           '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
           '<td class="cc"' + rs + '>' + (pr == null
               ? '<span class="pill kind">Not reported</span>'
               : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
                 (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+            '</td><td class="notecol"' + rs + '>' + noteOf(r) + '</td></tr>' + subs;
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
@@ -6253,8 +6318,8 @@ function renderMyLines(){
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
     (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
       'This is a record until the SMO opens the next one.</div>') +
-    chips + blocks +
-    '<div class="note"><b>You enter the figure; the unit writes the note and submits.</b> ' +
+    noteLockBar() + chips + blocks +
+    '<div class="note"><b>You enter the figure, and its note when it is red; the unit submits.</b> ' +
       'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
 }
 /* THE LOCK IS THE REPORTING BAR'S OWN PAIR (§263, §309), not a second control:
@@ -8129,14 +8194,11 @@ function capFormatCell(c, editable){
       : sel) +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
-   Two cells, read on the row and set in the dialog. The group is the ABSENCE
-   of a company (§50.6), so a function nobody placed reads exactly as every
-   function did before. The weight is offered only where there is a company
-   to weigh it in — a weight at the group would be a number nothing reads
-   (§61). A blank weight SAYS what it counts as, because "blank" alone reads
-   as nought, and nought is the one thing it is not. */
-var FNCOW_SAID = null;
+/* ── WHERE A FUNCTION BELONGS (§391) ─────────────────────────────────────
+   Read on the row and set in the dialog. The group is the ABSENCE of a
+   company (§50.6), so a function nobody placed reads exactly as every
+   function did before. §593 took the weight beside it away: a division's
+   functions now count equally, read beside its units, never mixed in. */
 function fnCompanyCell(fk, f, editable){
   var at = fnCompanyOf(fk) || "";
   if (!editable) return at ? '<span class="val"><b>' + esc(COMPANIES[at].name) + '</b></span>'
@@ -8147,22 +8209,6 @@ function fnCompanyCell(fk, f, editable){
       return '<option value="' + esc(ck) + '"' + (ck === at ? " selected" : "") + '>' +
         esc(COMPANIES[ck].name) + '</option>';
     }).join("") + '</select>';
-}
-function fnCoWeightShown(fk){
-  var ck = fnCompanyOf(fk);
-  if (!ck) return null;
-  var s = companyShares(ck).filter(function(x){ return x.fn === fk; })[0];
-  return s ? Math.round(s.w * 10) / 10 : null;
-}
-function fnCoWeightCell(fk, f, editable){
-  var ck = fnCompanyOf(fk), set = fnCoWeightSet(fk), shown = fnCoWeightShown(fk);
-  if (!ck) return editable ? '<span class="why" style="margin:0">Only when it belongs to a company</span>'
-                           : '<span class="why" style="margin:0">&mdash;</span>';
-  if (!editable) return set != null ? '<span class="val">' + set + '%</span>'
-    : '<span class="why" style="margin:0">Blank \u2192 ' + shown + '%</span>';
-  return '<input class="fld" type="number" min="0" max="100" step="any" data-fncow="' + esc(fk) + '"' +
-    ' value="' + (set != null ? set : "") + '" placeholder="Blank counts as ' + shown + '%"' +
-    ' aria-label="Weight of ' + esc(f.name) + ' in ' + esc(COMPANIES[ck].name) + ', in per cent">';
 }
 function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
@@ -8194,7 +8240,6 @@ var FN_COLS = [
   { k:"code",    label:"Code" },
   { k:"plansin", label:"Plans in" },
   { k:"company", label:"Company" },
-  { k:"coweight", label:"Weight" },
   { k:"caps",    label:"Caps" },
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
@@ -8382,7 +8427,6 @@ function renderFunctions(){
          The control is in the dialog; this cell reads it. */
       (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("coweight") ? '<td class="cc">' + fnCoWeightCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
       (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
       (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
@@ -8465,7 +8509,6 @@ function renderFunctions(){
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
                  (fnShowCol("company") ? h(L1("division"), "cc") : '') +
-                 (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
                  (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +
@@ -8516,9 +8559,8 @@ function renderCaps(){
   /* §542: this client's capabilities are pillars, not records. */
   var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
-    var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+    return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
       (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
@@ -8529,18 +8571,14 @@ function renderCaps(){
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
-      '<td>' + (editable
-        /* NAMED. Eight of these on one page announced as eight identical
-           unnamed combo boxes, and the searchable button in front of each
-           inherits the name from here (§48.5). */
-        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
-          esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
-            FUNCTION_KEYS.map(function(k){
-              return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
-                esc(FUNCTIONS[k].name) + '</option>';
-            }).join("") + '</select>'
-        : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
+      /* §544.13 — THE "HELD BY" COLUMN IS GONE. Islam, asked whether set-up
+         should still let the office put a capability under a function:
+         **"no — remove it"**; a capability is the company's. The picker was
+         the last way to attach one, so it goes with the column it sat in,
+         and what is left is the two seats §412 gave it — an Owner and a
+         Custodian of its own, which is how a capability is answered for
+         now. The `fn` already on a record is neither read here nor written
+         (§405). */
       /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
          used to borrow the holding function's head, which is right while a
          capability is only ever held by a function and wrong for a
@@ -8569,7 +8607,9 @@ function renderCaps(){
   /* A capability with no function is a real answer now (§412) — a
      company-wide one is held by nobody. What is still outstanding is one
      that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  /* §544.13: "no owner and no holding function" is just "no owner" — no
+     capability has a holding function any more. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
@@ -8587,7 +8627,7 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
@@ -8612,7 +8652,8 @@ function renderCaps(){
       (capsAreP
         ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
             L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
+            topStrategyWord() + ' \u203a ' + L("capability","bu") +
             ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
             ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
             capsAsPillars().map(function(r){

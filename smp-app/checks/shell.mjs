@@ -55,6 +55,19 @@ const SWWAS = readFileSync(SWFILE, "utf8");
 process.on("exit", () => { try { writeFileSync(SWFILE, SWWAS); } catch {} });
 if (brk === "keep-caches") writeFileSync(SWFILE, SWWAS.replace(/caches\.keys\(\)[\s\S]*?\.then\(\(ks\) => Promise\.all\(ks\.map\(\(k\) => caches\.delete\(k\)\)\)\)/, "Promise.resolve()"));
 if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventListener("fetch", (e) => { if (e.request.method === "GET") e.respondWith(caches.open("smp-shell-again").then((c) => fetch(e.request).then((r) => { if (r.ok && r.type === "basic") c.put(e.request, r.clone()); return r; }))); });\n');
+/* §538's GUARD TAKEN OFF APPLY TO PLAN, in the bytes the browser is served
+   and put back on the way out, the worker's way above: a held Apply that
+   still answers a press must turn §6's "does nothing at all" red. The
+   break is asserted to MATCH exactly once before it is written (§344.1),
+   or a renamed guard would leave a break that breaks nothing. */
+const SHELLJS = join(import.meta.dirname, "..", "public", "shell.js");
+const GUARD = 'if (!b.disabled && b.getAttribute("aria-disabled") !== "true")\n      applyAsk(';
+if (brk === "apply-unguarded") {
+  const was = readFileSync(SHELLJS, "utf8");
+  if (was.split(GUARD).length !== 2) { console.log("FAIL  the apply-unguarded break did not match exactly once"); process.exit(1); }
+  process.on("exit", () => { try { writeFileSync(SHELLJS, was); } catch {} });
+  writeFileSync(SHELLJS, was.replace(GUARD, "if (true)\n      applyAsk("));
+}
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
 const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
@@ -1543,14 +1556,35 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent),
       fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent, finOn: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
       inMsgs: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), run: !!document.querySelector("[data-cop-savebar] [data-cop-fcheck]"),
-      apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { off: a.disabled, title: a.title } : null; })() }));
+      apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { held: a.getAttribute("aria-disabled"), dead: a.disabled, tip: a.getAttribute("data-tip") || "" } : null; })() }));
     check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0,
       "the check lists what agrees and what does not, and offers Go back to that part", JSON.stringify(ck));
     /* §524 — SAVING IS A BAR UNDER THE CARDS, never a button in the chat:
        Save as Foundation — Mobile v1 live, Run the check beside it, and
-       Apply to plan dimmed with its reason until a version is saved. */
-    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.off && /Save the Foundation first/.test(ck.apply.title),
-      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan dimmed until something is saved (§524)", JSON.stringify(ck));
+       Apply to plan held with its reason until a version is saved.
+       REWRITTEN, NOT LOOSENED (§218), FOR §538 (2026-10-15, signed off):
+       Apply to plan is HELD, NOT DEAD — `aria-disabled` with its reason on a
+       bubble a pointer and Tab can reach (`data-tip`), never `disabled`,
+       which reaches nobody — and §538 moved its guard to read the hold, so a
+       press on it opens nothing. This line asked for `disabled` and a
+       `title` and so had read red on the right build for a week, every run
+       since §538; what it is FOR — held, saying why, until saved — is what
+       is asserted, now including the guard (§94.2: a held button that still
+       works would pass a line that only reads the attribute). */
+    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.held === "true" && !ck.apply.dead && /Save the Foundation first/.test(ck.apply.tip),
+      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan held with its reason until something is saved (§524, §538)", JSON.stringify(ck));
+    /* THE PRESS IS ANSWERED BY THE GUARD, NOT BY THE EMPTY ID: before a save
+       there is no deliverable, so even an unguarded press opens no dialog —
+       it falls to applyAsk's own "Save the Foundation first." line under the
+       pane. So the line is what is watched for, beside the dialog, and a
+       build without §538's guard reads red here. */
+    await page.evaluate(() => document.querySelector("[data-cop-savebar] [data-cop-fapply]").click());
+    await page.waitForTimeout(300);
+    const heldPress = await page.evaluate(() => {
+      const t = document.getElementById("modal-t"), s = document.querySelector(".copsay");
+      return { dialog: t && t.checkVisibility() ? t.textContent : "", line: s ? s.textContent : "" };
+    });
+    check(!heldPress.dialog && !/Save the Foundation first/.test(heldPress.line), "…and pressing it while held does nothing at all (§538's guard)", JSON.stringify(heldPress));
 
     /* §512 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
        opens it with the change applied; a line naming none asks nothing and
@@ -1637,9 +1671,11 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(await page.waitForFunction(() => Array.from(document.querySelectorAll("[data-cop-deliv]")).some((b) => /Foundation — Mobile/.test(b.textContent)), null, { timeout: 5000 }).then(() => true, () => false),
       "…and it is on the rail under Deliverables");
     /* §524 — AFTER THE SAVE the bar says so, Save is dimmed (nothing has
-       changed since v1) and Apply to plan is live. */
+       changed since v1) and Apply to plan is live. LIVE MEANS NEITHER HOLD
+       (§538): since Apply is held by `aria-disabled`, `:not([disabled])` alone
+       was true of a held button too, so this line could not fail. */
     const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
-      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]:not([disabled])"),
+      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector('[data-cop-savebar] [data-cop-fapply]:not([disabled]):not([aria-disabled="true"])'),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
     check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§524)", JSON.stringify(sb));
     /* §525.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there
@@ -2328,19 +2364,87 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW not mine", "mobhead", 0, "not_started");
   try {
     await page.locator("#nav button", { hasText: "My work" }).click();
-    await page.waitForSelector("table.work tr.wrow", { timeout: 8000 }).catch(() => {});
-    const w = await page.evaluate(() => ({
-      rows: Array.from(document.querySelectorAll("table.work tr.wrow td.act")).map((e) => e.textContent),
-      groups: Array.from(document.querySelectorAll("table.work tr.grp")).map((e) => e.textContent.trim()),
-      late: Array.from(document.querySelectorAll("table.work td.late")).length,
+    await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
+    /* REWRITTEN, NOT LOOSENED (\u00a7218) FOR \u00a7583: the list left the table for
+       the Tracker's own rows, so what each line is FOR \u2014 the three open
+       actions, none finished and none somebody else's, under the three
+       headings with the late one in the alarm \u2014 is asserted of the rows. */
+    const mw = () => page.evaluate(() => ({
+      rows: Array.from(document.querySelectorAll(".mwrow .t")).map((e) => e.textContent),
+      groups: Array.from(document.querySelectorAll(".mwsec .mwsh h2")).map((e) => e.textContent.trim()),
+      late: document.querySelectorAll(".mwwhen.late").length,
+      counts: Array.from(document.querySelectorAll(".mwstrip > div")).map((d) => d.querySelector("b").textContent + " " + d.querySelector("span").textContent),
+      metas: Array.from(document.querySelectorAll(".mwsh .meta")).map((e) => e.textContent),
+      week: (document.querySelector(".mwwk") || {}).textContent || "",
     }));
+    const w = await mw();
     check(w.rows.length === 3 && w.rows.includes("MW late one") && w.rows.includes("MW this week") && w.rows.includes("MW far off"),
       "My work lists the office's three open actions on this client", JSON.stringify(w.rows));
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
     check(JSON.stringify(w.groups) === JSON.stringify(["Late", "This week", "Next week and later"]) && w.rows[0] === "MW late one" && w.late === 1,
       "\u2026grouped Late, This week, Next week and later, with the late one said in the alarm ink", JSON.stringify(w));
-    await page.click("table.work tr.wrow >> nth=0");
+    /* \u00a7583 \u2014 THE TRACKER'S PANEL: the week line and the four counts, each a
+       number the made state fixes (one late, one due this week). */
+    check(/^This week \u00b7 /.test(w.week) && JSON.stringify(w.counts) === JSON.stringify(["3 Open actions", "1 Late", "1 Due this week", "1 Client"]),
+      "\u2026under the Tracker's navy panel: the week, and 3 open \u00b7 1 late \u00b7 1 due this week \u00b7 1 client (\u00a7583)", JSON.stringify({ week: w.week, counts: w.counts }));
+
+    /* \u00a7583 \u2014 THE TICK FINISHES IT, IN THAT CLIENT'S TRACKER. Asserted on the
+       STORED row and on the history line the Tracker writes, never on the
+       drawing alone (\u00a794.2), and the row STAYS, green, where the hand left
+       it \u2014 with the counts dropping at once. */
+    const ids = Object.fromEntries((await owner.query("SELECT title, id FROM tracker_actions WHERE tenant_id = $1", [tenantId])).rows.map((r) => [r.title, r.id]));
+    const stored = async (title) => (await owner.query("SELECT status FROM tracker_actions WHERE id = $1", [ids[title]])).rows[0].status;
+    const rowSel = (title) => '.mwrow[data-id="' + ids[title] + '"]';
+    await page.click(rowSel("MW this week") + " .mwtick");
+    await page.waitForSelector(rowSel("MW this week") + ".done", { timeout: 8000 }).catch(() => {});
+    const t1 = await mw();
+    const tickedRow = await page.evaluate((s) => { const r = document.querySelector(s); return r ? { when: r.querySelector(".mwwhen").textContent, checked: r.querySelector(".mwtick").getAttribute("aria-checked"), st: r.querySelector(".mwst select").value } : null; }, rowSel("MW this week"));
+    const ev = (await owner.query("SELECT from_status, to_status, by_key FROM tracker_events WHERE action_id = $1 AND kind = 'status' ORDER BY at DESC, id DESC LIMIT 1", [ids["MW this week"]])).rows[0];
+    check((await stored("MW this week")) === "done" && ev && ev.from_status === "not_started" && ev.to_status === "done" && ev.by_key === "smo",
+      "the tick finishes the action in the client's Tracker, with the Tracker's own history line, by the office (\u00a7583)", JSON.stringify(ev));
+    check(t1.rows.length === 3 && tickedRow && tickedRow.checked === "true" && /^Done /.test(tickedRow.when) && tickedRow.st === "done"
+      && JSON.stringify(t1.counts) === JSON.stringify(["2 Open actions", "1 Late", "0 Due this week", "1 Client"]) && t1.metas[1] === "0 open \u00b7 1 done",
+      "\u2026and the row stays where it was, ticked, saying when it was done, while the counts drop (\u00a7583)", JSON.stringify({ tickedRow, counts: t1.counts, metas: t1.metas }));
+    await page.click(rowSel("MW this week") + " .mwtick");
+    await page.waitForSelector(rowSel("MW this week") + ":not(.done)", { timeout: 8000 }).catch(() => {});
+    const t2 = await mw();
+    check((await stored("MW this week")) === "not_started" && JSON.stringify(t2.counts) === JSON.stringify(w.counts) && t2.metas[1] === "1 open",
+      "\u2026and unticking puts it back as it was, counts and all", JSON.stringify({ counts: t2.counts, metas: t2.metas }));
+
+    /* \u00a7583 \u2014 THE STATUS IS A CONTROL: In progress is written to the stored
+       row and the word takes the gold; the late one finished from the list
+       leaves the Late count. */
+    await page.selectOption(rowSel("MW far off") + " .mwst select", "in_progress");
+    await page.waitForSelector(rowSel("MW far off") + ' .mwst.prog', { timeout: 8000 }).catch(() => {});
+    check((await stored("MW far off")) === "in_progress", "the status changed on the row is the stored status (\u00a7583)", await stored("MW far off"));
+    await page.selectOption(rowSel("MW late one") + " .mwst select", "done");
+    await page.waitForSelector(rowSel("MW late one") + ".done", { timeout: 8000 }).catch(() => {});
+    const t3 = await mw();
+    check((await stored("MW late one")) === "done" && t3.counts[1] === "0 Late" && t3.late === 0,
+      "\u2026and choosing Done on a late one finishes it and takes it out of Late", JSON.stringify(t3.counts));
+
+    /* \u00a7583 \u2014 WHO MAY PRESS IS THE TRACKER'S RULE, ON THE SERVER (\u00a742): the
+       owner or the client's Super user. The office's seat is made Super
+       user's TEAM for this, so somebody else's action is refused in the
+       Tracker's own words and stays as it was; put back after. The break
+       hands the write to anybody past the gate, which must turn this red. */
+    const officeId = (await owner.query("SELECT id FROM users WHERE email = 'office@forefront.example'")).rows[0].id;
+    await owner.query("UPDATE tenant_users SET seat = 'smoteam' WHERE tenant_id = $1 AND user_id = $2", [tenantId, officeId]);
+    try {
+      const refused = await page.evaluate(async (id) => {
+        const r = await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "workStatus", client: "raya-trade", id, status: "done" }) });
+        return { status: r.status, body: await r.json() };
+      }, ids["MW not mine"]);
+      check(refused.status === 403 && /owner or the client's Super user/.test(refused.body.error || "") && (await stored("MW not mine")) === "not_started",
+        "somebody else's action is refused to a team seat, in the Tracker's words, and left as it was (\u00a7583)", JSON.stringify(refused));
+    } finally {
+      await owner.query("UPDATE tenant_users SET seat = 'super' WHERE tenant_id = $1 AND user_id = $2", [tenantId, officeId]);
+    }
+    /* the made state put back for the card below: three open, one late */
+    await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW late one"], "in_progress"]);
+    await owner.query("UPDATE tracker_actions SET status = $2, done_at = NULL, first_due = due WHERE id = $1", [ids["MW far off"], "not_started"]);
+    await page.click(".mwrow .t >> nth=0");
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
     check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
@@ -2351,6 +2455,104 @@ await section("4 · Forefront's own pages", async () => {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);
   }
+
+  /* \u00a74b.1 \u2014 THE CONSOLE ON A PHONE (\u00a7584). At 400px the eight tabs broke
+     onto three lines and ran past the screen, so the page was 620px wide:
+     every line below was RED on the build before (10 of 12 at 400 and 360,
+     measured). Read off the boxes the browser drew, never off the stylesheet. */
+  const phone = () => page.evaluate(() => {
+    const nav = document.getElementById("nav"), on = nav.querySelector("button.on");
+    const nr = nav.getBoundingClientRect(), or = on ? on.getBoundingClientRect() : null;
+    return { pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth,
+      navH: nav.offsetHeight, heights: Array.from(nav.children).map((b) => b.offsetHeight),
+      fade: (nav.parentNode.className || ""), onIn: !!or && or.left >= nr.left - 1 && or.right <= nr.right + 1,
+      tops: Array.from(document.querySelectorAll(".mwstrip b")).map((b) => Math.round(b.getBoundingClientRect().top)) };
+  });
+  await page.setViewportSize({ width: 400, height: 800 });
+  try {
+    await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+    await page.waitForSelector(".mwstrip > div", { timeout: 8000 }).catch(() => {});
+    const p1 = await phone();
+    check(p1.pageW <= p1.vw && p1.navH < 50 && new Set(p1.heights).size === 1,
+      "on a phone the page does not slide sideways and the tabs keep one line (\u00a7584)", JSON.stringify({ pageW: p1.pageW, vw: p1.vw, navH: p1.navH, heights: p1.heights }));
+    check(/\br\b/.test(p1.fade) && !/\bl\b/.test(p1.fade) && p1.onIn,
+      "\u2026the bar scrolls inside itself, faded at the edge with tabs past it, the tab that is on in view", JSON.stringify(p1));
+    check(p1.tops.length === 4 && new Set(p1.tops).size === 1, "\u2026and My work's four counts line up along their numbers (\u00a7584)", JSON.stringify(p1.tops));
+    await page.locator("#nav button", { hasText: "History" }).click();
+    await page.waitForTimeout(500);
+    const p2 = await phone();
+    check(p2.onIn && /\bl\b/.test(p2.fade), "\u2026and pressing History brings it into view, faded at the other edge", JSON.stringify(p2));
+    /* \u00a7584.1 \u2014 THE NAME LINE: one line, Sign out in one piece, the role a
+       span of its own and hidden here (null, not false, on the build before:
+       it had no span, which must not read as "hidden"). Then a name made too
+       long for a 360px phone ends in "\u2026" with the whole line on a hover.
+       All four RED on the build before, measured. */
+    const nameLine = () => page.evaluate(() => {
+      const who = document.getElementById("who"), role = who.querySelector(".role");
+      return { whoH: Math.round(who.getBoundingClientRect().height), soH: Math.round(document.getElementById("signout").getBoundingClientRect().height),
+        text: who.textContent, title: who.title || "", cut: who.scrollWidth > who.clientWidth,
+        roleShown: role ? getComputedStyle(role).display !== "none" : null, pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth };
+    });
+    const n1 = await nameLine();
+    check(n1.whoH < 24 && n1.soH < 40 && n1.roleShown === false && n1.text === "Mohamed Essam \u00b7 Super user",
+      "on a phone the name line is one line, Sign out in one piece, the role left for a wider screen (\u00a7584.1)", JSON.stringify(n1));
+    const nameWas = (await owner.query("SELECT name FROM users WHERE email = 'office@forefront.example'")).rows[0].name;
+    await owner.query("UPDATE users SET name = 'Abdelrahman Mostafa El-Sayed Ibrahim' WHERE email = 'office@forefront.example'");
+    try {
+      await page.setViewportSize({ width: 360, height: 800 });
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector("body.ready", { timeout: 8000 }).catch(() => {});
+      const n2 = await nameLine();
+      check(n2.cut && n2.whoH < 24 && n2.soH < 40 && n2.pageW <= n2.vw && /Abdelrahman Mostafa El-Sayed Ibrahim/.test(n2.title),
+        "\u2026and a name too long for a 360px phone ends in \u2026 on the one line, the whole of it on a hover", JSON.stringify(n2));
+    } finally {
+      await owner.query("UPDATE users SET name = $1 WHERE email = 'office@forefront.example'", [nameWas]);
+    }
+  } finally {
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
+  /* AND WHERE EVERY TAB FITS NOTHING MOVES: no fade either side (\u00a794.2's
+     other end \u2014 a fade drawn always would pass every line above). */
+  await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+  await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
+  const p3 = await phone();
+  check(!/\b[lr]\b/.test(p3.fade) && p3.navH < 50, "\u2026while on a computer screen every tab fits and neither fade shows", JSON.stringify(p3));
+  const roleWide = await page.evaluate(() => { const r = document.querySelector("#who .role"); return r ? getComputedStyle(r).display !== "none" : null; });
+  check(roleWide === true, "\u2026and the name line keeps the role there (\u00a7584.1)", roleWide);
+  /* \u00a7584.2 \u2014 THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
+     13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
+     a keyword), so the tabs drew at its own 13.33px regular \u2014 RED on the
+     build before, measured. Asked of the computed style, which is what the
+     browser actually used, never of the stylesheet's text. */
+  const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
+  check(tabFont === "13.5px 600", "\u2026and the tabs are in the weight their style asks for, semibold 13.5px (\u00a7584.2)", tabFont);
+  /* \u00a7584.3 \u2014 AND THE BUTTONS: `.btn` had the same dropped shorthand
+     (`font:600 13px/1.5 inherit`), so every console button drew at the
+     browser's 13.33px regular and 29px tall \u2014 RED on the build before,
+     measured. Sign out is the one button on every tab. */
+  const btnFont = await page.evaluate(() => { const b = document.getElementById("signout"), c = getComputedStyle(b);
+    return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height); });
+  check(btnFont === "13px 600 34", "\u2026and the console's buttons too, semibold 13px, Sign out among them (\u00a7584.3)", btnFont);
+  /* \u00a7584.4 \u2014 AND THE LAST THREE WITH THE SAME DROPPED SHORTHAND: the text
+     boxes (`.fld`), Frameworks' chips and client set-up's size band, each
+     at the browser's 13.33px regular on the build before \u2014 RED there,
+     measured (33, 29 and 44px tall). Asked of what the browser drew. */
+  const typeOf = (sel) => page.evaluate((s) => { const e = Array.from(document.querySelectorAll(s)).find((x) => x.offsetParent);
+    if (!e) return "none"; const c = getComputedStyle(e); return c.fontSize + " " + c.fontWeight + " " + Math.round(e.getBoundingClientRect().height); }, sel);
+  /* a blank page first: from /platform, an address differing only in its
+     hash is the same document and does not load the tab (measured: "none") */
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#frameworks", { waitUntil: "networkidle" });
+  await page.waitForSelector(".fwchip", { timeout: 8000 }).catch(() => {});
+  const fldT = await typeOf(".fld"), chipT = await typeOf(".fwchip");
+  check(fldT === "14px 400 39" && chipT === "12px 600 26", "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
+  await page.goto("about:blank");
+  await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
+  await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
+  await page.locator(".ccard.add").first().click();
+  await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
+  const bandT = await typeOf(".wzband button");
+  check(bandT === "12.5px 600 48", "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

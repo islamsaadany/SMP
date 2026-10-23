@@ -15,7 +15,7 @@
    which. Nothing here computes a figure — `rollUp` does, on that array, so
    the server and the drawings cannot arrive at two answers (§5.2). */
 import type { PoolClient } from "pg";
-import { shortNames } from "./people.ts";
+import { namesOf, shortNames } from "./people.ts";
 import { placesFor } from "./place.ts";
 
 /* The falsification switch, the same shape `lib/portfolio.ts` uses. NEVER set
@@ -906,7 +906,9 @@ export async function registerFor(c: Q): Promise<{ key: string; name: string; pl
       WHERE COALESCE(p.extra->>'active', 'true') <> 'false'
       ORDER BY p.name, p.key`);
   const rows = r.rows as Record<string, unknown>[];
-  const short = shortNames(rows.map((x) => ({ key: str(x.key), name: str(x.name) })));
+  /* Shortened from the register's Name, never the full name (§565). */
+  const names = await namesOf(c);
+  const short = shortNames(rows.map((x) => ({ key: str(x.key), name: names.get(str(x.key)) || str(x.name) })));
   const places = await placesFor(c);
   const label = new Map(places.map((p) => [p.at, p.label]));
   return rows.map((x) => {

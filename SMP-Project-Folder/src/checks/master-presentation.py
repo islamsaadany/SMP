@@ -35,11 +35,14 @@ this file most has to be able to see.
 Run: python3 checks/master-presentation.py   (or via qa-run.py for the bundled
 Chromium)
 """
-import pathlib, sys
+import os, pathlib, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
+# SMP_BUILT points it at another build (§276), so a claim can be run
+# against the build it is said to have changed from.
+FILE = pathlib.Path(os.environ["SMP_BUILT"]) if os.environ.get("SMP_BUILT") \
+  else ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 CHROME = "/opt/pw-browsers/chromium"
 
 ok = bad = 0
@@ -260,6 +263,15 @@ with sync_playwright() as p:
       const name = r => r.cells[1].textContent.trim();
       return {
         want: want.map(t => placeLabel(t)),
+        /* §553 PUT PARTS IN THE PICKER THAT ARE NOT BOXES — the company's
+           Foundation and its Analysis can be placed in the running order,
+           and are NOT in it until somebody places them (`masterDefault`).
+           `want` above is the boxes only, so the waiting column is no
+           longer empty by default and never will be again. What waits is
+           everything placeable that the order does not carry. */
+        placeable: masterSubjects().map(t => placeLabel(t)),
+        unplaced: masterSubjects().filter(t => masterOrder().indexOf(t) < 0)
+                                  .map(t => placeLabel(t)),
         waiting: col(1).map(name),
         flow: col(2).map(name),
         cols: document.querySelectorAll('#modal-b .mfcol').length,
@@ -276,8 +288,18 @@ with sync_playwright() as p:
           get(listed, "flow") == get(listed, "want") and get(listed, "flow"), listed)
     check("nothing stored yet means everybody presents",
           get(listed, "lit") == len(get(listed, "want") or []) and get(listed, "lit"), listed)
-    check("...so the waiting column is empty AND says why (§45.2)",
-          get(listed, "waiting") == [] and len(get(listed, "empty") or []) == 1,
+    # REWRITTEN TO THE NEW RULE, NOT LOOSENED (§218). It read "...so the
+    # waiting column is empty AND says why (§45.2)", which was the whole
+    # truth until §553: every subject in the picker was a box, and with
+    # nothing stored every box presents. The picker now also offers the
+    # company's Foundation and Analysis, which are placeable and unplaced —
+    # so the column is not empty, and an empty state over a row that IS
+    # there would be the §45.2 fault the old assertion was guarding against.
+    # Both ends (§94.2): exactly the unplaced parts wait, and no box does.
+    check("...so the waiting column holds the unplaced parts and no box (§553)",
+          get(listed, "waiting") == get(listed, "unplaced")
+          and not [n for n in (get(listed, "waiting") or [])
+                   if n in (get(listed, "want") or [])],
           listed)
     check("and the flow's column carries the total",
           "about" in at(get(listed, "counts"), 1), get(listed, "counts"))
@@ -298,10 +320,13 @@ with sync_playwright() as p:
       const col = (i) => [...document.querySelectorAll(
         '#modal-b .mfcol:nth-of-type(' + i + ') tbody tr')].map(
           r => r.cells[1].textContent.trim());
+      /* EVERYTHING PLACEABLE, not the boxes only (§553): the company's
+         Foundation waits here too, and asking only for boxes made this
+         claim read as a build that had lost a row. */
       return { waiting: col(1), flow: col(2),
                want: MFLOW.pick.map(t => placeLabel(t)),
-               out: boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets())
-                      .filter(t => MFLOW.pick.indexOf(t) < 0).map(t => placeLabel(t)) };
+               out: masterSubjects().filter(t => MFLOW.pick.indexOf(t) < 0)
+                      .map(t => placeLabel(t)) };
     }""", None, THREW)
     check("a subject taken out moves to the waiting column, and only there",
           get(split, "flow") == get(split, "want") and
@@ -370,6 +395,26 @@ with sync_playwright() as p:
       masterWrite(MFLOW.pick);
       masterPaint();
       document.querySelector('[data-mfgo]').click();
+      /* §556: THE BUTTON OPENS THE SLIDES NOW, not the projector — Islam:
+         *"after we set the master presentation, we say 'here, manage the
+         slides' … and then it takes me to the presentation when I say
+         present"*. Everything below is still about the DECK, so the check
+         does what the person does: looks at the slides, then presses
+         Present. `slidesPlay()` is that press. */
+      const landed = document.getElementById('slideroot').classList.contains('on');
+      const railRows = document.querySelectorAll('#slideroot .slrow').length;
+      const railFirst = (SLED.all && SLED.all[0]) ? SLED.all[0].dataset.anchor || '' : null;
+      /* §556.11: the parts row and the room's keys, read off the screen. */
+      const partsRow = document.getElementById('slparts');
+      const chips = partsRow ? [...partsRow.querySelectorAll('.slpart')] : [];
+      const keysText = (document.getElementById('slkeys') || {}).textContent || '';
+      let jumped = null;
+      if (chips[1]) { chips[1].click();
+        const i = SLED.all.map(e => e.dataset.ed).indexOf(SLED.sel);
+        jumped = { subject: SLED.all[i] && SLED.all[i].dataset.subject,
+                   where: document.getElementById('slnm').textContent,
+                   lit: [...document.querySelectorAll('#slparts .slpart')].findIndex(c => c.classList.contains('on')) }; }
+      slidesPlay();
       const deck = document.querySelector('#deckroot .deck');
       const slides = [...deck.querySelectorAll('.dslide')];
       /* Each subject's deck built ALONE, in the same run and by the same
@@ -390,10 +435,35 @@ with sync_playwright() as p:
           const m = s.querySelector('.dfootmark'); return m ? m.getAttribute('src') : null;
         }).filter(Boolean))].length,
         want: [...new Set(flow.map(t => deckMark(UNITS[t] || null)).filter(Boolean))].length,
-        flow: DECK.flow ? DECK.flow.slice() : null
+        flow: DECK.flow ? DECK.flow.slice() : null,
+        landed: landed, railRows: railRows, railFirst: railFirst,
+        parts: chips.length, partsShown: !!partsRow && !partsRow.hidden, jumped: jumped,
+        keysText: keysText,
+        deckFirst: slides[0] ? slides[0].dataset.anchor || '' : null
       };
     }""", flow, THREW)
-    check("Start opens the deck", get(built, "on") is True, built)
+    check("the button opens the SLIDES, not the projector (§556)",
+          get(built, "landed") is True and (get(built, "railRows") or 0) > 0, built)
+    check("...and Present from there opens the deck", get(built, "on") is True, built)
+    # §556.8: the list is the room's list — it opens on the flow's own cover
+    # and counts the same slides, so what you arrange is what you present.
+    # Read off both screens, never off flowWithParts (§94.8).
+    check("the slide list starts on the flow's cover, as the room does (§556.8)",
+          get(built, "railFirst") == "flowcover" and get(built, "deckFirst") == "flowcover", built)
+    check("...and lists exactly the slides the room shows",
+          get(built, "railRows") == get(built, "total"), built)
+    # §556.11: the room's bar moved here. One button per subject, and
+    # pressing the second lands on the second subject, lit, with the bar
+    # under the stage saying which part of how many.
+    check("the slides carry one button per part of the flow (§556.11)",
+          get(built, "partsShown") is True and get(built, "parts") == len(flow), built)
+    j = get(built, "jumped") or {}
+    check("...and a button jumps to that part, lit, saying which of how many",
+          j.get("subject") == flow[1] and j.get("lit") == 1 and
+          ("part 2 of %d" % len(flow)) in (j.get("where") or ""), j)
+    check("the room's timer keys are listed on the slides, in words",
+          "pause / start the timer" in (get(built, "keysText") or "") and
+          "reset the timer" in (get(built, "keysText") or ""), get(built, "keysText"))
     check("the flow holds every subject's slides and no others",
           get(built, "total") is not None and get(built, "alone") and
           get(built, "total") >= sum(get(built, "alone") or [0]), built)

@@ -1,0 +1,123 @@
+<!doctype html>
+<meta charset="utf-8"><title>What the owner sees</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+ :root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;
+  --ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--navy:#16325C;--navy-ink:#FFF;
+  --gold:#C9A24D;--gold-deep:#8A6B22;--gold-wash:#FBF6E9;--gold-line:#E8D9AE;--bad:#B04434;
+  --good:#2E7D5B;--warn:#B8860B;
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--track:.12em}
+ @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;
+  --surface-2:#242932;--line:#333A45;--line-soft:#2A303A;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;
+  --navy:#0E1014;--navy-ink:#EAF0FA;--gold:#D9B665;--gold-deep:#E6C65C;--gold-wash:#332C16;
+  --gold-line:#4A3F1E;--bad:#D97066;--good:#5FBF93;--warn:#D9B665;color-scheme:dark}}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.55 var(--sans)}
+ header{background:var(--surface);border-bottom:1px solid var(--line);padding:26px 32px 0}
+ h1{margin:0 0 6px;font-size:27px;letter-spacing:-.01em}
+ .sub{margin:0 0 16px;color:var(--ink-2);max-width:80ch}
+ .opts{display:flex;gap:8px;padding:0 0 18px;flex-wrap:wrap}
+ .obtn{font:600 14px var(--sans);padding:9px 18px;border:1px solid var(--line);background:var(--surface);
+   color:var(--ink-2);border-radius:999px;cursor:pointer;text-align:left}
+ .obtn[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
+ .obtn .w{display:block;font:400 12px var(--sans);opacity:.75;text-transform:uppercase;letter-spacing:var(--track)}
+ main{padding:22px 32px 40px}
+ .why{background:var(--gold-wash);border:1px solid var(--gold-line);border-radius:10px;
+   padding:13px 16px;margin:0 0 20px;max-width:88ch;color:var(--ink-2)}
+ .why b{color:var(--gold-deep)}
+ .deck{display:flex;gap:14px;overflow-x:auto;padding:4px 0 14px}
+ .sl{flex:0 0 310px;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+   overflow:hidden;display:flex;flex-direction:column;min-height:196px}
+ .sl.new{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-wash)}
+ .sl .hd{display:flex;align-items:baseline;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line-soft);
+   background:var(--surface-2);font:600 12px var(--sans);letter-spacing:var(--track);text-transform:uppercase;color:var(--ink-3)}
+ .sl .hd i{font-style:normal;color:var(--ink-3);font-weight:400}
+ .sl .bd{padding:13px 14px;flex:1}
+ .sl h3{margin:0 0 3px;font-size:17px}
+ .sl p{margin:0;color:var(--ink-3);font-size:13px}
+ .stats{display:flex;gap:9px;padding:7px 12px;border-top:1px solid var(--line-soft);background:var(--surface-2)}
+ .stats.none{color:var(--ink-3);font-size:12px;font-style:italic}
+ .st{font:600 12px var(--sans);color:var(--ink-3)}
+ .st b{display:block;font-size:17px;color:var(--good)}
+ .st.w b{color:var(--warn)}
+ .big{display:flex;gap:22px;padding:4px 0 0}
+ .big .st b{font-size:30px}
+ .tag{display:inline-block;margin-left:auto;font:600 10px var(--sans);letter-spacing:var(--track);
+   padding:2px 7px;border-radius:999px;background:var(--gold-wash);color:var(--gold-deep);border:1px solid var(--gold-line)}
+ .cost{margin:16px 0 0;padding:14px 16px;border:1px solid var(--line);border-radius:10px;
+   background:var(--surface);max-width:88ch}
+ .cost h4{margin:0 0 6px;font:700 11px var(--sans);letter-spacing:var(--track);text-transform:uppercase;color:var(--ink-3)}
+ .cost p{margin:0 0 7px;color:var(--ink-2);font-size:15px}
+ .cost p:last-child{margin:0}
+</style>
+<header>
+  <h1>What a direction's owner sees</h1>
+  <p class="sub">Egypt Expansion, presented by its owner. Today the readings sit in the
+  <b>header of every slide</b> and no slide presents them — measured, not assumed.
+  Three ways to answer it.</p>
+  <div class="opts" id="opts"></div>
+</header>
+<main>
+  <div class="why" id="why"></div>
+  <div class="deck" id="deck"></div>
+  <div class="cost" id="cost"></div>
+</main>
+<script>
+const KM = {l:"Key Measures", v:"95%"}, EX = {l:"Execution", v:"62%", w:true};
+const BASE = [
+  {k:"cover", t:"Egypt Expansion", s:"D002 · Strategy review · H1 2026"},
+  {k:"title page", t:"Egypt Expansion", s:"Direction · Theme · Amr Hassan"},
+  {k:"key measures", t:"Key Measures", s:"4 measures, against target"},
+  {k:"categories", t:"Categories", s:"by channel"},
+  {k:"tactics", t:"Tactics", s:"7 tactics, who and when"},
+  {k:"thank you", t:"Thank you", s:"Egypt Expansion · H1 2026"}
+];
+const OPTS = {
+  today: { n:"Today", w:"what it does now",
+    why:"<b>Today.</b> Every slide but the cover and the thank-you carries <b>Key Measures 95% · Execution 62%</b> in its header. The numbers are always there and never presented — the owner is never taken to them, and nothing says what they mean.",
+    cost:["<h4>What it costs</h4><p>Nothing to build. The owner leaves without ever having been shown how their direction did — the figure was decoration on four slides.</p>"],
+    head:i=>i>0&&i<5, stand:false },
+  A: { n:"A — a standing slide", w:"like every other box",
+    why:"<b>A.</b> The owner gets the same <b>Where X stands</b> slide every box now ends on, scoped to their direction. The headers stay as they are.",
+    cost:["<h4>What it costs</h4><p>One more slide in a six-slide deck, and the same figures appear in two places — the header and the standing. <b>Consistent with every other box</b>, which is the whole of stage 5.</p>"],
+    head:i=>i>0&&i<5, stand:true },
+  B: { n:"B — say it once", w:"header on the title page only",
+    why:"<b>B.</b> The readings appear on the <b>title page only</b>, where the direction is introduced, and come off the measures, categories and tactics slides. Nothing new is built.",
+    cost:["<h4>What it costs</h4><p>Nothing to build, and the figure stops repeating. But the owner still has no moment that presents it — and a reader three slides in can no longer see the score without going back.</p>"],
+    head:i=>i===1, stand:false },
+  AB:{ n:"A + B", w:"say it once, then present it",
+    why:"<b>A + B.</b> The title page introduces the direction with its readings; the work follows clean; the deck ends on <b>Where Egypt Expansion stands</b>.",
+    cost:["<h4>What it costs</h4><p>One slide to build and one header to remove. The figure is stated at the start and answered at the end, and appears nowhere in between — the shape a review actually has.</p>"],
+    head:i=>i===1, stand:true }
+};
+let CUR = "today";
+function draw(){
+  const o = OPTS[CUR];
+  document.getElementById("opts").innerHTML = Object.keys(OPTS).map(k =>
+    '<button class="obtn" type="button" data-opt="'+k+'" aria-pressed="'+(k===CUR)+'">'+
+    '<span class="w">'+OPTS[k].w+'</span>'+OPTS[k].n+'</button>').join("");
+  [...document.querySelectorAll("[data-opt]")].forEach(b =>
+    b.onclick = () => { CUR = b.dataset.opt; draw(); });
+  document.getElementById("why").innerHTML = o.why;
+  const slides = BASE.map((s,i) => {
+    const h = o.head(i);
+    return '<div class="sl"><div class="hd">'+s.k+'<i>'+(i+1)+'</i></div>'+
+      '<div class="bd"><h3>'+s.t+'</h3><p>'+s.s+'</p></div>'+
+      (h ? '<div class="stats"><span class="st">'+KM.l+'<b>'+KM.v+'</b></span>'+
+           '<span class="st w">'+EX.l+'<b>'+EX.v+'</b></span></div>'
+         : '<div class="stats none">no readings on this slide</div>')+'</div>';
+  });
+  if (o.stand) slides.splice(5, 0,
+    '<div class="sl new" data-stand="1"><div class="hd">standing<span class="tag">new</span></div>'+
+    '<div class="bd"><h3>Where Egypt Expansion stands</h3>'+
+    '<div class="big"><span class="st">'+KM.l+'<b>'+KM.v+'</b></span>'+
+    '<span class="st w">'+EX.l+'<b>'+EX.v+'</b></span></div>'+
+    '<p style="margin-top:9px">Measures say what was committed to. Execution says whether the work is landing on time.</p>'+
+    '</div></div>');
+  document.getElementById("deck").innerHTML = slides.join("");
+  document.getElementById("cost").innerHTML = o.cost.join("");
+}
+draw();
+</script>

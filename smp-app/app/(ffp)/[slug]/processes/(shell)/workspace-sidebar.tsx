@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "", key: "dashboard" },
   { href: "/org", key: "org" },
   { href: "/processes", key: "processes" },
+  { href: "/priorities", key: "priorities" },
   { href: "/helicopter", key: "helicopter" },
   { href: "/value-chain", key: "valueChain" },
   { href: "/governance", key: "governance" },

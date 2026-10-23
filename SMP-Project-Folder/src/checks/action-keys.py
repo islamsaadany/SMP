@@ -1,7 +1,7 @@
 """THREE ACTIONS, FROM THE KEYBOARD (§546).
 
 Usability audit, heuristic 7: "no accelerator for Submit, Save draft, or the
-pen". §544 answered the navigation half with the arrows every row of tabs
+pen". §552 answered the navigation half with the arrows every row of tabs
 already promised. This half had NO standard to follow — somebody had to pick
 the keys, and Islam picked Alt+S, Alt+D, Alt+E.
 
@@ -78,7 +78,15 @@ with sync_playwright() as p:
         '<button class="rc-submit" data-submit="mob" id="ak-sub">Submit to the SMO</button>' +
         '<button class="rc-draft" data-repsave="1" id="ak-draft">Save draft</button>' +
         '<button class="penbtn" data-page="plan" id="ak-pen">pen</button>';
-      document.body.appendChild(w);
+      /* §544.13: FIRST IN THE DOM, BECAUSE THE KEY PRESSES THE FIRST MATCH.
+         This appended the fixture at the end and relied on the landing page
+         having no pen of its own — true while the demo opened on
+         Performance. Its capability is a pillar of the company plan now, so
+         it opens on Strategy, which HAS a pen (`.secpen[data-page=plan]`),
+         and Alt+E pressed that one instead. The precondition was always
+         "the fixture is the pen the key finds"; it is made here rather than
+         left to where the client happens to open (§255). */
+      document.body.insertBefore(w, document.body.firstChild);
       window.__ak = { sub: 0, draft: 0, pen: 0 };
       document.getElementById('ak-sub').addEventListener('click', () => window.__ak.sub++);
       document.getElementById('ak-draft').addEventListener('click', () => window.__ak.draft++);

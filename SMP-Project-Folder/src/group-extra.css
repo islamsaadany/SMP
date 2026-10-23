@@ -938,6 +938,8 @@
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
+  /* §556: a group band's own count, at the right as the head's sits. */
+  .rail .rgroup .rgn { float:right; font-weight:600; font-variant-numeric:tabular-nums; }
   .rail button.ritem { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
     width:100%; text-align:left; font:inherit; color:inherit; background:none;
     padding:11px 14px 11px 11px; border:0; border-bottom:1px solid var(--line-soft);
@@ -1353,6 +1355,15 @@
   .pband-r { margin-left:auto; display:inline-flex; align-items:center; gap:10px;
              flex:none; }
   .pband-n { font-size:11.5px; color:var(--ink-3); }
+  /* §561: a direction's own slides, on its band — the office only. */
+  .pbslides { display:inline-flex; align-items:center; gap:7px; font:600 13px/1 var(--sans);
+              padding:8px 14px; border-radius:999px; border:1px solid var(--gold-deep);
+              background:var(--surface); color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .pbslides:hover { background:var(--gold-deep); color:var(--surface); }
+  .pbslides svg { width:15px; height:15px; flex:none; }
+  /* §561.1: at the far right, as Islam asked. The 76px above is kept for the
+     pen's corner; a band with no pen in its pane has nothing to keep it for. */
+  .pane:not(:has(> .paneact)) > .pband:has(.pbslides) { padding-right:18px; }
   /* ── A PROJECT SAVED AS A DRAFT (§309) ────────────────────────────────
      The bar's own two volumes, on the band: the state speaks and the way
      back is a bordered control. `.pbdone` takes `.rc-state.draft`'s exact

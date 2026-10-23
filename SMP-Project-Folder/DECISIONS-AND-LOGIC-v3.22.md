@@ -65077,6 +65077,9 @@ A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, 
 ## §530 — RACI fill and suggest
 Signed off from `design-mockups/raci-autofill/2026-10-13_fill-and-suggest.html` ("build"). Two pure planners in `ffp/lib/domain/raci-table.ts` (`planOwnerFill`, `planSuggestions`) so the rules are testable with no browser; the page only draws and saves their output. Owner fill: R for the step's assigned role, empty cells only, skipped and stepless rows excluded. Suggest: the manager's role (most frequent among managers of holders of the owner role, excluding the owner role, ties to the lower id) as A, only where the row has no A, the target cell is empty and the column is visible; unsaved until accepted. Source is Org Directory `managerId`/`PersonRole`; no manager data means no suggestions. A suggestion's main click accepts rather than cycles, so a stray click cannot silently store a code. Cycling an owner-filled cell clears its dot. Recorded, not done: a browser run of the page, and an automated check of the §524 propose/confirm/delete flow.
 
+## §538 — Processes: the process page, Risks & controls and Quality
+Built from the signed-off mockups `design-mockups/processes-space/2026-10-14_processes-structure.html` and `processes-complete/2026-10-14_processes-complete-solution.html`, in independently shippable steps. Step 1: a process page with seven tabs (Overview, Lifecycle, Risks & controls, Quality, People, Compliance, Connections) reusing existing data. Step 2 (this entry): two new tables in the `ffprocess` schema, `process_controls` (a risk, its level, the control, type, frequency, owner, last test) and `process_non_conformances` (title, status, corrective action, owner, dates), migration `20261015120000_process_controls_quality`, proved idempotent on a real Postgres. Server actions in `ffp/lib/actions/process-quality.ts` check EDITOR access and that the process belongs to the workspace. Status words are stored as plain strings, not enums. A step with no control is counted and a risk with no control wears a red "No control". Empty tabs say plainly "not recorded yet". Not yet built: the staff Reader view with Acknowledge, People tab, Governance space, list columns. Numbered §538 because main took §537 while this was built. Branch only, not merged.
+
 ## §531 — The role picker asks for an address before it mints anybody
 Signed off from `design-mockups/role-picker-email/2026-10-12_email-needed.html` ("build as drawn"). **This reverses the email half of §87.3**, which put both identifier fields in the picker and required neither on the ground that the SMO may know only a name. §506 had since marked the register's own Add form with a star and refused the press without an address — so the picker, which mints a person *without* that form, was the one remaining door that could still make a row nobody can sign in as (§69) or write to. Emp ID stays optional: nothing is unreachable without an employee number.
 
@@ -65298,6 +65301,19 @@ The product greys a control out in two ways. One leaves it alive — `aria-disab
 **AND IT PUTS A QUESTION ON §329's OWN REASONING**, which is left as a question rather than answered here: that section's argument is *"a change to a frozen source that stops there leaves the new stack serving the old bytes"*, and the build script has made that untrue since whenever it gained those four lines. The check still earns its place — a tracked file that disagrees with its generator is a file somebody will read as the truth — but its stated reason is not the one it now holds. **Not rewritten, because §329 is not this section's to rewrite** (rule 1b).
 
 **THE LIVE READ WAS MADE, which §526 and §528 both had to report they could not.** `https://smp-orpin-tau.vercel.app/` answered 200 from this container. The witnesses before this merge's deployment: shell.js **4,745,497**, platform.css **799,429**, sw.js **4,192** with release stamp **7cc8f01e07f38c24**. After it they should read **4,749,817**, **800,775**, 4,192 and a moved stamp (§397) — recorded so the next reader can tell a deployment that landed from one that did not.
+
+## §538.2 — The console check catches up with Apply to plan held, not dead (2026-10-22)
+Islam: *"fix the Copilot test that keeps failing"*.
+
+**IT WAS THE CHECK, NOT THE PAGE.** `checks/shell.mjs`'s §524 line asked for Apply to plan to be `disabled` with a `title` until a Foundation is saved. §538 (2026-10-15, signed off) moved it on purpose to **held, not dead** — `aria-disabled` with its reason on a `data-tip` bubble that a pointer and Tab can reach, since a `disabled` control's sentence reaches nobody — and moved its press guard to read the hold. The page has drawn that ever since; the line was never rewritten, so it read **red on the right build at every run for a week** (the *one failed* every §583–§584.4 note carried, red on the tree before each time). Measured on the page before anything was written: `aria-disabled="true"`, not `disabled`, tip *Save the Foundation first*.
+
+**REWRITTEN, NOT LOOSENED (§218).** What the line is FOR — held, saying why, until something is saved — is asserted in §538's shape: held, not `disabled`, the tip naming the reason. **AND THE GUARD WITH IT (§94.2)**: a held button that still answered a press would pass a line that only reads the attribute. Before a save there is no deliverable, so even an unguarded press opens no dialog — it falls to `applyAsk`'s own *"Save the Foundation first."* line under the pane — so that line is what is watched for, beside the dialog. A new break, `apply-unguarded`, takes the guard out of the served `shell.js` (asserted to match exactly once, the bytes put back on the way out as the worker's breaks are) and is in `check:shell:red`.
+
+**AND ONE LINE THAT COULD NOT FAIL.** After the save, *Apply to plan is live* was read as `:not([disabled])` — true of a held button too since §538. It now asks for neither hold.
+
+**CHECKED.** `checks/shell.mjs` **403 ok, 0 failed** — the first wholly green run of the console check since §538. Under `apply-unguarded`, **402 ok, 1 failed**: exactly the guard line, reading the *Save the Foundation first.* line the unguarded press put up; `public/shell.js` byte-identical after (md5). No page changed.
+
+**§538.2 MERGED TO `main`** 2026-10-23, Islam: *"merge it"*. `main` had moved under the branch overnight (§578.1, the figures beside their names, `SHELL` v6.79), so it was merged INTO the branch, the progress lines kept in order and the built files regenerated from the merged sources, byte-identical to `main`'s; on that tree `checks/shell.mjs` read **403 ok, 0 failed**; then a clean fast-forward and this note as a commit `main` alone holds (§91). **NO `SHELL` BUMP AND THE SAME RELEASE STAMP, BOTH CORRECTLY**: the merge changes a check, `package.json`'s red list and the record, and no file a browser is served (asserted: nothing under `public/`, `shell/`, `lib/`, `app/`, `modules/`, `sw.js` or `platform.html` differs from `main`), so `/sw.js` reads **`7b31190177c959e9`** before and after and nobody is offered a reload for nothing (§397). No forced sign-out.
 
 ## §531 — One address, one parse (spec 066 stage 3a, part 1 of 3)
 Islam, of the two questions he put to the box model (a capability and a direction are both pillars, one internal and one external; and what the four part-owner roles become): *"then we can go with the 2 steps in order"*. Step 1 of the split agreed with him is **code only, no data moves**, and this is its first part.
@@ -65926,40 +65942,554 @@ Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing a
 **The check** gains a sixth section, measured on three people at once — the office and two part owners the file makes, because the worked example's people all hold a unit or function seat and none of them is narrowed. Asserting on the part owners alone would pass over a build that hid the halves from everybody. 52 agreements. Two deliberate breaks: `boxHasHalf` asking the box → 4 red, and its output is Islam's own symptom word for word; the heading never dropping → 1 red.
 
 
-## §544 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
-The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
+> **TWO §544s, AND THE AUDIT'S IS THE ONE THAT MOVED.** Stage 4 (this branch)
+> and the tab-arrow audit (main) were both written as §544 while apart. Islam:
+> *"keep §544 for stage 4 and renumber main's one"* — so the audit is **§552**
+> and its re-carry **§552.1**, placed after §551.3 where they belong in order,
+> and stage 4 keeps §544 and its §544.1–§544.13c.
+>
+> **WHY THAT WAY ROUND, MEASURED RATHER THAN ASSUMED.** Stage 4 is referenced
+> from 169 places across 36 files; the audit's §544 from **eight**, each read
+> and classified before it was touched, and its §544.1 from none at all — the
+> number existed only in this document. The cheaper one moved.
+>
+> **AND IT HAD MOVED TWICE BEFORE.** §546 records this same work renumbered
+> §540 → §543 → §544 as main landed stages 3a and 3b underneath it. That line
+> now reads §540 → §543 → §544 → §552, so the trail stays whole. The stale
+> reference §546 already admits to — `d5463c7`'s commit message calling the
+> re-carry §543.1 — is still stale and still pushed; it is simply one number
+> further behind, and §552.1 is where that work lives.
 
-**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
+## §544 — Stage 4: seven set-up steps become three, and the tree is the screen
+Islam, having pressed the mockup through eight versions: *"the shape is good, let's build stage 4"*. Spec 066 §6, and the first four stages' reason exactly: *"every change requires me a new addition"*.
 
-**TWO DECISIONS, BOTH DELIBERATE:**
+**Five steps were one subject.** Structure, the divisions, the units, the functions and the capabilities each held one answer about the same tree, and the tree was on none of them: you set what a level carries on one screen, named the things in it on three more, and never saw the shape you were building. They are **one screen now** — the tree on the left, whatever you press on the right — and the flow is three steps: **the client, the shape, the office.**
 
-- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
-- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
+**Nothing was reduced to do it.** Every control is the control that was there, reading and writing what it did: a level opens the card `structureStep` has drawn since §418 (`only`, one card at a time), a box opens the row the list steps drew (its name, how it plans, which division it is in). What went is the scrolling and the four extra screens. The capabilities step went with them — a capability is an internal pillar since stage 3b, and the records a client still holds are managed on Setup › Capabilities, which this does not touch; the tree says so in a line rather than leaving it to be noticed (§61).
 
-**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
+### §544.1 — each bottom kind carries its own layer above it
+Islam: *"no not 1 list the business units has it's own layer above and the functions has their own layer above"*, and on how one comes to exist: *"the main layer is the bottom layer, which may be the business units or the functions. Creating another layer in between these layers and the company should be the thing that is the exception, or the creation."*
 
-**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
+So a middle layer is **not declared and then pointed at**. It is created by the kind that needs one (*"group these under a layer…"*), it belongs to that kind, and it has its own name. A client can have none, one, or two.
 
-**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
+**This changes what the set-up screen draws and not what is stored.** There is one list of divisions underneath, as there has been since §391; §544 says which kind's row each one is drawn on, **read from use** — a division belongs to the kinds whose boxes name it. Measured before it was written: Raya's two divisions are named by 6 units and 0 functions, El Abd's three by 22 functions and 0 live units. Neither client mixes them, so each one's existing list simply becomes that kind's own layer, and no navigation, page or figure moves. A division nothing is in yet belongs to the kind that made it (`layer` on the company record), and failing that to both rows, so it is drawn rather than hidden.
 
-**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
+**Use beats a stored answer that contradicts it**, and that rule exists because the first deliberate break of its check came back **green**: swapping the two changed nothing anybody was watching, because no division in either fixture carried a stored `layer` AND a box of the other kind. One does now.
 
-**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
+**A kind's layer is on when a division is used by that kind** — asked off `layerCompanies` at first, which read El Abd as having a layer above business units it does not have, because an empty division belongs to both rows for *drawing* and to neither for *deciding*. Removing a layer is **hidden, never cleared** (§405): every division and every assignment stays, so grouping again brings all of it back.
 
-## §544.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
-**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
+**One word while a client has one layer.** The second layer's name is `division`, which is what Setup › Companies and the navigation read, and while there is one layer that is right everywhere (§53.5). A client with two needs a name each, and only then: `structure[kind].layerWords`, read by the shape screen and falling back to the client's own word.
 
-`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
+### §544.2 — what is in the navigation is chosen, not derived
+Islam, of a first draft that worked out the row from the shape: *"this should be a choice what are the navigation switch… so it needs to be chosen somehow not derived"*. He is right that a rule read off two clients is a rule invented from two clients.
 
-**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
+So every row carries a **nav** tick, and the sides are the rows that are ticked — four can be: each bottom kind, and each kind's layer. **Stored as an absence, read as what `navSides()` answers today**: the units wherever they plan, the functions beside them, and the functions' divisions in their place where the company plans (§464). Every existing client therefore opens with exactly the row it has, and the only thing that changes it is somebody pressing a tick. Pressing one back to what the absence says deletes the key (§50.6).
 
-§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
+`companyUnitSides` is new and draws nothing today — nobody has ticked the units' layer — but a tick with nothing behind it is a control that does not work (§61), so the segments it needs exist: one per division holding a unit this viewer reaches, and a last one under the top level's word for the units in none, which is `companyFnSides`' own shape.
 
-**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
+**And a ticked row shows its own boxes, flat.** Islam, of the mockup: *"for raya trade when I chose the navigation on the business units you are showing the distribution > 3 and the B2C>3 while I didn't ask to have the divisons on the navigation"*. An earlier draft grouped a kind's boxes by their layer whenever one existed, which put divisions in a navigation he had not ticked them into. The tick is the whole of the rule.
 
-**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
+### §544.3 — what it cost, and what proves it
+**The checks.** Fifteen browser checks reached a card by pressing the Structure step; they press the shape and then the level in the tree (§218: rewritten to the new rule, never loosened). Two were rewritten further, because they described the thing that went: `client-setup.py`'s seven steps are three, and its list-step sections are the tree's own — the Add on a row, Remove on a box's panel, the refusal by name, the division written from a box's panel; `plan-level.py`'s *"seven cards in the agreed order"* is the tree's four rows and the three cards the top level brings, and its side-by-side pair is one column, in order. `setup-live-rows.py`'s capabilities section asserts the step is gone **and** that Setup › Capabilities answers (§94.2, both ends).
 
-**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+**The new ones.** `scripts/test-shape.js` — 30 agreements over Raya's shape and El Abd's, built side by side so no answer can be a constant; proved able to fail four ways (2 / 1 / 2 / 2 red), one of which came back green first and bought three more assertions. `checks/shape.py` — the screen's own behaviour: a layer created and removed and everything still there, two layers each named, one division's boxes at a time with the count saying both, the boxes with no division flagged, and the tick reaching the rail the viewer actually sees; proved able to fail three ways (1 / 3 / 1 red).
+
+**The add button carries no data attribute**, and that is a finding worth the line: the shell keeps the cursor across a repaint by the focused control's first `data-` attribute (§374), so an addressable Add takes the focus straight back off the box it has just made — measured, the new name box gained focus and lost it in the same paint. The row carries the address instead.
+
+**Not in this stage.** The two layers share the second layer's component switches, because there is one `mid` level in the store and nobody has asked for them to differ; a box's code, its short name for the navigation and who heads it stay on Setup › Business units and on the register, one answer in one place (§53.5).
+
+### §544.4 — "Where the strategy is planned" is gone, and §448 with it
+Islam, pressing the shape screen: *"why do we still have the question where the strategy is planned, the tree is clear"*, and then the whole of it: *"there's no question that now, if the plan is on the company or in the business unit, when you go to the level on the tree, you select: are there directions, are there pillars on the company level, or are there directions or pillars or strategy on the business unit level? **You might even have both.** What's the point of this choice now?"*
+
+**None.** Each level already answers it on its own card — the company's plan is the Directions card's switch, the units' is the units' card's — and **both can be on**, which an either/or cannot say. §448's question was a third answer to a question already asked twice, and the one that could be wrong. It also sent you in a circle on the new screen: the tree said *press the Business units row to switch it back on*, and that row's card said *answered on the top card*.
+
+So the question goes and §447's On/Off comes back to the business-units card, where it is symmetric with the functions' (§418) and where the tree points.
+
+**And off now means off.** The question did not only hide the units: it **copied every unit's plan onto the company page** as directions, archived the old pages and switched the company's pillars and SWOT on behind you. Asked what switching off should do now, Islam: *"just hide them, keep everything"* — which is spec 066 §2.2 in his own earlier words, *"nothing hides anything else"*, and the reversal of §447 that spec called for. Measured on the worked example: ten units, twenty-five pillars, nought company directions and nought archives before the press and after it, and switching back brings the side straight back.
+
+**`buFoldIntoTop` is no longer reachable from the product.** It stays in `config-data.js` as the record of §447 and as the way three checks make a company-level state. Noted as debt: nothing in the product calls it, and it should go when nothing needs it.
+
+**The checks, rewritten to the new rule and never loosened (§218).** `single-company.py` is §447's own check: it now asserts the new rule FIRST — off hides, copies nothing, and On brings everything back — and then runs the fold **directly** so every claim about what the fold does (figures travel, ids fresh, an objectives unit arrives as one direction) is kept whole. `plan-level.py`'s *"the directions are switched on by the fold"* is reversed into the claim that matters: the company's directions are **not** switched on behind you, and switching them on is the company card's own press. `checks/shape.py` gains the state the either/or could not express — the company planning and the units planning at once, on the pages as well as in the store. Proved able to fail: restoring the fold to the switch → 2 red.
+
+**Left alone, and worth saying:** switching the units off still moves the capabilities into the company plan (`capAtTop`, §465). That is the same shape of silent move, one level down, and nobody has asked for it yet.
+
+### §544.5 — the business units have nothing to do with the capabilities
+Islam, on the line §544.4 left standing: *"switching units off is not relevant to the capabilities. A capability is something that belongs to the company in general and maybe a business unit if chosen to. What's the relation?"*
+
+**None.** `capAtTop` opened with `if (!buExists(group)) return true` — switch the business units off and the capabilities moved into the company plan on their own, their side left the navigation, and the switch that governs them was not even drawn. That was never a fact about capabilities. It was a fact about §447's fold, which copied the units' plans onto the company page and therefore had to take the capabilities with them. §544.4 removed the fold; the coupling had nothing left holding it up.
+
+So the office's answer is the whole of it: one switch on the company's capabilities card, always drawn, whatever the units are doing.
+
+**Nothing moves, measured before it was cut.** The only client with its units off is El Abd, whose capabilities became internal pillars at stage 3b — it holds **nought** capability records, so every reader (`topCapsOn`, the navigation's side, the Copilot's `dvCapsHere`) already answered the same either way. Every other client has its units on, where the line never fired.
+
+**The checks.** `plan-level.py`'s *"and the capabilities follow into the company plan"* is reversed into the claim that matters — they do **not** follow, their side stays, and their card stays live (§218). `single-company.py` keeps §465's claims whole by having the fixture **say** where the capabilities live, which is the press the office makes. `checks/shape.py` asserts it at the screen: switch the units off and the capabilities are exactly where they were. Proved able to fail by putting the coupling back: 1 red in `shape.py`, 5 in `plan-level.py`.
+
+**Still open, and it is his sentence that names it:** *"a capability belongs to the company in general and maybe a business unit if chosen to"*. Today a capability RECORD is carried by a **function** (§334). Stage 3b made a capability an internal pillar of a box — the company's, or a unit's — which is exactly what he describes; what is left are the five records on Demo (2) and Wander Development (3) that have not moved yet. Moving them is what makes the Capabilities layer, its card, its Setup page, its navigation side and `capAtTop` itself disappear for everybody.
+
+### §544.6 — the move, taught what Wander needs
+Islam asked where capabilities sit on the tree, and the honest answer was: nowhere, because a capability is an internal pillar now — but Wander Development still holds the old kind, which is why they are in its navigation and not in its shape. He then described the shape he wants: *"We have two business units, and these two business units have their plans. The capabilities are on the company level… We say that the company level has only capabilities, right? That's what we will do, and it has two units. Every unit has its own pillars, and then the function has its own plans."*
+
+**Measured on Wander's own working copy before anything was written** (three units, not two — Commercial has no plan in it yet; thirteen functions; no divisions; the company's plan empty). The move refused all three capabilities, each for a different reason, which is the refusal doing its job:
+
+| Capability | Plans in | Holds | Refused because |
+|---|---|---|---|
+| Data Management | pillars | *Data analysis and dashboard* (5 measures, 5 tactics), *FFP – Fit-For-purpose tools* (9 measures, 1 tactic) | holds **two** pillars, not one; held by the Strategy Management Office |
+| Leadership and Development | pillars | *HIPOs Program & Talent Management* (5 measures, 4 tactics), owner HR | held by the Strategy Management Office |
+| Decision Making | **projects** | *Re-establishing financial and Business models* (5 milestones), owner BD | plans in projects, not pillars; held by the Strategy Management Office |
+
+Islam answered all three, and the move was taught each answer:
+
+- **Held by a function** is no longer a blocker **once the office has said the capabilities live in the company plan** (`capAtTop`). That setting is the statement; without it the refusal stands, because §7.1's other answer — a capability becomes a pillar of the function holding it — is still a real way to do this and nothing should guess between them.
+- **Two inner pillars become two capabilities**, each keeping its own name, measures and tactics. One record may become several; nothing is merged. The rehearsal tells them apart as `C001.1` and `C001.2`.
+- **A capability planning in projects becomes one capability** under its own name, the project's **milestones as its tactics**, timed by the quarter their finish date falls in — exactly as §447.1 times an action. The project's id becomes the pillar's and each milestone keeps its own, so nothing keyed on them has to be found (§48).
+
+**And the company has to be showing a plan.** Measured on Wander, whose company had never planned anything of its own: the rows landed in `GROUP.items` and the Strategy tab went on reading Foundation alone, because §428.2 starts the top layer's plan off and `pillar` is not in its components until somebody ticks it. El Abd never showed this — its top already carried both. The move switches them on now, because its whole promise is that nothing it carries disappears (§61).
+
+**What still refuses:** objectives of its own, a definition of its own, more than one project, nothing at all, and a milestone with a `covers` entered — a tactic has nowhere to put that and dropping it silently is the one thing this must not do (§96.2).
+
+**The rehearsal, on Wander's real numbers:** four rows — C001 *Data analysis and dashboard*, C002 *FFP – Fit-For-purpose tools*, C003 *HIPOs Program & Talent Management*, C004 *Decision Making* — 19 measures and 15 tactics on the company's Capabilities tab, the three units' 8 pillars untouched, the functions untouched, and the Capabilities side gone from the navigation. Nothing was written: the state lived in a browser tab.
+
+**The check** goes from 52 agreements to 62: the two refusals §544.6 lifts are rewritten into what now happens (two pillars → six rows out of five records, each marked a capability, the directions beside them untouched; a project → one pillar keeping its own id, its milestones keeping theirs, a done milestone arriving Done at 100 and timed into its quarter), the two it keeps are asserted unchanged, and the held-by refusal is asserted at **both ends** — it stands, and it lifts the moment the office says where the capabilities live.
+
+### §544.7 — the database found five rows the working copy never showed me
+The read-only look at Wander (§542.5's discipline, three rounds of it) ended with a question nobody had asked: *what else hangs off that project?* The answer was **five deliverables**, beside the five milestones — and the move I had already rehearsed and shown Islam carried the milestones and **dropped the deliverables without a word**. The screenshot he approved was missing five rows.
+
+That is the failure the whole rehearsal discipline exists to catch, and it was caught by asking the database a question rather than by reading the working copy harder: the copy had them all along, in `projects[0].deliverables`, and I printed `outcomes` and `milestones` and stopped.
+
+**First the refusal, before anything else.** A pillar holds measures and tactics; a deliverable and an outcome had nowhere to go, so the move refuses and names them. A silent drop is worse than a refusal (§96.2).
+
+**Then the answer.** Islam, reading his own five — *Achieve [X]% growth…*, *Improve overall portfolio margin by [X]%*, *X% of new agreements moved to performance-linked models* — they are **targets**, every one with an [X]% in it, where the milestones are **steps**. On a pillar, numbers are key measures and work is tactics, and that is what the two lists already are. So: **deliverables → measures, milestones → tactics**, each row keeping its own id.
+
+A deliverable reports Not started / In progress / Delivered with a per-cent (§104); a measure reports a figure and a progress, so Delivered arrives at 100 and In progress at its own per-cent. All five of Wander's are unreported and arrive unreported. **The target is left blank on purpose:** the [X] is inside the name, and inventing a number here would be the move writing a figure, which it never does.
+
+**AN OUTCOME STILL REFUSES**, and that is deliberate. It maps to a measure more directly than a deliverable does — which is exactly why it is left: no client holds one on a capability's project, so building it would be a guess nothing could check (§113.8).
+
+**And the rehearsal cannot list a row the move would not carry.** `capFoldPlan` reads `capFoldBlockers` now rather than re-testing the same conditions in its own words (§53.5) — found by the outcome case, where the plan went on offering a row the move refused.
+
+**Wander, rehearsed again on its own numbers:** four capabilities on the company — C001 *Data analysis and dashboard*, C002 *FFP – Fit-For-purpose tools*, C003 *HIPOs Program & Talent Management*, C004 *Decision Making* — **24 measures and 15 tactics**, up from the 19 and 15 of the first pass, which is the five that were going to be lost. Every one of Decision Making's ten rows keeps its own id: D1–D5 as measures, M1–M5 as tactics.
+
+**The check** goes to 67 agreements, red three ways: dropping the deliverables again → 3, dropping the outcome refusal → 2, letting the plan list a refused row → 1.
+
+**And the register, read while we were there:** ElAbd 0 capabilities and 10 company pillars (stage 3b, done), Raya Trade 0 (Islam: *"raya old ones are already removed"*), RHI 0 with 15 company pillars, testing 0 — so **Wander's three and Meridian Group's two are all that is left** of the old kind anywhere.
+
+### §544.8 — Wander's SQL, generated from the move and rehearsed on a real Postgres
+Islam: *"generate the SQL"*. The same shape as El Abd's (§542.2): the statements are **generated from the product's own `capFoldPlan()`**, never typed, so the list he approved, the rehearsal that was measured and the statements that run are one thing (§100.3).
+
+What `scripts/stage3-move-sql.js` had to learn, all of it from Wander:
+
+- **`--to-company`**, the office's statement that the capabilities are the company's. Without it a record a function holds refuses, because §7.1's other answer is still real. The emitted file writes `structure.cap.at = "top"` so the stored state ends as the rehearsal left it.
+- **One row per inner pillar**, built with `jsonb_array_elements … WITH ORDINALITY` instead of `extra->'items'->0`, ordered by the capability's `idx` then the pillar's place — the rehearsal's own order.
+- **A project becomes a pillar**, built from the `projects`, `deliverables` and `milestones` tables (they are tables, not JSON on the capability row — the read-only look is what established that). The project's id becomes the pillar's and every deliverable and milestone keeps its own.
+- **The company's plan switched on** and `pillar` ticked, or the rows land invisible (§544.6).
+- **DISTINCT capability ids**: one record may plan several rows now, and counting the plan would have asserted four records where there are three.
+- **It refuses to emit at all** when a milestone or deliverable carries a date, a state or a note. Translating those would mean working a quarter out inside PL/pgSQL where nothing here could test it; when a client turns up with one, that is when it gets written, and tested (§113.8). Wander's ten rows carry none, and the SQL asserts that too, inside the transaction.
+
+**REHEARSED ON A REAL POSTGRES**, not reasoned about: a throwaway PostgreSQL 16, the `smp` schema built to the columns the database itself reported, Wander's own rows loaded into it, and the generated file run.
+
+- it ran clean — `UPDATE 1 · UPDATE 1 · UPDATE 1 · DELETE 3 · COMMIT`;
+- the resulting `org.extra` is **identical, row for row and key for key, to what the product's own `capFoldIntoTop()` produces over the same state** — items and structure both;
+- a **second run** raises *expected 3 capabilities by id, found 0* and changes nothing;
+- the same statements pointed at **another client** raise *this is not Wander Development* and change nothing.
+
+The file is `scripts/wander/move.sql`, with the two read-only looks beside it.
+
+### §544.9 — one client's safety copy blocked another client's move
+Islam ran Wander's file and it stopped: `relation "org_before_20261018" already exists`. The transaction rolled back and **nothing was written** — the file working exactly as it should. The fault was the name.
+
+The backup tables carried the **date** and not the **client**, so El Abd's safety copy, made by the same generator on the same day, sat in the way of Wander's. A name that cannot tell two clients apart is not an address (§374's lesson, in a different place).
+
+Two changes, and the second is the one that matters more:
+
+- the copies are `smp.org_before_<client>_<date>` now, per tenant;
+- and **the collision is a precondition**, not a `CREATE TABLE` tripped over forty lines in: *"the backup tables … already exist — this file has run before, or they were left from an earlier run; look at them and drop them first."* An error forty lines into a transaction is a reader's puzzle; a sentence in the preconditions is an instruction.
+
+**Re-rehearsed on a fresh throwaway PostgreSQL**, with the collision put there on purpose: the precondition names it and nothing is written; with the table dropped, the file runs clean and the result is **again identical, row for row and key for key, to the product's own move**; a second run is still refused by the capability count.
+
+### §544.10 — a working copy is not the database, and a `coalesce` hid the difference
+Wander's file got further and stopped again: `null value in column "extra" of relation "org" violates not-null constraint`. The transaction rolled back and **nothing was written**. Twice now the file has been right to stop and the fault has been mine, and this one names the real mistake underneath both.
+
+`jsonb_set` returns NULL if any argument is NULL. Wander's company has never planned anything of its own, so its `org.extra` has **no `items` key at all** — not an empty array, nothing — and `o.extra->'items'` was NULL.
+
+**The rehearsal could not have caught it**, because the fixture was built from the working copy, and a working copy is not the database: `state-io` fills an absent `items` in as `[]` on the way out. So the throwaway Postgres got a row with an empty array where the live one has no key, and the file passed against a shape that does not exist.
+
+**And the diagnostic that was supposed to prevent exactly this asked with a `coalesce`** — `jsonb_array_length(coalesce(o.extra->'items','[]'::jsonb))` — which answered *0 company pillars* for a row that has no key and for a row that has an empty one, identically. The question was written to be robust and was therefore blind. §542.5's discipline is to ask the database; this is its second half: **ask it in a way that can tell the two answers apart.**
+
+Both ends are coalesced in the statement now, and the rehearsal runs twice — once against a row shaped like the live one (`extra` = `{}`, no `items`, no `structure`) and once against one with an empty array — with the result identical to the product's own move both times, and a second run still refused.
+
+### §544.11 — Meridian Group, looked at and parked
+Islam: *"yes do meridian group too"*, then, once the look came back: *"let's pause on meridian now, it's not a priority."* Nothing was run against it; what the read-only look found is recorded here so the next person does not have to ask again.
+
+It is **not a repeat of Wander**. Both of its capabilities refuse, and for reasons nobody has answered yet:
+
+| | Product Mindset (`cap6`, held by Marketing) | Data-led Decisions (`cap9`, held by IT) |
+|---|---|---|
+| Plans in | projects | pillars |
+| Holds | one project, *Portfolio review cadence* | two pillars: *One Source of Truth* (Ziad Maroun) and *Analytics in the Business* (Noura Ghanem) |
+| Refuses because | **a definition of its own**; its project carries **1 outcome**, **2 deliverables and 3 milestones all with a date, a state or a note** | **a definition of its own**; **2 objectives of its own** |
+
+So Meridian needs five answers where Wander needed three:
+
+1. **The definitions.** Both carry one — *"Treat what we sell as a portfolio to be shaped, not a catalogue to be carried"* and *"Decide from one trusted number, available to the people who need it on the day"*. A pillar has `name`, `sub`, `kind`, `theme`, `owner`, measures and tactics (`addPillar`); there is no definition on it. `sub` is the nearest thing and nobody has said it is the right one.
+2. **A capability's own objectives**, which cap9 has two of. They are not its pillars' measures; on the company there is no row for them, and cap9 becomes *two* pillars, so there is not even an obvious one to put them on.
+3. **An outcome**, which cap6's project has one of. §544.7 left this refusing deliberately — it maps to a measure more directly than a deliverable does, which is why it should be decided rather than assumed.
+4. **Dates, states and notes** on the milestones and deliverables. §544.8's generator refuses to emit for these: translating a finish date into its quarter inside PL/pgSQL is the one piece nothing here could test. It is the product's `capFoldIntoTop` that would do the work, so the honest route is a different kind of migration, not a cleverer SQL file.
+5. **`cap9-P2` is marked `kind: "Direction"`** — an *inner pillar of a capability*, marked as a direction. The move sets every row it carries to `Capability`, so that one row's kind would change silently. It is the only row like it in any client, and it needs somebody to say which it is.
+
+Meridian is the demo tenant (`key = 'demo'`, named *Meridian Group*), so none of this is a client waiting on it.
+
+**And the backup tables standing in the database**, read while we were there: `org_before_20261018` and `capabilities_before_20261018` (El Abd's, from §542.2), `org_before_wander_development_20261018` and `capabilities_before_wander_development_20261018` (Wander's, from §544.8). Both pairs can be dropped once their pages have been looked at.
+
+### §544.12 — asked before merging, and the answer was no twice
+Islam, with both clients live: *"elabd and wander are active now for the users, this merge to main will not damage anything right?"*
+
+The only honest answer is a measured one, and measuring it found **two regressions that reading the diff had not**.
+
+**First, the measurement itself was worthless and said so.** The first version of the comparison ran the sources in a node vm and reported *"nothing moved"* across ten questions — of which **eight had read nothing on either build**, because `SUBS`, the tab definitions, live in `shell.html` and never reach that vm. Nothing agreeing with nothing is not agreement (§94.2). `scripts/two-builds.py` runs both builds in a real browser and reports a question that reads nothing on both as **UNREAD**, counted apart from the answers it actually compared.
+
+**Then the first regression.** `dvCapsHere()` — which decides whether the Copilot offers a Capabilities section — asks `capAtTop`, and means *"are the capabilities part of the company's own plan?"* Those were the same question until stage 3b and are not any more: El Abd's capabilities are internal pillars now, so `capAtTop` answers no for it, and El Abd was about to be offered a section it has never had. `SMPRules.capsInTopPlan` is the question itself — the records living there, **or** a pillar of the company's marked as a capability — and the Copilot asks that.
+
+**Then the second, which was my description of §544.5 being wrong.** I told him the `if (!buExists(group)) return true` line was a leftover of §447's fold. It was also **§465's own sentence** — *"planned at company level they are always the company's"* — which he approved, and which §520's whole shape rests on: a capability reached as a SECTION of the company's plan. Cutting it outright reversed a decision of his, and `checks/direction-part.py` said so in seven assertions and `direction-seats.py` in one. Neither client was affected; the product was.
+
+**So it is a default now, not an override**, which is what his sentence actually asks for: before, the units' switch answered the question and the office could not say otherwise; now the office's answer wins wherever it has been given, and where it has not, a company that plans its own strategy keeps §465's reading. The units suggest; they no longer decide.
+
+That needed a third state. `at` was `"top"` or absent, so *"their own layer"* and *"nobody has said"* were the same stored thing. The office writes `"layer"` explicitly now, and absence stays absence (§50.6: a client nobody has touched stores nothing).
+
+**What it leaves open, and he should know it.** With nobody having said, switching the units off still carries the capabilities into the company plan. That is §465 reading through, and it is the half of his *"what's the relation?"* that is still true. `checks/shape.py` asserts **both** halves now — the default, and the office overriding it — so whichever way he decides, the check says which rule is in force.
+
+**Measured after the fix, in a browser, against `origin/main`, on all three clients that exist:** El Abd as it now stands, Wander as the move left it, and the demo with its capability records. **Nothing moved** — not the navigation row, the tabs, the Strategy sections, the pillars and their codes, nor either rendered page, and no page errors on either build.
+
+**What this does NOT prove:** the merge itself. `origin/main` is 26 commits ahead; this compares two tips, not their merge. The same three comparisons are what to run again once main is merged in.
+
+### §544.13 — a capability is the company's
+
+Islam, on being told the units-off case was the half still true: *"It's not
+about switching units off. Leave the capability completely alone. Everything
+should follow the rules. Does the capability belong to the business units or
+not? If it doesn't belong and it belongs to the company, they should be
+irrelevant. It's not about fixing this. It's about fixing the whole
+structure."*
+
+Then, asked plainly rather than told: *"I think there is some confusion. I
+want you to ask me what you need to understand and the cases that we have, in
+a very simple way, to get answers."* So the questions were asked one line
+each, and answered one line each:
+
+| Asked | Answered |
+|---|---|
+| Who can a capability belong to? | **The company only** |
+| Where does it appear on screen? | **Inside its owner's plan, with the directions** |
+| Someone owns one — can they always open it and report it? | **Yes, always** |
+| Should set-up still put a capability under a function? | **No — remove it** |
+| "Product Mindset" sits under Marketing — where does it end up? | **On the company** |
+
+**He also corrected the cases themselves**, which is why they were asked for:
+*"I removed all raya's capabilities already you are reading something old"*,
+and of Meridian, *"meridian is not live and not a priority"*. So the four
+real clients are El Abd (folded at stage 3b), Wander (folded at §544.6–.10),
+Raya (emptied by him) and Meridian (two records, not live). **No live client
+holds a capability record.** The only shape this changes on screen is the
+demo sample compiled into the build, which is code, not a client — which is
+exactly why this is the moment to make the change rather than defend it.
+
+**THE RULE, STATED ONCE.** A capability is the company's. Always. It lives as
+a pillar in the company's plan, beside the company's directions. Nothing
+below the company holds one. Its owner always reaches it.
+
+**THE FOUR PLACES THE BUSINESS UNITS DECIDED IT.** §544.5 had taken them out
+of one and called that the fix. Measuring rather than reading found four,
+each added for its own reason — which is what *"fixing the whole structure"*
+meant and what a patch would have missed:
+
+| # | Where | What it did | Now |
+|---|---|---|---|
+| 1 | `capAtTop` | Unsaid, the units decided where the records lived | `return true` — there is nothing left to ask |
+| 2 | `ownsTopPillar` | A direction's owner refused the moment the client had a unit | The name on the direction is the whole of it |
+| 3 | `ownsTopCapability` | A capability's owner refused the same way | *"Yes, always"* |
+| 4 | `group-render` | The Reporting page's capabilities section drawn only where there were no units | Drawn wherever there are capabilities |
+
+**WHAT ELSE WENT, AND WHY IT HAD TO.** Once the question has one answer, the
+things that existed to ask it are controls with nothing behind them (§61) and
+are read out rather than left standing as constants a reader must re-derive:
+
+- `capsInTopPlan` — §544.12's own rule, which answered true for every client
+  the day `capAtTop` did. Its *catch* is kept, not lost: it was that El Abd's
+  capabilities are in its company plan although `capAtTop` said otherwise.
+  They are, for everyone, now.
+- `dvCapsHere` in the Copilot, and the Capabilities section it gated — they
+  are always chosen inside the Directions chat.
+- The **capabilities side** in the navigation, and `foldsNeeded`'s clause
+  about it: three kinds cannot share that row because there are two.
+- The **independent-capabilities card** in set-up, and the where-switch
+  (`cap|top`) that chose between it and the company's. One card now, and its
+  switch is §428's *does this client have capabilities*, which the layer card
+  used to carry.
+- `addCapability(fnKey)` — it takes no function; the `[data-fncapadd]`
+  handler was already waiting for a button nothing renders.
+- `promoteToCapability` still promotes a function's projects, and the
+  capability that receives them is the company's.
+
+**`structure.cap.at` is dead storage.** Neither read nor written; the clients
+that hold one keep it (§405 — hidden, never cleared).
+
+**THIS REVERSES §7.1**, approved 2026-10-07 (*"ok for your recommendation"*):
+a capability held by a function was to become an internal pillar of that
+function. Asked again against the live shapes he chose **"on the company"**.
+Recorded as a reversal, not overwritten (Principle II).
+
+**And it closes §544.12's open point** rather than answering it — the
+question *"what happens to the capabilities when the units go off"* has no
+answer any more, because the units are not in the question.
+
+### §544.13b — what taking the function out actually reached
+
+The rule in §544.13 is one sentence. Applying it reached five more places that
+nothing in the rule names, and each is written down here because each was
+found by running the product, not by reading it.
+
+**The "Held by" column, gone from Setup › Capabilities.** Islam: *"no —
+remove it"*. The column's picker was the last way to attach a capability to a
+function, so it goes with the column; what is left is the Owner and Custodian
+§412 gave a capability of its own. The `[data-capfn]` handler goes with the
+select nothing renders (§61). The `fn` already on a record is neither read
+there nor written (§405).
+
+**The Overview's second row reads Owner, not Held by.** It named the holding
+function's head, because *"Rana Fouad" alone does not say which desk holds
+this work*. There is no desk; this would have printed an em dash on every
+capability there is, for ever — a row that can only be empty is not a row
+(§45.2, §61). It reads the capability's own owner, from the same door Setup
+writes (§33, §53.5).
+
+**Every other capability is a sibling.** `capSiblings` grouped them by the
+holding function and answered NOTHING for a capability holding none — which,
+after the rule, is every capability. The Remove dialog was left with no
+destination at all.
+
+**The Remove dialog offered a destination that did not exist.** It always
+listed *"the function itself"*, so with no function it offered `fn:null`,
+labelled "the function", and pressing it refused silently inside
+`removeCapability` — a button that does nothing, the one thing a control must
+never be (§61). The entry is offered only where `c.fn` resolves. The guard
+`to.fn !== c.fn` that refused every move survives as two halves: never into
+itself, and a FUNCTION destination only for a record that is that function's
+own.
+
+**And the sentence under Keep them was a lie.** With no destination it read
+*"It holds no projects, so there is nothing to move"* over a capability
+holding projects it was about to delete (§96.2). Islam, asked where a company
+capability's projects should go when there is nowhere to move them:
+**"deleting is fine"** — so nothing is built behind it and the sentence says
+what happens instead.
+
+**THE COST, STATED RATHER THAN DISCOVERED LATER.** §326 made the holding
+function a destination because Islam asked for *"the ability to turn
+functional projects to a capability and vice versa"*. Promoting still works —
+a function's projects become a capability, which is now the company's. The
+**vice versa does not**: a company capability has no function to be given
+back to, so its work goes to a sibling capability or goes. `capability-entry`
+asserts the new behaviour in full, and says in its own comment that this is
+what the rule costs.
+
+**Proof:** `capability-entry` 52/0 (was 29/14), `capability-seats`,
+`plan-level`, `shape`, `structure`, `top-plan`, `client-setup` all good,
+`test-capability-fold` 66/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
+`direction-part` and `direction-seats` — the two that caught §544.5's
+overreach — green untouched.
+
+**Proved able to fail (§113.8), two deliberate breaks.** Putting the old
+`capAtTop` back (`return !buExists(group)`) reds `shape` 3, `plan-level` 2 and
+`capability-entry` 1. `top-plan` stays green under that break and is proved by
+its own: `topCapsOn` no longer asks `capAtTop` — with one answer there is
+nothing to ask — so forcing `topCapsOn` false is the break that reaches it,
+and it reds 2. Both restored; the build is the unbroken one.
+
+**And one §266 trap worth naming.** Four checks reached a capability by
+pressing its side on the row, which §544.13 removed. The stand-in that
+replaced it assigned `current` — and a check that assigns `current` walks a
+viewer somewhere the product would refuse, which turned
+`capability-report-column`'s *"a business unit's head has no route to it at
+all"* green by cheating. The stand-ins ask `capsReachable()` first and refuse
+where the rail would not be drawn, and they do what a real press does
+(`leaveModes`, `entrySub`), without which `capability-pillar-edit` lost its
+pen and went from 1 red to 4.
+
+
+### §544.13c — main merged in, and the three comparisons run again
+
+Islam: *"now merge main and re-run the three comparisons"* — closing §544.12's
+own open item, which said in as many words that comparing two tips is not
+comparing their merge.
+
+`origin/main` was 27 commits ahead and this branch 24. **Four conflicts, and
+none in a source file:** both docs, and the two generated files, which were
+REGENERATED from the merged sources rather than hand-resolved — a built file
+settled by hand is a build nobody can reproduce.
+
+**THE §544 COLLISION IS REAL AND IS NOT RESOLVED HERE.** Stage 4 and main's
+tab-arrow audit were both written as §544 while apart. Both are kept in full
+and neither renamed, because a number is referenced from the code that
+implements it — 169 places across 36 files for stage 4, a comparable spread
+for the audit's — and renumbering is Islam's convention to set, not a side
+effect of a merge. A note at the join says so. **Owed as its own change.**
+
+**THE THREE COMPARISONS, re-run against main's tip (4b88ea1):**
+
+| Client | Result |
+|---|---|
+| **El Abd**, as the stage-3b move left it — 10 company pillars, 5 of them capabilities, no records | **NOTHING MOVED** |
+| **Wander**, as the SQL left it — 4 company pillars, all capabilities, no records | **NOTHING MOVED** |
+| **the demo sample**, which still holds one record | **5 answers moved — all of them the intended change** |
+
+The demo's capability leaves the sidebar and arrives in the company's plan;
+its Strategy tab leads and carries a Capabilities section; `capAtTop` reads
+true. That is §544.13 happening, on the one client that still had somewhere
+to move from. It is the sample compiled into the build, not a client.
+
+**AND THE TWO UNREAD ANSWERS WERE ASKED DIRECTLY**, because the script says
+in its own header that a question reading nothing on both builds is not
+evidence — which is exactly how §544.12's regression got past it once. The
+Copilot's separate-Capabilities-section decision was put to the rule behind
+it on each build: **same for El Abd and Wander, moved for the demo**, as
+designed.
+
+**MEASURING THE MERGE FOUND TWO REDS THAT MEASURING THE TIPS HAD NOT**, and
+both were main's own checks — green on main, red here, which is the only
+signal worth having. Neither was a product fault:
+
+- **`owner-from-the-register`** pressed a button whose whole text is
+  "Functions". The demo used to carry THREE nav sides, drawn as three
+  buttons; its capabilities are in the company plan now, so it carries TWO,
+  drawn as §41.8's two-sided toggle — one button holding two spans. Nothing
+  about the switch changed; the demo joined the group every client without
+  capabilities was already in. It presses `[data-fold="fns"]` now, which
+  names the side on BOTH shapes and is what the other checks here press
+  (§53.5).
+- **`action-keys`** appended its fixture pen at the end of the body and
+  relied on the landing page having none of its own — true while the demo
+  opened on Performance. It opens on Strategy now, which HAS a pen, so Alt+E
+  pressed that one. The fixture goes FIRST in the DOM: the precondition was
+  always "the fixture is the pen the key finds", and it is made rather than
+  left to luck (§255).
+
+Both fixes were then run against **main's own build** and pass there too — a
+fix that only works on one side of a merge is not a fix.
+
+**One more thing the merge moved.** `test-capability-fold`'s §1b compares two
+builds, and main changed something for EVERY owner on every page (§551's
+"not in the register" flag), which a cross-build comparison cannot tell apart
+from a move this branch caused — it went red naming Mohamed Rizk. The pinned
+baseline moves from `b773ac3` to `4b88ea1`, and §1's Reporting exception is
+read out: §542 is on both sides now, so **every page is word for word what it
+was, with nothing excluded** — a stronger claim than the one it replaces, and
+the fill bar is asserted present in this build instead.
+
+**Proof after the merge:** `capability-entry` 52/0, `capability-first`,
+`-seats`, `-remove`, `-pillar-edit`, `-report-column` 16/0, `plan-level`,
+`shape`, `structure`, `top-plan`, `client-setup`, `direction-part`,
+`direction-seats` all good; main's `tab-arrows`, `go-to-a-place`,
+`keyboard-sheet`, `filters-remembered`, `no-grey-descriptions`,
+`owner-from-the-register`, `action-keys` all good;
+`test-capability-fold` 65/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
+Proved able to fail: `pillarIsCap` forced false reds it 19 ways, and
+breaking `renderGroupFoundation` reds §1's rewritten assertion by name.
+
+### §544.14 — a layer can be removed on a client that is already running
+
+Islam, looking at El Abd on the live site the hour stage 4 shipped: *"layer 2
+above the business units I want to remove it but no option there to do
+that."*
+
+**There was none, and not for that client — for every client that matters.**
+The link exists (`data-shungroup`) and has since §544.1, but it was drawn
+only `if (shape)`, and `canShape()` goes false the moment a client holds a
+plan line. Measured on the demo: 182 plan lines, and the tree draws **no**
+"remove this layer", **no** "group these under a layer", **no** "+ add". So
+the control was there for a client with nothing in it and gone for every
+client anyone had used — which is the exact set that would ever need it.
+
+**WHY IT WAS GATED, AND WHY THAT WAS TOO WIDE A NET.** `canShape()` is older
+than stage 4: the seven-step flow REWROTE the lists from the form, so letting
+somebody re-shape a client with data in it would strand the data. That is a
+real danger and it still is — for **adding** a row. It was never true of
+these two links: by their own rule (§405) removing a layer **hides and keeps**
+— every division, every assignment and every plan stays, and grouping again
+brings all of it back. The screen was refusing a switch while offering the
+units' own On/Off beside it, which is the same kind of act on a bigger
+subject.
+
+**Asked which to unlock**, Islam chose **"add and remove layers"** — the two
+layer links come back for every client, and **"+ add" stays locked**. So the
+line is drawn where the danger actually is, and the banner is corrected to
+say so: it read *"adding and removing is read-only here"*, which is no longer
+true, and now reads that ADDING is. Both links carry a hover saying what is
+kept (1b-ii).
+
+**Proof.** `checks/shape.py` gains §3b, which MAKES the harder state (§255):
+section 3 runs on the open fixture and could never have seen this, so §3b
+writes one pillar onto a unit, asserts `canShape()` has shut (the banner is
+drawn, "+ add" is gone), and then asserts the two links survive it, that
+pressing one takes the row away while every division, every assignment and
+the plan line itself are kept, and that pressing the other brings it back.
+Both halves of the pair, because a control you can press one way and not the
+other is a trap (§61, §94.2). Proved able to fail: putting the old `if
+(shape)` back reds it **four ways**.
+
+### §544.15 — Meridian is closed, not parked
+
+Islam: *"forget meridian"*, after *"meridian is not live and not a
+priority"*.
+
+§544.11 left five questions open about its two capability records and said
+the move was waiting on him. It is not waiting any more — **it is not
+happening**, and the record says so rather than leaving a to-do nobody
+intends to do (§54.5).
+
+**WHAT THAT LEAVES IN THE DATABASE, said plainly rather than quietly
+dropped.** Meridian Group still holds `cap6` and `cap9` in `smp.capabilities`
+with their inner pillars, their project and its rows. Nothing reads them into
+a layer any more (§544.13), so they show in its company plan like any other
+client's — and the five things §544.11 could not answer (definitions, cap9's
+own objectives, cap6's outcome, the dated and stated rows, and `cap9-P2`
+marked `kind: "Direction"`) stay unanswered inside the records. They harm
+nobody while the tenant is not live. **If Meridian is ever switched on, this
+section is where to start**, and `scripts/meridian/look.sql` still reads it.
+
+**AND FOUR BACKUP TABLES ARE STILL THERE**, from El Abd's and Wander's moves:
+`smp.org_before_20261018`, `smp.capabilities_before_20261018`,
+`smp.org_before_wander_development_20261018` and
+`smp.capabilities_before_wander_development_20261018`. Both clients have been
+looked at and both are right, so these are droppable whenever Islam wants —
+they are named here so dropping them is a decision rather than a discovery.
+
+**DROPPED, 2026-10-18.** Islam: *"drop the backup tables"*, then *"done"*.
+`scripts/backups/drop.sql` is what he ran — read-only first (every copy
+actually in the schema, proof both moves landed, what each copy holds), then
+one transaction whose check re-asks that question and refuses to commit if
+either client does not look moved. Rehearsed three ways on a throwaway
+PostgreSQL 16: the happy path drops all four and reads back empty; a client
+that has not moved is refused with all four surviving; a renamed tenant key
+is refused with all four surviving. That third rehearsal earned its place —
+the guard's first draft asked only *"is any of them unmoved?"*, which answers
+0 when a mistyped key matches NO rows, so the copies would have gone with
+their reason never checked (§94.2: a check that cannot tell "all well" from
+"I found nothing" is not a check).
+
+**SAID PLAINLY: THIS ENTRY IS HIS WORD, NOT A MEASUREMENT.** Nothing here
+reaches the live database, so "done" is what is recorded and the read-back
+was not seen. If El Abd or Wander ever needs its pre-move plan again, it is
+gone and `scripts/wander/move.sql` and `scripts/stage3-move-sql.js` are the
+only description of what changed.
+
+### §544.16 — The door check catches up with three set-up steps (2026-10-23)
+Islam, after §538.2: *"fix the door check failures too"*.
+
+**IT WAS THE CHECK, NOT THE FLOW — §538.2's fault, in another file.** `checks/door-landing.mjs` asked for the client set-up to count **seven** steps and to list them `client,structure,cos,units,fns,caps,office`. §544 made Structure, the divisions, the units, the functions and the capabilities **one screen, the shape**, so the flow has three — `client,shape,office`, which is what the page drew (`{"done":3,"total":3}`) — and the two lines were never rewritten, so they read red on the right build at every run since: the *2 failed* every note from §583 on carried, red on the tree before each time.
+
+**REWRITTEN, NEVER LOOSENED (§218).** Still an exact count and still the whole list in order, so a step added, lost or moved reads red again, as these did when §544 moved them. The flow's own header comment in `client-setup.js` still says *"Seven, as the mockup draws them"* above §544's *"THREE STEPS"*; left as it is, because that file is built into what browsers are served and a comment is not worth a release — said here so it is not mistaken for the rule.
+
+**CHECKED.** `checks/door-landing.mjs` **146 ok, 0 failed** — the first wholly green run since §544. `check:door:red` all seven breaks still red (`demo-role-key`, `other-role-key`, `no-creator`, `no-landing-stamp`, `gate-open`, `no-areas-stamp`, `done-dropped`). No page changed.
+
+**§544.16 MERGED TO `main`** 2026-10-23, Islam: *"merge it"*. A clean fast-forward — `main` had not moved since §538.2 — so the tree pushed is the tree checked (146 ok, 0 failed; seven breaks red), then this note as a commit `main` alone holds (§91). **No `SHELL` bump and the same release stamp**, for §538.2's reason: the merge changes a check and the record and no file a browser is served, so `/sw.js` reads **`7b31190177c959e9`** before and after. No forced sign-out.
 
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
@@ -65979,7 +66509,7 @@ From the live deployment, 18 October 2026. A direction owner on El Abd entered t
 **The check** gains §545, at both ends and in both shapes (§94.2, §53.5): the company page where the pillar is a DIRECTION — the owner and the custodian enter a figure, a row note, and all of them in one save; the direction beside theirs is refused; the target in their own table stays the office's — and a unit's page where it is a plain pillar, by the other road (`onlyOwnLines`), so a fix to one that missed the other cannot pass. The figure is first asserted to classify as `unitReporting@group`, or a build that called it the plan would refuse the owner for a different reason and the rest would not say which. Five deliberate breaks against the unfixed file, reproducing Islam's sentence word for word including its count. 1094 agreements, 0 red.
 
 ## §546 — Three actions from the keyboard: Alt+S, Alt+D, Alt+E (usability audit, heuristic 7; 2026-10-18)
-The audit: *"no accelerator for Submit, Save draft, or the pen"*. §544 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
+The audit: *"no accelerator for Submit, Save draft, or the pen"*. §552 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
 
 **ALT IS THE PRODUCT'S OWN MODIFIER AND NOT A NEW ONE** (§528 chose it for the reporting walk), and the one thing wrong with it here was already solved there: on a Mac, Option+S types "ß" and `e.key` says so, so the match is on the **physical key** (`e.code`) and never on the character. Reusing that answer is the whole reason Alt was safe to pick again. **The check asserts it over the built file**, because a build matching `e.key` would pass every behavioural assertion on this machine and fail for every Mac.
 
@@ -65995,7 +66525,7 @@ The pen's selector is read from the check that already walks it, which records t
 
 **CHECK.** `checks/action-keys.py` — green here, **10 red on the build before**.
 
-**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§544.1**.
+**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 → §552 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§552.1**.
 
 
 ## §547 — Going to a place: Alt+G (usability audit, heuristic 7; 2026-10-18)
@@ -66183,3 +66713,1932 @@ Islam: *"fix the demo stakeholders too."* §551.3 had named the five non-conform
 **CHECK.** The §551 check gained §12 — green here, **2 red on the build before**. It asserts **no stakeholder anywhere in the demo is outside the register**, which is a permanent regression guard rather than a statement about today's values, and **that no project was emptied to achieve it** — dropping names until nothing is left would satisfy the first assertion and trade one fault for another. 19 projects carry stakeholders; all 19 still do.
 
 **AND ONE FAULT IN THE CHECK ITSELF, recorded rather than quietly fixed.** §551.3's assertion that the project's stakeholders are still picked was written with `["Finance Department", "IT Department"]` as **literals**, and went red the moment this entry tidied the demo. **A check that breaks when the content changes is measuring the content, not the control.** It reads the project's own list now (§48's rule about addressing a row, applied to a fixture). A second draft also split one label across two `ck` calls with the same condition, so the second could never say anything the first had not — §113.8's family, a line that looks like evidence.
+
+## §552 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
+
+**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
+
+**TWO DECISIONS, BOTH DELIBERATE:**
+
+- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
+- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
+
+**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
+
+**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
+
+**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
+
+**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
+
+**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
+
+## §552.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
+**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
+
+`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
+
+**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
+
+§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
+
+**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
+
+**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
+
+**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+
+## §553 — Stage 5 (a): a part of the running order that is not a box
+
+Islam, having rejected the way stage 5 had been framed — *"there is no thin
+deck and thick ones. rethink the whole module"* — and said what it is:
+
+> *"for a company like elabd where we choose to present the foundation and
+> then the swot if needed and then every direction and capability in the
+> sequence selected and then the functions in the sequence selected as well.
+> and this might match rhi as well where rhi presents in pillars on the
+> company level"*
+
+**A presentation is ONE ORDERED LIST OF PARTS.** Approved from
+`design-mockups/presentation-order/2026-10-18_the-running-order.html`
+(*"let's build it"*), which draws all three shapes on one screen.
+
+**THE SPINE ALREADY EXISTED.** The running order, the picker, the drag by
+the number and *"company comes last"* are §266.10's and §481's, built and
+shipped. What was missing is the one thing he asked for: the company's own
+Foundation and SWOT were drawn only INSIDE the company's deck, which the
+flow puts LAST — so a review that wants to set the scene first could not.
+
+**SO A PART GETS A TARGET.** `sec:found` and `sec:swot`, through a fifth
+prefix on `boxRef` — listed there rather than handled beside it, because the
+fallthrough reads an unknown target as a BUSINESS UNIT and `sec:found` would
+have become a unit of that name on every page that asks who the target is
+(§531: the prefixes are read once, in one place).
+
+**AND IT IS NOT A SECOND DESCRIPTION OF THE SAME SLIDES (§53.5).**
+`secDeckHtml` calls the very functions the company review calls —
+`companyFoundationSlides`, `companyAnalysisSlides` — so a change to either
+reaches both and a part presented on its own cannot drift from the same part
+inside the company's deck. The check asserts that as an AGREEMENT measured in
+the same run (§94.8), never as a literal.
+
+**OFFERED, NOT PLACED — AND THE FIRST DRAFT GOT THIS WRONG.** Adding the
+parts to `masterSubjects` alone also added them to the DEFAULT order, because
+`masterOrder` falls back to the whole list when nobody has chosen. Every
+tenant that never touched its flow would have found its Foundation at the
+front of its review, and the comment in that draft claimed *"no tenant's
+order moves"* while the code moved all of them. His word was *"we CHOOSE to
+present the foundation"*, so there are two lists now: `masterSubjects()` is
+what may be placed, `masterDefault()` is what a tenant that has chosen
+nothing gets, and it is the list without them. `masterWrite` measures the
+absence against the DEFAULT too, or placing a part and taking it out again
+would store a copy of the default rather than deleting the key (§50.6) — and
+then tomorrow's new unit would never join that tenant's flow.
+
+**"IF NEEDED" IS HALF THE SENTENCE.** A part that would draw nothing is not
+offered at all: `secDeckHtml` answers "" over an empty section rather than a
+cover and a Thank you around nothing (§45.2), and the picker never lists it
+(§61). Both ends are made in the check — the SWOT off, then switched on.
+
+**Proof:** `checks/presentation-parts.py`, 22 assertions, all good; proved
+able to fail three ways by restoring the default-order fault. `deck-figures`,
+`deck-strip`, `presentation-timer` and `capability-entry` all good.
+`master-picker` reads 57/1 — **identically on main**, measured in the same
+run, so it is the pre-existing failure and not this.
+
+**Still to come in stage 5:** (b) a box that plans in projects gets no
+performance and no standings while the same box planning in pillars does —
+the one genuine drift left after §553.1's corrections; (c) one template.
+
+### §553.1 — two things I told him that were wrong
+
+Both were offered as the ARGUMENT for stage 5, which makes them worse than
+ordinary mistakes, and both are corrected here rather than quietly dropped.
+
+**"A pillar gets three slides in a unit and four as a direction — same
+content, two shapes."** It does not. The fourth is the Categories slide and
+`if (bdRows)` draws it only where the pillar HAS categories. El Abd's
+direction has them; the Raya pillar it was compared against does not. Content,
+not two builders disagreeing.
+
+**"A function gets no Foundation and no SWOT, which is drift."** It is not:
+it is his own recorded decision (§243, §399) — *"it has a title of winning
+aspiration but it shouldn't show this as they don't have it"*.
+
+What survives is narrower and still worth fixing, and is stage 5 (b) above.
+
+**AND THE MOCKUP INVENTED ITS SLIDE NAMES.** "What it is aiming at", "Its
+work", "How it is doing" were written out of the air while
+`scripts/decks/compare.py`, which reads the real ones, sat in the same
+commit. Islam: *"that's a very strange components. did you assume that?"*
+Every name in it is measured now, and `drive-the-mockup.py` asserts the
+headings are the product's so the same fault cannot return silently.
+
+### §553.2 — Stage 5 (b): a box that plans in projects says how it did
+
+A pillars box has ended its deck on its readings since §254.4 — Islam:
+*"where the units stands to be the last slide"*. A projects box ended on its
+last milestone: no Overall performance divider, no standing, nothing
+answering the question the review is for. There was never a decision that it
+should not. It fell between two builders.
+
+**NOT A COPY OF THE PILLARS SLIDE.** A projects box has no pillars score —
+`unitPillars` answers null for it — so pasting that slide would print an
+empty cell where the middle reading goes. What it HAS, measured: its
+objectives (`capKOScore`, where `holderHasKOs` says it has them — the same
+question the PAGE asks, so the two cannot disagree) and its execution
+(`capExec`, counted the one way §515.2's P2 settled). Finance reads 86% and
+84%, 5 of 12 done.
+
+**SO THE SLIDE IS THE SAME SLIDE AND THE CELLS ARE THE BOX'S** — which is
+what one template means, and the first real piece of it. `standCell` and
+`standSlideOf` are built once and both decks hand them cells; writing a
+second copy of that markup beside `deckSlidesFn` is exactly the drift this
+stage exists to remove.
+
+**MEASURED, NOT ASSUMED: 12 DECKS UNCHANGED, 8 MOVED.** Every deck of the
+worked example was compared against main in a browser. The twelve that did
+not move are every unit, the company and the pillars function — so the
+refactor of the slide they already had moved none of them. The eight that
+moved are the seven projects functions and the one projects capability, each
+gaining the divider and the standing and nothing else.
+
+**AND THE CHECK CAUGHT A FAULT THE CHANGE INTRODUCED.** The first draft
+pushed the new slides AFTER the notes, so a projects box alone would have
+read notes → performance → standing while every other box reads performance
+→ standing → notes. The same slides in a different order from everything
+else, introduced by the change meant to stop exactly that. It goes before
+the notes now, and the check asserts the ORDER on both kinds rather than
+comparing the two lists literally — a projects box with no cycle note has no
+notes slide, which is content, not order, so the order is proved on one that
+has been given a note through the product's own `setCycleNote` (§42; the
+first draft of the check wrote `CYCLE.notes`, which nothing reads).
+
+**`checks/deck-strip.py` IS REWRITTEN, NEVER LOOSENED (§218).** It read
+`len(pills) == len(fpw) + 2` — the two being COVER and END, every structural
+stamp a projects box had. It is three now. Rewritten as AGREEMENT rather
+than as three (§94.8): the frame a projects box carries must be the frame a
+pillars box carries, read in the same run, which is what the assertion was
+really claiming all along. 33/0, up from 32.
+
+**Proof:** `checks/projects-box-stands.py` 22/0, proved able to fail two ways
+— taking the standing away again reds it 10 ways, giving it the pillars cell
+it does not have reds it 2. `presentation-parts`, `deck-figures`,
+`deck-strip`, `presentation-timer`, `capability-report-column` all good.
+
+**STILL OPEN, AND IT IS ISLAM'S TO DECIDE (§54.5).** He noted alongside this:
+*"the user view of a performance where he opens the presentation is not clear
+as the user only sees the performance of his directions in the presentation
+directly"*. Measured: a direction owner's deck carries its readings in the
+HEADER of every slide — `Key Measures 95% · Execution —` on the title page,
+the measures page, the categories page and the tactics page — and has no
+moment that presents them. The numbers are not missing; they are in the
+corner of everything and announced by nothing. What a part-owner's standing
+should be is a design question, not a merge, and nothing is built for it here.
+
+## §553.3 — Stage 5 (c): a direction owner's deck ends on its reading (2026-10-18)
+
+Islam, shown his own deck rendered — Amr Hassan's, for El Abd's direction
+D001 *Maximizing Current Stores* — picked both halves of what §553.2 left
+open: **A+B**.
+
+**WHAT HE WAS LOOKING AT.** Six slides. `Key Measures 95%` and `Execution —`
+on the title page, and the same two figures again in the corner of the
+measures slide, the categories slide and the tactics slide. Four printings of
+one pair, and no slide that presents it. His words, from §553.2: *"the user
+view of a performance where he opens the presentation is not clear as the
+user only sees the performance of his directions in the presentation
+directly"*.
+
+**A — IT IS SAID ONCE, PROPERLY.** A direction's own deck now ends on "Where
+&lt;direction&gt; stands", the slide §553.2 made every box's: a word under
+each figure saying what it counts, and a line under both saying why they are
+different questions. Only the cells are this direction's, so a change to the
+wording or the bands reaches it by construction (§53.5).
+
+It is said LAST, where §254.4 put it for a unit — Islam: *"where the units
+stands to be the last slide"*. And it is drawn only where there IS a reading
+(§45.2): four of El Abd's eleven presentable directions and capabilities have
+neither a measure score nor anything delivered, and a headline slide carrying
+two dashes says the plan owes an answer nobody asked it for. The footnote
+loses the clause for a figure the slide is not showing (§243).
+
+**B — AND IT LEAVES THE RUNNING HEAD.** `deckPillarHead` drew the pair over
+the measures, the categories and the tactics: three slides each ABOUT
+something else, none of which can say what the figures mean. Nothing is
+hidden by taking them off (§405 is about switches, not about printing the
+same number four times): the pillar's own title page still carries both,
+large, and the score table still scores every pillar.
+
+**IT GOES EVERYWHERE, AND THAT WAS THE QUESTION.** The four callers are all
+`pillarSlidesOf`, the ONE builder a direction's own deck and the full plan
+deck share. "Only on the owner's copy" is not a setting — it is a fork of a
+shared builder, and it would make the same direction read two different ways
+depending on who opened it. Islam did not need the question put twice: *"I
+like the mockup / I don't understand your last questions"*, which is the
+answer a question deserves when the alternative only exists in the person
+asking it.
+
+**MEASURED, NOT REASONED, ON ALL THREE LIVE CLIENTS** (every box's deck, two
+builds, a real browser, each client's own state):
+
+| | decks | gained the standing slide | slides that lost the repeated pair | heads still carrying one |
+|---|---|---|---|---|
+| El Abd | 20 | 4 (D001, D003, D004, D005) | 28 | 0 |
+| Wander | 15 | 0 — it presents its pillars inside the company deck, which already ended on its reading | 24 | 0 |
+| the demo | 21 | 0 | 54 | 0 |
+
+**AND THE RENDER THAT STARTED IT WAS WRONG FIRST.** The deck was first stood
+up in a 1180×664 box with no fit pass, and every table overran its slide.
+That is the renderer's damage, not the product's: a slide is AUTHORED at
+1600×900 and `deckFitPass()` decides how many rows a table gets by MEASURING
+against that box. Rendered at the real size this deck needs neither — 0
+tight, 0 continuations, 0 overflow. `design-mockups/owner-performance/`
+carries the renderer, and the before-and-after page built from two of its
+runs.
+
+**FOUR CHECKS REWRITTEN TO THE NEW RULE, NEVER LOOSENED (§218).**
+`deck-figures` claimed *"every pillar head reads Measures and Execution, and
+nothing else"*; it now claims the heads are drawn and none carries a figure,
+and — the half that makes it a change rather than a deletion — that the title
+page still carries both. Its probe was asking the fixture's own ten-times-
+rewritten unit and getting an empty list back, so the old claim was half
+vacuous pass and half bare fail; it now asks every active unit, and it learned
+`SMP_BUILT` so the new claim could be shown FAILING on the build it changed
+from (§113.8): 48 heads, each reading `Key measures · Execution`.
+`review-pptx` §6 checked the pair in the exported head band and now checks
+that band is empty while the head still names the slide (§61).
+`deck-dividers` §4 said *"a capability function's deck is byte-for-byte what
+it was"* — stale since §553.2, which gave a projects box the same Overall
+performance divider a pillars box has; it now asserts the one divider AND the
+slide behind it (§253). `direction-decks` §3 asked `masterSubjects()`, the
+catalogue of everything PLACEABLE, for a claim about the running ORDER; since
+§553 that catalogue opens with the company's Foundation and Analysis, so the
+claim failed while the order it described was unchanged. It asks
+`masterOrder()` now, and asserts the wider catalogue separately.
+
+## §553.4 — Stage 5 (c): one slide introduces a direction, not two (2026-10-19)
+
+Islam, on the deck §553.3 left: *"the cover page is enough let's remove the
+2nd page as the performance appear at the last slide anyway"*.
+
+**WHAT THE SECOND PAGE WAS FOR.** It carried the direction's kind, theme and
+owner, its code and name, its subtitle, and the two readings. The cover
+already carries the name, the code, the cycle and *Presented by …* — and
+§553.3 moved the readings to the end. So the page was introducing, a second
+time, a direction the room had just been shown.
+
+**IT IS THE CALLER'S FACT, NOT THE CLIENT'S SETTING (§50.6).** `pillarSlidesOf`
+takes a fourth argument, `named`: the deck has already said whose slides these
+are. A direction's own deck passes it; the full plan deck does not, and must
+not — there is no per-pillar cover there, so the title page is the only slide
+that names the pillar it opens. Nothing is switched: the flag states what the
+caller has already drawn.
+
+**AND NOTHING THAT PAGE CARRIED IS LOST (§96.2).** The theme and the subtitle
+were on it and on nothing else in this deck, so the cover now carries both —
+each drawn only where the direction HAS one (§45.2). No live client sets
+either today, which is exactly why the check MAKES the state (§255) rather
+than reading against them: against El Abd, Wander or the demo, a cover that
+dropped both would pass.
+
+A picture slide an owner had placed on the title page is not lost either: an
+anchor that is no longer there sends its slide to the end of the deck
+(`insertPictureSlides`).
+
+**MEASURED, NOT REASONED** (every box's deck, two builds, each client's own
+state): El Abd, 10 decks lose the page — its five directions' and its five
+capabilities' own decks — and the one full plan deck in the client,
+`fn:merchandising`, keeps it. Wander and the demo: not one deck loses it, and
+3 and 11 full plan decks respectively keep theirs.
+
+**ASSERTED AT BOTH ENDS, IN TWO CHECKS (§94.2).** `direction-decks` §2b: a
+direction's own deck carries no `p<code>d` anchor, and — with a theme and a
+subtitle written in — the cover carries both. Shown failing on the build it
+changed from: `['cover', 'pD001d', 'pD001m', 'end']`. The other end is
+`deck-figures`, which runs with the units on and reads both readings off that
+very title page in every full plan deck.
+
+**AND WHAT THE OWNER CAN DO WITH HIS DECK**, since Islam asked: the
+Presentation menu already gives a direction's owner **Manage slides** —
+*"Add your own picture slides to your Direction"*. Inside it he can add
+slides, make each a picture or a video, choose where each one sits (the deck's
+own anchors: after the cover, after Key Measures, after Tactics, before Thank
+you), reorder them and remove them. He cannot hide the built-in slides; that
+stays the office's (`inOffice()`), as §255's pane has always had it. The gate
+is `canSpeakForDir`: the cycle open, the plan on, and the signed-in person
+matching the direction's owner or custodian.
+
+**ONE THING THAT IS ISLAM'S, NOT THE CODE'S.** On El Abd today *Amr Hassan*
+is a typed owner name, not a person in the client's register — the register
+there is still the seed list. So the menu is correct and nobody can reach it
+as Amr until he is a user on that client. §551 ("an owner is picked from the
+register, never typed") is the rule that prevents this from here on; El Abd's
+data predates it.
+
+## §553.5 — The Master presentation's picker knew only boxes (2026-10-19)
+
+Found while running every check that touches the decks before shipping stage
+5 (c): `master-presentation` was red — and red on `origin/main` too, so this
+is §553's own debt, not the branch's.
+
+§553 put two things in the picker that are not boxes: the company's
+Foundation and its Analysis, placeable in the running order and NOT in it
+until somebody places them (`masterDefault`). The check built its expectation
+from `boardUnitTargets() + boardCapTargets() + boardFunctionTargets()` — the
+boxes — so two true statements became false:
+
+- *"...so the waiting column is empty AND says why (§45.2)"*. With nothing
+  stored, every BOX presents, which is still true; the column is not empty
+  because Foundation is waiting in it. Rewritten to the rule, at both ends
+  (§94.2): exactly the unplaced parts wait, and no box does. An empty state
+  drawn over a row that IS there would be the very §45.2 fault the old line
+  guarded against.
+- *"a subject taken out moves to the waiting column, and only there"*. Its
+  `out` list was boxes only, so a correct build read as one that had lost a
+  row. It asks `masterSubjects()` now.
+
+The product was right both times; only the checks were stale. The check also
+learned `SMP_BUILT` (§276), which is how it was shown failing identically on
+main's build and passing on it after the rewrite.
+
+## §553.6 — The company presents on the same spine as a box (2026-10-19)
+
+Islam, a week before El Abd present it: *"the setup gives the boxes and the
+slides should read from whatever is set for this function or business unit …
+when we are presenting on a company level it acts like a business unit
+approach, foundation, aims, key objectives and maybe directions and
+capabilities showing the directions as one slide and then showing progress
+then the capabilities as a group and then performance and the overall
+performance etc. … their spine to be well included is a priority"*.
+
+**WHAT EL ABD'S COMPANY REVIEW ACTUALLY DID**, read off the product rather
+than off the code, because three of the four faults below are invisible in a
+diff:
+
+- ONE roll-call headed *"Directions & Capabilities"*, listing all ten.
+- ONE score table headed *"Directions — where we stand"*, holding all ten —
+  and **489px past the bottom of the slide**. On the projector the last rows
+  were not there at all.
+- NO performance section: §481 made the review short by leaving things out,
+  and the divider went with them.
+- A closing slide reading *"Directions performance · 10 Directions, by their
+  measures"*, five of which are capabilities. The figure was right — it is
+  the average over every pillar the box plans. The words were wrong, which
+  is the worse of the two: **a room can check a name and cannot check an
+  average.**
+
+**THE SPINE WAS ALREADY THERE; IT NEEDED TO BE ASKED FOR TWO GROUPS.** The
+card and the row builders are lifted out of the two `.map`s they were written
+inside, unchanged, and `deckSlides` now builds a list of GROUPS: one, as
+every deck has always had, except on the company's own review of a plan shown
+apart, where it is the directions and the capabilities. Each group gets its
+own roll-call and its own score table. No second copy of the markup exists
+(§53.5), and the slides are the same slides.
+
+- THE FIRST GROUP KEEPS THE ANCHORS (`pillarnames`, `pillars`), so a picture
+  slide an owner placed after either stays where they put it. The second
+  group's slides are new ground and carry new anchors (`capnames`, `caps`).
+- A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2).
+- THE SCORE TABLE KEEPS THE HEADING IT HAD in the joined case. Only the
+  roll-call ever named both kinds (§542); widening the table's heading moved
+  Wander's live deck for nothing, and was put back the moment it was measured.
+- THE CLOSING SLIDE COUNTS WHAT IT NAMES, and stays ONE cell: the two groups
+  now have a score table each, which is where a per-group reading belongs,
+  and a fourth cell would break a grid that goes to three.
+- AND THE COMPANY'S REVIEW GETS THE PERFORMANCE DIVIDER. §253 is satisfied by
+  construction, as for every other deck: the stand slide always draws.
+
+**MEASURED, NOT REASONED** (every box's deck, two builds, each client's own
+state): **El Abd, one deck moves — the company's.** Wander: nothing. The
+demo: nothing.
+
+## §553.7 — The Foundation continues rather than runs off the slide (2026-10-19)
+
+Found while rendering El Abd's company review at the size the product fits
+it at: the Foundation slide is **22px taller than the slide**, with the last
+objective cut in half. The fit pass could do nothing about it — `.tight` is
+all it has for a slide that does not say it may be split, and §254.9's
+tightening was measured against the demo's four objectives. El Abd has six.
+
+So the slide says it may be split, and the pass continues the objectives
+table onto a second slide exactly as it does for every other long table in
+the deck (§69.5). The continuation does NOT repeat the aspiration:
+`present.css` hides `.aimtop` on a `[data-cont]` slide, because a lead
+paragraph said twice is the room reading it twice.
+
+El Abd's Foundation is now two slides, five objectives then one. If all six
+on one slide is wanted instead, that is a tightening of §254.9's figures and
+not this mechanism — and it would be a figure retuned against one client
+rather than a rule that holds for ten objectives as well as six.
+
+## §553.8 — El Abd presents as El Abd, and each group is followed by how it did (2026-10-19)
+
+Islam, on the review §553.6 built: *"there is nothing called elabd review as
+a group or as a company … they show their work similar to the business unit.
+foundation, swot, directions grouped and then each direction performance and
+then capabilities grouped and then each capability performance and then
+finally the overall performance"*.
+
+**THE DECK WAS HEADED "GROUP".** `topAsUnit()` hands the top box the tenant's
+WORD for the top layer as its `name` — "Group", beside "Business unit" and
+"Function" — and that is the right word on every page that is about the shape
+of the company. A ROOM IS NOT A NAVIGATION ROW: on a projector the cover says
+who is presenting, and that is El Abd. `deckBoxName()` asks for the company's
+own name and the pages go on asking for the word. The fallback is the word
+again, so a client who has not named their company reads as it does today
+(§50.6). Measured: three clients, one deck each — "Group" becomes El Abd,
+Wander Development, Raya Trade on the cover and on the closing slide, and
+nothing else anywhere moves.
+
+**AND EACH GROUP IS NOW FOLLOWED BY ITS OWN SCORING.** §553.6 left both score
+tables behind the Overall performance divider, where §254.4 put a unit's.
+
+THIS IS NOT §254.4 REVERSED, which is why it is safe to do for one deck and
+not the others. There Islam was looking at a UNIT's deck, where every
+pillar's own measures and tactics sit between the roll-call and the scoring:
+*"move the pillars performance till the end before the where we stand slide"*
+keeps the scoring beside the reading it belongs to, three sections later.
+The company's review has NO detail slides (§481) — the roll-call and the
+scoring are adjacent either way, and reading them as one group is the whole
+point of showing the two kinds apart. Units are untouched; only the split
+company review reorders.
+
+The divider's own line moved with them: it announces what is BEHIND it, and
+with the tables now in front it says the one thing left (§253, §61).
+
+**THE ANALYSIS SLIDE NEEDS NOTHING BUILT.** El Abd's Setup carries the SWOT
+and the slide is drawn from `companyAnalysisSlides`, which draws only where
+a quadrant has something in it (§45.2). Their four quadrants are empty today,
+so the review has no Analysis slide. Written in, it lands exactly where he
+asked — between Foundation and the Directions — and that was verified rather
+than assumed.
+
+El Abd's review, end to end: cover, Foundation (continued, §553.7),
+Analysis where there is one, Directions, Directions — where we stand,
+Capabilities, Capabilities — where we stand, Overall performance, Where
+El Abd stands, Thank you.
+
+## §553.9 — The company shows each direction and capability, as a unit shows each pillar (2026-10-19)
+
+Islam, after three readings in which I kept rearranging the wrong thing:
+*"you are still confused … can you review how Business units in raya
+present and let's reflect on how can we make it on elabd presentation"*,
+and then, shown the two side by side: *"yes I want elabd as a unit"*.
+
+**WHAT READING THEM SIDE BY SIDE SHOWED.** Raya's Mobile is 28 slides and
+**twelve of them are its four pillars** — a title page, Key measures and
+Tactics for each, inside the unit's own deck. El Abd's review drew **none**:
+its five directions and five capabilities were named in a roll-call, scored
+in a table, and never shown. Their measures and tactics existed only in each
+owner's separate deck — **32 slides the company's own review did not draw.**
+
+So *"each direction performance"* was never the score table. It is the
+direction's own slides, exactly as a pillar's are in a unit's deck. §553.6
+and §553.8 moved the furniture around a room with no furniture in it.
+
+**THE SLIDES ARE NOT NEW.** `pillarSlidesOf` is the same builder each owner's
+own deck already calls (§53.5); the company's review had simply never called
+it — `(pOn && !short ? u.items : [])`. It is called INSIDE the group now, so
+a group's pillars follow their own roll-call: the directions after
+Directions, the capabilities after Capabilities.
+
+**AND §553.8'S REORDER IS WITHDRAWN.** It moved the two score tables up
+beside their roll-calls for one reason: the review had no detail slides
+between them, so §254.4's *"move the pillars performance till the end before
+the where we stand slide"* had nothing to keep them away from. §553.9 put the
+detail slides back, so the reason is gone and so is the exception — the
+tables are said at the end, for every deck, as they always were. An exception
+that survives the thing that justified it is how a product grows two rules
+for one question (§53.5).
+
+**MEASURED, NOT REASONED:** El Abd, 10 slides become 42, and **one deck in
+the client moves — the company's.** Wander and the demo: not one deck moves.
+
+**WHAT ISLAM TOOK WITH IT.** Shown that the Master presentation runs each
+direction's own deck and then the company's last — which is why §481 made the
+review short — he chose to leave the flow alone and accept that it now shows
+each direction twice. The company's own review is the deck that mattered this
+week. The opening stays El Abd's compact pair (one Foundation, one Analysis)
+rather than a unit's eight slides, which was not asked for.
+
+## §553.10 — The running order is the order the company's review runs in (2026-10-19)
+
+Islam: *"I need to be able to set the arrangement of the directions and
+capabilties which appears first and which after"*, and then, of the shape put
+back to him: *"the company picker should pick the foundation of the company
+then I pick the directions arrangement and then the capabilities arranged.
+and the grouped directions comes before the directions automatically and the
+capability grouped comes before the capabilities automatically … is that
+ok?"* It is.
+
+**TWO PLACES ALREADY ORDERED THESE, AND ONE OF THEM RENUMBERS.** Measured
+before anything was built: the plan's own Arrange (Strategy › Directions ›
+Edit, drag by the handle) reorders them and the deck follows — and
+`pillarCode` counts position within a kind, so dragging Egypt Expansion to
+the top makes it **D001 on every surface in the platform**. An order for a
+room must not rewrite the codes the year is filed under.
+
+The other is the Master presentation's running order, which already lists
+every one of El Abd's five directions and five capabilities by name
+(`dir:<id>`), draggable, stored per client as an absence. So the company's
+review reads THAT. No second control, nothing to keep in step (§53.5).
+
+**THE ORDER ONLY, NEVER THE MEMBERSHIP.** A tick in that picker says who
+presents in the MASTER FLOW. It cannot also mean "and is therefore in the
+company's own deck", or unticking a direction would silently drop it from
+the company's review of its own plan (§96.2). What the order does not name
+keeps its place in the plan, after what it does.
+
+**AND THE ROLL-CALLS ARE NOT SUBJECTS.** "Directions" and "Capabilities" are
+drawn in front of their own group automatically, because they ARE the group
+— Islam's own word, *"automatically"*. The groups then lead in the order
+their first member does, so dragging a capability above every direction
+makes Capabilities the first group, score table and all. One list, one
+answer, no second setting for "which kind comes first".
+
+**MEASURED ON EL ABD'S REAL STATE:** nothing dragged — unchanged; E-Commerce
+dragged to the front — it leads the directions and **stays D005**; a
+capability dragged above every direction — Capabilities leads, roll-call,
+its five, then the directions, and the two score tables follow the same
+order; the order cleared — straight back to the plan's. And because the
+default is an absence (§50.6), **no client moves until somebody drags**: El
+Abd, Wander and the demo all read byte-identical to main.
+
+`direction-decks` §2c asserts all three ends, MAKING the split review the
+fixture does not have (§255), and reads the client's OWN words for the two
+groups rather than the English ones — the first draft looked for "Direction"
+in a fixture that calls a pillar a Pillar, found only the capabilities, and
+reported a correct build as one that had lost a slide (§395). Shown failing
+on main's build: the stored order moves nothing there.
+
+## §553.11 — The picker's Kind column knew two kinds out of five (2026-10-19)
+
+The last red in the deck-and-flow sweep, and red on `origin/main` too:
+`master-picker` built its expectation for the Kind column as
+`FUNC : BU`. That was the whole vocabulary until §334 added capabilities,
+§481 added the company and a direction, and §553 added the company's own
+Foundation — so a picker correctly showing CAP and SECTION read as a broken
+one.
+
+Rewritten to the five kinds, and still computed from the BOARD's own lists
+and the target's own prefix (§94.8) rather than from `masterKind`, which is
+the function that draws the column and so cannot be its own witness. Green
+on both builds afterwards, which is the shape of a check fault: the product
+was right the whole time.
+## §555 — The target is what the months come to, from the first one typed (2026-10-19)
+Islam, of a key measure four months into its monthly plan whose Target box still read the `13#` he had typed: *"when I was adding the monthly the target should be a sum of the months calculated automatically not on an entry as well."*
+
+**HE IS RIGHT, AND THIS REVERSES HALF OF §278.** That section derived the annual target the moment the TWELFTH month landed, and said so in its own words — *"a half-filled plan is stored and not used … what it must not do is quietly become the target"*. The consequence nobody costed is the one he met: until the twelfth box is filled, the SAME FIGURE IS AUTHORED TWICE, once as a target and once as a set of months, with nothing comparing them. On his row the two disagreed by 3 and the platform had no opinion about it. **Put to him with the cost of each option stated (rule 1b/1c)** — fill and lock, fill but leave the box typeable, or leave it at twelve — and he picked **fill and lock**.
+
+**WHICH HALF REVERSES, AND WHICH HALF STANDS.** Two different questions were collapsed into §278's one test, and only one of them changes:
+- **The TARGET is derived from the first month** (new). `SMPRules.monthlySoFar()` applies the row's own compile rule to the months that are set and passes over the blanks — `Sum` and `Count` add them, `Average` takes their mean, `Latest` takes the last one set. The Target box is locked on what it answers for as long as a monthly plan is there, so there is nothing to type twice.
+- **The YEAR is still spread evenly until all twelve are in** (unchanged, and it is the part §278 was really about). A missing month is **unknown, never nought** — `monthlyPlan()` still refuses a half-filled plan, `monthlyDue()` still returns null for it, and `monthlyInForce()` still waits for twelve. Reading eight empty boxes as eight planned noughts is the fault §278 was written around and it is untouched.
+
+**ONE FIGURE AND NOT TWO** (§42). On a complete plan `monthlySoFar()` returns exactly what `monthlyAnnual()` returns, and the check asserts that equality rather than the two numbers separately — the day they disagree, the target on a row stops agreeing with the months under it and nothing else would say so. It derives **nothing** where there is nothing to say: no month set, no compile rule, or a month holding something the platform cannot read (§278's own safe direction — a plan it cannot read leaves the target alone rather than deriving a figure from half of it). **A typed 0 derives 0**, which is the same distinction §278 turns on, asserted from both ends.
+
+**THE COMPILE RULE IS THE OTHER HALF OF THE ARITHMETIC, so picking it derives the target too.** Until there is a rule the platform cannot say whether the year is the months' sum or the last of them, so a row typed months-first sat with a figure nobody had reconciled — and once the box locks, nobody can correct it by typing. `gapCell` gained an `after` hook for it (the field listener writes WITHOUT a repaint, §71.2, so the row had to be put right where it stands); the tactic outcome's rule is a `selectOr` with its own setter (§248) and is wired by hand, which is a different wire and a silent one if it is wrong — so it is asserted separately.
+
+**WHAT THE DRAWER SAYS NOW.** Three sentences, because there are three states and §278's wording only described one: *no month set* says the target above is no longer typed by hand; a **part-filled** plan says what the months come to AND that the year is still spread evenly, which are two different facts and the old sentence carried only the second; **twelve** reads as before. Clearing asks in the platform's own dialog as §534.3 built it, with the "stays" half rewritten — the figure the months came to is kept **and the box goes back to being typed by hand**, which is the half somebody hesitates over.
+
+**AND A SPACE THAT WAS NEVER THERE.** The complete sentence read *"12 of 12 months setAdds up to 300M EGP"* — `.mpfoot` is a flex row whose gap falls outside the message, so the space has to be in the markup. The very fault §278's own comment describes two lines above, in the branch it was not written about. `objectives-table.py` held the literal words *"yet Until"*, which §555's rewording would have turned red on a correct build, so it is **rewritten to the promise rather than loosened** (§218): the parts of the sentence are read and must not run together — asked in both states, which is how the complete one's missing space was found at all.
+
+**CHECKS.** `checks/monthly-plan.py` — **67 green**, with a new §4a driving four months through the real boxes (the figure, the lock, the flat year and the drawer's two halves), a new §5b picking the compile rule after the months through the real select and reading the result back with no repaint, the same on a tactic's outcome, and the §5 pair that recorded the old behaviour **rewritten with the old words kept beside them** so the reversal is legible. **Proved able to fail: red 7 / 2 / 3 / 1** on four separate breaks — deriving at twelve again, locking on `monthlyInForce`, dropping the `after` hook, and dropping the outcome's wire — each restored and the build put back. `checks/objectives-table.py` green but for one failure **reproduced identically on the build before this one** (the `#` column's marks, 0.94px) and recorded as not this section's; `checks/count-compile.py`, `control-targets.py`, `template-round-trip.py`, `planning-period.py` all green; `scripts/test-graph-diff.js` 140/0 and `test-platform-rules.js` 69/0; `test-authorize.js` 1097/3 with the three reproduced on the build before (§447, §505, §520.6, all "with the business units on"). `qa.py` through `qa-run.py` — **33 viewers / 181 destinations / ERRORS none**, summed from the run's own lines (§332). `rules.cjs` re-carried, `built-in-step` all good, the four generators re-run, `sw.js` bumped to `v6.47-target-from-months` and proved held by no commit in any ref's history.
+
+**CARRIED, NOT CAUSED.** The rebuild and the re-carry in this commit also bring across source changes committed earlier on this branch whose build step was missed — the shipped file was 160 lines behind its sources and `rules.cjs` was missing §553 and §554 before anything here was written. `built-in-step.py` and `generated-in-step.mjs` both name that as the fault and name this as the remedy.
+
+## §554 — Viewing as belongs to the SMO team too, up to their own seat (2026-10-19)
+Islam: *"I want to enable the smo team to have the drop down of view as for the other users on the platform."*
+
+**THE TEAM ALREADY DOES THE WORK THE CONTROL IS FOR.** Setup, the register, the access matrix and the reporting cycle are the office's since §516.2, and the SMO team holds all of them — so they are the people who SET a narrowing and then need the mirror to check it in. Until today the mirror was the Super user's alone (§185, §383): a team member asking *does Karim actually see this report* had to ask somebody else to look.
+
+**AND IT WAS ALREADY HALF-OPEN, WHICH IS WORSE THAN SHUT.** The People register's row menu offered *View the platform as them* on every active row and asked nothing about who was looking. Setup is the office's, so an SMO team member reached that menu and got the entry — pressing it CHANGED WHAT WAS DRAWN, while every save that followed went on being judged as them, because `actingAs()` will not stamp a view the chrome never drew a switcher for. **That is §185's own fault, open on the one path that never asked**, and it is measured rather than argued: run the new check against the build before this one and the save after the switch posts `viewAs: null` with somebody else's screen in front of you.
+
+**THE CEILING IS YOUR OWN SEAT, AND IT IS THE WHOLE OF THE DESIGN.** A simulation hands you the seat of the person you look THROUGH — that is §185's narrowing and the reason simulating is safe at all. With two seats able to simulate it stops being a narrowing in one place: an SMO team member wearing the Super user's view would hold the Super user's rights, the one person on a client's register who holds more than they do. So the rule is one sentence — **the Super user may look through anybody, the SMO team through anybody but the Super user**. Islam's pick of three put to him with the cost of each stated (rule 1c); the alternatives were the whole register, and a Super-user view that refuses every save — a mirror nobody can act in, and a second behaviour to explain.
+
+**ONE RULE, FOUR PLACES, NONE OF THEM A COPY** (§42, §53.5). `lib/view-as.ts` gained `maySimulateSeat`, which `viewAsDecision` refuses on and the served bar's list filters by; `lib/rules.js actingFor` refuses the same row on the save path, reading `them.role` — the SEAT on the register row (§187), written by the server from the membership (`lib/state-api.ts officeRow`) and never a role read out of the state being written; `sync.js` answers both halves for the browser (`maySimulateSession`, `maySimulatePerson`) and the shell's switcher and the register's row menu fill their lists from it. **The refusals are the backstop for a forged address, never the thing anybody meets by pressing a control** (§61): no list offers a view the save would turn down.
+
+**RENAMED RATHER THAN WIDENED IN PLACE.** `isSMOSession()` is `maySimulateSession()` now. The question was always *may this session leave its own view*, and a name saying *is the SMO* while meaning *is the office* is how the next person comes to use it to gate a Super-user-only act. The fail-closed shape (§69.15) is untouched: hidden until something proves it should be shown. **The offline copy and the `file://` demo still list everybody** — there is no session to narrow and no server to act against.
+
+**CHECKS.** `smp-app/checks/view-as.mjs` — 33 green, **red four ways** (`viewas-any-seat`, `viewas-unknown-ok`, `viewas-keeps-seat`, and `viewas-team-takes-super`, the new one putting the escalation itself back). `scripts/test-authorize.js` — six new assertions on the save path, 1097 passing. `SMP-Project-Folder/src/checks/viewas-smoteam.py` — a new browser check that signs in as an SMO team member and presses the real controls: **green here, 7 red across §1–§4 on the build before**, which is where the leak above was measured. `checks/viewer-switch.py`, `checks/viewas-fresh.py`, `checks/role-picker.py` and `checks/seat-grant.py` all stay green.
+
+## §554.1 — The master flow is one presentation, so it opens like one (2026-10-19)
+
+Islam, having played it: *"we need a cover slide for the whole presentation
+as we are presenting elabd q3 strategy review and before the directions I
+find the grouped directions and same for the capabilities"*.
+
+The flow was each subject's deck back to back — nineteen covers and no cover
+for the thing itself, and the directions arriving one after another with
+nothing in front of them saying what the room was about to see. The company's
+own review has had that page since §553.6; the flow gets the SAME page,
+through the same builder.
+
+**LIFTED, NOT COPIED (§53.5).** `pillarCard`, `rollCallSlide` and
+`pillarGroups` came out of `deckSlides` unchanged, so the page the flow draws
+and the page the company's review draws are one page. Proved by measurement
+rather than by reading: with the three lifted out and nothing else altered,
+every deck of all three live clients is byte-identical.
+
+**INSERTED, NOT PLACED.** The cover and the two roll-calls are not subjects
+anybody ticks: the cover opens the flow because the flow is a presentation,
+and a group's page goes in front of the first of its members because that is
+what the page is for. Islam's word for it, twice, was *"automatically"*. A
+group with nobody in the flow gets no page (§45.2, §253).
+
+The divider that used to be built beside the roll-call stayed with the DECK,
+because the flow draws the roll-calls without it.
+
+## §554.2 — Three things the picker owed whoever uses it (2026-10-19)
+
+All three are Islam's, from one message after using it on El Abd.
+
+**IT STAYS WHERE IT WAS.** *"everytime I remove something from the right the
+list jumps it needs to stay still"*. Every press repaints the whole dialog,
+so both columns were scrolled back to the top under the finger — on a flow of
+nineteen, taking out the last row put the row you were working on off the
+screen. Each column's position is read before the repaint and put back after.
+
+**IT NARROWS BY KIND.** *"on the left list I need to have filters so I can
+choose from directions or capabilities or divisions to filter the functions
+so I can select properly or all"*. The chips are built from the kinds the
+client ACTUALLY has, so a client with no divisions is not offered a chip over
+nothing (§45.2), and they are asserted to add up to the whole list — a filter
+that hides a row nobody can reach another way is worse than no filter (§96.2).
+
+**AND IT EMPTIES.** *"there should be somewhere where I reset all and bring
+all selected flow to the left as if deselect all from the right pan"*.
+Nineteen presses, or one. Drawn only while there is something to take out
+(§61).
+
+**ONE WORD FOR WHAT A SUBJECT IS, AND IT FIXED WHAT THE COLUMN SAID.** The
+filter needed the kind as a bare word; `masterKind` spelled the same question
+out again as a chip. The chip is built FROM the word now, and the word is
+read from the pillar's own stored kind — which is how it came out that **a
+capability of El Abd's read DIR in the Kind column**, all five of them,
+because a capability is presented as `dir:<id>` exactly as a direction is.
+
+**A CORRECTION TO §553.11'S OWN RECORD.** It says the rewritten Kind claim was
+"green on both builds". `master-picker` did not read `SMP_BUILT` at all, so
+both runs were this build and the second proved nothing. It reads it now, and
+on main's build the six new claims here fail as they should — the scroll one
+reading 0 where it should read 200, which is the jump Islam reported. The
+Kind claim does pass on main's build, as that record said; it was the
+verification that was worthless, not the sentence.
+
+`master-picker` §9 holds the three, and `direction-decks` §3b the flow's
+cover and pages — the capability's Kind word among them, because the demo
+client has units and so its picker holds no `dir:` row for `master-picker` to
+see it on.
+
+## §554.3 — A flow's own pages are not people presenting (2026-10-19)
+
+§554.1 gave the master flow a cover and the two roll-calls, and the presenter
+counts SUBJECTS off `data-subject` — so each of those pages took a dot of its
+own, a pill reading **FL**, and turned "1 of 3" into "1 of 4". The
+contingency pack counted twenty-one subjects where twenty present.
+
+Caught by `master-presentation` and `contingency` rather than by looking at
+it, which is what they are for.
+
+Each page is stamped with what it INTRODUCES — the cover with the first
+subject of the flow, a group's page with the first of that group — and the
+flow's own entries are kept out of `DECK.targets` and `DECK.flow`. So the
+strip, the dots, the pills and the pack read exactly as they did before the
+pages existed, and each page rides inside the section it opens.
+
+**BOTH ATTRIBUTES, NOT ONE.** The first fix rewrote `data-subject` and the
+first dot went on reading `flow:cover`: a stop takes its name from
+`data-subject-name` and falls back to the target only when there is none.
+
+## §555 — The company's performance reads like a unit's (2026-10-19)
+
+Islam, of a direction owner: *"he should see the performance of the
+directions, like we see it in the business units format in Raya, as if he has
+a business unit of two directions. He sees the two directions on the left,
+and the performance is clear"* — and of his own view: *"for the super user or
+the SMO … it should show the performance, like the business units and
+directions, on the left, and the performance is clear in front of me"*.
+
+**TWO FAULTS, AND THE FIRST DRAFT FIXED NEITHER.** The page already had a
+Directions section and a Capabilities section, so the first thing written
+here was a SECOND pair beside them — added before the existing ones were
+looked at. Reverted. What the two sections actually drew was a grid of gauge
+cards, every direction's measures and tactics at once; and the page opened on
+the overall figures every time, so even that was one press away.
+
+So: **the sections draw `unitPerfRail`**, the rail and the pane a unit's page
+has had since the beginning. It takes the company box exactly as it takes a
+unit — §416's not-yet-running rows, §517's narrowing to a part owner's own,
+the execution line and the owner all come with it (§53.5). `drawHalf` has
+already set the half, so the rail asks for nothing new. The gauge grid is
+deleted rather than kept beside it: the pane says everything a card said, and
+two readings of one thing is §87's twins.
+
+**AND THE PAGE LANDS ON THEM.** A landing, not an override — once somebody
+chooses a section it stays chosen (§124).
+
+**A SECOND DEAD END WORTH RECORDING.** Before finding `drawHalf`, this change
+threaded an optional `half` argument through `halfWord`, `halfFilter`,
+`partFilter`, `partItems`, `unitRailSubj`, `unitRailKey`, `unitRailPick` and
+`unitPerfRail` so two rails could be drawn on one page. `drawHalf` already
+does exactly that, by setting `PILLAR_HALF` around the call — eight functions
+of new surface for a thing the codebase had. All of it reverted (§24).
+
+**MEASURED:** El Abd opens on its five directions, in a rail, with the pane
+in front; Capabilities is the tab beside it. **Wander now opens on its
+capabilities rather than the overall figures**, because those are its
+pillars — a real change to a live client's landing, stated rather than
+discovered. Raya is untouched: it has units, so it has no company-pillar
+section at all.
+
+## §556 — One way in: the flow, the slides, then the room (2026-10-19)
+
+Islam, after playing it: *"in the master presentation it takes me directly to
+the presentation, not the slides management, which I think is a better way in
+general to do — even for the users that have the present button, it takes
+them to the slides management and then they move to the presentation, not 2
+buttons"*, and then: *"you should remove the one 'present the whole company'.
+The first button should be master presentation, where it takes me to the
+flow, and then when I say go it shows me the manage slides, and then it takes
+me to the presentation when I say present."*
+
+**WHAT WAS WRONG WITH TWO DOORS.** The first time anybody saw their deck was
+in front of the room. "Present the whole company" was a second door onto the
+same evening, beside a flow that already carries the company last — and the
+flow's own button went straight to the projector, so the arrangement somebody
+had just made could not be looked at before it was shown.
+
+**THE SHAPE, AND IT IS HIS.** Master presentation is the first and only
+entry; the picker's button reads **Go to the slides**; that opens the slide
+view on the WHOLE FLOW; Play from there opens the show, and leaving the show
+comes back (§295, already true). A subject's own Present does the same with
+its own deck.
+
+**THE EDITOR HOLDS A FLOW, AND THE SUBJECT IS STILL A SUBJECT.** `SLED.flow`
+is the list; `SLED.target` stays the company. Each slide is stamped with
+whose it is as it is built, and the eye hides against THAT subject — so a
+direction's slide can be taken out from the flow view without the editor
+pretending to be about that direction. Islam drew the line himself: *"in the
+flow slide view I can hide and I can add final slides, but the addition on
+the sections as directions or capabilities should be from the direction or
+capability presentation itself"*, which is exactly what keeping `target` on
+the company gives.
+
+**AND NOBODY LOSES THE PROJECTOR.** The slide view is `canSpeakFor`, so
+anyone who cannot edit a deck still presses Present and gets the deck, as
+before — a control that opens nothing is worse than two controls (§61).
+
+**MEASURED, not reasoned:** on a unit, Present opens the editor on 31 rows
+and Play opens 31 slides with the way back reading *Back to slides*; on El
+Abd, the flow opens as 16 rows across three subjects, every row carrying its
+own subject, and hiding a direction's cover from there stores against that
+direction and drops it from the played deck.
+
+**FROM ISLAM'S OWN PAGE** (`Fouad_2026_2027_Customer_Story_Motion.html`, read
+rather than guessed at): thumbnails beside the stage, Present as the single
+primary button, a grid of all slides for a deck too long for a strip, hide on
+the slide you are looking at, blank, and the keys written across the bar. The
+mockup in `design-mockups/one-flow/` is the agreed shape; the thumbnails,
+grid and key line are the next slice, not this one.
+
+## §556.1 — One door, not two (2026-10-19)
+
+Islam, of the menu after §556: *"why do we still have manage slides?"*
+
+Because the press above it used to open the projector and this opened the
+editor. Since §556 the press opens the editor — the same screen, the same
+slides, the same Play — so this was the second control onto one act (§24,
+§87). It is gone from all three menus: the company's, a direction owner's,
+and a unit's or function's.
+
+Nothing goes with it. Adding and arranging picture slides is what that screen
+does, and it is reached by pressing Present; anybody who cannot edit a deck
+never saw the entry anyway (it was `canSpeakFor`) and still gets the deck.
+
+## §556.2 — The slide view, as Islam's own page has it (2026-10-19)
+
+*"the view here is not what we agreed on in the mockup"*, of the flow's slide
+view beside `design-mockups/one-flow/`. Three things were missing and one was
+wrong.
+
+**ALL SLIDES.** His Fouad page carries a grid, and a flow of forty-nine
+slides is past the point where scrolling a rail finds anything. It covers the
+rail and the stage together, because it IS the deck — a panel beside them
+would be a third place to look. It reads the same rows the rail reads
+(§53.5), and it says which are hidden, because that is what you open it to
+check. `G` opens it; `Esc` closes the grid before it closes the editor, since
+Escape from a grid means *put this away*.
+
+**THE KEYS, WRITTEN DOWN.** Along the bottom, as his page has them: move,
+all slides, present, done. Nobody should have to be told them.
+
+**PRESENT, NOT PLAY.** One word for one act, and it is the word on the button
+that got you here.
+
+**AND ADD, IN A FLOW, IS A FINAL SLIDE.** The selected row may be a
+direction's, and a picture dropped there would be the office writing into
+somebody else's deck from a screen that is not about them. In a flow the
+button reads *Add a final slide*, says where it lands, and lands at the end
+— which is the company's own ground, and exactly the line Islam drew: *"the
+addition on the sections as directions or capabilities should be from the
+direction or capability presentation itself"*.
+
+Measured: the flow's bar reads All slides · Present · Done; the grid draws 21
+cells for a four-subject flow and Escape closes it without closing the
+editor; and every deck of all three live clients is unchanged, because none
+of this touches what a deck holds.
+
+## §556.3 — The slide view, laid out as Islam's own page lays it out (2026-10-19)
+
+*"WHY ON EARTH YOU DIDN'T FOLLOW THE GUIDELINES IN THE HTML?!!!"* — fair.
+§556.2 bolted a grid and a line of keys onto our editor and left everything
+else where it was. He had handed over a working page and asked for its shape;
+what came back was our old chrome with two parts added.
+
+Read beside `Fouad_2026_2027_Customer_Story_Motion.html`, five things were
+wrong, and all five are now the way his page has them:
+
+- **A quiet header**, not a coloured band: who is presenting on the left, the
+  buttons on the right, **Present** the one filled button, Slides and Grid
+  beside it.
+- **The thumbnail IS the label.** A line of text under every preview said
+  what the preview already showed, and on a flow of forty-nine it pushed
+  three slides off the screen. The number sits outside; the name is on the
+  row's title and on the bar under the stage, where somebody reading it is
+  looking.
+- **One bar under the stage** carrying the counter, the slide's name and the
+  keys — his order, his three things.
+- **A progress rule over the stage and arrows at its edges.** The arrows call
+  the same stepper the keyboard calls (§53.5).
+- **Adding sits at the foot of the rail.** It was the loudest thing on a
+  screen whose job is to look at the deck. His page has no add at all; ours
+  needs one, and the foot is where it belongs.
+
+**AND THE PARAGRAPH UNDER THE STAGE IS GONE** — the same sentence under every
+one of forty-nine built slides, explaining a screen that now explains itself
+(§24, §15.1).
+
+`Slides` toggles the rail, `H` hides the slide in front of you by pressing the
+row's own eye (§53.5 — one act, one handler).
+## §556 — El Abd reports its directions and capabilities on one rail (2026-10-19)
+Islam, of El Abd's company Reporting page as the SMO: *"shall we merge the directions and pillars for better usabiilty in one rail?"*, then *"that's for elabd mainly"* with a screenshot of the two blocks.
+
+**THE PROBLEM IS §542's TWO SECTIONS.** A box shown apart reports each half as its own section, each with its own rail and its own open pane. Measured on the worked example's Mobile set apart, as the SMO at 1440×900: the second section's heading sits at 1,417px, the page is 2,619px tall against 1,722px joined, and two rows are selected at once. The rail exists so every row's state stays in view while one is entered (§15.12); stacked, the capabilities' tallies and red lines are below the fold while a direction is open.
+
+**PROPOSED, AND ANSWERED.** One section, one rail, one pane. The rail carries two group labels, which is the rail's existing group band (`.rgroup`, the Setup rail's since §46.1), not a new part. Mockup: `design-mockups/elabd-report-rail/2026-10-19_one-rail.html`. Islam's two answers: **the heading reads *Directions and Capabilities***, the client's two words with *Key Measures and Tactics* dropped; and **directions first, then capabilities**, each under its label.
+
+**SCOPE.** Only where a viewer reaches both halves of a box shown apart, which today is El Abd's company page for the office. Wander's company holds capabilities only and every unit is one list, so neither moves. A part owner who reaches one half keeps §543's single untitled half. Strategy keeps its two tabs (§535.10) and Performance its two gauge groups. On a phone the rail is the strip it already becomes, where `.rgroup` is already hidden and the D and C codes tell the kinds apart.
+
+**WHAT IT COSTS.** Reporting goes back to one remembered selection on this page in place of §542's two. The missing-elements deep link has to land on the one rail. `scripts/test-capability-fold.js`'s "Reporting draws a second section" assertion is rewritten to the new rule rather than loosened (§218).
+
+**BUILT** on Islam's *"build"*. One question, `reportOneRail(u)` in `config-data.js` beside `boxHasHalf`, asked by the page and by the rows' jump keys alike (§53.5). `renderReport`'s `halfBlock(one)` draws the whole list with no half set, so the rail's key is the box's own (`unit:group`), the rows skipped through twice — directions, then capabilities — each under the rail's existing `.rgroup` band with its count (one CSS line, `.rgn`). `unitRailPick` takes the drawn order, so the page opens on the rail's first row rather than the plan's. `reportItems` addresses each row's place by `reportRailKey(u, p)`, so the Reporting bar's chip lands on the one rail; the Strategy gap walk keeps `pillarRailKey`. Nothing else moved: a joined box and a part owner's single half go through the same calls with `one` absent, byte for byte.
+
+**CHECKS.** `scripts/test-capability-fold.js` — its two Reporting assertions rewritten to the new rule (§218), three added: one heading in the client's two words with no *— Key measures and Tactics* left, one rail with two group bands, D001–D005 before C001–C005, the office given the one rail and both part owners not. **Red 3 with the halves drawn apart again, red 1 with capabilities first**; 66 of 68 green, the other two (§1, §1b) red identically on the build before this one. `test-pillar-split.js` 35/0 (it needs `2158aab`, so the clone had to be unshallowed first), `test-box-ref.js` unmoved. In the browser, as the SMO: on Mobile set apart, one rail, codes MB02 MB03 MB04 then MB01, the page 1,636px against 2,619px, pressing MB01 moves the one pane; with a capability figure blanked, the bar's chip carries `unit:mobile` and lands on MB01 with its box focused; on an El-Abd-shaped company made in the page with `capFoldIntoTop()`, one rail reading D001–D005 then C001–C005 under one heading. `pillar-split`, `capability-report-column`, `top-plan`, `direction-part`, `direction-seats`, `pillar-rail`, `strategy-split`, `capability-entry`, `report-blockers`, `report-chrome`, `report-keys`, `report-saves`, `report-note-wrap`, `reported-note`, `fn-report-gate`, `squeezed-rail`, `my-reporting` green. `reporting-ytd-target` (1 red) and `rail-standard` (stops waiting for `cap:cap6` in the navigation) fail identically on the build before. `qa.py` through `qa-run.py` — 33 viewers / 181 destinations / ERRORS none. Phone width overflows sideways (836px at 400) identically before and after; recorded, not this section's.
+
+**MERGED TO `main`** 2026-10-19, Islam: *"merge to main"*. Fast-forwarded, then this note as a commit `main` alone holds, so production builds a SHA no preview has (§91). Pages only: no save is judged differently, so no forced sign-out.
+
+**ONE DIFFERENCE FROM THE MOCKUP, SAID.** The rail's head, *Directions & Capabilities 10*, wraps onto two lines in the product's rail width, where the mockup's wider rail held it on one.
+
+## §539 — Processes lifecycle: decisions (2026-10-18)
+1. **Governance sits in the side rail**, not as a top tab. The Processes side rail already has a "Governance" page (policies, risks, assessments); the new cross-process views (review calendar, compliance coverage, non-conformances, acknowledgements, audit trail) become sections of it.
+2. **The reader view opens to client staff, read-only**: approved or published versions only, with an Acknowledge button; no drafts, risks or quality data. Built after the lifecycle.
+3. **Existing processes**: those that already name an approver start as Published (with a baseline version 1); the rest start as Draft.
+4. **Review interval**: 12 months from publishing by default, changeable per process.
+5. **Approver**: chosen from the People register, must have an email and a role there; the approval records name and role as they stood. The approver cannot be the person who sends it for review.
+
+## §557 — A breakdown reports as Target and Reported, two columns per column (2026-10-19)
+
+Islam, of El Abd's D001 *Maximizing Current Stores* on Reporting: *"the reporting in elabd target mix needs to appear in the form of target and report not 1 column"*. Mockup `design-mockups/elabd-breakdown-columns/2026-10-19_target-and-reported.html`, then *"go ahead"*.
+
+**WHAT IT WAS.** §343 drew each breakdown column as ONE cell on Reporting: the box, with `/ 13%` in `.subhd` stacked under it. The Key Measures table on the same pane has always read *YTD Target* beside *Reported*, so the one pane asked for figures two different ways.
+
+**WHAT IT IS.** Every breakdown column becomes a PAIR: the column's own name and direction (*Target Mix% ≥*) heading its target as a read-only figure (`td.num`, `tgtShown`), then *Reported* heading the box. One pair per column, in the plan's order; the note stays one per row at the end. An unasked cell (no target) is a dash in both halves. The target is the plan's figure, unprorated, exactly as before — `bdCellScore` passes no compile, and §344's *YTD Target* treatment was never this table's.
+
+**AND THE UNIT GOES BACK INSIDE THE BOX.** `bdEntry` closed `.entry` before writing `.unitsuf`, so the unit — a flex block on its own — fell out under the box as a grey strip the width of the cell: the `%` bar under every category on Islam's screenshot. `repEntry` has always written it inside; this one now does the same. Found while drawing the mockup and shown on it, so it was signed off with the rest rather than riding along unsaid.
+
+**WHERE.** Reporting's breakdown table only (`reportPillarPane`), which is the one builder for every unit, function, capability and company that has a breakdown. Strategy, Performance (`bdReadTable`'s `figure / target` pair), the deck and the workbooks are untouched. Nothing stored moves, nothing is scored differently, no tally or permission changes, and no save is judged differently, so nobody is signed out.
+
+**HEADER CHOSEN, SAID.** The target column is headed by the column's own name rather than a fixed *Target*: with one column, a fixed word would lose the only thing saying what the figures are, and El Abd's column is already called *Target Mix%*. With several columns *Reported* repeats, once per pair; the platform has no two-row header to group them under, and rule A13 says follow what the platform already does rather than invent one here.
+
+**VERIFIED.** `pillar-breakdown.py` green, and **red 4** on the build before (the head, the target's column, the stacking, the unit outside the box). Measured on Reporting with one column and with three at 1600, 1440, 1280, 1100 and 1000: no sideways scroll at any width, a row **88px → 55px**. A function that plans in pillars (Merchandising) probed through `renderFnReport`: the same head, so the unit and function sides agree by construction (A15). `capability-report-column`, `fn-report-gate`, `my-reporting`, `report-blockers`, `report-chrome`, `report-keys`, `report-note-wrap`, `report-saves`, `reported-note` green on both builds; `reporting-ytd-target` red 1 on both, the same line (*"...and the same cell"*), already recorded under §556. `qa.py` through `qa-run.py` — 33 viewers / 181 destinations / ERRORS none.
+
+**MERGED TO `main`** 2026-10-19, Islam: *"merge to main"*. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.48-report-one-rail` → **`smp-shell-v6.49-breakdown-target-reported`** as a commit `main` alone holds (§91); the name was confirmed free on every remote ref. Pages only: no save is judged differently, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`849fb0b159a9f53c`**, `/shell.js` **4,969,724** bytes; after it they should read **`ece8b4a15bfa4d03`** and **4,970,739**, and the served `shell.js` should carry the new `"Reported"` pair.
+
+## §558 — A role over its own thing names itself and stops; and the top level is called what the client calls it
+Islam, of the chips under the name on Home: a **capability's owner** and a **direction's owner** should read the role and nothing after it. Then, of the first build: a capability's **custodian** with them.
+
+**IT LOOKED LIKE ONE FAULT AND WAS TWO, WEARING ONE COAT.** A direction's owner holds a role recorded at the TOP LEVEL (§505: `dirowner`, scope `group` — nothing records *which* direction, because `ownsTopPillar` is what answers that), so the chip printed the top level's word. A capability's owner and custodian hold theirs AT the capability (§412), and `roleWhereLabel()` has named a capability by its own title since §334 — deliberately, because that is the word the cycle board, the register's Unit column, the role chips and the switcher's own dropdown all read.
+
+**SO NEITHER OF THOSE TWO COULD MOVE.** Renaming the capability inside `roleWhereLabel()` renames it on five screens; moving where a direction's role is recorded moves who may open what. What is actually wrong is that THIS STRIP prints a place for a role whose place is already in its name — so the place is dropped in `welcome.js`, in the one line that prints it, and the two functions that answer *what is this place called* are untouched.
+
+**KEYED ON WHERE THE ROLE IS HELD, not on a list of role keys**, because that is the real question: a role held at a capability has the capability in its name already. One rule covers the owner (scope `cap`, so always there) and the capability's Strategy custodian — which is why Islam's second sentence cost a condition rather than a second branch. A **direction's** custodian needs nothing: being named one derives `dirowner` (§505), so they arrive as a direction owner and are already out. Every other role keeps its place; a unit custodian and a function head read exactly as before.
+
+**AND THE SECOND HALF, WHICH HE NAMED AND THE FIRST BUILD DID NOT FIX.** `topword` has been a real terminology row since §404 — *"The level at the top: the group, the company, or the client's own word"* — and eight screens read it. The place-naming functions were not among them: they said `"the group"` as a literal, so a tenant whose top level is a **company** read its own word on the navigation and "the group" on every role chip, place list and refusal sentence. One wording, wrong in four places: `roleWhereLabel()`, `placeLabel()`, `roleWheres()` for the seat roles, and `roleAtWord()`. They now read the row, through one `topWord()` so there is one answer and not four (§53.5). Lowercased, as `client-setup.js` already treats the same row. The two fallbacks in `copilot.js` and `safety.js` are left alone: both call `placeLabel()` first and only fall back if it is missing, so fixing `placeLabel()` fixed them.
+
+**THE ROUND-TRIP §93.12 REFUSED TO RISK, AND WHY THIS ONE CASE IS SAFE.** §93.12 would not rename anything in `roleWhereLabel()` because the people workbook's Unit column is written from it and read back against it (§65) — a rename leaves every file downloaded before today failing to match, and an unresolved Unit column is the one place in that file where every person at the top level silently detaches. So `placeByLabel()` now accepts **three** names for the top level: `"the group"`, `"group"` and the client's own word. Widening what is accepted can only ever make a file land. A rename anywhere else in that function still has no such net and is still off the table.
+
+**ON THE DEFAULT TENANT NOTHING MOVES AT ALL.** `topword` ships as "Group", so `topWord()` returns "the group" and every screen reads exactly what it read before. The wording changes only where a client has actually set the word — which is why none of the existing checks shifted.
+
+**AND THE ORDER, WHICH THIS SECTION FIRST LEFT ALONE AND THEN FIXED.** The first build named the listing order as a thing it had not touched. Islam then gave the sequence he wants: **seat, unit, direction, capability, project & pillar, function**. Measured against `personRoles()`, it was seat, unit, FUNCTION, capability, project & pillar, DIRECTION — **those two exactly swapped, and everything else already his order**. Each block had been appended where its own section happened to add it, §505 putting the direction last simply by being the newest; nothing had ever asked what order the LIST should read in. So the fix is one swap of two blocks, not the sprawling change it was set aside as.
+
+**IT MOVES NO PERMISSION, AND THAT WAS MEASURED, NOT ASSUMED.** Every consumer of `personRoles()` asks it with `.some()`, `.filter()` or `.map()`; nothing reads `[0]` or takes a first match, so no grant, no reach and no refusal travels with the order. `seen`/`once` are hoisted above the direction block, which is their first caller now, and the project and pillar blocks further down share the same two — so one role at one place is still entered once (§147.7). The function block stays ABOVE the contributor floor, which is reached only on `!out.length`: a function head arriving after that test would read as holding nothing and be handed a Contributor's floor (§387's trap, from the other end).
+
+**WHERE IT BITES IS THE STRIP, WHICH IS WHY IT WAS WORTH ASKING ABOUT.** Home draws the first three roles and no more. The direction being last meant somebody holding four roles did not see *Direction owner* pushed to the end — they did not see it at all. The same strip this section started with.
+
+**CHECKS.** `checks/role-chip-own-thing.py` drives the real strip in the real page over http with a signed-in person: **33 assertions, none failing**. Both ends (§94.2) — §3 reads ONE person holding a capability seat AND a unit custodian role, so one chip stopping at the role and the other still naming its unit are read side by side on one screen. The role word is asked of `SMPRules.ROLES` rather than typed. §5 asserts the half that must NOT move: `roleWhereLabel()` and `placeLabel()` still name a capability by its own title. **§6 asserts the order** as a sequence that never goes backwards through the six ranks, walked over every active person on the register in BOTH worlds (units on, units off) — pinned positions would only ever describe one row — plus the other end, that the walk actually crossed three blocks, and the swapped pair read off ONE person who holds both.
+
+**PROVED ABLE TO FAIL, twice and separately.** Against the build from before the chip and wording change: **10 red**, in the right shape — the three strip sections red on the place still printed, §3's unit-custodian end still green, §5's capability title still green, the top level reading "the group" and the client's own word unresolvable by the importer. Against a build with only `rules.js` reverted to main's order: **3 red**, and only in §6 — `cahead` came back `owner@care, fnhead@fn:care, plowner@care`, rank 6 before rank 5, and the swapped pair read function at index 1 and direction at 3.
+
+Also run on the merged tree, all green and matching their counts from before this work: `welcome` (73), `viewer-line` (20), `people-dialog` (80), `test-platform-rules.js` (69). `test-wherelist.js` was **not** run — it needs a Postgres this container has no driver for — and it reads `r.at` server-side, which this does not touch. `smp-app`'s own suites (`check:shell`, `typecheck`) could not run either: `smp-app/node_modules` is absent in this container.
+
+**A RED THAT IS MAIN'S AND NOT THIS BRANCH'S, reported rather than fixed.** `test-authorize.js` comes back **1097 passed, 3 failed** — and it fails identically with `main`'s own unmodified `lib/rules.js`, so the reorder did not cause it. All three are the same fact: *§447 REFUSED: with the units ON the rule does not exist*, *§505: with the business units on, the same naming derives no Direction owner*, *§520.6: with the business units on the rule answers nothing*. Commit `59ef980` ("A capability is the company's") dropped the `buExists(w.group)` guard from `ownsTopPillar`, which §505 relies on: *it is false whenever the business units are on, because then the top layer's pillars are not directions anybody reports*. So on `main` today a Direction owner derives with the units on. NOT changed here, because the two readings — a regression, or a deliberate move under spec 066 stage 4 whose tests were not updated — lead opposite ways and only Islam can say which. It is named because it sits in the exact rule this section's direction chip and §6 both read.
+
+**AND TWO MORE OF MAIN'S, FOUND WHILE CHECKING THE SERVER'S COPY.** `smp-app/tests/graph-diff.cjs` is **129 passed, 3 failed** — all three §216, about the seed holding capabilities across several functions — and `smp-app/tests/authorize.cjs` does not finish at all: *TypeError: Cannot read properties of undefined (reading 'projects')*. Both behave identically with `main`'s own carried `smp-app/lib/rules.cjs` swapped in, so neither is the reorder's. Named for the same reason as the three above: **`main` is not green today**, in three separate suites, and a branch merging into it should not be the first place that is noticed.
+
+**THE SERVER'S COPY WAS RE-CARRIED, which the reorder made necessary and nothing automates.** `smp-app/lib/rules.cjs` is `lib/rules.js` carried across with one declared transform (§330), and no generator does it — `generated-in-step` caught it stale (frozen 326,933 bytes, carried 324,770) immediately after the merge commit. Left as it was, the SERVER would have held the old order while the browser held the new one, which is the §53.5 drift both copies exist to prevent, and it would have been silent. Re-carried by running the check's own transform rather than by hand, so the two are byte-identical, and `generated-in-step` is green.
+
+Numbered **§558** — this shipped as §534 on the branch, and `main` took §534 twice ("Every browser dialog is gone" and "Stage 3a is finished") in the twenty-three sections it moved while this sat unmerged. Renumbered on the merge of `main` into the branch, as §524/§525 → §529/§530 were before it (§264.3).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"merge to main"*. Fast-forwarded — `main` was still at §557's merge, so the branch's two commits land whole with no second merge commit.
+
+**THE `SHELL` BUMP, `smp-shell-v6.49-breakdown-target-reported` → `smp-shell-v6.50-role-chip-and-order`.** The built file's bytes changed, which is the whole trigger (§91): without it a returning browser serves the platform off its own disk and never sees any of this. Proved held by no commit in any ref's history (§94.12) after fetching every ref, and confirmed again immediately before the push (§94.16). Nothing about saving changed, so nobody is signed out; a tab left open gets the reload banner.
+
+**THE WHOLE-PLATFORM SWEEP: `ERRORS: none`**, 33 viewers walked and 181 destinations opened. Counted from the sweep's own per-viewer lines rather than a total it prints, because it prints none — so the figure is this reading of its output and not a number the sweep asserts. Deliberately NOT compared against §531's "234 destinations": `main` moved twenty-three sections in between and there is no way from here to tell how that count was taken, so setting the two beside each other would invent a trend.
+
+**WHAT MAIN NOW CARRIES UNFIXED, and it is the same three suites named above.** The merge does not repair them and was not meant to: `test-authorize.js` 1097/3, `graph-diff.cjs` 129/3, `authorize.cjs` not finishing. The first is the `buExists` guard dropped from `ownsTopPillar` by `59ef980`, and it is now on `main` with this work sitting on top of it. Still Islam's call, and still the rule this section's own direction chip reads.
+
+**SEEN LIVE, and this replaces what was written a few minutes earlier.** The merge commit's own message says production is unread, because it was: the push was expected to be the last act from this container. It was not — §531.1's correction is exactly that remembering a container cannot reach the site is not the same as trying, so it was tried. Roughly seventy-five seconds after the push, `smp-orpin-tau.vercel.app` serves `/shell.js` at **4,978,148 bytes, byte-identical** to the copy generated here, and `/sw.js` byte-identical too, down to the release stamp `7574260bd73e882f`. All three of this section's changes are present in the file production is running: the strip's condition, `topWord()`, and the reordered blocks. So the deployment built and is serving this work — measured, not assumed, and the commit message is the thing now out of date rather than this.
+
+## §559 — Reporting fits a phone (2026-10-20)
+Islam: *"fix the phone overflow on reporting"*, then *"ok"* on the before/after drawn from the running page with the fix injected (`design-mockups/reporting-phone/2026-10-19_reporting-on-a-phone.html`).
+
+**WHAT WAS WIDE, MEASURED.** At 390px as the SMO the page was 836px wide on a unit and on a function, 741px on a unit with shorter counts, 407px on the company. Three things never gave way, and nothing else on the page was wide — the tables already scroll inside their own box:
+- the Reporting bar on the tab row (`.tabacts` > `.repchrome`, 515px), `flex:0 0 auto` on a row that never wraps;
+- the pane band's right end (`.pband-r`, 306px), `flex:none`;
+- the top bar, 7px over for everybody: §410 made the names `flex:none` (*"the product's and the client's names are never the thing that gives way"*), so at a phone's width nothing could.
+
+**THE FIRST TWO WRAP, AND ONLY WHEN THEY DO NOT FIT** — no breakpoint, because a wrap that is not needed changes nothing: at 1440, 1280 and 1024, Reporting (unit, function, company), Performance and Strategy are pixel-identical before and after, built against built. The bar's natural break puts the count above Submit, Save draft and Close; the band's puts its counts and tally under the name.
+
+**BELOW 520px, TWO MORE, AND BOTH REACH EVERY PAGE THAT HAS THEM.**
+- **The top bar takes two lines and the names stay whole**, which is §410's rule kept rather than broken — the first attempt let the names shrink, and the platform's name vanished under *Viewing as*. The break is a zero-height `::after` ordered between the names and the viewer, so a client logo stays on the first line with the names; the viewer gives way instead, as §410 says it should, and its role note is hidden for want of room and of a hover.
+- **The band stops pinning.** Wrapped it is 219px tall, and pinned under a chrome that wrapping makes taller it held ~500px of a 760px screen — the first attempt, rejected on its own screenshot. Unpinned, 275px of the screen stays pinned while scrolling, against 272px before. It is the same band on Strategy and Performance (§53.5), so it behaves the same there.
+
+**CHECKED.** At 400 and 360px, the unit, the function, a second unit and the company: no element past the right edge and the page exactly the viewport's width. Desktop as above. The browser checks touching the band, the top bar, narrow widths and Reporting: see the commit. The one 2×2px spot that sometimes differs on Mobile's Reporting at 1440 is the pane's antialiased edge: it reproduces with a no-op stylesheet, each build is identical to itself, and a re-run read the same pixels in both.
+
+**MERGED TO `main`** 2026-10-20, Islam: *"merge to main"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.50-role-chip-and-order` → **`v6.51-reporting-phone`**. Pages only: no save is judged differently, so no forced sign-out.
+
+**A NUMBER COLLISION, RECORDED AND NOT RESOLVED HERE.** Two sessions wrote §556 on 2026-10-19 — the slide view (*One way in*, first, 13:00) and the one rail on El Abd's Reporting (14:34). Both are on `main`. The later is the one that should move; it is referenced in code comments, a check, spec 066, the README and the progress file, so the renumber is put to Islam rather than done in passing. `main` also carries two §555s from other sessions. This entry took §559 because §558 was already taken (the role chip, merged to `main` while this was checked).
+
+## §560 — The company's Capabilities tab carries the Edit again (2026-10-20)
+Islam: *"the edit button in the capabilities disappeared for the smo team check it and fix it urgently"*.
+
+**WHAT HAPPENED, MEASURED.** §540 draws a split box's capabilities on a tab of their own, `plancap` — `renderUnitPlan` under `drawHalf("cap")`. El Abd's move (§544.13, `capFoldIntoTop()`) turned its five capability records into pillars on the company's own list, and that is what handed the company's old `caps` section over to `plancap`. `caps` had its Edit since §488 (`SEC_PENS_TOP.caps`); `plancap` was never put in either table, so `secPagePair("plancap")` answered null and `secActs()` drew nothing. **Nobody** got the Edit there — the Super user included, not only the SMO team — while the Pillars tab beside it kept its own. The fields were never shut: they open on `EDIT_PAGE.plan`, so pressing Edit on Pillars and walking across opened them. The door was missing, not the room.
+
+**THE FIX IS ONE KEY IN EACH TABLE.** `plancap` names `plan` in `SEC_PENS_TOP` and in `SEC_PENS` (a business unit set apart has the same tab and the same gap). It names the page its renderer already reads, so one Edit opens both halves and `secPagesOpen()` dedupes it with Pillars (§269). **No grant moves**: the question asked is `mayAuthor("u_plan")`, the one Pillars already asks — so the CEO and a capability's own owner, who do not author the company's plan (§428), are still drawn none.
+
+**CHECKED.** `checks/capability-tab-edit.py`, new: El Abd's shape made and moved with the product's own `capFoldIntoTop()`; the Super user and the SMO team each drawn Edit on Capabilities, worded as on Pillars; pressed, it reads *Done editing*, the capability's name is an open field, and a typed name is what the company's stored pillar holds; the CEO and a capability's owner drawn none (the owner still offered the tab, so the absence is the pen's); a business unit set apart carries it too. **Proved able to fail**: 8 red against the build before, on exactly the office rows, the press and the split unit, with the no-grant half green on both. Neighbours green: `pillar-split` 46/0, `capability-pillar-edit`, `strategy-split`, `top-plan`, `direction-part`, `capability-entry` 52/0, `plan-edit-head`, `smo-team`. `scripts/test-capability-fold.js` 66/68 with its two reds (§1, §1b — the pinned cross-build comparison) identical with and without this change. `built-in-step` all good; the four generators re-run; `SHELL` `v6.51-reporting-phone` → **`v6.52-capabilities-edit`**, held by no commit in any ref's history after fetching every ref. Pages only: no save is judged differently, so no forced sign-out.
+
+**MERGED TO `main`** 2026-10-20, Islam: *"Meege to main"*. Main had moved under the branch (§556.13, §557's deck model), so it was merged INTO the branch first and the two conflicting generated files were rebuilt from the merged sources, never resolved by hand. On the merged tree: `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** (summed from its own lines, §332); `single-company` 1 red (§449 *the group still opens on Performance*), identical against `origin/main`'s own built file — main's, not this. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.51-reporting-phone` → **`v6.52-capabilities-edit`**.
+
+## §561 — A direction's own slides, from the direction (2026-10-20)
+Islam: *"when the SMO starts to work on the addition they can't find the Manage slides. They only have the master"*, then, refusing an add from inside the Master presentation: *"the master slides is just a management area not a Slides editing approach. Slides edition should happen from the direction or the capability part"*. On the working mockup (El Abd's real Performance page): *"having the slides button on the direction itself is great … for now keep the slides button for the smo only … and keep add a final slide to the master presentation"*.
+
+**A SLIDES BUTTON ON EACH DIRECTION'S AND CAPABILITY'S OWN BAND**, on the company's Performance page. It opens that box's own slides (`slidesOpen("dir", id)`), the same screen a direction owner's Present lands on. A slide added there is kept on the direction and the Master presentation shows it in that direction's part, so the master stays order, timers, hide and present.
+
+**THE OFFICE ONLY, FOR NOW** — `mayMasterPresent`, the rule that offers the Master presentation, and `canSpeakFor`, the gate `slidesOpen` itself asks, so the button never opens nothing (§61). The owner keeps Present in their own menu. Nothing on the server changes: a direction's slides were already the office's to save (§481).
+
+**THE MASTER KEEPS "+ Add a final slide"**, as he said.
+
+**CHECKED.** New `direction-slides` (12 claims; 6 red on the previous build, the ones about the button). On El Abd's state: the button on D001 and on C001, and C001 opens its own slides. `direction-decks`, `master-presentation`, `deck-model`, `presentation-parts`, `present-loop`, `structure`, `no-twin-functions`, `built-in-step` green.
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Main was merged into the branch first and the generated files rebuilt; fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.52-capabilities-edit` → **`v6.53-direction-slides`**. Pages only: no save is judged differently, so no forced sign-out.
+
+## §561.1 — No heading over the company's rail; Slides at the far right (2026-10-20)
+Islam, on the live page: *"remove the title named directions and capabilities above the rail it's already writtn on the rail and make the slides button go to the far right"*.
+
+**THE HEADING GOES** from the company's Performance rail section (directions and, where drawn apart, capabilities); the rail's own head already says the word. The section nav keeps its label. The capability-records gauge section is not a rail and keeps its heading.
+
+**THE BUTTON SITS AT THE RIGHT EDGE.** The band reserves 76px on its right for the pen's corner (§117); a pane with no pen there now drops that reservation when the band carries Slides, so the button sits 18px from the edge.
+
+**CHECKED.** On El Abd's state: no heading on Directions or Capabilities, the button 18px from the band's edge on both. `direction-part`, `top-plan`, `direction-decks`, `objectives-actions`, `several-outcomes`, `pillar-rail`, `direction-slides`, `structure`, `strategy-split`, `capability-tab-edit` green; `single-company` 1 red, identical on the live build (§449).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.53-direction-slides` → **`v6.54-rail-heading`**. Pages only: no forced sign-out.
+
+## §562 — How many slides a subject adds, and one word for its slides (2026-10-20)
+Islam: *"a direction owner can add max of 2 slides and the units owner can add 4 max"*; agreed on the rest — a capability a direction's size, a function a unit's, the company's closing slides 4, counted per subject whoever adds, the office included. And: *"for the direction owner he can get slides only to manage and present from inside isn't that how slides work?"*
+
+**THE LIMITS** are `SMPRules.slidesMax(target)`: `dir:` and `cap:` 2, everything else 4 (it was 12 for all). Read by the add and by the check, so they are written once. A subject already holding more keeps them; only a new add is refused, with *"N slides is the limit here — remove one to add another."* The add's own line says *"· 1 of 2 added"*, so the refusal is no surprise. The count is read with `pslidesOf`, never the writer, so opening the screen or a refused add leaves no empty container (§42, §50.6) — the first try used the writer and `slide-move` caught it.
+
+**ONE WORD.** Where the press lands on the subject's own slides it reads **Slides** — a unit's and a function's Presentation menu, as the direction's own button already did (§561). Where it goes straight to the room (anybody `canSpeakFor` refuses) it still reads Present.
+
+**AN OWNER OF SEVERAL DIRECTIONS GETS A LINE FOR EACH.** Present carried the list and opened a flow, which is the office's (`mayMasterPresent`), so an owner of two pressed it and nothing opened (§61). Each direction is its own subject, so each gets *Slides · D001 Name*; one direction stays unnamed (§481).
+
+**CHECKED.** New `slide-limits` (13 claims, 8 red on the live build). `direction-decks` claim rewritten to the new word (§218).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.54-rail-heading` → **`v6.55-slide-limits`**. No save is judged differently (the limit is the add's, in the page), so no forced sign-out.
+
+## §563 — The People register names where somebody sits in the client's own word (2026-10-20)
+Islam, of the owner dropdown's *"Amr Hassan · Retail"*: *"in elabd people belong to functions not units how to fix this?"* Then, asked what Raya would see: *"ok go ahead"*.
+
+**THE DATA WAS RIGHT AND THE WORD WAS WRONG.** The hint beside a name in an owner picker is `placeLabel(personAt(p))` (§130.9) — the place the register puts the person — and El Abd's units were deleted at stage 3b (§535.8, with zero people attached), so "Retail" can only be a function or a division. What told Islam otherwise is the register: its column was headed **"Unit"** for every client (§65's word, chosen when every client had units), and the person's dialog said **"Unit or function"** over a dropdown with no unit in it. Answered in chat first, as content (§1c): the fix proposed, Raya's result stated, agreed.
+
+**ONE WORD, `sitsInWord()`, NEXT TO `navWord`.** It follows the Structure switches (`buExists`, `fnExists`): units only → *Unit*; functions only → *Function* (El Abd); both → *Unit or function* (Raya, RHI — measured on the worked example: 10 units, 8 functions, 24 people in units and 7 in functions); both off → the two-word form the dialog always said, since only the top is left to sit in. The short word unless the client typed its own in Terminology — `navWord`'s rule one form over, because the defaults *Business unit* / *Supporting Function* would be the longest heading on the register and §65 cut it to *Unit*. The second word of the pair is lowered as client-setup's sentence words are (§398), an acronym left alone. Asked of the switches rather than of what is stored, so a layer switched off and kept (§405) does not put its word back.
+
+**WHERE IT IS READ — the register and nothing else**: the column's heading, the Columns chooser (the column's KEY stays `bu`, §30.2), the person's dialog, the merge dialog's card, the Company column's hover (*"Comes from the unit. Change the Unit or function to move them."* on Raya), and the role list's hint and refusal (*"Set the Function first"* on El Abd). Not touched: the upload file's **Unit** column and the refusal naming it, so every file already used still loads; the units' own Setup table; the measure-unit columns, which are a different word.
+
+**THE FIELD'S LABEL IS ALSO A KEY, AND IT DID NOT MOVE.** `cellField()` finds the register's inline cell by it (`data-pcell="<key>|Unit or function"`) and `ATTN_FIELD.said` outlines the attention ring by it. So `personFields()` gained a `show` beside `label`: the label stays *"Unit or function"* and the dialog draws `show`. Renaming the label would have left the cell opening nothing and the ring outlining nothing, silently (§96).
+
+**A NAME COLLISION, AVOIDED.** First written as `placeWord`, which `copilot.js` and the history view already define inside their own closures. Shadowing made it harmless today, and that is the reason not to rely on it; renamed.
+
+**CHECKED.** New `checks/register-place-word.py`, 32 claims over the worked example made into four shapes (as it is, units off, functions off, a typed word with an acronym case): heading, chooser, dialog, Company hover, role hint and refusal, with the other end on each (no column reads *Unit* where it should not; the refusal granted nothing; the cell still opens on a double-click; the ring's key unchanged). **Proved able to fail: 25 red against the build before**, and the seven that stay green are the ones that should — where the old word was already right (Raya's dialog, the functions-off heading and chooser), the refusal granting nothing, the unchanged key, and no page errors. Neighbours green: `role-picker`, `people-dialog`, `register-header`, `attention-dismiss`, `smo-team`; `built-in-step` all good; the four generators re-run and `generated-in-step` byte-identical. The whole-platform sweep `qa.py` through `qa-run.py`: **33 viewers, 181 destinations, ERRORS none** (summed from its own lines, §332). `owner-picker` 1 red (*it is kept, in a group that says what it is*), **identical on the build before** — §551 renamed that group and the check was not followed; named, not fixed here. Not run: `smp-app`'s `check:shell` (no `node_modules` in this container).
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Fast-forwarded — `main` was still at §562's merge — then this note as a commit `main` alone holds (§91), `SHELL` `v6.55-slide-limits` → **`v6.56-register-word`**, held by no commit in any ref's history after fetching every ref (§94.12, §94.16). Wording only — no save is judged differently, so no forced sign-out.
+
+## §564 — The plan download is the presentation without its figures (2026-10-20)
+Islam, on the mockup (Raya's Mobile now and proposed, El Abd's company proposed): *"proceed"*. Spec 066 §5: *"the plan download is the same template without the reported figures — never a second builder."*
+
+**WHY.** The plan download had its own builder (`pptxUnitSlides`, `pptxFnSlides`), so it had its own look and order and drifted from the deck; and for a company whose plan is its own it threw on `UNITS["group"]` and made no file at all — El Abd's office pressed Download the plan and got nothing.
+
+**HOW.** `buildPlanPptx` asks `deckHtmlFor` with `DECK_PLAN` on (set in a `try/finally`, never left on) and converts the slides exactly as the review download does (`deckSlidePptx`, spec 030). Two halves, each in one place:
+- **The deck draws what only a plan carries** while `DECK_PLAN` is on: every direction, the ones not running yet included, with its years on its title page (§416); a tactic's requirements under its name (§415); a breakdown's targets alone; and what the plan still owes named in red — a tactic's owner or quarters, the aspiration, an empty SWOT box (§119). The review shows none of it.
+- **`planDeckBox` takes out what was reported**, by what the deck already says about it and never by reading a heading: the Overall performance part (its divider to Thank you), the objectives' "where we stand", the notes; every column the deck marks `th.fig` (actual, progress, score, status, note), cell by cell through row and column spans, so a tactic's outcome lines and "Outside this cycle" come out whole; the headline figures and tallies (`.leadstats`, `.dstats`, `.headgrid`, `.headfoot`). The cover says *Strategy plan — as agreed, no reported figures*.
+
+**WHAT IS NOT CARRIED ANY MORE, SAID RATHER THAN FOUND:** a measure's direction and compile rule (the deck's measures table is Measure · Annual target), so those two gaps are no longer named in the file; and a capability held apart on Setup › Capabilities (§334) is its own subject with its own deck, no longer folded into its function's file. The old builders and their helpers are deleted (§24).
+
+**CHECKED.** New `plan-download` (21 claims; on the live build the company's file, its contents and its name are red). Rewritten to the new rule (§218): `strategy-split` (the SWOT's own slides; the function's own projects; four gaps named, not six; one Quarters column with Missing in red), `tactic-requirements`, `years`, `review-pptx` §10. Rendered through LibreOffice on Raya's Mobile, Marketing and Merchandising and on El Abd's company.
+
+**MERGED TO `main`** 2026-10-20, Islam: *"put it live"*. Main had moved (another session's §563, the People register), so it was merged into the branch first, this entry renumbered §563 → **§564**, and the generated files rebuilt. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.56-register-word` → **`v6.57-plan-download`**. No save is judged differently, so no forced sign-out.
+
+## §565 — The Internal Tracker: names are the register's Name, the band stays put, the rename box takes its space (2026-10-21)
+Three asks of the Tracker in one sitting, each aligned before it was built.
+
+**§565.1 — A PERSON IS CALLED BY THE REGISTER'S NAME, NEVER THE FULL ONE.** Islam: *"the names in the tracker should follow the name not the official name"*; asked whether Notes and Portfolio should follow, *"Tracker, Notes, Portfolio"*. The register has carried two names since §93.8 — **Full Name** is the employee file's, **Name** is what the office says (what the SMO typed, `extra.known`, else the first two names) — and §181 already made the Name the platform's word for somebody. The three server modules never heard: `lib/people.ts`'s `namesOf()` read `people.name` and `shortNames()` shortened that, so the Tracker's Group-by-Owner headings printed the employee file and a Name typed on the register reached nothing outside it. `lib/tracker.ts` also kept a **second copy** of `namesOf()` (§53.5's drift, the reason `lib/people.ts` exists), which is how the Tracker would have gone on printing the full name even after the spine was fixed.
+- **`registerNames()` in `lib/people.ts` is the register's own rule**, the frozen `displayNames()`/`knownName()`: a typed Name wins and is never lengthened; an untyped one is `knownGuess()` (two names, a particle kept with its name), and a clashing guess is lengthened one name at a time for the whole clash together. Worked over EVERY row, retired ones included, because that is what the register's column is worked over. It is written beside the spine rather than moved into `lib/rules.js` because that file is embedded in the frozen product and moving it means rebuilding the platform for a server-only change; it calls the shared `nameWords`/`knownGuess`/`KNOWN_NAME_WORDS`, so the word rule itself exists once.
+- **`namesOf()` returns the Name**; `lib/tracker.ts` re-exports it instead of its copy, and its `officeRows()` names the office from it. Notes' `registerOf()` and Portfolio's `registerFor()` read it too, and `readNames()` gives Portfolio the same. The short name on a row is still `shortNames()` — first word unless that clashes — now taken off the Name, so somebody typed as "Essam" reads *Essam* on the row and the heading.
+- **Nothing identifies by it** (§93.8: *"for the identifiers keep it for the ID and email only"*): every read is a label; keys and emails are untouched.
+
+**§565.2 — THE BAND STAYS AT THE TOP.** Islam: *"make this part freezed on scrolling down"*. Drawn first (`design-mockups/internal-tracker/2026-10-21_frozen-band.html`, published as an artifact, a frame that scrolls) and approved *"Proceed"*. The masthead, the add line, the search and the count go in one `.pin` (`position:sticky; top:0`), so they cannot be pinned apart; on the Weekly check the band and its topic count. It paints the page's ground behind itself, the `.pg`'s own 20px above it included (`margin-top:-20px; padding-top:20px`, only while no refusal shows in `#said` above it, or that ground would paint over the sentence's foot — with one showing the band pins flush to the top), so a row never shows through the band's rounded corners or the gap above the add line, and it is `display:flow-root` so the last line's bottom margin stays inside that ground instead of collapsing out under the rows. **Not on a phone or a short window** (`max-width:760px`, the page's own narrow point, or `max-height:600px`): pinned there it would cover most of the screen. **One knock-on fixed with it**: *+ Add to <topic>* centred the add line with `scrollIntoView`, which on a pinned line carries the page back to the top, away from the topic just pressed — it now scrolls only when the line is off screen (a phone), measured before the focus because a focus scrolls by itself.
+
+**§565.3 — THE RENAME BOX TAKES THE NAME'S WHOLE SPACE.** Islam, with a screenshot of the box cutting a long name off: *"give the text space we already have space to write in"*. The name is a flex item sized by its words, so the input inside it (`width:100%` of that) came out at an input's default, about twenty letters, with the rest of the column empty beside it. While it is a box (`.tn2.editing`) the name now grows to the topic's column. Look unchanged otherwise.
+
+**CHECKED.** `checks/tracker.mjs` **289 passed, 1 failed**; the one red (*"the line is cleared back to This week and me…"*: after an add the line keeps the week and owner picked, `data-due` next week's Thursday, `data-owner` islam) is **identical on the build before** and is not this change's — recorded, not touched. New claims: the Name rule four ways in the pure section (typed wins, the two-name guess with a particle, a clash lengthened together, a typed Name never lengthened); the fixture's full names made LONGER than the Name (Islam's typed, Noran's guessed) so every heading and owner on the page proves which of the two it printed; scrolled 900px the band, add line and count are still at the top with a row gone under them, and at phone width the band has gone; the rename box as wide as its cell (434px, was 240). `checks/notes.mjs` 171/0 and `checks/portfolio-module.mjs` 207/1 each gain a typed-Name claim (Portfolio's red, the year-crossing span, is identical on the build before, as is `checks/portfolio.mjs` 134/1 — both main's, §526). **Red under each new break**: `full-names` (the employee file's name put back; tracker 5 red, notes 1, portfolio 1), `band-scrolls` (no pin; 1), `narrow-rename` (the box sized by its words; 1). Cold typecheck clean. Screenshots of the real page taken scrolled and with the box open. Server and screen only: nothing stored, no migration, the frozen product untouched, so no `sw.js` bump and nobody signed out.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"put it live"*. `main` had not moved since the branch left it (§564's record commit), so a clean fast-forward and the tree pushed is the tree verified; then this note as a commit `main` alone holds (§91). Nothing in the frozen product, the authoriser, the schema or `public/` moved, so no `SHELL` bump, no release stamp change (no reload banner is owed, the Tracker's page and script are drawn per request), and no save is judged differently, so no forced sign-out.
+
+## §566 — The Internal Tracker: the top bar pins with the band, no count line, the views are filters (2026-10-21)
+Islam, straight after §565 went live: *"make the top bar of the platform the white one freezed as well so the freeze starts by the top bar and ends by the text box to add an action and remove the small 14 action line under the add action as it's already existing in the navy large panel at the top"*, then *"regarding the filter of all and mine and so on they need to be filters not other pages that take me to another loading page they should act instantly"*. §565's mockup was redrawn (same artifact, the white bar pinned above the band, the line gone) and approved *"Proceed"*; the tabs were put in words (the tab lights at once, the list follows after one read, Back works) and approved *"Proceed"* over a background-fetch variant that would have read every view on every visit and could show a list seconds old.
+
+- **THE TOP BAR PINS, ON THIS PAGE ONLY.** `.tb{position:sticky;top:0}` in the Tracker's own stylesheet, after `TOPBAR_CSS`, so the bar every module shares (`lib/topbar.ts`) is untouched elsewhere; nobody asked for the others. The band's `.pin` sits at `top:var(--tbh)`, and **the script MEASURES the bar into `--tbh`** (`offsetHeight`, again on every resize through a `ResizeObserver`) rather than this page assuming 41px: an offset written as a number is right until the thing above it changes height, which is the smeared header the platform has already paid for. 41px is only the first paint's guess. On a phone or a short window both scroll away as before (`.tb` back to its own `position:relative`, so its menus keep their z-index).
+- **THE COUNT LINE UNDER THE ADD LINE IS GONE.** The navy band counts Open, Late, Due and Done this week. Said before it was built and agreed: the line also gave the number of matches while a search was on, and that number goes with it. The search form's own `#count` stays, hidden as it always was; the Weekly check keeps its own topic line, which no tile says.
+- **THE VIEWS ARE FILTERS, NOT PAGES.** Each tab was a link, so every press loaded a whole new page. A press now lights the tab at once, sets `data-view` and reads the list in place through `refetch()` — the read every other press already uses, so the list is drawn by the one renderer (§53.5) and what is typed on the add line survives the swap (§35). The address follows by `pushState` (an opened row's `open` dropped, as the link always dropped it), and `popstate` reads the list again, so Back steps through the views. **The tab stays a link**: a press with a modifier key opens it as before, and a page whose script did not run still navigates.
+
+**CHECKED.** `checks/tracker.mjs` **293 passed, 1 failed** — the one red §565 recorded, identical on the build before. §565's pinned claim split in two and extended: scrolled 900px the white bar is at 0, the band starts at its foot (within its 20px of ground), the add line is under it and a row has gone under them; at phone width the bar and the band have both gone. New: no `.counted` on This week; **All pressed** keeps the window's mark (no page loaded), puts `view=all` in the address, lights All and draws All's list (its count without "on this week"); **Back** returns This week the same way. **Red under each new break**: `bar-scrolls` (1), `count-line` (1), `tabs-reload` (the views as pages; 4, including the silent-press claims after it), and §565's `band-scrolls` still (2). `check:modules` 234/0; `check:look` 121/1 with the one red (*"…drawn from its rows"*, the fixture's "board pack" not on this week) identical on main's code. Cold typecheck clean. A screenshot of the real page scrolled. Screen only: nothing stored, no frozen-product file, no `sw.js` bump, nobody signed out.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"put it live"*. `main` stood at §565's record commit, this branch's own base, so a clean fast-forward and the tree pushed is the tree verified; then this note as a commit `main` alone holds (§91). No frozen-product, shared-lib, schema or `public/` file moved, so no `SHELL` bump and no release-stamp change; no save is judged differently, so no forced sign-out.
+
+## §567 — The add line goes back to This week and you after every add (2026-10-21)
+Islam, asked about the one red §565 and §566 had both recorded (after an add, the line kept the week and owner picked on it): *"reset after each add"*, chosen over keeping the picks for a run of actions to one person.
+
+**THE DESIGN WAS ALWAYS A RESET; THE SWAP UNDID IT.** §356.16 drew the line clearing back to its defaults after Enter, and `checks/tracker.mjs` has asserted it since (*"the line is cleared back to This week and me…"*). §532 then taught the swap to carry what a hand is doing across a redraw (`keep()` reads every line's text, note, picked week and owner and topic; `swap()` puts them back), and `submitAdd()` emptied only the text and the note of the line it had just posted — so the picked week and owner were put straight back onto the fresh line. Carried, the next action went to the same person and week with nothing on the screen saying so until it was posted (§96).
+
+**THE FIX IS ONE FLAG.** The written line's `picked` is cleared alongside its text and note, so the swap does not re-apply the week and owner, and the line the server draws is the line at rest: this week's Thursday, the person writing, the details held back. **The topic still rides on it**, as §532 decided: on a topic's own line on the Weekly check the topic is the line's structure, and on the page's line a topic picked (or set by *Add to <topic>*) is kept for the next one. Nothing else the swap carries changes: another line's half-typed action, its note and its picks survive exactly as before.
+
+**CHECKED.** `checks/tracker.mjs` **294 passed, 0 failed** — the first fully green run since §565 found the red. New break `keep-picks` (the picks carried past the add again) turns exactly that claim red. Cold typecheck clean. Screen only: nothing stored, no frozen-product file, no `sw.js` bump, nobody signed out.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"put it live"*. `main` stood at §566's record commit, this branch's own base, so a clean fast-forward and the tree pushed is the tree verified; then the merge note as a commit `main` alone holds (§91) — the progress line in `1858c64` and this paragraph a commit after it, because the first note's edit of this file missed its anchor and was not written. No frozen-product, shared-lib, schema or `public/` file moved, so no `SHELL` bump and no release-stamp change; no save is judged differently, so no forced sign-out.
+
+## §568 — On the slides the benchmark is the smaller half, and a breakdown reads Target then Actual on Performance and the slides (2026-10-21)
+Islam, of El Abd's D001 *Maximizing Current Stores* slides: *"in the presentation, the prorated target should be smaller not to take over the actual measure view in the measures or the tactics"*, and *"the target mix was fixed in the reporting as 2 columns but not fixed in the performance and slides as target, actual and progress"*. Mockup `design-mockups/deck-quiet-target/2026-10-21_quiet-target-and-categories.html` (real screenshots, today beside a build of the proposal, D001's figures on the demo tenant), published as an artifact. First drawn with a Progress column per breakdown column; Islam: *"for the cateogires slide remove the progress just keep he target and actual and color code the actual as you did earlier but after splitting to 2 columns in both the performance and the slides"*; on the redrawn mockup, *"mockup ok"*.
+
+**§568.1 — THE BENCHMARK IS SMALLER.** `.duehalf` (§254's quiet half: italic, `--ink-3`) gains `font-size:.74em` — three quarters of its figure, which at the deck's own 23px is `.dsub`'s 17px, the size the mockup was signed off at. **Relative, not 17px, and that was found by the check rather than by looking**: the fit pass sets a dense table smaller, Mobile's tactics measured 19px, and a fixed 17px sat 2px under the figure — not smaller to anybody in the room. The tactics slide's benchmark was a bare `<i>`, so it took the slide's full size and none of the quiet colour; it wears `.duehalf` now, on a one-outcome row and on each line of a several-outcome one (§414). Every slide that draws a figure against what is due — key measures, the key objectives' *where we stand*, a function's — reads the same, because they share `figVsDue`. **The PowerPoint download follows**: `deckCellSpec` already wrote `.duehalf` as a second italic run in the quiet ink, and its run now takes the second line's size (`SZ - 200`, as `.dsub`'s second paragraph does); the tactics' benchmark, a bare `<i>`, used to arrive inside the figure's own run and is a quiet run of its own now too.
+
+**§568.2 — A BREAKDOWN IS TWO COLUMNS PER COLUMN, TARGET THEN ACTUAL.** §557 made Reporting read *Target Mix% ≥ | Reported*; Performance (`bdReadTable`'s figures mode) and the categories slide still drew the figure with `/ 13%` beside or stacked under it in one cell. Both now draw, per breakdown column, the target as a plain figure headed by the column's own name and direction (§557's header rule, for §557's reason — with one column a fixed word would lose the only thing saying what the figures are), then *Actual* with the figure **in its band, exactly as the one cell wore it** (bold in its band on the slide, the band's ink on Performance); an indicator's actual stays plain (§343). No Progress column, Islam's call on the first drawing. An unasked cell is a dash in both halves. The plan download (§564) keeps its one target column; Strategy's reading table is untouched. Measured with three columns on the slide and at 1600 on Performance: both fit, no sideways scroll.
+
+**WHERE, AND WHAT DOES NOT MOVE.** Screen and file only: nothing stored, scored or tallied changes, no permission, and no save is judged differently, so nobody is signed out.
+
+**CHECKED.** `deck-figures.py` §1b new — the benchmark measured as PAINT in the opened deck on the key measures and the tactics slides, smaller than its figure by more than 3px and through `.duehalf`: green, **red 3** on the build before. `pillar-breakdown.py` §3 gains Performance's head, the target and figure in two cells with no slash, Bakery's 4-of-7 actual in the alarm ink, the indicator's plain; §6's slide head rewritten to the new rule (§218), the band asserted on the actuals and never their targets, no slash: green, **red 7** on the build before. `review-pptx.py` §4: the benchmark run's size below the figure's — green, red 1 before. `contingency.py`'s *a figure reported against its benchmark* read ONE run for `X / Y` and went red on this build, the feature working (§366's own fault by another road: the tactics' pair is two runs now) — it reads the cell, and is green on both builds. Neighbours green: `deck-outcome`, `tactic-proration`, `ytd-proration`, `deck-model`, `deck-pdf`, `direction-slides`, `direction-decks`, `deck-and-weights`, `notes-slide`, `plan-download`, `strategy-split`, `capability-report-column`, `my-reporting`; `reporting-ytd-target` red 1 on both builds, the line §556 recorded (main's). Screenshots of the real slides and page taken with D001's figures.
+
+## §569 — A monthly plan overrides the proration from its first month (2026-10-21)
+Islam, with a screenshot of *New Shop Openings*: Count, January to June planned 2+2+2+2+2+3, so a target of 13#, read in September as **14# / 9#, 150%** — *"in a target that is already set on monthly level it's still prorated arithmatic in the performance"*. Asked whether the months typed are the plan and an empty month counts as nothing planned: *"the monthly plan overrides the proration, so if that's what you mean then yes"*.
+
+**WHAT IT WAS.** §278 put a monthly plan in force only when all twelve months were set: a blank was UNKNOWN, never nought, so a half-filled plan left the row prorated flat. §555 then made the TARGET what the months set come to, from the first month — and kept the flat proration. So the one row was measured against two different plans: its target counted the empty months as nothing (13 = Jan–Jun), and its year-to-date spread that same 13 evenly across twelve months (13 × 9/12, floored, = 9). The drawer said so in words (*"Until all twelve are filled, it is still spread evenly across the year"*), which is the sentence Islam's row was obeying.
+
+**WHAT IT IS — §278's blank rule REVERSED for proration**, recorded here and in the rule's own comment rather than overwritten (A7). A plan is in force from its first month: what is due by the review month is the row's compile rule over the months set up to that month, **blanks passed over** — `Sum` and `Count` add nothing for them, `Average` does not count them, `Latest` stands on the last month set before. Months planned only after the review point owe nought, which `measureScore` already reads as *not due yet* (§278's own guard). It is the same walk the target takes (`monthsCompiled`, which `monthlySoFar` now is with `upto` = 12), so the target and what is due on it are one reading of one plan and cannot disagree again. `monthlyInForce` answers exactly when the target is derived, so the *by month* mark under the annual target shows on a half-filled plan too. **On a complete plan nothing moves** — the arithmetic is the one it was, asserted. What still keeps a plan out of force: no compile rule, and a month holding something that is not a number (checked across the whole year, §278's safe direction). Islam's row now reads **14# / 13#, 108%**.
+
+**THE WORDS.** The drawer's partial line ends *"A month left empty counts as nothing planned."* in place of the flat-year sentence. The office's help answer *How do I set a target month by month?* still said all twelve had to be filled before anything took effect — already half untrue since §555 — and says it takes effect from the first month now; `db/kb.json` regenerated. Spec 031 (*measureDue* step 4, the §278 bullet, R5) updated, the reversal stated there too.
+
+**WHERE.** `lib/rules.js` — the shared rule, carried byte-for-byte into `smp-app/lib/rules.cjs`. Every surface that prints what is due asks it through `measureDue`: Performance, Reporting's *YTD Target*, the slides, and a tactic outcome with a monthly plan of its own. Nothing stored moves and no row of the worked example carries a monthly plan, so the demo's figures are byte-identical; a tenant row with a half-filled plan reads against its own months from the next load. No save is judged differently, so nobody is signed out.
+
+**CHECKED.** `monthly-plan.py` rewritten to the new rule (§218), each old assertion's words kept beside the one that replaced it: a blank adds nothing (18, was null), Average and Latest pass it over their own way, Islam's row owes 13 in September, months planned only later owe nought, a half-filled plan is in force and one holding a word is not; on the page, four months set at June owe all four (61M EGP, was 30.5M) and the drawer says *counts as nothing planned*; one blank month owes nothing (80M, 120%, was 142M flat). Green; **red 9** on the build before. `planning-period`, `built-in-step` green. `qa.py` through `qa-run.py` — **33 viewers / 181 destinations / ERRORS none** (summed from its own lines, §332), §557's figure to the digit.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"put it live"*. `main` had moved under the branch twice (§566, then §567 — both the Tracker's), so this work was renumbered §567–§568 → §568–§569 and `main` merged INTO the branch, the two record files keeping both sides in number order and the built file, `public/shell.js`, `platform.css` and the release stamp regenerated from the merged sources, never resolved by hand. On that merged tree: the changed checks green (`monthly-plan`, `pillar-breakdown`, `deck-figures`, `review-pptx`, `contingency`) with their neighbours; `reporting-ytd-target` red 1, main's (§556); `generated-in-step` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.57-plan-download` → **`smp-shell-v6.58-quiet-target-monthly`** as a commit `main` alone holds (§91); the name was confirmed free on every remote ref. The frozen product and `lib/rules.js` changed, so the bump is owed; no save is judged differently, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`cf708078ba7c64e5`**, `/shell.js` **4,992,202** bytes; after it they should read **`c6d18b9c5cbdd772`** and **4,995,109**.
+
+## §570 — With no business units the first button is called Strategy, and the tab under it Plan (2026-10-21)
+Islam, with a screenshot of El Abd's row (*ElAbd* lit, then Commercial · Operations · Corporate Support and the functions): *"we need to adjust the word elabd that opens the strategy, what to call it? Strategy? as it's confusing to be elabd and we need to keep this tab as the default opening tab in general"*. Offered **Company**, he answered *"the rest of the navigation is for the functions who are in the company as well"*; offered **Overall**, *"still overall is like company and the functions are already under overall"*. Then, of Strategy with its own first tab renamed Plan: *"go ahead"*.
+
+**WHY THE TWO WORDS WERE WRONG AND THIS ONE IS NOT.** Any word for *the whole company* names a PARENT, and this button sits BESIDE the functions on one row, so it reads as one more place among them. What the button actually holds that no function holds is the strategy the functions deliver: the foundation, the SWOT, the directions, the capabilities and the scorecard over them. §556.13 had put the company's own name there, which answers *where am I* and not *what is this*.
+
+**THE TAB UNDER IT HAD THE SAME NAME, SO IT MOVES.** The top layer's first tab (§428) is called Strategy, which would read *Strategy › Strategy › Directions*. It becomes **Plan** — on the top layer only, and only with the business units off. The key stays `strategy`, so every stored place, grant, address and `[data-s]` selector is untouched; only the drawn word moves (§65).
+
+**ONE ANSWER PER WORD, IN `config-data.js` BESIDE `topOwnName()`.** `topNavWord()` is the button (`labelWord('topword')` with units, *Strategy* without) and `topStrategyWord()` the tab (*Strategy* with units, *Plan* without). Read by the button (`unitTabs`), the tab (`topStrategyTab(true)`), the Reporting bar's hover on a plan gap for the top layer (*press to open Plan*), and the Setup › Capabilities note that says where pillar-capabilities are planned (*Strategy › Plan › Capabilities* with no units, unchanged with units). The go-to finder (Alt+G, §547) reads the button's own words, so it follows without being told.
+
+**WHAT DOES NOT MOVE, said so it is not widened later.** §556.13's name stays wherever the company is named as a PLACE rather than a button: `placeLabel()` (the rails, the cycle board, Home's *Your pages*, the save and safety banners) and the switch's catch-all segment for functions linked to no division (`companyFnSides`/`companyUnitSides`), which lists functions and would be wrong as *Strategy*. A function's own Strategy tab, and every unit's, keep their word. With business units on, nothing moves at all — the button is the client's top word and the tab is Strategy. **The landing is untouched**: no line of `entrySub()` or the session's first destination changed, so the platform opens on this button exactly as before (§520.11's capability owner included, who lands on its Capabilities section).
+
+**NUMBERED §570.** It shipped on the branch as §569, the next number free when it was written; `claude/trusting-einstein-j0tskx` then renumbered its own pair to §568/§569 and reached `main` first, so this one moved to §570 on the merge of `main` into the branch, as §524/§525 → §529/§530 and §534 → §558 did before it (§264.3).
+
+**CHECKED.** `checks/single-company.py` gains seven claims, both ends (§94.2): with units the button is the client's top word and the tab Strategy; with none the button is Strategy (and the company's name is not), the tab Plan and still the one drawn open, and a function's own tabs keep Strategy and show no Plan; the §448.1 claim is rewritten to the rule (§218) from `buExists`, not by asking `topNavWord()` (§94.8), while the catch-all segment's claim keeps §556.13's name. **On this build: 1 red, §449's *the group still opens on Performance*, identical on the build before** and already recorded as `main`'s (§559). **On the build before: 4 red** — that one, the button (*Raya Trade*), the tab (*Strategy*) and the §448.1 claim. Driven in headless Chromium with the units off: the row reads *Strategy · Functions · Finance…*, the tab row *Plan · Performance · Focus · Reporting* with Plan lit, no page error. `built-in-step` green; `public/shell.js` and `public/sw.js` regenerated (the release stamp moves with `shell.js`, §397, so an open tab gets the reload banner). Screen only: no `api/`, `lib/` or `db/` file, nothing stored, no rule moved, so nobody is signed out.
+
+**AND ITS NEIGHBOURS**, the checks that read the top button, the top layer's tabs, `GROUP.org` or the places named after it, run on this build: **18 green** — capability-entry (52/0), capability-first, capability-report-column, direction-owner-role, direction-part, fold-caret, my-reporting, report-blockers, safety-banners, save-flush, save-said, save-tip, shape, tab-row, top-plan, unsaved-keep, welcome and go-to-a-place. **5 red, every one identical on the build before** and so not this change's: division-functions (a division by zero) and fn-perf-controls (*Present is among them*), both already named by §556.13; plan-edit-line (*the capability it holds is reachable*, `cap:cap6`); render-fail (*the failure card is drawn where the page would be*); wave3 (the same 10 lines, diffed). Recorded, not touched.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"merge to main"*. `main` had moved under the branch (§568–§569, the quiet target and the monthly plan), so it was merged INTO the branch first, this entry renumbered §569 → §570, and the built file, `public/shell.js` and `public/sw.js` rebuilt from the merged sources, never resolved by hand (`built-in-step` and `generated-in-step` green). On the merged tree: `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**; `single-company` 1 red, §449's, as before; `monthly-plan` all good. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.58-quiet-target-monthly` → **`v6.59-strategy-button`**, proved held by no commit in any ref's history after fetching every ref (§94.16). Nothing about saving changed, so nobody is signed out; an open tab gets the reload banner.
+
+## §571 — A tactic's status is the real word, Delayed is said under it, YTD actual is a number, the slides carry it, and one switch hides Owner and Collabs. (2026-10-21)
+Islam, of *Core & New Category Bundling* on El Abd's Performance (Q3 and Q4, reported Not started at the end of Q3, reading **Not started**): *"should show delayed right?"* — and, of the rule put to him, *"yes build it"*. Then, of D003 *Growing FMCG* on the live page, where §419 already read **Delayed** beside *In progress · 35% / 100%*: *"the ytd actual is saying in progress while the status says delayed which is a confusion and having a status in the ytd is confusing as well"*; *"bring the status to the slides"*; *"can you give me the option to hide the owner and collabs in the slides if needed?"*, *"one switch for everything"*; *"for the delayed the real status is not started. same like the in progress but they are both delayed … type delayed somewhere?"*; *"in progress to stay with it's color and the same for not started"*; *"In progress color should be a bit yellow the orange is close to the red"*. Mockup `design-mockups/tactic-status-slides/2026-10-21_status-and-columns.html` (real screenshots of D003's six tactics, today beside a build of each version, published as an artifact; four versions), then *"yes build it"*.
+
+**§571.1 — THE WORD IS WHAT IS HAPPENING; DELAYED IS A MARK, NOT A WORD. §419 REVERSED IN PART.** §419 made *Delayed* one of five status words, replacing the word the tactic actually had — so a row under way read *Delayed* beside *In progress · 35%*, and a row nobody had touched read the same word as one nearly done. The words are now four — **Completed · In progress · Not started · Not due** (`TACTIC_WORDS`), each in its own band (`TACTIC_BANDS`; In progress takes the YELLOW band, `attn`, which the middle scores already wear, not the orange `warn` beside the red — no new colour) — and **lateness is said under the word, in red: DELAYED** (`tacticDelayed`, `.latemark` on the page, `.dlate` on the slide). The word keeps its own colour when late, so red appears once per late row and means one thing. **LATE** is a tactic not complete whose whole window has passed (§419's rule, kept), or — new — one still at nought once its FIRST quarter is wholly behind the review month (`tacticFirstQuarterOver`, the same month arithmetic `tacticShare` counts with). The new half applies to a REPORTED row only: a row nobody has reported has not been said to be at nought, and the *Not reported* beside it is what the page knows. A row under way inside its window stays In progress and not late however far behind — §419's paragraph on that holds, and the Progress beside it already says so. Derived, never stored (§419): `t.status` is untouched.
+
+**§571.2 — YTD ACTUAL IS A NUMBER.** A yes/no outcome printed its answer in words there (*In progress · 35%*, *Not started*, *Completed*), the same words as the Status beside it. `outcomeShown` now answers with the figure — Done **100%**, Not started **0%**, In progress its own per cent (In progress with no per cent keeps its words; nothing else to say). The benchmark beside it is unchanged (§300: shown against a partial only), and the slide now asks the page's own question for it (`benchBeside`), where it used to print the due figure beside *Not started* too.
+
+**§571.3 — THE SLIDES CARRY THE STATUS.** The tactics slide gains *Status* after *Quarters*, the same word and band and the same red *Delayed* under it; the multi-outcome rows span it (§414). A tactic not due says *Not due* there and its two figure cells are empty — said once, as Performance has said it since §419.1, where the slide used to print *Outside this cycle* across them. The PowerPoint download follows by construction (`deckCellSpec` reads the cell's band; its second line, *Delayed*, now carries its own red, `subColor`). The plan download strips the column as a `fig`, so the cell is drawn on every row — the plan's too — to keep the columns lined up under their heads.
+
+**§571.4 — ONE SWITCH HIDES OWNER AND COLLABS.** *Columns*, beside *Grid* in the slide view's bar — the People register's own Columns menu (`.hmenu`, `.colrow`), drawn for the office alone. Unticking a column takes it off every tactics slide of the company and out of the PowerPoint download; it is stored once on the company as the names left out (`GROUP.slideColsOff`, sorted; DELETED when both are back, §50.6), read through `SMPRules.slideColOn`, carried into `smp-app/lib/rules.cjs`. On the server it is `deckHide` — the eye's own kind, the same office gate and the same *Manage slides* refusal — classified in `lib/authorize.js` and named in `gExtra` (§259.2), carried into `smp-app/lib/authorize.cjs` under its one declared transform. **The plan download keeps both columns**: there an empty owner is a gap the plan still owes (§564's *Missing*). It travels in the org row's `extra` like every other company setting, so no migration.
+
+**WHERE, AND WHAT DOES NOT MOVE.** Performance's tactics table, the tactics slide and its PowerPoint, the slide view's bar. Reporting is untouched: the reporter still picks Not started, In progress or Done. Nothing stored changes but the new switch, no score or tally moves, and the frozen product changed, so the `SHELL` bump is owed at the merge; no save is judged differently, so nobody is signed out.
+
+**CHECKED.** `tactic-status-words.py` rewritten to the new rule (§218): every state made on one tactic with the word, the mark and the band separately (Islam's row, August, unreported, under way); the page's pills agree with the rule and none says *Delayed*; and Islam's own six D003 rows on Performance AND on the slide — word, mark, YTD — with the DELAYED red and the pill above it not. Green; **red 24** on the live build. `slide-columns.py` new: the rule by name; untouched stores nothing; the office's menu pressed tick by tick and the stored field read back (`["owner"]`, then `["collabs","owner"]`, then DELETED); the slide's head and every row's width after each; the PowerPoint file read for its headings; the plan download keeping both and carrying no Status; a unit head opening the same view and not offered the menu. Green; **red 10** on the live build. `deck-outcome.py`: its ten columns (Status added) found by heading rather than position, and *a tactic outside the cycle* rewritten to *says Not due, once* (§218). `test-authorize.js` §28b, 7 new: the office hides and shows, a custodian may not either way, the refusal names Manage slides and never Setup, one sentence of kind `deckHide` — **1104 passed, 3 failed**, the three (§447, §505, §520.6) identical on the tree before this change. Neighbours green: `deck-figures`, `tactic-proration`, `contingency`, `review-pptx`, `plan-download`, `deck-model`, `direction-slides`, `direction-decks`, `hide-slide`, `slide-move`, `slide-limits`, `notes-slide`, `deck-and-weights`, `deck-strip`, `deck-fullscreen`, `deck-pdf`, `deck-dividers`, `deck-blank-slides`, `my-reporting`, `pillar-breakdown`. Screenshots of the real page, slide and slide view taken with D003's rows.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"put it live"*. `main` had not moved since the branch was restarted from it (§570's record commit), so a clean fast-forward and the tree pushed is the tree verified: `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, the deck and status checks green, `generated-in-step` all clear on the committed tree. Then this note and the `SHELL` bump `smp-shell-v6.59-strategy-button` → **`smp-shell-v6.60-tactic-status`** as a commit `main` alone holds (§91); the name was confirmed held by no commit on any remote ref. The frozen product, `lib/rules.js` and `lib/authorize.js` changed; no save is judged differently except the new switch, which only the office could set, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`6f32c46f872e5603`**, `/shell.js` **4,996,212** bytes; after it they should read **`547c5a8ea9361efa`** and **5,004,668**.
+
+## §572 — Option B: bold names, a status pill with a red-dot Delayed, what is due under the figure, a bigger Progress — on both slides and on Performance (2026-10-21)
+Islam, of D003's live tactics slide after §571: *"this slide is a big confusing I though we can make the tactic bold and the outcome not bold and the status the delayed word is not differentiated from the actuall status .. maybe suggest another view for this cell to keep it clean and a variation as well for the prorated or YTD target in grey and maybe make the progrss % font a bit bigger for clarity"*. Two options drawn on the real slide (`design-mockups/tactic-status-slides/2026-10-21_cleaner-tactics-slide.html`); then *"the ytd target if 100% already so no need to show it"*, drawn too, and then *"option B but keep the due even it's 100%"*. Asked whether the key measures slide and Performance follow: *"yes and the kye measure become bold"*, *"make the performance match as well show me a mockup to ensure"* — `design-mockups/tactic-status-slides/2026-10-21_option-b-everywhere.html` — and *"yes build it"*.
+
+**WHAT IT IS, THE SAME IN FOUR PLACES** (the tactics slide, the key measures slide, Performance's tactics and key measures tables):
+- **Names bold, the outcome regular.** A key measure's and a tactic's name bold (`td.lead.strong` on the slide; `b.mname` on Performance, beside the tactic's existing `b.tacname`, and not on the Plan page's unscored table); the outcome regular weight (`td.outc`), so the line reads name first.
+- **The status in a pill, DELAYED a red dot and word under it.** On the slide the word sits in `.dpill`, in its band (§571's yellow In progress), as Performance's pill already was; DELAYED is a red dot and word under it (`.dlate::before`; `.latemark::before` on the page), so the late mark can never read as the status itself — Islam's complaint about the §571 slide.
+- **What is due, under the figure and named.** `dueLine()` / `pdueLine()` write *due X* as a line of its own under the actual, where §254 drew *X / Y* beside it — **always, wherever there is a benchmark, 100% included** (Islam reversed his own *"if 100% already so no need to show it"* the same afternoon, before it was built; recorded so the drawing it was shown in is not read as the rule). §300's yes/no rule is untouched: Not started and Completed show none. `figVsDue` serves the deck's three figure cells, so the key objectives' *where we stand* slides follow by construction. On the slide it is a `.dsub`, so the PowerPoint writes it as the second, quieter paragraph it already knows.
+- **Progress a size up.** 29px on a slide (`td.dprog`), 24px on a slide the fit pass made dense (`.tight` set every cell to 19px and would otherwise have swallowed it — found in the screenshot, not by reading), 17px on Performance (`td.final.prog`, from 14).
+
+**WHAT DOES NOT MOVE.** No figure, score or rule; Reporting; the plan download (it strips the figure columns these live in); the categories slide. Screen and file only; no save is judged differently.
+
+**CHECKED.** Rewritten to the new rule (§218), each with the old words kept beside it: `deck-figures` §1 (*under the figure, due X*, was *the figure carries / X*) and §1b (the due line smaller, under the figure and quiet; the name bold; Progress a size up; the outcome regular — PAINT in the opened deck, the figure's box read through a Range because it is a text node on one row and an element on another) — green, **red 9** on the live build; `review-pptx` §4 (a second paragraph saying due, quieter and smaller, was a second italic run) — green, red 3; `contingency` (the cell's two paragraphs, a figure then *due* and a figure) — green on both builds; `ytd-proration` §4 (due under the figure and no `.pair i`; every measure's name bold; Progress at least 2px up) — green, red 3; `tactic-proration` reads the figure's whole cell; `tactic-status-words` §4 (D003's six rows, the figure and the due line apart, the pill on the slide, the red dot, the outcome regular, Progress up) — green, red 11. Neighbours green: `slide-columns`, `deck-outcome`, `monthly-plan`, `plan-download`, `deck-model`, `direction-slides`, `direction-decks`, `pillar-breakdown`, `my-reporting`, `hide-slide`, `notes-slide`, `deck-and-weights`, `deck-strip`, `deck-pdf`, `capability-report-column`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Built file byte-identical to the sources' build; `shell.js`, `platform.css` and the release stamp regenerated.
+
+**§572.1 — DELAYED IS REGULAR WEIGHT.** Islam, before it went live: *"can you show if the delayed word is not bold?"* — drawn beside the bold one on the slide and on Performance (`design-mockups/tactic-status-slides/2026-10-21_delayed-not-bold.html`) — then *"not bold, apply it and put it live"*. `.dlate` and `.latemark` at 400, and the PowerPoint's red second line no longer bold; the red dot, colour and size unchanged, so the pill leads and the dot carries the mark. `tactic-status-words` asserts the weight as PAINT on Performance's late rows — green, red 1 on the bold build.
+
+**MERGED TO `main`** 2026-10-21, Islam: *"not bold, apply it and put it live"*. `main` stood at §571's record commit, which the branch had merged in, so a clean fast-forward and the tree pushed is the tree verified: `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, the deck, status and proration checks green, `generated-in-step` all clear on the committed tree. Then this note and the `SHELL` bump `smp-shell-v6.60-tactic-status` → **`smp-shell-v6.61-option-b`** as a commit `main` alone holds (§91); the name was confirmed held by no commit on any remote ref. The frozen product changed; no save is judged differently, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`547c5a8ea9361efa`**, `/shell.js` **5,004,668** bytes; after it they should read **`7f78de2e7df3d377`** and **5,005,651**.
+
+**§572.2 — ON THE SLIDE, DELAYED IS CENTRED UNDER THE PILL.** Islam: *"delayed in the performance is centered like the status but not centered in the slides can you check this?"* Performance's Status cell is `td.cc`, so the pill and the mark under it are both centred; the slide's column is left-aligned like its other text columns, and `.dlate` was a full-width flex row, so its dot and word started at the pill's left edge. Drawn (`design-mockups/tactic-status-slides/2026-10-22_delayed-centred-slide.html`), then *"apply it and put it live"*: the pill and DELAYED are one `.dstack` (an inline column, items centred), the column itself left where it is. `tactic-status-words` measures the VISIBLE mark — its dot at the box's left to its word's last letter, through a Range — against the pill's centre in the opened deck: within 2px here, **17px off** on the live build. The first draft of that assertion measured the mark's BOX and passed on the live build too, because as a block the box spanned exactly the pill's width while the dot and word sat at its left (§94.5: a check proved red before it is believed). `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**.
+
+**§572.1–§572.2 MERGED TO `main`** 2026-10-22, Islam: *"apply it and put it live"*. `main` stood at §572's record commit, which the branch had merged in, so a clean fast-forward and the tree pushed is the tree verified (`qa.py` 33 / 181 / ERRORS none, the status and deck checks green, `generated-in-step` all clear). Then this note and the `SHELL` bump `smp-shell-v6.61-option-b` → **`smp-shell-v6.62-delayed-centred`** as a commit `main` alone holds (§91); the name was confirmed held by no commit on any remote ref. Pages only; no forced sign-out. Live witnesses before the push: `/sw.js` release **`7f78de2e7df3d377`**, `/shell.js` **5,005,651** bytes; after it they should read **`057b58551a31738b`** and **5,005,823**.
+
+## §573 — A figure's unit is a little smaller than its number and in dark grey, dollars are written in front, and the unit list is shorter (2026-10-22)
+Islam, with a key measures slide: *"let's make the units in general always smaller than the number like in the % it's already smaller I think but we can do this for the EGP and I want to review the units in general to make them concise. as d, h and SQM can be just # and maybe add a $ unit and for the k USD and M USD we make them K $"*. Asked which rows, and how dollars are written: *"only new ones, It should be $8m and $10b should it be a caps B & M or not hwat is the standard, draw the mockup"* — capitals, as money is written (`$8M`, `$10B`). Drawn on real screenshots (`design-mockups/units/2026-10-22_concise-units.html`); then *"the unit became too small make it a bit bigger and maybe make it dark grey to be differenteiated from the number ?and ok for the units list"*, redrawn at 0.82 of the number in `--ink-2`, and *"yes build it"*.
+
+**HOW A FIGURE IS WRITTEN** (`figHtml()`, display only, like §254):
+- **The unit is set apart**, at 0.82 of its number's size, semi-bold, in `--ink-2` (`.fu`). Inside a line that is already quiet — the *due* line under a figure, *due at* under Not reported, *of 6.2B EGP* under a YTD target — it takes that line's own grey and weight, so the line stays one quiet line.
+- **K, M and B are part of the amount**, so they stay in the number at full size: `6.2B` and a small `EGP`. A unit that is nothing but a scale (`5 M`, which the shipped plan holds) reads `5M`.
+- **Dollars go in front**: `2M USD` reads `$2M`, `500 USD` reads `$500`, and a `$` typed as a unit reads the same. The sign is the small grey unit, before the number.
+- **A word unit carries its own space inside its span**, so the TEXT of a cell is still `300 EGP` and `6.2B EGP` — what a copy, the PowerPoint and every check reads. A symbol (`%`, `#`) carries none and sits tight, the gap drawn by the stylesheet. §254.1's lesson (`8MEGP` was a glitch Islam saw) is why the space is text and not only margin.
+- **What is stored does not change** (§96.2): a dollar row stays `8M USD` in the plan and the workbook, and a box being typed into shows what was typed.
+
+**WHERE.** Everything that already went through `tgtShown()` and `figShown()` — every slide, Performance, Reporting's target column, the plan pages where a target is read — plus the figure cells that printed their own text: a tactic's and an outcome's YTD figure and its *due* on Performance and on the tactics slide, *due at* under Not reported, the categories' reported figures, an outcome's target under its name, Reporting's YTD target and its *of*, and the project outcomes' figures. `pdueLine()`/`dueLine()` are handed the written figure.
+
+**THE POWERPOINT FOLLOWS.** `deckPieces()` joined a cell's top-level pieces with a space, which would have written `$ 2M` and `13.4 %`; a `.fu` now joins its figure (a word unit bringing its own space), and a cell carrying one is written as runs — the figure in its own weight and ink, the unit at 0.82 of the size in `334155` (the light palette's `--ink-2`, a literal like every colour there, §311). The second, quiet line is one run as before.
+
+**THE LIST** (`TARGET_UNITS`): `%`, `#`, `Y/N`, `EGP`, `M EGP`, `B EGP`, `USD`, `K USD`, `M USD`, `B USD`.
+- **SQM, d and h leave it**, for new rows only: a new row counts with `#` and its name says what it counts (§199.4's own argument). A row that already holds one keeps it — `RETIRED_UNITS` still reads a target holding nothing but `SQM`, and the picker offers a stored unit it does not list, as it always has.
+- **The dollars are stored as USD and shown as $.** The list keeps the spelling the plan already holds, so an existing `K USD` row is ON the list rather than offered beside it, and the workbook still names its currency. The picker labels them `$`, `$K`, `$M`, `$B` (`UNIT_LABELS`), and so does the pen's Unit column where it is read rather than picked.
+- **This reverses half of §239.5**, at Islam's word: that section added `K USD` and `M USD` and *deliberately not* `B USD`; the bare `USD` and `B USD` join now because he approved the list drawn with `$` and `$B` on it. `B USD` joins `TIGHT_UNITS` with its twins; a bare `USD` takes a space, like `28 EGP`.
+
+**WHAT DOES NOT MOVE.** No figure, score or rule; nothing stored; the boxes typed into; the Progress column (a score, not a figure in a unit).
+
+**CHECKED.** New: `figure-units` (the writer's output for each kind of unit; on Performance and on the opened key measures slide the unit MEASURED at 0.82 of its number and in `--ink-2`, the `$` first, the due line's unit in the line's own ink; the PowerPoint's figures one word each and the unit its own smaller dark-grey run) — green, **red 14** on the live build. Rewritten to the new rule (§218), old words kept: `objective-unit` §7 picks `USD` where it picked `SQM`, and §7b keys the kept-unit case on `SQM` (it was `B USD`, now on the list), asserts the list is the short one and the dollars labelled `$ $K $M $B`, and that a row in SQM still reads its unit — green, red 5; it now takes `SMP_BUILT` like its neighbours. Four more were reading the figure in a way the unit's own element broke, and are rewritten to read it as text (§218, old words kept): `reporting-ytd-target` took the cell's FIRST NODE as its figure (`29` without its `%`) and now reads everything before the *of* line, and compares the count rows to the platform's own written text — a symbol is tight now, so a typed `6 #` reads `6#`; `tactic-proration` accepts `of 12#` beside `of 12 #`; `strategy-split` and `plan-download` read the PowerPoint a paragraph at a time with its runs joined, where they put a line or a space between every run (`32` and `%`). Each is green on this build and on the live one (`reporting-ytd-target` keeps its one known red, the capability case). **The whole suite, all 255, run against this build and every flagged one again against the live build: no other difference** — `chat-settings-scroll`, `cycle-edit`, `division-functions`, `fn-perf-controls`, `functional-projects`, `measure-score-spread`, `objectives-table`, `owner-picker`, `plan-edit-line`, `plan-horizon`, `project-header`, `render-fail`, `save-fidelity`, `setup-header`, `setup-live-rows`, `setup-rail`, `single-company`, `state-contrast`, `tactic-outcome`, `team-page`, `terminology`, `wave3` and `yn-in-progress` fail identically on the live build, so not here. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Built file byte-identical to the sources' build; `shell.js`, `platform.css` and the release stamp regenerated; `generated-in-step` all clear.
+
+**MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` stood at §572.1–§572.2's record commit, which the branch had merged in, so a clean fast-forward and the tree pushed is the tree verified: the whole suite against this build and the live one with no difference but the four checks rewritten above, `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, `generated-in-step` all clear on the committed tree. Then this note and the `SHELL` bump `smp-shell-v6.62-delayed-centred` → **`smp-shell-v6.63-figure-units`** as a commit `main` alone holds (§91); the name was confirmed held by no commit on any remote ref. Pages only; nothing stored changes, so no forced sign-out. Live witnesses before the push: `/sw.js` release **`057b58551a31738b`**, `/shell.js` **5,005,823** bytes; after it they should read **`6584dacf4fa1cae0`** and **5,010,670**.
+
+## §574 — A guided tour of one subject's slides, picked in the Master presentation
+
+Islam, 2026-10-22, before El Abd's Q3 review: *"for the master slide I need an option in the flow to present a demo direction or a demo unit or a demo function based on what the client has and let's create a demo on clicking in on the presentation it takes us in a tour through the slides of this direction … that highlights a part and dim the rest with a tool tip to explain what this is .. I was thinking about highlighting parts of the key measure slide and the tactics slide and the overall performance of the direction"*. Asked for a suggestion with the presentation a few hours away.
+
+**WHAT IS PROPOSED.** A **Guided tour** line under the two lists in Master presentation, offering None and each subject in the flow — so it lists whatever the client has, and a subject taken out of the flow takes the tour with it. The picked subject's own cover (never the flow's cover, which rides in front of it stamped with its name, §554.3) carries a **Guided tour** button; pressing it, or `G`, dims the slide and lights one part at a time with a card saying what the part is. → (or a clicker, or a press on the dim) lights the next part and turns the slide when its parts are done; ← goes back; `G` or the card's × ends it and leaves the deck where it is. A direction gets fourteen stops: its cover; the key measures' names, Annual target, Actual with its *due*, Progress with the bands, Note; the categories if it has any; the tactics with their outcomes, Quarters, Status, the first DELAYED row, YTD actual and Progress; then *Where it stands*' two readings and the line under them; and a closing card.
+
+**ONE LIST OF STOPS, BY KIND OF SLIDE.** Each stop names a kind of slide (the cover, `data-split` ending M, B or T, `.d-head`) and the part on it; the first slide of that kind in the subject's own run is the one shown. A part the slide does not carry — no categories, no delayed tactic, no execution reading — is a stop that is not made (§45.2), so the same list reads a direction, a business unit and a function with no list of each (A15: the unit's deck is in the check). A column is lit head to table bottom from its header cell, so a tactic's several outcome lines (§414) cannot break the highlight.
+
+**THE CLIENT'S WORDS.** The noun is the company plan's own word for a pillar (`LTraw`, so El Abd reads *direction*), the measures and tactics are `L()`, the status words are `TACTIC_WORDS`, and the bands on the Progress card are read off `BANDS.bands` with their floors — a tenant that moved its floors is not told 90 / 70 by a tooltip (§53.5).
+
+**A SCREEN PREFERENCE, NOT STATE.** The pick lives in this browser (`smp.deck.tour`), like the onboarding tour's answers (§25, §47.1): nothing a save carries, nothing for `lib/authorize.js` to classify, no migration. The cost, stated on the mockup: presenting from another laptop means picking it again there.
+
+**INSIDE `#deckroot`, AND THE KEYS ARE ITS OWN.** The deck goes full screen as an element, so an overlay outside it is not on the screen; the onboarding tour's spotlight (a masked shade, the accent ring) is drawn inside it at projector size. Its keydown listener runs in the capture phase and stops the deck's, so → lights the next part instead of turning the slide out from under it; its pointer and click handlers stop at the overlay, so a press in full screen (§265, §280) moves the tour and not the deck as well. Escape is left to the deck: in full screen the browser takes it first and leaving full screen leaves a deck opened from the slides (§556.11), so the tour ends on `G` or its ×. Never printed (§305).
+
+**WHAT IT COSTS, PUT TO ISLAM.** The button is on the projected cover — it is the click he asked for. The tour runs where the subject sits in the flow, so the example comes first only if he drags it first; a second, example-only copy of its slides at the front was not built (it would put one direction in the strip, the dots and the clock twice).
+
+**CHECKED.** New `guided-tour` (33 claims): the picker offers the flow and nothing else, reads None when its subject leaves the flow and is not drawn over an empty one; one button, on the picked direction's own cover and not the flow's; no button and no `G` for a pick outside the flow; the stops walk cover → key measures → tactics → where it stands, each lighting something, with a stop for each named part; Next on the closing card ends it in place; → and ← move the tour, not the deck; a press on the dim in full screen is Next and does not also turn the slide; × and `G` end it; closing the deck ends it; the button is not printed; a business unit takes the same tour. **Red 28** on the build before. Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `master-picker`, `master-presentation`, `present-loop`, `presentation-parts`, `presentation-timer`, `deck-figures`, `tactic-status-words`. `qa.py` through `qa-run.py` **ERRORS none**. Built file byte-identical to the sources' build; `shell.js`, `platform.css` and the release stamp regenerated. Mockup `design-mockups/guided-tour/2026-10-22_direction-tour.html`, real screenshots of this build, published as an artifact. Not merged.
+
+**§574.1 — REVERSED BEFORE IT WENT LIVE: THE MENU, ON A MADE-UP DIRECTION.** Islam, on the mockup: *"remove step 14 and how can I start the guiding tour I want to start it maybe out of the flow I mean maybe from the options of presentation drop down below the master presentation and can we make it on a dummy direction with multiple dynamics to explain the concept a made up one not an actual one not to present for the team"*. Asked, he chose the menu only (over keeping the flow's picker beside it), straight into the tour (over a cover with a button), a direction about *"growing our restaurant business"*, and no categories slide.
+
+So the picker in Master presentation, the button on a real direction's cover and the pick kept in the browser are **removed, not left beside this** (§24). **Presentation → Guided tour**, under Master presentation in both menus that carry it and for the same people (`mayMasterPresent`, asked again at the press, §48.2), opens a made-up direction full screen with the tour on its first stop. **Finish** on the closing card closes the example and lands on the platform, ready for Master presentation; `G` or the × ends the tour on the slide; Esc leaves.
+
+**EX001 GROWING THE RESTAURANT BUSINESS, NEVER STORED.** Built fresh on every open and handed to the ONE builder of a direction's deck — `dirDeckHtml` became `dirDeckOf(u, p, i, ex)` so a real direction and the example are drawn by the same lines (§53.5), the tour explaining exactly the slides the room is about to see. Nothing reaches GROUP, a save or anybody's plan: the check compares GROUP, UNITS and REVIEW before and after. Its cover says the figures are made up (B3); its code is EX001, never a D-code a real direction holds; no Thank you, because the tour ends the deck. Content mine, put to Islam on the mockup (A4): restaurant sales at 82% against what is due by now (a Sum, so the due is prorated), average spend 105%, delivery share 44% with a note, food cost 97% (lower is better); tactics Completed, In progress and DELAYED with a note, In progress on track, Not due; owners are departments, never people.
+
+**THE DYNAMICS ARE ASKED OF THE PLATFORM.** Which quarters make a tactic Completed, Delayed, on track or Not due depends on where the client's cycle stands, so each tactic tries windows of quarters until `tacticStatusKey()` and `tacticDelayed()` give the state it is there to show; the sales figure is set from `elapsedShare()`. Measured at June, August, September and March: the same mix each time. In a Q4 review nothing can be Not due and nothing can be partway, so those lines drop out (§45.2) — stated on the mockup.
+
+**STEP 14 GOES**: the stop on the line under the two readings. The tour ends on Execution, then the closing card: thirteen stops.
+
+**CHECKED.** `guided-tour` rewritten, 41 claims: the office's menu reads Master presentation then Guided tour; no picker in the flow, no button on a real deck and G does nothing there; the press opens the example full screen on stop 1, the deck the example's alone, the cover saying made up, coded EX001, no Thank you; cover → key measures → tactics → where it stands, each named stop present, the line under the readings absent, 14 cards; GROUP, UNITS and REVIEW unchanged; Finish closes the deck; → ← and a press on the dim move the tour and not the deck; × ends it on the slide; G restarts and ends it; not on paper; closing the deck ends it; all three bands and Completed / Delayed / on track / Not due at the demo's cycle, at Q3 and mid-quarter; somebody who may not open the flow has no entry and is refused at the press. **Red 32** on the first build. Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `master-picker`, `master-presentation`, `present-loop`, `presentation-parts`, `presentation-timer`, `deck-figures`, `tactic-status-words`, `figure-units`. `qa.py` through `qa-run.py` **ERRORS none**. Built file byte-identical to the sources' build; `shell.js`, `platform.css` and the release stamp regenerated. Mockup `design-mockups/guided-tour/2026-10-22_made-up-direction.html`, real screenshots at Q3, published to the same artifact. Not merged.
+
+**§574.2 — EACH TABLE OPENS AND CLOSES CLEAR; YTD BEFORE DELAYED; NO OWNER OR COLLABS. ON THE DEMO.** Islam, on the mockup: *"start the key measure tour with the full view all clear first and then the tour appears to show areas and dim the rest as you do and finish after the note with the full view clear as well showing everything. same for the tactics start with the view open and showing everything and end with it after the ytd actuals and progress"*, *"for the tactics show the ytd actual and progress before the delayed"*, *"hide the owner and collaborator columns from the demo slides"*. Read back to him in the reply as: key measures clear → names, target, actual, progress, note → clear; tactics clear → tactics and outcome, quarters, status, YTD actual and progress, Delayed → clear — Delayed now the last part lit, so the closing clear view follows it.
+
+**A CLEAR STOP LIGHTS NOTHING AND DRAWS NO CARD**: the shade and the ring fade out and the card is not drawn, so the room sees the slide exactly as it is presented. The overlay stays, transparent, so the next press is still the tour's and brings the spotlight in. The card's count is of the parts LIT (1 of 13 … 13 of 13); a clear view is not a step.
+
+**THE COLUMNS ARE THE DEMO'S ALONE.** `deckColOn()` answers false for Owner and Collabs. while `DECK_EXAMPLE` is set — only while the example's deck is drawn, the way `DECK_PLAN` is for the plan — so a real deck still follows the office's Columns switch (`slideColOn`), and the check asserts both ends.
+
+**CHECKED.** `guided-tour` 49 claims: each table opens clear, walks its parts lit and closes clear; a clear stop draws no card and no shade, a lit one both; the count is of the parts lit; YTD actual and Progress before Delayed; the example's tactics slide has no Owner or Collabs., and a real deck with the switch on still has Owner. **Red 5** on the build before (§574.1's). Neighbours green: `slide-columns`, `plan-download`, `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `master-presentation`, `present-loop`, `deck-figures`, `tactic-status-words`, `figure-units`. Mockup republished to the same artifact. Not merged.
+
+**§574.3 — AFTER THE NOTE, ONE KEY MEASURE'S WHOLE LINE.** Islam, mid-build: *"for the measures let's highlight a whole line like we did in the tactics after the note part"*. A stop after Note lights one row end to end, headed with that measure's own name, then the slide closes clear. WHICH LINE is the one furthest behind — the first in the lowest band the slide paints, else the first with a note — the same reason the tactics light their delayed row: it is the line the note has something to explain. On the example that is *Delivery share of sales*, 44%, with its note. Fourteen parts lit now.
+
+**CHECKED.** `guided-tour` 51 claims: after the Note the next lit stop is *Delivery share of sales*, and it is the last lit before the slide closes clear; the count reads 1 of 14 … 14 of 14. **Red 3** on the build before (§574.2's). `slide-columns`, `deck-figures`, `direction-decks` green; `qa.py` through `qa-run.py` **ERRORS none** (also on §574.2's build). Built file byte-identical to the sources' build; served copies regenerated. Mockup republished.
+
+**§574–§574.3 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` stood at §573's record commit, which the branch had merged in, so a clean fast-forward and the tree pushed is the tree verified: `guided-tour` 51 green, the deck, master and presentation neighbours green, `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, `generated-in-step` all clear on the committed tree. Then this note and the `SHELL` bump `smp-shell-v6.63-figure-units` → **`smp-shell-v6.64-guided-tour`** as a commit `main` alone holds (§91); the name was confirmed held by no commit on any of the 40 remote refs after fetching them. Pages only; nothing stored changes shape, so no forced sign-out. Witnesses from the two trees: `/sw.js` release **`6584dacf4fa1cae0`**, `/shell.js` **5,010,670** bytes before; after the deploy they should read **`aff728b715088192`** and **5,033,690**.
+
+**§574.4 — THE CARD IS SIZED FOR THE PROJECTOR.** Islam, after it went live: *"make the cards text bigger for the projector"*. The card was in fixed pixels — 16px body, 21px title — while the slide under it scales to the screen (`deckScale`), so on a 1920 projector the card read small against slide type set for a room. Now one base size off the screen's width, `clamp(17px, 1.3vw, 26px)`, and everything in the card in `em` of it: body **25px** and title **34px** at 1920, 21 / 28 at 1600, 18 / 24 at 1366; the card widens with it (24em: 599px at 1920).
+
+**AND A FAULT OF MINE IT SURFACED (B2).** The cover's lit area was the heading's BOX, which is as wide as the slide — so the card had nowhere to stand but over it. With the small card that already happened at 1366×768 (the new check is red on the live build for it); with the bigger one it happened at every size. The cover now lights the words themselves, measured with a Range (`deckTourInk`), plus the mark or the company's name above the title, which the ring had been cutting through. The card then stands beside it.
+
+**CHECKED.** `guided-tour` 55 claims, four new: at 1920×1080 the card's text is at least 24px and at 1366×768 at least 17px; at both, on every lit stop the card stays on screen and does not overlap the part it explains. **Red 3** on the live build (16px at both sizes; the cover overlap at 1366). Measured beside it at 1600×900: all fifteen cards on screen, none over its part. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Built file and served copies regenerated; mockup republished with the bigger cards. Not merged.
+
+**§574.5 — THE CLEAR VIEW SAYS WHICH SLIDE IT IS, AND WHAT IT IS ABOUT.** Islam: *"in the whole slide in the key measures or the tactics can we highlight somehow that we are in the measures and the tactics slides so people can be aware of the difference?"* Drawn two ways in real screenshots (`design-mockups/guided-tour/2026-10-22_slide-marker.html`): A, the slide's title ringed and its name turned gold; B, a label naming the slide and the difference — *KEY MEASURES · The results we committed to*, *TACTICS · The work that delivers them*. Recommended B. Asked, he chose **both**, on the **clear views only** (the opening and closing whole-slide moments), and to put it live once built and checked along with §574.4.
+
+Nothing is dimmed on a clear view still. The ring goes round the title's WORDS (a Range, as the cover's since §574.4); the gold name is a class on the slide, `dtmarked`, taken off as the stop is left and when the tour ends, so the slide is never left changed; the label is in the card's projector size, on the platform's navy with the accent edge and the quiet ink for its second line, at the table's right edge level with the title — the empty corner on both slides. The two lines are mine (A4): the first word is the client's own (`L()`).
+
+**CHECKED.** `guided-tour` 62 claims, seven new: each clear view of the key measures and the tactics slide rings its title, names it in gold and shows its label with those words; nothing is dimmed on them; a lit stop draws no label and leaves no slide marked; at 1920×1080 and 1366×768 every label stays on screen and clear of the ringed title; closing the deck leaves no slide marked. **Red 4** on §574.4's build. Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `master-presentation`, `present-loop`, `slide-columns`, `deck-figures`, `tactic-status-words`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Built file byte-identical to the sources' build; served copies regenerated; both mockups republished.
+
+**§574.4–§574.5 MERGED TO `main`** 2026-10-22, Islam: *"Yes, put it live when done"*, given with the choice of marker. `main` stood at §574's record commit, which the branch carried, so a clean fast-forward and the tree pushed is the tree verified: `guided-tour` 62 green, the deck neighbours green, `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the very build pushed (compared byte for byte after a worker restart), `generated-in-step` all clear. Then this note and the `SHELL` bump `smp-shell-v6.64-guided-tour` → **`smp-shell-v6.65-tour-cards-and-marker`** as a commit `main` alone holds (§91), the name held by no commit on any of the 40 remote refs. Pages only; no forced sign-out. Witnesses from the two trees: `/sw.js` release **`aff728b715088192`**, `/shell.js` **5,033,690** bytes before; after the deploy **`e887766e382d84a2`** and **5,036,265**.
+
+**§574.6 — THE EXAMPLE ENDS ON WHAT THE PLATFORM IS FOR (drawn, not live).** Islam: *"adding a final slide in the demo, reminding the audience of the purpose … single source of truth maintaining the history maybe something about the visibility … either a fourth one so think with me"*. Put to him: four, in the order they tell one story — **One source of truth**, **Visibility**, **Accountability** (the fourth, recommended because the tour has just shown it: the off-track line and its note, the delayed tactic and its note), **History that stays** — with *time for decisions* and *one rhythm* offered and set aside, and two cautions: Owner is hidden on the slides, so accountability is worded around the note; history runs from the client's first cycle here, so no "years of history". He agreed the four, the title *What this platform is for* and lighting them one by one, with *"make the titles of the objectives big and reduce the paragraphs to be very very minimal … show me before applying"*.
+
+Drawn as the example's last slide (`examplePurposeSlide`, appended to the example's deck and never to a real one): the four two by two, as the stand slide sets its readings, each behind the gold rule the overview's objective wears; titles 74px, the line under each five words or fewer. The tour shows it whole and clear, then lights each objective with one sentence tying it to what the room has just seen. The closing card after it becomes *Now, today's review* — *That is how every direction reads* no longer followed what it closed. Eighteen parts lit.
+
+**CHECKED.** `guided-tour` 67 claims: the walk ends on the purpose slide, whole and clear first; the four lit in order after Execution; the closing card *Now, today's review*; the slide is the example's last, its four titles in order, 70px or more, each line five words or fewer; a real deck has no purpose slide; the count reads 1 of 18 … 18 of 18 and five clear views. **Red 9** on the live build. Mockup `design-mockups/guided-tour/2026-10-22_purpose-slide.html`, real screenshots, published as an artifact. **Not merged: shown to Islam, waiting on "apply it".**
+
+**§574.7 — THE LINES ARE HIS MEANINGS.** Islam, on the drawn slide: *"The descriptions are weak. The one source of truth is about having one place for all the actuals and older numbers of the company performance and directions, and the visibility is about having visual representation of our progress with proper accessibility to different audiences … OK for the history that stays … accountability is about reporting what we said we will do and stopping the things that don't work, being on top of the plan"*. Offered three short lines for each; he chose *Every actual, past and present, one place* and *Doing what we said, stopping what doesn't work*. On Visibility he struck the word I kept putting in its card — *"why are you insisting on adding the word [DELAYED] … it's not relevant … brief, please"* — so the card is now one plain sentence with no DELAYED, and the Accountability card loses its reference to the delayed app for the same reason. Visibility's line is the one recommended, *Progress at a glance, for the right audience*, as he did not name another; said so in the reply.
+
+Cards: *The figures you just saw, and every cycle before them, for the company and each direction, live in one place.* · *Progress shown the same way to everyone, and each audience sees what is theirs.* · *Each cycle we report against what we committed to, and decide what to fix and what to stop.* · History's unchanged. The lines under the titles are now up to eight words; each still fits one line at the slide's size.
+
+**CHECKED.** `guided-tour` 68 claims: the four lines read as chosen, each eight words or fewer. Mockup republished. **Not merged: waiting on "apply it".**
+
+**§574.8 — THE PURPOSE SLIDE BUILDS UP; IT IS NOT TOURED.** Islam: *"I don't think the lighting up every objective is good in the demo. It's not a tour — you can make them appear one by one … on a click."* So the four lit stops and their cards go (§574.7's card sentences with them; the lines under the titles stay). The slide opens on its title alone and each press brings in the next objective, whole — nothing dimmed, no card, no ring — then the closing card. The build is a class on the slide (`preveal`, each objective `pshown` as it arrives) set and taken off in one task by the draw, so an objective already in never flickers; ending the tour anywhere takes the class off and all four show. Fourteen parts lit again; nine clear views.
+
+**CHECKED.** `guided-tour` 69 claims: after Execution the purpose slide shows 0, 1, 2, 3, 4 objectives on successive presses, nothing dimmed and no card while it builds; ending the tour half way (two shown) shows all four; the count reads 1 of 14 … 14 of 14 and nine clear views. My first draft of the half-way claim ran after the deck had closed and read the hidden slide's four — red on a working build; moved before the close (§94.5). **Red 6** on §574.7's build. Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `present-loop`, `master-presentation`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Mockup republished. **Not merged: waiting on "apply it".**
+
+**§574.9 — EVERY CARD A SIZE UP, THE CLOSING CARD BIGGEST.** Islam, approving §574.8: *"OK, but if you can make the box of Now today's review bigger it would be great just to make it obvious. We can always make the boxes big to be visible for the people even for the other boxes on the other slides … if the space is convenient"*. Every card's base goes from `clamp(17px, 1.3vw, 26px)` to `clamp(19px, 1.45vw, 30px)` — about 28px of text at 1920 (from 25), 23 at 1600, 20 at 1366 — and the closing card, centred over nothing it explains, to `clamp(26px, 2.1vw, 44px)`: about 40px at 1920, 20em wide.
+
+**AND A NARROWER CARD BEFORE ONE ON TOP.** At the bigger size the cover's card no longer fitted beside its words and fell to the corner, onto their last line (1,300–1,600px² of overlap at all three sizes, measured). The placement now tries a card narrowed to the room beside the part, down to fifteen of its own ems, before the corner; the cover's card stands beside the title at every size.
+
+**CHECKED.** `guided-tour` 72 claims, three new: at 1920 every card about 28px and the closing card 36px or more; at 1920 and 1366 the closing card at least a third bigger than the rest; and the fit claims — every card on screen and off its part at 1920 and 1366 — green at the new size. Measured beside them at 1600: fifteen cards, none over its part. **Red 3** on §574.8's build. Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `present-loop`, `master-presentation`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, on the build pushed (compared byte for byte).
+
+**§574.6–§574.9 MERGED TO `main`** 2026-10-22, Islam: *"OK, but … make the box of Now today's review bigger"* — his OK to §574.8 with §574.9 asked for in the same breath. `main` stood at §574.4–§574.5's record commit, which the branch carried, so a clean fast-forward and the tree pushed is the tree verified: `guided-tour` 72 green, the deck neighbours green, `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build pushed, `generated-in-step` all clear. Then this note and the `SHELL` bump `smp-shell-v6.65-tour-cards-and-marker` → **`smp-shell-v6.66-tour-purpose`** as a commit `main` alone holds (§91), the name held by no commit on any of the 40 remote refs. Pages only; no forced sign-out. Witnesses from the two trees: `/sw.js` release **`e887766e382d84a2`**, `/shell.js` **5,036,265** bytes before; after the deploy **`f35e94d9724b140f`** and **5,039,736**.
+
+**§574.10 — THE COVER OPENS CLEAR TOO.** Islam: *"for the first cover page let's start with it a clear slide before the highlighting"*. A clear stop in front of the cover's lit one, so the tour opens on the cover as the room would see it — nothing dimmed, no card — and the next press lights it with *One direction, from cover to close*, 1 of 14. Ten clear views now; the parts lit unchanged. A clear view draws no card and so no ×: `G` ends the tour there, as on the other clear views.
+
+**CHECKED.** `guided-tour` 73 claims: the menu's press opens on the cover, clear, no shade and no card; the next press lights it with its card, *1 of 14*; ten clear views. Two of the check's own claims moved with it (§94.5): the dim-press claim now asks the slide the tour's next stop names rather than "the same slide" (the cover's lit stop and the key measures' clear view are on two), and the × is tried on a lit stop — tried on a clear view it found no card to press, and four claims after it went red on a working build. **Red 3** on the live build. `deck-model`, `direction-decks`, `present-loop` green; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build pushed.
+
+**§574.10 MERGED TO `main`** 2026-10-22, on Islam's instruction, as the rounds before it went once checked. A clean fast-forward from §574.6–§574.9's record commit, the tree pushed the tree verified (`guided-tour` 73 green, `qa.py` 33 / 181 / ERRORS none on it, `generated-in-step` all clear); then this note and the `SHELL` bump `smp-shell-v6.66-tour-purpose` → **`smp-shell-v6.67-tour-clear-cover`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages only. Witnesses: `/sw.js` release **`f35e94d9724b140f`**, `/shell.js` **5,039,736** before; after **`19d78257ab253f6f`** and **5,040,104**.
+
+**§574.11 — "WHERE IT STANDS" OPENS CLEAR TOO.** Islam: *"for the where it stands slide start with a clear view too"*, then *"1. ok"* on the reading-back. A clear stop in front of its two lit ones in the guided tour; eleven clear views. `guided-tour` asserts it opens clear and then lights its two readings.
+
+## §575 — A tactic measured in numbers is Completed at its whole target, never at the part due so far (2026-10-22)
+Islam, with a screenshot of D003 *Digitalizing Route to Market* on the live Performance page — Q3 and Q4, *10k outlets coverage*, **8** reported against **due 5**, **150%**, the pill reading **Completed** and the reporter's own note under the name *"to be finalized Q4"*: *"someone reported a tactic is completed while in the ytd actual is still in progress … he said completed and then entered 8 in the actual ! this is a strange case. how can we resolve this"*. Put to him: nobody picked the word — the reporting box for a numeric outcome has no status control — the platform did; Completed only at the full target, the row reading In progress with its 150%, rows already saved that way reading right with nothing re-entered. *"ok"*.
+
+**§575.1 — WHY IT HAPPENED.** The outcome box's handler (`shell.html`, `data-fld="outActual"`) stored `Done` whenever `tacticOutcomeScore` reached 100, and `statusFromOutcomes` did the same for several outcomes. That score is against the PRORATED target (§250: the tactic's own window; Q3–Q4 at the end of September is half of it, so 5 of 10 are due), so it answers *how far ahead of what is due*, and 8 against 5 is 160, capped 150. `tacticComplete` then believed the stored word first. §300 had already said this of a yes/no row (*"the tactic's status follows the answer, never the score"*) and kept the score test for a number as *"right for a figure against a target"* — true only where the target is not prorated.
+
+**§575.2 — THE RULE.** `outcomeComplete(t, o)`: a yes/no outcome when it is Done (unchanged); an *at least* outcome when its figure reaches the **whole** target, read with `measureScore`'s own number parse; an *at most* outcome keeps the reading it had (inside its target, scored against what is due) — nobody has said when a ceiling is finished, and changing it was not asked. `tacticComplete` asks every outcome (§414) and **no longer reads `t.status` for a tactic with outcomes**, so a row saved as `Done` before this reads In progress the moment it is drawn and nothing is migrated (§419: derived, never stored). A tactic with no outcome is unchanged — its `actual` is already a share of the whole tactic, so 100 is the whole of it. The handler and `statusFromOutcomes` write `Done` through `tacticComplete` too, so what is stored agrees with what is drawn. The score and Progress do not move; Delayed now falls on such a row once its window has passed short of the target (`tacticDelayed`, which asked `done` first).
+
+**WHERE.** Every surface that draws the word reads `tacticStatusKey` — Performance, the tactics slide and its PowerPoint, the deck's tactic groupings — so all follow. Nothing stored changes shape; no save is judged differently, so nobody is signed out; the frozen product changed, so the `SHELL` bump is owed at the merge.
+
+**CHECKED.** `tactic-completed.py`, new: the rule made on one tactic — Islam's row In progress, not late, still 150; a stored `Done` at 8 of 10 read In progress; 10 and 12 Completed; behind what is due In progress; the window gone at 8 In progress and late; Latest at 9 of 10 In progress; yes/no, no-outcome and *at most* rows unchanged; two outcomes Completed only when both are whole — and then typed through the real Reporting box: 8 stores `WIP` and Performance draws In progress beside 150%, 10 stores `Done` and draws Completed, back to 8 stores `WIP`. Green; **red 10** on the build before. Neighbours: `tactic-status-words`, `several-outcomes`, `tactic-proration`, `deck-outcome`, `report-blockers`, `my-reporting` green; `tactic-outcome` (1: *the figure is shown against the outcome's own benchmark*, which still looks for §239's `8 / X` pair that §572 moved under the figure) and `reporting-ytd-target` (1: *…and the same cell*) fail identically on the build before, so they are noted and not touched here. Snapshots `ui-versions/tactic-completed/`.
+
+**§575 MERGED TO `main`** 2026-10-22, Islam: *"MERGE TO MAIN"*. `main` stood at §574.10's record commit, the branch's own base, so a clean fast-forward and the tree pushed is the tree verified: `tactic-completed` green, `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**, `built-in-step`, `generated-in-step` and `release-stamp` all clear. Then this note and the `SHELL` bump `smp-shell-v6.67-tour-clear-cover` → **`smp-shell-v6.68-tactic-completed`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages only; no save judged differently, so no forced sign-out. §576 rides along as a mockup and a record only — nothing of it is built. Witnesses: `/sw.js` release **`19d78257ab253f6f`**, `/shell.js` **5,040,104** before; after **`862483879f3af6b8`** and **5,041,913**.
+
+## §576 — A red figure gets its note before anything else (2026-10-22) — drawn, awaiting sign-off
+Islam: *"when people enter a number in the performance that is deviated and in red the note becomes mandatory as agreed. to the level it blocks the rest of the entries until the note is made"*. Today (§105, §221) a figure at risk with no note holds **Submit** and nothing else. Put to him in chat, and *"agreed"*: the moment a figure lands in red, every other box on the page locks; only that row's note stays open, with its own figure in case it was a typo; writing the note opens the page again; it applies on every Reporting page and on My reporting; a page that opens with red figures already missing notes asks for those first. **His one decision**, asked because §382 gives the note to the unit while the tactic owner enters the figure on My reporting (*"You enter the figure; the unit writes the note"*) — so the lock would have shut the owner in with no way out: the tactic owner writes the note on their own red rows. Reverses §382's note half for that case only.
+
+Mockup `design-mockups/note-first/2026-10-22_note-before-anything-else.html` (published as an artifact): Mobile's real Reporting page with Mobile market share typed at 18% against 32% due, today beside the lock drawn into the real page — a red bar in the *to finish* bar's place, *Mobile market share is off track. Write its note before entering anything else.* with *Go to it*; every other box greyed and shut; the row's note ringed. **Not built: waiting on his sign-off of the look.**
+
+**§576.1 — BUILT.** Islam: *"build the note lock"*.
+
+**THE RULE (`noteLockOf`, `config-data.js`).** A row on the open Reporting page that is red (`rowAtRisk`, the half of `needsNote` about the figure, split out so My reporting can keep its box once written) with no note, and whose note THIS person may write — asked the way the page draws the box, never a second rule (§53.5): `canEnterNote` on a unit-shaped report (the call `noteCell` makes), and on a holder's rows the gate its renderer hands `capNoteBox` (`noteMayWrite`: per row through the project, per row on an objectives plan, the whole holder for a capability's own objectives — `fnReportItems` now carries `cap` and `proj` on each row so this needs no second walk). A row this person cannot explain locks nothing for them, or the page would shut with no way out. A breakdown's cells share their row's note, so a row is one entry however many cells are red. A submitted or parked report holds nothing (there is no open box). The company's page asks the capabilities it reports as well (`noteLockSubjects`, `capsHere()`). Worked out ONCE per paint, before the render (`NOTELOCK`), because two halves read it.
+
+**THE PAGE.** The bar (`noteLockBar`, `group-render.js`) takes the "to finish" bar's place — `reportBar` returns it while the lock holds, for whoever is locked rather than only for whoever may submit — and is drawn above the tables on an objectives-format report and on My reporting, which carry no such bar. It names the first row in the band's own word (*"Mobile market share is off track. Write its note before entering anything else."*), counts the rest (*1 of 3*), and **Go to it** opens the row's pillar / project / capability the way the bar's chips do and lands in the note. After the paint (`noteLockApply`, `shell.html`) every reporting box (`REP_BOXES`) answering another row is `disabled`, greyed, with the hover *"Write the note on … first"*, and the subject's cycle note shuts too; the locked row's note is ringed and joins the tab path (§528 took unwanted notes out of it, and a capability's always). Enter from the red figure and Alt+Enter go to the note (`repStep`, `repWalk`).
+
+**THE CURSOR.** Typing a red figure and pressing Tab now lands in its note. That needed a capture-phase `change` listener: Chromium fires `change` as the focus leaves, so by the time the commit's paint runs, the focus it keeps is already gone — measured on the build before §576 too, Tab out of any figure has always left the cursor on the body. A page that merely OPENS with a red row moves nobody's cursor.
+
+**MY REPORTING** (spec 062 §9). A *Note* column: a box on the owner's own red rows, the row's note read-only elsewhere; `noteBox` gained `subj`, written as `data-repu`, and the note's handler resolves `data-repu || current` as the figure's has since §345. The page's last sentence now reads *"You enter the figure, and its note when it is red; the unit submits."* The column was not in the mockup — it is the Reporting page's own box on the same kind of table, shown to Islam as a screenshot before the merge.
+
+**THE SERVER — AND A FAULT IT FOUND.** Measured before anything was changed: with tactic owners switched on, `addOwnedTactics` sent the NOTE on an owned line to `lineReporting` with the figure, so the unit's custodian and head were REFUSED the note (*"That line is entered by …"*) while the screen offered them the box and Submit waited for it — §382's *"the unit writes the note"* was never true on the server. The note is now `lineNote`: the owner's, or (falling through to `unitReporting`'s own judgement, so a bounded reporter who could not write it before still cannot) the unit's; a locked cycle refuses both. Carried into `smp-app/lib/authorize.cjs` under its one transform. `history.js` names `lineNote` and `lineReporting` (*Reporting*) — the second had been printing its raw key in the change log since §382.
+
+**NOT ON *FIGURES I REPORT*.** A set owner enters the figure and the unit writes the note (§16.7), so nothing there is theirs to explain and nothing there locks.
+
+**CHECKED.** `note-lock.py`, new: the rule (nothing red; a red figure holds the page on that row; its note, the figure out of the red, or a submitted report lets it go; not on a page that is not a report; the company's page asks its capabilities; a breakdown row with two red cells held once); typed on Mobile's Reporting (bar in the approved words in the "to finish" bar's place, every other box shut and greyed with its hover, the figure and note open, the note ringed, the cursor in it after Tab, Save draft pressable, the bar 4.5:1 or better in light and dark, the note stored and the page open again); Enter from a red figure lands in its note; Go to it across pillars, and opening a held page moves nobody's cursor; Finance's capability report held on an outcome; a unit planning in objectives held on an objective; My reporting as an owner who does not run Mobile (the Note column, no box until red, the lock, the cursor, the note on the right tactic in the right unit, the box kept to correct it) and a red row they cannot explain holding nothing. Green; **red 33** on the live build. `test-authorize.js` §43, 8 new — **1112 passed, 3 failed**, the three (§447, §505, §520.6) the same as before; the new ones **red 3** on the rule before. `report-blockers.py` REWRITTEN, never loosened (§218): its §279 state (one note owed) is now the lock's, asserted as 2b (the lock's bar in this one's place, the rail still naming the place and the note, Go to it landing in the note); the walk, chips and pair are asserted over a figure still to enter; its projects subjects explain any seeded red row first — green, **red 4** on the live build (2b). `report-keys.py`: its §8 makes a red row and now explains it before §9–§10 measure the walk and keys on an unheld page. Neighbours green: `report-chrome`, `report-note-wrap`, `report-saves`, `reported-note`, `my-reporting`, `fn-report-gate`, `capability-report-column`, `capability-entry`, `pillar-breakdown`, `office-ask`, `unit-plans-in`, `fn-pillars`, `project-done`, `yn-target`, `monthly-plan`, `gap-walk`, `tactic-completed`, `tactic-status-words`, `several-outcomes`, `deck-outcome`, `notes-slide`, `action-keys`; `test-my-reporting.js` 64/1 and `yn-in-progress` 1, `tactic-outcome` 1, identical on the live build. `welcome.py` dies at its own §9 redirect race (*execution context destroyed*, the race its comment names) on the live build too (1 of 5), so it is noted, not touched. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**; `built-in-step` all good. Snapshots `ui-versions/note-lock/`.
+
+**§576.1 MERGED TO `main`** 2026-10-22, Islam: *"MERGE TO MAIN"*. `main` had moved under the branch (§577, a target by quarter, merged by another session), so `main` was merged INTO the branch: the sources without conflict, the record files keeping both sides in number order, and the built file, `public/shell.js`, `platform.css` and the release stamp regenerated from the merged sources, never resolved by hand. On that merged tree: `note-lock`, `tactic-completed`, `report-blockers`, `report-keys`, `quarterly-plan`, `monthly-plan`, `my-reporting`, `report-chrome`, `reported-note`, `fn-report-gate` green; `test-authorize.js` **1116 passed, 3 failed** (§447, §505, §520.6, as before); `built-in-step`, `generated-in-step`, `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.69-quarterly-plan` → **`smp-shell-v6.70-note-lock`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The authoriser changed, but only to WIDEN (the unit may now write an owned line's note; everything allowed before is still allowed, the owner's note included), so no old tab's save is refused and no forced sign-out is owed. Witnesses: `/sw.js` release **`691ae8520ee9766a`**, `/shell.js` **5,061,540** before; after they should read **`76204bfe9b4efe78`** and **5,074,863**.
+
+**§576.2 — THREE FAULTS IN THE LIVE LOCK, FIXED.** Islam, told one of them by the session that found it (*"on My reporting, after you type a red figure and press Tab, the cursor sometimes lands on Save draft instead of the note box … is that an issue?"*), then *"go ahead, fix the three and put it live"*. A second implementation of §576, built in parallel on another branch, was dropped rather than released over this one: it took the custodian's note box away where §576.1 had given the server the unit's half, and §382's *"the unit writes the note"* is the better rule.
+
+- **THE TAB.** `noteLockFocus` moved the cursor to the note only when it was NOWHERE — and on My reporting the browser's own step, which lands after the commit's paint, sometimes picks Save draft, the one control left live below the shut lines. Measured on the live build: the cursor on Save draft in **2 Tabs of 12**, and `note-lock.py`'s own *"…and the cursor is in it"* red **1 run in 4** (the flaky check Islam was told about is this race, not a flaky check). Now a commit made with **Tab or Enter** ends in the note unless the cursor is already on the locked row's own figure or note; a MOUSE press somewhere live is still left alone (`NOTELOCK_KEYED`, cleared on `mousedown`). 20 Tabs of 20 in the note after.
+- **THE BAR'S EDGE ON A CAPABILITY'S PAGE.** The pane pins its project band with a 24px strip of page ground above it (`.pane > .pband::before`), and at the bar's 10px it painted over the bar's bottom edge — found by looking at cap6, the one page the worked example opens locked. `.lockbar + .capbody{margin-top:26px}` (the bar's 10px collapses into it), so no other page moves.
+- **THE RINGED NOTE'S WORDS.** A capability's note box is always drawn *"Note, if there is one"*, under a bar asking for it. The ringed box takes the wanted note's words, *"Why, and what is being done"*, while it is ringed.
+
+**CHECKED.** `note-lock.py` §8–§9, new: the Tab race MADE rather than waited for (the browser's step played by focusing Save draft in a microtask after the commit, three times), its other end (a press held on Save draft keeps the cursor there, with nothing saved), and cap6's bar edge asked as paint and its note's words — **red 3 on the live build, every run**; all passed on this one, three runs in a row. And `direction-part.py`, **red 4 on `main` since §576.1 went live** — cap6's own unexplained red row locks the company's and the capability's Reporting pages, so *"its boxes live"* read a correctly locked page: its rows are explained first, as Submit's own rules name them, before reach is asked (§218, rewritten, never loosened), green. Neighbours green: `report-blockers`, `report-keys`, `my-reporting`, `submit-gate`, `report-saves`, `report-note-wrap`, `reported-note`, `capability-first`, `capability-report-column`, `project-done`, `quarterly-plan`, `monthly-plan`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**.
+
+**§576.2 MERGED TO `main`** 2026-10-22, Islam: *"go ahead, fix the three and put it live"*. `main` stood at §583's record commit, the branch's own base, so a clean fast-forward and the tree pushed is the tree verified. Then this note and the `SHELL` bump `smp-shell-v6.72-my-work-ledger` → **`smp-shell-v6.73-note-lock-fixes`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages only; no save judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`90c1188e40e92baa`**, `/shell.js` **5,107,310** before; after they should read **`44565c430e9f04c4`** and **5,108,886**.
+
+## §577 — A target by quarter as well as by month (2026-10-22)
+Islam: *"for setting targets in the plans we have the option to plan it in months I need to have the option to plan it in quarters as well"*.
+
+**WHAT CAN BE DONE TODAY, AND WHY IT IS NOT ENOUGH.** Since §569 an empty month counts as nothing planned, so a quarter's figure typed into its LAST month (Mar, Jun, Sep, Dec) with the other eight left empty already works — run on the shared rule, 30 / 50 / 90 / 130 on a Sum row reads a 300 target, 80 owed at June and 170 at September. Two costs: a quarter is owed only once it is over (a cycle ending in August owes nothing of Q3), and the row still says *by month* over eight empty boxes.
+
+**PROPOSED.** A **By month | By quarter** switch on the title line of the drawer §278 built, the platform's existing segmented pair (`.askseg`'s shape). By quarter shows four boxes, Q1 to Q4, each labelled with the months it covers. One drawer serves all four surfaces (§278(b)), so all four get it together. The target is what the quarters set come to from the first one typed (§555), an empty quarter counts as nothing planned (§569), and Performance says *by quarter* where a monthly row says *by month*. Stored beside the monthly plan in `extra` JSONB — no migration (§177's road).
+
+**ISLAM'S THREE ANSWERS, TAKEN BEFORE ANYTHING WAS DRAWN:**
+- **(1a) A review inside a quarter owes that quarter in proportion** — each quarter spread evenly over its three months, so Sum and Count rows owe Q/3 a month, and Latest and Average rows read the quarter's figure for each of its months. That makes a quarterly plan a monthly plan the platform derives, so it runs through the one walk `monthsCompiled` already is (§569) rather than a second arithmetic (§53.5). Measured on the shared rule with 45 / 51 / 84 / 120: 96 owed at June, **152 at August** (45 + 51 + 56), 180 at September; a Count of 3 shops in Q3 owes 2 by August (§276's floor). Refused: (1b) a quarter owed only once it is over — it agrees with (1a) at every quarter end and makes a row two months into a big quarter look ahead of plan.
+- **(2a) Switching carries the figures across.** Months to quarters is exact (Sum and Count add the three, Average averages them, Latest takes the last set); quarters to months spreads each quarter evenly, the three adding back to the quarter exactly (50 → 16, 17, 17), and the drawer says so. The cost, stated on the mockup: the shape inside a quarter does not survive a round trip. Refused: (2b) switching only on an empty plan.
+- **(3) Workbook columns** *Q1 target … Q4 target*, and *Outcome Q1 target … Outcome Q4 target* on Tactics — the Tactics sheet's own Q1–Q4 already say which quarters a tactic runs in. Appended after December (§65: a validation range is a position); Requirements stays last on Tactics (§415). A row with both months and quarters filled is refused at upload by name; a workbook from before has neither and uploads as today (§58).
+
+**THE MOCKUP** — `design-mockups/quarterly-plan/2026-10-22_quarterly-plan-entry.html`, every picture the running build's Key measures table (Mobile › MB03 › Accessory revenue) with the proposed drawer drawn into it. Measured: the switch costs the drawer **12px** (147 → 159 at 1600, 210 → 221 at 1280); the four 112px boxes sit on one line at 1600, 1280 and 1100 and the page gains no sideways scroll at any of them (§158).
+
+**FOUND WHILE DRAWING IT (B2).** The mark beside the target does not light when the first month is typed: `monthlyRefresh` rewrites the sentence, the Clear button and the locked box in place and never the mark's `on`, so it lights only on the next repaint — measured, `.mpopen` without `on` for 2.5s after twelve months were typed with no repaint. §278.2 says the mark is lit *"once anything has been typed, so a plan somebody is halfway through is findable again"*. To be fixed in the same build, for months and quarters together.
+
+**SIGNED OFF AND BUILT.** Islam, on the mockup: *"go ahead and build it"*. Built as drawn, with one addition found by driving it: a figure typed over a carried one takes the *Carried across* line away, since it is no longer true of that box.
+
+**WHERE.** `lib/rules.js` (carried byte-for-byte into `smp-app/lib/rules.cjs`): `planBy`, `quarterlySet`, `quartersCompiled` — reached from `monthsCompiled`, so every surface that asks what is due (Performance, Reporting's *YTD Target*, the slides, a tactic outcome) follows with no second copy — and the carry-across pair `quartersFromMonths` / `monthsFromQuarters`. The quarters are computed on the quarters rather than on twelve derived months so a quarter end is exact (50 split three ways and added back is 50.00000000000001). `group-render.js`: the drawer's mode is read off what the row HOLDS, with only an empty plan's pick held for the session and never saved (§50.6); `monthlySwitch` carries, deletes what it came from and re-derives the target through the typed figure's own ending; the mark's hover and lit state are rewritten in place by `monthlyRefresh`. `shell.html`: the switch's press, and Clear in the quarters' own words. `arrange.css`: `.mpseg` declared with `.askseg`. `config-data.js`: `outcomeOf` carries `outQuarterly`. `xlsx.js` / `templates.js`: the four columns out and in, the read-me's *Months or quarters* line, and `validatePlan` refusing a row with both. `recipes.js`: the office's answer and *Why is my year-to-date target not half the year?* name quarters; `db/kb.json` regenerated. Spec 031 gains §8.1 and R4a.
+
+**CHECKED.** `checks/quarterly-plan.py` — the arithmetic by name, the drawer through real presses on a measure, a tactic outcome, a unit's objectives and a FUNCTION's (A15), Performance's *by quarter* and the August figure (152M EGP), the workbook round trip and the both-filled refusal, Clear, the fit at 1600 / 1280 / 1100: **all good, red 60** on the build before; ten of its assertions could not fail when first written (absences that held on a build without the feature) and are asked beside a case that must answer now (§94.5). `monthly-plan.py` and `fn-pillars.py` rewritten where §577 moved what they asserted — the mark's hover words and the four columns after December (§218, old words kept) — green. Neighbours green: `planning-period`, `count-compile`, `plan-download`, `pillar-breakdown`, `deck-figures`, `objective-unit`, `ytd-proration`, `tactic-proration`, `contingency`, `figure-units`, `knowledge-base`; `reporting-ytd-target` red 1 on both builds, main's (§556). `test-graph-diff.js` 142/0 (two new: four quarters travel as one row edit, and the switch lands the four AND removes the twelve). `test-authorize.js` 1108 passed, 3 failed — the same three (§447, §505, §520.6) on the tree before this, none about plans; four new cases green (the office may set and clear quarters, the custodian may do neither, it classifies as `unitPlan`). `test-roundtrip.js` against a throwaway Postgres 16: quarters on all three shapes, nulls and a typed 0 kept, the key deleted on clear. `built-in-step` all good; `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build pushed, §569's figure to the digit.
+
+**§577 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` had moved under the branch (§575, a tactic Completed at its whole target, and §576 drawn), so this work was renumbered §575 → §577 and `main` merged INTO the branch, the record files keeping both sides in number order and the built file, `public/shell.js`, `platform.css` and the release stamp regenerated from the merged sources, never resolved by hand. On that merged tree: `quarterly-plan`, `monthly-plan`, `fn-pillars` and main's `tactic-completed` green with their neighbours; `reporting-ytd-target` red 1, main's (§556); `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.68-tactic-completed` → **`smp-shell-v6.69-quarterly-plan`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages and the shared rule; no save is judged differently (the server classifies `quarterly` exactly as `monthly`, asserted), so no forced sign-out. Witnesses: `/sw.js` release **`862483879f3af6b8`**, `/shell.js` **5,041,913** before; after they should read **`691ae8520ee9766a`** and **5,061,540**.
+
+## §578 — Where the two readings come from, under them
+
+*Renumbered on going live: §578–§582 were written as §575–§579 on a branch while `main` took §575–§577 (a tactic Completed at its whole target, the note lock, a target by quarter). The branch's commits carry the old numbers; everything they wrote now carries these.*
+
+Islam: *"for the overall performance slide with the final 2 numbers we need to give a detail below the 2 numbers to show where the numbers are coming from"*. Three ways put to him — the lines themselves, one line of arithmetic, small bars — and *"A ok"*: the lines. Under **Key measures performance**, each key measure (and each scored category column, when the direction has a categories table) with its own figure in its band — the very list `pillarPerf` averages, each read by `measureScore` and `bdColScore`, so the lines cannot disagree with the number above them (§53.5). Under **Execution performance**, each tactic it counts — due and reported — with what it delivered against what was planned (`tacticReads` of `tacticPlanShare`, the two `pillarExec` and `pillarPlan` average), the delivered figure in the band of the tactic's progress; and, quietly, what it leaves out: *Not counted: 1 not due, 2 not reported* — a tactic not due or not reported is not zero, and a reader adding up the lines needs to know why it is not there.
+
+Directions only, on the deck that ends on them; a unit's *Where the unit stands* is as it was (its two questions on scope and long lists were not answered, so the defaults were taken and are stated in the reply). Five lines, then *and N more* — never *and 1 more*, which would take the line it saves. The figures are their own class (`.hdf`), not `<b>`: the stand slide's 168px figure rule is written on `.headcell b`, and the first draw put every line's figure at that size. The PowerPoint download reads each cell's first `<b>`, so it carries the two readings as before without the lines.
+
+**CHECKED** in the new `line-by-line`: the Key measures lines are exactly `scorableMeasures` with their `measureScore`s and average to the reading; the Execution lines exactly `reportedTactics`; the not-due count said; four extra measures show five and *and 4 more*; a unit's stand slide has no detail; the stand slide still fits its 900px. `review-pptx` green.
+
+**§578.1 — THE FIGURES NEXT TO THEIR NAMES.** Islam, with a screenshot of El Abd's *Where Maximizing Current Stores stands*: *"the space between the element and the number is so far that the number nearly hits the other side element"*. Each line's figure sits at the far edge of its half (the name takes the rest of the row), so the left half's figures end 69px from the right half's names on the 1600px slide. Drawn (`design-mockups/stand-detail/2026-10-22_figures-beside-names.html`) as real screenshots of the build with each change applied: A, each list narrowed to 600px (171px clear); B, recommended, the figures as a column right after the longest name in each list, 40px from it (369px clear on the demo direction). Waiting on his choice.
+
+**§578.1, BUILT.** Islam: *"B, build it"*. The lines become a two-column grid, the names then the figures, the figure column 40px after the longest name and lined up on its right edge; the name column may shrink, so a name too long is cut before its figure. One thing added on driving it with a long name: the figures went back out to the half's edge, the very complaint, so the left half keeps 110px clear on its right (with the 70px gutter, its figures never come within 180px of the right half's names) and a name that would cross it is cut. The right half keeps its whole width. *and N more* and *Not counted* run under both columns without sizing them. The rule above stays the half's full width. CSS only (`present.css`); the PowerPoint is untouched.
+
+**CHECKED.** `line-by-line` gains six claims, measured on the slide at its own scale: the figures 40px after the longest name in each half; one right edge in each half; the left half's figures well clear of the right half's names; a too-long name cut with its figure still on the slide; even then the left half's figures 110px short of its edge; a long note under the list leaves the figures where they were (34 green). **Red 3** on the build before. Neighbours green: `guided-tour`, `master-presentation`, `deck-pdf`, `deck-model`, `direction-slides`, `direction-decks`, `deck-figures`, `clock-stages`, `two-screens`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§578.1 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` had moved under the branch (§584.2–§584.4, the console's tab names, buttons, text boxes and chips in their declared type), all in the console's own page, so `main` was merged INTO the branch, the progress lines kept in order and the served copies regenerated; the built platform file came out byte-identical to the one checked above, so those checks and the sweep stand. `built-in-step`, `generated-in-step` and `release-stamp` all clear. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.78-text-boxes` → **`smp-shell-v6.79-stand-lines`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Slides only; no save judged differently. Witnesses: `/sw.js` release **`f72c410256af6679`**, `/platform.css` **847,127** before (`/shell.js` does not change: the fix is CSS); after they should read **`7b31190177c959e9`** and **848,367**.
+
+## §579 — Line by line
+
+Islam: *"for the slides presentation give me an option in the sliders per direction or in the master slide to present box by box like line by line in the tables and number by number in the numbers slides"*. Asked where the switch lives, which slides build and how back behaves; *"3 ok b) objectives & swot no, projects yes. c) yes"* — the recommended switch, those slides, ← one line at a time.
+
+**THE SWITCH** is **Line by line**, a toggle in the slide view's bar beside Columns, for the office (`inOffice()`), and it is the COMPANY's: `GROUP.slideBuild`, `true` when on and absent when off (§50.6), read through `SMPRules.slideBuildOn` in the shared module. The server judges a change to it as it judges the Columns menu — `deckHide`, named in `gExtra` — so a unit's custodian, who opens the same view, is refused either way. `smp-app/lib/rules.cjs` and `authorize.cjs` carried with the one declared transform. The buttons in that bar had no pressed state; one is added (the accent edge on the quiet fill).
+
+**WHAT BUILDS**: the key measures, categories and tactics tables row by row; a function's projects — the cards, each project's deliverables and milestones, and *Projects — where we stand*; the pillar score table and the pillars roll-call cards, which are the same shapes; and *Where it stands*, one reading at a time. NOT a unit's objectives tables or its SWOT (Islam), which carry none of those marks. A line is a table row, or a tactic's rows together (an outcome's own line has no number cell and rides with the row above it, as `deckFitPass` moves them); a table continued on the next slide builds again from its first row.
+
+**HOW IT STEPS**: every way forward and back — the keys, the clicker, the bar's arrows, a press on the stage in full screen, a swipe — now goes through `deckStep`, which is `deckShow(i ± 1)` when the switch is off. On, the next slide arrives with its headings alone, each step shows a line, and the step after the last turns the slide; back takes the last line away, and from a slide with none showing goes to the one before, whole, whose lines the next steps back take away in turn. The dots, Home, End and the slide Present was pressed on land on whole slides (`deckShow` clears every build).
+
+**HELD BACK, NOT TAKEN OUT**: a waiting line is transparent, so the table does not move as it fills; its column rules stay, so the room can see how many lines are coming. Never on paper (print CSS), never in the editor's rail (its own copy), never on the guided tour's example (`deckBuildOn` is false there).
+
+**CHECKED.** New `line-by-line`, 28 claims (with §578's): the switch beside Columns for the office, off and absent by default, pressing it stores `true` and again removes it; the editor's slides never built; off, a step is a slide; on, the key measures and tactics slides arrive empty and fill one row per press, the continued table from its first row, *Where it stands* 0 → 1 → 2, the cover and Thank you one press each; ← from the last slide lands on *Where it stands* whole and the next ← takes its last reading; a jump lands whole; one line per numbered tactic covering every row; on paper every line; a unit's objectives and SWOT never build and a function's projects slides do; the tour's example never builds; somebody outside the office has no switch. **Red 15** on the live build. `test-authorize.js` §579 block: 7 claims, the office on and off, `deckHide` and nothing else, a unit's custodian refused both ways — 1111 passed, the 3 red identical on the tree before (§447, §505, §520.6, not this work's). Neighbours green: `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `present-loop`, `presentation-parts`, `presentation-timer`, `master-presentation`, `slide-columns`, `deck-figures`, `tactic-status-words`, `review-pptx`, `deck-and-weights`, `hide-slide`, `notes-slide`, `figure-units`; `guided-tour` 74. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. **Not merged: Islam said build without putting it live.**
+
+**§580 (drawn, not built) — THE PRESENTER'S CLOCK AS TIME RUNS OUT.** Islam: *"when the timer reaches a certain limit I believe it turns red … I want to make it grow in size a bit maybe and maybe start flicking by the end to notify the presenter .. is that already a behavior"*. Today: grey, amber numbers in the last two minutes, red with white numbers once over and counting up; it never grows or moves. Drawn as an interactive mockup over a real slide (`design-mockups/presenter-clock/2026-10-22_grow-and-pulse.html`): a third bigger at two minutes, a slow pulse from thirty seconds, 1.6× and pulsing once over — or pulsing for thirty seconds over and then still. Waiting on his choice.
+
+**§580, ROUND 2 — THE CLOCK'S STAGES, HIS (drawn, not built).** Islam, on the first mockup: *"it should jump earlier … more than 5 min keep grey, until 1 min the amber and grows, once reaching the min and below we start the red with larger gain until we reach the over time where it grows more and keeps pulsing in the overtime with the large size then at +2min of overtime the slide dims partially and at +5 min the slide goes black. the only way out of this is by the smo who press the T button to stop the timer"*. Read back as a table and answered: the table right, but *"in the last minute maybe don't make it red just bigger but not red and starts pulsing but on a longer period"*; T pausing lifts the dark at once and T again brings it back (*"yes"*); T for whoever is presenting (*"ok with your suggestion"*); moving on to the next direction starts its own time and clears everything (*"if we move forward things clear"*). Redrawn (`design-mockups/presenter-clock/2026-10-22_stages-dim-black.html`, the same artifact): grey above 5:00; amber, 1.3×, to 1:00; amber on a light amber ground, 1.6×, a slow pulse (about 3s) in the last minute; red, 2×, pulsing (about 1.4s) once over; the slide half dark at +2:00 and black at +5:00 with the clock still on it; T held lifts both. Waiting on his word on the last minute's ground, how dark +2:00 is, and the sizes.
+
+**§580, ROUND 3 — THE DARK COMES IN THE LAST MINUTE OF THE FIVE (drawn, not built).** Islam, on round 2: *"the dimming I think can come in the last minute of the 5 min and to have lighter and the box start pulsing .. and then at the 5min the slide go dark"*. Read back with one question — the clock already pulses from the moment time is up, so keep that and pulse faster in the dimmed minute (A), or hold it still and start pulsing only then (B) — and answered *"A"*. Pulsing stays on the clock alone, never the slide: a flashing slide distracts the room. Redrawn (`design-mockups/presenter-clock/2026-10-22_dim-last-minute.html`, the same artifact, version 3): as round 2 up to +4:00 over; from +4:00 to +5:00 the slide about a quarter dark, still fully readable, and the clock's pulse twice as fast (about every 0.7s against 1.4s); at +5:00 black with the clock still on it, pulsing fast. The +2:00 half dark is gone. Waiting on his word on how dark the dimmed minute is; the last minute's amber ground and the sizes stay as round 2 unless he says.
+
+**§580, BUILT.** Islam: *"quarter is fine, build it"*. As round 3, in the deck itself:
+
+- **THE STAGES ARE THE CLOCK'S CLASSES**, set in `clockPaint()` off four named times (`CLOCK_NEAR_MS` 5:00 left, moved from 2:00; `CLOCK_LAST_MS` 1:00; `CLOCK_DIM_MS` and `CLOCK_DARK_MS`, 4:00 and 5:00 over): `near` (amber, 1.3x), `last` (on `--attn-bg`, 1.6x, a 2.8s pulse), `over` (red, 2x, 1.4s), `fast` (0.7s). The colours keep §340's tokens and change at once; the size eases over 0.6s, from the clock's own corner. Held, nothing pulses.
+- **THE DARK IS A LAYER IN `.deck`**, over the slide and under the clock (`.dveil`, mounted beside the clock so it scales with the slide and never covers the bar): a quarter from 4:00 over, black from 5:00 over, eased in over 1.2s so the room sees it come. Only a RUNNING clock draws it, so T lifts it at once and T again brings back the stage reached; Y starts the time again and the dark goes with it; the next subject's own time clears it; a subject with no time set has neither clock nor dark.
+- **NOT ON PAPER**, as the clock is not (§305). **Asked for less motion**, the clock does not pulse or ease; the stages still show.
+- **ON TWO SCREENS (§582)** the laptop's strip adds *their slide is dimmed* or *their screen is dark, T lifts it*, because the laptop shows the slide view and not the slide. Not drawn on the mockup; a line of words on the strip already approved.
+- At twice the size the clock takes about 300x140 of the slide's 1600x900, in the bottom-right corner the slides keep empty (§340); a table filled to the slide's foot could lose its last cells behind it once over time.
+
+**CHECKED.** New `clock-stages`, 27 claims, measured off the computed transform, animation and the layer's opacity once its ease has run, each boundary from both sides: 6:00 grey, its size, still, clear; 5:02 not amber; 4:59 amber 1.3x still; 1:01 still amber; 0:59 1.6x on the light amber ground, a slow pulse, not red; +0:02 red 2x pulsing 1.4s, clear; +3:58 clear and 1.4s; +4:02 a quarter dark, 0.7s, the clock above the dark at 2x; +4:58 a quarter; +5:02 black with the clock on it, pulsing fast, counting on; T lifts at once, still, red, *Paused*; T again black and pulsing; held in the dimmed minute and back to a quarter; Y clears; the next direction's ten minutes clear; no time, no dark; none on paper; less motion, no pulse; the laptop's strip says dimmed and dark. **Red 21** on the build before. `presentation-timer`'s states moved to the new times — calm at 6:00, amber at 3:00, the last minute added at 0:40, each read for contrast in both palettes (65 green). Neighbours green: `two-screens`, `deck-refresh`, `present-loop`, `master-presentation`, `deck-fullscreen`, `video-slides`, `guided-tour`, `line-by-line`, `deck-pdf`, `presentation-parts`, `deck-strip`, `direction-slides`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§580 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` had moved under the branch (§583 My work, §584 and §584.1 the console's tab bar on a phone, §576.2 three fixes to the note lock), none touching these numbers, so `main` was merged INTO the branch, the progress lines kept in order and the built file, `public/shell.js`, `platform.css` and the release stamp regenerated from the merged sources, never resolved by hand. On that merged tree: `clock-stages` 27, `presentation-timer` 65, `two-screens`, `deck-refresh`, `master-presentation`, `present-loop` green, and main's `note-lock` and `direction-part` green (`note-lock`'s section 7, red before, is green now that §576.2 fixed it); `smp-app/checks/shell.mjs` and `console-record.mjs` not run here — the first needs a package and the second a database this container does not have, on `main` as on the branch; `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.74-phone-tabs` → **`smp-shell-v6.75-clock-stages`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages only; no save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`0e588ff46c7ef0a2`**, `/shell.js` **5,108,886** before; after they should read **`c3e72bcd57b75e8d`** and **5,111,351**.
+
+## §581 — Updating the figures while presenting
+
+Islam: *"when I'm presenting through the master presentation or the directions slides if I refresh can it keep the slides presented but update the numbers if I changed something in the inputs?"* Two ways put to him — in place, or surviving a browser reload (which the room would see, and which cannot take the browser back to full screen by itself); in place, *"for the key we can make it R to be relevant to refresh and ok with the automatic refresh between the directions"*, and *"for the reset let's make it Y"*.
+
+**`R` FETCHES AND REDRAWS IN PLACE.** Through the platform's own quiet refresh (`SYNC.refresh`, §433), which takes the server's answer only where nothing typed here would be lost; then the deck is opened again with what it was opened with (`DECK.args`, recorded by `openDeckWith`) and the slide found again by what it is (`slidesWhich` / `slidesFindIn`), never by its number. The clock is carried across — a refresh is not a new subject's time — still full screen, and a slide half built line by line stays where it was. A line in the corner for two seconds says *Figures updated*, *Figures already up to date* (nothing redrawn) or *Figures not updated · still showing the last ones*. Never on the tour's made-up example.
+
+**AND BY ITSELF BETWEEN DIRECTIONS.** A step in a flow that crosses into the next subject asks the same, quietly: a failure carries on with what is on the screen and says nothing to the room.
+
+**`Y` RESETS THE TIMER**, which `R` did since §556.11 — by the key's place as well as its letter, for the Arabic keyboard (R "ق", Y "غ"). The bar's Reset says (Y); the slide view's key line reads *T pause / start the timer · Y reset the timer · R update the figures*.
+
+**CHECKED.** New `deck-refresh`, 14 claims, the quiet refresh stood in for from file:// by one that changes a figure as a fetched graph would: R fetches once and the key measures' figure is redrawn, on the same slide, full screen, the clock within 3s of where it was, *Figures updated* said; nothing new — nothing redrawn, *up to date*; a failure — nothing redrawn, *not updated*; a half-built slide keeps its line; the flow fetches once, as it moves on to the next direction, never on a step inside one, saying nothing; R on the tour's example fetches nothing; the slide view lists R and Y. **Red 8** on the build before. `presentation-timer`'s R claim rewritten to Y, with *R no longer resets* beside it (61 green). Neighbours green: `line-by-line`, `guided-tour`, `present-loop`, `master-presentation`, `master-picker`, `presentation-parts`, `deck-model`, `deck-pdf`, `direction-decks`, `direction-slides`, `slide-columns`, `hide-slide`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam is presenting; nothing goes live now.**
+
+## §582 — Presenting on two screens
+
+Islam: *"how about the presenter has a different view than the presented on the screen to be able to manage to see what's next and see the slides flow and see the shortcuts"* — then, offered a PowerPoint-style presenter view: *"no need for presenter notes … I need the typical view of the slides management to scroll and see the shortcuts as normally the smo is viewing this view and needs to be able to manage the platform without disrupting the presentation but somehow can get back and do any shortcut action"*; the office only for now. Drawn (`design-mockups/two-screens/2026-10-22_slide-view-and-projector.html`): the projector shows the slides full screen; the laptop keeps the slide view with a strip saying what the room sees, slide n of N and the time, and the keys, the room's slide marked ON SCREEN in the list; clicking another slide shows it on the laptop only (Enter puts it on the room's screen, Esc comes back); leaving for any page keeps the projector where it is, with a strip at the top of every page to move the room, pause, or go back to the slides, the keys staying the page's own. Needs the projector as an extended screen. On the mockup: *"wait for Enter, strip buttons enough, build the two screens"*.
+
+**TWO WINDOWS OF THE SAME PLATFORM.** Present from the slide view, by the office, with the laptop's screen extended to a projector (`screen.isExtended`), opens the platform again in a window of its own (`?room=1`, the room's). The window is opened in the moment of the press, because a browser allows a new window only then, and is then moved onto the other screen where the browser says where that is (`getScreenDetails`, which asks the person once); refused, it opens on the laptop to be dragged across. The room builds the deck from its own fetch of the same server, so the same slides, and the two windows find a slide by what it is (`slidesWhich`, §556.11), never by its number. One screen, or anybody outside the office: Present does exactly what it did.
+
+**THEY TALK BY MESSAGES BETWEEN THE TWO WINDOWS, AND NOTHING ELSE.** The laptop sends a step, a jump to a slide, or a key (T, R, Y); the room says, twice a second and after every key, which slide it shows, of how many, how far a slide is built line by line, and what its clock reads. Sent only to the platform's own address on the web, and each window checks the message came from the other.
+
+**THE LAPTOP KEEPS THE SLIDE VIEW.** A navy strip under its bar: *On the room's screen*, the slide's name, slide n of N, the clock (amber near the end, red over, *paused*), and *Not full screen yet: click the slides on the projector* until somebody has. The room's slide is marked ON SCREEN in the list and the selection follows the room as it moves — unless somebody is looking elsewhere, when it stays where they are looking. → ← (and a clicker's PageDown, PageUp, Space) move the room; ↑ ↓ look through the slides as they always did; a click or ↑ ↓ shows a slide on the laptop only, with *Not on the room's screen · Enter shows it to the room · Esc back to what they see*; Enter shows it; Esc comes back; Esc on the room's own slide leaves the slide view, the room keeping its slide. T and Y act on the room's timer; R first saves what was typed on the laptop, then updates the room's figures (§581), or the room would fetch the figure from before the fix. P does nothing while presenting, and Present reads *Stop presenting*, which closes the room's window. The key line under the stage carries only what looking adds (↑ ↓, Enter, Esc); the room's own keys are on the strip, so the slide's name keeps its room.
+
+**AWAY FROM THE SLIDES, A STRIP ON EVERY PAGE.** At the top of the page's pinned bars (whose height is observed, §101.5, so what pins under them moves down with it): *Presenting on the second screen*, what the room sees, the clock, ← →, *T pause* / *T start*, and *Back to slides*, which opens the slide view on the room's slide. On a page the keys stay the page's own — typing a figure never moves a slide. Written only when it reads differently, because a strip rewritten between a press and its release loses the click.
+
+**THE ROOM'S WINDOW SHOWS THE SLIDES AND NOTHING ELSE.** The platform boots underneath, unseen from the first frame. A browser will not go full screen without a press on that screen, so the room asks for one: *Click here to show the slides full screen* — and asks again whenever it leaves full screen. Esc there never closes the slides, and leaving full screen there does not either: §556.11 closes a deck opened straight to full screen when full screen ends, which in the room would have shown the platform to the room — found by the check, not by looking. A clicker plugged into the projector's window drives the room directly and the laptop follows. **It saves nothing:** a save there answers "nothing to save" and the leave flush returns, so it can never send an older copy of the plan over the laptop's. Closing it ends presenting on the laptop.
+
+**NOT IN THIS.** The clock's stages (§580, round 2) are not built — the room's clock is today's. The guided tour stays on one screen. If the laptop's page is reloaded mid-presentation, the projector keeps its slide but the laptop no longer drives it; Present again takes the same window back (it is opened by name) and starts it afresh. And it has not met a real projector: a test browser has no second screen, so the second screen is stood in for and the room's window is real; the first true run is in a room.
+
+**CHECKED.** New `two-screens`, 46 claims, with `screen.isExtended` stood in for and the room's window opened for real from the same file: one screen — P presents on the laptop, no window, Esc back; two — P opens the room's window, the slide view stays, the room opens on the selected slide, fills its window with the platform hidden, asks for full screen unless given; the strip says the slide and slide n of N; ON SCREEN on that row; *Stop presenting*; the keys listed; → moves the room and the laptop follows, ← back; a click shows a slide on the laptop only, with the note, the whole slide still on the stage, the room's reports not pulling it back; Esc returns; Enter shows it and ON SCREEN moves; P does nothing; the room's clock reads on the laptop, T pauses (*paused* said) and starts, Y resets, R updates the room's figures; the room saves nothing (the laptop's save still runs); Esc twice on the projector keeps the slides, asking again; a key on the projector moves the room and the laptop follows; Esc leaves the slide view with the room kept; the strip on the page, pinned in the bars; → on a page does not move the room; the strip's → ← T, *T start* after; Back to slides on the room's slide; Stop presenting closes the window; closing the window ends it on the laptop; a unit's own presenter outside the office presents on one screen. **Red** on the build before (no window opens). `presentation-timer`'s *the bar's Reset does* compared the face's text with "14:" and failed whenever it was read in the millisecond of the reset ("15:00") — on the build before as well; now compared as a figure, as the claim before it already was (61 green, three runs). Neighbours green: `deck-fullscreen`, `deck-refresh`, `deck-strip`, `direction-slides`, `guided-tour`, `hide-slide`, `line-by-line`, `master-presentation`, `present-loop`, `presentation-parts`, `slide-columns`, `slide-move`, `video-slides`, `deck-model`, `tour`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam is presenting; nothing goes live now.**
+
+**§574.11 AND §578–§582 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. `main` had moved under the branch (§575 a tactic Completed at its whole target, §576 and §576.1 the note lock, §577 a target by quarter), so this work was renumbered §575–§579 → §578–§582 and `main` merged INTO the branch, the record files keeping both sides in number order and the built file, `public/shell.js`, `platform.css` and the release stamp regenerated from the merged sources, never resolved by hand. On that merged tree: `two-screens`, `line-by-line`, `deck-refresh`, `guided-tour`, `presentation-timer`, `master-presentation`, `present-loop`, `slide-columns`, `hide-slide`, `direction-slides`, `deck-model`, and main's `quarterly-plan`, `monthly-plan`, `tactic-completed`, `report-blockers`, `report-keys`, `fn-pillars` green; main's `note-lock` red 3 in its section 7 (My reporting: Tab out of a red figure on the last line lands on *Save draft*, which is live, so the lock leaves the cursor there) — red on `main`'s own build too, 3 of 4 runs, so main's, not this merge's; `test-authorize.js` 1123 passed, the 3 red the same as before (§447, §505, §520.6); `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.70-note-lock` → **`smp-shell-v6.71-two-screens`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Pages, and one company setting the office alone may change (`slideBuild`, judged as `deckHide`); no save is judged differently for anybody else, so no forced sign-out. Witnesses: `/sw.js` release **`76204bfe9b4efe78`**, `/shell.js` **5,074,863** before; after they should read **`c1f556142ba6e26f`** and **5,107,310**.
+
+**§582.1 — PRESENTING IN A WINDOW, FOR AN ONLINE MEETING.** Islam: *"what about in mac where I choose which page to present how does it work? is that extended as well?"* Answered: a projector or TV set to extend (cable by default; AirPlay with *Use As Separate Display*) is two screens; mirrored, or a Mac alone sharing in Teams, Zoom or Meet, is one screen, and Present fills it as before. Offered a way to keep the slide view in a meeting with no second screen, and *"ok"*. Drawn (`design-mockups/present-in-window/2026-10-23_present-in-a-window.html`) as real screenshots of the build with the parts drawn in: **Present in a window** just before Present in the slide view, for the office; pressed, the slides open in a window of their own on the same screen, named *Slides · Raya Trade · Master presentation* so the meeting's list shows it by that name, filling the window with no ask for full screen; the laptop's strip says *In the slides window* and which window to share; everything else as two screens. It needs no second-screen detection, so it works in Safari as well. Waiting on his word on the name, whether the button is always there for the office (recommended) or only with no second screen, and the office only for now.
+
+**§582.1, BUILT.** Islam: *"ok always there, office only, build it"*, the name as drawn. The two-screen machinery told it is a window: `slidesPlayWindow()` asks `roomStart(…, "window")`, which opens the same window but never moves it to another screen; the room hears `mode:"window"` and fills its window with the slide without asking for full screen (no *Click here…*, not on leaving it either). The room names itself **Slides · <client> · <what>** (*Master presentation*, or the subject's own name) and says it again on every report, because the platform under the deck may name the tab as it paints; it sends the name to the laptop, whose strip reads *In the slides window* and *In your meeting, share the window called "…"*, and on other pages *Presenting in the slides window*; the look-ahead note says *Not in the slides window*. The button sits just before Present, the office's, whatever is plugged in, and goes while presenting (Present has become *Stop presenting* beside it); below 1000px wide it keeps its icon and gives up its words before the client's name has to. Present itself is unchanged: full screen on one screen, the projector on two. Needs no second-screen detection, so Safari can use it.
+
+**CHECKED.** New `present-window`, 25 claims, the window real: the button in the bar for the office, just before Present, still there with a second screen; pressed, a window of its own, the slide view staying, on the selected slide, filling with the platform hidden, never asking for full screen, named *Slides · Raya Trade · Master presentation*; the strip says *In the slides window*, slide n of N, the window to share by its name, nothing about full screen or a projector; *Stop presenting*, the button gone; → moves it, *Not in the slides window*, Enter shows, Esc there keeps the slides, R updates and the name holds; the strip on other pages; Stop presenting closes it and the button returns; Present still goes to the projector with two screens and fills the screen with one; outside the office no button, and asking opens nothing. **Red** on the build before (no button). The bar measured at 1440, 1280, 1100 and 900px: one row, nothing overflowing. Neighbours green: `two-screens`, `deck-refresh`, `master-presentation`, `clock-stages`, `line-by-line`, `present-loop`, `slide-columns`, `hide-slide`, `guided-tour`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§582.1 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§586, one template for every box's presentation, which rewrote much of `present.js`), so `main` was merged INTO the branch — git joined the two with no conflict in the sources, and that was not taken on trust: on the merged tree `one-template` (main's own), `present-window`, `two-screens`, `deck-refresh`, `clock-stages`, `line-by-line`, `guided-tour`, `master-presentation`, `present-loop`, `presentation-timer` 65, `deck-pdf`, `deck-model`, `direction-slides`, `slide-columns`, `hide-slide` and `video-slides` all green; the progress lines kept in order and the built file and served copies regenerated, never resolved by hand; `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.81-one-template` → **`smp-shell-v6.82-present-window`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Slides and the slide view only; no save judged differently. Witnesses: `/sw.js` release **`0f84f2deea5eb9e7`**, `/shell.js` **5,116,453** before; after they should read **`a700e38c778e2ae1`** and **5,119,101**.
+
+**§582.2 — THE REMOTE, FROM ANY PAGE. A REVERSAL OF ONE §582 RULE.** Islam: *"when I'm on the platform trying to make edits and adjustments the navigation on the extended or the other window is lost so when we click right or left or up and down with a keyboard or a remote it doesn't work"*. A remote is a keyboard, and its keys go to whichever window is in front; §582 had kept a page's keys *the page's own — typing a figure never moves a slide*, and this is what that cost. Put to him: Page Down / Page Up (what most remotes send) and → / ← move the slides from any page while they are up; typing stays typing; a control that uses the keys keeps them; ↑ ↓ either scroll or move; T from a page or not. Answered *"keep for scrolling"* and *"yes T works, build it"*. No mockup: the one visible change is a line of keys on the strip already approved, and he went straight to build.
+
+- **WHAT IS TAKEN.** While `ROOM` is up and neither the slide view nor a deck is on this screen: Page Down and → step forward, Page Up and ← back, T holds or starts the slides' clock. Heard on the window and LAST, so every control has had its turn; anything already answered (`defaultPrevented` — the reorder handles, the search list) is left alone.
+- **WHAT IS NEVER TAKEN.** A box being typed in (input, text area, list box, anything editable), a player, and anything whose role says it uses the keys (the tab bar and its tabs, lists, menus, sliders, radio groups, grids); Alt, Ctrl and Cmd with any key, which are the platform's own shortcuts (§546); ↑ ↓, which keep scrolling. Typing a figure still never moves a slide — the half of §582's rule that was the point of it stays.
+- **SAID WHERE IT WORKS.** The strip on every page gains *PgDn → next · PgUp ← back · T timer*. The keyboard sheet gains an eighth section, *Slides in another window*, live while they are up; and its *Presenting* section finally lists T, Y and R, which §580/§581 should have added the day they arrived (B2: missed then, put right now).
+- **ONE LIMIT, SAID TO HIM.** Another app in front (Excel, Teams, mail) gets the keys; no web page can reach them there. Clicking back into the platform or the slides window brings them back.
+
+**CHECKED.** New `remote-keys`, 18 claims, the slides window real: on a page with the slides up, Page Down, Page Up, → and ← each move them one step; T holds and T again starts their clock; the strip names the keys; ↓ and ↑ leave the slides; Alt+→ leaves them; in a box → moves the cursor (caret measured), Page Down leaves the slides, a T typed is a letter and the clock untouched; on the tab bar → is the tab bar's; back in the slide view → moves the slides once, not twice; presenting stopped, Page Down is the page's again, nothing taken. **Red 6** on the build before. `two-screens`' *on a page the keys stay the page's own* rewritten to the reversal (→ moves the room), the reversal named in the check. `keyboard-sheet` told of the eighth section and of the keys it names (T, Y, R, PgDn, PgUp checked against the build). Neighbours green: `present-window`, `deck-refresh`, `clock-stages`, `master-presentation`, `line-by-line`, `report-keys`, `action-keys`, `dropdown-keys`, `tab-arrows`, `video-keys`. `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none** on the build committed. **Not merged: Islam said build it.**
+
+**§582.2 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§587–§591: a box's own split setting, TypeScript's checker on the pages and the authoriser, the company labelled the company; and §588, other people's saves arriving without a reload, which rewrote much of `sync.js`), so `main` was merged INTO the branch, no source conflict, the progress lines kept in order and the built file and served copies regenerated, never resolved by hand. Read after the merge, not assumed: the room window's no-saving guard still stands first in `save()` and the leave flush, ahead of §588's new paths (which only read); `SYNC.refresh` keeps its contract. On the merged tree: `remote-keys`, `two-screens`, `present-window`, `deck-refresh`, `clock-stages`, `line-by-line`, `keyboard-sheet`, `master-presentation`, `guided-tour`, and main's `both-levels`, `one-template`, `safety-banners` green; `test-graph-diff.js` 165; `test-authorize.js` 1123 with the same 3 red as before (§447, §505, §520.6); main's `pages-types` (no finding beyond its 98 recorded) and `rules-types` green, run with the lockfile's TypeScript 7.0.2 and Node types installed into a scratch folder for the run, since this container has neither; `saves-since.mjs` not run (it needs a database); `built-in-step`, `generated-in-step` and `release-stamp` all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.85-company-label` → **`smp-shell-v6.86-remote-keys`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Keys while presenting only; no save judged differently. Witnesses: `/sw.js` release **`2b79d450b9f786e2`**, `/shell.js` **5,148,812** before; after they should read **`92f3825ab0b2b113`** and **5,152,482**.
+
+## §583 — My work in the Internal Tracker's look, with the done tick and the status on the row (2026-10-22)
+Islam: *"let's redesign mywork to be similar to the internal tracker page creak a mockup"*; of the first round, which left the tick and the status out because My work only read, *"add the done tick and status change too"*; of the second, *"go ahead and build it"*.
+
+**WHAT IT LOOKS LIKE.** The console's first tab wears the Tracker's furniture (`modules/tracker/page.ts`) in the console's own tokens, so it reads as the console's page rather than a module dropped into it — the console's system type stays, and the panel takes the console's navy (`--ff`) and amber rather than the Tracker's bar. The title and the four white boxes become the **navy panel**: the week line (*This week · 18 Oct – 22 Oct*, the Tracker's own `weekWord` + `weekLabel`), *My work*, the admins' **Show** picker beside the name drawn as the Tracker's Group-by control, and the same four counts on the right — *Open actions*, *Late* (in the Tracker's late red on the navy), *Due this week*, *Clients*. The table's three grey bands become **numbered sections under a 2px rule** (*01 Late*, *02 This week*, *03 Next week and later*, numbered as they appear), each saying *N open*, and *· N done* once a row is finished here. A row is the Tracker's: **tick · action · client (a pill with the gold dot) · week · status · an arrow into that client's Tracker**, with no column headings. Pressing anywhere on the row but its two controls still opens the client's Tracker, and the arrow is the same door as a real link for the keyboard. On a phone the counts sit under the name and a row folds onto two lines, the status beside the action, as the Tracker's phone rows do. Measured on the panel (constitution XIII): the quiet words 6.75 light / 6.43 dark, the amber week line 6.54 / 7.54, the late count 6.52 / 7.53.
+
+**THE TICK AND THE STATUS ARE THE TRACKER'S OWN WRITE.** A new console action, `workStatus`, goes through the CLIENT'S OWN DOOR first (`door.ts resolveTenant`, the answer the Tracker's page is drawn under), then `lib/my-work.ts setWorkStatus`: the client has the Tracker, the person holds an office seat there (the Tracker's gate), and `mayChange` — the owner, or the client's Super user — judged against the STORED row (§42). It calls the Tracker's `setStatus`, so the action's history carries the same line whichever page finished it, and refuses in the Tracker's own sentence, now one constant (`ONLY_CHANGE`) both import. **WHO MAY PRESS IS THE PERSON LOOKING**, on a colleague's list too: every row carries `canChange`, worked out by the same rule for the viewer — the client is one the console lets them open, and the door's own seat rule, moved out of `resolveTenant` into `seatAt` so the door and My work cannot answer differently (§53.5), gives an office seat. A row they may not change shows a faded tick and the status as a word, never a control the server would refuse (§61).
+
+**A TICKED ROW STAYS WHERE THE HAND LEFT IT** — green, reading *Done Thu 22 Oct* (the Tracker's `whenText` wording, now `whenOf`'s), its section's line saying *· 1 done* — and leaves the list the next time My work is read: the Tracker's own rule for a row just ticked (§497). The counts drop at once: they are counted on the page off flags the SERVER set on each row (`late`, and `dueWeek`, new, decided beside it), so the page works out nothing about a week. A press holds the row (`aria-busy`) until the write lands and then draws the server's own row in its place (§124); a refusal is said under the panel in words and the row is left as it was. Any write drops the console's kept tab copies (§400.2), so the Clients cards' *N open · N late* is read fresh after a tick.
+
+**ONE DELIBERATE DIFFERENCE FROM THE TRACKER, FROM THE SIGNED-OFF MOCKUP:** unticking a row ticked HERE puts back the status it had (*In progress* stays *In progress*), where the Tracker's untick, which has no memory of it, writes *Not started*. The mockup said *"Unticking puts it back as it was"* and was signed off with it.
+
+**AND A LATE ROW COUNTS ITS WEEKS AS THE TRACKER DOES.** `whenOf` counted *Late N w* from the first due day only; with none it read a bare *Late* where the Tracker reads *Late N w* from the due day (`firstDue || due`, page.ts). It follows the Tracker now — §400's own rule that an action reads the same in both places.
+
+**WHAT STAYS.** `table.work` and its rules are the History tab's now (it wore My work's table, §53.5) and are untouched; `.wstat` and `.wpick` went with the boxes and the old picker. The console's API no longer sends `stats`; it sends `weekLine` and `statuses` (the Tracker's three words in its order).
+
+**THE MOCKUP** — `design-mockups/my-work/2026-10-22_tracker-look.html`, the console's chrome as built with the proposal drawn in; round 2 added the tick and the status.
+
+**WHERE.** `platform.html` (→ `smp-app/shell/platform.html`, `smp-app/public/platform-page.js` by `build-shell.mjs`): the `mw` styles and tokens `--ff-late` / `--ff-hover` in all three token blocks, `mwMast` / `mwCount` / `mwMeta` / `mwRow` / `drawMyWork`, and the waiting page drawing the panel. `smp-app/lib/my-work.ts`: `rowOf`, `canChange`, `dueWeek`, `whenOf` for a finished row, `weekLine`, `statuses`, `setWorkStatus`. `smp-app/lib/platform-api.ts`: `viewerOn` for `mywork`, and `workStatus`. `smp-app/lib/door.ts`: `seatAt`. `smp-app/lib/tracker.ts`: `ONLY_CHANGE`. Snapshot: `ui-versions/platform-console/2026-10-22_before-my-work-ledger.html`.
+
+**FOUND BY LOOKING AT THE BUILT PAGE.** The Show picker, a real `<select>`, was as wide as the LONGEST name on the list, leaving a gap between *Me* and its caret that the mockup did not have; `field-sizing: content` sizes it to the name showing (a browser without it keeps the longest name's width, as before). And at a phone's 400px the page scrolls sideways — **the console's own tab row**, eight tabs in one line, 620px wide, the same on the build before; My work itself ends inside the screen. Not touched here (rule 1b): it is the console's chrome, not this tab, and it is said rather than quietly widened.
+
+**CHECKED.** `checks/shell.mjs` §4b REWRITTEN, NOT LOOSENED (§218): the three rows, none finished and none somebody else's, the three headings and the late one in the alarm, asserted of the new rows; and new — the panel's week line and counts (3 · 1 · 1 · 1 on the made state), the tick asserted on the STORED row and on the Tracker's history line (`not_started → done`, by `smo`), the row staying put reading *Done …* with the counts at 2 · 1 · 0 · 1 and its section at *0 open · 1 done*, the untick back to the counts it started with, a status set from the row stored as *In progress*, *Done* on the late one taking it out of Late, and a team seat refused somebody else's action in the Tracker's words with the row unchanged. **389 ok, 1 failed** — the failure is §524's Copilot bar, **red on the unchanged tree too** (382 ok, 1 failed, run from a clean worktree of the same base). Red: `mywork-press-anyone` (new — the write without `mayChange`) turns exactly the refusal red; `mywork-everyone` turns six of §4b red against the new rows. `checks/tracker.mjs` **294 passed, 0 failed** (its refusal is now the shared constant). `checks/console-record.mjs` 73 all good (its line names the table as the console's one, My work's until here). `checks/door-landing.mjs` 144 ok, 2 failed — the client set-up flow's *seven steps*, **the same two on the unchanged tree**; `seatAt` is the door's two lines moved, not changed. `checks/release-stamp.mjs` all clear. `tsc --noEmit` from an empty cache: **0 errors**. Looked at on the build with seven made actions: 1280 light and dark, 400 phone, a row ticked, the picker with a second office person — no row's parts overlap at any width, no page error.
+
+**§583 MERGED TO `main`** 2026-10-22, Islam: *"put it live"*. A clean fast-forward: `origin/main` stood at §574.11/§578–§582's record commit, which this branch had already merged in (renumbering §578 → §583 before it did, the record files keeping both sides in number order and the built files regenerated from the merged sources, byte-identical to `main`'s). The tree pushed is the tree verified: on it, `checks/shell.mjs` 389 ok, 1 failed — §524's Copilot bar, red on the tree before — and `checks/tracker.mjs` 294/0; the build left no file changed. Then this note and the `SHELL` bump `smp-shell-v6.71-two-screens` → **`smp-shell-v6.72-my-work-ledger`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page, its script and the server; the Tracker's rule for a save is unchanged and only gains a second door onto it, so no forced sign-out. Witnesses: `/sw.js` release **`c1f556142ba6e26f`**, `/platform-page.js` **174,305** bytes before; after they should read **`90c1188e40e92baa`** and **181,221**, with `/shell.js` unchanged at **5,107,310** (the frozen shell is not touched).
+
+## §584 — The console's tab bar on a phone: one line that scrolls inside itself (2026-10-22)
+Islam, of the phone view §583's handover named and left alone: *"fix the tab bar on phone too"*; of the mockup, *"build it"*.
+
+**WHAT WAS WRONG, MEASURED ON THE BUILD.** At 400px the eight tabs shrank until their names broke onto two and three lines — the bar **74px** tall — and the last four (Frameworks, Copilot, History, most of Memory) sat past the screen, so the whole page was **620px** wide and slid sideways. The same at 360px. `.nav` was a flex row with nothing to say what happens when it does not fit, and nothing on any computer screen had ever made it not fit.
+
+**WHAT IT DOES NOW** (`design-mockups/console-tabs-phone/2026-10-22_tabs-swipe.html`). Every tab keeps one line (`flex:none`, `nowrap`) and **the bar scrolls inside itself** (`overflow-x:auto`, its scrollbar hidden); the page never does. **A BOX THAT SCROLLS SAYS SO (§108.6)**: with no scrollbar to show it, a fade in the bar's own navy lies over whichever edge still has tabs past it — `l` / `r` on a new wrapper, `.navwrap`, set from the boxes the browser drew whenever the bar is drawn or scrolled or the window changes. **The tab that is on is brought to the middle** each time the bar is drawn, which is on arrival and after every press (`go()` draws it again), so History opened from a link is in view rather than off the edge. Where every tab fits — any computer screen — nothing scrolls, neither fade shows, and the bar is the bar it was. The tabs' own type is untouched: their `font` shorthand ends in `inherit`, which a browser drops whole (the Tracker's §356.14), and fixing that would change every tab on every screen — said here rather than done.
+
+**AND A FAULT OF §583'S, FIXED WITH IT.** On a phone My work's four counts sat on a grid that kept the panel's `align-items:flex-end`, so a one-line label's number sat a line LOWER than a two-line label's (*Late* and *Clients* below *Open actions* and *Due this week*, measured 237 / 250 px). The phone grid aligns them at the top; the mockup showed it so and the note said so.
+
+**A GUARD, FROM DRIVING IT.** A server that had cached the old page while serving the new script (a stale process on the check's port) drew a console with no wrapper, and the fade's first line threw and stopped the page. In production the two arrive together, but a missing wrapper now means a bar without a fade, never a console that stops.
+
+**THE NAME LINE ABOVE THE TABS** also squeezes onto two lines on a phone (the name and its role wrapping, *Sign out* broken in two). Islam: *"fix the name line too"*. Drawn as round 2 of the same mockup, and built on his word — see §584.1.
+
+**WHERE.** `platform.html` (→ `smp-app/shell/platform.html`, `smp-app/public/platform-page.js`): `.navwrap` around `#nav`; the `.nav` and fade rules; `navFades` / `navCentre`, called from `drawNav`; the phone grid's `align-items:start`. Snapshot: `ui-versions/platform-console/2026-10-22_before-tabs-phone.html`.
+
+**CHECKED.** `checks/shell.mjs` §4b.1, new, read off the drawn boxes: at 400px the page no wider than the screen and the bar one line (every tab the same height, under 50px); the fade at the right only and the tab that is on inside the bar; My work's four numbers on one line; History pressed and in view, faded at the left; and at 1440 neither fade — the other end, so a fade drawn always could not pass (§94.2). **394 ok, 1 failed**, the failure §524's Copilot bar as on every tree since §583. The same assertions run on their own at 400 and 360 were **10 of 12 red on the build before** and 12 green after. `checks/release-stamp.mjs` all clear. The tabs' type measured, to back the sentence above: `font:600 13.5px/1 inherit` computes to the browser's own 13.33px at 400.
+
+### §584.1 — The name line on a phone keeps one line (2026-10-22)
+Islam, of round 2 of the mockup: *"yes build the name line and put both live"*.
+
+**MEASURED ON THE BUILD BEFORE.** At 400px the line was **63px**: the name and its role on two lines (39px) and *Sign out* broken in two (44px); at 360 with a long name, **97px**. **NOW** the line is one line at both. `#who` ellipsizes (`min-width:0` down from `.top .right`) with the whole line on a hover (`title`), *Sign out* is `flex:none; nowrap`, and under 560px the side padding is the page's 12px and the role is hidden. **THE ROLE IS A SPAN OF ITS OWN** (`.role`), so the line's words are unchanged — `textContent` is still *Mohamed Essam · Super user*, which `checks/shell.mjs` has asserted since spec 043 — and only its drawing is left for a wider screen. 560px is where a name of ordinary length and its role stop fitting beside the mark and *Sign out*; above it a long name still ends in *…* rather than wrap, and on a computer screen the line is as it was.
+
+**CHECKED.** `checks/shell.mjs` §4b.1 gains the line at 400 (one line, *Sign out* in one piece, the role hidden — asked as `false`, never as falsy, because the build before had no role span at all and a missing span must not read as hidden), a name made long at 360 (cut with *…*, one line, the whole name on the hover, nothing sliding; the name put back from what it was), and the role shown at 1440. All four **red on the build before**, run on their own, and green after; the tab bar's twelve still green beside them.
+
+**§584 AND §584.1 MERGED TO `main`** 2026-10-22, Islam: *"yes build the name line and put both live"*. `main` had moved under the branch (§576.2, three fixes to the note lock, `SHELL` v6.73), so it was merged INTO the branch, the progress lines kept in order and the built files and release stamp regenerated from the merged sources, never resolved by hand; then a clean fast-forward. The tree pushed is the tree verified: on it the full build left no file changed and `checks/shell.mjs` read **397 ok, 1 failed** — §524's Copilot bar, as on every tree since §583 — with every §584 and §584.1 line green. Then this note and the `SHELL` bump `smp-shell-v6.73-note-lock-fixes` → **`smp-shell-v6.74-phone-tabs`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page and its script only; nothing about a save changed, so no forced sign-out. Witnesses: `/sw.js` release **`44565c430e9f04c4`**, `/platform-page.js` **181,221** bytes before; after they should read **`0e588ff46c7ef0a2`** and **183,010**, with `/shell.js` unchanged at **5,108,886**.
+
+### §584.2 — The console's tab names in the weight their style asks for (2026-10-22)
+Islam, of §584's note that the tabs drew lighter than the mockup: *"fix the tab font weight too"*; of the mockup made from the real page, *"yes build it"*.
+
+**THE FAULT.** `.nav button{ font:600 13.5px/1 inherit }` — a `font` shorthand ending in a CSS-wide keyword is not CSS a browser reads, so the whole declaration was dropped and every tab drew in the browser's own button type, **13.33px regular**, since the console was written. The Tracker found and recorded the same fault in itself (§356.14). **NOW** the tabs' type is said one property at a time — `font-family:inherit; font-size:13.5px; font-weight:600; line-height:1` — and computes to **13.5px 600**. Measured on the real page before anything was written (`design-mockups/console-tabs-phone/2026-10-22_tab-weight.html`, the console screenshotted and then with only this rule applied in the browser): the bar **44 → 43px**, the eight tabs **714 → 768px**, so a window narrower than about 770px now scrolls the bar (§584) where it was about 715.
+
+**NAMED, NOT TOUCHED.** The same shorthand is dropped in four more places in `platform.html` — `.btn` (every console button, *Sign out* among them), `.fld` (its text boxes), `.wzband button` (client set-up's size band) and `.fwchip` (Frameworks' chips). Fixing each changes how it looks, so each is Islam's to ask for; it is said on the mockup.
+
+**CHECKED.** `checks/shell.mjs` §4b.1 asks the COMPUTED style of a tab, never the stylesheet's text: **13.5px 600**, red on the build before (13.3333px 400, measured at 1440 and 400). The tab bar's and name line's sixteen phone assertions still green beside it. The whole check: **398 ok, 1 failed** — §524's Copilot bar, as on every tree since §583. Release stamp clear.
+
+**§584.2 MERGED TO `main`** 2026-10-22, Islam: *"put it live and fix the buttons too"*. `main` had moved under the branch (§580, the presenter's clock, `SHELL` v6.75), so it was merged INTO the branch, the progress lines kept in order and the built files and release stamp regenerated from the merged sources; then a clean fast-forward. On the merged tree the full build left no file changed and `checks/shell.mjs` read **398 ok, 1 failed** — §524's Copilot bar, as before — with every §584 line green. Then this note and the `SHELL` bump `smp-shell-v6.75-clock-stages` → **`smp-shell-v6.76-tab-weight`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page only; no save changed, so no forced sign-out. Witnesses: `/sw.js` release **`c3e72bcd57b75e8d`** before, **`1ed81d67f8ec6ba6`** after; `/shell.js` unchanged at **5,111,351**. The buttons, the second half of his sentence, are drawn first (rule 1c): `design-mockups/console-buttons/2026-10-22_button-weight.html`.
+
+### §584.3 — The console's buttons in the weight their style asks for (2026-10-22)
+Islam, after §584.2 went live: *"fix the buttons too"*; of the mockup made from the real Memory and Copilot tabs, *"yes build it and put it live"*.
+
+**THE SAME FAULT AS THE TABS'.** `.btn{ font:600 13px/1.5 inherit }` was dropped whole, so every console button — *Sign out* on every tab, *Add a consultant*, *Add one insight*, *Write up a period*, the Copilot's *Edit* and the rest — drew in the browser's own button type, **13.33px regular, 29px tall**. Said one property at a time now (`font-family:inherit; font-size:13px; font-weight:600; line-height:1.5`): **13px 600, 34px**. The top line grows with *Sign out*, **48 → 53px** — the mockup said *about 4px*; measured on the build it is five, recorded rather than rounded to agree.
+
+**WHAT ELSE WAS LOOKED AT.** Every tab at 400 and 1280, the build against the same page with the old type put back in the browser: no tab wider than its screen and no button on two lines, before or after. The phone's name line still holds *Sign out* in one piece at 34px (§584.1's four assertions green).
+
+**NAMED, STILL NOT TOUCHED.** `.fld` (the text boxes), `.wzband button` and `.fwchip` carry the same dropped shorthand.
+
+**CHECKED.** `checks/shell.mjs` §4b.1 asks *Sign out*'s COMPUTED type and height — **13px 600 34**, red on the build before (13.3333px 400 29, at 1440 and 400). The whole check **399 ok, 1 failed**, §524's Copilot bar as before. Release stamp clear.
+
+**§584.3 MERGED TO `main`** 2026-10-22, Islam: *"yes build it and put it live"*. A clean fast-forward — `main` had not moved since §584.2 — so the tree pushed is the tree checked (399 ok, 1 failed, §524's as before). Then this note and the `SHELL` bump `smp-shell-v6.76-tab-weight` → **`smp-shell-v6.77-button-weight`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page only; no save changed, so no forced sign-out. Witnesses: `/sw.js` release **`1ed81d67f8ec6ba6`** before, **`d3c701d80dcd2e34`** after; `/shell.js` unchanged at **5,111,351**.
+
+### §584.4 — The console's text boxes, client set-up's size band and Frameworks' chips in their declared type (2026-10-22)
+Islam, after §584.3 went live: *"fix the text boxes and the two controls too"*; of the mockup made from the real Add-a-client step and Frameworks tab, *"yes build it and put it live"*.
+
+**THE LAST THREE.** The same dropped shorthand §584.2 and §584.3 found, in `.fld` (`font:400 14px/1.5 inherit` — every text box, dropdown and notes box in the console), `.wzband button` (`font:600 12.5px/1.5 inherit` — client set-up's size band) and `.fwchip` (`font:600 12px/1 inherit` — Frameworks' category chips). Each drew in the browser's own 13.33px regular. Said one property at a time now: **text boxes 14px, 33 → 39px tall** (the notes box 48 → 60), **the size band semibold 12.5px, 44 → 48px**, **the chips semibold 12px, 29 → 26px**. No `font` shorthand ending in a keyword is left in `platform.html`. The client platform's own copy of the set-up flow (`SMP-Project-Folder/src/client-setup.css`) writes its size band with `var(--sans)` and was never broken.
+
+**WHAT ELSE WAS LOOKED AT.** Every tab at 400 and 1280, the build against the same page with the old type put back in the browser: no tab wider than its screen and no box past its edge, before or after. §584's tab bar and §584.1's name line still green.
+
+**CHECKED.** `checks/shell.mjs` §4b.1 asks the COMPUTED type and height of a text box and a chip on Frameworks and of the size band in Add a client — **14px 400 39**, **12px 600 26**, **12.5px 600 48** — all three red on the build before (13.3333px 400, at 33, 29 and 44px). Its first run read `none` for the first two: from `/platform`, an address differing only in its hash is the same document and does not load the tab, so the check measured My work — a fault of the CHECK, found by its own red and fixed with a blank page first (the reload §400.2's own kept copies rely on not happening). The whole check then **401 ok, 1 failed**, §524's Copilot bar as before. Release stamp clear.
+
+**§584.4 MERGED TO `main`** 2026-10-22, Islam: *"yes build it and put it live"*. A clean fast-forward — `main` had not moved since §584.3 — so the tree pushed is the tree checked (401 ok, 1 failed, §524's as before). Then this note and the `SHELL` bump `smp-shell-v6.77-button-weight` → **`smp-shell-v6.78-text-boxes`** as a commit `main` alone holds (§91), the name held by no commit on any remote ref. The console page only; no save changed, so no forced sign-out. Witnesses: `/sw.js` release **`d3c701d80dcd2e34`** before, **`f72c410256af6679`** after; `/shell.js` unchanged at **5,111,351**.
+
+## §585 — The shared rules, read by TypeScript's checker: a trial on one file (2026-10-23)
+Islam asked whether the product would be better in TypeScript than in HTML. The answer given: yes for its logic, but not as a rewrite. Most of it already is TypeScript — the server and the newer modules (§20, §314) — and the console's ~88,000 lines of plain JavaScript are carried verbatim on purpose, so the settled screens cannot drift (§315.1). Recommended instead: turn TypeScript's checker on over the existing JavaScript with type comments, change no running line, and move a screen to the new stack only when it is being reworked anyway. Islam: *"go ahead, try step 1 on the shared rules"*.
+
+**MEASURED BEFORE ANYTHING WAS WRITTEN.** With the file untouched, the checker finds **nothing real** in `lib/rules.js`. Under the loose setting it reports two findings, both the browser global `self` that the file uses to find its own root. Under strict null checks it reports ten, and each one is the checker not following something the code guarantees: a variable filled inside a `forEach`, a year that a regex has already proved is digits, a frozen shared empty list. Measured earlier over the console's script files: **1,270** findings. About 900 are names declared by the shell's inline script, which the checker cannot see; that is setup, not bugs. The ~320 "this property does not exist" findings are where real ones would hide, and they were not read.
+
+**WHAT WAS WRITTEN** (`lib/rules.js` §4), as comments:
+- **The shapes the rules read:** a `Grant` (STATE_RANK's four words), a `Held` role (`{role, at}`), a `Person`, a `Place`, a `Company`, a `Capability`, and the `World` that W() builds.
+- **Type comments on the 28 functions of the authorisation core**, from W() and worldOf() through personRoles, grantFor, roleOwns and grantIn to mayIssuePasswordTo and actingFor.
+- **`// @ts-check` on line 1**, so an editor checks the file as it is typed.
+
+**THE WORLD IS CLOSED AND A ROW IS OPEN.** W()'s seventeen keys are named exactly. So a key that worldOf() passes and W() never names is now an error rather than §102's silent `undefined`, answered as the default. The same goes for a misspelt key in any of the 28 described functions. **It is not yet the whole of §102's trap.** A key added to the type and to W() but forgotten in worldOf() is still silent, because every input is optional. And the rules not yet described (47 more that take the world) are not read at all. A register row carries far more than the rules read, and the rest round-trips untouched (§187). So its type names what the rules ask and admits anything else.
+
+**ONE LINE OF CODE CHANGED SHAPE.** grantIn's `best` is now declared on a line of its own, with its type. Otherwise the checker reads `"none"` as any string.
+
+**THE RESULT, PLAINLY: IT FOUND NOTHING WRONG.** With the core described, two files check clean:
+- the rules file itself;
+- `lib/authorize.js`, the server's 2,483-line caller, which sees the types through its `require` without a comment of its own.
+
+Over every shared server file (`lib/*.js`, `api/*.js`) there are 15 more findings. Each one was read, and none is a fault: a date subtracted from a date, an `Error` given a `.code`, `[id].concat(vals)`, a test hook on `module.exports`. Strict null checks over the authoriser add 24 more, all one pattern (`var x = null`, filled in later). **So the check runs LOOSE.** Strict would mean days of quieting the checker, and it has found no fault.
+
+**WHAT IT BUYS IS THE NEXT FAULT, AND THAT IS PROVED.** Five faults were made deliberately in a copy:
+- a key the world does not hold (`w.unitkeys`);
+- worldOf() building with a key W() never names (exactly §102's trap);
+- a person handed where a held role is wanted;
+- a word that is not a grant;
+- the server calling grantIn one argument short.
+
+All five are **caught now, and none of them was caught on the file before this.**
+
+**NOTHING RUNS DIFFERENTLY.** Of the file's 355 exports, 354 are character-for-character the same function or value; grantIn differs only by the one split line.
+- `npm run test:rules` reads 129 passed / 3 failed, and `scripts/test-authorize.js` reads 1123 passed / 3 failed. Both counts are the same on `main` without this change, so those six failures are not this section's. They are recorded here and not touched.
+- The built file is byte-identical to the build, and the served copies were regenerated.
+- The served shell grows by **4,969 bytes** of comments, and the release stamp moves. So an open tab will be offered the reload when this ships, with nothing visible changed.
+
+**THE CHECK** is `smp-app/checks/rules-types.mjs`: `npm run check:rules-types`, and `:red` for the five breaks. It found a fault in itself before it was trusted. TypeScript 7 refuses to run on files named beside a `tsconfig.json`, and that refusal exits non-zero. So the first `--red` run reported all five breaks caught when the checker had run on none of them. It now:
+- ignores the app's config;
+- sets `--strict false` explicitly, because version 7 defaults to strict;
+- counts a break as red only when an error points INTO the broken file.
+
+It is not part of `npm run typecheck`. In a fresh container that command fails on generated framework and Prisma types before it reaches anything of this.
+
+**NOT DONE, SAID SO NOBODY ASSUMES IT.** Neither half of the product sees these types yet:
+- **The console** reaches the rules as a global, `SMPRules`, which the checker cannot see across the concatenated scripts.
+- **The Next app's TypeScript** reaches them through `require("./rules.cjs")`, which is `any` there, because its tsconfig reads no JavaScript.
+
+Either one is the next step, and each is Islam's call. Not merged; `main` stays untouched until Islam says.
+
+**§585 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§544.16, the door check catching up with three set-up steps), so it was merged INTO the branch. The progress lines were kept in order, and the built files and release stamp were regenerated from the merged sources; the build left no file changed. On the merged tree: built-in-step all good, `check:rules-types` 2 ok / 0 failed with all five breaks red, release-stamp clear, `sw.js` parses. §544.16's own `checks/door-landing.mjs` needs a database and was not run here. Then this note and the `SHELL` bump `smp-shell-v6.79-stand-lines` → **`smp-shell-v6.80-rules-types`**, as a commit `main` alone holds (§91), the name held by no commit on any remote ref. Comments in the shared rules and one line split in two; no save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`7b31190177c959e9`** and `/shell.js` **5,111,351** bytes before; after, they should read **`bc8ef34548b2e11c`** and **5,116,320**.
+
+## §586 — One template for every box's presentation (2026-10-21)
+Islam, of the last step of the simplification (spec 066 §5): *"ok"*, to *"one slide builder for everything… nothing changes on screen"*.
+
+**WHAT WAS TWO.** `deckSlides` (a pillars box, ~430 lines) and `deckSlidesFn` (a projects or actions box, ~360) each wrote the whole deck: its own cover, its own Overall performance block, its own notes, its own Thank you — and `dirDeckHtml` and `secDeckHtml` wrote the cover and Thank you a third and fourth time. §553.2 is what that costs: a projects box ended on its last milestone with no reading, because the closing block lived in one builder only.
+
+**WHAT IS ONE NOW.** `deckOf(b)` writes the order once — cover · Foundation · Analysis · the plan · Overall performance · notes · Thank you — from the shared `coverSlide`, `perfPart`, `notesSlide` and `thanksSlide`. The only part that differs is the PLAN, because that is what really differs: `pillarsPlanPart` (dividers, roll-calls, each pillar's slides, the score tables) or `projectsPlanPart` (the divider, each carried capability, each project's slides, the projects' score tables). `deckSlides` and `deckSlidesFn` are adapters: they read their box and hand `deckOf` the parts. A capability's objectives slide is `capKOSlide`, shared by the Foundation and the plan. The part decks (a direction's own, a company part) take the same cover and Thank you.
+
+**PROVED UNCHANGED, NOT ASSUMED.** Every deck the platform can draw — every unit, function, capability, direction and company part, in the review and in the plan, plus the plan file's size — on the baked demo and five saved states (Raya, El Abd, the seed, two more): **396 decks, byte for byte identical** before and after, at each of the three steps (unit side, function side, part decks). The snapshot itself was run twice on the old build first, 0 differences, so it is repeatable.
+
+**AND IT STAYS ONE.** New `checks/one-template.py`: every unit's and function's deck runs in the template's order (and an El Abd-shaped company, directions and capabilities apart); and the cover, Thank you, notes and Overall performance divider are each written in ONE place in the source — 4, 4, 2 and 2 on the live build, which is the drift it exists to catch.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*, after El Abd's review (the advice was to wait for it). Main had moved by twenty-odd entries (§565–§585, among them §574's guided tour, which had lifted `dirDeckOf` out of `dirDeckHtml` — merged so the tour's example keeps its aside and ends without a Thank you, through the shared cover and Thank you). This entry renumbered §565 → **§586**. **Re-proved against what was live**: the same 396 decks drawn from `origin/main`'s own build and from the merged build, byte for byte, 0 differences; the guided tour's example deck identical too. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.80-rules-types` → **`v6.81-one-template`**. Pages only: no forced sign-out.
+
+## §587 — The box's own setting splits its presentation, not which kind of box it is (2026-10-23)
+Islam, of the last special case in the presentations (spec 066 §5, *"the short company review becomes a switch on which sections the template draws"*): *"ok"*, to *"let the split setting decide, for the company and any unit that uses it"*.
+
+**WHAT IT WAS.** A `short` flag meaning "the company's own review, units off" (§481). It is not short any more — §553.9 put every direction's own slides back — so all it still did was show directions and capabilities as two groups, each behind its own divider, on the company alone, while Setup already carries the one answer to that question: shown apart (`boxSplit`, §542).
+
+**WHAT IT IS.** `pillarGroups` and `pillarsPlanPart` split on `boxSplit(u)`, for any box; a box shown apart takes a divider per group, one shown together takes the one divider; the closing slide names both kinds where the box is shown apart and holds both. What stays the company's alone is real: capability RECORDS (Setup › Capabilities, §334) are the company's, so `records` puts them on its roll-call where it is the plan, and on the Master presentation's group pages as before.
+
+**WHAT MOVES, MEASURED BEFORE BUILDING WAS CALLED DONE.** The same 396 decks against the live build: Raya and El Abd unchanged, byte for byte. One deck moves: **Wander Development's company** (units on, company shown apart, capabilities only) — its slides read *Strategic Pillars · Pillars & Capabilities · Pillars — where we stand* over a list of capabilities, and now read *Capabilities · Capabilities — where we stand*. Shown to Islam before going live.
+
+**CHECKED.** `one-template` gains the rule (a unit shown apart presents two parts; set back, one list again — red on the live build). `deck-figures`, `pillar-split` 46/0, `deck-dividers`, `deck-model`, `presentation-parts`, `master-presentation` 50/0, `direction-decks`, `top-plan`, `structure`, `capability-tab-edit`, `strategy-split`, `plan-download`, `built-in-step`, `no-twin-functions` green; `single-company` 1 red, identical on the live build (§449).
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*, having been shown the Wander change. Main had moved (§582.1, present in a window), merged into the branch first and the generated files rebuilt; re-measured against that live build: the same three Wander decks move and nothing else. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.82-present-window` → **`v6.83-box-split`**. Pages only: no forced sign-out.
+
+### §588 — Other people's saves arrive without a reload; rows travel by id; row ids no longer collide (2026-10-23)
+Islam: *"when others are using the platform a messages pops up to refresh the page as someone else entered an input … people are using different pages already they shouldn't get this message is there a way or a mechanism where people save things in the same time without needing a refresh and keeping data when they are working on different cells wihtout impacting the speed of the platform?"* Then, of the three-part answer: *"go ahead with step 1 and the two fixes."*
+
+**WHAT WAS TRUE BEFORE.** The server already merged cell by cell (§210, §215): two people in different cells of one unit never overwrote each other. What was stale was the SCREEN. §258's caution asked `change_log` every twenty seconds about the tab's TARGET — the unit, function or group, never the cell — so Plan, Performance and Reporting of one unit counted as "the same page", and the only remedy it offered was Reload. Two real collisions remained underneath: a row added, removed or moved sent the WHOLE part (`set["units.mobile"]`, §215's own stated fallback), carrying the sender's stale copy of every other cell in it; and `mintRowId` counted the list's length, so two tabs adding to the same list in the same minute minted the same id, and on the merge the second row replaced the first (every row is found by id, §48).
+
+**1 · THE MERGE (`sync.js` `mergeIn`, `safety.js`).** A landing by somebody else now fetches the server's graph and lays this tab's own unsaved LINES back over it — `splitLines` / `valueAt` / `applyChanges`, §504's own machinery and no second copy of it: a line whose place still holds its base value is kept; one whose place they changed too is a clash and goes to §504's bar (*Keep mine* / *Keep theirs*), the screen showing theirs until it is answered. The baseline becomes theirs — `normalized()` is lifted out of `serialize()` so a fetched graph is compared in the tab's own shape, or a missing `archives` would travel as a deletion on the next save — so the next save carries only this tab's lines. Never under a hand in a field (§35: a bound field writes on blur into the object `hydrate` replaces, so a merge mid-word loses the word) and never while a save is in flight (§433's reason: the baseline would be replaced under it): the answer is "busy", asked again on blur and every 2.5 s. `since` moves on only once the merge has landed, so a landing is never counted as seen before it is on the screen. The repaint keeps the scroll and the caret (paint's `focusMark`). Nothing is drawn for different cells — a console line records the merge; the caution stays as the fallback where there is no merge to call.
+
+**2 · LIST OPERATIONS (`lib/graph-diff.js`, both copies).** `changes.lists`: `{ at, path, list, drop:[ids], add:[{ row, after }], order:[ids] }`, validated down the same tree as a row edit (the path to the HOLDER, so an even number of steps) and applied by id, idempotently: a dropped id already gone is nothing to do; an added id already present stays as it is; a new row goes after the row it names, first for `null`, last when that row has gone meanwhile; an order keeps rows it does not know, after the ones it does. The differ replays its own adds the same way before deciding whether `order` is needed, so it travels only when it is. Lines: `l:<at>|<path>|<list>|add|<id>`, `…|drop|<id>`, `…|order` — one per row, so two people removing the same row are the same line, and the office's list re-splits each to itself (`lib/unsaved.ts cleanLine`; `unsaved.js` says *added / removed / reordered*). `planSubjects` (the old stack's incremental writer) reads them as subjects beside row edits; `save.ts` accepts a body that is only lists. The whole-part path stays for a list without ids (§191). Measured in the differ's own tests: the office adds a pillar while a figure is filled meanwhile — both land, either order; applied twice lands once; a reorder keeps a row somebody added meanwhile; the first row of a list that was not there is an add and not the whole unit.
+
+**3 · ROW IDS (`config-data.js` `mintRowId`).** `<prefix><n>-<four base-36 characters>` from `crypto.getRandomValues` (Math.random where there is none), the taken-id scan kept. Nothing in the product parses an id's text — measured: no `.id.split / .match / .replace` and no `-P\d` pattern anywhere outside the minters — and the ids minted by position on import (`renumberUnit`, `templates.js`, `xlsx.js`) are unchanged, because one person authors a whole plan at once and the collision needs two.
+
+**CHECKED.** `scripts/test-graph-diff.js` **165 / 0** (was 142) and `smp-app/tests/graph-diff.cjs` 152 / 3 — the three are the seed-fixture reds that predate this (§216's "the seed holds capabilities across several functions"), identical on the tree before; `scripts/test-authorize.js` 1123 / 3, the same three as before. `checks/safety-banners.py` rewritten for the rule rather than the wording: the stub now APPLIES every change list it is sent (set, del, rows, lists) so a merge can be told from a revert (§100.3) — **ALL GREEN** on this build, and against the build before (`SMP_HTML=…v3.22.html`) red on *the tab fetched the server's copy*, *their change is on the screen* and *no caution is drawn*. `tsc` in `smp-app` reports the same 6,411 lines before and after — the container has no `node_modules` for it (`pg`, `@types/node` missing), none of them in `save.ts`'s own line. Not run here, said rather than assumed: `checks/state-api.mjs` and `checks/shell.mjs`, which need a Postgres and the served app.
+
+**WHAT WAS STILL OPEN AFTER THIS (step 2 of the answer)** is built as §588.1 below: a landing cost one whole-graph fetch per visible tab on that target, and the peek was per target and every twenty seconds.
+
+### §588.1 — The change travels, not the graph: numbered saves, "what changed since N", and a slower clock when nobody is working (2026-10-23)
+Islam, of the three-part answer: *"go ahead with step 2 too."*
+
+**THE SAVE ITSELF, NUMBERED.** A new table `saves` (`smp-app/db/migrations/029-saves.sql`, in `schema.sql` for a fresh database; `db/migrations/050-saves.sql` on the old stack, one per client schema) holds every save that landed as the change list it carried, with a `bigserial` number. Written INSIDE the save's transaction, under the per-tenant lock (`lib/save.ts`, `api/state.js`), so the numbers run in the order the saves landed and none is handed out for a save that rolled back — measured: a refused save takes no number and the next landed save follows straight on. A change list over 300 KB (a plan import) or a whole-graph post from an older tab is recorded as `{full:true}`. The numbers are one sequence for every tenant, so what a tenant sees is monotonic, not contiguous; the check asserts order and gaps, never a literal. The save's answer carries `seq`; the full read carries `seq` beside the graph, read in the same transaction, so a tab's first ask starts exactly where its copy ends.
+
+**WHAT CHANGED SINCE N.** `GET /api/state?after=N` answers `{ seq, more, changes:[{ seq, by, byKey, at, changes }] }`, oldest first, fifty at a time, tenant-wide, one indexed read (`saves_since` on `(tenant_id, id)`); nothing new is an empty list. The asker's own saves are IN it on purpose: applied to a copy that already holds them they change nothing, and one that landed between two of somebody else's is what makes that copy converge — the tab's baseline is its own last save laid over the base it had, and replaying every save since in order rebuilds the server's copy from it. The per-target `since` peek stays for a tab on an older build.
+
+**THE TAB (`sync.js` `applyRemote`, `takeIn`; `safety.js` `peekSeq`).** When the full read came with `seq` the tab asks the lighter way, on every page — Setup included, which §258.1 never asked, because the answer is the change itself and applying it is §588's merge anyway. Each change list is applied onto the tab's baseline with the same differ the server applied it with; the result is theirs, and `takeIn` (lifted out of §588's `mergeIn`, one merge for both paths) lays this tab's unsaved lines back over it, clashes to §504's bar as before. A copy that comes out identical ("same": one's own save asked back) moves the number and repaints nothing. `{full:true}`, or a list this copy cannot apply, answers "full" and §588's whole-graph merge runs instead, adopting the number the fetched copy carries. "busy" (a hand in a field, a save in flight) is asked again on blur and on a short clock; the number moves on only once the answer is on the screen.
+
+**THE CLOCK.** Twenty seconds while somebody is working in the tab, sixty once nothing has been touched for three minutes, back to twenty on the first key or click; activity is read off the document (`keydown`, `pointerdown`, `input`), never off a list of controls (§104.7). The visibility gate stays: a hidden tab asks nothing.
+
+**CHECKED.** `smp-app/checks/saves-since.mjs` (new; `npm run check:saves`), on a real Postgres through the app's own `save()` and `readAnswer()` under the app role's row policy: **19 / 0** — the number 0 on a fresh copy, saves numbered in order, a refused save taking none, `after=N` answering the change lists and then nothing new, an unparseable number falling through to the ordinary read, the full read carrying the number, a 300 KB list handed on as `{full:true}`, and §588's list operations landing beside an earlier figure and travelling on; RED with `--break=no-save-number` (7 / 12). Migration 029 applied by the dev tenant's own `applyAll` onto a database that already held the schema, and a second time after its renumbering, both clean; `db/migrations/050-saves.sql` applied and written to on a scratch schema. `checks/safety-banners.py` extended (1b, 5b, 5d, 5e, and 2–5 now through the numbered path, the stub numbering its saves once `MODE["seq"]` is on): **ALL GREEN**; against the §588 build it dies at 1b on `SYNC.seq is not a function`. `scripts/test-graph-diff.js` 165 / 0 unchanged. `tsc` on the two edited server files reports only the container's missing `pg` typings, as before.
+
+**WHAT IT COSTS NOW, STATED.** A visible tab in use: one small request every twenty seconds, answered from one index; a change arrives as the bytes of that change. A tab left open: one every minute. A landing no longer fetches the graph unless it was too large to carry. **WHAT IS STILL OPEN:** the `saves` table grows with every save and nothing prunes it yet — a plan with a thousand saves a week is a few megabytes a month; a retention sweep is a one-line migration when it is wanted, and the old stack's `_sql_migrations` would carry it the same way.
+
+**§588 AND §588.1 MERGED TO `main`** 2026-10-23, Islam: *"merge it to main and put it live."* Both were numbered §585 and §585.1 on the branch; `main` had since taken a §585 of its own (the shared-rules type check), §586 and §587, so they were renumbered first, in the record, the comments, the checks and the migration headers. `main` had moved under the branch by three hundred commits (§585, §586, §587, §582.1, §544.16 and the rest), so it was merged INTO the branch: the sources did not conflict; the two record files did, both sides having appended, and were resolved by keeping both, main's sections first; the built page, `public/shell.js`, `shell/body.html`, `platform.css` and `public/sw.js` were regenerated from the merged sources, never resolved by hand. On the merged tree: `scripts/test-graph-diff.js` **165 / 0**; the app's differ test 152 / 3 and `test-authorize` 1123 / 3, the same pre-existing seed-fixture reds as before; `checks/saves-since.mjs` **19 / 0** on the local Postgres; `checks/safety-banners.py` **ALL GREEN**; `generated-in-step` all clear; `built-in-step.py` all good (the shipped file byte-identical to the build); `release-stamp` 9 / 0, all clear; `qa.py` through `qa-run.py` **33 viewers / 181 destinations / ERRORS none**; `sw.js` parses. Not run here: `checks/state-api.mjs` and `checks/shell.mjs`, which need `next build` and the served app. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.83-box-split` → **`smp-shell-v6.84-quiet-merge`** as a commit `main` alone holds (§91), the name held by no commit on any ref after fetching every ref (§94.16). **WHAT THE DEPLOY DOES:** `deploy.mjs` applies migration 029 (the `saves` table) before `next build`; a tab on the old build keeps working — it posts the change shapes the server still takes and peeks the old way — and is offered *A newer version is ready* by the worker's claim. No save is judged differently, so no forced sign-out. Witness: `/shell.js` **5,148,090** bytes after; the `/sw.js` release before and after were not read from the deployment from here. **One thing seen and left alone:** this container's stale local `main` held a commit of its own, *§564 merged to main* (2026-10-20), that the remote never received; it was not pushed, and `main` was taken from the remote.
+
+## §589 — The strategy pages, read by TypeScript's checker (2026-10-23)
+Islam, after §585 went live: *"now do the same for the console's own files"*. **The word was mine, and it was wrong.** §585's last note used "the console" for the strategy pages — everything inside a client, which is `SMP-Project-Folder/src`. In this project the console is `platform.html` (§584). So the question was put back to Islam, with the size of each: the strategy pages are about 88,000 lines, the console page 3,826. He chose **the strategy pages**.
+
+**NOTHING IN THE PAGES IS EDITED.** No type comment and no `// @ts-check` were added. The pages are 32 scripts sharing one page, so an editor opening one file sees none of the others, and a per-file marker would only light up names it cannot find. Not a byte the browser receives changes: no rebuild, no release stamp, no `SHELL` bump at the merge. The whole of this section is a check.
+
+**HOW THE CHECKER IS MADE TO SEE ONE PAGE.** `smp-app/checks/pages-types.mjs` hands the checker a scratch copy of the pages, assembled the way the browser runs them:
+- build.py's own list, read out of build.py (§53.5);
+- the shell's inline script, as one more file;
+- theme.js and route.js.
+
+It then declares what the page has that the checker cannot see:
+- **The names the library files put on the page** (`SMPRules`, `SMPDiff`, `SMPAudience`, `MAIL`), as what those files export, and recipes.js's three. These are modules to the checker, because they also export for Node.
+- **Three helpers the shell puts on `window`** and then calls by their bare names.
+- **The element properties the pages read off a lookup** (`dataset`, `value`, `hidden`, `focus`…). The checker types every `querySelector` as a bare Element, which has none of them. They are named one by one, never opened with an index signature, so a misspelt one is still a finding.
+
+The declarations live in the check, never in `smp-app/`: a `.d.ts` there would widen the Next app's own DOM types.
+
+**WHAT IT FOUND: NO FAULT.**
+- **895 findings** with the pages assembled as one page. The 1,270 measured for §585 came from files read one at a time, before they could see each other.
+- **756 of them** were the element properties above (`dataset` 274, `value` 125, `closest` 98…). With those declared, **140**.
+- **All 140 were read.** The window helpers, recipes.js and seven findings caused by this check's own first element description (`hidden` typed narrower than the browser's own) account for 43 more, which leaves **97**. Every one of the 97 is the checker unable to follow ordinary JavaScript:
+  - spreadsheet sheet layouts built by joining mixed pieces with `concat` (26), and two date formats passed in a form the checker cannot follow;
+  - a number written into page text or an attribute, which the browser converts;
+  - a property added to a list (`out.horizon`);
+  - `isNaN` of a date, and a file reader's result;
+  - `(x || {}).pct`;
+  - a name declared twice with `var`, each time set before it is read;
+  - a list type guessed too narrowly from its first value.
+- **Two oddities, harmless and left alone:**
+  - The Foundation entry in a slide deck passes the unit to a function that takes nothing and reads the company anyway.
+  - Two dialogs hand their own body to the dropdown tidier. It ignores the body and tidies every dropdown on the page, and tidying one twice is guarded, so nothing goes wrong.
+
+**THE CHECK GOT ONE THING WRONG BEFORE IT WAS TRUSTED, AND --red FOUND IT.** A rule name misspelt in a page was not a finding. An object written in JavaScript is OPEN to the checker, so `SMPRules.mayDestory` simply read as `any`. Calling a real rule wrongly was caught; calling a rule that does not exist was not. The library names are now declared as a closed copy of the same keys (`Closed<T>`, a mapped type). With that, **every one of the roughly 900 places the pages name a shared rule names one that exists.** That count includes mentions in comments; every one the checker actually reads names a real rule.
+
+**AND THE SAME GAP IN §585, SAID.** The server's authoriser reaches the rules by `require`, which is open in the same way, so a misspelt rule name in `lib/authorize.js` is still not a finding. None of §585's five planted faults was one, so nothing §585 claimed is wrong, but it is a gap. Closing it needs a type comment on that `require` line, and it is not done.
+
+**THE CHECK.** It runs in about 3 seconds.
+- **The 97 findings are recorded** in `smp-app/checks/pages-types.known.json`, by file, code and message and never by line, so an edit above one does not move it.
+- **It fails on any finding beyond those 97.**
+- **It also fails on a recorded finding that has gone.** The list stays exact, or it stops meaning anything; this was proved by adding one to a count.
+- **`--write` records the current findings**, and only after every new one has been read.
+- **`--red` plants six faults in a copy:**
+  - a rule name misspelt;
+  - a rule called one argument short;
+  - the world and the viewer swapped in a call;
+  - a function from another file misspelt;
+  - a misspelt property on a page element;
+  - a misspelt global.
+
+  All six are caught, each only when a NEW finding lands in the file that was broken.
+
+`main` moved under the branch while this was built: the deck work, merged from another session as §586, touched `present.js`. It was brought in first, and the 97 and the six held unchanged on top of it.
+
+**WHAT IT COSTS FROM NOW ON, STATED BEFORE IT IS PAID.** An edit to the pages that the checker dislikes fails this check until somebody reads it, even a harmless one like writing a number into page text. They then either write it the way the checker follows, or record it with `--write`. That is the price of the protection, and it falls on whoever edits the pages next.
+
+**NOT DONE:**
+- **Type comments in the pages.** Nothing here tells the checker what a plan, a unit or a person looks like on the page side, so a misspelt field on one (`u.pillers`) is still not a finding. That is the next step, one file at a time, and it is Islam's call.
+- **An editor still shows nothing** while somebody types in the pages.
+- **The console page** (`platform.html`), which Islam did not choose.
+- **The Next app** still reaches the rules as `any`.
+
+Not merged; `main` stays untouched until Islam says.
+
+## §590 — The server's authoriser stops reading a misspelt rule as `any` (2026-10-23)
+Islam, of the gap §589 named: *"fix the gap and put it live"*.
+
+**THE GAP, PROVED BEFORE IT WAS CLOSED.** `lib/authorize.js` loads the rules with `const R = require("./rules.js")`. The object that file returns is written in JavaScript, and the checker treats such an object as OPEN: a property it does not have reads as `any` rather than as a finding. A seventh planted fault was added to `check:rules-types --red` — the authoriser calling `R.isSMOO(w, person)` — and run against the code as it stood. **NOT RED**, exactly as §589 said.
+
+**THE FIX IS A TYPE COMMENT AND A PAIR OF BRACKETS.** `R` is cast to `Closed<typeof import("./rules.js")>`, a mapped copy of the rules' own keys. A mapped type is closed, the same answer §589 gave the pages. Nothing runs differently:
+- the four exports of the authoriser are character-for-character the same functions;
+- `scripts/test-authorize.js` still reads 1123 passed / 3 failed, and `npm run test:rules` 129 / 3 — the same six failures `main` already had (§585).
+
+The carried copy, `smp-app/lib/authorize.cjs`, takes the change by the usual transform and is asserted in step. Its comment keeps `./rules.js`, because only the original is checked.
+
+**WHAT CLOSING IT FOUND: NOTHING WRONG.** With `R` closed, the authoriser still checks clean, so every rule it calls by name exists. The seventh fault is now caught (TS2551), and the other six still are.
+
+**NOTHING A BROWSER RECEIVES CHANGES.** The authoriser is not in build.py's list, so the built file, `shell.js` and the release stamp are untouched, and a merge needs no `SHELL` bump. It is server code that judges saves, but it judges them exactly as before, so no forced sign-out.
+
+**STILL NOT DONE, AS §589 LISTED.** The Next app's own TypeScript still reaches the rules through `require("./rules.cjs")` as `any`, and the pages carry no type comments of their own.
+
+**§589 AND §590 MERGED TO `main`** 2026-10-23, Islam: *"fix the gap and put it live"*. `main` had moved under the branch twice. First came the deck work (§586), brought in before §589 was written. Then came §587, §588 and §588.1, which took both of this branch's numbers, so these two were renumbered from §587 and §588. Main was merged INTO the branch. The decision record keeps its sections in number order, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. **The page check did its job on the merge itself**: §588 had added one finding (`unsaved.js`, `label()` reusing its parameter name `l` for the split address after reading it). It was read, it is not a fault, and it was recorded, so the list is **98**. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses. `check:rules-types` 2 / 0 with all six breaks red, and `check:pages-types` 3 / 0 with all six red. `test-authorize` 1123 / 3 and `test:rules` 152 / 3, identical to `main` alone. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump**: no file a browser receives changed. The built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s, and the authoriser is server code. No forced sign-out, because no save is judged differently. Witnesses: `/sw.js` release **`e266d66d5fbfeea5`** and `/shell.js` **5,148,090** bytes before, and the same after. A release that touches only server code is the one case where the same stamp is correct (§397). The authoriser's change cannot be seen from a screen.
+
+## §591 — The company is labelled the company in the Master presentation; a box of capabilities is called that (2026-10-23)
+Islam, on the final test of spec 066 (§587's report): *"do 1 and 2"*.
+
+**1 — THE COMPANY IN THE MASTER PRESENTATION, CORRECTED BEFORE IT WAS BUILT.** The report said a client with business units AND a company planning its own work (Wander Development) could not put the company's plan in the Master presentation. That was wrong, and it was found by the check written for the fix going green on the live build: `boardUnitTargets` already offers the company first among the units (§428). What WAS wrong is its label — `masterKindWord` called it a business unit (BU) unless the company was the whole plan. It is the company (CO) on either shape now. The first draft also appended it at the end, which would have listed it twice; taken out. Its place in the order does not move.
+
+**2 — A BOX SHOWN APART THAT HOLDS ONLY CAPABILITIES IS CALLED THAT.** Since §587 Wander's company roll-call and score table say Capabilities; the closing slide went on saying *"Pillars performance · 4 Pillars, by their measures"* and the Overall performance divider *"Where the Pillars stand"*. They say Capabilities now (`kindBU`), and the footnote with them. A box holding both kinds keeps §553.6's wording.
+
+**CHECKED.** Every deck against the live build: only Wander's company deck (and its plan) moves. New `checks/both-levels.py` (9 claims; the label and the wording red on the live build). `one-template`, `master-presentation` 50/0, `direction-decks`, `presentation-parts`, `deck-model`, `deck-figures`, `pillar-split` 46/0, `presentation-timer` 65/0, `built-in-step`, `no-twin-functions` green.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. Main had moved (§588/§588.1 and §589/§590 from other sessions), so this entry was renumbered §588 → **§591**, main merged in and the generated files rebuilt; re-measured against that live build: Wander's company deck moves and nothing else. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.84-quiet-merge` → **`v6.85-company-label`**. Pages only: no forced sign-out.
+
+## §592 — The new app's code sees the carried rule modules' own types (2026-10-23)
+Islam, after §589 and §590 went live: *"now do the same for the new app's code"*.
+
+**THE GAP.** The Next app loads four plain-JavaScript modules carried from the frozen product (§330): the shared rules, the change-list differ, the authoriser and the platform's own rules. Nine of its files load them, with `require` or `createRequire(...)()`, and `require` hands back `any`. So until now **no call from this app into a rule was checked at all**, under a `strict` tsconfig that everybody reading it would have assumed covered them. One file, `lib/door.ts`, described the platform rules by hand: a second copy of two of the module's keys, free to drift.
+
+**WHAT WAS DONE:**
+- **`lib/shared-types.ts` READS each module's types out of the module itself** (`typeof import("./rules.cjs")` and so on). The types are never written out a second time, so they move with the code. They are CLOSED with a mapped type (§589's reason: a JavaScript object is open to the checker).
+- **Every load is declared with one** (`as Rules`, `as Differ`, `as Authorizer`, `as PlatformRules`). `door.ts`'s hand-written copy is gone.
+- **`allowJs` is on in tsconfig.json, so the checker can read the modules.** `checkJs` stays off, so the modules themselves are not held to this app's strict settings. Turned on alone, `allowJs` changed nothing: the app's full typecheck stayed clean.
+
+**THE PRICE, AND A REVERSAL OF §585, STATED.** `allowJs` makes TypeScript read `rules.cjs`, and §585's `// @ts-check` on line 1 makes it CHECK a JavaScript file whatever `checkJs` says. So the app's strict checker read the whole rules file and reported **586 findings**, which would have failed `next build`. **The marker is removed.** It only ever told an editor to underline while somebody typed. `check:rules-types` passes `--checkJs` itself and never needed it, and it now asserts the marker's ABSENCE, with the reason. The cost is that an editor no longer underlines `lib/rules.js` as it is typed. Removing one comment line changes the served `shell.js`, so open tabs are offered the reload once, with nothing visible changed.
+
+**WHAT TYPING THEM FOUND: NO FAULT.** With all four modules typed and closed, the app's checker reported **seven** findings, then **three**. Each was read, and none is a fault:
+- **The differ's two answers could not be told apart.** `applyChanges` answers `{ok:false, error}` or `{ok:true, state}`, and `valueAt` answers `{has:false}` or `{has:true, value}`. Inferred from JavaScript, `ok` and `has` were any boolean on both shapes, so the save's `if (!applied.ok) return` did not tell the checker that `state` was there. **Said in the differ's own file:** a type comment on `bad`, `applyChanges`, `valueAt` and `none`.
+- **The save reads the acting person, and the rules say it can be missing.** `actingFor` answers `{person: me}` even when `me` is null. In `save()` it never is: `me` is the register's row or a fallback object. **Said where it is used:** `act.person!`, with a comment saying why.
+- **The platform's defaults are looked up by `EVERYONE`,** a string, rather than by the one literal key the object has. `door.ts`'s hand-written copy had covered this. **Said once, in the module itself:** a type comment on `ACCESS_DEFAULTS`.
+
+Every rule the app calls by name, in all four modules, exists.
+
+**NOTHING RUNS DIFFERENTLY.** Every change is a comment, a type, or a TypeScript `as`, `!` or `import type`, all erased at build.
+- With comments removed, all **355 / 8 / 36** exports of the rules, the differ and the platform rules are identical.
+- `test-authorize` 1123 / 3 and `test:rules` 152 / 3, the same six failures `main` already had. `test-platform-rules` 69 / 0 and `test-graph-diff` 165 / 0.
+- `npm run typecheck` is clean, and **`next build` passes, its TypeScript step included** (run here with the database step left out).
+- The pages' check still reads its 98, and the rules' check is 2 / 0.
+
+**THE CHECK** is `smp-app/checks/app-types.mjs`: `npm run check:app-types`, with `:red`. It asserts three things the app's own typecheck would never say out loud if they stopped being true:
+- every load of one of the four, in every `.ts`/`.tsx` (found by scanning, never by a list), carries its type — a new file loading the rules bare would otherwise be `any` again, silently;
+- tsconfig keeps `allowJs` on and `checkJs` off;
+- the app's checker reports nothing in the files that load them.
+
+`--red` breaks seven things IN PLACE and puts each file back byte for byte in a `finally`; copying the app would mean copying its generated Prisma and route types too. The seven:
+- a rule misspelt;
+- a rule one argument short;
+- a grant compared against a word that is not one;
+- the differ misspelt;
+- the authoriser misspelt;
+- a platform rule misspelt;
+- a load with its type taken off.
+
+**All seven are caught**, each only when the failure names the broken file. Before this, none of the six code faults could have been: `any` is never an error.
+
+**NOT DONE.** The app's other carried modules (the assistant, the mailer, `frozen.cjs`, `graph-io.cjs`, `chat-api.cjs`, `mail-api.cjs`) still carry hand-written `as {…}` shapes or none. They are not rule modules, and each is its own errand.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§592 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§582.2, the remote from any page, and §591, which took the number this branch had written into its comments, so they were renumbered §592). It was merged INTO the branch. The decision record keeps §591 before §592, and the progress lines keep newest first. The built file, `shell.js` and `sw.js` conflicted and were regenerated from the merged sources, never resolved by hand. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. The three type checks read 2 / 0, 3 / 0 (still 98) and 4 / 0, with red 6 / 6, 6 / 6 and 7 / 7. The tests are unchanged, and `qa.py` reads no errors for any viewer. Then this note and the `SHELL` bump `smp-shell-v6.86-remote-keys` → **`smp-shell-v6.87-app-types`**, as a commit `main` alone holds (§91), the name held by no commit on any remote ref. No save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`92f3825ab0b2b113`** and `/shell.js` **5,152,482** bytes before; after, they should read **`23aa60634dbc23b5`** and **5,153,015**.
+
+## §593 — Units and functions each get their own score, on the group and on a division (2026-10-23)
+Islam, on the simplification's final test: *"in case of business units they get their own score and the functions get their own score and we see both on the group"*; of how the functions count, *"stay equal"*; of divisions, *"yes same for divisions"*. Shown first as a picture on Raya's real group page.
+
+**WHY.** The group read its units alone and never its functions; a division blended its units and functions into one figure, the functions taking shares set on Setup (§391, his A at the time). One question, two answers — spec 066's finding.
+
+**WHAT.** Neither level blends now. The units' figures are the units' (weighted by size, unchanged), and the functions' are the functions' — `fnsReading`, the plain average of what each function's own page shows (`fnMemberScores`), a function with nothing to read left out rather than counted as nought:
+- **The group** (where it has units): a second row of two cards, *Functions — performance* and *Functions — execution*, under the units' two, each with a drill listing every function's figure; and a *Functions — where to look next* row of chips.
+- **A division**: its headline cards are its units' alone (`companyObjectives` / `companyRatio` over its units); its functions get the same two cards and keep their own section; a division of functions alone draws only that row.
+- **Setup**: the function's *Weight in its division* field and the Functions table's *Weight* column are gone (§24), with the handler that stored it. A weight left from §391 is ignored, and dropped when the function moves. `companyShares`, `companyMix` and `fnCoWeightSet` are deleted.
+
+**WHAT MOVES.** The group's units' figures do not move. A division that held functions now headlines on its units alone, with its functions beside it. A client with no units (El Abd) is unchanged: "in case of business units".
+
+**CHECKED.** `division-functions` rewritten to the new rule (§218), 24/0. `single-company`'s division claim rewritten; its one red (§449) is identical on the live build, as are `top-plan` 1, `setup-live-rows` 2 and `wave3` 9 (all pre-existing). `control-targets`, `role-picker`, `objectives-actions` 58/0, `structure`, `platform-cards` 30/0, `perf-line`, `built-in-step`, `no-twin-functions` green. Every deck on six states unchanged.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*, having seen the group and a division drawn by the build. Main had moved (§582.2, §592 from other sessions), so this entry was renumbered §592 → **§593**, main merged in and the generated files rebuilt; `division-functions` 24/0 on the merged tree. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.87-app-types` → **`v6.88-functions-row`**. No save is judged differently (a stored `coWeight` is simply no longer read), so no forced sign-out.
+
+## §594 — The console page, read by TypeScript's checker (2026-10-23)
+Islam, after §592 went live: *"now do the same for the console page"*. This is the console in this project's own sense: `platform.html`, the page with My work, the clients, Memory, Copilot, Frameworks and History.
+
+**NOTHING ON THE PAGE IS EDITED**, as with the strategy pages (§589). `checks/pages-types.mjs` now reads two pages, each as the browser runs it and each with its own recorded list.
+
+**HOW THE CONSOLE IS READ.** The page is served unchanged by `lib/shell.ts`. Its script tags are read off the page, never listed in the check. Each is mapped to the file `build-shell.mjs` copies to that address:
+- `/memory-split.js` is the debrief splitter. It is a module to the checker, so it is declared closed, like the library names (§589).
+- `/client-setup.js` is the set-up flow, which the console mounts for Add a client and for an archived client.
+
+The page's own inline script makes the third. A script tag the check does not know is a refusal, never a page quietly read without it.
+
+**WHAT IT FOUND.** 233 findings:
+- **The console's own script has two, both noise:** `isNaN` of a date, and date-format options the checker cannot follow.
+- **Three are the set-up flow's inference noise,** the same three the strategy pages record.
+- **The other 228 are the set-up flow naming STRATEGY-PAGE data** — `GROUP`, `UNITS`, `SMPRules`, `SYNC` and 19 more — which the console page does not have. On the console, any one of them reached unguarded would throw.
+
+**THE 228 WERE NOT TAKEN ON TRUST.** The calls from the console's two entry points (`mountCreate`, `mountArchived`) were traced through the flow:
+- **The traced paths are safe.** The word lookup asks `typeof labelWord === "function"` first. `__smpHoldsNow` answers zeros when `typeof GROUP === "undefined"`, which is §467's own fix. `isDone` asks `typeof SMPRules`. And `canShape()` is true on the console's create piece, so the field handler never redraws into the wizard.
+- **`client-setup-outside.py` drives both screens in a browser** against its stub, and reads **0 failures, no page errors**.
+
+What was not done is proving all 228 site by site. They are recorded with that said in the list's own note. **The protection is the point of listing them:** a NEW strategy-page name in the set-up flow is a new finding on the console, and the person who wrote it has to show it is guarded or unreachable there before it is recorded.
+
+**SAID PLAINLY, BECAUSE IT WOULD BE EASY TO CLAIM OTHERWISE: THIS WOULD NOT HAVE CAUGHT §467.** That fault added a new PATH, a change handler calling `canShape()`, to a name that was already there. The check counts names, not paths. A check that walked the console's calls into the flow and required a guard on every strategy-page name reached would have caught it. That is a separate piece of work, offered and not done.
+
+**AND A LIMIT, FOUND BY TESTING IT: a misspelt member of an object a page script builds itself is not caught,** on the console or on the strategy pages. `CLIENTSETUP.mountCreat(…)` reads as `any`, because an object written in JavaScript is open, and only the library names are declared closed. Closing the pages' own objects would mean editing their code, and that was not asked.
+
+**THE CHECK.** Run with no arguments, `pages-types.mjs` now reads both pages: 3 / 0 each, the strategy pages still at 98 and their list byte-identical. `--write` records both, each with its own note. `--red` plants eleven faults, all caught:
+- **the strategy pages' six;**
+- **five on the console:** a function, a variable, the splitter and an element's method misspelt, and the create piece reaching for `GROUP`. That last one is §467's class: the check flags it as a new name where the console mounts the flow.
+
+No new npm script: `check:pages-types` and `:red` cover both pages.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§594 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§593, units and functions scored apart, which took the number this branch had used, so it was renumbered §594). It was merged INTO the branch. The decision record keeps §593 before §594, and the progress lines keep newest first. The built files were regenerated from the merged sources and came out unchanged from main's. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. `pages-types` 6 / 0, with 98 and 233 recorded, main's changes adding none; `rules-types` 2 / 0 and `app-types` 4 / 0. Red 11 / 11, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed, and the built file, `/shell.js` and `/sw.js` are byte-identical to `main`'s. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
+
+## §596 — The console's paths into the set-up flow, walked (2026-10-23)
+Islam, of the check §594 named and did not build: *"build the check that follows the console's paths"*.
+
+**WHY §594 WAS NOT ENOUGH.** §594 counts names. §467's crash came from a new PATH to an old name. §436 added a change handler to every set-up field (`if (!canShape()) redraw()`). `canShape()` asked `holdsNow()`, and `__smpHoldsNow` read `GROUP`, which the console does not have, so typing in Add a client threw. The name `GROUP` was already there, so a list of names could not have said anything. A browser check found it a week later.
+
+**WHAT IT DOES** (`consolePaths` in `checks/pages-types.mjs`, run as part of the console's subject).
+- **It starts where the console calls into the flow.** That is the `CLIENTSETUP` members the console's own script calls, plus any top-level name of the flow's file it uses, both read off the page (today `mountCreate` and `mountArchived`), together with whatever the file runs as it loads.
+- **It follows every function a reached one names:** called, passed as a callback, or stored. An inline callback is reached with the function it sits in, since an event can fire it. Names are resolved by scope, not by spelling.
+- **Every strategy-page name it can reach must be guarded.** The names are the ones the checker cannot find on the console (§594's list), so a name added tomorrow is covered without an edit. Guarded means only run when the strategy page is there:
+  - under a `typeof X !== "undefined"` or `=== "function"` test;
+  - after an early `if (typeof X === "undefined") return`;
+  - on the right of an `&&` that tests presence;
+  - or in a function reached only through such guarded calls.
+
+  The strategy page's names arrive together, so a test on any one of them guards all of them.
+- **The flow's own `return {…}` at the end of its wrapper is the API it hands the page.** Naming a function there is not calling it. The prototype got this wrong at first, and reached the whole wizard through `mount`.
+
+**ONE DOORWAY IS DECLARED, NOT INFERRED.** With everything else precise, exactly one route led from the console into the wizard: `wordCommit`'s `if (!canShape()) redraw()`, the very handler §467 was about. On the console `canShape()` is always true, because `S` is null on the create piece and `holdsNow()` reads zeros there (§467's fix). So `redraw()` never runs there. No `typeof` says so, and the analysis cannot know it. It is therefore declared in `DOORWAYS` with that reason, keyed by the function it sits in and the call it gates. **A declared doorway that no longer exists fails the check,** so the declaration cannot outlive the code it describes. `client-setup-outside.py` types in that form in a browser, with no page error.
+
+**WHAT IT FOUND: NOTHING OPEN.** From the console's two calls, 18 functions are reached, and none of them uses one of the 24 strategy-page names unguarded.
+
+**AND IT WOULD HAVE CAUGHT §467, PROVED.** `--red` takes §467's guard out of `__smpHoldsNow` in a copy. The check reports eight open uses, each with its route: *GROUP at client-setup.js:64, in __smpHoldsNow ← holdsNow ← canShape ← wordCommit ← field ← mountCreate ← the console calls CLIENTSETUP.mountCreate.* That is §467's path exactly, a week before a browser found it. Three more planted faults are caught as well: the word lookup unguarded, a strategy name read as the file loads, and the doorway rewired to call `render()` directly (115 open, and the declared doorway gone). `--red` now plants fifteen faults across both pages, all caught.
+
+**THE PARSER, AND WHAT IT COSTS.** TypeScript 7 has no JavaScript API apart from an `unstable` one that talks to its background engine. So the walk uses **acorn and acorn-walk**, the standard small JavaScript parser, with no dependencies of its own. They are added to `smp-app`'s devDependencies (two packages). They are used only by this check, and no page or server code imports them. The full check runs in under 2 seconds, and `--red` in about 9.
+
+**WHAT IT DOES NOT DO.**
+- **It does not run the code.** A doorway decided by data, like `canShape()`, is declared rather than proved, and each one costs a reason written down.
+- **It walks the set-up flow only.** It does not walk the console's own script, which runs only on the console and has nothing of the strategy page's to reach for.
+- **A call made through a computed name** (`obj[k]()`) is not followed. The flow has none on the reached paths today.
+
+Not merged; `main` stays untouched until Islam says.
+
+**§596 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch: the deep-dive priorities for Processes, recorded as §595 in the progress file. That took this section's number, so it was renumbered §596. The merge into the branch was clean. The merged `package-lock.json` was proved by a clean `npm ci` from it: 448 packages, acorn 8.19.0. npm's `--package-lock-only` rewrite added 66 unrelated optional-dependency lines and was discarded rather than shipped. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean (after the route types were regenerated for main's new priorities pages). `pages-types` 8 / 0, `rules-types` 2 / 0 and `app-types` 4 / 0, with red 15 / 15, 6 / 6 and 7 / 7. Then this note, as a commit `main` alone holds (§91). **No `SHELL` bump:** no file a browser receives changed. The release adds two devDependencies, which the deploy's install fetches and nothing at run time loads. No forced sign-out. Witnesses: `/sw.js` release **`1bfe7a65447c2c58`** and `/shell.js` **5,149,076** bytes before, and the same after.
+
+### §588.2 — The numbered saves are kept for a week (2026-10-23)
+Islam, asked whether the technical list the tabs read should be swept: *"ok"*.
+
+**WHAT IS SWEPT, AND WHAT IS NOT.** Only `saves` — the list §588.1 added for open tabs to ask "what changed since N" of. The History page (`change_log`, §42) is the record Islam keeps and is not touched: *"last one wins is ok we keep history anyway."*
+
+**HOW.** On the way out of every save, after the new entry is written, one bounded delete: `DELETE FROM saves WHERE at < now() - interval '7 days'` (`SAVES_KEPT_DAYS`, `lib/save.ts` and `api/state.js`), under the tenant's own row policy on the new stack and inside the client's schema on the old. No clock job and no migration: the save is the one moment the list grows, so it is the one moment it is trimmed, and a table that never holds more than a week needs no index for the sweep. Seven days, because a tab only ever needs the entries since it was opened, and a tab left open longer than that is the case below.
+
+**A TAB OLDER THAN THE LIST.** The read answers `oldest` beside `seq` — the smallest number still kept, null when nothing is. A tab whose number is below `oldest − 1` cannot know what was swept between, so it takes the graph once through §588's whole-graph merge and carries on from the number that copy holds; a server that sends no `oldest` (an older build) is believed. Stated cost: the numbers are one sequence for every tenant, so a tab whose own last save is the tenant's only entry older than a week fetches the graph once more than it strictly had to — once a week, on a quiet tenant.
+
+**CHECKED.** `checks/saves-since.mjs` **24 / 0**: an entry dated eight days back is in the list, a save lands, the entry is gone, the read names the oldest kept entry and answers only kept ones; RED with `--break=no-sweep` (the entry stays) and still RED with `--break=no-save-number`. `checks/safety-banners.py` **ALL GREEN** with 5f: the stub sweeps to one entry, the tab is set below it, the graph is fetched once with the swept save on the screen, and the next landing arrives as a change again. `release-stamp` all clear, `built-in-step.py` all good, `test-graph-diff` 165 / 0.
+
+**§588.2 MERGED TO `main`** 2026-10-23, Islam: *"ok for both"* (the sweep, and the two checks that need the served app). `main` moved under the branch twice while this was checked — §589–§595 and §582.2, then §596 — so it was merged INTO the branch each time: the sources merged by themselves both times, the two record files were kept both sides with main's first, and the built page and served copies were regenerated, never resolved by hand. **And the two checks §588's note said were not run here were run on this work**, with the app installed and built in the container against the local Postgres (`npm run build`, migrations through `deploy.mjs`): `checks/state-api.mjs` **GREEN 92 ok, 0 failed** — the two tabs, the eight concurrent saves all kept, the refusal naming its rows, view-as judged as the viewed person, the history read and the per-target peek, through the real route with the door's sign-in in front — and `checks/shell.mjs` **GREEN 403 ok, 0 failed**, §524's Copilot bar included. Both ran on the tree after the first merge; §596 then landed (a check, the package files and the rules file, nothing served or run by the app) and the second merge's build left the built page (**5,922,496** bytes) and `/shell.js` (**5,149,559**) byte for byte as checked, with `generated-in-step`, `release-stamp`, `built-in-step.py`, `saves-since` 24 / 0, `safety-banners.py` ALL GREEN and `test-graph-diff` 165 / 0 green on the final tree. Fast-forwarded, then this note and the `SHELL` bump `smp-shell-v6.88-functions-row` → **`smp-shell-v6.89-week-sweep`** as a commit `main` alone holds (§91), the name held by no commit on any ref after fetching every ref (§94.16). No save is judged differently, so no forced sign-out.
+## §597 — A hidden row stays on the slide, greyed, so the presenter can defend the removal (2026-10-23)
+Islam, of §233's eye: *"the eye in this case can leave things out and not counted as is .. but we need to keep them on the slides showing that they are removed so the presenter can validate the removel. would that work?"* — and of the mockup drawn for it: *"yes build it"*, with two answers taken in the same breath: **always on**, and **the row keeps its place**.
+
+**WHAT IS REVERSED, AND ONLY THAT.** §233 made one mark do three things: the row leaves every score, reporting stops asking for it, and the deck leaves it out. The first two stand. The third is the opposite now: the review deck, Present mode, the deck PDF and the .pptx **keep a hidden row in its own seat with its own number**, greyed at regular weight, wearing the plan page's own chip after its name. §233 already said *the row stays, and says so* — of the PAGE, for everyone, *because an average over rows the page shows has to be explicable to whoever reads it*. The room is the one reader that argument had not reached: a score of 71% over a slide that silently dropped a row is a number the presenter cannot defend, and a row shown greyed with its note beside it is the defence.
+
+**THE SCORE IS UNTOUCHED BY CONSTRUCTION, NOT BY CARE.** Every reader that averages, asks or counts still goes through `SMPRules.shown()` — the counts on the dividers, the Delivered figure, the pillar scores, the gap map, the reporting pane. Only the deck's DRAWING helpers read the whole list: `deckRows()` is the list a table draws, `deckTr()` opens a row with the mark (and whatever class the caller already had — `dim` on a not-due deliverable keeps its seat), and `deckStamp()` puts the mark on a row a builder opened bare, which is how the tactics table's six returns and the §414 outcome lines take it once rather than six times. The chip is `hidChip()`, the plan page's own: one word for one state (§53.5). Ten tables changed — a unit's aim and objectives, a pillar's measures, breakdown and tactics, the company's objectives, a capability's objectives, a function's actions, a project's deliverables-and-outcomes and its milestones. **The overview slide's five-name preview keeps `shown()`**: it previews what counts, not a table a presenter defends.
+
+**THE .PPTX SAYS WHAT THE ROOM WAS TOLD.** `deckCellSpec()` reads the row it sits in: in a `hiddenrow`, every run takes the quiet ink at regular weight — no band colour, no bold figure, no red *Missing*, no red *Delayed* — and the name cell is written as two runs, the name and *· Hidden — not counted* smaller after it, because a reader of the file has no stylesheet to tell them why one row is grey. Read off a real build: a hidden tactic's nine cells all `5E6E88`, `b:false`, the name run followed by the chip's words.
+
+**THE STYLESHEET IS THE PAGE'S TWO SIGNS AT THE DECK'S SIZE.** `present.css`: every cell of the row in `--ink-3` at 400, the status pill emptied to a dashed outline, the lit quarters greyed, the Delayed dot greyed, and `.hidchip` stepped up to 13px for a projector. Ink only, never `display:none` — keeping the row on the slide is the whole of this feature.
+
+**PROVED ABLE TO FAIL.** `checks/hide-element.py` §3 and §6 asserted the deck carried neither the row nor its name; both now assert the row IS there, in a `tr.hiddenrow` carrying the chip's words, with the sibling still present and PLAIN (so a deck that greyed everything could not pass, §113.8). Run against the previous frozen build, exactly those two lines go red and nothing else; against this build, all 21 green. Neighbours green: `review-pptx`, `deck-model`, `deck-figures`, `deck-outcome`, `deck-and-weights`, `hide-slide` 42/0, `slide-columns`, `line-by-line`, `table-fit`.
+
+**COSTS, STATED.** A hidden row takes a line on the slide again, so a long table may split one slide earlier than it did under §233. And anything hidden is back in front of the room: a row hidden because it should not be SEEN, rather than because it was dropped, wants the × instead — said in the mockup before the yes. **Screen only**: nothing stored moves, no migration, no rule about who may save what changes, so no forced sign-out (spec 029). The built file's bytes changed, so `sw.js` is bumped (§91); at the merge the stamp is `v6.90-plan-as-it-stood`, past main's `v6.89`.
+
+**RECORDED, NOT DONE — the question asked in the same message.** *"If I remove a line fully do I get history of the plans somehow to check what was it on a certain date the way Google Docs history works?"* Partly: Setup › History (§262) logs the removal — who, when, where — but a dropped row travels by id (§588's `listOp`), so the line has no Restore and the row's contents are not on it; archives exist only for a whole pillar or project, Clear plan and an import (§232, §49.2); and there is no view of the plan as it stood on a date. Two pieces named for alignment, neither built here: archive a removed row's contents so its History line gets a working Restore, and a date view on History that rebuilds the plan as of that day.
+
+## §598 — A removed row comes back in its seat, and the Plan page shows the plan as it stood on a day (2026-10-23)
+Islam, in the message that asked for §597: *"if I remove a line fully do I get history of the plans somehow to check what was it on a certain date the way google docs history work?"* Told what stood (§262 logs the removal, puts nothing back, and has no day view) and asked two questions, he answered *"old position, and on screen is enough"*; then, of the first drawing, *"I believe the history of the plans should be on the plans page for the smo to see and review"*; then *"I need a real mockup for both"* — made of the real pages by `checks/history-asof-mockup.py` — and of that: *"yes build both"*.
+
+**THE LOG CARRIES THE ROW, AND ITS SEAT.** `splitRows` in `lib/authorize.js` reached `onPlan()` with NO rows whenever a list's ids differed, so a removal was logged as "the unit's plan" and nothing else — History's own §262 mockup had already said so: *a row added or removed is put back from the plan archive*, and no archive is written for one row. `structuralRows()` reports each row that left as `{field:"row", had:true, from:{in, list, at, of, row}}` and each that arrived as the mirror with `to`; the holder, the list name, the index and the list's length are the seat, the row is its whole contents. Only where a caller names the seat — a unit's and a capability's objectives, a pillar's measures, tactics and breakdown rows, a unit's and a function's actions, a project's deliverables, outcomes and milestones — and `keep()` reports a row once however many field passes walk its list. **THE GATE IS BYTE-FOR-BYTE WHAT IT WAS**: ids differing is still plan, still the office's (`test-authorize` 1129/3, the same three as `main`; a unit head's removal is refused naming the row). A reorder is still what it was and names no row.
+
+**RESTORE PUTS THE ROW BACK WHERE IT SAT** (his *"old position"*): `seatBack()` in history.js finds the holder by the seat (`in` null is the subject itself; else the plan's own finder), the list by name (`breakdown.rows` walks the dot), and splices a copy of the row in at its index — rows after it move down one, a row added there since sits just after it — unless the id is already there, which the line then says. The confirmation names the seat in the plan's words, *measure 2 of MB01*; the save is the platform's own (§170), travels as §588's list add with the id it follows, and lands at the same seat on the server. A value changed on a removed row is HELD until the row is back — *put the row back first, from its own line* — asked only of the kinds whose rows the plan holds, so a figure set's line is never greyed by a finder that does not know it. A removal logged before this keeps today's greyed button, with its reason. **The refused-save path takes the same door** (`putBackRefused` in sync.js → `TRAIL.seatBack`), so a refused structural change is put back whole rather than missed.
+
+**THE DAY VIEW IS A COPY, HANDED TO THE PAGE'S OWN PAINTER.** On the Plan page's band, after *See history*: *As it stood on…*, the office's (`inOffice()`), for a unit or a pillars function. A day; one ask of the log for everything after the end of it (cap 500); and `rebuild()` walks the entries newest first over a deep copy of the subject, putting each entry's "value before" back through the same `applyFrom()` Restore uses, re-seating a row that left and taking out one that arrived. **The live graph is never touched** — asserted as byte identity before and after — so nothing the differ watches moves, nothing is saved, and another person's save merging in (§588) lands on the live graph the view is not drawn from. `renderUnitPlan()` draws the copy under the banner; `mayAuthor()` and `mayFill()` answer no for the subject while the view is on, so every table draws its read-mode self and the pen button is hidden by one body class; rows the copy holds that today's plan does not wear `hiddenrow` and a *Removed since* chip through `hidCls()`/`hidChip()`, the plan tables' own two helpers (§53.5). Walking to another subject lets the view go; *Back to today* repaints.
+
+**WHAT IT CANNOT REPLAY IS COUNTED AND SAID.** A reorder is logged without the order it replaced; an entry logged before its rows were kept carries nothing; the log caps an entry's rows at 200. Each counts one, and the banner says *N of them could not be replayed … so an order or a value may differ*, and when the 500 cap is hit, that only the latest 500 were. **NOT DONE, SAID**: the company's own plan (`topAsUnit()` is derived from GROUP, not a subject the finder walks) and a projects or objectives function draw no link yet; a figure's `quarters` entry is put back as the log wrote it, as Restore already does.
+
+**PROVED ABLE TO FAIL.** `checks/history-asof.py` (own server, the same stub `history-page.py` runs, the removed row a REAL row of the seed taken out of the served copy): 34 green here; on the previous frozen build 21 red — the seat line, the live Restore, the held figure, the re-seat in the DATA, the save, the link, the picker, the banner, the greyed row — and it FAILS there rather than dying (§215). `test-authorize` gains five §598 lines. Neighbours green: `history-page`, `hide-element`, `safety-banners`, `refusal-keeps-work`; `test:rules` 152/3 as before; `generated-in-step` all clear after the re-carry.
+
+**Screen and log only**: no migration (`rows_` is JSONB and takes the shape), no rule about who may save what changes, so no forced sign-out (spec 029). `sw.js` bumped at the merge to `v6.90-plan-as-it-stood`, past main's `v6.89` (§91).
+
+**§597 AND §598 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had moved under the branch: it took §591–§596 (the Master presentation's company label, the carried modules' types, a unit's and a function's own score, the console page check, deep-dive priorities, the console's paths), so these two were renumbered from §591 and §592 BEFORE the merge (§264.3), and main was merged INTO the branch. The decision record keeps its sections in number order and the progress lines newest first; the two record files were COMBINED, never picked (§318.7). The built file, the frozen copy and the served copies were REGENERATED from the merged sources (§91, §329). On the merged tree: `hide-element`, `history-asof`, `history-page`, `review-pptx`, `deck-model`, `hide-slide` 42/0, `slide-columns`, `refusal-keeps-work` green; `test-authorize` 1129/3 and `test:rules` 152/3, the same three as main; `test-graph-diff` 165/0; `built-in-step` all good; `generated-in-step` all clear once committed; `qa.py` ERRORS none. **`sw.js` is `v6.90-plan-as-it-stood`**, past main's `v6.89-week-sweep` (main moved twice: §588.2 arrived while the first merged tree was being swept, and was merged in the same way) — one live `const SHELL`, `node --check` clean — because the built file's bytes changed (§91). No forced sign-out: nothing stored moves, no migration, and no save that worked before is judged differently (the log gains a shape; the gate is byte-for-byte what it was). **The live read is reported rather than claimed** (§54.5, §91.5): production cannot be reached from this container, so nobody here has seen the site serve this commit.

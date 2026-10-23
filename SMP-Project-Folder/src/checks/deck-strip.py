@@ -239,9 +239,27 @@ with sync_playwright() as p:
           "bysub" in str(get(k, "cls")) and (get(k, "pills") or []), k)
     fpw = ev(pg, """() => fnProjects('marketing').map(p => projCode('fn:marketing', p))""", None, [])
     check("...and its pills are its own projects, by the code the page shows",
-          bool(fpw) and all(c in (get(k, "pills") or []) for c in (fpw or []))
-          and len(get(k, "pills") or []) == len(fpw) + 2,
+          bool(fpw) and all(c in (get(k, "pills") or []) for c in (fpw or [])),
           {"want": fpw, "got": get(k, "pills")})
+    # §553.2 REWRITES THE COUNT, and the rewrite is the point (§218). This
+    # read `len(pills) == len(fpw) + 2` — the two being COVER and END, which
+    # was every structural stamp a projects box had, because it ended on its
+    # last milestone with nothing that said how it did. It has the Overall
+    # performance section now, like every other box, so the number is three.
+    #
+    # ASSERTED AS AGREEMENT RATHER THAN AS THREE (§94.8): the structural
+    # stamps a projects box carries must be the ones a PILLARS box carries,
+    # read in the same run. A literal would go stale the next time a section
+    # is added and would not say what it is really claiming — that the two
+    # kinds of box are framed the same way.
+    frame = lambda t: [x for x in (ev(pg, """(t)=>{var d=document.createElement('div');
+        d.innerHTML=deckHtmlFor(t);
+        return [...d.querySelectorAll('[data-sec]')].map(s=>s.getAttribute('data-sec'));}""",
+        [], t) or []) if not x[0].isdigit() and x.upper() == x and len(x) <= 7
+        and x in ("COVER", "FOUND", "SWOT", "PILLARS", "SCORE", "END")]
+    check("...and it is framed the way a pillars box is framed",
+          frame("fn:marketing") == [x for x in frame("fn:merchandising") if x != "PILLARS"],
+          {"projects": frame("fn:marketing"), "pillars": frame("fn:merchandising")})
     check("...and the full name is on the hover",
           all(len(h) > 3 for h in (get(k, "hovers") or [])), get(k, "hovers"))
 

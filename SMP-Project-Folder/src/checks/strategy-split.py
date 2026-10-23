@@ -82,10 +82,14 @@ def read_pptx(path):
         if n.endswith(".xml") or n.endswith(".rels"):
             ET.fromstring(z.read(n))  # raises on anything malformed
     slides = slidenames(z)
+    # §573: ONE LINE PER PARAGRAPH, its runs joined as PowerPoint shows them.
+    # A figure's unit is a run of its own now (`32` and a smaller `%`), and a
+    # line per run read it as two words.
+    A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
     for n in slides:
         root = ET.fromstring(z.read(n))
-        for t in root.iter("{http://schemas.openxmlformats.org/drawingml/2006/main}t"):
-            text.append(t.text or "")
+        for para in root.iter(A + "p"):
+            text.append("".join(t.text or "" for t in para.iter(A + "t")))
     # the package is consistent: every slide the presentation lists exists
     pres = z.read("ppt/presentation.xml").decode()
     return {"slides": len(slides), "text": "\n".join(text), "pres": pres}
@@ -287,8 +291,11 @@ with sync_playwright() as p:
         ck("it carries more than a cover", d["slides"] >= 6, d["slides"])
         ck("the plan's own words are inside (a measure)",
            "Orders processed digitally" in d["text"])
+        # REWRITTEN TO THE NEW RULE (218, 564): the plan is the deck without
+        # its figures, so the SWOT is the deck's own four slides, each headed.
         ck("...the SWOT Islam asked for by name",
-           "STRENGTHS" in d["text"] and "Strong brand equity (Raya & i2)" in d["text"])
+           "Strengths" in d["text"] and "Strong brand equity (Raya &amp; i2)" in d["text"] or
+           "Strengths" in d["text"] and "Strong brand equity (Raya & i2)" in d["text"])
         ck("...a tactic and its owner",
            "Clean and standardize customer and SKU base" in d["text"] and "Ramy Behairy" in d["text"])
         ck("...and the key objectives", "Distribution revenue" in d["text"])
@@ -342,12 +349,18 @@ with sync_playwright() as p:
     ck("...and it downloads", ff is not None)
     if ff:
         d = read_pptx(ff)
+        # REWRITTEN TO THE NEW RULE (218, 564): the plan carries what the
+        # function's own deck carries — its own projects. A capability held
+        # apart (Setup › Capabilities, §334) is its own subject in the flow,
+        # with its own deck, and is no longer folded into the function's file.
         got = pg.evaluate("""(w) => {
-          const c = capsOfFunction(w.fn)[0];
-          return { cap: c.name, proj: (c.projects[0] || {}).name || "" };
+          const f = FUNCTIONS[w.fn], ps = [];
+          capsOfFunction(w.fn).forEach(c => { if (c.own) (c.projects || []).forEach(p => ps.push(p.name)); });
+          const box = document.createElement("div"); box.innerHTML = deckHtmlFor("fn:" + w.fn);
+          return { deck: [...box.querySelectorAll(".pcard-n")].map(x => x.textContent) };
         }""", who)
-        ck("a capability and its project are inside",
-           got["cap"] in d["text"] and got["proj"] in d["text"],
+        ck("the function's own projects are inside, as its deck names them",
+           bool(got["deck"]) and all(n.replace("&", "&amp;") in d["text"] or n in d["text"] for n in got["deck"]),
            got)
 
     # ── 4 · §119'S FOUR FOLLOW-UPS ───────────────────────────────────
@@ -384,10 +397,13 @@ with sync_playwright() as p:
                 marks.append((bold, val))
                 if not bold or val is None:
                     plain += 1
-        # SIX GAPS WERE MADE AND SIX MUST BE NAMED — an exact count, because
-        # "at least one" passes a build that marks the aspiration and forgets
-        # every table cell.
-        ck("every gap made is named Missing (6)", len(marks) == 6, len(marks))
+        # SIX GAPS WERE MADE; FOUR ARE ON THE PLAN'S SLIDES AND FOUR ARE
+        # NAMED — an exact count, because "at least one" passes a build that
+        # marks the aspiration and forgets every table cell. REWRITTEN TO THE
+        # NEW RULE (218, 564): the plan is the deck's slides, and they carry
+        # a measure's target but not its direction or compile rule, so those
+        # two gaps have no cell to be named in.
+        ck("every gap on the plan's slides is named Missing (4)", len(marks) == 4, len(marks))
         ck("...all of them bold", all(b for b, _ in marks), marks)
         ck("...all of them in the platform's own red, not the page ink",
            all(v == "B04434" for _, v in marks), marks)
@@ -415,11 +431,11 @@ with sync_playwright() as p:
                              for c in row.iter(A + "tc") ]
                     marked += sum(1 for v in vals[-4:] if v.strip())
             break
-        ck("the tactics table ends in Q1 Q2 Q3 Q4",
-           heads is not None and heads[-4:] == ["Q1", "Q2", "Q3", "Q4"], heads)
-        ck("...and the quarters in action carry a mark", marked > 0, marked)
-        ck("...while the ones that are not stay empty",
-           heads is not None and marked < 4 * 12, marked)
+        # REWRITTEN TO THE NEW RULE (218, 564): the deck's own Quarters
+        # column, the lit quarters written out ("Q2 Q3").
+        ck("the tactics table carries the deck's Quarters column, and no figure",
+           heads is not None and heads[-1] == "Quarters"
+           and not any(h in heads for h in ["YTD actual", "Progress", "Note"]), heads)
 
     # THE RAIL OPENS TERSE (§119). Asserted from a FRESH page, because the
     # preference is per-browser and this one has been driven all run.
@@ -509,31 +525,17 @@ with sync_playwright() as p:
                         "merged": [c.get("hMerge") for c in qs[1:]] })
             break
         ck("the tactics table was found", len(rows) > 0, len(rows))
-        # THE TEMPLATE'S SHAPE IS NOT SPENT ON SAYING THE GAP (§128.1, Islam's
-        # correction): four separate columns on EVERY row, no merged cell ever.
-        ck("every row keeps all four quarter columns",
-           all(r["cells"] == 4 for r in rows), [r["cells"] for r in rows])
-        ck("...and nothing is merged", all(not r["span"] and not any(r["merged"])
-                                           for r in rows), rows[:2])
-        gapped = [r for r in rows if r["alarm"]]
-        # A QUESTION MARK, NEVER A TICK (§128.2). Asserted as BOTH halves —
-        # the mark is `?` AND no tick appears on a gapped row — because a
-        # build that put a red ✓ back would satisfy "four red bold cells".
-        ck("a tactic with no quarter carries a question mark in all four",
-           all(r["texts"] == ["?"] * 4 for r in gapped), gapped[:2])
-        ck("...and never a tick, which would read as an affirmation",
-           all("\u2713" not in r["texts"] for r in gapped), gapped[:2])
-        ck("...in bold red, the colour the deck keeps for a gap",
-           all(r["reds"] == 4 and r["bolds"] == 4 for r in gapped), gapped[:2])
-        ck("...and that is every tactic but the one that names a quarter",
-           len(gapped) == len(rows) - 1, (len(gapped), len(rows)))
-        # THE OTHER HALF, or a build that marked every row would pass.
-        kept = [r for r in rows if not r["alarm"]]
-        ck("a tactic that names a quarter is not flagged", len(kept) == 1, kept)
-        ck("...its tick is the ordinary ink, and only the named quarter carries one",
-           all(r["reds"] == 0 and r["texts"].count("\u2713") < 4 for r in kept), kept)
-        ck("...and an answered row never wears a question mark",
-           all("?" not in r["texts"] for r in kept), kept)
+        # REWRITTEN TO THE NEW RULE (218, 564). One Quarters column, the
+        # deck's; a tactic that names no quarter is a gap and says Missing in
+        # the platform's bold red, as §119.7 asked; the one that names a
+        # quarter says which, in the ordinary ink.
+        q = [{"t": r["texts"][-1], "red": r["reds"] > 0 and "Missing" in r["texts"][-1]} for r in rows]
+        gapped = [x for x in q if x["red"]]
+        ck("a tactic with no quarter says Missing, in red",
+           len(gapped) == len(q) - 1 and all(x["t"] == "Missing" for x in gapped), q)
+        kept = [x for x in q if not x["red"]]
+        ck("...and the one that names a quarter says which, unflagged",
+           len(kept) == 1 and kept[0]["t"] == "Q2", kept)
 
         # THE DECK CLOSES ON THANK YOU (§119.8).
         last = slidenames(z)[-1]

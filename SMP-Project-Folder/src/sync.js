@@ -269,6 +269,10 @@ var SYNC = (function () {
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
   var repaint = null;
+  /* §588.1: the number of the last save this copy holds — the server's
+     `seq` on the graph it sent — or null where the server does not number
+     its saves yet, in which case safety.js keeps §258's per-target ask. */
+  var SEQ = null;
 
   /* ONE DATASET NOW (spec 042 §6.1, retiring §21 and §67).
 
@@ -306,8 +310,13 @@ var SYNC = (function () {
     };
   }
 
-  function serialize() {
-    var s = JSON.parse(JSON.stringify(graph()));
+  /* The graph in the shape a save compares and sends (§588 lifts this out of
+     serialize() so the quiet merge can put a FETCHED graph in the same shape
+     before it is compared — a baseline taken from the raw fetch would differ
+     from the screen's own serialization in exactly these two places and
+     every later save would carry the difference as a change). */
+  function normalized(g) {
+    var s = JSON.parse(JSON.stringify(g));
     s.unitKeys.forEach(function (k) { if (s.units[k]) s.units[k].weight = 0; });
     /* A branding that sets NOTHING is not a branding. branding() fills the
        four keys with nulls the first time anything asks, so an untouched
@@ -319,8 +328,9 @@ var SYNC = (function () {
        Same rule as `weight` above: what is not the tenant's own is not sent. */
     var b = s.group && s.group.branding;
     if (b && Object.keys(b).every(function (k) { return b[k] == null; })) delete s.group.branding;
-    return JSON.stringify(s);
+    return s;
   }
+  function serialize() { return JSON.stringify(normalized(graph())); }
 
   /* The globals are rebound, not patched: every function in the platform
      resolves these names at call time, so reassignment reaches everything.
@@ -413,9 +423,9 @@ var SYNC = (function () {
        through nobody's choice. Sending that would have every one of their
        saves judged as that stranger: a narrowing, which is the safe
        direction, and still a bootstrap tenant unable to set itself up.
-       Asked through isSMOSession() and the register, which together are
+       Asked through maySimulateSession() and the register, which together are
        exactly when the control that sets VIEWER is drawn at all. */
-    if (!isSMOSession()) return null;
+    if (!maySimulateSession()) return null;
     if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
     var v = typeof window !== "undefined" ? window.VIEWER : null;
     return v && v !== person.key ? v : null;
@@ -605,6 +615,12 @@ var SYNC = (function () {
       });
     } catch (e) { return []; }
   }
+  /* Two readings of a line's place agree when both are absent, or both are
+     there with the same value — the one comparison §504's replay and §588's
+     merge both make, written once. */
+  function lineSame(a, b) {
+    return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
+  }
   function keepSig(lines) { try { return JSON.stringify((lines || []).map(function (l) { return [l.addr, l.mine]; })); } catch (e) { return ""; } }
   function keepFailed(kind) {
     var who = person && person.key;
@@ -712,9 +728,7 @@ var SYNC = (function () {
     var k = keepRead();
     if (!k || !person || k.who !== person.key || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return;
     var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
-    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = function (a, b) {
-      return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
-    };
+    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = lineSame;
     k.lines.forEach(function (l) {
       var now = SMPDiff.valueAt(cur, l);
       if (same(now, l.mine)) return;
@@ -833,6 +847,14 @@ var SYNC = (function () {
             row.swot[r.field.slice(5)] = r.from == null ? [] : JSON.parse(JSON.stringify(r.from));
             return;
           }
+        }
+        /* §598: a row that LEFT or ARRIVED is put back by its seat — the
+           removed row re-seated where it was, the added one taken out —
+           through the same door History's Restore uses (§53.5). */
+        if (r.field === "row") {
+          var why = (typeof TRAIL !== "undefined" && TRAIL.seatBack) ? TRAIL.seatBack(ch.target, r) : "no seat";
+          if (why) missed.push(r);
+          return;
         }
         roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
         if (!row) { missed.push(r); return; }
@@ -1003,6 +1025,12 @@ var SYNC = (function () {
         save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
       }, 0);
     };
+    /* §582: THE ROOM'S WINDOW WRITES NOTHING. It is the projector's copy of
+       the platform, driven from the laptop and edited by nobody; a save from
+       it could only ever send an older copy of the plan over the one the
+       laptop is changing. First, and "clean" rather than "offline", so nothing
+       on that screen ever says it lost something. */
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) { if (done) done("clean"); return; }
     if (!live) return say("offline");
     /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
        Islam: *"the reporting then saving to draft keep saying saving and
@@ -1151,7 +1179,41 @@ var SYNC = (function () {
      SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
-  function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE OFFICE IS TWO SEATS, NOT ONE (§554) ──────────────────
+     Islam: *"I want to enable the smo team to have the drop down of view as
+     for the other users on the platform."* This asked for the Super user
+     alone, so the control was named after the seat rather than after the
+     question it answers — and the question is *may this session leave its
+     own view*, which both office seats now answer yes to.
+
+     RENAMED RATHER THAN WIDENED IN PLACE, because `isSMOSession` is read in
+     the one place a mistake is dangerous (`actingAs`, which stamps the save)
+     and a name that says "is the SMO" while meaning "is the office" is how
+     the next person comes to use it for a Super-user-only act. The fail-
+     closed shape above is untouched: still hidden until something proves it
+     should be shown.
+
+     WHO IS *IN* THE LIST is a second question and it is `maySimulatePerson`
+     below — an SMO team member may not look through the Super user, who is
+     the one person on a client's register holding more than they do. */
+  function maySimulateSession() {
+    return !!person && (person.role === "super" || person.role === "smoteam");
+  }
+  /* MAY THIS SESSION LOOK THROUGH *THIS* PERSON (§554). `p.role` is the seat
+     on the register row, which is what the server writes from the membership
+     — the same field `lib/rules.js actingFor` refuses on, so the control the
+     page draws and the save the server accepts cannot disagree (§42, §61).
+
+     NOBODY SIGNED IN LISTS EVERYBODY: the offline copy and the file:// demo
+     have no session at all, and they have always offered the whole cast.
+     That is not a gate failing open — there is no server to act against and
+     nothing to narrow. */
+  function maySimulatePerson(p) {
+    if (!person) return true;
+    if (!maySimulateSession()) return false;
+    if (person.role === "super") return true;
+    return !p || p.role !== "super";
+  }
   /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
      Islam, of the trail standing at full weight while he viewed as somebody:
      *"I think yes greyed is better not to get confused that the user has
@@ -1277,8 +1339,11 @@ var SYNC = (function () {
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
        for EVERYBODY and the switcher was hidden from the one person it is for
-       (§45.3). It is asked through isSMOSession() now, in one place. */
-    if (!isSMOSession()) {
+       (§45.3). It is asked through maySimulateSession() now, in one place —
+       and since §554 that is both office seats, so an SMO team member keeps
+       the control and gets a list with the Super user left out of it
+       (`maySimulatePerson`), rather than their own name in place of it. */
+    if (!maySimulateSession()) {
       sel.hidden = true;
       /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
          the whole mechanism, and it relied on SEARCHSEL noticing on the next
@@ -1481,6 +1546,7 @@ var SYNC = (function () {
   function flushLeave() {
     commitFocus();
     if (!live || saving) return;
+    if (typeof ROOM_MODE !== "undefined" && ROOM_MODE) return;   /* §582 */
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved) return;
@@ -1528,11 +1594,7 @@ var SYNC = (function () {
        a field (a bound field writes on blur into the object it was drawn
        from, and hydrate replaces that object, §35), the answer is dropped
        and the page keeps what it has. The next crossing asks again. */
-    var busy = function () {
-      if (serialize() !== lastSaved) return true;
-      var a = document.activeElement;
-      return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
-    };
+    var busy = function () { return serialize() !== lastSaved || handInField(); };
     if (quiet && busy()) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
@@ -1545,10 +1607,133 @@ var SYNC = (function () {
         if (quiet && busy()) return done(false);
         var before = lastSaved;
         hydrate(data.state);
+        if (typeof data.seq === "number") SEQ = data.seq;
         lastSaved = serialize();
         done(true, lastSaved !== before);
       })
       .catch(function () { done(false); });
+  }
+
+  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§588) ──────────────
+     Islam: *"is there a way or a mechanism where people save things in the
+     same time without needing a refresh and keeping data when they are
+     working on different cells?"*
+
+     §258 told a tab that somebody else had landed a change on its page and
+     offered Reload. The server was already merging cell by cell (§210,
+     §215), so the storage was never at risk — only the SCREEN was stale,
+     and the one way to freshen it threw the page away. This takes the
+     server's graph and lays this tab's own unsaved lines back over it, line
+     by line, with the §504 machinery that already does exactly that for a
+     kept save: a line whose place still holds what it held when it was
+     typed is kept; a line whose place THEY changed too is a clash, and the
+     person decides on §504's own bar (Keep mine / Keep theirs) — the screen
+     shows theirs until they do. Everything they did not touch is theirs
+     now, and the baseline is theirs too, so the next save carries only this
+     tab's lines (§210's diff, against the new base).
+
+     NEVER WHILE A HAND IS IN A FIELD: a bound field writes on blur into the
+     object it was drawn from (§35), and hydrate replaces that object — so a
+     merge mid-word would lose the word. The caller is told "busy" and asks
+     again on blur. Never while a save is in flight either, for the reason
+     §433 states: the baseline would be replaced under it. The repaint that
+     follows keeps the scroll and the caret (paint's own focusMark). */
+  function handInField() {
+    var a = document.activeElement;
+    return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
+  }
+  function mergeIn(done) {
+    done = done || function () {};
+    if (!live || !lastSaved || typeof SMPDiff === "undefined" || !SMPDiff.splitLines || !SMPDiff.applyChanges) return done("off");
+    if (saving || handInField()) return done("busy");
+    fetch(withClient("/api/state"), { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        /* A save or a hand that arrived during the fetch: the answer is
+           dropped rather than applied under them, and the caller asks again. */
+        if (!live || saving || handInField()) return done("busy");
+        var before = lastSaved, mineS = serialize();
+        /* Theirs, in the tab's own shape — through the same door a boot goes
+           through (§53.5), so a missing list or a stored null reads exactly
+           as it would after a reload, and the baseline matches the screen.
+           The number it carries is the number this copy now holds (§588.1). */
+        hydrate(data.state);
+        if (typeof data.seq === "number") SEQ = data.seq;
+        done("merged", takeIn(JSON.stringify(normalized(graph())), before, mineS));
+      })
+      .catch(function (e) { done(e && e.message === "sign in" ? "off" : "failed"); });
+  }
+  /* THE MERGE ITSELF, shared by the whole-graph fetch above and the lighter
+     path below (§588.1). `theirs` is the server's copy in the tab's own
+     shape, `before` the baseline it replaces, `mineS` the screen as it was
+     before theirs was taken: this tab's unsaved lines are the difference
+     between the two, and they go back over theirs line by line. */
+  function takeIn(theirs, before, mineS) {
+    var B = JSON.parse(before), M = JSON.parse(mineS);
+    var mine = SMPDiff.splitLines(SMPDiff.graphChanges(B, M)).map(function (l) {
+      l.base = SMPDiff.valueAt(B, l); return l;
+    });
+    var merged = JSON.parse(theirs), clash = [], kept = 0;
+    mine.forEach(function (l) {
+      var now = SMPDiff.valueAt(merged, l);
+      if (lineSame(now, l.mine)) return;                   /* landed already */
+      if (lineSame(now, l.base)) {
+        var r = SMPDiff.applyChanges(merged, l.change);
+        if (r && r.ok) { merged = r.state; kept++; } else clash.push(l);
+      } else clash.push(l);
+    });
+    hydrate(merged);
+    lastSaved = theirs;
+    if (clash.length) keepClash(clash);
+    /* The repaint ends in afterPaint, which saves the kept lines against
+       the new baseline; before the page has a painter, save directly. */
+    if (repaint) repaint(); else if (serialize() !== lastSaved) save();
+    try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
+    return { changed: theirs !== before, kept: kept, clash: clash.length };
+  }
+  /* ── THE LIGHTER WAY IN (§588.1): THE CHANGE, NOT THE GRAPH ─────────
+     safety.js asks the server "what changed since N" and hands the answer
+     here: each save's change list, oldest first, applied onto this tab's
+     baseline with the same differ the server applied it with — so theirs
+     is rebuilt from a few hundred bytes instead of fetched whole. A list
+     the server could not carry ({full:true}), or one this copy cannot
+     apply, answers "full" and the caller fetches the graph (mergeIn). This
+     tab's own saves come back in the stream too, and applied to a copy
+     that already holds them they change nothing: "same". */
+  function applyRemote(entries, done) {
+    done = done || function () {};
+    if (!live || !lastSaved || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return done("off");
+    if (saving || handInField()) return done("busy");
+    var before = lastSaved, mineS = serialize();
+    var t = JSON.parse(before);
+    for (var i = 0; i < (entries || []).length; i++) {
+      var ch = entries[i] && entries[i].changes;
+      if (!ch || typeof ch !== "object" || ch.full) return done("full");
+      var r = SMPDiff.applyChanges(t, ch);
+      if (!r || !r.ok) return done("full");
+      t = r.state;
+    }
+    var theirs = JSON.stringify(normalized(t));
+    if (theirs === before) return done("same");
+    done("merged", takeIn(theirs, before, mineS));
+  }
+  /* The lines theirs and mine both changed, put where §504 keeps a clash so
+     its bar and its two buttons answer them — the record is this person's
+     and this client's, exactly as a kept save's is. */
+  function keepClash(lines) {
+    var who = person && person.key;
+    if (!who) return;
+    var old = keepRead();
+    if (old && old.who !== who) old = null;
+    keepWrite({ who: who, viewAs: actingAs() || null, at: Date.now(), kind: "merge", error: "",
+                lines: (old && old.lines) || [], reports: (old && old.reports) || [],
+                clash: ((old && old.clash) || []).concat(lines) });
+    keepClashBar();
   }
 
   return {
@@ -1590,26 +1775,41 @@ var SYNC = (function () {
     /* The quiet refresh after a crossing (§433): the same fetch, dropped
        rather than applied if anything on the page would be lost. */
     refresh: function (done) { rebase(done, true); },
+    /* §588: the server's copy, with this tab's own unsaved lines laid back
+       over it and no reload. The only caller is safety.js, when somebody
+       else has landed a change; it answers "merged", "busy", "failed" or
+       "off", and "busy" is asked again. */
+    mergeIn: function (done) { mergeIn(done); },
+    /* §588.1: the same merge from the change lists the server numbered —
+       no graph fetched; "full" means fetch it after all. And the number this
+       copy holds, read and moved by safety.js alone. */
+    applyRemote: function (entries, done) { applyRemote(entries, done); },
+    seq: function () { return SEQ; },
+    setSeq: function (n) { SEQ = (typeof n === "number" && isFinite(n)) ? n : null; },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
        carries the switcher's own two guards (the seat that draws it, and the
        key being on the register), so a second test would be a second idea of
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
-       exactly as `isSMOSession` is below and for the same reason. */
+       exactly as `maySimulateSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
     /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
        — the shell calls this at the end of every paint. */
     markViewing: function () { markViewing(); },
     person: function () { return person; },
-    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
-       the viewer switcher too, and the note above isSMOSession() is explicit
-       that this question must have ONE answer: a control that is dangerous
-       when wrong must fail closed, and two files each testing `role ===
-       "super"` is exactly how one of them comes to test something else.
-       Exported rather than re-asked — §42's rule about one copy of a rule,
-       on the chrome. */
-    isSMOSession: function () { return isSMOSession(); },
+    /* WHO MAY LEAVE THEIR OWN VIEW, ASKED AND NEVER COPIED (§179, §554). The
+       welcome screen draws the viewer switcher too, and the note above
+       maySimulateSession() is explicit that this question must have ONE
+       answer: a control that is dangerous when wrong must fail closed, and
+       two files each testing the seat by hand is exactly how one of them
+       comes to test something else. Exported rather than re-asked — §42's
+       rule about one copy of a rule, on the chrome. */
+    maySimulateSession: function () { return maySimulateSession(); },
+    /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
+       switcher and the People register's row menu both fill their lists
+       from this, so neither offers a view the save would turn down (§61). */
+    maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
@@ -1948,6 +2148,7 @@ var SYNC = (function () {
             cacheWipe(); cacheWrite(data.state, data.person); location.reload(); return;
           }
           hydrate(data.state);
+          SEQ = typeof data.seq === "number" ? data.seq : null;
           live = true;
           person = data.person || null;
           CLIENT_MARK = (person && person.clientMark) || "";

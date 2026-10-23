@@ -133,7 +133,7 @@ with sync_playwright() as p:
         ok(sorted(cats) == ["t-bad", "t-good", "t-stone", "t-warn"],
            "the four category slides still carry theirs — %s" % sorted(cats))
 
-    print("\n4 · a pillars function gets two; a capability function is untouched")
+    print("\n4 · a pillars function gets two; a box that plans in projects gets one")
     fnp = pg.evaluate(DECK, "fn:merchandising")
     fnc = pg.evaluate(DECK, "fn:marketing")
     ok(not fnp.get("err") and sum(1 for s in fnp["slides"] if s["sect"]) == 2,
@@ -141,8 +141,21 @@ with sync_playwright() as p:
     ok(not fnp.get("err") and
        [s["anchor"] for s in fnp["slides"] if s["sect"]] == ["spillars", "sperf"],
        "and they are the two it has a section for")
-    ok(not fnc.get("err") and sum(1 for s in fnc["slides"] if s["sect"]) == 0,
-       "a capability function's deck is byte-for-byte what it was")
+    # REWRITTEN TO THE NEW RULE, NOT LOOSENED (§218). It read "a capability
+    # function's deck is byte-for-byte what it was" and counted ZERO
+    # dividers, which was true until §553.2 gave a box that plans in projects
+    # the same closing section a box that plans in pillars has always had:
+    # the Overall performance divider, and "Where <box> stands" behind it.
+    # So the claim is now the OTHER number, and it is asserted at both ends
+    # (§94.2) — the one divider it has, and the slide that divider announces,
+    # or a divider over nothing is exactly what §253 forbids.
+    ok(not fnc.get("err") and
+       [s["anchor"] for s in fnc["slides"] if s["sect"]] == ["sprojects", "sperf"],
+       "a box that plans in projects has a divider before each part it draws (§557)")
+    ok(not fnc.get("err") and
+       any("stands" in (s.get("head") or "") for s in fnc["slides"]),
+       "...and the slide behind it is there — %s"
+       % [s.get("head") for s in fnc["slides"]][-4:])
 
     print("\n5 · a divider is never drawn over nothing (§253) — the state is MADE")
     made = pg.evaluate("""() => {

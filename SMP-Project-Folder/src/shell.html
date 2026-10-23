@@ -164,7 +164,7 @@
          undone, so it does not go on a key or on the clock, which are the two
          surfaces a hand can brush past in fullscreen. -->
     <button data-dpause class="txt" title="Hold the timer (P)" hidden>Pause</button>
-    <button data-dreset class="txt" title="Start this subject's time again" hidden>Reset</button>
+    <button data-dreset class="txt" title="Start this subject's time again (Y)" hidden>Reset</button>
     <button data-dprev title="Previous">&#8592;</button>
     <button data-dnext title="Next">&#8594;</button>
     <button data-dfit class="txt" title="Fit to window instead of 16:9">Fit</button>
@@ -180,21 +180,57 @@
      said by where it sits rather than by a dropdown describing it. -->
 <div id="slideroot" class="slideroot" role="dialog" aria-modal="true"
      aria-labelledby="sl-title" tabindex="-1">
+  <!-- §556.3: laid out as Islam's own presentation page lays it out — who is
+       presenting on the left, the three buttons on the right, Present the one
+       filled button; the counter, the slide's name and the keys on ONE bar
+       under the stage; the thumbnail its own label. -->
   <div class="slidebar">
-    <span class="sl-title" id="sl-title"></span>
-    <span class="sl-sub"></span>
+    <img class="sl-logo" alt="" hidden>
+    <span class="sl-who"><span class="sl-title" id="sl-title"></span>
+      <span class="sl-sub"></span></span>
     <!-- PLAY, AND THEN DONE (§295). Islam: *"when they open the presentation,
          they see the manage section part and then present from there and if
          they exit the presentation mood thye get back to the manage ppt."*
          The pair sits in one group so the two do not drift apart (§225). -->
+    <!-- §556.2: and a grid of every slide beside them, for a flow too long
+         for a strip — Islam's own page carries one, and forty-nine slides
+         is past the point where scrolling a rail finds anything. -->
+    <!-- §556.4: the three buttons are Islam's own, icon for icon — the
+         sidebar, the four squares and the four corners — at his size and
+         his weight, with Present the one filled button. -->
     <span class="sl-acts">
-      <button data-slplay class="sl-play" title="Play the deck (it comes back here)">&#9654;&ensp;Play</button>
-      <button data-slexit class="txt" title="Done (Esc)">Done</button>
+      <button data-slrail class="sl-b on" title="Show or hide the slide list"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><path d="M14 6h7M14 12h7M14 18h7"/></svg><span class="lbl">Slides</span></button>
+      <!-- §571: the Columns menu — which columns every tactics slide of the
+           company shows. The office's; drawn hidden and shown by slides.js. -->
+      <span class="hmenu" id="slcols" hidden><button data-slcols class="sl-b" title="Columns on the tactics slides" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M9 4v16M15 4v16"/></svg><span class="lbl">Columns</span></button><div class="hmenu-panel cols" id="slcolspanel" hidden></div></span>
+      <!-- §579: line by line — tables row by row and readings one at a time
+           when presenting. The office's, the company's; shown by slides.js. -->
+      <button data-slbuild class="sl-b" hidden aria-pressed="false" title="Present tables row by row and readings one at a time"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h11M4 18h6"/></svg><span class="lbl">Line by line</span></button>
+      <button data-slgrid class="sl-b" title="Slide grid (G)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Grid</span></button>
+      <!-- §582.1: the slides in a window of their own on this screen, to share
+           in an online meeting while this view stays here to drive them. The
+           office's; shown by present.js. -->
+      <button data-slwin class="sl-b" hidden title="Present in a window of its own, to share in an online meeting"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg><span class="lbl">Present in a window</span></button>
+      <button data-slplay class="sl-b go" title="Present (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="lbl">Present</span></button>
+      <button data-slexit class="sl-b quiet" title="Done (Esc)">Done</button>
     </span>
   </div>
+  <!-- §556.11: one button per part of the flow, as the room's bar had. -->
+  <div class="slparts" id="slparts" hidden></div>
   <div class="slidebody">
     <div class="slidelist" id="slidelist"></div>
-    <div class="slidepane" id="slidepane"></div>
+    <div class="slidecol">
+      <div class="slprog"><i id="slprog"></i></div>
+      <div class="slidepane" id="slidepane"></div>
+      <div class="slfoot">
+        <button class="slnav" data-slstep="-1" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="slct" id="slct"></span>
+        <button class="slnav" data-slstep="1" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        <span class="slnm" id="slnm"></span>
+        <span class="slkeys" id="slkeys"></span>
+      </div>
+    </div>
+    <div class="slgrid" id="slgrid" hidden></div>
   </div>
 </div>
 
@@ -343,13 +379,15 @@
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §465: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §544.13: the capabilities are a section of this tab, full stop. There is
+     no longer a "wherever the office put them" — a capability is the
+     company's, so the company's plan is where it shows (`capAtTop`). What is
+     left to ask is only whether this client has any and whether this viewer
+     reaches them. */
+  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
-      get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
+      get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
       when: function(){ return topExtrasOn() === lead; },
       sections: function(){
           return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
@@ -1519,16 +1557,31 @@
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
      how many sides there are (§53.5). */
+  /* §544.2 — AND WHICH OF THEM IS ON THE ROW IS CHOSEN. Islam, of the shape
+     screen: *"this should be a choice what are the navigation switch… so it
+     needs to be chosen somehow not derived"*. Four rows can be a side — each
+     bottom kind, and each kind's own layer — and the shape screen ticks them.
+
+     EVERY TICK IS READ AS AN ABSENCE FIRST, and the absence is exactly what
+     this function answered before it existed (navRowUnsaid): the units
+     wherever they plan, the functions beside them, and the functions'
+     divisions in their place where the company plans. So no client's row
+     moves by upgrading, and the only thing that changes it is somebody
+     pressing a tick. */
+  function navPick(row){ return SMPRules.navPicked(GROUP, row); }
   function navSides(){
-    var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
-    if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
+    var out = [], us = myUnits(), fs = myFns();
+    if (us.length && navPick("bu@g")) out = out.concat(companyUnitSides(us, navPick("bu")));
+    if (us.length && navPick("bu")) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    /* §447: with the units off, capabilities are a section of the company
-       page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
-      keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
-    if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
+    /* §544.13 — AND NO CAPABILITIES SIDE AT ALL. Islam, asked where a
+       capability appears: *"inside its owner's plan, with the directions"*.
+       A capability is the company's, so it shows in the company's plan and
+       is reached from there (§520's rail) — never as a third kind of thing
+       on this row. The `cap:<id>` destination stays reachable for the
+       clients that still hold records; what goes is the side. */
+    if (fs.length && navPick("fn@g")) out = out.concat(companyFnSides(fs, navPick("fn")));
+    if (fs.length && navPick("fn")) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1545,7 +1598,31 @@
      linking no function this viewer reaches has nothing to list and no
      segment (&sect;61 from the other side: a segment that lists nothing is a
      control with nothing behind it). */
-  function companyFnSides(fs){
+  /* §544.2: THE SAME, FOR THE UNITS' OWN LAYER. Nobody has this row today —
+     Raya's two divisions have never been sides — so this draws nothing until
+     the tick is pressed; it is the segment builder the tick needs to have
+     something behind it (§61). `companyFnSides`'s own shape exactly: one
+     segment per division that holds a unit this viewer reaches, in the order
+     they are declared, and a last segment under the top level's word for the
+     units in none. */
+  /* `alsoWhole` says the kind's OWN row is ticked as well. Then the boxes in
+     no division already have a side, and the catch-all is not added a second
+     time: two sides would carry the same fold key and the row could not say
+     which of them is open. */
+  function companyUnitSides(us, alsoWhole){
+    var left = us.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = unitsOfCompany(ck).filter(function(k){ return us.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name, keys:mine });
+    });
+    if (alsoWhole) return out;
+    if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
+    if (left.length) out.push({ fold:"units", label:topOwnName() || labelWord("topword", "group"), keys:left });
+    return out;
+  }
+  function companyFnSides(fs, alsoWhole){
     var left = fs.slice(), out = [];
     activeCompanyKeys().forEach(function(ck){
       var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
@@ -1554,9 +1631,12 @@
       out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
         keys:mine.map(function(k){ return "fn:" + k; }) });
     });
+    /* §544.2, as above: the kind's own row ticked too means the catch-all
+       already has a side of its own. */
+    if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
-    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
+    if (left.length) out.push({ fold:"fns", label:topOwnName() || labelWord("topword", "group"),
       keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1591,7 +1671,9 @@
        says what the row beside it lists. */
     if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
-    return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
+    /* §544.13: the capabilities clause went with the capabilities side —
+       three kinds can no longer share this row because there are two. */
+    return myUnits().length > 1 && myFns().length > 1;
   }
 
   /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
@@ -1622,7 +1704,7 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: topNavWord() });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer — §570: with no business units the button is Strategy and the tab under it Plan */
     /* §448: planned on the company, a division is read under Strategy ›
        Performance rather than visited, so it leaves the navigation — unless
        the group is out of reach, when the divisions are all there is. */
@@ -3432,6 +3514,15 @@
        It holds the TARGET rather than a boolean, so it can never open
        somebody else's report. */
     if (def && def.k === "report") REPORTING = current;
+    /* §576: AND WHETHER A RED FIGURE HOLDS THIS PAGE. Worked out ONCE per
+       paint, before the render, because two halves read it — the bar the
+       renderers draw in the "to finish" bar's place, and `noteLockApply()`
+       after the paint, which shuts every other box — and two answers to one
+       question inside one frame is how a bar comes to name a row whose boxes
+       are open (§53.5). */
+    NOTELOCK = (def && typeof noteLockOf === "function" &&
+                (def.k === "report" || def.k === MY_TAB.k))
+      ? noteLockOf(def.k === "report" ? REPORTING : null, def.k === MY_TAB.k) : null;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -3784,7 +3875,7 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* §546: and the three action keys say themselves on the buttons they
+    /* §554: and the three action keys say themselves on the buttons they
        belong to, marked here for the same reason the boxes above are —
        these controls are drawn by several renderers and a mark set at each
        is several places to forget. */
@@ -3797,6 +3888,10 @@
        ones a bound field did not rebuild — a second listener on a survivor
        would step twice on one Enter (§24, §47.2). */
     if (typeof repKeys === "function") repKeys();
+    /* §576: AND WHILE A RED FIGURE HOLDS THE PAGE, every box but its row's
+       shuts — after the marks and the keys, because it reads the same
+       controls they annotate and only switches some of them off. */
+    noteLockApply();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -3837,6 +3932,7 @@
     putScrollsIn(document.getElementById("panel"), _keep.boxes);
     if (_keep.y) window.scrollTo(0, _keep.y);
     putFocus(_keep.focus);
+    noteLockFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
@@ -4357,6 +4453,131 @@
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
     "[data-cpct],[data-note],[data-cnote]";
+  /* ── §576: THE LOCK, APPLIED TO WHAT THE PAINT DREW ─────────────────
+     `NOTELOCK` (paint(), from `noteLockOf`) names the rows whose note is
+     owed; every reporting box that answers any OTHER row is switched off
+     here, along with the subject's own cycle note. In ONE place over the
+     same list the walk and the keys read (`REP_BOXES`), never at the eight
+     builders — a box kind added tomorrow is locked by being a box (§104.7).
+
+     `disabled`, not `aria-disabled`: the person must not be able to type, and
+     a shut box that still takes a keystroke is a lock in name only. The hover
+     says why. A locked row's note joins the tab path even where its builder
+     took it out (§528, and a capability's note always), because it is now the
+     one box the page is asking for. */
+  function repBoxRow(el){
+    var d = el.dataset;
+    return d.rep != null ? d.rep : d.crep != null ? d.crep : d.cpick != null ? d.cpick
+         : d.cpct != null ? d.cpct : d.note != null ? d.note : d.cnote;
+  }
+  function noteLockApply(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0];
+    var why = "Write the note on " +
+      (String((x.obj && x.obj.name) || "").trim() || "the red figure") + " first";
+    document.querySelectorAll(REP_BOXES + ",[data-unote]").forEach(function(el){
+      var id = el.dataset.unote != null ? null : repBoxRow(el);
+      if (id != null && NOTELOCK.ids[id]) {
+        if (el.dataset.note != null || el.dataset.cnote != null) {
+          el.classList.add("lockhere");
+          el.removeAttribute("tabindex");
+          /* §576.2: in the wanted note's own words (`noteBox`). A capability's
+             box is always drawn with the quiet "Note, if there is one", which
+             the bar above it contradicts. */
+          if (!el.value) el.placeholder = "Why, and what is being done";
+        }
+        return;
+      }
+      el.disabled = true;
+      el.setAttribute("title", why);
+      /* The figure's box wears its unit beside it; the wrapper is what reads
+         as the box, so it is the wrapper that greys. */
+      (el.closest(".entry") || el).classList.add("lockshut");
+    });
+  }
+  /* The first owed note that is ON THE SCREEN, in the bar's order. */
+  function noteLockNote(){
+    if (!NOTELOCK) return null;
+    var notes = [].slice.call(document.querySelectorAll("[data-note],[data-cnote]"));
+    for (var i = 0; i < NOTELOCK.rows.length; i++) {
+      var id = NOTELOCK.rows[i].noteId || NOTELOCK.rows[i].id;
+      for (var j = 0; j < notes.length; j++) if (repBoxRow(notes[j]) === id) return notes[j];
+    }
+    return null;
+  }
+  /* WHEN THE BOX SOMEBODY WAS IN HAS JUST SHUT, the cursor goes to the note.
+     That is the moment this exists for: a red figure typed and Tab pressed
+     lands in the NEXT row's box, which the commit's paint has just greyed, and
+     the browser drops a disabled box's focus on the body. Only then — a paint
+     that left the focus somewhere live (a rail button, the row's own figure)
+     is somebody doing something else, and the page does not take it away. */
+  /* A reporting box has just committed. Heard in the CAPTURE phase, so it is
+     set before the box's own handler runs the paint that reads it — the
+     focus the paint keeps (`_keep.focus`) is already gone by then on a Tab,
+     because Chromium fires `change` as the focus leaves. A page that merely
+     OPENS with a red row does not move anybody's cursor; typing does. */
+  var NOTELOCK_TYPED = false;
+  document.addEventListener("change", function(e){
+    if (e.target && e.target.matches && e.target.matches(REP_BOXES)) NOTELOCK_TYPED = true;
+  }, true);
+  /* §576.2: AND WHETHER THE COMMIT WAS A KEY. Tab or Enter is somebody
+     moving on through the report; a mouse press is somebody choosing where
+     to go, and that choice is left alone. */
+  var NOTELOCK_KEYED = false;
+  document.addEventListener("keydown", function(e){
+    NOTELOCK_KEYED = e.key === "Tab" || e.key === "Enter";
+  }, true);
+  document.addEventListener("mousedown", function(){ NOTELOCK_KEYED = false; }, true);
+  /* Is this control the locked row's own — its figure or its note? */
+  function noteLockOwn(el){
+    if (!NOTELOCK || !el || !el.matches || !el.matches(REP_BOXES)) return false;
+    var id = repBoxRow(el);
+    return id != null && !!NOTELOCK.ids[id];
+  }
+  function noteLockFocus(kept){
+    var typed = NOTELOCK_TYPED, keyed = NOTELOCK_KEYED;
+    NOTELOCK_TYPED = false;
+    if (!NOTELOCK || !(kept || typed)) return;
+    var go = function(){
+      if (!NOTELOCK) return;
+      var a = document.activeElement;
+      /* §576.2: A TAB FROM A RED FIGURE ENDS IN THE NOTE, wherever the
+         browser's own step put it. The step is taken AFTER the commit's paint
+         and picks the next control it can still reach — on My reporting, with
+         every other line shut, that is Save draft, and the line below left it
+         there: measured, the cursor on Save draft in 2 Tabs of 12, and
+         note-lock.py's own Tab red 1 run in 4. Only a key does this; a press
+         somewhere live is still somebody doing something else. */
+      if (a && a !== document.body && !a.disabled &&
+          !(typed && keyed && !noteLockOwn(a))) return;
+      var n = noteLockNote();
+      if (n) n.focus();
+    };
+    go();
+    /* AND ONCE MORE AFTER THE BROWSER'S OWN STEP. A Tab commits the figure
+       (`change`, whose paint runs inside the keypress) and only THEN moves the
+       focus — to the box it had picked before the paint replaced it, which is
+       detached, so the focus falls on the body after this paint has already
+       returned. Measured on the build before §576 too: Tab out of a figure
+       has always left the cursor nowhere. Queued, it lands in the note. */
+    setTimeout(go, 0);
+  }
+  /* GO TO IT: the place the first owed note is in, opened the way the bar's
+     chips open one (`repGoTo`) — its rail, its capability on the company's
+     page, every band on My reporting — and then the note itself, lit. */
+  function noteGo(){
+    if (!NOTELOCK) return;
+    var x = NOTELOCK.rows[0], pl = x.place || {};
+    if (NOTELOCK.mine) {
+      if (MYLINEF && MYLINEF !== x.target) MYLINEF = "";
+    } else {
+      if (REPORTING === "group" && String(x.subj || "").indexOf("cap:") === 0)
+        TOPCAP = String(x.subj).slice(4);
+      if (pl.rail) RAIL[pl.rail] = pl.code;
+    }
+    paint();
+    setTimeout(function(){ var n = noteLockNote(); if (n) gapLight(n); }, 0);
+  }
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -4425,6 +4646,8 @@
     }, 0);
   }
   function repWalk(){
+    /* §576: and Alt+Enter is the lock's Go to it while it holds. */
+    if (NOTELOCK) { noteGo(); return; }
     var chips = repChips(), i = -1, a;
     for (a = 0; a < chips.length; a++)
       if (chips[a].dataset.rkey === REPWALK_KEY) { i = a; break; }
@@ -4529,6 +4752,9 @@
      there is genuinely nothing to point at and nothing is better than a guess
      at which row took its place. */
   function repStep(key, by){
+    /* §576: while a red figure holds the page, the next place is its note. */
+    var owed = noteLockNote();
+    if (owed) { gapLight(owed); return; }
     var els = repTypedBoxes(), i, here = null;
     for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
     if (here == null) return;
@@ -5083,6 +5309,10 @@
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
+    /* §561: a direction's or capability's own slides, from its own pane. */
+    document.querySelectorAll("[data-dirslides]").forEach(function(b){
+      b.addEventListener("click", function(){ slidesOpen("dir", this.dataset.dirslides); });
+    });
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
@@ -5110,7 +5340,35 @@
            §253.3 each came to be fixed on one surface and left broken on
            another. Two functions answering it was found and closed AT THE
            MERGE that brought both here (§281). */
-        openDeckFor(this.dataset.present);
+        /* ── IT OPENS THE SLIDES FIRST (§556) ──────────────────────
+           Islam: *"even for the users that have the present button it
+           takes them to the slides management and then they move to the
+           presentation, not 2 buttons"*. The first time anybody saw their
+           deck was in front of the room; now the press lands on the
+           slides, where Play is one more press and a slide that should
+           not be there can be taken out before it is projected.
+
+           ONLY WHERE THERE IS AN EDITOR TO LAND IN. `slidesOpen` is
+           `canSpeakFor` — the subject's own head or custodian, and the
+           office — so anybody else goes straight to the deck as before,
+           rather than pressing Present and getting nothing (§61). A list
+           of targets is a direction owner's several, and those open as a
+           flow of their own. */
+        var t = this.dataset.present, many = t.indexOf(",") >= 0;
+        if (many) {
+          var mine = t.split(",").filter(Boolean);
+          if (mine.every(function(x){ return canSpeakFor(x); })) slidesOpenFlow(mine);
+          else openDeckFor(t);
+        } else if (canSpeakFor(t)) {
+          slidesOpen(boxRef(t).kind === "dir" ? "dir"
+                   : boxRef(t).kind === "fn" ? "fn"
+                   : boxRef(t).kind === "cap" ? "cap" : "unit",
+                   boxRef(t).kind === "dir" ? t.slice(4)
+                   : boxRef(t).kind === "fn" || boxRef(t).kind === "cap" ? t.slice(t.indexOf(":") + 1)
+                   : t);
+        } else {
+          openDeckFor(t);
+        }
       });
     });
     /* The same deck, taken away as a PDF. Beside Present and through the same
@@ -5129,6 +5387,14 @@
       b.addEventListener("click", function(){
         closeDlMenu(this);
         masterOpen();
+      });
+    });
+    /* §574: the guided tour, on its made-up direction — beside the master
+       presentation it sits under. */
+    document.querySelectorAll("[data-extour]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        exampleTourOpen();
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into
@@ -5341,12 +5607,9 @@
     }
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", addFnFromField);
-    document.querySelectorAll("[data-capfn]").forEach(function(el){
-      el.addEventListener("change", function(){
-        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
-        paint();
-      });
-    });
+    /* §544.13: the Held by picker is gone from Setup › Capabilities, so
+       nothing renders that column's select any more and the handler which
+       wrote a capability's function through it goes with it (§61). */
     /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
@@ -5789,11 +6052,11 @@
            figure the score does not read and nobody can see, and it would come
            back the moment somebody picked In progress again.
 
-           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. The
-           branch below sets `Done` from a score of 100 or more, which is right
-           for a figure against a target and wrong here: an outcome 60% through
-           a half-elapsed window scores 120, and reading that as Done would put
-           the word on a row whose own answer says In progress. */
+           AND THE TACTIC'S STATUS FOLLOWS THE ANSWER, NEVER THE SCORE. An
+           outcome 60% through a half-elapsed window scores 120, and reading
+           that as Done would put the word on a row whose own answer says In
+           progress. §575 found the branch below doing exactly that to a
+           NUMBER, so it asks `tacticComplete` (the whole target) now too. */
         /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
@@ -5859,13 +6122,16 @@
           if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
-             its target is done. `tacticOutcomeScore` is the one reader of that
-             (§53.5) rather than a second comparison written here. */
+             its target is done. `tacticOutcomeScore` is the one reader of
+             whether it is scored (§53.5) rather than a second comparison here.
+             §575: and DONE IS THE WHOLE TARGET, asked of `tacticComplete` —
+             a score of 100 or more is against what is DUE, so 8 of 10 with 5
+             due scored 150 and was stored as Done beside "to be finalized Q4". */
           /* §414: with several outcomes the status follows all of them. */
           if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
-          else if (sc >= 100) hit.obj.status = "Done";
+          else if (tacticComplete(hit.obj)) hit.obj.status = "Done";
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }
@@ -5907,7 +6173,10 @@
            lost. The note is the half a reporter is REQUIRED to write when a
            figure is off track (§105's submit refusal), so losing it silently
            also made that refusal impossible to satisfy. */
-        var subj = unitLike(current);
+        /* §576: `data-repu` where the box names its row's subject — My
+           reporting's note, on a row from another unit (the figure's handler
+           has asked it this way since §345). */
+        var subj = unitLike(el.dataset.repu || current);
         if (!subj) return;
         var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
@@ -6359,7 +6628,18 @@
       b.addEventListener("click", function(){
         var k = b.dataset.mpopen;
         MONTHOPEN = (MONTHOPEN === k) ? null : k;
+        /* §577: the carried-across line belongs to the opening it was said in. */
+        MONTHCARRY = null;
         paint();
+      });
+    });
+    /* §577: BY MONTH OR BY QUARTER. A press, so the repaint is safe; the
+       carrying across is the drawer's own (`monthlySwitch`). */
+    document.querySelectorAll("[data-mpmode]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = MONTHREG[+b.dataset.mpreg];
+        if (!e || b.disabled) return;
+        if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });
     /* CLEARING IS A DELETION AND IS ASKED FOR ONCE. It throws away twelve
@@ -6374,17 +6654,27 @@
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
+        /* §577: the same act on four quarters, in their own words. */
+        var qq = !!e.q, pf = qq ? quarterlyFld(e.fld) : e.fld;
         destroyConfirmOpen({
-          title: "Clear this monthly plan?",
+          title: qq ? "Clear this quarterly plan?" : "Clear this monthly plan?",
           sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
-          goes: "<b>The twelve months</b> somebody typed",
+          goes: qq ? "<b>The four quarters</b> somebody typed" : "<b>The twelve months</b> somebody typed",
           goesWhy: "The row goes back to being spread evenly across the year.",
           stays: "The annual target",
-          staysWhy: "It keeps the figure the twelve added up to, as the authored one.",
-          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
-          yesWord: "Clear the twelve",
+          /* §555: and it is TYPED AGAIN after this. With the months gone there
+             is nothing deriving the figure, so the box the plan had locked
+             goes back to being the office's to fill — said here because that
+             is the half somebody hesitates over. */
+          staysWhy: "It keeps the figure the months came to, and goes back to being typed by hand.",
+          noway: "<b>There is no way back.</b> The " + (qq ? "four" : "twelve") + " numbers are not archived.",
+          yesWord: qq ? "Clear the four" : "Clear the twelve",
           onYes: function(){
-            delete e.row[e.fld];
+            delete e.row[pf];
+            MONTHCARRY = null;
+            /* The drawer stays the way it was cleared in, rather than falling
+               back to months the moment nothing is typed. */
+            MONTHMODE[monthlyKey(e.row, e.fld)] = qq ? "q" : "m";
             fieldSaved();
             paint();
           }
@@ -6504,7 +6794,10 @@
       b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
     });
     document.querySelectorAll("[data-sec]").forEach(function(b){
-      b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
+      b.addEventListener("click", function(){
+        /* §555: a chosen section stays chosen — the landing only applies
+           until somebody says otherwise. */
+        GSEC = +b.dataset.sec; GSEC_PICKED = true; paint(); window.scrollTo(0,0); });
     });
     /* Cards or a table, per section (§16.6). A view preference — it changes
        how a section is laid out, never what anything is or in what order it
@@ -7579,7 +7872,8 @@
              two fields it points at. */
           var atCo = wheres.every(function(w){
             return boxRef(w.v).kind === "mid"; });
-          var fld = atCo ? "Company" : "Unit";
+          /* The field's own name, which is the client's word for it (§563). */
+          var fld = atCo ? "Company" : sitsInWord();
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
              there is no open picker any more: the list commits a tick and
@@ -9206,32 +9500,9 @@
           var f = FUNCTIONS[this.dataset.fnco];
           if (!f) return;
           if (this.value) f.company = this.value; else delete f.company;
+          /* §593: functions count equally, so there is no weight to keep —
+             one left from §391 is dropped the moment the function moves. */
           delete f.coWeight;
-          FNCOW_SAID = null;
-          paint();
-        });
-      });
-      root.querySelectorAll("[data-fncow]").forEach(function(inp){
-        inp.addEventListener("change", function(){
-          var fk = this.dataset.fncow, f = FUNCTIONS[fk], raw = String(this.value).trim();
-          if (!f) return;
-          FNCOW_SAID = null;
-          if (raw === "") { delete f.coWeight; paint(); return; }
-          var v = Number(raw), ck = fnCompanyOf(fk);
-          if (!isFinite(v) || v < 0 || v > 100) {
-            FNCOW_SAID = { k: fk, msg: "A weight is a per cent between 0 and 100." };
-            paint(); return;
-          }
-          var others = companyFnKeys(ck).filter(function(k){ return k !== fk; })
-            .map(fnCoWeightSet).filter(function(x){ return x != null; })
-            .reduce(function(a, b){ return a + b; }, 0);
-          if (others + v > 100) {
-            FNCOW_SAID = { k: fk, msg: "The functions in " + COMPANIES[ck].name + " would add up to " +
-              (Math.round((others + v) * 10) / 10) + "% \u2014 more than the whole company. " +
-              "Lower this one or another first." };
-            paint(); return;
-          }
-          f.coWeight = v;
           paint();
         });
       });
@@ -9757,6 +10028,11 @@
       }
       if (ev.target.closest("[data-repnext]")) repWalk();
     });
+    /* §576: the lock's own bar, drawn in that bar's place while a red figure
+       holds the page — one button, and it goes to the note that is owed. */
+    document.querySelectorAll("[data-notego]").forEach(function(b){
+      b.addEventListener("click", function(){ noteGo(); });
+    });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never
        rewritten in place), and never double-bound onto the bar's own. */
@@ -10222,15 +10498,9 @@
         promoOpen(fk);
       });
     });
-    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = b.dataset.fncapadd;
-        if (!mayAuthor("k_found", "fn:" + fk)) return;
-        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
-        addCapability(fk);
-        fieldSaved(); paint();
-      });
-    });
+    /* §544.13: the "add a capability under this function" button is gone —
+       a capability is the company's, and nothing renders `[data-fncapadd]`
+       any more, so the handler that waited for it goes too (§61). */
     /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
        §318 put it here, inside a client's Setup. Islam moved it out:
        "the setup should happen on the external creatoin not inside ..
@@ -11839,11 +12109,26 @@
        a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+    /* §544.13 — THE FUNCTION IS A DESTINATION ONLY WHERE THERE IS ONE. A
+       capability is the company's, so a new one has no holding function and
+       this list used to offer "the function itself" anyway: `fn:null`, with
+       the words "the function", and pressing it refused silently inside
+       `removeCapability` — a button that does nothing, which is the one
+       thing a control must never be (§61). Offered where `c.fn` resolves,
+       which is the records that still carry one, and left out where it does
+       not.
+
+       Islam, asked where a company capability's projects should go when
+       there is nowhere to move them: *"deleting is fine"*. So there is
+       nothing to build behind this — only the honest sentence about why
+       Keep them is not available, which `whyNot` now gives. */
+    var dests = (f ? [{ id: "fn:" + c.fn, label: fname + " itself", own: true }] : [])
       .concat(sibs.map(function(x){
         return { id: x.id, label: x.name || x.id, own: false }; }));
-    var keepable = np > 0;
-    var dest = dests.length === 1
+    var toFnOnly = dests.length === 1 && dests[0].own;
+    var keepable = np > 0 && dests.length > 0;
+    var dest = !dests.length ? ''
+      : dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
@@ -11856,7 +12141,7 @@
        which is what this dialog has always said. */
     var fnHasKo = !!((f && f.keyObjectives) || []).length;
     var koNote = !nko ? ''
-      : (dests.length === 1
+      : (toFnOnly
           ? (fnHasKo
               ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
@@ -11865,7 +12150,17 @@
           : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
             '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
-    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
+    /* §544.13: TWO REASONS NOW, AND THE SECOND ONE CAN HAPPEN. "It holds no
+       projects" was the only way Keep them could be unavailable while every
+       capability had a function to fall back on. A company capability with
+       projects and no sibling has nowhere to put them, and saying it holds
+       none would be a lie on the screen about the work it is about to take
+       (§96.2). Removing it removes them, which the row beside this says in
+       full and the archive line backs. */
+    var whyNot = !np
+      ? 'It holds no ' + L("project") + ', so there is nothing to move.'
+      : 'There is nowhere to move ' + (np === 1 ? 'it' : 'them') + ' to \u2014 this is the only ' +
+        L1("capability") + '. Removing it removes ' + (np === 1 ? 'the ' + L1("project") : 'the ' + L("project")) + ' too.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +
@@ -12450,8 +12745,24 @@
      the signature says when nothing has. */
   var sel = document.getElementById("asWho");
   var viewerSig = null;
+  /* ── AND NOT EVERY SEAT MAY LOOK THROUGH EVERY PERSON (§554) ─────
+     The SMO team holds this control now, and the one row it may not wear is
+     the Super user's — the only person on a client's register who holds more
+     than they do. Asked of sync.js rather than tested here, because the SAVE
+     refuses the same row (`lib/rules.js actingFor`) and a list that offered
+     it would be a control that un-happens when pressed (§61, §42).
+
+     THE SEAT IS IN THE SIGNATURE for the same reason the keys are: granting
+     somebody the Super user seat changes who may be looked through without
+     changing who is on the register, and a list keyed on names alone would
+     go on offering the row until the next person joined. */
+  function viewerPool(){
+    if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return PEOPLE;
+    return PEOPLE.filter(function(p){ return SYNC.maySimulatePerson(p); });
+  }
   function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    var pool = viewerPool();
+    var sig = pool.map(function(p){ return p.key + ":" + (p.role || ""); }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
       /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -12471,7 +12782,7 @@
          The job title goes from the option and stays on the `title`: it is
          the thing you might want and never the thing you scan by. */
       var dn = displayNames();
-      sel.innerHTML = PEOPLE.map(function(p){
+      sel.innerHTML = pool.map(function(p){
         var where = placeLabel(personAt(p));
         /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 042). Every
            person on this register carried one until the office's own row
@@ -12621,10 +12932,10 @@
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();
-  /* §544: the arrows every row of tabs already promises. One handler for
+  /* §552: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
-  /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  /* §554: Alt+S, Alt+D, Alt+E — Islam's letters. */
   ACTIONKEYS.wire();
   /* §547: Alt+G, the list of places. */
   GOTO.wire();

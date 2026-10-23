@@ -74,23 +74,35 @@ with sync_playwright() as p:
        safe(pg, "()=>detailWord('outcomes','one',%s)" % UT) == "Result")
     ck("…and stays 'Outcome' where it is off", safe(pg, "()=>detailWord('outcomes','one',%s)" % FT) == "Outcome")
 
-    print("\n4 · the Structure step: the rows, pressed")
+    print("\n4 · the shape screen's level cards: the rows, pressed (§544)")
     safe(pg, "()=>{delete GROUP.structure}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="structure"]')
-    ck("the set-up flow's Structure step opens", ok)
-    rows = safe(pg, "()=>[...document.querySelectorAll('[data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
+        and press(pg, '.wzstep[data-step="shape"]')
+    ck("the set-up flow's shape screen opens", ok)
+    # §544: the Structure step's seven cards are the shape screen's panel,
+    # one at a time — press the level in the tree, then read its card.
+    def lvl(k):
+        return press(pg, '[data-shlvl="%s"]' % k)
+    def drows():
+        return safe(pg, "()=>[...document.querySelectorAll('[data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
+    rows = []
+    for k in ("bu", "fn"):
+        ck("the %s card opens" % k, lvl(k))
+        rows += drows()
     ck("every layer shown carries all four rows",
        all(("%s|%s" % (k, d)) in rows for k in ("bu", "fn") for d in ("overview", "outcomes", "requirements", "years")), rows)
     # §465: the company's rows are on its Directions card, separate from the
     # units' — none while it is off, all four once it is on.
-    ck("…none for the company while its Directions are off (§465)", not any(r.startswith("top|") for r in rows), rows)
+    lvl("top")
+    ck("…none for the company while its Directions are off (§465)",
+       not any(r.startswith("top|") for r in drows()), drows())
     press(pg, '[data-stsec="top|plan"] button:nth-child(1)')
     rows2 = safe(pg, "()=>[...document.querySelectorAll('[data-stcard=\"dir\"] [data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
     ck("…and all four on the Directions card once it is on",
        all(("top|%s" % d) in rows2 for d in ("overview", "outcomes", "requirements", "years")), rows2)
     press(pg, '[data-stsec="top|plan"] button:nth-child(2)')
     ck("no old client-wide card", safe(pg, "()=>document.querySelectorAll('[data-stdetail]:not([data-stdetail*=\"|\"])').length") == 0)
+    ck("the functions' card opens", lvl("fn"))
     ck("an off row says so and draws no name box",
        safe(pg, "()=>{var r=document.querySelector('[data-stdetrow=\"fn|requirements\"]');return r?[r.textContent.indexOf('Off for')>=0, r.querySelectorAll('input').length]:null}") == [True, 0])
     press(pg, '[data-stdetail="fn|requirements"]')
@@ -105,6 +117,7 @@ with sync_playwright() as p:
     ck("a name typed there is stored on that layer",
        safe(pg, "()=>GROUP.structure.fn.words.requirement.many") == "Enablers", safe(pg, "()=>JSON.stringify(GROUP.structure.fn)"))
     ck("…and reaches the function's tactic", "Enablers" in (safe(pg, "()=>reqsCell(%s, true)" % FT) or ""))
+    lvl("bu")
     ck("years carries no names", safe(pg, "()=>{var r=document.querySelector('[data-stdetrow=\"bu|years\"]');return r?r.querySelectorAll('input').length:-1}") == 0)
 
     ck("no page errors", not errs, errs[:3])

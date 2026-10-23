@@ -1,0 +1,249 @@
+<title>The shape on one screen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --good:#2E7D5B; --bad:#B04434; --bad-bg:#F7E3E0;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --good:#5FB68C; --bad:#D97066; --bad-bg:#33201E; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --good:#5FB68C; --bad:#D97066; --bad-bg:#33201E; color-scheme: dark; }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:64rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.5rem 4rem; }
+  header { border-bottom:2px solid var(--navy); padding-bottom:1.1rem; margin-bottom:2rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--gold-deep); margin:0 0 .35rem; }
+  h1 { font-size:1.9rem; line-height:1.15; margin:0 0 .5rem; font-weight:700; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  h2 { font-size:1.2rem; margin:2.8rem 0 .3rem; font-weight:700; }
+  h2 .n { color:var(--gold-deep); font-variant-numeric:tabular-nums; margin-right:.45rem; }
+  p { max-width:48rem; } .lede { color:var(--ink-2); margin-top:.2rem; }
+
+  /* steps strip */
+  .steps { display:flex; flex-wrap:wrap; gap:.4rem; margin:.9rem 0 .3rem; }
+  .step { border:1px solid var(--line); background:var(--surface); border-radius:999px;
+          padding:.3rem .8rem; font-size:13px; font-weight:600; }
+  .step.gone { color:var(--ink-3); text-decoration:line-through; background:var(--surface-2); }
+  .step.keep { border-color:var(--navy); }
+  .step.new  { background:var(--gold-wash); border-color:var(--gold-line); color:var(--gold-deep); }
+  .cap { font-size:12.5px; color:var(--ink-3); margin:.15rem 0 0; }
+
+  /* the one screen */
+  .screen { background:var(--surface); border:1px solid var(--line); border-radius:10px;
+            overflow:hidden; margin:.9rem 0 .2rem; }
+  .schead { background:var(--navy); color:var(--navy-ink); padding:.5rem .85rem;
+            font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase; }
+  .scbody { display:grid; grid-template-columns: 1.25fr 1fr; }
+  @media (max-width:720px){ .scbody { grid-template-columns:1fr; } }
+  .shape { padding:1rem .9rem; border-right:1px solid var(--line-soft); }
+  @media (max-width:720px){ .shape { border-right:0; border-bottom:1px solid var(--line-soft); } }
+  .panel { padding:1rem .9rem; background:var(--surface-2); }
+
+  /* the shape itself */
+  .lvl { font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+         color:var(--ink-3); margin:.9rem 0 .35rem; display:flex; align-items:baseline; gap:.5rem; }
+  .lvl:first-child { margin-top:0; }
+  .lvl .ed { font-size:10.5px; font-weight:600; color:var(--gold-deep); letter-spacing:0;
+             text-transform:none; cursor:pointer; }
+  .box { display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--line);
+         background:var(--surface); border-radius:7px; padding:.3rem .6rem; margin:0 .3rem .3rem 0;
+         font-size:13.5px; }
+  .box.top { border-color:var(--navy); font-weight:700; }
+  .box.sel { border-color:var(--gold); background:var(--gold-wash); font-weight:600; }
+  .box .x { color:var(--ink-3); font-size:11px; }
+  .add { display:inline-flex; align-items:center; border:1px dashed var(--line); color:var(--ink-3);
+         border-radius:7px; padding:.3rem .6rem; margin:0 .3rem .3rem 0; font-size:13px; }
+  .indent { margin-left:1.1rem; border-left:2px solid var(--line-soft); padding-left:.7rem; }
+
+  /* the panel's rows */
+  .prow { display:flex; align-items:center; gap:.5rem; margin:0 0 .5rem; }
+  .plab { flex:0 0 9rem; font-size:12.5px; color:var(--ink-2); font-weight:600; }
+  .fld { flex:1; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+         border-radius:6px; padding:.25rem .45rem; font-size:13px; font-family:inherit; }
+  .ptitle { font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+            color:var(--gold-deep); margin:0 0 .7rem; }
+  .chips { display:flex; flex-wrap:wrap; gap:.3rem; margin:.1rem 0 .8rem; }
+  .chip { font-size:12px; border:1px solid var(--line); border-radius:999px; padding:.15rem .55rem;
+          background:var(--surface); color:var(--ink-2); }
+  .chip.on { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); font-weight:600; }
+  .why { font-size:12px; color:var(--ink-3); margin:.3rem 0 0; }
+
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0 .3rem; }
+  @media (max-width:860px){ .pair { grid-template-columns:1fr; } }
+  .tag { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:var(--track);
+         text-transform:uppercase; padding:.12rem .5rem; border-radius:999px; margin-bottom:.4rem; }
+  .tag.a { background:var(--navy); color:var(--navy-ink); }
+  .tag.b { background:var(--gold-wash); color:var(--gold-deep); border:1px solid var(--gold-line); }
+  .verdict { background:var(--surface-2); border-left:3px solid var(--gold); padding:.6rem .8rem;
+             font-size:13.5px; margin:.5rem 0 0; }
+  .ask { background:var(--gold-wash); border:1px solid var(--gold-line); border-radius:9px;
+         padding:1rem 1.1rem; margin-top:2.4rem; }
+  ul.checks { list-style:none; padding:0; margin:.6rem 0 0; }
+  ul.checks li { display:flex; gap:.6rem; margin:0 0 .55rem; font-size:14px; }
+  ul.checks .k { flex:0 0 1.3rem; height:1.3rem; border-radius:50%; background:var(--navy);
+                 color:var(--navy-ink); font-size:11px; font-weight:700; display:grid; place-items:center; }
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Spec 066 · stage 4 · set-up</p>
+  <h1>The shape on one screen</h1>
+  <p class="standfirst">Today you build a client's shape across five screens. This is what one
+    screen would look like, drawn with El&nbsp;Abd's real structure — three divisions and
+    twenty-two functions, as they are stored today.</p>
+</header>
+
+<h2><span class="n">1</span>Seven steps become three</h2>
+<div class="steps">
+  <span class="step keep">The client</span>
+  <span class="step gone">Structure</span>
+  <span class="step gone">Divisions</span>
+  <span class="step gone">Business units</span>
+  <span class="step gone">Functions</span>
+  <span class="step gone">Capabilities</span>
+  <span class="step keep">The office</span>
+</div>
+<p class="cap">Today — the five struck through all answer one question: what is this client made of.</p>
+<div class="steps">
+  <span class="step keep">The client</span>
+  <span class="step new">The shape</span>
+  <span class="step keep">The office</span>
+</div>
+<p class="cap">After. The client and the office steps are untouched.</p>
+<p class="lede"><b>Capabilities drops out entirely</b> — since last week a capability is a pillar,
+  not a box, so there is nothing left to name on a step of its own.</p>
+
+<h2><span class="n">2</span>The one screen, with your real structure</h2>
+<p class="lede">The shape on the left. Press anything on it and its settings open on the right.
+  Nothing is buried: what you are looking at is the whole client.</p>
+
+<div class="screen">
+  <div class="schead">Client set-up · The shape</div>
+  <div class="scbody">
+    <div class="shape">
+      <div class="lvl">The company <span class="ed">rename level…</span></div>
+      <div><span class="box top">ElAbd</span></div>
+
+      <div class="lvl">Divisions &nbsp;3 <span class="ed">rename level…</span></div>
+      <div class="indent">
+        <span class="box sel">Commercial <span class="x">5</span></span>
+        <span class="box">Operations <span class="x">8</span></span>
+        <span class="box">Corporate Support <span class="x">9</span></span>
+        <span class="add">+ add</span>
+      </div>
+
+      <div class="lvl">Functions &nbsp;22 <span class="ed">rename level…</span></div>
+      <div class="indent">
+        <span class="box">Retail</span><span class="box">External Sales</span>
+        <span class="box">E-Commerce</span><span class="box">Marketing</span>
+        <span class="box">Customer Experience</span>
+        <span class="add">+ add under Commercial</span>
+      </div>
+      <p class="why">Showing Commercial's five, because Commercial is selected. Press another
+        division to see its own.</p>
+    </div>
+
+    <div class="panel">
+      <p class="ptitle">Commercial</p>
+      <div class="prow"><span class="plab">Name</span><input class="fld" value="Commercial"></div>
+      <div class="prow"><span class="plab">Short name</span><input class="fld" value="Commercial" placeholder="for the navigation"></div>
+      <div class="prow"><span class="plab">Code</span><input class="fld" value="CM" style="max-width:5rem"></div>
+      <div class="prow"><span class="plab">Head</span><input class="fld" value="— nobody yet —"></div>
+      <p class="ptitle" style="margin-top:1.2rem">What this level carries</p>
+      <div class="chips">
+        <span class="chip on">Foundation</span><span class="chip on">SWOT</span>
+        <span class="chip">Themes</span><span class="chip on">Pillars</span>
+        <span class="chip">Values</span>
+      </div>
+      <p class="why">Set once for every division. A single division that differs says so here, and
+        only then.</p>
+    </div>
+  </div>
+</div>
+<p class="verdict">Everything on this screen exists today — it is just spread over five of them,
+  and the words for each level are on a sixth.</p>
+
+<h2><span class="n">3</span>The one thing I need you to choose</h2>
+<p class="lede">How you add a box. Same screen, two ways. Look at them and say A or B.</p>
+
+<div class="pair">
+  <div>
+    <span class="tag a">A &nbsp;·&nbsp; on the shape</span>
+    <div class="screen"><div class="scbody" style="grid-template-columns:1fr">
+      <div class="shape" style="border:0">
+        <div class="lvl">Functions &nbsp;22</div>
+        <div class="indent">
+          <span class="box">Retail</span><span class="box">External Sales</span>
+          <span class="box">E-Commerce</span><span class="box">Marketing</span>
+          <span class="box">Customer Experience</span>
+          <span class="box sel"><input class="fld" value="Trade Marketing" style="border:0;background:transparent;padding:0;width:8.5rem"></span>
+        </div>
+        <p class="why">You pressed <b>+ add under Commercial</b> and typed. It is there.</p>
+      </div>
+    </div></div>
+    <p class="cap">Fewest presses. You never leave the picture, and a box is always added
+      somewhere you can see.</p>
+  </div>
+
+  <div>
+    <span class="tag b">B &nbsp;·&nbsp; a list beside the shape</span>
+    <div class="screen"><div class="scbody" style="grid-template-columns:1fr">
+      <div class="shape" style="border:0">
+        <div class="lvl">Functions &nbsp;22 <span class="ed">edit the list…</span></div>
+        <div class="indent">
+          <span class="box">Retail</span><span class="box">External Sales</span>
+          <span class="box">E-Commerce</span><span class="box">Marketing</span>
+          <span class="box">Customer Experience</span>
+        </div>
+        <div style="margin-top:.9rem;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <div style="background:var(--surface-2);padding:.35rem .6rem;font-size:11.5px;font-weight:700;letter-spacing:var(--track);text-transform:uppercase;color:var(--ink-3)">Functions · the list</div>
+          <div style="padding:.5rem .6rem;font-size:13px">
+            <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.35rem">
+              <input class="fld" value="Trade Marketing" style="flex:1">
+              <select class="fld" style="flex:0 0 9rem"><option>Commercial</option><option>Operations</option></select>
+            </div>
+            <span class="add">+ add a function</span>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <p class="cap">Closer to what you use now. A box's parent is chosen from a dropdown rather
+      than by where you pressed.</p>
+  </div>
+</div>
+
+<div class="ask">
+  <h2 style="margin:0 0 .4rem"><span class="n">4</span>What I am asking</h2>
+  <ul class="checks">
+    <li><span class="k">1</span><span>Seven steps become three, and <b>Capabilities disappears</b>.</span></li>
+    <li><span class="k">2</span><span>One screen: the shape on the left, the selected thing's settings on the right.</span></li>
+    <li><span class="k">3</span><span><b>A or B</b> — adding a box on the picture, or from a list beside it.</span></li>
+  </ul>
+  <p style="margin:.9rem 0 0"><b>Weighting is not touched.</b> It stays on its own page, as you said.</p>
+  <p style="margin:.5rem 0 0">Nothing here changes what any client sees on their own pages — this is
+    the set-up flow only.</p>
+</div>
+</div>

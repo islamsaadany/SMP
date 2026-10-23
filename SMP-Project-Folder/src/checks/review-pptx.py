@@ -257,11 +257,20 @@ def main():
             banded = [c for c in cells
                       if any(('val="%s"' % h) in c for h in BANDS) and 'b="1"' in c]
             ok("a score wears its band, in bold", len(banded) >= 1, len(banded))
-            two = [c for c in cells if c.count("<a:r>") == 2 and 'i="1"' in c]
-            ok("the benchmark is a second, italic run in the same cell",
+            # §572 REWROTE THESE: they asked for the benchmark as a second,
+            # italic run beside the figure ("13.4% / 14%"). It is a line of its
+            # own under the figure now, saying what it is — "due 14%" (Islam's
+            # Option B) — so it is a second PARAGRAPH, quiet and smaller.
+            paras = [re.findall(r"<a:p>(.*?)</a:p>", c, re.S) for c in cells]
+            two = [ps for ps in paras if len(ps) == 2 and
+                   "".join(re.findall(r"<a:t>([^<]*)</a:t>", ps[1])).startswith("due ")]
+            ok("what is due is a second line under the figure, saying due",
                len(two) >= 1, len(two))
             ok("and it is the quieter of the two",
-               any('val="5E6E88"' in c for c in two), None)
+               any('val="5E6E88"' in ps[1] for ps in two), None)
+            szs = [[int(x) for x in re.findall(r'<a:rPr[^>]*\bsz="(\d+)"', "".join(ps))] for ps in two]
+            ok("and it is set smaller than the figure it stands under (§568, §572)",
+               any(len(z) == 2 and z[1] < z[0] for z in szs), szs[:3])
 
         # ── §5 ───────────────────────────────────────────────────────────
         print("\n§5 · a heading fits its own column")
@@ -281,20 +290,30 @@ def main():
         ok("every heading has room for itself", not bad, bad[:3])
 
         # ── §6 ───────────────────────────────────────────────────────────
-        print("\n§6 · the headline pair is in the head, not the lead")
+        # REWRITTEN TO THE NEW RULE, NOT LOOSENED (§218, §553.3). This section
+        # read "the headline pair is in the head, not the lead" and checked
+        # that the export drew the two figures in the measures slide's head
+        # band. §553.3 took them off the running head altogether: they were
+        # printed over the measures, the categories and the tactics and
+        # presented on none of them, and they are now said once on "Where …
+        # stands" — which §2 above already reads out of the same file.
+        #
+        # SO THE CLAIM IS THAT THEY ARE GONE, at both ends (§94.2): the deck
+        # draws no pair, and the exported slide has nothing in the band where
+        # the pair used to sit. Asserting only the first would pass on an
+        # export that still carried a stale pair of its own.
+        print("\n§6 · the pillar's running head carries no reading (§553.3)")
         stats = facts.get("stats") or []
-        ok("the deck draws a pair on a pillar's tables", len(stats) >= 2, len(stats))
-        if meas and stats:
+        ok("the deck draws no pair on a pillar's tables", stats == [], stats)
+        if meas:
             pair = re.findall(r'<a:off x="(\d+)" y="388620"/>', meas)
-            ok("the pair is drawn in the head band", len(pair) == len(stats), pair)
-            ok("right-aligned there",
-               meas.count('algn="r"') >= 2 * len(stats), meas.count('algn="r"'))
-            body = meas.split("<p:graphicFrame")[0]
-            lead = re.findall(r'<a:off x="640080" y="1381125"/>', body)
-            ok("and not stacked above the table as lead prose", not lead, lead)
-            ok("the pair's values are the deck's own",
-               all(s["v"] in [unesc(t) for t in texts(meas)] for s in stats),
-               [s["v"] for s in stats])
+            ok("and the exported head band is empty where it sat", pair == [], pair)
+            # AND THE SLIDE IS STILL THE SLIDE: the head's own words stay, or
+            # this section would pass just as well on an export that lost the
+            # whole band (§61's control with nothing behind it).
+            ok("…while the head still names the pillar and what the slide is",
+               any("Key measures" in t for t in [unesc(x) for x in texts(meas)]),
+               [unesc(t) for t in texts(meas)][:4])
 
         # ── §7 ───────────────────────────────────────────────────────────
         print("\n§7 · the pillars roll-call is cards")
@@ -349,7 +368,11 @@ def main():
                None)
 
         # ── §10 ──────────────────────────────────────────────────────────
-        print("\n§10 · and the plan download is untouched (§94.2)")
+        print("\n§10 · and the plan download is this deck without its figures (§564)")
+        # REWRITTEN TO THE NEW RULE (218, 564). §10 said the plan download
+        # was untouched by this converter; it is now made BY it, from the same
+        # deck with DECK_PLAN on, so its rows are the review's and it carries
+        # the subject's mark — and no reported figure.
         plan = js(pg, """(t)=>{
           const b = buildPlanPptx(t);
           let s = ''; const CH = 0x8000;
@@ -362,10 +385,10 @@ def main():
             pxml = "".join(pz.read(n).decode("utf-8") for n in pz.namelist()
                            if n.startswith("ppt/slides/slide"))
             hs = set(re.findall(r'<a:tr h="(\d+)"', pxml))
-            ok("the plan's rows are still 335280", hs == {"335280"}, sorted(hs))
-            ok("its cells are still 11pt", 'sz="1100"' in pxml, None)
-            ok("and it carries no media part",
-               "ppt/media/mark.png" not in pz.namelist(), None)
+            ok("the plan's rows are the review's", hs == {ROW_H}, sorted(hs))
+            ok("no figure column survives in it",
+               not any(w in pxml for w in [">YTD actual<", ">Progress<", ">Actual<"]), None)
+            ok("and no Overall performance part", "Overall performance" not in pxml, None)
         else:
             ok("the plan download still builds", False, plan)
 

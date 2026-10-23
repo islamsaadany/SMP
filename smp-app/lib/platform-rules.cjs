@@ -62,6 +62,10 @@
      partner's standing is the seats they hold. */
   var EVERYONE = "everyone";
 
+  /* §592: a table of tables of words, said so — the app reads this file's
+     types, and looks a row up by `EVERYONE`, a string, not the one literal
+     key the object happens to have. Comment only. */
+  /** @type {Object<string, Object<string, string>>} */
   var ACCESS_DEFAULTS = {
     everyone: { other_clients: "listed", consultants: "view", create_client: "none", demo: "edit" }
   };

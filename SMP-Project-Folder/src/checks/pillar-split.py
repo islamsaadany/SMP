@@ -252,9 +252,11 @@ with sync_playwright() as p:
     # join or split, which is the same guard the unit's dialog applies.
     # §6b left a dialog open on the Business units page; close it first.
     press('[data-rowdlg-close]') or press('[data-rowdlg-cancel]')
+    # §544: the Structure step is the shape screen now, and the top level's
+    # card opens from the tree.
     opened = ((press('.setuprail [data-setupgo="start"]') or press('[data-setupgo="start"]')) and
-              press('.wzstep[data-step="structure"]'))
-    ck("the Structure step opens", opened)
+              press('.wzstep[data-step="shape"]') and press('[data-shlvl="top"]'))
+    ck("the shape screen's top level opens", opened)
     ck("with the company's plan off, no row is drawn",
        ev(pg, "() => !document.querySelector('[data-wztopsplit]')", None) is True)
     ck("switching the company's plan on", press('[data-stsec="top|plan"] button:nth-child(1)'))

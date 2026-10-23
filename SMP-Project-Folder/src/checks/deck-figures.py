@@ -41,7 +41,10 @@ import os
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FILE = os.path.join(os.path.dirname(HERE), "strategy-management-platform.html")
+# SMP_BUILT points it at another build (§276), so a claim about what this
+# branch changed can be run against the build it changed FROM.
+FILE = os.path.abspath(os.environ.get("SMP_BUILT")
+  or os.path.join(os.path.dirname(HERE), "strategy-management-platform.html"))
 fails = []
 
 
@@ -134,8 +137,10 @@ with sync_playwright() as p:
         const heads = [...s.querySelectorAll("thead th")].map(x => x.textContent.trim());
         const rows = [...s.querySelectorAll("tbody tr")].map((tr, i) => {
           const m = list[i]; const c = tr.querySelectorAll("td");
+          const dl = c[3] ? c[3].querySelector(".ddue") : null;
           return { target: c[2] ? c[2].textContent.trim() : "",
                    actual: c[3] ? c[3].textContent.trim() : "",
+                   dueLine: dl ? dl.textContent.trim() : null,
                    due: m ? measureDueLabel(m) : null,
                    fig: m ? String(m.actual == null ? "" : m.actual) : "" };
         });
@@ -155,14 +160,67 @@ with sync_playwright() as p:
         ok("the " + name + " table has a row with a benchmark to show",
            len(withdue) > 0, got["rows"][:2])
         for r in withdue[:3]:
-            ok("  %s: the figure carries / %s" % (name, r["due"]),
-               "/" in r["actual"] and r["due"].replace(" ", "") in r["actual"].replace(" ", ""),
-               r)
+            # §572 REWROTE THIS ONE: it read "the figure carries / X" and asked
+            # for the slash. What is due is a line of its own under the figure
+            # now, saying what it is (Islam's Option B, "keep the due").
+            ok("  %s: under the figure, due %s" % (name, r["due"]),
+               (r["dueLine"] or "").replace(" ", "") == ("due" + r["due"]).replace(" ", "") and
+               "/" not in r["actual"], r)
         for r in got["rows"][:3]:
             ok("  %s: the target reads tight (%s)" % (name, r["target"]),
                r["target"] == "" or r["target"] == "—"
                or " M " not in r["target"] and " B " not in r["target"] and " K " not in r["target"],
                r["target"])
+
+    print("\n── 1b · §568, §572 · the due line is quiet and under the figure; names bold, Progress big")
+    # §568: *"the prorated target should be smaller not to take over the
+    # actual"*. §572 (Option B): a line of its own under the figure, "due X",
+    # the key measure and tactic names bold, the outcome regular, Progress a
+    # size up. Measured as PAINT in the opened deck, never as a class
+    # (§145.14): a build that kept the class and lost the rule passes any
+    # class test. Both slides, because they are drawn by different rows.
+    sz = js(pg, """() => {
+      openDeck(UNITS[activeKeys()[0]]);
+      const cs = el => getComputedStyle(el), px = el => parseFloat(cs(el).fontSize);
+      const pick = rx => [...document.querySelectorAll('#deckroot .deck .dslide')]
+        .filter(s => rx.test(((s.querySelector('h2') || {}).textContent || '')));
+      const read = list => {
+        for (const s of list) {
+          s.classList.add('on');
+          for (const d of s.querySelectorAll('td.num .ddue')) {
+            const td = d.closest('td'), b = td.querySelector('b') || td;
+            /* the figure is a text node on one row and an element on another,
+               so its box is read through a Range either way */
+            const rg = document.createRange(); rg.selectNode(td.firstChild);
+            const fig = { getBoundingClientRect: () => rg.getBoundingClientRect() };
+            const tr = td.closest('tr'), lead = tr.querySelector('td.lead');
+            const prog = tr.querySelector('td.dprog'), outc = tr.querySelector('td.outc b');
+            const out = { due: px(d), fig: px(td), below: d.getBoundingClientRect().top >= fig.getBoundingClientRect().bottom - 2,
+                     txt: d.textContent.trim(), ink: cs(d).color, figInk: cs(td).color,
+                     lead: lead ? cs(lead).fontWeight : null, outc: outc ? cs(outc).fontWeight : null,
+                     prog: prog ? px(prog) : null };
+            s.classList.remove('on');
+            return out;
+          }
+          s.classList.remove('on');
+        }
+        return null;
+      };
+      const out = { mea: read(pick(/Key measures/)), tac: read(pick(/Tactics/)) };
+      closeDeck();
+      return out;
+    }""")
+    for name, got in (("key measures", sz.get("mea")), ("tactics", sz.get("tac"))):
+        ok("the %s slide has a figure with a due line under it" % name, bool(got), sz)
+        if got:
+            ok("  %s: it says due, is smaller than its figure, and sits under it (%s)" % (name, got["txt"]),
+               got["txt"].startswith("due ") and got["due"] < got["fig"] - 3 and got["below"], got)
+            ok("  %s: ...in the quiet ink, not the figure's" % name, got["ink"] != got["figInk"], got)
+            ok("  %s: the name is bold" % name, got["lead"] in ("700", "bold"), got)
+            ok("  %s: the Progress is a size up from the figure" % name,
+               got["prog"] is not None and got["prog"] > got["fig"], got)
+    ok("the tactics slide's outcome is regular weight",
+       (sz.get("tac") or {}).get("outc") in ("400", "normal"), sz.get("tac"))
 
     print("\n── 4 · a tactic outside this cycle is not dimmed, and still says so")
     dim = js(pg, """() => {
@@ -306,11 +364,25 @@ with sync_playwright() as p:
       const aim = [...d.querySelectorAll("section.dslide")].filter(s =>
         /aiming at/.test((s.querySelector("h2")||{}).textContent||""))[0];
       const heads = aim ? [...aim.querySelectorAll("thead th")].map(x => x.textContent.trim()) : [];
-      const cover = [...d.querySelectorAll("section.dslide .leadstats")]
-        .map(x => [...x.querySelectorAll(".dlab")].map(y => y.textContent.trim()));
-      const stats = [...d.querySelectorAll("section.dslide .dstats")]
-        .map(x => [...x.querySelectorAll("i")].map(y => y.textContent.trim()));
       d.remove();
+      /* ACROSS EVERY UNIT, NOT THE FIXTURE'S ONE (§94.8). Both readings were
+         gathered from the deck built above, out of a unit this fixture has
+         just finished rewriting ten times — and by the time it got here that
+         deck carried no pillar head at all, so `cover` and `stats` both came
+         back empty and the two assertions below were a vacuous pass and a
+         bare-faced fail. Asked of every active unit's own deck, built clean,
+         they measure something. */
+      const cover = [], stats = []; let phdr = 0;
+      activeKeys().forEach(k => {
+        const e = document.createElement("div");
+        e.innerHTML = deckSlides(unitLike(k));
+        phdr += e.querySelectorAll("section.dslide .dphdr").length;
+        [...e.querySelectorAll("section.dslide .leadstats")].forEach(x =>
+          cover.push([...x.querySelectorAll(".dlab")].map(y => y.textContent.trim())));
+        [...e.querySelectorAll("section.dslide .dphdr .dstats")].forEach(x =>
+          stats.push([...x.querySelectorAll("i")].map(y => y.textContent.trim())));
+        e.remove();
+      });
       /* MEASURED ON THE REAL DECK, NOT THE DETACHED ONE. `getComputedStyle` on
          a detached element does not resolve the stylesheet, so the first
          version of this assertion reported a correct build as broken —
@@ -348,7 +420,7 @@ with sync_playwright() as p:
           s.classList.remove("on"); }
         try { closeDeck(); } catch (e) {}
       });
-      return { sizes, heads, cover, stats, oneCol, aspFull, tdPx, sizesByUnit, worst, over };
+      return { sizes, heads, cover, stats, phdr, oneCol, aspFull, tdPx, sizesByUnit, worst, over };
     }""")
     if isinstance(late, dict) and late.get("sizes"):
         s = late["sizes"]
@@ -386,14 +458,24 @@ with sync_playwright() as p:
         ok("no pillar cover carries Delivered / planned (§254.10)",
            all("Delivered / planned" not in c for cov in late["cover"] for c in cov),
            late["cover"][:3])
-        ok("...and every pillar head reads Measures and Execution, and nothing else",
-           # REWRITTEN, never loosened (§218, §214.3): since §395 the first
-           # word is the client's own label for a measure, so it is asked of
-           # the page rather than held as a literal — a head carrying a third
-           # figure, or the wrong word, still fails.
-           len(late["stats"]) > 0
-           and all(x == [js(pg, "() => L('measure')"), "Execution"] for x in late["stats"]),
-           late["stats"][:3])
+        # REWRITTEN TO THE NEW RULE, NOT LOOSENED (§218, §553.3). It read
+        # "...and every pillar head reads Measures and Execution, and nothing
+        # else". §553.3 took both figures off the running head: they were
+        # printed over the measures, the categories and the tactics — three
+        # slides each about something else — and presented on none of them.
+        # So the claim reverses, and is asserted at BOTH ENDS (§94.2): the
+        # heads are still drawn, and not one of them carries a figure.
+        ok("every pillar head is drawn, and none carries a reading (§553.3)",
+           late.get("phdr", 0) > 0 and late["stats"] == [],
+           {"heads": late.get("phdr"), "with figures": late["stats"][:3]})
+        # AND THE FIGURES ARE NOT LOST, which is the half that makes the one
+        # above a change rather than a deletion: the pillar's own title page
+        # still carries both, large, and still names them the client's way
+        # (§395) rather than against a literal.
+        ok("...because the pillar's title page still carries both (§553.3)",
+           len(late["cover"]) > 0
+           and all(x == [js(pg, "() => L('measure')"), "Execution"] for x in late["cover"]),
+           late["cover"][:3])
     else:
         ok("the §254.8-.10 fixture ran", False, late)
 

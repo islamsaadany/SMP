@@ -31,6 +31,7 @@
      SMP_BREAK=done-is-hit     node checks/portfolio-module.mjs  # must go red
      SMP_BREAK=on-track        node checks/portfolio-module.mjs  # must go red
      SMP_BREAK=far-words       node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=full-names      node checks/portfolio-module.mjs  # must go red (§565)
 
    TWO OF THOSE WENT GREEN WHEN THEY WERE FIRST WRITTEN, and both were this
    file rather than the product (§54.5): `stale-name` had no stored name to
@@ -345,6 +346,16 @@ try {
     /class="pwho">Zeinab</.test(renamed.html) && !/Omar/.test(renamed.html),
     (renamed.html.match(/class="pwho">[^<]*/g) || []).join(" | "));
   await owner("UPDATE people SET name = 'Omar Tarek' WHERE tenant_id = $1 AND key = 'omar'", [A]);
+  /* §565 — THE REGISTER'S NAME, NEVER THE FULL ONE: a Name typed on the
+     register (`extra.known`) is what the plan shortens, so somebody the office
+     calls by another name is called it here. Typed for this claim alone and
+     taken off again, so nothing below reads it. */
+  await owner("UPDATE people SET extra = extra || '{\"known\":\"Tarek\"}'::jsonb WHERE tenant_id = $1 AND key = 'omar'", [A]);
+  const known = await get(A, [proj.id, "plan"], SEAT);
+  check("...and the owner is shortened from the Name typed on the register, never the full name (§565)",
+    /class="pwho">Tarek</.test(known.html) && !/class="pwho">Omar</.test(known.html),
+    (known.html.match(/class="pwho">[^<]*/g) || []).join(" | "));
+  await owner("UPDATE people SET extra = extra - 'known' WHERE tenant_id = $1 AND key = 'omar'", [A]);
 
   const marks = plan.html;
   check("a row past its date is marked late, and one that is not is not — both ends (§94.2)",

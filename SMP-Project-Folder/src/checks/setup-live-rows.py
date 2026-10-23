@@ -53,6 +53,29 @@ def pick(pg, sel, value, wait=500):
 def step(pg, k):
     return press(pg, ".csetup .wzstep[data-step=%s]" % k, 500)
 
+def shape(pg):
+    """§544: the four list steps are the shape screen's tree."""
+    return step(pg, "shape")
+
+def box(pg, kind, key=None):
+    """Open one box's panel. `kind` is bu, fn or co; `key` is the row's own
+       key where the flow carries one, else the first box of that kind."""
+    shape(pg)
+    sel = ".csetup [data-shbox^=%s:]" % kind
+    if key is not None:
+        at = ev(pg, """()=>{var L=%s, k=%r; for(var i=0;i<L.length;i++) if(L[i]===k) return i; return -1;}"""
+                % ("UNIT_KEYS" if kind == "bu" else "FUNCTION_KEYS", key), -1)
+        if at is None or at < 0: return False
+        sel = ".csetup [data-shbox='%s:%d']" % (kind, at)
+    # The tree shows one division's boxes at a time, so if this box is not
+    # on screen the divisions are opened in turn until it is.
+    if not ev(pg, "()=>!!document.querySelector(%r)" % sel, False):
+        n = ev(pg, "()=>document.querySelectorAll('.csetup [data-shbox^=\"co:\"]').length", 0) or 0
+        for d in range(n):
+            press(pg, ".csetup [data-shbox='co:%d']" % d, 250)
+            if ev(pg, "()=>!!document.querySelector(%r)" % sel, False): break
+    return press(pg, sel, 450)
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME) if CHROME else p.chromium.launch()
     pg = b.new_page(viewport={"width": 1440, "height": 900})
@@ -69,10 +92,13 @@ with sync_playwright() as p:
     ck("(fixture) there are at least two divisions to move between", len(cos) >= 2, cos)
 
     print("\n§1 · a unit's division")
-    step(pg, "units")
-    ck("the list is still frozen: no Add, names read-only",
-       ev(pg, "()=>!document.querySelector('.csetup .wzadd') && [...document.querySelectorAll('.csetup .wzrow input.fld')].every(i=>i.readOnly)", False))
     u0 = ev(pg, "()=>activeKeys()[0]")
+    box(pg, "bu", u0)
+    # §544: the list steps are the shape screen, so the freeze is asserted
+    # where it shows now — nothing to add with, and the box's own name box
+    # read-only (§218: the rule is unchanged, the place is not).
+    ck("the shape is still frozen: no Add, the name read-only",
+       ev(pg, "()=>!document.querySelector('.csetup .shadd') && [...document.querySelectorAll('.csetup [data-shname]')].every(i=>i.readOnly)", False))
     before = ev(pg, "()=>UNITS[%r].company||null" % u0)
     other = ev(pg, "()=>COMPANY_KEYS.filter(k=>k!==(UNITS[%r].company||''))[0]" % u0)
     oname = ev(pg, "()=>COMPANIES[%r].name" % other)
@@ -84,13 +110,13 @@ with sync_playwright() as p:
     ev(pg, "()=>{UNITS[%r].company=%r}" % (u0, before))
 
     print("\n§2 · a function's division and how it plans")
-    step(pg, "fns")
     # the first function row without a capability, and one with
     free = ev(pg, "()=>FUNCTION_KEYS.filter(k=>!capsOfFunction(k).length && FUNCTIONS[k].active!==false)[0]")
     held = ev(pg, "()=>FUNCTION_KEYS.filter(k=>capsOfFunction(k).length)[0]")
     ck("(fixture) a function with no capability, and one carrying one", bool(free) and bool(held), [free, held])
+    fk0 = ev(pg, "()=>FUNCTION_KEYS[0]")
+    box(pg, "fn", fk0)
     ok = pick(pg, ".csetup select[data-wzdiv=fn]", oname)
-    fk0 = ev(pg, "()=>document.querySelector('.csetup select[data-wzfmt]').dataset.wzfmt")
     ck("the function's division select writes its company",
        ok and ev(pg, "()=>FUNCTIONS[%r].company" % fk0) == other, ev(pg, "()=>FUNCTIONS[%r].company" % fk0))
     pick(pg, ".csetup select[data-wzdiv=fn]", "")
@@ -99,6 +125,7 @@ with sync_playwright() as p:
     was = ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % free)
     to = "pillars" if was != "pillars" else "projects"
     held_n = ev(pg, "()=>{var f=FUNCTIONS[%r]; return (f.projects||[]).length+(f.items||[]).length+(f.actions||[]).length}" % free)
+    box(pg, "fn", free)
     ok = pick(pg, ".csetup select[data-wzfmt=%s]" % free, to)
     ck("the function's plans-in select is live on a frozen client", ok)
     if held_n:
@@ -107,44 +134,45 @@ with sync_playwright() as p:
         ck("…and nothing changes until it is confirmed", ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % free) == was)
         press(pg, "#modal-b [data-rmyes]", 600)
     ck("confirmed, the function plans the new way", ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % free) == to)
-    step(pg, "fns")
+    box(pg, "fn", free)
     ok = pick(pg, ".csetup select[data-wzfmt=%s]" % free, was)
     if held_n and ev(pg, "()=>!!document.querySelector('#modal-b [data-rmyes]')", False):
         press(pg, "#modal-b [data-rmyes]", 600)
     ck("switching back brings the old way back, with what it held",
        ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % free) == was and
        ev(pg, "()=>{var f=FUNCTIONS[%r]; return (f.projects||[]).length+(f.items||[]).length+(f.actions||[]).length}" % free) == held_n)
-    step(pg, "fns")
+    box(pg, "fn", held)
     hwas = ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % held)
     pick(pg, ".csetup select[data-wzfmt=%s]" % held, "pillars" if hwas != "pillars" else "projects")
     ck("a function carrying a capability is refused, and the refusal is SAID",
        ev(pg, "()=>fnFormat(FUNCTIONS[%r])" % held) == hwas and
        "carries" in (ev(pg, "()=>(document.querySelector('.csetup [data-cssaid]')||{}).textContent||''", "") or ""))
 
-    print("\n§3 · a capability's function and how it plans")
-    step(pg, "caps")
+    print("\n§3 · a capability's function and how it plans — on its own page (§544)")
+    # §544, spec 066 §6: the Capabilities STEP is gone with the other four
+    # list steps. A capability is an internal pillar now (stage 3b), and the
+    # records a client still holds are managed on Setup › Capabilities,
+    # which asks these same two answers with the same two selects. Asserted
+    # at BOTH ENDS (§94.2): the step is gone AND the page answers.
     cid = ev(pg, "()=>(GROUP.capabilities||[])[0] && GROUP.capabilities[0].id")
     ck("(fixture) there is a capability", bool(cid))
-    fnames = ev(pg, "()=>FUNCTION_KEYS.map(k=>FUNCTIONS[k].name)", [])
+    shape(pg)
+    ck("the flow no longer carries a Capabilities step",
+       ev(pg, "()=>!document.querySelector('.csetup .wzstep[data-step=caps]')", False))
+    ck("…and the shape screen says where they are managed",
+       "Setup" in (ev(pg, "()=>{var p=[...document.querySelectorAll('.csetup .shwhy')].map(x=>x.textContent).join(' '); return p}", "") or ""))
+    ev(pg, "()=>{ current='setup'; currentSub='caps'; paint(); }"); pg.wait_for_timeout(500)
     cfn = ev(pg, "()=>GROUP.capabilities[0].fn")
     target = [k for k in ev(pg, "()=>FUNCTION_KEYS", []) if k != cfn][0]
-    tname = ev(pg, "()=>FUNCTIONS[%r].name" % target)
-    ok = pick(pg, ".csetup .wzrow select[aria-label^='Which function carries']", tname)
-    ck("the capability's carried-by select is live and writes its function",
+    press(pg, "[data-tkrow] .tkpen, [data-rowedit='caps|0']", 400)
+    ok = pick(pg, "select[data-capfn='0']", target)
+    ck("Setup › Capabilities writes which function carries it",
        ok and ev(pg, "()=>GROUP.capabilities[0].fn") == target, ev(pg, "()=>GROUP.capabilities[0].fn"))
-    pick(pg, ".csetup .wzrow select[aria-label^='Which function carries']", "")
+    pick(pg, "select[data-capfn='0']", "")
     ck("…and it can be left unassigned", not ev(pg, "()=>GROUP.capabilities[0].fn"))
     ev(pg, "()=>{GROUP.capabilities[0].fn=%r; paint();}" % cfn); pg.wait_for_timeout(300)
-    step(pg, "caps")
-    cwas = ev(pg, "()=>GROUP.capabilities[0].format==='pillars'?'pillars':'projects'")
-    cto = "pillars" if cwas != "pillars" else "projects"
-    ok = pick(pg, ".csetup .wzrow select[aria-label^='How ']", cto)
-    ck("the capability's plans-in select is live", ok)
-    if ev(pg, "()=>!!document.querySelector('#modal-b [data-rmyes]')", False):
-        ck("…holding work, it warns before changing", ev(pg, "()=>(GROUP.capabilities[0].format==='pillars'?'pillars':'projects')") == cwas)
-        press(pg, "#modal-b [data-rmyes]", 600)
-    ck("confirmed, the capability plans the new way",
-       ev(pg, "()=>GROUP.capabilities[0].format==='pillars'?'pillars':'projects'") == cto)
+
+    ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
 
     print("\n§4 · the first section")
     ck("a function's description is off until ticked", ev(pg, "()=>compOn('fn:%s','desc')" % free) is False)
@@ -155,7 +183,7 @@ with sync_playwright() as p:
 
     print("\n§5 · a function's key objectives are a tick (§437)")
     ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
-    step(pg, "structure")
+    shape(pg); press(pg, ".csetup [data-shlvl=fn]", 450)
     tick = ev(pg, "()=>{var b=document.querySelector('.csetup [data-stcomp=\"fn|keyobj\"]'); return b ? b.getAttribute('aria-pressed') : null}")
     ck("the functions' first section offers a Key objectives tick, on by default", tick == "true", tick)
     # the rule, both ends: on by default, off stops counting, a unit untouched
@@ -174,9 +202,26 @@ with sync_playwright() as p:
 
     print("\n§6 · a business unit says how it plans (§438)")
     ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
-    step(pg, "units")
-    nsel = ev(pg, "()=>document.querySelectorAll('.csetup select[data-wzfmt]').length", 0)
-    ck("every unit row carries a plans-in select", nsel == ev(pg, "()=>UNIT_KEYS.length", -1), [nsel])
+    # §544: one box's panel at a time, so "every unit row carries one" is
+    # asserted by opening every unit in the tree and finding its select.
+    # The tree shows one division's boxes at a time (the signed-off mockup:
+    # press a division and its boxes follow), so every division is opened in
+    # turn and its boxes counted.
+    nsel = 0
+    nunits = ev(pg, "()=>UNIT_KEYS.length", -1)
+    ndivs = ev(pg, "()=>document.querySelectorAll('.csetup [data-shbox^=\"co:\"]').length", 0)
+    seen = set()
+    for d in range(max(ndivs, 1)):
+        shape(pg)
+        if ndivs: press(pg, ".csetup [data-shbox='co:%d']" % d, 300)
+        for i in range(nunits):
+            if i in seen: continue
+            if press(pg, ".csetup [data-shbox='bu:%d']" % i, 200) and \
+               ev(pg, "()=>!!document.querySelector('.csetup select[data-wzfmt]')", False):
+                seen.add(i)
+    nsel = len(seen)
+    ck("every unit carries a plans-in select on its own panel", nsel == nunits, [nsel, nunits])
+    box(pg, "bu", u0)
     shown = ev(pg, "()=>document.querySelector('.csetup select[data-wzfmt=%s]').value" % u0)
     ck("…reading the way the unit plans today", shown == ev(pg, "()=>unitFormat(UNITS[%r])" % u0), shown)
     uwas = ev(pg, "()=>unitFormat(UNITS[%r])" % u0)
@@ -189,7 +234,7 @@ with sync_playwright() as p:
        ev(pg, "()=>unitFormat(UNITS[%r])" % u0) == "pillars")
     press(pg, "#modal-b [data-rmyes]", 600)
     ck("confirmed, the unit plans in projects", ev(pg, "()=>UNITS[%r].format" % u0) == "projects")
-    step(pg, "units")
+    box(pg, "bu", u0)
     pick(pg, ".csetup select[data-wzfmt=%s]" % u0, "pillars")
     if ev(pg, "()=>!!document.querySelector('#modal-b [data-rmyes]')", False):
         press(pg, "#modal-b [data-rmyes]", 600)

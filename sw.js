@@ -403,7 +403,165 @@
    behind them differ — so the name goes PAST both rather than picking
    either. Confirmed against origin/main once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.46-demo-stakeholders-real";
+/* v6.46-staff-processes-link — the Processes lifecycle, the staff reading view
+   and the staff "Processes" link in the top bar (§539–§544). The built file's
+   bytes changed, which is the whole trigger (§91). Confirmed against
+   origin/main serving "smp-shell-v6.45-stakeholders-picked" and against every
+   ref's history — nobody holds v6.46 (§94.12); confirm once more immediately
+   before the push to main (§94.16). `node --check sw.js` run after the merge. */
+/* v6.47-target-from-months — §555: the annual target is derived from the
+   months as they are typed, and the box holding it stops taking typing while
+   a monthly plan is there. The built file's bytes changed, which is the whole
+   trigger (§91). Proved held by no commit in any ref's history (§94.12);
+   confirm once more immediately before the push (§94.16). */
+/* v6.48-report-one-rail — §556: where the office reaches both halves of a box
+   shown apart (El Abd's company page), Reporting draws its directions and its
+   capabilities on one rail, under one heading naming both. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history (§94.12) after fetching every ref; confirm once more
+   immediately before the push (§94.16). */
+/* v6.49-breakdown-target-reported — §557: a breakdown's columns report as
+   Target and Reported. */
+/* v6.50-role-chip-and-order — §558: a role held over its own thing names
+   itself and stops on Home's strip; the four places that said "the group" as
+   a fixed word read the client's `topword` row instead; and a person's roles
+   list in Islam's own sequence — seat, unit, direction, capability, project &
+   pillar, function. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history (§94.12) after fetching
+   every ref; confirm once more immediately before the push (§94.16). */
+/* v6.51-reporting-phone — §559: Reporting fits a phone. The Reporting bar and
+   the pane band wrap when they do not fit; below 520px the top bar takes two
+   lines and the band stops pinning. First written as v6.50 on the branch, the
+   name main took for §558 while this was being checked — §94.12's collision,
+   caught by the search before the merge, and rebuilt from main's copy with
+   this one line re-applied (§146.2). Proved held by no commit in any ref's
+   history after fetching every ref; confirm once more immediately before the
+   push (§94.16). */
+/* v6.52-capabilities-edit — §560: the company's Capabilities tab carries the
+   Edit again. El Abd's move put its capabilities on §540's `plancap` tab and
+   no table listed it, so the line drew no Edit for anybody. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref; confirm once more
+   immediately before the push (§94.16). */
+/* v6.53-direction-slides — §561: a Slides button on each direction and
+   capability, for the office. The built file's bytes changed, which is the
+   whole trigger (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v6.54-rail-heading — §561.1: no heading over the company's rail, and the
+   Slides button at the band's right edge. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v6.55-slide-limits — §562: 2 slides for a direction or capability, 4 for
+   a unit, a function or the company; Slides as the one word. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v6.56-register-word — §563: the People register names where somebody sits
+   in the client's own word (Function on El Abd, Unit or function on Raya).
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.57-plan-download — §564: the plan download is the presentation without
+   its figures. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+/* v6.59-strategy-button — §570: with no business units the first button is
+   called Strategy and the tab under it Plan. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history after fetching every ref (§94.16). */
+/* v6.63-figure-units — §573: a figure's unit a little smaller than its
+   number and in dark grey, dollars written in front, a shorter unit list.
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.64-guided-tour — §574–§574.3: Presentation → Guided tour, a made-up
+   direction walked part by part. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+/* v6.65-tour-cards-and-marker — §574.4–§574.5: the guided tour's cards
+   sized for the projector, and its clear views naming the slide. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v6.66-tour-purpose — §574.6–§574.9: the guided tour's closing slide on
+   what the platform is for, built one objective per press, and every card a
+   size up. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.67-tour-clear-cover — §574.10: the guided tour opens on its cover
+   clear. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.68-tactic-completed — §575: a tactic counted in numbers says Completed
+   only at its whole target. The built file's bytes changed, which is the
+   whole trigger (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v6.69-quarterly-plan — §577: a target planned by quarter as well as by
+   month. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.70-note-lock — §576.1: a red figure gets its note before anything
+   else. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.71-two-screens — §574.11, §578–§582: the guided tour's Where it
+   stands opens clear, the lines under a direction's two readings, line by
+   line, R updating the figures while presenting, and presenting on two
+   screens. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.73-note-lock-fixes — §576.2: a Tab from a red figure ends in its note,
+   and a capability's lock bar is not clipped and asks in the wanted note's
+   words. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.75-clock-stages — §580: the presenter's clock as time runs out, the
+   slide a quarter dark from four over and black from five. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v6.79-stand-lines — §578.1: on a direction's Where it stands, the
+   figures under the two readings sit right after their names. The served
+   stylesheet's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.80-rules-types — §585: the shared rules carry type comments that
+   TypeScript's checker reads; nothing runs differently. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v6.81-one-template — §586: one template for every box's presentation.
+   The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.82-present-window — §582.1: present in a window, for an online
+   meeting. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.83-box-split — §587: the box's own split setting splits its
+   presentation. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+/* v6.84-quiet-merge — §588 / §588.1: other people's saves arrive on the
+   screen without a reload (the caution's Reload is the fallback now), rows
+   added, removed or moved travel by id, row ids carry a tag of their own,
+   and a tab asks "what changed since N" instead of fetching the graph. The
+   built file's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.85-company-label — §591: the company labelled the company in the
+   Master presentation; a box of capabilities called that. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.86-remote-keys — §582.2: the remote works from any page while the
+   slides are up. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+/* v6.87-app-types — §592: the rules file loses its `// @ts-check` line and
+   the differ gains type comments; nothing runs differently. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.88-functions-row — §593: units and functions each get their own
+   score on the group and on a division. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v6.89-week-sweep — §588.2: the numbered saves are kept for a week, and a
+   tab older than the list takes the graph once. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.91-demo-stakeholders-real";
 const ASSETS = [
   "/",
   "/index.html",

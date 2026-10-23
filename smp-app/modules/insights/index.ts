@@ -25,18 +25,23 @@ import type { ServeArgs } from "../registry.ts";
 import { insightsDocument, libraryFragment } from "./page.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { registerOf } from "../../lib/notes.ts";
-import { maySimulate } from "../../lib/view-as.ts";
+import { maySimulate, maySimulateSeat, type Seat } from "../../lib/view-as.ts";
 import type { TopViewer } from "../../lib/topbar.ts";
 
 /* ── VIEWING AS, ON THE SHARED BAR (§444) ─────────────────────────────
    Islam: Viewing as stays where it changes what is shown, and on Insights it
    does — who sees which report is the person's (spec 046 §4.10). Offered by
    the SIGNED-IN seat (`me`), never the one being looked through, because the
-   rule is lib/view-as.ts's and only a Super user may act through somebody
-   else's view (§185). The list is the client's register, active rows only,
-   with what each person is — their seat for the office, their place for
-   everybody else — so the office can tell two of a name apart. A register
-   that cannot be read draws no switcher rather than an empty one (§61). */
+   rule is lib/view-as.ts's and a simulation may only ever narrow (§185). The
+   list is the client's register, active rows only, with what each person is
+   — their seat for the office, their place for everybody else — so the
+   office can tell two of a name apart. A register that cannot be read draws
+   no switcher rather than an empty one (§61).
+
+   §554: AND THE SMO TEAM HOLDS IT TOO, with the Super user left out of THEIR
+   list — `maySimulateSeat` is the same rule `viewAsDecision` refuses on, so
+   this bar never offers a view the next request would turn down (§61, §42).
+   The seats are already read here, for the note beside each name. */
 async function viewerList(a: ServeArgs): Promise<TopViewer | null> {
   const me = a.me || { personKey: a.personKey, seat: a.seat };
   if (!me.personKey || !maySimulate(me)) return null;
@@ -46,7 +51,8 @@ async function viewerList(a: ServeArgs): Promise<TopViewer | null> {
       const seats = new Map<string, string>((await c.query(
         "SELECT person_key, seat FROM tenant_users WHERE seat IN ('super', 'smoteam')")).rows
         .map((x: any) => [String(x.person_key), String(x.seat)]));
-      const people = [...reg.entries()].filter(([, p]) => p.active).map(([key, p]) => ({
+      const people = [...reg.entries()].filter(([key, p]) =>
+        p.active && maySimulateSeat(me, (seats.get(key) as Seat) || "none")).map(([key, p]) => ({
         key, name: p.name,
         note: seats.get(key) === "super" ? "Super user" : seats.get(key) === "smoteam" ? "SMO team" : p.place,
       }));

@@ -253,6 +253,10 @@
 /* §418: a layer's three sections, from the signed-off mockup
    (design-mockups/structure-sections/). Side by side, stacked below 980px. */
 .csetup .wzcol.wzwide { max-width:1240px; }
+/* §544: the shape takes the tree AND a level's three sections, so it is
+   given what the window has; the tree is the narrow half, because the
+   panel is what holds the controls. */
+.csetup .wzcol.wzwide:has(.wzshape) { max-width:1460px; }
 .csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);
   border-radius:var(--r-md); overflow:hidden; margin-top:4px; }
 .csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
@@ -323,3 +327,71 @@
 .csetup .stask { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; background:var(--surface-2); font-size:var(--fs-small); color:var(--ink-2); }
 .csetup .stask p { margin:0 0 8px; }
 .csetup .stbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ══ THE SHAPE, ON ONE SCREEN (§544, spec 066 stage 4) ══════════════════
+   From the signed-off mockup (design-mockups/setup-one-screen/). The tree
+   on the left, whatever is selected on the right; one column below 980px,
+   where two would make both unreadable. */
+.csetup .wzshape { display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr);
+                   gap:16px; align-items:start; }
+@media (max-width:980px) { .csetup .wzshape { grid-template-columns:minmax(0,1fr); } }
+.csetup .shtree { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
+                  padding:12px 14px; min-width:0; }
+.csetup .shpanel { min-width:0; }
+.csetup .shpanel .stcard:last-child { margin-bottom:0; }
+/* a level's row: its number, its name, how many, and the navigation tick */
+.csetup .shlvl { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px; margin:16px 0 5px; }
+.csetup .shtree > .shlvl:first-child { margin-top:0; }
+.csetup .shlay { font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                 color:var(--cs-fill-ink); background:var(--cs-fill); border-radius:3px; padding:1px 5px; flex:none; }
+.csetup .shlvlb { border:0; background:none; padding:0; cursor:pointer; color:var(--ink-2);
+                  font:700 var(--fs-micro)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shlvlb:hover, .csetup .shlvlb:focus-visible { color:var(--cs-acc-tx); }
+.csetup .shlvl.sel .shlvlb { color:var(--cs-acc-tx); text-decoration:underline; }
+.csetup .shn { font-size:var(--fs-micro); color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.csetup .shsub { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .shunder { margin-left:auto; display:flex; align-items:center; gap:5px;
+                   font-size:var(--fs-micro); color:var(--ink-3); text-transform:none; letter-spacing:0; }
+.csetup .shlink { border:0; background:none; padding:0; cursor:pointer; color:var(--cs-acc-tx);
+                  font:600 var(--fs-micro)/1.4 var(--sans); }
+.csetup .shlink:hover { text-decoration:underline; }
+.csetup .shnav { border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                 border-radius:999px; padding:0 7px; cursor:pointer;
+                 font:700 var(--fs-micro)/1.7 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.csetup .shnav.on { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .shnav:hover { border-color:var(--cs-acc-tx); }
+/* the boxes in a row */
+.csetup .shrow { display:flex; flex-wrap:wrap; gap:5px; margin-left:14px;
+                 border-left:2px solid var(--line); padding-left:10px; }
+.csetup .shrow.shtoprow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shb { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:7px; padding:4px 9px;
+               font:400 13.5px/1.35 var(--sans); cursor:pointer; text-align:left; }
+.csetup .shb:hover { border-color:var(--cs-acc-tx); }
+.csetup .shb.top { border-color:var(--cs-fill); font-weight:700; }
+.csetup .shb.sel { border-color:var(--cs-acc-tx); background:var(--cs-wash, var(--surface-2)); font-weight:600; }
+.csetup .shb.under { box-shadow:inset 0 -2px 0 var(--cs-acc-tx); }
+.csetup .shb.orphan { border-style:dashed; border-color:var(--bad-tx); }
+.csetup .shadd { border:1px dashed var(--line); background:none; color:var(--ink-3); border-radius:7px;
+                 padding:4px 9px; font:400 13px/1.35 var(--sans); cursor:pointer; }
+.csetup .shadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .shwhy { font-size:var(--fs-small); color:var(--ink-3); margin:6px 0 0 14px; max-width:46ch; }
+.csetup .shchips { display:flex; flex-wrap:wrap; gap:5px; margin:7px 0 0 14px; }
+.csetup .shchip { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                  padding:3px 8px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .shchip:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .shchip .p { color:var(--ink-3); margin-right:4px; }
+/* the boxes with no layer yet (§544) */
+.csetup .shneeds { margin:7px 0 0 14px; border:1px dashed var(--bad-tx); border-radius:7px;
+                   padding:7px 9px; background:var(--bad-bg, var(--surface-2)); }
+.csetup .shneedh { margin:0 0 5px; font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em;
+                   text-transform:uppercase; color:var(--bad-tx); }
+.csetup .shneeds .shrow { margin-left:0; border-left:0; padding-left:0; }
+.csetup .shpanel .danger { border:0; background:none; color:var(--bad-tx); cursor:pointer;
+                           font:600 var(--fs-small)/1.4 var(--sans); padding:0; margin-top:10px; text-align:left; }
+.csetup .shpanel .danger:hover { text-decoration:underline; }
+/* A box's own panel is a short column of fields, not a card of sections, so
+   its labelled boxes sit full width and close together rather than inheriting
+   the 240px tiles a level's name row uses. */
+.csetup .shpanel .stcard > .stnm { max-width:26rem; flex:none; gap:4px; }
+.csetup .shpanel .stcard > .stnm > .lab { margin:0; }

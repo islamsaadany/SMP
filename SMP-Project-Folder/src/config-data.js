@@ -1852,13 +1852,39 @@ function personIdentified(p){
    row then reads "Strategy custodian · Care" twice and looks like a duplicate
    rather than two real roles over two different things. The kind is part of
    the answer, so it is part of the label. */
-/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers "the
-   group" for a null, which is right on a role chip (a role is always held over
-   something) and wrong in a file column, where blank means "nothing to say"
-   and "the group" would be an assertion nobody made (§65). */
+/* ── THE TOP LEVEL IS CALLED WHAT THE CLIENT CALLS IT (§558) ───────────
+   `topword` has been a real terminology row since §404 — "The level at the
+   top: the group, the company, or the client's own word" — and eight screens
+   read it. The place-naming functions below were not among them: they said
+   "the group" as a literal, so a tenant whose top level is a COMPANY read its
+   own word on the navigation and "the group" on every role chip, every place
+   list and every refusal sentence. One wording, wrong in four places.
+
+   LOWERCASED, because it is read mid-sentence ("held at the company", "Strategy
+   custodian · the company") and the row stores the word as a heading does
+   ("Group", "Company"). That is `client-setup.js`'s own treatment of the same
+   row, so the two agree rather than each choosing a case.
+
+   `labelWord()` and not `L1()`: these functions return PLAIN text that their
+   callers escape (`esc`, `wesc`), and L1 escapes on the way out — so L1 here
+   would escape an ampersand twice. Called from this file as §461's
+   `roleAtWord` already calls it: the scripts are concatenated in build.py's
+   order and these run long after config-render.js has loaded. */
+function topWord(){
+  try {
+    var w = labelWord("topword", "group");
+    if (w) return "the " + String(w).toLowerCase();
+  } catch (e) {}
+  return "the group";
+}
+
+/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers the
+   top level's word for a null, which is right on a role chip (a role is always
+   held over something) and wrong in a file column, where blank means "nothing
+   to say" and naming the top level would be an assertion nobody made (§65). */
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topWord();
   var r = boxRef(at);
   if (r.kind === "cap") {
     var cw = capById(r.key);
@@ -1880,10 +1906,15 @@ function roleWhereLabel(at){
    names, and for the units remove the word function that comes between
    brackets."
 
-   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
-   because it is also the people workbook's vocabulary — the Unit column is
-   written from it and read back against it (§65), so renaming it would leave
-   every file downloaded before today failing to match.
+   Two changes, and only on the REGISTER. `roleWhereLabel()` keeps its own
+   wording for the units and functions, because it is also the people
+   workbook's vocabulary — the Unit column is written from it and read back
+   against it (§65), so renaming it would leave every file downloaded before
+   today failing to match. §558 moved its word for the TOP LEVEL onto
+   `topword` and that one case is safe for exactly one reason: `placeByLabel()`
+   still accepts "the group" and "group" alongside the client's own word, so a
+   file downloaded before today reads back unchanged. A rename anywhere else
+   in here would not have that, and is still off the table.
 
    1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
        where somebody learned the word: this tenant's `it` unit is "IT Dist." in
@@ -1898,8 +1929,34 @@ function roleWhereLabel(at){
        So it is dropped from the seven that are unambiguous and kept for the one
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
+/* ── A COMPANY IS CALLED BY ITS OWN NAME (§556.13) ──────────────────────
+   Islam, of El Abd: *"there is nothing called elabd review as a group"* —
+   and then of the two places the platform still said it, the top tab and
+   "Mohamed Essam — the group" in Viewing as. With no business units the
+   top IS the company, and its name is the word; with units it really is a
+   group, and the client's own top word (§404) still stands. Empty when
+   there is no name to use, so every caller keeps its old word. */
+function topOwnName(){
+  var org = String((GROUP && GROUP.org) || "").trim();
+  return (org && !buExists()) ? org : "";
+}
+/* ── BUT ITS BUTTON IS CALLED STRATEGY, AND THE TAB UNDER IT PLAN (§570) ──
+   Islam, of El Abd's row: the company's name on the first button is
+   confusing, because every function beside it is the company too — and so
+   are "Company" and "Overall", which he turned down for the same reason.
+   What sets that button apart is that it holds the strategy the functions
+   deliver. Its own first tab was also called Strategy, so that one becomes
+   Plan: *Strategy › Plan › Directions*. With business units the button is
+   the client's top word and the tab keeps Strategy, exactly as before.
+   §556.13's name stays everywhere else the company is named as a PLACE —
+   placeLabel() (the rails, the board, Home's links) and the switch's
+   catch-all segment, which lists functions. */
+function topNavWord(){ return buExists() ? labelWord("topword", "group") : "Strategy"; }
+function topStrategyWord(){ return buExists() ? "Strategy" : "Plan"; }
 function placeLabel(at){
-  if (!at || at === "group") return "the group";
+  /* A company with no business units by its own name (§556.13); otherwise
+     the client's own word for the top level (§558). */
+  if (!at || at === "group") return topOwnName() || topWord();
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
@@ -1910,6 +1967,19 @@ function placeLabel(at){
   if (r.kind === "cap") {
     var cc = capById(r.key);
     return cc ? navName(cc) : r.key;
+  }
+  /* §553: a section of the company's own review is a place in the flow too,
+     and it is named by what it IS — the picker, the running order and the
+     deck's cover all read this one function, so naming it here is naming it
+     everywhere (§53.5). The company's word for its SWOT is the client's own
+     (§15.1), never the literal "Analysis". */
+  if (r.kind === "sec") {
+    if (r.key === "swot") {
+      var sw = "";
+      try { sw = String(SMPRules.swotTitle(GROUP, "group") || "").trim(); } catch (e) { sw = ""; }
+      return (sw || "Analysis") + " — the " + labelWord("topword", "group").toLowerCase() + "'s";
+    }
+    return "Foundation — the " + labelWord("topword", "group").toLowerCase() + "'s";
   }
   /* §481: a direction is a place in the company's flow, named by itself. */
   if (r.kind === "dir") {
@@ -2400,7 +2470,7 @@ function mergePeople(keepKey, dropKey, picks){
    whose scope is the group has exactly one answer, and the control says so
    rather than offering a list of one. */
 function roleWheres(roleKey){
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:"the group" }];
+  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:topWord() }];
   if (roleKey === "cceo") {
     /* A retired company is not somewhere a new CEO can be seated (§49.3). An
        existing role pointing at one is left alone — restoring the company
@@ -2828,7 +2898,21 @@ function placeOptions(){
 function placeByLabel(name){
   var want = String(name == null ? "" : name).trim().toLowerCase();
   if (!want) return { at:null };
-  if (want === "the group" || want === "group") return { at:"group" };
+  /* THE TOP LEVEL ANSWERS TO THREE NAMES, NOT ONE (§558). The screen now
+     writes the client's own word for it (`topword` — "the company" on a tenant
+     whose top level is a company), and "the group" and "group" are kept
+     BESIDE it rather than replaced: the Unit column is written from
+     `roleWhereLabel()` and read back through here (§65), so a workbook
+     downloaded before today would otherwise arrive with a column this cannot
+     resolve — and it is the one place in the file where an unresolved name
+     means every person at the top level silently detaches. Widening what is
+     accepted can only ever make a file land; narrowing it is what breaks one.
+
+     THE THREE CANNOT COLLIDE, because `topword` names the top level and
+     `placeOptions()` lists only units and functions — and if a client ever did
+     call a unit "Group", this branch answers first and the exact-match below
+     never sees it. That is the pre-§558 behaviour for that name, unchanged. */
+  if (want === "the group" || want === "group" || want === topWord().toLowerCase()) return { at:"group" };
   var opts = placeOptions();
   var exact = opts.filter(function(o){ return o.label.toLowerCase() === want; });
   if (exact.length > 1) return { ambiguous:exact.map(function(o){ return o.label; }) };
@@ -3199,7 +3283,7 @@ function roleAtWord(roleKey){
     var k = boxRef(w.v).kind;
     kinds[w.v === "group" ? "top" : (k === "fn" || k === "mid") ? k : "unit"] = 1;
   });
-  var WORD = { top:"the group", unit:"a " + labelWord("unitword","group"),
+  var WORD = { top:topWord(), unit:"a " + labelWord("unitword","group"),
                fn:"a " + labelWord("fnword","group"), mid:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";
@@ -5744,8 +5828,10 @@ function reportItems(u){
     /* §542: the rail that HOLDS this pillar, which on a split box is the
        half its kind puts it in — not the half on screen, because this walk
        runs outside any render. */
+    /* §556: and where Reporting draws both halves on one rail, it is that
+       rail — the Reporting bar's chip is the only reader of this key. */
     var place = { key:"p:" + (p.id || pi), label:code,
-                  rail:pillarRailKey(u, p), code:pillarRailId(p) };
+                  rail:reportRailKey(u, p), code:pillarRailId(p) };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -5863,7 +5949,12 @@ function rowReads(x){
      year. The note rule and the Submit gate both hang off this. */
   return measureScore(x.obj);
 }
-function needsNote(x){
+/* §576: the half of the rule that is about the FIGURE — red, whether or not
+   anybody has explained it yet. My reporting asks it on its own, because it
+   draws the owner's note box on a red row and must keep drawing it once the
+   note is written (a box that vanished the moment it was used could not be
+   corrected). */
+function rowAtRisk(x){
   var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
@@ -5873,7 +5964,10 @@ function needsNote(x){
      asking for a note on every figure between 50 and 69 in their deployment.
      The ranges happen to coincide on the new defaults (bad is everything below
      70, which is what bad+warn covered before), so nobody's obligations move. */
-  return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
+  return k === "bad" || k === "warn";
+}
+function needsNote(x){
+  return rowAtRisk(x) && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
@@ -5905,7 +5999,7 @@ function fnReportItems(subject){
     var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
     (!c.own || fnKoCounted(c.id) ? SMPRules.shown(kos) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
-                 place:koPlace });
+                 place:koPlace, cap:c });
     });
     /* §342: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
        the In-progress rule, Submit's refusal and §279's bar all learn the new
@@ -5915,7 +6009,7 @@ function fnReportItems(subject){
        a row answered early still counts). */
     SMPRules.shown(c.actions).forEach(function(a){
       out.push({ id:a.id, obj:a, kind:"action", group:c.name, sub:"",
-                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace });
+                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace, cap:c });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
@@ -5923,16 +6017,16 @@ function fnReportItems(subject){
                     rail:railKeyFor(c), code:p.id };
       SMPRules.shown(p.deliverables).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
-                   asked:dueThisCycle(d.due), owner:p.owner, place:place });
+                   asked:dueThisCycle(d.due), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.outcomes).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
-                   asked:outcomeDue(o), owner:p.owner, place:place });
+                   asked:outcomeDue(o), owner:p.owner, place:place, cap:c, proj:p });
       });
       SMPRules.shown(p.milestones).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
                    asked:dueThisCycle(m.finish), owner:m.owner || p.owner,
-                   place:place });
+                   place:place, cap:c, proj:p });
       });
     });
   });
@@ -6219,6 +6313,76 @@ function submitWhyShort(target){
     " at risk with no note");
   if (!lines.length) return "";
   return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
+}
+
+/* \u2500\u2500 A RED FIGURE GETS ITS NOTE BEFORE ANYTHING ELSE (\u00a7576) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Islam: *"when people enter a number \u2026 that is deviated and in red the note
+   becomes mandatory as agreed. to the level it blocks the rest of the entries
+   until the note is made."* \u00a7105's rule held Submit and nothing else, so a
+   reporter could type forty figures past a red one and meet the refusal at
+   the end. Agreed in chat, then drawn and approved: while a figure this
+   person may explain is red with no note, every other box on the page shuts;
+   that row's note and its own figure stay open (a typo is fixed where it was
+   made, and a figure moved out of the red lifts the lock by itself).
+
+   WHOSE NOTE IS ASKED THE WAY THE PAGE ASKS IT, never a second rule (\u00a753.5):
+   a unit-shaped report through `canEnterNote` \u2014 the very call `noteCell`
+   draws its box with \u2014 and a holder's rows through the gate each of its
+   renderers hands `capNoteBox`. A row whose note this person cannot write
+   locks nothing for them, or the page would shut with no way out. */
+function noteMayWrite(subject, x){
+  var t = holderSubject(String(subject || ""));
+  var u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return canEnterNote(u.ukey, x);
+  var c = x && x.cap;
+  if (!c) return false;
+  /* `projReportBody`: per row, through the project. */
+  if (x.kind === "deliverable" || x.kind === "outcome" || x.kind === "milestone")
+    return canReportFnRow(holderCodeOwner(c), x.proj, x.obj);
+  /* `fnObjReportBody`: per row, with no project. */
+  if (plansInObjectives(t)) return canReportFnRow(holderTarget(t), null, x.obj);
+  /* `capReportBody`: a capability's own objectives belong to no project. */
+  return canReportFnWhole(holderCodeOwner(c));
+}
+/* THE SUBJECTS ONE REPORTING PAGE DRAWS: its own, and on the company's the
+   capabilities reported in its own section (\u00a7520.8 \u2014 `capsHere()`, the same
+   narrowing that section is drawn from). */
+function noteLockSubjects(target){
+  var t = String(target || ""), out = [t];
+  if (t === "group" && holderSubject(t) === "group" && SMPRules.capExists(GROUP) &&
+      typeof capsHere === "function")
+    capsHere().forEach(function(c){ out.push("cap:" + c.id); });
+  return out;
+}
+/* The lock for one page: the Reporting page of `target`, or My reporting
+   (`mine`). NULL when nothing is red, so every caller asks one truthy
+   question. A breakdown's cells share their row's note (\u00a7343), so its row is
+   one entry however many of its figures are red. A report already closed
+   (submitted or parked, \u00a7220) has no open box to shut. */
+function noteLockOf(target, mine){
+  if (!REVIEW || REVIEW.state !== "open") return null;
+  var rows = [], ids = {};
+  var take = function(x, subj){
+    var id = x.noteId || x.id;
+    if (ids[id]) return;
+    ids[id] = true;
+    rows.push(Object.assign({ subj: subj }, x));
+  };
+  if (mine) {
+    /* \u00a7576: on My reporting the owner writes the note on their own red rows
+       (Islam's call) \u2014 asked through the gate their figure is entered by. */
+    myLineRows().forEach(function(r){
+      if (needsNote(r) && canEnterLine(r.target, r, "mine")) take(r, r.target);
+    });
+  } else if (target) {
+    noteLockSubjects(target).forEach(function(s){
+      if (reportClosed(s)) return;
+      subjectAsked(s).forEach(function(x){
+        if (needsNote(x) && noteMayWrite(s, x)) take(x, s);
+      });
+    });
+  }
+  return rows.length ? { rows: rows, ids: ids, mine: !!mine } : null;
 }
 /* ── WHERE THE REFUSAL IS, NOT ONLY HOW MUCH OF IT (§279) ──────────────
    Islam, from his own tenant: the report would not submit because something
@@ -6755,6 +6919,11 @@ function strategyAc(acKey, target){
 }
 function mayAuthor(acKey, target){
   var t = target === undefined ? TARGET : target;
+  /* §598: while the Plan page shows the plan as it stood on a day, nothing
+     on it can be authored — the view is read only by construction, not by
+     hiding controls one at a time. The guard asks the TARGET, so a page on
+     another subject is untouched. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
@@ -6768,6 +6937,8 @@ function mayFill(acKey, target){
      half and leaving the other is how the two came to disagree in the first
      place (§53.5). */
   var t = target === undefined ? TARGET : target;
+  /* §598: the same guard the pen gets — an old plan takes no fill either. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
@@ -6804,6 +6975,22 @@ function mayDestroy(){ return SMPRules.mayDestroy(world(), viewer()); }
 function mayIssuePasswordTo(target){
   return SMPRules.mayIssuePasswordTo(world(), viewer(),
     typeof target === "string" ? personBy(target) : target);
+}
+/* ── MAY THIS SESSION LOOK THROUGH THIS ROW (§554) ─────────────────────
+   NOT asked of `viewer()` like everything else on this line, and the
+   difference is the whole point: every rule above answers about the person
+   being LOOKED AT, and this one answers about the person SIGNED IN. Taking
+   `viewer()` here would let a simulation widen itself — look through the
+   Super user once and the control that let you is suddenly offered on every
+   row (§185's rule: a simulation may only ever narrow).
+
+   sync.js holds it, because the save it must agree with is stamped there
+   (§42). No session — the offline copy, the file:// demo — lists everybody,
+   exactly as it always has. */
+function maySimulatePerson(target){
+  var p = typeof target === "string" ? personBy(target) : target;
+  if (typeof SYNC === "undefined" || !SYNC.maySimulatePerson) return true;
+  return SYNC.maySimulatePerson(p);
 }
 /* Who a bulk password action would actually reach. The SCREEN counts them so
    it can say a true number; the SERVER picks the set (§35), so a stale screen
@@ -7316,7 +7503,8 @@ function measureDue(m, share){
   if (!SMPRules.targetHasNumber(m.target)) return null;
   /* ── §278: ITS OWN MONTHLY PLAN ANSWERS FIRST ─────────────────────
      Twelve numbers in the target's own unit, compiled by the row's own
-     compile rule (SMPRules.monthlyDue). It supersedes the flat share and it
+     compile rule (SMPRules.monthlyDue) — from the first month set since
+     §569, an empty month counting as nothing planned. It supersedes the flat share and it
      supersedes the SUPPLIED one: §250 hands a tactic's outcome the share of
      its own window, and a monthly plan already states what every month is
      expected to carry — including the noughts for the months the thing does
@@ -7467,9 +7655,10 @@ function outcomeOf(t){
      (§248), so the twelve months ride across under the name the rules
      module reads — `outMonthly` on the tactic, `monthly` on the shape.
      Without this line the drawer would write a plan that nothing reads. */
+  /* §577: and its quarters, under the name the rules read beside the months. */
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual,
-           monthly: t.outMonthly };
+           monthly: t.outMonthly, quarterly: t.outQuarterly };
 }
 /* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
    open cycle: a tactic is read the OLD way until its outcome has both a target
@@ -7669,11 +7858,12 @@ function setExtraFigure(t, id, v){
    reading surfaces draw these. */
 function scoredExtras(t){ return outcomeOf(t) ? tacticExtras(t) : []; }
 /* The word a tactic's status takes after a figure lands, with several
-   outcomes: Done once the average reaches the target, In progress once any
+   outcomes: Done once every outcome reaches its whole target (§575 — the
+   average reaching what is DUE is ahead, not done), In progress once any
    outcome has a figure. A single outcome keeps its own rule unchanged. */
 function statusFromOutcomes(t){
   var sc = tacticOutcomeScore(t), keep = t.status === "Blocked";
-  if (sc != null) return sc >= 100 ? "Done" : (keep ? "Blocked" : "WIP");
+  if (sc != null) return tacticComplete(t) ? "Done" : (keep ? "Blocked" : "WIP");
   var any = tacticOutcomes(t).some(function(x){
     return x.o.actual != null && x.o.actual !== ""; });
   return any ? (keep ? "Blocked" : "WIP") : "Not started";
@@ -7868,16 +8058,63 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    the tactic's own quarters, all of them behind the review month. A tactic
    halfway through its window and behind its benchmark is In progress; the
    score beside it already says it is behind, and a second word for that
-   would be a second, looser judgement of the same number. */
-var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
+   would be a second, looser judgement of the same number.
+
+   §571: DELAYED IS NOT A WORD OF ITS OWN ANY MORE — IT IS A MARK ON ONE.
+   Islam, of D003's tactics: a Q3–Q4 tactic reported Not started at the end
+   of Q3 read **Not started** — *"should show delayed right?"*; then, of rows
+   reading **Delayed** beside *In progress · 35%*, *"a confusion"*; then
+   *"for the delayed the real status is not started. same like the in
+   progress but they are both delayed … type delayed somewhere?"*. So the
+   word is what is actually happening (Completed · In progress · Not
+   started · Not due) and LATENESS is said beside it: *Delayed* under it,
+   in red (`tacticDelayed`), the word keeping its own colour — Islam: *"in
+   progress to stay with it's color and the same for not started not to
+   confuse the audience given that we have delayed in red below"*.
+
+   LATE is a tactic not complete whose whole window has passed, or one still
+   at nought once its FIRST quarter is behind the review month — on a report
+   only, because a row nobody has reported has not been said to be at
+   nought. The paragraph above still holds for a row under way inside its
+   window: behind it is not late. */
+var TACTIC_WORDS = { done: "Completed", wip: "In progress",
                      notdue: "Not due", todo: "Not started" };
+/* §571: the band each word is drawn in, read by the page's pill and the
+   slide's word alike so the two cannot colour one state two ways. A late
+   tactic keeps its word's band; only the Delayed under it is red. In
+   progress is the yellow band, not the orange one — Islam: *"the orange is
+   close to the red"*, and beside a red Delayed the two read as one. */
+var TACTIC_BANDS = { done: "good", wip: "attn", notdue: "kind", todo: "none" };
+/* ── COMPLETED IS THE WHOLE TARGET, NEVER THE PART DUE (§575) ──────────
+   Islam, of D003 *Digitalizing Route to Market*: Q3–Q4, 10 outlets' worth
+   of coverage, 8 reported at the end of Q3 against 5 due — 150%, and the
+   pill read **Completed** beside the reporter's own note *"to be finalized
+   Q4"*. Nobody picked the word: the reporting box stored `Done` from a score
+   of 100 or more, and that score is against the PRORATED target, so "ahead
+   of what is due" read as "finished".
+
+   SO A TACTIC WITH OUTCOMES IS ASKED OF ITS FIGURES, NEVER OF `t.status`.
+   The stored word is the box's old guess and stays as it is (§419: derived,
+   never stored), so a row saved as `Done` before this reads right the moment
+   it is drawn and nothing is migrated. Every outcome must be complete (§414),
+   and an "at most" outcome keeps the reading it always had — inside its
+   target, scored against what is due — because nobody has said when a
+   ceiling is finished. A tactic with no outcome is unchanged: its figure is
+   already a share of the whole tactic, so 100 is the whole of it. */
+function outcomeComplete(t, o){
+  if (!o) return false;
+  if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status === "done";
+  if (o.dir === "≤") { var s = oneOutcomeScore(t, o); return s != null && s >= 100; }
+  if (o.actual == null || o.actual === "") return false;
+  var whole = parseFloat(String(o.target).replace(/[^0-9.]/g, ""));
+  var a = parseFloat(String(o.actual).replace(/[^0-9.]/g, ""));
+  return !isNaN(whole) && !isNaN(a) && a >= whole;
+}
 function tacticComplete(t){
   if (!t) return false;
-  if (t.status === "Done") return true;
   var list = tacticOutcomes(t);
-  /* §414: complete only when EVERY outcome is a yes/no that is done. */
-  if (list.length) return list.every(function(x){
-    return SMPRules.isYesNo(x.o.target) && SMPRules.ynState(x.o.actual).status === "done"; });
+  if (list.length) return list.every(function(x){ return outcomeComplete(t, x.o); });
+  if (t.status === "Done") return true;
   return t.actual != null && t.actual >= 100;
 }
 function tacticAtNought(t){
@@ -7897,14 +8134,35 @@ function outcomeAtNought(o, t){
   }
   return !(t.actual > 0);
 }
+/* §571: IS THE FIRST QUARTER THIS TACTIC RUNS IN WHOLLY BEHIND THE REVIEW
+   MONTH. The same month arithmetic `tacticShare` counts with (a quarter's
+   last month is its third), and the same quarter fallback where the cycle's
+   year cannot be read, so the two can never disagree about where we are. */
+function tacticFirstQuarterOver(t){
+  var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
+  for (var i = 0; i < 4; i++) {
+    if (!q[i]) continue;
+    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    return y * 12 + i * 3 + 2 <= a;
+  }
+  return false;
+}
 function tacticStatusKey(t){
   if (!t) return "todo";
   if (tacticComplete(t)) return "done";
   if (!tacticDue(t)) return "notdue";
-  if (tacticShare(t) === 1) return "late";
   return tacticAtNought(t) ? "todo" : "wip";
 }
 function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
+/* §571: IS THIS TACTIC LATE. Its whole window gone unfinished, or its first
+   quarter gone with its own report still at nought. */
+function tacticDelayed(t){
+  var k = tacticStatusKey(t);
+  if (k === "done" || k === "notdue") return false;
+  if (tacticShare(t) === 1) return true;
+  return k === "todo" && tacticAnswered(t) && tacticFirstQuarterOver(t);
+}
+function tacticBand(t){ return TACTIC_BANDS[tacticStatusKey(t)]; }
 
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
@@ -8735,6 +8993,16 @@ function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
   return drawHalf(half, function(){ return partItems(u).length > 0; });
 }
+/* §556 — REPORTING DRAWS BOTH HALVES ON ONE RAIL WHERE THIS VIEWER REACHES
+   BOTH. Islam, of El Abd's company Reporting as the SMO: *"shall we merge the
+   directions and pillars for better usabiilty in one rail?"*. §542 drew a box
+   shown apart as two stacked sections there, each with its own rail and its
+   own open pane, so the second rail started below the first pane and two rows
+   were selected at once. Strategy keeps its two tabs; this is Reporting's
+   alone. One question, asked by the page and by the rows' jump keys alike
+   (§53.5), and false wherever the box is joined or the viewer reaches one half
+   — which is every box but El Abd's company page, for the office, today. */
+function reportOneRail(u){ return boxHasHalf(u, "dir") && boxHasHalf(u, "cap"); }
 /* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
    headed with the client's word for a capability and its external half with
    the word for a pillar, because the two tabs are the two words — that is
@@ -8899,18 +9167,75 @@ function buFoldIntoTop(){
    move must not do is change what anybody sees: the five rows join the
    company's one pillar list, and the setting is what keeps them on their own
    tab, reading Capabilities, exactly as they read now. */
+/* §544.6 — AND WHAT WANDER NEEDED, WHICH EL ABD DID NOT. Measured on
+   Wander Development's own working copy before any of this was written:
+   three capabilities, every one held by the Strategy Management Office, one
+   of them holding TWO inner pillars and one planning in projects. The move
+   refused all three, each for a different reason, which is the refusal
+   working — and then Islam answered all three:
+
+     · *"the capabilities are on the company level"* — so a record held by a
+       function is no longer a blocker. §544.13 finished this: asked straight
+       out where a function-held capability should land, Islam answered
+       **"on the company"**, and §7.1's other way (a pillar of the function
+       holding it) is reversed. There is nothing left to guess between, so
+       the office's statement is no longer needed either.
+     · Data Management's two pillars: *"two capability pillars"* — each
+       keeps its own name, measures and tactics. One capability may become
+       several; nothing is merged.
+     · Decision Making's project: *"a capability whose work is its
+       milestones"* — one pillar under the capability's own name, the
+       project's milestones as its tactics, timed by the quarter their
+       finish date falls in, exactly as §447.1 times an action.
+
+   WHAT STILL REFUSES: a capability with objectives of its own or a
+   definition of its own (nobody has said what either becomes), one holding
+   more than one project, one holding nothing at all, and a milestone with
+   a `covers` entered — a tactic has nowhere to put it and dropping it
+   silently is the one thing this must not do (§96.2). */
 function capFoldBlockers(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
   var out = [];
   caps.forEach(function(c){
     if (!c || !c.id) return;
-    var why = [];
-    if (!capPlansInPillars(c)) why.push("plans in " + L("project").toLowerCase() + ", not " + L("pillar","bu").toLowerCase());
-    else if (capItems(c).length !== 1) why.push("holds " + capItems(c).length + " " + L("pillar","bu").toLowerCase() + ", not one");
+    var why = [], prs = c.projects || [];
+    if (capPlansInPillars(c)) {
+      if (!capItems(c).length) why.push("holds no " + L("pillar","bu").toLowerCase());
+      if (prs.length) why.push(prs.length + " " + L("project").toLowerCase() + " beside its " + L("pillar","bu").toLowerCase());
+    } else {
+      if (!prs.length) why.push("holds no " + L("project").toLowerCase());
+      else if (prs.length > 1) why.push("holds " + prs.length + " " + L("project").toLowerCase() + ", not one");
+      else {
+        /* §544.7 — AND WHAT ELSE HANGS OFF THE PROJECT. Wander's own
+           database answered a question its working copy had not been asked:
+           `Decision Making`'s one project carries FIVE DELIVERABLES beside
+           its five milestones, and the first rehearsal of this move carried
+           the milestones and dropped the deliverables without a word. A
+           pillar holds measures and tactics; a deliverable and an outcome
+           have nowhere to go until somebody says where, so they refuse.
+           §96.2 is the whole point: the move's promise is that nothing it
+           carries disappears, and a silent drop is worse than a refusal.
+
+           ISLAM ANSWERED THE DELIVERABLES, reading his own five: they are
+           all targets with an [X]% in them, so they become the capability's
+           KEY MEASURES, and the milestones — which are steps — become its
+           tactics. On a pillar, work is tactics and numbers are measures,
+           and that is what these two lists already are.
+
+           AN OUTCOME STILL REFUSES. It maps to a measure even more directly
+           than a deliverable does, and that is exactly why it is left: no
+           client holds one on a capability's project, so building it would
+           be a guess nothing could check (§113.8). The refusal says so. */
+        var o = (prs[0].outcomes || []).length;
+        if (o) why.push(o + " " + L("outcome").toLowerCase() + " with nowhere to go");
+        (prs[0].milestones || []).forEach(function(m){
+          if (m && String(m.covers || "").trim() && why.indexOf("a milestone covers something") < 0)
+            why.push("a milestone covers something");
+        });
+      }
+    }
     if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
-    if ((c.projects || []).length) why.push((c.projects || []).length + " " + L("project").toLowerCase().toLowerCase());
     if (String(c.def || "").trim()) why.push("a definition of its own");
-    if (c.fn) why.push("held by " + ((FUNCTIONS[c.fn] || {}).name || c.fn));
     if (why.length) out.push({ id: c.id, name: c.name || "", why: why });
   });
   return out;
@@ -8921,14 +9246,41 @@ function capFoldBlockers(){
 function capFoldPlan(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
   var top = topAsUnit(), n = (GROUP.items || []).length, out = [];
+  /* §544.7: a capability the move REFUSES is not a row the rehearsal plans.
+     The two used to agree by construction, because the plan re-tested the
+     same conditions the refusals did; the reasons live in one place now and
+     the plan reads them, so a rehearsal cannot list a row the move would
+     not carry (§53.5). */
+  var blocked = {};
+  capFoldBlockers().forEach(function(b){ blocked[b.id] = true; });
   caps.forEach(function(c){
-    if (!c || !c.id || !capPlansInPillars(c) || capItems(c).length !== 1) return;
-    var p = capItems(c)[0], head = personBy(c.head), cust = personBy(c.custodian);
-    out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c),
-               name: p.name || c.name || "", at: n,
-               owner: p.owner || (head ? head.name : ""),
-               custodian: p.custodian || (cust ? cust.name : ""),
-               measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+    if (!c || !c.id || blocked[c.id]) return;
+    var head = personBy(c.head), cust = personBy(c.custodian);
+    /* §544.6: one row per inner pillar — one capability may become several,
+       and each keeps its own name. A capability planning in projects becomes
+       ONE row under the capability's own name, its project's milestones the
+       tactics; the project's id is kept as the pillar's, so nothing keyed on
+       it has to be found (§48). */
+    if (capPlansInPillars(c)) {
+      var list = capItems(c), many = list.length > 1;
+      list.forEach(function(p, i){
+        out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c) + (many ? "." + (i + 1) : ""),
+                   name: p.name || c.name || "", at: n,
+                   owner: p.owner || (head ? head.name : ""),
+                   custodian: p.custodian || (cust ? cust.name : ""),
+                   measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+        n++;
+      });
+      return;
+    }
+    var pr = (c.projects || [])[0];
+    if (!pr) return;
+    out.push({ capId: c.id, pillarId: pr.id, projectId: pr.id, fromProject: true,
+               was: topCapCode(c), name: c.name || pr.name || "", at: n,
+               owner: pr.owner || (head ? head.name : ""),
+               custodian: cust ? cust.name : "",
+               measures: (pr.deliverables || []).length,
+               tactics: (pr.milestones || []).length });
     n++;
   });
   /* The code each row will read, worked out over the list as it WILL be —
@@ -8950,10 +9302,59 @@ function capFoldIntoTop(){
   var byId = {};
   (GROUP.capabilities || []).forEach(function(c){ if (c && c.id) byId[c.id] = c; });
   rows.forEach(function(r){
-    var c = byId[r.capId], p = capItems(c)[0];
-    /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
-       own ids too, and an object the page already holds a handle on stays
-       the same object (§48). */
+    var c = byId[r.capId], p;
+    if (r.fromProject) {
+      /* §544.6 — A PROJECT BECOMES A PILLAR WHOSE TACTICS ARE ITS
+         MILESTONES (Islam's own pick). The project's id becomes the
+         pillar's and each milestone keeps its own id, so every figure,
+         snapshot and report keyed on them still matches (§48). A finish
+         date becomes the ONE quarter it falls in, the date kept on the row
+         beside it, exactly as §447.1 times an action. */
+      var pr = (c.projects || []).filter(function(x){ return x && x.id === r.projectId; })[0];
+      p = { id: pr.id, code: "", name: r.name, sub: "", kind: "", theme: "",
+            owner: "", measures: [], tactics: [] };
+      /* §544.7: the deliverables are the measures (Islam's own reading of
+         his five — they are targets, every one with an [X]% in it). Each
+         keeps its id. A deliverable reports Not started / In progress /
+         Delivered with a per-cent (§104); a measure reports a figure and a
+         progress, so Delivered arrives at 100 and In progress at its own
+         per-cent. One nobody has reported arrives unreported, which is all
+         five of Wander's. The TARGET is left blank on purpose: the [X] is
+         inside the name, and inventing a number here would be the move
+         writing a figure, which it never does. */
+      (pr.deliverables || []).forEach(function(dl, i){
+        var m = { id: dl.id || (pr.id + "-M" + (i + 1)), name: dl.name || "",
+                  dir: "\u2265", target: "", compile: "", actual: null, progress: null };
+        var ds = String(dl.status || "").toLowerCase();
+        if (ds === "delivered" || ds === "done") m.progress = 100;
+        else if (dl.pct != null && dl.pct !== "") m.progress = Number(dl.pct);
+        if (dl.note) m.note = dl.note;
+        p.measures.push(m);
+      });
+      (pr.milestones || []).forEach(function(m, i){
+        var t = { id: m.id || (pr.id + "-T" + (i + 1)), name: m.name || "", owner: m.owner || "",
+                  q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+        var mo = monthsOf(m.finish);
+        if (mo != null) t["q" + (Math.floor((mo % 12) / 3) + 1)] = 1;
+        if (m.finish) t.due = m.finish;
+        var st = String(m.status || "").toLowerCase();
+        if (st === "done" || st === "delivered") { t.status = "Done"; t.actual = 100; }
+        else if (st === "wip" || st === "in progress") {
+          t.status = "WIP";
+          if (m.pct != null && m.pct !== "") t.actual = Number(m.pct);
+        }
+        if (m.note) t.note = m.note;
+        p.tactics.push(t);
+      });
+      /* the record's own project list goes with it */
+      c.projects = (c.projects || []).filter(function(x){ return !x || x.id !== r.projectId; });
+    } else {
+      /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
+         own ids too, and an object the page already holds a handle on stays
+         the same object (§48). */
+      p = capItems(c).filter(function(x){ return x && x.id === r.pillarId; })[0];
+      if (!p) return;
+    }
     p.name = r.name;
     p.kind = SMPRules.PILLAR_CAP;
     p.owner = r.owner;
@@ -8966,6 +9367,18 @@ function capFoldIntoTop(){
   /* §540: and the company shows its pillars apart, so the tabs do not move. */
   var st = SMPRules.structureOf(GROUP) ? clone(SMPRules.structureOf(GROUP)) : {};
   st.top = st.top || {}; st.top.plan = st.top.plan || {}; st.top.plan.split = true;
+  /* §544.6 — AND THE COMPANY HAS TO BE SHOWING A PLAN, or the rows arrive
+     stored and invisible. Measured on a company that had never planned
+     anything of its own (Wander's): the three landed in `GROUP.items` and
+     the Strategy tab went on reading Foundation alone, because §428.2
+     starts the top layer's plan OFF and `pillar` is not in its components
+     until somebody ticks it. El Abd never showed this — its top already
+     carried both. Switched on here rather than left to be noticed (§61):
+     the move's whole promise is that nothing it carries disappears. */
+  delete st.top.plan.on;
+  if (!Object.keys(st.top.plan).length) delete st.top.plan;
+  st.top.on = (SMPRules.levelComponents(GROUP, "top") || []).slice();
+  if (st.top.on.indexOf("pillar") < 0) st.top.on.push("pillar");
   GROUP.structure = st;
   return rows.length;
 }
@@ -9392,12 +9805,35 @@ FUNCTION_KEYS.forEach(function(k){
    AND NOT length + 1. After a row has been removed, `-P3` can still be held by
    the last of three — the same collision mintPersonKey() and mintClaimId()
    already scan for. */
+/* §588: AND NOT THE POSITION ALONE. Two people adding a row to the same list
+   in the same minute both counted the same length and minted the same id, so
+   on the merge the second row replaced the first (every row is found by id,
+   §48). A short random tag after the number keeps the id readable — `-P4`
+   still says where it was added — and makes two tabs' ids distinct without a
+   clock or a server round trip. The scan for a taken id stays, for the one
+   list and the one tab. */
 function mintRowId(list, prefix){
   var taken = {};
   (list || []).forEach(function(x){ if (x && x.id) taken[x.id] = 1; });
   var n = (list || []).length + 1;
-  while (taken[prefix + n]) n++;
-  return prefix + n;
+  var id;
+  do { id = prefix + n + "-" + mintTag(); n++; } while (taken[id]);
+  return id;
+}
+/* Four characters from the browser's own random source (0-9, a-z): about
+   1.7 million values, so two tabs minting into the same list at the same
+   moment all but never agree, and a stored id never grows past readable. */
+function mintTag(){
+  var chars = "0123456789abcdefghijklmnopqrstuvwxyz", out = "";
+  var buf = null;
+  try {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) { buf = new Uint8Array(4); crypto.getRandomValues(buf); }
+  } catch (e) { buf = null; }
+  for (var i = 0; i < 4; i++) {
+    var v = buf ? buf[i] : Math.floor(Math.random() * 256);
+    out += chars.charAt(v % 36);
+  }
+  return out;
 }
 
 /* A pillar arrives with every field a reader asks for, present and empty
@@ -10839,9 +11275,14 @@ function mintCapId(){
   });
   return "cap" + (n + 1);
 }
-function addCapability(fnKey){
+/* §544.13 — AND IT TAKES NO FUNCTION. Islam, asked whether the set-up should
+   still let the office put a capability under a function: **"no — remove
+   it"**. A capability is the company's, so a new one is the company's; `fn`
+   is minted null and stays readable only for the records that already carry
+   one (Meridian's), which stage 3b folds. */
+function addCapability(){
   var made = { id:mintCapId(), name:"New " + labelWord("capability","group"), def:"",
-               fn:fnKey || null, keyObjectives:[], projects:[] };
+               fn:null, keyObjectives:[], projects:[] };
   GROUP.capabilities.push(made);
   renumberCapability(made);
   return made;
@@ -10879,8 +11320,11 @@ function promoteToCapability(fnKey, ids, name){
   var own = fnOwnHolder(fnKey);
   if (own) archiveCapPlan(own, "before " + plural(mv.projects.length, L1("project"), L("project")) +
     " became \u201c" + (String(name || "").trim() || "a capability") + "\u201d");
+  /* §544.13: the projects leave the function and the capability that
+     receives them is the COMPANY'S, not the function's — which is what
+     promoting them means now. The projects keep their ids (§232). */
   var made = { id:mintCapId(), name:String(name || "").trim() || "New " + labelWord("capability","group"),
-               def:"", fn:fnKey, keyObjectives:[], projects:mv.projects.slice() };
+               def:"", fn:null, keyObjectives:[], projects:mv.projects.slice() };
   mv.projects.forEach(function(p){
     var i = f.projects.indexOf(p);
     if (i > -1) f.projects.splice(i, 1);
@@ -10908,11 +11352,14 @@ function promoteToCapability(fnKey, ids, name){
    no help: a project's code has always been its position across the whole
    FUNCTION and not inside its box (§310), so they close up on their own and
    nothing a person reads is renamed. */
+/* §544.13 — EVERY OTHER CAPABILITY IS A SIBLING. This grouped them by the
+   function holding them and answered NOTHING for a capability holding none,
+   which since Islam's *"the company only"* is every capability — so the
+   Remove dialog offered no destination at all and could only delete the
+   work. They are all the company's; they are all siblings. */
 function capSiblings(c){
-  if (!c || !c.fn) return [];
-  return GROUP.capabilities.filter(function(x){
-    return x && x.id !== c.id && x.fn === c.fn;
-  });
+  if (!c) return [];
+  return GROUP.capabilities.filter(function(x){ return x && x.id !== c.id; });
 }
 /* What removing it would move, so the dialog can say so: its own key
    objectives, and every figure inside every project it holds. */
@@ -10977,7 +11424,13 @@ function removeCapability(id, moveToId){
      so it is resolved as a HOLDER and through the WRITING half — a reader
      hands out a frozen empty and the move would push into it. */
   var to = moveToId ? holderByIdWritable(moveToId) : null;
-  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
+  /* §544.13: `to.fn !== c.fn` refused every move the moment a capability
+     stopped having a function — including to a sibling, which is now any
+     other capability. What the guard is for survives in two halves: never
+     into itself, and a FUNCTION destination only for a record that is that
+     function's own. */
+  if (to && to.id === c.id) return false;
+  if (to && to.own && to.fn !== c.fn) return false;
   archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
     "\u201d was removed");
   /* §326: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the
@@ -11668,10 +12121,6 @@ function companyFnKeys(ck){
 }
 /* A weight the office typed, or null — never NaN and never a blank read as
    nought (§104.10: Number("") is 0, and nought is a real weight). */
-function fnCoWeightSet(fk){
-  var v = FUNCTIONS[fk] && FUNCTIONS[fk].coWeight;
-  return (typeof v === "number" && isFinite(v) && v >= 0) ? v : null;
-}
 /* WHAT ONE FUNCTION SCORES, READ OFF THE PAGE THAT FUNCTION DRAWS — its own
    Performance page's primary figure and its execution figure, per format, so
    a division can never print a different number for a function from the one
@@ -11704,67 +12153,45 @@ function fnMemberScores(fk){
   if (!h) return { perf:null, exec:null };
   return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
-/* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
-   The functions take their share first: a weight the office set is used as
-   given; a blank takes the AVERAGE of the weights that are set (§243's rule
-   for objectives); and with none set each function counts as one equal member
-   of the company. The units split what is left in proportion to the weights
-   they already carry at group level, so their relative sizes never move.
-   A company of functions alone divides the whole by their weights. */
-function companyShares(ck){
-  var units = companyUnitKeys(ck), fns = companyFnKeys(ck), out = [];
-  if (!fns.length) {
-    var uw0 = companyWeight(ck);
-    units.forEach(function(k){
-      out.push({ unit:k, w: uw0 ? (UNITS[k].weight || 0) / uw0 * 100 : 100 / units.length });
-    });
-    return out;
-  }
-  var set = fns.map(fnCoWeightSet).filter(function(v){ return v != null; });
-  var blank = set.length ? set.reduce(function(a, b){ return a + b; }, 0) / set.length
-                         : 100 / (units.length + fns.length);
-  var fw = fns.map(function(k){ var v = fnCoWeightSet(k); return v == null ? blank : v; });
-  var ftot = fw.reduce(function(a, b){ return a + b; }, 0);
-  /* More than the whole, or no units to share the rest: the functions are
-     scaled to 100 between them. Setup refuses a total over 100, so the first
-     case is a stored value from elsewhere, never a normal one. */
-  var scale = (!units.length || ftot > 100) ? (ftot ? 100 / ftot : 0) : 1;
-  var left = units.length ? Math.max(0, 100 - ftot * scale) : 0;
-  var uw = companyWeight(ck);
-  units.forEach(function(k){
-    out.push({ unit:k, w: uw ? (UNITS[k].weight || 0) / uw * left : left / units.length });
+/* ── THE FUNCTIONS' OWN READING, BESIDE THE UNITS' (§593) ─────────────────
+   Islam: *"in case of business units they get their own score and the
+   functions get their own score and we see both on the group"* — and of how
+   the functions count, *"stay equal"*; of the divisions, *"yes same for
+   divisions"*.
+
+   THIS REVERSES §391's MIX, and says so. A division read its units and its
+   functions as ONE figure, the functions taking a share set on Setup (his A
+   at the time) and the units the rest — while the group read its units
+   alone and never its functions. One question, two answers (spec 066's own
+   finding). Now neither level blends: the units' figures are the units'
+   (weighted by size, as always), and the functions' are the functions',
+   each counted equally, drawn beside them. No number a client already sees
+   moves except a division that held functions, whose headline becomes its
+   units' alone with its functions' drawn next to it.
+
+   Each function's figure is the one its own page shows (`fnMemberScores`),
+   so the group can never print a different number for a function from the
+   one that function shows about itself (§53.5). A function with nothing to
+   read is left out of the average, never counted as nought (§5.7). */
+function fnsReading(fks){
+  var p = [], e = [];
+  (fks || []).forEach(function(k){
+    var sc = fnMemberScores(k);
+    if (sc.perf != null) p.push(sc.perf);
+    if (sc.exec != null) e.push(sc.exec);
   });
-  fns.forEach(function(k, i){
-    out.push({ fn:k, w: ftot ? fw[i] * scale : 100 / fns.length, set: fnCoWeightSet(k) != null });
-  });
-  return out;
+  var avg = function(a){ return a.length ? Math.round(a.reduce(function(x, y){ return x + y; }, 0) / a.length) : null; };
+  return { perf: avg(p), exec: avg(e), n: (fks || []).length };
 }
-function companyMix(ck, which){
-  var acc = 0, tot = 0;
-  companyShares(ck).forEach(function(s){
-    var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                   : fnMemberScores(s.fn)[which];
-    if (v == null || !s.w) return;
-    acc += v * s.w; tot += s.w;
-  });
-  return tot ? Math.round(acc / tot) : null;
-}
-/* A COMPANY WITH NO FUNCTIONS COMPILES EXACTLY AS IT DID (§68), byte for
-   byte, through the same weightedOver() — asserted, because a rounding step
-   moved would change every company's figure on a day nothing about it did. */
-function companyObjectives(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "perf")
-                                  : weightedOver(companyUnitKeys(ck), unitObjectives);
-}
+/* A division's own figures are its units' — the group's rule over a smaller
+   list (§68, §515.2 P3). Its functions read beside them (`fnsReading`). */
+function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-/* §515.2 (P3): a division of units alone is the weighted average of its
-   units' own execution figures — the group's rule, over a smaller list. With
-   functions in it, companyMix() was already that rule (§391). */
-function companyRatio(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : weightedOver(companyUnitKeys(ck), unitRatio);
-}
+/* §515.2 (P3): a division is the weighted average of its units' own
+   execution figures — the group's rule, over a smaller list. Its functions
+   read beside it (§593). */
+function companyRatio(ck){ return weightedOver(companyUnitKeys(ck), unitRatio); }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
    forget it. */

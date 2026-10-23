@@ -182,6 +182,7 @@ model Workspace {
   roles                 Role[]
   people                Person[]
   processes             Process[]
+  priorityPlan          PriorityPlan?
   phases                Phase[]
   governanceAspects     GovernanceAspect[]
   governanceAssessments GovernanceAssessment[]
@@ -335,6 +336,39 @@ model Process {
   sopApprovedBy    String?
   sopRevisions     Json     @default("[]")
 
+  /// Controlled lifecycle. Existing processes with an "approved by" were
+  /// backfilled as PUBLISHED; the rest start as DRAFT. The approver and the
+  /// reviewers are chosen from the People register, and their name and role
+  /// are written down here as they stood at the time — a later rename or
+  /// role change must not rewrite who approved what.
+  lifecycleStatus      ProcessLifecycleStatus @default(DRAFT)
+  reviewIntervalMonths Int                    @default(12)
+  nextReviewDue        DateTime?
+  approverPersonId     String?
+  approverName         String?
+  approverRole         String?
+  /// { personId, name, role }[]
+  reviewers            Json                   @default("[]")
+  submittedByName      String?
+  submittedByEmail     String?
+  submittedAt          DateTime?
+  /// Why the last review sent it back, shown until the next submission.
+  returnReason         String?
+  /// What the sender said changed; becomes the version's note on approval.
+  pendingChangeNote    String?
+  publishedAt          DateTime?
+  retiredAt            DateTime?
+  versions             ProcessVersion[]
+  acknowledgements     ProcessAcknowledgement[]
+
+  /// Choosing which high-level processes to take deep (Priorities). The three scores are 1–5 and the
+  /// office's own judgement; the decision is where the process goes. Null until somebody says.
+  priorityImportance Int?
+  priorityComplexity Int?
+  priorityRisk       Int?
+  priorityWhy        String?
+  deepDiveDecision   DeepDiveDecision?
+
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])
@@ -348,6 +382,8 @@ model Process {
   raciMatrixStatus     RaciMatrixStatus?
   linkedFromSteps      ProcessStepLink[]     @relation("LinkTargetProcess")
   reviewFindings       ReviewFinding[]
+  controls             ProcessControl[]
+  nonConformances      ProcessNonConformance[]
   authorityAssignments AuthorityAssignment[]
 
   createdAt DateTime @default(now())
@@ -509,6 +545,7 @@ model ProcessStep {
   handoffsIn          StepHandoff[]        @relation("HandoffTo")
   activities          Activity[]
   reviewFindings      ReviewFinding[]
+  controls            ProcessControl[]
   authorityAssignment AuthorityAssignment?
   branchedProcesses   Process[]            @relation("ProcessBranchOrigin")
 
@@ -550,6 +587,145 @@ model StepConnection {
 /// predecessor of the `to` step, which lives in another process. Kept apart
 /// from StepConnection on purpose — that table is same-process only and the
 /// layout, arrange, readiness, print and export code all rely on it.
+enum DeepDiveDecision {
+  WAVE_1
+  WAVE_2
+  LATER
+  HIGH_LEVEL
+}
+
+enum PriorityPlanStatus {
+  DRAFT
+  SENT
+  APPROVED
+}
+
+/// One per workspace: how the scores are weighed, how many deep dives run at once, and the client's
+/// sign-off of the resulting shortlist. What was sent is frozen in `snapshot`, so the client approves
+/// exactly what they were shown; changing the plan after that is a reopening, with a reason, on record.
+model PriorityPlan {
+  id               String             @id @default(uuid())
+  workspaceId      String             @unique
+  weightImportance Int                @default(35)
+  weightRisk       Int                @default(40)
+  weightComplexity Int                @default(25)
+  capacity         Int                @default(4)
+  wave1Label       String             @default("Start now")
+  wave2Label       String             @default("Next")
+  laterLabel       String             @default("Review later")
+  status           PriorityPlanStatus @default(DRAFT)
+  approverPersonId String?
+  approverName     String?
+  approverRole     String?
+  sentAt           DateTime?
+  sentByName       String?
+  sentByEmail      String?
+  snapshot         Json?
+  returnReason     String?
+  approvedAt       DateTime?
+  approvedByName   String?
+  approvedByRole   String?
+  /// { at, by, what, reason? }[] — the plan's own record.
+  history          Json               @default("[]")
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("priority_plans")
+}
+
+enum ProcessLifecycleStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  RETIRED
+}
+
+/// One approved version of a process: who changed what, who approved it, and
+/// in which role. Written when a version is approved, never edited after.
+model ProcessVersion {
+  id            String    @id @default(uuid())
+  processId     String
+  number        Int
+  changeNote    String
+  submittedBy   String?
+  approvedBy    String
+  approvedRole  String?
+  approvedAt    DateTime  @default(now())
+  publishedAt   DateTime?
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@unique([processId, number])
+  @@map("process_versions")
+}
+
+/// "I have read version N" — one row per person per version. Keyed by the
+/// person's People-register key (not a Person row) so a member of staff can
+/// acknowledge without the office having opened the client first; the name is
+/// written down as it was.
+model ProcessAcknowledgement {
+  id             String   @id @default(uuid())
+  processId      String
+  versionNumber  Int
+  personKey      String
+  personName     String
+  acknowledgedAt DateTime @default(now())
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@unique([processId, versionNumber, personKey])
+  @@index([processId, versionNumber])
+  @@map("process_acknowledgements")
+}
+
+// A risk and the control that answers it, on a process (optionally on one step).
+model ProcessControl {
+  id             String    @id @default(uuid())
+  processId      String
+  stepId         String?
+  risk           String
+  riskLevel      String    @default("medium") // low | medium | high
+  control        String?
+  controlType    String?   // preventive | detective | corrective
+  frequency      String?
+  owner          String?
+  evidence       String?
+  lastTestedAt   DateTime?
+  lastTestResult String?   // pass | fail | not_tested
+  order          Int       @default(0)
+
+  process Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
+  step    ProcessStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([processId])
+  @@index([stepId])
+  @@map("process_controls")
+}
+
+// Something that went wrong in a process, and what is being done about it.
+model ProcessNonConformance {
+  id               String    @id @default(uuid())
+  processId        String
+  title            String
+  detail           String?
+  raisedAt         DateTime  @default(now())
+  status           String    @default("open") // open | in_progress | closed
+  correctiveAction String?
+  actionOwner      String?
+  dueAt            DateTime?
+  closedAt         DateTime?
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@index([processId])
+  @@map("process_non_conformances")
+}
+
 model StepHandoff {
   id         String  @id @default(uuid())
   fromStepId String

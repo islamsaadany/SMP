@@ -184,3 +184,30 @@ and what changed is that the switch turned out to be the visible control.
   I run still drawing rows on My reporting **1 red**.
 - `scripts/test-tactic-owner.js` is **deleted**: its whole subject was the
   role (§24).
+
+## 9 · §576 — the owner writes the note on their own red rows
+
+Islam, agreeing the note lock (a red figure with no note shuts every other box
+on the page until it is explained): the tactic's owner, who enters the figure
+here, writes its note too when it is red — otherwise the lock would shut them
+in with no way out. **This reverses decision 3's note half for that one case**;
+the submission stays the unit's.
+
+- **The page**: a *Note* column. A box on the owner's own red rows
+  (`rowAtRisk`, so it stays once written and can be corrected), the row's note
+  read-only everywhere else. The box carries `data-repu`, and the note's
+  handler resolves the row against its own unit, as the figure's does.
+- **The lock**: while one of the owner's rows is red with no note, every
+  other box on My reporting shuts and the lock's bar names the row
+  (`noteLockOf(null, true)`). A red row they cannot explain locks nothing.
+- **The server**: the note on an owned line is `lineNote`, neither the
+  figure's `lineReporting` nor the unit's alone — the owner's, **or** the
+  unit's, judged for anybody but the owner exactly as the unit's own note is.
+  This also fixes what §382 meant and did not do: the note went to the owner
+  with the figure, so a unit's custodian and head were refused the note on an
+  owned line while the screen offered them the box (measured, both refused).
+- **Checked**: `scripts/test-authorize.js` §43 (8 new: classified as
+  `lineNote`, owner / custodian / head / office allowed, nobody else, the
+  figure still the owner's alone, a locked cycle refused) — red 3 on the rule
+  before; `checks/note-lock.py` §7 (the column, the box only on the red row,
+  the lock, the note landing on the right tactic in the right unit).

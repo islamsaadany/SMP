@@ -1,6 +1,6 @@
 /* ══ THREE ACTIONS, FROM THE KEYBOARD (§546) ═══════════════════════════════
    Usability audit, heuristic 7: *"no accelerator for Submit, Save draft, or
-   the pen"*. §544 answered the navigation half of that finding with the arrows
+   the pen"*. §552 answered the navigation half of that finding with the arrows
    every row of tabs already promised; this is the other half, and unlike the
    arrows it had NO standard to follow — somebody had to pick the keys.
 
@@ -49,7 +49,7 @@ var ACTIONKEYS = (function(){
 
   /* WHAT IS ACTUALLY ON THE SCREEN. A control the page is not drawing is not
      one a key can reach, and `offsetParent` is null for anything hidden or
-     inside something hidden — the same test §544 uses on a row of tabs. */
+     inside something hidden — the same test §552 uses on a row of tabs. */
   function live(sel){
     var all = document.querySelectorAll(sel);
     for (var i = 0; i < all.length; i++) {

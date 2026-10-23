@@ -49,7 +49,7 @@ var KEYSHEET = (function(){
     },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
-    /* §544: a row worth walking is one with somewhere to walk to. Counted
+    /* §552: a row worth walking is one with somewhere to walk to. Counted
        rather than assumed — a tablist holding a single tab answers the arrows
        and has nothing to say about it. */
     tabs: function(){
@@ -66,6 +66,11 @@ var KEYSHEET = (function(){
     deck: function(){
       var d = document.getElementById("deckroot");
       return !!d && d.classList.contains("on");
+    },
+    /* §582.2: the slides are up in another window (a second screen or a
+       window to share) and this one is driving them — present.js's ROOM. */
+    room: function(){
+      return typeof ROOM !== "undefined" && !!ROOM;
     }
   };
 
@@ -103,7 +108,7 @@ var KEYSHEET = (function(){
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
       ] },
-    /* §544 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+    /* §552 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
        sheet exists: the alternative is a fifth idiom nobody can discover. */
     { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
       rows:[
@@ -123,8 +128,19 @@ var KEYSHEET = (function(){
         { keys:[["Home"], ["End"]], what:"First or last slide" },
         { keys:[["F"]], what:"Fullscreen" },
         { keys:[["W"]], what:"Fit to the window" },
-        { keys:[["P"]], what:"Pause the clock" },
+        { keys:[["T"], ["P"]], what:"Hold or start the clock" },
+        /* §581, added late: the sheet missed them the day they arrived. */
+        { keys:[["Y"]], what:"Start the clock again" },
+        { keys:[["R"]], what:"Update the figures" },
         { keys:[["Esc"]], what:"Leave fullscreen, then leave the deck" }
+      ] },
+    /* §582.2 — ADDED THE DAY THE KEYS WERE. */
+    { id:"room", name:"Slides in another window", where:"any page, while they are up",
+      rows:[
+        { keys:[["PgDn"], ["→"]], what:"Next slide — what most remotes send" },
+        { keys:[["PgUp"], ["←"]], what:"Back one" },
+        { keys:[["T"]], what:"Hold or start their clock" },
+        { says:"typing in a box", what:"Keeps every key — nothing moves a slide" }
       ] }
   ];
 

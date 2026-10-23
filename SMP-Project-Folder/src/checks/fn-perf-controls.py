@@ -180,8 +180,16 @@ with sync_playwright() as p:
     fn = read(pg, "fn-cap")
     ck("the menu has entries at all", bool(fn["entries"]), fn["entries"])
     if fn["entries"]:
-        ck("...Present is among them",
-           any(e.lower().startswith("present") for e in fn["entries"]), fn["entries"])
+        # §562: ONE WORD FOR ITS SLIDES. The entry that opens the deck reads
+        # Slides for somebody who may speak for the subject (it lands on its
+        # own slides) and Present for anybody else (it goes straight to the
+        # room). Rewritten to that rule, never loosened (§218): whichever word
+        # the viewer is owed must be there, and the other must not.
+        speak = pg.evaluate("()=>{try{return !!canSpeakFor(current);}catch(e){return 'ERR '+e;}}")
+        want, other = ("slides", "present") if speak is True else ("present", "slides")
+        ck("...the deck's own entry is among them, in the word this viewer is owed (§562)",
+           any(e.lower().startswith(want) for e in fn["entries"]) and
+           not any(e.lower().startswith(other) for e in fn["entries"]), (speak, fn["entries"]))
         may = pg.evaluate("()=>{try{return !!SMPRules.mayDownloadPlan(world(), viewer(),"
                           " current);}catch(e){return 'ERR '+e;}}")
         # THE PLAN, BY NAME. §305 put a second download in this menu — the

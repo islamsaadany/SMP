@@ -3624,7 +3624,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
-  compete: { unit: "analysis",                        ac: "u_anal"  },
+  compete: { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
@@ -6210,6 +6210,10 @@ function renderUnitAnalysis(u){
    pillars function already carries, so a pillars function's uploaded s/w
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
+function renderFnCompete(t){
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
+  return FUNCTIONS[fk] ? renderUnitCompete({ ukey: "fn:" + fk }) : "";
+}
 function renderFnSW(t){
   var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
@@ -6225,7 +6229,10 @@ function renderFnSW(t){
    rights move. In edit mode every cell is a box: a How or a Measure is one
    line per bullet. */
 function renderUnitCompete(u){
-  var t = u.ukey, page = "analysis", ac = "u_anal";
+  /* §608: a function's own sits on its Overview's page and grant, the pair
+     its S&W already uses (renderFnSW). */
+  var t = u.ukey, isFn = boxRef(t).kind === "fn";
+  var page = isFn ? "capfoundation" : "analysis", ac = isFn ? "k_found" : "u_anal";
   var c = competeOf(t), ed = authoring(page, ac);
   var vals = c.values;
   var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };

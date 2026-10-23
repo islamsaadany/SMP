@@ -4756,8 +4756,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      a business unit only — a company page draws no SWOT either (§427), and
      a function or a capability supports the business rather than
      competing in a market. */
+  /* §608 — AND A FUNCTION MAY CARRY ONE, if the office ticks it. Islam, on
+     the fixed rules that should be settings: *"proceed with the settings"*.
+     The reasoning above stands as the DEFAULT — a function supports the
+     business, so the section is off on every function until somebody turns
+     it on — but it is no longer a rule written into the code. A
+     capability is still not offered it: it is part of the company's plan,
+     not a box facing anyone. */
   var COMPETE = "compete";
-  var COMPETE_LEVELS = ["top", "bu"];
+  var COMPETE_LEVELS = ["top", "bu", "fn"];
   /* The three value disciplines, in the order a tie breaks (§3.2). */
   var DISCIPLINES = [["btc", "Best Total Cost"], ["bts", "Best Total Solution"], ["bp", "Best Product"]];
   function disciplineName(k) {
@@ -17629,7 +17636,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){
@@ -30973,7 +30982,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
-  compete: { unit: "analysis",                        ac: "u_anal"  },
+  compete: { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
@@ -33559,6 +33568,10 @@ function renderUnitAnalysis(u){
    pillars function already carries, so a pillars function's uploaded s/w
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
+function renderFnCompete(t){
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
+  return FUNCTIONS[fk] ? renderUnitCompete({ ukey: "fn:" + fk }) : "";
+}
 function renderFnSW(t){
   var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
@@ -33574,7 +33587,10 @@ function renderFnSW(t){
    rights move. In edit mode every cell is a box: a How or a Measure is one
    line per bullet. */
 function renderUnitCompete(u){
-  var t = u.ukey, page = "analysis", ac = "u_anal";
+  /* §608: a function's own sits on its Overview's page and grant, the pair
+     its S&W already uses (renderFnSW). */
+  var t = u.ukey, isFn = boxRef(t).kind === "fn";
+  var page = isFn ? "capfoundation" : "analysis", ac = isFn ? "k_found" : "u_anal";
   var c = competeOf(t), ed = authoring(page, ac);
   var vals = c.values;
   var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };
@@ -50222,8 +50238,9 @@ function swotPart(target, name, slides){
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
    table with no rows is not a slide). The same table as the page. */
+/* §608: a function's too, once the office ticks the section on. */
 function competeSlides(u){
-  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  if (!u || !compOn(u.ukey, SMPRules.COMPETE)) return [];
   var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
     return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
   if (!c.discipline && !vals.length) return [];
@@ -51596,6 +51613,7 @@ function deckSlidesFn(subject){
     isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
   var analysis = [];
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (!isCap && !isUnit) analysis = analysis.concat(competeSlides({ ukey: "fn:" + fk }));
   if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
   var plan = projectsPlanPart(target, f, caps, objMode);
 
@@ -74371,6 +74389,9 @@ var SYNC = (function () {
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* §608: How we compete, once the office ticks it on. */
+                  { k:"compete", ac:"k_found", label:"Competitive Discipline", render:renderFnCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,

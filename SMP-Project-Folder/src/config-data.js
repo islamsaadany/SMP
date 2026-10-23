@@ -9418,7 +9418,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){

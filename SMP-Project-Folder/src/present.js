@@ -433,8 +433,9 @@ function swotPart(target, name, slides){
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
    table with no rows is not a slide). The same table as the page. */
+/* §608: a function's too, once the office ticks the section on. */
 function competeSlides(u){
-  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  if (!u || !compOn(u.ukey, SMPRules.COMPETE)) return [];
   var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
     return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
   if (!c.discipline && !vals.length) return [];
@@ -1807,6 +1808,7 @@ function deckSlidesFn(subject){
     isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
   var analysis = [];
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (!isCap && !isUnit) analysis = analysis.concat(competeSlides({ ukey: "fn:" + fk }));
   if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
   var plan = projectsPlanPart(target, f, caps, objMode);
 

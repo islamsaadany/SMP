@@ -583,6 +583,9 @@
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* §608: How we compete, once the office ticks it on. */
+                  { k:"compete", ac:"k_found", label:"Competitive Discipline", render:renderFnCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,

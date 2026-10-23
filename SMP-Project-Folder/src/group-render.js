@@ -9239,7 +9239,15 @@ function renderFnObjReport(fk){
   return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
+/* §598.1: a function's projects or objectives page shows the plan as it
+   stood on a day the same way the unit's does — its holder is read off
+   FUNCTIONS[k] (or UNITS[k] for a unit's own projects) inside the swap. */
 function renderFnProjects(fnKey){
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderFnProjectsBody(fnKey); });
+  return renderFnProjectsBody(fnKey);
+}
+function renderFnProjectsBody(fnKey){
   /* §334: the argument the pillars branch below already makes, one kind of
      thing further out — this page draws a HOLDER's projects, and a capability
      is one. `plansInPillars()` answers for a function and a capability alike,
@@ -10640,8 +10648,11 @@ function unitWayOf(u){
    The pen is off by `mayAuthor()`'s own guard, so every table below draws
    its read-mode self. */
 function renderUnitPlan(u){
-  var asof = (typeof TRAIL !== "undefined" && TRAIL.asofFor) ? TRAIL.asofFor(u) : null;
-  if (asof) return TRAIL.asofBanner() + renderUnitPlanBody(asof);
+  /* §598.1: the swap is the store's, so the unit-shaped view is read again
+     inside it — unitLike() then answers with the copy, for a unit, a
+     pillars function and the company alike. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderUnitPlanBody(unitLike(TARGET) || u); });
   return renderUnitPlanBody(u);
 }
 function renderUnitPlanBody(u){

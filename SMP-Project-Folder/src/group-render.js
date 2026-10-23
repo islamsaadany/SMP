@@ -2788,10 +2788,11 @@ function whereNext(keys){
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' +
-      /* §593: the functions' own row, under the units' two cards. Only where
-         the group HAS units — "in case of business units". */
-      (buExists() ? fnReadingCards(boardFunctionKeys(), "", 1 + (topPlanCard() ? 1 : 0)) : "") +
-      (buExists() ? whereNext(UNIT_KEYS) + whereNextFns(boardFunctionKeys()) : "")) });
+      /* §593: the functions' own row, under the units' two cards.
+         §601: and on a company WITHOUT units too (El Abd) — there the
+         functions are all it holds, so their row leads with no gap. */
+      fnReadingCards(boardFunctionKeys(), "", buExists() ? 1 + (topPlanCard() ? 1 : 0) : 0) +
+      (buExists() ? whereNext(UNIT_KEYS) : "") + whereNextFns(boardFunctionKeys())) });
 
   /* §464: the divisions left this page for the navigation — planned on the
      company, a division is a segment of the row and its page is its own

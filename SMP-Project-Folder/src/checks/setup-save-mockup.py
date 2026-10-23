@@ -177,41 +177,81 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     shot(pg, "colours-applied.png")
 
-    # 3 · Scoring bands, one floor changed (typed, never sent: nothing is written)
+    # 3 · Scoring bands: a band's colour picked — a colour area, so Apply (round 3)
     pg.evaluate("()=>{ branding().accent = null; applyBrand(); }")
     setup_go(pg, "bands")
     pg.evaluate("()=>{ EDITING.bands = true; paint(); }")   # the page's own Edit, pressed
     pg.wait_for_timeout(500)
     pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
-      const box = document.querySelector('input.bfloor');
-      const name = (box.getAttribute('aria-label') || '').replace(/^Floor for /, '');
-      const was = parseFloat(box.value) || 0, now = Math.max(0, was - 5);
-      box.value = String(now);
-      box.style.outline = '2px solid var(--attn)'; box.style.outlineOffset = '1px';
-      /* the range column follows the box, as it would on screen */
-      const rows = box.closest('tbody').querySelectorAll('tr');
-      rows[0].children[2].querySelector('.mono').textContent = now + '% and above';
-      const r2 = rows[1] && rows[1].children[2].querySelector('.mono');
-      if (r2) r2.textContent = r2.textContent.replace(/to \d+%/, 'to ' + (now - 1) + '%');
-      /* Save and Discard take the place of the page's own Done */
-      document.querySelectorAll('button').forEach(b => { if (/^\s*done\s*$/i.test(b.textContent)) b.style.visibility = 'hidden'; });
-      const cfg = box.closest('.cfg');
+      const rows = [...document.querySelectorAll('table.bandtbl tbody tr')];
+      const row = rows[1];                                  /* the second band */
+      const name = row.querySelector('input.blabel').value;
+      const cols = row.querySelector('.bcols');
+      cols.querySelectorAll('.bcol').forEach(c => { c.classList.remove('on'); c.removeAttribute('aria-pressed'); });
+      const pick = cols.querySelector('[data-bcol$="|warn"]') || cols.querySelectorAll('.bcol')[2];
+      pick.classList.add('on'); pick.setAttribute('aria-pressed', 'true');
+      cols.style.outline = '2px solid var(--attn)'; cols.style.outlineOffset = '3px'; cols.style.borderRadius = '6px';
+      document.querySelectorAll('button').forEach(b => { if (/^\\s*done\\s*$/i.test(b.textContent)) b.style.visibility = 'hidden'; });
       const add = document.querySelector('[data-badd]');
-      const foot = (add && add.closest('.cfg-bar')) || cfg;
-      foot.insertAdjacentHTML('afterend', __mk.row('Save', 'dirty', '1 change not saved yet: the floor for ' + name));
-      window.__mkWas = name;
-      cfg.scrollIntoView({block:'center'});
+      const foot = (add && add.closest('.cfg-bar')) || row.closest('.cfg');
+      foot.insertAdjacentHTML('afterend', __mk.row('Apply', 'dirty', '1 change not applied yet: the colour for ' + name));
+      row.closest('.cfg').scrollIntoView({block:'center'});
     }""")
     pg.wait_for_timeout(400)
-    shot(pg, "bands-unsaved.png")
+    shot(pg, "bands-colour-unapplied.png")
 
-    # 4 · trying to leave with it unsaved: the rail item pressed, the strip asks
+    # 4 · Roles & access: one cell changed, the Save row under the matrix (round 3)
+    setup_go(pg, "access")
+    pg.evaluate(JS_PIECES)
+    cell = pg.evaluate("""()=>{
+      const tr = [...document.querySelectorAll('#panel table tbody tr')]
+        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
+      const td = tr && tr.children[3];                      /* Their own · Reporting */
+      const b = td && td.querySelector('button');
+      if (b) b.click();
+      return !!b;
+    }""")
+    pg.wait_for_timeout(600)
+    pg.evaluate(JS_PIECES)
     pg.evaluate("""()=>{
-      const it = document.querySelector('.setuprail [data-setupgo=units]');
-      if (it) { it.scrollIntoView({block:'nearest'}); it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
-      __mk.strip('Scoring bands', 'the floor for ' + window.__mkWas);
+      const tr = [...document.querySelectorAll('#panel table tbody tr')]
+        .find(r => /^\\s*Owner/.test(r.children[0].textContent));
+      const td = tr.children[3];
+      td.style.outline = '2px solid var(--attn)'; td.style.outlineOffset = '-3px';
+      const cfg = td.closest('.cfg');
+      cfg.insertAdjacentHTML('afterend', __mk.row('Save', 'dirty', '1 change not saved yet: Owner \u00b7 their own reporting'));
     }""")
     pg.wait_for_timeout(300)
-    shot(pg, "bands-leave.png")
+    shot(pg, "access-unsaved.png")
+
+    # 5 · leaving Roles & access with it unsaved: the strip asks (agreed in round 2)
+    pg.evaluate("""()=>{
+      const it = document.querySelector('.setuprail [data-setupgo=units]');
+      if (it) { it.style.outline = '2px dashed var(--attn)'; it.style.outlineOffset = '-2px'; }
+      __mk.strip('Roles & access', 'Owner \u00b7 their own reporting');
+    }""")
+    pg.wait_for_timeout(300)
+    shot(pg, "access-leave.png")
+    pg.evaluate("()=>{ const s=document.querySelector('.mk-strip'); if(s) s.remove(); }")
+
+    # 6 · the shape screen names End in Mind, under Winning Aspiration (Terminology goes)
+    setup_go(pg, "start")
+    pg.wait_for_timeout(800)
+    pg.evaluate("()=>{const b=[...document.querySelectorAll('.csetup .wzstep')].find(x=>x.dataset.step==='shape'); if(b) b.click();}")
+    pg.wait_for_timeout(1200)
+    pg.evaluate("""()=>{
+      const asp = [...document.querySelectorAll('.csetup .stpart')]
+        .find(r => /^Aspiration/.test((r.querySelector('input') || {}).getAttribute ? r.querySelector('input').getAttribute('aria-label') : ''));
+      if (!asp) return;
+      const row = asp.cloneNode(true);
+      const tick = row.firstElementChild; tick.replaceWith(document.createElement('span'));
+      row.classList.remove('off');
+      row.querySelectorAll('input').forEach(i => { i.value = ''; i.placeholder = 'End in Mind'; });
+      row.style.outline = '2px dashed var(--attn)'; row.style.outlineOffset = '3px'; row.style.borderRadius = '6px';
+      asp.after(row);
+      row.scrollIntoView({block:'center'});
+    }""")
+    pg.wait_for_timeout(400)
+    shot(pg, "shape-endinmind.png")
     b.close()

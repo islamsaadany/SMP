@@ -16,6 +16,7 @@ const ROOTS = [
   "app/api/ffp/export",                    // PDF / Word / sheet downloads
   "ffp/lib/domain/sop.ts",                 // the SOP compile
   "ffp/lib/domain/process-report.ts",      // the report's own rules
+  `${PROC}/priorities-document.tsx`,       // the deep-dive priorities page the client signs
 ];
 const FORBIDDEN = /reviewNotes|proposedLabel|proposedNotes|proposedAfterStepId|reviewFinding|ReviewFinding|AI Review|from AI review|ai-review/;
 

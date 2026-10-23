@@ -18,6 +18,32 @@ var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"p
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
 
+/* ── A HIDDEN ROW STAYS ON THE SLIDE, AND SAYS SO (§597) ────────────────
+   Islam, 2026-10-23: *"we need to keep them on the slides showing that they
+   are removed so the presenter can validate the removal."* §233 left a
+   hidden row out of the deck; it is KEPT now, in its own seat with its own
+   number, greyed, wearing the plan page's chip — so the room sees what was
+   set aside and why (the note beside it), and the score above it is still
+   the average of the counted rows alone. Always on, every deck.
+
+   THE SCORE IS UNTOUCHED BY CONSTRUCTION: every reader that averages, asks
+   or counts still goes through `SMPRules.shown()`; only the three drawing
+   helpers below read the whole list. `deckRows` is the list a TABLE draws,
+   `deckTr` opens a row with the mark (and any class the caller already
+   had), and `deckStamp` puts the mark on a row a builder opened bare. The
+   chip is `hidChip()`, the plan page's own (§53.5 — one word for one
+   state). The overview slide's five-name preview keeps `shown()`: it is a
+   preview of what counts, not a table a presenter defends. */
+function deckRows(list){ return list || []; }
+function deckTr(row, cls){
+  var c = (cls || "") + (SMPRules.isHidden(row) ? " hiddenrow" : "");
+  c = c.trim();
+  return c ? '<tr class="' + c + '">' : '<tr>';
+}
+function deckStamp(row, html){
+  return SMPRules.isHidden(row) ? html.replace("<tr>", '<tr class="hiddenrow">') : html;
+}
+
 /* ── WHERE A PICTURE SLIDE CAN GO (§50.3) ─────────────────────────────────
    An anchor is a NAMED POINT IN THIS DECK, written on the slide it names and
    carrying its own label. The position picker is built by generating the deck
@@ -234,9 +260,9 @@ function unitAimSlides(u, bare){
      objectives are the group's Foundation, shown on its own tab, and its
      unit-shaped view holds neither (topAsUnit). */
   var aimAsp = !fnAim && !u.topLayer && compOn(u.ukey, "aspiration"), aimKo = !u.topLayer && compOn(u.ukey, "keyobj");
-  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var aimRows = !aimKo ? "" : deckRows(u.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       (aimNear
         ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
         : '') +
@@ -911,9 +937,9 @@ function deckSlides(u){
      the column, *"it's called annual target"* — which is Performance's own
      word since §239.2, so the projector and the page behind it stop using two
      names for one number. */
-  var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var oRows = deckRows(u.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : "&mdash;") + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
@@ -1251,10 +1277,10 @@ function pillarSlidesOf(u, p, pi, named){
       '</div></section>');
   }
 
-  var mRows = SMPRules.shown(p.measures).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
+  var mRows = deckRows(p.measures).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
       /* §572: the name bold and the Progress larger (Islam, on Option B). */
-      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final dprog ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
@@ -1299,8 +1325,8 @@ function pillarSlidesOf(u, p, pi, named){
      (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
-    SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
-      return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+    deckRows(SMPRules.bdRows(p)).map(function(r, ri){
+      return deckTr(r) + '<td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + hidChip(r) + '</td>' +
         bdCols.map(function(c){
           var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
           /* §564: the plan carries the target alone. */
@@ -1355,12 +1381,19 @@ function pillarSlidesOf(u, p, pi, named){
      A ROW THAT IS OWED A FIGURE SAYS SO. It printed the same em-dash as an
      unmeasurable row, so a review could not tell "nobody has entered this"
      from "there is nothing to enter" (§35). */
-  var tRows = SMPRules.shown(p.tactics).map(function(t, i){
+  var tRows = deckRows(p.tactics).map(function(t, i){
+    /* §597: a hidden tactic's first line opens with the mark; its outcome
+       lines already take it through outSubCls(). The builders below all
+       open their first line with a bare `<tr>`, so it is stamped once here
+       rather than at each of the six returns. */
+    return deckStamp(t, tacticRow(t, i));
+  }).join("");
+  function tacticRow(t, i){
     /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -1402,7 +1435,7 @@ function pillarSlidesOf(u, p, pi, named){
       '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
       '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
-  }).join("");
+  }
   if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
@@ -1485,8 +1518,8 @@ function companyFoundationSlides(){
   var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
   var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
-  var rows = kos.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var rows = (!compOn("group", "keyobj") ? [] : deckRows(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
   }).join("");
@@ -1823,9 +1856,9 @@ function deckSlidesFn(subject){
 }
 
 function capKOSlide(c){
-  var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + '</td>' +
+  var kRows = deckRows(c.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
@@ -1894,11 +1927,11 @@ function projectsPlanPart(target, f, caps, objMode){
     if (!c.own && holderHasKOs(c)) S.push(capKOSlide(c));
     if (!planOn(target)) return;
     if (objMode) {
-      var acts = SMPRules.shown(c.actions);
+      var acts = deckRows(c.actions);
       var aRows = acts.map(function(a3, i){
         var v = msReads(a3);
-        return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
-          '<b>' + esc(a3.name) + '</b>' +
+        return deckTr(a3) + '<td class="idx">' + (i+1) + '</td><td class="dirname">' +
+          '<b>' + esc(a3.name) + '</b>' + hidChip(a3) +
           (a3.owner ? '<span class="dsub">' + esc(a3.owner) + '</span>' : '') + '</td>' +
           '<td class="num">' + esc(a3.due || "\u2014") + '</td>' +
           '<td class="num">' + esc(msStatusWord(a3.status) || "\u2014") + '</td>' +
@@ -1999,8 +2032,8 @@ function projectsPlanPart(target, f, caps, objMode){
                        : esc(SMPRules.isYesNo(o.target) ? SMPRules.ynShown(o.actual)
                                                         : String(o.actual)));
         var notDue = !dueThisCycle(dxWhen(row));
-        return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(o.name) + '</td>' +
+        return deckTr(o, notDue ? "dim" : "") + '<td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(o.name) + hidChip(o) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
           '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
@@ -2009,10 +2042,9 @@ function projectsPlanPart(target, f, caps, objMode){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      /* §233: filtered HERE, never inside dxRows() — the pane's pen
-         shares that builder and the pen shows everything. */
-      var dxRowsHtml = dxRows(p).filter(function(r){
-        return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
+      /* §233 filtered here; §597 keeps every row and marks the hidden ones
+         inside dxRow(), as every other table of the deck now does. */
+      var dxRowsHtml = dxRows(p).map(dxRow).join("");
       /* §236.2: the unit ruling's mirror — between a project's deliverables and
          its milestones is a valid place too, or the two sides drift (§53.5). */
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D"' +
@@ -2024,10 +2056,10 @@ function projectsPlanPart(target, f, caps, objMode){
         '<th class="fig">Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
-      var mRows = SMPRules.shown(p.milestones).map(function(m, i){
+      var mRows = deckRows(p.milestones).map(function(m, i){
         var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(m.name) +
+        return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) + hidChip(m) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
           /* §227: the same cell the deck's tactic tables carry (§50). */

@@ -113,6 +113,7 @@ function RailRow({ rail, workspaceId, hiddenOrigin }: { rail: Rail; workspaceId:
         >
           {rail.name}
         </Link>
+        {rail.deepDive && <span className="flex-none rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-bold text-amber-800">Deep dive</span>}
         <span className="flex-none rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-semibold text-slate-600">
           {rail.stepCount} {rail.stepCount === 1 ? "step" : "steps"}
         </span>

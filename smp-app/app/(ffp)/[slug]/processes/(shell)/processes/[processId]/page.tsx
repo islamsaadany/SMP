@@ -1,3 +1,5 @@
+import { loadPlan, loadPriorityRows } from "@/ffp/lib/data/priorities";
+import { DECISION_LABEL, goesDeep, type Decision } from "@/ffp/lib/domain/priorities";
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import Link from "next/link";
 import { registerReady } from "@/ffp/lib/register-sync";
@@ -96,6 +98,14 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   const me = (session?.user.email ?? "").trim().toLowerCase();
   const canReturnFromReview =
     !!me && (me === (approverRow?.email ?? "").trim().toLowerCase() || me === (process.submittedByEmail ?? "").trim().toLowerCase());
+  // Chosen for a deep dive? Then say so, with where it ranks and how far it has got (Priorities).
+  const deepDive = goesDeep(process.deepDiveDecision)
+    ? await (async () => {
+        const plan = await loadPlan(workspaceId);
+        const row = (await loadPriorityRows(workspaceId, plan.weights)).find((r) => r.id === processId);
+        return row ? { decision: process.deepDiveDecision as Decision, rank: row.rank, done: row.progress.done, total: row.progress.total } : null;
+      })()
+    : null;
   const today = new Date();
   const overdue = isOverdueForReview(process.lifecycleStatus, process.nextReviewDue, today);
   const covered = new Set(controls.filter((c) => c.control && c.stepId).map((c) => c.stepId));
@@ -125,6 +135,16 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
           >
             {overdue ? "Review overdue" : STATUS_LABEL[process.lifecycleStatus]}
           </span>
+          {deepDive && (
+            <Link
+              href={`/${workspaceId}/processes/priorities?step=plan`}
+              title="Why this process is being taken deep, and how far it has got"
+              className="rounded-md border border-amber-500 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
+            >
+              {DECISION_LABEL[deepDive.decision]}
+              {deepDive.rank ? ` · rank ${deepDive.rank}` : ""} · deep dive {deepDive.done} of {deepDive.total}
+            </Link>
+          )}
         </div>
         <p className="mt-1 mb-4 text-sm text-slate-500">
           {process._count.steps} step(s) ·{" "}

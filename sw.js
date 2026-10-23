@@ -553,7 +553,15 @@
    the differ gains type comments; nothing runs differently. The built
    file's bytes changed, which is the whole trigger (§91). Proved held by
    no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.87-app-types";
+/* v6.88-functions-row — §593: units and functions each get their own
+   score on the group and on a division. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v6.89-week-sweep — §588.2: the numbered saves are kept for a week, and a
+   tab older than the list takes the graph once. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.91-day-view-everywhere";
 const ASSETS = [
   "/",
   "/index.html",

@@ -5722,11 +5722,19 @@ function eyeBtn(row, page, acKey){
     '" data-hideac="' + esc(page) + '|' + esc(acKey) + '" aria-pressed="' + (on ? 'true' : 'false') +
     '" title="' + word + '" aria-label="' + word + '">' + eyeSvg(on) + '</button>';
 }
+/* \u00a7592: on the Plan page shown as it stood on a day, a row that has since
+   been removed wears the same quiet ink and a chip of its own \u2014 the reader
+   is told why it is not on today's plan. The same two helpers, so every
+   plan table takes it without being edited (\u00a753.5). */
+function asofGone(row){
+  return !!(row && typeof TRAIL !== "undefined" && TRAIL.asofGone && TRAIL.asofGone(row.id));
+}
 function hidChip(row){
+  if (asofGone(row)) return '<span class="hidchip">Removed since</span>';
   return SMPRules.isHidden(row)
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
-function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
+function hidCls(row){ return (SMPRules.isHidden(row) || asofGone(row)) ? ' class="hiddenrow"' : ''; }
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -9231,7 +9239,15 @@ function renderFnObjReport(fk){
   return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
+/* §598.1: a function's projects or objectives page shows the plan as it
+   stood on a day the same way the unit's does — its holder is read off
+   FUNCTIONS[k] (or UNITS[k] for a unit's own projects) inside the swap. */
 function renderFnProjects(fnKey){
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderFnProjectsBody(fnKey); });
+  return renderFnProjectsBody(fnKey);
+}
+function renderFnProjectsBody(fnKey){
   /* §334: the argument the pillars branch below already makes, one kind of
      thing further out — this page draws a HOLDER's projects, and a capability
      is one. `plansInPillars()` answers for a function and a capability alike,
@@ -10624,7 +10640,22 @@ function unitWayOf(u){
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }
+/* §598: THE PLAN AS IT STOOD ON A DAY. Islam: *"the history of the plans
+   should be on the plans page for the smo to see and review."* When the
+   office has picked a day, the page draws the copy History rebuilt from the
+   change log — the live graph is never touched, so nothing the differ
+   watches moves and nothing can be saved — under a banner naming the day.
+   The pen is off by `mayAuthor()`'s own guard, so every table below draws
+   its read-mode self. */
 function renderUnitPlan(u){
+  /* §598.1: the swap is the store's, so the unit-shaped view is read again
+     inside it — unitLike() then answers with the copy, for a unit, a
+     pillars function and the company alike. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofHere && TRAIL.asofHere())
+    return TRAIL.asofWith(function(){ return renderUnitPlanBody(unitLike(TARGET) || u); });
+  return renderUnitPlanBody(u);
+}
+function renderUnitPlanBody(u){
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? fnObjPlan("u:" + u.ukey) : renderFnProjects("u:" + u.ukey);
   var sel = unitRailPick(u);

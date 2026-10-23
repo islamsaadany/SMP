@@ -325,6 +325,21 @@ a warning); read mode wears *"Hidden — not counted"* for everyone; and every r
 sheet gains a **Hidden** column **at the end**, because a validation range is a
 POSITION (§65).
 
+**§597 — and the row stays on the slide (2026-10-23).** Islam: *"we need to
+keep them on the slides showing that they are removed so the presenter can
+validate the removal."* §233's "left out of the deck" is reversed, and only
+that: the review deck, Present mode, the deck PDF and the .pptx **keep a hidden
+row in its own seat with its own number**, greyed at regular weight, wearing the
+plan page's chip after its name (in the .pptx, the chip's words as a smaller
+run). **Scoring is untouched by construction** — every reader that averages,
+asks or counts still goes through `SMPRules.shown()`; only the deck's drawing
+helpers (`deckRows`/`deckTr`/`deckStamp` in present.js) read the whole list.
+Always on, every deck; the overview slide's five-name preview keeps `shown()`.
+Mockup `design-mockups/hide-from-presentation/2026-10-23_hidden-row-on-slide.html`,
+signed off the same day. Cost stated: a hidden row takes a line again, so a long
+table may split one slide earlier; and anything hidden is back in front of the
+room — a row that should not be SEEN wants the ×, not the eye.
+
 ---
 
 ## 8 · A milestone's collaborators (§227)

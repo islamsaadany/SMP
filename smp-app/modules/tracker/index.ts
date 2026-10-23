@@ -32,7 +32,7 @@ import { APP_JS } from "./script.ts";
 import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
-  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay,
+  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay, ONLY_CHANGE,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -48,7 +48,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
     return new Response(APP_JS.replace("/*%BRK%*/", brk() === "reload-on-add" ? "location.reload();" : "")
       /* The third break puts the blur timer back on the date box — the fault
          Islam hit (§356.14) — which must turn §10 red (§94.5). */
-      .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : ""),
+      .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : "")
+      /* §566: the views put back to pages — a press on a tab loads one. */
+      .replace("/*%TABS%*/", brk() === "tabs-reload" ? "return;" : "")
+      /* §567: the add line's picks carried past the add again. */
+      .replace("st.picked = false; /*%PICKS%*/", brk() === "keep-picks" ? "" : "st.picked = false;"),
       { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
@@ -124,7 +128,7 @@ type Q = Parameters<typeof oneAction>[0];
 type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
 const refused = (status: number, why: string): Out => out(status, { ok: false, why });
-const ONLY = "Only its owner or the client's Super user can change this action.";
+const ONLY = ONLY_CHANGE;
 
 /* ONE RULE FOR EVERY CHANGE (§356.11): with collaborators gone there is no
    longer a "somebody on it" — a `collab` act, from a tab on the build

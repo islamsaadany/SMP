@@ -459,7 +459,71 @@
    in the client's own word (Function on El Abd, Unit or function on Raya).
    The built file's bytes changed, which is the whole trigger (§91). Proved
    held by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.56-register-word";
+/* v6.57-plan-download — §564: the plan download is the presentation without
+   its figures. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+/* v6.59-strategy-button — §570: with no business units the first button is
+   called Strategy and the tab under it Plan. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in
+   any ref's history after fetching every ref (§94.16). */
+/* v6.63-figure-units — §573: a figure's unit a little smaller than its
+   number and in dark grey, dollars written in front, a shorter unit list.
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.64-guided-tour — §574–§574.3: Presentation → Guided tour, a made-up
+   direction walked part by part. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+/* v6.65-tour-cards-and-marker — §574.4–§574.5: the guided tour's cards
+   sized for the projector, and its clear views naming the slide. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v6.66-tour-purpose — §574.6–§574.9: the guided tour's closing slide on
+   what the platform is for, built one objective per press, and every card a
+   size up. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.67-tour-clear-cover — §574.10: the guided tour opens on its cover
+   clear. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.68-tactic-completed — §575: a tactic counted in numbers says Completed
+   only at its whole target. The built file's bytes changed, which is the
+   whole trigger (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v6.69-quarterly-plan — §577: a target planned by quarter as well as by
+   month. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.70-note-lock — §576.1: a red figure gets its note before anything
+   else. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.71-two-screens — §574.11, §578–§582: the guided tour's Where it
+   stands opens clear, the lines under a direction's two readings, line by
+   line, R updating the figures while presenting, and presenting on two
+   screens. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.73-note-lock-fixes — §576.2: a Tab from a red figure ends in its note,
+   and a capability's lock bar is not clipped and asks in the wanted note's
+   words. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.75-clock-stages — §580: the presenter's clock as time runs out, the
+   slide a quarter dark from four over and black from five. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v6.79-stand-lines — §578.1: on a direction's Where it stands, the
+   figures under the two readings sit right after their names. The served
+   stylesheet's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+/* v6.80-rules-types — §585: the shared rules carry type comments that
+   TypeScript's checker reads; nothing runs differently. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.80-rules-types";
 const ASSETS = [
   "/",
   "/index.html",

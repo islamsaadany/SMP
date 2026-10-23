@@ -609,7 +609,13 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§360.9)", JSON.stringify(r.back));
   check(!!r.strip && r.strip.go === "start" && r.strip.lab === "Getting started", "…and Getting started is a STRIP under the head while the set-up is not done", JSON.stringify(r.strip));
   check(!!r.strip && !!r.progress && r.strip.prog.startsWith(r.progress.done + " of " + r.progress.total + " done"), "…counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.strip && r.strip.prog, r.progress]));
-  check(!!r.progress && r.progress.total === 7, "…out of the flow's seven steps", JSON.stringify(r.progress));
+  /* REWRITTEN, NEVER LOOSENED (§218), FOR §544 (spec 066 §6, Islam: "the
+     shape is good, let's build stage 4"): Structure, the divisions, the
+     units, the functions and the capabilities became ONE screen, the shape,
+     so the flow has three steps. This line asked for seven and read red on
+     the right build at every run since (§538.2's fault, in this file); it is
+     still an exact count, so a step added or lost reads red again. */
+  check(!!r.progress && r.progress.total === 3, "…out of the flow's three steps (§544)", JSON.stringify(r.progress));
   check(r.startRow === null && !r.groups.includes("look"), "…with the start def OUT of the groups, and no Branding group (it lives inside the flow now)", JSON.stringify([r.startRow, r.groups]));
   /* THE STRIP OPENS THE FLOW */
   const strip = page.locator('.setuprail .railstart[data-setupgo="start"]');
@@ -617,11 +623,13 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   else fail("pressing the strip", "no strip to press");
   r = await readRail();
   check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing it opens the flow at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
-  check(r.steps.join(",") === "client,structure,cos,units,fns,caps,office" && r.step === "client",
+  check(r.steps.join(",") === "client,shape,office" && r.step === "client",
     /* REWRITTEN, NEVER LOOSENED (§218): §404.4 put Structure second, the
        divisions before the units, and asked the words on Structure's cards
-       rather than a Words step of their own. Still seven, still client first. */
-    "…on step 1 of seven, the client itself (§404.4's order)", JSON.stringify([r.steps, r.step]));
+       rather than a Words step of their own. §544 then made those five one
+       step, the shape: three now, still client first, still the whole list
+       asked in order, never a count alone. */
+    "…on step 1 of three, the client itself (§404.4's order, §544)", JSON.stringify([r.steps, r.step]));
   check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
   /* §489: REWRITTEN, NEVER LOOSENED (§218, §214.3). §461 made the client's
      door mark the decks' mark too and DELETED Branding's group-mark upload

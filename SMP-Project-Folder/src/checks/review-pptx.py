@@ -257,11 +257,20 @@ def main():
             banded = [c for c in cells
                       if any(('val="%s"' % h) in c for h in BANDS) and 'b="1"' in c]
             ok("a score wears its band, in bold", len(banded) >= 1, len(banded))
-            two = [c for c in cells if c.count("<a:r>") == 2 and 'i="1"' in c]
-            ok("the benchmark is a second, italic run in the same cell",
+            # §572 REWROTE THESE: they asked for the benchmark as a second,
+            # italic run beside the figure ("13.4% / 14%"). It is a line of its
+            # own under the figure now, saying what it is — "due 14%" (Islam's
+            # Option B) — so it is a second PARAGRAPH, quiet and smaller.
+            paras = [re.findall(r"<a:p>(.*?)</a:p>", c, re.S) for c in cells]
+            two = [ps for ps in paras if len(ps) == 2 and
+                   "".join(re.findall(r"<a:t>([^<]*)</a:t>", ps[1])).startswith("due ")]
+            ok("what is due is a second line under the figure, saying due",
                len(two) >= 1, len(two))
             ok("and it is the quieter of the two",
-               any('val="5E6E88"' in c for c in two), None)
+               any('val="5E6E88"' in ps[1] for ps in two), None)
+            szs = [[int(x) for x in re.findall(r'<a:rPr[^>]*\bsz="(\d+)"', "".join(ps))] for ps in two]
+            ok("and it is set smaller than the figure it stands under (§568, §572)",
+               any(len(z) == 2 and z[1] < z[0] for z in szs), szs[:3])
 
         # ── §5 ───────────────────────────────────────────────────────────
         print("\n§5 · a heading fits its own column")

@@ -594,7 +594,9 @@ function measureRows(ms, opts){
                (SMPRules.isHidden(m) ? ' class="hiddenrow"'
                 : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
-               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
+               /* §572: on Performance the name is bold, as the slide's is. */
+               '<span class="idx-n">' + (i+1) + '</span></td><td>' +
+               (opts.unscored ? esc(m.name) : '<b class="mname">' + esc(m.name) + '</b>') + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
                /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
                   branch names the reported note (§255) and main reads the
@@ -624,11 +626,11 @@ function measureRows(ms, opts){
        loses its scale and a scaled one loses what it is measured against. */
     var dueLab = measureDueLabel(m);
     var actCell = (m.actual == null || m.actual === "") ? '&mdash;'
-      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b> <i>/ ' + esc(dueLab) + '</i></span>'
+      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b></span>' + pdueLine(figHtml(dueLab))
                : figShown(m);
     return head + '<td class="num">' + actCell + '</td>' +
            (scored
-             ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
+             ? '<td class="num final prog" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
              /* §276: a count with nothing owed yet has not been asked, which is
                 a different thing from a row that cannot be scored, and it wears
                 the tactics' own "not yet due" pill rather than the alarm one. */
@@ -847,7 +849,15 @@ function outcomeShown(t){
   if (!o || o.actual == null || o.actual === "") return null;
   /* §300: TEXT, not html — the caller escapes — and never joined with a unit,
      because `Y/N` is the unit and "Done Y/N" is not an answer anybody gave. */
-  if (SMPRules.isYesNo(o.target)) return SMPRules.ynShown(o.actual);
+  /* §571: AS A FIGURE — the Status beside it says the word, so YTD actual
+     says how far: Done 100%, Not started 0%, In progress its own per cent. */
+  if (SMPRules.isYesNo(o.target)) {
+    var st = SMPRules.ynState(o.actual);
+    if (st.status === "done") return "100%";
+    if (st.status === "todo") return "0%";
+    if (st.status === "wip" && st.pct != null) return st.pct + "%";
+    return SMPRules.ynShown(o.actual);
+  }
   return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
 }
 /* The target as it is written on the plan — the whole year's number, unit and
@@ -890,12 +900,12 @@ function outFigCell(t, x){
   if (shown == null) {
     var b = measureDueLabel(o, share);
     return '<td class="cc"><span class="pill none">Not reported</span>' +
-      (b ? '<span class="why" style="margin:2px 0 0">due at ' + esc(b) + '</span>' : '') + '</td>';
+      (b ? '<span class="why" style="margin:2px 0 0">due at ' + figHtml(b) + '</span>' : '') + '</td>';
   }
   var bp = benchBeside(o, share), sc = oneOutcomeScore(t, o);
-  return '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-    (bp ? ' <i>/ ' + esc(bp) + '</i>' : '') +
-    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span></td>';
+  return '<td class="num"><span class="pair"><b>' + figHtml(shown) + '</b>' +
+    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span>' +
+    pdueLine(bp ? figHtml(bp) : '') + '</td>';
 }
 function outRowspan(n){ return n ? ' rowspan="' + (n + 1) + '"' : ''; }
 function outPad(n){ return n % 2 ? '<tr class="opad" hidden></tr>' : ''; }
@@ -931,7 +941,7 @@ function planOutRows(t, ed, tdCls){
         /* the same fold the first line has below 880 (§249) */
         '<span class="subhd narrowtgt">' + (emptyTgt ? '<span class="missing">Missing</span>'
           : SMPRules.isYesNo(x.outTarget) ? tgtShown(x.outTarget)
-          : esc(x.outDir || "\u2265") + ' ' + esc(x.outTarget)) + '</span>';
+          : esc(x.outDir || "\u2265") + ' ' + figHtml(x.outTarget)) + '</span>';
     var tgt = ed
       ? outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false)
       : (emptyTgt ? '<span class="missing">Missing</span>' : tgtShown(x.outTarget));
@@ -961,9 +971,9 @@ function tacticRows(ts, unitKey){
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     /* §419: the word is derived, never read off `t.status` (RHI's words). */
-    var sk = tacticStatusKey(t);
-    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
-                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
+    /* §571: the word, and Delayed under it when the tactic is late. */
+    var status = '<span class="pill ' + tacticBand(t) + '">' + esc(tacticStatusWord(t)) + '</span>' +
+                 (tacticDelayed(t) ? '<span class="latemark">Delayed</span>' : '');
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign
@@ -975,10 +985,10 @@ function tacticRows(ts, unitKey){
       ? '<td class="cc" colspan="2"></td>'
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
-        (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
-      : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-        (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
-        '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
+        (bench ? '<span class="why" style="margin:2px 0 0">due at ' + figHtml(bench) + '</span>' : '') + '</td>'
+      : '<td class="num"><span class="pair"><b>' + figHtml(shown) + '</b></span>' +
+        pdueLine(benchPair ? figHtml(benchPair) : '') + '</td>' +
+        '<td class="num final prog" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     /* §414: SEVERAL OUTCOMES. Each outcome's figure, its benchmark and its
        own score sit on its own line; Progress spans them and is the AVERAGE,
        saying so, because a number that is an average of two others and does
@@ -992,7 +1002,7 @@ function tacticRows(ts, unitKey){
           (r == null ? '<span class="why">&mdash;</span>'
                      : pct(r) + '<span class="oavg">average of ' + lines.length + '</span>') + '</td>';
       subs = scoredExtras(t).map(function(x, k){
-        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + outcomeCell(x) + '</td>' +
+        return '<tr class="' + outSubCls(t) + '"><td class="outc">' + otag(x.id) + outcomeCell(x) + '</td>' +
           (due ? figs[k + 1] : '') + '</tr>';
       }).join('') + outPad(nEx);
     }
@@ -1015,7 +1025,7 @@ function tacticRows(ts, unitKey){
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
       repNote(t) + '</td>' +
-      '<td>' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      '<td class="outc">' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
       '<td' + rs + '>' + qs(t) + '</td><td class="cc"' + rs + '>' + status + '</td>' + tail + '</tr>' + subs;
   }).join("");
@@ -1213,16 +1223,24 @@ function bdReadTable(p, mode){
            is drawn plain with its target behind it, which is the rule two
            tables up: coloured means a score, plain with a target behind it
            means a reported fact. */
-        if (!String(a).trim()) return '<td class="num"><span class="nobody">&mdash;</span></td>';
-        var sc = bdCellScore(r, c);
-        return '<td class="num"><span class="pair">' +
-          (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
-                      : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') +
-          (String(t).trim() ? ' <i>/ ' + tgtShown(t) + '</i>' : '') + '</span></td>';
+        /* §568: AND THE TWO ARE TWO COLUMNS, the target then the actual, as
+           §557 laid them out on Reporting (Islam: *"after splitting to 2
+           columns in both the performance and the slides"*). The colouring
+           rule above is unchanged; only the slash goes. */
+        var dash = '<td class="num"><span class="nobody">&mdash;</span></td>';
+        var sc = String(a).trim() ? bdCellScore(r, c) : null;
+        return (String(t).trim() ? '<td class="num">' + tgtShown(t) + '</td>' : dash) +
+          (!String(a).trim() ? dash : '<td class="num">' +
+            (sc == null ? '<b>' + figHtml(unitTight(a)) + '</b>'
+                        : '<b style="color:' + bandInk(sc) + '">' + figHtml(unitTight(a)) + '</b>') + '</td>');
       }).join("") + '</tr>';
   }).join("");
   return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
-      .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
+      .concat([].concat.apply([], cols.map(function(c){
+        var h = [{ h:bdColHead(p, c), cls:"cc" }];
+        if (mode !== "figures") return h;
+        return h.concat([{ h:"Actual", cls:"cc" }]);
+      }))),
     rows);
 }
 /* §343: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
@@ -1563,7 +1581,7 @@ function companyPresentMenu(){
        onto the projector — a second door onto the same evening, beside a
        flow that already carries the company last. The flow is the door
        now, and it is first. */
-    items = master +
+    items = master + exTourItem() +
       '<button role="menuitem" data-deckpdf="group">Download the presentation' +
         '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
       slides + dl;
@@ -1685,7 +1703,18 @@ function presentMenu(kind, key){
     : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + '</div></details>';
+    '<div class="menu" role="menu">' + present + pdf + slides + dl + master + exTourItem() +
+    '</div></details>';
+}
+/* §574: THE GUIDED TOUR, UNDER MASTER PRESENTATION in both menus that carry
+   it, and for the same people — Islam: *"from the options of presentation
+   drop down below the master presentation"*. It names no subject because it
+   tours none of them: the direction it walks is made up (present.js). */
+function exTourItem(){
+  return SMPRules.mayMasterPresent(world(), viewer())
+    ? '<button role="menuitem" data-extour="1">Guided tour' +
+      '<span class="dlsub">How to read the slides, on a made-up direction</span></button>'
+    : "";
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────
@@ -3907,9 +3936,14 @@ function textOr(page, value, cls, setter){
    function, where `capNoteBox` passes `want:false` ALWAYS (§279's own recorded
    not-done), so EVERY note there leaves the tab path and the key is the only
    road to it — said here rather than discovered on that page. */
-function noteBox(hook, id, value, want){
+/* §576: `subj` is the subject the row belongs to, written as `data-repu` the
+   way `repEntry` writes it — My reporting draws rows from several units, so
+   the note's handler must resolve the row against ITS unit rather than the
+   page it is standing on (§345). Absent everywhere else, as before. */
+function noteBox(hook, id, value, want, subj){
   return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
+    '="' + esc(id) + '"' + (subj ? ' data-repu="' + esc(subj) + '"' : '') +
+    ' rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
     (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
@@ -4864,7 +4898,7 @@ function koYearToggle(){
    the next bare number typed into the other horizon — "30 Maintain share",
    silently. The list is the vocabulary the picker offers (§199.4), so it is
    exactly the set of values this control can ever have written. */
-function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0; }
+function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0 || RETIRED_UNITS.indexOf(s) > -1; }
 function unitOfTarget(v){
   var s = String(v == null ? "" : v).trim();
   if (!s) return "";
@@ -5054,7 +5088,39 @@ var MONTHOPEN = null;
    on every repaint beside `FIELDS` and `KOLISTS` (§96), because a button
    carrying an index from the last paint acts on the paint before it. */
 var MONTHREG = [];
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
+   Which way a row is planned is read off what it HOLDS (`SMPRules.planBy`),
+   so there is no stored switch to drift from the figures. The one thing the
+   data cannot say is which way an EMPTY plan is being started, so that pick
+   lives here for the session and never in a save: a row nobody typed into
+   and a row whose plan was cleared must stay byte-identical (§50.6).
+   `MONTHCARRY` is the line saying where carried-across figures came from;
+   it is drawn while that drawer stays open and dropped when it closes. */
+var MONTHMODE = {};
+var MONTHCARRY = null;
 function monthlyKey(row, fld){ return String(row && row.id) + "|" + fld; }
+/* The field the quarters live in, beside the months (§248's pairing again). */
+function quarterlyFld(fld){ return fld === "outMonthly" ? "outQuarterly" : "quarterly"; }
+/* "q" or "m" for the drawer. What the row holds decides; only a plan with
+   nothing typed either way falls back on the pick. */
+function monthlyMode(row, fld){
+  var sh = monthlyShape(row, fld);
+  if (SMPRules.planBy(sh) === "quarter") return "q";
+  if (monthlyTyped(sh.monthly)) return "m";
+  return MONTHMODE[monthlyKey(row, fld)] === "q" ? "q" : "m";
+}
+/* Anything typed at all, readable or not — a word in a box is still
+   something the switch must carry rather than lose. */
+function monthlyTyped(a){
+  return Array.isArray(a) && a.some(function(v){ return v != null && String(v).trim() !== ""; });
+}
+/* How many of how many are set, in the drawer's own words. */
+function monthlyCount(row, fld){
+  var sh = monthlyShape(row, fld);
+  return monthlyMode(row, fld) === "q"
+    ? { n: SMPRules.quarterlySet(sh), of: 4, one: "quarter", many: "quarters" }
+    : { n: SMPRules.monthlySet(sh), of: 12, one: "month", many: "months" };
+}
 /* WHAT THE RULES READ. A measure and a key objective ARE that shape already;
    a tactic's outcome is five fields on the tactic (§248). `outcomeOf` does
    this same mapping and is deliberately NOT asked here: it refuses an outcome
@@ -5063,7 +5129,7 @@ function monthlyKey(row, fld){ return String(row && row.id) + "|" + fld; }
    yet. */
 function monthlyShape(row, fld){
   return fld === "outMonthly"
-    ? { compile: row.outCompile, monthly: row.outMonthly }
+    ? { compile: row.outCompile, monthly: row.outMonthly, quarterly: row.outQuarterly }
     : row;
 }
 /* ── TWELVE CELLS, FOUR ACROSS AND THREE DOWN (§278.2) ─────────────
@@ -5098,20 +5164,31 @@ function monthlySvg(){
    somewhere). `aria-label` too, or the button has no accessible name at all
    once the text is gone. */
 function monthlyChip(row, fld){
-  var n = SMPRules.monthlySet(monthlyShape(row, fld)),
-      k = monthlyKey(row, fld), open = MONTHOPEN === k;
-  var word = n ? n + " of 12 months set — the target month by month"
-               : "Set this target month by month";
-  return '<button class="mpopen' + (n ? ' on' : '') + '" data-mpopen="' + esc(k) +
+  var k = monthlyKey(row, fld), open = MONTHOPEN === k, w = monthlyChipWord(row, fld);
+  return '<button class="mpopen' + (w.n ? ' on' : '') + '" data-mpopen="' + esc(k) +
     '" aria-expanded="' + (open ? 'true' : 'false') +
-    '" title="' + esc(word) + '" aria-label="' + esc(word) + '">' +
+    '" title="' + esc(w.word) + '" aria-label="' + esc(w.word) + '">' +
     monthlySvg() + '</button>';
+}
+/* §577: THE HOVER NAMES THE WAY THE ROW IS PLANNED, and its own builder
+   because `monthlyRefresh` rewrites it in place as the first figure lands —
+   the mark used to light only on the next repaint, so a plan somebody had
+   just started was not findable until they left the pillar and came back. */
+function monthlyChipWord(row, fld){
+  var c = monthlyCount(row, fld);
+  return { n: c.n, word: c.n
+    ? c.n + " of " + c.of + " " + c.many + " set — the target " + c.one + " by " + c.one
+    : "Set this target by month or by quarter" };
 }
 /* The sentence under the boxes. Its own builder because it is rewritten IN
    PLACE as somebody types — a repaint under a typing hand destroys the box
    being typed into (§71.2), which is why §145's counts refresh this way too. */
 function monthlyMsg(row, fld, tfld){
-  var sh = monthlyShape(row, fld), n = SMPRules.monthlySet(sh);
+  /* §577: ONE SENTENCE FOR BOTH WAYS OF PLANNING, its nouns read off the
+     drawer's mode — four of the same sentences again would be the drift
+     §53.5 exists to stop. */
+  var sh = monthlyShape(row, fld), cn = monthlyCount(row, fld), n = cn.n,
+      of = cn.of, one = cn.one, many = cn.many;
   /* TWO SPANS AND A SPACE. `.mpfoot` is a flex row with a gap, and these two
      are wrapped in ONE flex item — so the gap falls between the message and
      the Clear button, and nothing at all separated these: the footer read
@@ -5126,9 +5203,9 @@ function monthlyMsg(row, fld, tfld){
      row with no compile rule is stuck at month one rather than at month
      twelve, so the sentence that says why has to arrive there too. */
   if (!c)
-    return '<span class="part">' + n + ' of 12 months set — not in force yet</span>' +
+    return '<span class="part">' + n + ' of ' + of + ' ' + many + ' set — not in force yet</span>' +
       ' <span>This row has no compile rule, so the platform cannot tell what ' +
-      'the months add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
+      'the ' + many + ' add up to. Set ' + esc(orList(SMPRules.COMPILES)) + '.</span>';
   /* §276's Count adds up like Sum and is then owed in whole ones, so it says
      the same word — the rounding is what the figure beside it shows. */
   var word = (c === "sum" || c === "count") ? "Adds up to"
@@ -5138,26 +5215,29 @@ function monthlyMsg(row, fld, tfld){
      taking typing the moment the first month lands (§61: the page says what
      happened rather than leaving somebody to find it). */
   if (!n)
-    return '<span class="part">No month set yet</span>' +
-      ' <span>Fill a month and the target above becomes what the months set ' +
+    return '<span class="part">No ' + one + ' set yet</span>' +
+      ' <span>Fill a ' + one + ' and the target above becomes what the ' + many + ' set ' +
       'come to — it is no longer typed by hand.</span>';
   /* §555: THE TARGET IS DERIVED FROM THE FIRST MONTH, AND THE YEAR IS NOT.
      Two different things, and the sentence says both — what the figure above
      now is, and that the row is still measured flat until the twelfth lands.
      §278's wording said only the second, on a build where the first was not
-     true yet. */
-  if (n < 12)
-    return '<span class="part">' + n + ' of 12 months set</span>' +
+     true yet.
+     §569: AND NOW THE YEAR IS TOO — the months set are the plan, so the
+     second half says what an empty month means instead (Islam's wording,
+     agreed before this was built). */
+  if (n < of)
+    return '<span class="part">' + n + ' of ' + of + ' ' + many + ' set</span>' +
       ' <span>' + word + ' <b>' + esc(monthlyAnnualText(row, fld, tfld)) +
-      '</b> — the target, from the months set so far. Until all twelve are ' +
-      'filled, it is still spread evenly across the year.</span>';
+      '</b> — the target, from the ' + many + ' set so far. A ' + one + ' left empty ' +
+      'counts as nothing planned.</span>';
   /* THE SPACE BEFORE THE SECOND HALF, which this branch never had: `.mpfoot`
      is a flex row and these two are ONE flex item, so the gap falls between
      the message and the Clear button and nothing at all separated them — the
      complete case read "12 of 12 months setAdds up to 300M EGP". The very
      fault §278's own comment describes, two lines above, in the branch it was
      not written about. */
-  return '<b>12 of 12 months set</b> <span>' + word + ' <b>' +
+  return '<b>' + of + ' of ' + of + ' ' + many + ' set</b> <span>' + word + ' <b>' +
     esc(monthlyAnnualText(row, fld, tfld)) + '</b> — the annual target</span>';
 }
 /* The derived year, written the way the target is written — through the
@@ -5174,8 +5254,8 @@ function monthlyAnnualText(row, fld, tfld){
 }
 /* IS THE TARGET THIS ROW'S TO TYPE, OR THE MONTHS' TO DERIVE (§555). The one
    question the locked box and the refresh both ask, so the box and the figure
-   inside it can never disagree about which it is. NOT `monthlyInForce`, which
-   is about PRORATION and still waits for all twelve. */
+   inside it can never disagree about which it is. `monthlyInForce`, which is
+   about PRORATION, waited for all twelve until §569 and now answers the same. */
 function monthlyDerived(row, fld){
   return SMPRules.monthlySoFar(monthlyShape(row, fld)) != null;
 }
@@ -5208,15 +5288,26 @@ function monthlyAfterCompile(row, fld){
    stored as null, and the LAST one cleared deletes the key (§50.6): a row
    that never had a monthly plan and one whose plan was cleared must be
    byte-identical, or every save carries a change nobody made. */
-function monthlyWrite(row, fld, tfld, i, v){
-  var a = Array.isArray(row[fld]) ? row[fld].slice() : [];
-  while (a.length < 12) a.push(null);
-  a.length = 12;
+/* §577: `q` WRITES A QUARTER — the same write into the four beside the
+   twelve, so a quarter is stored, cleared and derived from exactly as a
+   month is. */
+function monthlyWrite(row, fld, tfld, i, v, q){
+  var pf = q ? quarterlyFld(fld) : fld, len = q ? 4 : 12;
+  var a = Array.isArray(row[pf]) ? row[pf].slice() : [];
+  while (a.length < len) a.push(null);
+  a.length = len;
   var s = String(v == null ? "" : v).trim();
   a[i] = !s ? null : (SMPRules.monthSet(s) ? Number(s.replace(/,/g, "")) : s);
   var any = false;
-  for (var k = 0; k < 12; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
-  if (any) row[fld] = a; else delete row[fld];
+  for (var k = 0; k < len; k++) if (a[k] != null && String(a[k]).trim() !== "") any = true;
+  if (any) row[pf] = a; else delete row[pf];
+  /* §577: a figure typed over a carried one makes "carried across" untrue of
+     it, so the line goes — in place, since this is a typing hand (§71.2). */
+  if (MONTHCARRY && MONTHCARRY.key === monthlyKey(row, fld)) {
+    MONTHCARRY = null;
+    var note = document.querySelector('tr.mprow .mpnote');
+    if (note) note.remove();
+  }
   /* THE ANNUAL TARGET IS DERIVED THE MOMENT THE FIRST MONTH LANDS (§555, and
      §278's twelfth before it), and written into the target field itself
      rather than left to be worked out by every reader. That is what makes the
@@ -5263,7 +5354,15 @@ function monthlyRefresh(row, fld, tfld){
   var msg = document.querySelector('.mpmsg' + sel);
   if (msg) msg.innerHTML = monthlyMsg(row, fld, tfld);
   var clr = document.querySelector('.mpbtn' + sel);
-  if (clr) clr.hidden = !SMPRules.monthlySet(monthlyShape(row, fld));
+  if (clr) clr.hidden = !monthlyCount(row, fld).n;
+  /* §577: AND THE MARK, which lights the moment a figure lands rather than on
+     the next repaint (§278.2: lit "once anything has been typed"). */
+  var chip = document.querySelector('[data-mpopen="' + k.replace(/"/g, '\\"') + '"]');
+  if (chip) {
+    var w = monthlyChipWord(row, fld);
+    if (w.n) chip.classList.add("on"); else chip.classList.remove("on");
+    chip.title = w.word; chip.setAttribute("aria-label", w.word);
+  }
   var td = document.querySelector('td[data-mptgt="' + k.replace(/"/g, '\\"') + '"]');
   if (td) {
     var derived = monthlyDerived(row, fld);
@@ -5310,27 +5409,92 @@ function monthlyTgtAttrs(row, fld, partOnly){
    drew twelve read-only labels on Foundation — twelve boxes that looked like
    boxes and stored nothing (§96, found by driving it rather than by reading
    it). The four tables sit on three different pages; each says which. */
+/* §577: AND IT DRAWS THE QUARTERS TOO — four boxes where the twelve were,
+   each labelled with the months it covers so "Q3" never has to be worked
+   out, and 112px against a month's 72 to carry that label. Measured on the
+   mockup Islam signed off: the four sit on one line at 1600, 1280 and 1100,
+   and the switch costs the drawer 12px (147 to 159 at 1600). */
 function monthlyDrawer(row, fld, tfld, cols, title, page){
   var k = monthlyKey(row, fld), unit = unitOfTarget(row[tfld]),
-      a = Array.isArray(row[fld]) ? row[fld] : [], boxes = "";
-  for (var i = 0; i < 12; i++) {
-    boxes += '<label class="mpm"><span>' + SMPRules.MONTH_NAMES[i] + '</span>' +
+      q = monthlyMode(row, fld) === "q", pf = q ? quarterlyFld(fld) : fld,
+      a = Array.isArray(row[pf]) ? row[pf] : [], boxes = "", N = SMPRules.MONTH_NAMES;
+  for (var i = 0; i < (q ? 4 : 12); i++) {
+    boxes += '<label class="mpm' + (q ? ' mpq' : '') + '"><span>' +
+      (q ? SMPRules.QUARTER_NAMES[i] + ' <i>· ' + N[i * 3] + '–' + N[i * 3 + 2] + '</i>'
+         : N[i]) + '</span>' +
       inputOr(page || "plan", a[i] == null ? "" : String(a[i]), "mono",
-              (function(j){ return function(v){ monthlyWrite(row, fld, tfld, j, v); }; })(i)) +
+              (function(j){ return function(v){ monthlyWrite(row, fld, tfld, j, v, q); }; })(i)) +
       '</label>';
   }
+  var reg = MONTHREG.push({ row: row, fld: fld, tfld: tfld, q: q }) - 1;
+  var carry = MONTHCARRY && MONTHCARRY.key === k ? MONTHCARRY.text : "";
   return '<tr class="mprow"><td class="idx"></td><td colspan="' + Math.max(1, cols - 1) + '">' +
-    '<div class="mpwrap"><div class="mphead">Monthly plan' +
-    (title ? " — " + esc(title) : "") +
+    '<div class="mpwrap"><div class="mphead"><span>' + (q ? 'Quarterly plan' : 'Monthly plan') +
+    (title ? " — " + esc(title) : "") + '</span>' +
     (unit ? '<em>in ' + esc(unit) + ', the target’s own unit</em>'
           : '<em>in the target’s own unit</em>') +
+    monthlySeg(row, fld, q, reg) +
     '</div><div class="mpgrid">' + boxes + '</div>' +
     '<div class="mpfoot"><span class="mpmsg" data-mpkey="' + esc(k) + '">' +
     monthlyMsg(row, fld, tfld) + '</span>' +
-    '<button class="mpbtn" data-mpkey="' + esc(k) + '" data-mpclear="' +
-    (MONTHREG.push({ row: row, fld: fld, tfld: tfld }) - 1) + '"' +
-    (SMPRules.monthlySet(monthlyShape(row, fld)) ? "" : " hidden") +
-    '>Clear the monthly plan</button></div></div></td></tr>';
+    '<button class="mpbtn" data-mpkey="' + esc(k) + '" data-mpclear="' + reg + '"' +
+    (monthlyCount(row, fld).n ? "" : " hidden") +
+    '>Clear the ' + (q ? 'quarterly' : 'monthly') + ' plan</button></div>' +
+    (carry ? '<div class="mpfoot mpnote">' + esc(carry) + '</div>' : '') +
+    '</div></td></tr>';
+}
+/* ── THE SWITCH (§577) ────────────────────────────────────────────────
+   The two-way segmented pair the platform already uses (`.askseg`'s, declared
+   with it), the chosen half lit. On a row holding figures and no compile rule
+   the other half is DISABLED and says why: the figures cannot be carried
+   across without knowing whether a quarter is its months added up or the last
+   of them (§278: never guess a number nobody chose). An empty plan switches
+   freely — there is nothing to carry. */
+function monthlySeg(row, fld, q, reg){
+  var sh = monthlyShape(row, fld);
+  var stuck = (monthlyTyped(sh.monthly) || monthlyTyped(sh.quarterly)) &&
+              !SMPRules.monthlyCompile(sh);
+  var half = function(mode, word){
+    var on = (mode === "q") === q;
+    return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
+      '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
+      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      '>' + word + '</button>';
+  };
+  return '<span class="mpseg" role="group" aria-label="Plan this target">' +
+    half("m", "By month") + half("q", "By quarter") + '</span>';
+}
+/* PRESSING THE OTHER HALF. Carries what is typed into the other shape by the
+   row's own rule (`SMPRules.quartersFromMonths` / `monthsFromQuarters`, Islam's
+   (2a)), deletes what it came from so a row never holds both, and re-derives
+   the target through the same ending as a typed figure. Answers whether
+   anything changed; the caller saves and repaints, because this is a PRESS
+   and a repaint under it is safe (§71.2). */
+function monthlySwitch(e, mode){
+  var row = e.row, fld = e.fld, tfld = e.tfld, k = monthlyKey(row, fld),
+      qf = quarterlyFld(fld), sh = monthlyShape(row, fld);
+  if ((mode === "q") === (monthlyMode(row, fld) === "q")) return false;
+  MONTHMODE[k] = mode;
+  MONTHCARRY = null;
+  if (!monthlyTyped(sh.monthly) && !monthlyTyped(sh.quarterly)) return true;
+  var c = SMPRules.monthlyCompile(sh), toQ = mode === "q";
+  var moved = toQ ? SMPRules.quartersFromMonths(sh.monthly, sh.compile)
+                  : SMPRules.monthsFromQuarters(sh.quarterly, sh.compile);
+  if (!moved) return true;
+  if (toQ) { row[qf] = moved; delete row[fld]; }
+  else { row[fld] = moved; delete row[qf]; }
+  var spread = c === "sum" || c === "count";
+  MONTHCARRY = { key: k, text: toQ
+    ? "Carried across from the months: each quarter is " +
+      (spread ? "what its three months added up to."
+       : c === "average" ? "the average of its months." : "its last month set.")
+    : "Carried across from the quarters: " +
+      (spread ? "each quarter is spread evenly over its three months."
+              : "each month takes its quarter’s figure.") +
+      " Change any month to reshape it." };
+  var ann = monthlyAnnualText(row, fld, tfld);
+  if (ann) { row[tfld] = ann; gapLift(row, tfld); }
+  return true;
 }
 /* Drawn under the row only while its own chip is open. One at a time, because
    the drawer is 147px and two of them push the row being compared off the
@@ -5345,7 +5509,10 @@ function monthlyRowFor(row, fld, tfld, cols, title, page){
    cell whose meaning changed rather than under the row's name, where it would
    stack under a reporter's own note (§255). */
 function monthlyMark(row){
-  return SMPRules.monthlyInForce(row) ? '<span class="subhd">by month</span>' : '';
+  /* §577: "by quarter" where the quarters are what the row is read against. */
+  return SMPRules.monthlyInForce(row)
+    ? '<span class="subhd">by ' + (SMPRules.planBy(row) === "quarter" ? "quarter" : "month") + '</span>'
+    : '';
 }
 
 /* Is this row judged by a yes or a no? Asked by every surface that decides
@@ -5439,8 +5606,25 @@ function fillUnitCell(page, acKey, m, ctx){
 /* §257: `Y/N` SITS WITH `#`, not with the currencies — it belongs to the
    half of the list that says what a row is COUNTED in rather than valued in,
    and it is the one entry saying the row carries no number at all. */
+/* §573: A SHORTER LIST, AND THE DOLLARS IN FULL. Islam: *"d, h and SQM can be
+   just # and maybe add a $ unit"* — for new rows only. SQM, d and h leave the
+   list and a new row counts with `#`, its name saying what it counts; a row
+   that already holds one keeps it (`RETIRED_UNITS`, and the rule below that
+   offers a stored value). The dollars gain a bare `USD` and `B USD` beside
+   K and M, reversing §239.5's "K and M only" at his word.
+
+   STORED AS USD, SHOWN AS $. The list keeps the spelling the plan already
+   holds (`6.2M USD`), so an existing dollar row is ON the list rather than
+   offered beside it, and a workbook still says what currency it is. The
+   picker labels them `$`, `$K`, `$M`, `$B` (`UNIT_LABELS`), and every figure
+   printed reads `$8M` (`figHtml`). */
 var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
-                    "K USD", "M USD", "SQM", "d", "h"];
+                    "USD", "K USD", "M USD", "B USD"];
+/* Off the list, still read: a row holding one is not losing its unit. */
+var RETIRED_UNITS = ["SQM", "d", "h"];
+var UNIT_LABELS = { "USD": "$", "K USD": "$K", "M USD": "$M", "B USD": "$B" };
+/* The same name where the unit is read rather than picked. */
+function unitLabel(u){ return UNIT_LABELS[u] || u; }
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
    `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
@@ -5453,11 +5637,11 @@ var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
 /* A SCALED CURRENCY IS ONE TOKEN whichever currency it is, so the dollars
    join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
    convention the plan already uses for `6.2B EGP`. */
-var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1, "B USD":1 };
 function targetUnitOpts(cur){
   var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
-  return opts;
+  return opts.map(function(u){ return UNIT_LABELS[u] ? { v: u, label: unitLabel(u) } : u; });
 }
 
 function koView(list, isGroup, acKey){
@@ -5626,7 +5810,7 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + (pg
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(page, acKey, m) || esc(unitLabel(targetUnitOf(m))))) + '</td>' +
         '<td class="cc">' + (pg && yn ? offInput(targetKeep(m.target3y || ""))
           : gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: tgtShown })) + '</td>' +
@@ -6739,8 +6923,30 @@ function renderFocusBoard(){
    is not fixed from this page, so the chip is a door to where it is (§16.7 —
    a count that cannot take you to what it counts makes work; a door that
    admits what it cannot do is not the same fault). */
+/* ── §576: THE BAR THAT SAYS WHICH NOTE COMES FIRST ────────────────────
+   `NOTELOCK` is worked out by paint() before the render (`noteLockOf`), and
+   while it holds a row THIS bar is drawn in the "to finish" bar's place — the
+   mockup Islam approved: one bar, naming the row, and Go to it. Drawn for
+   whoever is locked, not only for whoever may submit, because a bounded
+   reporter and a tactic's owner are locked too and are the people most in
+   need of being told why every box went grey. It names the FIRST row and
+   counts the rest, so the person is never handed a list to work out. */
+var NOTELOCK = null;
+function noteLockBar(){
+  var lk = NOTELOCK;
+  if (!lk) return "";
+  var x = lk.rows[0], n = lk.rows.length;
+  var name = String((x.obj && x.obj.name) || "").trim() || "A figure";
+  var band = bandOf(rowReads(x)).label || "Off track";
+  return '<div class="lockbar" data-notelock="1" role="status">' +
+    '<span><b>' + esc(name) + ' is ' + esc(band.toLowerCase()) + '.</b> ' +
+    'Write its note before entering anything else.' +
+    (n > 1 ? ' <span class="lockn">1 of ' + n + '</span>' : '') + '</span>' +
+    '<button type="button" class="lockgo" data-notego="1">Go to it</button></div>';
+}
 function reportBar(target){
   var t = String(target || "");
+  if (NOTELOCK) return noteLockBar();
   if (typeof canSpeakFor !== "function" || !canSpeakFor(t)) return "";
   if (!REVIEW || REVIEW.state !== "open" || reportClosed(t)) return "";
   var places = reportPlaces(t).filter(function(e){ return e.count > 0; });
@@ -6753,7 +6959,7 @@ function reportBar(target){
       (e.rail ? ' data-rrail="' + esc(e.rail) + '" data-rcode="' +
                 esc(String(e.code == null ? "" : e.code)) + '"' : '') +
       ' title="' + esc(blockWords(e)) +
-      (e.plan ? ' — press to open Strategy' : ' — press to go') + '">' +
+      (e.plan ? ' — press to open ' + (t === "group" ? topStrategyWord() : "Strategy") : ' — press to go') + '">' +
       esc(e.label) + ' <b>' + e.count + '</b></button>';
   }).join("");
   /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure
@@ -6881,9 +7087,9 @@ function repOutTarget(t, x){
   var o = outcomeOf(x);
   if (!o) return '<span class="nobody">&mdash;</span>';
   var bench = measureDueLabel(o, tacticShare(t)), whole = outcomeTargetShown(x);
-  return (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+  return (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
     (whole && whole !== bench && !SMPRules.isYesNo(x.outTarget)
-      ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
+      ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '');
 }
 
 /* §520.7, reshaped by §520.8: `opt.paneOnly` returns the key objectives and
@@ -6944,7 +7150,7 @@ function renderReport(u, opt){
     var has = String(cur).trim() !== "";
     var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
     if (!canEnterFigure(u.ukey, x)) {
-      return '<span class="mono">' + (has ? esc(unitTight(cur)) : "\u2014") + '</span>';
+      return '<span class="mono">' + (has ? figHtml(unitTight(cur)) : "\u2014") + '</span>';
     }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
@@ -7105,9 +7311,9 @@ function renderReport(u, opt){
                  and the whole it is a part of is the word "Yes / No" — "50% of
                  Yes / No" is not a sentence anybody reads, so the second line
                  is for a row whose target is a NUMBER. */
-              '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+              '<td class="num">' + (bench ? figHtml(bench) : '<span class="nobody">&mdash;</span>') +
                 (whole && whole !== bench && !SMPRules.isYesNo(x.obj.outTarget)
-                  ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
+                  ? '<span class="subhd">of ' + figHtml(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol"' + rs + '>' + noteCell(x) + '</td></tr>' + subs(true);
@@ -8237,7 +8443,7 @@ function projPerformanceBody(p, fk){
     var notDue = !dueThisCycle(when);
     var has = reportedAny(o, d);
     var got = d ? statusPill(o, "Delivered")
-                : (has ? esc(o.actual) : (notDue ? notDueCell() : '<span class="pill kind">&mdash;</span>'));
+                : (has ? figHtml(o.actual) : (notDue ? notDueCell() : '<span class="pill kind">&mdash;</span>'));
     var reads = d ? statusReads(o) : o.progress;
     /* "Finished" is a status for a deliverable and a REPORTED FIGURE for an
        outcome. Asking statusReads() of an outcome answers null, which read
@@ -8896,7 +9102,7 @@ function fnObjKoBlock(fk, ed){
       '<td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + (m.weight == null || m.weight === "" ? "&mdash;" : esc(m.weight) + "%") + '</td>' +
       '<td class="cc">' + esc(m.dir || "") + '</td>' +
-      '<td class="cc">' + esc(unitTight(m.target)) + '</td>' +
+      '<td class="cc">' + figHtml(unitTight(m.target)) + '</td>' +
       '<td class="cc">' + esc(m.compile || "") + '</td></tr>';
   }).join("");
   return '<h4 class="mini">' + L("keyobj") + '</h4>' +
@@ -9036,7 +9242,9 @@ function renderFnObjReport(fk){
      shut. */
   REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
                             submitWhyShort(target), ownStateChip(target));
-  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+  /* §576: this format draws no "to finish" bar, so the lock's bar goes where
+     the others put it — above the tables. */
+  return noteLockBar() + '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
 }
 
 function renderFnProjects(fnKey){
@@ -10016,7 +10224,7 @@ function unitPlanBody(it, u, railed, bare){
            how many cells a row has; a row with nothing to offer gets the
            unit it already carries, read-only. */
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
-            || esc(targetUnitOf(m))) + '</td>'
+            || esc(unitLabel(targetUnitOf(m)))) + '</td>'
         : '') +
       /* §278: the way in to a monthly plan sits in the TARGET cell, because
          the monthly plan IS the target — under Compiled it read as a second
@@ -10186,7 +10394,7 @@ function unitPlanBody(it, u, railed, bare){
              /* §257: no direction on a yes/no outcome — there is nothing for
                 it to point at, and `\u2265 Yes / No` reads as a comparison. */
              : SMPRules.isYesNo(t.outTarget) ? tgtShown(t.outTarget)
-             : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
+             : esc(t.outDir || "\u2265") + ' ' + figHtml(t.outTarget)) + '</span>' : '') +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
          its four facts a control of its own in one cell (Islam). §249 draws
@@ -10760,7 +10968,7 @@ function unitTight(v){
      something on the offered list — or of a scaled currency, which is the one
      shape the list deliberately does not enumerate — collapses. */
   var rep = u.match(/^(.+?)\s*\1$/);
-  if (rep && (TARGET_UNITS.indexOf(rep[1]) > -1 || /^[KMB]\s+\S+$/.test(rep[1])))
+  if (rep && (knownUnit(rep[1]) || /^[KMB]\s+\S+$/.test(rep[1])))
     u = rep[1];
   /* THE UNIT IS NEVER TOUCHED — only the gap between it and the number.
      The first draft closed the space INSIDE the unit and produced `8MEGP`,
@@ -10790,7 +10998,30 @@ function unitTight(v){
    somebody will be choosing between. Inside main's own reader rather than
    beside it, or the deck and the page spell one target two ways. */
 function tgtShown(v){
-  return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
+  return SMPRules.isYesNo(v) ? "Yes / No" : figHtml(unitTight(v));
+}
+/* ── A FIGURE AS IT IS READ (§573) ─────────────────────────────────────
+   Islam: *"make the units in general always smaller than the number"*, in
+   dark grey, and *"it should be $8m and $10b"* — written `$8M`, the scale
+   letter in capitals as money is written.
+
+   DISPLAY ONLY, like §254: what is stored stays number-first (`8M USD`) and a
+   box being typed into shows what was typed. The SCALE LETTER is part of the
+   amount, so it stays full size beside the number; only the unit is set
+   apart. A word carries its own space inside its span, so the text of the
+   cell is still `300 EGP` — the PowerPoint, a copy and a check all read it —
+   while a symbol (`%`, `#`) sits tight with the gap drawn by the stylesheet. */
+function figHtml(s){
+  s = String(s == null ? "" : s);
+  var sp = splitTarget(s);
+  if (!sp.unit) return esc(s);
+  var u = sp.unit, m = u.match(/^([KMB])(?:\s+(\S+))?$/);
+  var scale = m ? m[1] : "", cur = m ? (m[2] || "") : u;
+  if (cur === "USD" || cur === "$") return '<span class="fu pre">$</span>' + esc(sp.value + scale);
+  if (!cur) return esc(sp.value + scale);
+  return /^[A-Za-z]/.test(cur)
+    ? esc(sp.value + scale) + '<span class="fu w"> ' + esc(cur) + '</span>'
+    : esc(sp.value + scale) + '<span class="fu">' + esc(cur) + '</span>';
 }
 
 /* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344) ──
@@ -10853,7 +11084,7 @@ function repTargetCell(m){
      prorate all land here and are drawn exactly as they were. */
   if (bench == null || due == null || !isFinite(num) || Math.abs(due - num) < 1e-9)
     return whole;
-  return esc(bench) + '<span class="subhd">of ' + whole + '</span>';
+  return figHtml(bench) + '<span class="subhd">of ' + whole + '</span>';
 }
 /* ONE NAME FOR THE COLUMN, read by all four tables that carry it — a literal
    typed at four call sites is how two of them come to say different things
@@ -10872,7 +11103,20 @@ var REP_TGT_HEAD = "YTD Target";
    §252, so the deck gains no new vocabulary. */
 function figVsDue(m, share){
   var due = benchBeside(m, share);   /* §300 */
-  return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
+  return figShown(m) + dueLine(due ? tgtShown(due) : "");
+}
+/* §572: WHAT IS DUE SO FAR, UNDER THE FIGURE AND NAMED. Islam, of the
+   tactics slide: *"a variation as well for the prorated or YTD target in
+   grey"*, Option B, *"keep the due even it's 100%"*. A second line rather
+   than a slash beside the figure, saying what the grey number is. `.dsub`,
+   so the PowerPoint writes it as the second paragraph it already knows.
+   Takes HTML: the caller escapes, as it does for the figure beside it. */
+/* …and the page's own size of it, under a figure on Performance (§572). */
+function pdueLine(html){
+  return html ? '<span class="pdue">due ' + html + '</span>' : '';
+}
+function dueLine(html){
+  return html ? '<span class="dsub ddue">due ' + html + '</span>' : '';
 }
 
 function figShown(m){
@@ -10881,7 +11125,7 @@ function figShown(m){
      for a figure with a unit on the end of it. One reader, `ynShown`. */
   if (SMPRules.isYesNo(m.target)) return esc(SMPRules.ynShown(m.actual));
   var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
-  return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
+  return full ? '<span title="' + esc(full) + '">' + figHtml(s) + '</span>' : figHtml(s);
 }
 function koReadBlock(list, emptyLine){
   if (!(list || []).length)
@@ -10977,7 +11221,7 @@ function capKoEdit(c, pgIn, acIn){
         '<td class="cc">' + (ed
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(pg, ac, m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(pg, ac, m) || esc(unitLabel(targetUnitOf(m))))) + '</td>' +
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */

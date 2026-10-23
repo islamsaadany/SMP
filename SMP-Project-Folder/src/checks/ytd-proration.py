@@ -142,13 +142,25 @@ def main():
           var tt=tabs.find(x=>hdr(x) && hdr(x).indexOf('Tactic')>-1);
           return {m:hdr(mt), t:hdr(tt),
                   mCells:[...mt.querySelectorAll('tbody tr')].map(r=>r.querySelectorAll('td').length),
-                  pairs:[...document.querySelectorAll('.pair i')].length};
+                  pairs:[...document.querySelectorAll('.pair i')].length,
+                  dues:[...document.querySelectorAll('td.num .pdue')].filter(d => /^due /.test(d.textContent.trim())).length,
+                  /* §572: the measure's name bold, as the slide's is, and the
+                     Progress a size up from the figure beside it — PAINT. */
+                  mRows:mt.querySelectorAll('tbody tr').length,
+                  mBold:[...mt.querySelectorAll('tbody tr td:nth-child(2) > b')]
+                    .filter(b => +getComputedStyle(b).fontWeight >= 700).length,
+                  progUp:[...mt.querySelectorAll('tbody td.final')].every(td =>
+                    parseFloat(getComputedStyle(td).fontSize) >= parseFloat(getComputedStyle(td.previousElementSibling).fontSize) + 2)};
         }""")
         ck("the measures table names the annual target and the YTD actual",
            # §395: the second heading is the client's word for one measure,
            # asked of the page — every other heading still a literal (§218).
            t["m"] == ["#", pg.evaluate("() => L1('measure')"),"Dir.","Annual target","Compile","YTD actual","Progress"], t["m"])
         ck("...and every row still fills it", set(t["mCells"]) == {7}, t["mCells"])
+        ck("§572: every measure's name is bold, as on the slide",
+           t["mBold"] == t["mRows"] and t["mRows"] > 0, (t["mBold"], t["mRows"]))
+        ck("§572: and its Progress is a size up from the figure beside it",
+           t["progUp"] is True, t["progUp"])
         # §248 gave this table an Outcome column and renamed its figure to match
         # the measures table above it -- "delivery" is wrong for a row measured
         # in stores. §239's own point survives: no Variance, and it ends in
@@ -156,8 +168,11 @@ def main():
         ck("the tactics table drops Variance and ends in Progress",
            t["t"] == ["#","Tactic","Outcome","Owner","Collabs.","Quarters",
                       "Status","YTD actual","Progress"], t["t"])
-        ck("the benchmark is drawn beside the figure, not in a column of its own",
-           t["pairs"] > 0, t["pairs"])
+        # §572 REWROTE THIS ONE: it read "the benchmark is drawn beside the
+        # figure" and counted `.pair i`. It is drawn UNDER the figure now, in
+        # the same cell, saying "due" (Islam's Option B on Performance too).
+        ck("the benchmark is drawn under the figure, in its cell, not a column of its own",
+           t["dues"] > 0 and t["pairs"] == 0, (t["dues"], t["pairs"]))
 
         print("\n── 5 · the reporter's note reaches Performance ──")
         n = pg.evaluate("""()=>{

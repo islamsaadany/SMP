@@ -352,6 +352,9 @@ export function summary(all: Action[], today: string): Summary {
 export function mayChange(a: Action, who: Who): boolean {
   return who.seat === "super" || isMine(a, who);
 }
+/* What a refusal of that rule says — the Tracker's api and My work's tick
+   (§583) refuse with the one sentence. */
+export const ONLY_CHANGE = "Only its owner or the client's Super user can change this action.";
 
 /* THE SHORT NAME ON A ROW is the SPINE's answer now (lib/people.ts) — the
    register's own first-name rule, a clashing pair lengthened, and the whole
@@ -363,22 +366,28 @@ export { shortNames } from "./people.ts";
 
 /* ══ the rows ═════════════════════════════════════════════════════════ */
 export type { Person } from "./people.ts";
+import { namesOf } from "./people.ts";
 import type { Person } from "./people.ts";
+/* WHAT A KEY IS CALLED is the spine's, and since §565 that is the register's
+   NAME rather than the employee file's full name. This file kept a copy of
+   its own, which is how the tracker went on printing the full name after the
+   spine existed (§53.5); it is the spine's now, re-exported so every caller
+   of this file is untouched. */
+export { namesOf };
 /* The people on this register who hold a seat on this client — the office.
    `tenant_users` is the platform's own table and carries no tenant policy,
    so the join is written against THIS tenant's rows explicitly rather than
-   trusted to the setting. */
+   trusted to the setting. Each is named as the register names them (§565),
+   which is worked over the WHOLE register, so it is read off namesOf()
+   rather than off these rows alone. */
 export async function officeRows(c: Q): Promise<Person[]> {
   const r = await c.query(
     "SELECT p.key, COALESCE(NULLIF(p.name, ''), p.key) AS name FROM people p " +
     "JOIN tenant_users tu ON tu.tenant_id = p.tenant_id AND tu.person_key = p.key " +
     "WHERE tu.seat IN ('super', 'smoteam') AND COALESCE(p.extra->>'active', 'true') <> 'false' " +
     "ORDER BY p.idx, p.key");
-  return r.rows.map((x: any) => ({ key: str(x.key), name: str(x.name) }));
-}
-export async function namesOf(c: Q): Promise<Map<string, string>> {
-  const r = await c.query("SELECT key, COALESCE(NULLIF(name, ''), key) AS name FROM people");
-  return new Map(r.rows.map((x: any) => [str(x.key), str(x.name)]));
+  const names = await namesOf(c);
+  return r.rows.map((x: any) => ({ key: str(x.key), name: names.get(str(x.key)) || str(x.name) }));
 }
 export async function isOfficeRow(c: Q, key: string): Promise<boolean> {
   if (brk() === "owner-anyone") return (await c.query("SELECT 1 FROM people WHERE key = $1", [key])).rows.length > 0;

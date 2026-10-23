@@ -691,6 +691,25 @@
   .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
   .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
   .pill.bad { background:var(--bad-bg); color:var(--bad-tx); }
+  /* §571: a tactic that is late says so under its status, in words. */
+  .latemark { display:flex; align-items:center; justify-content:center; gap:5px; margin-top:6px;
+              font:400 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--bad-tx); }
+  /* §572: a red dot before it, as the slide draws it. */
+  .latemark::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--bad); flex:none; }
+  /* §572: what is due, under the figure and named; the Progress a size up;
+     a tactic's outcome in regular weight under its bold name. */
+  .pdue { display:block; margin-top:3px; font:400 11.5px/1.3 var(--sans); color:var(--ink-3); }
+  td.final.prog { font-size:17px; }
+  td.outc b { font-weight:400; }
+  /* §573: the unit a little smaller than its number and in dark grey. A word
+     carries its own space (`.w`), so the figure still reads "300 EGP" when it
+     is copied or written into the PowerPoint; a dollar sign goes in front. */
+  .fu { font-size:.82em; font-family:var(--sans); font-weight:600; letter-spacing:.02em;
+        margin-left:.18em; color:var(--ink-2); }
+  .fu.w { margin-left:0; }
+  .fu.pre { margin-left:0; margin-right:.08em; }
+  /* inside a line that is already quiet, the unit takes the line's own ink */
+  .ddue .fu, .pdue .fu, .why .fu, .subhd .fu { color:inherit; font-weight:inherit; }
   .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
   .pill.kind { background:var(--surface-2); color:var(--ink-2); }
   .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
@@ -6635,6 +6654,29 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      note does not float in the middle of a cell beside a one-line figure. */
   .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
+  /* §576: A RED FIGURE HOLDS THE PAGE — the mockup Islam approved
+     (design-mockups/note-first/). The bar takes the "to finish" bar's place;
+     every other box greys and will not take typing; the owed note is ringed.
+     Tokens only, so the dark theme carries it with nothing added. */
+  .lockbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;
+    width:fit-content;max-width:100%;margin:0 0 10px;padding:10px 14px;
+    border:1px solid var(--bad);border-radius:var(--r);background:var(--bad-bg);
+    color:var(--ink);font-size:var(--fs-body)}
+  .lockbar b{color:var(--bad-tx)}
+  .lockbar .lockn{color:var(--ink-3);font-size:var(--fs-small);white-space:nowrap}
+  .lockbar .lockgo{font:inherit;font-weight:600;font-size:13px;padding:5px 14px;
+    border:1px solid var(--bad);border-radius:6px;background:var(--surface);
+    color:var(--bad-tx);cursor:pointer;white-space:nowrap}
+  .lockbar .lockgo:hover{background:var(--bad-bg)}
+  .lockbar .lockgo:focus-visible{outline:2px solid var(--bad);outline-offset:2px}
+  .notefld.lockhere{outline:3px solid var(--bad);outline-offset:1px}
+  /* §576.2: A CAPABILITY'S PANE PINS ITS PROJECT BAND with a strip of page
+     ground 24px tall above it (`.pane > .pband::before`), and at the bar's
+     10px that strip painted over the bar's bottom edge — found by looking at
+     cap6, the one page the worked example opens locked. 26px because the
+     bar's own 10px collapses into it. Spaced where the bar meets that pane
+     and nowhere else, so no other page moves. */
+  .lockbar + .capbody{margin-top:26px}
   /* And the break survives being read (§271, §161.3): `pre-line` keeps the
      newlines somebody typed and wraps everything else. On the READ-ONLY note
      wherever it is printed — never on `.why` at large, which is the page's
@@ -6672,6 +6714,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .entry .field{border:0;width:78px;border-radius:0}
   .entry .field:focus-visible{outline:none}
   .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+  /* §576: a box shut by the note lock — after `.entry.filled`, and naming it,
+     because a box that already holds a figure would otherwise stay green and
+     read as open. */
+  .lockshut, .entry.lockshut, .entry.filled.lockshut{opacity:.45;cursor:not-allowed;
+    background:var(--surface-2);border-color:var(--line)}
+  .entry.lockshut .field, .entry.filled.lockshut .field,
+  .entry.lockshut .unitsuf{background:transparent;cursor:not-allowed}
   .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
     border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
     color:var(--ink-3);white-space:nowrap}
@@ -7773,14 +7822,17 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
 .askwin { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE FILTER IS TWO EQUALLY LIKELY CHOICES, so its halves are equal — the 2:1
    next door is the corner's switch, where they are not (§299). */
-.askseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+/* §577: the monthly drawer's By month | By quarter is the same two equally
+   likely choices, so it is declared here with this one rather than drawn a
+   second time (§53.5: one block for one control). */
+.askseg, .mpseg { display:inline-flex; margin-left:auto; border:1px solid var(--line);
           border-radius:var(--r-sm); overflow:hidden; }
-.askseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
+.askseg button, .mpseg button { font:inherit; font-size:var(--fs-small); font-weight:650;
                  color:var(--ink-2); background:var(--surface); border:0;
                  padding:5px 11px; cursor:pointer; white-space:nowrap; }
-.askseg button + button { box-shadow:inset 1px 0 0 var(--line); }
-.askseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
-.askseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.askseg button + button, .mpseg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.askseg button[aria-pressed="true"], .mpseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); }
+.askseg button:focus-visible, .mpseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .asknone { padding:22px 16px; color:var(--ink-3); font-size:var(--fs-note); }
 .asknone.bad-note { color:var(--ink); background:var(--warn-bg);
                     border-left:3px solid var(--warn); }
@@ -8274,8 +8326,23 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   cursor:pointer;
 }
 .mpbtn:hover { border-color:var(--ink-3); color:var(--ink-2); }
+/* ── BY MONTH OR BY QUARTER (§577) ─────────────────────────────────────
+   The title line becomes a flex row so the switch can sit at its right end
+   (the switch's shape is `.askseg`'s, declared with it). Its own small caps
+   are not the switch's: the halves read in sentence case like every other
+   segmented pair. */
+.mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
+.mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
+.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+/* A quarter carries its months in its label, so its box is wider than a
+   month's — 112px, measured to sit four on one line down to 1100. */
+.mpm.mpq { width:112px; }
+.mpm.mpq input.fld { width:112px !important; }
+.mpm.mpq span i { font-style:normal; text-transform:none; letter-spacing:0; opacity:.8; }
+.mpfoot.mpnote { margin-top:6px; }
 @media (max-width: 700px) {
   .mpm, .mpm input.fld { width:64px !important; }
+  .mpm.mpq, .mpm.mpq input.fld { width:96px !important; }
 }
 
 /* ── SETUP · IMPORT & ARCHIVES (§304) ─────────────────────────────────
@@ -8724,6 +8791,25 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub td { background:none; }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .dslide td.final { font-weight:700; }
+  /* §571: a tactic's Status on the slide, the word in its band. */
+  .dslide td.dstat { font-weight:600; white-space:nowrap; }
+  .dslide td.dstat.kind, .dslide td.dstat.none { color:var(--none); font-weight:400; }
+  /* §572: Option B — the word in a pill, as on Performance, and DELAYED as a
+     red dot and word under it, so the two can never read as one. */
+  .dslide td.dstat .dpill { display:inline-block; padding:5px 12px; border-radius:999px;
+                            font-size:18px; font-weight:600; }
+  .dslide td.dstat.attn .dpill { background:var(--attn-bg); color:var(--attn-tx); }
+  .dslide td.dstat.good .dpill { background:var(--good-bg); color:var(--good-tx); }
+  .dslide td.dstat.none .dpill { border:1.5px dashed var(--none); color:var(--ink-2); font-weight:500; }
+  .dslide td.dstat.kind .dpill { background:var(--surface-2); color:var(--ink-2); font-weight:500; }
+  /* §572.1: regular weight, so the pill leads and the dot carries it
+     (Islam: "not bold"). */
+  .dslide td.dstat .dlate { display:flex; align-items:center; gap:6px; margin-top:8px; color:var(--bad);
+                            font-weight:400; letter-spacing:.1em; text-transform:uppercase; font-size:13px; }
+  /* §572.2: one block, Delayed centred under the pill; the column stays left. */
+  .dslide td.dstat .dstack { display:inline-flex; flex-direction:column; align-items:center; }
+  .dslide td.dstat .dlate::before { content:""; width:9px; height:9px; border-radius:50%;
+                                    background:var(--bad); flex:none; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
      them as classes because a cell carries its band as one. */
   .dslide .good, .dslide b.good { color:var(--good); }
@@ -8735,6 +8821,12 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
   .dslide .lead { font-weight:500; }
+  /* §572: the key measures' and tactics' names bold, the outcome regular. */
+  .dslide .lead.strong { font-weight:700; }
+  .dslide td.outc b { font-weight:400; }
+  .dslide td.dprog { font-size:29px; }
+  .dslide.tight td.dprog { font-size:24px; }   /* the same step up on a slide the fit pass made dense */
+  .dslide .ddue { font:400 15px/1.2 var(--sans); color:var(--none); margin-top:6px; letter-spacing:.02em; }
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
   /* §271: a note may be several lines now, and a projector shows them the way
      the person who wrote them typed them — the deck reads the same stored
@@ -8970,6 +9062,37 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dclock.over .dcw { color:var(--surface); }
   .dclock.paused:not(.near):not(.over) { color:var(--ink-2); }
   .dclock:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  /* ── §580: THE STAGES ─────────────────────────────────────────────────
+     Islam's, drawn in design-mockups/presenter-clock/ (round 3) and signed
+     off: a third bigger from five minutes, 1.6x on the light amber ground in
+     the last minute with a slow pulse, twice the size and pulsing once over,
+     twice as fast from four over. GROWN FROM ITS OWN CORNER, so it never
+     moves towards the slide's middle. The size eases (a jump in size is not
+     a colour a check samples); the colours still change at once, for the
+     reason the note above gives. HELD, IT STOPS: a pulsing clock that says
+     Paused is two messages at once. */
+  .dclock { transform-origin:100% 100%; transition:transform .6s ease; }
+  .dclock.near { transform:scale(1.3); }
+  .dclock.last { background:var(--attn-bg); transform:scale(1.6);
+                 animation:dclockPulse 2.8s ease-in-out infinite; --dglow:rgba(180,83,9,.45); }
+  .dclock.over { transform:scale(2); animation:dclockPulse 1.4s ease-in-out infinite; --dglow:rgba(176,68,52,.6); }
+  .dclock.over.fast { animation-duration:.7s; }
+  .dclock.paused { animation:none; }
+  @keyframes dclockPulse {
+    0%, 100% { box-shadow:0 0 0 0 var(--dglow); opacity:1; }
+    50% { box-shadow:0 0 0 .45em transparent; opacity:.6; }
+  }
+  /* The dark over the slide and under the clock: a quarter in the last
+     minute before five over, black from five over, eased in so the room
+     sees it come rather than a flash. */
+  .dveil { position:absolute; inset:0; z-index:1; background:#000; opacity:0;
+           pointer-events:none; transition:opacity 1.2s ease; }
+  .dveil.dim { opacity:.25; }
+  .dveil.dark { opacity:1; }
+  @media (prefers-reduced-motion: reduce) {
+    .dclock { animation:none !important; transition:none; }
+    .dveil { transition:none; }
+  }
   /* NO TRANSITION ON THE STATE CHANGE, deliberately. A fade was written here
      and removed on looking at it: turning amber is INFORMATION a presenter is
      meant to catch, and easing it in is the one thing that makes it easier to
@@ -9499,8 +9622,16 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 
 /* The quiet half of a figure cell — what it is measured against so far
    (§254). The same weight the tactics table has used since §252, so one
-   number does not read louder on one table than on another. */
-  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }
+   number does not read louder on one table than on another.
+   §568: AND SMALLER. Islam, of D001's slides: *"the prorated target should be
+   smaller not to take over the actual measure view in the measures or the
+   tactics"*. Three quarters of its figure, which at the deck's own 23px is
+   `.dsub`'s 17px — the size the mockup was signed off at. RELATIVE, NOT 17px:
+   the fit pass sets a dense table smaller (Mobile's tactics measured 19px),
+   and a fixed 17px there sat 2px under the figure, which is not smaller to
+   anybody in the room. The tactics table wears the class now too, where its
+   `<i>` was bare. */
+  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; font-size:.74em; }
 
   /* ══ THE MASTER PRESENTATION'S PICKER (§266) ═══════════════════════
      The dialog the office makes a running order in. It lives in the deck's
@@ -9646,6 +9777,10 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .sl-b.quiet:hover{ color:var(--ink); }
   .sl-b:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:720px){ .sl-b .lbl{ display:none; } }
+  /* §579: a switch that is on says so — the accent edge on the quiet fill,
+     so "Line by line" reads as set without being the one filled button. */
+  .sl-b[aria-pressed="true"]{ border-color:var(--gold-deep); background:var(--surface-2);
+    box-shadow:inset 0 0 0 1px var(--gold-deep); }
 
   .slidecol{ flex:1; min-width:0; display:flex; flex-direction:column; position:relative; }
   .slprog{ height:3px; background:var(--line); flex:none; }
@@ -9978,7 +10113,7 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
     @page { size: 1600px 900px; margin: 0; }
     /* §340: a clock on a printed slide is a number from a moment that has
        passed. The contingency pack is a record, not a rehearsal (§305). */
-    #dclock { display:none !important; }
+    #dclock, .dveil { display:none !important; }
     html, body { background:#fff; }
     /* Only the deck prints. Everything else at body level is the platform. */
     body.presenting > *:not(#deckroot) { display:none !important; }
@@ -10014,6 +10149,208 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .d-compete table.cmptab th, .d-compete table.cmptab td { font-size:17px; padding:14px 16px; }
   .d-compete table.cmptab td.cmpval { font-size:20px; }
   .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
+
+/* ── THE GUIDED TOUR, ON A MADE-UP DIRECTION (§574) ───────────────────────
+   The onboarding tour's spotlight (tour.css) at projector size: the shade is
+   painted by a masked rect so the lit part is never washed by a dim laid over
+   it, and the ring is the accent. Inside `#deckroot`, so it is on the screen
+   when the deck is full screen. Every colour a token (§25). */
+/* The example's cover says its figures are made up (B3), in the cover's own
+   sub-line size and the attention ink, so it reads as part of the slide and
+   is not missed. */
+.dslide .coversub.dexample { color:var(--attn-tx, var(--ink-3)); font-weight:600; }
+
+.dtour { position:absolute; inset:0; z-index:5; cursor:pointer; }
+.dtour .dtsvg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.dtour .dtshade { fill:rgba(9,14,24,.66); }
+/* §574.2: a clear stop — the whole slide as presented, nothing over it. The
+   overlay stays, transparent, so the next press is still the tour's. */
+.dtour .dtshade, .dtour .dtring { transition:opacity .3s ease; }
+.dtour.dtclear .dtshade, .dtour.dtclear:not(.dtmark) .dtring { opacity:0; }
+.dtour.dtclear .dtcard { display:none; }
+/* §574.5: on a clear view, which slide this is — its title ringed and its
+   name in gold, and a label naming it and what it is about, results against
+   work. The label is in the card's own projector size, on the platform's
+   navy with the accent edge, and stands in the empty corner beside the
+   title, so it covers nothing. */
+.dtour .dtlabel { display:none; position:absolute; transform:translateY(-50%);
+                  font-size:clamp(17px, 1.3vw, 26px); line-height:1.2; text-align:right;
+                  background:var(--panel); color:var(--panel-ink); border:2px solid var(--gold);
+                  border-radius:.5em; padding:.45em 1em .5em; box-shadow:0 10px 30px rgba(9,14,24,.35);
+                  pointer-events:none; }
+.dtour.dtmark .dtlabel { display:block; }
+.dtour .dtlabel b { display:block; font-size:1.25em; font-weight:800; letter-spacing:.08em;
+                    text-transform:uppercase; }
+.dtour .dtlabel span { display:block; font-size:.8em; color:var(--panel-quiet); margin-top:.15em; }
+.dslide.dtmarked .dwhich { color:var(--gold-deep); font-weight:700; }
+.dtour .dthole, .dtour .dtring { transition:x .35s ease, y .35s ease, width .35s ease, height .35s ease; }
+.dtour .dtring { fill:none; stroke:var(--gold); stroke-width:3;
+                 filter:drop-shadow(0 0 8px rgba(201,162,77,.6)); }
+@media (prefers-reduced-motion: reduce) {
+  .dtour .dthole, .dtour .dtring { transition:none; }
+}
+/* §574.4: THE CARD IS SIZED TO THE SCREEN, AS THE SLIDE UNDER IT IS. Islam:
+   *"make the cards text bigger for the projector"*. The deck scales the
+   slide to whatever screen it is on (`deckScale`), and a card in fixed
+   pixels read 16px on a 1920 projector — small against slide type set for a
+   room. One base size off the screen's width, everything in the card in `em`
+   of it: about 25px of body text at 1920, 18px on a 1366 laptop, never
+   under 17px nor over 26px. */
+.dtour .dtcard { position:absolute; font-size:clamp(19px, 1.45vw, 30px);
+                 width:24em; max-width:calc(100vw - 24px); cursor:default;
+                 background:var(--surface); color:var(--ink); border:1px solid var(--line);
+                 border-radius:.6em; box-shadow:0 18px 48px rgba(9,14,24,.45); }
+.dtour .dtcard.dtcentre { left:50% !important; top:50% !important; transform:translate(-50%,-50%); }
+/* §574.9: AND BIGGER STILL WHERE THERE IS ROOM. Islam: *"make the box of
+   Now today's review bigger … just to make it obvious. We can always make
+   the boxes big to be visible for the people … if the space is
+   convenient"*. Every card is a size up (about 28px of text at 1920, from
+   25), and the closing card — centred, over nothing it explains — half as
+   big again again: about 40px at 1920. */
+.dtour .dtcard.dtcentre { font-size:clamp(26px, 2.1vw, 44px); width:20em; }
+.dtour .dttop { display:flex; align-items:center; padding:.75em .9em 0; }
+.dtour .dtstep { font-size:.6em; text-transform:uppercase; letter-spacing:.1em;
+                 font-weight:700; color:var(--gold-deep); }
+.dtour .dtx { margin-left:auto; font:inherit; font-size:1.1em; line-height:1; background:none;
+              border:0; color:var(--ink-3); cursor:pointer; padding:.1em .3em; border-radius:5px; }
+.dtour .dtx:hover { color:var(--ink); background:var(--surface-2); }
+.dtour .dtcard h3 { font-size:1.35em; line-height:1.2; margin:.3em .667em 0; text-wrap:balance; }
+.dtour .dtbody { font-size:1em; line-height:1.45; color:var(--ink-2); margin:.4em .9em .8em; }
+.dtour .dtbands { display:flex; flex-direction:column; gap:.3em; margin-top:.5em; }
+.dtour .dtbands span { display:flex; align-items:center; gap:.45em; color:var(--ink); font-weight:600; }
+.dtour .dtbands i { width:.6em; height:.6em; border-radius:3px; flex:none; }
+.dtour .dtbands em { font-style:normal; font-weight:400; color:var(--ink-3); }
+.dtour .dtfoot { display:flex; align-items:center; gap:.6em; border-top:1px solid var(--line-soft, var(--line));
+                 padding:.6em .9em; }
+.dtour .dtback { font:inherit; font-size:.85em; font-weight:600; background:none; border:0;
+                 color:var(--ink-2); cursor:pointer; padding:0; }
+.dtour .dtback:hover { color:var(--ink); text-decoration:underline; }
+.dtour .dtnext { font:inherit; font-size:.9em; font-weight:600; margin-left:auto; border:0;
+                 background:var(--panel); color:var(--panel-ink); border-radius:.45em;
+                 padding:.5em 1.3em; cursor:pointer; }
+.dtour .dtnext:hover { background:var(--panel-hover, var(--panel)); }
+.dtour button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+@media print { .dtour { display:none !important; } }
+
+/* ── §574.6: THE EXAMPLE'S CLOSING SLIDE, WHAT THE PLATFORM IS FOR ────────
+   Four objectives two by two, as the stand slide sets its two readings
+   (`.headgrid`), each behind the gold rule the overview's objective wears
+   (`.dovs .objq`). The titles big and the line under each short (Islam):
+   the words are said by the presenter, the slide only names them. */
+.d-purpose h2 { margin-bottom:10px; }
+.d-purpose .pgrid { display:grid; grid-template-columns:1fr 1fr; gap:72px 80px; flex:1;
+                    align-content:center; }
+.d-purpose .pitem { border-left:6px solid var(--gold); padding:4px 0 6px 30px; }
+.d-purpose .pnum { display:block; font:600 22px/1 var(--mono); color:var(--gold-deep); margin-bottom:14px; }
+.d-purpose h3 { font:700 74px/1.04 var(--serif); margin:0; color:var(--ink); text-wrap:balance; }
+.d-purpose p { font-size:30px; line-height:1.3; color:var(--ink-2); margin:16px 0 0; }
+/* §574.8: in the tour the four come in one press at a time; out of it, or
+   with the tour ended, they are simply there. */
+.d-purpose.preveal .pitem { opacity:0; transform:translateY(14px);
+                            transition:opacity .45s ease, transform .45s ease; }
+.d-purpose.preveal .pitem.pshown { opacity:1; transform:none; }
+@media (prefers-reduced-motion: reduce) {
+  .d-purpose.preveal .pitem { transition:none; transform:none; }
+}
+
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Under each reading on a direction's "Where it stands": its lines with
+   their own figures, in their bands, at a size the room can read, the name
+   cut short before the figure is. */
+/* §578.1: THE FIGURES NEXT TO THEIR NAMES. Islam: *"the space between the
+   element and the number is so far that the number nearly hits the other
+   side element"* — each figure sat at the far edge of its half, 69px from
+   the next half's names. Now a two-column grid: the names, then the figures
+   as one column 40px after the LONGEST name, lined up on their right edge.
+   The name column may shrink, so a name too long for the half is still cut
+   before its figure is; the rule above stays the half's full width. */
+.headdetail { list-style:none; margin:18px 0 0; padding:14px 0 0; border-top:1px solid var(--line);
+              display:grid; grid-template-columns:minmax(0, max-content) max-content;
+              justify-content:start; column-gap:40px; row-gap:6px; font-size:22px; }
+.headdetail li { display:contents; }
+.headdetail .hdn { min-width:0; color:var(--ink-2); white-space:nowrap;
+                   overflow:hidden; text-overflow:ellipsis; }
+.headdetail .hdv { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;
+                   text-align:right; }
+/* The left half keeps 110px clear on its right however long a name is, so
+   with the 70px gutter its figures never come within 180px of the right
+   half's names: a name that would push them there is cut first. The right
+   half has only the slide's edge beside it and keeps its whole width. */
+.headcell:not(:last-child) > .headdetail { padding-right:110px; }
+/* "and 3 more" and "Not counted: …" run under both columns and do not size
+   them: a long note must not push the figures back out to the edge. */
+.headdetail li.hdmore, .headdetail li.hdnote { display:block; grid-column:1 / -1; contain:inline-size; }
+.headdetail .hdf { font-weight:600; }
+.headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
+.headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+
+/* ── §579: LINE BY LINE ───────────────────────────────────────────────────
+   A line waiting is transparent, never removed, so nothing moves as the
+   slide fills. On paper every line is there. */
+.dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * {
+  transition:opacity .35s ease; }
+.dslide.building .bhide { opacity:0; }
+@media (prefers-reduced-motion: reduce) {
+  .dslide.building tbody > tr, .dslide.building .headcell, .dslide.building .pcards > * { transition:none; }
+}
+@media print { .dslide .bhide { opacity:1 !important; } }
+
+/* ── §581: THE FIGURES WERE UPDATED, SAID FOR TWO SECONDS ─────────────────
+   Bottom-left, where the bar's title sits when there is a bar, small and
+   quiet: it is for the presenter, on a screen the room is also reading. */
+.drefresh { position:absolute; left:24px; bottom:22px; z-index:4; pointer-events:none;
+            font:600 15px/1 var(--sans); padding:9px 14px; border-radius:999px;
+            background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+            box-shadow:0 6px 18px rgba(9,14,24,.25); opacity:0; transform:translateY(6px);
+            transition:opacity .25s ease, transform .25s ease; }
+.drefresh.show { opacity:1; transform:none; }
+@media print { .drefresh { display:none !important; } }
+
+/* ── PRESENTING ON TWO SCREENS (§582) ─────────────────────────────────────
+   The laptop's two strips, in the deck's own navy so they read as "this is
+   the room's" against the slide view's quiet bar; the ON SCREEN mark on the
+   rail row the room is showing; and, in the room's window, the one press a
+   browser needs before it will fill the projector. */
+.sl-live, .roomstrip { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:none;
+  padding:7px 18px; background:#0B1A33; color:#E9EEF6; font-size:13px; line-height:1.35; }
+.sl-live > b, .roomstrip > b { font-weight:700; color:#fff; }
+.rs-dot { width:9px; height:9px; border-radius:50%; flex:none; background:#34D399;
+  box-shadow:0 0 0 3px rgba(52,211,153,.25); }
+.rs-where { font-weight:600; color:#fff; max-width:34em; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rs-n { color:#A9B6C9; font-variant-numeric:tabular-nums; }
+.rs-clk { font-weight:700; font-variant-numeric:tabular-nums; padding:2px 8px; border-radius:6px;
+  background:rgba(255,255,255,.08); }
+.rs-clk.near { color:#FBBF24; }
+.rs-clk.over { color:#F87171; }
+.rs-clk.paused { color:#A9B6C9; }
+.rs-warn { color:#FBBF24; font-weight:600; }
+.rs-sp { flex:1; }
+.rs-keys { color:#A9B6C9; font-size:12px; }
+.rs-keys b { display:inline-block; min-width:1.5em; text-align:center; padding:1px 4px; margin:0 1px;
+  border:1px solid rgba(255,255,255,.28); border-radius:4px; color:#fff; font-weight:600; }
+.roomstrip button { font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  padding:4px 11px; border-radius:7px; border:1px solid rgba(255,255,255,.3);
+  background:transparent; color:#fff; }
+.roomstrip button:hover { border-color:#fff; }
+.roomstrip button.rs-go { background:#fff; border-color:#fff; color:#0B1A33; }
+.roomstrip button:focus-visible { outline:2px solid #FBBF24; outline-offset:2px; }
+.slrow.onscreen .sthumb { outline:2px solid #34D399; outline-offset:1px; }
+.slrow.onscreen::after { content:"On screen"; position:absolute; top:10px; left:38px;
+  font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  padding:2px 6px; border-radius:4px; background:#0B1A33; color:#fff; pointer-events:none; }
+.sl-notroom { flex:none; margin:10px 16px 0; padding:7px 12px; border-radius:8px; font-size:13px;
+  background:#FFF6E0; color:#5C4300; border:1px solid #E8C468; }
+.sl-notroom b { font-weight:700; }
+.roomfull { position:absolute; left:50%; bottom:7%; transform:translateX(-50%); z-index:5;
+  font:inherit; font-size:24px; font-weight:700; cursor:pointer; padding:16px 30px;
+  border-radius:12px; border:0; background:#fff; color:#0B1A33;
+  box-shadow:0 10px 30px rgba(0,0,0,.35); }
+/* The room's window shows the deck and nothing else, from the first frame:
+   the platform boots underneath it as it always does, unseen. */
+html.smp-room body { background:#0B1A33; }
+html.smp-room body > *:not(.deckroot) { visibility:hidden !important; }
+@media print { .sl-live, .roomstrip, .roomfull, .sl-notroom { display:none !important; } }
 
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.

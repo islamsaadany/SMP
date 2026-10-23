@@ -81,6 +81,7 @@ function pptxColors(){
     bar:   strip(b.bar,    "#16325C"),      /* headers — the navigation's own */
     accent:strip(b.accent, "#C9A24D"),      /* the mark, sparingly (§41) */
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
+    unit:  "334155",       /* §573: a figure's unit, the screen's --ink-2 */
     zebra: "F2F5F9",
     /* The platform's own light --bad: what `.missing` wears on screen, worn
        here on the slide's white ground (§119). */
@@ -172,14 +173,21 @@ function pptxTable(id, box, widths, head, rows, o){
     var pPr = o2.align ? { align: o2.align } : undefined;
     var body = o2.runs
       ? pptxPara(o2.runs.map(function(r){
-          return pptxRun(r.t, { sz:r.sz || SZ, b:!!r.b, i:!!r.i, color:r.color || C.ink });
+          /* §568: a `small` run takes the second line's size, as `.duehalf`
+             takes `.dsub`'s on the slide. */
+          /* §573: a `unit` run a little smaller than its figure, in dark grey. */
+          if (r.unit) return pptxRun(r.t, { sz: Math.round(SZ * 0.82 / 100) * 100, b:!!r.b, color:C.unit });
+          return pptxRun(r.t, { sz: r.small ? Math.max(900, SZ - 200) : (r.sz || SZ),
+                                b:!!r.b, i:!!r.i, color:r.color || C.ink });
         }), pPr)
       : pptxPara(pptxRun(o2.miss ? "Missing" : (o2.t == null ? "" : o2.t), runOpts), pPr);
     /* A SECOND LINE IS A SECOND PARAGRAPH, never the same one. The deck's
        score table writes a pillar's name over a grey line naming its kind
        and owner; read as one string they arrive as one word, which is what
        "…Scale RAYA Smart CareDirection · · Mahmoud" was (§311). */
-    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200), color:C.quiet }), pPr);
+    /* §571: a second line may carry its own ink — a tactic's Delayed is red. */
+    if (o2.sub) body += pptxPara(pptxRun(o2.sub, { sz:Math.max(900, SZ - 200),
+      color:o2.subColor || C.quiet }), pPr);   /* §572.1: never bold */
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' + body +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
@@ -589,15 +597,47 @@ function deckTxt(el){
    The pieces are joined with ONE space and then collapsed, so a value that
    already carries its own spacing is unchanged — this can only ever add a
    separator where the document had none. */
-function deckPieces(el){
+/* §573: A UNIT IS PART OF ITS FIGURE, never a piece of its own. `14` and its
+   `%` are one word, a word unit brings the space it carries (`300 EGP`), and
+   a dollar sign in front joins what follows (`$8M`) — joined with a space
+   they read `14 %` and `$ 8M`. `mark` brackets each unit so a cell can write
+   it as a run of its own (`deckUnitRuns`). */
+var DECK_U0 = "\uE000", DECK_U1 = "\uE001";
+function deckNodeTxt(n, mark){
+  if (n.nodeType === 3) return n.nodeValue;
+  if (n.nodeType !== 1) return "";
+  if (mark && n.classList.contains("fu")) return DECK_U0 + n.textContent + DECK_U1;
+  return [].map.call(n.childNodes, function(c){ return deckNodeTxt(c, mark); }).join("");
+}
+function deckPieces(el, mark){
   if (!el) return "";
-  var out = [];
+  var out = [], glue = false;
   [].forEach.call(el.childNodes, function(n){
-    var t = String(n.textContent || "").replace(/\s+/g, " ").trim();
-    if (t) out.push(t);
+    var u = n.nodeType === 1 && n.classList.contains("fu");
+    var t = String(deckNodeTxt(n, mark)).replace(/\s+/g, " ");
+    if (u && !n.classList.contains("pre") && out.length) { out[out.length - 1] += t; return; }
+    t = t.trim();
+    if (!t) return;
+    if (glue) out[out.length - 1] += t; else out.push(t);
+    glue = u;
   });
   return out.join(" ").replace(/\s+/g, " ").trim();
 }
+/* A marked text as runs: the figure in the cell's own weight and ink, each
+   unit a run the table writes smaller and in dark grey. */
+function deckUnitRuns(text, base){
+  var runs = [];
+  String(text).split(DECK_U0).forEach(function(part, i){
+    var cut = i ? part.indexOf(DECK_U1) : -1;
+    if (cut > -1) {
+      runs.push({ t: part.slice(0, cut), unit:true, b: base.b });
+      part = part.slice(cut + 1);
+    }
+    if (part) runs.push({ t: part, b: base.b, color: base.color });
+  });
+  return runs;
+}
+function deckPlain(text){ return String(text).split(DECK_U0).join("").split(DECK_U1).join(""); }
 
 /* ── THREE THINGS A RAW `textContent` GETS WRONG, EACH FOUND BY READING THE
    FILE RATHER THAN THE CODE (§96's family) ──────────────────────────────
@@ -673,21 +713,25 @@ function deckCellSpec(td){
   var due = td.querySelector(".duehalf");
   if (due) {
     var c2 = td.cloneNode(true); c2.querySelector(".duehalf").remove();
-    return { align:align, runs: [
-      { t: deckPieces(c2) || "—", b:bold, color: color || C.ink },
-      { t: " " + deckTxt(due), i:true, color: C.quiet }
-    ] };
+    return { align:align, runs: deckUnitRuns(deckPieces(c2, true) || "—", { b:bold, color: color || C.ink })
+      .concat([{ t: " " + deckTxt(due), i:true, color: C.quiet, small:true }]) };
   }
 
+  /* §573: a figure carrying a unit is written as runs, the unit its own. */
+  var withUnits = function(spec, text){
+    if (text.indexOf(DECK_U0) > -1) spec.runs = deckUnitRuns(text, { b:bold, color:color });
+    spec.t = deckPlain(text);
+    return spec;
+  };
   var sub = td.querySelector(".dsub");
   if (sub) {
     var c3 = td.cloneNode(true); c3.querySelector(".dsub").remove();
-    return { t: deckPieces(c3) || "—", sub: deckTxt(sub), align:align,
-             color: color, b: bold };
+    return withUnits({ sub: deckTxt(sub), align:align,
+             color: color, b: bold,
+             subColor: sub.classList.contains("dlate") ? C.band.bad : null }, deckPieces(c3, true) || "—");
   }
 
-  var t = deckPieces(td) || "—";
-  return { t:t, align:align, color:color, b:bold };
+  return withUnits({ align:align, color:color, b:bold }, deckPieces(td, true) || "—");
 }
 
 /* THE COLUMN WIDTHS ARE READ OFF THE HEADER, never guessed per slide kind.

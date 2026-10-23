@@ -30,7 +30,11 @@ def slides_text(b64):
     z = zipfile.ZipFile(io.BytesIO(base64.b64decode(b64)))
     names = sorted([n for n in z.namelist() if re.match(r"ppt/slides/slide\d+\.xml$", n)],
                    key=lambda n: int(re.findall(r"\d+", n)[0]))
-    return [" ".join(re.findall(r"<a:t>([^<]*)</a:t>", z.read(n).decode("utf-8"))) for n in names]
+    # §573: a paragraph's runs are joined as PowerPoint shows them, and the
+    # paragraphs with a space -- a figure's unit is a run of its own now.
+    return [" ".join("".join(re.findall(r"<a:t>([^<]*)</a:t>", p))
+                     for p in re.findall(r"<a:p>.*?</a:p>", z.read(n).decode("utf-8"), re.S))
+            for n in names]
 
 MAKE = """()=>{
   GROUP.structure = {bu:{exists:false}, top:{on:SMPRules.STRUCT_COMPONENTS.slice(), temple:true}};

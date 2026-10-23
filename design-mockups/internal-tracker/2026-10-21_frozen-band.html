@@ -1,0 +1,152 @@
+<title>Tracker Frozen Band</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap">
+<style>
+/* One page: the tracker as built, inside a frame that scrolls, with the band
+   above the list pinned to the top of the frame. Tokens are the page's own
+   (modules/tracker/page.ts). */
+*{box-sizing:border-box}
+:root{--bar:#1F3158;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-hover:rgba(255,255,255,.12);--bar-accent:#E3A64A;--bar-late:#FF9B8F;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --bad:#B23025;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;--bad:#E8776B;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;--bad:#E8776B;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.doc{max-width:1060px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.doc>p.lede{max-width:74ch;color:var(--ink-2);margin:0 0 4px}
+.doc>p.lede b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:26px 0 7px}
+.cap span{font-family:var(--font);letter-spacing:0;text-transform:none;font-weight:400}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--ink-2);margin:12px 0 0;max-width:80ch}
+.note b{color:var(--ink)}
+svg{display:block}
+
+/* THE FRAME stands in for the browser window: it scrolls, and the band is
+   pinned to its top edge. */
+.stage{height:560px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;background:var(--ground)}
+.pg{padding:0 20px 48px}
+
+/* ── NEW (round 2): the platform's white top bar pins too, so what stays put
+   runs from the top bar down to the add line. Its tokens are lib/topbar.ts's. ── */
+:root{--tb-surface:#FFFFFF;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA}
+.tb{position:sticky;top:0;z-index:30;background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink)}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbff{color:var(--tb-ink-2);font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;font-weight:600}
+.tbstep.cl{color:var(--tb-ink-2)}
+.tbstep svg{width:10px;height:10px;color:var(--tb-ink-3)}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;border-radius:50%;border:1px solid var(--tb-line)}
+.tbout{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px}
+
+/* ── the band that stays put, now pinned UNDER the top bar: the week, the
+   counts, the views, the add line and the search. It paints the page's own
+   ground behind itself, so the rows slide UNDER it and never show through
+   its rounded corners or the gap above the add line. ── */
+.pin{position:sticky;top:41px;z-index:20;background:var(--ground);padding-top:20px}
+
+/* the page's own furniture, as built */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right;min-height:48px}
+.tile b{display:block;font:600 22px/1 var(--font)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
+.cats a{font:600 13.5px/1 var(--font);color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent}
+.cats a[aria-current]{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.cats .sp{flex:1}
+.dots{align-self:center;margin-bottom:9px;display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:var(--bar-quiet);padding:6px 8px}
+.dots b{color:var(--bar-ink);font-weight:600}
+.dots svg{width:12px;height:12px}
+.dots svg.d3{width:16px;height:16px;margin-left:4px}
+.tools{display:flex;gap:18px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
+.write{flex:1 1 380px;min-width:0;border-bottom:1.5px solid var(--gold);display:flex;align-items:center;gap:10px;padding:6px 2px;color:var(--ink-3)}
+.write svg{width:15px;height:15px;color:var(--gold);flex:none}
+.find{display:flex;align-items:center;gap:8px;flex:0 1 240px;min-width:0;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--ink-3)}
+.find svg{width:14px;height:14px;flex:none}
+.find .s{flex:1}
+.find .go{font:600 12.5px/1 var(--font)}
+.counted{font:500 12.5px/1 var(--font);color:var(--ink-3);margin:-14px 0 0;padding-bottom:18px;text-align:right}
+
+/* the list, as built */
+.sh{display:flex;align-items:baseline;gap:12px;padding:20px 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.sh h3{margin:0;font:600 17px/1.2 var(--font)}
+.sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+.r{display:grid;grid-template-columns:20px minmax(0,1fr) 120px 74px 70px 108px 16px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line-2)}
+.tk{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.r .t{font:400 15px/1.35 var(--font);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc{font:500 12.5px/1 var(--font);color:var(--ink-3);white-space:nowrap}
+.r .w,.r .p{font:500 13px/1 var(--font);color:var(--ink-2);white-space:nowrap}
+.r .s{font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;display:flex;align-items:center;gap:7px}
+.r .s::before{content:"";width:12px;height:2px;background:currentColor;border-radius:1px}
+.r .ar{color:var(--ink-3)}
+.r .ar svg{width:12px;height:12px}
+.r.ex .t{color:var(--ink-3);font-style:italic}
+
+@media (max-width:860px){
+  .r{grid-template-columns:20px minmax(0,1fr) 16px}.r .w,.r .p,.r .s,.r .tc{display:none}
+  .strip{gap:14px}.tile span{white-space:normal}
+  /* NEW: on a phone the band scrolls away as it does today — pinned, it
+     would take most of the screen. */
+  .pin,.tb{position:static}
+  .tbff,.tbff+.tbsep{display:none}.tbin{padding:0 12px}
+}
+</style>
+
+<div class="doc">
+<h1>Internal Tracker: the band stays put</h1>
+<p class="lede">Scroll inside the frame below. <b>Everything from the white top bar down to the add line stays at the top</b>; the actions slide under it. The <b>&ldquo;14 actions on this week&rdquo; line is gone</b>, since the navy panel already gives the counts.</p>
+
+<p class="cap">The page, scrolled <span>(scroll inside the frame)</span></p>
+<div class="stage" tabindex="0" aria-label="The tracker page, scrollable">
+<header class="tb"><div class="tbin">
+  <nav class="tbtrail" aria-label="Where you are"><span class="tbff">Platform</span><span class="tbsep">&rsaquo;</span>
+    <span class="tbstep cl">Raya Trade<svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="tbsep">&rsaquo;</span>
+    <span class="tbstep">Internal Tracker<svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></nav>
+  <div class="tbacts"><span class="tbtheme"></span><span class="tbout">Sign out</span></div>
+</div></header>
+<div class="pg">
+  <div class="pin">
+    <header class="mast">
+      <div class="mrow"><div><div class="wkof">This week &middot; 18 Oct &ndash; 22 Oct</div><h2 class="pt">Internal Tracker</h2></div>
+        <div class="strip"><div class="tile"><b>14</b><span>Open</span></div><div class="tile"><b>0</b><span>Late</span></div><div class="tile"><b>14</b><span>Due</span></div><div class="tile"><b>0</b><span>Done this week</span></div></div></div>
+      <nav class="cats"><a aria-current="true">This week</a><a>All</a><a>Mine</a><a>Undated</a><a>Weekly check</a><span class="sp"></span>
+        <span class="dots">Group by <b>Owner</b><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="d3" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span>
+      </nav>
+    </header>
+    <div class="tools">
+      <div class="write"><svg viewBox="0 0 16 16"><path d="M10.5 2.5l3 3L5 14H2v-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Write the next action and press Enter</div>
+      <div class="find"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="s">Search</span><span class="go">Search</span></div>
+    </div>
+  </div>
+
+  <div class="sh"><span class="ix">01</span><h3>Islam Saadany</h3><span class="meta">1 open</span></div>
+  <div class="r"><span class="tk"></span><span class="t">UNITS Strategy Revamp | Logistics</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+
+  <div class="sh"><span class="ix">02</span><h3>Mohamed Essam</h3><span class="meta">3 open</span></div>
+  <div class="r"><span class="tk"></span><span class="t">UNITS plan require refinement, since there are redundancy</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Mohamed</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"></span><span class="t">UNITS - Don't have foundation | Online</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Mohamed</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"></span><span class="t">Develop Monthly reports across Units &amp; Functions</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Mohamed</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+
+  <div class="sh"><span class="ix">03</span><h3>Omar Alaa</h3><span class="meta">10 open</span></div>
+  <div class="r"><span class="tk"></span><span class="t">IT Refinement and adjust redundncey</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"></span><span class="t">Confirm IT Project updates with IT Function Owner (Tamer)</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"></span><span class="t">Transformation Project Refinement</span><span class="tc">+ Add a topic</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r ex"><span class="tk"></span><span class="t">Omar's other seven actions (not shown in the screenshot)</span><span class="tc"></span><span class="w"></span><span class="p"></span><span class="s" style="visibility:hidden">x</span><span></span></div>
+</div>
+</div>
+
+<div class="note"><b>The tabs</b> (This week, All, Mine, Undated, Weekly check) switch the list in place: the tab lights up the moment you press it and the list changes under the band, with no new page loading. <b>Weekly check</b> pins the same way and keeps its own line about the topics. <b>On a phone</b> nothing is pinned, as today, because it would cover most of the screen.</div>
+</div>

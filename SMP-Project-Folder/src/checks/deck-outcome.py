@@ -102,9 +102,14 @@ with sync_playwright() as p:
     ck("a tactics table is drawn at all", deck is not None)
     if deck is None:
         print("\nFAILURES: 1"); sys.exit(1)
+    # §571 ADDED STATUS after Quarters (Islam: "bring the status to the
+    # slides"), so the nine are ten; the figure cells are found by their own
+    # heading below rather than by a position that has now moved once.
     WANT = ["#", "Tactic", "Outcome", "Owner", "Collabs.", "Quarters",
-            "YTD actual", "Progress", "Note"]
-    ck("its columns are the nine agreed, in order", deck["head"] == WANT, deck["head"])
+            "Status", "YTD actual", "Progress", "Note"]
+    ck("its columns are the ten agreed, in order", deck["head"] == WANT, deck["head"])
+    YI = deck["head"].index("YTD actual") if "YTD actual" in deck["head"] else 6
+    PI = deck["head"].index("Progress") if "Progress" in deck["head"] else 7
     ck("the outcome is a COLUMN, never under the name",
        "Outcome" in deck["head"], deck["head"])
     ck("the old wordings are gone",
@@ -127,30 +132,35 @@ with sync_playwright() as p:
     ck("the outcome tactic names its outcome on the slide",
        r0[2] == "Stores opened", r0)
     ck("its figure on the slide is the figure Performance shows",
-       p0["shown"] is not None and p0["shown"].replace(" ", "") in r0[6].replace(" ", ""),
-       (p0["shown"], r0[6]))
+       p0["shown"] is not None and p0["shown"].replace(" ", "") in r0[YI].replace(" ", ""),
+       (p0["shown"], r0[YI]))
     ck("it is read against the target due so far",
-       p0["bench"] is not None and p0["bench"].replace(" ", "") in r0[6].replace(" ", ""),
-       (p0["bench"], r0[6]))
+       p0["bench"] is not None and p0["bench"].replace(" ", "") in r0[YI].replace(" ", ""),
+       (p0["bench"], r0[YI]))
     ck("its score on the slide is the score Performance gives it",
-       str(p0["reads"]) + "%" == r0[7], (p0["reads"], r0[7]))
-    ck("and it is no longer an em-dash", "—" not in r0[6] + r0[7], (r0[6], r0[7]))
+       str(p0["reads"]) + "%" == r0[PI], (p0["reads"], r0[PI]))
+    ck("and it is no longer an em-dash", "—" not in r0[YI] + r0[PI], (r0[YI], r0[PI]))
 
     r1, p1 = rows[1], perf[1]
     ck("a tactic with NO outcome says Missing in the outcome column",
        r1[2] == "Missing", r1[2])
     ck("...and its figure reads exactly as it always did (62%)",
-       "62%" in r1[6], r1[6])
+       "62%" in r1[YI], r1[YI])
     ck("...against the share of its plan that is due",
-       p1["bench"] in r1[6], (p1["bench"], r1[6]))
-    ck("...scored the old way", str(p1["reads"]) + "%" == r1[7], (p1["reads"], r1[7]))
+       p1["bench"] in r1[YI], (p1["bench"], r1[YI]))
+    ck("...scored the old way", str(p1["reads"]) + "%" == r1[PI], (p1["reads"], r1[PI]))
 
     r2 = rows[2]
     ck("a tactic still owed a figure SAYS so", "Not reported" in " ".join(r2), r2)
     ck("...and says what it is due at", "4 min" in " ".join(r2), r2)
     r3 = rows[3]
-    ck("a tactic outside the cycle is unchanged",
-       "Outside this cycle" in " ".join(r3), r3)
+    # §571 REWROTE THIS ONE: it read "a tactic outside the cycle is unchanged"
+    # and asked for the words "Outside this cycle". Status says Not due now, so
+    # the figure cells say nothing — said once, as Performance says it (§419.1).
+    SI = deck["head"].index("Status") if "Status" in deck["head"] else -1
+    ck("a tactic outside the cycle says Not due, once",
+       SI >= 0 and r3[SI] == "Not due" and "Outside this cycle" not in " ".join(r3) and
+       r3[YI] == "", r3)
 
     # ── §3 the counts: answered means answered, everywhere ───────────────
     print("\n§3  a reported outcome counts as reported")

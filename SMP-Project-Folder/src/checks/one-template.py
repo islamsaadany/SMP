@@ -1,4 +1,4 @@
-"""Every box's presentation is one template, in one order (§565).
+"""Every box's presentation is one template, in one order (§586).
 
 Spec 066 §5, agreed by Islam: *"one template for every box, built from its
 sections in a fixed order: cover → Foundation → Analysis → Plan → results →

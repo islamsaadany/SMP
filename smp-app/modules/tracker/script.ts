@@ -251,7 +251,12 @@ export const APP_JS = `(function () {
      next one — on whichever line was written, so a check walked down topic
      by topic never loses its place. The topic the line was picked or stood
      in rides on it; everything else the line holds is kept across the swap
-     exactly as the other lines' is. */
+     exactly as the other lines' is — EXCEPT THE WEEK AND THE OWNER PICKED ON
+     IT, which go back to the line's own (§567). Islam, of a line that kept
+     "Next week · Islam" after the add: *"reset after each add"*. Carried, the
+     next action went to the same person and week with nothing on the screen
+     saying so until it was posted (§96); the drawn line is the server's, so
+     forgetting the picks is all a reset takes. */
   function submitAdd(ar) {
     var box = boxOf(ar), nt = noteOf(ar);
     if (!ar || !box) return;
@@ -264,7 +269,7 @@ export const APP_JS = `(function () {
     var payload = { act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner };
     if (tid) payload.topicId = tid; else if (tname) payload.topicName = tname;
     var k = keep();
-    k.lines.forEach(function (st) { if (st.key === key) { st.add = ""; st.note = ""; st.noteOpen = false; } });
+    k.lines.forEach(function (st) { if (st.key === key) { st.add = ""; st.note = ""; st.noteOpen = false; st.picked = false; /*%PICKS%*/ } });
     k.focus = { line: key };
     post(payload, k, function (j) { if (!j) { box.disabled = false; if (nt) nt.disabled = false; box.focus(); } /*%BRK%*/ });
   }
@@ -472,7 +477,11 @@ export const APP_JS = `(function () {
       if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
     } else if (act === "add-to-topic") {
       var ar2 = lineOf("main");
-      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = boxOf(ar2); if (add3) { add3.focus(); add3.scrollIntoView({ block: "center" }); } }
+      /* PINNED, THE LINE IS ALREADY ON SCREEN (§565), and scrolling it to the
+         middle would carry the page away from the topic just pressed — so
+         it scrolls only where it is out of sight: on a phone, where the band
+         is not pinned. Measured BEFORE the focus, which scrolls by itself. */
+      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = boxOf(ar2); if (add3) { var bx = add3.getBoundingClientRect(), off = bx.top < 0 || bx.bottom > window.innerHeight; add3.focus(); if (off) add3.scrollIntoView({ block: "center" }); } }
     } else if (act === "carry") {
       /* CARRY TO NEXT WEEK (§532): one press, and the same action redraws
          inside the next card down. The server asks the stored row whether it
@@ -554,6 +563,48 @@ export const APP_JS = `(function () {
     var act = c.getAttribute("data-act"), id = rowOf(c);
     if (act === "status") { if (c.value === "done") fresh.add(id); post({ act: "status", id: id, status: c.value }); }
     else if (act === "topic") post({ act: "topic", id: id, topicId: c.value || null });
+  });
+
+  /* THE BAND PINS AT THE TOP BAR'S FOOT (§566), measured rather than assumed:
+     the bar is every module's and its height is its own business, so the
+     offset is read off it now and again whenever it changes. */
+  var tb = document.querySelector(".tb");
+  function barFoot() { if (tb) document.documentElement.style.setProperty("--tbh", tb.offsetHeight + "px"); }
+  barFoot();
+  if (tb && typeof ResizeObserver === "function") new ResizeObserver(barFoot).observe(tb);
+  else window.addEventListener("resize", barFoot);
+
+  /* THE VIEWS ARE FILTERS, NOT PAGES (§566). Islam: "they need to be filters
+     not other pages that take me to another loading page they should act
+     instantly". A press lights the tab at once and reads the list in place
+     through the read every other press uses (refetch, §53.5), so no page
+     loads; the address follows by pushState, so Back steps through the views.
+     The tab stays a link: a press with a modifier key, or a page whose script
+     did not run, still opens it as before. */
+  function viewOf(href) { return new URL(href, location.href).searchParams.get("view"); }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest(".cats a[href]");
+    if (!t || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    /*%TABS%*/
+    var v = viewOf(t.href);
+    if (!v) return;
+    e.preventDefault();
+    closePops(null);
+    if (v === (B.getAttribute("data-view") || "week")) return;
+    document.querySelectorAll(".cats a[href]").forEach(function (o) {
+      if (viewOf(o.href) === v) o.setAttribute("aria-current", "true"); else o.removeAttribute("aria-current");
+    });
+    B.setAttribute("data-view", v);
+    var u = new URL(location.href);
+    u.searchParams.set("view", v); u.searchParams.delete("open");
+    history.pushState(null, "", u);
+    refetch();
+  });
+  window.addEventListener("popstate", function () {
+    var v = new URLSearchParams(location.search).get("view") || "week";
+    if (v === (B.getAttribute("data-view") || "week")) return;
+    B.setAttribute("data-view", v);
+    refetch();
   });
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter

@@ -164,8 +164,18 @@ export async function resolveTenant(c: Q, user: SessionUser | null, slug: string
   if (!tenant) return refused();
   const access = await platformAccess(c);
   if (!mayOpen(user, mine, access, tenant)) return refused();
-  const seat = mine.find((m) => m.tenant_id === tenant.id);
-  /* the admin arriving with no seat holds the client's own Super user seat —
-     somebody has to open a client nobody is on yet (seatFor) */
-  return { ok: true, tenant, seat: seat ? seat.seat : user.isAdmin ? "super" : null, personKey: seat ? seat.person_key : null };
+  return { ok: true, tenant, ...seatAt(user, mine, tenant.id) };
+}
+
+/* WHO AN OFFICE ACCOUNT IS ON A CLIENT IT MAY OPEN (seatFor): its own seat
+   there — or, an admin arriving with no seat, the client's own Super user
+   seat, because somebody has to open a client nobody is on yet.
+   ONE ANSWER, ASKED BY THE DOOR ABOVE AND BY MY WORK (§583), which has to
+   know before anything is pressed whether a client's Tracker would let this
+   person change a row there — a tick drawn where the Tracker refuses is the
+   control §61 forbids, and a second copy of these two lines is how the two
+   would come to disagree (§53.5). Asked only after the door's own mayOpen. */
+export function seatAt(user: { isAdmin: boolean }, mine: Pick<Membership, "tenant_id" | "person_key" | "seat">[], tenantId: string): { seat: Membership["seat"] | null; personKey: string | null } {
+  const seat = mine.find((m) => m.tenant_id === tenantId);
+  return { seat: seat ? seat.seat : user.isAdmin ? "super" : null, personKey: seat ? seat.person_key : null };
 }

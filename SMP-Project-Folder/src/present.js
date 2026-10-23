@@ -134,6 +134,7 @@ function anch(key, label, where){
    few things only a plan carries are drawn here, and taking the figures
    out is the converter's (`planDeckBox` in pptx.js). It is never left on. */
 var DECK_PLAN = false;
+var DECK_EXAMPLE = false;   /* §574.2: drawing the guided tour's example */
 /* What the plan still OWES is named, in the platform's red, as the plan
    download always did (§119): a tactic's owner or quarters, the aspiration,
    an empty SWOT box. The review shows none of it — it is about the figures. */
@@ -144,6 +145,8 @@ function deckHtmlFor(target){
      and a group's roll-call in front of the first of its members. Answered
      before `boxRef`, which would read an unknown prefix as a business unit. */
   if (t.indexOf("flow:") === 0) return flowPartHtml(t);
+  /* §574: the guided tour's made-up direction, drawn fresh on every open. */
+  if (t === EXAMPLE_T) return exampleDeckHtml();
   /* §481: a direction's own deck, presented by whoever owns it. */
   if (r.kind === "dir") return dirDeckHtml(t);
   /* §553: and a part of the order that is not a box at all. */
@@ -438,12 +441,63 @@ function competeSlides(u){
    beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
    both callers build cells and hand them here. A change to the wording, the
    bands or the footer reaches both by construction. */
-function standCell(label, val, sub){
+function standCell(label, val, sub, detail){
   return '<div class="headcell"><span class="dlab">' + label + '</span>' +
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
-    '<span class="headsub">' + sub + '</span></div>';
+    '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
 }
-/* ── ONE TEMPLATE FOR EVERY BOX (§565, spec 066 §5) ──────────────────────
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Islam: *"for the overall performance slide with the final 2 numbers we
+   need to give a detail below the 2 numbers to show where the numbers are
+   coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
+
+   EACH LINE IS READ BY THE FUNCTION THAT SCORED IT, never worked out again
+   here (§53.5): a key measure's figure is `measureScore`, a category
+   column's `bdColScore` — the two lists `pillarPerf` averages — and a
+   tactic's is `tacticReads` of `tacticPlanShare`, the two `pillarExec` and
+   `pillarPlan` average. So the lines cannot disagree with the number above
+   them. What the reading leaves out is said, quietly, under the list: a
+   tactic not due and one not reported are not zero, and a reader adding up
+   the lines needs to know why they are not there.
+
+   Directions only, on the deck that ends on them. Five lines, then "and N
+   more" — never "and 1 more", which would take the line it saves. */
+var STAND_DETAIL_MAX = 5;
+function standDetail(rows, note){
+  if (!rows.length && !note) return "";
+  var cut = rows.length > STAND_DETAIL_MAX + 1 ? STAND_DETAIL_MAX : rows.length;
+  return '<ul class="headdetail">' + rows.slice(0, cut).map(function(r){
+      return '<li><span class="hdn">' + esc(r.name) + '</span><span class="hdv">' + r.fig + '</span></li>';
+    }).join("") +
+    (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
+    (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
+}
+function dirMeasureDetail(p){
+  var rows = scorableMeasures(p).map(function(m){
+    var v = measureScore(m);
+    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+  });
+  if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
+    var v = bdColScore(p, c);
+    if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
+                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+  });
+  return standDetail(rows, "");
+}
+function dirExecDetail(p){
+  var rep = reportedTactics(p), due = dueTactics(p);
+  var rows = rep.map(function(t){
+    var r = tacticProgress(t);
+    return { name:t.name,
+             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+                 '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
+  });
+  var notDue = SMPRules.shown(p.tactics || []).length - due.length;
+  var unrep = due.length - rep.length;
+  var left = [notDue ? notDue + " not due" : "", unrep ? unrep + " not reported" : ""].filter(Boolean);
+  return standDetail(rows, left.length ? "Not counted: " + left.join(", ") : "");
+}
+/* ── ONE TEMPLATE FOR EVERY BOX (§586, spec 066 §5) ──────────────────────
    Islam agreed the last step of the simplification: *"one template for every
    box, built from its sections in a fixed order"*. A unit's deck and a
    function's were two builders of some four hundred lines each, and each
@@ -1009,7 +1063,7 @@ function deckSlides(u){
    A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
    rather than a grid: five in three columns leaves two on the second row, and
    a grid would push them left. */
-/* THE PLAN PART OF A PILLARS BOX (§565): its divider, each group's roll-call
+/* THE PLAN PART OF A PILLARS BOX (§586): its divider, each group's roll-call
    and each pillar's own slides — and the score tables, which `deckOf` says
    at the end (§254.4). */
 function pillarsPlanPart(u, short){
@@ -1177,10 +1231,11 @@ function pillarSlidesOf(u, p, pi, named){
 
   var mRows = SMPRules.shown(p.measures).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      /* §572: the name bold and the Progress larger (Islam, on Option B). */
+      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
-      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      '<td class="num final dprog ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
       (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
       '</tr>';
   }).join("");
@@ -1211,7 +1266,15 @@ function pillarSlidesOf(u, p, pi, named){
 
      ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
      `m` and the tactics slide's bare code, both of which stored picture
-     slides already name (§236.2, §50.3). */
+     slides already name (§236.2, §50.3).
+
+     §568: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
+     progress just keep the target and actual and color code the actual as
+     you did earlier but after splitting to 2 columns"* — §557's split on
+     Reporting, carried here and to Performance. The target heads with the
+     column's own name and direction, as there; the actual wears the band it
+     wore as one cell, and an indicator's stays plain. The plan download
+     (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
     SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
@@ -1221,14 +1284,11 @@ function pillarSlidesOf(u, p, pi, named){
           /* §564: the plan carries the target alone. */
           if (DECK_PLAN)
             return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
-          if (!String(a).trim())
-            return '<td class="num">' + (String(t).trim()
-              ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
-              : '<span class="dmuted">&mdash;</span>') + '</td>';
-          var sc = bdCellScore(r, c);
-          return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
-            esc(a) + (String(t).trim()
-              ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          var dash = '<td class="num"><span class="dmuted">&mdash;</span></td>';
+          var sc = String(a).trim() ? bdCellScore(r, c) : null;
+          return (String(t).trim() ? '<td class="num">' + esc(t) + '</td>' : dash) +
+            (!String(a).trim() ? dash
+              : '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' + esc(a) + '</td>');
         }).join("") +
         (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
                 : '<td class="dnote empty">&mdash;</td>') + '</tr>';
@@ -1240,8 +1300,10 @@ function pillarSlidesOf(u, p, pi, named){
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
     '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
     bdCols.map(function(c){
-      return '<th class="num">' + esc(bdColWord(p, c)) +
+      var h = '<th class="num">' + esc(bdColWord(p, c)) +
         (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      if (DECK_PLAN) return h;
+      return h + '<th class="num fig">Actual</th>';
     }).join("") +
     '<th class="fig">Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
 
@@ -1276,12 +1338,20 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
-      '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-      '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' +
-      '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
+      '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
+      (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
       '<td class="cc"' + rs + '>' + (DECK_PLAN && !["q1","q2","q3","q4"].some(function(q){ return t[q]; })
-        ? PLAN_MISS : qs(t)) + '</td>';
+        ? PLAN_MISS : qs(t)) + '</td>' +
+      /* §571: the Status, as Performance draws it — the word in its band and
+         Delayed under it when late. On every row, the plan's too, so the cells
+         line up with the head and `planStripFigs` takes it out as a `fig`. */
+      /* §572.2: the pill and Delayed as one block, Delayed centred under the
+         pill as Performance's centred cell draws it (Islam). */
+      '<td class="dstat ' + tacticBand(t) + '"' + rs + '><span class="dstack">' +
+        '<span class="dpill">' + esc(tacticStatusWord(t)) + '</span>' +
+        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</span></td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
     if (xs.length) return deckOutRows(t, lead, note, xs, rs);
@@ -1291,8 +1361,7 @@ function pillarSlidesOf(u, p, pi, named){
        that also costs the owner and the quarters their legibility on a
        projector. */
     if (!tacticDue(t))
-      return '<tr>' + lead +
-        '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
+      return '<tr>' + lead + '<td colspan="2" class="cc"></td>' + note + '</tr>';
     /* What this row is measured against RIGHT NOW: an outcome answers with
        its own target, prorated where it compiles by Sum or Count (§276); everything else
        with the share of its plan that is due (§239). One function, so the
@@ -1300,23 +1369,27 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = tacticBenchmark(t);
     if (!tacticAnswered(t))
       return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>' +
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
+    /* §571: the benchmark beside the figure is the page's (§300) — a yes/no
+       row shows it only against a partial, so 0% and 100% stand alone. */
+    var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
-      '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
-      '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
+      '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
+      '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
   if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-    '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
-    '<th>Collabs.</th>' +
-    '<th class="num">Quarters</th><th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
+    '<th>' + DW("outcomes", "one", p) + '</th>' +
+    (deckColOn("owner") ? '<th>Owner</th>' : '') +
+    (deckColOn("collabs") ? '<th>Collabs.</th>' : '') +
+    '<th class="num">Quarters</th><th class="fig">Status</th>' +
+    '<th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
     '<th class="fig">Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
 
   return S;
@@ -1331,27 +1404,26 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
     if (shown == null)
       return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(bench ? figHtml(bench) : "") + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
     if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '></td>' + note + '</tr>';
       xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
+        out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
       });
       return out + outPad(xs.length);
     }
     var r = tacticProgress(t);
     var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
+                         : '<td class="num final dprog ' + dBand(r) + '"' + rs + '>' + dPct(r);
     prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
     out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
     xs.forEach(function(x){
       var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
+      out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(e) + '</td>' +
         deckOutFig(t, e) + '</tr>';
     });
     return out + outPad(xs.length);
@@ -1367,6 +1439,17 @@ function pillarSlidesOf(u, p, pi, named){
    ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN: the units off and the
    directions in pillars. Everywhere else the group deck is exactly what it
    was, asserted. */
+/* §571: ONE SWITCH FOR EVERY SLIDE — Owner and Collabs. on the tactics
+   slides, the office's, kept on the company (`SMPRules.slideColOn`). The plan
+   download keeps both: there an empty owner is a gap the plan still owes. */
+function deckColOn(k){
+  /* §574.2: the guided tour's made-up direction draws neither, whatever the
+     office's switch says for the real slides (Islam: *"hide the owner and
+     collaborator columns from the demo slides"*). Set only while its deck
+     is drawn, as DECK_PLAN is for the plan. */
+  if (DECK_EXAMPLE && (k === "owner" || k === "collabs")) return false;
+  return DECK_PLAN || SMPRules.slideColOn(GROUP, k);
+}
 function companyReviewOn(){
   return !SMPRules.buExists(GROUP) && topWay() !== "projects";
 }
@@ -1467,8 +1550,17 @@ function secDeckHtml(t){
    builder (§53.5) — and Thank you. */
 function dirDeckHtml(t){
   var d = dirPillar(t);
-  if (!d) return "";
-  var u = topAsUnit(), p = d.p, code = pillarCode(u, d.i);
+  return d ? dirDeckOf(topAsUnit(), d.p, d.i, null) : "";
+}
+/* §574: THE ONE BUILDER OF A DIRECTION'S DECK, so the guided tour's made-up
+   direction is drawn by exactly what draws a real one (§53.5) — a second
+   copy of these slides for the example would be a second answer to "what
+   does a direction's deck look like", and the tour would then be explaining
+   slides nobody presents. `ex` is the example's: the line saying the figures
+   are made up (B3), its slides whatever the company's own plan switch says,
+   and no Thank you, because the tour ends the deck. Null for every real one. */
+function dirDeckOf(u, p, i, ex){
+  var code = pillarCode(u, i);
   var who = [p.owner ? "Presented by " + esc(p.owner) : "",
              p.custodian ? "custodian " + esc(p.custodian) : ""].filter(Boolean).join(" &middot; ");
   var S = [coverSlide(p.name, deckMark(u), u.name,
@@ -1482,8 +1574,10 @@ function dirDeckHtml(t){
         ? ' &middot; ' + L1("theme") + ' ' + esc(p.theme) : '') +
       ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
     (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
-    (who ? '<p class="coversub dwho">' + who + '</p>' : ''))];
-  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i, true));
+    (who ? '<p class="coversub dwho">' + who + '</p>' : '') +
+    (ex ? '<p class="coversub dexample">' + ex.aside + '</p>' : ''))];
+  var on = !!ex || planOn(u);
+  if (on) S = S.concat(pillarSlidesOf(u, p, i, true));
 
   /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
      The deck a direction's owner presents had no slide that said how the
@@ -1505,16 +1599,17 @@ function dirDeckHtml(t){
      measures and nothing delivered would otherwise get a headline slide
      carrying two dashes, which says the plan owes an answer nobody asked
      it for. */
-  var dirPerf = planOn(u) ? pillarPerf(p) : null;
-  var dirExec = planOn(u) && pillarExec(p) && pillarPlan(p)
+  var dirPerf = on ? pillarPerf(p) : null;
+  var dirExec = on && pillarExec(p) && pillarPlan(p)
     ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   if (dirPerf != null || dirExec != null) {
     S.push(standSlideOf(esc(p.name),
       [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
           SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
-          ', by their targets'),
+          ', by their targets', dirMeasureDetail(p)),
         dirExec != null && standCell('Execution performance', dirExec,
-          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned',
+          dirExecDetail(p)) ],
       /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
          direction with nothing delivered draws no Execution cell, and a
          footnote explaining Execution would be the slide explaining a
@@ -1526,7 +1621,7 @@ function dirDeckHtml(t){
         ? 'Execution measures whether that work is landing on time.' : '')));
   }
 
-  S.push(thanksSlide(p.name));
+  if (!ex) S.push(thanksSlide(p.name));
   return S.join("");
 }
 
@@ -1724,7 +1819,7 @@ function capKOSlide(c){
     '<tbody>' + kRows + '</tbody></table></section>';
 }
 
-/* THE PLAN PART OF A PROJECTS OR ACTIONS BOX (§565): its divider, each
+/* THE PLAN PART OF A PROJECTS OR ACTIONS BOX (§586): its divider, each
    capability it carries and each project's own slides — and the projects'
    score tables, which `deckOf` says at the end (§557). */
 function projectsPlanPart(target, f, caps, objMode){
@@ -1886,7 +1981,7 @@ function projectsPlanPart(target, f, caps, objMode){
           '<td class="lead">' + esc(o.name) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
-          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
+          '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
           '<td class="num">' + got + '</td>' +
           '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
@@ -2104,6 +2199,9 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
+  /* §581: what this deck was opened with, so updating its figures rebuilds
+     the same deck (`deckRebuild`) rather than guessing it back. */
+  DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
   /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
      §554.1's cover and roll-calls are slides, not people presenting — and
@@ -2174,6 +2272,7 @@ function openDeckWith(titleHtml, targets, from){
   document.body.classList.add("presenting");
   deckFitPass();
   deckIndex();
+  deckTourEnd();   /* §574 */
   deckShow(0);
   deckScale();
   root.focus();
@@ -3031,6 +3130,7 @@ function closeDeck(){
      tab. */
   if (CLOCKTICK) { clearInterval(CLOCKTICK); CLOCKTICK = null; }
   DECK.clock = null;
+  deckTourEnd();   /* §574 */
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
@@ -3248,8 +3348,25 @@ function deckStopAt(i){
    figures are top-right, so that corner is the one that is empty on every
    slide kind rather than on the one that was looked at. */
 
-/* Under two minutes it turns; the amber is a warning and the red is a fact. */
-var CLOCK_NEAR_MS = 2 * 60000;
+/* ── THE STAGES AS TIME RUNS OUT (§580) ────────────────────────────────
+   Islam: *"it should jump earlier … more than 5 min keep grey, until 1 min
+   the amber and grows"*; the last minute *"not red just bigger … and starts
+   pulsing but on a longer period"*; over time red, bigger and pulsing; and,
+   on round 2, *"the dimming … in the last minute of the 5 min and … lighter
+   and the box start pulsing … and then at the 5min the slide go dark"* —
+   "quarter is fine". So: grey; amber and 1.3x from five minutes left; on its
+   light amber ground, 1.6x and a slow pulse in the last minute; red, 2x and
+   pulsing once over; from four over the pulse twice as fast and the slide a
+   quarter dark; from five over the slide black with the clock still on it.
+
+   ONLY THE CLOCK MOVES, NEVER THE SLIDE: a flashing slide distracts the room
+   (said to him, and kept). T holds the time and lifts the dark at once; T
+   again brings back whatever stage it had reached; the next subject starts
+   its own time, so all of it clears with no one pressing anything. */
+var CLOCK_NEAR_MS = 5 * 60000;
+var CLOCK_LAST_MS = 60000;
+var CLOCK_DIM_MS = 4 * 60000;    /* over by this much: the slide dims */
+var CLOCK_DARK_MS = 5 * 60000;   /* over by this much: the slide goes black */
 var CLOCKTICK = null;
 
 /* Which subject is being presented RIGHT NOW. In a flow the stops ARE the
@@ -3351,9 +3468,21 @@ function clockPaint(){
     b.hidden = !c;
   });
   if (!el) return;
-  if (!c) { el.hidden = true; return; }
+  var veil = root.querySelector(".dveil");
+  if (!c) {
+    el.hidden = true;
+    if (veil) veil.classList.remove("dim", "dark");
+    return;
+  }
   el.hidden = false;
   var left = clockLeft(), held = !c.from, over = left < 0;
+  /* §580: the stage, and the dark that only a running clock draws. */
+  el.classList.toggle("last", !over && left <= CLOCK_LAST_MS);
+  el.classList.toggle("fast", left <= -CLOCK_DIM_MS);
+  if (veil) {
+    veil.classList.toggle("dark", !held && left <= -CLOCK_DARK_MS);
+    veil.classList.toggle("dim", !held && left <= -CLOCK_DIM_MS && left > -CLOCK_DARK_MS);
+  }
   /* THE COLOUR ALWAYS SAYS WHERE YOU ARE AND THE MARK SAYS IT IS HELD — two
      facts, two devices. Paused takes its own quiet grey only where there is
      nothing louder to say; a clock paused while OVER stays red, or holding it
@@ -3384,6 +3513,12 @@ function clockMount(root){
                  '<span class="dctime"></span>' +
                  '<span class="dcw" hidden>Paused</span>';
   el.addEventListener("click", clockToggle);
+  /* §580: the dark over the slide, under the clock — inside `.deck`, so it
+     covers the slide at whatever size the deck is drawn and never the bar. */
+  var veil = document.createElement("div");
+  veil.className = "dveil";
+  veil.setAttribute("aria-hidden", "true");
+  root.querySelector(".deck").appendChild(veil);
   root.querySelector(".deck").appendChild(el);
   /* TWICE A SECOND, not once: at one second the shown figure can be a whole
      second stale, which reads as a clock that skips. Cleared in `closeDeck()`
@@ -3393,6 +3528,9 @@ function clockMount(root){
 }
 
 function deckShow(n){
+  /* §579: a slide arrived at any way but a step forward is shown whole —
+     the dots, Home and End, the editor's own slide, a step back. */
+  DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
@@ -3497,8 +3635,11 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
-  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
+  /* §579: every way forward and back goes through `deckStep`, which
+     builds a slide line by line where the company has asked for it and is
+     `deckShow(DECK.i ± 1)` where it has not. */
+  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
+  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckStep(-1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
   /* §340. Both are in the bar, which in fullscreen is not on the screen — so
      pause has two more ways in (the `P` key and the clock itself) and reset
@@ -3559,7 +3700,7 @@ function wireDeck(){
     if (DECKSWIPED) { DECKSWIPED = false; return; }
     if (deckOwnControl(ev.target)) return;
     var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
-    deckShow(DECK.i + (back ? -1 : 1));
+    deckStep(back ? -1 : 1);
   });
 
   /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
@@ -3592,7 +3733,7 @@ function wireDeck(){
     var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
     if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
     DECKSWIPED = true;
-    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+    deckStep(dx < 0 ? 1 : -1);
   });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
@@ -3610,7 +3751,10 @@ function wireDeck(){
     /* §556.11: a deck the slides opened full screen has no windowed state
        to fall back to — leaving full screen IS leaving the deck, or one Esc
        lands on the bar Islam asked never to see. */
-    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on")) {
+    /* §582: except in the room's window, where behind the deck is the
+       platform the room is not to see: there, leaving full screen keeps the
+       slides filling the window and asks for the click again. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
       closeDeck();
       return;
     }
@@ -3646,8 +3790,8 @@ function wireDeck(){
        return to has moved. */
     var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
     var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
-    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
+    if (fwd[ev.key]) { ev.preventDefault(); deckStep(1); }
+    if (back[ev.key]) { ev.preventDefault(); deckStep(-1); }
     if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
     if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
     /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
@@ -3663,7 +3807,9 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      else closeDeck();
+      /* §582: the room's window never closes its deck. Behind it is the
+         platform, and the room is not to see the platform. */
+      else if (!ROOM_MODE) closeDeck();
     }
     /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
        new one — `f` and `w` below have answered since §69.7 — and `p` was
@@ -3678,8 +3824,1048 @@ function wireDeck(){
        "ق", and Islam's "T is not working" was exactly that. */
     var kc = ev.code || "";
     if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
-    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); clockReset(); }
+    /* §581: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+       we can make it R to be relevant to refresh … for the reset let's make
+       it Y"*). By the key's place as well as its letter, for §556.11's
+       Arabic keyboard: R sends "ق" and Y "غ". */
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); deckRefresh(false); }
+    if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
+}
+
+/* ══ A GUIDED TOUR, ON A MADE-UP DIRECTION (§574) ═══════════════════════
+   Islam, before El Abd's Q3 review: *"an option … to present a demo
+   direction … on clicking in on the presentation it takes us in a tour
+   through the slides of this direction … that highlights a part and dim the
+   rest with a tool tip to explain what this is"*, naming the key measures
+   slide, the tactics slide and the direction's overall performance.
+
+   AND THEN, ON THE FIRST BUILD: *"remove step 14 … start it maybe out of the
+   flow … from the options of presentation drop down below the master
+   presentation … on a dummy direction with multiple dynamics to explain the
+   concept a made up one not an actual one"*. So the first build's picker in
+   the Master presentation and its button on a real direction's cover are
+   gone, reversed rather than kept beside this (§24): one way in, the
+   Presentation menu, under Master presentation, for whoever may open that.
+
+   THE DIRECTION IS MADE UP AND NEVER STORED. Built fresh on every open from
+   the lines below and handed to the same builder a real direction's deck
+   uses (`dirDeckOf`), so the slides the tour explains are the slides the
+   room is about to see — and nothing reaches GROUP, a save, or anybody's
+   plan. Its cover says the figures are made up (B3), and its code is EX001,
+   never a D-code a real direction could hold.
+
+   "MULTIPLE DYNAMICS" ARE ASKED OF THE PLATFORM, NOT ASSUMED. Which of a
+   tactic's quarters make it Completed, Delayed, on track or Not due depends
+   on where this client's cycle stands — Raya reviews at H1, El Abd at Q3 — so
+   each tactic tries windows until the platform's own `tacticStatusKey()` and
+   `tacticDelayed()` give the state it is there to show, and a state the cycle
+   cannot hold (nothing is Not due in Q4) is a tactic left out (§45.2). The
+   sales figure is set against what is due by now through `elapsedShare()`,
+   for the same reason.
+
+   THE TOUR WALKS THE SLIDES THE DECK ALREADY HAS. Each stop names a KIND of
+   slide and the part of it to light; a part a slide does not carry is a stop
+   not made. The words are the client's: `L()` for measures and tactics, the
+   company's own word for a pillar (El Abd's "direction"), and the bands read
+   off `BANDS` with their floors (§53.5).
+
+   DRAWN INSIDE `#deckroot`: the deck goes full screen as an ELEMENT, and
+   anything outside that element is not on the screen. The onboarding tour's
+   spotlight (tour.css), at projector size. Never printed (§305). */
+var DTOUR = null;
+var EXAMPLE_T = "example:tour";
+
+function exampleDirection(){
+  var top = topAsUnit(), u = {};
+  for (var k in top) u[k] = top[k];
+  u.pillarPrefix = u.pillarCapPrefix = "EX";
+  var share = elapsedShare();
+  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  var sales = Math.round(120 * share * 0.82 * 10) / 10;
+  var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
+    sub:"", owner:"Head of Restaurants", custodian:"",
+    measures:[
+      { id:"example-M1", name:"Restaurant sales", dir:"≥", target:"120 M EGP", compile:"Sum",
+        actual:sales + "M EGP",
+        note:"Two new branches opened a quarter late, so sales are behind plan." },
+      { id:"example-M2", name:"Average spend per guest", dir:"≥", target:"350 EGP",
+        compile:"Latest", actual:"368 EGP" },
+      { id:"example-M3", name:"Delivery share of sales", dir:"≥", target:"25%",
+        compile:"Latest", actual:"11%",
+        note:"Our own delivery app slipped; orders still come through third-party apps." },
+      { id:"example-M4", name:"Food cost as a share of sales", dir:"≤", target:"32%",
+        compile:"Latest", actual:"33%" } ],
+    tactics:[] };
+  /* Every window of one to four quarters in a row, each tactic trying them
+     in its own order until the platform says it shows what it is there for. */
+  var wins = [];
+  for (var a = 1; a <= 4; a++) for (var b = a; b <= 4; b++) {
+    var w = []; for (var q = a; q <= b; q++) w.push(q); wins.push(w);
+  }
+  var place = function(t, order, ok){
+    var ws = wins.slice().sort(order);
+    for (var i = 0; i < ws.length; i++) {
+      t.q1 = t.q2 = t.q3 = t.q4 = 0;
+      ws[i].forEach(function(q){ t["q" + q] = 1; });
+      if (ok(t)) return t;
+    }
+    return null;
+  };
+  var early = function(x, y){ return x[x.length-1] - y[y.length-1] || y.length - x.length; };
+  var late = function(x, y){ return y[y.length-1] - x[x.length-1] || y.length - x.length; };
+  var now = function(x, y){ return x[0] - y[0] || y.length - x.length; };
+  p.tactics = [
+    place({ id:"example-T1", name:"Open two new restaurant branches", owner:"Operations",
+            outcome:"Two branches trading", status:"Done", actual:100 }, early,
+      function(t){ return tacticStatusKey(t) === "done" && tacticShare(t) === 1; }),
+    place({ id:"example-T2", name:"Launch delivery through our own app", owner:"Digital",
+            outcome:"App live in all branches", status:"WIP", actual:40,
+            note:"Payment gateway approval is pending; launch moved to next quarter." }, late,
+      function(t){ return tacticStatusKey(t) === "wip" && tacticDelayed(t); }),
+    place({ id:"example-T3", name:"Refresh the menu around best sellers", owner:"Culinary",
+            outcome:"New menu in all branches", status:"WIP", actual:0 }, now,
+      function(t){
+        var sh = tacticShare(t);
+        if (!(sh > 0 && sh < 1)) return false;
+        t.actual = Math.round(sh * 95);
+        return tacticStatusKey(t) === "wip" && !tacticDelayed(t);
+      }),
+    place({ id:"example-T4", name:"Family-meal campaign for the holidays", owner:"Marketing",
+            outcome:"Campaign in market", status:"", actual:0 }, late,
+      function(t){ return tacticStatusKey(t) === "notdue"; })
+  ].filter(Boolean);
+  return { u:u, p:p };
+}
+function exampleDeckHtml(){
+  var x = exampleDirection();
+  DECK_EXAMPLE = true;
+  try {
+    return dirDeckOf(x.u, x.p, 0,
+      { aside:"An example to show how the slides read &middot; the figures are made up" }) +
+      examplePurposeSlide();
+  } finally { DECK_EXAMPLE = false; }
+}
+/* §574.6: AND THE EXAMPLE ENDS ON WHY. Islam: *"adding a final slide in the
+   demo, reminding the audience of the purpose … single source of truth
+   maintaining the history … the visibility"*; the fourth, accountability,
+   and the order and title were put to him and agreed, with *"make the titles
+   of the objectives big and reduce the paragraphs to be very very minimal"*.
+   The example's own slide, never a real deck's: it is about the platform,
+   not about a direction. The four in the order they tell one story — one
+   truth, everyone sees it, someone owns it, it is kept. */
+/* §574.7: the lines under the titles are Islam's meanings, put back to him
+   short: one place for every actual, the company's and each direction's,
+   this cycle's and the ones before; progress seen at a glance by each
+   audience; doing what we said and stopping what does not work. */
+var EXAMPLE_PURPOSE = [
+  ["One source of truth", "Every actual, past and present, one place"],
+  ["Visibility", "Progress at a glance, for the right audience"],
+  ["Accountability", "Doing what we said, stopping what doesn't work"],
+  ["History that stays", "Every cycle kept as reported"]
+];
+function examplePurposeSlide(){
+  return '<section class="dslide d-purpose"><h2>What this platform is for</h2><div class="pgrid">' +
+    EXAMPLE_PURPOSE.map(function(x, i){
+      return '<div class="pitem"><span class="pnum">' + (i + 1) + '</span>' +
+        '<h3>' + esc(x[0]) + '</h3><p>' + esc(x[1]) + '</p></div>';
+    }).join("") + '</div></section>';
+}
+/* The Presentation menu's Guided tour: the example, full screen, the tour
+   already on its first stop — one press from the menu to the room. Asked
+   the office's rule at the press, never trusted from the menu (§48.2). */
+function exampleTourOpen(){
+  if (!SMPRules.mayMasterPresent(world(), viewer())) return;
+  openDeckWith("<b>Guided tour</b> &middot; an example", [EXAMPLE_T]);
+  deckGoFull();
+  requestAnimationFrame(function(){ deckTourStart(); });
+}
+
+function deckTourOwn(){
+  return (DECK.slides || []).filter(function(s){
+    return s.dataset.subject === EXAMPLE_T;
+  });
+}
+function deckTourBands(){
+  var bs = BANDS.bands;
+  return '<span class="dtbands">' + bs.map(function(x, i){
+    var rng = i === 0 ? x.floor + "% and above"
+      : i === bs.length - 1 ? "below " + bs[i-1].floor + "%"
+      : x.floor + "–" + (bs[i-1].floor - 1) + "%";
+    return '<span><i style="background:var(--' + esc(x.key) + ')"></i>' +
+      esc(x.label) + ' <em>' + rng + '</em></span>';
+  }).join("") + '</span>';
+}
+/* A table column, head to last row — so a column is lit whole, whatever a
+   tactic's several outcome lines do to the rows under it (§414). */
+function deckTourCol(s, test){
+  var ths = [].slice.call(s.querySelectorAll("table thead th"));
+  var hit = ths.filter(function(th, i){
+    return test(th.textContent.trim().toLowerCase(), i);
+  });
+  if (!hit.length) return null;
+  var tb = hit[0].closest("table").getBoundingClientRect();
+  var a = hit[0].getBoundingClientRect(), z = hit[hit.length - 1].getBoundingClientRect();
+  return { left:a.left, top:a.top, right:z.right, bottom:tb.bottom };
+}
+/* The extent of an element's text, for `deckTourBox` — which takes a Range
+   as readily as an element, since both answer getBoundingClientRect. */
+function deckTourInk(e){
+  if (!e) return null;
+  var r = document.createRange();
+  r.selectNodeContents(e);
+  return r;
+}
+function deckTourBox(els){
+  els = els.filter(Boolean);
+  if (!els.length) return null;
+  var r = null;
+  els.forEach(function(e){
+    var b = e.getBoundingClientRect();
+    if (!b.width && !b.height) return;
+    r = r ? { left:Math.min(r.left, b.left), top:Math.min(r.top, b.top),
+              right:Math.max(r.right, b.right), bottom:Math.max(r.bottom, b.bottom) }
+          : { left:b.left, top:b.top, right:b.right, bottom:b.bottom };
+  });
+  return r;
+}
+/* The key measure furthest behind: the first in the lowest band the slide
+   paints, else the first carrying a note. */
+function deckTourRow(s){
+  var rows = [].slice.call(s.querySelectorAll("table tbody tr"));
+  var by = function(sel){
+    return rows.filter(function(r){ return r.querySelector(sel); })[0];
+  };
+  return by("td.dprog.bad") || by("td.dprog.warn") || by("td.dprog.attn") ||
+    by("td.dnote:not(.empty)") || null;
+}
+function deckTourNoun(){
+  return esc(LTraw("group", "pillar", "one").toLowerCase());
+}
+function deckTourStops(){
+  var M = L("measure"), T = L("tactic"), T1 = esc(labelWord("tactic", "group")).toLowerCase();
+  var noun = deckTourNoun();
+  var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isP = function(s){ return s.classList.contains("d-purpose"); };
+  var reveal = function(n){ return { on:isP, clear:true, reveal:n }; };
+  var eq = function(w){ return function(x){ return x === w; }; };
+  /* §574.2: EACH TABLE OPENS AND CLOSES ON THE WHOLE SLIDE, CLEAR. Islam:
+     *"start the key measure tour with the full view all clear first and then
+     the tour appears … and finish after the note with the full view clear as
+     well showing everything. same for the tactics"*. A clear stop lights
+     nothing and draws no card: the room sees the slide as it is presented,
+     and the next press brings the spotlight in. */
+  /* §574.5: AND THE CLEAR VIEW SAYS WHICH SLIDE IT IS, AND WHAT IT IS
+     ABOUT. Islam: *"in the whole slide in the key measures or the tactics
+     can we highlight somehow that we are in the measures and the tactics
+     slides so people can be aware of the difference?"* — shown two ways and
+     choosing both, on the clear views only: the slide's title ringed with
+     its name in gold, and a label in the corner naming the slide and the
+     difference, results against work. Nothing is dimmed. */
+  var clear = function(on, mark){ return { on:on, clear:true, mark:mark }; };
+  var markM = [M, "The results we committed to"], markT = [T, "The work that delivers them"];
+  return [
+    /* §574.10: the cover too opens whole and clear before it is lit (Islam:
+       *"for the first cover page let's start with it a clear slide before
+       the highlighting"*) — so the tour begins on the slide as the room
+       would see it. */
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); }, clear:true },
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
+      /* §574.4: the WORDS, not the blocks they sit in — a heading is as wide
+         as the slide, so lighting its box left the bigger card nowhere to
+         stand but on top of it. A Range measures the text itself. */
+      at:function(s){ return deckTourBox([s.querySelector(".dcovermark"), deckTourInk(s.querySelector(".eyebrow")),
+                       deckTourInk(s.querySelector("h1")), s.querySelector(".coverrule")]
+                       .concat([].slice.call(s.querySelectorAll(".coversub")).map(deckTourInk))); },
+      h:"One " + noun + ", from cover to close",
+      b:"Every " + noun + " in today's review is presented the same way: its " + M +
+        ", its " + T + ", and where it stands overall. This made-up one shows how to read them." },
+
+    clear(isM, markM),
+    { on:isM, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1; }); },
+      h:M,
+      b:"The results this " + noun + " committed to for the year, one to a row." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("annual target")); },
+      h:"Annual target",
+      b:"What the plan set for the whole year." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("actual")); },
+      h:"Actual",
+      b:"What was reported for this cycle. Under it, in grey, what was <b>due</b> by " +
+        "this point in the year, which is what the figure is judged against." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("progress")); },
+      h:"Progress",
+      b:"The actual against what was due, in the colour of its band:" + deckTourBands() },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("note")); },
+      h:"Note",
+      b:"The owner's word on the figure: why it is where it is, and what happens next." },
+    /* §574.3: AND ONE LINE READ ACROSS, as the tactics light their delayed
+       row — Islam: *"for the measures let's highlight a whole line like we
+       did in the tactics after the note part"*. The line furthest behind,
+       so the note has something to explain. */
+    { on:isM, at:function(s){ var r = deckTourRow(s); return r ? deckTourBox([r]) : null; },
+      h:function(s){
+        var r = deckTourRow(s), n = r && r.querySelector("td.lead");
+        return n ? esc(n.textContent.trim()) : "One line, read across"; },
+      b:"One line read across: the target, what was reported against what was due, " +
+        "the progress in its band, and the owner's note on why." },
+    clear(isM, markM),
+
+    clear(isT, markT),
+    { on:isT, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1 || i === 2; }); },
+      h:T,
+      b:"The work that delivers the " + M + ": each " + T1 +
+        " with the outcome it is measured by." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("quarters")); },
+      h:"Quarters",
+      b:"The quarters this work is planned to run in." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("status")); },
+      h:"Status",
+      b:"Where the work stands, as its owner reported it: " +
+        [TACTIC_WORDS.done, TACTIC_WORDS.wip, TACTIC_WORDS.todo, TACTIC_WORDS.notdue]
+          .map(esc).join(", ") + "." },
+    /* §574.2: YTD actual and Progress before Delayed (Islam). */
+    { on:isT, at:function(s){ return deckTourCol(s, function(x){
+        return x === "ytd actual" || x === "progress"; }); },
+      h:"YTD actual and Progress",
+      b:"What has been delivered so far against what was due by now, and the progress " +
+        "that makes, in the same colours as the " + M + "." },
+    { on:isT, at:function(s){
+        var late = s.querySelector(".dlate");
+        return late ? deckTourBox([late.closest("tr")]) : null; },
+      h:"Delayed",
+      b:"A red <b>DELAYED</b> means this " + T1 + " has fallen behind its plan: its window " +
+        "has passed unfinished, or its first quarter went by with nothing delivered." },
+    clear(isT, markT),
+
+    /* §574.11: and "Where it stands" opens whole and clear too (Islam). */
+    { on:function(s){ return s.classList.contains("d-head"); }, clear:true },
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
+      h:"Where it stands: " + M,
+      b:"How the results are doing: every one of the " + M +
+        " against its target, in one figure." },
+    /* §574: and it ends here. Islam struck the stop on the line under the
+       two readings ("remove step 14"). */
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[1]]); },
+      h:"Where it stands: Execution",
+      b:"Whether the work is landing on time: what the " + T +
+        " have delivered against what was planned by now." },
+
+    /* §574.6, §574.8: THE PURPOSE BUILDS UP, IT IS NOT TOURED. Islam: *"I
+       don't think the lighting up every objective is good in the demo. It's
+       not a tour — you can make them appear one by one … on a click"*. So
+       the slide opens on its title alone and each press brings in the next
+       objective, whole: nothing dimmed, no card, no ring. Ending the tour
+       anywhere shows all four (`deckTourUnmark`). */
+    reveal(0), reveal(1), reveal(2), reveal(3), reveal(4)
+  ];
+}
+function deckTourStart(){
+  var root = document.getElementById("deckroot");
+  var own = deckTourOwn();
+  if (!root.classList.contains("on") || !own.length) return;
+  deckTourEnd();
+  /* Only the stops whose part is on the slide. Asked with the slide SHOWN,
+     because a slide behind `display:none` measures as nothing (§69). */
+  var keep = [];
+  deckTourStops().forEach(function(st){
+    var s = own.filter(st.on)[0];
+    if (!s) return;
+    var at = DECK.slides.indexOf(s);
+    deckShow(at);
+    if (st.clear || st.at(s)) keep.push({ at:at, s:s, st:st });
+  });
+  if (!keep.length) { deckShow(0); return; }
+  keep.push({ at:keep[keep.length - 1].at, end:true,
+    /* §574.6: after the purpose slide the close hands over to the review. */
+    st:{ h:"Now, today's review",
+         b:"Every " + deckTourNoun() + " follows the pattern you just saw. Finish takes you back to the platform." } });
+  DTOUR = { stops:keep, i:0 };
+  root.insertAdjacentHTML("beforeend",
+    '<div class="dtour" data-dtour>' +
+      '<svg class="dtsvg" aria-hidden="true"><defs><mask id="dtmask">' +
+        '<rect x="0" y="0" width="100%" height="100%" fill="#fff"/>' +
+        '<rect class="dthole" rx="10" fill="#000"/></mask></defs>' +
+        '<rect class="dtshade" x="0" y="0" width="100%" height="100%" mask="url(#dtmask)"/>' +
+        '<rect class="dtring" rx="10"/></svg>' +
+      '<div class="dtlabel" aria-live="polite"></div>' +
+      '<div class="dtcard" role="dialog" aria-live="polite">' +
+        '<div class="dttop"><span class="dtstep"></span>' +
+          '<button type="button" class="dtx" data-dtend title="End the tour (G)" aria-label="End the tour">&times;</button></div>' +
+        '<h3></h3><div class="dtbody"></div>' +
+        '<div class="dtfoot"><button type="button" class="dtback" data-dtback>Back</button>' +
+          '<button type="button" class="dtnext" data-dtnext>Next</button></div>' +
+      '</div></div>');
+  var dock = root.querySelector("[data-dtour]");
+  /* EVERY PRESS ON THE TOUR IS THE TOUR'S. The deck advances on a click and
+     a swipe in full screen (§265, §280); left to bubble, one press would move
+     the tour AND the deck under it. A press on the dim is Next, which is
+     what a presenter's hand does. */
+  ["pointerdown", "pointerup"].forEach(function(n){
+    dock.addEventListener(n, function(ev){ ev.stopPropagation(); });
+  });
+  dock.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    if (ev.target.closest("[data-dtend]")) return deckTourEnd();
+    if (ev.target.closest("[data-dtback]")) return deckTourGo(DTOUR.i - 1);
+    if (ev.target.closest(".dtcard") && !ev.target.closest("[data-dtnext]")) return;
+    deckTourGo(DTOUR.i + 1);
+  });
+  deckTourGo(0);
+}
+function deckTourGo(n){
+  if (!DTOUR) return;
+  if (n < 0) n = 0;
+  /* Past the closing card is past the example: it exists for the tour, so
+     the deck closes with it and the platform is where Finish lands. */
+  if (n >= DTOUR.stops.length) { deckTourEnd(); closeDeck(); return; }
+  DTOUR.i = n;
+  var x = DTOUR.stops[n];
+  if (DECK.i !== x.at) deckShow(x.at);
+  requestAnimationFrame(deckTourDraw);
+}
+function deckTourDraw(){
+  if (!DTOUR) return;
+  var root = document.getElementById("deckroot");
+  var dock = root.querySelector("[data-dtour]");
+  if (!dock) return;
+  var x = DTOUR.stops[DTOUR.i], st = x.st;
+  var card = dock.querySelector(".dtcard");
+  dock.classList.toggle("dtclear", !!st.clear);
+  deckTourUnmark();
+  dock.classList.toggle("dtmark", !!(st.clear && st.mark && deckTourMark(dock, x.s, st.mark)));
+  if (st.reveal != null) deckTourReveal(x.s, st.reveal);
+  if (st.clear) return;
+  /* The count is of the parts lit — a clear view is not a step to count. */
+  var lit = DTOUR.stops.filter(function(y){ return !y.st.clear && !y.end; });
+  card.querySelector(".dtstep").textContent = x.end ? "Guided tour" :
+    (lit.indexOf(x) + 1) + " of " + lit.length;
+  card.querySelector("h3").innerHTML = typeof st.h === "function" ? st.h(x.s) : st.h;
+  card.querySelector(".dtbody").innerHTML = st.b;
+  card.querySelector("[data-dtback]").hidden = DTOUR.i === 0;
+  card.querySelector("[data-dtnext]").textContent = x.end ? "Finish" : "Next";
+  var r = x.end ? null : st.at(x.s);
+  var hole = dock.querySelector(".dthole"), ring = dock.querySelector(".dtring");
+  card.classList.toggle("dtcentre", !r);
+  if (!r) {
+    [hole, ring].forEach(function(e){ e.setAttribute("width", 0); e.setAttribute("height", 0); });
+    card.style.left = card.style.top = "";
+    return;
+  }
+  var pad = 10;
+  var hx = r.left - pad, hy = r.top - pad, hw = r.right - r.left + pad * 2, hh = r.bottom - r.top + pad * 2;
+  [hole, ring].forEach(function(e){
+    e.setAttribute("x", hx); e.setAttribute("y", hy);
+    e.setAttribute("width", hw); e.setAttribute("height", hh);
+  });
+  /* The card where there is room: under the part, then over it, then
+     beside it — and failing all three, in the corner of the screen, never
+     over the part it is explaining. */
+  var W = innerWidth, H = innerHeight, gap = 18;
+  card.style.width = "";
+  var cw = card.offsetWidth, ch = card.offsetHeight;
+  var left, top;
+  if (hy + hh + gap + ch <= H - 12) { top = hy + hh + gap; left = hx; }
+  else if (hy - gap - ch >= 12) { top = hy - gap - ch; left = hx; }
+  else if (hx + hw + gap + cw <= W - 12) { left = hx + hw + gap; top = hy; }
+  else if (hx - gap - cw >= 12) { left = hx - gap - cw; top = hy; }
+  else {
+    /* §574.9: a NARROWER card beside the part before a full one over it.
+       The bigger card no longer fitted beside the cover's words, and the
+       corner it fell back to sat on their last line. Fifteen of its own
+       ems is the narrowest that still reads as a card. */
+    var room = W - 12 - (hx + hw + gap);
+    var fs = parseFloat(getComputedStyle(card).fontSize) || 16;
+    if (room >= 15 * fs) {
+      card.style.width = room + "px";
+      cw = room; ch = card.offsetHeight;
+      left = hx + hw + gap; top = hy;
+    } else { left = W - cw - 24; top = H - ch - 24; }
+  }
+  card.style.left = Math.max(12, Math.min(left, W - cw - 12)) + "px";
+  card.style.top = Math.max(12, Math.min(top, H - ch - 12)) + "px";
+}
+function deckTourEnd(){
+  var root = document.getElementById("deckroot");
+  var dock = root && root.querySelector("[data-dtour]");
+  if (dock) dock.remove();
+  deckTourUnmark();
+  DTOUR = null;
+}
+/* §574.5: the clear view's mark — the title's words ringed, the slide's own
+   name in gold (a class on the slide, taken off as the stop is left), and
+   the label at the table's right edge, level with the title. */
+function deckTourMark(dock, s, words){
+  var h = s.querySelector(".dphdr h2"), t = s.querySelector("table");
+  if (!h || !t) return false;
+  var b = deckTourInk(h).getBoundingClientRect(), tb = t.getBoundingClientRect(), pad = 12;
+  var ring = dock.querySelector(".dtring");
+  ring.setAttribute("x", b.left - pad); ring.setAttribute("y", b.top - pad);
+  ring.setAttribute("width", b.width + pad * 2); ring.setAttribute("height", b.height + pad * 2);
+  var lab = dock.querySelector(".dtlabel");
+  lab.innerHTML = '<b>' + words[0] + '</b><span>' + esc(words[1]) + '</span>';
+  lab.style.right = Math.max(12, innerWidth - tb.right) + "px";
+  lab.style.top = (b.top + b.height / 2) + "px";
+  s.classList.add("dtmarked");
+  return true;
+}
+function deckTourUnmark(){
+  [].forEach.call(document.querySelectorAll("#deckroot .dtmarked"), function(e){
+    e.classList.remove("dtmarked");
+  });
+  /* §574.8: and a purpose slide built part way shows whole again. Taken off
+     and put back in one task by `deckTourDraw`, so an objective already in
+     does not flicker; only the new one animates. */
+  [].forEach.call(document.querySelectorAll("#deckroot .preveal"), function(e){
+    e.classList.remove("preveal");
+  });
+}
+/* §574.8: the first `n` objectives in, the rest held back. */
+function deckTourReveal(s, n){
+  s.classList.add("preveal");
+  [].forEach.call(s.querySelectorAll(".pitem"), function(it, i){
+    it.classList.toggle("pshown", i < n);
+  });
+}
+/* THE KEYBOARD IS THE TOUR'S WHILE IT RUNS — asked BEFORE the deck's own
+   listener (the capture phase), so Next lights the next part instead of
+   turning the slide out from under it. Escape is left alone: in full screen
+   the browser takes it first, and leaving full screen leaves the deck
+   (§556.11), so inside the deck the tour ends on `G` or its ×. `G` starts it
+   again, on the example only. */
+addEventListener("keydown", function(ev){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on")) return;
+  var kc = ev.code || "";
+  var g = kc === "KeyG" || ev.key === "g" || ev.key === "G";
+  if (!DTOUR) {
+    if (g && !ev.target.isContentEditable && deckTourOwn().length) {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      deckTourStart();
+    }
+    return;
+  }
+  var fwd = { ArrowRight:1, ArrowDown:1, PageDown:1, " ":1 };
+  var back = { ArrowLeft:1, ArrowUp:1, PageUp:1 };
+  if (fwd[ev.key]) deckTourGo(DTOUR.i + 1);
+  else if (back[ev.key]) deckTourGo(DTOUR.i - 1);
+  else if (g || ev.key === "Escape") deckTourEnd();
+  else return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+}, true);
+addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+
+/* ══ LINE BY LINE (§579) ═════════════════════════════════════════════════
+   Islam: *"give me an option … to present box by box like line by line in
+   the tables and number by number in the numbers slides"*; asked, the
+   switch in the slide view beside Columns, the office's and the company's
+   (`SMPRules.slideBuildOn`); the key measures, categories and tactics
+   tables, the projects' slides, and "Where it stands" — NOT the objectives
+   or the SWOT; and ← taking back one line at a time.
+
+   A STEP FORWARD ON A SLIDE THAT BUILDS shows its next line, and the step
+   after its last line turns the slide. The next slide arrives with only its
+   headings; a step back takes the last line away, and from a slide with
+   none showing goes to the one before, whole, whose lines the next steps
+   back take away in turn. The dots, Home and End land on whole slides
+   (`deckShow` clears every build).
+
+   A LINE IS A TABLE ROW, OR A TACTIC'S ROWS TOGETHER: an outcome's own line
+   carries no number cell, so it rides with the row above it, as
+   `deckFitPass` moves them (§414). A table carried onto a "continued" slide
+   is a table of its own and builds from its first row.
+
+   HELD BACK, NOT TAKEN OUT: a line waiting is transparent, so the table
+   does not move as it fills and its stripes stay where they will be. Never
+   on paper (present.css), never in the editor's rail (it assembles its own
+   copy), and never on the guided tour's example, which steps on its own. */
+function deckBuildOn(){
+  return SMPRules.slideBuildOn(GROUP) &&
+    (DECK.targets || []).indexOf(EXAMPLE_T) < 0;
+}
+function deckBuildUnits(s){
+  if (!s) return [];
+  if (s.classList.contains("d-head"))
+    return [].slice.call(s.querySelectorAll(".headgrid > .headcell"));
+  var cards = s.querySelector(".pcards");
+  if (cards) return [].slice.call(cards.children);
+  var tbl = s.querySelector("table");
+  if (!tbl || !(/[MBTD]$/.test(s.dataset.split || "") || tbl.classList.contains("dirs"))) return [];
+  var lines = [];
+  [].forEach.call(tbl.querySelectorAll("tbody > tr"), function(tr){
+    if (tr.querySelector("td.idx") || !lines.length) lines.push([tr]);
+    else lines[lines.length - 1].push(tr);
+  });
+  return lines;
+}
+function deckBuildShow(s, n){
+  var units = deckBuildUnits(s);
+  if (!units.length) return;
+  s.classList.add("building");
+  s.dataset.bn = n;
+  units.forEach(function(u, i){
+    [].concat(u).forEach(function(e){ e.classList.toggle("bhide", i >= n); });
+  });
+}
+function deckBuildClear(s){
+  if (!s || !s.classList.contains("building")) return;
+  s.classList.remove("building");
+  delete s.dataset.bn;
+  [].forEach.call(s.querySelectorAll(".bhide"), function(e){ e.classList.remove("bhide"); });
+}
+function deckStep(d){
+  var s = DECK.slides[DECK.i];
+  if (deckBuildOn() && s && s.classList.contains("building")) {
+    var n = +s.dataset.bn || 0, all = deckBuildUnits(s).length;
+    if (d > 0 && n < all) return deckBuildShow(s, n + 1);
+    if (d < 0 && n > 0) return deckBuildShow(s, n - 1);
+  }
+  var j = DECK.i + d;
+  if (j < 0 || j > DECK.slides.length - 1) return;
+  var was = s && s.dataset.subject;
+  deckShow(j);
+  /* §581: a flow moving on to the next subject brings that subject's
+     latest figures with it — quietly: a failed fetch carries on with what
+     is on the screen, and never interrupts the room. */
+  var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
+  if (DECK.flow && was && now && was !== now) deckRefresh(true);
+  /* Forward, the next slide arrives with its headings alone; back, the one
+     before arrives whole and the next step back takes its last line away. */
+  if (deckBuildOn()) {
+    var t = DECK.slides[DECK.i];
+    deckBuildShow(t, d > 0 ? 0 : deckBuildUnits(t).length);
+  }
+}
+
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§581) ════════════════════════
+   Islam: *"when I'm presenting through the master presentation or the
+   directions slides if I refresh can it keep the slides presented but update
+   the numbers if I changed something in the inputs?"* — of two ways put to
+   him, in place: `R` fetches the latest saved figures and redraws the deck
+   on the slide the room is looking at, still full screen; and the flow does
+   it by itself as it moves on to the next direction.
+
+   THE PLATFORM'S OWN QUIET REFRESH, never a second fetch (`SYNC.refresh`,
+   §433): it takes the server's answer only where nothing here would be lost,
+   so a change typed and not yet saved is never overwritten by it.
+
+   THE SAME DECK, REBUILT: opened again with what it was opened with
+   (`DECK.args`), the slide found again by what it is — its subject, its
+   page, which of its kind — never by its number (`slidesWhich`), because a
+   slide added or hidden in between moves every number after it. The clock
+   is carried across (a refresh is not a new subject's time), and a slide
+   half built line by line stays where it was.
+
+   SAID, BRIEFLY, on a press: a small line in the corner for two seconds —
+   updated, already up to date, or not updated and still showing what it
+   had. The automatic one says nothing. Never on the tour's made-up
+   example, which has no figures to fetch. */
+var DREFRESH_T = null;
+function deckRefreshSay(msg){
+  var root = document.getElementById("deckroot");
+  var el = root && root.querySelector(".drefresh");
+  if (!root) return;
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "drefresh"; el.setAttribute("role", "status");
+    root.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  if (DREFRESH_T) clearTimeout(DREFRESH_T);
+  DREFRESH_T = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+}
+function deckRefresh(quiet){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on") || !DECK.args) return;
+  if ((DECK.targets || []).indexOf(EXAMPLE_T) >= 0) return;
+  if (typeof SYNC === "undefined" || !SYNC.refresh) {
+    if (!quiet) deckRefreshSay("Figures not updated: no connection");
+    return;
+  }
+  SYNC.refresh(function(ok, changed){
+    if (!root.classList.contains("on")) return;
+    if (!ok) {
+      if (!quiet) deckRefreshSay("Figures not updated \u00b7 still showing the last ones");
+      return;
+    }
+    if (changed) deckRebuild();
+    if (!quiet) deckRefreshSay(changed ? "Figures updated" : "Figures already up to date");
+  });
+}
+function deckRebuild(){
+  if (!DECK.args) return;
+  var at = DECK.i, where = slidesWhich(DECK.slides, at);
+  var here = DECK.slides[at], bn = here && here.classList.contains("building") ? +here.dataset.bn : null;
+  var clock = DECK.clock;
+  openDeckWith(DECK.args[0], DECK.args[1], DECK.args[2]);
+  DECK.clock = clock;
+  var j = where ? slidesFindIn(DECK.slides, where) : -1;
+  deckShow(j >= 0 ? j : Math.min(at, DECK.slides.length - 1));
+  if (bn != null && deckBuildOn()) deckBuildShow(DECK.slides[DECK.i], bn);
+  clockPaint();
+}
+
+/* ══ PRESENTING ON TWO SCREENS (§582) ════════════════════════════════════
+   Islam: *"how about the presenter has a different view than the presented
+   on the screen"* — and, offered a PowerPoint-style presenter view: *"no
+   need for presenter notes … I need the typical view of the slides
+   management to scroll and see the shortcuts as normally the smo is viewing
+   this view and needs to be able to manage the platform without disrupting
+   the presentation but somehow can get back and do any shortcut action"*.
+   On the mockup: clicking a slide waits for Enter, the strip's buttons are
+   enough, the office only for now.
+
+   TWO WINDOWS OF THE SAME PLATFORM. Present from the slide view, with the
+   projector connected as a second screen, opens the platform again in a
+   window of its own on that screen (`?room=1`, the ROOM), which shows the
+   deck and nothing else; the laptop stays on the slide view and drives it.
+   The room builds the deck from its own copy of the state — the same server,
+   so the same slides — and the two find a slide by what it is
+   (`slidesWhich`), never by its number, which is what that function was
+   written for (§556.11).
+
+   THEY TALK BY MESSAGES BETWEEN THE TWO WINDOWS, and nothing else: the
+   laptop sends a step, a jump, a key (T, R, Y); the room says, twice a
+   second and after every change, which slide it shows, how far it is built
+   and what its clock reads. A clicker pressed while the projector window
+   has the focus drives the room directly, and the laptop follows it.
+
+   THE ROOM WRITES NOTHING. It is a screen, not a second editor: its saving
+   is switched off (`SYNC.save` and the leave flush answer nothing in a
+   room), so it can never send an older copy of the plan over the laptop's.
+
+   FULL SCREEN NEEDS A PRESS ON THE PROJECTOR: a browser will not take a
+   window full screen without one, so the room opens filling its screen and
+   asks for one click there. With one screen, Present works exactly as it
+   did. */
+var ROOM_MODE = (function(){
+  try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
+})();
+var ROOM = null;
+/* Sent only to the platform's own address; a file opened from disk has none
+   a browser will match ("file://" is not an origin), and there the two
+   windows know each other by `e.source` alone, which is checked anyway. */
+function roomOrigin(){ return /^https?:$/.test(location.protocol) ? location.origin : "*"; }
+function roomCanTwo(){
+  return !ROOM_MODE && typeof inOffice === "function" && inOffice() &&
+    !!(window.screen && window.screen.isExtended);
+}
+
+/* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
+function roomStart(open, which){
+  var u = new URL(location.href);
+  u.searchParams.set("room", "1");
+  u.hash = "";
+  /* OPENED AT ONCE, MOVED AFTER. A browser lets a page open a window only in
+     the moment of a press, and asking where the other screen is can wait on
+     a question to the person; so the window opens here, and is then moved
+     onto the other screen if the browser says where it is. */
+  var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
+  if (!w) return false;
+  ROOM = { win:w, open:open, which:which, at:null, last:null };
+  if (ROOMPOLL) clearInterval(ROOMPOLL);
+  ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
+  if (window.getScreenDetails) window.getScreenDetails().then(function(d){
+    var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
+    if (!other || w.closed) return;
+    try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
+  }, function(){ /* not allowed: it opens on this screen, to be dragged across */ });
+  roomPaint();
+  return true;
+}
+var ROOMPOLL = null;
+function roomSend(m){
+  if (!ROOM || ROOM.win.closed) return;
+  m.smpRoom = m.smpRoom || "cmd";
+  ROOM.win.postMessage(m, roomOrigin());
+}
+function roomEnd(closeIt){
+  if (!ROOM) return;
+  var w = ROOM.win;
+  ROOM = null;
+  if (ROOMPOLL) { clearInterval(ROOMPOLL); ROOMPOLL = null; }
+  if (closeIt && w && !w.closed) { try { w.postMessage({ smpRoom:"close" }, roomOrigin()); w.close(); } catch (e) {} }
+  roomPaint();
+  var sr = document.getElementById("slideroot");
+  if (sr && sr.classList.contains("on") && typeof slidesPaint === "function") slidesPaint();
+}
+/* The row of the slide view that the room is showing: its slide found by
+   what it is, then as many "continued" slides on as the room is. */
+function roomRow(){
+  if (!ROOM || !ROOM.at || !ROOM.at.which || typeof SLED === "undefined" || !SLED.all) return -1;
+  var i = slidesFindIn(SLED.all, ROOM.at.which);
+  if (i < 0) return -1;
+  var k = ROOM.at.cont || 0;
+  while (k > 0 && SLED.all[i + 1] && SLED.all[i + 1].dataset.cont) { i++; k--; }
+  return i;
+}
+function roomKeyAt(i){ return i >= 0 && SLED.all[i] ? SLED.all[i].dataset.ed : null; }
+/* What the room said. Where the slide view was on the room's slide, it
+   follows the room to its new one; where somebody was looking ahead, it
+   stays where they are looking. */
+addEventListener("message", function(e){
+  var m = e.data || {};
+  if (!m || typeof m !== "object" || !m.smpRoom) return;
+  if (ROOM_MODE) { if (e.source === window.opener) roomHear(m); return; }
+  if (!ROOM || e.source !== ROOM.win) return;
+  if (m.smpRoom === "ready") {
+    /* Where the room already was if it is the projector's window loading
+       again; otherwise the slide Present was pressed on. */
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which });
+    return;
+  }
+  if (m.smpRoom === "bye") { roomEnd(false); return; }
+  if (m.smpRoom !== "at") return;
+  var sr = document.getElementById("slideroot");
+  var editing = sr && sr.classList.contains("on") && typeof SLED !== "undefined" && SLED.all;
+  var wasFollowing = editing && ROOM.last != null && SLED.sel === ROOM.last;
+  ROOM.at = m;
+  if (editing) {
+    var key = roomKeyAt(roomRow());
+    if (key && key !== ROOM.last && (wasFollowing || ROOM.last == null)) {
+      ROOM.last = key;
+      SLED.sel = key;
+      slidesPaint();
+      return;
+    }
+    ROOM.last = key;
+  }
+  roomPaint();
+});
+
+/* The laptop's two surfaces: a strip in the slide view, under its bar, and
+   a strip at the top of every other page. Both written into nodes they own,
+   never by repainting the page (§63). */
+function roomStripText(){
+  var a = ROOM && ROOM.at;
+  if (!a || !a.on) return '<span>Opening the slides on the second screen\u2026</span>';
+  return '<span class="rs-where">' + esc(a.label || "") + '</span>' +
+    '<span class="rs-n">slide ' + a.n + ' of ' + a.total +
+      (a.built ? ' \u00b7 line ' + a.built[0] + ' of ' + a.built[1] : '') + '</span>' +
+    (a.clock ? '<span class="rs-clk' + (a.clock.over ? ' over' : a.clock.near ? ' near' : '') +
+      (a.clock.paused ? ' paused' : '') + '">' + esc(a.clock.text) +
+      (a.clock.paused ? ' \u00b7 paused' : '') +
+      /* §580: the laptop is told when the room's slide is dimmed or dark,
+         and how to lift it: its own screen shows the slide view, not the
+         slide. */
+      (a.clock.dark === "dark" ? ' \u00b7 their screen is dark, T lifts it'
+       : a.clock.dark ? ' \u00b7 their slide is dimmed' : '') + '</span>' : '') +
+    (a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+}
+function roomPaint(){
+  var sr = document.getElementById("slideroot");
+  var editing = !!(sr && sr.classList.contains("on"));
+  /* In the slide view. */
+  var live = sr && sr.querySelector(".sl-live");
+  if (!ROOM || !editing) { if (live) live.remove(); }
+  else {
+    if (!live) {
+      live = document.createElement("div");
+      live.className = "sl-live";
+      var bar = sr.querySelector(".slidebar");
+      if (bar) bar.insertAdjacentElement("afterend", live);
+    }
+    roomFill(live, '<span class="rs-dot"></span><b>On the room\u2019s screen</b>' + roomStripText() +
+      '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
+      '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
+  }
+  if (sr) {
+    var row = editing && ROOM ? roomRow() : -1;
+    [].forEach.call(sr.querySelectorAll("#slidelist .slrow"), function(r, i){
+      r.classList.toggle("onscreen", i === row);
+    });
+    var pane = sr.querySelector("#slidepane");
+    var note = pane && pane.querySelector(".sl-notroom");
+    var away = editing && ROOM && ROOM.at && ROOM.at.on && row >= 0 && SLED.sel !== roomKeyAt(row);
+    /* The stage is fitted to the pane, so the pane is fitted again when the
+       note comes or goes, or the slide's foot falls off the bottom. */
+    if (!away) { if (note) { note.remove(); slidesFitStage(); } }
+    else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
+      '<div class="sl-notroom" role="status">Not on the room\u2019s screen \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
+    var play = sr.querySelector("[data-slplay]");
+    if (play) {
+      var lbl = play.querySelector(".lbl");
+      if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
+      play.title = ROOM && editing ? "Stop presenting on the second screen" : "Present (P)";
+    }
+    var keys = document.getElementById("slkeys");
+    /* The room's own keys are on the strip above; here, only what looking
+       through the slides adds, so the slide's name keeps its room. */
+    if (keys && ROOM && editing) keys.innerHTML =
+      '<b>\u2191</b> <b>\u2193</b> look &middot; <b>Enter</b> show it to the room &middot; ' +
+      '<b>Esc</b> back to what they see';
+  }
+  /* Everywhere else. */
+  var st = document.getElementById("roomstrip");
+  if (!ROOM || editing) {
+    if (st) st.remove();
+    document.body.classList.remove("roomon");
+    return;
+  }
+  if (!st) {
+    st = document.createElement("div");
+    st.id = "roomstrip"; st.className = "roomstrip"; st.setAttribute("role", "region");
+    st.setAttribute("aria-label", "Presenting on the second screen");
+    /* At the top of the pinned chrome, so it stays in view as the page
+       scrolls; the chrome's height is observed (§101.5), so everything
+       pinned beneath it moves down with it. */
+    var chrome = document.querySelector(".chrome");
+    if (chrome) chrome.insertBefore(st, chrome.firstChild);
+    else document.body.insertBefore(st, document.body.firstChild);
+    st.addEventListener("click", function(ev){
+      var b = ev.target.closest("[data-rs]");
+      if (!b) return;
+      var k = b.dataset.rs;
+      if (k === "back") roomBackToSlides();
+      else if (k === "prev") roomSend({ step:-1 });
+      else if (k === "next") roomSend({ step:1 });
+      else if (k === "t") roomSend({ key:"T" });
+    });
+  }
+  document.body.classList.add("roomon");
+  var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
+  roomFill(st, '<span class="rs-dot"></span><b>Presenting on the second screen</b>' + roomStripText() +
+    '<span class="rs-sp"></span>' +
+    '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
+    '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
+    '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
+}
+/* Written only when it reads differently: the room reports twice a second,
+   and a strip rewritten between a press and its release loses the click. */
+function roomFill(el, html){ if (el._rs !== html) { el.innerHTML = html; el._rs = html; } }
+/* R from the laptop: what was just typed here is saved FIRST, then the
+   room fetches, or it would fetch the figure from before the fix. */
+function roomUpdate(){
+  if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(function(){ roomSend({ key:"R" }); });
+  else roomSend({ key:"R" });
+}
+function roomBackToSlides(){
+  if (!ROOM) return;
+  var o = ROOM.open || {};
+  if (o.flow) slidesOpenFlow(o.flow);
+  else if (o.kind) slidesOpen(o.kind, o.key);
+  var key = roomKeyAt(roomRow());
+  if (key) { SLED.sel = key; ROOM.last = key; slidesPaint(); }
+  roomPaint();
+}
+/* The slide view's keys while the room is showing (slides.js asks first).
+   ← → move the ROOM; ↑ ↓ still walk the slide view, so looking ahead is
+   the keys it always was; Enter puts what you are looking at on the room's
+   screen; Escape comes back to what the room sees before it leaves the
+   view. Answers whether it took the key. */
+function roomEditorKey(ev){
+  if (!ROOM || slidesTyping(ev.target)) return false;
+  var kc = ev.code || "";
+  var fwd = { ArrowRight:1, PageDown:1, " ":1 }, back = { ArrowLeft:1, PageUp:1 };
+  if (fwd[ev.key]) { ev.preventDefault(); roomSend({ step:1 }); return true; }
+  if (back[ev.key]) { ev.preventDefault(); roomSend({ step:-1 }); return true; }
+  if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); roomSend({ key:"T" }); return true; }
+  if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); roomUpdate(); return true; }
+  if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); roomSend({ key:"Y" }); return true; }
+  if (ev.key === "p" || ev.key === "P") return true;
+  var row = roomRow(), rk = roomKeyAt(row);
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    var w = slidesSelEl();
+    if (w) { ROOM.last = SLED.sel; roomSend({ jump:w }); }
+    return true;
+  }
+  var g = document.getElementById("slgrid"), cp = document.getElementById("slcolspanel");
+  if (ev.key === "Escape" && rk && SLED.sel !== rk && !(g && !g.hidden) && !(cp && !cp.hidden)) {
+    ev.preventDefault();
+    SLED.sel = rk; ROOM.last = rk;
+    slidesPaint();
+    return true;
+  }
+  return false;
+}
+
+/* ── IN THE ROOM ──────────────────────────────────────────────────────── */
+function roomHear(m){
+  if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
+  if (m.smpRoom === "open") roomOpen(m.open || {}, m.which);
+  else if (m.step) deckStep(m.step);
+  else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
+  else if (m.key === "T") clockToggle();
+  else if (m.key === "R") deckRefresh(false);
+  else if (m.key === "Y") clockReset();
+  roomReport();
+}
+function roomOpen(open, which){
+  if (open.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), flowWithParts(open.flow), "page");
+  else if (open.target) openDeckFor(open.target, "page");
+  var j = which ? slidesFindIn(DECK.slides, which) : -1;
+  if (j > 0) deckShow(j);
+  /* Full screen asked for, and refused without a press on that screen; the
+     deck fills the window regardless, and the button below asks for the
+     press. */
+  deckGoFull();
+  roomFullAsk();
+  /* What this window booted on may be the copy the browser kept (§431): the
+     quiet refresh takes the server's own, and redraws only if it differs. */
+  deckRefresh(true);
+}
+function roomFullAsk(){
+  var root = document.getElementById("deckroot");
+  var ask = root.querySelector(".roomfull");
+  if (document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ask) return;
+  root.insertAdjacentHTML("beforeend",
+    '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
+  root.querySelector(".roomfull").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    try {
+      var p = root.requestFullscreen && root.requestFullscreen();
+      if (p && p.catch) p.catch(function(){});
+    } catch (e) {}
+  });
+}
+function roomReport(){
+  if (!ROOM_MODE || !window.opener) return;
+  var root = document.getElementById("deckroot");
+  var on = !!(root && root.classList.contains("on"));
+  var s = on && DECK.slides[DECK.i];
+  var cont = 0, k = DECK.i;
+  while (s && k > 0 && DECK.slides[k] && DECK.slides[k].dataset.cont) { cont++; k--; }
+  var c = DECK.clock, left = c ? clockLeft() : 0;
+  var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
+  var name = s ? (s.dataset.subjectName || "") : "";
+  try {
+    window.opener.postMessage({ smpRoom:"at", on:on,
+      which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
+      n: DECK.i + 1, total: DECK.slides.length,
+      label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
+      built: s && s.classList.contains("building") ? [+s.dataset.bn, deckBuildUnits(s).length] : null,
+      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from,
+                   dark: c.from && left <= -CLOCK_DARK_MS ? "dark" : c.from && left <= -CLOCK_DIM_MS ? "dimmed" : "" } : null,
+      full: document.fullscreenElement === root }, roomOrigin());
+  } catch (e) { /* the laptop has gone; the room carries on */ }
+}
+if (ROOM_MODE) {
+  document.documentElement.classList.add("smp-room");
+  /* Ready once the platform has drawn: asked rather than timed, so a slow
+     server is waited for and a fast one is not. */
+  (function wait(){
+    if (document.readyState === "complete" && typeof GROUP !== "undefined" && document.querySelector(".wrap")) {
+      try { window.opener && window.opener.postMessage({ smpRoom:"ready" }, roomOrigin()); } catch (e) {}
+      return;
+    }
+    setTimeout(wait, 150);
+  })();
+  setInterval(roomReport, 500);
+  addEventListener("fullscreenchange", function(){ roomFullAsk(); roomReport(); });
+  addEventListener("pagehide", function(){
+    try { window.opener && window.opener.postMessage({ smpRoom:"bye" }, roomOrigin()); } catch (e) {}
+  });
+  /* Every key the deck takes is reported at once, not on the next tick, so
+     the laptop never shows the slide before last. */
+  addEventListener("keyup", function(){ setTimeout(roomReport, 0); });
 }

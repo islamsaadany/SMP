@@ -4,7 +4,7 @@
 is a proposal.
 **Decisions:** §5 (the original model) · §35 · §199 · §239 (+.1 –.6) · §243 ·
 §248 · §249 (+.2 –.4) · §250 (+.1, .2) · §251 · §254.2 · §257 (+.2 –.3) ·
-§264 (+.1, .2) · §276 · §277 · §278 (+.2, .3)
+§264 (+.1, .2) · §276 · §277 · §278 (+.2, .3) · §577
 **Constitution:** checked against v1.2.0 — Principles V (derived, never stored;
 null is never zero), VI (follow what the platform already does), IX (one copy of
 a rule, run on both sides) and XVI (a check that measures the wrong thing
@@ -47,7 +47,8 @@ Four kinds of row are scored by one arithmetic:
 Every one of the first three carries the same five facts, which is what lets one
 arithmetic serve them: a **direction** (`≥` or `≤`), a **target** (a number and
 a unit, in one string — §199), a **compile rule**, an **actual**, and — since
-§278 — an optional **monthly plan** of twelve numbers.
+§278 — an optional **monthly plan** of twelve numbers, or since §577 a
+**quarterly plan** of four.
 
 ---
 
@@ -72,8 +73,13 @@ directions (§239).
    "can a number be found in this string".
 3. The target holds no number → **null** (§251 lets a unit be picked before the
    number, so `"%"` is a real intermediate state and is not scorable).
-4. **A monthly plan answers first** if all twelve months are set and the review
-   point is readable (§278) — it supersedes the flat share *and* a supplied one.
+4. **A monthly plan answers first** from the first month set, when the row has
+   a compile rule and the review point is readable (§278, §569) — it
+   supersedes the flat share *and* a supplied one. The compile rule is applied
+   to the months set up to the review month, blanks passed over; months set
+   only later owe nought. A **quarterly plan** answers the same way (§577),
+   each quarter spread evenly over its three months: a review two months into
+   Q3 owes Q1, Q2 and two-thirds of Q3.
 5. Otherwise: the target's number, prorated by the share **only if the compile
    rule prorates**.
 6. A `Count` is floored to a whole one, with an epsilon (§276).
@@ -230,6 +236,19 @@ first time either is corrected.
   one pillar 100 → not scored, another 83 → 65. **Adding an optional parameter
   is a change to every place that function is passed by name.**
 
+**§575 — Completed is the whole target, never the part due.** The score is
+against what is due by now, so it says *ahead*, not *finished*: D003's
+*Digitalizing Route to Market* (Q3–Q4, target 10, 5 due at the end of
+September) reported 8, scored 150 and read **Completed** beside its own note
+*"to be finalized Q4"*, because the reporting box stored `Done` from a score of
+100 or more. A tactic with outcomes is now complete only when **every outcome
+has reached its whole target** (`outcomeComplete`; a yes/no when it is Done),
+asked of the figures and never of the stored `t.status`, so rows saved the old
+way read right with nothing migrated. An *at most* outcome keeps its old
+reading (inside its target against what is due); a tactic with no outcome is
+unchanged (its figure is already a share of the whole). The score beside it does
+not move.
+
 ---
 
 ## 8 · A target with a shape of its own (§278)
@@ -250,7 +269,13 @@ Latest takes the month being stood in.
   year by more than half.
 - **In force only when all twelve are set.** A half-filled plan is stored, says
   so in the warning ink, and the row is still spread evenly across the year —
-  the months that are missing are *unknown*, never nought.
+  the months that are missing are *unknown*, never nought. **Reversed by §569**
+  (Islam: *"the monthly plan overrides the proration"*): once §555 made the
+  target what the months set come to, an empty month was already counted as
+  nothing in the target, so a half-filled plan is in force from its first
+  month — the row's compile rule over the months set up to the review month,
+  blanks passed over. A month holding something that is not a number still
+  keeps the plan out of force.
 - **The monthly plan becomes the target** (Islam's (a)), so the deck, the
   workbook, the archive and the Focus board are right without being taught
   anything. The normalised-shape alternative was drawn and refused: months
@@ -266,6 +291,30 @@ Latest takes the month being stood in.
   shapes against a real Postgres rather than claimed (§172's lesson).
 - **The workbook gains twelve columns, appended**, because a validation range is
   a POSITION (§65).
+
+### 8.1 · By quarter as well as by month (§577)
+
+*"I need to have the option to plan it in quarters as well."* Four numbers,
+Q1 to Q4, on the row as `quarterly` (a tactic's outcome: `outQuarterly`). A
+**By month | By quarter** switch on the drawer's title line; Islam's three
+answers were taken before the mockup was drawn.
+
+- **(1a) A quarter inside the review is owed in proportion** — each quarter
+  spread evenly over its three months, so a quarterly plan is read by the same
+  rules as a monthly one: Sum adds what has passed (exact at a quarter end),
+  Count does and floors, Average weighs each quarter by its months passed,
+  Latest stands on the quarter being stood in. 45 / 51 / 84 / 120 owes 96 at
+  June and 152 at August. Refused: (1b), a quarter owed only once it is over.
+- **(2a) Switching carries the figures across** by the row's compile rule and
+  deletes what they came from, so a row never holds both. Months to quarters
+  is exact; quarters to months splits evenly, adding back exactly (50 → 16,
+  17, 17). With no compile rule nothing is carried — the switch says so.
+- **A row holding both reads the months** (the finer plan); an upload filling
+  both is refused by name.
+- **The workbook appends Q1 target to Q4 target** after December (Outcome Q1
+  target… on Tactics, whose own Q1–Q4 are the tactic's timing).
+- §569's blank rule, §278's unreadable rule and §555's derived target apply to
+  quarters unchanged; a row planned by month reads exactly as before.
 
 ---
 
@@ -340,7 +389,12 @@ re-entered once; a one-time heal was offered and not taken up.
 - **R2** The share is *supplied*, never re-derived by the caller.
 - **R3** `m.progress` is never written by any of this.
 - **R4** A monthly plan supersedes both the flat share and a supplied one.
-- **R5** A blank month is not a nought; a typed 0 is.
+- **R4a** A quarterly plan is read as its quarters spread evenly over their
+  months, exact at a quarter end, and a row planned by month is unchanged by
+  it (§577).
+- **R5** A typed 0 is a real month. A blank month is passed over: under `Sum`
+  and `Count` it adds nothing, under `Average` it is not counted, under
+  `Latest` the last month set before it stands (§569).
 - **R6** `Count` floors with an epsilon; `Sum` does not floor at all.
 - **R7** A `Y/N` target scores 100/0/null and is never given a due figure.
 - **R8** A target holding a unit and no number is Missing everywhere — the
@@ -348,6 +402,9 @@ re-entered once; a one-time heal was offered and not taken up.
 - **R9** The Focus board reads the raw stored figure, not the derived score.
 - **R10** `COMPILES` is the single list; the pen, the plan builder, the workbook
   and the upload all read it.
+- **R11** A tactic measured by outcomes is Completed only when every outcome
+  reaches its whole target, never when its score against what is due reaches
+  100 (§575).
 
 ---
 
@@ -367,6 +424,7 @@ re-entered once; a one-time heal was offered and not taken up.
 | Count compiles in whole ones | §276 | `checks/count-compile.py` |
 | A figure follows the unit | §277 | `checks/unit-follows.py` |
 | Monthly plan | §278 | `checks/monthly-plan.py`, `objectives-table.py` |
+| Quarterly plan | §577 | `checks/quarterly-plan.py` |
 
 ---
 

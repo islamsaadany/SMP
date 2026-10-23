@@ -269,7 +269,10 @@ with sync_playwright() as p:
     # be written row by row. Asked of the HOLDER's own spelling, never the
     # unit's — and since §334.18 that holder is the function itself.
     ck("…and it landed with a minted id, in the holder's own spelling",
-       pg.evaluate("fnOwnHolder('%s').keyObjectives[0].id === fnOwnHolder('%s').id + '-KO1'" % (FK, FK)),
+       # §588: a minted id carries a four-character tag after its number, so
+       # two tabs adding at once cannot mint the same one: `<holder>-KO1-xxxx`.
+       pg.evaluate("""(() => { const h = fnOwnHolder('%s'), id = h.keyObjectives[0].id || '';
+         return id.indexOf(h.id + '-KO1-') === 0 && /^[0-9a-z]{4}$/.test(id.slice((h.id + '-KO1-').length)); })()""" % FK),
        pg.evaluate("fnOwnHolder('%s').keyObjectives[0].id" % FK))
     pg.query_selector('#buildband [data-bnav="proj"]').click(); pg.wait_for_timeout(400)
     pg.query_selector('[data-rowadd^="project"]').click(); pg.wait_for_timeout(200)
@@ -609,7 +612,14 @@ with sync_playwright() as p:
         for k, v in (("name", "Agree the service levels"),
                      ("owner", "Hala Mansour"), ("due", "Sep 2026")):
             box = pg.query_selector('[data-bf="%s"]' % k)
-            if box:
+            if box and box.evaluate("e => e.tagName") == "SELECT":
+                # §130.1: an owner is PICKED from the register's list now, never
+                # typed; a name it does not carry is added as one stored outside
+                # the list is (§96.2), then chosen the way a person chooses it.
+                box.evaluate("""(e, v) => { if (![...e.options].some(o => o.value === v)) {
+                    const o = document.createElement('option'); o.value = o.textContent = v; e.appendChild(o); } }""", v)
+                box.select_option(v)
+            elif box:
                 box.fill(v)
         pg.wait_for_timeout(100)
         add1 = pg.query_selector('[data-bfadd="one"]')

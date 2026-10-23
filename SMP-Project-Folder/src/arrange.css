@@ -2859,7 +2859,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
    segmented pair. */
 .mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
 .mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
-.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+.mpseg button:disabled, .mpseg button[aria-disabled="true"] { color:var(--ink-3); cursor:not-allowed; }
 /* A quarter carries its months in its label, so its box is wider than a
    month's — 112px, measured to sit four on one line down to 1100. */
 .mpm.mpq { width:112px; }

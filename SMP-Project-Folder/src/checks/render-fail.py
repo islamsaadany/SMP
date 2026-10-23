@@ -51,12 +51,32 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
 
     # Poison the group's landing page — the def table paint() actually reads.
-    poisoned = pg.evaluate("""() => {
-      var d = SUBS.group.filter(function(x){ return x.render; })[0];
-      if (!d) return "no renderable group def";
-      d.render = function(){ throw new Error("injected by render-fail check"); };
-      return d.k;
-    }""")
+    # §449 / §520.11: the group no longer always lands on its first renderable
+    # tab (Performance) — a group with its own plan opens on Strategy › Plan.
+    # So the walk is taken once to LEARN where it lands, and that tab's
+    # renderer is the one poisoned: a section's, when the tab draws sections.
+    pg.query_selector("#topsel > summary").click()
+    pg.wait_for_timeout(200)
+    pg.query_selector('#topsel [data-u="group"]').click()
+    pg.wait_for_timeout(400)
+    LAND = pg.evaluate("() => current === 'group' ? currentSub : null")
+    pg.query_selector('#units [data-u="mobile"]').click()
+    pg.wait_for_timeout(400)
+    poisoned = pg.evaluate("""(land) => {
+      var boom = function(){ throw new Error("injected by render-fail check"); };
+      var d = SUBS.group.filter(function(x){ return x.k === land; })[0];
+      if (!d) return "no group def for " + land;
+      if (d.render) { d.render = boom; return d.k; }
+      if (d.sections) {
+        var orig = d.sections;
+        d.sections = function(){
+          return (orig.apply(this, arguments) || []).map(function(s){
+            return Object.assign({}, s, { render: boom }); });
+        };
+        return d.k + " (its sections)";
+      }
+      return "no renderer on " + land;
+    }""", LAND)
     ck("a group def was poisoned", isinstance(poisoned, str) and "no " not in poisoned, poisoned)
 
     # Walk to the group through the real control (§68: it lives in a details).

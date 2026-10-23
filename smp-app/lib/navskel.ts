@@ -108,6 +108,7 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §606
       (name ? "<b>" + esc(name) + "</b>" : b("90px")) + '<span class="sp">\\u203a</span><b>' + esc(label) + "</b></div>";
   }
   function rows(k, cols) { return n(k, function (i) { return '<div class="r" style="padding:10px 0;border-bottom:1px solid var(--ns-line)">' + b("16px") + b((60 - i * 7) + "%") + '<span class="grow"></span>' + cols + "</div>"; }); }
+  var LEDGER = { insights: 1, notes: 1, portfolio: 1 };
   var SHAPE = {
     strategy: function () {
       return '<div class="r" style="height:44px;flex:none;padding:0 18px;background:var(--ns-q);border-bottom:1px solid var(--ns-line)">' + b("26px", "k") +
@@ -122,17 +123,16 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §606
       return '<div class="body"><div class="mid c"><div class="box" style="background:var(--ns-q)"><div class="r" style="align-items:flex-end"><div class="c">' + b("150px", "q") + b("150px", "t") + '</div><span class="grow"></span>' +
         n(4, function () { return '<div class="c" style="align-items:flex-end;gap:6px">' + b("22px", "t") + b("40px", "q") + "</div>"; }) + '</div></div>' + b("100%", "k q") + rows(5, b("70px", "q") + b("80px")) + "</div></div>";
     },
-    insights: function () {
-      return '<div class="body"><div class="mid c">' + b("110px", "t") + n(4, function (i) { return '<div class="box c"><div class="r">' + b((200 + i * 30) + "px") + b("90px", "p q") + "</div>" + b("90%", "q") + b("55%", "q") + "</div>"; }) + "</div></div>";
-    },
-    notes: function () {
-      return '<div class="body"><div class="r">' + b("120px", "t") + b("80px", "q") + '</div><div class="r">' + b("70%", "k q") + b("70px", "k q") + b("120px", "k") + "</div>" +
-        n(4, function (i) { return '<div class="box r">' + b("60px", "q") + b((300 - i * 30) + "px") + '<span class="grow"></span>' + b("120px", "q") + "</div>"; }) + "</div>";
-    },
-    portfolio: function () {
-      return '<div class="body"><div class="mid c"><div class="r"><div class="c">' + b("120px", "q") + b("100px", "t") + '</div><span class="grow"></span>' + b("130px", "k") + "</div>" +
-        '<div class="r">' + n(3, function () { return '<div class="box c grow">' + b("70px", "q") + b("30px", "t") + b("120px", "q") + "</div>"; }) + "</div>" + b("110px", "q") +
-        n(3, function (i) { return '<div class="box r">' + b((220 - i * 30) + "px") + '<span class="grow"></span>' + b("140px", "q") + b("60px", "p q") + "</div>"; }) + "</div></div>";
+    /* Insights, Meeting Notes and Portfolio wear the Tracker's furniture
+       since §605 (lib/ledger.ts): the panel with the counts and the views,
+       the underlined search line, numbered sections under a heavy rule */
+    ledger: function () {
+      return '<div class="body"><div class="mid c" style="max-width:1000px;gap:18px"><div class="box" style="background:var(--ns-q);padding:16px 20px"><div class="r" style="align-items:flex-end"><div class="c">' +
+        b("150px", "q") + b("170px", "t") + '</div><span class="grow"></span>' + n(3, function () { return '<div class="c" style="align-items:flex-end;gap:6px">' + b("22px", "t") + b("56px", "q") + "</div>"; }) +
+        '</div><div class="r" style="margin-top:14px">' + n(4, function (i) { return b((54 + (i % 2) * 22) + "px", "q"); }) + '</div></div><div class="r">' + b("280px", "q") + "</div>" +
+        n(2, function () { return '<div class="c" style="gap:0"><div class="r" style="padding-bottom:8px;border-bottom:2px solid var(--ns-line)">' + b("16px", "q") + b("130px", "t") + b("60px", "q") + "</div>" +
+          n(3, function (i) { return '<div class="r" style="padding:12px 0;border-bottom:1px solid var(--ns-line)">' + b((58 - i * 9) + "%") + '<span class="grow"></span>' + b("110px", "q") + b("80px") + "</div>"; }) + "</div>"; }) +
+        "</div></div>";
     },
     copilot: function () {
       return '<div class="body"><div class="mid c" style="max-width:780px"><div class="r">' + b("100px", "t") + '<span class="grow"></span>' + b("130px", "k q") + '</div><div class="r">' +
@@ -170,7 +170,8 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §606
     up.id = "navskel";
     up.setAttribute("aria-busy", "true");
     up.setAttribute("aria-label", "Opening " + (to.kind === "console" ? "the platform" : to.label));
-    up.innerHTML = to.kind === "console" ? consoleShape() : topLine(clientName(to.slug), to.label) + (SHAPE[to.kind] || SHAPE.insights)();
+    var shape = SHAPE[to.kind] || SHAPE[LEDGER[to.kind] ? "ledger" : ""] || SHAPE.ledger;
+    up.innerHTML = to.kind === "console" ? consoleShape() : topLine(clientName(to.slug), to.label) + shape();
     document.body.appendChild(up);
     safety = setTimeout(down, 8000);
     /* registered now, so it runs after the page's own: a page that asks

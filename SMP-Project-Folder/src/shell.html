@@ -6641,7 +6641,7 @@
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });

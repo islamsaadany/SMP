@@ -5496,7 +5496,10 @@ function monthlySeg(row, fld, q, reg){
     var on = (mode === "q") === q;
     return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
       '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
-      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      /* §538's house rule: HELD, not dead — `aria-disabled` keeps the
+         pointer and the focus, so the reason on it reaches somebody; the
+         handler declines the press. */
+      (!on && stuck ? ' aria-disabled="true" title="Set a compile rule first, so the figures can be carried across"' : '') +
       '>' + word + '</button>';
   };
   return '<span class="mpseg" role="group" aria-label="Plan this target">' +

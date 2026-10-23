@@ -592,7 +592,12 @@
    execution card beside its directions, and How we compete as a setting on
    functions. The built file's bytes changed (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.00-company-reading";
+/* v7.01-foundation-themes — §611 and §611.1: the company's Core Values can
+   be added, its Capabilities section stands before the first one, its themes
+   are written on the Foundation and the Temple only shows. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.01-foundation-themes";
 const ASSETS = [
   "/",
   "/index.html",

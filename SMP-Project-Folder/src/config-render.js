@@ -1582,13 +1582,11 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §391: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
-           plans, because both answer "what is this function part of". */
+        /* §391: WHERE IT BELONGS. Beside how it plans, because both answer
+           "what is this function part of". §593: and no weight there — a
+           division's functions count equally, beside its units. */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
-        pdField("Weight in its " + L1("division"), fnCoWeightCell(k, f, true)) +
-        (FNCOW_SAID && FNCOW_SAID.k === k
-          ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
         pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
         pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
@@ -8196,14 +8194,11 @@ function capFormatCell(c, editable){
       : sel) +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
-   Two cells, read on the row and set in the dialog. The group is the ABSENCE
-   of a company (§50.6), so a function nobody placed reads exactly as every
-   function did before. The weight is offered only where there is a company
-   to weigh it in — a weight at the group would be a number nothing reads
-   (§61). A blank weight SAYS what it counts as, because "blank" alone reads
-   as nought, and nought is the one thing it is not. */
-var FNCOW_SAID = null;
+/* ── WHERE A FUNCTION BELONGS (§391) ─────────────────────────────────────
+   Read on the row and set in the dialog. The group is the ABSENCE of a
+   company (§50.6), so a function nobody placed reads exactly as every
+   function did before. §593 took the weight beside it away: a division's
+   functions now count equally, read beside its units, never mixed in. */
 function fnCompanyCell(fk, f, editable){
   var at = fnCompanyOf(fk) || "";
   if (!editable) return at ? '<span class="val"><b>' + esc(COMPANIES[at].name) + '</b></span>'
@@ -8214,22 +8209,6 @@ function fnCompanyCell(fk, f, editable){
       return '<option value="' + esc(ck) + '"' + (ck === at ? " selected" : "") + '>' +
         esc(COMPANIES[ck].name) + '</option>';
     }).join("") + '</select>';
-}
-function fnCoWeightShown(fk){
-  var ck = fnCompanyOf(fk);
-  if (!ck) return null;
-  var s = companyShares(ck).filter(function(x){ return x.fn === fk; })[0];
-  return s ? Math.round(s.w * 10) / 10 : null;
-}
-function fnCoWeightCell(fk, f, editable){
-  var ck = fnCompanyOf(fk), set = fnCoWeightSet(fk), shown = fnCoWeightShown(fk);
-  if (!ck) return editable ? '<span class="why" style="margin:0">Only when it belongs to a company</span>'
-                           : '<span class="why" style="margin:0">&mdash;</span>';
-  if (!editable) return set != null ? '<span class="val">' + set + '%</span>'
-    : '<span class="why" style="margin:0">Blank \u2192 ' + shown + '%</span>';
-  return '<input class="fld" type="number" min="0" max="100" step="any" data-fncow="' + esc(fk) + '"' +
-    ' value="' + (set != null ? set : "") + '" placeholder="Blank counts as ' + shown + '%"' +
-    ' aria-label="Weight of ' + esc(f.name) + ' in ' + esc(COMPANIES[ck].name) + ', in per cent">';
 }
 function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
@@ -8261,7 +8240,6 @@ var FN_COLS = [
   { k:"code",    label:"Code" },
   { k:"plansin", label:"Plans in" },
   { k:"company", label:"Company" },
-  { k:"coweight", label:"Weight" },
   { k:"caps",    label:"Caps" },
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
@@ -8449,7 +8427,6 @@ function renderFunctions(){
          The control is in the dialog; this cell reads it. */
       (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("coweight") ? '<td class="cc">' + fnCoWeightCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
       (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
       (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
@@ -8532,7 +8509,6 @@ function renderFunctions(){
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
                  (fnShowCol("company") ? h(L1("division"), "cc") : '') +
-                 (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
                  (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +

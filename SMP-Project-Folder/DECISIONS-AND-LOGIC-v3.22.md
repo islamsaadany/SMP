@@ -68494,6 +68494,22 @@ Not merged; `main` stays untouched until Islam says.
 
 **§592 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved under the branch (§582.2, the remote from any page, and §591, which took the number this branch had written into its comments, so they were renumbered §592). It was merged INTO the branch. The decision record keeps §591 before §592, and the progress lines keep newest first. The built file, `shell.js` and `sw.js` conflicted and were regenerated from the merged sources, never resolved by hand. On the merged tree: built-in-step all good, release-stamp clear, `sw.js` parses, typecheck clean. The three type checks read 2 / 0, 3 / 0 (still 98) and 4 / 0, with red 6 / 6, 6 / 6 and 7 / 7. The tests are unchanged, and `qa.py` reads no errors for any viewer. Then this note and the `SHELL` bump `smp-shell-v6.86-remote-keys` → **`smp-shell-v6.87-app-types`**, as a commit `main` alone holds (§91), the name held by no commit on any remote ref. No save is judged differently, so no forced sign-out. Witnesses: `/sw.js` release **`92f3825ab0b2b113`** and `/shell.js` **5,152,482** bytes before; after, they should read **`23aa60634dbc23b5`** and **5,153,015**.
 
+## §593 — Units and functions each get their own score, on the group and on a division (2026-10-23)
+Islam, on the simplification's final test: *"in case of business units they get their own score and the functions get their own score and we see both on the group"*; of how the functions count, *"stay equal"*; of divisions, *"yes same for divisions"*. Shown first as a picture on Raya's real group page.
+
+**WHY.** The group read its units alone and never its functions; a division blended its units and functions into one figure, the functions taking shares set on Setup (§391, his A at the time). One question, two answers — spec 066's finding.
+
+**WHAT.** Neither level blends now. The units' figures are the units' (weighted by size, unchanged), and the functions' are the functions' — `fnsReading`, the plain average of what each function's own page shows (`fnMemberScores`), a function with nothing to read left out rather than counted as nought:
+- **The group** (where it has units): a second row of two cards, *Functions — performance* and *Functions — execution*, under the units' two, each with a drill listing every function's figure; and a *Functions — where to look next* row of chips.
+- **A division**: its headline cards are its units' alone (`companyObjectives` / `companyRatio` over its units); its functions get the same two cards and keep their own section; a division of functions alone draws only that row.
+- **Setup**: the function's *Weight in its division* field and the Functions table's *Weight* column are gone (§24), with the handler that stored it. A weight left from §391 is ignored, and dropped when the function moves. `companyShares`, `companyMix` and `fnCoWeightSet` are deleted.
+
+**WHAT MOVES.** The group's units' figures do not move. A division that held functions now headlines on its units alone, with its functions beside it. A client with no units (El Abd) is unchanged: "in case of business units".
+
+**CHECKED.** `division-functions` rewritten to the new rule (§218), 24/0. `single-company`'s division claim rewritten; its one red (§449) is identical on the live build, as are `top-plan` 1, `setup-live-rows` 2 and `wave3` 9 (all pre-existing). `control-targets`, `role-picker`, `objectives-actions` 58/0, `structure`, `platform-cards` 30/0, `perf-line`, `built-in-step`, `no-twin-functions` green. Every deck on six states unchanged.
+
+**MERGED TO `main`** 2026-10-23, Islam: *"put it live"*, having seen the group and a division drawn by the build. Main had moved (§582.2, §592 from other sessions), so this entry was renumbered §592 → **§593**, main merged in and the generated files rebuilt; `division-functions` 24/0 on the merged tree. Fast-forwarded, then this note as a commit `main` alone holds (§91), `SHELL` `v6.87-app-types` → **`v6.88-functions-row`**. No save is judged differently (a stored `coWeight` is simply no longer read), so no forced sign-out.
+
 ## §594 — The console page, read by TypeScript's checker (2026-10-23)
 Islam, after §592 went live: *"now do the same for the console page"*. This is the console in this project's own sense: `platform.html`, the page with My work, the clients, Memory, Copilot, Frameworks and History.
 

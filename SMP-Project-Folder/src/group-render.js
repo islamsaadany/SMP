@@ -2318,6 +2318,52 @@ function unitCards(keys){
   }).join("");
 }
 
+/* ── THE FUNCTIONS' TWO CARDS, ON THE GROUP AND ON A DIVISION (§593) ─────
+   Islam: *"the functions get their own score and we see both"*, each
+   function counted equally (*"stay equal"*). `lead` is how many cards the
+   row above draws before its units' two, so these sit under those two —
+   the shape signed off on the mockup — rather than under the group's own
+   objectives. The drill lists each function's own figure: a number nobody
+   can trace is a number nobody can defend. */
+function fnReadingCards(fks, where, lead, trail){
+  var r = fnsReading(fks);
+  if (!fks.length || (r.perf == null && r.exec == null)) return "";
+  var FN = L("fnword","bu");
+  var drill = function(which){
+    return miniTable([L1("fnword"), which === "perf" ? "Performance" : "Execution"],
+      fks.map(function(k){
+        var v = fnMemberScores(k)[which];
+        return '<tr><td><b>' + esc(FUNCTIONS[k].name) + '</b></td><td class="num">' + pct(v) + '</td></tr>';
+      }).join("") +
+      '<tr style="background:var(--surface-2)"><td><b>' + esc(FN) + '</b></td><td class="num"><b>' +
+        pct(which === "perf" ? r.perf : r.exec) + '</b></td></tr>') +
+      '<p class="sub">Each ' + esc(L1("fnword")).toLowerCase() + '\u2019s own figure, the one its own ' +
+      'page shows, counted equally. One with nothing to read yet is left out rather than counted as nought.</p>';
+  };
+  var gap = function(n){ var o = ""; for (var i = 0; i < n; i++) o += '<div class="scores-gap" aria-hidden="true"></div>'; return o; };
+  return '<div class="scores">' + gap(lead) +
+    drillCard(FN + " &mdash; performance" + tip("Each " + L1("fnword").toLowerCase() + "\u2019s own headline \u2014 its objectives where it has them, its " + L("pillar").toLowerCase() + " or projects where it does not \u2014 counted equally."), r.perf, {
+      sub: "All <b>" + fks.length + "</b> " + esc(FN) + "\u2019 own headline" + where + ", each counted equally.",
+      drill: drill("perf"), modalTitle: esc(FN) + " \u2014 performance", modalSub: "Each counted equally"
+    }) +
+    drillCard(FN + " &mdash; execution" + tip(TIP_EXEC()), r.exec, {
+      sub: "All <b>" + fks.length + "</b> " + esc(FN) + where + ", each on its own execution, counted equally.",
+      drill: drill("exec"), modalTitle: esc(FN) + " \u2014 execution", modalSub: "Each counted equally"
+    }) + gap(trail || 0) +
+  '</div>';
+}
+function whereNextFns(fks){
+  var rows = fks.map(function(k){ return { k: k, name: FUNCTIONS[k].name, v: fnMemberScores(k).perf }; })
+    .filter(function(r){ return r.v != null; });
+  if (rows.length < 2) return "";
+  rows.sort(function(a, b){ return a.v - b.v; });
+  return '<div class="ustrip-h">' + esc(L("fnword","bu")) + ' \u2014 where to look next</div><div class="ustrip">' +
+    rows.map(function(r){
+      return '<button type="button" data-go="fn:' + esc(r.k) + '">' +
+        '<span class="un">' + esc(r.name) + '</span>' +
+        '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
+    }).join("") + '</div>';
+}
 /* ── COMPANY · Performance (§68) ──────────────────────────────────────
    Islam: "we will need to add a Companies performance page that includes the
    overall performance of the company and the general view of the units
@@ -2346,10 +2392,10 @@ function renderCompanyPerformance(coKey){
     ' holds nothing yet.</b> A unit belongs to a company on ' +
     '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
     '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §391: a company that holds functions reads them into its figures, and the
-     page says so — its headline cards stop being "Business units — …" because
-     they no longer are. With none, everything below is exactly what it was. */
-  if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
+  /* §593: A DIVISION'S FUNCTIONS READ BESIDE ITS UNITS, NEVER MIXED IN
+     (reversing §391's one blended figure). The units' cards are exactly a
+     units-only division's; the functions get their own row under them and
+     their own section. A division of functions alone has only that row. */
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -2415,24 +2461,24 @@ function renderCompanyPerformance(coKey){
     }) +
   '</div>';
 
-  return perfActs("") + head +
-    section("", L("unitword","bu"), null,
+  return perfActs("") + (keys.length ? head : "") +
+    (fks.length ? fnReadingCards(fks, " in " + esc(co.name), 0, keys.length ? 1 : 0) : "") +
+    (keys.length ? section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF(), viewToggle("units"));
+      TIP_PERF(), viewToggle("units")) : "") +
+    (fks.length ? section("", L("fnword"), null,
+      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck); }).join("") + '</div>') : "");
 }
 
-/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
-   Settled from a mockup drawn out of this very page: the same three cards,
-   the units' section unchanged, and a Supporting functions section under it
-   drawing each function with the card a unit wears. The drill says how every
-   member's share was reached, because a weight nobody can trace is a weight
-   nobody can defend. */
-function fnCompanyCard(fk, ck, share){
-  var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
-  var w = Math.round(share.w * 10) / 10;
-  var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
-    " &middot; " + L1("fnword");
+/* ── A FUNCTION'S CARD ON ITS DIVISION (§391, §593) ─────────────────────
+   Each function in a division drawn with the card a unit wears, in the
+   division's own Functions section. Since §593 it carries no share: the
+   functions count equally and read beside the units, never mixed in. */
+function fnCompanyCard(fk, ck){
+  var f = FUNCTIONS[fk], sc = fnMemberScores(fk);
+  /* §593: counted equally, so there is no share to state. */
+  var sub = L1("fnword");
   var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
@@ -2449,72 +2495,6 @@ function fnCompanyCard(fk, ck, share){
       '<span class="ratio-l">nothing reported</span>';
   return '<div class="gwrap">' + splitCard(name, sub, sc.perf, null, null, "", "", f.name, "", body) + '</div>';
 }
-function renderCompanyWithFunctions(ck, co, keys, fks){
-  var shares = companyShares(ck);
-  var perf = companyObjectives(ck), r = companyRatio(ck), share = companyWeight(ck);
-  var nameOf = function(s){ return s.unit ? UNITS[s.unit].name : FUNCTIONS[s.fn].name; };
-  var how = function(s){
-    if (s.unit) return (UNITS[s.unit].weight || 0) + "% of the group";
-    return s.set ? "weight set on Setup" : "weight left blank";
-  };
-  var drill = function(which){
-    var tot = 0;
-    var rows = shares.map(function(s){
-      var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                     : fnMemberScores(s.fn)[which];
-      var w = Math.round(s.w * 10) / 10;
-      return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
-          how(s) + '</span></td>' +
-        '<td>' + (s.unit ? L1("unitword") : L1("fnword")) + '</td>' +
-        '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
-        '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
-    }).join("");
-    return miniTable(["Part of " + esc(co.name), "Kind",
-        which === "perf" ? "Performance" : "Execution", "Weight in " + esc(co.name), "Contribution"],
-      rows + '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td><td></td>' +
-        '<td class="num">100%</td><td class="num"><b>' + pct(which === "perf" ? perf : r) + '</b></td></tr>') +
-      '<p class="sub">The functions take their share first: a weight set on Setup is used as ' +
-      'given, a blank takes the average of the weights that are set, and with none set each ' +
-      'function counts as one equal member. ' + (keys.length
-        ? 'The units share what is left in proportion to the weights they carry at group level.'
-        : '') + '</p>';
-  };
-  var parts = plural(keys.length, "unit") + " and " +
-    plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name);
-  var head = '<div class="scores">' +
-    drillCard("Performance" + tip(TIP_PERF()), perf, {
-      primary: true,
-      sub: "The " + (keys.length ? parts : plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name)) +
-        ", each on its own " + L("keyobj") + ", weighted.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    drillCard("Execution" + tip(TIP_EXEC()), r, {
-      sub: "Each part’s own execution figure, weighted as in performance.",
-      drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
-        L("fnword") + " carry no group weight, so they are not in this number."), share, {
-      plain: true, pill: "of the group",
-      sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
-        ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
-        "weight, so they are not in this number.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — weight",
-      modalSub: "Where this company's share comes from"
-    }) : '') +
-  '</div>';
-  var byFn = {};
-  shares.forEach(function(s){ if (s.fn) byFn[s.fn] = s; });
-  return perfActs("") + head +
-    (keys.length ? section("", L("unitword","bu"), null,
-      GVIEW.units === "table" ? unitsTable(keys)
-        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF(), viewToggle("units")) : '') +
-    section("", L("fnword"), null,
-      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
-}
-
 function renderGroupPerformance(){
   syncWeights();
   /* The one shared list — reordering business units mutates UNIT_KEYS, so a
@@ -2807,7 +2787,11 @@ function whereNext(keys){
           sub: execLine(groupRatio(), "", scoringUnitKeys().length),
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
-      '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
+      '</div>' +
+      /* §593: the functions' own row, under the units' two cards. Only where
+         the group HAS units — "in case of business units". */
+      (buExists() ? fnReadingCards(boardFunctionKeys(), "", 1 + (topPlanCard() ? 1 : 0)) : "") +
+      (buExists() ? whereNext(UNIT_KEYS) + whereNextFns(boardFunctionKeys()) : "")) });
 
   /* §464: the divisions left this page for the navigation — planned on the
      company, a division is a segment of the row and its page is its own

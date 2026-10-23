@@ -62,7 +62,13 @@ with sync_playwright() as p:
         if not title:
             missing.append(label)
             continue
-        if title[0] != label:
+        # §614: a page may keep a fuller title than its menu line has room
+        # for (Islam: "yes shorten it"). Then the title is the entry's own
+        # `title`, and the menu line must be its opening words, so the two
+        # still read as one name. Every other page: the rail's word exactly.
+        full = pg.evaluate("k=>{var d=setupDefs().filter(x=>x.k===k)[0]; return d && d.title || null}", k)
+        want = full or label
+        if title[0] != want or (full and not full.startswith(label)):
             wrong_name.append((label, title[0]))
         # THE DUPLICATE IS THE POINT: a section heading repeating the page's
         # name. Compared case-insensitively, because that is how a reader sees
@@ -74,7 +80,7 @@ with sync_playwright() as p:
         if ck2 != 1:
             missing.append((label, "%d titles" % ck2))
     ck("every page draws exactly one title", not missing, missing)
-    ck("and it is the word the rail uses", not wrong_name, wrong_name)
+    ck("and it is the word the rail uses (or, §614, the fuller title that opens with it)", not wrong_name, wrong_name)
     ck("no section heading repeats the page's name", not duplicated, duplicated)
 
     print("\n── 2 · a real section heading is NOT swallowed ──")

@@ -304,6 +304,9 @@ check(/selected/i.test(await body(A.page)), "a circle opens that process beside 
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
 const w1 = await A.page.$$eval("section[aria-label='Wave 1'] article", (a) => a.map((x) => x.textContent));
 check(w1.length === 1 && /Order to cash/.test(w1[0]) && /Deep dive \d of 6/.test(w1[0]), "the plan puts the process in its wave with its deep-dive progress", JSON.stringify(w1));
+await A.page.click("section[aria-label='Wave 1'] summary[aria-label='What the bars mean']");
+const info = await A.page.innerText("section[aria-label='Wave 1'] details");
+check(["Map", "RACI", "Authority", "Controls", "SOP", "Approved"].every((k) => info.includes(k)) && /at least 3 steps/.test(info) && /Green = done/.test(info), "the ! on a deep-dive card says what each bar is and what turns it green");
 check(/Team capacity: 4 deep dives at a time\. Wave 1 holds 1 — fits/.test(await body(A.page)), "…and says whether Wave 1 fits the team");
 
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DECISION_LABEL, wave1OverCapacity, type Decision } from "@/ffp/lib/domain/priorities";
 import type { PlanView, PriorityRow } from "@/ffp/lib/data/priorities";
 import { WaveLabel } from "./wave-label";
+import { AspectInfo } from "./aspect-info";
 
 const COLS: { d: Decision; sub: (p: PlanView) => string; edit?: "wave1Label" | "wave2Label" | "laterLabel" }[] = [
   { d: "WAVE_1", sub: (p) => p.wave1Label, edit: "wave1Label" },
@@ -34,10 +35,10 @@ export function PlanBoard({ workspaceId, plan, rows, editable }: { workspaceId: 
                   <div className="font-semibold text-slate-900">{r.name}</div>
                   <div className="text-xs text-slate-500">{r.code} · {r.department ?? "No department"}</div>
                   <div className="my-1.5 flex gap-[3px]" role="img" aria-label={`Deep dive ${r.progress.done} of ${r.progress.total}: ${r.progress.aspects.map((a) => `${a.label} ${a.done ? "done" : "not yet"}`).join(", ")}`}>
-                    {r.progress.aspects.map((a) => <i key={a.label} title={`${a.label}${a.done ? " ✓" : ""}`} className={`h-[7px] flex-1 rounded ${a.done ? "bg-emerald-600" : "bg-slate-200"}`} />)}
+                    {r.progress.aspects.map((a) => <i key={a.label} title={`${a.label}${a.done ? " ✓ done" : " — not yet"}: ${a.help}`} className={`h-[7px] flex-1 rounded ${a.done ? "bg-emerald-600" : "bg-slate-200"}`} />)}
                   </div>
                   <div className="text-xs text-slate-500">
-                    Deep dive {r.progress.done} of {r.progress.total} · <Link href={`/${workspaceId}/processes/processes/${r.id}`} className="font-semibold text-indigo-700 hover:underline">Open process →</Link>
+                    Deep dive {r.progress.done} of {r.progress.total} <AspectInfo aspects={r.progress.aspects} /> · <Link href={`/${workspaceId}/processes/processes/${r.id}`} className="font-semibold text-indigo-700 hover:underline">Open process →</Link>
                   </div>
                 </article>
               ))}
@@ -46,7 +47,7 @@ export function PlanBoard({ workspaceId, plan, rows, editable }: { workspaceId: 
         })}
       </div>
       {undecided.length > 0 && <p className="mt-3 text-xs text-slate-500">Not decided yet: {undecided.map((r) => r.name).join(", ")}. Decide them on the Score step.</p>}
-      <p className="mt-3 text-xs text-slate-500">The six marks are Map · RACI · Authority · Controls · SOP · Approved. They fill in by themselves as the work is done on the process.</p>
+      <p className="mt-3 text-xs text-slate-500">Each card has one bar per aspect: Map · RACI · Authority · Controls · SOP · Approved. A green bar means that aspect is done; they fill in by themselves as the work is done on the process. Press the ! on a card to see what each one needs.</p>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export type PriorityRow = {
   rank: number | null;
   suggestedComplexity: { score: number; reason: string } | null;
   suggestedRisk: { score: number; reason: string } | null;
-  progress: { done: number; total: number; aspects: { label: string; done: boolean }[] };
+  progress: { done: number; total: number; aspects: { label: string; help: string; done: boolean }[] };
   lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
 };
 

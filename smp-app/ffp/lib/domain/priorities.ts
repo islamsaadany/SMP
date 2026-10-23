@@ -110,10 +110,19 @@ export type ProgressFacts = {
   lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
 };
 
-export const ASPECTS = ["Map", "RACI", "Authority", "Controls", "SOP", "Approved"] as const;
+/** One list for every aspect, so a new one cannot be added without saying what turns it green. Order is the order of the bars and of `done` below. */
+export const ASPECT_DEFS = [
+  { label: "Map", help: "The process is drawn step by step: at least 3 steps on its map." },
+  { label: "RACI", help: "Who does, owns, is consulted and told at each step: the RACI is marked final." },
+  { label: "Authority", help: "Who may approve what: at least one approval authority is assigned on the process." },
+  { label: "Controls", help: "Risks and the controls that answer them: at least one control is logged." },
+  { label: "SOP", help: "The written procedure exists: the process has an SOP version." },
+  { label: "Approved", help: "The client's named approver has approved it (Approved or Published)." },
+] as const;
+export const ASPECTS = ASPECT_DEFS.map((a) => a.label);
 
 /** Six aspects, each done or not, read off what the process holds — nobody ticks them by hand. */
-export function deepDiveProgress(p: ProgressFacts): { done: number; total: number; aspects: { label: string; done: boolean }[] } {
+export function deepDiveProgress(p: ProgressFacts): { done: number; total: number; aspects: { label: string; help: string; done: boolean }[] } {
   const done = [
     p.steps >= 3,
     p.raciFinal,
@@ -122,7 +131,7 @@ export function deepDiveProgress(p: ProgressFacts): { done: number; total: numbe
     !!(p.sopVersion && p.sopVersion.trim()),
     p.lifecycleStatus === "APPROVED" || p.lifecycleStatus === "PUBLISHED",
   ];
-  return { done: done.filter(Boolean).length, total: ASPECTS.length, aspects: ASPECTS.map((label, i) => ({ label, done: done[i]! })) };
+  return { done: done.filter(Boolean).length, total: ASPECTS.length, aspects: ASPECT_DEFS.map((a, i) => ({ label: a.label, help: a.help, done: done[i]! })) };
 }
 
 /* ── the sign-off ── */

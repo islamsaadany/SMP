@@ -66613,6 +66613,8 @@ The audit's seventh section ends: *"there is **no customisation anywhere**: the 
 
 **WITH HEURISTIC 7 THIS CLOSES, the audit has been wrong six times** — five undercounts (26 dialogs that were 30, six date spellings that were nine, one dead-greyed control that was four, one keyboard idiom that was four, five remembered things that were 18) and one overcount (zero `section()` notes that were three) — besides twice reporting as missing something already built, and once inventing a decision for Islam that the product had already made. Every correction is in this record, each closed by a check that goes red rather than a note saying somebody looked.
 
+**§550 MERGED TO `main`** 2026-10-18, Islam: *"merge to main"*. `main` had not moved since the branch was cut from it, so the branch fast-forwarded. SHELL `v6.40-filters-remembered`.
+
 ## §551 — An owner is picked from the register, never typed (2026-10-18)
 Islam, straight after §542.6 named a direction owned by *"Tamer Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner should be selected from a drop down, generally all the owners shouldn't be written by hand and only be selected from a list from the registr in a drop down serachable list."*
 
@@ -66638,6 +66640,8 @@ Islam, straight after §542.6 named a direction owned by *"Tamer Abdelhamid"* wh
 
 **NOT COVERED, named rather than left as an absence (§54.5):** the **Collaborators** columns in the workbook. They are picked from this same register on screen and are still free text in the file, so the identical hole is open one column over. Owners are what was asked for, and widening a change past its ask is how a fix becomes unreviewable. It is Islam's to call. — **He called it the same day: §551.1.** Naming it is what got it closed, which is the argument for naming a boundary rather than quietly drawing it.
 
+**§551 MERGED TO `main`** 2026-10-18, Islam: *"merge to main"*. Fast-forward, `main` unmoved. SHELL `v6.42-owner-from-the-register`. **And its premise was corrected five days later — see §551.2.**
+
 ## §551.1 — Collaborators too, and the Read me that had gone stale (2026-10-18)
 Islam, told that the Collaborators columns were the same hole one column over and left out of §551 deliberately: *"fix the collaborators too."* §551 named it rather than hiding it, and this is the follow-on it was named for.
 
@@ -66659,6 +66663,8 @@ Islam, told that the Collaborators columns were the same hole one column over an
 
 **STILL NOT COVERED, and named rather than left as an absence (§54.5): `stakeholders`.** — **Done in §551.3, and the guess in this paragraph was wrong**: not one stakeholder in the demo is a person's name. Islam settled what they are (*"either units or people names"*), which made it §130.1's existing control rather than the wider job this paragraph expected. A project's stakeholders are people's names too, and they are **typed on the screen as well** — an `inputOr` text box, not a picker — besides being free text in the workbook's Stakeholders column. So this one is a wider job than collaborators was: it needs the control changed, not just the file. It is not done here because it was not asked for, and because a stakeholder may legitimately be somebody outside the register (a client, a regulator, a partner) — which is a question for Islam before any rule is imposed on it.
 
+**§551.1 MERGED TO `main`** 2026-10-18, Islam: *"merge to main and fix the collaborators too"* — the merge and the next piece of work in one sentence. Fast-forward. SHELL `v6.43-collaborators-too`.
+
 ## §551.2 — The builder picks the owner, and §551's premise was wrong (2026-10-18)
 Islam, after §551 and §551.1 had both been built and merged: *"Actually, after working some time on the platform, do not consider the upload through the sheets. Mostly, we build it through the app, through the builder itself, so this shouldn't be an issue later on."*
 
@@ -66677,6 +66683,8 @@ Islam, after §551 and §551.1 had both been built and merged: *"Actually, after
 **CHECK.** The §551 check gained §10 — green here, **6 red on the build before**. Its last assertion picks a name through the real control and demands it reach `BFORM.draft`, because a dropdown nobody reads would satisfy every assertion above it.
 
 **STANDING, for future work:** the sheet upload path is not how plans are built, and a finding about it is not a finding about the product's main route. Weigh it accordingly.
+
+**§551.2 MERGED TO `main`** 2026-10-18, Islam: *"merge to main"*. Fast-forward. SHELL `v6.44-builder-picks-the-owner`.
 
 ## §551.3 — A stakeholder is picked from the same list (2026-10-18)
 Asked **where** stakeholders are written, the answer was worth having before anything was built: **one place in the whole app** — a project's row on a function's or capability's Projects page, with the pen on, as a single comma-separated text box. **The builder never asks for them at all**, so a project created the way plans are actually made (§551.2) starts with none and only ever gets them from that one box. The other two doors are the workbook's Stakeholders column and the template round-trip, and §551.2 settled what those are worth.
@@ -66697,6 +66705,8 @@ Asked **where** stakeholders are written, the answer was worth having before any
 
 **NOT DONE, and named (§54.5)** — **done the next morning, §551.4, because naming it got it asked for:** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.
 
+**§551.3 MERGED TO `main`** 2026-10-18, Islam: *"merge to main"*. Fast-forward. SHELL `v6.45-stakeholders-picked`.
+
 ## §551.4 — The demo names only real units and people (2026-10-19)
 Islam: *"fix the demo stakeholders too."* §551.3 had named the five non-conforming values and left them, on the grounds that demo content is a separate change with his name on it. This is that change.
 
@@ -66713,6 +66723,18 @@ Islam: *"fix the demo stakeholders too."* §551.3 had named the five non-conform
 **CHECK.** The §551 check gained §12 — green here, **2 red on the build before**. It asserts **no stakeholder anywhere in the demo is outside the register**, which is a permanent regression guard rather than a statement about today's values, and **that no project was emptied to achieve it** — dropping names until nothing is left would satisfy the first assertion and trade one fault for another. 19 projects carry stakeholders; all 19 still do.
 
 **AND ONE FAULT IN THE CHECK ITSELF, recorded rather than quietly fixed.** §551.3's assertion that the project's stakeholders are still picked was written with `["Finance Department", "IT Department"]` as **literals**, and went red the moment this entry tidied the demo. **A check that breaks when the content changes is measuring the content, not the control.** It reads the project's own list now (§48's rule about addressing a row, applied to a fixture). A second draft also split one label across two `ck` calls with the same condition, so the second could never say anything the first had not — §113.8's family, a line that looks like evidence.
+
+**§551.4 MERGED TO `main` AND PUT LIVE** 2026-10-23, Islam: *"merge to main"*, then *"put it live"*. **Four days passed between the commit and the merge, and `main` moved 307 commits in them** — §552 to §601 — so Islam asked first whether the fix was still valid. It was, and three things were established rather than assumed: **the fault was still there** (all five stray values survived those 307 commits untouched, so nothing had superseded it); **the replacements were still real names**, re-measured against `main`'s CURRENT register, which the set-up restructuring could have changed and did not — *Distribution* in particular still exists, which the one substituted value depends on; and **§551.4 was still a free number**, `main` having gone from §551.3 to §601 without taking it.
+
+**`main` HAD ALSO REPAIRED THIS BRANCH'S CHECK, and the repair was kept.** §544.13 replaced its navigation: the demo used to carry three sides (Units · Capabilities · Functions) drawn as three buttons, so a button whose whole text is "Functions" existed to find; its capabilities are in the company plan now, so the row draws §41.8's two-sided toggle and that selector found nothing. They pointed it at `data-fold="fns"`, which names the side on both shapes. The merge keeps their fix beside this branch's two sections.
+
+**AND THIS BRANCH'S §544 IS `main`'s §552 NOW**, `main`'s own §544 having taken the number for stage 4. The renumber **reached the code** — `tabkeys.js` and `tab-arrows.py` both say §552 — checked rather than assumed, because a renumber that stops at this file is the stale reference §264.3 exists to prevent.
+
+**THREE SHELL NAMES WERE TAKEN WHILE THIS WAS BEING VERIFIED.** `main` took `v6.91` (§598.1), then `v6.92` (§600) and `v6.93` (§601) — `v6.91` and `v6.92` being names this branch had already claimed. It merged four times in all, each time regenerating rather than picking the built file and the served copies, and shipped as **`v6.94-demo-stakeholders-real`**, confirmed free against every ref before it was taken (§276).
+
+**THE SWEEP'S FIGURE CHANGED AND IT IS NOT THIS BRANCH'S.** It reads **33 viewers / 181 destinations** now rather than 234 — `main`'s own number, appearing 39 times in this file from the set-up restructuring. The merged tree produces exactly 181, so the merge moved it by zero.
+
+**LIVE READ, AS SEEN (§601's shape).** `smp-orpin-tau.vercel.app/shell.js` returns **5,176,115 bytes, byte-identical** to the served copy built here (`cmp` clean), and **every `stakeholders:` array in the file production serves holds register names only** — Marketing, HR, Strategy Management Office, IT, Finance, Care, Treasury and Distribution. **The first reading of that file looked like a failure and was not**: searching it for "Finance Department" and "Unit heads" returns matches, which are **this work's own code comments** quoting the old names to explain the change, and "Operations" matches the pillar *Retail Operations Excellence*. A count was checked rather than reported — in either direction.
 
 ## §552 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
 The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.

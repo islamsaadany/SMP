@@ -1,8 +1,8 @@
-/* THE SAVE ITSELF, NUMBERED (§585.1). Islam: *"is there a way or a mechanism
+/* THE SAVE ITSELF, NUMBERED (§588.1). Islam: *"is there a way or a mechanism
    where people save things in the same time without needing a refresh …
    without impacting the speed of the platform?"*
 
-   §585 took other people's changes in without a reload, but found out about
+   §588 took other people's changes in without a reload, but found out about
    them through §258's peek — per target, every twenty seconds — and fetched
    the WHOLE graph to do it. This table is the lighter way: every save that
    lands is written here as the change list it carried, with a number in the

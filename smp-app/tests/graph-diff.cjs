@@ -186,7 +186,7 @@ console.log("\n§215 · row-level changes");
           got.ok && same(got.state, want), got.error || "differs");
   });
 
-  /* — §585: anything structural travels as ONE LIST OPERATION, by id — never
+  /* — §588: anything structural travels as ONE LIST OPERATION, by id — never
        the whole unit, which carried a stale copy of every other cell — */
   [["a pillar added",     n => { n.units.mobile.items.push({ id:"p3", name:"P3" }); }],
    ["a pillar removed",   n => { n.units.mobile.items.pop(); }],
@@ -197,10 +197,10 @@ console.log("\n§215 · row-level changes");
    ["an objective added", n => { n.units.mobile.keyObjectives.push({ id:"k3" }); }]
   ].forEach(function (pair) {
     const got = land(pair[1]);
-    check("§585: " + pair[0] + " travels as a list operation, never the whole unit",
+    check("§588: " + pair[0] + " travels as a list operation, never the whole unit",
           !!(got.changes.lists && got.changes.lists.length === 1) && !got.changes.rows &&
           !got.changes.set["units.mobile"], JSON.stringify(got.changes).slice(0,120));
-    check("§585: ...and still lands exactly", got.ok && same(got.state, edit(pair[1])), got.error);
+    check("§588: ...and still lands exactly", got.ok && same(got.state, edit(pair[1])), got.error);
   });
 
   /* — A STRUCTURAL CHANGE **BESIDE** A FIELD EDIT, which is the case the
@@ -225,7 +225,7 @@ console.log("\n§215 · row-level changes");
   ].forEach(function (pair) {
     const want = edit(pair[1]);
     const got = land(pair[1]);
-    check("§585: " + pair[0] + " travels as the edit AND a list operation",
+    check("§588: " + pair[0] + " travels as the edit AND a list operation",
           !!got.changes.rows && got.changes.rows.length === 1 &&
           !!got.changes.lists && got.changes.lists.length === 1 && !got.changes.set["units.mobile"],
           JSON.stringify(got.changes).slice(0, 100));
@@ -414,7 +414,7 @@ console.log("\n§216 · a capability travels on its own");
     }
   })();
 
-  /* — §585: AND STRUCTURE TRAVELS AS A LIST OPERATION HERE TOO — */
+  /* — §588: AND STRUCTURE TRAVELS AS A LIST OPERATION HERE TOO — */
   [["a project added",    n => { n.group.capabilities[0].projects.push({ id:"NEWP", name:"New" }); }],
    ["a milestone removed", n => { n.group.capabilities[0].projects[0].milestones.pop(); }],
    ["a capability added", n => { n.group.capabilities.push({ id:"NEWC", fn:"smo", projects:[], keyObjectives:[] }); }],
@@ -423,7 +423,7 @@ console.log("\n§216 · a capability travels on its own");
            n.group.capabilities[0].projects[0].milestones.push({ id:"NEWM", name:"New" }); }]
   ].forEach(function (pair) {
     const got = land(pair[1]);
-    check("§585: " + pair[0] + " travels as a list operation, never the whole group",
+    check("§588: " + pair[0] + " travels as a list operation, never the whole group",
           !!(got.ch.lists && got.ch.lists.length === 1) && !got.ch.set.group,
           JSON.stringify(got.ch).slice(0, 100));
     check("§216: ...and still lands exactly", got.ok && D.sameValue(got.state, got.want),
@@ -636,14 +636,14 @@ console.log("\n§234 · one function's submit carries nobody else's report");
         JSON.stringify((gone.state || {}).review && gone.state.review.done));
 })();
 
-/* ── §585 · ROWS ADDED, REMOVED AND MOVED TRAVEL BY ID ─────────────────
+/* ── §588 · ROWS ADDED, REMOVED AND MOVED TRAVEL BY ID ─────────────────
    The case the whole-unit fallback got wrong: the office adds a pillar while
    a custodian fills a figure on the same unit, and whichever save landed
    second with the whole unit put the other's cell back as it was. A list
    operation is applied by id onto the stored list, so the other cell is
    never touched — and applied twice it lands once, which §504's replay and
    the quiet merge both lean on. */
-console.log("\n§585 · structure travels by id, and lands beside other people's cells");
+console.log("\n§588 · structure travels by id, and lands beside other people's cells");
 (function () {
   const same = (a, b) => D.sameValue(a, b);
   const plan = () => ({ units: { mobile: { name:"Mobile", aspiration:"A",
@@ -659,8 +659,8 @@ console.log("\n§585 · structure travels by id, and lands beside other people's
     const office = D.graphChanges(plan(), edit(n => { n.units.mobile.items.push({ id:"p3", name:"P3", measures:[], tactics:[] }); }));
     const stored = edit(n => { n.units.mobile.items[0].measures[0].target = "FILLED MEANWHILE"; });
     const r = apply(stored, office);
-    check("§585: the add lands on the stored unit", r.ok && ids(r.state) === "p1,p2,p3", r.ok ? ids(r.state) : r.error);
-    check("§585: ...and the figure filled meanwhile is still there",
+    check("§588: the add lands on the stored unit", r.ok && ids(r.state) === "p1,p2,p3", r.ok ? ids(r.state) : r.error);
+    check("§588: ...and the figure filled meanwhile is still there",
           r.ok && r.state.units.mobile.items[0].measures[0].target === "FILLED MEANWHILE",
           r.ok ? r.state.units.mobile.items[0].measures[0].target : r.error);
   }
@@ -669,7 +669,7 @@ console.log("\n§585 · structure travels by id, and lands beside other people's
     const custodian = D.graphChanges(plan(), edit(n => { n.units.mobile.items[0].measures[0].target = "FILLED"; }));
     const stored = edit(n => { n.units.mobile.items.push({ id:"p3", name:"P3", measures:[], tactics:[] }); });
     const r = apply(stored, custodian);
-    check("§585: a figure saved after an add keeps the new pillar",
+    check("§588: a figure saved after an add keeps the new pillar",
           r.ok && ids(r.state) === "p1,p2,p3" && r.state.units.mobile.items[0].measures[0].target === "FILLED", r.error);
   }
   /* 3 · applied twice lands once (a replay after a failed save, §504) */
@@ -677,26 +677,26 @@ console.log("\n§585 · structure travels by id, and lands beside other people's
     const ch = D.graphChanges(plan(), edit(n => { n.units.mobile.items.splice(1, 0, { id:"p3", name:"P3" }); n.units.mobile.items[0].measures.pop(); }));
     const once = apply(plan(), ch);
     const twice = once.ok ? apply(once.state, ch) : once;
-    check("§585: a new row goes after the row it names", once.ok && ids(once.state) === "p1,p3,p2", once.ok ? ids(once.state) : once.error);
-    check("§585: the same operation applied twice lands once", once.ok && twice.ok && same(once.state, twice.state), twice.error || ids(twice.state));
-    check("§585: ...and the count sees both lists", D.countChanges(ch) === 2, D.countChanges(ch));
+    check("§588: a new row goes after the row it names", once.ok && ids(once.state) === "p1,p3,p2", once.ok ? ids(once.state) : once.error);
+    check("§588: the same operation applied twice lands once", once.ok && twice.ok && same(once.state, twice.state), twice.error || ids(twice.state));
+    check("§588: ...and the count sees both lists", D.countChanges(ch) === 2, D.countChanges(ch));
   }
   /* 4 · the row it names has gone meanwhile: it still lands, last */
   {
     const ch = D.graphChanges(plan(), edit(n => { n.units.mobile.items.push({ id:"p3", name:"P3" }); }));
     const stored = edit(n => { n.units.mobile.items.pop(); });
     const r = apply(stored, ch);
-    check("§585: a row added after one that has gone still lands", r.ok && ids(r.state) === "p1,p3", r.ok ? ids(r.state) : r.error);
+    check("§588: a row added after one that has gone still lands", r.ok && ids(r.state) === "p1,p3", r.ok ? ids(r.state) : r.error);
   }
   /* 5 · a reorder keeps rows it does not know; a drop of a row already gone is nothing */
   {
     const ch = D.graphChanges(plan(), edit(n => { n.units.mobile.items.reverse(); }));
     const stored = edit(n => { n.units.mobile.items.push({ id:"p9", name:"Theirs" }); });
     const r = apply(stored, ch);
-    check("§585: a reorder keeps a row somebody added meanwhile", r.ok && ids(r.state) === "p2,p1,p9", r.ok ? ids(r.state) : r.error);
+    check("§588: a reorder keeps a row somebody added meanwhile", r.ok && ids(r.state) === "p2,p1,p9", r.ok ? ids(r.state) : r.error);
     const gone = D.graphChanges(plan(), edit(n => { n.units.mobile.items.pop(); }));
     const r2 = apply(edit(n => { n.units.mobile.items.pop(); }), gone);
-    check("§585: removing a row somebody already removed is nothing to do", r2.ok && ids(r2.state) === "p1", r2.ok ? ids(r2.state) : r2.error);
+    check("§588: removing a row somebody already removed is nothing to do", r2.ok && ids(r2.state) === "p1", r2.ok ? ids(r2.state) : r2.error);
   }
   /* 6 · a first tactic on a pillar with no tactics key is an add, not the whole unit */
   {
@@ -704,7 +704,7 @@ console.log("\n§585 · structure travels by id, and lands beside other people's
     const next = JSON.parse(JSON.stringify(base)); next.units.mobile.items[1].tactics = [{ id:"t9", owner:"Bea" }];
     const ch = D.graphChanges(base, next);
     const r = apply(base, ch);
-    check("§585: the first row of a list that was not there is an add",
+    check("§588: the first row of a list that was not there is an add",
           !!ch.lists && ch.lists.length === 1 && !ch.set["units.mobile"] && r.ok && same(r.state, next), JSON.stringify(ch).slice(0, 120));
   }
   /* 7 · lines (§504): one per row and one per order, each stable and readable */
@@ -713,34 +713,34 @@ console.log("\n§585 · structure travels by id, and lands beside other people's
     const ch = D.graphChanges(plan(), next);
     const lines = D.splitLines(ch);
     const addrs = lines.map(l => l.addr).sort();
-    check("§585: a list operation splits into one line per row, plus one per order", lines.length === 3,
+    check("§588: a list operation splits into one line per row, plus one per order", lines.length === 3,
           JSON.stringify(addrs));
-    check("§585: ...each line names what it does",
+    check("§588: ...each line names what it does",
           addrs.join(" ") === ["l:units.mobile|items/p1|measures|drop|m2", "l:units.mobile||items|add|p3",
                                "l:units.mobile||keyObjectives|order"].sort().join(" "), JSON.stringify(addrs));
     const stable = lines.every(l => { const again = D.splitLines(l.change); return again.length === 1 && again[0].addr === l.addr && same(again[0].mine, l.mine); });
-    check("§585: ...splitting a line's own change gives that line back (the office's list relies on it)", stable);
+    check("§588: ...splitting a line's own change gives that line back (the office's list relies on it)", stable);
     const add = lines.filter(l => /\|add\|/.test(l.addr))[0], drop = lines.filter(l => /\|drop\|/.test(l.addr))[0], ord = lines.filter(l => /\|order$/.test(l.addr))[0];
-    check("§585: an added row reads as absent before and present after",
+    check("§588: an added row reads as absent before and present after",
           add && !D.valueAt(plan(), add).has && D.valueAt(next, add).has && same(D.valueAt(next, add).value, add.mine.value));
-    check("§585: a dropped row reads as present before and absent after",
+    check("§588: a dropped row reads as present before and absent after",
           drop && D.valueAt(plan(), drop).has && !D.valueAt(next, drop).has && !drop.mine.has);
-    check("§585: an order reads as the ids, before and after",
+    check("§588: an order reads as the ids, before and after",
           ord && D.valueAt(plan(), ord).value.join() === "k1,k2" && D.valueAt(next, ord).value.join() === "k2,k1" && ord.mine.value.join() === "k2,k1");
     const replay = lines.reduce((s, l) => { const r = apply(s, l.change); return r.ok ? r.state : s; }, plan());
-    check("§585: the lines replayed one by one give the screen's plan", same(replay, next));
+    check("§588: the lines replayed one by one give the screen's plan", same(replay, next));
   }
   /* 8 · what is refused */
   {
     const op = (x) => ({ set: {}, del: [], lists: [Object.assign({ at:"units.mobile", path:[], list:"items" }, x)] });
-    check("§585: a list the tree does not name is refused", !apply(plan(), op({ list:"nope", add:[{ row:{ id:"z" } }] })).ok);
-    check("§585: a row with no id is refused", !apply(plan(), op({ add:[{ row:{ name:"no id" } }] })).ok);
-    check("§585: a path to a row that is not here is refused", !apply(plan(), op({ path:["items","p77"], list:"measures", add:[{ row:{ id:"z" } }] })).ok);
-    check("§585: an operation that changes nothing is refused", !apply(plan(), op({})).ok);
-    check("§585: a part this server does not address is refused", !apply(plan(), op({ at:"people" })).ok);
+    check("§588: a list the tree does not name is refused", !apply(plan(), op({ list:"nope", add:[{ row:{ id:"z" } }] })).ok);
+    check("§588: a row with no id is refused", !apply(plan(), op({ add:[{ row:{ name:"no id" } }] })).ok);
+    check("§588: a path to a row that is not here is refused", !apply(plan(), op({ path:["items","p77"], list:"measures", add:[{ row:{ id:"z" } }] })).ok);
+    check("§588: an operation that changes nothing is refused", !apply(plan(), op({})).ok);
+    check("§588: a part this server does not address is refused", !apply(plan(), op({ at:"people" })).ok);
     const before = plan();
     apply(before, op({ list:"nope", add:[{ row:{ id:"z" } }] }));
-    check("§585: ...and a refused body changes nothing", same(before, plan()));
+    check("§588: ...and a refused body changes nothing", same(before, plan()));
   }
 })();
 

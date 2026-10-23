@@ -39,7 +39,7 @@
        nothing to send). A refusal or a failure stays on the page in its own
        banner (§171) and nothing reloads over it.
 
-       SINCE §585 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
+       SINCE §588 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
        on different pages shouldn't get this message … save things in the
        same time without needing a refresh."* A landing by somebody else now
        asks sync.js to take the server's copy in under this tab's own unsaved
@@ -54,7 +54,7 @@
 var SAFETY = (function(){
   var UPDATE_EVERY = 60000;   /* ask the worker for a newer build */
   var PEEK_EVERY   = 20000;   /* ask about other people's saves while somebody is working here */
-  /* §585.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
+  /* §588.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
      Islam: *"without impacting the speed of the platform"*. A tab left open
      on a desk asks a third as often; the first key or click brings the
      short clock back. Activity is read off the document, never off a list
@@ -196,7 +196,7 @@ var SAFETY = (function(){
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }
 
-  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§585) ─────────────
+  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§588) ─────────────
      A landing by somebody else asks sync.js to merge the server's copy
      under this tab's own unsaved lines. "busy" means a hand is in a field
      or a save is in flight: it is asked again on blur and on a short clock.
@@ -224,7 +224,7 @@ var SAFETY = (function(){
         /* The fetch was made after every landing reported so far, so the
            newest of them is what the screen now holds. */
         var newest = (want || w).at; want = null;
-        if (newest) { lastAt = newest; since = newest; }   /* null when §585.1's path asked for the graph */
+        if (newest) { lastAt = newest; since = newest; }   /* null when §588.1's path asked for the graph */
         return;
       }
       if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
@@ -247,7 +247,7 @@ var SAFETY = (function(){
   function seqMode(){ return typeof SYNC !== "undefined" && !!SYNC.seq && !!SYNC.applyRemote && SYNC.seq() !== null; }
   function peek(){
     if (!servable() || !live() || document.visibilityState !== "visible") return;
-    /* §585.1: a server that numbers its saves is asked the lighter way, on
+    /* §588.1: a server that numbers its saves is asked the lighter way, on
        every page; the per-target ask below is kept for one that does not. */
     if (seqMode()) return peekSeq();
     var t = target(); if (!t) return;
@@ -267,20 +267,20 @@ var SAFETY = (function(){
         var last = j.changed[j.changed.length - 1];
         /* Remember the newest we have SEEN so the same landing is not
            announced twice, and the next peek only asks about what is newer. */
-        /* §585: taken in rather than announced; `since` and `lastAt` move on
+        /* §588: taken in rather than announced; `since` and `lastAt` move on
            when the merge has landed (or at once, on the caution fallback). */
         if (last.at && last.at !== lastAt) landed(last, t);
       })
       .catch(function(){ clearTimeout(late); });
   }
 
-  /* ── 2c · THE LIGHTER ASK (§585.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
+  /* ── 2c · THE LIGHTER ASK (§588.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
      When the server numbers its saves (the full read came with `seq`), the
      tab asks for everything after the number it holds — on any page, Setup
      included, because the answer is the change itself and applying it is
-     what §585 does anyway — and is answered with a few hundred bytes, or an
+     what §588 does anyway — and is answered with a few hundred bytes, or an
      empty list that cost one indexed read. "full" (a list too large to
-     carry, or one this copy cannot apply) falls back to §585's whole-graph
+     carry, or one this copy cannot apply) falls back to §588's whole-graph
      merge; "busy" is asked again on blur and on a short clock; the number
      moves on only once the answer is on the screen, so nothing is counted
      as seen before it is. */
@@ -319,7 +319,7 @@ var SAFETY = (function(){
       }
       if (how === "busy") { retryTimer = setTimeout(tryMergeSeq, RETRY); return; }
       if (how === "full") {
-        /* the whole graph through §585's merge, which adopts the number the
+        /* the whole graph through §588's merge, which adopts the number the
            fetched copy carries */
         wantSeq = null; want = { at: null, by: null, t: null }; tryMerge(); return;
       }
@@ -342,7 +342,7 @@ var SAFETY = (function(){
     armWorker();
     /* The first ask is the clock sync; it waits for hydration (`live()`),
        which is why it is retried on the clock rather than fired once. */
-    /* The clock ticks often and asks on its own cadence (§585.1: twenty
+    /* The clock ticks often and asks on its own cadence (§588.1: twenty
        seconds while somebody is working here, a minute once nobody is). */
     if (!peekTimer) peekTimer = setInterval(onClock, 5000);
     setTimeout(function(){ lastPeek = Date.now(); peek(); }, 1500);
@@ -363,8 +363,8 @@ var SAFETY = (function(){
     onPaint: onPaint,
     hide: hide,
     shownFor: function(){ return shownFor; },
-    /* §585, for the check: a landing reported and not yet on the screen;
-       §585.1: the clock's current cadence, and a way to stamp activity. */
+    /* §588, for the check: a landing reported and not yet on the screen;
+       §588.1: the clock's current cadence, and a way to stamp activity. */
     pending: function(){ return !!(want || wantSeq); },
     every: every,
     active: function(at){ lastActive = typeof at === "number" ? at : Date.now(); },

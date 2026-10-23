@@ -269,7 +269,7 @@ var SYNC = (function () {
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
   var repaint = null;
-  /* §585.1: the number of the last save this copy holds — the server's
+  /* §588.1: the number of the last save this copy holds — the server's
      `seq` on the graph it sent — or null where the server does not number
      its saves yet, in which case safety.js keeps §258's per-target ask. */
   var SEQ = null;
@@ -310,7 +310,7 @@ var SYNC = (function () {
     };
   }
 
-  /* The graph in the shape a save compares and sends (§585 lifts this out of
+  /* The graph in the shape a save compares and sends (§588 lifts this out of
      serialize() so the quiet merge can put a FETCHED graph in the same shape
      before it is compared — a baseline taken from the raw fetch would differ
      from the screen's own serialization in exactly these two places and
@@ -616,7 +616,7 @@ var SYNC = (function () {
     } catch (e) { return []; }
   }
   /* Two readings of a line's place agree when both are absent, or both are
-     there with the same value — the one comparison §504's replay and §585's
+     there with the same value — the one comparison §504's replay and §588's
      merge both make, written once. */
   function lineSame(a, b) {
     return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
@@ -1606,7 +1606,7 @@ var SYNC = (function () {
       .catch(function () { done(false); });
   }
 
-  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§585) ──────────────
+  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§588) ──────────────
      Islam: *"is there a way or a mechanism where people save things in the
      same time without needing a refresh and keeping data when they are
      working on different cells?"*
@@ -1653,7 +1653,7 @@ var SYNC = (function () {
         /* Theirs, in the tab's own shape — through the same door a boot goes
            through (§53.5), so a missing list or a stored null reads exactly
            as it would after a reload, and the baseline matches the screen.
-           The number it carries is the number this copy now holds (§585.1). */
+           The number it carries is the number this copy now holds (§588.1). */
         hydrate(data.state);
         if (typeof data.seq === "number") SEQ = data.seq;
         done("merged", takeIn(JSON.stringify(normalized(graph())), before, mineS));
@@ -1661,7 +1661,7 @@ var SYNC = (function () {
       .catch(function (e) { done(e && e.message === "sign in" ? "off" : "failed"); });
   }
   /* THE MERGE ITSELF, shared by the whole-graph fetch above and the lighter
-     path below (§585.1). `theirs` is the server's copy in the tab's own
+     path below (§588.1). `theirs` is the server's copy in the tab's own
      shape, `before` the baseline it replaces, `mineS` the screen as it was
      before theirs was taken: this tab's unsaved lines are the difference
      between the two, and they go back over theirs line by line. */
@@ -1688,7 +1688,7 @@ var SYNC = (function () {
     try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
     return { changed: theirs !== before, kept: kept, clash: clash.length };
   }
-  /* ── THE LIGHTER WAY IN (§585.1): THE CHANGE, NOT THE GRAPH ─────────
+  /* ── THE LIGHTER WAY IN (§588.1): THE CHANGE, NOT THE GRAPH ─────────
      safety.js asks the server "what changed since N" and hands the answer
      here: each save's change list, oldest first, applied onto this tab's
      baseline with the same differ the server applied it with — so theirs
@@ -1767,12 +1767,12 @@ var SYNC = (function () {
     /* The quiet refresh after a crossing (§433): the same fetch, dropped
        rather than applied if anything on the page would be lost. */
     refresh: function (done) { rebase(done, true); },
-    /* §585: the server's copy, with this tab's own unsaved lines laid back
+    /* §588: the server's copy, with this tab's own unsaved lines laid back
        over it and no reload. The only caller is safety.js, when somebody
        else has landed a change; it answers "merged", "busy", "failed" or
        "off", and "busy" is asked again. */
     mergeIn: function (done) { mergeIn(done); },
-    /* §585.1: the same merge from the change lists the server numbered —
+    /* §588.1: the same merge from the change lists the server numbered —
        no graph fetched; "full" means fetch it after all. And the number this
        copy holds, read and moved by safety.js alone. */
     applyRemote: function (entries, done) { applyRemote(entries, done); },

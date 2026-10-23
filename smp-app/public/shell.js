@@ -5949,9 +5949,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
    that unit. Two people on different units, or on a unit and the register,
    no longer touch each other at all, which is what was happening today.
 
-   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §585 CLOSES THE
+   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §588 CLOSES THE
    LAST GAP: ADDING, REMOVING AND REORDERING ROWS ──────────────────────────
-   Until §585 a row added, removed or moved made the WHOLE part travel again
+   Until §588 a row added, removed or moved made the WHOLE part travel again
    (`set["units.mobile"] = the unit`), which carried the adder's stale copy
    of every other cell in that unit. Measured: the office adds a pillar while
    a custodian fills a figure on the same unit, and whichever save lands
@@ -5961,7 +5961,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
    after), and the id order when it moved. Applied by id onto the stored
    list, so a cell somebody else filled meanwhile is never touched, and the
    same operation applied twice lands once (a replay after a failed save,
-   §504, and the quiet merge, §585, both depend on that). The whole-part
+   §504, and the quiet merge, §588, both depend on that). The whole-part
    path stays for what has no ids (§191), exactly as before. */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -6139,7 +6139,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `here` is the path walked so far: alternating list name and row id, so
      ["capabilities","cap1","projects"] addresses a project inside cap1. The
      server validates against the SAME tree rather than walking freely. */
-  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§585) ──
+  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§588) ──
      `ia` and `ib` are the two sides' id orders. What left is dropped by id;
      what arrived is added whole, each new row naming the id it follows (null
      for the first place) so a chain of new rows lands in order; and if the
@@ -6181,7 +6181,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     for (var i = 0; i < names.length; i++) {
       var name = names[i], la = a[name], lb = b[name];
       if (la === undefined && lb === undefined) continue;
-      /* §585: a list that is not there yet counts as empty, so the first row
+      /* §588: a list that is not there yet counts as empty, so the first row
          added to a pillar with no `tactics` key is still an add and not the
          whole unit. Anything else that is not a list sends the part whole. */
       if ((la !== undefined && !Array.isArray(la)) || (lb !== undefined && !Array.isArray(lb))) return false;
@@ -6450,7 +6450,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       plan.push({ row: holder, set: e.set, del: e.del || [] });
     }
 
-    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§585) ──────────────
+    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§588) ──────────────
        The address is walked down the same tree, to the HOLDER of the list
        (so the path has an even number of steps), and the list itself must be
        one the tree names. What the operation does is checked for shape here
@@ -6510,7 +6510,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       if (!isMap(target[parts[0]][parts[1]])) target[parts[0]][parts[1]] = {};
       target[parts[0]][parts[1]][parts[2]] = set[p];
     });
-    /* §585: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
+    /* §588: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
        already gone is nothing to do; an added row whose id is already here
        stays as it is (the add landed before — a replay must not double it);
        a new row goes after the row it names, first when it names none, and
@@ -6601,7 +6601,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
                    mine: { has: false } });
       });
     });
-    /* §585: a list operation splits into one line per row it drops or adds,
+    /* §588: a list operation splits into one line per row it drops or adds,
        and one for the order. `l:<at>|<path>|<list>|drop|<id>` names what
        went, `…|add|<id>` what arrived (the row is the value), `…|order` the
        new sequence — so two people removing the same row are the same line,
@@ -6643,7 +6643,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       }
       return { has: true, value: h };
     }
-    /* §585: a list line answers with the row it names (add, drop) or with
+    /* §588: a list line answers with the row it names (add, drop) or with
        the list's id order (order), read off whatever the graph holds now. */
     var op = ch.lists && ch.lists[0];
     if (op) {
@@ -17882,7 +17882,7 @@ FUNCTION_KEYS.forEach(function(k){
    AND NOT length + 1. After a row has been removed, `-P3` can still be held by
    the last of three — the same collision mintPersonKey() and mintClaimId()
    already scan for. */
-/* §585: AND NOT THE POSITION ALONE. Two people adding a row to the same list
+/* §588: AND NOT THE POSITION ALONE. Two people adding a row to the same list
    in the same minute both counted the same length and minted the same id, so
    on the merge the second row replaced the first (every row is found by id,
    §48). A short random tag after the number keeps the id readable — `-P4`
@@ -62999,7 +62999,7 @@ var UNSAVED = (function(){
       return { place: placeOf(p), what: field(parts[parts.length - 1]) };
     }
     if (a.indexOf("l:") === 0) {
-      /* §585: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
+      /* §588: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
          row added, removed or moved, said as what happened to which list. */
       var l = a.slice(2).split("|");
       var verb = l[3] === "add" ? "added" : l[3] === "drop" ? "removed" : "reordered";
@@ -66591,7 +66591,7 @@ var COPILOT = (function(){
        nothing to send). A refusal or a failure stays on the page in its own
        banner (§171) and nothing reloads over it.
 
-       SINCE §585 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
+       SINCE §588 THE CAUTION IS THE FALLBACK, NOT THE RULE. Islam: *"people
        on different pages shouldn't get this message … save things in the
        same time without needing a refresh."* A landing by somebody else now
        asks sync.js to take the server's copy in under this tab's own unsaved
@@ -66606,7 +66606,7 @@ var COPILOT = (function(){
 var SAFETY = (function(){
   var UPDATE_EVERY = 60000;   /* ask the worker for a newer build */
   var PEEK_EVERY   = 20000;   /* ask about other people's saves while somebody is working here */
-  /* §585.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
+  /* §588.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
      Islam: *"without impacting the speed of the platform"*. A tab left open
      on a desk asks a third as often; the first key or click brings the
      short clock back. Activity is read off the document, never off a list
@@ -66748,7 +66748,7 @@ var SAFETY = (function(){
       '<button type="button" class="safety-btn ghost" data-safety-dismiss>Dismiss</button></div>');
   }
 
-  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§585) ─────────────
+  /* ── 2b · THEIR CHANGE IS TAKEN IN, NOT ANNOUNCED (§588) ─────────────
      A landing by somebody else asks sync.js to merge the server's copy
      under this tab's own unsaved lines. "busy" means a hand is in a field
      or a save is in flight: it is asked again on blur and on a short clock.
@@ -66776,7 +66776,7 @@ var SAFETY = (function(){
         /* The fetch was made after every landing reported so far, so the
            newest of them is what the screen now holds. */
         var newest = (want || w).at; want = null;
-        if (newest) { lastAt = newest; since = newest; }   /* null when §585.1's path asked for the graph */
+        if (newest) { lastAt = newest; since = newest; }   /* null when §588.1's path asked for the graph */
         return;
       }
       if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
@@ -66799,7 +66799,7 @@ var SAFETY = (function(){
   function seqMode(){ return typeof SYNC !== "undefined" && !!SYNC.seq && !!SYNC.applyRemote && SYNC.seq() !== null; }
   function peek(){
     if (!servable() || !live() || document.visibilityState !== "visible") return;
-    /* §585.1: a server that numbers its saves is asked the lighter way, on
+    /* §588.1: a server that numbers its saves is asked the lighter way, on
        every page; the per-target ask below is kept for one that does not. */
     if (seqMode()) return peekSeq();
     var t = target(); if (!t) return;
@@ -66819,20 +66819,20 @@ var SAFETY = (function(){
         var last = j.changed[j.changed.length - 1];
         /* Remember the newest we have SEEN so the same landing is not
            announced twice, and the next peek only asks about what is newer. */
-        /* §585: taken in rather than announced; `since` and `lastAt` move on
+        /* §588: taken in rather than announced; `since` and `lastAt` move on
            when the merge has landed (or at once, on the caution fallback). */
         if (last.at && last.at !== lastAt) landed(last, t);
       })
       .catch(function(){ clearTimeout(late); });
   }
 
-  /* ── 2c · THE LIGHTER ASK (§585.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
+  /* ── 2c · THE LIGHTER ASK (§588.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
      When the server numbers its saves (the full read came with `seq`), the
      tab asks for everything after the number it holds — on any page, Setup
      included, because the answer is the change itself and applying it is
-     what §585 does anyway — and is answered with a few hundred bytes, or an
+     what §588 does anyway — and is answered with a few hundred bytes, or an
      empty list that cost one indexed read. "full" (a list too large to
-     carry, or one this copy cannot apply) falls back to §585's whole-graph
+     carry, or one this copy cannot apply) falls back to §588's whole-graph
      merge; "busy" is asked again on blur and on a short clock; the number
      moves on only once the answer is on the screen, so nothing is counted
      as seen before it is. */
@@ -66871,7 +66871,7 @@ var SAFETY = (function(){
       }
       if (how === "busy") { retryTimer = setTimeout(tryMergeSeq, RETRY); return; }
       if (how === "full") {
-        /* the whole graph through §585's merge, which adopts the number the
+        /* the whole graph through §588's merge, which adopts the number the
            fetched copy carries */
         wantSeq = null; want = { at: null, by: null, t: null }; tryMerge(); return;
       }
@@ -66894,7 +66894,7 @@ var SAFETY = (function(){
     armWorker();
     /* The first ask is the clock sync; it waits for hydration (`live()`),
        which is why it is retried on the clock rather than fired once. */
-    /* The clock ticks often and asks on its own cadence (§585.1: twenty
+    /* The clock ticks often and asks on its own cadence (§588.1: twenty
        seconds while somebody is working here, a minute once nobody is). */
     if (!peekTimer) peekTimer = setInterval(onClock, 5000);
     setTimeout(function(){ lastPeek = Date.now(); peek(); }, 1500);
@@ -66915,8 +66915,8 @@ var SAFETY = (function(){
     onPaint: onPaint,
     hide: hide,
     shownFor: function(){ return shownFor; },
-    /* §585, for the check: a landing reported and not yet on the screen;
-       §585.1: the clock's current cadence, and a way to stamp activity. */
+    /* §588, for the check: a landing reported and not yet on the screen;
+       §588.1: the clock's current cadence, and a way to stamp activity. */
     pending: function(){ return !!(want || wantSeq); },
     every: every,
     active: function(at){ lastActive = typeof at === "number" ? at : Date.now(); },
@@ -71188,7 +71188,7 @@ var SYNC = (function () {
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
   var repaint = null;
-  /* §585.1: the number of the last save this copy holds — the server's
+  /* §588.1: the number of the last save this copy holds — the server's
      `seq` on the graph it sent — or null where the server does not number
      its saves yet, in which case safety.js keeps §258's per-target ask. */
   var SEQ = null;
@@ -71229,7 +71229,7 @@ var SYNC = (function () {
     };
   }
 
-  /* The graph in the shape a save compares and sends (§585 lifts this out of
+  /* The graph in the shape a save compares and sends (§588 lifts this out of
      serialize() so the quiet merge can put a FETCHED graph in the same shape
      before it is compared — a baseline taken from the raw fetch would differ
      from the screen's own serialization in exactly these two places and
@@ -71535,7 +71535,7 @@ var SYNC = (function () {
     } catch (e) { return []; }
   }
   /* Two readings of a line's place agree when both are absent, or both are
-     there with the same value — the one comparison §504's replay and §585's
+     there with the same value — the one comparison §504's replay and §588's
      merge both make, written once. */
   function lineSame(a, b) {
     return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
@@ -72525,7 +72525,7 @@ var SYNC = (function () {
       .catch(function () { done(false); });
   }
 
-  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§585) ──────────────
+  /* ── OTHER PEOPLE'S SAVES ARRIVE WITHOUT A RELOAD (§588) ──────────────
      Islam: *"is there a way or a mechanism where people save things in the
      same time without needing a refresh and keeping data when they are
      working on different cells?"*
@@ -72572,7 +72572,7 @@ var SYNC = (function () {
         /* Theirs, in the tab's own shape — through the same door a boot goes
            through (§53.5), so a missing list or a stored null reads exactly
            as it would after a reload, and the baseline matches the screen.
-           The number it carries is the number this copy now holds (§585.1). */
+           The number it carries is the number this copy now holds (§588.1). */
         hydrate(data.state);
         if (typeof data.seq === "number") SEQ = data.seq;
         done("merged", takeIn(JSON.stringify(normalized(graph())), before, mineS));
@@ -72580,7 +72580,7 @@ var SYNC = (function () {
       .catch(function (e) { done(e && e.message === "sign in" ? "off" : "failed"); });
   }
   /* THE MERGE ITSELF, shared by the whole-graph fetch above and the lighter
-     path below (§585.1). `theirs` is the server's copy in the tab's own
+     path below (§588.1). `theirs` is the server's copy in the tab's own
      shape, `before` the baseline it replaces, `mineS` the screen as it was
      before theirs was taken: this tab's unsaved lines are the difference
      between the two, and they go back over theirs line by line. */
@@ -72607,7 +72607,7 @@ var SYNC = (function () {
     try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
     return { changed: theirs !== before, kept: kept, clash: clash.length };
   }
-  /* ── THE LIGHTER WAY IN (§585.1): THE CHANGE, NOT THE GRAPH ─────────
+  /* ── THE LIGHTER WAY IN (§588.1): THE CHANGE, NOT THE GRAPH ─────────
      safety.js asks the server "what changed since N" and hands the answer
      here: each save's change list, oldest first, applied onto this tab's
      baseline with the same differ the server applied it with — so theirs
@@ -72686,12 +72686,12 @@ var SYNC = (function () {
     /* The quiet refresh after a crossing (§433): the same fetch, dropped
        rather than applied if anything on the page would be lost. */
     refresh: function (done) { rebase(done, true); },
-    /* §585: the server's copy, with this tab's own unsaved lines laid back
+    /* §588: the server's copy, with this tab's own unsaved lines laid back
        over it and no reload. The only caller is safety.js, when somebody
        else has landed a change; it answers "merged", "busy", "failed" or
        "off", and "busy" is asked again. */
     mergeIn: function (done) { mergeIn(done); },
-    /* §585.1: the same merge from the change lists the server numbered —
+    /* §588.1: the same merge from the change lists the server numbered —
        no graph fetched; "full" means fetch it after all. And the number this
        copy holds, read and moved by safety.js alone. */
     applyRemote: function (entries, done) { applyRemote(entries, done); },

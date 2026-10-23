@@ -9798,7 +9798,7 @@ FUNCTION_KEYS.forEach(function(k){
    AND NOT length + 1. After a row has been removed, `-P3` can still be held by
    the last of three — the same collision mintPersonKey() and mintClaimId()
    already scan for. */
-/* §585: AND NOT THE POSITION ALONE. Two people adding a row to the same list
+/* §588: AND NOT THE POSITION ALONE. Two people adding a row to the same list
    in the same minute both counted the same length and minted the same id, so
    on the merge the second row replaced the first (every row is found by id,
    §48). A short random tag after the number keeps the id readable — `-P4`

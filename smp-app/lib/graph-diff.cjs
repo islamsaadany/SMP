@@ -44,9 +44,9 @@
    that unit. Two people on different units, or on a unit and the register,
    no longer touch each other at all, which is what was happening today.
 
-   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §585 CLOSES THE
+   ── §215 THEN MADE IT FINER (a field of a row, by id), AND §588 CLOSES THE
    LAST GAP: ADDING, REMOVING AND REORDERING ROWS ──────────────────────────
-   Until §585 a row added, removed or moved made the WHOLE part travel again
+   Until §588 a row added, removed or moved made the WHOLE part travel again
    (`set["units.mobile"] = the unit`), which carried the adder's stale copy
    of every other cell in that unit. Measured: the office adds a pillar while
    a custodian fills a figure on the same unit, and whichever save lands
@@ -56,7 +56,7 @@
    after), and the id order when it moved. Applied by id onto the stored
    list, so a cell somebody else filled meanwhile is never touched, and the
    same operation applied twice lands once (a replay after a failed save,
-   §504, and the quiet merge, §585, both depend on that). The whole-part
+   §504, and the quiet merge, §588, both depend on that). The whole-part
    path stays for what has no ids (§191), exactly as before. */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -234,7 +234,7 @@
      `here` is the path walked so far: alternating list name and row id, so
      ["capabilities","cap1","projects"] addresses a project inside cap1. The
      server validates against the SAME tree rather than walking freely. */
-  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§585) ──
+  /* ── A LIST THAT GAINED, LOST OR MOVED ROWS TRAVELS AS ONE OPERATION (§588) ──
      `ia` and `ib` are the two sides' id orders. What left is dropped by id;
      what arrived is added whole, each new row naming the id it follows (null
      for the first place) so a chain of new rows lands in order; and if the
@@ -276,7 +276,7 @@
     for (var i = 0; i < names.length; i++) {
       var name = names[i], la = a[name], lb = b[name];
       if (la === undefined && lb === undefined) continue;
-      /* §585: a list that is not there yet counts as empty, so the first row
+      /* §588: a list that is not there yet counts as empty, so the first row
          added to a pillar with no `tactics` key is still an add and not the
          whole unit. Anything else that is not a list sends the part whole. */
       if ((la !== undefined && !Array.isArray(la)) || (lb !== undefined && !Array.isArray(lb))) return false;
@@ -545,7 +545,7 @@
       plan.push({ row: holder, set: e.set, del: e.del || [] });
     }
 
-    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§585) ──────────────
+    /* ── LIST OPERATIONS ARE VALIDATED THE SAME WAY (§588) ──────────────
        The address is walked down the same tree, to the HOLDER of the list
        (so the path has an even number of steps), and the list itself must be
        one the tree names. What the operation does is checked for shape here
@@ -605,7 +605,7 @@
       if (!isMap(target[parts[0]][parts[1]])) target[parts[0]][parts[1]] = {};
       target[parts[0]][parts[1]][parts[2]] = set[p];
     });
-    /* §585: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
+    /* §588: APPLIED BY ID, AND APPLIED TWICE LANDS ONCE. A dropped id that is
        already gone is nothing to do; an added row whose id is already here
        stays as it is (the add landed before — a replay must not double it);
        a new row goes after the row it names, first when it names none, and
@@ -696,7 +696,7 @@
                    mine: { has: false } });
       });
     });
-    /* §585: a list operation splits into one line per row it drops or adds,
+    /* §588: a list operation splits into one line per row it drops or adds,
        and one for the order. `l:<at>|<path>|<list>|drop|<id>` names what
        went, `…|add|<id>` what arrived (the row is the value), `…|order` the
        new sequence — so two people removing the same row are the same line,
@@ -738,7 +738,7 @@
       }
       return { has: true, value: h };
     }
-    /* §585: a list line answers with the row it names (add, drop) or with
+    /* §588: a list line answers with the row it names (add, drop) or with
        the list's id order (order), read off whatever the graph holds now. */
     var op = ch.lists && ch.lists[0];
     if (op) {

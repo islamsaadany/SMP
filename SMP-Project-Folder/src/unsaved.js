@@ -53,7 +53,7 @@ var UNSAVED = (function(){
       return { place: placeOf(p), what: field(parts[parts.length - 1]) };
     }
     if (a.indexOf("l:") === 0) {
-      /* §585: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
+      /* §588: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
          row added, removed or moved, said as what happened to which list. */
       var l = a.slice(2).split("|");
       var verb = l[3] === "add" ? "added" : l[3] === "drop" ? "removed" : "reordered";

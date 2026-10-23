@@ -29,7 +29,7 @@ const { authorize } = require("./authorize.cjs");
 
 export const LOCK_NS = 420043;
 const LOG_ROW_CAP = 20;   /* api/state.js's cap on the rows a log line carries */
-/* §585.1: a change list larger than this is not carried to other tabs — a
+/* §588.1: a change list larger than this is not carried to other tabs — a
    plan import is thousands of rows — they are told to fetch the graph. */
 export const SAVE_BYTES_CAP = 300 * 1024;
 
@@ -104,7 +104,7 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
       });
       await c.query("INSERT INTO change_log (person_key, person_name, email, kind, target, what, rows_) VALUES " + vals.join(","), params);
     }
-    /* §585.1: THE SAVE ITSELF, NUMBERED — inside the transaction, under the
+    /* §588.1: THE SAVE ITSELF, NUMBERED — inside the transaction, under the
        lock, so the numbers run in the order the saves landed and a number is
        never handed out for a save that rolled back. The change list is
        stored as it was sent (the server applied exactly this), so a tab can

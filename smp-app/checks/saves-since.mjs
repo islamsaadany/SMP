@@ -1,7 +1,7 @@
-/* §585.1 AGAINST A REAL POSTGRES: the save numbers itself (`saves`, migration
+/* §588.1 AGAINST A REAL POSTGRES: the save numbers itself (`saves`, migration
    029), the read answers "what changed since N" with the change itself, a
    list too large to carry is handed on as {full:true}, a refused save takes
-   no number, and a list operation (§585) is a save the server accepts. Runs
+   no number, and a list operation (§588) is a save the server accepts. Runs
    on the dev tenant (remade at the start), through the app's own save() and
    readAnswer() and under the app role's row policy — no HTTP, so it needs
    no `next build`. Prints one line per property (§215) and ends RED/GREEN.
@@ -78,7 +78,7 @@ const a3b = await readAnswer(r, new URLSearchParams("after=" + n3));
 check(a3b.body.changes.length === 1 && a3b.body.changes[0].changes.full === true && !a3b.body.changes[0].changes.rows,
       "...and is handed on as {full:true}, not the list", JSON.stringify(a3b.body.changes[0]).slice(0, 160));
 
-console.log("\n5 · a list operation (§585) is a save the server accepts");
+console.log("\n5 · a list operation (§588) is a save the server accepts");
 const items = graph0.units.mobile.items;
 const op = { set: {}, del: [], lists: [{ at: "units.mobile", path: [], list: "items",
   add: [{ row: { id: "mobile-P99-test", code: "", name: "Added by the test", sub: "", kind: "", theme: "", owner: "", measures: [], tactics: [] }, after: String(items[items.length - 1].id) }] }] };

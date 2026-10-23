@@ -61,7 +61,7 @@ function send(res, code, obj) {
    of figures at once, and a log entry nobody can read is not a record — the
    count stays exact, the itemised before-and-after stops at the cap. */
 const LOG_ROW_CAP = 200;
-/* §585.1: how many saves one "what changed since" ask carries (a tab told
+/* §588.1: how many saves one "what changed since" ask carries (a tab told
    `more` asks again), and the change list above which a save is not carried
    to other tabs at all — a plan import is thousands of rows — but recorded
    as {full:true}, which tells them to fetch the graph. */
@@ -246,7 +246,7 @@ module.exports = async function handler(req, res) {
           " ORDER BY at DESC, id DESC LIMIT $" + params.length, params);
         return send(res, 200, { ok: true, office: office, log: r.rows });
       }
-      /* ── WHAT CHANGED SINCE N (§585.1): the change itself, tenant-wide ──
+      /* ── WHAT CHANGED SINCE N (§588.1): the change itself, tenant-wide ──
          The tab holds the number of the last save it has taken in and asks
          for everything after it, oldest first; the answer is each save's
          change list, applied in the browser with the same differ. Nothing
@@ -279,7 +279,7 @@ module.exports = async function handler(req, res) {
           return { by: x.by || x.by_key, at: x.at }; }) });
       }
       const state = await readState(client);
-      /* §585.1: and the number of the last save in this copy, so the tab's
+      /* §588.1: and the number of the last save in this copy, so the tab's
          first "what changed since" starts exactly where it ends. */
       const seqRow = await client.query("SELECT COALESCE(max(id), 0) AS seq FROM saves");
       /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 042): the client's
@@ -397,7 +397,7 @@ module.exports = async function handler(req, res) {
               if (!wrote) await writeState(client, state, { inTransaction: true });
               wrotePath = wrote ? "incremental" : "full";
               logWho = me; logList = verdict.changes;
-              /* §585.1: THE SAVE ITSELF, NUMBERED — inside the transaction,
+              /* §588.1: THE SAVE ITSELF, NUMBERED — inside the transaction,
                  under the lock, so the numbers run in the order the saves
                  landed and none is handed out for a save that rolled back.
                  The change list is stored as it was sent; a list too large

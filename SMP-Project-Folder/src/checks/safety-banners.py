@@ -24,7 +24,7 @@ WHAT IS ASSERTED IS THE PROBLEM, NOT THE WORDING (§94.8):
 
   * the tab ASKS the server about its page, scoped to that page and to the
     moment it loaded — a peek that asks about everything is noise;
-  * §585: a landing by somebody else is TAKEN IN, not announced — the tab
+  * §588: a landing by somebody else is TAKEN IN, not announced — the tab
     fetches the server's copy, their change is on the screen, no caution is
     drawn, and the next peek asks from that landing onward;
   * a line this tab has typed and not yet saved SURVIVES the merge and is
@@ -40,7 +40,7 @@ WHAT IS ASSERTED IS THE PROBLEM, NOT THE WORDING (§94.8):
     is no server to be stale against).
 
 THE STUB IS A SERVER, NOT A RECORDING (§100.3): it holds a graph, applies
-every change list a POST carries onto it (set, del, rows and §585's lists,
+every change list a POST carries onto it (set, del, rows and §588's lists,
 the same way lib/graph-diff.js does) and serves that graph back — because
 the merge takes the server's copy, and a stub that forgot what it was sent
 would make a correct merge read as a revert.
@@ -61,7 +61,7 @@ HTML_PATH = pathlib.Path(os.environ.get("SMP_HTML") or
 HTML = HTML_PATH.read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 STATE = json.loads(json.dumps(SEED))     # what the stub "stores"; changed mid-run
-# §585.1: the stub numbers its saves once MODE["seq"] is on — the full read
+# §588.1: the stub numbers its saves once MODE["seq"] is on — the full read
 # then carries `seq`, a POST appends to SAVES, and `?after=N` answers from it.
 MODE = {"seq": False}
 SAVES = []
@@ -91,7 +91,7 @@ def _by_id(lst, i):
 
 def apply_changes(state, ch):
     """lib/graph-diff.js applyChanges, in enough Python for the shapes a check
-    sends: part paths, row field edits, and §585's list operations."""
+    sends: part paths, row field edits, and §588's list operations."""
     for pth, v in (ch.get("set") or {}).items():
         parts = pth.split("."); h = state
         for k in parts[:-1]:
@@ -307,7 +307,7 @@ with sync_playwright() as p:
     ck("...not as a sync", not q.get("sync"))
     ck("nothing drawn when nobody landed anything", banner(pg) == "", banner(pg))
 
-    # ── 1b · A SERVER THAT NUMBERS ITS SAVES IS ASKED THE LIGHTER WAY (§585.1) ──
+    # ── 1b · A SERVER THAT NUMBERS ITS SAVES IS ASKED THE LIGHTER WAY (§588.1) ──
     print("\n1b · with numbered saves the ask is \"what changed since N\", on every page")
     MODE["seq"] = True
     pg.goto(URL, wait_until="networkidle"); pg.wait_for_timeout(1800)
@@ -328,7 +328,7 @@ with sync_playwright() as p:
     states_at_load = states()
     ck("nothing new costs no graph", states() == states_at_load, states())
 
-    # ── 2 · SOMEBODY ELSE LANDED A CHANGE: TAKEN IN, NOT ANNOUNCED (§585) ──
+    # ── 2 · SOMEBODY ELSE LANDED A CHANGE: TAKEN IN, NOT ANNOUNCED (§588) ──
     print("\n2 · somebody else saved: their change arrives, no caution, no graph fetched")
     states0 = states()
     n = land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Ltd"}, "del": []}]})
@@ -425,7 +425,7 @@ with sync_playwright() as p:
     ck("...and nothing is pending", pg.evaluate("()=>SAFETY.pending()") is False)
     ck("no caution was drawn through any of it", banner(pg) == "", banner(pg))
 
-    # ── 5b · ON SETUP THE LIGHTER ASK IS MADE TOO (§585.1; §258.1 asked nothing there) ──
+    # ── 5b · ON SETUP THE LIGHTER ASK IS MADE TOO (§588.1; §258.1 asked nothing there) ──
     print("\n5b · Setup asks the lighter way as well; a page still does")
     pg.evaluate("()=>{const g=document.querySelector('[data-s=\"setup\"],[data-setup],button[title=\"Setup\"]'); if(g) g.click();}")
     pg.wait_for_timeout(600)
@@ -439,7 +439,7 @@ with sync_playwright() as p:
     a0 = afters(); peek(pg)
     ck("...it asks the same way", afters() == a0 + 1, afters() - a0)
 
-    # ── 5c · A NEW ROW'S ID IS ITS OWN (§585) ─────────────────────────────
+    # ── 5c · A NEW ROW'S ID IS ITS OWN (§588) ─────────────────────────────
     # Two tabs adding a row to the same list in the same minute both counted
     # the same length and minted the same id, so on the merge the second row
     # replaced the first (every row is found by id, §48).
@@ -448,7 +448,7 @@ with sync_playwright() as p:
     ck("an id still says where it was added, with a tag of its own", all(re.match(r"^x-P2-[0-9a-z]{4}$", x) for x in r), r)
     ck("...and two minted from the same list differ", r[0] != r[1], r)
 
-    # ── 5d · A SAVE TOO LARGE TO CARRY: THE GRAPH IS FETCHED INSTEAD (§585.1) ──
+    # ── 5d · A SAVE TOO LARGE TO CARRY: THE GRAPH IS FETCHED INSTEAD (§588.1) ──
     print("\n5d · a save the server could not carry falls back to fetching the graph")
     STATE["group"]["org"] = "Theirs Five"
     n = land({"full": True, "bytes": 999999}, at="2026-09-02T10:20:00.000Z")
@@ -459,7 +459,7 @@ with sync_playwright() as p:
     ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == n, (pg.evaluate("()=>SYNC.seq()"), n))
     ck("no caution is drawn", banner(pg) == "", banner(pg))
 
-    # ── 5e · THE CLOCK SLOWS WHEN NOBODY IS WORKING HERE (§585.1) ─────────
+    # ── 5e · THE CLOCK SLOWS WHEN NOBODY IS WORKING HERE (§588.1) ─────────
     print("\n5e · the ask comes every 20s while somebody works here, every 60s once nobody does")
     ck("working here: 20s", pg.evaluate("()=>SAFETY.every()") == 20000, pg.evaluate("()=>SAFETY.every()"))
     pg.evaluate("()=>SAFETY.active(Date.now() - 4*60*1000)")
@@ -527,7 +527,7 @@ with sync_playwright() as p:
 
     # ── 7 · CONTRAST, THE SWEEP'S OWN ARITHMETIC (§95) ───────────────────
     print("\n7 · the caution is readable in both themes")
-    # The fallback caution, drawn by name (§585 takes a landing in instead).
+    # The fallback caution, drawn by name (§588 takes a landing in instead).
     pg.evaluate("()=>{SAFETY.hide(); SAFETY.edited('Hala Ibrahim','2026-09-02T13:00:00.000Z');}")
     pg.wait_for_timeout(200)
     for theme in ("light", "dark"):

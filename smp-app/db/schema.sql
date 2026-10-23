@@ -735,7 +735,7 @@ CREATE INDEX change_log_target ON change_log (tenant_id, target, at DESC);
 CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
 CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
 
-/* §585.1: every save that landed, as the change list it carried, numbered in
+/* §588.1: every save that landed, as the change list it carried, numbered in
    the order the save lock let them land — so an open tab asks "what changed
    since N" and is answered with the change itself and nothing else. A body
    too large to carry (a plan import) or a whole-graph post is recorded as

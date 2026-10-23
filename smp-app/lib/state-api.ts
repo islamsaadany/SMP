@@ -203,7 +203,7 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
       return { code: 200, body: { ok: true, office, log: rows } };
     });
   }
-  /* ── WHAT CHANGED SINCE N (§585.1): the change itself, tenant-wide ──
+  /* ── WHAT CHANGED SINCE N (§588.1): the change itself, tenant-wide ──
      The tab holds the number of the last save it has taken in and asks for
      everything after it, oldest first; the answer is each save's change
      list, which the tab applies onto its own copy with the same differ the
@@ -238,7 +238,7 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
       return { code: 200, body: { ok: true, changed: rows.map((x: any) => ({ by: x.by || x.by_key, at: x.at })) } };
     });
   }
-  /* §585.1: the graph and the number of the last save in it, read in the one
+  /* §588.1: the graph and the number of the last save in it, read in the one
      transaction, so the tab's first "what changed since" starts exactly
      where this copy ends. */
   const got = await withTenant(r.tenant.id, async (c) => ({
@@ -248,7 +248,7 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
   if (!got.state) return { code: 404, body: { ok: false, error: "This client holds no plan yet." } };
   return { code: 200, body: { ok: true, person, state: got.state, seq: got.seq } };
 }
-/* §585.1: how many saves one ask carries; a tab that is told `more` asks again. */
+/* §588.1: how many saves one ask carries; a tab that is told `more` asks again. */
 const PEEK_CAP = 50;
 
 export async function writeAnswer(r: Resolved, body: SaveBody): Promise<Answer> {

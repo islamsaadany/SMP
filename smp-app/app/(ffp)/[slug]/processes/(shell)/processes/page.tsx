@@ -1,3 +1,5 @@
+import { loadPlan } from "@/ffp/lib/data/priorities";
+import { DECISION_LABEL, goesDeep, rankProcesses } from "@/ffp/lib/domain/priorities";
 import { requireOffice } from "@/ffp/lib/auth/require-office";
 import { isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { registerReady } from "@/ffp/lib/register-sync";
@@ -79,6 +81,20 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
   // displayed, I have to search for it."
   //
   // Search results stay flat (by code) — a match's parent may not itself match.
+  // Where each process stands in the deep-dive ranking (Priorities), among every process, not just those searched for.
+  const plan = await loadPlan(workspaceId);
+  const scored = await prisma.process.findMany({
+    where: { workspaceId, archivedAt: null },
+    select: { id: true, code: true, priorityImportance: true, priorityComplexity: true, priorityRisk: true },
+  });
+  const rankById = new Map(
+    rankProcesses(
+      scored.map((x) => ({ id: x.id, code: x.code, importance: x.priorityImportance, complexity: x.priorityComplexity, risk: x.priorityRisk })),
+      plan.weights
+    )
+      .filter((x) => x.rank != null)
+      .map((x) => [x.item.id, x.rank] as const)
+  );
   const rows = q
     ? processes.map((process) => ({ process, depth: 0 }))
     : orderProcessTree(processes);
@@ -142,6 +158,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
               <th className="px-4 py-2">Process</th>
               <th className="px-4 py-2">Category</th>
               <th className="px-4 py-2">Steps</th>
+              <th className="px-4 py-2">Depth</th>
+              <th className="px-4 py-2">Priority</th>
               <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">RACI</th>
               <th className="px-4 py-2 text-end">
@@ -202,6 +220,19 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                 </td>
                 <td className="px-4 py-2 text-slate-500">{p._count.steps}</td>
                 <td className="px-4 py-2 text-xs font-semibold">
+                  {goesDeep(p.deepDiveDecision) ? <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-indigo-700">Deep dive</span> : <span className="text-slate-500">High-level</span>}
+                </td>
+                <td className="px-4 py-2 text-xs">
+                  {goesDeep(p.deepDiveDecision) ? (
+                    <span className="rounded-full border border-amber-500 bg-amber-50 px-2 py-0.5 font-bold text-amber-800">
+                      {DECISION_LABEL[p.deepDiveDecision!]}
+                      {rankById.get(p.id) ? ` · rank ${rankById.get(p.id)}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2 text-xs font-semibold">
                   {isOverdueForReview(p.lifecycleStatus, p.nextReviewDue, new Date()) ? (
                     <span className="text-rose-700">Review overdue</span>
                   ) : (
@@ -260,7 +291,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={9} className="px-4 py-6 text-center text-slate-400">
                   {q ? `No processes match "${q}".` : "No processes yet — create one below."}
                 </td>
               </tr>

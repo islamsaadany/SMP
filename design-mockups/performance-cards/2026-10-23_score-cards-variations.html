@@ -1,0 +1,303 @@
+<title>Direction Score Cards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one review column. Section 1 = page spacing before/after, then four
+   card variants stacked, each with a short "what changed" note. Built in the
+   app's own tokens (Source Sans 3, mono figures, client rose header, band inks). */
+:root{
+  --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ground:#F4F5F8; --surface:#FFFFFF; --surface-2:#F0F2F6;
+  --line:#D9DEE6; --line-soft:#E8EBF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#69717E;
+  --client:#E8AEB8; --client-soft:#F6DDE2; --client-ink:#5A2A33;
+  --gold:#C9A24D;
+  --good:#1F6248; --good-bg:#E4F0EA;
+  --attn:#7A5D1C; --attn-bg:#F5EDD3;
+  --bad:#8C3327;  --bad-bg:#F7E3E0;
+  --track:#E9ECF1; --note:#FFF8E6; --note-line:#EBD9A6;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#14181F; --surface:#1C222B; --surface-2:#232A35;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#8E97A4;
+  --client:#7A4450; --client-soft:#3A252B; --client-ink:#F5D3DA;
+  --good:#8FD3B0; --good-bg:#1B3129; --attn:#E8CA6A; --attn-bg:#332C16;
+  --bad:#E79A93; --bad-bg:#33201E; --track:#2C333E; --note:#2B2616; --note-line:#4A4122;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --ground:#14181F; --surface:#1C222B; --surface-2:#232A35;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#8E97A4;
+  --client:#7A4450; --client-soft:#3A252B; --client-ink:#F5D3DA;
+  --good:#8FD3B0; --good-bg:#1B3129; --attn:#E8CA6A; --attn-bg:#332C16;
+  --bad:#E79A93; --bad-bg:#33201E; --track:#2C333E; --note:#2B2616; --note-line:#4A4122;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding-block:28px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:40px}
+h1{font-size:26px;margin:0;font-weight:800;text-wrap:balance}
+h2{font-size:19px;margin:0;font-weight:800;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:68ch;margin:6px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px}
+.seg button{font:inherit;font-size:13px;font-weight:700;border:0;background:none;color:var(--ink-2);padding:5px 12px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.bar small{color:var(--ink-3)}
+
+section{display:flex;flex-direction:column;gap:14px}
+.sec-h{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:12px;font-weight:700;background:var(--client-soft);color:var(--client-ink);padding:2px 8px;border-radius:6px}
+.why{margin:0;padding:0 0 0 18px;color:var(--ink-2);display:grid;gap:3px;max-width:80ch}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;overflow-x:auto}
+
+/* shared atoms */
+.lab{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:var(--ink-3)}
+.fig{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+.pill{font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.attn{background:var(--attn-bg);color:var(--attn)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.good{color:var(--good)} .attn{color:var(--attn)} .bad{color:var(--bad)}
+.big{font-weight:800;line-height:.9;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.big sup{font-size:.42em;letter-spacing:0;vertical-align:top;margin-left:2px;position:relative;top:.18em;font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--note);border:1px solid var(--note-line);border-radius:6px;padding:2px 8px;display:inline-block}
+
+/* ── Page frame (spacing) ── */
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.frame .cap{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line);color:var(--ink-2)}
+.f-top{height:26px;background:var(--surface);border-bottom:1px solid var(--line)}
+.f-body{display:grid;grid-template-columns:30% 1fr;gap:10px;padding:0 10px 12px;position:relative}
+.f-rail{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.f-rail i{display:block;height:16px;background:var(--client)}
+.f-rail b{display:block;height:26px;margin:6px;border:1px solid var(--line-soft);border-radius:5px;background:var(--surface)}
+.f-main{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.f-main i{display:block;height:24px;background:var(--surface-2);border-bottom:1px solid var(--line);border-left:3px solid var(--gold)}
+.f-main u{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
+.f-main u s{height:44px;border:1px solid var(--line);border-radius:5px;display:block}
+.gap{position:relative;background:repeating-linear-gradient(45deg,transparent 0 6px,var(--bad-bg) 6px 12px);border-block:1px dashed var(--bad)}
+.gap.ok{background:var(--good-bg);border-color:var(--good)}
+.gap em{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-style:normal;font-family:var(--mono);font-size:11px;font-weight:700}
+
+/* ── Variant A: Hero number ── */
+.va{padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.va .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.va h4{margin:0;font-size:15px;font-weight:800}
+.va .big{font-size:64px}
+.va .hl{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.va .hl .ofp{margin-bottom:8px}
+.va .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;border-top:1px solid var(--line-soft);padding-top:12px}
+.va .mini div{display:flex;flex-direction:column;gap:2px}
+.va .mini .fig{font-size:13px}
+.va .mini .lab{font-size:9.5px}
+
+/* ── Variant B: Number + gauge ── */
+.vb{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.vb .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.vb h4{margin:0;font-size:15px;font-weight:800}
+.vb .big{font-size:58px}
+.g{position:relative;height:10px;background:var(--track);border-radius:999px;margin-top:22px}
+.g .fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:currentColor}
+.g .range{position:absolute;top:-4px;bottom:-4px;border-left:2px solid var(--ink-2);border-right:2px solid var(--ink-2);background:transparent}
+.g .range::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--ink-2)}
+.g .tick{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
+.g .tl{position:absolute;bottom:16px;transform:translateX(-50%);font-size:11px;font-family:var(--mono);font-weight:700;color:var(--ink-2);white-space:nowrap}
+.g .rl{position:absolute;top:16px;transform:translateX(-50%);font-size:11px;font-family:var(--mono);font-weight:700;white-space:nowrap}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:22px}
+.vb .foot{font-size:13px;color:var(--ink-2)}
+
+/* ── Variant C: Split tile ── */
+.vc{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);}
+.vc .l{padding:20px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;border-right:1px solid var(--line-soft)}
+.vc h4{margin:0;font-size:15px;font-weight:800}
+.vc .big{font-size:72px}
+.vc .r{padding:14px 20px;display:flex;flex-direction:column;justify-content:center}
+.vc .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+.vc .row:last-child{border-bottom:0}
+.vc .row span{font-size:13px;color:var(--ink-2)}
+.vc .row .fig{font-size:14px}
+
+/* ── Variant D: One band ── */
+.vd{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.vd .half{padding:22px 26px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 24px;align-items:center}
+.vd .half + .half{border-left:1px solid var(--line-soft)}
+.vd .big{font-size:76px;grid-row:span 2}
+.vd .t{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.vd .t b{font-size:15px;font-weight:800}
+.vd .s{font-size:13.5px;color:var(--ink-2);line-height:1.6}
+.vd .s .fig{font-size:13px}
+
+/* Recommendation */
+.rec{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:var(--r);padding:16px 20px}
+.rec p{margin:4px 0 0;color:var(--ink-2);max-width:80ch}
+
+@media (max-width:620px){
+  .vc{grid-template-columns:1fr} .vc .l{border-right:0;border-bottom:1px solid var(--line-soft)}
+  .vd .half + .half{border-left:0;border-top:1px solid var(--line-soft)}
+  .va .big{font-size:54px} .vc .big,.vd .big{font-size:60px}
+}
+@media (prefers-reduced-motion:no-preference){ .g .fill{transition:width .4s ease} }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Direction score cards — four directions</h1>
+    <p class="lede">The two performance cards on a Direction page, redrawn four ways. Each one makes the main score the loudest thing on the card and turns the supporting figures down. Switch the direction to see a strong one and a weak one.</p>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="Sample direction">
+        <button id="d1" aria-pressed="true" data-d="d1">D001 · 94%</button>
+        <button id="d3" aria-pressed="false" data-d="d3">D003 · 60%</button>
+      </div>
+      <small>Figures from your screenshot; D003's breakdown is made up for the demo.</small>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-h"><span class="tag">Fix 1</span><h2>The empty space above the rail and the cards</h2></div>
+    <ul class="why">
+      <li>Today there's roughly 60px of blank ground between the top bar and the rail and header. Proposed: 16px, the same as the gap between the rail and the main panel, so the page starts right under the tabs.</li>
+      <li>No other change to the rail or the header.</li>
+    </ul>
+    <div class="frames">
+      <div class="frame"><div class="cap">Today</div><div class="f-top"></div>
+        <div class="gap" style="height:46px"><em class="bad">~60px</em></div>
+        <div class="f-body"><div class="f-rail"><i></i><b></b><b></b><b></b></div><div class="f-main"><i></i><u><s></s><s></s></u></div></div></div>
+      <div class="frame"><div class="cap">Proposed</div><div class="f-top"></div>
+        <div class="gap ok" style="height:12px"><em class="good">16px</em></div>
+        <div class="f-body"><div class="f-rail"><i></i><b></b><b></b><b></b></div><div class="f-main"><i></i><u><s></s><s></s></u></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="tag">A</span><h2>Hero number</h2></div>
+    <ul class="why">
+      <li>Same layout as today, so the smallest change. Main score goes from 31px to 64px; the three small figures drop to 13px and lose their colour except the one that matters.</li>
+      <li>"4 scored" goes. When some measures haven't reported, one plain note says so instead: <i>"2 not reported yet"</i>. It disappears when everything's in.</li>
+    </ul>
+    <div class="stage"><div class="pair" id="A"></div></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="tag">B</span><h2>Number with a gauge</h2></div>
+    <ul class="why">
+      <li>The score sits on a bar against the 100% target line. On key measures, a bracket shows the lowest-to-highest spread, so Highest and Lowest become a picture rather than two more numbers.</li>
+      <li>On execution, the bar is what was delivered and the line is the plan, so the gap is the variance.</li>
+    </ul>
+    <div class="stage"><div class="pair" id="B"></div></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="tag">C</span><h2>Split tile</h2></div>
+    <ul class="why">
+      <li>The score gets the left half of the card to itself, at 72px. The details stack on the right as label and value rows, read like a short list.</li>
+      <li>Cards get shorter, so the Key Measures table moves up the page.</li>
+    </ul>
+    <div class="stage"><div class="pair" id="C"></div></div>
+  </section>
+
+  <section>
+    <div class="sec-h"><span class="tag">D</span><h2>One band, two scores</h2></div>
+    <ul class="why">
+      <li>The two cards merge into one strip split by a thin line. Less box-on-box, and the two scores sit side by side for comparison.</li>
+      <li>The details become one sentence under each title, e.g. "6 measures · range 83–107%".</li>
+    </ul>
+    <div class="stage" style="padding:0;border:0;background:none"><div class="card vd" id="D"></div></div>
+  </section>
+
+  <div class="rec">
+    <b>My pick: A, or B if you want something more visual.</b>
+    <p>A is a small change to today's card and fixes exactly what you raised. B tells the same story at a glance with less reading, but it's a bigger change and the gauge has to be built for the slides too. C and D save the most height.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var DATA = {
+    d1:{ kpi:94, n:6, scored:4, hi:107, lo:83, exec:96, del:96, plan:100 },
+    d3:{ kpi:60, n:5, scored:5, hi:88,  lo:31, exec:71, del:64, plan:90 }
+  };
+  function band(v){ return v >= 90 ? "good" : v >= 75 ? "attn" : "bad"; }
+  function word(v){ return v >= 90 ? "On track" : v >= 75 ? "Watch" : "Off track"; }
+  function big(v){ return '<span class="big ' + band(v) + '">' + v + '<sup>%</sup></span>'; }
+  function pill(v){ return '<span class="pill ' + band(v) + '">' + word(v) + '</span>'; }
+  function variance(d){ var x = d.del - d.plan; return (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x); }
+  function missing(d){ var m = d.n - d.scored; return m > 0 ? '<span class="note">' + m + ' not reported yet</span>' : ''; }
+  function execRatio(d){ return Math.round(d.del / d.plan * 100); }
+
+  function A(d){
+    var r = execRatio(d);
+    return '<div class="card va"><div class="top"><h4>Key Measures performance</h4>' + pill(d.kpi) + '</div>' +
+      '<div class="hl">' + big(d.kpi) + missing(d) + '</div>' +
+      '<div class="mini"><div><span class="lab">Measures</span><span class="fig">' + d.n + '</span></div>' +
+      '<div><span class="lab">Highest</span><span class="fig">' + d.hi + '%</span></div>' +
+      '<div><span class="lab">Lowest</span><span class="fig ' + (band(d.lo) === "good" ? "" : band(d.lo)) + '">' + d.lo + '%</span></div></div></div>' +
+    '<div class="card va"><div class="top"><h4>Execution performance</h4>' + pill(r) + '</div>' +
+      '<div class="hl">' + big(r) + '<span class="lab ofp">of plan</span></div>' +
+      '<div class="mini"><div><span class="lab">Delivered</span><span class="fig">' + d.del + '%</span></div>' +
+      '<div><span class="lab">Planned</span><span class="fig">' + d.plan + '%</span></div>' +
+      '<div><span class="lab">Variance</span><span class="fig ' + (d.del < d.plan ? "bad" : "") + '">' + variance(d) + '</span></div></div></div>';
+  }
+
+  var MAX = 120;
+  function at(v){ return Math.min(v, MAX) / MAX * 100; }
+  function B(d){
+    var r = execRatio(d);
+    return '<div class="card vb"><div class="top"><h4>Key Measures performance</h4>' + pill(d.kpi) + '</div>' +
+      big(d.kpi) +
+      '<div class="g ' + band(d.kpi) + '"><span class="fill" style="width:' + at(d.kpi) + '%;opacity:.85"></span>' +
+        '<span class="range" style="left:' + at(d.lo) + '%;width:' + (at(d.hi) - at(d.lo)) + '%"></span>' +
+        '<span class="tick" style="left:' + at(100) + '%"></span><span class="tl" style="left:' + at(100) + '%">target</span>' +
+        '<span class="rl" style="left:' + at(d.lo) + '%;color:var(--ink-2)">' + d.lo + '</span>' +
+        '<span class="rl" style="left:' + at(d.hi) + '%;color:var(--ink-2)">' + d.hi + '</span></div>' +
+      '<div class="foot">' + d.n + ' measures, spread ' + d.lo + '–' + d.hi + '% ' + missing(d) + '</div></div>' +
+    '<div class="card vb"><div class="top"><h4>Execution performance</h4>' + pill(r) + '</div>' +
+      big(r) +
+      '<div class="g ' + band(r) + '"><span class="fill" style="width:' + at(d.del) + '%;opacity:.85"></span>' +
+        '<span class="tick" style="left:' + at(d.plan) + '%"></span><span class="tl" style="left:' + at(d.plan) + '%">plan ' + d.plan + '%</span>' +
+        '<span class="rl ' + band(r) + '" style="left:' + at(d.del) + '%">' + d.del + '</span></div>' +
+      '<div class="foot">Delivered ' + d.del + '% of a planned ' + d.plan + '% · <span class="' + (d.del < d.plan ? "bad" : "good") + '">' + variance(d) + ' pts</span></div></div>';
+  }
+
+  function C(d){
+    var r = execRatio(d);
+    function row(l, v, cls){ return '<div class="row"><span>' + l + '</span><b class="fig ' + (cls || "") + '">' + v + '</b></div>'; }
+    return '<div class="card vc"><div class="l"><h4>Key Measures performance</h4>' + big(d.kpi) + '<div>' + pill(d.kpi) + '</div></div>' +
+      '<div class="r">' + row("Measures", d.n + (d.scored < d.n ? ' <span style="color:var(--ink-3);font-weight:500">(' + (d.n - d.scored) + ' pending)</span>' : '')) +
+      row("Highest", d.hi + "%") + row("Lowest", d.lo + "%", band(d.lo) === "good" ? "" : band(d.lo)) + '</div></div>' +
+    '<div class="card vc"><div class="l"><h4>Execution performance</h4>' + big(r) + '<div>' + pill(r) + ' <span class="lab" style="margin-left:6px">of plan</span></div></div>' +
+      '<div class="r">' + row("Delivered", d.del + "%") + row("Planned", d.plan + "%") +
+      row("Variance", variance(d), d.del < d.plan ? "bad" : "") + '</div></div>';
+  }
+
+  function D(d){
+    var r = execRatio(d);
+    return '<div class="half">' + big(d.kpi) +
+      '<div class="t"><b>Key Measures</b>' + pill(d.kpi) + '</div>' +
+      '<div class="s">' + d.n + ' measures · range <span class="fig">' + d.lo + '–' + d.hi + '%</span>' +
+        (d.scored < d.n ? '<br>' + missing(d) : '') + '</div></div>' +
+    '<div class="half">' + big(r) +
+      '<div class="t"><b>Execution</b>' + pill(r) + '</div>' +
+      '<div class="s">Delivered <span class="fig">' + d.del + '%</span> of <span class="fig">' + d.plan + '%</span> planned · ' +
+        '<span class="fig ' + (d.del < d.plan ? "bad" : "good") + '">' + variance(d) + '</span></div></div>';
+  }
+
+  function render(key){
+    var d = DATA[key];
+    document.getElementById("A").innerHTML = A(d);
+    document.getElementById("B").innerHTML = B(d);
+    document.getElementById("C").innerHTML = C(d);
+    document.getElementById("D").innerHTML = D(d);
+    document.querySelectorAll(".seg button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === key)); });
+  }
+  document.querySelectorAll(".seg button").forEach(function(b){ b.addEventListener("click", function(){ render(b.dataset.d); }); });
+  render("d1");
+})();
+</script>

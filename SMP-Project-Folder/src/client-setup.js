@@ -281,7 +281,9 @@ var CLIENTSETUP = (function () {
   "use strict";
 
   /* ── THE STEPS, BY KEY AND NEVER BY NUMBER (§322) ────────────────────
-     Seven, as the mockup draws them. There is no Summary step any more:
+     Three since §544 — the client, the shape, the office (seven until the
+     shape screen took in the five between them; §544.16 found this line
+     still saying so). There is no Summary step any more:
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
      destination at the end (spec 057). */
@@ -502,7 +504,13 @@ var CLIENTSETUP = (function () {
     /* §436: a list nobody is editing is re-read off the graph, so a change
        written straight into it (below, on a client with a plan) shows. */
     if (!S.shapeDirty) S.shape = liveShape();
-    ensureReg("[data-csetup]", mount);
+    /* §600: WHEN THE RECORD LANDS, THE SHELL REDRAWS, NOT THE FLOW. The
+       first step draws the colour controls and only wire() binds them, so
+       mounting again from here put back pickers wired to nothing — on a
+       served platform every colour changed on the first visit went nowhere
+       (§96). The console passes no repaint and draws no colours, so it
+       mounts again as before. */
+    ensureReg("[data-csetup]", function (h, o) { if (o.repaint) o.repaint(); else mount(h, o); });
     render();
   }
 

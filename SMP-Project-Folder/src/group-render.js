@@ -2725,7 +2725,7 @@ function whereNext(keys){
         }).join("")) +
         '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
       var ptitle = L("project", "bu") + " &mdash; performance";
-      /* §602: and its execution beside it — the same `capExec` a function's
+      /* §607: and its execution beside it — the same `capExec` a function's
          own projects are read by: the milestones due so far, completed. */
       var pe = th ? capExec(th) : { pct: null };
       var pedrill = miniTable(["#", L1("project"), "Milestones done", "Execution"],
@@ -2758,7 +2758,7 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
-    /* §602: EXECUTION BESIDE IT. Islam: *"the directions needs to have
+    /* §607: EXECUTION BESIDE IT. Islam: *"the directions needs to have
        performance and execution"*. The same `unitRatio` a unit's own
        execution card reads (delivered as a share of planned), over the top
        layer's own view — nothing new computed. */
@@ -2805,7 +2805,7 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
-        /* §602: with the company's own two cards beside the objectives, the
+        /* §607: with the company's own two cards beside the objectives, the
            units' two start a row of their own under them — three pairs
            stacked, never five cards wrapping wherever the width breaks. */
         (buExists() && topPlanCard() ? '</div><div class="scores"><div class="scores-gap" aria-hidden="true"></div>' : "") +
@@ -2830,9 +2830,9 @@ function whereNext(keys){
         })) +
       '</div>' +
       /* §593: the functions' own row, under the units' two cards.
-         §601: and on a company WITHOUT units too (El Abd) — there the
+         §606: and on a company WITHOUT units too (El Abd) — there the
          functions are all it holds, so their row leads with no gap. */
-      /* §602: every pair sits under the objectives' column, so the
+      /* §607: every pair sits under the objectives' column, so the
          functions line up under the units' two, or the directions' two. */
       fnReadingCards(boardFunctionKeys(), "", buExists() || topPlanCard() ? 1 : 0) +
       (buExists() ? whereNext(UNIT_KEYS) : "") + whereNextFns(boardFunctionKeys())) });

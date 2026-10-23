@@ -1,4 +1,4 @@
-"""The company's own plan reads execution beside performance (§602).
+"""The company's own plan reads execution beside performance (§607).
 
 Islam: *"the directions needs to have performance and execution and the
 functions as well"*. The functions had both (§593); the company's own

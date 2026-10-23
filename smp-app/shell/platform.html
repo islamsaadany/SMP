@@ -42,6 +42,11 @@
     /* My work's panel (§583): the Tracker's late red on the navy, 6.52:1, and
        the wash a control under the pointer takes there */
     --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
+    /* the left column (§601): its hover and its tab-that-is-on washes, its
+       hairlines, its headings' ink (5.36:1 on the navy) and the shade a
+       phone's open menu lays over the page */
+    --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
+    --ff-label:#8FA3C9; --scrim:rgba(20,28,43,.45);
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
     --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
@@ -54,6 +59,8 @@
       --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
       --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
       --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
+      --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
+      --ff-label:#8197BE; --scrim:rgba(0,0,0,.55);
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
       --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -72,6 +79,8 @@
     --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
     --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
     --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
+    --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
+    --ff-label:#8197BE; --scrim:rgba(0,0,0,.55);
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
     --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -86,72 +95,139 @@
      was not theirs. */
   body:not(.ready) .wrap{ visibility:hidden }
 
-  /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
-  .top{ background:var(--surface); border-bottom:1px solid var(--line);
-    display:flex; align-items:center; gap:12px; padding:9px 18px }
-  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
-     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
-     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
-     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
-     Forefront's own platform. A fill and a word need two tokens, declared
-     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
-  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing:.16em; color:var(--ff-tx) }
-  .top .nm{ font-weight:600; font-size:14px }
-  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
-    color:var(--ink-3); font-size:12.5px }
-  /* ── THE NAME LINE ON A PHONE (§584.1) ──────────────────────────────────
-     Islam: "fix the name line too", round 2 of design-mockups/
-     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the name and its
-     role broke onto two lines and Sign out onto two more (a 63px line). It
-     keeps one line now: Sign out never breaks, a name too long for what is
-     left ends in "…" with the whole of it on a hover, and on a phone the side
-     padding is the page's 12px and the role is left for a wider screen. The
-     words are unchanged — the role is a span of its own, hidden, so the line
-     still reads the name and the role to anybody who asks it. */
-  .top .right{ min-width:0 }
-  #who{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-  .top .btn{ flex:none; white-space:nowrap }
-  @media (max-width:560px){
-    .top{ padding:9px 12px }
-    #who .role{ display:none }
-  }
-  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
-  /* THE TABS' TYPE IS SAID ONE PROPERTY AT A TIME (§584.2). It was
-     `font:600 13.5px/1 inherit`, and a shorthand ending in a keyword is not
-     CSS a browser reads, so the whole line was dropped and every tab drew in
-     the browser's own button type, 13.33px regular, since the console was
-     written (the Tracker found the same fault in itself, §356.14). Islam,
-     from design-mockups/console-tabs-phone/2026-10-22_tab-weight.html:
-     "yes build it". The bar is 1px shorter and the eight tabs 714 → 768px. */
-  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
-    font-family:inherit; font-size:13.5px; font-weight:600; line-height:1;
-    padding:13px 14px; cursor:pointer;
-    border-bottom:3px solid transparent }
-  .nav button:hover{ color:var(--ff-ink) }
-  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
-  /* ── THE TABS ON A PHONE (§584) ──────────────────────────────────────────
-     Islam: "fix the tab bar on phone too", from design-mockups/
-     console-tabs-phone/2026-10-22_tabs-swipe.html. At 400px the eight tabs
-     broke their names onto three lines (a 74px bar) and the last four ran
-     past the screen, so the whole page was 620px wide and slid sideways.
-     Every tab keeps one line and THE BAR SCROLLS INSIDE ITSELF; the page
-     never does. Where all eight fit — any computer screen — nothing moves.
-     A BOX THAT SCROLLS SAYS SO (§108.6): with no scrollbar to show, a fade
-     lies over whichever edge still has tabs past it, set by drawNav and the
-     bar's own scroll (`l` / `r` on the wrapper), and the tab that is on is
-     brought to the middle each time the bar is drawn. */
-  .navwrap{ position:relative; background:var(--ff) }
-  .nav{ overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain }
-  .nav::-webkit-scrollbar{ display:none }
-  .nav button{ flex:none; white-space:nowrap }
-  .navwrap::before, .navwrap::after{ content:""; position:absolute; top:0; bottom:0; width:36px;
-    pointer-events:none; opacity:0; transition:opacity .15s }
-  .navwrap::before{ left:0; background:linear-gradient(to left, transparent, var(--ff) 85%) }
-  .navwrap::after{ right:0; background:linear-gradient(to right, transparent, var(--ff) 85%) }
-  .navwrap.l::before, .navwrap.r::after{ opacity:1 }
-  @media (prefers-reduced-motion:reduce){ .navwrap::before, .navwrap::after{ transition:none } }
+  /* ── THE CHROME IS A COLUMN ON THE LEFT (§601) ─────────────────────────
+     Islam, of design-mockups/left-nav/2026-10-23_left-sidebar.html: "yes
+     build it, keep the headings and the « button, but make the names of the
+     module appear on hovering when they are collapsed". The two lines that
+     ran across the top — the white one with the mark and Sign out (§2.9),
+     and the navy tab bar (§584) — are ONE navy column now: the mark at its
+     head, the tabs in today's order under three headings with History alone
+     at the foot, and the name, the role and Sign out under that.
+     THE WINDOW STILL SCROLLS, NOT THE PAGE'S OWN BOX: the column stands
+     beside the page, sticky and the window's height, so everything that
+     scrolls the window (§400.2's kept copy, a form opened down the page)
+     moves the page exactly as it did. Only the column's own list scrolls,
+     and only on a window too short for eight tabs. */
+  .shell{ display:flex; align-items:flex-start; min-height:100vh }
+  .side{ position:sticky; top:0; z-index:20; flex:none; width:232px; height:100vh; height:100dvh;
+    display:flex; flex-direction:column; background:var(--ff); color:var(--ff-quiet) }
+  .main{ flex:1; min-width:0 }
+  .sbhead{ display:flex; align-items:center; gap:8px; min-height:58px; padding:12px 12px 12px 18px;
+    border-bottom:1px solid var(--ff-rule) }
+  /* THE MARK IS TYPE ON THE NAVY NOW, so it is the bar's ink rather than
+     --ff-tx, which was measured for a white line (§38.4). */
+  .sbhead .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
+  .sbhead .nm{ font-weight:600; font-size:14px; color:var(--ff-quiet) }
+  /* the mark the column wears when it is only icons wide */
+  .sbff{ display:none; width:28px; height:28px; border-radius:7px; background:var(--amber); color:var(--amber-ink);
+    font:700 11px/28px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
+  /* ICON BUTTONS ON THE NAVY: « (icons only), × (close, on a phone), the
+     menu (on a phone) and Sign out. Each says what it does in its
+     accessible name and in the hover label below. */
+  .sbbtn{ flex:none; width:30px; height:30px; display:grid; place-items:center; margin-left:auto; padding:0;
+    border:0; border-radius:7px; background:transparent; color:var(--ff-quiet); cursor:pointer }
+  .sbbtn:hover{ background:var(--ff-wash); color:var(--ff-ink) }
+  .sbbtn:focus-visible{ outline:2px solid var(--amber); outline-offset:1px }
+  .sbbtn svg{ width:16px; height:16px }
+  #sbclose{ display:none }
+
+  /* THE TABS. One property at a time, never a `font` shorthand ending in a
+     keyword (§584.2): a browser drops that whole line. */
+  .nav{ flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:10px 10px 12px;
+    scrollbar-width:thin }
+  .sbgrp{ display:flex; flex-direction:column; gap:2px }
+  .sbgrp.foot{ margin-top:auto; padding-top:10px; border-top:1px solid var(--ff-rule) }
+  .sbgl{ font:600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ff-label); padding:6px 10px }
+  .nav button{ position:relative; display:flex; align-items:center; gap:11px; width:100%; padding:10px; border:0; border-radius:8px;
+    background:transparent; color:var(--ff-quiet); font-family:inherit; font-size:14px; font-weight:600; line-height:1;
+    text-align:left; white-space:nowrap; cursor:pointer }
+  .nav button svg{ width:18px; height:18px; flex:none }
+  .nav button .lb{ min-width:0; overflow:hidden; text-overflow:ellipsis }
+  .nav button:hover{ background:var(--ff-wash); color:var(--ff-ink) }
+  .nav button:focus-visible{ outline:2px solid var(--amber); outline-offset:-2px }
+  /* THE TAB YOU ARE ON keeps the amber that underlined it: a short bar on
+     its left edge, and its icon in amber (the mockup's). */
+  .nav button.on{ background:var(--ff-on); color:var(--ff-ink) }
+  .nav button.on svg{ color:var(--amber) }
+  .nav button.on::before{ content:""; position:absolute; left:-10px; top:8px; bottom:8px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--amber) }
+
+  /* THE NAME LINE (§584.1) is the column's foot: initials, the name and
+     the role under it, Sign out. `#who` keeps its words — the role span
+     still carries " · Super user", its dot drawn only where the two share a
+     line — so the line reads the same to anybody who asks it. */
+  .sbfoot{ display:flex; align-items:center; gap:10px; padding:12px 12px 14px 14px; border-top:1px solid var(--ff-rule) }
+  .sbav{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--ff-on); color:var(--ff-ink);
+    font:700 11px/30px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
+  #who{ min-width:0; display:flex; flex-direction:column; gap:3px; line-height:1.15 }
+  #who > span:first-child{ font-size:13px; font-weight:600; color:var(--ff-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  #who .role{ font-size:11.5px; color:var(--ff-quiet); white-space:nowrap }
+  #who .role .sep{ display:none }
+
+  /* THE NAME A HIDDEN LABEL STANDS FOR, on a hover or a key (Islam: "make
+     the names of the module appear on hovering when they are collapsed").
+     One label for the whole column, placed beside the control from the box
+     the browser drew, because the column's list scrolls and anything drawn
+     inside it would be cut at its edge. */
+  .sbtip{ position:fixed; z-index:60; display:none; transform:translateY(-50%); pointer-events:none;
+    background:var(--ink); color:var(--surface); font-size:12.5px; font-weight:600; line-height:1; white-space:nowrap;
+    padding:7px 10px; border-radius:6px; box-shadow:var(--shadow) }
+  .sbtip.on{ display:block }
+
+  .mtop, .sbscrim{ display:none }
   .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
+
+  /* ── ICONS ONLY (§601): the « button narrows the column to 64px and the
+     choice is kept on this device. The names stay in each tab, hidden from
+     sight but not from a screen reader or a search, and show beside the
+     icon on a hover (.sbtip). Only where the column stands beside the
+     page: below 1000px it is the menu below, and has nothing to narrow. */
+  @media (min-width:1000px){
+    html[data-rail="1"] .side{ width:64px }
+    html[data-rail="1"] .sbhead{ flex-direction:column; gap:10px; padding:14px 0 10px }
+    html[data-rail="1"] .sbhead .mk, html[data-rail="1"] .sbhead .nm{ display:none }
+    html[data-rail="1"] .sbff{ display:block }
+    html[data-rail="1"] .sbhead .sbbtn{ margin:0 }
+    html[data-rail="1"] #sbfold svg{ transform:rotate(180deg) }
+    html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--ff-rule) }
+    html[data-rail="1"] .sbgrp:first-child .sbgl{ display:none }
+    html[data-rail="1"] .nav button{ justify-content:center; padding:11px 0 }
+    html[data-rail="1"] .nav button .lb{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%) }
+    html[data-rail="1"] .sbfoot{ flex-direction:column; gap:8px; padding:12px 0 14px }
+    html[data-rail="1"] #who{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%) }
+    html[data-rail="1"] .sbfoot .sbbtn{ margin:0 }
+  }
+
+  /* ── ON A PHONE OR A TABLET (§601, replacing §584's sideways tab bar): a
+     slim navy bar with the menu button, the mark and the tab you are on;
+     the same column opens over the page from the left, and pressing a tab,
+     the ×, the shade or Esc closes it. Hidden when shut, not only moved, so
+     a key cannot walk into a menu nobody can see.
+     WHY 1000px AND NOT A PHONE'S WIDTH: beside a 232px column a 768px
+     tablet leaves the page 500px, and My work's row keeps about 500px of
+     controls (§583), so its action's words would get what was left — the
+     §267 trap. Below 1000 the page keeps the window's whole width. */
+  @media (max-width:999px){
+    .side{ position:fixed; left:0; top:0; bottom:0; height:auto; width:min(84%, 288px); z-index:50;
+      transform:translateX(-102%); visibility:hidden; box-shadow:0 0 40px rgba(0,0,0,.35);
+      transition:transform .22s ease, visibility 0s linear .22s }
+    html[data-menu="1"] .side{ transform:none; visibility:visible; transition:transform .22s ease }
+    #sbfold{ display:none }
+    #sbclose{ display:grid }
+    .sbscrim{ display:block; position:fixed; inset:0; z-index:45; background:var(--scrim); opacity:0; pointer-events:none;
+      transition:opacity .22s ease }
+    html[data-menu="1"] .sbscrim{ opacity:1; pointer-events:auto }
+    .mtop{ position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:10px; min-height:50px; padding:8px 12px;
+      background:var(--ff); color:var(--ff-ink) }
+    .mtop .sbbtn{ margin:0; color:var(--ff-ink) }
+    .mtop .sbbtn svg{ width:20px; height:20px }
+    .mtop .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
+    #sbhere{ margin-left:auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      font-size:13px; font-weight:600; color:var(--ff-quiet) }
+    .nav button{ padding:12px 10px; font-size:15px }
+  }
+  @media (prefers-reduced-motion:reduce){ .side, .sbscrim{ transition:none } }
 
   .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
     padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
@@ -959,13 +1035,34 @@
 </style>
 </head>
 <body>
-<div class="top">
-  <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
-  <span class="right"><span id="who"></span>
-    <button class="btn" id="signout" type="button">Sign out</button></span>
+<!-- §601: the chrome is one navy column on the left; on a phone it opens
+     from the menu button in .mtop. The tabs are drawn into #nav once `me`
+     answers (§45.2), as they always were. -->
+<div class="shell">
+<aside class="side" id="side" aria-label="Forefront Platform">
+  <div class="sbhead">
+    <span class="sbff" aria-hidden="true">FF</span>
+    <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+    <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
+    <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <nav class="nav" id="nav" aria-label="Pages"></nav>
+  <div class="sbfoot">
+    <span class="sbav" id="sbav" aria-hidden="true"></span>
+    <span id="who"></span>
+    <button class="sbbtn" id="signout" type="button" aria-label="Sign out" data-tip="Sign out"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg></button>
+  </div>
+</aside>
+<div class="sbscrim" id="sbscrim"></div>
+<div class="main">
+  <div class="mtop">
+    <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <span class="mk">FOREFRONT</span><span id="sbhere"></span>
+  </div>
+  <div class="wrap" id="page"></div>
 </div>
-<div class="navwrap" id="navwrap"><nav class="nav" id="nav"></nav></div>
-<div class="wrap" id="page"></div>
+</div>
+<div class="sbtip" id="sbtip" aria-hidden="true"></div>
 
 <!-- The debrief splitter (spec 045). Its own file, because node's own check
      requires the SAME BYTES this page runs (checks/memory-split.mjs) rather

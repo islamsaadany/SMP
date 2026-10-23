@@ -7097,7 +7097,7 @@ var GROUP = {
       projects: [
         { name: "Standardise the core order process across units", owner: "Ashraf Abdelaty",
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
-          stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Single documented order process", due: "Sep 26", status: "done" },
             { name: "Unit-by-unit gap assessment", due: "Oct 26", status: "done" },
@@ -7116,7 +7116,7 @@ var GROUP = {
           ] },
         { name: "Cost-to-serve model and monthly review", owner: "Fayad Sobhy",
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
-          stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Finance"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Cost-to-serve model built and validated", due: "Sep 26", status: "done" },
             { name: "Monthly review running with all units", due: "Oct 26", status: "wip", pct: 60 }
@@ -7131,7 +7131,7 @@ var GROUP = {
           ] },
         { name: "First-time-right programme in distribution", owner: "Hala",
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
-          stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["Distribution"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Failure analysis on twelve months of orders", due: "Dec 26", status: "done" },
             { name: "Corrective standard operating procedures", due: "May 26", status: "wip", pct: 40, note: "Drafted for the two largest warehouses; the rest follow the Q3 process review." }
@@ -7155,7 +7155,7 @@ var GROUP = {
       projects: [
         { name: "Key-role succession map for every unit", owner: "Noran Adel",
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
-          stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
+          stakeholders: ["HR"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
             { name: "Key-role definition agreed group-wide", due: "Apr 26", status: "done" },
             { name: "Succession map per unit", due: "Oct 26", status: "wip", pct: 70 }
@@ -7187,7 +7187,7 @@ var GROUP = {
           ] },
         { name: "Group training calendar and delivery", owner: "Hala",
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
-          stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["HR"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Annual training calendar published", due: "Apr 26", status: "done" },
             { name: "Calendar delivered", due: "Mar 26", status: "wip", pct: 44, note: "Half the calendar is delivered; the rest is scheduled around the peak trading period." }
@@ -7212,7 +7212,7 @@ var GROUP = {
       projects: [
         { name: "Consolidate ERP instances across units", owner: "Abdelhamid",
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
-          stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Target instance design", due: "Sep 26", status: "done" },
             { name: "Instances migrated", due: "Jun 26", status: "wip", pct: 33,
@@ -7281,7 +7281,7 @@ var GROUP = {
           ] },
         { name: "Trade communication programme", owner: "Tarek Nour",
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
-          stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
+          stakeholders: ["Marketing"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
             { name: "Twelve-month communication calendar", due: "Sep 26", status: "done" },
             { name: "Calendar executed", due: "Dec 26", status: "wip", pct: 35 }
@@ -7304,7 +7304,7 @@ var GROUP = {
       projects: [
         { name: "Voice of customer loop across units", owner: "Mennah Farouk",
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
-          stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Care"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Feedback instrument agreed across units", due: "Apr 26", status: "done" },
             { name: "Loop running in all units", due: "Dec 26", status: "wip", pct: 50 }
@@ -7340,7 +7340,7 @@ var GROUP = {
       projects: [
         { name: "Portfolio review cadence", owner: "Tarek Nour",
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
-          stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Review framework and evidence pack", due: "Mar 26", status: "done" },
             { name: "Quarterly reviews held", due: "Feb 26", status: "wip", pct: 50 }
@@ -7370,7 +7370,7 @@ var GROUP = {
            refused. */
         { name: "Average debt utilisation report automation", owner: "Hossam Abuelenien", real: true,
           brief: "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
-          stakeholders: ["Finance Department", "IT Department"], timeline: "date",
+          stakeholders: ["Finance", "IT"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
             { name: "Oracle-based interest utilisation form", due: "Feb 26", status: "done" },
@@ -7393,7 +7393,7 @@ var GROUP = {
           ] },
         { name: "Credit facility consolidation", owner: "Fayad Sobhy",
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
-          stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
+          stakeholders: ["Finance", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Facility term sheet agreed with lead bank", due: "Feb 26", status: "wip", pct: 50, note: "Terms are back from two of the three lenders; the third is expected in July and the sheet is signed once all three are in." },
             { name: "Covenant reporting pack rebuilt", due: "Sep 26", status: null },
@@ -7410,7 +7410,7 @@ var GROUP = {
           ] },
         { name: "Working capital programme across units", owner: "Hossam Abuelenien",
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
-          stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
+          stakeholders: ["Finance"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
             { name: "Working capital baseline per unit", due: "Sep 26", status: null },
             { name: "Unit-level release plans agreed", due: "Dec 26", status: null }
@@ -7436,7 +7436,7 @@ var GROUP = {
       projects: [
         { name: "Quarterly review cadence with every unit", owner: "Islam Saadany",
           brief: "A review with every unit every quarter, on the same evidence, in the same shape.",
-          stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
+          stakeholders: ["Strategy Management Office"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
             { name: "Review format and evidence pack", due: "May 26", status: "done" },
@@ -26444,7 +26444,9 @@ function planDeckBox(target){
 function buildPlanPptx(target){
   var m = reviewPptxMark(target), kicker = placeLabel(target) || String(target || "");
   var out = [];
-  [].forEach.call(planDeckBox(target).querySelectorAll(".dslide"), function(sl){
+  /* §604: measured after the figures are stripped, so the plan's own columns
+     share the room. */
+  [].forEach.call(deckColFitBox(planDeckBox(target)).querySelectorAll(".dslide"), function(sl){
     out = out.concat(deckSlidePptx(sl, kicker, m && m.shape));
   });
   return pptxPackage(out, planPptxName(target).replace(/\.pptx$/, ""), m && m.media);
@@ -26686,6 +26688,20 @@ function deckColWidths(ths){
     var sh = th.classList.contains("num") ? 1 : 2;
     shares.push(sh); mins.push(m); total += sh; fixed += m;
   });
+  /* §604: THE SLIDE'S OWN WIDTHS, where the deck worked them out
+     (`deckColFit`, kept on the header as `data-fw`): each column takes the
+     same share of the file's table that it has on the slide, and still never
+     less than its heading needs. */
+  var fw = ths.map(function(th){ return Number(th.getAttribute("data-fw")) || 0; });
+  if (fw.every(function(x){ return x > 0; })) {
+    var sum = fw.reduce(function(n, x){ return n + x; }, 0);
+    var w = fw.map(function(x, i){ return Math.max(mins[i], Math.round(PPTX_CW * x / sum)); });
+    var over = w.reduce(function(n, x){ return n + x; }, 0) - PPTX_CW;
+    var give = w.reduce(function(n, x, i){ return n + (x - mins[i]); }, 0);
+    if (over > 0 && give > 0)
+      w = w.map(function(x, i){ return Math.round(x - over * (x - mins[i]) / give); });
+    if (over <= give) return w;
+  }
   var room = PPTX_CW - fixed;
   /* A table whose headings alone overflow the slide keeps its proportions
      rather than running off the edge — the minima are scaled to fit and the
@@ -27010,6 +27026,7 @@ function reviewPptxMark(target){
 function reviewPptxSlides(target, mark){
   var box = document.createElement("div");
   box.innerHTML = deckHtmlFor(target);
+  deckColFitBox(box);   /* §604: the slide's widths, for `deckColWidths` */
   var kicker = placeLabel(target) || String(target || "");
   var out = [];
   [].forEach.call(box.querySelectorAll(".dslide"), function(sl){
@@ -30057,7 +30074,7 @@ function whereNext(keys){
         }).join("")) +
         '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
       var ptitle = L("project", "bu") + " &mdash; performance";
-      /* §602: and its execution beside it — the same `capExec` a function's
+      /* §607: and its execution beside it — the same `capExec` a function's
          own projects are read by: the milestones due so far, completed. */
       var pe = th ? capExec(th) : { pct: null };
       var pedrill = miniTable(["#", L1("project"), "Milestones done", "Execution"],
@@ -30090,7 +30107,7 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
-    /* §602: EXECUTION BESIDE IT. Islam: *"the directions needs to have
+    /* §607: EXECUTION BESIDE IT. Islam: *"the directions needs to have
        performance and execution"*. The same `unitRatio` a unit's own
        execution card reads (delivered as a share of planned), over the top
        layer's own view — nothing new computed. */
@@ -30137,7 +30154,7 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
-        /* §602: with the company's own two cards beside the objectives, the
+        /* §607: with the company's own two cards beside the objectives, the
            units' two start a row of their own under them — three pairs
            stacked, never five cards wrapping wherever the width breaks. */
         (buExists() && topPlanCard() ? '</div><div class="scores"><div class="scores-gap" aria-hidden="true"></div>' : "") +
@@ -30162,9 +30179,9 @@ function whereNext(keys){
         })) +
       '</div>' +
       /* §593: the functions' own row, under the units' two cards.
-         §601: and on a company WITHOUT units too (El Abd) — there the
+         §606: and on a company WITHOUT units too (El Abd) — there the
          functions are all it holds, so their row leads with no gap. */
-      /* §602: every pair sits under the objectives' column, so the
+      /* §607: every pair sits under the objectives' column, so the
          functions line up under the units' two, or the directions' two. */
       fnReadingCards(boardFunctionKeys(), "", buExists() || topPlanCard() ? 1 : 0) +
       (buExists() ? whereNext(UNIT_KEYS) : "") + whereNextFns(boardFunctionKeys())) });
@@ -52976,6 +52993,225 @@ function closeDeck(){
   if (toEditor) slidesResume(reached);
 }
 
+/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§604) ──────────────────────
+   Islam, of the tactics slide: *"the outcome column is too narrow can we make
+   things more coherent to the content"*, and of the mockup, *"yes build it
+   and apply to all slides"*.
+
+   The tables were laid out by the browser, with the Note held at a quarter of
+   the slide whatever it said — so on a tactics slide with short notes the
+   Tactic and the Outcome wrapped to three and four lines, and two of six
+   tactics went to a second slide. Now, on every slide table:
+     · a column that cannot usefully wrap — #, quarters, a status pill, a
+       figure, a score — is exactly as wide as its widest entry;
+     · an Owner is as wide as the longest name, while that is short;
+     · the columns of words share the rest by what they are: the row's name
+       and its outcome a third each, the note a little less, collaborators
+       less again — each never narrower than its longest word nor wider than
+       its longest entry on one line; what is left when every one of them
+       fits on one line goes to them by the length of that longest entry.
+       A column nobody filled is as wide as its heading.
+
+   MEASURED, so the slide must be laid out (`.on`, at 1600x900): the widest
+   entry is the column at `width:max-content`, the longest word the column
+   at `width:1px`. The result is written on the header cells with
+   `table-layout:fixed`, and kept on them as `data-fw` for the PowerPoint
+   (`deckColWidths`). Nothing in a cell changes; only the widths. */
+var DECK_FIT_SHARE = { name:32, outcome:32, note:22, collabs:14, text:20 };
+/* Shares of `room` by weight, each between its floor and its cap. A column
+   that would fall under its floor or over its cap is held there and the rest
+   is shared again; what every cap leaves over goes back by the caps.
+   Null when the floors alone do not fit, and the table keeps its own layout. */
+function deckShare(room, cols){
+  var out = cols.map(function(){ return null; }), left = room;
+  var open = function(){ return cols.map(function(c, i){ return i; }).filter(function(i){ return out[i] === null; }); };
+  for (var o = open(); o.length; o = open()) {
+    var sum = o.reduce(function(n, i){ return n + cols[i].w; }, 0);
+    var part = function(i){ return left * cols[i].w / sum; };
+    var under = o.filter(function(i){ return part(i) < cols[i].lo; });
+    var over = under.length ? [] : o.filter(function(i){ return part(i) > cols[i].hi; });
+    if (!under.length && !over.length) {
+      o.forEach(function(i){ out[i] = part(i); });
+      left = 0;
+      break;
+    }
+    under.forEach(function(i){ out[i] = cols[i].lo; });
+    over.forEach(function(i){ out[i] = cols[i].hi; });
+    under.concat(over).forEach(function(i){ left -= out[i]; });
+  }
+  if (left < -0.5) return null;
+  if (left > 0.5) {
+    var all = cols.reduce(function(n, c){ return n + c.hi; }, 0);
+    out = out.map(function(w, i){ return w + left * cols[i].hi / all; });
+  }
+  return out;
+}
+/* What a column holds, read off the first row that has a cell in every
+   column — a tactic's outcome lines borrow cells from the row above. */
+function deckColRole(t, ths){
+  var row = [].filter.call(t.querySelectorAll("tbody tr"), function(tr){
+    return [].reduce.call(tr.children, function(n, td){ return n + (td.colSpan || 1); }, 0) === ths.length;
+  })[0];
+  return ths.map(function(th, i){
+    var td = row ? row.children[i] : null, cls = td ? td.classList : { contains:function(){ return false; } };
+    if (/^owner$/i.test(deckTxt(th))) return "who";
+    return cls.contains("lead") ? "name" : cls.contains("outc") ? "outcome"
+         : cls.contains("dnote") ? "note" : cls.contains("collabs") ? "collabs" : "text";
+  });
+}
+function deckColFit(sl){
+  [].forEach.call(sl.querySelectorAll("table.zebra"), function(t){
+    var ths = [].slice.call(t.querySelectorAll("thead th"));
+    t.style.tableLayout = ""; t.style.width = "";
+    ths.forEach(function(th){ th.style.width = ""; th.removeAttribute("data-fw"); });
+    if (ths.length < 3 || ths.some(function(th){ return th.colSpan > 1; })) return;
+    /* In the slide's own pixels: a presented deck is SCALED to the window, and
+       a box's on-screen size is not the width to write. */
+    var tw = t.offsetWidth;
+    if (!tw) return;
+    var scale = t.getBoundingClientRect().width / tw || 1;
+    var at = function(w){ t.style.width = w; return ths.map(function(th){ return th.offsetWidth; }); };
+    /* a pixel over, because the widths are written whole and a column a
+       fraction short of its widest entry wraps it */
+    var lo = at("1px").map(Math.ceil), hi = at("max-content").map(function(x){ return Math.ceil(x) + 1; });
+    t.style.width = "";
+    var role = deckColRole(t, ths), out = [], words = [], fixed = 0;
+    ths.forEach(function(th, i){
+      /* the `#` and a figure (`.num`, which never wraps) are fixed whatever
+         a squeeze would make of them */
+      var oneLine = th.classList.contains("idx") || th.classList.contains("num") ||
+        hi[i] - lo[i] < 12 || (role[i] === "who" && hi[i] <= tw * 0.16);
+      if (oneLine) { out[i] = hi[i]; fixed += hi[i]; }
+      else words.push({ i:i, w:DECK_FIT_SHARE[role[i] === "who" ? "collabs" : role[i]], lo:lo[i], hi:hi[i],
+                        tied: role[i] === "name" || role[i] === "outcome" });
+    });
+    if (!words.length) return;
+    var share = deckShare(tw - fixed, words);
+    if (!share) return;
+    words.forEach(function(c, k){ out[c.i] = share[k]; });
+    deckColBalance(t, words, out, scale);
+    t.style.tableLayout = "fixed";
+    ths.forEach(function(th, i){
+      th.style.width = Math.floor(out[i]) + "px";
+      th.setAttribute("data-fw", String(Math.round(out[i])));
+    });
+  });
+}
+/* ── AND THEN AS SHORT AS THE WORDS ALLOW ──────────────────────────────
+   The shares are where the columns START: the right answer for a slide whose
+   notes are short, and the wrong one for a slide whose notes are paragraphs —
+   squeezed to a share, a long note stands six lines tall beside a tactic on
+   two. So width is then moved between the columns of words, a step at a
+   time, wherever that makes the table shorter: each row as tall as its
+   tallest cell, a cell's lines counted by setting its words the way the
+   slide does. A move that saves nothing is not made, so a slide whose rows
+   are already as short as they can be keeps its shares. Each column stays
+   between its longest word and its longest entry. */
+function deckColBalance(t, words, out, scale){
+  var cv = deckColBalance.cv || (deckColBalance.cv = document.createElement("canvas").getContext("2d"));
+  var at = {}; words.forEach(function(c, k){ at[c.i] = k; });
+  /* Every body cell in its column, rowspans and colspans taken into account. */
+  var grid = [], rows = [].slice.call(t.querySelectorAll("tbody tr"));
+  var fix = [];
+  var cells = rows.map(function(tr, r){
+    var c = 0, mine = [];
+    fix[r] = 0;
+    grid[r] = grid[r] || [];
+    [].forEach.call(tr.children, function(td){
+      while (grid[r][c]) c++;
+      var rs = td.rowSpan || 1, cs = td.colSpan || 1;
+      for (var y = 0; y < rs; y++) for (var x = 0; x < cs; x++) {
+        grid[r + y] = grid[r + y] || []; grid[r + y][c + x] = 1;
+      }
+      if (cs === 1 && at[c] !== undefined) mine.push({ td:td, k:at[c] });
+      /* a cell that is not words (a pill, a figure, the quarters) is as tall
+         as it is whatever the widths, and the row is never shorter */
+      else if (rs === 1) {
+        var rg = document.createRange(); rg.selectNodeContents(td);
+        fix[r] = Math.max(fix[r], rg.getBoundingClientRect().height / (scale || 1));
+      }
+      c += cs;
+    });
+    return mine;
+  });
+  /* A cell's words at its own size, and how tall a line of them is. */
+  var info = cells.map(function(mine){
+    return mine.map(function(m){
+      var cs = getComputedStyle(m.td);
+      cv.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+      var txt = m.td.textContent.replace(/\s+/g, " ").trim();
+      var lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+      var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      return { k:m.k, lh:lh, pad:pad, sp:cv.measureText(" ").width,
+               ws:txt ? txt.split(" ").map(function(w){ return cv.measureText(w).width; }) : [] };
+    });
+  });
+  var lines = function(x, w){
+    var room = w - x.pad, n = x.ws.length ? 1 : 0, run = 0;
+    x.ws.forEach(function(ww){
+      if (run && run + x.sp + ww > room) { n++; run = ww; }
+      else run += (run ? x.sp : 0) + ww;
+    });
+    return n;
+  };
+  var height = function(w){
+    return info.reduce(function(sum, row, r){
+      return sum + row.reduce(function(m, x){ return Math.max(m, lines(x, w[x.k]) * x.lh); }, fix[r]);
+    }, 0);
+  };
+  /* The row's name and its outcome move TOGETHER and stay equal, as the
+     mockup Islam approved has them; the note and the collaborators give or
+     take room beside them. */
+  var w = words.map(function(c){ return out[c.i]; });
+  var tied = words.map(function(c, k){ return c.tied ? k : -1; }).filter(function(k){ return k > -1; });
+  var units = words.map(function(c, k){ return c.tied ? null : [k]; }).filter(Boolean);
+  if (tied.length) units.push(tied);
+  var give = function(v, u, d){
+    u.forEach(function(k){ v[k] += d / u.length; });
+    return u.every(function(k){ return v[k] >= words[k].lo && v[k] <= Math.max(words[k].hi, w[k]); });
+  };
+  var best = height(w);
+  [64, 32, 16, 8].forEach(function(step){
+    for (var guard = 0; guard < 60; guard++) {
+      var move = null;
+      units.forEach(function(a){ units.forEach(function(b){
+        if (a === b) return;
+        var v = w.slice();
+        if (!give(v, a, step) || !give(v, b, -step)) return;
+        var h = height(v);
+        if (h < best - 0.5 && (!move || h < move.h)) move = { v:v, h:h };
+      }); });
+      if (!move) break;
+      w = move.v; best = move.h;
+    }
+  });
+  words.forEach(function(c, k){ out[c.i] = w[k]; });
+}
+
+/* The same widths on a deck that is not on the screen — the PowerPoint's, which
+   is built from `deckHtmlFor()` and never laid out. It is laid out here, off
+   screen at the slide's own size, for as long as the measuring takes. */
+function deckColFitBox(box){
+  var host = document.createElement("div");
+  host.className = "slmeasure";
+  host.setAttribute("aria-hidden", "true");
+  host.inert = true;
+  var home = box.parentNode, next = box.nextSibling, wasDeck = box.classList.contains("deck");
+  box.classList.add("deck");
+  host.appendChild(box);
+  document.body.appendChild(host);
+  try {
+    [].forEach.call(box.querySelectorAll(".dslide"), function(s){
+      s.classList.add("on"); deckColFit(s); s.classList.remove("on");
+    });
+  } finally {
+    host.remove();
+    if (!wasDeck) box.classList.remove("deck");
+    if (home) home.insertBefore(box, next);
+  }
+  return box;
+}
+
 /* Squeeze anything that overruns, then split what still does. Run once on
    open, so the deck never reflows while it is being presented.
 
@@ -52996,7 +53232,12 @@ function deckFitPass(deck){
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
-    if (s.scrollHeight > s.clientHeight) s.classList.add("tight");
+    /* §604: the columns are sized to what they hold FIRST, so a table that
+       now fits is not squeezed or split, and sized again at the smaller type
+       of a slide that still does not — before the split below, so a slide
+       and its continuation carry the same widths (the clone takes them). */
+    deckColFit(s);
+    if (s.scrollHeight > s.clientHeight) { s.classList.add("tight"); deckColFit(s); }
     s.classList.remove("on");
   });
   for (var pass = 0; pass < 20; pass++) {
@@ -68397,7 +68638,9 @@ var CLIENTSETUP = (function () {
   "use strict";
 
   /* ── THE STEPS, BY KEY AND NEVER BY NUMBER (§322) ────────────────────
-     Seven, as the mockup draws them. There is no Summary step any more:
+     Three since §544 — the client, the shape, the office (seven until the
+     shape screen took in the five between them; §544.16 found this line
+     still saying so). There is no Summary step any more:
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
      destination at the end (spec 057). */
@@ -68618,7 +68861,13 @@ var CLIENTSETUP = (function () {
     /* §436: a list nobody is editing is re-read off the graph, so a change
        written straight into it (below, on a client with a plan) shows. */
     if (!S.shapeDirty) S.shape = liveShape();
-    ensureReg("[data-csetup]", mount);
+    /* §600: WHEN THE RECORD LANDS, THE SHELL REDRAWS, NOT THE FLOW. The
+       first step draws the colour controls and only wire() binds them, so
+       mounting again from here put back pickers wired to nothing — on a
+       served platform every colour changed on the first visit went nowhere
+       (§96). The console passes no repaint and draws no colours, so it
+       mounts again as before. */
+    ensureReg("[data-csetup]", function (h, o) { if (o.repaint) o.repaint(); else mount(h, o); });
     render();
   }
 

@@ -1,4 +1,4 @@
-"""A company without business units still reads its functions (§601).
+"""A company without business units still reads its functions (§606).
 
 §593 gave the functions their own two cards and their own "where to look
 next" on the group page — but only where the group has units. A client with

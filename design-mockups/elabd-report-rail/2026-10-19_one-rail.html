@@ -1,0 +1,307 @@
+<title>El Abd Reporting Rail</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  /* Layout: a reading column with the proposed page drawn full width inside it,
+     rail left and pane right, collapsing to the product's own strip on a phone.
+     Tokens: the platform's furniture (_shared.css) in El Abd's tan brand, as on
+     the screenshot of its Reporting page. */
+  :root {
+    --ground:#F6F7F9; --surface:#FFFFFF; --surface-2:#EEF1F4;
+    --line:#D9DEE5; --line-soft:#E8EBF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#69717D;
+    --panel:#D5B48B; --panel-ink:#3E2F1D; --panel-quiet:#6B5639;
+    --accent:#D98993; --accent-wash:#FBEFF0; --tab:#9B4A2C; --tab-ink:#FFFFFF;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --bad:#A8372A;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#252A33;
+      --line:#353C47; --line-soft:#2B313B;
+      --ink:#E9ECF1; --ink-2:#B9C1CC; --ink-3:#959EAB;
+      --panel:#5C4830; --panel-ink:#F3E7D6; --panel-quiet:#D7C3A6;
+      --accent:#E69CA5; --accent-wash:#3A2428; --tab:#B8643F; --tab-ink:#FFFFFF;
+      --good:#6CC096; --good-bg:#1B3129; --bad:#E58378;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#252A33;
+    --line:#353C47; --line-soft:#2B313B;
+    --ink:#E9ECF1; --ink-2:#B9C1CC; --ink-3:#959EAB;
+    --panel:#5C4830; --panel-ink:#F3E7D6; --panel-quiet:#D7C3A6;
+    --accent:#E69CA5; --accent-wash:#3A2428; --tab:#B8643F; --tab-ink:#FFFFFF;
+    --good:#6CC096; --good-bg:#1B3129; --bad:#E58378;
+    color-scheme: dark;
+  }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:72rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.5rem 4rem; }
+
+  header { border-bottom:2px solid var(--panel); padding-bottom:1.1rem; margin-bottom:1.8rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--panel-quiet); margin:0 0 .35rem; }
+  h1 { font-size:1.9rem; line-height:1.15; margin:0 0 .5rem; font-weight:700; text-wrap:balance; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  h2 { font-size:1.2rem; margin:2.6rem 0 .3rem; font-weight:700; text-wrap:balance; }
+  p { max-width:46rem; } .lede { color:var(--ink-2); margin-top:.2rem; }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:var(--track);
+         text-transform:uppercase; padding:.2rem .55rem; border-radius:999px; margin:0 0 .6rem; }
+  .tag.today { background:var(--surface-2); color:var(--ink-3); border:1px solid var(--line); }
+  .tag.after { background:var(--accent-wash); color:var(--bad); border:1px solid var(--accent); }
+
+  /* ── today, as a plan of the page (heights to scale with the screenshot) ── */
+  .plan { display:grid; gap:1rem; grid-template-columns:1fr; }
+  @media (min-width:48rem) { .plan { grid-template-columns:1fr 1fr; } }
+  .sheet { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:.8rem; }
+  .sheet .shd { font-size:12px; font-weight:700; margin:.2rem 0 .4rem; }
+  .blk { display:grid; grid-template-columns:28% 1fr; gap:.4rem; margin-bottom:.7rem; }
+  .blk .r { background:var(--surface-2); border:1px solid var(--line); border-radius:6px;
+            display:flex; flex-direction:column; gap:3px; padding:4px; }
+  .blk .r i { display:block; height:13px; border-radius:3px; background:var(--surface); border:1px solid var(--line-soft); }
+  .blk .r i.on { border-left:3px solid var(--accent); }
+  .blk .r b { display:block; height:9px; background:var(--panel); border-radius:3px; }
+  .blk .p { border:1px solid var(--line); border-radius:6px; background:var(--surface);
+            border-left:3px solid var(--accent); }
+  .fold { position:relative; }
+  .fold::after { content:"bottom of the first screen"; position:absolute; left:0; right:0; top:var(--y);
+                 border-top:2px dashed var(--bad); font-size:10.5px; font-weight:700; color:var(--bad);
+                 letter-spacing:.04em; text-align:right; padding-top:1px; }
+  .cap { font-size:13px; color:var(--ink-2); margin:.5rem 0 0; }
+
+  /* ── the proposed page, drawn with the product's own parts ── */
+  .screen { background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .subtabs { display:flex; gap:.4rem; padding:.55rem .7rem; background:var(--surface-2);
+             border-bottom:1px solid var(--line); flex-wrap:wrap; align-items:center; }
+  .subtab { font-size:13px; font-weight:600; padding:.3rem .8rem; border-radius:7px; color:var(--ink-2); }
+  .subtab.on { background:var(--tab); color:var(--tab-ink); }
+  .page { padding:1.1rem 1rem 1.3rem; }
+  .sechd { font-size:1.15rem; font-weight:700; margin:0 0 .8rem; text-wrap:balance; }
+
+  .split { display:grid; grid-template-columns:13.5rem minmax(0,1fr); gap:1rem; align-items:start; }
+  .rail { border:1px solid var(--line); border-radius:8px; background:var(--surface-2); overflow:hidden; }
+  .rhead, .rgroup { display:flex; justify-content:space-between; align-items:center;
+          font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase; }
+  .rhead { background:var(--panel); color:var(--panel-ink); padding:.55rem .75rem; }
+  .rhead span, .rgroup span { font-variant-numeric:tabular-nums; }
+  .rgroup { color:var(--panel-quiet); padding:.75rem .75rem .35rem; border-top:1px solid var(--line); }
+  .rgroup.first { border-top:0; }
+  .rows { display:flex; flex-direction:column; gap:.45rem; padding:0 .5rem .2rem; }
+  .ritem { all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:1fr auto;
+           gap:.1rem .5rem; align-items:center; background:var(--surface); border:1px solid var(--line);
+           border-left:3px solid transparent; border-radius:7px; padding:.5rem .6rem; }
+  .ritem:hover { border-color:var(--ink-3); border-left-color:transparent; }
+  .ritem:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .ritem.on { background:var(--surface-2); border-left-color:var(--accent); }
+  .ritem.on:hover { border-left-color:var(--accent); }
+  .rcode { grid-column:1/-1; font:700 11px/1.2 var(--mono); color:var(--ink); }
+  .rname { font-size:13px; line-height:1.3; font-weight:500; min-width:0;
+           display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .ritem.on .rname { font-weight:700; }
+  .rtally { font:600 12px/1 var(--mono); color:var(--ink-3); border:1px solid var(--line);
+            border-radius:999px; padding:.25rem .5rem; background:var(--surface-2); white-space:nowrap; }
+  .rtally.full { color:var(--good); background:var(--good-bg); border-color:var(--good); }
+  .rsub { grid-column:1/-1; font-size:11.5px; font-style:italic; color:var(--bad); margin-top:.15rem; }
+  .rsub.ok { color:var(--ink-3); font-style:normal; }
+  .rfoot { font-size:11.5px; color:var(--ink-3); padding:.55rem .75rem; border-top:1px solid var(--line); margin-top:.5rem; }
+
+  .pane { min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden; }
+  .band { display:flex; flex-wrap:wrap; gap:.3rem .7rem; align-items:baseline; padding:.75rem .9rem;
+          background:var(--surface-2); border-bottom:1px solid var(--line); border-left:3px solid var(--accent); }
+  .band .bcode { font:700 13px/1 var(--mono); }
+  .band .bname { font-size:1.05rem; font-weight:700; }
+  .band .bkind { font-size:11.5px; color:var(--ink-2); }
+  .band .bmeta { margin-left:auto; font-size:12px; color:var(--ink-3); display:flex; gap:.6rem; align-items:center; }
+  .pbody { padding:.6rem .9rem 1rem; }
+  .mini { font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+          color:var(--ink-2); margin:.7rem 0 .45rem; }
+  .tbl { overflow-x:auto; border:1px solid var(--line); border-radius:7px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; min-width:34rem; }
+  th { background:var(--panel); color:var(--panel-ink); font-size:10px; font-weight:700;
+       letter-spacing:var(--track); text-transform:uppercase; text-align:left; padding:.55rem .6rem; }
+  td { padding:.55rem .6rem; border-top:1px solid var(--line-soft); vertical-align:top; }
+  td.n { color:var(--ink-3); width:1.5rem; }
+  td.num { font-family:var(--mono); text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .why { display:block; font-size:12px; color:var(--ink-3); }
+  .box { display:inline-block; min-width:4.5rem; text-align:right; font-family:var(--mono);
+         background:var(--good-bg); border:1px solid var(--line); border-radius:6px; padding:.2rem .45rem; }
+  .box.empty { background:var(--surface); color:var(--ink-3); }
+  .notd { font-size:11px; color:var(--ink-3); background:var(--surface-2); border-radius:999px; padding:.15rem .5rem; white-space:nowrap; }
+  .more { font-size:12.5px; color:var(--ink-3); margin:.6rem 0 0; }
+  .placeholder { color:var(--ink-2); font-size:14px; margin:.4rem 0 0; }
+
+  @media (max-width:44rem) {
+    /* the product's own phone shape: the rail becomes a strip, the group labels go,
+       and the D and C codes are what tell the two kinds apart */
+    .split { grid-template-columns:1fr; }
+    .rail { overflow-x:auto; }
+    .rhead, .rgroup, .rfoot { display:none; }
+    .railin { display:flex; gap:.4rem; padding:.45rem; width:max-content; }
+    .rows { flex-direction:row; padding:0; }
+    .ritem { width:9.5rem; }
+    .rsub { display:none; }
+  }
+
+  .facts { list-style:none; padding:0; margin:.8rem 0 0; max-width:48rem; }
+  .facts li { display:grid; grid-template-columns:7.5rem 1fr; gap:.8rem; padding:.6rem 0; border-top:1px solid var(--line-soft); }
+  .facts li:first-child { border-top:0; }
+  .facts b { font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--panel-quiet); padding-top:.15rem; }
+  @media (max-width:30rem) { .facts li { grid-template-columns:1fr; gap:.1rem; } }
+  .ask { margin-top:2.4rem; background:var(--surface); border:1px solid var(--panel); border-radius:12px; padding:1.1rem 1.2rem; }
+  .ask h2 { margin-top:0; }
+  .ask ol { margin:.6rem 0 0; padding-left:1.2rem; max-width:48rem; }
+  .ask li { margin:.6rem 0; }
+  .ask .rec { display:block; color:var(--ink-2); font-size:14px; }
+  .src { font-size:12.5px; color:var(--ink-3); margin-top:1rem; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">El Abd · Company · Reporting · mockup, signed off and built 19 October</p>
+    <h1>One rail for Directions and Capabilities</h1>
+    <p class="standfirst">When the SMO opens El Abd's Reporting, the five directions and the five
+      capabilities sit in one rail, under two labels, with one pane beside it. Press any row and
+      the pane changes. Every row's tally and its red line stay in view while you fill another.</p>
+  </header>
+
+  <span class="tag today">Today</span>
+  <div class="plan">
+    <div class="sheet fold" style="--y:56%">
+      <div class="shd">Directions — Key Measures and Tactics</div>
+      <div class="blk" style="height:13rem">
+        <div class="r"><b></b><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="p"></div>
+      </div>
+      <div class="shd">Capabilities — Key Measures and Tactics</div>
+      <div class="blk" style="height:8rem">
+        <div class="r"><b></b><i class="on"></i><i></i><i></i><i></i><i></i></div><div class="p"></div>
+      </div>
+    </div>
+    <div>
+      <p class="cap" style="margin-top:0">Two blocks, one under the other, each with its own rail and its
+        own open pane. Two rows are selected at once, D001 above and C001 below. The Capabilities rail
+        only starts once D001's pane ends, so while you are in a direction you cannot see what the
+        capabilities still owe.</p>
+      <p class="cap">On the worked example, measured at 1440 by 900 as the SMO, the second block's heading
+        sits at 1,417px, a screen and a half down. El Abd's five directions are taller than that
+        example's three, so the gap there is larger.</p>
+    </div>
+  </div>
+
+  <h2>Proposed</h2>
+  <span class="tag after">After</span>
+  <div class="screen" role="img" aria-label="Drawing of El Abd's Reporting page with one rail">
+    <div class="subtabs">
+      <span class="subtab">Strategy</span><span class="subtab">Performance</span><span class="subtab on">Reporting</span>
+    </div>
+    <div class="page">
+      <div class="sechd">Directions and Capabilities</div>
+      <div class="split">
+        <div class="rail"><div class="railin" id="rail"></div></div>
+        <div class="pane" id="pane"></div>
+      </div>
+    </div>
+  </div>
+  <p class="src">Names, the C001 and D001 tables, and the tallies on D003, D004, D005, C001 and C002 are read
+    from your screenshot. D002's name, and the tallies on D001, D002 and C003 to C005, are invented for the
+    drawing. Press any row to see the pane follow it.</p>
+
+  <h2>What changes, and what doesn't</h2>
+  <ul class="facts">
+    <li><b>Where</b><span>Only El Abd's company Reporting page. It is the only box that shows directions and
+      capabilities apart and holds both. Wander's company holds capabilities only, and every unit already
+      reports one list in one rail.</span></li>
+    <li><b>Who</b><span>Anyone who sees both halves: the SMO and the Super user. A direction owner still sees
+      only their directions and a capability owner only their capabilities, with no labels, exactly as
+      today.</span></li>
+    <li><b>Selection</b><span>One selected row on the page instead of two. It opens on your own row if you
+      own one, otherwise on D001, as the rail does today.</span></li>
+    <li><b>Strategy</b><span>Unchanged. Directions and Capabilities stay two tabs there, as you set.</span></li>
+    <li><b>Performance</b><span>Unchanged. Its two groups of gauges are read, not filled, so they stay apart.</span></li>
+    <li><b>Phone</b><span>The rail turns into the strip it already becomes on a phone. The two labels drop out
+      there, and the D and C codes tell the kinds apart.</span></li>
+  </ul>
+
+  <section class="ask">
+    <h2>Decided, 19 October</h2>
+    <ol>
+      <li><b>The heading reads <i>Directions and Capabilities</i>.</b>
+        <span class="rec"><i>Key Measures and Tactics</i> is dropped from it.</span></li>
+      <li><b>Directions first, then capabilities</b>, each under its own label in the rail.</li>
+    </ol>
+    <p class="rec" style="margin-top:.9rem">Built 19 October. Not merged yet.</p>
+  </section>
+</div>
+
+<script>
+  var ROWS = [
+    { g:"Directions", k:"D001", n:"Maximizing Current Stores", kind:"Direction", d:8, t:9, s:"1 figure still to enter",
+      meta:"5 Key Measures · 5 categories figures · 2 Tactics asked" },
+    { k:"D002", n:"Name not in the screenshot", kind:"Direction", d:6, t:7, s:"1 figure still to enter" },
+    { k:"D003", n:"Growing FMCG", kind:"Direction", d:9, t:9, s:"4 figures need a note" },
+    { k:"D004", n:"ELABD Corner, Events and Catering", kind:"Direction", d:3, t:4, s:"1 figure still to enter" },
+    { k:"D005", n:"E-Commerce Growth", kind:"Direction", d:8, t:9, s:"1 figure still to enter" },
+    { g:"Capabilities", k:"C001", n:"End-to-End Quality Mindset", kind:"Capability", d:6, t:6, s:"1 figure needs a note",
+      meta:"6 Key Measures · 0 Tactics asked · 4 outside this cycle" },
+    { k:"C002", n:"ERP Enhancement", kind:"Capability", d:1, t:6, s:"5 figures still to enter" },
+    { k:"C003", n:"Digital Transformation", kind:"Capability", d:4, t:4, s:"" },
+    { k:"C004", n:"Talent & Workforce", kind:"Capability", d:2, t:5, s:"3 figures still to enter" },
+    { k:"C005", n:"Operational excellence", kind:"Capability", d:5, t:5, s:"" }
+  ];
+  var BODY = {
+    D001: '<div class="mini">Tactics</div><div class="tbl"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th>' +
+      '<th>Quarters</th><th>YTD target</th><th>Reported</th><th>Note</th></tr></thead><tbody>' +
+      '<tr><td class="n">1</td><td>Experience Upgrade<span class="why">Localize offering based on store-specific data and neighborhood in-store marketing</span></td>' +
+        '<td>Self-serve dine-in experience design</td><td class="num">1 2 3 4</td><td colspan="3"><span class="notd">Not asked, outside this cycle</span></td></tr>' +
+      '<tr><td class="n">2</td><td><b>Data-Driven Store Management</b></td><td>Forecast Model, Live Transaction Activation</td>' +
+        '<td class="num">1 2 3 4</td><td class="num">100%</td><td><span class="box">In progress · 50 %</span></td><td>Testing</td></tr>' +
+      '<tr><td class="n">3</td><td><b>Categories AOPs</b><span class="why">Bakery, Barista and Ice Cream AOPs</span></td><td>Plan Executed</td>' +
+        '<td class="num">1 2 3 4</td><td class="num">75%</td><td><span class="box empty">—</span></td><td class="why">Note, if there is one</td></tr>' +
+      '</tbody></table></div><p class="more">Its key measures and the categories table sit above the tactics, as today.</p>',
+    C001: '<div class="mini">Key measures</div><div class="tbl"><table><thead><tr><th>#</th><th>Key measure</th><th>Dir.</th>' +
+      '<th>YTD target</th><th>Reported</th><th>Note</th></tr></thead><tbody>' +
+      '<tr><td class="n">1</td><td>FSSC 22000 maintained internally &amp; GFSI-equivalent compliance externally</td><td class="num">≥</td>' +
+        '<td class="num">Yes / No</td><td><span class="box">Completed</span></td><td class="why">Note, if there is one</td></tr>' +
+      '<tr><td class="n">2</td><td>NFSA approval ≥3 branches / quarter</td><td class="num">≥</td>' +
+        '<td class="num">9 #<span class="why">of 12 #</span></td><td><span class="box">30 #</span></td><td>30 Phase one done pending NFSA</td></tr>' +
+      '<tr><td class="n">3</td><td>Reduce critical food safety issues &amp; audit findings vs 2025</td><td class="num">≥</td>' +
+        '<td class="num">3%</td><td><span class="box">2.5 %</span></td><td class="why">Note, if there is one</td></tr>' +
+      '</tbody></table></div><p class="more">Three more key measures below, as today.</p>'
+  };
+  var sel = "C001";
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function tally(r){ return '<span class="rtally' + (r.d >= r.t && !/note/.test(r.s) ? ' full' : '') + '">' + r.d + '/' + r.t + '</span>'; }
+  function draw(){
+    var h = '<div class="rhead">Directions &amp; Capabilities <span>10</span></div>', open = false;
+    ROWS.forEach(function(r){
+      if (r.g) {
+        if (open) h += '</div>';
+        h += '<div class="rgroup' + (r.g === "Directions" ? ' first' : '') + '">' + r.g + ' <span>5</span></div><div class="rows">';
+        open = true;
+      }
+      var sub = r.s ? '<span class="rsub">' + esc(r.s) + '</span>' : '<span class="rsub ok">Complete</span>';
+      h += '<button type="button" class="ritem' + (r.k === sel ? ' on' : '') + '" data-k="' + r.k + '" aria-pressed="' + (r.k === sel) + '">' +
+           '<span class="rcode">' + r.k + '</span><span class="rname">' + esc(r.n) + '</span>' + tally(r) + sub + '</button>';
+    });
+    h += '</div><div class="rfoot">Tally is entries given of asked</div>';
+    document.getElementById("rail").innerHTML = h;
+    var r = ROWS.filter(function(x){ return x.k === sel; })[0];
+    document.getElementById("pane").innerHTML =
+      '<div class="band"><span class="bcode">' + r.k + '</span><span class="bname">' + esc(r.n) + '</span>' +
+      '<span class="bkind">' + r.kind + '</span><span class="bmeta">' + (r.meta ? esc(r.meta) : '') + tally(r) + '</span></div>' +
+      '<div class="pbody">' + (BODY[r.k] || '<p class="placeholder">Its key measures and tactics open here, exactly as they do today.</p>') + '</div>';
+  }
+  document.getElementById("rail").addEventListener("click", function(e){
+    var b = e.target.closest(".ritem"); if (!b) return;
+    sel = b.getAttribute("data-k"); draw();
+    var nb = document.querySelector('.ritem[data-k="' + sel + '"]'); if (nb) nb.focus();
+  });
+  draw();
+</script>

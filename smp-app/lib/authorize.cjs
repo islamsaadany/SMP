@@ -29,7 +29,18 @@
    (spec 006 §4): a partial save leaves the browser holding a picture the
    database does not share, and its next save writes that picture back. */
 
-const R = require("./rules.cjs");
+/* CLOSED FOR THE CHECKER (§590). An object written in JavaScript is open to
+   TypeScript's checker, so `R.isSMOO(…)` read as `any` and a misspelt rule
+   was never a finding — §589 found the same hole on the pages' side. The
+   cast is a comment and a pair of brackets: a mapped copy of the rules' own
+   keys, which is closed. Nothing runs differently. The carried copy in
+   smp-app/lib keeps this comment's `./rules.js` as it is; only this original
+   is checked (`npm run check:rules-types`). */
+/**
+ * @template T
+ * @typedef {{ [K in keyof T]: T[K] }} Closed
+ */
+const R = /** @type {Closed<typeof import("./rules.js")>} */ (require("./rules.cjs"));
 /* §234: the differ and this file must agree about which review fields are
    keyed by target — a field on one list and not the other travels whole and
    reverts every other function's report state (the incident §234 records). */
@@ -102,6 +113,11 @@ const UNIT_CONFIG     = ["name", "navName", "codePrefix", "active", "real", "com
    nothing at all, which is §191 — and §234 is what it costs when the two
    lists that must agree are kept apart. */
 const HIDE_SLIDES     = R.HIDE_SLIDES;
+/* §571: which columns the tactics slides leave out — the company's one
+   switch, judged as `deckHide` (the office's, set beside it in the slide
+   view). Named from the shared module for HIDE_SLIDES' reason. */
+const SLIDE_COLS_OFF  = R.SLIDE_COLS_OFF;
+const SLIDE_BUILD     = R.SLIDE_BUILD;
 /* §266: which subjects a master presentation runs through, and in what order.
    Its own kind rather than a group setting, for HIDE_SLIDES' reason above:
    both land on the office, so this changes no permission — it changes the
@@ -543,6 +559,16 @@ function collect(stored, incoming, w) {
      names the control that sets it. */
   if (!same(sg[MASTER_FLOW], ig[MASTER_FLOW]))
     add("masterFlow", null, "the master presentation's running order");
+  /* §571: the columns the tactics slides leave out. `deckHide`, the eye's
+     own kind: the same person sets it in the same view, and it scores
+     nothing. The two edits go together (§259.2): classified here AND named
+     in gExtra below, or it is swept as unknown. */
+  if (!same(sg[SLIDE_COLS_OFF], ig[SLIDE_COLS_OFF]))
+    add("deckHide", null, "which columns the tactics slides show");
+  /* §579: and whether the slides build line by line — the same menu's
+     neighbour, the same person, the same kind; named in gExtra below too. */
+  if (!same(sg[SLIDE_BUILD], ig[SLIDE_BUILD]))
+    add("deckHide", null, "whether the slides are presented line by line");
   /* §340: how long each subject has when it presents. Its own sentence beside
      the order, for the order's own reason — it scores nothing and hides
      nothing, and a refusal has to name the Presentation menu rather than
@@ -647,7 +673,8 @@ function collect(stored, incoming, w) {
   const gExtra = GROUP_OWN.concat(["items", "swot", "compete", "capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
-                                   SEASONS, DRIVERS_ON, DIR_SCOPE, "planYear", "topProjects"]);
+                                   SEASONS, DRIVERS_ON, DIR_SCOPE, "planYear", "topProjects", SLIDE_COLS_OFF,
+                                   SLIDE_BUILD]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -811,18 +838,30 @@ function addFigures(w, unitKey, storedUnit, rows, what, add) {
 
    The register comes off the STORED world by construction, so this cannot be
    claimed in the request that uses it (§42.2 again, one field over). */
+/* §576: AND THE NOTE IS NOT THE FIGURE. §382 settled *"You enter the figure;
+   the unit writes the note"*, and this function sent the note to the owner
+   with the figure — measured, a unit's custodian and head writing the note on
+   a line somebody else owns were both REFUSED (*"That line is entered by …"*)
+   while the screen offered them the box and Submit waited for it. §576 then
+   gives the owner the note on their own red rows (Islam, agreeing the lock),
+   so the note on an owned line is `lineNote`: the owner's, OR the unit's, and
+   judged as the unit's for anybody who is not the owner. */
 function addOwnedTactics(w, unitKey, storedPillar, rows, add, mine) {
-  const byOwner = {};
+  const byOwner = {}, notes = {};
   rows.forEach(function (r) {
     let stored = null;
     (storedPillar.tactics || []).forEach(function (t) { if (t.id === r.id) stored = t; });
     const who = R.lineOwned(w, stored) && R.lineOwnerIsHere(w, stored)
       ? R.lineOwnerName(stored) : "";
     if (!who) { mine.push(r); return; }
-    (byOwner[who] = byOwner[who] || []).push(Object.assign({}, r, { owner: who }));
+    const into = r.field === "note" ? notes : byOwner;
+    (into[who] = into[who] || []).push(Object.assign({}, r, { owner: who }));
   });
   Object.keys(byOwner).forEach(function (who) {
     add("lineReporting", unitKey, "figures entered by " + who, byOwner[who]);
+  });
+  Object.keys(notes).forEach(function (who) {
+    add("lineNote", unitKey, "the note on a line entered by " + who, notes[who]);
   });
 }
 
@@ -2015,6 +2054,20 @@ function authorize(stored, incoming, person) {
         no("A direction is presented, never submitted on its own — its report is the company's.");
         return;
 
+      /* §576: THE NOTE ON AN OWNED LINE. Its owner's, as the figure is
+         (`lineReporting` above), or the unit's — and for anybody who is not
+         the owner it is judged exactly as the unit's own note is, by falling
+         through to the case below, so a bounded reporter who could not write
+         this row's note before still cannot. A locked cycle takes it from
+         neither. */
+      case "lineNote":
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
+        if (smo || (ch.rows || []).every(function (r) {
+              return R.ownedBy({ owner: r.owner }, person); })) return;
+        /* falls through */
       case "unitReporting":
       case "reportState": {
         const t = String(ch.target || "");
@@ -2031,7 +2084,7 @@ function authorize(stored, incoming, person) {
              the rows of their own direction and nothing else — never the
              company's submission, note or slides. Found through the STORED
              top plan (§42), never the incoming one. */
-          if (ch.kind !== "unitReporting" || !ch.ids || !R.ownsTopPillar(w, person)) {
+          if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids || !R.ownsTopPillar(w, person)) {
             no("The top layer's own plan is reported by the SMO team and the CEO.");
             return;
           }
@@ -2069,7 +2122,7 @@ function authorize(stored, incoming, person) {
             return;
           }
         }
-        if (ch.kind !== "unitReporting" || !ch.ids) return;
+        if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids) return;
         /* "They should be allowed to their lines only" — a rule with teeth,
            so a tenant that opened a bounded row cannot touch anybody else's
            rows. mayReportRow() is the one reach rule the screen also asks

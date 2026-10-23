@@ -72,7 +72,8 @@ var TRAIL = (function(){
                reportState:"Report", capPlan:"Plan", capReporting:"Reporting", gapFill:"Fill",
                gapConfirm:"Fill", arrange:"Order", setup:"Setup", access:"Access", cycle:"Cycle",
                group:"Group", focus:"Focus", claim:"Figure set", claimRequest:"Figure set",
-               sourceReporting:"Reporting", deckHide:"Slides", destroy:"Register",
+               sourceReporting:"Reporting", lineReporting:"Reporting", lineNote:"Reporting",
+               deckHide:"Slides", destroy:"Register",
                /* §266 joins this the day its kind was added, not later: the
                   authoriser's kinds and this map are two lists that must agree,
                   and `kindWord()` falls back to the RAW KEY — so a kind missing

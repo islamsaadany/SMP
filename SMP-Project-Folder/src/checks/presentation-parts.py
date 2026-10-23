@@ -84,7 +84,17 @@ with sync_playwright() as p:
     print("\n4 · what it presents is the company's own Foundation, not a second one")
     n = ev(pg, """()=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor('sec:found');
       return [...d.querySelectorAll('.dslide')].map(s=>s.getAttribute('data-anchor'));}""", [])
-    ck("it is a cover, the Foundation and a Thank you", n == ["cover", "aim", "end"], n)
+    # §557, rewritten to the deck model (§218): the part is the company's
+    # whole Foundation — Who we are, the aim and the values, each where the
+    # structure has it on and it is written — read off the company's OWN
+    # deck between its divider and the next one, never off a list (§94.8).
+    want = ev(pg, """()=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor('group');
+      var a=[...d.querySelectorAll('.dslide')].map(s=>s.getAttribute('data-anchor'));
+      var i=a.indexOf('sfound'); if(i<0) return null; var out=[];
+      for(var j=i+1;j<a.length && !/^s(found|wot|pillars|caps|projects|perf)|^swothead$/.test(a[j]);j++) out.push(a[j]);
+      return out;}""")
+    ck("it is a cover, the company's whole Foundation and a Thank you (§557)",
+       bool(want) and n == ["cover"] + want + ["end"] and "aim" in n, [n, want])
     ck("…and the Foundation slide AGREES with the company review's own (§94.8)",
        ev(pg, """()=>{var a=document.createElement('div'), b=document.createElement('div');
          a.innerHTML = deckHtmlFor('sec:found');
@@ -100,7 +110,11 @@ with sync_playwright() as p:
        ev(pg, "()=>masterSubjects().filter(t=>t.indexOf('sec:')===0)"))
     made = ev(pg, """()=>{
       var st = JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP) || {}));
-      st.top = st.top || {}; st.top.on = (st.top.on || []).concat(['swot']);
+      /* From the EFFECTIVE list, not an empty one: with no stored answer the
+         top layer reads every part ON, and starting from [] switched the
+         aim and the objectives off while switching the SWOT on — invisible
+         until §557 made the deck follow the structure. */
+      st.top = st.top || {}; st.top.on = (st.top.on || SMPRules.STRUCT_COMPONENTS.slice()).concat(['swot']);
       GROUP.structure = st;
       GROUP.swot = { s:['A real strength'], w:['A real weakness'], o:[], t:[] };
       return compOn('group','swot');}""")

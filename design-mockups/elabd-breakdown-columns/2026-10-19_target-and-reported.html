@@ -1,0 +1,207 @@
+<title>Categories Target and Reported</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  /* Layout: a reading column with the pane drawn twice inside it, today above
+     and proposed below. Tokens: the platform's furniture (_shared.css) in
+     El Abd's tan brand, as on the screenshot of its Reporting page. */
+  :root {
+    --ground:#F6F7F9; --surface:#FFFFFF; --surface-2:#EEF1F4;
+    --line:#D9DEE5; --line-soft:#E8EBF0; --field-line:#5F6B7A;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#69717D;
+    --panel:#D5B48B; --panel-ink:#3E2F1D; --panel-quiet:#6B5639;
+    --accent:#D98993; --accent-wash:#FBEFF0;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --bad:#A8372A;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#252A33;
+      --line:#353C47; --line-soft:#2B313B; --field-line:#7D8794;
+      --ink:#E9ECF1; --ink-2:#B9C1CC; --ink-3:#959EAB;
+      --panel:#5C4830; --panel-ink:#F3E7D6; --panel-quiet:#D7C3A6;
+      --accent:#E69CA5; --accent-wash:#3A2428;
+      --good:#6CC096; --good-bg:#1B3129; --bad:#E58378;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#252A33;
+    --line:#353C47; --line-soft:#2B313B; --field-line:#7D8794;
+    --ink:#E9ECF1; --ink-2:#B9C1CC; --ink-3:#959EAB;
+    --panel:#5C4830; --panel-ink:#F3E7D6; --panel-quiet:#D7C3A6;
+    --accent:#E69CA5; --accent-wash:#3A2428;
+    --good:#6CC096; --good-bg:#1B3129; --bad:#E58378;
+    color-scheme: dark;
+  }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:68rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.5rem 4rem; }
+
+  header { border-bottom:2px solid var(--panel); padding-bottom:1.1rem; margin-bottom:1.8rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--panel-quiet); margin:0 0 .35rem; }
+  h1 { font-size:1.9rem; line-height:1.15; margin:0 0 .5rem; font-weight:700; text-wrap:balance; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  h2 { font-size:1.2rem; margin:2.4rem 0 .6rem; font-weight:700; text-wrap:balance; }
+  p { max-width:46rem; }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:var(--track);
+         text-transform:uppercase; padding:.2rem .55rem; border-radius:999px; margin:0 0 .6rem; }
+  .tag.today { background:var(--surface-2); color:var(--ink-3); border:1px solid var(--line); }
+  .tag.after { background:var(--accent-wash); color:var(--bad); border:1px solid var(--accent); }
+
+  /* ── the pane, drawn with the product's own parts ── */
+  .pane { border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden; }
+  .band { display:flex; flex-wrap:wrap; gap:.3rem .8rem; align-items:baseline; padding:.75rem .9rem;
+          background:var(--surface-2); border-bottom:1px solid var(--line); border-left:3px solid var(--accent); }
+  .band .bcode { font:700 13px/1 var(--mono); }
+  .band .bname { font-size:1.05rem; font-weight:700; }
+  .band .bkind { font-size:11.5px; color:var(--ink-2); }
+  .band .bmeta { margin-left:auto; font-size:12px; color:var(--ink-3); display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
+  .rtally { font:600 12px/1 var(--mono); color:var(--ink-3); border:1px solid var(--line);
+            border-radius:999px; padding:.25rem .5rem; background:var(--surface-2); white-space:nowrap; }
+  .pbody { padding:.4rem .9rem 1rem; }
+  .mini { font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+          color:var(--ink-2); margin:.8rem 0 .45rem; }
+  .tbl { overflow-x:auto; border:1px solid var(--line); border-radius:12px; }
+  table { border-collapse:collapse; width:100%; font-size:13.5px; min-width:38rem; }
+  th { background:var(--panel); color:var(--panel-ink); font-size:10px; font-weight:700;
+       letter-spacing:var(--track); text-transform:uppercase; text-align:left; padding:.8rem .9rem;
+       border-left:1px solid var(--line-soft); white-space:nowrap; }
+  th:first-child { border-left:0; }
+  th.cc, td.cc { text-align:center; }
+  td { padding:.7rem .9rem; border-top:1px solid var(--line-soft); border-left:1px solid var(--line-soft); vertical-align:top; }
+  td:first-child { border-left:0; }
+  tbody tr:nth-child(even) td { background:var(--surface-2); }
+  td.n { color:var(--ink-3); width:1.5rem; }
+  td.num { font-family:var(--mono); text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  td.notecol { width:30%; }
+
+  /* the reporting box: the number, and its unit fixed inside the box */
+  .entry { display:inline-flex; align-items:stretch; border:1px solid var(--field-line); border-radius:6px;
+           overflow:hidden; background:var(--surface); vertical-align:middle; }
+  .entry.filled { border-color:var(--good); }
+  .entry .v { display:block; width:78px; padding:.35rem .55rem; text-align:right; font-family:var(--mono);
+              font-variant-numeric:tabular-nums; }
+  .entry.filled .v { background:var(--good-bg); }
+  .unitsuf { display:flex; align-items:center; padding:0 9px; background:var(--surface-2);
+             border-left:1px solid var(--line); font-family:var(--mono); font-size:12px; color:var(--ink-3); }
+  /* today's fault: the % is outside the box, so it falls under it as a strip */
+  .stray { display:flex; align-items:center; padding:.1rem .6rem; margin-top:.2rem; background:var(--surface-2);
+           border-left:1px solid var(--line); font-family:var(--mono); font-size:12px; color:var(--ink-3); text-align:left; }
+  .of { display:block; font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-top:.2rem; }
+  .note { display:block; border:1px solid var(--field-line); border-radius:6px; padding:.35rem .6rem;
+          color:var(--ink-3); background:var(--surface); }
+  .dir { font-style:italic; }
+
+  .facts { list-style:none; padding:0; margin:.4rem 0 0; max-width:48rem; }
+  .facts li { display:grid; grid-template-columns:7.5rem 1fr; gap:.8rem; padding:.6rem 0; border-top:1px solid var(--line-soft); }
+  .facts li:first-child { border-top:0; }
+  .facts b { font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--panel-quiet); padding-top:.15rem; }
+  @media (max-width:30rem) { .facts li { grid-template-columns:1fr; gap:.1rem; } }
+  .src { font-size:12.5px; color:var(--ink-3); margin-top:.6rem; }
+  .ask { margin-top:2.4rem; background:var(--surface); border:1px solid var(--panel); border-radius:12px; padding:1.1rem 1.2rem; }
+  .ask h2 { margin-top:0; }
+  .ask p { margin:.4rem 0 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">El Abd · Reporting · mockup for sign-off, nothing built yet</p>
+    <h1>Target and Reported, side by side</h1>
+    <p class="standfirst">The categories table on Reporting gets a Target column and a Reported column,
+      the way the Key Measures table above it already reads.</p>
+  </header>
+
+  <span class="tag today">Today</span>
+  <div class="pane">
+    <div class="band"><span class="bcode">D001</span><span class="bname">Maximizing Current Stores</span>
+      <span class="bkind">Direction</span>
+      <span class="bmeta">5 Key Measures · 5 categories figures · 2 Tactics asked · 1 outside this cycle <span class="rtally">9/12</span></span></div>
+    <div class="pbody">
+      <div class="mini">Categories</div>
+      <div class="tbl"><table>
+        <thead><tr><th>#</th><th>Categories</th><th class="cc">Target Mix% <span class="dir">≥</span></th><th>Note</th></tr></thead>
+        <tbody id="today"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <p class="src">One column holds the box and the target together, and the % has slipped out of the box
+    into a grey strip under it.</p>
+
+  <h2>Proposed</h2>
+  <span class="tag after">After</span>
+  <div class="pane">
+    <div class="band"><span class="bcode">D001</span><span class="bname">Maximizing Current Stores</span>
+      <span class="bkind">Direction</span>
+      <span class="bmeta">5 Key Measures · 5 categories figures · 2 Tactics asked · 1 outside this cycle <span class="rtally">9/12</span></span></div>
+    <div class="pbody">
+      <div class="mini">Categories</div>
+      <div class="tbl"><table>
+        <thead><tr><th>#</th><th>Categories</th><th class="cc">Target Mix% <span class="dir">≥</span></th><th class="cc">Reported</th><th>Note</th></tr></thead>
+        <tbody id="after"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <p class="src">Names, targets and reported figures are read from your screenshot of D001.</p>
+
+  <h2>A table with more than one column</h2>
+  <p>Each column gets its own pair, target then reported, in the order the plan lists them.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>Regions</th><th class="cc">Revenue per store (M EGP) <span class="dir">≥</span></th><th class="cc">Reported</th>
+      <th class="cc">Prime-location share <span class="dir">≥</span></th><th class="cc">Reported</th><th>Note</th></tr></thead>
+    <tbody id="two"></tbody>
+  </table></div>
+  <p class="src">Invented demo data (Raya Trade's Retail stores), shown only to draw the two-column case.</p>
+
+  <h2>What changes, and what doesn't</h2>
+  <ul class="facts">
+    <li><b>Where</b><span>The categories table on Reporting only, for every company, unit, function and
+      capability that has one. Strategy, Performance and the slides are unchanged.</span></li>
+    <li><b>Target</b><span>Read-only, the figure the plan sets for that category. It is not prorated,
+      exactly as today.</span></li>
+    <li><b>Reported</b><span>The same box as today. The % now sits inside the box, as it does on Key
+      Measures.</span></li>
+    <li><b>Nothing else</b><span>No figure, score, tally or permission changes. Only where the target is
+      drawn.</span></li>
+  </ul>
+
+  <section class="ask">
+    <h2>Your call</h2>
+    <p>Go ahead and build this as drawn?</p>
+  </section>
+</div>
+
+<script>
+  var ROWS = [["Bakery","10","13%"],["Barista","5","5%"],["Western","16","15%"],["Oriental","12","14%"],["Ice Cream","9","12%"]];
+  var note = '<span class="note">Note, if there is one</span>';
+  function box(v, u){
+    return '<span class="entry' + (v ? ' filled' : '') + '"><span class="v">' + (v || '—') + '</span>' +
+      (u ? '<span class="unitsuf">' + u + '</span>' : '') + '</span>';
+  }
+  document.getElementById("today").innerHTML = ROWS.map(function(r, i){
+    return '<tr><td class="n">' + (i+1) + '</td><td>' + r[0] + '</td>' +
+      '<td class="cc"><span class="entry filled"><span class="v">' + r[1] + '</span></span>' +
+      '<span class="stray">%</span><span class="of">/ ' + r[2] + '</span></td>' +
+      '<td class="notecol">' + note + '</td></tr>';
+  }).join("");
+  document.getElementById("after").innerHTML = ROWS.map(function(r, i){
+    return '<tr><td class="n">' + (i+1) + '</td><td>' + r[0] + '</td>' +
+      '<td class="num">' + r[2] + '</td><td class="cc">' + box(r[1], "%") + '</td>' +
+      '<td class="notecol">' + note + '</td></tr>';
+  }).join("");
+  var TWO = [["Greater Cairo","60","64","70%","58"],["Alexandria","52","55","60%","50"],["Delta","45","47","50%","38"],["Upper Egypt","40","36","45%","31"]];
+  document.getElementById("two").innerHTML = TWO.map(function(r, i){
+    return '<tr><td class="n">' + (i+1) + '</td><td>' + r[0] + '</td>' +
+      '<td class="num">' + r[1] + '</td><td class="cc">' + box(r[2], "") + '</td>' +
+      '<td class="num">' + r[3] + '</td><td class="cc">' + box(r[4], "%") + '</td>' +
+      '<td class="notecol">' + note + '</td></tr>';
+  }).join("");
+</script>

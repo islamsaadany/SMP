@@ -285,6 +285,39 @@ with sync_playwright() as pw:
     ok("the card counts the scored columns among its measures (§264)",
        nums and nums["measures"] == str(sc["rows"] + 2), {"card": nums, "sc": sc})
 
+    # §568: PERFORMANCE READS TARGET, THEN ACTUAL — two columns per column, as
+    # §557 laid Reporting out. Islam: *"color code the actual as you did
+    # earlier but after splitting to 2 columns in both the performance and the
+    # slides"*. The head is read as textContent: the page uppercases it in CSS
+    # and innerText would hand back the paint rather than the words.
+    perf = pg.evaluate("""()=>{
+      const hs = [...document.querySelectorAll('#panel h5.mini')]
+        .filter(h => h.textContent.trim() === 'Categories');
+      const h = hs[hs.length - 1]; if (!h) return { none: true };
+      const w = h.nextElementSibling, t = w && (w.matches('table') ? w : w.querySelector('table'));
+      if (!t) return { none: true };
+      const rows = [...t.querySelectorAll('tbody tr')].map(tr =>
+        [...tr.querySelectorAll('td')].map(td => {
+          const b = td.querySelector('b');
+          return { t: td.textContent.trim(), ink: b ? b.style.color : '' }; }));
+      const p = UNITS['mobile'].items[1], c0 = SMPRules.bdCols(p)[0];
+      const probe = document.createElement('b'); probe.style.color = bandInk(57);
+      return { head: [...t.querySelectorAll('thead th')].map(x => x.textContent.trim()),
+               rows, bad: probe.style.color,
+               t0: SMPRules.bdTarget(SMPRules.bdRows(p)[0], c0),
+               a0: SMPRules.bdActual(SMPRules.bdRows(p)[0], c0) }; }""")
+    ok("Performance heads each column with its target, then Actual (§568)",
+       perf.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
+                            "Mix", "Actual"], perf.get("head"))
+    r0 = (perf.get("rows") or [[]])[0]
+    ok("...the target and the figure sit in two cells, with no slash between them",
+       len(r0) == 8 and r0[2]["t"] == perf.get("t0") and r0[3]["t"] == perf.get("a0") and
+       not any("/" in c["t"] for row in perf.get("rows", []) for c in row), perf)
+    ok("...the actual still wears its band — Bakery's growth, 4 of 7, in the alarm ink",
+       len(r0) == 8 and r0[3]["ink"] and r0[3]["ink"] == perf.get("bad"), r0)
+    ok("...and the indicator's actual stays plain",
+       len(r0) == 8 and r0[7]["ink"] == "" and r0[7]["t"], r0)
+
     print("\n4 · the indicator scores nothing and never asks for a note")
     # THE COLUMN HAS TO BE FOUND FIRST (§113.8, §94.5). Without this, a build
     # that scores EVERY column leaves `c` undefined, `bdCellScore(r, undefined)`
@@ -334,20 +367,42 @@ with sync_playwright() as pw:
       const tbs=[...document.querySelectorAll('#panel table')]
         .filter(t=>t.innerText.indexOf('Bakery')>-1);
       if(!tbs.length) return { tables:0 };
-      const t=tbs[0];
+      const t=tbs[0], r0=[...t.querySelectorAll('tbody tr')][0];
+      const cells=[...r0.children];
+      /* §557: each box's own cell, and the cell BEFORE it — the target
+         column, by position, never by searching the row for the figure. */
+      const pairs=cells.map((td,i)=>td.querySelector('input[data-bdcol]')
+          ? { tgt: cells[i-1].innerText.trim(),
+              tgtBox: !!cells[i-1].querySelector('input'),
+              unitIn: !!td.querySelector('.entry > .unitsuf'),
+              unitOut: [...td.children].some(e=>e.classList.contains('unitsuf')),
+              stacked: td.innerText.indexOf('/') > -1 } : null).filter(Boolean);
       return { tables: tbs.length,
         head: [...t.querySelectorAll('th')].map(x=>x.innerText.trim()),
         boxes: t.querySelectorAll('input[data-bdcol]').length,
         notes: t.querySelectorAll('[data-note]').length,
         rows: t.querySelectorAll('tbody tr').length,
-        behind: [...t.querySelectorAll('tbody tr')][0].innerText.indexOf('/ 7%') > -1,
+        width: cells.length, pairs: pairs,
         wantnote: t.querySelectorAll('tr.wantnote').length }; }""")
     ok("the Reporting page draws the breakdown", rep.get("tables") == 1, rep)
     ok("...with a box per asked cell (three columns, two rows)",
        rep.get("boxes") == 6, rep)
     ok("...ONE note per row, not one per figure", rep.get("notes") == rep.get("rows"), rep)
-    ok("...the target behind each box, so nobody has to remember it",
-       rep.get("behind") is True, rep)
+    # §557: TARGET AND REPORTED, two columns per breakdown column, the way the
+    # Key Measures table beside it reads. Islam: *"needs to appear in the form
+    # of target and report not 1 column"*. The head is asserted WHOLE, so a
+    # build that drops either half of any pair, or reorders them, is red.
+    hd = [h.upper().replace(" ", "") for h in (rep.get("head") or [])]
+    ok("...the head reads each column's own name, then Reported (§557)",
+       hd[2:9] == ["GROWTH≥", "REPORTED", "CM≥", "REPORTED", "MIX", "REPORTED", "NOTE"],
+       rep.get("head"))
+    ok("...and every row is as wide as the head", rep.get("width") == len(hd), rep)
+    pr = rep.get("pairs") or []
+    ok("...each box has its target in the column before it, as a figure (§557)",
+       [p["tgt"] for p in pr] == ["7%", "69%", "13%"] and not any(p["tgtBox"] for p in pr), pr)
+    ok("...and the target is no longer stacked under the box", not any(p["stacked"] for p in pr), pr)
+    ok("...with the unit inside the box, not fallen out under it (§557)",
+       len(pr) == 3 and all(p["unitIn"] and not p["unitOut"] for p in pr), pr)
     ok("...and the row whose growth is off track is rung for a note",
        rep.get("wantnote") == 1, rep)
     typed = pg.evaluate("""()=>{ const p=UNITS['mobile'].items[1];
@@ -372,14 +427,25 @@ with sync_playwright() as pw:
       return { slides: sl.length,
                head: [...sl[0].querySelectorAll('th')].map(t=>t.innerText.trim()),
                banded: sl[0].querySelectorAll('td.final').length,
+               bandedAreActuals: [...sl[0].querySelectorAll('tbody tr')].every(tr => {
+                 const td = [...tr.querySelectorAll('td')];
+                 return [3, 5].every(i => td[i] && td[i].classList.contains('final')) &&
+                        [2, 4, 6, 7].every(i => td[i] && !td[i].classList.contains('final')); }),
+               slash: [...sl[0].querySelectorAll('td.num')].some(td => td.textContent.indexOf('/') > -1),
                anchor: sl[0].getAttribute('data-anchor'),
                note: sl[0].innerText.indexOf('Ramadan') > -1 }; }""")
     ok("the breakdown has one slide of its own", deck.get("slides") == 1, deck)
-    ok("...its head carries the direction on the scored columns only",
-       deck.get("head") and deck["head"][2].endswith("≥") and
-       not deck["head"][4].endswith("≥"), deck.get("head"))
+    # §568 REWROTE THIS ONE: it read the head as one column per column
+    # (`head[2]` scored, `head[4]` the indicator). Each is two now.
+    ok("...its head is each column's target, then Actual, the direction on the scored only",
+       deck.get("head") == ["#", "Categories", "Growth ≥", "Actual", "CM ≥", "Actual",
+                            "Mix", "Actual", "Note"], deck.get("head"))
     ok("...only the scored cells are banded (one per row)",
        deck.get("banded") == 4, deck)
+    ok("...and the band is on the ACTUAL, never on its target or the indicator (§568)",
+       deck.get("bandedAreActuals") is True, deck)
+    ok("...with no target stacked under a figure any more",
+       deck.get("slash") is False, deck)
     ok("...and it carries its own anchor, clear of the measures slide's",
        deck.get("anchor", "").endswith("b"), deck.get("anchor"))
 

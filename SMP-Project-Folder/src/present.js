@@ -55,7 +55,7 @@ function dBand(v){ return band(v); }
    which is one test rather than an unconditional plate and a white rectangle
    in the corner of every divider. */
 var SEC_WORD = { sfound:"FOUND", swothead:"SWOT", spillars:"PILLARS",
-                 sperf:"SCORE" };
+                 sperf:"SCORE", scaps:"CAPS", sprojects:"PLAN" };
 function sectSlide(key, label, title, sub, cells){
   return '<section class="dslide d-cover d-sect"' + anch(key, label) +
     sec(SEC_WORD[key] || secTwo(title), title, true) + '>' +
@@ -127,8 +127,26 @@ function anch(key, label, where){
    surface to want a deck cannot get a different one. `unitLike()` resolves a
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
+/* ── THE PLAN IS THIS DECK WITHOUT ITS FIGURES (§564) ───────────────────
+   Islam agreed the plan download be the presentation's own slides with
+   every reported figure taken out, one template rather than two builders
+   (spec 066 §5). `buildPlanPptx` sets this while it asks `deckHtmlFor`; the
+   few things only a plan carries are drawn here, and taking the figures
+   out is the converter's (`planDeckBox` in pptx.js). It is never left on. */
+var DECK_PLAN = false;
+var DECK_EXAMPLE = false;   /* §574.2: drawing the guided tour's example */
+/* What the plan still OWES is named, in the platform's red, as the plan
+   download always did (§119): a tactic's owner or quarters, the aspiration,
+   an empty SWOT box. The review shows none of it — it is about the figures. */
+var PLAN_MISS = '<span class="missing">Missing</span>';
 function deckHtmlFor(target){
   var t = String(target || ""), r = boxRef(t);
+  /* §554.1: and a part of the FLOW that is not a box either — its cover,
+     and a group's roll-call in front of the first of its members. Answered
+     before `boxRef`, which would read an unknown prefix as a business unit. */
+  if (t.indexOf("flow:") === 0) return flowPartHtml(t);
+  /* §574: the guided tour's made-up direction, drawn fresh on every open. */
+  if (t === EXAMPLE_T) return exampleDeckHtml();
   /* §481: a direction's own deck, presented by whoever owns it. */
   if (r.kind === "dir") return dirDeckHtml(t);
   /* §553: and a part of the order that is not a box at all. */
@@ -202,7 +220,7 @@ function deckAnchors(kind, key){
 
 /* §405: the aim slides, lifted out of deckSlides so a unit that plans in
    projects or objectives presents its aspiration too (§53.5: one builder). */
-function unitAimSlides(u){
+function unitAimSlides(u, bare){
   var S = [];
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
@@ -235,7 +253,9 @@ function unitAimSlides(u){
      one thing rather than printing a horizon that appears nowhere after it. */
   var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
   if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || aimAsp)
+  /* §557: `bare` leaves the divider to foundationPart(), which draws it
+     once in front of the whole part, Who we are and Values included. */
+  if (!bare && (aimRows || aimAsp))
     S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
       "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
       foundCells));
@@ -244,7 +264,7 @@ function unitAimSlides(u){
     '><h2>What we are aiming at</h2>' +
     (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
-      '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
+      '<p class="asp2">' + (u.aspiration || !DECK_PLAN ? esc(u.aspiration) : PLAN_MISS) + '</p></div>' +
       (u.endInMind
         ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
@@ -264,7 +284,13 @@ function unitAimSlides(u){
 /* §405: the SWOT section, lifted out of deckSlides for the same reason. */
 function unitSwotSlides(u){
   var S = [];
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
+  /* §557 reverses §243's "a unit with an empty SWOT still draws its
+     section": Islam chose the deck model on a page that said, of every
+     part, switched on but empty draws no slide yet — and the company's
+     analysis has always worked that way. One rule for every box. */
+  var swAny = u.swot && SMPRules.swotQuads(GROUP, u.ukey).some(function(q){
+    return (u.swot[q] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!u.fnKey && compOn(u.ukey, "swot") && (swAny || DECK_PLAN)) {
     /* §418: the boxes this layer carries, under the layer's own names. */
     var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
     var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
@@ -293,11 +319,90 @@ function unitSwotSlides(u){
         (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
                               : anch("swot" + x[0], "After " + x[1])) +
         '><h2>' + esc(x[1]) + '</h2>' +
-        '<ol class="dswot">' + items + '</ol></section>');
+        (items || !DECK_PLAN ? '<ol class="dswot">' + items + '</ol>' : '<p>' + PLAN_MISS + '</p>') + '</section>');
     });
   }
 
   return S;
+}
+/* ── §557: THE DECK SHOWS WHAT THE BOX'S STRUCTURE HAS ──────────────────
+   Islam, choosing the deck model: *"the presentation should show what the
+   function or unit or company has in their structure"* — not a list kept per
+   kind of box. Client set-up › Structure switches each Foundation part on or
+   off per layer (`compOn`, §404); a part that is on AND filled in is a slide,
+   on every kind of box, through these two builders and the aim slide beside
+   them. Off, or on and empty, draws nothing (§253: a heading over nothing is
+   not a slide).
+
+   WHERE A BOX'S FOUNDATION IS KEPT: the group's on GROUP, a unit's on its
+   UNITS entry, a function's on FUNCTIONS, a capability's on its own record.
+   Read from the target, never from the kind of deck asking. */
+function foundSrc(target){
+  var t = String(target || ""), r = boxRef(t);
+  if (t === "group") return GROUP;
+  if (r.kind === "fn") return FUNCTIONS[r.key] || null;
+  if (r.kind === "cap") return capById(r.key) || null;
+  return UNITS[t] || null;
+}
+/* "Who we are": the brief's lines and the description, with the purpose
+   under them — each only where it is switched on and written. */
+function whoWeAreSlide(target){
+  var o = foundSrc(target);
+  if (!o) return "";
+  var lines = !compOn(target, "brief") ? [] : (o.clauses || []).filter(function(c){
+    return c && String(c[1] || "").trim(); });
+  var desc = !compOn(target, "desc") ? "" : String(o.desc || o.def || "").trim();
+  var mission = !compOn(target, "purpose") ? "" : String(o.mission || "").trim();
+  if (!lines.length && !desc && !mission) return "";
+  return '<section class="dslide d-who"' + anch("who", "After “Who we are”") + '>' +
+    '<h2>Who we are</h2>' +
+    (desc ? '<p class="whodesc">' + esc(desc) + '</p>' : '') +
+    (lines.length ? '<dl class="wholines">' + lines.map(function(c){
+      return '<dt>' + esc(c[0] || "") + '</dt><dd>' + esc(c[1]) + '</dd>'; }).join("") + '</dl>' : '') +
+    (mission ? '<div class="whomission"><span class="dlab">' + L1("purpose") + '</span>' +
+      '<p>' + esc(mission) + '</p></div>' : '') +
+    '</section>';
+}
+/* The values, one card each, where Values is switched on and written. */
+function valuesSlide(target){
+  var o = foundSrc(target);
+  if (!o || !compOn(target, "values")) return "";
+  var vals = (o.values || []).filter(function(v){ return v && String(v.name || "").trim(); });
+  if (!vals.length) return "";
+  return '<section class="dslide d-values"' + anch("values", "After the values") + '>' +
+    '<h2>' + esc(L("values", target === "group" ? "group" : "bu")) + '</h2>' +
+    '<div class="dvals" style="--n:' + vals.length + '">' + vals.map(function(v){
+      return '<div class="dval"><b>' + esc(v.name) + '</b>' +
+        (String(v.def || "").trim() ? '<span>' + esc(v.def) + '</span>' : '') + '</div>'; }).join("") +
+    '</div></section>';
+}
+/* THE FOUNDATION PART, IN ONE ORDER FOR EVERY BOX (§557): its divider, who
+   we are, what we are aiming at, the values, and the key objectives read
+   against their targets. The divider is drawn only when something follows
+   it (§253), and it is the part's own: Islam chose *"before every part"*. */
+function deckFoundationBody(target, aim, objectives){
+  /* The whole section has a switch of its own (Client set-up › Structure,
+     `foundOn`), and a name of its own on each layer — "Overview" on a
+     function and a capability (`foundTitle`). Off, the part is not drawn. */
+  if (!SMPRules.foundOn(GROUP, target)) return [];
+  return [whoWeAreSlide(target)].concat(aim || [], [valuesSlide(target)], objectives || [])
+    .filter(Boolean);
+}
+function foundationPart(target, name, cells, aim, objectives){
+  var body = deckFoundationBody(target, aim, objectives);
+  if (!body.length) return [];
+  return [sectSlide("sfound", "After the Foundation divider", SMPRules.foundTitle(GROUP, target) || "Foundation",
+    "What " + name + " is aiming at, and the objectives it is judged on.", cells)].concat(body);
+}
+/* A SWOT divider in front of a SWOT drawn as one slide (a function's
+   strengths and weaknesses, the company's analysis), so every part opens
+   the same way (§557). */
+function swotPart(target, name, slides){
+  slides = (slides || []).filter(Boolean);
+  if (!slides.length) return [];
+  return [sectSlide("swothead", "After the SWOT title page",
+    SMPRules.swotTitle(GROUP, target) || LTraw(target, "swot"),
+    "Where " + name + " is strong, exposed, and what the market is offering it.", null)].concat(slides);
 }
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
@@ -336,10 +441,119 @@ function competeSlides(u){
    beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
    both callers build cells and hand them here. A change to the wording, the
    bands or the footer reaches both by construction. */
-function standCell(label, val, sub){
+function standCell(label, val, sub, detail){
   return '<div class="headcell"><span class="dlab">' + label + '</span>' +
     '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
-    '<span class="headsub">' + sub + '</span></div>';
+    '<span class="headsub">' + sub + '</span>' + (detail || '') + '</div>';
+}
+/* ── §578: WHERE THE TWO READINGS COME FROM ───────────────────────────────
+   Islam: *"for the overall performance slide with the final 2 numbers we
+   need to give a detail below the 2 numbers to show where the numbers are
+   coming from"*; of three ways put to him, the lines themselves (*"A ok"*).
+
+   EACH LINE IS READ BY THE FUNCTION THAT SCORED IT, never worked out again
+   here (§53.5): a key measure's figure is `measureScore`, a category
+   column's `bdColScore` — the two lists `pillarPerf` averages — and a
+   tactic's is `tacticReads` of `tacticPlanShare`, the two `pillarExec` and
+   `pillarPlan` average. So the lines cannot disagree with the number above
+   them. What the reading leaves out is said, quietly, under the list: a
+   tactic not due and one not reported are not zero, and a reader adding up
+   the lines needs to know why they are not there.
+
+   Directions only, on the deck that ends on them. Five lines, then "and N
+   more" — never "and 1 more", which would take the line it saves. */
+var STAND_DETAIL_MAX = 5;
+function standDetail(rows, note){
+  if (!rows.length && !note) return "";
+  var cut = rows.length > STAND_DETAIL_MAX + 1 ? STAND_DETAIL_MAX : rows.length;
+  return '<ul class="headdetail">' + rows.slice(0, cut).map(function(r){
+      return '<li><span class="hdn">' + esc(r.name) + '</span><span class="hdv">' + r.fig + '</span></li>';
+    }).join("") +
+    (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
+    (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
+}
+function dirMeasureDetail(p){
+  var rows = scorableMeasures(p).map(function(m){
+    var v = measureScore(m);
+    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+  });
+  if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
+    var v = bdColScore(p, c);
+    if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
+                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+  });
+  return standDetail(rows, "");
+}
+function dirExecDetail(p){
+  var rep = reportedTactics(p), due = dueTactics(p);
+  var rows = rep.map(function(t){
+    var r = tacticProgress(t);
+    return { name:t.name,
+             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+                 '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
+  });
+  var notDue = SMPRules.shown(p.tactics || []).length - due.length;
+  var unrep = due.length - rep.length;
+  var left = [notDue ? notDue + " not due" : "", unrep ? unrep + " not reported" : ""].filter(Boolean);
+  return standDetail(rows, left.length ? "Not counted: " + left.join(", ") : "");
+}
+/* ── ONE TEMPLATE FOR EVERY BOX (§586, spec 066 §5) ──────────────────────
+   Islam agreed the last step of the simplification: *"one template for every
+   box, built from its sections in a fixed order"*. A unit's deck and a
+   function's were two builders of some four hundred lines each, and each
+   wrote its own cover, its own Overall performance block, its own notes and
+   its own Thank you — the same slides twice, which is how §553.2 found a
+   projects box ending on its last milestone with no reading at all.
+
+   THE ORDER IS WRITTEN ONCE, HERE: cover · Foundation · Analysis · the plan ·
+   Overall performance · notes · Thank you. What differs between boxes is the
+   PLAN part alone — pillars (`pillarsPlanPart`) or projects and actions
+   (`projectsPlanPart`) — because that is the one thing that really is
+   different about them; everything around it is these few slides.
+
+   `deckSlides` and `deckSlidesFn` are what is left of the two builders: each
+   reads its box and hands this the parts. Proved by drawing every deck on
+   every state held — 396 of them — before and after, byte for byte. */
+function coverSlide(title, mark, markAlt, subHtml){
+  return '<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", title, true) + '>' +
+    (mark
+        ? '<img class="dcovermark" src="' + esc(mark) + '" alt="' + esc(markAlt) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    subHtml + '</section>';
+}
+function thanksSlide(name){
+  return '<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
+    sec("END", "Thank you") +
+    '><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(name) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+/* §243: drawn only when a note is written — the caller asks. */
+function notesSlide(key, text){
+  return '<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
+    '><h2>Notes and achievements</h2>' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(key) + '">' +
+      esc(text) + '</div>' +
+    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
+    'platform, not in a deck that is already wrong.</p></section>';
+}
+/* THE CLOSING BLOCK (§254.4, §259.1, §553.2): its divider, the score tables,
+   then where the box stands. A box with no reading and no table has no
+   block at all (§45.2) — a divider over nothing is a blank slide. */
+function perfPart(sub, scores, stand){
+  if (!scores.length && !stand) return [];
+  return [sectSlide("sperf", "After the Overall performance divider", "Overall performance", sub, null)]
+    .concat(scores, stand ? [stand] : []);
+}
+function deckOf(b){
+  var note = cycleNote(b.noteKey);
+  return [coverSlide(b.name, b.mark, b.markAlt, b.coverSub)]
+    .concat(b.found, b.analysis, b.plan.slides,
+            perfPart(b.perfSub, b.plan.scores, b.stand),
+            note ? [notesSlide(b.noteKey, note)] : [],
+            [thanksSlide(b.name)]).join("");
 }
 function standSlideOf(name, cells, foot){
   cells = cells.filter(Boolean);
@@ -368,28 +582,185 @@ function deckBoxName(u){
   return (u && u.topLayer && String(GROUP.org || "").trim()) || (u && u.name) || "";
 }
 
+function pillarCard(u, p, i){
+  /* §542: on a box SHOWN APART, an internal pillar says what it is where
+     it has nothing else to say — exactly as a capability's own card does
+     below, so a client whose capabilities have become pillars reads the
+     roll-call it read when they were records. Its own sub-line still wins.
+
+     THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
+     six of the worked example's ten units carry a pillar marked Capability
+     in one joined list, and the first draft of this line put the word
+     "Capability" under every one of them on their decks. checks/
+     deck-figures.py caught it on the heading below; the same mistake was
+     here, one line up, and the same guard closes both. */
+  var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
+  return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
+    '<span class="pcard-n">' + esc(p.name) + '</span>' +
+    (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
+    /* §416: the years each direction runs in, and a later one says when. */
+    (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+    '</div>';
+}
+
+/* ── THE ROLL-CALL, FOR WHOEVER IS DRAWING IT (§554.1) ──────────────────
+   It was written inside `deckSlides`, which is the only place that needed
+   it until Islam asked for the same page in the MASTER flow: *"before the
+   directions I find the grouped directions and same for the capabilities"*.
+   Lifted out unchanged so the flow shows the same slide the company's own
+   review shows, and a change to one is a change to both (§53.5). */
+function groupSize(g){
+  return g.ix.length + (g.cards ? boardCapTargets().length : 0);
+}
+function rollCallSlide(u, g){
+  var n = groupSize(g);
+  if (!n) return "";
+  return '<section class="dslide"' +
+    anch(g.names, "After the " + g.plain + " names") +
+    '><h2>' + g.many + '</h2>' +
+    '<div class="pcards" style="--n:' + n +
+      ';--c:' + pillarCols(n) +
+      ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
+    g.ix.map(function(x){ return pillarCard(u, x.p, x.i); }).join("") +
+    g.cards + '</div></section>';
+}
+
+/* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
+   Lifted out of `deckSlides` whole, so the master flow can draw the same
+   roll-calls the company's own review draws rather than a second pair
+   that looks like them (§53.5).
+
+   §587: THE BOX'S OWN SETTING SPLITS IT, never which kind of box it is.
+   This took a `short` flag that meant "the company's review, units off", and
+   split the two kinds only there — a special case for one kind of box,
+   while Setup already carries the one answer to the question (directions
+   and capabilities shown apart, `boxSplit`). So the setting decides, for the
+   company and for any unit or function that uses it.
+
+   `records` is the one thing that IS the company's alone: capability
+   RECORDS (Setup › Capabilities, §334) are the company's, so they ride as
+   cards on its roll-call where the company is the plan (units off) and in
+   the Master presentation's group pages. */
+function pillarGroups(u, records){
+var capCards = !records ? "" : boardCapTargets().map(function(t){
+  var c = capById(t.slice(4)), nm = placeLabel(t);
+  return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
+    '<span class="pcard-n">' + esc(nm) + '</span>' +
+    '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
+}).join("");
+/* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
+   One group, as every deck has had, EXCEPT on the company's own review of
+   a plan that is shown apart: there the directions and the capabilities
+   are two things, and reading all ten under one heading called Directions
+   was not a wording slip — the standing slide below counted ten of them
+   and said "10 Directions, by their measures", five of which were
+   capabilities.
+
+   THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
+   roll-call or the score table stays where its owner put it; the second
+   group's two slides are new ground and carry new anchors (§96.2).
+
+   A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
+   directions and no capabilities reads exactly as it does today. */
+var groups;
+if (boxSplit(u)) {
+  var dirs = [], caps = [];
+  u.items.forEach(function(p, i){
+    (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
+  });
+  /* ── THE RUNNING ORDER IS THE ORDER (§553.10) ──────────────────────
+     Islam: *"the company picker should pick the foundation of the company
+     then I pick the directions arrangement and then the capabilities
+     arranged. and the grouped directions comes before the directions
+     automatically and the capability grouped comes before the
+     capabilities automatically"*.
+
+     THE PICKER ALREADY HOLDS THEM. The Master presentation's running
+     order lists every direction and every capability by name, draggable,
+     stored per client as an absence (§50.6) — `dir:<id>` for each. So the
+     company's own review reads THAT, and there is no second control to
+     keep in step (§53.5). The alternative was the plan's own Arrange,
+     which works today and renumbers as it goes: drag Egypt Expansion to
+     the top and it becomes D001 on every surface in the platform. An
+     order for a room must not rewrite the codes the year is filed under.
+
+     THE ORDER ONLY, NEVER THE MEMBERSHIP. A tick in that picker says
+     who presents in the MASTER FLOW; it cannot mean "and is therefore in
+     the company's own deck", or unticking a direction would silently
+     drop it from the company's review of its own plan (§96.2). Anything
+     the order does not name keeps its place in the plan, after those it
+     does.
+
+     AND THE ROLL-CALLS ARE NOT IN THE PICKER. "Directions" and
+     "Capabilities" are drawn in front of their own group, automatically,
+     because they are the group — not a subject somebody places. */
+  var flow = masterOrder();
+  var at = function(x){
+    var k = flow.indexOf("dir:" + x.p.id);
+    return k < 0 ? flow.length + x.i : k;
+  };
+  var byFlow = function(a, b){ return at(a) - at(b); };
+  dirs.sort(byFlow); caps.sort(byFlow);
+  groups = [
+    { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
+      one: L1("pillar"), head: L("pillar","bu"),
+      names: "pillarnames", score: "pillars", cards: "" },
+    { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
+      one: L1("capability"), head: L("capability","bu"),
+      names: "capnames",    score: "caps",    cards: capCards }
+  ].filter(function(g){ return g.ix.length || g.cards; });
+  /* AND THE GROUPS LEAD IN THE ORDER THEIR FIRST MEMBER DOES, so dragging
+     a capability above every direction makes Capabilities the first
+     group — one list, one answer, no second setting for "which kind
+     comes first" (§53.5). */
+  groups.sort(function(a, b){
+    return (a.ix.length ? at(a.ix[0]) : flow.length + 99) -
+           (b.ix.length ? at(b.ix[0]) : flow.length + 99);
+  });
+} else {
+  var bothKinds = !!capCards ||
+    (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
+  groups = [{
+    ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
+    /* §542: the one heading names both kinds whether the capabilities are
+       records beside the list or pillars inside a list SHOWN APART —
+       never because a joined list happens to hold a marked row (see the
+       sub-line above, and checks/deck-figures.py, which went red on
+       exactly that). */
+    many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
+    /* The anchor's label is PLAIN TEXT, not the heading: the heading
+       carries `&amp;`, and a label is escaped on its way into the
+       attribute, so the rail would have read "Directions &amp;amp;
+       Capabilities". */
+    plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
+    one: L1("pillar"),
+    /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
+       named both kinds (§542); the table below has always been headed
+       with the pillar word alone, and widening it here would have moved
+       a live client's slide for nothing. */
+    head: L("pillar","bu"),
+    names: "pillarnames", score: "pillars", cards: capCards
+  }];
+}
+
+  return groups;
+}
+
 function deckSlides(u){
-  var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
-  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
-  var pOn = planOn(u);
   /* §481: the company's own review is SHORT when its plan is the whole plan
      (units off): foundation, analysis, the directions and capabilities, then
      their performance. Each direction's detail is its owner's own deck. */
-  var short = !!u.topLayer && companyReviewOn();
+  /* §587: the company's capability records ride on its roll-call where it
+     is the plan (see `pillarGroups`). */
+  var records = !!u.topLayer && companyReviewOn();
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
     (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
 
-  /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", deckBoxName(u), true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
+  /* 1 — the cover carries the unit and the cycle, and nothing else (drawn
+     by `deckOf`, below). */
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
   /* The near horizon is hidden on a unit's objectives (§51.16). This is the
@@ -425,7 +796,12 @@ function deckSlides(u){
 
      A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
      asserted, because a unit authors both. */
-  S = S.concat(short ? companyFoundationSlides() : unitAimSlides(u));
+  /* §557: built here, pushed as one Foundation part with the objectives
+     slide below — so Who we are, the aim, the values and the objectives
+     read in one order under one divider on every box. The company's own
+     aim is its Foundation's (`companyFoundationSlides`) whether or not its
+     units present too: the structure decides what shows, not the shape. */
+  var aimS = u.topLayer ? companyFoundationSlides() : unitAimSlides(u, true);
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -471,9 +847,17 @@ function deckSlides(u){
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
   /* §553.6: the company's own review shows its directions and its
      capabilities apart, so the wording below has two groups to name. */
-  var capsApart = short && boxSplit(u) &&
+  var capsApart = boxSplit(u) &&
     u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
+  /* §591: AND A BOX SHOWN APART THAT HOLDS ONLY ONE KIND IS CALLED BY THAT
+     KIND. Wander's company is all capabilities; since §587 its roll-call and
+     score table say Capabilities, and this slide went on saying "4 Pillars"
+     — two names for the same four things in one deck (§553.6's rule: a room
+     can check a name). */
+  var onlyCaps = boxSplit(u) && u.items.length > 0 &&
+    u.items.every(function(p){ return SMPRules.pillarIsCap(p); });
+  var kindBU = onlyCaps ? L("capability","bu") : L("pillar","bu");
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
     (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
@@ -492,17 +876,17 @@ function deckSlides(u){
          cell would also break a grid that goes to three. */
       standCell(capsApart
           ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
-          : L("pillar","bu") + ' performance', pl,
+          : kindBU + ' performance', pl,
         capsApart
           ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("pillar","bu")) + ' and ' +
             itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("capability","bu")) + ', by their measures'
-          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+          : itemsNow(u).length + ' ' + esc(kindBU) + ', by their measures'),
       standCell('Execution performance', ex,
         dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    esc(kindBU) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
     ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.');
 
@@ -535,11 +919,17 @@ function deckSlides(u){
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
   /* §404: a switched-off North Star draws no slide. */
-  if (oRows && compOn(u.ukey, "keyobj")) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  var objS = !(oRows && compOn(u.ukey, "keyobj")) ? [] : ['<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Annual target</th><th class="num">Actual</th>' +
-    '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
+    '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>'];
+  var foundKOs = u.topLayer ? SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])
+                            : SMPRules.shown(u.keyObjectives);
+  var foundCells = foundKOs.length ? [[foundKOs.length, L("keyobj","bu")]] : [];
+  if (!u.fnKey && GROUP.horizon && foundKOs.length) foundCells.push([GROUP.horizon, "Horizon"]);
+  var found = foundationPart(u.ukey,
+    u.fnKey ? u.name : u.topLayer ? deckBoxName(u) : "this unit", foundCells, aimS, objS);
 
 /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§243) ──────────────
      Islam: *"the functions has no swot, remove from the slides."* Measured on
@@ -562,9 +952,10 @@ function deckSlides(u){
      has something on it (§253: a table with no rows is not a slide).
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
-  if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  S = S.concat(short ? companyAnalysisSlides(u) : unitSwotSlides(u));
-  S = S.concat(competeSlides(u));
+  var analysis = [];
+  if (u.fnKey && compOn(u.ukey, "swot")) analysis = analysis.concat(swotPart(u.ukey, u.name, [fnSWSlide(FUNCTIONS[u.fnKey])]));
+  analysis = analysis.concat(u.topLayer ? swotPart("group", deckBoxName(u), companyAnalysisSlides(u)) : unitSwotSlides(u));
+  analysis = analysis.concat(competeSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -599,110 +990,124 @@ function deckSlides(u){
      takes the pillar's REAL index in `u.items`, because `pillarCode` numbers
      from the whole list and must keep doing so when the list is shown in two
      halves; the row's own counter is separate and restarts per table. */
-  function pillarCard(p, i){
-    /* §542: on a box SHOWN APART, an internal pillar says what it is where
-       it has nothing else to say — exactly as a capability's own card does
-       below, so a client whose capabilities have become pillars reads the
-       roll-call it read when they were records. Its own sub-line still wins.
-
-       THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
-       six of the worked example's ten units carry a pillar marked Capability
-       in one joined list, and the first draft of this line put the word
-       "Capability" under every one of them on their decks. checks/
-       deck-figures.py caught it on the heading below; the same mistake was
-       here, one line up, and the same guard closes both. */
-    var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
-    return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
-      '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
-      /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
-      '</div>';
-  }
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
      same white background as is just the divider with the strategic pillars
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  var capCards = !short ? "" : boardCapTargets().map(function(t){
-    var c = capById(t.slice(4)), nm = placeLabel(t);
-    return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
-      '<span class="pcard-n">' + esc(nm) + '</span>' +
-      '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
-  }).join("");
-  if (pOn && u.items.length && !short)
+  /* The divider belongs to the deck, not to the group reader: the master
+     flow draws the roll-calls without it (§554.1). */
+  var plan = pillarsPlanPart(u, records);
+
+
+  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
+     Islam: *"make the notes and achievements slide optional and they can add
+     it when they need"*, and of this shape: *"ok clear accepted."*
+
+     There is no switch to remember and nothing new stored: the note is
+     written on the reporting page as it always was, and the slide follows it.
+     A deck with nothing to say on it does not spend a slide saying so.
+
+     THE COST IS REAL AND WAS STATED BEFORE IT WAS ACCEPTED: this box is
+     editable in the room, so until now a note could be STARTED on the
+     projector. One that already exists can still be corrected there; one that
+     does not has no box to start it in, and is written where every other
+     figure in the review is written. */
+  /* (the note is `notesSlide`, drawn by `deckOf` when one is written) */
+
+  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
+     every measure and tactic reading under 70 into one closing table — a
+     second telling of numbers the deck has already shown pillar by pillar,
+     and the one slide in the review that reads as a list of failures rather
+     than as the unit's own account of its plan. The notes slide above is
+     where what is being done gets said, in the unit's words. Its anchor
+     ("attention") goes with it; a picture slide that named it lands at the
+     end rather than being dropped (§50.3). */
+
+  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
+     The score table, the three readings, the note, then Thank you.
+
+     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
+     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
+     recorded as a reversal rather than overwritten. It also means the deck's
+     last content slide is the unit's own words rather than its numbers, which
+     sits against *"where the units stands to be the last slide"*: both cannot
+     be true at once, and this is the one he answered most recently and most
+     specifically. Swapping the two is one line if he wants it back. */
+  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
+     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
+     three headline readings two slides before the slide whose whole job is
+     those three readings, and prints them without their bands or the change
+     on last cycle: the room reads them once flat and once properly and
+     cannot tell which is the real one (§87's twins, in figures). The stand
+     slide always draws, so there is always something behind this. */
+  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
+     Islam, of the company's own review: *"and then performance and the
+     overall performance etc."* It was the one deck with no divider in front
+     of its closing block — §481 made the review short by leaving things
+     out, and this went with them. What it announces was always there: the
+     score tables and the slide the whole deck ends on.
+
+     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
+     stand slide always draws, so this is never a divider over nothing. */
+  return deckOf({
+    name: deckBoxName(u), mark: deckMark(u), markAlt: u.name,
+    coverSub: '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p>',
+    found: found, analysis: analysis, plan: plan,
+    /* It announces what is BEHIND it, and §553.8 moved the two score
+       tables in front of it — so where they have already been read, this
+       says the one thing left (§253, §61). */
+    perfSub: "Where the " + kindBU +
+      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
+      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
+      " stands, and what the cycle is remembered for.",
+    stand: standSlide, noteKey: u.ukey
+  });
+}
+
+/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
+   Islam, looking at five in a row: *"the 5 pillars beside each other are very
+   small can we arrange them in the slide to fill better?"*
+
+   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
+   and the name lands at 27.6px, with the whole lower half of the slide empty —
+   the layout was spending width it did not have and leaving height it did.
+
+   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
+   two by two, which is what he meant and what a square arrangement of four
+   gives. Up to three stay in a row, because two rows for three is a shape
+   nobody would draw on purpose; above that it is the square-ish grid
+   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
+   in three rows, ten as four.
+
+   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
+   rather than a grid: five in three columns leaves two on the second row, and
+   a grid would push them left. */
+/* THE PLAN PART OF A PILLARS BOX (§586): its divider, each group's roll-call
+   and each pillar's own slides — and the score tables, which `deckOf` says
+   at the end (§254.4). */
+function pillarsPlanPart(u, records){
+  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
+  var S = [], pOn = planOn(u);
+  var apart = boxSplit(u);
+  if (pOn && u.items.length && !apart)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  /* ── THE GROUPS THIS BOX IS PRESENTED IN (§553.6) ───────────────────
-     One group, as every deck has had, EXCEPT on the company's own review of
-     a plan that is shown apart: there the directions and the capabilities
-     are two things, and reading all ten under one heading called Directions
-     was not a wording slip — the standing slide below counted ten of them
-     and said "10 Directions, by their measures", five of which were
-     capabilities.
-
-     THE FIRST GROUP KEEPS THE ANCHORS. A picture slide placed after the
-     roll-call or the score table stays where its owner put it; the second
-     group's two slides are new ground and carry new anchors (§96.2).
-
-     A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
-     directions and no capabilities reads exactly as it does today. */
-  var groups;
-  if (short && boxSplit(u)) {
-    var dirs = [], caps = [];
-    u.items.forEach(function(p, i){
-      (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
-    });
-    groups = [
-      { ix: dirs, many: L("pillar","bu"),     plain: L("pillar","bu"),
-        one: L1("pillar"), head: L("pillar","bu"),
-        names: "pillarnames", score: "pillars", cards: "" },
-      { ix: caps, many: L("capability","bu"), plain: L("capability","bu"),
-        one: L1("capability"), head: L("capability","bu"),
-        names: "capnames",    score: "caps",    cards: capCards }
-    ].filter(function(g){ return g.ix.length || g.cards; });
-  } else {
-    var bothKinds = !!capCards ||
-      (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }));
-    groups = [{
-      ix: u.items.map(function(p, i){ return { p: p, i: i }; }),
-      /* §542: the one heading names both kinds whether the capabilities are
-         records beside the list or pillars inside a list SHOWN APART —
-         never because a joined list happens to hold a marked row (see the
-         sub-line above, and checks/deck-figures.py, which went red on
-         exactly that). */
-      many: L("pillar","bu") + (bothKinds ? ' &amp; ' + L("capability","bu") : ''),
-      /* The anchor's label is PLAIN TEXT, not the heading: the heading
-         carries `&amp;`, and a label is escaped on its way into the
-         attribute, so the rail would have read "Directions &amp;amp;
-         Capabilities". */
-      plain: L("pillar","bu") + (bothKinds ? ' & ' + L("capability","bu") : ''),
-      one: L1("pillar"),
-      /* THE SCORE TABLE KEEPS THE HEADING IT HAD. Only the roll-call ever
-         named both kinds (§542); the table below has always been headed
-         with the pillar word alone, and widening it here would have moved
-         a live client's slide for nothing. */
-      head: L("pillar","bu"),
-      names: "pillarnames", score: "pillars", cards: capCards
-    }];
-  }
+  var groups = pillarGroups(u, records);
 
   if (pOn) groups.forEach(function(g){
-    var extra = g.cards ? boardCapTargets().length : 0;
-    var n = g.ix.length + extra;
-    if (!n) return;
-    S.push('<section class="dslide"' +
-      anch(g.names, "After the " + g.plain + " names") +
-      '><h2>' + g.many + '</h2>' +
-      '<div class="pcards" style="--n:' + n +
-        ';--c:' + pillarCols(n) +
-        ';--r:' + Math.ceil(n / pillarCols(n)) + '">' +
-      g.ix.map(function(x){ return pillarCard(x.p, x.i); }).join("") +
-      g.cards + '</div></section>');
+    if (!groupSize(g)) return;
+    /* §557: Islam's *"before every part"* — the company's review shows its
+       directions and its capabilities as two parts, so each opens with its
+       own divider, as the one group of a unit's deck does above. */
+    if (apart) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
+      "After the " + g.plain + " divider", (g.names === "capnames" ? "" : "Strategic ") + g.plain,
+      "The " + groupSize(g) + " " + g.plain + " " + deckBoxName(u) + " committed to, and how each is going.", null));
+    S.push(rollCallSlide(u, g));
     /* ── AND THEN EACH ONE, IN TURN (§553.9) ──────────────────────────
        Islam, having been shown Raya's Mobile beside El Abd's review:
        *"yes I want elabd as a unit"*.
@@ -762,105 +1167,9 @@ function deckSlides(u){
      between there was nothing to keep it away from. §553.9 put the detail
      slides back, so that reason is gone and so is the exception. */
   var pillarScoreSlides = groups.map(groupScoreSlide).filter(Boolean);
-
-
-  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
-     Islam: *"make the notes and achievements slide optional and they can add
-     it when they need"*, and of this shape: *"ok clear accepted."*
-
-     There is no switch to remember and nothing new stored: the note is
-     written on the reporting page as it always was, and the slide follows it.
-     A deck with nothing to say on it does not spend a slide saying so.
-
-     THE COST IS REAL AND WAS STATED BEFORE IT WAS ACCEPTED: this box is
-     editable in the room, so until now a note could be STARTED on the
-     projector. One that already exists can still be corrected there; one that
-     does not has no box to start it in, and is written where every other
-     figure in the review is written. */
-  var unote = cycleNote(u.ukey);
-  var noteSlide = !unote ? "" : ('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
-      esc(unote) + '</div>' +
-    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
-    'platform, not in a deck that is already wrong.</p></section>');
-
-  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
-     every measure and tactic reading under 70 into one closing table — a
-     second telling of numbers the deck has already shown pillar by pillar,
-     and the one slide in the review that reads as a list of failures rather
-     than as the unit's own account of its plan. The notes slide above is
-     where what is being done gets said, in the unit's words. Its anchor
-     ("attention") goes with it; a picture slide that named it lands at the
-     end rather than being dropped (§50.3). */
-
-  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
-     The score table, the three readings, the note, then Thank you.
-
-     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
-     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
-     recorded as a reversal rather than overwritten. It also means the deck's
-     last content slide is the unit's own words rather than its numbers, which
-     sits against *"where the units stands to be the last slide"*: both cannot
-     be true at once, and this is the one he answered most recently and most
-     specifically. Swapping the two is one line if he wants it back. */
-  /* THE CLOSING BLOCK GETS A DIVIDER OF ITS OWN (§259.1), and it carries
-     NO NUMBERS — Islam's B, from two drawn in the real deck. A prints the
-     three headline readings two slides before the slide whose whole job is
-     those three readings, and prints them without their bands or the change
-     on last cycle: the room reads them once flat and once properly and
-     cannot tell which is the real one (§87's twins, in figures). The stand
-     slide always draws, so there is always something behind this. */
-  /* ── AND THE COMPANY'S REVIEW GETS IT TOO (§553.6) ──────────────────
-     Islam, of the company's own review: *"and then performance and the
-     overall performance etc."* It was the one deck with no divider in front
-     of its closing block — §481 made the review short by leaving things
-     out, and this went with them. What it announces was always there: the
-     score tables and the slide the whole deck ends on.
-
-     §253 IS SATISFIED BY CONSTRUCTION, as it is for every other deck: the
-     stand slide always draws, so this is never a divider over nothing. */
-  S.push(sectSlide("sperf", "After the Overall performance divider",
-    "Overall performance",
-    /* It announces what is BEHIND it, and §553.8 moved the two score
-       tables in front of it — so where they have already been read, this
-       says the one thing left (§253, §61). */
-    "Where the " + L("pillar","bu") +
-      (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
-      (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
-      " stands, and what the cycle is remembered for.",
-    null));
-  if (pOn && u.items.length) pillarScoreSlides.forEach(function(x){ S.push(x); });
-  S.push(standSlide);
-  if (noteSlide) S.push(noteSlide);
-
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
-    '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(deckBoxName(u)) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  return S.join("");
+  return { slides: S, scores: pOn && u.items.length ? pillarScoreSlides : [] };
 }
 
-/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
-   Islam, looking at five in a row: *"the 5 pillars beside each other are very
-   small can we arrange them in the slide to fill better?"*
-
-   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
-   and the name lands at 27.6px, with the whole lower half of the slide empty —
-   the layout was spending width it did not have and leaving height it did.
-
-   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
-   two by two, which is what he meant and what a square arrangement of four
-   gives. Up to three stay in a row, because two rows for three is a shape
-   nobody would draw on purpose; above that it is the square-ish grid
-   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
-   in three rows, ten as four.
-
-   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
-   rather than a grid: five in three columns leaves two on the second row, and
-   a grid would push them left. */
 function pillarCols(n){
   return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
 }
@@ -890,14 +1199,17 @@ function pillarCols(n){
    it (§96.2, and `insertPictureSlides`'s own note). */
 function pillarSlidesOf(u, p, pi, named){
   var S = [];
-  /* §416: and it gets no slides of its own until its year comes. */
-  if (!runsNow(p)) return S;
+  /* §416: and it gets no slides of its own until its year comes — except in
+     the plan (§564), which carries every direction with its years, as the
+     plan download always has. */
+  if (!runsNow(p) && !DECK_PLAN) return S;
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   if (!named) S.push('<section class="dslide d-cover"' +
     anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
     sec(pillarCode(u, pi), p.name) +
     '><span class="seclab">' + esc(p.kind) +
-    ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
+    ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) +
+    (DECK_PLAN && yearsOn(p) ? ' &middot; ' + esc(yearsTag(p)) : '') + '</span>' +
     '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
       esc(p.name) + '</h1>' +
     (p.sub ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
@@ -941,10 +1253,11 @@ function pillarSlidesOf(u, p, pi, named){
 
   var mRows = SMPRules.shown(p.measures).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      /* §572: the name bold and the Progress larger (Islam, on Option B). */
+      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
-      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      '<td class="num final dprog ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
       (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
       '</tr>';
   }).join("");
@@ -956,8 +1269,8 @@ function pillarSlidesOf(u, p, pi, named){
     anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — " + labelWord("measure","bu")) + '>' +
     deckPillarHead(u, p, pi, L("measure")) +
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th>' +
-    '<th class="num">Annual target</th><th class="num">Actual</th>' +
-    '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+    '<th class="num">Annual target</th><th class="num fig">Actual</th>' +
+    '<th class="num fig">Progress</th><th class="fig">Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
   /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
      After that pillar's targets, because the columns ARE two of the numbers
@@ -975,21 +1288,29 @@ function pillarSlidesOf(u, p, pi, named){
 
      ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
      `m` and the tactics slide's bare code, both of which stored picture
-     slides already name (§236.2, §50.3). */
+     slides already name (§236.2, §50.3).
+
+     §568: EACH COLUMN IS TWO, Target and Actual. Islam: *"remove the
+     progress just keep the target and actual and color code the actual as
+     you did earlier but after splitting to 2 columns"* — §557's split on
+     Reporting, carried here and to Performance. The target heads with the
+     column's own name and direction, as there; the actual wears the band it
+     wore as one cell, and an indicator's stays plain. The plan download
+     (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
     SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
       return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
         bdCols.map(function(c){
           var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
-          if (!String(a).trim())
-            return '<td class="num">' + (String(t).trim()
-              ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
-              : '<span class="dmuted">&mdash;</span>') + '</td>';
-          var sc = bdCellScore(r, c);
-          return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
-            esc(a) + (String(t).trim()
-              ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          /* §564: the plan carries the target alone. */
+          if (DECK_PLAN)
+            return '<td class="num">' + (String(t).trim() ? esc(t) : '&mdash;') + '</td>';
+          var dash = '<td class="num"><span class="dmuted">&mdash;</span></td>';
+          var sc = String(a).trim() ? bdCellScore(r, c) : null;
+          return (String(t).trim() ? '<td class="num">' + esc(t) + '</td>' : dash) +
+            (!String(a).trim() ? dash
+              : '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' + esc(a) + '</td>');
         }).join("") +
         (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
                 : '<td class="dnote empty">&mdash;</td>') + '</tr>';
@@ -1001,10 +1322,12 @@ function pillarSlidesOf(u, p, pi, named){
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
     '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
     bdCols.map(function(c){
-      return '<th class="num">' + esc(bdColWord(p, c)) +
+      var h = '<th class="num">' + esc(bdColWord(p, c)) +
         (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      if (DECK_PLAN) return h;
+      return h + '<th class="num fig">Actual</th>';
     }).join("") +
-    '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
+    '<th class="fig">Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
 
   /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
      Islam: *"presentations doesn't change when the plan performance is
@@ -1037,11 +1360,20 @@ function pillarSlidesOf(u, p, pi, named){
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
-      '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-      '<td' + rs + '>' + esc(t.owner) + '</td>' +
-      '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
-      '<td class="cc"' + rs + '>' + qs(t) + '</td>';
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
+      '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
+      (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
+      '<td class="cc"' + rs + '>' + (DECK_PLAN && !["q1","q2","q3","q4"].some(function(q){ return t[q]; })
+        ? PLAN_MISS : qs(t)) + '</td>' +
+      /* §571: the Status, as Performance draws it — the word in its band and
+         Delayed under it when late. On every row, the plan's too, so the cells
+         line up with the head and `planStripFigs` takes it out as a `fig`. */
+      /* §572.2: the pill and Delayed as one block, Delayed centred under the
+         pill as Performance's centred cell draws it (Islam). */
+      '<td class="dstat ' + tacticBand(t) + '"' + rs + '><span class="dstack">' +
+        '<span class="dpill">' + esc(tacticStatusWord(t)) + '</span>' +
+        (tacticDelayed(t) ? '<span class="dsub dlate">Delayed</span>' : '') + '</span></td>';
     var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
                       : '<td class="dnote empty"' + rs + '>&mdash;</td>';
     if (xs.length) return deckOutRows(t, lead, note, xs, rs);
@@ -1051,8 +1383,7 @@ function pillarSlidesOf(u, p, pi, named){
        that also costs the owner and the quarters their legibility on a
        projector. */
     if (!tacticDue(t))
-      return '<tr>' + lead +
-        '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
+      return '<tr>' + lead + '<td colspan="2" class="cc"></td>' + note + '</tr>';
     /* What this row is measured against RIGHT NOW: an outcome answers with
        its own target, prorated where it compiles by Sum or Count (§276); everything else
        with the share of its plan that is due (§239). One function, so the
@@ -1060,24 +1391,28 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = tacticBenchmark(t);
     if (!tacticAnswered(t))
       return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>' +
         note + '</tr>';
     var r = tacticProgress(t);
     var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
+    /* §571: the benchmark beside the figure is the page's (§300) — a yes/no
+       row shows it only against a partial, so 0% and 100% stand alone. */
+    var pair = onOutcome(t) && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     return '<tr>' + lead +
-      '<td class="num"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
-      '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
+      '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
+      '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
   }).join("");
   if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
     '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-    '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
-    '<th>Collabs.</th>' +
-    '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
-    '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
+    '<th>' + DW("outcomes", "one", p) + '</th>' +
+    (deckColOn("owner") ? '<th>Owner</th>' : '') +
+    (deckColOn("collabs") ? '<th>Collabs.</th>' : '') +
+    '<th class="num">Quarters</th><th class="fig">Status</th>' +
+    '<th class="num fig">YTD actual</th><th class="num fig">Progress</th>' +
+    '<th class="fig">Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
 
   return S;
 
@@ -1091,27 +1426,26 @@ function pillarSlidesOf(u, p, pi, named){
     var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
     if (shown == null)
       return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+        (bench ? ' <i>&middot; due at ' + figHtml(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(bench ? figHtml(bench) : "") + '</td>';
   }
   function deckOutRows(t, lead, note, xs, rs){
     var due = tacticDue(t), sub = outSubCls(t), out;
     if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '></td>' + note + '</tr>';
       xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
+        out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
       });
       return out + outPad(xs.length);
     }
     var r = tacticProgress(t);
     var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
+                         : '<td class="num final dprog ' + dBand(r) + '"' + rs + '>' + dPct(r);
     prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
     out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
     xs.forEach(function(x){
       var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
+      out += '<tr class="' + sub + '"><td class="outc">' + otag(x.id) + outcomeCell(e) + '</td>' +
         deckOutFig(t, e) + '</tr>';
     });
     return out + outPad(xs.length);
@@ -1127,6 +1461,17 @@ function pillarSlidesOf(u, p, pi, named){
    ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN: the units off and the
    directions in pillars. Everywhere else the group deck is exactly what it
    was, asserted. */
+/* §571: ONE SWITCH FOR EVERY SLIDE — Owner and Collabs. on the tactics
+   slides, the office's, kept on the company (`SMPRules.slideColOn`). The plan
+   download keeps both: there an empty owner is a gap the plan still owes. */
+function deckColOn(k){
+  /* §574.2: the guided tour's made-up direction draws neither, whatever the
+     office's switch says for the real slides (Islam: *"hide the owner and
+     collaborator columns from the demo slides"*). Set only while its deck
+     is drawn, as DECK_PLAN is for the plan. */
+  if (DECK_EXAMPLE && (k === "owner" || k === "collabs")) return false;
+  return DECK_PLAN || SMPRules.slideColOn(GROUP, k);
+}
 function companyReviewOn(){
   return !SMPRules.buExists(GROUP) && topWay() !== "projects";
 }
@@ -1135,8 +1480,10 @@ function companyReviewOn(){
    there; the unit-shaped view carries none). Nothing to say draws nothing
    (§253). */
 function companyFoundationSlides(){
-  var asp = String(GROUP.aspiration || "").trim(), end = String(GROUP.endInMind || "").trim();
-  var kos = SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
+  /* §557: what the company's structure switches on, and nothing it does not. */
+  var aspOn = compOn("group", "aspiration");
+  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
+  var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
   var rows = kos.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
@@ -1153,7 +1500,7 @@ function companyFoundationSlides(){
      present.css hides `.aimtop` on a `[data-cont]` slide, because a lead
      paragraph said twice is the room reading it twice. */
   return ['<section class="dslide" data-split="cofound"' +
-    anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+    anch("aim", "After the Foundation") + '><h2>What we are aiming at</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
       (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
@@ -1202,7 +1549,9 @@ function companyAnalysisSlides(u){
    same reason: a part is a part. */
 var SEC_PART_KEYS = ["found", "swot"];
 var SEC_PARTS = {
-  found: { name: "Foundation", slides: function(u){ return companyFoundationSlides(u); } },
+  /* §557: the whole Foundation part, as the company's deck draws it — Who
+     we are and Values included — under the part's own cover. */
+  found: { name: "Foundation", slides: function(u){ return deckFoundationBody("group", companyFoundationSlides(u), []); } },
   swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
 };
 function secDeckHtml(t){
@@ -1213,20 +1562,9 @@ function secDeckHtml(t){
      over an empty section is a blank slide with a heading on it. */
   if (!body.length) return "";
   var title = part.name;
-  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", title, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
-    esc(REVIEW.name) + '</p></section>'];
-  S = S.concat(body);
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
-    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(title) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-  return S.join("");
+  return [coverSlide(title, deckMark(u), u.name,
+      '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
+      esc(REVIEW.name) + '</p>')].concat(body, [thanksSlide(title)]).join("");
 }
 
 /* A direction's own deck: its cover naming who presents it, the direction's
@@ -1234,16 +1572,20 @@ function secDeckHtml(t){
    builder (§53.5) — and Thank you. */
 function dirDeckHtml(t){
   var d = dirPillar(t);
-  if (!d) return "";
-  var u = topAsUnit(), p = d.p, code = pillarCode(u, d.i);
+  return d ? dirDeckOf(topAsUnit(), d.p, d.i, null) : "";
+}
+/* §574: THE ONE BUILDER OF A DIRECTION'S DECK, so the guided tour's made-up
+   direction is drawn by exactly what draws a real one (§53.5) — a second
+   copy of these slides for the example would be a second answer to "what
+   does a direction's deck look like", and the tour would then be explaining
+   slides nobody presents. `ex` is the example's: the line saying the figures
+   are made up (B3), its slides whatever the company's own plan switch says,
+   and no Thank you, because the tour ends the deck. Null for every real one. */
+function dirDeckOf(u, p, i, ex){
+  var code = pillarCode(u, i);
   var who = [p.owner ? "Presented by " + esc(p.owner) : "",
              p.custodian ? "custodian " + esc(p.custodian) : ""].filter(Boolean).join(" &middot; ");
-  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", p.name, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
+  var S = [coverSlide(p.name, deckMark(u), u.name,
     /* AND IT CARRIES WHAT THE TITLE PAGE CARRIED (§96.2, §553.4). Dropping
        that slide would otherwise take the theme and the subtitle with it —
        neither is on the cover, and neither is anywhere else in this deck.
@@ -1254,8 +1596,10 @@ function dirDeckHtml(t){
         ? ' &middot; ' + L1("theme") + ' ' + esc(p.theme) : '') +
       ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
     (String(p.sub || "").trim() ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
-    (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
-  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i, true));
+    (who ? '<p class="coversub dwho">' + who + '</p>' : '') +
+    (ex ? '<p class="coversub dexample">' + ex.aside + '</p>' : ''))];
+  var on = !!ex || planOn(u);
+  if (on) S = S.concat(pillarSlidesOf(u, p, i, true));
 
   /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
      The deck a direction's owner presents had no slide that said how the
@@ -1277,16 +1621,17 @@ function dirDeckHtml(t){
      measures and nothing delivered would otherwise get a headline slide
      carrying two dashes, which says the plan owes an answer nobody asked
      it for. */
-  var dirPerf = planOn(u) ? pillarPerf(p) : null;
-  var dirExec = planOn(u) && pillarExec(p) && pillarPlan(p)
+  var dirPerf = on ? pillarPerf(p) : null;
+  var dirExec = on && pillarExec(p) && pillarPlan(p)
     ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   if (dirPerf != null || dirExec != null) {
     S.push(standSlideOf(esc(p.name),
       [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
           SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
-          ', by their targets'),
+          ', by their targets', dirMeasureDetail(p)),
         dirExec != null && standCell('Execution performance', dirExec,
-          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned',
+          dirExecDetail(p)) ],
       /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
          direction with nothing delivered draws no Execution cell, and a
          footnote explaining Execution would be the slide explaining a
@@ -1298,10 +1643,7 @@ function dirDeckHtml(t){
         ? 'Execution measures whether that work is landing on time.' : '')));
   }
 
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
-    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+  if (!ex) S.push(thanksSlide(p.name));
   return S.join("");
 }
 
@@ -1333,6 +1675,14 @@ function dirDeckHtml(t){
    the full plan deck share (§53.5) — so "only on the owner's copy" is not a
    setting, it is a fork of the shared builder, and it would make the same
    direction read two different ways depending on who opened it. */
+/* §564: WHAT A TACTIC NEEDS rides under its name in the plan, as it does on
+   the Plan page and always did in the plan download (§415) — never in the
+   review, which is about how the figures went. */
+function planReqs(t){
+  var rq = DECK_PLAN && requirementsOn(t) ? reqsOf(t) : [];
+  return rq.length ? '<span class="dsub">' + esc(detailWord("requirements", "many", t)) + ': ' +
+    esc(rq.join("  \u00b7  ")) + '</span>' : '';
+}
 function deckPillarHead(u, p, pi, which){
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
     esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
@@ -1394,19 +1744,8 @@ function deckSlidesFn(subject){
      lists the work: Actions where a projects holder lists Projects, with no
      per-project sections behind it because there are none. */
   var objMode = plansInObjectives(target);
-  var S = [];
 
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", f.name, true) + '>' +
-    (groupLogo()
-        ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    /* §326: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
-       are its own is not presenting a capability review, and saying so on the
-       first slide in front of a room is Islam's complaint at its loudest. The
-       capability wording survives for a function that really carries one. */
-    '<p class="coversub">' + (realCaps.length
+  var coverSub = '<p class="coversub">' + (realCaps.length
       ? L1("capability") + ' review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         realCaps.length + ' ' + (realCaps.length === 1 ? L1("capability") : L("capability"))
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
@@ -1417,13 +1756,105 @@ function deckSlidesFn(subject){
           ? plural(SMPRules.shown(caps.reduce(function(a2, c){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
-              return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+              return n + ((c.projects || []).length); }, 0), "project"))) + '</p>';
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
-  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
-  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
+  /* ── §557: THE PARTS, IN THE ONE ORDER ──────────────────────────────
+     Foundation, then SWOT, then the plan, then Overall performance, each
+     behind its own divider (Islam: *"before every part"*). The key
+     objectives of the box's OWN work are its Foundation's; those of a
+     capability it carries stay inside that capability, where they are
+     read. A unit presents its aspiration and its SWOT whichever way it
+     plans (§405). */
+  var structT = isUnit ? subjKey(target) : isCap ? target : "fn:" + fk;
+  var ownKs = caps.filter(function(c){ return c.own && holderHasKOs(c); });
+  var nKO = ownKs.reduce(function(n, c){ return n + SMPRules.shown(c.keyObjectives).length; }, 0);
+  var found = foundationPart(structT, f.name, nKO ? [[nKO, L("keyobj","bu")]] : [],
+    isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
+  var analysis = [];
+  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
+  var plan = projectsPlanPart(target, f, caps, objMode);
+
+  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
+     deliverables, outcomes and milestone overruns instead of measures and
+     tactics — and removed for the same reason, on both sides of the switch
+     rather than on one (A15). */
+
+  /* §243: the same rule as a unit's deck — drawn only when a note is written.
+     One question, one answer on both decks (§53.5). */
+  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
+     milestone: no Overall performance divider, no standing, nothing that
+     answers the question the review is for. The pillars deck has said this
+     since §254.4 (Islam: *"where the units stands to be the last slide"*),
+     and there was never a decision that a projects box should not — it
+     simply fell between two builders.
+
+     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
+     because it has no pillars. Its objectives where it has them (§515.2's
+     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
+     cannot disagree), and its execution, which `capExec` counts the one way
+     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
+     a heading over three dashes (§45.2).
+
+     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
+     sperf, pillars, stand, notes, end. The first draft of this pushed it
+     after them, so a projects box alone would have ended notes, sperf,
+     stand — the same slides in a different order from every other box,
+     which is the drift this stage exists to remove, introduced by the
+     change meant to remove it. `checks/projects-box-stands.py` caught it. */
+  var exTally = capExec(f) || {}, exPct = exTally.pct;
+  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
+  var stand = (exPct != null || koHere != null) ? standSlideOf(esc(f.name),
+      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
+          'by their measures'),
+        exPct != null && standCell('Execution performance', exPct,
+          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
+      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
+      'Execution measures whether the work is landing on time.') : "";
+  return deckOf({
+    name: f.name, mark: groupLogo(), markAlt: GROUP.org, coverSub: coverSub,
+    found: found, analysis: analysis, plan: plan,
+    perfSub: "Where " + (plan.scores.length ? "the " + L("project").toLowerCase() + " stand, where " : "") +
+      esc(f.name) + " stands, and what the cycle is remembered for.",
+    stand: stand, noteKey: noteKey
+  });
+}
+
+function capKOSlide(c){
+  var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + '</td>' +
+      '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
+      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+  }).join("");
+  return '<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
+    '><h2>' + L("keyobj") + (DECK_PLAN ? '' : ' &mdash; where we stand') +
+    '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+    '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+    '<th class="num">Weight</th><th class="num">Annual target</th>' +
+    '<th class="num fig">Actual</th><th class="num fig">Score</th><th class="fig">Note</th></tr></thead>' +
+    '<tbody>' + kRows + '</tbody></table></section>';
+}
+
+/* THE PLAN PART OF A PROJECTS OR ACTIONS BOX (§586): its divider, each
+   capability it carries and each project's own slides — and the projects'
+   score tables, which `deckOf` says at the end (§557). */
+function projectsPlanPart(target, f, caps, objMode){
+  var S = [];
+  /* The plan's divider: projects, or actions where the box plans that way. */
+  var nWork = caps.reduce(function(n, c){
+    return n + (objMode ? SMPRules.shown(c.actions).length : (c.projects || []).length); }, 0);
+  if (planOn(target) && nWork)
+    S.push(sectSlide("sprojects", "After the " + (objMode ? "Actions" : labelWord("project","bu")) + " divider",
+      objMode ? "Actions" : L("project"),
+      "The " + nWork + " " + (objMode ? (nWork === 1 ? "action" : "actions") : (nWork === 1 ? L1("project") : L("project"))).toLowerCase() +
+        " " + f.name + " committed to, and how each is going.", null));
+  var scoreTables = [];
 
   caps.forEach(function(c){
     /* §515.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
@@ -1460,26 +1891,7 @@ function deckSlidesFn(subject){
 
     /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
        objectives switched off (§437) draw no slide here either. */
-    if (holderHasKOs(c)) {
-      var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(m.name) + '</td>' +
-          '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
-          '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
-          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-      }).join("");
-      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
-        '><h2>' + L("keyobj") + ' &mdash; where we stand' +
-        '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
-        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-        '<th class="num">Weight</th><th class="num">Annual target</th>' +
-        '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
-        '<tbody>' + kRows + '</tbody></table></section>');
-    }
-
-    /* §422: a plan switched off draws its objectives and no plan slides. */
+    if (!c.own && holderHasKOs(c)) S.push(capKOSlide(c));
     if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
@@ -1500,8 +1912,8 @@ function deckSlidesFn(subject){
       S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 actions") +
         '><h2>Actions<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Action</th>' +
-        '<th class="num">Due</th><th class="num">Status</th>' +
-        '<th class="num">Progress</th><th>Note</th></tr></thead>' +
+        '<th class="num">Due</th><th class="num fig">Status</th>' +
+        '<th class="num fig">Progress</th><th class="fig">Note</th></tr></thead>' +
         '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
         '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
           (tal.due < tal.total ? ' &middot; ' + tal.due + ' due so far' : '') +
@@ -1520,8 +1932,25 @@ function deckSlidesFn(subject){
         '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
-    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
-      '><h2>' + L("project") + '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+/* ── §557: THE PROJECTS ARE NAMED BEFORE THEY ARE SCORED ─────────
+       Islam: *"the projects view at the start should show the projects
+       like the pillars not the performance … in the overall performance
+       view it's fine to show it as performance"*. The same cards as the
+       pillars' roll-call (§254.5); the table with the figures moves to
+       Overall performance. The anchor stays here, where the list was, so
+       a picture placed after it keeps its place. */
+    if (c.projects.length) S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
+      '><h2>' + L("project") + (c.own ? '' : '<span class="dwhich">' + esc(c.name) + '</span>') + '</h2>' +
+      '<div class="pcards" style="--n:' + c.projects.length + ';--c:' + pillarCols(c.projects.length) +
+        ';--r:' + Math.ceil(c.projects.length / pillarCols(c.projects.length)) + '">' +
+      c.projects.map(function(p){
+        var who = [p.owner || "", (p.start || "") + (p.end ? " \u2192 " + p.end : "")].filter(function(x){ return String(x).trim(); }).join(" \u00b7 ");
+        return '<div class="pcard"><span class="pcard-c">' + esc(projCode(holderCodeOwner(c), p)) + '</span>' +
+          '<span class="pcard-n">' + esc(p.name) + '</span>' +
+          (who ? '<span class="pcard-s">' + esc(who) + '</span>' : '') + '</div>';
+      }).join("") + '</div></section>');
+        if (c.projects.length) scoreTables.push('<section class="dslide"' + anch("cap" + c.id + "p", "After " + c.name + " \u2014 " + labelWord("project","bu") + " where we stand") +
+      '><h2>' + L("project") + ' &mdash; where we stand<span class="dwhich">' + esc(c.name) + '</span></h2>' +
       '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
@@ -1574,7 +2003,7 @@ function deckSlidesFn(subject){
           '<td class="lead">' + esc(o.name) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
-          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
+          '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
           '<td class="num">' + got + '</td>' +
           '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
@@ -1591,8 +2020,8 @@ function deckSlidesFn(subject){
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
         '<th>Deliverables &amp; outcomes</th><th>Type</th><th class="num">Due date</th>' +
-        '<th class="num">Target</th><th class="num">Status</th><th class="num">' + DX_PCT + '</th>' +
-        '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
+        '<th class="num">Target</th><th class="num fig">Status</th><th class="num fig">' + DX_PCT + '</th>' +
+        '<th class="fig">Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
       var mRows = SMPRules.shown(p.milestones).map(function(m, i){
@@ -1611,71 +2040,13 @@ function deckSlidesFn(subject){
       }).join("");
       if (mRows) S.push('<section class="dslide" data-split="' + esc(p.id) + 'M"' +
         anch("ms" + p.id, "After " + p.name + " — milestones") + '>' +
-        '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Milestones' + (DECK_PLAN ? '' : ' &middot; ' + mst.done + ' of ' + mst.total + ' completed') + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
-        '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+        '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num fig">Status</th><th class="num fig">' + MS_PCT + '</th>' +
+        '<th class="fig">Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });
-
-  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
-     deliverables, outcomes and milestone overruns instead of measures and
-     tactics — and removed for the same reason, on both sides of the switch
-     rather than on one (A15). */
-
-  /* §243: the same rule as a unit's deck — drawn only when a note is written.
-     One question, one answer on both decks (§53.5). */
-  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
-     milestone: no Overall performance divider, no standing, nothing that
-     answers the question the review is for. The pillars deck has said this
-     since §254.4 (Islam: *"where the units stands to be the last slide"*),
-     and there was never a decision that a projects box should not — it
-     simply fell between two builders.
-
-     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
-     because it has no pillars. Its objectives where it has them (§515.2's
-     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
-     cannot disagree), and its execution, which `capExec` counts the one way
-     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
-     a heading over three dashes (§45.2).
-
-     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
-     sperf, pillars, stand, notes, end. The first draft of this pushed it
-     after them, so a projects box alone would have ended notes, sperf,
-     stand — the same slides in a different order from every other box,
-     which is the drift this stage exists to remove, introduced by the
-     change meant to remove it. `checks/projects-box-stands.py` caught it. */
-  var exTally = capExec(f) || {}, exPct = exTally.pct;
-  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
-  if (exPct != null || koHere != null) {
-    S.push(sectSlide("sperf", "After the Overall performance divider",
-      "Overall performance",
-      "Where " + esc(f.name) + " stands, and what the cycle is remembered for.",
-      null));
-    S.push(standSlideOf(esc(f.name),
-      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
-          'by their measures'),
-        exPct != null && standCell('Execution performance', exPct,
-          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
-      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
-      'Execution measures whether the work is landing on time.'));
-  }
-
-  var fnote = cycleNote(noteKey);
-  if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(noteKey) + '">' +
-      esc(fnote) + '</div>' +
-    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
-    'platform, not in a deck that is already wrong.</p></section>');
-
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    sec("END", "Thank you") +
-    '><h1 class="cover">Thank you</h1>' +
-    '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
-    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  return S.join("");
+  return { slides: S, scores: scoreTables };
 }
 
 /* ── Opening, moving and closing ──────────────────────────────────────── */
@@ -1824,7 +2195,12 @@ function deckBuild(target){
      UNITS — so passing null here is not a miss, it is the case that used to
      go unmarked and now wears the group's. */
   deckFootMarks(frag, UNITS[target] || null);
-  var name = placeLabel(target);
+  /* The company by its own name (§553.8's rule, reaching the strip under the
+     room): the slides it adds itself were labelled "the group" there, which
+     is the word Islam struck out — "there is nothing called elabd review as
+     a group". */
+  var org = String((GROUP && GROUP.org) || "").trim();
+  var name = (target === "group" && org) ? org : placeLabel(target);
   [].forEach.call(frag.querySelectorAll(".dslide"), function(sl){
     sl.dataset.subject = target;
     sl.dataset.subjectName = name;
@@ -1845,13 +2221,49 @@ function deckBuild(target){
 function openDeckWith(titleHtml, targets, from){
   var root = document.getElementById("deckroot");
   var list = [].concat(targets).filter(Boolean);
+  /* §581: what this deck was opened with, so updating its figures rebuilds
+     the same deck (`deckRebuild`) rather than guessing it back. */
+  DECK.args = [titleHtml, list.slice(), from];
   root.querySelector(".deck").innerHTML = list.map(deckBuild).join("");
+  /* ── A FLOW'S OWN PAGES ARE NOT SUBJECTS (§554.3) ──────────────────
+     §554.1's cover and roll-calls are slides, not people presenting — and
+     the presenter counts SUBJECTS off `data-subject`, so each of them took
+     a dot of its own, a pill reading "FL", and turned "1 of 3" into
+     "1 of 4". Found by the checks rather than by looking, which is the
+     point of them.
+
+     EACH ONE IS STAMPED WITH WHAT IT INTRODUCES: the cover with the first
+     subject of the flow, a group's page with the first of that group. So
+     the strip, the dots and the pills read exactly as they did before the
+     pages existed, and the pages ride inside the section they open. */
+  var slides = [].slice.call(root.querySelectorAll(".deck .dslide"));
+  for (var i = slides.length - 1; i >= 0; i--) {
+    var sub = slides[i].dataset.subject || "";
+    if (sub.indexOf("flow:") !== 0) continue;
+    /* …and marked as the flow's own, so the clock can tell it is nobody's
+       time (§556.9): stamped with the first direction, the cover was
+       spending that direction's minutes before it had begun. */
+    slides[i].dataset.flowpart = "1";
+    var next = slides[i + 1];
+    if (next && next.dataset.subject) {
+      slides[i].dataset.subject = next.dataset.subject;
+      /* BOTH, because the strip names a stop from `subjectName` and falls
+         back to the target only when there is none — so rewriting the
+         subject alone left the first dot reading "flow:cover". */
+      if (next.dataset.subjectName) slides[i].dataset.subjectName = next.dataset.subjectName;
+      else slides[i].removeAttribute("data-subject-name");
+    } else {
+      slides[i].removeAttribute("data-subject");
+      slides[i].removeAttribute("data-subject-name");
+    }
+  }
   /* §340: the subjects this deck is of, kept because one subject's deck has
      stops that name SECTIONS rather than subjects, so there is nothing else
      to ask which unit is presenting. Mounted after the innerHTML that would
      otherwise destroy it, and before the fit pass, which only ever inserts
      `.dslide` siblings and leaves it alone. */
-  DECK.targets = list.slice();
+  /* …and they are not in the list of who is presenting either (§554.3). */
+  DECK.targets = list.filter(function(t){ return String(t).indexOf("flow:") !== 0; });
   DECK.clock = null;
   clockMount(root);
   /* ── THE WAY BACK, AND THE WORD FOR IT (§295) ─────────────────────
@@ -1873,13 +2285,16 @@ function openDeckWith(titleHtml, targets, from){
   var ex = root.querySelector("[data-dexit]");
   ex.textContent = back ? "Back to slides" : "Exit";
   ex.title = (back ? "Back to slides" : "Exit") + " (Esc)";
-  DECK.flow = list.length > 1 ? list : null;
+  /* §554.3: and the stops are the subjects, so the flow's own pages are
+     not in the list the strip is built from either. */
+  DECK.flow = DECK.targets.length > 1 ? DECK.targets : null;
   DECK.title = titleHtml;
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
   deckFitPass();
   deckIndex();
+  deckTourEnd();   /* §574 */
   deckShow(0);
   deckScale();
   root.focus();
@@ -1889,7 +2304,9 @@ function openDeckWith(titleHtml, targets, from){
    and `deckHtmlFor()` is what decides which deck each gets, so a pillars
    function opened through either lands on the same slides. */
 function openDeck(u, from){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
+  /* The bar under the room names the box as its cover does (§553.8): the
+     company by its own name, never the top word "Group". */
+  openDeckWith("<b>" + esc(deckBoxName(u)) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
 function openDeckFn(subject, from){
   /* §334: a TARGET, so a capability opens its own review with its own name on
@@ -2012,11 +2429,66 @@ function contFlowTargets(){
   return first.concat(all.filter(function(t){ return first.indexOf(t) < 0; }));
 }
 
+/* ── THE FLOW IS ONE PRESENTATION, SO IT OPENS LIKE ONE (§554.1) ────────
+   Islam, having played it: *"we need a cover slide for the whole
+   presentation as we are presenting elabd q3 strategy review and before the
+   directions I find the grouped directions and same for the capabilities"*.
+
+   The master flow was each subject's deck, back to back — nineteen covers
+   and no cover for the thing itself, and the directions arriving one after
+   another with nothing in front of them saying what the room was about to
+   see. The company's own review has had that page since §553.6; this gives
+   the flow the SAME page, through the same builder, rather than a second
+   one that looks like it (§53.5).
+
+   INSERTED, NOT PLACED. The cover and the two roll-calls are not subjects
+   somebody ticks: the cover opens the flow because the flow is a
+   presentation, and a group's page goes in front of the first of its
+   members because that is what the page is for. Islam's word for it was
+   *"automatically"*, twice.
+
+   A GROUP WITH NOBODY IN THE FLOW GETS NO PAGE (§45.2, §253): tick three
+   directions and no capability and the Capabilities page is not drawn. */
+function flowCoverHtml(){
+  var u = topAsUnit();
+  return '<section class="dslide d-cover"' + anch("flowcover", "After the cover") +
+    sec("COVER", deckBoxName(u), true) + '>' +
+    (deckMark(u)
+      ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(deckBoxName(u)) + '">'
+      : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(deckBoxName(u)) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>';
+}
+function flowPartHtml(t){
+  if (t === "flow:cover") return flowCoverHtml();
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  for (var i = 0; i < gs.length; i++)
+    if ("flow:g" + gs[i].names === t) return rollCallSlide(u, gs[i]);
+  return "";
+}
+/* The flow, with its own cover in front and each group's page in front of
+   the first of its members. */
+function flowWithParts(list){
+  var u = topAsUnit(), gs = pillarGroups(u, true);
+  var owner = {};
+  gs.forEach(function(g){
+    g.ix.forEach(function(x){ owner["dir:" + x.p.id] = "flow:g" + g.names; });
+  });
+  var seen = {}, out = ["flow:cover"];
+  list.forEach(function(t){
+    var k = owner[t];
+    if (k && !seen[k]) { seen[k] = 1; out.push(k); }
+    out.push(t);
+  });
+  return out;
+}
+
 function flowToPdf(){
   var list = contFlowTargets();
   if (!list.length) return false;
   deckPrint(function(){
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name),
+      flowWithParts(list));
   });
   return true;
 }
@@ -2261,24 +2733,73 @@ function masterCount(t){
    rewrites two counts; a repaint would replace the box being typed into. And
    a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
    again to a person who believes they are reading their results. */
-function masterKind(t){
+/* ── WHAT KIND A SUBJECT IS, IN ONE WORD (§554.2) ───────────────────────
+   `masterKind` above answers the same question in a chip; this answers it
+   as the bare word the filter groups by, and the chip is built FROM this
+   so a filter can never offer a word the column does not show (§53.5). */
+function masterKindWord(t){
   t = String(t);
-  /* §481: four kinds in the company's flow, said in the picker's own chips. */
   var k = boxRef(t).kind;
-  /* §553: without this a section part falls to the bottom line and the
-     picker calls the company's Foundation a BUSINESS UNIT. */
-  if (k === "sec") return '<span class="mfkind">SECTION</span>';
-  if (k === "dir") return '<span class="mfkind">DIR</span>';
-  if (k === "cap") return '<span class="mfkind fn">CAP</span>';
-  if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return k === "fn"
-    ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
+  if (k === "sec") return "SECTION";
+  if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
+  if (k === "cap") return "CAP";
+  /* §591: THE COMPANY IS THE COMPANY ON EITHER SHAPE. With units on and the
+     company planning too (§544, "both can be on"), `boardUnitTargets` puts
+     the company first among the units (§428) — and this chip called it a
+     business unit. */
+  if (t === "group") return "CO";
+  return k === "fn" ? "FUNC" : "BU";
+}
+var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",
+                    BU:"Business units", FUNC:"Functions", CO:"The company" };
+
+function masterKind(t){
+  /* ── ONE ANSWER, WORN AS A CHIP (§554.2) ──────────────────────────────
+     §481's four kinds were spelled out again here, and the filter above
+     would have been a fifth spelling — so the chip is built FROM
+     `masterKindWord` and the two cannot disagree by construction (§53.5).
+
+     IT ALSO FIXES WHAT THE COLUMN SAID. A capability of El Abd's is
+     presented as `dir:<id>` like a direction is, so every one of its five
+     read DIR in this column while the Capabilities tab, the roll-call and
+     the deck all called them capabilities (§542). */
+  var k = masterKindWord(t);
+  return '<span class="mfkind' + (k === "CAP" || k === "FUNC" ? " fn" : "") +
+    '">' + k + '</span>';
 }
 function masterPaint(){
   var box = document.getElementById("modal-b");
   if (!box || !MFLOW) return;
   var all = masterSubjects();
+  /* ── THE LISTS STAY WHERE THEY WERE (§554.2) ──────────────────────
+     Islam: *"everytime I remove something from the right the list jumps it
+     needs to stay still"*. Every press repaints the whole dialog, so both
+     columns were scrolled back to the top under the finger — on a flow of
+     nineteen, taking out the last one put the row you were working on off
+     the screen. Read before the repaint, put back after. */
+  var keepTop = [].map.call(box.querySelectorAll(".mflist"), function(e){ return e.scrollTop; });
   var rest = all.filter(function(t){ return MFLOW.pick.indexOf(t) < 0; });
+  /* ── AND THE LEFT COLUMN NARROWS BY KIND (§554.2) ─────────────────
+     Islam: *"on the left list I need to have filters so I can choose from
+     directions or capabilities or divisions to filter the functions so I
+     can select properly or all"*. The chips are built from the kinds the
+     client ACTUALLY has, in the picker's own order, so a client with no
+     divisions is not offered a Divisions chip over nothing (§45.2). */
+  var kinds = [];
+  all.forEach(function(t){
+    var k = masterKindWord(t);
+    if (kinds.indexOf(k) < 0) kinds.push(k);
+  });
+  if (MFLOW.kind && kinds.indexOf(MFLOW.kind) < 0) MFLOW.kind = "";
+  if (MFLOW.kind) rest = rest.filter(function(t){ return masterKindWord(t) === MFLOW.kind; });
+  var chips = kinds.length < 2 ? "" :
+    '<div class="mfkinds" role="group" aria-label="Narrow the list by kind">' +
+    [""].concat(kinds).map(function(k){
+      var lit = (MFLOW.kind || "") === k;
+      return '<button type="button" class="mfchip' + (lit ? " on" : "") +
+        '" data-mfkind="' + esc(k) + '" aria-pressed="' + (lit ? "true" : "false") + '">' +
+        esc(k ? (MFKIND_NAME[k] || k) : "All") + '</button>';
+    }).join("") + '</div>';
   var total = MFLOW.pick.reduce(function(a, t){ return a + masterCount(t); }, 0);
   /* Waiting to be picked. The row carries the name AND the code the deck's own
      pills show while presenting (§266.9), because both are what somebody would
@@ -2332,7 +2853,7 @@ function masterPaint(){
   };
   box.innerHTML = '<div class="mflow"><div class="mfcols">' +
     '<div class="mfcol"><div class="mfhead">' +
-      '<h4>Everyone who reports</h4>' +
+      '<h4>Everyone who reports</h4>' + chips +
       '<input class="mffind" data-mffind-box="1" autocomplete="off"' +
         ' placeholder="Search a unit or function…"' +
         ' aria-label="Search a unit or function" value="' + esc(MFLOW.q || "") + '">' +
@@ -2344,6 +2865,14 @@ function masterPaint(){
       '<p class="mfempty" data-mfrestempty' + (rest.length ? ' hidden' : '') + '>' +
         'Everybody is in the flow.</p></div></div>' +
     '<div class="mfcol"><div class="mfhead"><h4>The flow</h4>' +
+      /* ── AND A WAY BACK TO AN EMPTY FLOW (§554.2) ─────────────────
+         Islam: *"there should be somewhere where I reset all and bring all
+         selected flow to the left as if deselect all from the right pan"*.
+         Nineteen presses, or one. Drawn only while there is something to
+         take out, so it is never a control over nothing (§61). */
+      (MFLOW.pick.length
+        ? '<button type="button" class="lnk" data-mfnone="1">Take all out</button>'
+        : '') +
       '<span class="mfcount" data-mfsum>' + masterSumLine(total) + '</span></div>' +
       '<div class="mflist"><table class="mftbl"><thead><tr>' +
         '<th class="c-h"></th><th>Name</th><th class="c-k">Kind</th>' +
@@ -2357,8 +2886,11 @@ function masterPaint(){
     '<div class="cbtns"><button data-mfno="1">Cancel</button>' +
     '<button class="mfgo" data-mfgo="1"' +
       (MFLOW.pick.length ? "" : ' aria-disabled="true"') +
-      '>Start the flow</button></div></div>';
+      '>Go to the slides</button></div></div>';
   masterWire();
+  [].forEach.call(box.querySelectorAll(".mflist"), function(e, i){
+    if (keepTop[i] != null) e.scrollTop = keepTop[i];
+  });
   /* AFTER the wiring, and from HERE rather than from inside it: the count is
      the whole list's, which `masterWire()` does not hold — the first build
      passed it `all.length` from a scope that function cannot see, and every
@@ -2426,6 +2958,22 @@ function masterWire(){
   var box = document.getElementById("modal-b");
   if (!box) return;
   var find = box.querySelector("[data-mffind-box]");
+  /* §554.2: the kind chips and the way back to an empty flow. Both repaint
+     through `masterPaint`, which now keeps each column where it was. */
+  [].forEach.call(box.querySelectorAll("[data-mfkind]"), function(b){
+    b.addEventListener("click", function(){
+      MFLOW.kind = (MFLOW.kind || "") === this.dataset.mfkind ? "" : this.dataset.mfkind;
+      MFLOW.note = "";
+      masterPaint();
+    });
+  });
+  var none = box.querySelector("[data-mfnone]");
+  if (none) none.addEventListener("click", function(){
+    MFLOW.pick = [];
+    MFLOW.note = "";
+    masterWrite(MFLOW.pick);
+    masterPaint();
+  });
   [].forEach.call(box.querySelectorAll("[data-mftick]"), function(b){
     b.addEventListener("click", function(){
       /* The search keeps the cursor when a tick was made from the search: the
@@ -2534,9 +3082,17 @@ function masterWire(){
       masterPaint();
       return;
     }
+    /* ── IT OPENS THE SLIDES, NOT THE SHOW (§556) ──────────────────
+       Islam: *"after we set the master presentation, we say 'here, manage
+       the slides' … and then it takes me to the presentation when I say
+       present"*. The first time anybody saw this deck was in front of the
+       room; now the flow lands on its own slides, where a slide that
+       should not be there can be taken out before it is projected. Play
+       is one press from there, and leaving the show comes back here
+       (§295). */
     var list = MFLOW.pick.slice();
     closeModal();
-    openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), list);
+    slidesOpenFlow(list);
   });
 }
 
@@ -2564,6 +3120,20 @@ function masterMoved(order){
    the two with NO CONFLICT: the later one wins by hoisting, so the product
    would have run this copy and main's would have been dead (§146.2, §56.7).
    Removed rather than reconciled, because one question may have one answer. */
+/* ── FULL SCREEN, STRAIGHT AWAY (§556.11) ──────────────────────────────
+   The class first, so the bar is gone even where the browser refuses full
+   screen (a preview frame, a locked-down kiosk): the deck still fills what
+   it has, and Esc still comes back. */
+function deckGoFull(){
+  var root = document.getElementById("deckroot");
+  DECK.direct = true;
+  root.classList.add("fs");
+  try {
+    var p = root.requestFullscreen && root.requestFullscreen();
+    if (p && p.catch) p.catch(function(){});
+  } catch (e) { /* refused: the class above already did what it can */ }
+  deckScale();
+}
 function closeDeck(){
   var root = document.getElementById("deckroot");
   /* ── ONE DOOR DECIDES WHERE YOU LAND (§295, §53.5) ────────────────
@@ -2576,13 +3146,17 @@ function closeDeck(){
      inert behind it. Both, or neither. */
   var toEditor = DECK.from === "editor" &&
                  document.getElementById("slideroot").classList.contains("on");
+  /* §556.11: which slide the room reached, so the slides come back on it. */
+  var reached = toEditor ? slidesWhich(DECK.slides, DECK.i) : null;
   DECK.from = "page";
+  DECK.direct = false;
   /* §340: the clock's own interval, stopped with the deck it was drawing. An
      interval left running is the leak §24 is about — it would go on writing
      into a node that has been replaced, twice a second, for the life of the
      tab. */
   if (CLOCKTICK) { clearInterval(CLOCKTICK); CLOCKTICK = null; }
   DECK.clock = null;
+  deckTourEnd();   /* §574 */
   root.classList.remove("on");
   /* The fullscreen class goes with it. `fullscreenchange` would clear it too,
      but only if the deck was in fullscreen — a deck closed from windowed mode
@@ -2595,7 +3169,7 @@ function closeDeck(){
      moment a deck closed over it. */
   if (!toEditor) document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
-  if (toEditor) slidesResume();
+  if (toEditor) slidesResume(reached);
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
@@ -2800,8 +3374,25 @@ function deckStopAt(i){
    figures are top-right, so that corner is the one that is empty on every
    slide kind rather than on the one that was looked at. */
 
-/* Under two minutes it turns; the amber is a warning and the red is a fact. */
-var CLOCK_NEAR_MS = 2 * 60000;
+/* ── THE STAGES AS TIME RUNS OUT (§580) ────────────────────────────────
+   Islam: *"it should jump earlier … more than 5 min keep grey, until 1 min
+   the amber and grows"*; the last minute *"not red just bigger … and starts
+   pulsing but on a longer period"*; over time red, bigger and pulsing; and,
+   on round 2, *"the dimming … in the last minute of the 5 min and … lighter
+   and the box start pulsing … and then at the 5min the slide go dark"* —
+   "quarter is fine". So: grey; amber and 1.3x from five minutes left; on its
+   light amber ground, 1.6x and a slow pulse in the last minute; red, 2x and
+   pulsing once over; from four over the pulse twice as fast and the slide a
+   quarter dark; from five over the slide black with the clock still on it.
+
+   ONLY THE CLOCK MOVES, NEVER THE SLIDE: a flashing slide distracts the room
+   (said to him, and kept). T holds the time and lifts the dark at once; T
+   again brings back whatever stage it had reached; the next subject starts
+   its own time, so all of it clears with no one pressing anything. */
+var CLOCK_NEAR_MS = 5 * 60000;
+var CLOCK_LAST_MS = 60000;
+var CLOCK_DIM_MS = 4 * 60000;    /* over by this much: the slide dims */
+var CLOCK_DARK_MS = 5 * 60000;   /* over by this much: the slide goes black */
 var CLOCKTICK = null;
 
 /* Which subject is being presented RIGHT NOW. In a flow the stops ARE the
@@ -2827,6 +3418,14 @@ var CLOCKTICK = null;
    §303 baseline run from this directory measures this build and says the
    failure is not yours (§334.13, walked into an hour before this comment). */
 function clockSubject(){
+  /* THE FLOW'S OWN PAGES RUN NO CLOCK (§556.9). Islam: *"it should reset
+     when we get to a new direction as we set in the start of the flow"* —
+     the cover and the group pages ride inside the first subject's section
+     (§554.3), so its time was running from the cover, and by its own first
+     slide it no longer read what the flow had set. A subject's time starts
+     on that subject's slides. */
+  var here = DECK.slides && DECK.slides[DECK.i];
+  if (here && here.dataset.flowpart) return null;
   if (DECK.flow && DECK.stops) {
     var k = deckStopAt(DECK.i);
     return k >= 0 ? DECK.stops[k].t : null;
@@ -2895,9 +3494,21 @@ function clockPaint(){
     b.hidden = !c;
   });
   if (!el) return;
-  if (!c) { el.hidden = true; return; }
+  var veil = root.querySelector(".dveil");
+  if (!c) {
+    el.hidden = true;
+    if (veil) veil.classList.remove("dim", "dark");
+    return;
+  }
   el.hidden = false;
   var left = clockLeft(), held = !c.from, over = left < 0;
+  /* §580: the stage, and the dark that only a running clock draws. */
+  el.classList.toggle("last", !over && left <= CLOCK_LAST_MS);
+  el.classList.toggle("fast", left <= -CLOCK_DIM_MS);
+  if (veil) {
+    veil.classList.toggle("dark", !held && left <= -CLOCK_DARK_MS);
+    veil.classList.toggle("dim", !held && left <= -CLOCK_DIM_MS && left > -CLOCK_DARK_MS);
+  }
   /* THE COLOUR ALWAYS SAYS WHERE YOU ARE AND THE MARK SAYS IT IS HELD — two
      facts, two devices. Paused takes its own quiet grey only where there is
      nothing louder to say; a clock paused while OVER stays red, or holding it
@@ -2928,6 +3539,12 @@ function clockMount(root){
                  '<span class="dctime"></span>' +
                  '<span class="dcw" hidden>Paused</span>';
   el.addEventListener("click", clockToggle);
+  /* §580: the dark over the slide, under the clock — inside `.deck`, so it
+     covers the slide at whatever size the deck is drawn and never the bar. */
+  var veil = document.createElement("div");
+  veil.className = "dveil";
+  veil.setAttribute("aria-hidden", "true");
+  root.querySelector(".deck").appendChild(veil);
   root.querySelector(".deck").appendChild(el);
   /* TWICE A SECOND, not once: at one second the shown figure can be a whole
      second stale, which reads as a clock that skips. Cleared in `closeDeck()`
@@ -2937,6 +3554,9 @@ function clockMount(root){
 }
 
 function deckShow(n){
+  /* §579: a slide arrived at any way but a step forward is shown whole —
+     the dots, Home and End, the editor's own slide, a step back. */
+  DECK.slides.forEach(deckBuildClear);
   DECK.i = Math.max(0, Math.min(DECK.slides.length - 1, n));
   DECK.slides.forEach(function(s, k){ s.classList.toggle("on", k === DECK.i); });
   var root = document.getElementById("deckroot");
@@ -3041,8 +3661,11 @@ function wireDeck(){
   /* The keyboard is the presentation's, on every slide (§297). Armed once,
      here, beside the rest of the deck's wiring. */
   videoKeepKeys(root);
-  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckShow(DECK.i + 1); });
-  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckShow(DECK.i - 1); });
+  /* §579: every way forward and back goes through `deckStep`, which
+     builds a slide line by line where the company has asked for it and is
+     `deckShow(DECK.i ± 1)` where it has not. */
+  root.querySelector("[data-dnext]").addEventListener("click", function(){ deckStep(1); });
+  root.querySelector("[data-dprev]").addEventListener("click", function(){ deckStep(-1); });
   root.querySelector("[data-dexit]").addEventListener("click", closeDeck);
   /* §340. Both are in the bar, which in fullscreen is not on the screen — so
      pause has two more ways in (the `P` key and the clock itself) and reset
@@ -3103,7 +3726,7 @@ function wireDeck(){
     if (DECKSWIPED) { DECKSWIPED = false; return; }
     if (deckOwnControl(ev.target)) return;
     var back = DECKPOINTER !== "mouse" && ev.clientX < innerWidth / 3;
-    deckShow(DECK.i + (back ? -1 : 1));
+    deckStep(back ? -1 : 1);
   });
 
   /* ── SWIPE: LEFT IS FORWARD, RIGHT IS BACK (§280, Islam's) ────────────
@@ -3136,7 +3759,7 @@ function wireDeck(){
     var dx = ev.clientX - from.x, dy = ev.clientY - from.y;
     if (Math.abs(dx) < DECKSWIPE_MIN || Math.abs(dx) <= Math.abs(dy)) return;
     DECKSWIPED = true;
-    deckShow(DECK.i + (dx < 0 ? 1 : -1));
+    deckStep(dx < 0 ? 1 : -1);
   });
   addEventListener("resize", deckScale);
   /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
@@ -3151,7 +3774,17 @@ function wireDeck(){
      inset and scales the deck to the box it is about to stop being. */
   addEventListener("fullscreenchange", function(){
     var root = document.getElementById("deckroot");
-    root.classList.toggle("fs", document.fullscreenElement === root);
+    /* §556.11: a deck the slides opened full screen has no windowed state
+       to fall back to — leaving full screen IS leaving the deck, or one Esc
+       lands on the bar Islam asked never to see. */
+    /* §582: except in the room's window, where behind the deck is the
+       platform the room is not to see: there, leaving full screen keeps the
+       slides filling the window and asks for the click again. */
+    if (!document.fullscreenElement && DECK.direct && root.classList.contains("on") && !ROOM_MODE) {
+      closeDeck();
+      return;
+    }
+    root.classList.toggle("fs", document.fullscreenElement === root || !!DECK.direct);
     deckScale();
   });
   addEventListener("keydown", function(ev){
@@ -3183,8 +3816,8 @@ function wireDeck(){
        return to has moved. */
     var fwd = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, " ": 1 };
     var back = { ArrowLeft: 1, ArrowUp: 1, PageUp: 1 };
-    if (fwd[ev.key]) { ev.preventDefault(); deckShow(DECK.i + 1); }
-    if (back[ev.key]) { ev.preventDefault(); deckShow(DECK.i - 1); }
+    if (fwd[ev.key]) { ev.preventDefault(); deckStep(1); }
+    if (back[ev.key]) { ev.preventDefault(); deckStep(-1); }
     if (ev.key === "Home") { ev.preventDefault(); deckShow(0); }
     if (ev.key === "End") { ev.preventDefault(); deckShow(DECK.slides.length - 1); }
     /* ── ESCAPE LEAVES FULLSCREEN, AND ONLY THEN THE DECK (§265) ──────
@@ -3200,7 +3833,9 @@ function wireDeck(){
        itself lands on exactly the same state. */
     if (ev.key === "Escape") {
       if (document.fullscreenElement === root) document.exitFullscreen();
-      else closeDeck();
+      /* §582: the room's window never closes its deck. Behind it is the
+         platform, and the room is not to see the platform. */
+      else if (!ROOM_MODE) closeDeck();
     }
     /* §340: `P` pauses. A letter is this deck's existing idiom rather than a
        new one — `f` and `w` below have answered since §69.7 — and `p` was
@@ -3209,7 +3844,1122 @@ function wireDeck(){
        never gets here, because the contenteditable branch above returns
        first. */
     if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); clockToggle(); }
+    /* §556.11: T pauses and starts, R resets — listed on the slides, which
+       is where they are read now the room has no bar. BY THE KEY'S PLACE as
+       well as its letter: on an Arabic keyboard the T key sends "ف" and R
+       "ق", and Islam's "T is not working" was exactly that. */
+    var kc = ev.code || "";
+    if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); clockToggle(); }
+    /* §581: R UPDATES THE FIGURES, Y RESETS THE TIMER (Islam: *"for the key
+       we can make it R to be relevant to refresh … for the reset let's make
+       it Y"*). By the key's place as well as its letter, for §556.11's
+       Arabic keyboard: R sends "ق" and Y "غ". */
+    if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); deckRefresh(false); }
+    if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); clockReset(); }
     if (ev.key === "f" || ev.key === "F") root.querySelector("[data-dfs]").click();
     if (ev.key === "w" || ev.key === "W") root.querySelector("[data-dfit]").click();
   });
+}
+
+/* ══ A GUIDED TOUR, ON A MADE-UP DIRECTION (§574) ═══════════════════════
+   Islam, before El Abd's Q3 review: *"an option … to present a demo
+   direction … on clicking in on the presentation it takes us in a tour
+   through the slides of this direction … that highlights a part and dim the
+   rest with a tool tip to explain what this is"*, naming the key measures
+   slide, the tactics slide and the direction's overall performance.
+
+   AND THEN, ON THE FIRST BUILD: *"remove step 14 … start it maybe out of the
+   flow … from the options of presentation drop down below the master
+   presentation … on a dummy direction with multiple dynamics to explain the
+   concept a made up one not an actual one"*. So the first build's picker in
+   the Master presentation and its button on a real direction's cover are
+   gone, reversed rather than kept beside this (§24): one way in, the
+   Presentation menu, under Master presentation, for whoever may open that.
+
+   THE DIRECTION IS MADE UP AND NEVER STORED. Built fresh on every open from
+   the lines below and handed to the same builder a real direction's deck
+   uses (`dirDeckOf`), so the slides the tour explains are the slides the
+   room is about to see — and nothing reaches GROUP, a save, or anybody's
+   plan. Its cover says the figures are made up (B3), and its code is EX001,
+   never a D-code a real direction could hold.
+
+   "MULTIPLE DYNAMICS" ARE ASKED OF THE PLATFORM, NOT ASSUMED. Which of a
+   tactic's quarters make it Completed, Delayed, on track or Not due depends
+   on where this client's cycle stands — Raya reviews at H1, El Abd at Q3 — so
+   each tactic tries windows until the platform's own `tacticStatusKey()` and
+   `tacticDelayed()` give the state it is there to show, and a state the cycle
+   cannot hold (nothing is Not due in Q4) is a tactic left out (§45.2). The
+   sales figure is set against what is due by now through `elapsedShare()`,
+   for the same reason.
+
+   THE TOUR WALKS THE SLIDES THE DECK ALREADY HAS. Each stop names a KIND of
+   slide and the part of it to light; a part a slide does not carry is a stop
+   not made. The words are the client's: `L()` for measures and tactics, the
+   company's own word for a pillar (El Abd's "direction"), and the bands read
+   off `BANDS` with their floors (§53.5).
+
+   DRAWN INSIDE `#deckroot`: the deck goes full screen as an ELEMENT, and
+   anything outside that element is not on the screen. The onboarding tour's
+   spotlight (tour.css), at projector size. Never printed (§305). */
+var DTOUR = null;
+var EXAMPLE_T = "example:tour";
+
+function exampleDirection(){
+  var top = topAsUnit(), u = {};
+  for (var k in top) u[k] = top[k];
+  u.pillarPrefix = u.pillarCapPrefix = "EX";
+  var share = elapsedShare();
+  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  var sales = Math.round(120 * share * 0.82 * 10) / 10;
+  var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
+    sub:"", owner:"Head of Restaurants", custodian:"",
+    measures:[
+      { id:"example-M1", name:"Restaurant sales", dir:"≥", target:"120 M EGP", compile:"Sum",
+        actual:sales + "M EGP",
+        note:"Two new branches opened a quarter late, so sales are behind plan." },
+      { id:"example-M2", name:"Average spend per guest", dir:"≥", target:"350 EGP",
+        compile:"Latest", actual:"368 EGP" },
+      { id:"example-M3", name:"Delivery share of sales", dir:"≥", target:"25%",
+        compile:"Latest", actual:"11%",
+        note:"Our own delivery app slipped; orders still come through third-party apps." },
+      { id:"example-M4", name:"Food cost as a share of sales", dir:"≤", target:"32%",
+        compile:"Latest", actual:"33%" } ],
+    tactics:[] };
+  /* Every window of one to four quarters in a row, each tactic trying them
+     in its own order until the platform says it shows what it is there for. */
+  var wins = [];
+  for (var a = 1; a <= 4; a++) for (var b = a; b <= 4; b++) {
+    var w = []; for (var q = a; q <= b; q++) w.push(q); wins.push(w);
+  }
+  var place = function(t, order, ok){
+    var ws = wins.slice().sort(order);
+    for (var i = 0; i < ws.length; i++) {
+      t.q1 = t.q2 = t.q3 = t.q4 = 0;
+      ws[i].forEach(function(q){ t["q" + q] = 1; });
+      if (ok(t)) return t;
+    }
+    return null;
+  };
+  var early = function(x, y){ return x[x.length-1] - y[y.length-1] || y.length - x.length; };
+  var late = function(x, y){ return y[y.length-1] - x[x.length-1] || y.length - x.length; };
+  var now = function(x, y){ return x[0] - y[0] || y.length - x.length; };
+  p.tactics = [
+    place({ id:"example-T1", name:"Open two new restaurant branches", owner:"Operations",
+            outcome:"Two branches trading", status:"Done", actual:100 }, early,
+      function(t){ return tacticStatusKey(t) === "done" && tacticShare(t) === 1; }),
+    place({ id:"example-T2", name:"Launch delivery through our own app", owner:"Digital",
+            outcome:"App live in all branches", status:"WIP", actual:40,
+            note:"Payment gateway approval is pending; launch moved to next quarter." }, late,
+      function(t){ return tacticStatusKey(t) === "wip" && tacticDelayed(t); }),
+    place({ id:"example-T3", name:"Refresh the menu around best sellers", owner:"Culinary",
+            outcome:"New menu in all branches", status:"WIP", actual:0 }, now,
+      function(t){
+        var sh = tacticShare(t);
+        if (!(sh > 0 && sh < 1)) return false;
+        t.actual = Math.round(sh * 95);
+        return tacticStatusKey(t) === "wip" && !tacticDelayed(t);
+      }),
+    place({ id:"example-T4", name:"Family-meal campaign for the holidays", owner:"Marketing",
+            outcome:"Campaign in market", status:"", actual:0 }, late,
+      function(t){ return tacticStatusKey(t) === "notdue"; })
+  ].filter(Boolean);
+  return { u:u, p:p };
+}
+function exampleDeckHtml(){
+  var x = exampleDirection();
+  DECK_EXAMPLE = true;
+  try {
+    return dirDeckOf(x.u, x.p, 0,
+      { aside:"An example to show how the slides read &middot; the figures are made up" }) +
+      examplePurposeSlide();
+  } finally { DECK_EXAMPLE = false; }
+}
+/* §574.6: AND THE EXAMPLE ENDS ON WHY. Islam: *"adding a final slide in the
+   demo, reminding the audience of the purpose … single source of truth
+   maintaining the history … the visibility"*; the fourth, accountability,
+   and the order and title were put to him and agreed, with *"make the titles
+   of the objectives big and reduce the paragraphs to be very very minimal"*.
+   The example's own slide, never a real deck's: it is about the platform,
+   not about a direction. The four in the order they tell one story — one
+   truth, everyone sees it, someone owns it, it is kept. */
+/* §574.7: the lines under the titles are Islam's meanings, put back to him
+   short: one place for every actual, the company's and each direction's,
+   this cycle's and the ones before; progress seen at a glance by each
+   audience; doing what we said and stopping what does not work. */
+var EXAMPLE_PURPOSE = [
+  ["One source of truth", "Every actual, past and present, one place"],
+  ["Visibility", "Progress at a glance, for the right audience"],
+  ["Accountability", "Doing what we said, stopping what doesn't work"],
+  ["History that stays", "Every cycle kept as reported"]
+];
+function examplePurposeSlide(){
+  return '<section class="dslide d-purpose"><h2>What this platform is for</h2><div class="pgrid">' +
+    EXAMPLE_PURPOSE.map(function(x, i){
+      return '<div class="pitem"><span class="pnum">' + (i + 1) + '</span>' +
+        '<h3>' + esc(x[0]) + '</h3><p>' + esc(x[1]) + '</p></div>';
+    }).join("") + '</div></section>';
+}
+/* The Presentation menu's Guided tour: the example, full screen, the tour
+   already on its first stop — one press from the menu to the room. Asked
+   the office's rule at the press, never trusted from the menu (§48.2). */
+function exampleTourOpen(){
+  if (!SMPRules.mayMasterPresent(world(), viewer())) return;
+  openDeckWith("<b>Guided tour</b> &middot; an example", [EXAMPLE_T]);
+  deckGoFull();
+  requestAnimationFrame(function(){ deckTourStart(); });
+}
+
+function deckTourOwn(){
+  return (DECK.slides || []).filter(function(s){
+    return s.dataset.subject === EXAMPLE_T;
+  });
+}
+function deckTourBands(){
+  var bs = BANDS.bands;
+  return '<span class="dtbands">' + bs.map(function(x, i){
+    var rng = i === 0 ? x.floor + "% and above"
+      : i === bs.length - 1 ? "below " + bs[i-1].floor + "%"
+      : x.floor + "–" + (bs[i-1].floor - 1) + "%";
+    return '<span><i style="background:var(--' + esc(x.key) + ')"></i>' +
+      esc(x.label) + ' <em>' + rng + '</em></span>';
+  }).join("") + '</span>';
+}
+/* A table column, head to last row — so a column is lit whole, whatever a
+   tactic's several outcome lines do to the rows under it (§414). */
+function deckTourCol(s, test){
+  var ths = [].slice.call(s.querySelectorAll("table thead th"));
+  var hit = ths.filter(function(th, i){
+    return test(th.textContent.trim().toLowerCase(), i);
+  });
+  if (!hit.length) return null;
+  var tb = hit[0].closest("table").getBoundingClientRect();
+  var a = hit[0].getBoundingClientRect(), z = hit[hit.length - 1].getBoundingClientRect();
+  return { left:a.left, top:a.top, right:z.right, bottom:tb.bottom };
+}
+/* The extent of an element's text, for `deckTourBox` — which takes a Range
+   as readily as an element, since both answer getBoundingClientRect. */
+function deckTourInk(e){
+  if (!e) return null;
+  var r = document.createRange();
+  r.selectNodeContents(e);
+  return r;
+}
+function deckTourBox(els){
+  els = els.filter(Boolean);
+  if (!els.length) return null;
+  var r = null;
+  els.forEach(function(e){
+    var b = e.getBoundingClientRect();
+    if (!b.width && !b.height) return;
+    r = r ? { left:Math.min(r.left, b.left), top:Math.min(r.top, b.top),
+              right:Math.max(r.right, b.right), bottom:Math.max(r.bottom, b.bottom) }
+          : { left:b.left, top:b.top, right:b.right, bottom:b.bottom };
+  });
+  return r;
+}
+/* The key measure furthest behind: the first in the lowest band the slide
+   paints, else the first carrying a note. */
+function deckTourRow(s){
+  var rows = [].slice.call(s.querySelectorAll("table tbody tr"));
+  var by = function(sel){
+    return rows.filter(function(r){ return r.querySelector(sel); })[0];
+  };
+  return by("td.dprog.bad") || by("td.dprog.warn") || by("td.dprog.attn") ||
+    by("td.dnote:not(.empty)") || null;
+}
+function deckTourNoun(){
+  return esc(LTraw("group", "pillar", "one").toLowerCase());
+}
+function deckTourStops(){
+  var M = L("measure"), T = L("tactic"), T1 = esc(labelWord("tactic", "group")).toLowerCase();
+  var noun = deckTourNoun();
+  var isM = function(s){ return /M$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isT = function(s){ return /T$/.test(s.dataset.split || "") && !s.dataset.cont; };
+  var isP = function(s){ return s.classList.contains("d-purpose"); };
+  var reveal = function(n){ return { on:isP, clear:true, reveal:n }; };
+  var eq = function(w){ return function(x){ return x === w; }; };
+  /* §574.2: EACH TABLE OPENS AND CLOSES ON THE WHOLE SLIDE, CLEAR. Islam:
+     *"start the key measure tour with the full view all clear first and then
+     the tour appears … and finish after the note with the full view clear as
+     well showing everything. same for the tactics"*. A clear stop lights
+     nothing and draws no card: the room sees the slide as it is presented,
+     and the next press brings the spotlight in. */
+  /* §574.5: AND THE CLEAR VIEW SAYS WHICH SLIDE IT IS, AND WHAT IT IS
+     ABOUT. Islam: *"in the whole slide in the key measures or the tactics
+     can we highlight somehow that we are in the measures and the tactics
+     slides so people can be aware of the difference?"* — shown two ways and
+     choosing both, on the clear views only: the slide's title ringed with
+     its name in gold, and a label in the corner naming the slide and the
+     difference, results against work. Nothing is dimmed. */
+  var clear = function(on, mark){ return { on:on, clear:true, mark:mark }; };
+  var markM = [M, "The results we committed to"], markT = [T, "The work that delivers them"];
+  return [
+    /* §574.10: the cover too opens whole and clear before it is lit (Islam:
+       *"for the first cover page let's start with it a clear slide before
+       the highlighting"*) — so the tour begins on the slide as the room
+       would see it. */
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); }, clear:true },
+    { on:function(s){ return s.classList.contains("d-cover") && !s.classList.contains("d-thanks"); },
+      /* §574.4: the WORDS, not the blocks they sit in — a heading is as wide
+         as the slide, so lighting its box left the bigger card nowhere to
+         stand but on top of it. A Range measures the text itself. */
+      at:function(s){ return deckTourBox([s.querySelector(".dcovermark"), deckTourInk(s.querySelector(".eyebrow")),
+                       deckTourInk(s.querySelector("h1")), s.querySelector(".coverrule")]
+                       .concat([].slice.call(s.querySelectorAll(".coversub")).map(deckTourInk))); },
+      h:"One " + noun + ", from cover to close",
+      b:"Every " + noun + " in today's review is presented the same way: its " + M +
+        ", its " + T + ", and where it stands overall. This made-up one shows how to read them." },
+
+    clear(isM, markM),
+    { on:isM, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1; }); },
+      h:M,
+      b:"The results this " + noun + " committed to for the year, one to a row." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("annual target")); },
+      h:"Annual target",
+      b:"What the plan set for the whole year." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("actual")); },
+      h:"Actual",
+      b:"What was reported for this cycle. Under it, in grey, what was <b>due</b> by " +
+        "this point in the year, which is what the figure is judged against." },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("progress")); },
+      h:"Progress",
+      b:"The actual against what was due, in the colour of its band:" + deckTourBands() },
+    { on:isM, at:function(s){ return deckTourCol(s, eq("note")); },
+      h:"Note",
+      b:"The owner's word on the figure: why it is where it is, and what happens next." },
+    /* §574.3: AND ONE LINE READ ACROSS, as the tactics light their delayed
+       row — Islam: *"for the measures let's highlight a whole line like we
+       did in the tactics after the note part"*. The line furthest behind,
+       so the note has something to explain. */
+    { on:isM, at:function(s){ var r = deckTourRow(s); return r ? deckTourBox([r]) : null; },
+      h:function(s){
+        var r = deckTourRow(s), n = r && r.querySelector("td.lead");
+        return n ? esc(n.textContent.trim()) : "One line, read across"; },
+      b:"One line read across: the target, what was reported against what was due, " +
+        "the progress in its band, and the owner's note on why." },
+    clear(isM, markM),
+
+    clear(isT, markT),
+    { on:isT, at:function(s){ return deckTourCol(s, function(x, i){ return i === 1 || i === 2; }); },
+      h:T,
+      b:"The work that delivers the " + M + ": each " + T1 +
+        " with the outcome it is measured by." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("quarters")); },
+      h:"Quarters",
+      b:"The quarters this work is planned to run in." },
+    { on:isT, at:function(s){ return deckTourCol(s, eq("status")); },
+      h:"Status",
+      b:"Where the work stands, as its owner reported it: " +
+        [TACTIC_WORDS.done, TACTIC_WORDS.wip, TACTIC_WORDS.todo, TACTIC_WORDS.notdue]
+          .map(esc).join(", ") + "." },
+    /* §574.2: YTD actual and Progress before Delayed (Islam). */
+    { on:isT, at:function(s){ return deckTourCol(s, function(x){
+        return x === "ytd actual" || x === "progress"; }); },
+      h:"YTD actual and Progress",
+      b:"What has been delivered so far against what was due by now, and the progress " +
+        "that makes, in the same colours as the " + M + "." },
+    { on:isT, at:function(s){
+        var late = s.querySelector(".dlate");
+        return late ? deckTourBox([late.closest("tr")]) : null; },
+      h:"Delayed",
+      b:"A red <b>DELAYED</b> means this " + T1 + " has fallen behind its plan: its window " +
+        "has passed unfinished, or its first quarter went by with nothing delivered." },
+    clear(isT, markT),
+
+    /* §574.11: and "Where it stands" opens whole and clear too (Islam). */
+    { on:function(s){ return s.classList.contains("d-head"); }, clear:true },
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[0]]); },
+      h:"Where it stands: " + M,
+      b:"How the results are doing: every one of the " + M +
+        " against its target, in one figure." },
+    /* §574: and it ends here. Islam struck the stop on the line under the
+       two readings ("remove step 14"). */
+    { on:function(s){ return s.classList.contains("d-head"); },
+      at:function(s){ return deckTourBox([s.querySelectorAll(".headcell")[1]]); },
+      h:"Where it stands: Execution",
+      b:"Whether the work is landing on time: what the " + T +
+        " have delivered against what was planned by now." },
+
+    /* §574.6, §574.8: THE PURPOSE BUILDS UP, IT IS NOT TOURED. Islam: *"I
+       don't think the lighting up every objective is good in the demo. It's
+       not a tour — you can make them appear one by one … on a click"*. So
+       the slide opens on its title alone and each press brings in the next
+       objective, whole: nothing dimmed, no card, no ring. Ending the tour
+       anywhere shows all four (`deckTourUnmark`). */
+    reveal(0), reveal(1), reveal(2), reveal(3), reveal(4)
+  ];
+}
+function deckTourStart(){
+  var root = document.getElementById("deckroot");
+  var own = deckTourOwn();
+  if (!root.classList.contains("on") || !own.length) return;
+  deckTourEnd();
+  /* Only the stops whose part is on the slide. Asked with the slide SHOWN,
+     because a slide behind `display:none` measures as nothing (§69). */
+  var keep = [];
+  deckTourStops().forEach(function(st){
+    var s = own.filter(st.on)[0];
+    if (!s) return;
+    var at = DECK.slides.indexOf(s);
+    deckShow(at);
+    if (st.clear || st.at(s)) keep.push({ at:at, s:s, st:st });
+  });
+  if (!keep.length) { deckShow(0); return; }
+  keep.push({ at:keep[keep.length - 1].at, end:true,
+    /* §574.6: after the purpose slide the close hands over to the review. */
+    st:{ h:"Now, today's review",
+         b:"Every " + deckTourNoun() + " follows the pattern you just saw. Finish takes you back to the platform." } });
+  DTOUR = { stops:keep, i:0 };
+  root.insertAdjacentHTML("beforeend",
+    '<div class="dtour" data-dtour>' +
+      '<svg class="dtsvg" aria-hidden="true"><defs><mask id="dtmask">' +
+        '<rect x="0" y="0" width="100%" height="100%" fill="#fff"/>' +
+        '<rect class="dthole" rx="10" fill="#000"/></mask></defs>' +
+        '<rect class="dtshade" x="0" y="0" width="100%" height="100%" mask="url(#dtmask)"/>' +
+        '<rect class="dtring" rx="10"/></svg>' +
+      '<div class="dtlabel" aria-live="polite"></div>' +
+      '<div class="dtcard" role="dialog" aria-live="polite">' +
+        '<div class="dttop"><span class="dtstep"></span>' +
+          '<button type="button" class="dtx" data-dtend title="End the tour (G)" aria-label="End the tour">&times;</button></div>' +
+        '<h3></h3><div class="dtbody"></div>' +
+        '<div class="dtfoot"><button type="button" class="dtback" data-dtback>Back</button>' +
+          '<button type="button" class="dtnext" data-dtnext>Next</button></div>' +
+      '</div></div>');
+  var dock = root.querySelector("[data-dtour]");
+  /* EVERY PRESS ON THE TOUR IS THE TOUR'S. The deck advances on a click and
+     a swipe in full screen (§265, §280); left to bubble, one press would move
+     the tour AND the deck under it. A press on the dim is Next, which is
+     what a presenter's hand does. */
+  ["pointerdown", "pointerup"].forEach(function(n){
+    dock.addEventListener(n, function(ev){ ev.stopPropagation(); });
+  });
+  dock.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    if (ev.target.closest("[data-dtend]")) return deckTourEnd();
+    if (ev.target.closest("[data-dtback]")) return deckTourGo(DTOUR.i - 1);
+    if (ev.target.closest(".dtcard") && !ev.target.closest("[data-dtnext]")) return;
+    deckTourGo(DTOUR.i + 1);
+  });
+  deckTourGo(0);
+}
+function deckTourGo(n){
+  if (!DTOUR) return;
+  if (n < 0) n = 0;
+  /* Past the closing card is past the example: it exists for the tour, so
+     the deck closes with it and the platform is where Finish lands. */
+  if (n >= DTOUR.stops.length) { deckTourEnd(); closeDeck(); return; }
+  DTOUR.i = n;
+  var x = DTOUR.stops[n];
+  if (DECK.i !== x.at) deckShow(x.at);
+  requestAnimationFrame(deckTourDraw);
+}
+function deckTourDraw(){
+  if (!DTOUR) return;
+  var root = document.getElementById("deckroot");
+  var dock = root.querySelector("[data-dtour]");
+  if (!dock) return;
+  var x = DTOUR.stops[DTOUR.i], st = x.st;
+  var card = dock.querySelector(".dtcard");
+  dock.classList.toggle("dtclear", !!st.clear);
+  deckTourUnmark();
+  dock.classList.toggle("dtmark", !!(st.clear && st.mark && deckTourMark(dock, x.s, st.mark)));
+  if (st.reveal != null) deckTourReveal(x.s, st.reveal);
+  if (st.clear) return;
+  /* The count is of the parts lit — a clear view is not a step to count. */
+  var lit = DTOUR.stops.filter(function(y){ return !y.st.clear && !y.end; });
+  card.querySelector(".dtstep").textContent = x.end ? "Guided tour" :
+    (lit.indexOf(x) + 1) + " of " + lit.length;
+  card.querySelector("h3").innerHTML = typeof st.h === "function" ? st.h(x.s) : st.h;
+  card.querySelector(".dtbody").innerHTML = st.b;
+  card.querySelector("[data-dtback]").hidden = DTOUR.i === 0;
+  card.querySelector("[data-dtnext]").textContent = x.end ? "Finish" : "Next";
+  var r = x.end ? null : st.at(x.s);
+  var hole = dock.querySelector(".dthole"), ring = dock.querySelector(".dtring");
+  card.classList.toggle("dtcentre", !r);
+  if (!r) {
+    [hole, ring].forEach(function(e){ e.setAttribute("width", 0); e.setAttribute("height", 0); });
+    card.style.left = card.style.top = "";
+    return;
+  }
+  var pad = 10;
+  var hx = r.left - pad, hy = r.top - pad, hw = r.right - r.left + pad * 2, hh = r.bottom - r.top + pad * 2;
+  [hole, ring].forEach(function(e){
+    e.setAttribute("x", hx); e.setAttribute("y", hy);
+    e.setAttribute("width", hw); e.setAttribute("height", hh);
+  });
+  /* The card where there is room: under the part, then over it, then
+     beside it — and failing all three, in the corner of the screen, never
+     over the part it is explaining. */
+  var W = innerWidth, H = innerHeight, gap = 18;
+  card.style.width = "";
+  var cw = card.offsetWidth, ch = card.offsetHeight;
+  var left, top;
+  if (hy + hh + gap + ch <= H - 12) { top = hy + hh + gap; left = hx; }
+  else if (hy - gap - ch >= 12) { top = hy - gap - ch; left = hx; }
+  else if (hx + hw + gap + cw <= W - 12) { left = hx + hw + gap; top = hy; }
+  else if (hx - gap - cw >= 12) { left = hx - gap - cw; top = hy; }
+  else {
+    /* §574.9: a NARROWER card beside the part before a full one over it.
+       The bigger card no longer fitted beside the cover's words, and the
+       corner it fell back to sat on their last line. Fifteen of its own
+       ems is the narrowest that still reads as a card. */
+    var room = W - 12 - (hx + hw + gap);
+    var fs = parseFloat(getComputedStyle(card).fontSize) || 16;
+    if (room >= 15 * fs) {
+      card.style.width = room + "px";
+      cw = room; ch = card.offsetHeight;
+      left = hx + hw + gap; top = hy;
+    } else { left = W - cw - 24; top = H - ch - 24; }
+  }
+  card.style.left = Math.max(12, Math.min(left, W - cw - 12)) + "px";
+  card.style.top = Math.max(12, Math.min(top, H - ch - 12)) + "px";
+}
+function deckTourEnd(){
+  var root = document.getElementById("deckroot");
+  var dock = root && root.querySelector("[data-dtour]");
+  if (dock) dock.remove();
+  deckTourUnmark();
+  DTOUR = null;
+}
+/* §574.5: the clear view's mark — the title's words ringed, the slide's own
+   name in gold (a class on the slide, taken off as the stop is left), and
+   the label at the table's right edge, level with the title. */
+function deckTourMark(dock, s, words){
+  var h = s.querySelector(".dphdr h2"), t = s.querySelector("table");
+  if (!h || !t) return false;
+  var b = deckTourInk(h).getBoundingClientRect(), tb = t.getBoundingClientRect(), pad = 12;
+  var ring = dock.querySelector(".dtring");
+  ring.setAttribute("x", b.left - pad); ring.setAttribute("y", b.top - pad);
+  ring.setAttribute("width", b.width + pad * 2); ring.setAttribute("height", b.height + pad * 2);
+  var lab = dock.querySelector(".dtlabel");
+  lab.innerHTML = '<b>' + words[0] + '</b><span>' + esc(words[1]) + '</span>';
+  lab.style.right = Math.max(12, innerWidth - tb.right) + "px";
+  lab.style.top = (b.top + b.height / 2) + "px";
+  s.classList.add("dtmarked");
+  return true;
+}
+function deckTourUnmark(){
+  [].forEach.call(document.querySelectorAll("#deckroot .dtmarked"), function(e){
+    e.classList.remove("dtmarked");
+  });
+  /* §574.8: and a purpose slide built part way shows whole again. Taken off
+     and put back in one task by `deckTourDraw`, so an objective already in
+     does not flicker; only the new one animates. */
+  [].forEach.call(document.querySelectorAll("#deckroot .preveal"), function(e){
+    e.classList.remove("preveal");
+  });
+}
+/* §574.8: the first `n` objectives in, the rest held back. */
+function deckTourReveal(s, n){
+  s.classList.add("preveal");
+  [].forEach.call(s.querySelectorAll(".pitem"), function(it, i){
+    it.classList.toggle("pshown", i < n);
+  });
+}
+/* THE KEYBOARD IS THE TOUR'S WHILE IT RUNS — asked BEFORE the deck's own
+   listener (the capture phase), so Next lights the next part instead of
+   turning the slide out from under it. Escape is left alone: in full screen
+   the browser takes it first, and leaving full screen leaves the deck
+   (§556.11), so inside the deck the tour ends on `G` or its ×. `G` starts it
+   again, on the example only. */
+addEventListener("keydown", function(ev){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on")) return;
+  var kc = ev.code || "";
+  var g = kc === "KeyG" || ev.key === "g" || ev.key === "G";
+  if (!DTOUR) {
+    if (g && !ev.target.isContentEditable && deckTourOwn().length) {
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      deckTourStart();
+    }
+    return;
+  }
+  var fwd = { ArrowRight:1, ArrowDown:1, PageDown:1, " ":1 };
+  var back = { ArrowLeft:1, ArrowUp:1, PageUp:1 };
+  if (fwd[ev.key]) deckTourGo(DTOUR.i + 1);
+  else if (back[ev.key]) deckTourGo(DTOUR.i - 1);
+  else if (g || ev.key === "Escape") deckTourEnd();
+  else return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+}, true);
+addEventListener("resize", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+addEventListener("fullscreenchange", function(){ if (DTOUR) requestAnimationFrame(deckTourDraw); });
+
+/* ══ LINE BY LINE (§579) ═════════════════════════════════════════════════
+   Islam: *"give me an option … to present box by box like line by line in
+   the tables and number by number in the numbers slides"*; asked, the
+   switch in the slide view beside Columns, the office's and the company's
+   (`SMPRules.slideBuildOn`); the key measures, categories and tactics
+   tables, the projects' slides, and "Where it stands" — NOT the objectives
+   or the SWOT; and ← taking back one line at a time.
+
+   A STEP FORWARD ON A SLIDE THAT BUILDS shows its next line, and the step
+   after its last line turns the slide. The next slide arrives with only its
+   headings; a step back takes the last line away, and from a slide with
+   none showing goes to the one before, whole, whose lines the next steps
+   back take away in turn. The dots, Home and End land on whole slides
+   (`deckShow` clears every build).
+
+   A LINE IS A TABLE ROW, OR A TACTIC'S ROWS TOGETHER: an outcome's own line
+   carries no number cell, so it rides with the row above it, as
+   `deckFitPass` moves them (§414). A table carried onto a "continued" slide
+   is a table of its own and builds from its first row.
+
+   HELD BACK, NOT TAKEN OUT: a line waiting is transparent, so the table
+   does not move as it fills and its stripes stay where they will be. Never
+   on paper (present.css), never in the editor's rail (it assembles its own
+   copy), and never on the guided tour's example, which steps on its own. */
+function deckBuildOn(){
+  return SMPRules.slideBuildOn(GROUP) &&
+    (DECK.targets || []).indexOf(EXAMPLE_T) < 0;
+}
+function deckBuildUnits(s){
+  if (!s) return [];
+  if (s.classList.contains("d-head"))
+    return [].slice.call(s.querySelectorAll(".headgrid > .headcell"));
+  var cards = s.querySelector(".pcards");
+  if (cards) return [].slice.call(cards.children);
+  var tbl = s.querySelector("table");
+  if (!tbl || !(/[MBTD]$/.test(s.dataset.split || "") || tbl.classList.contains("dirs"))) return [];
+  var lines = [];
+  [].forEach.call(tbl.querySelectorAll("tbody > tr"), function(tr){
+    if (tr.querySelector("td.idx") || !lines.length) lines.push([tr]);
+    else lines[lines.length - 1].push(tr);
+  });
+  return lines;
+}
+function deckBuildShow(s, n){
+  var units = deckBuildUnits(s);
+  if (!units.length) return;
+  s.classList.add("building");
+  s.dataset.bn = n;
+  units.forEach(function(u, i){
+    [].concat(u).forEach(function(e){ e.classList.toggle("bhide", i >= n); });
+  });
+}
+function deckBuildClear(s){
+  if (!s || !s.classList.contains("building")) return;
+  s.classList.remove("building");
+  delete s.dataset.bn;
+  [].forEach.call(s.querySelectorAll(".bhide"), function(e){ e.classList.remove("bhide"); });
+}
+function deckStep(d){
+  var s = DECK.slides[DECK.i];
+  if (deckBuildOn() && s && s.classList.contains("building")) {
+    var n = +s.dataset.bn || 0, all = deckBuildUnits(s).length;
+    if (d > 0 && n < all) return deckBuildShow(s, n + 1);
+    if (d < 0 && n > 0) return deckBuildShow(s, n - 1);
+  }
+  var j = DECK.i + d;
+  if (j < 0 || j > DECK.slides.length - 1) return;
+  var was = s && s.dataset.subject;
+  deckShow(j);
+  /* §581: a flow moving on to the next subject brings that subject's
+     latest figures with it — quietly: a failed fetch carries on with what
+     is on the screen, and never interrupts the room. */
+  var now = DECK.slides[DECK.i] && DECK.slides[DECK.i].dataset.subject;
+  if (DECK.flow && was && now && was !== now) deckRefresh(true);
+  /* Forward, the next slide arrives with its headings alone; back, the one
+     before arrives whole and the next step back takes its last line away. */
+  if (deckBuildOn()) {
+    var t = DECK.slides[DECK.i];
+    deckBuildShow(t, d > 0 ? 0 : deckBuildUnits(t).length);
+  }
+}
+
+/* ══ UPDATING THE FIGURES WHILE PRESENTING (§581) ════════════════════════
+   Islam: *"when I'm presenting through the master presentation or the
+   directions slides if I refresh can it keep the slides presented but update
+   the numbers if I changed something in the inputs?"* — of two ways put to
+   him, in place: `R` fetches the latest saved figures and redraws the deck
+   on the slide the room is looking at, still full screen; and the flow does
+   it by itself as it moves on to the next direction.
+
+   THE PLATFORM'S OWN QUIET REFRESH, never a second fetch (`SYNC.refresh`,
+   §433): it takes the server's answer only where nothing here would be lost,
+   so a change typed and not yet saved is never overwritten by it.
+
+   THE SAME DECK, REBUILT: opened again with what it was opened with
+   (`DECK.args`), the slide found again by what it is — its subject, its
+   page, which of its kind — never by its number (`slidesWhich`), because a
+   slide added or hidden in between moves every number after it. The clock
+   is carried across (a refresh is not a new subject's time), and a slide
+   half built line by line stays where it was.
+
+   SAID, BRIEFLY, on a press: a small line in the corner for two seconds —
+   updated, already up to date, or not updated and still showing what it
+   had. The automatic one says nothing. Never on the tour's made-up
+   example, which has no figures to fetch. */
+var DREFRESH_T = null;
+function deckRefreshSay(msg){
+  var root = document.getElementById("deckroot");
+  var el = root && root.querySelector(".drefresh");
+  if (!root) return;
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "drefresh"; el.setAttribute("role", "status");
+    root.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  if (DREFRESH_T) clearTimeout(DREFRESH_T);
+  DREFRESH_T = setTimeout(function(){ el.classList.remove("show"); }, 2200);
+}
+function deckRefresh(quiet){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("on") || !DECK.args) return;
+  if ((DECK.targets || []).indexOf(EXAMPLE_T) >= 0) return;
+  if (typeof SYNC === "undefined" || !SYNC.refresh) {
+    if (!quiet) deckRefreshSay("Figures not updated: no connection");
+    return;
+  }
+  SYNC.refresh(function(ok, changed){
+    if (!root.classList.contains("on")) return;
+    if (!ok) {
+      if (!quiet) deckRefreshSay("Figures not updated \u00b7 still showing the last ones");
+      return;
+    }
+    if (changed) deckRebuild();
+    if (!quiet) deckRefreshSay(changed ? "Figures updated" : "Figures already up to date");
+  });
+}
+function deckRebuild(){
+  if (!DECK.args) return;
+  var at = DECK.i, where = slidesWhich(DECK.slides, at);
+  var here = DECK.slides[at], bn = here && here.classList.contains("building") ? +here.dataset.bn : null;
+  var clock = DECK.clock;
+  openDeckWith(DECK.args[0], DECK.args[1], DECK.args[2]);
+  DECK.clock = clock;
+  var j = where ? slidesFindIn(DECK.slides, where) : -1;
+  deckShow(j >= 0 ? j : Math.min(at, DECK.slides.length - 1));
+  if (bn != null && deckBuildOn()) deckBuildShow(DECK.slides[DECK.i], bn);
+  clockPaint();
+}
+
+/* ══ PRESENTING ON TWO SCREENS (§582) ════════════════════════════════════
+   Islam: *"how about the presenter has a different view than the presented
+   on the screen"* — and, offered a PowerPoint-style presenter view: *"no
+   need for presenter notes … I need the typical view of the slides
+   management to scroll and see the shortcuts as normally the smo is viewing
+   this view and needs to be able to manage the platform without disrupting
+   the presentation but somehow can get back and do any shortcut action"*.
+   On the mockup: clicking a slide waits for Enter, the strip's buttons are
+   enough, the office only for now.
+
+   TWO WINDOWS OF THE SAME PLATFORM. Present from the slide view, with the
+   projector connected as a second screen, opens the platform again in a
+   window of its own on that screen (`?room=1`, the ROOM), which shows the
+   deck and nothing else; the laptop stays on the slide view and drives it.
+   The room builds the deck from its own copy of the state — the same server,
+   so the same slides — and the two find a slide by what it is
+   (`slidesWhich`), never by its number, which is what that function was
+   written for (§556.11).
+
+   THEY TALK BY MESSAGES BETWEEN THE TWO WINDOWS, and nothing else: the
+   laptop sends a step, a jump, a key (T, R, Y); the room says, twice a
+   second and after every change, which slide it shows, how far it is built
+   and what its clock reads. A clicker pressed while the projector window
+   has the focus drives the room directly, and the laptop follows it.
+
+   THE ROOM WRITES NOTHING. It is a screen, not a second editor: its saving
+   is switched off (`SYNC.save` and the leave flush answer nothing in a
+   room), so it can never send an older copy of the plan over the laptop's.
+
+   FULL SCREEN NEEDS A PRESS ON THE PROJECTOR: a browser will not take a
+   window full screen without one, so the room opens filling its screen and
+   asks for one click there. With one screen, Present works exactly as it
+   did. */
+var ROOM_MODE = (function(){
+  try { return /[?&]room=1(&|$)/.test(location.search || ""); } catch (e) { return false; }
+})();
+var ROOM = null;
+var ROOM_WIN = false;   /* §582.1: this room is a window to share, not a projector */
+/* Sent only to the platform's own address; a file opened from disk has none
+   a browser will match ("file://" is not an origin), and there the two
+   windows know each other by `e.source` alone, which is checked anyway. */
+function roomOrigin(){ return /^https?:$/.test(location.protocol) ? location.origin : "*"; }
+function roomCanTwo(){
+  return !ROOM_MODE && typeof inOffice === "function" && inOffice() &&
+    !!(window.screen && window.screen.isExtended);
+}
+
+/* ── ON THE LAPTOP ─────────────────────────────────────────────────────── */
+function roomStart(open, which, mode){
+  var u = new URL(location.href);
+  u.searchParams.set("room", "1");
+  u.hash = "";
+  /* OPENED AT ONCE, MOVED AFTER. A browser lets a page open a window only in
+     the moment of a press, and asking where the other screen is can wait on
+     a question to the person; so the window opens here, and is then moved
+     onto the other screen if the browser says where it is. */
+  var w = window.open(u.toString(), "smp-room", "popup,width=1280,height=720");
+  if (!w) return false;
+  /* §582.1: "window" is a window on THIS screen, to share in a meeting; it
+     is never moved, and it never asks for full screen. */
+  ROOM = { win:w, open:open, which:which, at:null, last:null, mode:mode === "window" ? "window" : "screen" };
+  if (ROOMPOLL) clearInterval(ROOMPOLL);
+  ROOMPOLL = setInterval(function(){ if (ROOM && ROOM.win.closed) roomEnd(false); }, 700);
+  if (ROOM.mode === "screen" && window.getScreenDetails) window.getScreenDetails().then(function(d){
+    var other = (d.screens || []).filter(function(sc){ return sc !== d.currentScreen; })[0];
+    if (!other || w.closed) return;
+    try { w.moveTo(other.availLeft, other.availTop); w.resizeTo(other.availWidth, other.availHeight); } catch (e) {}
+  }, function(){ /* not allowed: it opens on this screen, to be dragged across */ });
+  roomPaint();
+  return true;
+}
+var ROOMPOLL = null;
+function roomSend(m){
+  if (!ROOM || ROOM.win.closed) return;
+  m.smpRoom = m.smpRoom || "cmd";
+  ROOM.win.postMessage(m, roomOrigin());
+}
+function roomEnd(closeIt){
+  if (!ROOM) return;
+  var w = ROOM.win;
+  ROOM = null;
+  if (ROOMPOLL) { clearInterval(ROOMPOLL); ROOMPOLL = null; }
+  if (closeIt && w && !w.closed) { try { w.postMessage({ smpRoom:"close" }, roomOrigin()); w.close(); } catch (e) {} }
+  roomPaint();
+  var sr = document.getElementById("slideroot");
+  if (sr && sr.classList.contains("on") && typeof slidesPaint === "function") slidesPaint();
+}
+/* The row of the slide view that the room is showing: its slide found by
+   what it is, then as many "continued" slides on as the room is. */
+function roomRow(){
+  if (!ROOM || !ROOM.at || !ROOM.at.which || typeof SLED === "undefined" || !SLED.all) return -1;
+  var i = slidesFindIn(SLED.all, ROOM.at.which);
+  if (i < 0) return -1;
+  var k = ROOM.at.cont || 0;
+  while (k > 0 && SLED.all[i + 1] && SLED.all[i + 1].dataset.cont) { i++; k--; }
+  return i;
+}
+function roomKeyAt(i){ return i >= 0 && SLED.all[i] ? SLED.all[i].dataset.ed : null; }
+/* What the room said. Where the slide view was on the room's slide, it
+   follows the room to its new one; where somebody was looking ahead, it
+   stays where they are looking. */
+addEventListener("message", function(e){
+  var m = e.data || {};
+  if (!m || typeof m !== "object" || !m.smpRoom) return;
+  if (ROOM_MODE) { if (e.source === window.opener) roomHear(m); return; }
+  if (!ROOM || e.source !== ROOM.win) return;
+  if (m.smpRoom === "ready") {
+    /* Where the room already was if it is the projector's window loading
+       again; otherwise the slide Present was pressed on. */
+    roomSend({ smpRoom:"open", open:ROOM.open, which:(ROOM.at && ROOM.at.which) || ROOM.which, mode:ROOM.mode });
+    return;
+  }
+  if (m.smpRoom === "bye") { roomEnd(false); return; }
+  if (m.smpRoom !== "at") return;
+  var sr = document.getElementById("slideroot");
+  var editing = sr && sr.classList.contains("on") && typeof SLED !== "undefined" && SLED.all;
+  var wasFollowing = editing && ROOM.last != null && SLED.sel === ROOM.last;
+  ROOM.at = m;
+  if (editing) {
+    var key = roomKeyAt(roomRow());
+    if (key && key !== ROOM.last && (wasFollowing || ROOM.last == null)) {
+      ROOM.last = key;
+      SLED.sel = key;
+      slidesPaint();
+      return;
+    }
+    ROOM.last = key;
+  }
+  roomPaint();
+});
+
+/* The laptop's two surfaces: a strip in the slide view, under its bar, and
+   a strip at the top of every other page. Both written into nodes they own,
+   never by repainting the page (§63). */
+function roomStripText(){
+  var a = ROOM && ROOM.at;
+  if (!a || !a.on) return '<span>Opening the slides on the second screen\u2026</span>';
+  return '<span class="rs-where">' + esc(a.label || "") + '</span>' +
+    '<span class="rs-n">slide ' + a.n + ' of ' + a.total +
+      (a.built ? ' \u00b7 line ' + a.built[0] + ' of ' + a.built[1] : '') + '</span>' +
+    (a.clock ? '<span class="rs-clk' + (a.clock.over ? ' over' : a.clock.near ? ' near' : '') +
+      (a.clock.paused ? ' paused' : '') + '">' + esc(a.clock.text) +
+      (a.clock.paused ? ' \u00b7 paused' : '') +
+      /* §580: the laptop is told when the room's slide is dimmed or dark,
+         and how to lift it: its own screen shows the slide view, not the
+         slide. */
+      (a.clock.dark === "dark" ? ' \u00b7 their screen is dark, T lifts it'
+       : a.clock.dark ? ' \u00b7 their slide is dimmed' : '') + '</span>' : '') +
+    (ROOM && ROOM.mode === "window"
+      ? (a.title ? '<span class="rs-tip">In your meeting, share the window called \u201c' + esc(a.title) + '\u201d</span>' : '')
+      : a.full ? '' : '<span class="rs-warn">Not full screen yet: click the slides on the projector</span>');
+}
+function roomPaint(){
+  var sr = document.getElementById("slideroot");
+  var editing = !!(sr && sr.classList.contains("on"));
+  /* In the slide view. */
+  var live = sr && sr.querySelector(".sl-live");
+  if (!ROOM || !editing) { if (live) live.remove(); }
+  else {
+    if (!live) {
+      live = document.createElement("div");
+      live.className = "sl-live";
+      var bar = sr.querySelector(".slidebar");
+      if (bar) bar.insertAdjacentElement("afterend", live);
+    }
+    roomFill(live, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'In the slides window' : 'On the room\u2019s screen') + '</b>' + roomStripText() +
+      '<span class="rs-sp"></span><span class="rs-keys"><b>\u2190</b><b>\u2192</b> move the room \u00b7 ' +
+      '<b>T</b> timer \u00b7 <b>R</b> update figures \u00b7 <b>Y</b> reset timer</span>');
+  }
+  if (sr) {
+    var row = editing && ROOM ? roomRow() : -1;
+    [].forEach.call(sr.querySelectorAll("#slidelist .slrow"), function(r, i){
+      r.classList.toggle("onscreen", i === row);
+    });
+    var pane = sr.querySelector("#slidepane");
+    var note = pane && pane.querySelector(".sl-notroom");
+    var away = editing && ROOM && ROOM.at && ROOM.at.on && row >= 0 && SLED.sel !== roomKeyAt(row);
+    /* The stage is fitted to the pane, so the pane is fitted again when the
+       note comes or goes, or the slide's foot falls off the bottom. */
+    if (!away) { if (note) { note.remove(); slidesFitStage(); } }
+    else if (pane && !note) { pane.insertAdjacentHTML("afterbegin",
+      '<div class="sl-notroom" role="status">Not ' + (ROOM.mode === "window" ? 'in the slides window' : 'on the room\u2019s screen') +
+      ' \u00b7 <b>Enter</b> shows it to the room \u00b7 ' +
+      '<b>Esc</b> back to what they see</div>'); slidesFitStage(); }
+    var play = sr.querySelector("[data-slplay]");
+    if (play) {
+      var lbl = play.querySelector(".lbl");
+      if (lbl) lbl.textContent = ROOM && editing ? "Stop presenting" : "Present";
+      play.title = ROOM && editing ? (ROOM.mode === "window" ? "Stop presenting and close the slides window"
+                                                              : "Stop presenting on the second screen") : "Present (P)";
+    }
+    /* §582.1: always there for the office, and gone while presenting —
+       Present has become Stop presenting beside it. */
+    var wb = sr.querySelector("[data-slwin]");
+    if (wb) wb.hidden = !inOffice() || !!(ROOM && editing);
+    var keys = document.getElementById("slkeys");
+    /* The room's own keys are on the strip above; here, only what looking
+       through the slides adds, so the slide's name keeps its room. */
+    if (keys && ROOM && editing) keys.innerHTML =
+      '<b>\u2191</b> <b>\u2193</b> look &middot; <b>Enter</b> show it to the room &middot; ' +
+      '<b>Esc</b> back to what they see';
+  }
+  /* Everywhere else. */
+  var st = document.getElementById("roomstrip");
+  if (!ROOM || editing) {
+    if (st) st.remove();
+    document.body.classList.remove("roomon");
+    return;
+  }
+  if (!st) {
+    st = document.createElement("div");
+    st.id = "roomstrip"; st.className = "roomstrip"; st.setAttribute("role", "region");
+    st.setAttribute("aria-label", "Presenting on the second screen");
+    /* At the top of the pinned chrome, so it stays in view as the page
+       scrolls; the chrome's height is observed (§101.5), so everything
+       pinned beneath it moves down with it. */
+    var chrome = document.querySelector(".chrome");
+    if (chrome) chrome.insertBefore(st, chrome.firstChild);
+    else document.body.insertBefore(st, document.body.firstChild);
+    st.addEventListener("click", function(ev){
+      var b = ev.target.closest("[data-rs]");
+      if (!b) return;
+      var k = b.dataset.rs;
+      if (k === "back") roomBackToSlides();
+      else if (k === "prev") roomSend({ step:-1 });
+      else if (k === "next") roomSend({ step:1 });
+      else if (k === "t") roomSend({ key:"T" });
+    });
+  }
+  document.body.classList.add("roomon");
+  var paused = ROOM.at && ROOM.at.clock && ROOM.at.clock.paused;
+  roomFill(st, '<span class="rs-dot"></span><b>' + (ROOM.mode === "window" ? 'Presenting in the slides window' : 'Presenting on the second screen') + '</b>' + roomStripText() +
+    '<span class="rs-sp"></span>' +
+    '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
+    '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    /* §582.2: the keys that reach the slides from here, said where they work. */
+    '<span class="rs-keys"><b>PgDn</b><b>\u2192</b> next \u00b7 <b>PgUp</b><b>\u2190</b> back' +
+      (ROOM.at && ROOM.at.clock ? ' \u00b7 <b>T</b> timer' : '') + '</span>' +
+    (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
+    '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
+}
+/* Written only when it reads differently: the room reports twice a second,
+   and a strip rewritten between a press and its release loses the click. */
+function roomFill(el, html){ if (el._rs !== html) { el.innerHTML = html; el._rs = html; } }
+/* R from the laptop: what was just typed here is saved FIRST, then the
+   room fetches, or it would fetch the figure from before the fix. */
+function roomUpdate(){
+  if (typeof SYNC !== "undefined" && SYNC.saveNow) SYNC.saveNow(function(){ roomSend({ key:"R" }); });
+  else roomSend({ key:"R" });
+}
+function roomBackToSlides(){
+  if (!ROOM) return;
+  var o = ROOM.open || {};
+  if (o.flow) slidesOpenFlow(o.flow);
+  else if (o.kind) slidesOpen(o.kind, o.key);
+  var key = roomKeyAt(roomRow());
+  if (key) { SLED.sel = key; ROOM.last = key; slidesPaint(); }
+  roomPaint();
+}
+/* The slide view's keys while the room is showing (slides.js asks first).
+   ← → move the ROOM; ↑ ↓ still walk the slide view, so looking ahead is
+   the keys it always was; Enter puts what you are looking at on the room's
+   screen; Escape comes back to what the room sees before it leaves the
+   view. Answers whether it took the key. */
+function roomEditorKey(ev){
+  if (!ROOM || slidesTyping(ev.target)) return false;
+  var kc = ev.code || "";
+  var fwd = { ArrowRight:1, PageDown:1, " ":1 }, back = { ArrowLeft:1, PageUp:1 };
+  if (fwd[ev.key]) { ev.preventDefault(); roomSend({ step:1 }); return true; }
+  if (back[ev.key]) { ev.preventDefault(); roomSend({ step:-1 }); return true; }
+  if (kc === "KeyT" || ev.key === "t" || ev.key === "T") { ev.preventDefault(); roomSend({ key:"T" }); return true; }
+  if (kc === "KeyR" || ev.key === "r" || ev.key === "R") { ev.preventDefault(); roomUpdate(); return true; }
+  if (kc === "KeyY" || ev.key === "y" || ev.key === "Y") { ev.preventDefault(); roomSend({ key:"Y" }); return true; }
+  if (ev.key === "p" || ev.key === "P") return true;
+  var row = roomRow(), rk = roomKeyAt(row);
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    var w = slidesSelEl();
+    if (w) { ROOM.last = SLED.sel; roomSend({ jump:w }); }
+    return true;
+  }
+  var g = document.getElementById("slgrid"), cp = document.getElementById("slcolspanel");
+  if (ev.key === "Escape" && rk && SLED.sel !== rk && !(g && !g.hidden) && !(cp && !cp.hidden)) {
+    ev.preventDefault();
+    SLED.sel = rk; ROOM.last = rk;
+    slidesPaint();
+    return true;
+  }
+  return false;
+}
+
+/* ── THE REMOTE, FROM ANY PAGE (§582.2) ─────────────────────────────────
+   Islam: *"when I'm on the platform trying to make edits … the navigation on
+   the extended or the other window is lost so when we click right or left …
+   with a keyboard or a remote it doesn't work"* — a remote is a keyboard,
+   and its keys go to whichever window is in front; §582 had kept a page's
+   keys the page's own so typing could never move a slide. Now, while the
+   slides are up and somebody is on any other page of the platform: Page
+   Down / Page Up (what most remotes send) and → / ← move them, and T holds
+   or starts their timer — *"keep [↑ ↓] for scrolling"*, *"yes T works"*.
+
+   TYPING STAYS TYPING, AND A CONTROL KEEPS ITS KEYS: nothing is taken from
+   a box being typed in, a list or menu, the tab bar, a slider, a player, or
+   anything that has already answered the key (`defaultPrevented` — the
+   reorder handles, the search list). Heard on the WINDOW and last, so all of
+   those have had their turn. Alt, Ctrl and Cmd belong to the platform's own
+   shortcuts and are never taken. The slide view and a deck on this screen
+   have their own keys (§582) and are left to them. */
+var ROOM_KEEP_ROLES = /^(tab|tablist|slider|listbox|option|menu|menubar|menuitem|menuitemradio|menuitemcheckbox|radio|radiogroup|spinbutton|grid|gridcell|tree|treeitem|treegrid|combobox|scrollbar)$/;
+function roomKeysOwn(el){
+  for (var e = el; e && e.nodeType === 1; e = e.parentElement) {
+    var t = e.tagName;
+    if (e.isContentEditable || t === "INPUT" || t === "TEXTAREA" || t === "SELECT" ||
+        t === "VIDEO" || t === "AUDIO") return true;
+    if (ROOM_KEEP_ROLES.test(e.getAttribute("role") || "")) return true;
+  }
+  return false;
+}
+addEventListener("keydown", function(ev){
+  if (!ROOM || ROOM_MODE || ev.defaultPrevented) return;
+  if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+  var sr = document.getElementById("slideroot"), dr = document.getElementById("deckroot");
+  if ((sr && sr.classList.contains("on")) || (dr && dr.classList.contains("on"))) return;
+  if (roomKeysOwn(ev.target)) return;
+  var k = ev.key, kc = ev.code || "";
+  if (k === "PageDown" || k === "ArrowRight") { ev.preventDefault(); roomSend({ step:1 }); }
+  else if (k === "PageUp" || k === "ArrowLeft") { ev.preventDefault(); roomSend({ step:-1 }); }
+  else if (kc === "KeyT" || k === "t" || k === "T") { ev.preventDefault(); roomSend({ key:"T" }); }
+});
+
+/* ── IN THE ROOM ──────────────────────────────────────────────────────── */
+function roomHear(m){
+  if (m.smpRoom === "close") { try { window.close(); } catch (e) {} return; }
+  if (m.smpRoom === "open") { ROOM_WIN = m.mode === "window"; roomOpen(m.open || {}, m.which); }
+  else if (m.step) deckStep(m.step);
+  else if (m.jump) { var j = slidesFindIn(DECK.slides, m.jump); if (j >= 0) deckShow(j); }
+  else if (m.key === "T") clockToggle();
+  else if (m.key === "R") deckRefresh(false);
+  else if (m.key === "Y") clockReset();
+  roomReport();
+}
+function roomOpen(open, which){
+  if (open.flow) openDeckWith("<b>Master presentation</b> &middot; " + esc(REVIEW.name), flowWithParts(open.flow), "page");
+  else if (open.target) openDeckFor(open.target, "page");
+  var j = which ? slidesFindIn(DECK.slides, which) : -1;
+  if (j > 0) deckShow(j);
+  /* Full screen asked for, and refused without a press on that screen; the
+     deck fills the window regardless, and the button below asks for the
+     press. A window to share asks for neither: it is shared as it is, and
+     may sit behind the slide view while it is (§582.1). */
+  if (ROOM_WIN) { DECK.direct = true; document.getElementById("deckroot").classList.add("fs"); deckScale(); }
+  else deckGoFull();
+  roomTitle(open);
+  roomFullAsk();
+  /* What this window booted on may be the copy the browser kept (§431): the
+     quiet refresh takes the server's own, and redraws only if it differs. */
+  deckRefresh(true);
+}
+/* §582.1: THE WINDOW'S NAME, which is what a meeting's list of windows
+   shows: "Slides · <client> · <what>". Said again on every report, because
+   the platform under the deck may name the tab as it paints. */
+var ROOM_TITLE = "";
+function roomTitle(open){
+  var org = String(GROUP.org || "").trim();
+  var what = open && open.flow ? "Master presentation"
+           : open && open.target ? placeLabel(open.target) : "";
+  ROOM_TITLE = ["Slides", org, what].filter(Boolean).join(" \u00b7 ");
+  document.title = ROOM_TITLE;
+}
+function roomFullAsk(){
+  var root = document.getElementById("deckroot");
+  var ask = root.querySelector(".roomfull");
+  if (ROOM_WIN || document.fullscreenElement === root) { if (ask) ask.remove(); return; }
+  if (ask) return;
+  root.insertAdjacentHTML("beforeend",
+    '<button type="button" class="roomfull">Click here to show the slides full screen</button>');
+  root.querySelector(".roomfull").addEventListener("click", function(ev){
+    ev.stopPropagation();
+    try {
+      var p = root.requestFullscreen && root.requestFullscreen();
+      if (p && p.catch) p.catch(function(){});
+    } catch (e) {}
+  });
+}
+function roomReport(){
+  if (!ROOM_MODE || !window.opener) return;
+  var root = document.getElementById("deckroot");
+  var on = !!(root && root.classList.contains("on"));
+  var s = on && DECK.slides[DECK.i];
+  var cont = 0, k = DECK.i;
+  while (s && k > 0 && DECK.slides[k] && DECK.slides[k].dataset.cont) { cont++; k--; }
+  var c = DECK.clock, left = c ? clockLeft() : 0;
+  var page = s ? ((s.querySelector(".dwhich") || s.querySelector("h2, h1") || {}).textContent || "").trim() : "";
+  var name = s ? (s.dataset.subjectName || "") : "";
+  if (ROOM_TITLE && document.title !== ROOM_TITLE) document.title = ROOM_TITLE;
+  try {
+    window.opener.postMessage({ smpRoom:"at", on:on, title:ROOM_TITLE,
+      which: s ? slidesWhich(DECK.slides, DECK.i) : null, cont: cont,
+      n: DECK.i + 1, total: DECK.slides.length,
+      label: name && page && page.indexOf(name) < 0 ? name + " \u2014 " + page : (page || name),
+      built: s && s.classList.contains("building") ? [+s.dataset.bn, deckBuildUnits(s).length] : null,
+      clock: c ? { text:clockWords(left), over:left < 0, near:left >= 0 && left <= CLOCK_NEAR_MS, paused:!c.from,
+                   dark: c.from && left <= -CLOCK_DARK_MS ? "dark" : c.from && left <= -CLOCK_DIM_MS ? "dimmed" : "" } : null,
+      full: document.fullscreenElement === root }, roomOrigin());
+  } catch (e) { /* the laptop has gone; the room carries on */ }
+}
+if (ROOM_MODE) {
+  document.documentElement.classList.add("smp-room");
+  /* Ready once the platform has drawn: asked rather than timed, so a slow
+     server is waited for and a fast one is not. */
+  (function wait(){
+    if (document.readyState === "complete" && typeof GROUP !== "undefined" && document.querySelector(".wrap")) {
+      try { window.opener && window.opener.postMessage({ smpRoom:"ready" }, roomOrigin()); } catch (e) {}
+      return;
+    }
+    setTimeout(wait, 150);
+  })();
+  setInterval(roomReport, 500);
+  addEventListener("fullscreenchange", function(){ roomFullAsk(); roomReport(); });
+  addEventListener("pagehide", function(){
+    try { window.opener && window.opener.postMessage({ smpRoom:"bye" }, roomOrigin()); } catch (e) {}
+  });
+  /* Every key the deck takes is reported at once, not on the next tick, so
+     the laptop never shows the slide before last. */
+  addEventListener("keyup", function(){ setTimeout(roomReport, 0); });
 }

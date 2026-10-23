@@ -113,6 +113,10 @@ plan anywhere. So:
 - How a pillars plan is **shown** is one setting per box:
   - **One list** — every pillar together (today's business units);
   - **Split** — directions in one list, capabilities in another (today's El Abd).
+    Strategy shows them as two tabs. **Reporting** shows them on ONE rail
+    wherever the viewer reaches both — directions first, then capabilities,
+    each under its own label, one heading naming both — and a viewer who
+    reaches one half sees that half alone (§556, §543).
 - So a direction is a pillar, a capability is a pillar, and neither is a kind of
   box. `dir:<id>` and `cap:<id>` stop being addresses; `dirowner` and
   `capowner` stop being roles (§3).

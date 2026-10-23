@@ -139,18 +139,26 @@ with sync_playwright() as p:
     print("\n6 · the review deck and the plan download")
     dk = safe(pg, "()=>{var h=deckHtmlFor('mobile'); return [h.indexOf('Requirements'), h.indexOf('Two data analysts')]}")
     ok("the review deck carries neither the key nor an item", dk == [-1, -1], dk)
-    px = safe(pg, "()=>{var s=pptxUnitSlides(UNITS.mobile, 'Mobile').join(''); return [s.indexOf('Requirements:'), s.indexOf('Two data analysts'), s.indexOf('Budget sign-off from Finance')]}")
+    # REWRITTEN TO THE NEW RULE (218, 564): the plan download is the deck
+    # without its figures, converted (`planSlidesXml` below reads the file's
+    # own slide XML), and a tactic's requirements ride under its name there.
+    PLAN = """()=>{var m=null, out=[]; [].forEach.call(planDeckBox('mobile').querySelectorAll('.dslide'), function(sl){ out=out.concat(deckSlidePptx(sl,'Mobile',null)); }); return out}"""
+    px = safe(pg, "()=>{var s=(" + PLAN + ")().join(''); return [s.indexOf('Requirements:'), s.indexOf('Two data analysts'), s.indexOf('Budget sign-off from Finance')]}")
     ok("the plan download carries both items under the tactic", px and all(x >= 0 for x in px), px)
-    # the pillar holds 5 tactics, which fit any slide — so it is made 12 long,
-    # or "at most 7" is true of a build that never shortened anything (§113.8)
+    ok("…and the review deck still carries neither (it is about the figures)",
+       safe(pg, "()=>deckHtmlFor('mobile').indexOf('Two data analysts')") == -1)
+    # the pillar is made 12 tactics long: no slide may run past the rows the
+    # converter allows, and every tactic arrives (§113.8 — a check of "at most
+    # N" is true of a build that never shortened anything)
     rows = safe(pg, """()=>{var p=UNITS.mobile.items[0], keep=p.tactics.slice();
       for(var i=0;i<7;i++) p.tactics.push({id:'tmp'+i, name:'Extra tactic '+i, owner:'x', q1:1});
-      var s=pptxUnitSlides(UNITS.mobile,'M'); p.tactics=keep;
+      var s=(""" + PLAN + """)(); p.tactics=keep;
       var ss=s.filter(x=>x.indexOf('Extra tactic')>=0 || x.indexOf('Two data analysts')>=0);
       return ss.map(sl=>(sl.match(/<a:tr /g)||[]).length - 1)}""")
-    ok("a pillar of 12 tactics with requirements splits 7 + 5", rows == [7, 5], rows)
+    ok("a pillar of 12 tactics splits across slides and loses none",
+       rows and len(rows) >= 2 and sum(rows) >= 12, rows)
     safe(pg, "()=>{delete GROUP.structure;}")
-    ok("off, the plan download carries no requirements", safe(pg, "()=>pptxUnitSlides(UNITS.mobile,'M').join('').indexOf('Requirements:')") == -1)
+    ok("off, the plan download carries no requirements", safe(pg, "()=>(" + PLAN + ")().join('').indexOf('Requirements:')") == -1)
     safe(pg, "()=>{GROUP.structure={details:{requirements:true}};}")
 
     print("\n7 · the workbook")

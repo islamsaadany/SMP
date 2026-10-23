@@ -5,6 +5,9 @@
 
 ## 2026-10-23
 
+### On a narrow window the strip of directions stays and the title scrolls away (§609) (built, merged to `main` 2026-10-23)
+Below 1200px wide, the strip of directions across a unit's Plan, Performance and Reporting pages (and a function's projects) sticks under the top bar when you scroll, and the open direction's title, which only repeated it, scrolls away with the plan. The open direction is filled navy like the Plan button, the others are greyed, and names wrap instead of being cut or pushed off the end; where the strip carries scores or counts, the name has its own line under them. Wide windows are unchanged. Mockup shown and approved first.
+
 ### Insights, Meeting Notes and Portfolio's projects in the Internal Tracker's look (§605) (built, merged to `main` 2026-10-23)
 Each opens with the client's coloured panel: the client's name, the page's name and its count, with Insights' categories inside it. Under it are the Tracker's underlined search line and the amber button (New meeting, Start a project). Lists sit under the Tracker's heavy rule: Notes' months are numbered sections, and "Not sent" is a status word rather than a pill that looked pressable. Portfolio's two tables lose their navy band, zebra stripes and box. Every word and control is in the Tracker's typeface; many had been falling back to Arial. On a phone, the counts sit inside the panel, Portfolio's rows fold, and nothing runs past the screen. Processes, the one-line top bar on phones and the Tracker's phone views were drawn but are not built. Mockup: `design-mockups/modules-look/2026-10-23_one-look.html`.
 

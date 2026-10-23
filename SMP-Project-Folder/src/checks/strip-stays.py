@@ -29,7 +29,7 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
       because a pseudo-element is invisible to every DOM probe (band-corner's
       rule). The screenshot is decoded by the browser's own canvas, so the
       suite still needs no image library.
-  6b · THE STRIP IS ITS OWN CARD (§611). Pinned, its navy outline is unbroken
+  6b · THE STRIP IS ITS OWN CARD (§618). Pinned, its navy outline is unbroken
       on all four sides and a gutter of page ground lies under it.
   7 · ABOVE 1200 NOTHING MOVES (§94.2). The vertical rail is a list, and the
       band beside it is still pinned once scrolled.
@@ -148,7 +148,7 @@ def corners(pg, s, ground):
 
 
 def edges(pg, s):
-    """§611: the outline on all four sides, and the gutter under the strip."""
+    """§618: the outline on all four sides, and the gutter under the strip."""
     shot = pg.screenshot()
     img = pg.evaluate(DECODE, base64.b64encode(shot).decode())
     w = img["w"]
@@ -204,10 +204,10 @@ with sync_playwright() as p:
                {"ground": g, **c})
             line, gutter = edges(pg, s)
             st = rgb(tok["--stone"])
-            ok("1100 · pinned, the strip's outline runs round all four sides in the navy (§611)",
+            ok("1100 · pinned, the strip's outline runs round all four sides in the navy (§618)",
                all(max(abs(a - b2) for a, b2 in zip(v, st)) <= 40 for v in line.values()),
                {"stone": st, **line})
-            ok("1100 · pinned, the plan stops a gutter short of the strip — page ground under it (§611)",
+            ok("1100 · pinned, the plan stops a gutter short of the strip — page ground under it (§618)",
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in gutter), {"ground": g, "gutter": gutter})
         if pg._errs:
             ok("%d · no page errors" % w, False, pg._errs[:2])

@@ -1,0 +1,248 @@
+<title>Home Dashboard Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one drawing of the console with My work turned into Home — the
+   navy band, then your tasks (late and this week), your clients with a
+   button into each module, and a strip of new case studies. Tokens and
+   components are the console's own (smp-app/shell/platform.html): the band
+   and rows are My work's (§583), the cards are Clients', the covers are the
+   case studies library's (spec 067). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.14);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1260px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:82ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flag{display:inline-block;margin:12px 0 18px;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:0 0 16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;margin-top:36px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.note h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink)}
+
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.app{display:flex}
+.side{width:232px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.brand{display:flex;gap:8px;align-items:center;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px}
+.snav{padding:10px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;padding:10px;border-radius:8px;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--ff-rule)}
+.av0{width:30px;height:30px;border-radius:50%;background:var(--ff-on);color:var(--ff-ink);font:700 11px/30px var(--mono);text-align:center}
+.swho b{display:block;font-size:13px;color:var(--ff-ink)}
+.swho i{font-style:normal;font-size:11.5px}
+.main{flex:1;min-width:0}
+.pg{padding:22px 24px 36px;max-width:1080px}
+
+/* the band, My work's own (§583) */
+.mast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:16px 20px 19px;margin:0 0 26px;box-shadow:inset 0 -3px 0 var(--amber)}
+.mtop{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.nmrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.nmrow h1{margin:0;font-size:24px;font-weight:600;line-height:1.15;color:var(--ff-ink)}
+.nmrow span{font-size:13px;font-weight:600;color:var(--ff-quiet)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.strip div{text-align:right}
+.strip b{display:block;font-size:22px;font-weight:600;line-height:1;color:var(--ff-ink)}
+.strip span{display:block;font-size:10.5px;font-weight:600;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px;white-space:nowrap}
+.strip .late b{color:var(--ff-late)}
+/* a block of Home: a heading, a count, a way to the whole of it */
+.blk{margin:0 0 30px}
+.bh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.bh .ix{font-size:12px;font-weight:600;color:var(--gold)}
+.bh h2{margin:0;font-size:17px;font-weight:600}
+.bh .meta{font-size:13px;color:var(--ink-3)}
+.bh .all{margin-left:auto;font-size:13px;font-weight:600;color:var(--gold);background:none;border:0;cursor:pointer;padding:0}
+.sub{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 2px}
+/* the task rows, My work's own */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row .t b{font-weight:600}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.row.late .tick{border-color:var(--bad)}
+.doc2{color:var(--gold);display:grid;place-items:center}
+.doc2 svg.i{width:17px;height:17px}
+.cl{justify-self:end;display:inline-flex;align-items:center;gap:6px;max-width:160px;font-size:12.5px;font-weight:500;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.cl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
+.when{font-size:13px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.when.late{color:var(--bad);font-weight:600}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.st::before{content:"";width:12px;height:2px;background:currentColor}
+.st.prog{color:var(--gold)}
+.go{color:var(--ink-3);display:grid;place-items:center;justify-self:end}
+.go svg.i{width:14px;height:14px}
+.more{margin:10px 0 0;font-size:13px;color:var(--ink-3)}
+.more button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--gold);cursor:pointer}
+/* your clients: the Clients card, shorter, its modules as buttons */
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));margin-top:14px}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column}
+.ctop{display:flex;gap:10px;align-items:center;padding:12px 14px}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 11px/30px var(--mono);text-align:center;flex:none}
+.ctop b{display:block;font-size:15px;font-weight:600;line-height:1.25}
+.ctop span{display:block;font-size:12.5px;color:var(--ink-3)}
+.mods{border-top:1px solid var(--line)}
+.mrow{display:flex;align-items:baseline;gap:8px;width:100%;padding:7px 14px;font-size:13px;text-align:left;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow:last-child{border-bottom:0}
+.mrow:hover{background:var(--surface-2)}
+.mrow i{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.mrow i.alarm{color:var(--warn);font-weight:600}
+.mrow i.due{color:var(--ink-2);font-weight:600}
+/* new in case studies: the library's covers, smaller */
+.books{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:16px;margin-top:14px}
+.cover{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px 10px 10px 6px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);text-align:left;padding:0;color:inherit;cursor:pointer}
+.cv{position:relative;background:linear-gradient(160deg,var(--ff) 0%,color-mix(in srgb,var(--ff) 78%,#000) 100%);color:var(--ff-ink);padding:12px 12px 13px 16px;min-height:132px;display:flex;flex-direction:column;gap:6px;box-shadow:inset 0 -3px 0 var(--amber)}
+.cv::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:rgba(0,0,0,.18)}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--surface);color:var(--ff);font:700 11px/30px var(--mono);text-align:center}
+.newtag{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:2px 7px}
+.cind{margin-top:auto;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet)}
+.ctitle{font-size:15px;font-weight:600;line-height:1.25}
+.cmeta{padding:8px 12px 10px 16px;font-size:12.5px;color:var(--ink-3)}
+.cmeta b{display:block;color:var(--ink);font-size:13.5px;font-weight:600}
+.loose{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding:10px 14px;border:1px dashed var(--line);border-radius:10px;background:var(--surface);font-size:13.5px;color:var(--ink-2)}
+.loose b{color:var(--ink)}
+.loose button{margin-left:auto;background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--gold);cursor:pointer}
+
+@container (max-width:719px){
+  .side{display:none}
+  .pg{padding:14px 12px 28px}
+  .strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .strip div{text-align:left}
+  .strip span{white-space:normal;line-height:1.3}
+  .row{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tk t st go" ". when cl go";row-gap:7px;column-gap:10px}
+  .row > :first-child{grid-area:tk}.row .t{grid-area:t}.row .when{grid-area:when}.row .cl{grid-area:cl;justify-self:start}.row .st{grid-area:st}.row .go{grid-area:go}
+  .books{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
+<div class="doc">
+  <h1>Home</h1>
+  <p class="lede">My work becomes <b>Home</b>, the page the console opens on. Under the navy band: <b>your tasks</b>, late and this week, with the rest one press away; <b>your clients</b>, with a button straight into each module; and <b>new in case studies</b>.</p>
+  <span class="flag">Nothing here is built · the tasks, clients and case studies are invented for the drawing</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+
+  <div class="frame"><div class="app" data-on="home"><aside class="side"></aside><div class="main"><div class="pg">
+    <header class="mast"><div class="mtop">
+      <div><div class="wk">This week · 26 Oct – 30 Oct</div><div class="nmrow"><h1>Home</h1><span>Islam Saadany</span></div></div>
+      <div class="strip"><div><b>9</b><span>Open actions</span></div><div class="late"><b>1</b><span>Late</span></div><div><b>3</b><span>Due this week</span></div><div><b>4</b><span>Your clients</span></div></div>
+    </div></header>
+
+    <section class="blk">
+      <div class="bh"><span class="ix">01</span><h2>Your tasks</h2><span class="meta">late and this week · 4</span><button type="button" class="all">All 9 tasks ›</button></div>
+      <p class="sub">Late</p>
+      <div class="row late"><span class="tick"></span><span class="t">Send the Q3 scorecard to the Head of Strategy</span><span class="cl">Raya Trade</span><span class="when late">Late 1 w</span><span class="st prog">In progress</span><span class="go" data-i="go"></span></div>
+      <p class="sub">This week</p>
+      <div class="row"><span class="tick"></span><span class="t">Prepare the plant managers' scoring session</span><span class="cl">El Abd Foods</span><span class="when">Thu 29 Oct</span><span class="st">Not started</span><span class="go" data-i="go"></span></div>
+      <div class="row"><span class="doc2" data-i="book"></span><span class="t">Write up the case study · <b>Operating model 2023</b></span><span class="cl">Nile Logistics</span><span class="when">Fri 30 Oct</span><span class="st prog">Case study</span><span class="go" data-i="go"></span></div>
+      <div class="row"><span class="tick"></span><span class="t">Review the unit heads' draft targets</span><span class="cl">Wander</span><span class="when">Fri 30 Oct</span><span class="st prog">In progress</span><span class="go" data-i="go"></span></div>
+      <p class="more">5 more next week and later. <button type="button">See them ›</button></p>
+    </section>
+
+    <section class="blk">
+      <div class="bh"><span class="ix">02</span><h2>Your clients</h2><span class="meta">the ones you have a seat on · 4</span><button type="button" class="all">All clients ›</button></div>
+      <div class="cards">
+        <div class="card"><div class="ctop"><span class="cmark">RT</span><span><b>Raya Trade</b><span>Retail &amp; E-commerce · Super user</span></span></div>
+          <div class="mods"><button type="button" class="mrow">Strategy<i class="due">Cycle open</i></button><button type="button" class="mrow">Insights</button><button type="button" class="mrow">Internal Tracker<i class="due">3 open</i></button></div></div>
+        <div class="card"><div class="ctop"><span class="cmark">EA</span><span><b>El Abd Foods</b><span>Food &amp; Beverage · Super user</span></span></div>
+          <div class="mods"><button type="button" class="mrow">Strategy<i class="alarm">No plan</i></button><button type="button" class="mrow">Internal Tracker<i class="due">2 open</i></button></div></div>
+        <div class="card"><div class="ctop"><span class="cmark">WD</span><span><b>Wander</b><span>Real Estate &amp; Property · SMO team</span></span></div>
+          <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Portfolio</button></div></div>
+        <div class="card"><div class="ctop"><span class="cmark">RHI</span><span><b>Reliance Heavy Industries</b><span>Manufacturing · SMO team</span></span></div>
+          <div class="mods"><button type="button" class="mrow">Strategy</button><button type="button" class="mrow">Processes</button></div></div>
+      </div>
+    </section>
+
+    <section class="blk">
+      <div class="bh"><span class="ix">03</span><h2>New in case studies</h2><span class="meta">finished in the last 30 days</span><button type="button" class="all">The library ›</button></div>
+      <div class="books">
+        <button type="button" class="cover"><span class="cv"><span class="logo">RT</span><span class="newtag">New</span><span class="cind">Retail &amp; E-commerce</span><span class="ctitle">Reporting set-up 2025</span></span><span class="cmeta"><b>Raya Trade</b>5 deliverables · 6 insights</span></button>
+        <button type="button" class="cover"><span class="cv"><span class="logo">NL</span><span class="newtag">New</span><span class="cind">Transportation &amp; Logistics</span><span class="ctitle">Operating model 2023</span></span><span class="cmeta"><b>Nile Logistics</b>4 deliverables · 3 insights</span></button>
+        <button type="button" class="cover"><span class="cv"><span class="logo">WD</span><span class="newtag">New</span><span class="cind">Real Estate &amp; Property</span><span class="ctitle">Strategy build 2025</span></span><span class="cmeta"><b>Wander</b>6 deliverables · 4 insights</span></button>
+      </div>
+      <div class="loose"><span><b>2 of your insights</b> are not in a case study yet.</span><button type="button">Place them ›</button></div>
+    </section>
+  </div></div></div></div>
+
+  <div class="notes">
+    <div class="note"><h2>What changes</h2><ul>
+      <li><b>My work is renamed Home</b> and stays first in the column. The console still opens on it.</li>
+      <li><b>Your tasks</b> shows late and this week. "All 9 tasks" opens the full list, which is today's My work.</li>
+      <li><b>Your clients</b> are the ones you have a seat on, with each module one press away, carrying the same marks as on Clients.</li>
+      <li><b>New in case studies</b> shows the ones finished in the last 30 days, and your insights still to place.</li>
+    </ul></div>
+    <div class="note"><h2>What it costs</h2><ul>
+      <li><b>Home reads more</b> when it opens: your clients and the case studies as well as your Tracker, so it may take a moment longer to fill.</li>
+      <li><b>An admin with no seat</b> sees no clients there, only "All clients ›". Admins could instead see every active client; say if you want that.</li>
+      <li><b>Empty blocks are left out</b>: no case studies in 30 days means no strip.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    cases:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    go:'<path d="m9 6 6 6-6 6"/>',
+    book:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')); });
+  var G = [{h:"Work",items:[["home","Home"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["cases","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll('.app').forEach(function(a){
+    var on = a.getAttribute('data-on');
+    a.querySelector('.side').innerHTML = '<div class="brand"><span class="bmk">FOREFRONT</span><span class="nm">Platform</span></div><nav class="snav">' +
+      G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){
+        return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join('') + '</div>'; }).join('') +
+      '</nav><div class="me"><span class="av0">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
+  });
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener('click', function(){ document.documentElement.setAttribute('data-theme', b.getAttribute('data-v')); press(b.getAttribute('data-v')); }); });
+  press(document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+})();
+</script>

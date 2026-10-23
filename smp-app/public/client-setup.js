@@ -1401,10 +1401,11 @@ var CLIENTSETUP = (function () {
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
-     every part but a function's own description. */
+     every part but a function's own description. §603: all of it is asked of
+     the shared rule, the capability's two included, so the page draws only
+     what this card can switch. */
   function firstParts(k){
-    if (k === "cap") return ["brief", "keyobj"];
-    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
+    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
       return SMPRules.compOffered(tgt, c); });
   }
@@ -2854,6 +2855,9 @@ var CLIENTSETUP = (function () {
 
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
+           /* the standard industry list and the size bands, ONE copy (§322):
+              the console's case studies add a past client with them (spec 067) */
+           INDUSTRIES:INDUSTRIES, SIZES:SIZES,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; } };
 })();

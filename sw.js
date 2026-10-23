@@ -587,7 +587,29 @@
    score and the rail opens one gap under the chrome. Numbered v6.97 on the
    branch; main took v6.98 while it waited. The built file's bytes changed
    (§91). Proved held by no commit in any ref's history (§94.16). */
-const SHELL = "smp-shell-v6.99-score-cards-hero";
+/* v7.00-company-reading — §595, §606, §607 and §608: one seat rule for the
+   company's own plan, the functions' row without units, the company's
+   execution card beside its directions, and How we compete as a setting on
+   functions. The built file's bytes changed (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.01-foundation-themes — §611 and §611.1: the company's Core Values can
+   be added, its Capabilities section stands before the first one, its themes
+   are written on the Foundation and the Temple only shows. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.02-capability-parts — §602 and §603: the review and the plan described
+   for the page check; a capability offered only what its Structure card
+   offers; one answer for the quarter a cycle ends in. The built file's bytes
+   changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
+   file's bytes changed (§91). Proved held by no commit in any ref's history
+   (§94.16). */
+/* v7.05-cards-overview-slides — §616: the unit Overview's cards and the
+   direction slide's "where it stands" read like §610's cards. Numbered v7.01
+   on the branch; main took v7.01–v7.04 while it waited. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history (§94.16). */
+const SHELL = "smp-shell-v7.05-cards-overview-slides";
 const ASSETS = [
   "/",
   "/index.html",

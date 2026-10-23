@@ -1318,6 +1318,8 @@ const FN_SETUP = ["name", "navName", "codePrefix", "active", "head", "custodian"
    fall-through §42 exists for. */
 const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
   ["key", "items", "keyObjectives", "swot", "perf", "exec", "pend",
+   /* §608: How we compete, once the office offers it on a function. */
+   "compete",
    /* §326: a supporting function holds its own projects now. It is in the
       list so a change to them is not swept up as "a supporting function" —
       Setup, the office's — the way any unnamed field is; what they ARE is
@@ -1375,6 +1377,10 @@ function fnOwnWork(sf2, iff, target, add) {
   if (!same(ssw, isw))
     say("unitAnalysis", target, "the function's strengths and weaknesses",
         fieldRows(target, sf2.name || target, ssw, isw, ["s", "w", "o", "t"], "swot."));
+  /* §608: AND HOW IT COMPETES, judged exactly as a unit's is — beside the
+     SWOT, by the rule the SWOT gets (`unitAnalysis`). */
+  if (!sameCanon(sf2.compete, iff.compete))
+    say("unitAnalysis", target, "how the function competes");
   /* §342: AND ITS ACTIONS, judged by the rules a milestone's row already gets
      — reported figures are the reporter's, the row itself is the plan, and
      the order is `arrange` (§278.3). Without this the whole list falls to the
@@ -1425,6 +1431,11 @@ function collectFunction(key, sf, iff, add, w) {
 
   if (String(sf.format) === "pillars") {
     collectUnit(target, asUnit(sf2, target), asUnit(iff, target), add, w);
+    /* §608: and its How we compete, classified HERE for §256's reason —
+       `asUnit()` names its fields and would drop this one, so the change
+       would reach the unit pass as nothing and be allowed to everybody. */
+    if (!sameCanon(sf.compete, iff.compete))
+      add("unitAnalysis", target, "how the function competes");
   } else if (fnOwnWork(sf2, iff, target, add)) {
     /* §326 classified the function's own plan; anything else FN_KNOWN speaks
        for is still the office's, below. */
@@ -1813,6 +1824,16 @@ function containerIndex(stored) {
   return out;
 }
 
+/* §595: THE ROWS OF THE COMPANY'S OWN PLAN THIS PERSON DOES NOT HOLD — the
+   one question every company branch below asks of a bounded reporter, through
+   the one seat rule (`holdsTopPart`). `seatOf` reads the part's seats off the
+   row's context; a row with no part is never theirs. */
+function topRowsNotMine(w, person, kind, ids, ctxs, seatOf) {
+  return ids.filter(function (id) {
+    const c = ctxs[id], seat = c ? seatOf(c) : null;
+    return !seat || !R.holdsTopPart(w, person, kind, seat);
+  });
+}
 function authorize(stored, incoming, person) {
   const w = R.worldOf(stored);              /* THE STORED WORLD. Never the incoming one. */
   const smo = R.isSMO(w, person);
@@ -2095,7 +2116,7 @@ function authorize(stored, incoming, person) {
           return;
         }
         if (R.mayReportTop(w, person)) return;
-        if (R.ownsTopPillar(w, person, p.owner || "", p.custodian || "")) return;
+        if (R.holdsTopPart(w, person, "pillar", { names: [p.owner || "", p.custodian || ""] })) return;
         no("Only the direction's owner and custodian, the SMO team and the CEO add its slides.");
         return;
       }
@@ -2133,14 +2154,13 @@ function authorize(stored, incoming, person) {
              the rows of their own direction and nothing else — never the
              company's submission, note or slides. Found through the STORED
              top plan (§42), never the incoming one. */
-          if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids || !R.ownsTopPillar(w, person)) {
+          if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids || !R.holdsTopPart(w, person, "pillar")) {
             no("The top layer's own plan is reported by the SMO team and the CEO.");
             return;
           }
           const tctx = ctxOfUnit(topView(stored.group));
-          const notMineT = ch.ids.filter(function (id) {
-            const c = tctx[id];
-            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "", c.pillarCust || "");
+          const notMineT = topRowsNotMine(w, person, "pillar", ch.ids, tctx, function (c) {
+            return { names: [c.pillarOwner || "", c.pillarCust || ""] };
           });
           if (notMineT.length)
             no("Your role reports only your own direction — " + notMineT.length +
@@ -2250,7 +2270,7 @@ function authorize(stored, incoming, person) {
             return;
           }
           if (!R.mayReportTop(w, person) &&
-              !R.ownsTopPillar(w, person, c.owner || "", c.custodian || ""))
+              !R.holdsTopPart(w, person, "pillar", { names: [c.owner || "", c.custodian || ""] }))
             no("Saving " + (c.name ? "“" + c.name + "”" : "a direction") +
                " is its owner's or its custodian's.");
           return;
@@ -2473,14 +2493,13 @@ function authorize(stored, incoming, person) {
             return;
           }
           if (R.mayReportTop(w, person)) return;
-          if (!ch.ids || !R.ownsTopProject(w, person)) {
+          if (!ch.ids || !R.holdsTopPart(w, person, "project")) {
             no("The top layer's own plan is reported by the SMO team and the CEO.");
             return;
           }
           const gctx = ctxOfUnitOwn(topView(stored.group));
-          const notMineP = ch.ids.filter(function (id) {
-            const c = gctx[id];
-            return !c || !c.project || !R.ownsTopProject(w, person, c.project.owner || "");
+          const notMineP = topRowsNotMine(w, person, "project", ch.ids, gctx, function (c) {
+            return c.project ? { names: [c.project.owner || ""] } : null;
           });
           if (notMineP.length)
             no("Your role reports only your own project — " + notMineP.length +

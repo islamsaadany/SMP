@@ -5,8 +5,13 @@
 
 ## 2026-10-23
 
-### The strip of directions is its own card (§611) (built, on the branch)
+### The strip of directions is its own card (§618) (built, on the branch)
 On a narrow window the strip has a navy outline all the way round, and a gap of page background stays under it while you scroll, so it reads apart from the plan as the side list does on a wide window. Its hidden top line is fixed.
+### A theme's note runs to several lines (§613) (built, merged to `main` 2026-10-23)
+On the company level's Foundation, a theme's Note is a box that grows, where Enter starts a new line; the theme cards and the Temple's columns show the note with its line breaks.
+
+### The company's Core Values can be added, its Capabilities section is there before the first one, and its themes are written on the Foundation while the Temple only shows (§611, §611.1) (built, merged to `main` 2026-10-23)
+On the company level, with the pen open, Core Values work as a business unit's do: a name and a definition per value, × to remove, *+ Add a value*. Once the office has switched capabilities on, the Capabilities section under Strategy shows while still empty, with its *+ Add*. The Foundation has a Themes box under Key Objectives (code, name, note, how many pillars use it, *In use* or Remove, *+ Add a theme*), and Key Objectives a Heading column where the Temple is on. The Temple has no Edit: it shows what the Foundation and the Capabilities section hold. El Abd is unchanged but for its Core Values box while editing.
 
 ### On a narrow window the strip of directions stays and the title scrolls away (§609) (built, merged to `main` 2026-10-23)
 Below 1200px wide, the strip of directions across a unit's Plan, Performance and Reporting pages (and a function's projects) sticks under the top bar when you scroll, and the open direction's title, which only repeated it, scrolls away with the plan. The open direction is filled navy like the Plan button, the others are greyed, and names wrap instead of being cut or pushed off the end; where the strip carries scores or counts, the name has its own line under them. Wide windows are unchanged. Mockup shown and approved first.

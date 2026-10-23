@@ -153,10 +153,9 @@ var PAGE_INFO = {
       ["A view, not a scoreboard",
        "The roof is the aspiration, the band is the Key Objectives with their targets, the columns are the " +
        "themes, and the base is the capabilities that carry no theme because they support all three."],
-      ["Edited as tables, saved as the temple",
-       "A temple is a picture, and a picture is an awkward thing to type into. Editing opens tables for the " +
-       "aspiration, the objectives, the themes and the capabilities \u2014 they write to the same objects the " +
-       "view renders, so what is saved is the temple."],
+      ["Written where each part lives",
+       "The temple only shows. The aspiration, the Key Objectives with their headings, and the themes are " +
+       "written on the Foundation; the capabilities in Strategy's Capabilities section."],
       ["A theme's code is what pillars point at",
        "Renaming a theme carries its pillars with it. A theme still in use cannot be removed, because " +
        "deleting it would leave those pillars pointing at nothing and quietly absent from every theme."],

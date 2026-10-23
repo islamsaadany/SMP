@@ -659,7 +659,7 @@
      accent itself is chosen to work as a fill on the page, and on the panel it
      is 2.84:1 — the same pairing .banner strong already had to solve. */
   .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
-  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; white-space:pre-line; }
   .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
                border-top:3px solid var(--gold); background:var(--surface); }
   .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
@@ -1224,6 +1224,16 @@ html[data-client-settings] .viewer { display:none; }
   details.valcard summary:hover { background:var(--surface-2); }
   details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
+
+  /* ── Themes box on the top layer's Foundation (§611.1) ─── */
+  .themeband { margin-top:20px; }
+  .themegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:12px 15px; }
+  .themecard b { font-family:var(--serif); font-size:16px; font-weight:600; }
+  .themecard .themenote { font-size:13.5px; color:var(--ink-2); white-space:pre-line; }
+  .themeband input.themecode { width:5.5em; text-align:center; }
+  .themeband .why { display:inline; margin:0; }
 
   /* ── Temple entablature, fixed grid ───────────────────── */
   .entablature { grid-template-columns:repeat(3,1fr); gap:16px 26px; align-items:start; }
@@ -2284,13 +2294,13 @@ html[data-client-settings] .viewer { display:none; }
       overflow-x:auto; }
     /* §53.7's ground above the pinned strip, across the full width now that
        there is no gutter beside it to reach over — and ENDING ON THE BORDER'S
-       OUTER EDGE (§611). `bottom:100%` is measured from the padding box, so
+       OUTER EDGE (§618). `bottom:100%` is measured from the padding box, so
        the filler ran one pixel down over the strip's own top border and the
        line was missing along the whole top: Islam, of the outlined strip, *"the
        outer line is not around the whole thing is it broken?"* It was, and it
        had been since §609 in the grey too. */
     .split:not(.setupsplit) .rail::before { right:-1px; bottom:calc(100% + 1px); }
-    /* ── THE STRIP IS ITS OWN CARD (§611) ─────────────────────────────────
+    /* ── THE STRIP IS ITS OWN CARD (§618) ─────────────────────────────────
        Islam: *"make the rail when it's in the top to be separate as if in a
        separate card from the direction or capability data, just to be
        appearing separately like the rail on the left"*; of five drawn
@@ -6595,13 +6605,15 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  /* §610: the pillar pane's score pair, headline first (`scorePair`). */
+  /* §610: the pillar pane's score pair, headline first (`scorePair`); §616:
+     and the unit Overview's cards above the rail. */
   .scores.hero .card.tight { padding:18px 20px 16px; }
   .scores.hero .card.tight .score-h { margin-bottom:10px; }
   .scores.hero .headline { align-items:center; gap:14px; }
   .scores.hero .headline .big { font-size:60px; letter-spacing:-.04em; }
   .scores.hero .headline .big small { font-size:24px; margin-left:2px; }
   .scores.hero .headline .ofplan { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .headline .drill { align-self:flex-end; margin-bottom:9px; }
   .scores.hero .minirow { margin-top:14px; padding-top:11px; }
   .scores.hero .minirow em { font-size:9px; }
   .scores.hero .minirow b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
@@ -10463,6 +10475,10 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 .headdetail .hdf { font-weight:600; }
 .headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
 .headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+/* §616: the lines under the headline speak more quietly than it does —
+   smaller, and a figure in the top band in ink rather than in colour. */
+.headdetail { font-size:20px; }
+.dslide .headdetail .hdf.quiet { color:var(--ink-2); font-weight:500; }
 
 /* ── §579: LINE BY LINE ───────────────────────────────────────────────────
    A line waiting is transparent, never removed, so nothing moves as the

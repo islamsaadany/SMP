@@ -549,7 +549,11 @@
    slides are up. The built file's bytes changed, which is the whole trigger
    (§91). Proved held by no commit in any ref's history after fetching every
    ref (§94.16). */
-const SHELL = "smp-shell-v6.86-remote-keys";
+/* v6.87-app-types — §592: the rules file loses its `// @ts-check` line and
+   the differ gains type comments; nothing runs differently. The built
+   file's bytes changed, which is the whole trigger (§91). Proved held by
+   no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.87-app-types";
 const ASSETS = [
   "/",
   "/index.html",

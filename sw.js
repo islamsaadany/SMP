@@ -605,7 +605,7 @@
 /* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
    file's bytes changed (§91). Proved held by no commit in any ref's history
    (§94.16). */
-const SHELL = "smp-shell-v7.03-theme-notes";
+const SHELL = "smp-shell-v7.04-home-case-studies";
 const ASSETS = [
   "/",
   "/index.html",

@@ -1,6 +1,6 @@
 # Spec 068 — Home, and the console made compact
 
-**Status: BUILT on branch `claude/cool-bardeen-xqllne`, not merged.**
+**Status: LIVE — merged to `main` 2026-10-23 on Islam's word.**
 Decision record: `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` §614.
 
 ## What Islam asked for

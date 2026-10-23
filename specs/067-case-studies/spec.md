@@ -1,7 +1,7 @@
 # 067 · Case studies — what we did for a client, written for the next person
 
-**Status:** **BUILT on the branch 2026-10-23, on Islam's "yes build it"; not
-merged.** The library drawing (`design-mockups/case-studies/2026-10-23_case-studies-library.html`)
+**Status:** **LIVE — built 2026-10-23 on Islam's "yes build it", merged to
+`main` the same day on "merge it and put it live" (decision record §615).** The library drawing (`design-mockups/case-studies/2026-10-23_case-studies-library.html`)
 was signed off by that answer; what was built and what was not is §14.
 
 **Read with spec 045 (the consulting memory)**, which this changes rather than

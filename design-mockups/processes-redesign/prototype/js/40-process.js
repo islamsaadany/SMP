@@ -17,9 +17,7 @@ R.p = (args) => {
   CUR = p;
   const tab = tabsFor().some((t) => t[0] === args[1]) ? args[1] : 'overview';
   const railOff = !OPT.rail || (UI.railHidden === null ? tab === 'map' : UI.railHidden);
-  const parent = p.parent && byCode(p.parent);
-  const crumb = '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a>' + (parent ? ' › <a href="#" data-go="' + openP(parent.code, tab) + '">' + parent.code + ' ' + esc(parent.name) + '</a>' : '') + ' › ' + p.code + ' ' + esc(p.name);
-  return '<div class="crumb" style="margin-bottom:10px">' + crumb + '</div><div class="pwrap' + (railOff ? ' railoff' : '') + '">' + (OPT.rail ? rail(p, tab) : '') + '<div class="pane">' + paneHead(p, tab) + '<div class="pane-b">' + tabBody(p, tab) + '</div></div></div>';
+  return processBand(p, tab, railOff) + '<div class="pwrap' + (railOff ? ' railoff' : '') + '">' + (OPT.rail ? rail(p, tab) : '') + '<div class="pane"><div class="pane-b">' + tabBody(p, tab) + '</div></div></div>';
 };
 function rail(p, tab) {
   const q = (UI.f.railQ || '').toLowerCase();
@@ -43,26 +41,30 @@ INP.railQ = (el) => { UI.f.railQ = el.value; render(); };
 ACT.railHide = () => { UI.railHidden = true; render(); };
 ACT.railShow = () => { UI.railHidden = false; render(); };
 
-function paneHead(p, tab) {
-  const f = inForce(p), rank = rankOf(p), mk = marks(p), nx = nextMissing(p), showMarks = OPT.marksAll || isDeep(p);
-  const primary = p.status === 'DRAFT' ? '<button class="btn gold" type="button" data-act="lcSendOpen">Send for review</button>'
-    : p.status === 'APPROVED' ? '<button class="btn gold" type="button" data-act="lcPublish">Publish v' + latestVersion(p).n + ' to staff</button>'
+/* the process's own band: the Tracker's masthead, holding the process — its
+   name and stage, the six marks, its counts and its seven tabs */
+function processBand(p, tab, railOff) {
+  const f = inForce(p), rank = rankOf(p), nx = nextMissing(p), showMarks = OPT.marksAll || isDeep(p), parent = p.parent && byCode(p.parent);
+  const noCtl = p.controls.filter((c) => !c.control).length, openNc = p.ncs.filter((n) => n.status !== 'Closed').length;
+  const primary = p.status === 'DRAFT' ? '<button class="btn gold sm" type="button" data-act="lcSendOpen">Send for review</button>'
+    : p.status === 'APPROVED' ? '<button class="btn gold sm" type="button" data-act="lcPublish">Publish v' + latestVersion(p).n + ' to staff</button>'
     : p.status === 'IN_REVIEW' ? '<span class="pill navy">Waiting on ' + esc(personName(p.approver)) + '</span>' : '';
-  const exp = menuBtn('pexp', 'Export', '<div class="mh">This process</div><button class="mi" type="button" data-go="sop~' + p.code + '">SOP document</button>' + mi('Process map, printed', 'toast', 'data-msg="Opens the printed map in Flow or Roles layout, ready to print."') + mi('RACI matrix · PDF or Excel', 'toast', 'data-msg="Downloads the RACI matrix in the product."') + mi('Authority matrix · PDF or Excel', 'toast', 'data-msg="Downloads the authority matrix in the product."') + '<div class="rule"></div><button class="mi" type="button" data-go="export">Report for several processes…</button>');
-  const more = menuBtn('pmore', '⋯', mi('Edit details', 'editProcess', 'data-code="' + p.code + '"', 'Name, code, category, where it sits') + mi('Clone', 'cloneProcess', 'data-code="' + p.code + '"') + mi('Add a sub-process', 'newProcess', 'data-parent="' + p.code + '"') + '<div class="rule"></div>' + mi('Delete…', 'deleteProcess', 'bad data-code="' + p.code + '"'), { cls: 'btn', noCaret: true, aria: 'More', w: 220 });
-  return '<div class="pane-h' + (OPT.brand ? ' brand' : '') + '"><div class="ph1">' + (OPT.rail ? '<button class="btn sm railbtn" type="button" data-act="railShow">☰ Processes</button>' : '') +
-    '<span class="code">' + p.code + '</span><h2>' + esc(p.name) + '</h2>' + statusPill(p) +
-    (f && p.status !== 'PUBLISHED' ? '<span class="q" style="font-size:12px">v' + f.n + ' in force for staff</span>' : '') +
-    (isDeep(p) ? '<a class="chip gold" href="#" data-go="priorities~plan">' + DEC[p.prio.dec] + (rank ? ' · rank ' + rank : '') + '</a>' : '') +
-    '<div class="who"><span><em>Owner</em>' + (p.owner ? esc(personName(p.owner)) : '<span class="q">None yet</span>') + '</span>' + (p.approver ? '<span><em>Approver</em>' + esc(personName(p.approver)) + '</span>' : '') + '</div></div>' +
-    (showMarks ? '<div class="ph2"><span class="rdl">Ready for staff <b>' + marksDone(p) + ' of 6</b></span>' + mk.map((m) => '<button type="button" class="rdm' + (m.done ? '' : ' no') + '" data-go="' + openP(p.code, m.tab) + '">' + m.label + '</button>').join('') +
-      (nx ? '<span class="next">Next: <a data-go="' + openP(p.code, nx[0]) + '">' + nx[1] + '</a></span>' : '<span class="next">Ready. Every mark is done.</span>') + '</div>' : '<div class="ph2"><span class="rdl">High-level process</span><span class="next">No deep dive planned. Decide on <a data-go="priorities">Priorities</a>.</span></div>') +
-    '<div class="ph3"><div class="seg" role="tablist" aria-label="Views of this process">' + tabsFor().map(([k, l]) => '<button type="button" role="tab" aria-selected="' + (k === tab) + '" class="' + (k === tab ? 'on' : '') + (['people', 'compliance', 'connections'].indexOf(k) >= 0 ? ' empty-tab' : '') + '" data-go="' + openP(p.code, k) + '">' + l + tabCount(p, k) + '</button>').join('') + '</div>' +
-    '<div class="acts">' + (OPT.aiPanel ? '<button class="btn" type="button" data-act="aiOpen">Check with AI</button>' : '') + exp + primary + more + '</div></div></div>';
+  const exp = menuBtn('pexp', 'Export', '<div class="mh">This process</div><button class="mi" type="button" data-go="sop~' + p.code + '">SOP document</button>' + mi('Process map, printed', 'toast', 'data-msg="Opens the printed map in Flow or Roles layout, ready to print."') + mi('RACI matrix · PDF or Excel', 'toast', 'data-msg="Downloads the RACI matrix in the product."') + mi('Authority matrix · PDF or Excel', 'toast', 'data-msg="Downloads the authority matrix in the product."') + '<div class="rule"></div><button class="mi" type="button" data-go="export">Report for several processes…</button>', { cls: 'bq' });
+  const more = menuBtn('pmore', '⋯', mi('Edit details', 'editProcess', 'data-code="' + p.code + '"', 'Name, code, category, where it sits') + mi('Clone', 'cloneProcess', 'data-code="' + p.code + '"') + mi('Add a sub-process', 'newProcess', 'data-parent="' + p.code + '"') + '<div class="rule"></div>' + mi('Delete…', 'deleteProcess', 'bad data-code="' + p.code + '"'), { cls: 'bq', noCaret: true, aria: 'More', w: 220 });
+  const ready = showMarks
+    ? '<div class="mready"><span class="rl">Ready for staff <b>' + marksDone(p) + ' of 6</b></span>' + marks(p).map((m) => '<button type="button" class="mk2' + (m.done ? '' : ' no') + '" data-go="' + openP(p.code, m.tab) + '">' + m.label + '</button>').join('') +
+      (nx ? '<span class="mnext">Next: <a data-go="' + openP(p.code, nx[0]) + '">' + nx[1] + '</a></span>' : '<span class="mnext">Ready. Every mark is done.</span>') + '</div>'
+    : '<div class="mready"><span class="rl">High-level process</span><span class="mnext">No deep dive planned. Decide on <a data-go="priorities">Priorities</a>.</span></div>';
+  const tabs = tabsFor().map(([k, l]) => '<a href="#" data-go="' + openP(p.code, k) + '"' + (k === tab ? ' class="on" aria-current="page"' : '') + (['people', 'compliance', 'connections'].indexOf(k) >= 0 ? ' style="font-style:italic"' : '') + '>' + l + tabCount(p, k) + '</a>').join('');
+  const title = esc(p.name) + ' ' + statusPill(p) + (isDeep(p) ? '<a class="chip gold" href="#" data-go="priorities~plan">' + DEC[p.prio.dec] + (rank ? ' · rank ' + rank : '') + '</a>' : '');
+  const sub = 'Owner <b>' + (p.owner ? esc(personName(p.owner)) : 'none yet') + '</b>' + (p.approver ? ' · Approver <b>' + esc(personName(p.approver)) + '</b>' : '') + (f && p.status !== 'PUBLISHED' ? ' · v' + f.n + ' in force for staff' : '');
+  const tiles = (showMarks ? [[marksDone(p) + '/6', 'Ready', 0, openP(p.code, nx ? nx[0] : 'lifecycle')]] : []).concat([[p.steps.length, 'Steps', 0, openP(p.code, 'map')], [p.controls.length, 'Risks', 0, openP(p.code, 'risks')]]).concat(noCtl ? [[noCtl, 'No control', true, openP(p.code, 'risks')]] : []).concat([[openNc, 'Open issues', openNc > 0, openP(p.code, 'quality')]]);
+  return phead(title, { eyebrow: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a>' + (parent ? ' › <a href="#" data-go="' + openP(parent.code, tab) + '">' + parent.code + '</a>' : '') + ' › ' + p.code + (p.cat ? ' · ' + esc(p.cat) : ''), sub, tiles, extra: ready, tabs, tabsLabel: 'Views of this process',
+    acts: (OPT.rail && railOff ? '<button class="bq" type="button" data-act="railShow">☰ Processes</button>' : '') + (OPT.aiPanel ? '<button class="bq" type="button" data-act="aiOpen">Check with AI</button>' : '') + exp + more + primary });
 }
 function tabCount(p, k) {
   const n = { map: p.steps.length, risks: p.controls.length, quality: p.ncs.filter((x) => x.status !== 'Closed').length }[k];
-  return n ? '<span class="c">' + n + '</span>' : '';
+  return n ? ' <span class="c">' + n + '</span>' : '';
 }
 function tabBody(p, tab) {
   return ({ overview: tabOverview, map: tabMap, raci: tabRaci, authority: tabAuthority, risks: tabRisks, quality: tabQuality, lifecycle: tabLifecycle, ai: (x) => aiBody(x, true),

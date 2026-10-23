@@ -6,7 +6,8 @@ const planLocked = () => S.plan.status !== 'DRAFT';
 R.priorities = (args) => {
   const step = PSTEPS.some((s) => s[0] === args[0]) ? args[0] : 'score';
   const n = procs().length;
-  return phead('Deep-dive priorities', { sub: plural(n, 'high-level process', 'high-level processes') + '. Which ones do we take deep next: full steps, RACI, controls and an SOP?' }) +
+  const scored = procs().filter((p) => score(p) != null).length;
+  return phead('Deep-dive priorities', { sub: 'Which of the ' + plural(n, 'high-level process', 'high-level processes') + ' do we take deep next: full steps, RACI, controls and an SOP?', tiles: [[scored + '/' + n, 'Scored', 0, 'priorities~score'], [procs().filter((p) => p.prio.dec === 'W1').length, 'Wave 1', 0, 'priorities~plan'], [procs().filter((p) => p.prio.dec === 'W2').length, 'Wave 2', 0, 'priorities~plan'], [{ DRAFT: 'Draft', SENT: 'With client', APPROVED: 'Approved' }[S.plan.status], 'The plan', 0, 'priorities~signoff']] }) +
     '<div class="steps4" role="tablist">' + PSTEPS.map(([k, t, s]) => '<button type="button" role="tab" aria-selected="' + (k === step) + '" class="' + (k === step ? 'on' : '') + '" data-go="priorities~' + k + '"><b>' + t + '</b><span>' + s + '</span></button>').join('') + '</div>' +
     (planLocked() && step !== 'signoff' ? '<div class="banner attn">The plan ' + (S.plan.status === 'SENT' ? 'is with the client' : 'is approved') + ', so scores, weights and decisions are locked. Reopen it on the Sign-off step, with a reason, to change it.</div>' : '') +
     ({ score: pScore, rank: pRank, plan: pPlan, signoff: pSignoff }[step])();

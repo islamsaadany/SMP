@@ -22,7 +22,8 @@ function gTiles() {
 }
 R.governance = (args) => {
   const v = GV.some((g) => g[0] === args[0]) ? args[0] : 'attention';
-  return phead('Governance', { sub: 'An AI-assisted assessment of board structure, risk and controls, ethics, compensation, ESG, data integrity and accessibility; and the control points and KPIs that come from each process.' }) +
+  const openR = S.gov.risks.filter((r) => r.status !== 'Closed'), hi = openR.filter((r) => riskLevel(r) === 'High').length, ck = S.gov.checklist;
+  return phead('Governance', { sub: 'An AI-assisted assessment of board structure, risk and controls, ethics, compensation, ESG, data integrity and accessibility; and the control points and KPIs that come from each process.', tiles: [[hi, 'High risks', hi > 0, 'governance~risks~High'], [openR.length, 'Open risks', 0, 'governance~risks'], [S.gov.policies.length, 'Policies', 0, 'governance~policies'], [ck.filter((c) => c.done).length + '/' + ck.length, 'Checklist done', 0, 'governance~assessment']] }) +
     '<div class="seg" style="margin-bottom:16px">' + GV.map(([k, l]) => '<button type="button" class="' + (k === v ? 'on' : '') + '" data-go="governance~' + k + '">' + l + '</button>').join('') + '</div>' +
     ({ attention: gAttention, assessment: gAssessment, risks: gRisks, policies: gPolicies, controls: gControls, activity: gActivity }[v])(args.slice(1));
 };

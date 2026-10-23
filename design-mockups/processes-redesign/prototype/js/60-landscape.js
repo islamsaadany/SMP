@@ -30,7 +30,7 @@ R.landscape = (args) => {
   const title = OPT.landscape ? 'Landscape' : helicopter ? 'Helicopter View' : 'Value Chain';
   const sub = helicopter || OPT.landscape ? 'How ' + esc(S.ws.name) + '\'s processes connect — ' + [plural(procs().length, 'process', 'processes'), br && plural(br, 'branch', 'branches'), ln && plural(ln, 'step link')].filter(Boolean).join(' · ') + '.' : 'How work moves through ' + esc(S.ws.name) + ', phase by phase, across every process.';
   const seg = (OPT.landscape ? [['rails', 'Milestones'], ['cards', 'Cards'], ['chain', 'Value chain']] : helicopter ? [['rails', 'Milestones'], ['cards', 'Cards']] : []).map(([k, l]) => '<button type="button" class="' + (k === view ? 'on' : '') + '" data-go="landscape~' + k + '">' + l + '</button>').join('');
-  return phead(title, { sub }) + '<div class="filters">' + (seg ? '<div class="seg">' + seg + '</div>' : '') + (helicopter ? pickerMenu() + '<button class="btn sm" type="button" data-act="toast" data-msg="Downloads the picture as a PNG in the product." style="margin-left:auto">⬇ PNG</button>' : '') + '</div>' +
+  return phead(title, { sub, tiles: [[procs().length, 'Processes'], [br, 'Branches'], [ln, 'Step links'], [activities().length, 'Activities', 0, 'landscape~chain']] }) + '<div class="filters">' + (seg ? '<div class="seg">' + seg + '</div>' : '') + (helicopter ? pickerMenu() + '<button class="btn sm" type="button" data-act="toast" data-msg="Downloads the picture as a PNG in the product." style="margin-left:auto">⬇ PNG</button>' : '') + '</div>' +
     (view === 'rails' ? railsView() : view === 'cards' ? cardsView() : chainView()) +
     (helicopter ? connectionsList(E) : '');
 };

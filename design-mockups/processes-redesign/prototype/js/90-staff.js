@@ -26,7 +26,8 @@ function staffScreen() {
 }
 function readList(who) {
   const wait = waitingFor(who), plan = S.plan.status === 'SENT' && S.plan.approver === who.id;
-  return '<div class="phead"><div><h1>Processes</h1><div class="sub">The approved way we work. Open one to read it and confirm you have.</div></div></div>' +
+  const c = staffCounts(who);
+  return phead('Processes', { eyebrow: esc(S.ws.name), sub: 'The approved way we work. Open one to read it and confirm you have.', tabs: '', tiles: [[published().length, 'Published'], [c.toRead, 'To read', c.toRead > 0], [c.toApprove, 'To approve']] }) +
     (wait.length || plan ? '<div class="sect" style="color:var(--attn-tx)">Waiting for your approval</div><div class="box" style="border-color:var(--attn);margin-bottom:18px">' +
       (plan ? '<div class="readitem" data-go="plan-signoff"><span class="chip attn">Plan</span><span><b>Deep-dive priorities</b><span class="psub">Which processes to take deep, and in what order</span></span><span class="btn sm gold">Open to approve</span></div>' : '') +
       wait.map((p) => '<div class="readitem" data-go="approve~' + p.code + '"><span class="code">' + p.code + '</span><span><b>' + esc(p.name) + '</b><span class="psub">Sent by ' + esc(p.sentBy) + ' on ' + dt(p.sentAt) + '</span></span><span class="btn sm gold">Open to approve</span></div>').join('') + '</div>' : '') +
@@ -46,7 +47,7 @@ function readPage(p, who, approving) {
     const read = p.acks.indexOf(who.id) >= 0;
     bar = read ? '<div class="stick done">You have read version ' + nextN + '. Thank you.</div>' : '<div class="stick"><span>Confirm you have read and understood version ' + nextN + '.</span><span class="acts"><button class="btn gold" type="button" data-act="ack" data-code="' + p.code + '">I have read this</button></span></div>';
   }
-  return '<a class="lnk" href="#" data-go="read">← All processes</a><div class="phead" style="margin-top:10px"><div><h1>' + esc(p.name) + ' <span class="code" style="font-size:14px">' + p.code + '</span></h1><div class="sub">' + (approving ? 'For your approval · sent by ' + esc(p.sentBy) : 'Version ' + nextN + ' · in force from ' + dt(f.published)) + '</div></div></div>' +
+  return phead(esc(p.name), { eyebrow: '<a href="#" data-go="read">' + esc(S.ws.name) + ' · Processes</a> › ' + p.code, sub: approving ? 'For your approval · sent by <b>' + esc(p.sentBy) + '</b>' : 'Version <b>' + nextN + '</b> · in force from ' + dt(f.published), tabs: '', tiles: [[workSteps(p).length, 'Steps'], ['v' + nextN, approving ? 'To approve' : 'In force']] }) +
     (note ? '<div class="banner attn"><b>What changed in this version.</b> ' + esc(note) + '</div>' : '') +
     '<div class="box" style="padding:16px 18px">' + (p.purpose ? '<div class="lbl">Purpose</div><p style="margin:4px 0 14px">' + esc(p.purpose) + '</p>' : '') +
     (p.inScope.length || p.outScope.length ? '<div class="two" style="margin-bottom:14px"><div><div class="lbl">Covers</div><ul style="padding-left:18px;margin-top:4px">' + p.inScope.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div><div><div class="lbl">Does not cover</div><ul style="padding-left:18px;margin-top:4px">' + p.outScope.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div>' : '') +
@@ -65,7 +66,7 @@ ACT.apBack = (el) => { const p = byCode(el.dataset.code), why = val('ap-why'); i
 function planSignPage(who) {
   const P = S.plan;
   if (P.status !== 'SENT' || P.approver !== who.id) return '<a class="lnk" href="#" data-go="read">← All processes</a><div class="box" style="margin-top:10px"><div class="empty"><b>There is no plan waiting for your approval.</b>When the Strategy Office sends the deep-dive plan to you, it appears here.</div></div>';
-  return '<a class="lnk" href="#" data-go="read">← All processes</a><div style="height:10px"></div>' + planDoc(P.snapshot, '<span class="pill attn">Waiting for approval</span>') +
+  return phead('Deep-dive priorities', { eyebrow: '<a href="#" data-go="read">' + esc(S.ws.name) + ' · Processes</a> › For your approval', sub: 'Sent by <b>' + esc(P.sentBy) + '</b> on ' + dt(P.sentAt), tabs: '' }) + planDoc(P.snapshot, '<span class="pill attn">Waiting for approval</span>') +
     '<div class="stick"><span>You are asked to approve this plan.</span><span class="acts"><input class="inp" id="pa-why" placeholder="Why it is sent back" maxlength="500" style="max-width:240px"><button class="btn" type="button" data-act="planBack">Send back</button><button class="btn gold" type="button" data-act="planApprove">Approve</button></span></div>';
 }
 ACT.planApprove = () => { const P = S.plan, who = me(); P.status = 'APPROVED'; P.approvedAt = todayIso(); P.record.unshift([todayIso(), who.name, 'Approved the plan']); toast('Plan approved.'); go('read'); };

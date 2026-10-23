@@ -23,6 +23,8 @@
   --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
   --over-bg:#FBF6E9; --over-line:#D9C489;
   --brand:#0F6B63; --brand-ink:#FFFFFF; --brand-to:#3E7F8F;
+  /* the band: the Tracker's masthead, navy in both themes as the Tracker wears it; option B paints it the client's colour with inks worked out for it */
+  --bar:#16325C; --bar-ink:#FFFFFF; --bar-quiet:#B9C2CE; --bar-accent:#E8A33A; --bar-late:#FF9B8F; --bar-hover:rgba(255,255,255,.1);
   --scrim:rgba(10,14,22,.45); --ring:rgba(15,23,42,.12); --shadow:0 10px 28px rgba(15,23,42,.16);
   --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
@@ -733,6 +735,53 @@ button.rc:hover{box-shadow:0 0 0 2px var(--ring)}
 .heat2 button.zero{opacity:.45;cursor:default}
 .heat2 button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ring)}
 
+/* ── THE MASTHEAD: the Internal Tracker's band (modules/tracker/page.ts .mast) ── */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mast.flat{padding-bottom:18px}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font-size:11px;font-weight:600;line-height:1;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.wkof a{color:inherit;text-decoration:none}
+.wkof a:hover{text-decoration:underline}
+.mast h1{margin:0;font-size:24px;font-weight:600;line-height:1.15;letter-spacing:-.01em;color:var(--bar-ink);display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.mast h1 .code{color:var(--bar-accent);font-size:15px}
+.msub{font-size:13px;color:var(--bar-quiet);margin-top:5px;max-width:84ch}
+.msub b{color:var(--bar-ink);font-weight:600}
+.mstrip{display:flex;gap:22px;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.mtile{text-align:right;min-height:48px;background:none;border:0;padding:0;color:inherit;font:inherit}
+button.mtile{cursor:pointer;border-radius:6px}
+button.mtile:hover span{color:var(--bar-ink)}
+.mtile b{display:block;font-size:22px;font-weight:600;line-height:1;color:var(--bar-ink)}
+.mtile span{display:block;font-size:10.5px;font-weight:600;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.mtile.late b{color:var(--bar-late)}
+.mcats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
+.mcats a{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;line-height:1;color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none;white-space:nowrap}
+.mcats a.on{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.mcats a:hover,.mcats a:focus-visible{color:var(--bar-ink)}
+.mcats a .c{font-size:11px;opacity:.8}
+.mcats .sp{flex:1}
+.mact{display:flex;gap:6px;align-items:center;align-self:center;margin-bottom:9px;flex-wrap:wrap}
+.bq{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;line-height:1.35;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0;cursor:pointer;white-space:nowrap}
+.bq b{color:var(--bar-ink);font-weight:600}
+.bq .dn{color:inherit}
+.bq:hover,.bq[aria-expanded="true"],.bq:focus-visible{background:var(--bar-hover);color:var(--bar-ink);outline:none}
+.mast .btn.gold{background:var(--bar-accent);border-color:var(--bar-accent);color:var(--bar)}
+.mast .btn.gold:hover{filter:brightness(1.07);background:var(--bar-accent);border-color:var(--bar-accent);color:var(--bar)}
+.mast .btn.gold .dn{color:inherit}
+.mast .cnt{font-size:11px;font-weight:700;border-radius:99px;padding:0 6px;line-height:17px;background:var(--bar-late);color:var(--bar)}
+.mast .chip.gold{background:transparent;border-color:var(--bar-accent);color:var(--bar-accent)}
+.mast .pill.navy{background:var(--bar-hover);color:var(--bar-ink)}
+.mready{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:12px}
+.mready .rl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet)}
+.mready .rl b{color:var(--bar-ink);font-size:13px;letter-spacing:0;text-transform:none;margin-left:4px}
+.mk2{display:inline-flex;align-items:center;gap:5px;border:1px solid color-mix(in srgb,var(--bar-ink) 30%,transparent);background:none;color:var(--bar-ink);border-radius:99px;padding:2px 10px 2px 7px;font-size:12.5px;font-weight:600;cursor:pointer}
+.mk2::before{content:"✓";font-weight:800;color:var(--bar-accent)}
+.mk2.no{border-style:dashed;color:var(--bar-quiet)}
+.mk2.no::before{content:"○";color:var(--bar-quiet)}
+.mk2:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.mnext{font-size:12.5px;color:var(--bar-quiet)}
+.mnext a{color:var(--bar-accent);font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+@media (max-width:640px){.mast{padding:14px 14px 0}.mast h1{font-size:21px}.mstrip{gap:16px}.mtile{text-align:left}}
+
 </style>
 <div id="band"></div>
 <div id="app"></div>
@@ -1331,8 +1380,8 @@ function log(type, name, what) { S.gov.activity.unshift([todayIso() + ' ' + new 
 const LOOKS = { office: 'Strategy Office (consultant)', staff: 'Dalia Sabry · staff, Sales coordinator', approver: 'Yara Kamal · approver, CFO' };
 const LOOK_PERSON = { staff: 'p13', approver: 'p1' };
 const OPTION_LIST = [
-  ['nav', 1, 'Section bar along the top', 'Off shows option B: the left menu, restyled.', (v) => v === 'top', (on) => { OPT.nav = on ? 'top' : 'side'; }],
-  ['brand', 1, 'Page titles in the client\'s colour', 'Option B of question 1. Off is SMP\'s plain title.', (v) => v, (on) => { OPT.brand = on; }],
+  ['nav', 2, 'Sections as tabs in the band', 'Off shows option B: the left menu, restyled.', (v) => v === 'top', (on) => { OPT.nav = on ? 'top' : 'side'; }],
+  ['brand', 1, 'The band in the client\'s own colour', 'Option B of question 1, as Portfolio does. Off is the house navy the Tracker wears.', (v) => v, (on) => { OPT.brand = on; }],
   ['landscape', 3, 'Helicopter View and Value Chain as one section', 'Off shows them as two sections.', (v) => v, (on) => { OPT.landscape = on; }],
   ['oldTabs', 4, 'Keep the seven tabs signed off on 14 October', 'On brings back People, Compliance and Connections.', (v) => v, (on) => { OPT.oldTabs = on; }],
   ['marksAll', 5, 'Readiness marks on every process', 'Off shows them on deep dives only.', (v) => v, (on) => { OPT.marksAll = on; }],
@@ -1388,24 +1437,49 @@ function topBar() {
     '<span class="step">' + menuBtn('mod', 'Processes', mods, { cls: 'tstep', left: true, w: 280 }) + '</span></div>' +
     '<div class="tbacts"><button class="tbtheme" type="button" data-act="theme" aria-label="Light or dark">' + THEME_ICON + '</button><button class="tbout" type="button" data-act="soon" data-what="Sign out">Sign out</button></div></div>';
 }
-function brandVars() { const c = S.ws.colors; return '--brand:' + c[0] + ';--brand-to:' + c[1] + ';'; }
+/* THE BAND'S INKS, the platform's own rule (lib/branding.ts barInks, §498):
+   white or near-black ink, whichever reads on the bar; quiet words walked to
+   4.5:1; the house gold walked the same way; a late red that reads. So the
+   client's own colour (option B) stays legible however light it is. */
+function barInks(bar) {
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const hex = (c) => '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  const lum = (c) => { const x = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2]; };
+  const con = (a, b) => { const l1 = lum(rgb(a)), l2 = lum(rgb(b)); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const W = [255, 255, 255], D = [12, 17, 26], light = con('#FFFFFF', bar) >= con(hex(D), bar), ink = light ? W : D;
+  const readable = (fg, need) => { const tg = light ? W : [0, 0, 0]; for (let t = 0; t <= 1.001; t += 0.04) { const c = hex(mix(fg, tg, t)); if (con(c, bar) >= need) return c; } return hex(tg); };
+  return { ink: hex(ink), quiet: readable(mix(ink, rgb(bar), 0.3), 4.5), accent: readable(rgb('#E8A33A'), 4.5), late: readable(rgb(light ? '#FF9B8F' : '#A23123'), 4.5), hover: light ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.07)' };
+}
+function brandVars() {
+  const c = S.ws.colors, bar = OPT.brand && /^#[0-9a-fA-F]{6}$/.test(c[0]) ? c[0] : '#16325C', i = barInks(bar);
+  return '--brand:' + c[0] + ';--brand-to:' + c[1] + ';--bar:' + bar + ';--bar-ink:' + i.ink + ';--bar-quiet:' + i.quiet + ';--bar-accent:' + i.accent + ';--bar-late:' + i.late + ';--bar-hover:' + i.hover + ';';
+}
 function frame(content, name) {
   lastProductRoute = UI.route.slice();
-  const on = activeSection(name), secs = sections();
-  const nav = OPT.nav === 'top'
-    ? '<nav class="sb" aria-label="Processes sections">' + secs.map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === on ? ' class="on" aria-current="page"' : '') + '>' + l + (r === 'overview' && urgentCount() ? '<span class="cnt" title="Overdue, waiting to approve, or a risk with no control">' + urgentCount() + '</span>' : '') + '</a>').join('') + langSwitch() + '</nav>'
-    : '';
+  UI.section = activeSection(name);
   const side = OPT.nav === 'side'
-    ? '<nav class="side" aria-label="Processes sections"><div class="ws">Workspace<b>' + esc(S.ws.name) + '</b></div>' + secs.map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === on ? ' class="on" aria-current="page"' : '') + '>' + l + '</a>').join('') + '<a href="#" data-go="export"' + (name === 'export' ? ' class="on"' : '') + '>Export Report</a>' + langSwitch() + '</nav>'
+    ? '<nav class="side" aria-label="Processes sections"><div class="ws">Workspace<b>' + esc(S.ws.name) + '</b></div>' + sections().map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === UI.section ? ' class="on" aria-current="page"' : '') + '>' + l + '</a>').join('') + '<a href="#" data-go="export"' + (name === 'export' ? ' class="on"' : '') + '>Export Report</a>' + langSwitch() + '</nav>'
     : '';
-  return '<div class="frame" style="' + brandVars() + '">' + topBar() + nav + (side ? '<div class="body">' + side + '<div class="pg">' + content + '</div></div>' : '<div class="pg">' + content + '</div>') + '</div>';
+  return '<div class="frame" style="' + brandVars() + '">' + topBar() + (side ? '<div class="body">' + side + '<div class="pg">' + content + '</div></div>' : '<div class="pg">' + content + '</div>') + '</div>';
 }
+/* the module's sections, as the masthead's own tabs (the Tracker's views row) */
+function moduleTabs() {
+  return sections().map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === UI.section ? ' class="on" aria-current="page"' : '') + '>' + l + (r === 'overview' && urgentCount() ? '<span class="cnt" title="Overdue, waiting to approve, or a risk with no control">' + urgentCount() + '</span>' : '') + '</a>').join('');
+}
+/* THE MASTHEAD, the Internal Tracker's band class for class (modules/tracker/page.ts .mast):
+   navy, a gold rule under it, the gold line above the name, the counts on the
+   right, and the views as tabs inside the band. Every page opens with one. */
 function phead(title, o) {
   o = o || {};
-  return '<div class="phead' + (OPT.brand ? ' brand' : '') + '"><div style="min-width:0"><div class="crumb">' + (o.crumb || '<a href="#" data-go="overview">' + esc(S.ws.name) + ' · Processes</a>') + '</div><h1>' + title + '</h1>' + (o.sub ? '<div class="sub">' + o.sub + '</div>' : '') + '</div>' + (o.acts ? '<div class="acts">' + o.acts + '</div>' : '') + '</div>';
+  const tiles = o.tiles && o.tiles.length ? '<div class="mstrip">' + o.tiles.map((t) => { const [n, l, late, go] = t, tag = go ? 'button' : 'div', at = go ? ' type="button" ' + (go.indexOf('act:') === 0 ? 'data-act="' + go.slice(4) + '"' : 'data-go="' + go + '"') : ''; return '<' + tag + ' class="mtile' + (late ? ' late' : '') + '"' + at + '><b>' + n + '</b><span>' + l + '</span></' + tag + '>'; }).join('') + '</div>' : '';
+  const tabs = o.tabs !== undefined ? o.tabs : (OPT.nav === 'top' ? moduleTabs() : '');
+  const acts = o.acts || '';
+  return '<header class="mast' + (tabs || acts ? '' : ' flat') + '"><div class="mrow"><div style="min-width:0"><p class="wkof">' + (o.eyebrow || esc(S.ws.name) + ' · Processes') + '</p><h1>' + title + '</h1>' + (o.sub ? '<p class="msub">' + o.sub + '</p>' : '') + '</div>' + tiles + '</div>' +
+    (o.extra || '') + (tabs || acts ? '<nav class="mcats" aria-label="' + (o.tabsLabel || 'Processes sections') + '">' + tabs + '<span class="sp"></span><span class="mact">' + acts + '</span></nav>' : '') + '</header>';
 }
 function exportMenu(id) {
-  return menuBtn(id || 'exp', 'Export', '<button class="mi" type="button" data-go="export">Report for several processes…<small>Pick processes, preview, print</small></button><button class="mi" type="button" data-act="sopAll">SOPs for every process<small>One document each, ready to print</small></button>');
+  return menuBtn(id || 'exp', 'Export', '<button class="mi" type="button" data-go="export">Report for several processes…<small>Pick processes, preview, print</small></button><button class="mi" type="button" data-act="sopAll">SOPs for every process<small>One document each, ready to print</small></button>', { cls: 'bq' });
 }
 ACT.sopAll = () => { UI.f.sopCodes = procs().filter((p) => p.steps.length).map((p) => p.code); go('sop~pack'); };
 const newBtn = () => menuBtn('new', '+ New process', mi('Blank process', 'newProcess', '', 'Name, category, where it sits') + mi('Draft with AI', 'aiDraft', '', 'From your notes and the org chart\'s roles') + mi('Import from Excel', 'importXls', '', 'A whole process from the template'), { cls: 'btn gold' });
@@ -1438,13 +1512,9 @@ R.overview = () => {
   all.forEach((p) => { if (inForce(p) && (p.status === 'PUBLISHED' || p.status === 'APPROVED')) { const e = expectedReaders(p); exp += e.length; done += e.filter((x) => p.acks.indexOf(x.id) >= 0).length; } });
   const att = attention();
   const wave1 = ranked().filter((x) => x.p.prio.dec === 'W1');
-  return phead('Overview', { acts: exportMenu() + newBtn() }) +
-    '<div class="cells">' +
-    '<button class="cell" type="button" data-go="processes"><div class="k">Processes</div><div class="v">' + all.length + '</div><div class="w">' + m.length + ' main, ' + (all.length - m.length) + ' sub-processes · ' + all.filter((p) => p.steps.length).length + ' mapped</div></button>' +
-    '<button class="cell" type="button" data-go="priorities~plan"><div class="k">Deep dives</div><div class="v">' + deep.length + '</div><div class="w">Wave 1: ' + w1.length + ' · Wave 2: ' + w2.length + '</div></button>' +
-    '<button class="cell' + (late.length ? ' attn' : '') + '" type="button" data-go="governance~attention"><div class="k">Reviews due in 60 days</div><div class="v">' + due.length + '</div><div class="w">' + (late.length ? '<span class="bad">' + late.length + ' overdue:</span> ' + late.map((p) => esc(p.name)).join(', ') : 'None overdue') + '</div></button>' +
-    '<div class="cell"><div class="k">Read by staff</div><div class="v">' + (exp ? Math.round(done / exp * 100) : 0) + '<small>%</small></div><div class="w">' + done + ' of ' + exp + ' have confirmed the version in force</div></div>' +
-    '</div><div class="ovgrid"><div>' +
+  const pct = exp ? Math.round(done / exp * 100) : 0;
+  return phead('Overview', { eyebrow: esc(S.ws.name) + ' · Processes · ' + dt(todayIso()), acts: exportMenu() + newBtn(), tiles: [[all.length, 'Processes', 0, 'processes'], [deep.length, 'Deep dives', 0, 'priorities~plan'], [due.length, 'Reviews due', 0, 'governance~attention'], [late.length, 'Overdue', late.length > 0, 'governance~attention'], [pct + '%', 'Read by staff']] }) +
+    '<div class="ovgrid"><div>' +
     '<div class="sect">Needs attention <span>· ' + plural(att.length, 'thing') + ', most urgent first</span></div>' +
     '<div class="box">' + (att.length ? att.map((x) => '<div class="att"><span class="chip ' + x.chip + '">' + x.word + '</span><div class="what">' + (x.p ? '<span class="code">' + x.p.code + '</span> <b>' + esc(x.p.name) + '</b>' : '<b>Deep-dive priorities</b>') + '<span class="w2">' + esc(x.line) + '</span></div>' +
       '<a class="btn sm" href="#" data-go="' + (x.go || openP(x.p.code, x.tab)) + '">' + (x.go ? 'Sign-off' : { lifecycle: 'Lifecycle', risks: 'Risks', raci: 'RACI' }[x.tab]) + ' →</a></div>').join('') : '<div class="empty"><b>Nothing needs you today</b>Reviews, approvals and gaps will show here as they come up.</div>') + '</div>' +
@@ -1490,7 +1560,8 @@ R.processes = () => {
     mains().forEach((p) => { rows += listRow(p, 0); if (UI.open[p.code]) subsOf(p.code).forEach((s) => { rows += listRow(s, 1); }); });
   }
   const deleted = S.processes.filter((p) => p.deleted).length, anyClosed = mains().some((p) => subsOf(p.code).length && !UI.open[p.code]);
-  return phead('Processes', { sub: plural(all.length, 'process', 'processes') + ' · every one has its own code and can sit under a main process', acts: exportMenu() + newBtn() }) +
+  const inRev = all.filter((p) => p.status === 'IN_REVIEW').length, od = all.filter(overdue).length;
+  return phead('Processes', { sub: 'Every process has its own code and can sit under a main process.', acts: exportMenu() + newBtn(), tiles: [[all.length, 'Processes', 0, 'act:listChipAll'], [all.filter(isDeep).length, 'Deep dive', 0, 'act:listChipDeep'], [inRev, 'In review', 0, 'act:listChipReview'], [od, 'Overdue', od > 0, 'act:listChipOverdue']] }) +
     '<div class="filters">' + searchBox('q-list', 'Search by name, code, category, step or task', q, 'listQ') +
     '<span class="filters" style="margin:0">' + LIST_CHIPS.map(([k, l, f]) => '<button type="button" class="fchip' + (chip === k ? ' on' : '') + (k === 'overdue' ? ' bad' : '') + '" data-act="listChip" data-k="' + k + '">' + l + '<b>' + all.filter(f).length + '</b></button>').join('') + '</span>' +
     '<span style="margin-left:auto;display:flex;gap:14px;align-items:center">' + (flat ? '' : '<button class="lnk" type="button" data-act="openAll">' + (anyClosed ? 'Open all' : 'Fold all') + '</button>') + '<a class="lnk" href="#" data-go="deleted">Deleted (' + deleted + ')</a></span></div>' +
@@ -1499,6 +1570,10 @@ R.processes = () => {
 };
 INP.listQ = (el) => { UI.f.q = el.value; render(); };
 ACT.listChip = (el) => { UI.f.chip = el.dataset.k; render(); };
+ACT.listChipAll = () => { UI.f.chip = 'all'; render(); };
+ACT.listChipDeep = () => { UI.f.chip = 'deep'; render(); };
+ACT.listChipReview = () => { UI.f.chip = 'review'; render(); };
+ACT.listChipOverdue = () => { UI.f.chip = 'overdue'; render(); };
 ACT.fold = (el) => { UI.open[el.dataset.code] = !UI.open[el.dataset.code]; render(); };
 ACT.openAll = () => { const any = mains().some((p) => subsOf(p.code).length && !UI.open[p.code]); mains().forEach((p) => { UI.open[p.code] = any; }); render(); };
 ACT.openProc = (el) => go(openP(el.dataset.code));
@@ -1647,7 +1722,7 @@ ACT.impCreate = () => {
 /* ── deleted processes ────────────────────────────────────────────── */
 R.deleted = () => {
   const del = S.processes.filter((p) => p.deleted).sort((a, b) => b.deleted.localeCompare(a.deleted));
-  return phead('Deleted processes', { crumb: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a> › Deleted', sub: 'Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.', acts: goBtn('processes', '← Back to Processes') }) +
+  return phead('Deleted processes', { eyebrow: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a> › Deleted', sub: 'Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.', tiles: [[del.length, 'Deleted']], acts: goBtn('processes', '← Back to Processes', 'bq') }) +
     '<div class="tw"><table class="t"><thead><tr><th>Code</th><th>Process</th><th>Steps</th><th>Deleted</th><th class="r"></th></tr></thead><tbody>' +
     (del.length ? del.map((p) => '<tr><td><span class="code">' + p.code + '</span></td><td><b>' + esc(p.name) + '</b>' + (p.parent && byCode(p.parent) && !byCode(p.parent).deleted ? '<span class="psub">sub-process of ' + p.parent + '</span>' : '') + '</td><td class="num">' + p.steps.length + '</td><td class="num">' + dt(p.deleted) + '</td><td class="r"><button class="btn sm" type="button" data-act="restore" data-code="' + p.code + '">Restore</button></td></tr>').join('')
       : '<tr><td colspan="5"><div class="empty"><b>Nothing has been deleted</b>Every process in this workspace is still on the Processes list.</div></td></tr>') + '</tbody></table></div>';
@@ -1673,9 +1748,7 @@ R.p = (args) => {
   CUR = p;
   const tab = tabsFor().some((t) => t[0] === args[1]) ? args[1] : 'overview';
   const railOff = !OPT.rail || (UI.railHidden === null ? tab === 'map' : UI.railHidden);
-  const parent = p.parent && byCode(p.parent);
-  const crumb = '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a>' + (parent ? ' › <a href="#" data-go="' + openP(parent.code, tab) + '">' + parent.code + ' ' + esc(parent.name) + '</a>' : '') + ' › ' + p.code + ' ' + esc(p.name);
-  return '<div class="crumb" style="margin-bottom:10px">' + crumb + '</div><div class="pwrap' + (railOff ? ' railoff' : '') + '">' + (OPT.rail ? rail(p, tab) : '') + '<div class="pane">' + paneHead(p, tab) + '<div class="pane-b">' + tabBody(p, tab) + '</div></div></div>';
+  return processBand(p, tab, railOff) + '<div class="pwrap' + (railOff ? ' railoff' : '') + '">' + (OPT.rail ? rail(p, tab) : '') + '<div class="pane"><div class="pane-b">' + tabBody(p, tab) + '</div></div></div>';
 };
 function rail(p, tab) {
   const q = (UI.f.railQ || '').toLowerCase();
@@ -1699,26 +1772,30 @@ INP.railQ = (el) => { UI.f.railQ = el.value; render(); };
 ACT.railHide = () => { UI.railHidden = true; render(); };
 ACT.railShow = () => { UI.railHidden = false; render(); };
 
-function paneHead(p, tab) {
-  const f = inForce(p), rank = rankOf(p), mk = marks(p), nx = nextMissing(p), showMarks = OPT.marksAll || isDeep(p);
-  const primary = p.status === 'DRAFT' ? '<button class="btn gold" type="button" data-act="lcSendOpen">Send for review</button>'
-    : p.status === 'APPROVED' ? '<button class="btn gold" type="button" data-act="lcPublish">Publish v' + latestVersion(p).n + ' to staff</button>'
+/* the process's own band: the Tracker's masthead, holding the process — its
+   name and stage, the six marks, its counts and its seven tabs */
+function processBand(p, tab, railOff) {
+  const f = inForce(p), rank = rankOf(p), nx = nextMissing(p), showMarks = OPT.marksAll || isDeep(p), parent = p.parent && byCode(p.parent);
+  const noCtl = p.controls.filter((c) => !c.control).length, openNc = p.ncs.filter((n) => n.status !== 'Closed').length;
+  const primary = p.status === 'DRAFT' ? '<button class="btn gold sm" type="button" data-act="lcSendOpen">Send for review</button>'
+    : p.status === 'APPROVED' ? '<button class="btn gold sm" type="button" data-act="lcPublish">Publish v' + latestVersion(p).n + ' to staff</button>'
     : p.status === 'IN_REVIEW' ? '<span class="pill navy">Waiting on ' + esc(personName(p.approver)) + '</span>' : '';
-  const exp = menuBtn('pexp', 'Export', '<div class="mh">This process</div><button class="mi" type="button" data-go="sop~' + p.code + '">SOP document</button>' + mi('Process map, printed', 'toast', 'data-msg="Opens the printed map in Flow or Roles layout, ready to print."') + mi('RACI matrix · PDF or Excel', 'toast', 'data-msg="Downloads the RACI matrix in the product."') + mi('Authority matrix · PDF or Excel', 'toast', 'data-msg="Downloads the authority matrix in the product."') + '<div class="rule"></div><button class="mi" type="button" data-go="export">Report for several processes…</button>');
-  const more = menuBtn('pmore', '⋯', mi('Edit details', 'editProcess', 'data-code="' + p.code + '"', 'Name, code, category, where it sits') + mi('Clone', 'cloneProcess', 'data-code="' + p.code + '"') + mi('Add a sub-process', 'newProcess', 'data-parent="' + p.code + '"') + '<div class="rule"></div>' + mi('Delete…', 'deleteProcess', 'bad data-code="' + p.code + '"'), { cls: 'btn', noCaret: true, aria: 'More', w: 220 });
-  return '<div class="pane-h' + (OPT.brand ? ' brand' : '') + '"><div class="ph1">' + (OPT.rail ? '<button class="btn sm railbtn" type="button" data-act="railShow">☰ Processes</button>' : '') +
-    '<span class="code">' + p.code + '</span><h2>' + esc(p.name) + '</h2>' + statusPill(p) +
-    (f && p.status !== 'PUBLISHED' ? '<span class="q" style="font-size:12px">v' + f.n + ' in force for staff</span>' : '') +
-    (isDeep(p) ? '<a class="chip gold" href="#" data-go="priorities~plan">' + DEC[p.prio.dec] + (rank ? ' · rank ' + rank : '') + '</a>' : '') +
-    '<div class="who"><span><em>Owner</em>' + (p.owner ? esc(personName(p.owner)) : '<span class="q">None yet</span>') + '</span>' + (p.approver ? '<span><em>Approver</em>' + esc(personName(p.approver)) + '</span>' : '') + '</div></div>' +
-    (showMarks ? '<div class="ph2"><span class="rdl">Ready for staff <b>' + marksDone(p) + ' of 6</b></span>' + mk.map((m) => '<button type="button" class="rdm' + (m.done ? '' : ' no') + '" data-go="' + openP(p.code, m.tab) + '">' + m.label + '</button>').join('') +
-      (nx ? '<span class="next">Next: <a data-go="' + openP(p.code, nx[0]) + '">' + nx[1] + '</a></span>' : '<span class="next">Ready. Every mark is done.</span>') + '</div>' : '<div class="ph2"><span class="rdl">High-level process</span><span class="next">No deep dive planned. Decide on <a data-go="priorities">Priorities</a>.</span></div>') +
-    '<div class="ph3"><div class="seg" role="tablist" aria-label="Views of this process">' + tabsFor().map(([k, l]) => '<button type="button" role="tab" aria-selected="' + (k === tab) + '" class="' + (k === tab ? 'on' : '') + (['people', 'compliance', 'connections'].indexOf(k) >= 0 ? ' empty-tab' : '') + '" data-go="' + openP(p.code, k) + '">' + l + tabCount(p, k) + '</button>').join('') + '</div>' +
-    '<div class="acts">' + (OPT.aiPanel ? '<button class="btn" type="button" data-act="aiOpen">Check with AI</button>' : '') + exp + primary + more + '</div></div></div>';
+  const exp = menuBtn('pexp', 'Export', '<div class="mh">This process</div><button class="mi" type="button" data-go="sop~' + p.code + '">SOP document</button>' + mi('Process map, printed', 'toast', 'data-msg="Opens the printed map in Flow or Roles layout, ready to print."') + mi('RACI matrix · PDF or Excel', 'toast', 'data-msg="Downloads the RACI matrix in the product."') + mi('Authority matrix · PDF or Excel', 'toast', 'data-msg="Downloads the authority matrix in the product."') + '<div class="rule"></div><button class="mi" type="button" data-go="export">Report for several processes…</button>', { cls: 'bq' });
+  const more = menuBtn('pmore', '⋯', mi('Edit details', 'editProcess', 'data-code="' + p.code + '"', 'Name, code, category, where it sits') + mi('Clone', 'cloneProcess', 'data-code="' + p.code + '"') + mi('Add a sub-process', 'newProcess', 'data-parent="' + p.code + '"') + '<div class="rule"></div>' + mi('Delete…', 'deleteProcess', 'bad data-code="' + p.code + '"'), { cls: 'bq', noCaret: true, aria: 'More', w: 220 });
+  const ready = showMarks
+    ? '<div class="mready"><span class="rl">Ready for staff <b>' + marksDone(p) + ' of 6</b></span>' + marks(p).map((m) => '<button type="button" class="mk2' + (m.done ? '' : ' no') + '" data-go="' + openP(p.code, m.tab) + '">' + m.label + '</button>').join('') +
+      (nx ? '<span class="mnext">Next: <a data-go="' + openP(p.code, nx[0]) + '">' + nx[1] + '</a></span>' : '<span class="mnext">Ready. Every mark is done.</span>') + '</div>'
+    : '<div class="mready"><span class="rl">High-level process</span><span class="mnext">No deep dive planned. Decide on <a data-go="priorities">Priorities</a>.</span></div>';
+  const tabs = tabsFor().map(([k, l]) => '<a href="#" data-go="' + openP(p.code, k) + '"' + (k === tab ? ' class="on" aria-current="page"' : '') + (['people', 'compliance', 'connections'].indexOf(k) >= 0 ? ' style="font-style:italic"' : '') + '>' + l + tabCount(p, k) + '</a>').join('');
+  const title = esc(p.name) + ' ' + statusPill(p) + (isDeep(p) ? '<a class="chip gold" href="#" data-go="priorities~plan">' + DEC[p.prio.dec] + (rank ? ' · rank ' + rank : '') + '</a>' : '');
+  const sub = 'Owner <b>' + (p.owner ? esc(personName(p.owner)) : 'none yet') + '</b>' + (p.approver ? ' · Approver <b>' + esc(personName(p.approver)) + '</b>' : '') + (f && p.status !== 'PUBLISHED' ? ' · v' + f.n + ' in force for staff' : '');
+  const tiles = (showMarks ? [[marksDone(p) + '/6', 'Ready', 0, openP(p.code, nx ? nx[0] : 'lifecycle')]] : []).concat([[p.steps.length, 'Steps', 0, openP(p.code, 'map')], [p.controls.length, 'Risks', 0, openP(p.code, 'risks')]]).concat(noCtl ? [[noCtl, 'No control', true, openP(p.code, 'risks')]] : []).concat([[openNc, 'Open issues', openNc > 0, openP(p.code, 'quality')]]);
+  return phead(title, { eyebrow: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a>' + (parent ? ' › <a href="#" data-go="' + openP(parent.code, tab) + '">' + parent.code + '</a>' : '') + ' › ' + p.code + (p.cat ? ' · ' + esc(p.cat) : ''), sub, tiles, extra: ready, tabs, tabsLabel: 'Views of this process',
+    acts: (OPT.rail && railOff ? '<button class="bq" type="button" data-act="railShow">☰ Processes</button>' : '') + (OPT.aiPanel ? '<button class="bq" type="button" data-act="aiOpen">Check with AI</button>' : '') + exp + more + primary });
 }
 function tabCount(p, k) {
   const n = { map: p.steps.length, risks: p.controls.length, quality: p.ncs.filter((x) => x.status !== 'Closed').length }[k];
-  return n ? '<span class="c">' + n + '</span>' : '';
+  return n ? ' <span class="c">' + n + '</span>' : '';
 }
 function tabBody(p, tab) {
   return ({ overview: tabOverview, map: tabMap, raci: tabRaci, authority: tabAuthority, risks: tabRisks, quality: tabQuality, lifecycle: tabLifecycle, ai: (x) => aiBody(x, true),
@@ -2173,7 +2250,8 @@ const planLocked = () => S.plan.status !== 'DRAFT';
 R.priorities = (args) => {
   const step = PSTEPS.some((s) => s[0] === args[0]) ? args[0] : 'score';
   const n = procs().length;
-  return phead('Deep-dive priorities', { sub: plural(n, 'high-level process', 'high-level processes') + '. Which ones do we take deep next: full steps, RACI, controls and an SOP?' }) +
+  const scored = procs().filter((p) => score(p) != null).length;
+  return phead('Deep-dive priorities', { sub: 'Which of the ' + plural(n, 'high-level process', 'high-level processes') + ' do we take deep next: full steps, RACI, controls and an SOP?', tiles: [[scored + '/' + n, 'Scored', 0, 'priorities~score'], [procs().filter((p) => p.prio.dec === 'W1').length, 'Wave 1', 0, 'priorities~plan'], [procs().filter((p) => p.prio.dec === 'W2').length, 'Wave 2', 0, 'priorities~plan'], [{ DRAFT: 'Draft', SENT: 'With client', APPROVED: 'Approved' }[S.plan.status], 'The plan', 0, 'priorities~signoff']] }) +
     '<div class="steps4" role="tablist">' + PSTEPS.map(([k, t, s]) => '<button type="button" role="tab" aria-selected="' + (k === step) + '" class="' + (k === step ? 'on' : '') + '" data-go="priorities~' + k + '"><b>' + t + '</b><span>' + s + '</span></button>').join('') + '</div>' +
     (planLocked() && step !== 'signoff' ? '<div class="banner attn">The plan ' + (S.plan.status === 'SENT' ? 'is with the client' : 'is approved') + ', so scores, weights and decisions are locked. Reopen it on the Sign-off step, with a reason, to change it.</div>' : '') +
     ({ score: pScore, rank: pRank, plan: pPlan, signoff: pSignoff }[step])();
@@ -2335,7 +2413,7 @@ R.landscape = (args) => {
   const title = OPT.landscape ? 'Landscape' : helicopter ? 'Helicopter View' : 'Value Chain';
   const sub = helicopter || OPT.landscape ? 'How ' + esc(S.ws.name) + '\'s processes connect — ' + [plural(procs().length, 'process', 'processes'), br && plural(br, 'branch', 'branches'), ln && plural(ln, 'step link')].filter(Boolean).join(' · ') + '.' : 'How work moves through ' + esc(S.ws.name) + ', phase by phase, across every process.';
   const seg = (OPT.landscape ? [['rails', 'Milestones'], ['cards', 'Cards'], ['chain', 'Value chain']] : helicopter ? [['rails', 'Milestones'], ['cards', 'Cards']] : []).map(([k, l]) => '<button type="button" class="' + (k === view ? 'on' : '') + '" data-go="landscape~' + k + '">' + l + '</button>').join('');
-  return phead(title, { sub }) + '<div class="filters">' + (seg ? '<div class="seg">' + seg + '</div>' : '') + (helicopter ? pickerMenu() + '<button class="btn sm" type="button" data-act="toast" data-msg="Downloads the picture as a PNG in the product." style="margin-left:auto">⬇ PNG</button>' : '') + '</div>' +
+  return phead(title, { sub, tiles: [[procs().length, 'Processes'], [br, 'Branches'], [ln, 'Step links'], [activities().length, 'Activities', 0, 'landscape~chain']] }) + '<div class="filters">' + (seg ? '<div class="seg">' + seg + '</div>' : '') + (helicopter ? pickerMenu() + '<button class="btn sm" type="button" data-act="toast" data-msg="Downloads the picture as a PNG in the product." style="margin-left:auto">⬇ PNG</button>' : '') + '</div>' +
     (view === 'rails' ? railsView() : view === 'cards' ? cardsView() : chainView()) +
     (helicopter ? connectionsList(E) : '');
 };
@@ -2438,7 +2516,8 @@ function gTiles() {
 }
 R.governance = (args) => {
   const v = GV.some((g) => g[0] === args[0]) ? args[0] : 'attention';
-  return phead('Governance', { sub: 'An AI-assisted assessment of board structure, risk and controls, ethics, compensation, ESG, data integrity and accessibility; and the control points and KPIs that come from each process.' }) +
+  const openR = S.gov.risks.filter((r) => r.status !== 'Closed'), hi = openR.filter((r) => riskLevel(r) === 'High').length, ck = S.gov.checklist;
+  return phead('Governance', { sub: 'An AI-assisted assessment of board structure, risk and controls, ethics, compensation, ESG, data integrity and accessibility; and the control points and KPIs that come from each process.', tiles: [[hi, 'High risks', hi > 0, 'governance~risks~High'], [openR.length, 'Open risks', 0, 'governance~risks'], [S.gov.policies.length, 'Policies', 0, 'governance~policies'], [ck.filter((c) => c.done).length + '/' + ck.length, 'Checklist done', 0, 'governance~assessment']] }) +
     '<div class="seg" style="margin-bottom:16px">' + GV.map(([k, l]) => '<button type="button" class="' + (k === v ? 'on' : '') + '" data-go="governance~' + k + '">' + l + '</button>').join('') + '</div>' +
     ({ attention: gAttention, assessment: gAssessment, risks: gRisks, policies: gPolicies, controls: gControls, activity: gActivity }[v])(args.slice(1));
 };
@@ -2585,7 +2664,7 @@ function gActivity() {
 /* the org directory: people come from the client's People register */
 R.org = (args) => {
   const v = ['people', 'roles', 'chart'].indexOf(args[0]) >= 0 ? args[0] : 'people';
-  return phead('Org directory', { sub: 'Roles and people are shared by every process map, RACI matrix and authority matrix. People come from the client\'s People register.', acts: v === 'chart' ? '<button class="btn" type="button" data-act="toast" data-msg="Downloads the org chart as a PDF in the product.">Export PDF</button>' : '' }) +
+  return phead('Org directory', { sub: 'Roles and people are shared by every process map, RACI matrix and authority matrix. People come from the client\'s People register.', tiles: [[livePeople().length, 'People', 0, 'org~people'], [liveRoles().length, 'Roles', 0, 'org~roles'], [livePeople().filter((p) => p.reg).length, 'From the register', 0, 'org~people']], acts: v === 'chart' ? '<button class="bq" type="button" data-act="toast" data-msg="Downloads the org chart as a PDF in the product.">Export PDF</button>' : '' }) +
     '<div class="seg" style="margin-bottom:14px"><button type="button" class="' + (v === 'people' ? 'on' : '') + '" data-go="org~people">People <span class="c">' + livePeople().length + '</span></button><button type="button" class="' + (v === 'roles' ? 'on' : '') + '" data-go="org~roles">Roles <span class="c">' + liveRoles().length + '</span></button><button type="button" class="' + (v === 'chart' ? 'on' : '') + '" data-go="org~chart">Org chart</button></div>' +
     ({ people: orgPeople, roles: orgRoles, chart: orgChart })[v]();
 };
@@ -2633,15 +2712,16 @@ R.export = (args) => {
   if (args[0] === 'preview') return exportPreview();
   const pk = UI.f.exp, all = procs(), n = pk.length;
   const res = UI.f.check;
-  return phead('Export report', { sub: 'Pick which processes to include. The report opens as a clean, printable document — company name, a summary, the org structure, then each process\'s documentation. Anything not filled in is shown as not yet recorded.' }) +
+  return phead('Export report', { sub: 'Pick which processes to include. The report opens as a clean, printable document — company name, a summary, the org structure, then each process\'s documentation. Anything not filled in is shown as not yet recorded.', tiles: [[n, 'Ticked'], [all.length, 'Processes']] }) +
     '<div class="ovgrid" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)"><div class="stack">' +
     '<div class="blk"><div class="blk-h"><span class="lbl">Pack sections</span></div><p class="note" style="margin-bottom:8px">The parts that appear once, around the processes. Untick one to leave it out of this client\'s pack.</p>' + S.pack.map((x, i) => '<div class="filters" style="margin:0 0 4px' + (x.on ? '' : ';opacity:.55') + '"><label class="checks"><label><input type="checkbox" data-chg="packOn" data-i="' + i + '"' + (x.on ? ' checked' : '') + (x.locked ? ' disabled' : '') + '> ' + (x.on ? '' : '<s>') + esc(x.name) + (x.on ? '' : '</s>') + '</label></label><span style="margin-left:auto"><button class="btn sm ghost" type="button" data-act="packMove" data-i="' + i + '" data-d="-1" aria-label="Up">↑</button><button class="btn sm ghost" type="button" data-act="packMove" data-i="' + i + '" data-d="1" aria-label="Down">↓</button></span></div>').join('') + '</div>' +
     '<div class="blk"><div class="blk-h"><span class="lbl">Inside each process</span></div><p class="note" style="margin-bottom:8px">These repeat for every process. Numbers follow the order.</p>' + S.inside.map((s, i) => '<div style="margin-bottom:6px"><label class="checks"><label><input type="checkbox" data-chg="insideOn" data-i="' + i + '"' + (s.on ? ' checked' : '') + '> <b>' + (i + 1) + '.0 ' + esc(s.name) + '</b></label></label>' + s.blocks.map((b, j) => '<label class="checks" style="margin:3px 0 0 24px"><label><input type="checkbox" data-chg="blockOn" data-i="' + i + '" data-j="' + j + '"' + (b.on ? ' checked' : '') + (s.on ? '' : ' disabled') + '> ' + (i + 1) + '.' + (j + 1) + ' ' + esc(b.name) + (b.id === 'ext' && !procs().some((p) => p.entities.length) ? ' <span class="chip attn">no data yet</span>' : '') + '</label></label>').join('') + '</div>').join('') + '</div></div>' +
     '<div class="stack"><div class="tw"><table class="t"><thead><tr><th><input type="checkbox" data-chg="expAll" aria-label="Select all"' + (n === all.length ? ' checked' : '') + '></th><th>Code</th><th>Process</th><th class="r">Order</th></tr></thead><tbody>' +
     (pk.concat(all.map((p) => p.code).filter((c) => pk.indexOf(c) < 0))).map((c) => { const p = byCode(c), on = pk.indexOf(c) >= 0; return '<tr><td><input type="checkbox" data-chg="expPick" data-code="' + c + '"' + (on ? ' checked' : '') + ' aria-label="Include ' + esc(p.name) + '"></td><td><span class="code">' + c + '</span></td><td>' + esc(p.name) + (p.parent ? '<span class="psub">under ' + p.parent + '</span>' : '') + '</td><td class="r">' + (on ? '<button class="btn sm ghost" type="button" data-act="expMove" data-code="' + c + '" data-d="-1">↑</button><button class="btn sm ghost" type="button" data-act="expMove" data-code="' + c + '" data-d="1">↓</button>' : '') + '</td></tr>'; }).join('') + '</tbody></table></div>' +
     '<p class="note">The report follows the order above. Arranging it here changes this pack only.</p>' +
-    '<div class="acts"><button class="btn gold" type="button" data-act="expPreview"' + (n ? '' : ' disabled title="Tick at least one process to preview the report"') + '>Preview report →</button><button class="btn" type="button" data-act="expSop"' + (n ? '' : ' disabled title="Tick at least one process to see the SOP"') + '>SOP →</button><button class="btn" type="button" data-act="expCheck"' + (n ? '' : ' disabled') + '>Check ' + (n ? 'these ' + n : 'these') + ' end to end</button></div>' +
-    '<p class="note">The check is optional, and a warning only — the report opens either way. Nothing is saved. Up to 12 processes at a time.</p>' +
+    '<div class="acts"><button class="btn gold" type="button" data-act="expPreview"' + (n ? '' : ' disabled title="Tick at least one process to preview the report"') + '>Preview report →</button><button class="btn" type="button" data-act="expSop"' + (n ? '' : ' disabled title="Tick at least one process to see the SOP"') + '>SOP →</button><button class="btn" type="button" data-act="expCheck"' + (checkWhy(n) ? ' disabled title="' + esc(checkWhy(n)) + '"' : '') + '>Check ' + (n ? 'these ' + n : 'these') + ' end to end</button></div>' +
+    (n > 12 ? '<p class="note" style="color:var(--attn-tx);font-weight:600">' + esc(checkWhy(n)) + '</p>' : '') +
+    '<p class="note">The check is optional, and a warning only — the report opens either way. Nothing is saved.</p>' +
     (res ? '<div class="blk"><div class="blk-h"><span class="lbl">End-to-end check</span><span class="r note">' + res.counts + '</span></div>' + res.html + '</div>' : '') + '</div></div>';
 };
 CHG.packOn = (el) => { S.pack[el.dataset.i].on = el.checked; render(); };
@@ -2653,6 +2733,8 @@ CHG.expPick = (el) => { const c = el.dataset.code, s = UI.f.exp; if (el.checked)
 ACT.expMove = (el) => { const s = UI.f.exp, i = s.indexOf(el.dataset.code), j = i + Number(el.dataset.d); if (j < 0 || j >= s.length) return; const t = s[i]; s[i] = s[j]; s[j] = t; UI.f.check = null; render(); };
 ACT.expPreview = () => go('export~preview');
 ACT.expSop = () => { UI.f.sopCodes = UI.f.exp.slice(); go('sop~pack'); };
+/* the live module's rule since §599 (ffp/lib/domain/pack-check.ts): the button says why it cannot run */
+function checkWhy(n) { return n < 1 ? 'Tick at least one process to check' : n > 12 ? 'The check reads up to 12 processes at a time and ' + n + ' are ticked. Untick ' + (n - 12) + ' to run it.' : null; }
 ACT.expCheck = () => {
   const list = UI.f.exp.map(byCode);
   if (list.length > 12) { toast('Pick between 1 and 12 processes to check.'); return; }
@@ -2689,7 +2771,7 @@ function exportPreview() {
 /* processes settings: everything that was on the old Dashboard and the governance profile */
 R.settings = () => {
   const c = S.ws.colors;
-  return phead('Processes settings', { crumb: '<a href="#" data-go="overview">' + esc(S.ws.name) + ' · Processes</a> › Settings', sub: 'What used to sit on the Dashboard, plus the governance profile. Reached from the Processes menu in the top bar.' }) +
+  return phead('Processes settings', { eyebrow: '<a href="#" data-go="overview">' + esc(S.ws.name) + ' · Processes</a> › Settings', sub: 'What used to sit on the Dashboard, plus the governance profile. Reached from the Processes menu in the top bar.' }) +
     '<div class="two"><div class="blk"><div class="blk-h"><span class="lbl">Client logo and colours</span></div><div class="filters" style="align-items:flex-start"><div class="logo-box">' + (S.ws.logo ? '<img src="' + S.ws.logo + '" alt="Client logo">' : 'No logo') + '</div><div class="stack" style="gap:8px"><label class="btn sm" style="cursor:pointer">' + (S.ws.logo ? 'Replace logo' : 'Upload logo') + '<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" data-chg="logo" style="display:none"></label>' + (S.ws.logo ? '<button class="btn sm ghost" type="button" data-act="logoRemove">Remove</button>' : '') + '<span class="note">PNG, JPEG, WebP or SVG, under 300 KB.</span></div></div>' +
     '<div class="filters" style="margin-top:10px">' + ['Primary', 'Secondary', 'Tertiary'].map((l, i) => '<label class="swatch"><input type="color" value="' + c[i] + '" data-chg="color" data-i="' + i + '" aria-label="' + l + ' colour"> ' + l + '</label>').join('') + '</div><p class="note" style="margin-top:6px">Used on the report and the SOP' + (OPT.brand ? ', and on page titles (option B of question 1)' : '') + '.</p></div>' +
     '<div class="blk"><div class="blk-h"><span class="lbl">Client profile</span><button class="pen" type="button" data-act="profEdit">Edit</button></div><dl class="dl"><dt>Industry</dt><dd>' + esc(S.ws.industry || 'No industry set') + '</dd><dt>About</dt><dd>' + esc(S.ws.about || 'No background notes yet.') + '</dd></dl><p class="note" style="margin-top:6px">Helps Check with AI and the drafts suit this client.</p></div>' +
@@ -2734,7 +2816,8 @@ function staffScreen() {
 }
 function readList(who) {
   const wait = waitingFor(who), plan = S.plan.status === 'SENT' && S.plan.approver === who.id;
-  return '<div class="phead"><div><h1>Processes</h1><div class="sub">The approved way we work. Open one to read it and confirm you have.</div></div></div>' +
+  const c = staffCounts(who);
+  return phead('Processes', { eyebrow: esc(S.ws.name), sub: 'The approved way we work. Open one to read it and confirm you have.', tabs: '', tiles: [[published().length, 'Published'], [c.toRead, 'To read', c.toRead > 0], [c.toApprove, 'To approve']] }) +
     (wait.length || plan ? '<div class="sect" style="color:var(--attn-tx)">Waiting for your approval</div><div class="box" style="border-color:var(--attn);margin-bottom:18px">' +
       (plan ? '<div class="readitem" data-go="plan-signoff"><span class="chip attn">Plan</span><span><b>Deep-dive priorities</b><span class="psub">Which processes to take deep, and in what order</span></span><span class="btn sm gold">Open to approve</span></div>' : '') +
       wait.map((p) => '<div class="readitem" data-go="approve~' + p.code + '"><span class="code">' + p.code + '</span><span><b>' + esc(p.name) + '</b><span class="psub">Sent by ' + esc(p.sentBy) + ' on ' + dt(p.sentAt) + '</span></span><span class="btn sm gold">Open to approve</span></div>').join('') + '</div>' : '') +
@@ -2754,7 +2837,7 @@ function readPage(p, who, approving) {
     const read = p.acks.indexOf(who.id) >= 0;
     bar = read ? '<div class="stick done">You have read version ' + nextN + '. Thank you.</div>' : '<div class="stick"><span>Confirm you have read and understood version ' + nextN + '.</span><span class="acts"><button class="btn gold" type="button" data-act="ack" data-code="' + p.code + '">I have read this</button></span></div>';
   }
-  return '<a class="lnk" href="#" data-go="read">← All processes</a><div class="phead" style="margin-top:10px"><div><h1>' + esc(p.name) + ' <span class="code" style="font-size:14px">' + p.code + '</span></h1><div class="sub">' + (approving ? 'For your approval · sent by ' + esc(p.sentBy) : 'Version ' + nextN + ' · in force from ' + dt(f.published)) + '</div></div></div>' +
+  return phead(esc(p.name), { eyebrow: '<a href="#" data-go="read">' + esc(S.ws.name) + ' · Processes</a> › ' + p.code, sub: approving ? 'For your approval · sent by <b>' + esc(p.sentBy) + '</b>' : 'Version <b>' + nextN + '</b> · in force from ' + dt(f.published), tabs: '', tiles: [[workSteps(p).length, 'Steps'], ['v' + nextN, approving ? 'To approve' : 'In force']] }) +
     (note ? '<div class="banner attn"><b>What changed in this version.</b> ' + esc(note) + '</div>' : '') +
     '<div class="box" style="padding:16px 18px">' + (p.purpose ? '<div class="lbl">Purpose</div><p style="margin:4px 0 14px">' + esc(p.purpose) + '</p>' : '') +
     (p.inScope.length || p.outScope.length ? '<div class="two" style="margin-bottom:14px"><div><div class="lbl">Covers</div><ul style="padding-left:18px;margin-top:4px">' + p.inScope.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div><div><div class="lbl">Does not cover</div><ul style="padding-left:18px;margin-top:4px">' + p.outScope.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div>' : '') +
@@ -2773,7 +2856,7 @@ ACT.apBack = (el) => { const p = byCode(el.dataset.code), why = val('ap-why'); i
 function planSignPage(who) {
   const P = S.plan;
   if (P.status !== 'SENT' || P.approver !== who.id) return '<a class="lnk" href="#" data-go="read">← All processes</a><div class="box" style="margin-top:10px"><div class="empty"><b>There is no plan waiting for your approval.</b>When the Strategy Office sends the deep-dive plan to you, it appears here.</div></div>';
-  return '<a class="lnk" href="#" data-go="read">← All processes</a><div style="height:10px"></div>' + planDoc(P.snapshot, '<span class="pill attn">Waiting for approval</span>') +
+  return phead('Deep-dive priorities', { eyebrow: '<a href="#" data-go="read">' + esc(S.ws.name) + ' · Processes</a> › For your approval', sub: 'Sent by <b>' + esc(P.sentBy) + '</b> on ' + dt(P.sentAt), tabs: '' }) + planDoc(P.snapshot, '<span class="pill attn">Waiting for approval</span>') +
     '<div class="stick"><span>You are asked to approve this plan.</span><span class="acts"><input class="inp" id="pa-why" placeholder="Why it is sent back" maxlength="500" style="max-width:240px"><button class="btn" type="button" data-act="planBack">Send back</button><button class="btn gold" type="button" data-act="planApprove">Approve</button></span></div>';
 }
 ACT.planApprove = () => { const P = S.plan, who = me(); P.status = 'APPROVED'; P.approvedAt = todayIso(); P.record.unshift([todayIso(), who.name, 'Approved the plan']); toast('Plan approved.'); go('read'); };
@@ -2832,8 +2915,8 @@ function rvAssessment() {
 }
 function rvDecisions() {
   const Q = [
-    ['Should Processes take SMP\'s look?', 'On 1 October you chose to keep FFProcess\'s own design when it came into SMP. This reverses that, and is recorded as a reversal.', [['SMP\'s look throughout: navy and gold, Source Sans, navy-headed tables, the section bar.', 'Every Processes page is restyled. The client\'s colour moves to the report and the SOP.', true], ['SMP\'s look, but keep the client\'s colour on each page title.', 'Closer to today; the one place Processes differs from Portfolio and the Tracker.', false, { brand: true }]]],
-    ['Swap the left menu for a section bar along the top?', 'Eight items become six. Export becomes a button. Logo, colours and the client profile move to Processes settings in the top bar\'s Processes menu.', [['Yes, as drawn.', 'The page gets back the 224 pixels the menu takes, and Processes moves the way Strategy does.', true], ['Keep the left menu, restyled.', 'Less change for people used to it.', false, { nav: 'side' }]]],
+    ['Should Processes take SMP\'s look?', 'On 1 October you chose to keep FFProcess\'s own design when it came into SMP. This reverses that, and is recorded as a reversal.', [['SMP\'s look throughout, as the Internal Tracker wears it: a navy band with a gold rule on every page, Source Sans, navy-headed tables.', 'Every Processes page is restyled. The client\'s colour moves to the report and the SOP.', true], ['The same, with the band in the client\'s own colour, as Portfolio does.', 'Each client\'s Processes pages wear their colour; the words on the band adjust so they stay readable.', false, { brand: true }]]],
+    ['Swap the left menu for tabs in the band?', 'Eight items become six tabs inside the navy band, as the Tracker\'s views are. Export becomes a button. Logo, colours and the client profile move to Processes settings in the top bar\'s Processes menu.', [['Yes, as drawn.', 'The page gets back the 224 pixels the menu takes, and Processes moves the way the Tracker does.', true], ['Keep the left menu, restyled.', 'Less change for people used to it.', false, { nav: 'side' }]]],
     ['Put Helicopter View and Value Chain together as “Landscape”?', 'Both show the whole company at once. As one section they are three views under one switch.', [['One section, called Landscape. The name is yours to choose.', '', true], ['Keep them as two sections.', 'Seven items on the bar instead of six.', false, { landscape: false }]]],
     ['Take the three empty tabs off a process for now?', 'People, Compliance and Connections were in the structure signed off on 14 October. Today they hold nothing and offer nothing to fill in.', [['Off for now; back as each one gets content.', 'Changes what was signed off on 14 October; recorded as a change.', true], ['Keep all seven tabs as signed off.', 'Three tabs keep saying “not recorded yet”.', false, { oldTabs: true }]]],
     ['One measure of readiness: the six deep-dive marks?', 'The five-step strip goes; the header shows Map, RACI, Authority, Controls, SOP and Approved. “Next” names what is missing.', [['Six marks on every process, deep dive or not.', 'A high-level process shows mostly empty marks. That is true, and the list says High-level beside it.', true], ['Six marks on deep dives only.', 'Quieter for high-level processes, and two kinds of process header.', false, { marksAll: false }]]],

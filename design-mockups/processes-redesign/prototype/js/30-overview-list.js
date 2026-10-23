@@ -8,13 +8,9 @@ R.overview = () => {
   all.forEach((p) => { if (inForce(p) && (p.status === 'PUBLISHED' || p.status === 'APPROVED')) { const e = expectedReaders(p); exp += e.length; done += e.filter((x) => p.acks.indexOf(x.id) >= 0).length; } });
   const att = attention();
   const wave1 = ranked().filter((x) => x.p.prio.dec === 'W1');
-  return phead('Overview', { acts: exportMenu() + newBtn() }) +
-    '<div class="cells">' +
-    '<button class="cell" type="button" data-go="processes"><div class="k">Processes</div><div class="v">' + all.length + '</div><div class="w">' + m.length + ' main, ' + (all.length - m.length) + ' sub-processes · ' + all.filter((p) => p.steps.length).length + ' mapped</div></button>' +
-    '<button class="cell" type="button" data-go="priorities~plan"><div class="k">Deep dives</div><div class="v">' + deep.length + '</div><div class="w">Wave 1: ' + w1.length + ' · Wave 2: ' + w2.length + '</div></button>' +
-    '<button class="cell' + (late.length ? ' attn' : '') + '" type="button" data-go="governance~attention"><div class="k">Reviews due in 60 days</div><div class="v">' + due.length + '</div><div class="w">' + (late.length ? '<span class="bad">' + late.length + ' overdue:</span> ' + late.map((p) => esc(p.name)).join(', ') : 'None overdue') + '</div></button>' +
-    '<div class="cell"><div class="k">Read by staff</div><div class="v">' + (exp ? Math.round(done / exp * 100) : 0) + '<small>%</small></div><div class="w">' + done + ' of ' + exp + ' have confirmed the version in force</div></div>' +
-    '</div><div class="ovgrid"><div>' +
+  const pct = exp ? Math.round(done / exp * 100) : 0;
+  return phead('Overview', { eyebrow: esc(S.ws.name) + ' · Processes · ' + dt(todayIso()), acts: exportMenu() + newBtn(), tiles: [[all.length, 'Processes', 0, 'processes'], [deep.length, 'Deep dives', 0, 'priorities~plan'], [due.length, 'Reviews due', 0, 'governance~attention'], [late.length, 'Overdue', late.length > 0, 'governance~attention'], [pct + '%', 'Read by staff']] }) +
+    '<div class="ovgrid"><div>' +
     '<div class="sect">Needs attention <span>· ' + plural(att.length, 'thing') + ', most urgent first</span></div>' +
     '<div class="box">' + (att.length ? att.map((x) => '<div class="att"><span class="chip ' + x.chip + '">' + x.word + '</span><div class="what">' + (x.p ? '<span class="code">' + x.p.code + '</span> <b>' + esc(x.p.name) + '</b>' : '<b>Deep-dive priorities</b>') + '<span class="w2">' + esc(x.line) + '</span></div>' +
       '<a class="btn sm" href="#" data-go="' + (x.go || openP(x.p.code, x.tab)) + '">' + (x.go ? 'Sign-off' : { lifecycle: 'Lifecycle', risks: 'Risks', raci: 'RACI' }[x.tab]) + ' →</a></div>').join('') : '<div class="empty"><b>Nothing needs you today</b>Reviews, approvals and gaps will show here as they come up.</div>') + '</div>' +
@@ -60,7 +56,8 @@ R.processes = () => {
     mains().forEach((p) => { rows += listRow(p, 0); if (UI.open[p.code]) subsOf(p.code).forEach((s) => { rows += listRow(s, 1); }); });
   }
   const deleted = S.processes.filter((p) => p.deleted).length, anyClosed = mains().some((p) => subsOf(p.code).length && !UI.open[p.code]);
-  return phead('Processes', { sub: plural(all.length, 'process', 'processes') + ' · every one has its own code and can sit under a main process', acts: exportMenu() + newBtn() }) +
+  const inRev = all.filter((p) => p.status === 'IN_REVIEW').length, od = all.filter(overdue).length;
+  return phead('Processes', { sub: 'Every process has its own code and can sit under a main process.', acts: exportMenu() + newBtn(), tiles: [[all.length, 'Processes', 0, 'act:listChipAll'], [all.filter(isDeep).length, 'Deep dive', 0, 'act:listChipDeep'], [inRev, 'In review', 0, 'act:listChipReview'], [od, 'Overdue', od > 0, 'act:listChipOverdue']] }) +
     '<div class="filters">' + searchBox('q-list', 'Search by name, code, category, step or task', q, 'listQ') +
     '<span class="filters" style="margin:0">' + LIST_CHIPS.map(([k, l, f]) => '<button type="button" class="fchip' + (chip === k ? ' on' : '') + (k === 'overdue' ? ' bad' : '') + '" data-act="listChip" data-k="' + k + '">' + l + '<b>' + all.filter(f).length + '</b></button>').join('') + '</span>' +
     '<span style="margin-left:auto;display:flex;gap:14px;align-items:center">' + (flat ? '' : '<button class="lnk" type="button" data-act="openAll">' + (anyClosed ? 'Open all' : 'Fold all') + '</button>') + '<a class="lnk" href="#" data-go="deleted">Deleted (' + deleted + ')</a></span></div>' +
@@ -69,6 +66,10 @@ R.processes = () => {
 };
 INP.listQ = (el) => { UI.f.q = el.value; render(); };
 ACT.listChip = (el) => { UI.f.chip = el.dataset.k; render(); };
+ACT.listChipAll = () => { UI.f.chip = 'all'; render(); };
+ACT.listChipDeep = () => { UI.f.chip = 'deep'; render(); };
+ACT.listChipReview = () => { UI.f.chip = 'review'; render(); };
+ACT.listChipOverdue = () => { UI.f.chip = 'overdue'; render(); };
 ACT.fold = (el) => { UI.open[el.dataset.code] = !UI.open[el.dataset.code]; render(); };
 ACT.openAll = () => { const any = mains().some((p) => subsOf(p.code).length && !UI.open[p.code]); mains().forEach((p) => { UI.open[p.code] = any; }); render(); };
 ACT.openProc = (el) => go(openP(el.dataset.code));
@@ -217,7 +218,7 @@ ACT.impCreate = () => {
 /* ── deleted processes ────────────────────────────────────────────── */
 R.deleted = () => {
   const del = S.processes.filter((p) => p.deleted).sort((a, b) => b.deleted.localeCompare(a.deleted));
-  return phead('Deleted processes', { crumb: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a> › Deleted', sub: 'Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.', acts: goBtn('processes', '← Back to Processes') }) +
+  return phead('Deleted processes', { eyebrow: '<a href="#" data-go="processes">' + esc(S.ws.name) + ' · Processes</a> › Deleted', sub: 'Deleting a process hides it — it never destroys anything. Restore one to bring it back exactly as it was.', tiles: [[del.length, 'Deleted']], acts: goBtn('processes', '← Back to Processes', 'bq') }) +
     '<div class="tw"><table class="t"><thead><tr><th>Code</th><th>Process</th><th>Steps</th><th>Deleted</th><th class="r"></th></tr></thead><tbody>' +
     (del.length ? del.map((p) => '<tr><td><span class="code">' + p.code + '</span></td><td><b>' + esc(p.name) + '</b>' + (p.parent && byCode(p.parent) && !byCode(p.parent).deleted ? '<span class="psub">sub-process of ' + p.parent + '</span>' : '') + '</td><td class="num">' + p.steps.length + '</td><td class="num">' + dt(p.deleted) + '</td><td class="r"><button class="btn sm" type="button" data-act="restore" data-code="' + p.code + '">Restore</button></td></tr>').join('')
       : '<tr><td colspan="5"><div class="empty"><b>Nothing has been deleted</b>Every process in this workspace is still on the Processes list.</div></td></tr>') + '</tbody></table></div>';

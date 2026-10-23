@@ -5,8 +5,8 @@
 const LOOKS = { office: 'Strategy Office (consultant)', staff: 'Dalia Sabry · staff, Sales coordinator', approver: 'Yara Kamal · approver, CFO' };
 const LOOK_PERSON = { staff: 'p13', approver: 'p1' };
 const OPTION_LIST = [
-  ['nav', 1, 'Section bar along the top', 'Off shows option B: the left menu, restyled.', (v) => v === 'top', (on) => { OPT.nav = on ? 'top' : 'side'; }],
-  ['brand', 1, 'Page titles in the client\'s colour', 'Option B of question 1. Off is SMP\'s plain title.', (v) => v, (on) => { OPT.brand = on; }],
+  ['nav', 2, 'Sections as tabs in the band', 'Off shows option B: the left menu, restyled.', (v) => v === 'top', (on) => { OPT.nav = on ? 'top' : 'side'; }],
+  ['brand', 1, 'The band in the client\'s own colour', 'Option B of question 1, as Portfolio does. Off is the house navy the Tracker wears.', (v) => v, (on) => { OPT.brand = on; }],
   ['landscape', 3, 'Helicopter View and Value Chain as one section', 'Off shows them as two sections.', (v) => v, (on) => { OPT.landscape = on; }],
   ['oldTabs', 4, 'Keep the seven tabs signed off on 14 October', 'On brings back People, Compliance and Connections.', (v) => v, (on) => { OPT.oldTabs = on; }],
   ['marksAll', 5, 'Readiness marks on every process', 'Off shows them on deep dives only.', (v) => v, (on) => { OPT.marksAll = on; }],
@@ -62,24 +62,49 @@ function topBar() {
     '<span class="step">' + menuBtn('mod', 'Processes', mods, { cls: 'tstep', left: true, w: 280 }) + '</span></div>' +
     '<div class="tbacts"><button class="tbtheme" type="button" data-act="theme" aria-label="Light or dark">' + THEME_ICON + '</button><button class="tbout" type="button" data-act="soon" data-what="Sign out">Sign out</button></div></div>';
 }
-function brandVars() { const c = S.ws.colors; return '--brand:' + c[0] + ';--brand-to:' + c[1] + ';'; }
+/* THE BAND'S INKS, the platform's own rule (lib/branding.ts barInks, §498):
+   white or near-black ink, whichever reads on the bar; quiet words walked to
+   4.5:1; the house gold walked the same way; a late red that reads. So the
+   client's own colour (option B) stays legible however light it is. */
+function barInks(bar) {
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const hex = (c) => '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  const lum = (c) => { const x = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2]; };
+  const con = (a, b) => { const l1 = lum(rgb(a)), l2 = lum(rgb(b)); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const W = [255, 255, 255], D = [12, 17, 26], light = con('#FFFFFF', bar) >= con(hex(D), bar), ink = light ? W : D;
+  const readable = (fg, need) => { const tg = light ? W : [0, 0, 0]; for (let t = 0; t <= 1.001; t += 0.04) { const c = hex(mix(fg, tg, t)); if (con(c, bar) >= need) return c; } return hex(tg); };
+  return { ink: hex(ink), quiet: readable(mix(ink, rgb(bar), 0.3), 4.5), accent: readable(rgb('#E8A33A'), 4.5), late: readable(rgb(light ? '#FF9B8F' : '#A23123'), 4.5), hover: light ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.07)' };
+}
+function brandVars() {
+  const c = S.ws.colors, bar = OPT.brand && /^#[0-9a-fA-F]{6}$/.test(c[0]) ? c[0] : '#16325C', i = barInks(bar);
+  return '--brand:' + c[0] + ';--brand-to:' + c[1] + ';--bar:' + bar + ';--bar-ink:' + i.ink + ';--bar-quiet:' + i.quiet + ';--bar-accent:' + i.accent + ';--bar-late:' + i.late + ';--bar-hover:' + i.hover + ';';
+}
 function frame(content, name) {
   lastProductRoute = UI.route.slice();
-  const on = activeSection(name), secs = sections();
-  const nav = OPT.nav === 'top'
-    ? '<nav class="sb" aria-label="Processes sections">' + secs.map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === on ? ' class="on" aria-current="page"' : '') + '>' + l + (r === 'overview' && urgentCount() ? '<span class="cnt" title="Overdue, waiting to approve, or a risk with no control">' + urgentCount() + '</span>' : '') + '</a>').join('') + langSwitch() + '</nav>'
-    : '';
+  UI.section = activeSection(name);
   const side = OPT.nav === 'side'
-    ? '<nav class="side" aria-label="Processes sections"><div class="ws">Workspace<b>' + esc(S.ws.name) + '</b></div>' + secs.map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === on ? ' class="on" aria-current="page"' : '') + '>' + l + '</a>').join('') + '<a href="#" data-go="export"' + (name === 'export' ? ' class="on"' : '') + '>Export Report</a>' + langSwitch() + '</nav>'
+    ? '<nav class="side" aria-label="Processes sections"><div class="ws">Workspace<b>' + esc(S.ws.name) + '</b></div>' + sections().map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === UI.section ? ' class="on" aria-current="page"' : '') + '>' + l + '</a>').join('') + '<a href="#" data-go="export"' + (name === 'export' ? ' class="on"' : '') + '>Export Report</a>' + langSwitch() + '</nav>'
     : '';
-  return '<div class="frame" style="' + brandVars() + '">' + topBar() + nav + (side ? '<div class="body">' + side + '<div class="pg">' + content + '</div></div>' : '<div class="pg">' + content + '</div>') + '</div>';
+  return '<div class="frame" style="' + brandVars() + '">' + topBar() + (side ? '<div class="body">' + side + '<div class="pg">' + content + '</div></div>' : '<div class="pg">' + content + '</div>') + '</div>';
 }
+/* the module's sections, as the masthead's own tabs (the Tracker's views row) */
+function moduleTabs() {
+  return sections().map(([r, l]) => '<a href="#" data-go="' + r + '"' + (r === UI.section ? ' class="on" aria-current="page"' : '') + '>' + l + (r === 'overview' && urgentCount() ? '<span class="cnt" title="Overdue, waiting to approve, or a risk with no control">' + urgentCount() + '</span>' : '') + '</a>').join('');
+}
+/* THE MASTHEAD, the Internal Tracker's band class for class (modules/tracker/page.ts .mast):
+   navy, a gold rule under it, the gold line above the name, the counts on the
+   right, and the views as tabs inside the band. Every page opens with one. */
 function phead(title, o) {
   o = o || {};
-  return '<div class="phead' + (OPT.brand ? ' brand' : '') + '"><div style="min-width:0"><div class="crumb">' + (o.crumb || '<a href="#" data-go="overview">' + esc(S.ws.name) + ' · Processes</a>') + '</div><h1>' + title + '</h1>' + (o.sub ? '<div class="sub">' + o.sub + '</div>' : '') + '</div>' + (o.acts ? '<div class="acts">' + o.acts + '</div>' : '') + '</div>';
+  const tiles = o.tiles && o.tiles.length ? '<div class="mstrip">' + o.tiles.map((t) => { const [n, l, late, go] = t, tag = go ? 'button' : 'div', at = go ? ' type="button" ' + (go.indexOf('act:') === 0 ? 'data-act="' + go.slice(4) + '"' : 'data-go="' + go + '"') : ''; return '<' + tag + ' class="mtile' + (late ? ' late' : '') + '"' + at + '><b>' + n + '</b><span>' + l + '</span></' + tag + '>'; }).join('') + '</div>' : '';
+  const tabs = o.tabs !== undefined ? o.tabs : (OPT.nav === 'top' ? moduleTabs() : '');
+  const acts = o.acts || '';
+  return '<header class="mast' + (tabs || acts ? '' : ' flat') + '"><div class="mrow"><div style="min-width:0"><p class="wkof">' + (o.eyebrow || esc(S.ws.name) + ' · Processes') + '</p><h1>' + title + '</h1>' + (o.sub ? '<p class="msub">' + o.sub + '</p>' : '') + '</div>' + tiles + '</div>' +
+    (o.extra || '') + (tabs || acts ? '<nav class="mcats" aria-label="' + (o.tabsLabel || 'Processes sections') + '">' + tabs + '<span class="sp"></span><span class="mact">' + acts + '</span></nav>' : '') + '</header>';
 }
 function exportMenu(id) {
-  return menuBtn(id || 'exp', 'Export', '<button class="mi" type="button" data-go="export">Report for several processes…<small>Pick processes, preview, print</small></button><button class="mi" type="button" data-act="sopAll">SOPs for every process<small>One document each, ready to print</small></button>');
+  return menuBtn(id || 'exp', 'Export', '<button class="mi" type="button" data-go="export">Report for several processes…<small>Pick processes, preview, print</small></button><button class="mi" type="button" data-act="sopAll">SOPs for every process<small>One document each, ready to print</small></button>', { cls: 'bq' });
 }
 ACT.sopAll = () => { UI.f.sopCodes = procs().filter((p) => p.steps.length).map((p) => p.code); go('sop~pack'); };
 const newBtn = () => menuBtn('new', '+ New process', mi('Blank process', 'newProcess', '', 'Name, category, where it sits') + mi('Draft with AI', 'aiDraft', '', 'From your notes and the org chart\'s roles') + mi('Import from Excel', 'importXls', '', 'A whole process from the template'), { cls: 'btn gold' });

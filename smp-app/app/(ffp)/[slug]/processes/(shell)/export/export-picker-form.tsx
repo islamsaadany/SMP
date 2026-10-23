@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { checkPackWithAI, type PackCheckReport } from "@/ffp/lib/actions/pack-check";
+import { PACK_CHECK_MAX, packCheckBlocked } from "@/ffp/lib/domain/pack-check";
 import { saveReportArrangement } from "@/ffp/lib/actions/report-arrangement";
 import {
   resolveArrangement,
@@ -57,6 +58,7 @@ export function ExportPickerForm({
   const [checking, startChecking] = useTransition();
   const allPicked = ordered.length > 0 && picked.size === ordered.length;
   const somePicked = picked.size > 0 && !allPicked;
+  const checkBlocked = packCheckBlocked(picked.size);
 
   function pick(id: string, on: boolean) {
     const next = new Set(picked);
@@ -216,12 +218,15 @@ export function ExportPickerForm({
       <button
         type="button"
         onClick={runCheck}
-        disabled={checking || picked.size === 0}
-        title={picked.size === 0 ? "Tick at least one process to check" : undefined}
+        disabled={checking || checkBlocked !== null}
+        title={checkBlocked ?? undefined}
         className="mt-4 ms-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {checking ? "Checking…" : `✨ Check ${picked.size > 0 ? `these ${picked.size}` : "these"} end to end`}
       </button>
+      {/* Said in words, not only on hover, once there are too many: an empty
+          pick explains itself, a full one does not. */}
+      {picked.size > PACK_CHECK_MAX && <p className="mt-1 text-xs font-semibold text-amber-700">{checkBlocked}</p>}
       <p className="mt-1 text-xs text-slate-500">
         Optional, and a warning only — the report opens either way. Nothing is saved.
       </p>

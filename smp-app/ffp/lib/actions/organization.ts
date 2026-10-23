@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { requireFirmOwner, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
-import { canChangeLastFirmOwner } from "@/ffp/lib/domain/access-control";
+import { canChangeLastFirmOwner, WORKSPACE_UPKEEP_LEVEL } from "@/ffp/lib/domain/access-control";
 import { validateLogoDataUrl, isValidHexColor } from "@/ffp/lib/domain/logo";
 import { DEFAULT_GOVERNANCE_ASPECT_NAMES } from "@/ffp/lib/domain/governance-focus-areas";
 import { ok, validationError, type ActionResult, type ActionError } from "@/ffp/lib/actions/errors";
@@ -97,7 +97,7 @@ export async function updateWorkspaceProfile(
   const parsed = updateWorkspaceProfileSchema.safeParse(input);
   if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
 
-  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, WORKSPACE_UPKEEP_LEVEL);
   if (!access.ok) return access;
 
   const workspace = await prisma.workspace.update({
@@ -176,7 +176,7 @@ export async function updateWorkspaceBranding(
   const parsed = updateWorkspaceBrandingSchema.safeParse(input);
   if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
 
-  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, WORKSPACE_UPKEEP_LEVEL);
   if (!access.ok) return access;
 
   if (parsed.data.logoDataUrl !== null) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCanEdit } from "./workspace-access";
+import { useCanKeepUpWorkspace } from "./workspace-access";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ export function WorkspaceProfile({
   industry: string | null;
   description: string | null;
 }) {
-  const canEdit = useCanEdit();
+  const canKeepUp = useCanKeepUpWorkspace();
   const [editing, setEditing] = useState(false);
   const [industryInput, setIndustryInput] = useState(industry ?? "");
   const [descriptionInput, setDescriptionInput] = useState(description ?? "");
@@ -105,7 +105,7 @@ export function WorkspaceProfile({
           {description || <span className="text-slate-500">No background notes yet.</span>}
         </p>
       </div>
-      {canEdit && (
+      {canKeepUp && (
         <button
           type="button"
           onClick={() => setEditing(true)}

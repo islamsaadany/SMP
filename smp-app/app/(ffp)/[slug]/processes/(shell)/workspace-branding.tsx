@@ -1,6 +1,6 @@
 "use client";
 
-import { useCanEdit } from "./workspace-access";
+import { useCanKeepUpWorkspace } from "./workspace-access";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ export function WorkspaceBranding({
   accentColorSecondary: string | null;
   accentColorTertiary: string | null;
 }) {
-  const canEdit = useCanEdit();
+  const canKeepUp = useCanKeepUpWorkspace();
   const [preview, setPreview] = useState<string | null>(logoDataUrl);
   const [accents, setAccents] = useState<Accents>({
     primary: accentColor ?? DEFAULT_PRIMARY,
@@ -38,9 +38,9 @@ export function WorkspaceBranding({
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Nothing here but a way to change something, so a Viewer is shown none
-  // of it rather than controls the server would refuse.
-  if (!canEdit) return null;
+  // Nothing here but a way to change something, so anyone below Admin is
+  // shown none of it rather than controls the save would refuse.
+  if (!canKeepUp) return null;
 
   function save(
     nextLogo: string | null,

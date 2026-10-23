@@ -9,12 +9,11 @@ import { runPackCheck, type PackCheckFinding } from "@/ffp/lib/ai/pack-check";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
-
-const MAX_PROCESSES = 12;
+import { PACK_CHECK_MAX } from "@/ffp/lib/domain/pack-check";
 
 const schema = z.object({
   workspaceId: z.string().min(1),
-  processIds: z.array(z.string().min(1)).min(1).max(MAX_PROCESSES),
+  processIds: z.array(z.string().min(1)).min(1).max(PACK_CHECK_MAX),
 });
 
 export type PackCheckReport = {
@@ -32,7 +31,7 @@ export type PackCheckReport = {
 export async function checkPackWithAI(input: z.infer<typeof schema>): Promise<ActionResult<PackCheckReport>> {
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
-    return validationError(`Pick between 1 and ${MAX_PROCESSES} processes to check.`, parsed.error.issues);
+    return validationError(`Pick between 1 and ${PACK_CHECK_MAX} processes to check.`, parsed.error.issues);
   }
   const access = await requireWorkspaceAccess(parsed.data.workspaceId, "VIEWER");
   if (!access.ok) return access;

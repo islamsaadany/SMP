@@ -56,6 +56,8 @@
     "check:propose": "node --experimental-strip-types checks/review-propose-step.mjs",
     "check:propose:red": "node --experimental-strip-types checks/review-propose-step.mjs --red",
     "check:sop": "node --experimental-strip-types checks/process-sop.mjs",
+    "check:upkeep": "node --experimental-strip-types checks/upkeep-and-pack-check.mjs",
+    "check:upkeep:red": "node --experimental-strip-types checks/upkeep-and-pack-check.mjs --red",
     "check:pick": "node --experimental-strip-types checks/helicopter-pick.mjs",
     "check:pick:red": "node --experimental-strip-types checks/helicopter-pick.mjs --red",
     "check:handoff": "node --experimental-strip-types checks/process-handoff.mjs",

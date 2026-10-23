@@ -138,7 +138,13 @@ with sync_playwright() as p:
     flat = [c for v in chips.values() for c in v]
     ck("no `SMO` pill survives anywhere", not any(c.strip() in ("SMO", "SMO only", "Everyone")
                                                   for c in flat), flat)
-    ck("no chip is a bare count", not any(c[:1].isdigit() and "not on this list" not in c
+    # §135.1 kept TWO alarms, not one: the register's "N not on this list"
+    # and the capabilities page's "N with no owner" (drawn only while a
+    # capability has no owner — the demo's one capability has none since its
+    # holding function went, §544.13). An alarm names its condition; a bare
+    # count ("8 capabilities") names nothing, and is still refused.
+    ALARMS = ("not on this list", "with no owner")
+    ck("no chip is a bare count", not any(c[:1].isdigit() and not any(a in c for a in ALARMS)
                                           for c in flat), flat)
     # AND THE ALARM STILL WORKS. The demo has no stray name, so the state is
     # MADE — otherwise this ships unexercised (§94.2).

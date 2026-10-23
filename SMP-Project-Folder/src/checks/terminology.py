@@ -129,10 +129,15 @@ with sync_playwright() as p:
     print("\n§5  the navigation")
     js(pg, "LABELS.entries=JSON.parse(JSON.stringify(LABEL_DEFAULTS.map(function(d,i){var e=LABELS.entries[i];e.group=d.one;e.bu=d.many;return e})));current='mobile';paint()")
     pg.wait_for_timeout(250)
-    nav = js(pg, "[...document.querySelectorAll('[data-fold]')].map(function(b){return b.textContent.trim()})", [])
+    # §41.8 / §334: the two-sided switch is ONE button carrying both words as
+    # `.nsw` segments, so its textContent is the two run together
+    # ("UnitsFunctions"). Each segment is read on its own — rewritten, never
+    # loosened (§218): the word must still be exactly "Units" / "Brands".
+    NAV = "[...document.querySelectorAll('#units .navswitch .nsw')].map(function(b){return b.textContent.trim()})"
+    nav = js(pg, NAV, [])
     ck("on the defaults the switch keeps its short word", any(t == "Units" for t in nav), nav)
     js(pg, "LABELS.entries[%d].bu='Brands'; paint()" % ORDER.index("unitword")); pg.wait_for_timeout(250)
-    nav = js(pg, "[...document.querySelectorAll('[data-fold]')].map(function(b){return b.textContent.trim()})", [])
+    nav = js(pg, NAV, [])
     ck("a client's word replaces it", any(t == "Brands" for t in nav) and not any(t == "Units" for t in nav), nav)
 
     print("\n§6  Reset, an emptied box, and a shared word")

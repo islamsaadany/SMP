@@ -294,7 +294,7 @@ with sync_playwright() as pw:
       const shut={open:d.open, h:Math.round(d.getBoundingClientRect().height),
         seen:rows.filter(r=>r.checkVisibility&&r.checkVisibility()).length,
         verdict:sum?sum.textContent.trim():null,
-        content:p.scrollHeight, mustScroll:p.scrollHeight-p.clientHeight};
+        content:p.scrollHeight, mustScroll:p.scrollHeight-p.clientHeight, view:p.clientHeight};
       sum.click();
       const open={open:d.open, h:Math.round(d.getBoundingClientRect().height),
         seen:rows.filter(r=>r.checkVisibility&&r.checkVisibility()).length,
@@ -322,10 +322,23 @@ with sync_playwright() as pw:
     # A number here would go stale again the next time a row is added, and
     # a check that has to be edited on every ordinary change is one people
     # learn to edit without reading (§94.8).
-    ck("folding removes almost all of the scroll",
-       st["shut"]["mustScroll"] * 4 < max(1, st["open"]["content"] - st["shut"]["content"]),
-       {"shut": st["shut"]["mustScroll"],
-        "folding saves": st["open"]["content"] - st["shut"]["content"]})
+    # ── AND REWRITTEN AGAIN, TO WHAT FOLDING ACTUALLY DOES (§218) ─────
+    # The 4x ratio went stale exactly as the paragraph above predicted: the
+    # panel has gained rows since §299 (folded it now needs 59px of scroll in
+    # a 606px panel, with the fold saving 154px), so "folding removes the
+    # great majority" became a statement about how many rows the panel has,
+    # not about the fold. What §296 decided (Islam's B) is that the
+    # diagnostic arrives folded, asserted above; what folding must DO is take
+    # away the diagnostic's whole open height and nothing else. So that is
+    # asserted to the pixel: the panel's content shrinks by exactly what the
+    # disclosure itself grows by. A fold that hid only part of the steps, or
+    # left their space behind, fails here; a new settings row does not.
+    grew = st["open"]["h"] - st["shut"]["h"]
+    saved = st["open"]["content"] - st["shut"]["content"]
+    ck("folding removes exactly the diagnostic's open height from the panel",
+       grew > 0 and abs(saved - grew) <= 2,
+       {"disclosure grows": grew, "panel grows": saved, "shut scroll": st["shut"]["mustScroll"],
+        "view": st["shut"].get("view")})
     ck("...and opening it is what makes the scroll necessary",
        st["open"]["content"] > st["shut"]["content"], st)
     pg.close()

@@ -565,7 +565,15 @@
    step stay wired when the client's record lands. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in any
    ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.92-brand-wired";
+/* v6.93-left-column — §601: the console's tabs in a column on the left.
+   The console page and its script changed (§584's precedent: a served
+   file's bytes are the trigger). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v6.95-slide-widths — §604: every slide table's columns as wide as what they
+   hold. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.95-slide-widths";
 const ASSETS = [
   "/",
   "/index.html",

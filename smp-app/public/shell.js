@@ -54238,6 +54238,9 @@ function roomPaint(){
     '<span class="rs-sp"></span>' +
     '<button type="button" data-rs="prev" title="Back one step on the room\u2019s screen">\u2190</button>' +
     '<button type="button" data-rs="next" title="Forward one step on the room\u2019s screen">\u2192</button>' +
+    /* §582.2: the keys that reach the slides from here, said where they work. */
+    '<span class="rs-keys"><b>PgDn</b><b>\u2192</b> next \u00b7 <b>PgUp</b><b>\u2190</b> back' +
+      (ROOM.at && ROOM.at.clock ? ' \u00b7 <b>T</b> timer' : '') + '</span>' +
     (ROOM.at && ROOM.at.clock ? '<button type="button" data-rs="t">' + (paused ? 'T start' : 'T pause') + '</button>' : '') +
     '<button type="button" data-rs="back" class="rs-go">Back to slides</button>');
 }
@@ -54290,6 +54293,45 @@ function roomEditorKey(ev){
   }
   return false;
 }
+
+/* ── THE REMOTE, FROM ANY PAGE (§582.2) ─────────────────────────────────
+   Islam: *"when I'm on the platform trying to make edits … the navigation on
+   the extended or the other window is lost so when we click right or left …
+   with a keyboard or a remote it doesn't work"* — a remote is a keyboard,
+   and its keys go to whichever window is in front; §582 had kept a page's
+   keys the page's own so typing could never move a slide. Now, while the
+   slides are up and somebody is on any other page of the platform: Page
+   Down / Page Up (what most remotes send) and → / ← move them, and T holds
+   or starts their timer — *"keep [↑ ↓] for scrolling"*, *"yes T works"*.
+
+   TYPING STAYS TYPING, AND A CONTROL KEEPS ITS KEYS: nothing is taken from
+   a box being typed in, a list or menu, the tab bar, a slider, a player, or
+   anything that has already answered the key (`defaultPrevented` — the
+   reorder handles, the search list). Heard on the WINDOW and last, so all of
+   those have had their turn. Alt, Ctrl and Cmd belong to the platform's own
+   shortcuts and are never taken. The slide view and a deck on this screen
+   have their own keys (§582) and are left to them. */
+var ROOM_KEEP_ROLES = /^(tab|tablist|slider|listbox|option|menu|menubar|menuitem|menuitemradio|menuitemcheckbox|radio|radiogroup|spinbutton|grid|gridcell|tree|treeitem|treegrid|combobox|scrollbar)$/;
+function roomKeysOwn(el){
+  for (var e = el; e && e.nodeType === 1; e = e.parentElement) {
+    var t = e.tagName;
+    if (e.isContentEditable || t === "INPUT" || t === "TEXTAREA" || t === "SELECT" ||
+        t === "VIDEO" || t === "AUDIO") return true;
+    if (ROOM_KEEP_ROLES.test(e.getAttribute("role") || "")) return true;
+  }
+  return false;
+}
+addEventListener("keydown", function(ev){
+  if (!ROOM || ROOM_MODE || ev.defaultPrevented) return;
+  if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+  var sr = document.getElementById("slideroot"), dr = document.getElementById("deckroot");
+  if ((sr && sr.classList.contains("on")) || (dr && dr.classList.contains("on"))) return;
+  if (roomKeysOwn(ev.target)) return;
+  var k = ev.key, kc = ev.code || "";
+  if (k === "PageDown" || k === "ArrowRight") { ev.preventDefault(); roomSend({ step:1 }); }
+  else if (k === "PageUp" || k === "ArrowLeft") { ev.preventDefault(); roomSend({ step:-1 }); }
+  else if (kc === "KeyT" || k === "t" || k === "T") { ev.preventDefault(); roomSend({ key:"T" }); }
+});
 
 /* ── IN THE ROOM ──────────────────────────────────────────────────────── */
 function roomHear(m){
@@ -70152,6 +70194,11 @@ var KEYSHEET = (function(){
     deck: function(){
       var d = document.getElementById("deckroot");
       return !!d && d.classList.contains("on");
+    },
+    /* §582.2: the slides are up in another window (a second screen or a
+       window to share) and this one is driving them — present.js's ROOM. */
+    room: function(){
+      return typeof ROOM !== "undefined" && !!ROOM;
     }
   };
 
@@ -70209,8 +70256,19 @@ var KEYSHEET = (function(){
         { keys:[["Home"], ["End"]], what:"First or last slide" },
         { keys:[["F"]], what:"Fullscreen" },
         { keys:[["W"]], what:"Fit to the window" },
-        { keys:[["P"]], what:"Pause the clock" },
+        { keys:[["T"], ["P"]], what:"Hold or start the clock" },
+        /* §581, added late: the sheet missed them the day they arrived. */
+        { keys:[["Y"]], what:"Start the clock again" },
+        { keys:[["R"]], what:"Update the figures" },
         { keys:[["Esc"]], what:"Leave fullscreen, then leave the deck" }
+      ] },
+    /* §582.2 — ADDED THE DAY THE KEYS WERE. */
+    { id:"room", name:"Slides in another window", where:"any page, while they are up",
+      rows:[
+        { keys:[["PgDn"], ["→"]], what:"Next slide — what most remotes send" },
+        { keys:[["PgUp"], ["←"]], what:"Back one" },
+        { keys:[["T"]], what:"Hold or start their clock" },
+        { says:"typing in a box", what:"Keeps every key — nothing moves a slide" }
       ] }
   ];
 

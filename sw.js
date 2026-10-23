@@ -573,7 +573,12 @@
    hold. The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.95-slide-widths";
+/* v6.96-modules-look — §605 with §544.16: Insights, Meeting Notes and
+   Portfolio's projects in the Tracker's look, and the client set-up's
+   comment that said seven steps. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.96-modules-look";
 const ASSETS = [
   "/",
   "/index.html",

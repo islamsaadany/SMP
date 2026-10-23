@@ -29,11 +29,14 @@ const { authorize } = require("./authorize.cjs");
 
 export const LOCK_NS = 420043;
 const LOG_ROW_CAP = 20;   /* api/state.js's cap on the rows a log line carries */
+/* §585.1: a change list larger than this is not carried to other tabs — a
+   plan import is thousands of rows — they are told to fetch the graph. */
+export const SAVE_BYTES_CAP = 300 * 1024;
 
 export type Actor = { key: string; name?: string; role?: string; email?: string };
 export type SaveBody = { base?: unknown; changes?: unknown; viewAs?: string; state?: unknown };
 export type SaveResult =
-  | { code: 200; body: { ok: true; wrote: "rows"; rows: number; tables: string[]; at: string } }
+  | { code: 200; body: { ok: true; wrote: "rows"; rows: number; tables: string[]; at: string; seq: number } }
   | { code: 400; body: { ok: false; error: string; table?: string } }
   | { code: 403; body: { ok: false; refused: true; error: string; refusals: string[]; refusedChanges: unknown[]; undoable: boolean; judgedAs: { key: string; name: string } | null } };
 
@@ -101,7 +104,21 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
       });
       await c.query("INSERT INTO change_log (person_key, person_name, email, kind, target, what, rows_) VALUES " + vals.join(","), params);
     }
-    return { code: 200 as const, body: { ok: true as const, wrote: "rows" as const, rows: report.rows, tables: report.tables, at: new Date().toISOString() } };
+    /* §585.1: THE SAVE ITSELF, NUMBERED — inside the transaction, under the
+       lock, so the numbers run in the order the saves landed and a number is
+       never handed out for a save that rolled back. The change list is
+       stored as it was sent (the server applied exactly this), so a tab can
+       apply it onto its own copy with the same differ. A list too large to
+       carry is recorded as {full:true}: the tab fetches the graph instead. */
+    const sent = JSON.stringify(body.changes);
+    const kept = sent.length > SAVE_BYTES_CAP ? JSON.stringify({ full: true, bytes: sent.length }) : sent;
+    /* `no-save-number` (checks/saves-since.mjs): a save that lands and is
+       never numbered — every other tab stays stale for ever and nothing
+       says so. Never set on a deployment. */
+    const seq = brk === "no-save-number" ? 0
+      : Number((await c.query("INSERT INTO saves (person_key, person_name, changes) VALUES ($1, $2, $3::jsonb) RETURNING id",
+          [me.key, me.name || null, kept])).rows[0].id);
+    return { code: 200 as const, body: { ok: true as const, wrote: "rows" as const, rows: report.rows, tables: report.tables, at: new Date().toISOString(), seq } };
   }).catch((e: any) => {
     if (e && e.unaddressable) return { code: 400 as const, body: { ok: false as const, error: e.message, table: e.table } };
     throw e;

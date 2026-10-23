@@ -735,6 +735,24 @@ CREATE INDEX change_log_target ON change_log (tenant_id, target, at DESC);
 CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
 CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
 
+/* §585.1: every save that landed, as the change list it carried, numbered in
+   the order the save lock let them land — so an open tab asks "what changed
+   since N" and is answered with the change itself and nothing else. A body
+   too large to carry (a plan import) or a whole-graph post is recorded as
+   {"full": true}, which tells the tab to fetch the graph instead
+   (migration 029). */
+CREATE TABLE saves (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  at timestamptz NOT NULL DEFAULT now(),
+  person_key text NOT NULL,
+  person_name text,
+  changes jsonb NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE (tenant_id, id)
+);
+CREATE INDEX saves_since ON saves (tenant_id, id);
+
 /* §504: a line of a save that failed, sent to the Strategy Office from the
    person's own computer (migration 026). */
 CREATE TABLE unsaved_lines (

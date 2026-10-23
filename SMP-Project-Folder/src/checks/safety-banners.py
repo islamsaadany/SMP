@@ -61,6 +61,20 @@ HTML_PATH = pathlib.Path(os.environ.get("SMP_HTML") or
 HTML = HTML_PATH.read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 STATE = json.loads(json.dumps(SEED))     # what the stub "stores"; changed mid-run
+# §585.1: the stub numbers its saves once MODE["seq"] is on — the full read
+# then carries `seq`, a POST appends to SAVES, and `?after=N` answers from it.
+MODE = {"seq": False}
+SAVES = []
+SEQN = [0]
+
+
+def land(changes, by="Hala Ibrahim", at="2026-09-02T10:00:00.000Z"):
+    """Somebody else's save: applied to the stub's graph and numbered."""
+    if not changes.get("full"):                # too large to carry: STATE was changed by hand
+        apply_changes(STATE, changes)
+    SEQN[0] += 1
+    SAVES.append({"seq": SEQN[0], "by": by, "byKey": "x", "at": at, "changes": changes})
+    return SEQN[0]
 
 
 def _host(state, at):
@@ -152,6 +166,13 @@ class H(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/state"):
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if "after" in q:
+                after = int(q["after"][0])
+                SEEN.setdefault("afters", []).append({"after": after, "q": q})
+                page = [x for x in SAVES if x["seq"] > after]
+                self._s(200, json.dumps({"ok": True, "seq": page[-1]["seq"] if page else after,
+                                         "more": False, "changes": page}).encode(), "application/json")
+                return
             if "since" in q:
                 SEEN["peeks"].append({"since": q["since"][0], "target": q.get("target", [""])[0],
                                       "sync": "sync" in q})
@@ -163,8 +184,10 @@ class H(http.server.BaseHTTPRequestHandler):
                         "application/json")
                 return
             SEEN["states"] = SEEN.get("states", 0) + 1
-            self._s(200, json.dumps({"ok": True, "state": STATE, "person": PERSON}).encode(),
-                    "application/json")
+            full = {"ok": True, "state": STATE, "person": PERSON}
+            if MODE["seq"]:
+                full["seq"] = SEQN[0]
+            self._s(200, json.dumps(full).encode(), "application/json")
             return
         if self.path.startswith("/raya-trade"):
             import time; SEEN["loads"] += 1; SEEN["load_at"] = time.time()
@@ -195,7 +218,11 @@ class H(http.server.BaseHTTPRequestHandler):
                 STATE.clear(); STATE.update(j["state"])
         except Exception as e:  # a body the stub cannot apply is a finding, not a crash
             SEEN.setdefault("apply_errors", []).append(str(e))
-        self._s(200, b'{"ok":true,"wrote":"rows"}', "application/json")
+        seq = None
+        if MODE["seq"] and isinstance(j.get("changes"), dict):
+            SEQN[0] += 1; seq = SEQN[0]
+            SAVES.append({"seq": seq, "by": PERSON["name"], "byKey": PERSON["key"], "at": "2026-09-02T09:30:00.000Z", "changes": j["changes"]})
+        self._s(200, json.dumps({"ok": True, "wrote": "rows", "seq": seq}).encode(), "application/json")
 
 
 srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
@@ -280,43 +307,59 @@ with sync_playwright() as p:
     ck("...not as a sync", not q.get("sync"))
     ck("nothing drawn when nobody landed anything", banner(pg) == "", banner(pg))
 
-    # ── 2 · SOMEBODY ELSE LANDED A CHANGE: TAKEN IN, NOT ANNOUNCED (§585) ──
-    print("\n2 · somebody else updated this page: their change arrives, no caution")
+    # ── 1b · A SERVER THAT NUMBERS ITS SAVES IS ASKED THE LIGHTER WAY (§585.1) ──
+    print("\n1b · with numbered saves the ask is \"what changed since N\", on every page")
+    MODE["seq"] = True
+    pg.goto(URL, wait_until="networkidle"); pg.wait_for_timeout(1800)
+    ck("the platform hydrated again", pg.evaluate("()=>SYNC.isLive()") is True)
+    ck("...holding the number the server sent", pg.evaluate("()=>SYNC.seq()") == SEQN[0], pg.evaluate("()=>SYNC.seq()"))
     def settle(ms=1500):
         pg.wait_for_timeout(ms)
     def states():
         return SEEN.get("states", 0)
+    def afters():
+        return len(SEEN.get("afters", []))
+    n0, a0 = len(SEEN["peeks"]), afters()
+    peek(pg)
+    ck("the ask names the number it holds and nothing else",
+       afters() == a0 + 1 and SEEN["afters"][-1]["after"] == SEQN[0] and "target" not in SEEN["afters"][-1]["q"]
+       and "since" not in SEEN["afters"][-1]["q"], SEEN["afters"][-1] if SEEN.get("afters") else None)
+    ck("...and the per-target ask is not made", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    states_at_load = states()
+    ck("nothing new costs no graph", states() == states_at_load, states())
+
+    # ── 2 · SOMEBODY ELSE LANDED A CHANGE: TAKEN IN, NOT ANNOUNCED (§585) ──
+    print("\n2 · somebody else saved: their change arrives, no caution, no graph fetched")
     states0 = states()
-    STATE["group"]["org"] = "Theirs Ltd"
-    PEEK["changed"] = [{"by": "Hala Ibrahim", "at": "2026-09-02T10:00:00.000Z"}]
+    n = land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Ltd"}, "del": []}]})
     peek(pg); settle()
-    ck("the tab fetched the server's copy", states() == states0 + 1, states() - states0)
-    ck("...and their change is on the screen", pg.evaluate("()=>GROUP.org") == "Theirs Ltd", pg.evaluate("()=>GROUP.org"))
+    ck("their change is on the screen", pg.evaluate("()=>GROUP.org") == "Theirs Ltd", pg.evaluate("()=>GROUP.org"))
     ck("...drawn, not only held", pg.evaluate("()=>document.getElementById('orgname').textContent") == "Theirs Ltd",
        pg.evaluate("()=>document.getElementById('orgname').textContent"))
+    ck("...from the change itself: the graph was not fetched", states() == states0, states() - states0)
     ck("no caution is drawn", banner(pg) == "", banner(pg))
     ck("nothing is left pending", pg.evaluate("()=>SAFETY.pending()") is False)
+    ck("the number moved on to that save", pg.evaluate("()=>SYNC.seq()") == n, pg.evaluate("()=>SYNC.seq()"))
+    a0 = afters()
     peek(pg); settle(600)
-    ck("the next peek asks from that landing onward", last_since() == "2026-09-02T10:00:00.000Z", last_since())
-    ck("...and the same landing is not fetched again", states() == states0 + 1, states() - states0)
+    ck("the next ask starts from it", afters() == a0 + 1 and SEEN["afters"][-1]["after"] == n, SEEN["afters"][-1]["after"])
     ck("the baseline is theirs now: nothing to send", pg.evaluate("()=>{let r=null;SYNC.saveNow(s=>r=s);return r;}") == "clean")
 
     # ── 3 · A LINE THIS TAB HAS NOT SAVED SURVIVES THE MERGE ──────────────
     # The server is made to fail so the line stays unsaved (§504 keeps it);
     # theirs lands on ANOTHER cell; both must be on the screen afterwards,
     # and the kept line must then save against the new baseline by itself.
-    print("\n3 · my unsaved line survives their update, and then saves itself")
+    print("\n3 · my unsaved line survives their update, then saves itself; my own save changes nothing")
     SEEN["post_status"] = 500
     pg.evaluate("UNITS.mobile.aspiration = 'mine-1'; paint();")
     settle(1200)
     ck("my change could not be saved and is kept on this computer", "safe on this computer" in unsaved(pg), unsaved(pg) or "(nothing)")
-    STATE["group"]["org"] = "Theirs Two"
-    PEEK["changed"] = [{"by": "Hala Ibrahim", "at": "2026-09-02T10:05:00.000Z"}]
+    land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Two"}, "del": []}]}, at="2026-09-02T10:05:00.000Z")
     states0 = states()
     peek(pg); settle()
-    ck("the merge ran", states() == states0 + 1, states() - states0)
     ck("their change arrived", pg.evaluate("()=>GROUP.org") == "Theirs Two", pg.evaluate("()=>GROUP.org"))
     ck("...and my unsaved line is still mine", pg.evaluate("()=>UNITS.mobile.aspiration") == "mine-1", pg.evaluate("()=>UNITS.mobile.aspiration"))
+    ck("...without fetching the graph", states() == states0, states() - states0)
     ck("different cells raise no clash", not pg.evaluate("()=>!!document.querySelector('[data-unsaved-clash]')"), unsaved(pg))
     ck("no caution is drawn", banner(pg) == "", banner(pg))
     SEEN["post_status"] = 200
@@ -329,14 +372,21 @@ with sync_playwright() as p:
     ck("...and the server holds both", STATE["units"]["mobile"]["aspiration"] == "mine-1" and STATE["group"]["org"] == "Theirs Two",
        (STATE["units"]["mobile"]["aspiration"], STATE["group"]["org"]))
     ck("the stub applied every body it was sent", not SEEN.get("apply_errors"), SEEN.get("apply_errors"))
+    # MY OWN SAVE COMES BACK IN THE STREAM and changes nothing: no repaint, the number moves on.
+    mine_seq = SEQN[0]
+    ck("the stub numbered my save", bool(SAVES) and SAVES[-1]["byKey"] == "smo", SAVES[-1] if SAVES else None)
+    states0 = states(); peek(pg); settle(800)
+    ck("my own save, asked back, moves the number and nothing else",
+       pg.evaluate("()=>SYNC.seq()") == mine_seq and states() == states0 and pg.evaluate("()=>UNITS.mobile.aspiration") == "mine-1",
+       (pg.evaluate("()=>SYNC.seq()"), mine_seq, states() - states0))
 
     # ── 4 · THE SAME CELL CHANGED BY BOTH: A CLASH, AND THE PERSON DECIDES ──
     print("\n4 · the same cell changed by both: theirs shows, Keep mine puts mine back")
     SEEN["post_status"] = 500
     pg.evaluate("UNITS.mobile.aspiration = 'mine-2'; paint();")
     settle(1200)
-    STATE["units"]["mobile"]["aspiration"] = "Theirs Three"
-    PEEK["changed"] = [{"by": "Karim Fahmy", "at": "2026-09-02T10:10:00.000Z"}]
+    land({"rows": [{"at": "units.mobile", "path": [], "id": None, "set": {"aspiration": "Theirs Three"}, "del": []}]},
+         by="Karim Fahmy", at="2026-09-02T10:10:00.000Z")
     peek(pg); settle()
     ck("the screen shows theirs", pg.evaluate("()=>UNITS.mobile.aspiration") == "Theirs Three", pg.evaluate("()=>UNITS.mobile.aspiration"))
     ck("...and the clash bar asks, with both ways out",
@@ -360,37 +410,34 @@ with sync_playwright() as p:
     print("\n5 · nothing is merged under a hand in a field; blur, and it is")
     pg.evaluate("()=>{const i=document.createElement('input'); i.id='probe-field'; document.body.appendChild(i); i.focus(); i.value='typing';}")
     ck("a field has the cursor", pg.evaluate("()=>document.activeElement && document.activeElement.id==='probe-field'"))
-    STATE["group"]["org"] = "Theirs Four"
-    PEEK["changed"] = [{"by": "Hala Ibrahim", "at": "2026-09-02T10:15:00.000Z"}]
-    states0 = states()
+    held_at = pg.evaluate("()=>SYNC.seq()")
+    n = land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Four"}, "del": []}]}, at="2026-09-02T10:15:00.000Z")
     peek(pg); settle(1200)
-    ck("no fetch while the hand is in the field", states() == states0, states() - states0)
-    ck("...the landing is held, not dropped", pg.evaluate("()=>SAFETY.pending()") is True)
+    ck("the landing is held, not dropped", pg.evaluate("()=>SAFETY.pending()") is True)
     ck("...the screen is untouched", pg.evaluate("()=>GROUP.org") == "Theirs Two", pg.evaluate("()=>GROUP.org"))
+    ck("...the number has not moved", pg.evaluate("()=>SYNC.seq()") == held_at, (pg.evaluate("()=>SYNC.seq()"), held_at, n))
     ck("...and the field keeps what was typed and the cursor",
        pg.evaluate("()=>document.getElementById('probe-field').value==='typing' && document.activeElement.id==='probe-field'"))
     pg.evaluate("()=>{const i=document.getElementById('probe-field'); i.blur(); i.remove();}")
     settle(2000)
-    ck("on blur the merge goes", states() == states0 + 1 and pg.evaluate("()=>GROUP.org") == "Theirs Four",
-       (states() - states0, pg.evaluate("()=>GROUP.org")))
+    ck("on blur the merge goes", pg.evaluate("()=>GROUP.org") == "Theirs Four" and pg.evaluate("()=>SYNC.seq()") == n,
+       (pg.evaluate("()=>GROUP.org"), pg.evaluate("()=>SYNC.seq()")))
     ck("...and nothing is pending", pg.evaluate("()=>SAFETY.pending()") is False)
     ck("no caution was drawn through any of it", banner(pg) == "", banner(pg))
 
-    # ── 5b · SETUP ASKS NOTHING; A PAGE ASKS AGAIN (§258.1) ───────────────
-    print("\n5b · Setup never asks; back on a page, it asks again")
-    n0 = len(SEEN["peeks"])
+    # ── 5b · ON SETUP THE LIGHTER ASK IS MADE TOO (§585.1; §258.1 asked nothing there) ──
+    print("\n5b · Setup asks the lighter way as well; a page still does")
     pg.evaluate("()=>{const g=document.querySelector('[data-s=\"setup\"],[data-setup],button[title=\"Setup\"]'); if(g) g.click();}")
     pg.wait_for_timeout(600)
     ck("Setup opened", pg.evaluate("()=>typeof current!=='undefined' && current==='setup'"))
+    a0, n0 = afters(), len(SEEN["peeks"])
     peek(pg)
-    ck("...and Setup asks the server nothing", len(SEEN["peeks"]) == n0, len(SEEN["peeks"]) - n0)
+    ck("...and it asks what changed, by number", afters() == a0 + 1 and len(SEEN["peeks"]) == n0, (afters() - a0, len(SEEN["peeks"]) - n0))
     pg.evaluate("()=>{const b=document.querySelector('button[data-u=\"mobile\"]'); if(b) b.click();}")
     pg.wait_for_timeout(600)
     ck("back on a page", pg.evaluate("()=>TARGET") == "mobile", pg.evaluate("()=>TARGET"))
-    n0 = len(SEEN["peeks"])
-    peek(pg)
-    ck("...it asks again, about that page", len(SEEN["peeks"]) == n0 + 1 and SEEN["peeks"][-1]["target"] == "mobile",
-       SEEN["peeks"][-1] if SEEN["peeks"] else None)
+    a0 = afters(); peek(pg)
+    ck("...it asks the same way", afters() == a0 + 1, afters() - a0)
 
     # ── 5c · A NEW ROW'S ID IS ITS OWN (§585) ─────────────────────────────
     # Two tabs adding a row to the same list in the same minute both counted
@@ -400,6 +447,25 @@ with sync_playwright() as p:
     r = pg.evaluate("()=>[mintRowId([{id:'x-P1-aaaa'}],'x-P'), mintRowId([{id:'x-P1-aaaa'}],'x-P')]")
     ck("an id still says where it was added, with a tag of its own", all(re.match(r"^x-P2-[0-9a-z]{4}$", x) for x in r), r)
     ck("...and two minted from the same list differ", r[0] != r[1], r)
+
+    # ── 5d · A SAVE TOO LARGE TO CARRY: THE GRAPH IS FETCHED INSTEAD (§585.1) ──
+    print("\n5d · a save the server could not carry falls back to fetching the graph")
+    STATE["group"]["org"] = "Theirs Five"
+    n = land({"full": True, "bytes": 999999}, at="2026-09-02T10:20:00.000Z")
+    states0 = states()
+    peek(pg); settle(1800)
+    ck("the graph was fetched once", states() == states0 + 1, states() - states0)
+    ck("...and their change is on the screen", pg.evaluate("()=>GROUP.org") == "Theirs Five", pg.evaluate("()=>GROUP.org"))
+    ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == n, (pg.evaluate("()=>SYNC.seq()"), n))
+    ck("no caution is drawn", banner(pg) == "", banner(pg))
+
+    # ── 5e · THE CLOCK SLOWS WHEN NOBODY IS WORKING HERE (§585.1) ─────────
+    print("\n5e · the ask comes every 20s while somebody works here, every 60s once nobody does")
+    ck("working here: 20s", pg.evaluate("()=>SAFETY.every()") == 20000, pg.evaluate("()=>SAFETY.every()"))
+    pg.evaluate("()=>SAFETY.active(Date.now() - 4*60*1000)")
+    ck("four minutes untouched: 60s", pg.evaluate("()=>SAFETY.every()") == 60000, pg.evaluate("()=>SAFETY.every()"))
+    pg.keyboard.press("Shift")
+    ck("one key, and it is 20s again", pg.evaluate("()=>SAFETY.every()") == 20000, pg.evaluate("()=>SAFETY.every()"))
 
     # ── 6 · A NEWER VERSION IS READY ─────────────────────────────────────
     print("\n6 · a newer version of the platform")

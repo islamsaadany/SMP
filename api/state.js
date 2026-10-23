@@ -61,6 +61,12 @@ function send(res, code, obj) {
    of figures at once, and a log entry nobody can read is not a record — the
    count stays exact, the itemised before-and-after stops at the cap. */
 const LOG_ROW_CAP = 200;
+/* §585.1: how many saves one "what changed since" ask carries (a tab told
+   `more` asks again), and the change list above which a save is not carried
+   to other tabs at all — a plan import is thousands of rows — but recorded
+   as {full:true}, which tells them to fetch the graph. */
+const PEEK_CAP = 50;
+const SAVE_BYTES_CAP = 300 * 1024;
 
 /* ── SAVES TAKE TURNS (2026-09-01 concurrency safety) ────────────────────────
    A save is a read-modify-write: read the stored graph, lay this client's
@@ -240,6 +246,24 @@ module.exports = async function handler(req, res) {
           " ORDER BY at DESC, id DESC LIMIT $" + params.length, params);
         return send(res, 200, { ok: true, office: office, log: r.rows });
       }
+      /* ── WHAT CHANGED SINCE N (§585.1): the change itself, tenant-wide ──
+         The tab holds the number of the last save it has taken in and asks
+         for everything after it, oldest first; the answer is each save's
+         change list, applied in the browser with the same differ. Nothing
+         new is one indexed read and an empty list. The asker's own saves
+         are included on purpose — applied to a copy that already holds
+         them they change nothing, and one that landed between two of
+         somebody else's is what makes the copy converge. */
+      const after = q && q.get("after");
+      if (after !== null && after !== undefined && /^\d{1,18}$/.test(after)) {
+        const r = await client.query(
+          "SELECT id, at, person_key, person_name, changes FROM saves WHERE id > $1 ORDER BY id ASC LIMIT " + (PEEK_CAP + 1), [after]);
+        const page = r.rows.slice(0, PEEK_CAP);
+        return send(res, 200, { ok: true, more: r.rows.length > PEEK_CAP,
+          seq: page.length ? Number(page[page.length - 1].id) : Number(after),
+          changes: page.map(function (x) {
+            return { seq: Number(x.id), by: x.person_name || x.person_key, byKey: x.person_key, at: x.at, changes: x.changes }; }) });
+      }
       const since = q && q.get("since"), target = q && q.get("target");
       if (since && target && !isNaN(Date.parse(since))) {
         /* §258.1: the tab's first ask syncs its clock to the database's. */
@@ -255,6 +279,9 @@ module.exports = async function handler(req, res) {
           return { by: x.by || x.by_key, at: x.at }; }) });
       }
       const state = await readState(client);
+      /* §585.1: and the number of the last save in this copy, so the tab's
+         first "what changed since" starts exactly where it ends. */
+      const seqRow = await client.query("SELECT COALESCE(max(id), 0) AS seq FROM saves");
       /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 042): the client's
          own name, and whether this person has cards to go back TO. Only the
          server knows the second — a client's own person holds one client and
@@ -263,7 +290,7 @@ module.exports = async function handler(req, res) {
         clientName: client._smpClient.name,
         cards: person.kind !== "client"
       });
-      return send(res, 200, { ok: true, seeded: ready.seeded, person: who, state: state });
+      return send(res, 200, { ok: true, seeded: ready.seeded, person: who, state: state, seq: Number(seqRow.rows[0].seq) });
     }
     if (req.method === "POST") {
       /* ── WHAT CHANGED, APPLIED ONTO OUR OWN COPY (§210) ──────────────
@@ -319,7 +346,7 @@ module.exports = async function handler(req, res) {
          it — nobody is silently overwritten. */
       await client.query("BEGIN");
       let out = null;                    /* { code, obj } to send, or null on success */
-      let logWho = null, logList = null, wrotePath = null;
+      let logWho = null, logList = null, wrotePath = null, seq = null;
       try {
         if (USE_SAVE_LOCK) await client.query("SELECT pg_advisory_xact_lock($1)", [SAVE_LOCK]);
         const stored = await readState(client);
@@ -370,6 +397,19 @@ module.exports = async function handler(req, res) {
               if (!wrote) await writeState(client, state, { inTransaction: true });
               wrotePath = wrote ? "incremental" : "full";
               logWho = me; logList = verdict.changes;
+              /* §585.1: THE SAVE ITSELF, NUMBERED — inside the transaction,
+                 under the lock, so the numbers run in the order the saves
+                 landed and none is handed out for a save that rolled back.
+                 The change list is stored as it was sent; a list too large
+                 to carry, or a whole-graph post from an older tab, is
+                 recorded as {full:true} and the tab fetches the graph. */
+              const sent = changes ? JSON.stringify(changes) : null;
+              const kept = !sent ? JSON.stringify({ full: true })
+                         : sent.length > SAVE_BYTES_CAP ? JSON.stringify({ full: true, bytes: sent.length }) : sent;
+              const sv = await client.query(
+                "INSERT INTO saves (person_key, person_name, changes) VALUES ($1, $2, $3::jsonb) RETURNING id",
+                [me.key, me.name || null, kept]);
+              seq = Number(sv.rows[0].id);
             }
           }
         }
@@ -388,7 +428,7 @@ module.exports = async function handler(req, res) {
          have gone bit-by-bit (incremental) or the full rewrite (full) — read in
          the browser Network tab's Response, and in Vercel's runtime logs. */
       console.log("[save]", wrotePath);
-      return send(res, 200, { ok: true, wrote: wrotePath });
+      return send(res, 200, { ok: true, wrote: wrotePath, seq: seq });
     }
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });

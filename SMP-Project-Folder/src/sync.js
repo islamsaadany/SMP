@@ -269,6 +269,10 @@ var SYNC = (function () {
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
   var repaint = null;
+  /* §585.1: the number of the last save this copy holds — the server's
+     `seq` on the graph it sent — or null where the server does not number
+     its saves yet, in which case safety.js keeps §258's per-target ask. */
+  var SEQ = null;
 
   /* ONE DATASET NOW (spec 042 §6.1, retiring §21 and §67).
 
@@ -1595,6 +1599,7 @@ var SYNC = (function () {
         if (quiet && busy()) return done(false);
         var before = lastSaved;
         hydrate(data.state);
+        if (typeof data.seq === "number") SEQ = data.seq;
         lastSaved = serialize();
         done(true, lastSaved !== before);
       })
@@ -1644,35 +1649,70 @@ var SYNC = (function () {
         /* A save or a hand that arrived during the fetch: the answer is
            dropped rather than applied under them, and the caller asks again. */
         if (!live || saving || handInField()) return done("busy");
-        var before = lastSaved;
-        var B = JSON.parse(before), M = JSON.parse(serialize());
-        var mine = SMPDiff.splitLines(SMPDiff.graphChanges(B, M)).map(function (l) {
-          l.base = SMPDiff.valueAt(B, l); return l;
-        });
+        var before = lastSaved, mineS = serialize();
         /* Theirs, in the tab's own shape — through the same door a boot goes
            through (§53.5), so a missing list or a stored null reads exactly
-           as it would after a reload, and the baseline matches the screen. */
+           as it would after a reload, and the baseline matches the screen.
+           The number it carries is the number this copy now holds (§585.1). */
         hydrate(data.state);
-        var theirs = JSON.stringify(normalized(graph()));
-        var merged = JSON.parse(theirs), clash = [], kept = 0;
-        mine.forEach(function (l) {
-          var now = SMPDiff.valueAt(merged, l);
-          if (lineSame(now, l.mine)) return;                   /* landed already */
-          if (lineSame(now, l.base)) {
-            var r = SMPDiff.applyChanges(merged, l.change);
-            if (r && r.ok) { merged = r.state; kept++; } else clash.push(l);
-          } else clash.push(l);
-        });
-        hydrate(merged);
-        lastSaved = theirs;
-        if (clash.length) keepClash(clash);
-        /* The repaint ends in afterPaint, which saves the kept lines against
-           the new baseline; before the page has a painter, save directly. */
-        if (repaint) repaint(); else if (serialize() !== lastSaved) save();
-        try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
-        done("merged", { changed: theirs !== before, kept: kept, clash: clash.length });
+        if (typeof data.seq === "number") SEQ = data.seq;
+        done("merged", takeIn(JSON.stringify(normalized(graph())), before, mineS));
       })
       .catch(function (e) { done(e && e.message === "sign in" ? "off" : "failed"); });
+  }
+  /* THE MERGE ITSELF, shared by the whole-graph fetch above and the lighter
+     path below (§585.1). `theirs` is the server's copy in the tab's own
+     shape, `before` the baseline it replaces, `mineS` the screen as it was
+     before theirs was taken: this tab's unsaved lines are the difference
+     between the two, and they go back over theirs line by line. */
+  function takeIn(theirs, before, mineS) {
+    var B = JSON.parse(before), M = JSON.parse(mineS);
+    var mine = SMPDiff.splitLines(SMPDiff.graphChanges(B, M)).map(function (l) {
+      l.base = SMPDiff.valueAt(B, l); return l;
+    });
+    var merged = JSON.parse(theirs), clash = [], kept = 0;
+    mine.forEach(function (l) {
+      var now = SMPDiff.valueAt(merged, l);
+      if (lineSame(now, l.mine)) return;                   /* landed already */
+      if (lineSame(now, l.base)) {
+        var r = SMPDiff.applyChanges(merged, l.change);
+        if (r && r.ok) { merged = r.state; kept++; } else clash.push(l);
+      } else clash.push(l);
+    });
+    hydrate(merged);
+    lastSaved = theirs;
+    if (clash.length) keepClash(clash);
+    /* The repaint ends in afterPaint, which saves the kept lines against
+       the new baseline; before the page has a painter, save directly. */
+    if (repaint) repaint(); else if (serialize() !== lastSaved) save();
+    try { console.info("[merge] took the server's copy" + (kept ? ", kept " + kept + " unsaved line" + (kept === 1 ? "" : "s") : "") + (clash.length ? ", " + clash.length + " clash" + (clash.length === 1 ? "" : "es") : "")); } catch (e) {}
+    return { changed: theirs !== before, kept: kept, clash: clash.length };
+  }
+  /* ── THE LIGHTER WAY IN (§585.1): THE CHANGE, NOT THE GRAPH ─────────
+     safety.js asks the server "what changed since N" and hands the answer
+     here: each save's change list, oldest first, applied onto this tab's
+     baseline with the same differ the server applied it with — so theirs
+     is rebuilt from a few hundred bytes instead of fetched whole. A list
+     the server could not carry ({full:true}), or one this copy cannot
+     apply, answers "full" and the caller fetches the graph (mergeIn). This
+     tab's own saves come back in the stream too, and applied to a copy
+     that already holds them they change nothing: "same". */
+  function applyRemote(entries, done) {
+    done = done || function () {};
+    if (!live || !lastSaved || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return done("off");
+    if (saving || handInField()) return done("busy");
+    var before = lastSaved, mineS = serialize();
+    var t = JSON.parse(before);
+    for (var i = 0; i < (entries || []).length; i++) {
+      var ch = entries[i] && entries[i].changes;
+      if (!ch || typeof ch !== "object" || ch.full) return done("full");
+      var r = SMPDiff.applyChanges(t, ch);
+      if (!r || !r.ok) return done("full");
+      t = r.state;
+    }
+    var theirs = JSON.stringify(normalized(t));
+    if (theirs === before) return done("same");
+    done("merged", takeIn(theirs, before, mineS));
   }
   /* The lines theirs and mine both changed, put where §504 keeps a clash so
      its bar and its two buttons answer them — the record is this person's
@@ -1732,6 +1772,12 @@ var SYNC = (function () {
        else has landed a change; it answers "merged", "busy", "failed" or
        "off", and "busy" is asked again. */
     mergeIn: function (done) { mergeIn(done); },
+    /* §585.1: the same merge from the change lists the server numbered —
+       no graph fetched; "full" means fetch it after all. And the number this
+       copy holds, read and moved by safety.js alone. */
+    applyRemote: function (entries, done) { applyRemote(entries, done); },
+    seq: function () { return SEQ; },
+    setSeq: function (n) { SEQ = (typeof n === "number" && isFinite(n)) ? n : null; },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
@@ -2094,6 +2140,7 @@ var SYNC = (function () {
             cacheWipe(); cacheWrite(data.state, data.person); location.reload(); return;
           }
           hydrate(data.state);
+          SEQ = typeof data.seq === "number" ? data.seq : null;
           live = true;
           person = data.person || null;
           CLIENT_MARK = (person && person.clientMark) || "";

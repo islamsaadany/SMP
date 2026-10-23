@@ -53,7 +53,23 @@
    failed registration is not this feature's to complain about (§231.5). */
 var SAFETY = (function(){
   var UPDATE_EVERY = 60000;   /* ask the worker for a newer build */
-  var PEEK_EVERY   = 20000;   /* ask change_log about this page   */
+  var PEEK_EVERY   = 20000;   /* ask about other people's saves while somebody is working here */
+  /* §585.1: AND MORE SLOWLY ONCE NOBODY HAS TOUCHED THE PAGE FOR A WHILE.
+     Islam: *"without impacting the speed of the platform"*. A tab left open
+     on a desk asks a third as often; the first key or click brings the
+     short clock back. Activity is read off the document, never off a list
+     of controls (§104.7). */
+  var PEEK_IDLE    = 60000;
+  var IDLE_AFTER   = 3 * 60000;
+  var lastActive = Date.now(), lastPeek = 0;
+  function every(){ return Date.now() - lastActive > IDLE_AFTER ? PEEK_IDLE : PEEK_EVERY; }
+  function onClock(){
+    if (Date.now() - lastPeek < every() - 500) return;
+    lastPeek = Date.now(); peek();
+  }
+  ["keydown", "pointerdown", "input"].forEach(function (ev) {
+    document.addEventListener(ev, function(){ lastActive = Date.now(); }, true);
+  });
 
   var el = null, shown = null, since = null, armed = false, peekTimer = null,
       updTimer = null, lastAt = null, shownFor = null;
@@ -207,16 +223,18 @@ var SAFETY = (function(){
       if (how === "merged") {
         /* The fetch was made after every landing reported so far, so the
            newest of them is what the screen now holds. */
-        var newest = (want || w).at; want = null; lastAt = newest; since = newest; return;
+        var newest = (want || w).at; want = null;
+        if (newest) { lastAt = newest; since = newest; }   /* null when §585.1's path asked for the graph */
+        return;
       }
       if (how === "busy") { retryTimer = setTimeout(tryMerge, RETRY); return; }
       want = null;                        /* failed, or off: the next peek asks again */
     });
   }
   document.addEventListener("focusout", function () {
-    if (!want || merging) return;
+    if ((!want && !wantSeq) || merging) return;
     if (retryTimer) clearTimeout(retryTimer);
-    retryTimer = setTimeout(tryMerge, 250);
+    retryTimer = setTimeout(function(){ tryMergeSeq(); tryMerge(); }, 250);
   });
 
   /* THE CLOCK IS THE SERVER'S. `since` began as the browser's own time at
@@ -226,8 +244,12 @@ var SAFETY = (function(){
      server's `now` as the moment this tab loaded; only from then on are
      landings compared (§258.1). A tab that never syncs never asks. */
   var synced = false;
+  function seqMode(){ return typeof SYNC !== "undefined" && !!SYNC.seq && !!SYNC.applyRemote && SYNC.seq() !== null; }
   function peek(){
     if (!servable() || !live() || document.visibilityState !== "visible") return;
+    /* §585.1: a server that numbers its saves is asked the lighter way, on
+       every page; the per-target ask below is kept for one that does not. */
+    if (seqMode()) return peekSeq();
     var t = target(); if (!t) return;
     if (!synced && !since) since = new Date().toISOString();
     var ctl = ("AbortController" in window) ? new AbortController() : null;
@@ -252,6 +274,59 @@ var SAFETY = (function(){
       .catch(function(){ clearTimeout(late); });
   }
 
+  /* ── 2c · THE LIGHTER ASK (§585.1): WHAT CHANGED SINCE N, TENANT-WIDE ──
+     When the server numbers its saves (the full read came with `seq`), the
+     tab asks for everything after the number it holds — on any page, Setup
+     included, because the answer is the change itself and applying it is
+     what §585 does anyway — and is answered with a few hundred bytes, or an
+     empty list that cost one indexed read. "full" (a list too large to
+     carry, or one this copy cannot apply) falls back to §585's whole-graph
+     merge; "busy" is asked again on blur and on a short clock; the number
+     moves on only once the answer is on the screen, so nothing is counted
+     as seen before it is. */
+  var wantSeq = null, asking = false;
+  function peekSeq(){
+    if (asking || wantSeq) return;
+    var cur = SYNC.seq();
+    var ctl = ("AbortController" in window) ? new AbortController() : null;
+    var late = setTimeout(function(){ if (ctl) ctl.abort(); }, 8000);
+    asking = true;
+    fetch(SYNC.withClient("/api/state?after=" + encodeURIComponent(cur)),
+          { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        clearTimeout(late); asking = false;
+        if (!j || !j.ok || !Array.isArray(j.changes)) return;
+        if (!j.changes.length) { if (typeof j.seq === "number") SYNC.setSeq(j.seq); return; }
+        wantSeq = { list: j.changes, seq: j.seq, more: !!j.more };
+        tryMergeSeq();
+      })
+      .catch(function(){ clearTimeout(late); asking = false; });
+  }
+  function tryMergeSeq(){
+    if (!wantSeq || merging) return;
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    var w = wantSeq;
+    merging = true;
+    SYNC.applyRemote(w.list, function (how) {
+      merging = false;
+      if (how === "merged" || how === "same") {
+        wantSeq = null;
+        if (typeof w.seq === "number") SYNC.setSeq(w.seq);
+        try { if (how === "merged") console.info("[safety] took in " + w.list.length + " save" + (w.list.length === 1 ? "" : "s") + ", up to #" + w.seq); } catch (e) {}
+        if (w.more) peekSeq();
+        return;
+      }
+      if (how === "busy") { retryTimer = setTimeout(tryMergeSeq, RETRY); return; }
+      if (how === "full") {
+        /* the whole graph through §585's merge, which adopts the number the
+           fetched copy carries */
+        wantSeq = null; want = { at: null, by: null, t: null }; tryMerge(); return;
+      }
+      wantSeq = null;                     /* failed, or off: the next ask starts from the same number */
+    });
+  }
+
   /* CALLED AT THE END OF EVERY paint(): the edit caution is about ONE page,
      and a person who has moved to another tab is no longer on it. It goes
      with the page it was about (§258.1 — Islam met it on Units, about a save
@@ -267,8 +342,10 @@ var SAFETY = (function(){
     armWorker();
     /* The first ask is the clock sync; it waits for hydration (`live()`),
        which is why it is retried on the clock rather than fired once. */
-    if (!peekTimer) peekTimer = setInterval(peek, PEEK_EVERY);
-    setTimeout(peek, 1500);
+    /* The clock ticks often and asks on its own cadence (§585.1: twenty
+       seconds while somebody is working here, a minute once nobody is). */
+    if (!peekTimer) peekTimer = setInterval(onClock, 5000);
+    setTimeout(function(){ lastPeek = Date.now(); peek(); }, 1500);
     document.addEventListener("visibilitychange", function(){
       if (document.visibilityState === "visible") peek();
     });
@@ -286,8 +363,11 @@ var SAFETY = (function(){
     onPaint: onPaint,
     hide: hide,
     shownFor: function(){ return shownFor; },
-    /* §585, for the check: a landing reported and not yet on the screen. */
-    pending: function(){ return !!want; },
+    /* §585, for the check: a landing reported and not yet on the screen;
+       §585.1: the clock's current cadence, and a way to stamp activity. */
+    pending: function(){ return !!(want || wantSeq); },
+    every: every,
+    active: function(at){ lastActive = typeof at === "number" ? at : Date.now(); },
     synced: function(){ return synced; },
     isArmed: function(){ return armed; },
     shown: function(){ return shown; }

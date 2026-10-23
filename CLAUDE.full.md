@@ -11142,8 +11142,15 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # most of it is the set-up flow naming
                                 # STRATEGY-PAGE data the console lacks — a NEW
                                 # one there may throw on the console (§467):
-                                # show it is guarded before `--write`. Eleven
-                                # breaks across both pages, all caught
+                                # show it is guarded before `--write`. AND
+                                # §596 WALKS THE CONSOLE'S PATHS into the
+                                # set-up flow (acorn): every strategy-page name
+                                # reachable from CLIENTSETUP.mountCreate /
+                                # mountArchived must sit under a typeof guard.
+                                # A route only data closes (canShape()) goes in
+                                # DOORWAYS with its reason; a doorway that
+                                # vanishes fails. Fifteen breaks, §467 itself
+                                # among them, all caught
 node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
                                 # — `npm run check:app-types`. A carried .cjs
                                 # loaded with `require` is `any`: load the

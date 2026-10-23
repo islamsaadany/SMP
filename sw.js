@@ -527,7 +527,11 @@
    The built file's bytes changed, which is the whole trigger (§91).
    Proved held by no commit in any ref's history after fetching every ref
    (§94.16). */
-const SHELL = "smp-shell-v6.81-one-template";
+/* v6.82-present-window — §582.1: present in a window, for an online
+   meeting. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v6.82-present-window";
 const ASSETS = [
   "/",
   "/index.html",

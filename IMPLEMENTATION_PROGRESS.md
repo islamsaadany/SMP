@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-23 — Present in a window, for an online meeting (§582.1), built on the branch, not live.** For the office, a Present in a window button in the slide view opens the slides in a window of their own on the same screen, named "Slides · <client> · Master presentation", to share in Teams, Zoom or Meet. The laptop keeps the slide view and drives it as on two screens, and its strip says which window to share. Present itself is unchanged. Works in Safari too.
+**2026-10-23 — Present in a window, for an online meeting (§582.1), merged to `main` 2026-10-23 on Islam's word.** For the office, a Present in a window button in the slide view opens the slides in a window of their own on the same screen, named "Slides · <client> · Master presentation", to share in Teams, Zoom or Meet. The laptop keeps the slide view and drives it as on two screens, and its strip says which window to share. Present itself is unchanged. Works in Safari too.
 
 **2026-10-23 — One template for every presentation (§586), merged to `main` 2026-10-23 on Islam's word.** Units, functions and the company now build their presentations from one template in one order — cover, Foundation, Analysis, the plan, Overall performance, notes, Thank you — with only the plan part differing (directions or projects). Nothing changes on screen: every presentation the platform can draw, on six saved states including El Abd and Raya, was compared with what was live, 396 of them, all identical. A new check keeps it one template. Nobody is signed out.
 

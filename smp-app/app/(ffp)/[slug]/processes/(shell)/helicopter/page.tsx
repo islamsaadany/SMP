@@ -27,6 +27,7 @@ export default async function HelicopterViewPage(props: PageProps<"/[slug]/proce
       where: { workspaceId, archivedAt: null },
       select: {
         id: true,
+        deepDiveDecision: true,
         code: true,
         name: true,
         branchFromStepId: true,
@@ -77,6 +78,8 @@ export default async function HelicopterViewPage(props: PageProps<"/[slug]/proce
         ? { processId: origin.processId, stepLabel: origin.label, stepNumber: origin.number }
         : null,
       branchFromCode: origin?.processCode ?? null,
+      // Chosen for a deep dive (Priorities): the picture shows what is being taken deep.
+      deepDive: process.deepDiveDecision === "WAVE_1" || process.deepDiveDecision === "WAVE_2",
       linksTo: process.steps.flatMap((step) =>
         step.links.map((link) => ({ targetProcessId: link.targetProcessId, fromStepLabel: step.label }))
       ),
@@ -94,6 +97,7 @@ export default async function HelicopterViewPage(props: PageProps<"/[slug]/proce
       code: source.code,
       name: source.name,
       stepCount: source._count.steps,
+      deepDive: landscapeProcess.deepDive,
       branchFrom:
         source.branchFromStepId && stepIndex.has(source.branchFromStepId)
           ? {

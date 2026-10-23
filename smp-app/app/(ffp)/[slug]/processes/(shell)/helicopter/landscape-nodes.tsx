@@ -10,6 +10,7 @@ export type ProcessCardData = {
   name: string;
   stepCount: number;
   parentCode: string | null;
+  deepDive: boolean;
   branchFrom: { sourceCode: string; stepLabel: string; stepNumber: number } | null;
 };
 
@@ -35,13 +36,16 @@ export function ProcessCardNode({ data }: NodeProps & { data: ProcessCardData })
     <div
       className={`relative w-[210px] rounded-xl border-[1.5px] bg-white px-3 py-2.5 shadow-sm ${
         data.branchFrom ? "border-dashed border-amber-400" : "border-slate-300"
-      }`}
+      } ${data.deepDive ? "ring-2 ring-amber-500 ring-offset-2" : ""}`}
     >
       <Handles />
       <div className="flex items-baseline justify-between gap-2">
         <span className="font-mono text-[11px] font-bold text-[var(--accent)]">{data.code}</span>
-        <span className="flex-none rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-semibold text-slate-600">
-          {data.stepCount} {data.stepCount === 1 ? "step" : "steps"}
+        <span className="flex flex-none items-center gap-1">
+          {data.deepDive && <span className="rounded-full bg-amber-100 px-1.5 py-px text-[9px] font-bold text-amber-800">Deep dive</span>}
+          <span className="rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-semibold text-slate-600">
+            {data.stepCount} {data.stepCount === 1 ? "step" : "steps"}
+          </span>
         </span>
       </div>
       <Link

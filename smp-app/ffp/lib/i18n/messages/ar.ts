@@ -55,6 +55,7 @@ export const ar: Messages = {
       org: "الدليل التنظيمي",
       processes: "العمليات",
       helicopter: "النظرة الشاملة",
+      priorities: "الأولويات",
       valueChain: "سلسلة القيمة",
       governance: "الحوكمة",
       members: "الأعضاء",

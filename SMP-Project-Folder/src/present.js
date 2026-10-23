@@ -433,8 +433,9 @@ function swotPart(target, name, slides){
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
    table with no rows is not a slide). The same table as the page. */
+/* §608: a function's too, once the office ticks the section on. */
 function competeSlides(u){
-  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  if (!u || !compOn(u.ukey, SMPRules.COMPETE)) return [];
   var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
     return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
   if (!c.discipline && !vals.length) return [];
@@ -1807,6 +1808,7 @@ function deckSlidesFn(subject){
     isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
   var analysis = [];
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (!isCap && !isUnit) analysis = analysis.concat(competeSlides({ ukey: "fn:" + fk }));
   if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
   var plan = projectsPlanPart(target, f, caps, objMode);
 
@@ -4165,7 +4167,9 @@ function exampleDirection(){
   for (var k in top) u[k] = top[k];
   u.pillarPrefix = u.pillarCapPrefix = "EX";
   var share = elapsedShare();
-  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  /* §603: where the share cannot be read, the example stands at the quarter
+     the tactics fall back to -- one answer, not a Q2 of its own. */
+  if (share == null) share = cycleEndQuarter() / 4;
   var sales = Math.round(120 * share * 0.82 * 10) / 10;
   var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
     sub:"", owner:"Head of Restaurants", custodian:"",

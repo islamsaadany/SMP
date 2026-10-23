@@ -283,7 +283,7 @@ def main():
         check("a client nobody may open draws no rows — there is no way in (§61)", shut["rows"] == 0, shut["rows"])
         check("…and still says so", "Listed only" in shut["text"], shut["text"][:80])
         # the worked example sits under Demo since the Clients filter (spec
-        # 067's §602.6), so it is pressed rather than found in a band
+        # 067's §615.6), so it is pressed rather than found in a band
         pg.click('.clwhich button[data-which="demo"]')
         pg.wait_for_timeout(200)
         demo = pg.evaluate("""() => document.querySelectorAll('[data-grid="demo"] .ccard .mrow').length""")

@@ -5186,6 +5186,28 @@ console.log("\n46 · the client's structure (§404)");
   });
 })();
 
+/* ── §608: A FUNCTION'S HOW WE COMPETE ─────────────────────────────────────
+   The same rule as its S&W, both ends: the office writes it, the function's
+   own head and a unit's owner may not, and it is classified as the analysis
+   it is — never swept up as "a supporting function's settings". */
+(function () {
+  const fks = Object.keys(SEED.functions);
+  const proj = fks.filter(function (k) { return String(SEED.functions[k].format) !== "pillars" && SEED.functions[k].head; })[0];
+  const pil = fks.filter(function (k) { return String(SEED.functions[k].format) === "pillars"; })[0];
+  [proj, pil].forEach(function (fk) {
+    const put = function (inc) { inc.functions[fk].compete = { discipline: "bts", values: [{ title: "Answers in a day", how: [], measure: [] }] }; };
+    allows("smo", put, "§608: the office writes " + fk + "'s How we compete");
+    const head = SEED.functions[fk].head;
+    if (head && head !== "smo") refuses(head, put, "§608 REFUSED: " + fk + "'s own head may not (the Strategy half is the office's)");
+    refuses("own_mob", put, "§608 REFUSED: a business unit's owner may not write a function's How we compete");
+    const inc = clone(SEED); put(inc);
+    const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+    check("§608: " + fk + "'s How we compete is classified as its analysis",
+          kinds.indexOf("unitAnalysis") > -1 && kinds.indexOf("unknown") < 0 && kinds.indexOf("setup") < 0,
+          kinds.join(",") || "(nothing)");
+  });
+})();
+
 /* ── §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN ──────────────────
    Held by no function (company-wide), with `head` and `custodian` named on the
    capability itself. BOTH ENDS (§94.2): the two seats report, somebody else

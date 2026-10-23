@@ -1400,10 +1400,11 @@ var CLIENTSETUP = (function () {
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
-     every part but a function's own description. */
+     every part but a function's own description. §603: all of it is asked of
+     the shared rule, the capability's two included, so the page draws only
+     what this card can switch. */
   function firstParts(k){
-    if (k === "cap") return ["brief", "keyobj"];
-    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
+    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
       return SMPRules.compOffered(tgt, c); });
   }

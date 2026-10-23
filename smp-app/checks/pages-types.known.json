@@ -136,6 +136,12 @@
   {
    "file": "present.js",
    "code": "TS2339",
+   "message": "Property 'cv' does not exist on type '(t: any, words: any, out: any, scale: any) => void'.",
+   "count": 2
+  },
+  {
+   "file": "present.js",
+   "code": "TS2339",
    "message": "Property 'discipline' does not exist on type 'Readonly<{ values: readonly any[]; }> | { discipline: any; values: any; }'.",
    "count": 3
   },

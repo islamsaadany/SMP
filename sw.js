@@ -578,7 +578,12 @@
    comment that said seven steps. The built file's bytes changed, which is
    the whole trigger (§91). Proved held by no commit in any ref's history
    after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.96-modules-look";
+/* v6.97-ask-and-apply — §608: a floating box asks first with the impact;
+   colours and scoring bands wait for Apply with an Undo; End in Mind has its
+   own tick; the Terminology page is gone. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.97-ask-and-apply";
 const ASSETS = [
   "/",
   "/index.html",

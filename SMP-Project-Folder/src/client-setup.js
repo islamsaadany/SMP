@@ -1482,7 +1482,7 @@ var CLIENTSETUP = (function () {
     endinmind: function (o) { return txt(o.endInMind); },
     keyobj: function (o) { return (o.keyObjectives || []).length > 0; },
     values: function (o) { return (o.values || []).length > 0; },
-    theme: function (o) { return o === GROUP && (GROUP.themes || []).length > 0; },
+    theme: function (o) { return typeof GROUP !== "undefined" && o === GROUP && (GROUP.themes || []).length > 0; },
     swot: function (o) { return ["s", "w", "o", "t"].some(function (q) { return quadHas(o, q); }); },
     plan: function (o) { return ["items", "projects", "actions"].some(function (f) { return Array.isArray(o[f]) && o[f].length > 0; }); }
   };

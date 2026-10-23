@@ -3078,10 +3078,12 @@
       '<div class="askacts"><button type="button" class="askyes">' + esc(o.yes || "Change it") + '</button>' +
       '<button type="button" class="askno">' + esc(o.no || "Keep as it was") + '</button></div>';
     document.body.appendChild(box);
-    var a = ASK = { box: box, anchor: anchor };
-    a.away = function(e){ if (!box.contains(e.target)) askClose(); };
-    a.key = function(e){ if (e.key === "Escape") { e.stopPropagation(); askClose(); } };
-    a.move = function(){ askPlace(); };
+    var a = ASK = {
+      box: box, anchor: anchor,
+      away: function(e){ if (!box.contains(e.target)) askClose(); },
+      key: function(e){ if (e.key === "Escape") { e.stopPropagation(); askClose(); } },
+      move: function(){ askPlace(); }
+    };
     document.addEventListener("mousedown", a.away, true);
     document.addEventListener("keydown", a.key, true);
     window.addEventListener("scroll", a.move, true);

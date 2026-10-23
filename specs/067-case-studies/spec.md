@@ -3,9 +3,12 @@
 **Status:** **clarified and DRAWN 2026-10-23, waiting on sign-off; nothing
 built.** Eleven decisions are Islam's, taken the same day as three rounds of
 questions (§3), and the name is his too: *"call it case studies"*.
-**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies.html` — ten
-drawings in the console's own tokens and components (rule 1c, A17). Three
-things are put to him on it (§10).
+**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies-tracker-look.html`
+— eight drawings in the Internal Tracker's look (rule 1c, A17), waiting on
+sign-off. The first drawing, `2026-10-23_case-studies.html`, is kept as the
+record and was **rejected by Islam**: *"very poor design. check internal
+tracker and show me what we can adjust"* (§10.1). His three answers on it are
+in §10.
 
 **Read with spec 045 (the consulting memory)**, which this changes rather than
 sits beside: a case study is the main thing and the memory's entries move
@@ -246,7 +249,32 @@ confidently from nothing.
 
 ---
 
-## 10 · Open — put to Islam on the mockup
+## 10 · Put to Islam on the mockup — answered 2026-10-23
+
+Islam: *"1 yes 2 keep insight 3 yes"*. So all three below are **decisions**:
+a piece of work is opened when the work starts; the small entries stay
+*insights*; a past client's card carries *Case studies · N to write*.
+
+### 10.1 · The first drawing was rejected, and why the second is the Tracker's
+
+*"very poor design. check internal tracker and show me what we can adjust."*
+The first drawing borrowed the memory's own screens — a card for the reading
+view, boxed monospace labels on every row, forms for every act — and that is
+a list of furniture, not a page. **The Internal Tracker is the console's
+signed-off way of laying out a list of work** (§497's ledger, and §583 already
+carried it onto My work), so the second drawing is built from it and nothing
+else: the navy band with what the page is, four counts and the views as tabs;
+the gold write line; numbered sections under a heavy rule; one-line rows of
+name · client · when · person · status word · the way in; a row that opens in
+place for its detail. **What that changes beyond the look, and is asked rather
+than assumed:** an insight opens under its own row instead of on a page of its
+own; one gold line asks the case studies on the list, writes an insight under
+Insights and inside a case study, and — for an admin — opens a piece of work
+with its client, months and writer arriving beside the name, as the Tracker's
+topic, week and owner do. The list groups by state (*To write · Running ·
+Done*), and *Group by* offers client and industry.
+
+### The three, as they were put
 
 **Settled:** the tab is **Case studies** (Islam, 2026-10-23, asking for the
 drawing: *"draw the mockup, call it case studies"*). It takes Memory's place

@@ -10393,11 +10393,15 @@
     /* §478: a unit's Core Values — add and remove, re-asked on the click
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
+       may, from the stored state at press time — never from the drawn one.
+       §603: THE LIST IS A STORED UNIT'S, so that is the only place either
+       handler writes. They asked `unitLikeWritable()`, whose capability,
+       function and top answers are views rebuilt on every draw, and a value
+       added to one was shown and lost. */
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -10410,7 +10414,7 @@
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);
         if (!how) return;

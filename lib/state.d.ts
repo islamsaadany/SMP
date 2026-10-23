@@ -1,4 +1,4 @@
-/* THE DATA THE PLATFORM HOLDS, DESCRIBED ONCE (§601).
+/* THE DATA THE PLATFORM HOLDS, DESCRIBED ONCE (§602).
 
    Types only: this file is never sent to a browser and never run. The state
    graph is open by design — the server keeps a field it does not know in a

@@ -1,5 +1,5 @@
 {
- "note": "Read before recorded: none of these is a fault (§589), with ONE exception said here. The `values` findings in the shell's add- and remove-value handlers mark a fault §601 found and confirmed in the page: a capability that plans in pillars shows Core values with + Add a value, and the value goes onto a throwaway view and is lost. They stay recorded until that is fixed. The rest that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
+ "note": "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a confirmed fault (a capability's Core values written onto a throwaway view and lost) went with its fix (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
  "findings": [
   {
    "file": "builder.js",
@@ -252,12 +252,6 @@
    "code": "TS2339",
    "message": "Property 'keyObjectives' does not exist on type '{}'.",
    "count": 1
-  },
-  {
-   "file": "shell-inline.js",
-   "code": "TS2339",
-   "message": "Property 'values' does not exist on type 'Unit | { ukey: string; fnKey: any; name: any; navName: any; codePrefix: any; items: any; keyObjectives: any; aspiration: any; endInMind: any; clauses: any; swot: any; active: boolean; } | { ukey: string; ... 15 more ...; active: boolean; } | { ...; }'.",
-   "count": 6
   },
   {
    "file": "shell-inline.js",

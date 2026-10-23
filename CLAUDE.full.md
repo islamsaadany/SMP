@@ -11156,7 +11156,7 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # checked COPY only, so a misspelt member is a
                                 # finding; data-only objects and computed
                                 # names (`ROWFIND[t]`) stay open. Eighteen
-                                # breaks now. §601: lib/state.d.ts DESCRIBES
+                                # breaks now. §602: lib/state.d.ts DESCRIBES
                                 # the data (SMP.Review, SMP.Unit, Pillar…);
                                 # DESCRIBED labels REVIEW and UNITS with it in
                                 # the copy. A new field on them goes into

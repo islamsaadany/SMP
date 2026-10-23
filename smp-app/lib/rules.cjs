@@ -4765,10 +4765,25 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     for (var i = 0; i < DISCIPLINES.length; i++) if (DISCIPLINES[i][0] === k) return DISCIPLINES[i][1];
     return "";
   }
+  /* §603 — A CAPABILITY IS OFFERED WHAT ITS CARD OFFERS (Islam, 2026-10-23:
+     *"isn't what holds what is a setting in the client setup?"*). The
+     Capabilities card on Client set-up › Structure gives a capability's first
+     section two parts, its brief and its North Star (§436's firstParts), and
+     its second section the S&W. The rule did not know that: a capability
+     whose card was never saved reads the functions' answers (§428), and the
+     functions' unsaid list carries Purpose, Aspiration and Core Values, which
+     STRUCT_NEVER_FN keeps off a function and nothing kept off a capability.
+     So a capability planning in pillars drew all three, and each one wrote
+     onto `capAsUnit()`'s throwaway view: added, shown, and gone on the next
+     draw (found by §602's data description, confirmed in the page). The set-up
+     now reads this list too, so the card and the page cannot disagree
+     (§53.5). Nothing stored is touched: off hides and keeps (§404). */
+  var CAP_PARTS = ["brief", "keyobj", "swot"];
   function compOffered(target, comp) {
-    var isFn = boxRef(target).kind === "fn";
+    var kind = boxRef(target).kind, isFn = kind === "fn";
     if (comp === FN_DESC) return isFn;
     if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
+    if (kind === "cap") return STRUCT_COMPONENTS.indexOf(comp) < 0 || CAP_PARTS.indexOf(comp) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
   /* The part that draws a function's or a capability's "What it is" card:

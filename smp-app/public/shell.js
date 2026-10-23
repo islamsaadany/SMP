@@ -4767,10 +4767,25 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     for (var i = 0; i < DISCIPLINES.length; i++) if (DISCIPLINES[i][0] === k) return DISCIPLINES[i][1];
     return "";
   }
+  /* §603 — A CAPABILITY IS OFFERED WHAT ITS CARD OFFERS (Islam, 2026-10-23:
+     *"isn't what holds what is a setting in the client setup?"*). The
+     Capabilities card on Client set-up › Structure gives a capability's first
+     section two parts, its brief and its North Star (§436's firstParts), and
+     its second section the S&W. The rule did not know that: a capability
+     whose card was never saved reads the functions' answers (§428), and the
+     functions' unsaid list carries Purpose, Aspiration and Core Values, which
+     STRUCT_NEVER_FN keeps off a function and nothing kept off a capability.
+     So a capability planning in pillars drew all three, and each one wrote
+     onto `capAsUnit()`'s throwaway view: added, shown, and gone on the next
+     draw (found by §602's data description, confirmed in the page). The set-up
+     now reads this list too, so the card and the page cannot disagree
+     (§53.5). Nothing stored is touched: off hides and keeps (§404). */
+  var CAP_PARTS = ["brief", "keyobj", "swot"];
   function compOffered(target, comp) {
-    var isFn = boxRef(target).kind === "fn";
+    var kind = boxRef(target).kind, isFn = kind === "fn";
     if (comp === FN_DESC) return isFn;
     if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
+    if (kind === "cap") return STRUCT_COMPONENTS.indexOf(comp) < 0 || CAP_PARTS.indexOf(comp) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
   /* The part that draws a function's or a capability's "What it is" card:
@@ -15510,9 +15525,18 @@ function reviewAsOf(){
      rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
+  return y * 12 + (cycleEndQuarter() * 3 - 1);   /* the LAST month of that quarter */
+}
+/* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
+   `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
+   Four readers used to ask the raw field each in their own way, and on a cycle
+   opened in the product -- which never writes it -- with no year in its name
+   or end they split: the quarter pips said all four quarters had passed while
+   `tacticShare()` compared against `undefined`, called every tactic 0% due and
+   emptied the reporting page, the exact failure its own comment warns of. */
+function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+  return (q >= 1 && q <= 4) ? q : 4;
 }
 /* Did the month come from the cycle's own end, or from one of the fallbacks
    above? The strip says which, because a review point nobody set is a guess
@@ -15618,7 +15642,7 @@ function elapsedMonths(){
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
   var a = reviewAsOf(), y = reviewYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  if (a == null || y == null) return (i + 1) <= cycleEndQuarter();
   return y * 12 + i * 3 + 2 <= a;
 }
 /* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
@@ -16192,7 +16216,7 @@ function tacticShare(t){
     for (var j = 0; j < 4; j++) {
       if (!q[j]) continue;
       tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
+      if (j + 1 <= cycleEndQuarter()) el++;
     }
     return tot ? el / tot : null;
   }
@@ -16314,7 +16338,7 @@ function tacticFirstQuarterOver(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    if (y == null || a == null) return i + 1 <= cycleEndQuarter();
     return y * 12 + i * 3 + 2 <= a;
   }
   return false;
@@ -53635,7 +53659,9 @@ function exampleDirection(){
   for (var k in top) u[k] = top[k];
   u.pillarPrefix = u.pillarCapPrefix = "EX";
   var share = elapsedShare();
-  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  /* §603: where the share cannot be read, the example stands at the quarter
+     the tactics fall back to -- one answer, not a Q2 of its own. */
+  if (share == null) share = cycleEndQuarter() / 4;
   var sales = Math.round(120 * share * 0.82 * 10) / 10;
   var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
     sub:"", owner:"Head of Restaurants", custodian:"",
@@ -69436,10 +69462,11 @@ var CLIENTSETUP = (function () {
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
-     every part but a function's own description. */
+     every part but a function's own description. §603: all of it is asked of
+     the shared rule, the capability's two included, so the page draws only
+     what this card can switch. */
   function firstParts(k){
-    if (k === "cap") return ["brief", "keyobj"];
-    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
+    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
       return SMPRules.compOffered(tgt, c); });
   }
@@ -83860,11 +83887,15 @@ var SYNC = (function () {
     /* §478: a unit's Core Values — add and remove, re-asked on the click
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
+       may, from the stored state at press time — never from the drawn one.
+       §603: THE LIST IS A STORED UNIT'S, so that is the only place either
+       handler writes. They asked `unitLikeWritable()`, whose capability,
+       function and top answers are views rebuilt on every draw, and a value
+       added to one was shown and lost. */
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -83877,7 +83908,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        var o = unitLikeWritable(t);
+        var o = UNITS[t];
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);
         if (!how) return;

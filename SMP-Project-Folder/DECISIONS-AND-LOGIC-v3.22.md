@@ -68680,7 +68680,7 @@ Islam, with a screenshot of *The tenant's colours* on Client set-up: *"when I ch
 
 **§600 MERGED TO `main`** 2026-10-23, Islam: *"merge to main"*. `main` had not moved since the branch was cut from it, so the branch fast-forwards; the proof above was run on this exact tree (`brand-served` 11/0 and 6 red on the previous frozen build, `client-setup`, `client-setup-outside`, `forefront-team`, `deck-dividers` green, `pages-types` 10/0, `generated-in-step` all clear, `qa.py` ERRORS none; `team-page`'s 3 red are main's, recorded). `sw.js` is `v6.92-brand-wired`, past main's `v6.91`, because the built file's bytes changed (§91). No forced sign-out. The live read is reported rather than claimed (§54.5): production cannot be reached from this container.
 
-## §601 — The data described: the review and the plan, first (2026-10-23)
+## §602 — The data described: the review and the plan, first (2026-10-23)
 Islam asked to close the data-only objects too. Measured first: closing them gave **about 260 findings, and every one read was the checker guessing a field does not exist because the worked example's starting value does not have it.** None was a fault. So the choice went back to Islam in plain words, with each option's cost. He chose the third: *describe the data* — write down once which fields the data can have — starting with the plan and the review, and report before going further.
 
 **THE DESCRIPTION IS `lib/state.d.ts`: types only, never sent to a browser, never run.** The state graph is open by design (§52, §213): the server keeps a field it does not know in a row's `extra`, which lets a field be added without a migration and keeps a misspelt one for ever, unannounced. The file is the list of fields that exist. The page check labels the pages' own data with it in the copy it reads, the same way §599 closes objects, so **the pages are untouched**:
@@ -68700,7 +68700,7 @@ Unlabelled, the plan alone gave 365 findings. With the description finished, 29 
 1. **A capability that plans in pillars loses an added value.** Its Foundation shows *Core values* by default: `values` is in the function level's default list, and only a function *target* is barred from it (`STRUCT_NEVER_FN`, `compOffered`). While editing it offers *+ Add a value*. The handler writes `o.values` on `unitLikeWritable(t)`, which for a capability is `capAsUnit()`: a fresh view with no `values` on it. So the new list lives on the view and is gone at the next paint. **Measured in the page,** with a capability made to plan in pillars: values on, the card drawn, the button drawn while editing, and after the add the view holds 1 value, the capability none, and a fresh view none. The checker pointed at it: six `values` findings on `Unit | <view>`. They are recorded with that said in the list's own note, until it is fixed. **The company level has the same mechanics** — `topAsUnit()` carries no `values` either, while GROUP has its own — but whether the unit-style Foundation is ever drawn for the company in practice was **not confirmed**.
 2. **A cycle opened in the product has no `endsQuarter`,** which is deliberate: nothing writes it since §47.8, and it is kept only as a floor. **But the three readers of the floor disagree when a cycle's year cannot be read.** `quarterPast()` falls back to Q4, so every quarter has passed. `tacticShare()` and `tacticFirstQuarterOver()` compare against `undefined`, so nothing is due yet. Same screen, two answers: §53.5 in the fallback. Found by reading what the description had to say about the field, not by the checker. Loose settings do not flag a comparison with `undefined`.
 
-**PROVED.** Two more planted faults: a misspelt review field (`REVIEW.parkd`) and a misspelt pillar field (`p.byy`). Both are caught. With the labels taken off and the list as it was before §601, **neither is caught**: measured in a throwaway copy of the check. `--red` plants twenty faults across both pages, all caught.
+**PROVED.** Two more planted faults: a misspelt review field (`REVIEW.parkd`) and a misspelt pillar field (`p.byy`). Both are caught. With the labels taken off and the list as it was before §602, **neither is caught**: measured in a throwaway copy of the check. `--red` plants twenty faults across both pages, all caught.
 
 **WHAT IT COSTS FROM NOW ON.** A new field on the review or the plan goes into `lib/state.d.ts` in the same edit as the code that first writes it, or the check fails and says which field.
 
@@ -68708,5 +68708,33 @@ Unlabelled, the plan alone gave 365 findings. With the description finished, 29 
 - **GROUP**, the company's own plan and every client setting, and **the unit-like views**: the next slice, and where the 29 go.
 - **`FUNCTIONS`, `PEOPLE` and the capabilities.**
 - **The server and the Next app reading `lib/state.d.ts` themselves.**
+
+Not merged; `main` stays untouched until Islam says.
+
+## §603 — The two faults §602 found, fixed (2026-10-23)
+Islam: *"fix both problems"*. For the first, I asked whether a capability should lose Core values or keep them. He answered with a question: *"isn't what holds what is a setting in the client setup?"* It is. Client set-up › Structure decides, and its Capabilities card offers a capability's first section two parts, its brief ("What it is") and its North Star, and its second section the S&W. Core values is not offered there. So following the setting means a capability does not show Core values, which is what the card has always said. I said so and went ahead on that basis.
+
+**1 · A CAPABILITY SHOWS WHAT ITS CARD OFFERS, AND NOTHING ELSE.** Measured first, with every capability made to plan in pillars:
+- **A capability whose card was never saved** read the functions' answers (§428). The functions' default list carries Purpose, Aspiration and Core values, and only a function *target* was barred from them (`STRUCT_NEVER_FN`). So the capability drew **all three, and each wrote onto `capAsUnit()`'s throwaway view**: shown, then gone at the next draw. That is wider than §602 said. Purpose and Aspiration had the same fault as Core values.
+- **A saved card holding a part the card cannot switch,** and an "Except for" override on one capability, did the same.
+- **The fix is in the shared rule.** `compOffered()` offers a capability only `CAP_PARTS` (brief, keyobj, swot) among the structure's parts; a part the platform does not know stays on, as everywhere (§30.2). The Structure card's `firstParts("cap")` was a hand-written `["brief","keyobj"]` and now asks the same rule, so the card and the page are one answer (§53.5). The card shows exactly what it did before.
+- **Nothing stored is touched**: off hides and keeps (§404).
+- **After:** in all four shapes a capability shows brief and North Star (plus S&W where ticked), and no Purpose, Aspiration or Core values. Units, functions and the company answer exactly as before, measured part by part.
+- **The value handlers now write only to a stored unit** (`UNITS[t]`), because Core values live on a unit (§478). They asked `unitLikeWritable()`, whose capability, function and company answers are views. This also closes the company-level case §602 left unconfirmed. A real unit's add and remove, pressed in the page, still land on the unit.
+- The six `values` findings the type check recorded as this fault went with it. The strategy list is 114 findings now, none new.
+
+**2 · ONE ANSWER FOR "WHICH QUARTER DOES THE CYCLE END IN".** `cycleEndQuarter()` in config-data.js: the stored `endsQuarter` if it is a quarter, otherwise Q4, the fallback `reviewAsOf()` and `quarterPast()` already used. All five readers use it: `reviewAsOf`, `quarterPast`, `tacticShare`, `tacticFirstQuarterOver`, and the presentation tour's example in present.js.
+- **Measured** on a cycle named "Annual Plan", Jan to Dec, with no year anywhere and no stored quarter. **Before:** the quarter markers said all four quarters had passed, while the tactic's due share said **0** and its first quarter "not over". That is the empty reporting page `tacticShare`'s own comment warns of. **After:** all three say Q4 (share 1, first quarter over). A stored Q2 still reads Q2 everywhere. A stored nonsense value (9) reads Q4.
+- **The tour's example** used Q2 as its own fallback, but only when the share cannot be read. It now stands where the tactics do. This changes only the example's sales figure, and only on such a cycle.
+
+**PROVED.**
+- The type checks: strategy pages 10/10 with 20 of 20 planted faults red; rules-types; app-types.
+- `test:rules` 152/3, as before.
+- 28 browser checks that touch structure, capabilities, values, cycles, proration and the tour pass on this tree and on the branch without the change, run side by side.
+- The full page sweep (`qa.py`): no errors. The built file is in step with its sources.
+
+**NOT DONE.**
+- `checks/setup-shape.mjs` fails one assertion, *"each carried by the function it names"*, **with or without this change**. It expects a capability to be held by a function, which §544.13 ended. It is left for its own change.
+- **A THIRD FAULT, FOUND WHILE CHECKING THIS ONE, FOR ISLAM.** On a capability that plans in pillars, the "What it is" card is the unit's list of lines, drawn from the view's frozen empty `clauses`. It does not show the capability's own definition (`def`), which is what that card means for a capability (§334). And **"+ Add a line" throws** (*"Cannot add property 0, object is not extensible"*), measured in the page. It was not fixed here: how a pillars capability's card should draw its definition is a change of its own.
 
 Not merged; `main` stays untouched until Islam says.

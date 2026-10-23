@@ -134,7 +134,7 @@ const STRATEGY_BREAKS = {
                       'var asp = aspOn ? String(GRUOP.aspiration || "").trim() : ""'],
   /* §599: a member of an object a page builds itself, misspelt */
   "own-object-member-misspelt": ["shell-inline.js", "if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;", "if (!SEARCHSEL.openOnn(rsel)) PROLEPICK = null;"],
-  /* §601: a field of the described data, misspelt — the review's, then the plan's */
+  /* §602: a field of the described data, misspelt — the review's, then the plan's */
   "review-field-misspelt": ["config-data.js", 'return !!((REVIEW.parked || {})[String(target || "")]);', 'return !!((REVIEW.parkd || {})[String(target || "")]);'],
   "plan-field-misspelt": ["config-data.js", "if (p.by === fk) carried.push(UNITS[k].name", "if (p.byy === fk) carried.push(UNITS[k].name"],
   /* §599: a plain object of behaviour — a `{ … }` holding functions — read wrongly */
@@ -197,7 +197,7 @@ function closeObjects(dir, files) {
   return closed;
 }
 
-/* THE PAGES' OWN DATA, LABELLED WITH ITS DESCRIPTION (§601). lib/state.d.ts
+/* THE PAGES' OWN DATA, LABELLED WITH ITS DESCRIPTION (§602). lib/state.d.ts
    describes the data once; here, in the COPY the checker reads and nowhere
    else, each page variable named below gets `/** @type {…} *\/` on its own
    line, so a field the description does not name is a finding. Every name
@@ -430,7 +430,7 @@ const CONSOLE_PATH_BREAKS = {
 };
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
-              note: "Read before recorded: none of these is a fault (§589), with ONE exception said here. The `values` findings in the shell's add- and remove-value handlers mark a fault §601 found and confirmed in the page: a capability that plans in pillars shows Core values with + Add a value, and the value goes onto a throwaway view and is lost. They stay recorded until that is fixed. The rest that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
+              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a confirmed fault (a capability's Core values written onto a throwaway view and lost) went with its fix (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",

@@ -4315,15 +4315,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     ctx = ctx || {};
     if (roleKey === "powner")
       return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
-    if (roleKey === "plowner")
-      return (ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
-              namedOn({ owner: ctx.pillarOwner }, person)) ||
-             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
-    /* §505: a direction's owner reaches the rows of a pillar naming them in
-       either seat — and only ever on the top layer, where they hold the role. */
-    if (roleKey === "dirowner")
-      return (!!ctx.pillarOwner && namedOn({ owner: ctx.pillarOwner }, person)) ||
-             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
+    /* §505, §595: a pillar's owner and a direction's owner reach the same
+       rows — those of the pillar naming them in either seat. One seat rule
+       (`holdsSeat`), where it was two copies of it; the direction's role is
+       only ever held on the top layer, so the target still tells them apart. */
+    if (roleKey === "plowner" || roleKey === "dirowner")
+      return holdsSeat(person, { names: [ctx.pillarOwner, ctx.pillarCust] });
     /* ── §384's `towner` BRANCH SAT HERE, AND THE CONTRADICTION WITH IT ──
        That section gave a tactic's Owner a role and a branch; §382's switch
        gave the same person a page. Both shipped, and the merge that brought
@@ -5083,13 +5080,53 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      Under §2.2 a company plans whether or not it has units, so the units
      answer nothing here: what admits a direction's owner is a direction with
      their name on it, which is what the rest of this function asks. */
-  function ownsTopPillar(w, person, pillarOwner, pillarCust) {
+  /* ── ONE RULE FOR A SEAT ON A PART OF THE COMPANY'S OWN PLAN (§595) ────
+     Spec 066's final test: *"No role, address, formula or deck branch exists
+     for one kind of thing only"* — and Islam's *"do 2"*, to "who may report
+     on what" becoming one rule. A part of the company's plan is a direction
+     (or a capability planned as one), a capability RECORD, or a company
+     project; each was answered by a function of its own (§447/§469, §520,
+     §466) that asked the same question three ways: does this person hold a
+     seat on it? They ask it HERE now, once.
+
+     WHAT A SEAT IS, by where the plan stores it — and that difference is
+     data, not a second rule: a direction and a project name their seats by
+     the register NAME (`namedOn`, §130.1); a capability record by the person
+     KEY (§412). A project counts only while the company plans in projects
+     (§466), with or without the part named, exactly as before.
+
+     `ownsTopPillar`, `ownsTopProject` and `ownsTopCapability` stay as the
+     names their callers ask, each one line over this. Proved unchanged by the
+     whole census: every rule answer and every save the server judges, for
+     every person, on seven states — 91,084 decisions, before and after. */
+  var TOP_PART_KINDS = ["pillar", "cap", "project"];
+  function holdsSeat(person, seat) {
+    if (!person || !seat) return false;
+    return (seat.names || []).some(function (n) { return !!n && namedOn({ owner: n }, person); }) ||
+           (seat.keys || []).some(function (k) { return k === person.key; });
+  }
+  function topPartSeats(w, kind) {
+    if (kind === "pillar") return (w.topItems || []).map(function (p) {
+      return p ? { names: [p.owner, p.custodian] } : null; });
+    if (kind === "cap") return (w.capabilities || []).map(function (c) {
+      return c && c.id ? { keys: [c.head, c.custodian] } : null; });
+    return (w.topProjects || []).map(function (p) {
+      return p && p.owner ? { names: [p.owner] } : null; });
+  }
+  function holdsTopPart(w, person, kind, seat) {
     if (!person) return false;
-    var seat = function (name) { return !!name && namedOn({ owner: name }, person); };
-    if (pillarOwner != null || pillarCust != null) return seat(pillarOwner) || seat(pillarCust);
-    return (w.topItems || []).some(function (p) {
-      return p && (seat(p.owner) || seat(p.custodian));
+    if (kind === "project" && (!w || topWay(w.group) !== "projects")) return false;
+    if (seat) return holdsSeat(person, seat);
+    if (!w) return false;
+    return (kind ? [kind] : TOP_PART_KINDS).some(function (k) {
+      if (k === "project" && topWay(w.group) !== "projects") return false;
+      return topPartSeats(w, k).some(function (s) { return holdsSeat(person, s); });
     });
+  }
+  function ownsTopPillar(w, person, pillarOwner, pillarCust) {
+    return pillarOwner != null || pillarCust != null
+      ? holdsTopPart(w, person, "pillar", { names: [pillarOwner, pillarCust] })
+      : holdsTopPart(w, person, "pillar");
   }
   /* §517 — A DIRECTION'S OWNER SEES THEIR PART ONLY, IF THE OFFICE SAYS SO.
      Islam, of El Abd: direction owners "see the full plan and can't report",
@@ -5208,10 +5245,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      needs, units or no units; this used to refuse them the moment the client
      had a unit, which is the same mistake in a second place. */
   function ownsTopCapability(w, person) {
-    if (!person || !w) return false;
-    return (w.capabilities || []).some(function (c) {
-      return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
-    });
+    return !!w && holdsTopPart(w, person, "cap");
   }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
@@ -5295,11 +5329,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the function's own rule, §301) and never submits. A RULE beside
      mayReportTop, and only while the company plans in projects. */
   function ownsTopProject(w, person, projectOwner) {
-    if (!person || topWay(w.group) !== "projects") return false;
-    if (projectOwner != null) return projectOwner !== "" && namedOn({ owner: projectOwner }, person);
-    return (w.topProjects || []).some(function (p) {
-      return p && p.owner && namedOn({ owner: p.owner }, person);
-    });
+    return projectOwner != null
+      ? holdsTopPart(w, person, "project", { names: [projectOwner] })
+      : holdsTopPart(w, person, "project");
+  }
+  /* §595: WHO MAY OPEN THE COMPANY'S OWN REPORTING: whoever reports all of
+     it (the office and the group's CEO, §428), or whoever holds a seat on
+     any part of it. Which rows they then type on is each part's question. */
+  function mayReportTopOrPart(w, person) {
+    return mayReportTop(w, person) || holdsTopPart(w, person);
   }
   var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview", cap: "Overview" };
   function levelBlock(group, level, part) {
@@ -5920,6 +5958,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
     PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,

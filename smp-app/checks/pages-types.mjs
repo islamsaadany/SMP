@@ -220,13 +220,18 @@ function assembleStrategy() {
    build-shell.mjs copies to that address — a script added to the page that
    this does not know is a refusal, never a page quietly checked without it —
    and its own inline script. */
-const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js") };
+/* §606: /navskel.js is KNOWN and left out of the page read: it is the
+   press drawing (lib/navskel.ts), one closed function that names nothing of
+   the console's and that the console names nothing of — the same script
+   every client page loads — so it is not part of the console's page. */
+const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
 function assembleConsole() {
   const dir = mkdtempSync(join(tmpdir(), "console-types-"));
   const page = readFileSync(join(REPO, "platform.html"), "utf8");
   const files = ["globals.d.ts"];
   for (const m of page.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    if (!CONSOLE_SRC[m[1]]) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (!(m[1] in CONSOLE_SRC)) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (CONSOLE_SRC[m[1]] === null) continue;
     const name = basename(m[1]);
     copyFileSync(CONSOLE_SRC[m[1]], join(dir, name));
     if (name !== "memory-split.js") files.push(name);

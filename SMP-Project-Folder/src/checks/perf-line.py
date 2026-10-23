@@ -12,7 +12,9 @@ page. What is asserted is the promise, never the mechanism (§94.8).
   3  Bands opens, and shuts on a second press or a click outside.
   4  Three bands, reading 90+/70-89/below 70 — and the chart legend agrees with
      them, because it used to keep its own copy and that copy was already wrong.
-  7  Nothing paints over the pinned pane title, at any width or scroll offset.
+  7  Nothing paints over what is pinned, at any width or scroll offset: the
+     pane title beside a wide window's rail, the strip of directions on a
+     squeezed one, where the title now scrolls away (§609).
 
 AND THE COLOUR BANNER IS GONE — asserted as an absence beside its replacement,
 or a build that dropped both would pass (§94.2).
@@ -195,16 +197,23 @@ with sync_playwright() as p:
         print("  note    no chart legend on this page — not asserted here")
 
     # ── 7 · nothing over the pinned title, swept
+    # REWRITTEN, NOT DELETED (§218), FOR §609: below 1200px the title is no
+    # longer pinned — the strip of directions is, and the title scrolls away
+    # with the plan on purpose, so "nothing over the title" would assert the
+    # behaviour Islam asked to remove. The promise is the same one, made of
+    # whatever is pinned at that width: the title beside a wide window's side
+    # rail, the strip on a squeezed one. The widths are untouched.
     found = None
     for w in (1440, 1180, 1024, 900, 860, 820, 800, 768):
         pg.set_viewport_size({"width": w, "height": 700}); pg.wait_for_timeout(320)
         el = pg.query_selector('#units [data-u="mobile"]')
         if el and el.is_visible():
             el.click(); pg.wait_for_timeout(430)
+        held = '.pane .pband' if w > 1200 else '.split > .rail'
         for y in range(120, 1300, 25):
             pg.evaluate("(y)=>window.scrollTo(0,y)", y); pg.wait_for_timeout(18)
-            r = pg.evaluate("""() => {
-              var t=document.querySelector('.pane .pband'); if(!t) return null;
+            r = pg.evaluate("""(held) => {
+              var t=document.querySelector(held); if(!t) return null;
               var r=t.getBoundingClientRect(); if(r.height<2) return null;
               var pts=[[r.left+14,r.top+6],[r.left+r.width/2,r.top+r.height/2],
                        [r.right-14,r.bottom-6],[r.left+r.width/2,r.bottom-3]];
@@ -215,10 +224,11 @@ with sync_playwright() as p:
                     (typeof e.className==='string'?e.className.split(' ')[0]:''),
                     txt:(e.textContent||'').trim().slice(0,18)};
               }
-              return null; }""")
-            if r: found = (w, y, r); break
+              return null; }""", held)
+            if r: found = (w, y, held, r); break
         if found: break
-    ck("nothing paints over the pinned pane title, at any width or scroll", not found, found)
+    ck("nothing paints over what is pinned — the title on a wide window, the strip"
+       " on a squeezed one (§609) — at any width or scroll", not found, found)
 
     ck("no page errors while driving", not errs, errs[:2])
     b.close()

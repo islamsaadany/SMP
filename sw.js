@@ -569,7 +569,40 @@
    The console page and its script changed (§584's precedent: a served
    file's bytes are the trigger). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.94-demo-stakeholders-real";
+/* v6.95-slide-widths — §604: every slide table's columns as wide as what they
+   hold. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.96-modules-look — §605 with §544.16: Insights, Meeting Notes and
+   Portfolio's projects in the Tracker's look, and the client set-up's
+   comment that said seven steps. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+/* v6.98-strip-stays — §609: on a squeezed window the strip of directions
+   stays and the title goes. v6.97 is held twice on other branches, so this
+   skips it. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+/* v6.99-score-cards-hero — §610: the pillar pane's score cards lead with the
+   score and the rail opens one gap under the chrome. Numbered v6.97 on the
+   branch; main took v6.98 while it waited. The built file's bytes changed
+   (§91). Proved held by no commit in any ref's history (§94.16). */
+/* v7.00-company-reading — §595, §606, §607 and §608: one seat rule for the
+   company's own plan, the functions' row without units, the company's
+   execution card beside its directions, and How we compete as a setting on
+   functions. The built file's bytes changed (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.01-foundation-themes — §611 and §611.1: the company's Core Values can
+   be added, its Capabilities section stands before the first one, its themes
+   are written on the Foundation and the Temple only shows. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.02-capability-parts — §602 and §603: the review and the plan described
+   for the page check; a capability offered only what its Structure card
+   offers; one answer for the quarter a cycle ends in. The built file's bytes
+   changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.02-capability-parts";
 const ASSETS = [
   "/",
   "/index.html",

@@ -79,7 +79,15 @@ with sync_playwright() as p:
     safe(pg, "()=>{closeDeck(); return true}"); pg.wait_for_timeout(200)
 
     # ── 3. On: a step is a line ───────────────────────────────────────────
+    # §604: the slides size their columns to what they hold now, and this
+    # direction's tactics fit on one slide -- so for this walk they are
+    # doubled, or the continued-table case below has no continuation to walk.
+    # Put back once the deck is built; the deck keeps its own copy.
+    safe(pg, """()=>{ const p = GROUP.items[0]; window.__tacs = p.tactics;
+      p.tactics = p.tactics.concat(JSON.parse(JSON.stringify(p.tactics)).map((t, k) => (t.id = p.id + '-X' + (k + 1), t)));
+      return true }""")
     safe(pg, "()=>{GROUP.slideBuild=true; openDeckFor('dir:group-P1'); return true}"); pg.wait_for_timeout(700)
+    safe(pg, "()=>{ GROUP.items[0].tactics = window.__tacs; return true }")
     walk = []
     for k in range(40):
         walk.append(safe(pg, VIS) or {})
@@ -92,8 +100,14 @@ with sync_playwright() as p:
     t = [x for x in walk if x.get("split", "").endswith("T") and not x.get("cont")]
     ck("…the tactics slide the same", t and [x["shown"] for x in t] == list(range(0, t[0]["all"] + 1)), [x.get("shown") for x in t])
     c = [x for x in walk if x.get("cont")]
+    # §604: each continuation slide on its own -- a long table may run onto
+    # more than one, and each builds from its own first row to its last.
+    per = {}
+    for x in c:
+        per.setdefault(x["i"], []).append(x)
     ck("…and a table continued on the next slide builds again from its first row",
-       c and c[0]["shown"] == 0 and c[-1]["shown"] == c[0]["all"], [x.get("shown") for x in c])
+       bool(per) and all(v[0]["shown"] == 0 and v[-1]["shown"] == v[0]["all"] for v in per.values()),
+       [x.get("shown") for x in c])
     h = [x for x in walk if x.get("head")]
     ck("\"Where it stands\" comes in one reading at a time", [x["shown"] for x in h] == [0, 1, 2], [x.get("shown") for x in h])
     ck("the cover and Thank you, which have no lines, are one press each",

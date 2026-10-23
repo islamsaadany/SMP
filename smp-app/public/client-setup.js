@@ -282,7 +282,9 @@ var CLIENTSETUP = (function () {
   "use strict";
 
   /* ── THE STEPS, BY KEY AND NEVER BY NUMBER (§322) ────────────────────
-     Seven, as the mockup draws them. There is no Summary step any more:
+     Three since §544 — the client, the shape, the office (seven until the
+     shape screen took in the five between them; §544.16 found this line
+     still saying so). There is no Summary step any more:
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
      destination at the end (spec 057). */

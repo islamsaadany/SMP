@@ -107,9 +107,11 @@ with sync_playwright() as p:
           return d.sections(t.slice(3)).map(s=>s.k+'/'+s.ac); }""", t)
         # §399 put S&W between them, on the Overview's own key — REWRITTEN,
         # never loosened (§218): still both on the function's keys, still
-        # Overview first and the plan last.
-        ok("the " + what + " function has Overview, S&W and plan, all on the function's keys",
-           secs == ["found/k_found", "swot/k_found", "proj/k_proj"], secs)
+        # Overview first and the plan last. §608 offers How we compete after
+        # the S&W (drawn only once ticked; this list is unfiltered), on the
+        # same Overview key — rewritten again, never loosened.
+        ok("the " + what + " function has Overview, S&W, How we compete and plan, all on the function's keys",
+           secs == ["found/k_found", "swot/k_found", "compete/k_found", "proj/k_proj"], secs)
 
     print("\n── 2 · and they draw the SAME two cards (§53.5, asserted as agreement)")
     open_at(pg, T);  a = cards(pg)

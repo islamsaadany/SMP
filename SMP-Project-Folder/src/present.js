@@ -18,7 +18,7 @@ var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"p
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
 
-/* ── A HIDDEN ROW STAYS ON THE SLIDE, AND SAYS SO (§591) ────────────────
+/* ── A HIDDEN ROW STAYS ON THE SLIDE, AND SAYS SO (§597) ────────────────
    Islam, 2026-10-23: *"we need to keep them on the slides showing that they
    are removed so the presenter can validate the removal."* §233 left a
    hidden row out of the deck; it is KEPT now, in its own seat with its own
@@ -1374,7 +1374,7 @@ function pillarSlidesOf(u, p, pi, named){
      unmeasurable row, so a review could not tell "nobody has entered this"
      from "there is nothing to enter" (§35). */
   var tRows = deckRows(p.tactics).map(function(t, i){
-    /* §591: a hidden tactic's first line opens with the mark; its outcome
+    /* §597: a hidden tactic's first line opens with the mark; its outcome
        lines already take it through outSubCls(). The builders below all
        open their first line with a bare `<tr>`, so it is stamped once here
        rather than at each of the six returns. */
@@ -2034,7 +2034,7 @@ function projectsPlanPart(target, f, caps, objMode){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      /* §233 filtered here; §591 keeps every row and marks the hidden ones
+      /* §233 filtered here; §597 keeps every row and marks the hidden ones
          inside dxRow(), as every other table of the deck now does. */
       var dxRowsHtml = dxRows(p).map(dxRow).join("");
       /* §236.2: the unit ruling's mirror — between a project's deliverables and

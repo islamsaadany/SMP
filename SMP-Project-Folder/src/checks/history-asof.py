@@ -1,4 +1,4 @@
-"""A REMOVED ROW COMES BACK IN ITS SEAT, AND THE PLAN AS IT STOOD ON A DAY (§592).
+"""A REMOVED ROW COMES BACK IN ITS SEAT, AND THE PLAN AS IT STOOD ON A DAY (§598).
 
 qa-run: own-server — the same stub `history-page.py` runs: a fixed change
 log, the demo seed, the office signed in. Both ends throughout (§94.2), and
@@ -62,7 +62,7 @@ LOG = [
   {"id": 6, "at": _at(1, 7, 20), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan",
    "rows_": {"count": 1, "moved": [{"id": "mobile-P1-T99", "name": "A new tactic", "field": "row", "had": False, "from": None,
                                     "to": {"in": PILLAR_ID, "list": "tactics", "at": 5, "of": 6, "row": {"id": "mobile-P1-T99", "name": "A new tactic"}}}]}},
-  # a removal logged BEFORE §592: no rows at all
+  # a removal logged BEFORE §598: no rows at all
   {"id": 5, "at": _at(2, 7, 5), "person_key": "smo", "person_name": "Mohamed Essam", "kind": "unitPlan", "target": "mobile", "what": "the unit's plan", "rows_": None},
 ]
 SEEN = {"asks": [], "posts": []}
@@ -148,7 +148,7 @@ with sync_playwright() as p:
     ck("an added row's line is held: removed from the Plan page",
        bool(added) and not added[0]["live"] and "added" in added[0]["why"], added)
     old = [r for r in rs if r["fld"] == "" and "the unit's plan" in r["text"]]
-    ck("a removal logged before §592 keeps today's greyed button",
+    ck("a removal logged before §598 keeps today's greyed button",
        bool(old) and not old[0]["live"] and "no single value" in old[0]["why"], old)
 
     # ── 2 · Put it back ──────────────────────────────────────────────────
@@ -203,7 +203,7 @@ with sync_playwright() as p:
     ck("the banner names the day and the changes since",
        pg.evaluate("()=>{const b=document.querySelector('[data-asof-bar]');return !!b && /as it stood on/.test(b.textContent) && /5 changes have been made since/.test(b.textContent) && !!b.querySelector('[data-asof-off]');}"),
        pg.evaluate("()=>{const b=document.querySelector('[data-asof-bar]');return b?b.textContent:null}"))
-    ck("...and says one change could not be replayed (the pre-§592 removal)",
+    ck("...and says one change could not be replayed (the pre-§598 removal)",
        pg.evaluate("()=>/1 of them could not be replayed/.test((document.querySelector('[data-asof-bar]')||{}).textContent||'')"))
     ck("the band's control now reads the day", pg.evaluate("()=>{const c=document.querySelector('.pband-hist .asof-on');return !!c && /As it stood on/.test(c.textContent);}"))
     ck("the pen is put away and mayAuthor answers no for Mobile",

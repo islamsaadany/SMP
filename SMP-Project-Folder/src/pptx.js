@@ -698,7 +698,7 @@ function deckBandColor(el){
    its own columns the same way and arrives here already right. */
 function deckCellSpec(td){
   var C = pptxColors();
-  /* §591: A HIDDEN ROW IS WRITTEN WHOLE AND QUIET. The deck keeps it on the
+  /* §597: A HIDDEN ROW IS WRITTEN WHOLE AND QUIET. The deck keeps it on the
      slide greyed (`tr.hiddenrow`), so the file does the same: every run in
      the row takes the quiet ink at regular weight — no band, no red Missing,
      no bold — and the name carries the words the chip says, as a smaller

@@ -94,9 +94,9 @@ var TRAIL = (function(){
                 clauses:"Who we are", mission:"Mission", values:"Values", org:"Organisation",
                 asOfQuarter:"Review quarter", "swot.s":"Strengths", "swot.w":"Weaknesses",
                 "swot.o":"Opportunities", "swot.t":"Threats",
-                /* §592: the row itself, when one left or arrived */
+                /* §598: the row itself, when one left or arrived */
                 row:"Row" };
-  /* §592: THE SEAT A ROW SAT IN, in words. The log carries which holder,
+  /* §598: THE SEAT A ROW SAT IN, in words. The log carries which holder,
      which list and which position (lib/authorize.js structuralRows); the
      page says it the way the plan does: "MB01 · measure 2 of 5". */
   var LIST_WORD = { measures:"measure", tactics:"tactic", keyObjectives:"objective",
@@ -205,8 +205,8 @@ var TRAIL = (function(){
         k === "claim" || k === "claimRequest" || k === "deckHide" || (k === "group" && !r.m))
       return "This is a setting, put back on its own page.";
     if (r.m.field === "name" && r.m.from == null) return "A row that was added is removed from the Plan page.";
-    /* §592: a row that left can be put back where it was — if the log kept
-       it (rows removed before §592 carry no contents) and it is not back
+    /* §598: a row that left can be put back where it was — if the log kept
+       it (rows removed before §598 carry no contents) and it is not back
        already. A row that arrived is removed from the Plan page, as before. */
     if (r.m.field === "row") {
       if (r.m.had === false || !r.m.from) return "A row that was added is removed from the Plan page.";
@@ -214,7 +214,7 @@ var TRAIL = (function(){
       if (locate(r.e.target, r.m.id)) return "This row is back in the plan already.";
       return null;
     }
-    /* §592: a value on a row that is no longer in the plan waits for the row:
+    /* §598: a value on a row that is no longer in the plan waits for the row:
        the removal's own line, above, puts it back with its figures. Asked
        only of the kinds whose rows the plan holds, so a figure set's line or
        a setting is never greyed by a finder that does not know it. */
@@ -246,7 +246,7 @@ var TRAIL = (function(){
     list.forEach(function(r, i){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
-      /* §592: a row's own line reads its seat, not its contents — "MB01 ·
+      /* §598: a row's own line reads its seat, not its contents — "MB01 ·
          measure 2 of 5 → removed", or "— → MB01 · tactic 6 of 6" for one
          that arrived. The contents are what Restore puts back. */
       var fromTo = !m ? '<span class="hist-none">—</span>'
@@ -302,7 +302,7 @@ var TRAIL = (function(){
     if (f.person) qs.push("person=" + encodeURIComponent(f.person));
     if (f.kind) qs.push("kind=" + encodeURIComponent(f.kind));
     var w = window_(f.when);
-    /* §592: the as-of view names its own instant — everything after the
+    /* §598: the as-of view names its own instant — everything after the
        end of the chosen day — rather than one of the page's windows. */
     if (f.fromAt) w.from = f.fromAt;
     if (w.from) qs.push("from=" + encodeURIComponent(w.from));
@@ -435,7 +435,7 @@ var TRAIL = (function(){
   function onPaint(){
     if (!servable() || !live()) return;
     var t = target();
-    /* §592: the day view belongs to one subject; walking to another page
+    /* §598: the day view belongs to one subject; walking to another page
        lets it go, quietly — the page just painted did not use it. */
     if (ASOF.on && t !== ASOF.target) asofOff(false);
     if (!t) return;
@@ -517,7 +517,7 @@ var TRAIL = (function(){
   }
   function confirmHtml(r){
     var m = r.m, e = r.e;
-    /* §592: a row's own line puts the whole row back, in its old seat. */
+    /* §598: a row's own line puts the whole row back, in its old seat. */
     if (m.field === "row" && isSeat(m.from))
       return '<div class="hist-confirm">' +
         '<p><strong>Put back ' + E(m.name || m.id) + ' on ' + E(placeWord(e.target)) + ', as ' +
@@ -537,7 +537,7 @@ var TRAIL = (function(){
       '<button type="button" class="btn" data-hist-ok>Put it back</button></div></div>';
   }
   /* ONE VALUE, PUT BACK INTO ONE ROW — shared by Restore and by the day
-     view's walk back through the log (§592), so the two cannot disagree
+     view's walk back through the log (§598), so the two cannot disagree
      about what "the value before" means. */
   function applyFrom(obj, m){
     if (obj.__swot) { obj.__swot.arr[obj.__swot.idx] = m.from == null ? "" : m.from; }
@@ -557,7 +557,7 @@ var TRAIL = (function(){
     return null;
   }
 
-  /* ── §592: A ROW BACK IN ITS SEAT ──────────────────────────────────────
+  /* ── §598: A ROW BACK IN ITS SEAT ──────────────────────────────────────
      Islam: *"old position"*. The log entry names the holder (a pillar, a
      project, a capability, or the subject itself), the list and the index
      the row sat at. It goes back at that index — the rows after it move
@@ -607,7 +607,7 @@ var TRAIL = (function(){
     return null;
   }
 
-  /* ── §592: THE PLAN AS IT STOOD ON A DAY ───────────────────────────────
+  /* ── §598: THE PLAN AS IT STOOD ON A DAY ───────────────────────────────
      Islam: *"the history of the plans should be on the plans page for the
      smo to see and review"*, and of the drawn pictures: *"yes build both"*.
      A link beside See history, the office's; a day; and the Plan page
@@ -746,7 +746,7 @@ var TRAIL = (function(){
     if (!b) return;
     if (b.hasAttribute("data-hist-retry")) { load(true); return; }
     if (b.hasAttribute("data-hist-open")) { openFor(b.getAttribute("data-hist-open")); return; }
-    /* §592: the day view's three acts */
+    /* §598: the day view's three acts */
     if (b.hasAttribute("data-asof-pick")) { asofPick(b.getAttribute("data-asof-pick")); return; }
     if (b.hasAttribute("data-asof-go")) {
       var inp = document.querySelector("[data-asof-day]");
@@ -793,7 +793,7 @@ var TRAIL = (function(){
   });
 
   return { renderPage: renderPage, onPaint: onPaint, openFor: openFor, load: load,
-           /* §592: the day view, read by the Plan page's painter and the
+           /* §598: the day view, read by the Plan page's painter and the
               authoring gate; seatBack is shared with the refused-save path */
            asofActive: asofActive, asofFor: asofFor, asofGone: asofGone, asofBanner: asofBanner,
            asofGo: asofGo, asofOff: asofOff, seatBack: seatBack, seatWord: seatWord,

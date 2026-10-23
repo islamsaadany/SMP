@@ -19,7 +19,7 @@ Both ends throughout (§94.2), and the DATA is read back after every press
     (gapMap), and the reporting pane stops drawing the row;
   - read mode says so — the chip, on a row still showing its figure;
   - the deck KEEPS the row in its seat, greyed and chipped, on the unit AND
-    the function side of the switch (§53.5) — §591 reversed §233's "left
+    the function side of the switch (§53.5) — §597 reversed §233's "left
     out" on Islam's word, 2026-10-23, so the presenter can defend the
     removal while the score still leaves the row out;
   - the workbook writes Yes in the Hidden column and the reader brings it
@@ -118,8 +118,8 @@ with sync_playwright() as p:
     ck("...and its blanks are not gaps",
        blank_gap["without"] == blank_gap["withHide"] + 1, blank_gap)
 
-    # ── 3 · read mode says so, and so does the deck (§591) ──────────────
-    # §233 asserted the deck carried neither the row nor its name. §591
+    # ── 3 · read mode says so, and so does the deck (§597) ──────────────
+    # §233 asserted the deck carried neither the row nor its name. §597
     # reverses that half on Islam's word (2026-10-23): the row STAYS on the
     # slide, in its seat, greyed and chipped, so the presenter can defend
     # the removal — while the score (asserted above, as agreement over the
@@ -230,7 +230,7 @@ with sync_playwright() as p:
                deckMarked: tr.indexOf('class="hiddenrow"') > -1 && tr.indexOf("Hidden — not counted") > -1,
                asked: fnReportItems("finance").some(x => x.id === spec.id) };
     }""", fn)
-    ck("the milestone hides, leaves the exec counts and the asks — and stays on the slide, marked (§591)",
+    ck("the milestone hides, leaves the exec counts and the asks — and stays on the slide, marked (§597)",
        fna["hide"] and fna["total"] == fn["total"] - 1
        and fna["deckHasIt"] and fna["deckMarked"] and not fna["asked"], (fn, fna))
     # put it back — the demo data must leave as it arrived (§94.2)

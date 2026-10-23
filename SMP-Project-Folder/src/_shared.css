@@ -491,7 +491,7 @@
   .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
   .pband-hist b { font-weight:600; color:inherit; }
   .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
-  /* ── §592: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
+  /* ── §598: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
      The control sits in the band's own line, after See history; while a
      day is shown it wears a field's edge so the page says which day it is
      reading. The banner is the attention family — a decision about what is

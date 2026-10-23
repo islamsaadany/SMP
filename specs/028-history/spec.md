@@ -23,13 +23,13 @@ A screen over the change log the platform has written on every accepted save sin
 
 `GET /api/state?log=1&person=&target=&kind=&from=&to=&limit=` → `{ ok, office, log:[…] }`. The office may ask any slice; anybody else must name one `target` they hold a role at (read off the stored register and the world) or is refused with 403. No session → 401. The ordinary read is untouched.
 
-## §592 — A removed row's Restore, and the plan as it stood on a day (2026-10-23)
+## §598 — A removed row's Restore, and the plan as it stood on a day (2026-10-23)
 
 Islam: *"if I remove a line fully do I get history of the plans somehow to check what was it on a certain date the way google docs history work?"* — answers: **old position**, **on screen is enough**, and **on the Plan page** for the office.
 
 1. The log carries a row that left or arrived **whole, with its seat** (holder, list, index, length) — `structuralRows()` in `lib/authorize.js`. The gate is unchanged.
-2. On History the line reads the seat (*MB01 · measure 2 of 5 → removed*) and **Restore puts the row back at that index**, with everything it held. A value on a removed row is held until the row is back. Rows removed before §592 keep the greyed button.
-3. On a unit's or pillars function's **Plan page**, after *See history*: **As it stood on…** (office only). The page draws a copy rebuilt from the log — newest first, each value before put back, rows re-seated or taken out — under a banner; read only by `mayAuthor()`'s own guard; rows removed since wear *Removed since*. The live graph is never touched. What cannot be replayed (a reorder, a pre-§592 entry, a capped entry) is counted in the banner.
+2. On History the line reads the seat (*MB01 · measure 2 of 5 → removed*) and **Restore puts the row back at that index**, with everything it held. A value on a removed row is held until the row is back. Rows removed before §598 keep the greyed button.
+3. On a unit's or pillars function's **Plan page**, after *See history*: **As it stood on…** (office only). The page draws a copy rebuilt from the log — newest first, each value before put back, rows re-seated or taken out — under a banner; read only by `mayAuthor()`'s own guard; rows removed since wear *Removed since*. The live graph is never touched. What cannot be replayed (a reorder, a pre-§598 entry, a capped entry) is counted in the banner.
 
 Not yet: the company's own plan, and a projects or objectives function. Proof: `checks/history-asof.py` (34 green, 21 red on the previous build), `test-authorize` +5. Mockups: `design-mockups/history/2026-10-23_removed-row-and-as-of-real.html`.
 

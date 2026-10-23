@@ -10648,7 +10648,7 @@ function unitWayOf(u){
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }
-/* §592: THE PLAN AS IT STOOD ON A DAY. Islam: *"the history of the plans
+/* §598: THE PLAN AS IT STOOD ON A DAY. Islam: *"the history of the plans
    should be on the plans page for the smo to see and review."* When the
    office has picked a day, the page draws the copy History rebuilt from the
    change log — the live graph is never touched, so nothing the differ

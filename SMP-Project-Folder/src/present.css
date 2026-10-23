@@ -132,7 +132,7 @@
   .dslide td.idx { width:60px; color:var(--none); font-family:var(--mono); font-size:18px; text-align:right; }
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
-  /* ── §591: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
+  /* ── §597: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
      The plan page's own two signs (§233), at the deck's size: every cell of
      the row in the quiet ink at regular weight — a band colour, a bold
      figure or a coloured pill would say the row still counts, and it does

@@ -325,7 +325,7 @@ a warning); read mode wears *"Hidden — not counted"* for everyone; and every r
 sheet gains a **Hidden** column **at the end**, because a validation range is a
 POSITION (§65).
 
-**§591 — and the row stays on the slide (2026-10-23).** Islam: *"we need to
+**§597 — and the row stays on the slide (2026-10-23).** Islam: *"we need to
 keep them on the slides showing that they are removed so the presenter can
 validate the removal."* §233's "left out of the deck" is reversed, and only
 that: the review deck, Present mode, the deck PDF and the .pptx **keep a hidden

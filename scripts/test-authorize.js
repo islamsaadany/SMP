@@ -1278,7 +1278,7 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
 
-/* ── §592: A ROW THAT LEFT OR ARRIVED IS LOGGED WITH ITS SEAT ──────────────
+/* ── §598: A ROW THAT LEFT OR ARRIVED IS LOGGED WITH ITS SEAT ──────────────
    Islam: "if I remove a line fully do I get history of the plans somehow?"
    The structural change used to reach the log with no rows; it carries the
    row's contents and its seat now, so History can put it back where it was
@@ -1291,20 +1291,20 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
   const v = A.authorize(SEED, inc, personOf(SEED, "smo"));
   const ch = v.changes.filter(function (c) { return c.kind === "unitPlan"; })[0];
   const row = ch && (ch.rows || []).filter(function (r) { return r.field === "row"; })[0];
-  check("§592: a removed measure is logged as one `row` entry", !!row && ch.rows.length === 1,
+  check("§598: a removed measure is logged as one `row` entry", !!row && ch.rows.length === 1,
         JSON.stringify(ch && ch.rows));
-  check("§592: ...carrying the row whole, and its seat (holder, list, index, length)",
+  check("§598: ...carrying the row whole, and its seat (holder, list, index, length)",
         !!row && row.had === true && row.to === null && row.from && row.from.in === p.id &&
         row.from.list === "measures" && row.from.at === 1 && row.from.of === p.measures.length + 1 &&
         row.from.row && row.from.row.id === gone.id && row.from.row.name === gone.name,
         JSON.stringify(row && row.from && { in: row.from.in, list: row.from.list, at: row.from.at, of: row.from.of }));
-  check("§592: ...and the save is still the office's: allowed as the SMO", v.ok, v.refusals.join(" / "));
+  check("§598: ...and the save is still the office's: allowed as the SMO", v.ok, v.refusals.join(" / "));
   const inc2 = clone(SEED);
   inc2.units[UNIT].items[0].tactics.push({ id: UNIT + "-P1-T999", name: "A new tactic" });
   const v2 = A.authorize(SEED, inc2, personOf(SEED, "smo"));
   const ch2 = v2.changes.filter(function (c) { return c.kind === "unitPlan"; })[0];
   const row2 = ch2 && (ch2.rows || []).filter(function (r) { return r.field === "row"; })[0];
-  check("§592: an added tactic is logged as a `row` entry with `to` and no `from`",
+  check("§598: an added tactic is logged as a `row` entry with `to` and no `from`",
         !!row2 && row2.had === false && row2.from === null && row2.to && row2.to.list === "tactics" &&
         row2.to.at === inc2.units[UNIT].items[0].tactics.length - 1 && row2.to.row.id === UNIT + "-P1-T999",
         JSON.stringify(row2));
@@ -1312,14 +1312,14 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
   const ms = inc3.units[UNIT].items[0].measures; ms.push(ms.shift());
   const v3 = A.authorize(SEED, inc3, personOf(SEED, "smo"));
   /* A measure list carries no `onArrange`, so its reorder has classified as
-     `unitPlan` since §101 — unchanged here; what §592 adds is that no row
+     `unitPlan` since §101 — unchanged here; what §598 adds is that no row
      is reported as having left or arrived when only the order moved. */
-  check("§592: a reorder is classified as it was, never as a row that left",
+  check("§598: a reorder is classified as it was, never as a row that left",
         v3.changes.some(function (c) { return c.kind === "unitPlan"; }) &&
         !v3.changes.some(function (c) { return (c.rows || []).some(function (r) { return r.field === "row"; }); }),
         JSON.stringify(v3.changes.map(function (c) { return c.kind; })));
   const v4 = A.authorize(SEED, inc, personOf(SEED, headKey));
-  check("§592: ...and refused for a unit head, naming the row that left",
+  check("§598: ...and refused for a unit head, naming the row that left",
         !v4.ok && v4.refused && v4.refused.some(function (r) { return (r.rows || []).some(function (x) { return x.field === "row"; }); }),
         JSON.stringify((v4.refused || []).map(function (r) { return r.kind; })));
 })();

@@ -848,7 +848,7 @@ var SYNC = (function () {
             return;
           }
         }
-        /* §592: a row that LEFT or ARRIVED is put back by its seat — the
+        /* §598: a row that LEFT or ARRIVED is put back by its seat — the
            removed row re-seated where it was, the added one taken out —
            through the same door History's Restore uses (§53.5). */
         if (r.field === "row") {

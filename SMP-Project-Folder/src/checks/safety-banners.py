@@ -171,6 +171,7 @@ class H(http.server.BaseHTTPRequestHandler):
                 SEEN.setdefault("afters", []).append({"after": after, "q": q})
                 page = [x for x in SAVES if x["seq"] > after]
                 self._s(200, json.dumps({"ok": True, "seq": page[-1]["seq"] if page else after,
+                                         "oldest": SAVES[0]["seq"] if SAVES else None,
                                          "more": False, "changes": page}).encode(), "application/json")
                 return
             if "since" in q:
@@ -458,6 +459,26 @@ with sync_playwright() as p:
     ck("...and their change is on the screen", pg.evaluate("()=>GROUP.org") == "Theirs Five", pg.evaluate("()=>GROUP.org"))
     ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == n, (pg.evaluate("()=>SYNC.seq()"), n))
     ck("no caution is drawn", banner(pg) == "", banner(pg))
+
+    # ── 5f · A NUMBER OLDER THAN THE OLDEST ENTRY KEPT TAKES THE GRAPH (§588.2) ──
+    # The list is swept after a week. A tab holding a number from before the
+    # oldest entry kept cannot know what was swept between, so it fetches the
+    # graph once and carries on from the number that copy holds.
+    print("\n5f · a tab older than the oldest kept entry fetches the graph once")
+    del SAVES[:-1]                                   # the sweep: one entry left
+    STATE["group"]["org"] = "Theirs Six"             # a save that was swept
+    pg.evaluate("n=>SYNC.setSeq(n)", max(0, SAVES[0]["seq"] - 3))
+    states0 = states()
+    peek(pg); settle(1800)
+    ck("the graph was fetched once", states() == states0 + 1, states() - states0)
+    ck("...and the screen holds what the swept save wrote", pg.evaluate("()=>GROUP.org") == "Theirs Six", pg.evaluate("()=>GROUP.org"))
+    ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == SEQN[0], (pg.evaluate("()=>SYNC.seq()"), SEQN[0]))
+    states0 = states(); peek(pg); settle(600)
+    ck("the next ask is the light one again", states() == states0, states() - states0)
+    n = land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Seven"}, "del": []}]}, at="2026-09-02T10:25:00.000Z")
+    peek(pg); settle()
+    ck("...and a landing arrives as a change, as before", pg.evaluate("()=>GROUP.org") == "Theirs Seven" and states() == states0 and pg.evaluate("()=>SYNC.seq()") == n,
+       (pg.evaluate("()=>GROUP.org"), states() - states0))
 
     # ── 5e · THE CLOCK SLOWS WHEN NOBODY IS WORKING HERE (§588.1) ─────────
     print("\n5e · the ask comes every 20s while somebody works here, every 60s once nobody does")

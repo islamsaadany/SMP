@@ -220,7 +220,11 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
         [after])).rows;
       const page = rows.slice(0, PEEK_CAP);
       const seq = page.length ? Number(page[page.length - 1].id) : Number(after);
-      return { code: 200, body: { ok: true, seq, more: rows.length > PEEK_CAP,
+      /* §588.2: the oldest entry still kept (the list is swept after a week),
+         so a tab holding an older number knows saves may be missing between
+         and takes the graph instead; null when nothing is kept. */
+      const oldestRow = (await c.query("SELECT min(id) AS id FROM saves")).rows[0].id;
+      return { code: 200, body: { ok: true, seq, more: rows.length > PEEK_CAP, oldest: oldestRow === null ? null : Number(oldestRow),
         changes: page.map((x: any) => ({ seq: Number(x.id), by: x.person_name || x.person_key, byKey: x.person_key, at: x.at, changes: x.changes })) } };
     });
   }

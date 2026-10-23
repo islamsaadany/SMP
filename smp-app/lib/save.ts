@@ -33,6 +33,8 @@ const LOG_ROW_CAP = 20;   /* api/state.js's cap on the rows a log line carries *
 /* §588.1: a change list larger than this is not carried to other tabs — a
    plan import is thousands of rows — they are told to fetch the graph. */
 export const SAVE_BYTES_CAP = 300 * 1024;
+/* §588.2: how long a numbered save is kept for other tabs to ask about. */
+export const SAVES_KEPT_DAYS = 7;
 
 export type Actor = { key: string; name?: string; role?: string; email?: string };
 export type SaveBody = { base?: unknown; changes?: unknown; viewAs?: string; state?: unknown };
@@ -122,6 +124,14 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
     const seq = brk === "no-save-number" ? 0
       : Number((await c.query("INSERT INTO saves (person_key, person_name, changes) VALUES ($1, $2, $3::jsonb) RETURNING id",
           [me.key, me.name || null, kept])).rows[0].id);
+    /* §588.2: THE LIST IS KEPT FOR A WEEK. A tab only ever needs the entries
+       since it was opened, so what is older is swept on the way out of every
+       save — one bounded delete, under the tenant's own policy, on a table
+       that never holds more than a week. A tab whose number is older than
+       the oldest entry kept is told so by the read (`oldest`) and takes the
+       graph instead. `no-sweep` (checks/saves-since.mjs): the list grows for
+       ever. Never set on a deployment. */
+    if (brk !== "no-sweep") await c.query("DELETE FROM saves WHERE at < now() - interval '" + SAVES_KEPT_DAYS + " days'");
     return { code: 200 as const, body: { ok: true as const, wrote: "rows" as const, rows: report.rows, tables: report.tables, at: new Date().toISOString(), seq } };
   }).catch((e: any) => {
     if (e && e.unaddressable) return { code: 400 as const, body: { ok: false as const, error: e.message, table: e.table } };

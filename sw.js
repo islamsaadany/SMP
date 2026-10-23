@@ -605,7 +605,15 @@
 /* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
    file's bytes changed (§91). Proved held by no commit in any ref's history
    (§94.16). */
-const SHELL = "smp-shell-v7.03-theme-notes";
+/* v7.05-cards-overview-slides — §616: the unit Overview's cards and the
+   direction slide's "where it stands" read like §610's cards. Numbered v7.01
+   on the branch; main took v7.01–v7.04 while it waited. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history (§94.16). */
+/* v7.06-strip-card — §618: the squeezed strip is its own card, a navy
+   outline and the gutter kept under it. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.06-strip-card";
 const ASSETS = [
   "/",
   "/index.html",

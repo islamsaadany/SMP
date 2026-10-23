@@ -343,7 +343,7 @@ await section("5 · the office", async () => {
      REWRITTEN, NEVER LOOSENED (§218): the landing is asserted, and the cards
      are still asserted, one press away. */
   await page.waitForSelector("#nav button", { timeout: 15000 }).catch(() => {});
-  check((await text(page, "#nav button"))[0] === "My work", "…which opens on My work (§400)", (await text(page, "#nav button")).join("|"));
+  check((await text(page, "#nav button"))[0] === "Home", "…which opens on Home (spec 068; it opened on My work, §400)", (await text(page, "#nav button")).join("|"));
   await page.locator("#nav button", { hasText: "Clients" }).click();
   await page.waitForSelector(".ccard[data-client]", { timeout: 15000 }).catch(() => {});
   check((await page.$$eval(".ccard[data-client] .ctop h2, .ccard[data-client] .ctop img.cmark", (els) => els.map((e) => e.tagName === "IMG" ? e.alt : e.textContent.trim()))).includes("Raya Trade"), "…and one press away lists the clients they may open");

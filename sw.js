@@ -587,7 +587,12 @@
    score and the rail opens one gap under the chrome. Numbered v6.97 on the
    branch; main took v6.98 while it waited. The built file's bytes changed
    (§91). Proved held by no commit in any ref's history (§94.16). */
-const SHELL = "smp-shell-v6.99-score-cards-hero";
+/* v7.00-company-reading — §595, §606, §607 and §608: one seat rule for the
+   company's own plan, the functions' row without units, the company's
+   execution card beside its directions, and How we compete as a setting on
+   functions. The built file's bytes changed (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.00-company-reading";
 const ASSETS = [
   "/",
   "/index.html",

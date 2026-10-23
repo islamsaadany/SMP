@@ -1,16 +1,8 @@
 # 067 · Case studies — what we did for a client, written for the next person
 
-**Status:** **clarified and DRAWN 2026-10-23, waiting on sign-off; nothing
-built.** Eleven decisions are Islam's, taken the same day as three rounds of
-questions (§3), and the name is his too: *"call it case studies"*.
-**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies-library.html`
-— Case studies as **a library** (rule 1c, A17), nine drawings, waiting on
-sign-off. Two earlier drawings are kept as the record and both were turned
-down by Islam: the first, `2026-10-23_case-studies.html`, as *"very poor
-design"*; the second, `2026-10-23_case-studies-tracker-look.html`, because
-*"that view is suitable for the tracker only. the view of the cases should be
-different … how would a library look like?"* (§10.1, §10.2). His three
-answers on the first are in §10.
+**Status:** **BUILT on the branch 2026-10-23, on Islam's "yes build it"; not
+merged.** The library drawing (`design-mockups/case-studies/2026-10-23_case-studies-library.html`)
+was signed off by that answer; what was built and what was not is §14.
 
 **Read with spec 045 (the consulting memory)**, which this changes rather than
 sits beside: a case study is the main thing and the memory's entries move
@@ -394,3 +386,40 @@ one press away as **Insights** (drawings 1 and 3).
 - **A deliverable's file** is served to an office account through our route
   and refused to a client account.
 - **Deleting a client** that holds a case study is refused by name.
+
+---
+
+## 14 · Built (2026-10-23), and what was not
+
+**Built:** the `case_studies` table, the insight's `case_id` and the tenant's
+`past` flag (schema.sql + migration 030, the same on a fresh and an existing
+database); `/api/cases` with every rule of §8 on the server; the library on
+the console's Case studies tab (the memory's tab, renamed: the front with its
+search, industries and shelves, the desk, a case study as a report, opening a
+piece of work with a past client in three fields, the interview, the draft,
+files on each deliverable); insights inside a case study and placed from an
+insight's own page; the write-up on My work; the interview's splitter
+(`lib/case-split.cjs`, reading insights with the memory's own).
+
+**Islam's two later calls, honoured:** a past client is kept off the Clients
+page, archived band included, and cannot be brought back (*"I don't want it
+to be there"*); so **for now a past client is added only from Open a piece of
+work**. The Clients filter (Active / Ended / Demo, Mine, cards or list) that
+would also show it under Ended is drawn
+(`design-mockups/clients-filter/2026-10-23_clients-filter-and-list.html`) and
+**waits on his sign-off; not built**.
+
+**Not built, said:** the assistant reading case studies (§9) — *Ask a
+question instead* asks the insights, as the memory's assistant does today;
+*Write up a period* has no piece-of-work box yet (an insight it saves is
+placed afterwards from its own page); a file cannot be attached where no file
+store is set up, and the page says so in words.
+
+**Checked:** `checks/case-api.mjs` 62/0, red under seven broken rules;
+`checks/case-page.mjs` 46/0 in a real browser (admin, writer, new joiner,
+phone), red under three; `checks/case-split.mjs` 15/0, red two ways; the
+memory's five checks green (the page check rewritten for the rename);
+`checks/shell.mjs` 409/0; the console page through the type checker with no
+new finding; the release stamp clear. `checks/pages-types.mjs` is red on the
+strategy pages' `present.js` and identically on `main` — not this branch's.
+

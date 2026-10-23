@@ -2332,7 +2332,8 @@ await section("4 · Forefront's own pages", async () => {
   const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
   check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
     "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
-  check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
+  /* the memory's tab is called Case studies since spec 067 — renamed, not loosened (§218) */
+  check(ffTabs.includes("Case studies"), "…and the consulting memory, now Case studies, which every consultant reaches (spec 045, 067)", ffTabs.join("|"));
   /* \u00a7400: THE CONSOLE OPENS ON *MY WORK*, which is the first tab \u2014 so the
      cards are one press away rather than the landing. REWRITTEN, NEVER
      LOOSENED (\u00a7218): the landing is asserted as the new decision, and the

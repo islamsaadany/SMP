@@ -2853,6 +2853,9 @@ var CLIENTSETUP = (function () {
 
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
+           /* the standard industry list and the size bands, ONE copy (§322):
+              the console's case studies add a past client with them (spec 067) */
+           INDUSTRIES:INDUSTRIES, SIZES:SIZES,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; } };
 })();

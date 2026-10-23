@@ -268,6 +268,11 @@ await section("10 · removing a piece of work keeps its insights", async () => {
   check(r.status === 200 && before === 2 && loose === 2, "an admin removes it, and its insights go back under their client rather than with it", JSON.stringify([before, loose]));
 });
 
+/* AND IT LEAVES NO CLIENT BEHIND: a second client named "Other Client"
+   sorts first in every client picker and moves the next check's defaults. */
+await owner.query("DELETE FROM memory_entries WHERE about_tenant_id IN (SELECT id FROM tenants WHERE key IN ('case-other','nile-logistics'))");
+await owner.query("DELETE FROM case_studies WHERE about_tenant_id IN (SELECT id FROM tenants WHERE key IN ('case-other','nile-logistics'))");
+await owner.query("DELETE FROM tenants WHERE key IN ('case-other','nile-logistics')");
 await stopServer(server);
 await owner.end();
 console.log((fails ? "RED  " : "GREEN  ") + oks + " ok, " + fails + " failed");

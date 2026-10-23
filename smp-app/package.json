@@ -97,7 +97,11 @@
     "check:saves": "node checks/saves-since.mjs",
     "check:saves:red": "for b in no-save-number no-sweep; do node checks/saves-since.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:cases": "node --experimental-strip-types checks/case-api.mjs",
-    "check:cases:red": "for b in anyone-opens drafts-open anyone-writes take-file client-reads cross-client done-empty; do node --experimental-strip-types checks/case-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:cases:red": "for b in anyone-opens drafts-open anyone-writes take-file client-reads cross-client done-empty; do node --experimental-strip-types checks/case-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:cases:page": "node --experimental-strip-types checks/case-page.mjs",
+    "check:cases:page:red": "for b in no-split drafts-open no-writeups; do node --experimental-strip-types checks/case-page.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:cases:split": "node checks/case-split.mjs",
+    "check:cases:split:red": "for b in drop-prose no-insights; do node checks/case-split.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
   },
   "dependencies": {
     "@google/genai": "^2.25.0",

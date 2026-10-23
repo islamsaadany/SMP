@@ -52,6 +52,14 @@ var UNSAVED = (function(){
       var p = a.slice(2), parts = p.split(".");
       return { place: placeOf(p), what: field(parts[parts.length - 1]) };
     }
+    if (a.indexOf("l:") === 0) {
+      /* §588: l:<at>|<path>|<list>|add|<id>, …|drop|<id>, or …|order — a
+         row added, removed or moved, said as what happened to which list. */
+      var l = a.slice(2).split("|");
+      var verb = l[3] === "add" ? "added" : l[3] === "drop" ? "removed" : "reordered";
+      var ln = l[3] === "order" ? "" : rowName(l[4]);
+      return { place: placeOf(l[0]), what: (ln ? ln + " · " : "") + field(l[2]) + " " + verb };
+    }
     var r = a.slice(2).split("|");   /* r:<at>|<path>|<id>|<field> */
     var nm = rowName(r[2]);
     return { place: placeOf(r[0]), what: (nm ? nm + " · " : "") + field(r[3]) };

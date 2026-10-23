@@ -523,7 +523,25 @@
    TypeScript's checker reads; nothing runs differently. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.80-rules-types";
+/* v6.81-one-template — §586: one template for every box's presentation.
+   The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.82-present-window — §582.1: present in a window, for an online
+   meeting. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.83-box-split — §587: the box's own split setting splits its
+   presentation. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching
+   every ref (§94.16). */
+/* v6.84-quiet-merge — §588 / §588.1: other people's saves arrive on the
+   screen without a reload (the caution's Reload is the fallback now), rows
+   added, removed or moved travel by id, row ids carry a tag of their own,
+   and a tab asks "what changed since N" instead of fetching the graph. The
+   built file's bytes changed, which is the whole trigger (§91). Proved held
+   by no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v6.84-quiet-merge";
 const ASSETS = [
   "/",
   "/index.html",

@@ -8,7 +8,7 @@
    page call into the rules is then checked against the rules' own types.
 
    THE PAGES ARE NOT CLEAN AND THIS DOES NOT PRETEND THEY ARE. Today the
-   checker reports 97 findings, every one READ and none a fault (§589 names
+   checker reports 98 findings, every one READ and none a fault (§589 names
    the kinds): spreadsheet layouts built from mixed pieces, a number written
    into page text, a property added to a list. They are recorded in
    pages-types.known.json — file, code and message, never a line, so an edit

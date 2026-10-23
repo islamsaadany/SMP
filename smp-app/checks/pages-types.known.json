@@ -278,6 +278,12 @@
    "count": 1
   },
   {
+   "file": "unsaved.js",
+   "code": "TS2403",
+   "message": "Subsequent variable declarations must have the same type.  Variable 'l' must be of type 'any', but here has type 'string[]'.",
+   "count": 1
+  },
+  {
    "file": "xlsx.js",
    "code": "TS2339",
    "message": "Property 'horizon' does not exist on type 'any[]'.",

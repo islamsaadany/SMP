@@ -9798,12 +9798,35 @@ FUNCTION_KEYS.forEach(function(k){
    AND NOT length + 1. After a row has been removed, `-P3` can still be held by
    the last of three — the same collision mintPersonKey() and mintClaimId()
    already scan for. */
+/* §588: AND NOT THE POSITION ALONE. Two people adding a row to the same list
+   in the same minute both counted the same length and minted the same id, so
+   on the merge the second row replaced the first (every row is found by id,
+   §48). A short random tag after the number keeps the id readable — `-P4`
+   still says where it was added — and makes two tabs' ids distinct without a
+   clock or a server round trip. The scan for a taken id stays, for the one
+   list and the one tab. */
 function mintRowId(list, prefix){
   var taken = {};
   (list || []).forEach(function(x){ if (x && x.id) taken[x.id] = 1; });
   var n = (list || []).length + 1;
-  while (taken[prefix + n]) n++;
-  return prefix + n;
+  var id;
+  do { id = prefix + n + "-" + mintTag(); n++; } while (taken[id]);
+  return id;
+}
+/* Four characters from the browser's own random source (0-9, a-z): about
+   1.7 million values, so two tabs minting into the same list at the same
+   moment all but never agree, and a stored id never grows past readable. */
+function mintTag(){
+  var chars = "0123456789abcdefghijklmnopqrstuvwxyz", out = "";
+  var buf = null;
+  try {
+    if (typeof crypto !== "undefined" && crypto.getRandomValues) { buf = new Uint8Array(4); crypto.getRandomValues(buf); }
+  } catch (e) { buf = null; }
+  for (var i = 0; i < 4; i++) {
+    var v = buf ? buf[i] : Math.floor(Math.random() * 256);
+    out += chars.charAt(v % 36);
+  }
+  return out;
 }
 
 /* A pillar arrives with every field a reader asks for, present and empty

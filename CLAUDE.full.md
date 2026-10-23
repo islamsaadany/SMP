@@ -11129,7 +11129,7 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # theme.js + route.js, handed to the checker
                                 # with the library names (SMPRules…) declared
                                 # CLOSED (JS objects are open: a misspelt rule
-                                # read as `any` until --red caught it). 97
+                                # read as `any` until --red caught it). 98
                                 # findings today, each read, none a fault, in
                                 # pages-types.known.json by file/code/message;
                                 # it fails on one beyond them OR one gone. Edit

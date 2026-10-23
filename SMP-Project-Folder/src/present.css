@@ -1637,6 +1637,10 @@
 .rs-clk.over { color:#F87171; }
 .rs-clk.paused { color:#A9B6C9; }
 .rs-warn { color:#FBBF24; font-weight:600; }
+.rs-tip { color:#A9B6C9; }   /* §582.1: which window to share */
+/* §582.1: the bar's newest button gives up its words first in a narrow
+   window, before the client's name has to: its icon and its hover say it. */
+@media (max-width:1000px){ #slideroot [data-slwin] .lbl { display:none; } }
 .rs-sp { flex:1; }
 .rs-keys { color:#A9B6C9; font-size:12px; }
 .rs-keys b { display:inline-block; min-width:1.5em; text-align:center; padding:1px 4px; margin:0 1px;

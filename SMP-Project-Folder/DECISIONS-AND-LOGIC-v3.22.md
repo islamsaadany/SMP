@@ -66489,6 +66489,8 @@ Islam, after §538.2: *"fix the door check failures too"*.
 
 **CHECKED.** `checks/door-landing.mjs` **146 ok, 0 failed** — the first wholly green run since §544. `check:door:red` all seven breaks still red (`demo-role-key`, `other-role-key`, `no-creator`, `no-landing-stamp`, `gate-open`, `no-areas-stamp`, `done-dropped`). No page changed.
 
+**§544.16 MERGED TO `main`** 2026-10-23, Islam: *"merge it"*. A clean fast-forward — `main` had not moved since §538.2 — so the tree pushed is the tree checked (146 ok, 0 failed; seven breaks red), then this note as a commit `main` alone holds (§91). **No `SHELL` bump and the same release stamp**, for §538.2's reason: the merge changes a check and the record and no file a browser is served, so `/sw.js` reads **`7b31190177c959e9`** before and after. No forced sign-out.
+
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
 

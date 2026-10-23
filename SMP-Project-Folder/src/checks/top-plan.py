@@ -106,7 +106,9 @@ with sync_playwright() as p:
     ck("…and not the builder or the workbook, which cannot address the top layer",
        safe(pg, "()=>!document.querySelector('#panel .bempty [data-buildplan]') && !/Import/.test(document.querySelector('#panel .bempty').innerText)") is True)
     ck("pressing it adds the first pillar to the group's own row", press(pg, '[data-rowadd="pillar|group"]')
-       and safe(pg, "()=>GROUP.items.length===1 && GROUP.items[0].id==='group-P1'") is True,
+       # §588 mints a short random tag after the number (`group-P1-x7k2`), so
+       # two tabs adding at once cannot collide — rewritten, never loosened.
+       and safe(pg, "()=>GROUP.items.length===1 && /^group-P1-[0-9a-z]{4}$/.test(GROUP.items[0].id)") is True,
        safe(pg, "()=>JSON.stringify(GROUP.items)"))
     ck("…with its code D001 — a direction's own letter (§482)",
        safe(pg, "()=>pillarCode(topAsUnit(), 0)", "") == "D001", safe(pg, "()=>pillarCode(topAsUnit(), 0)"))

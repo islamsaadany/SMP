@@ -1,0 +1,394 @@
+<title>Console Left Navigation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the review page holds three drawings of the console — a computer
+   screen with the tabs moved into a navy column on the left, and two phones
+   (menu shut, menu open). Each drawing is a container, so the same markup
+   becomes the phone layout below 720px. Tokens are the console's own
+   (platform.html), Forefront navy and amber, light and dark. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-label:#8FA3C9;--ff-tx:#0F2C69;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;
+  --scrim:rgba(20,28,43,.45);
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --side-w:232px;--rail-w:64px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;--ff-tx:#95A9CC;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
+  --scrim:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;--ff-tx:#95A9CC;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;
+  --scrim:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the review page around the drawings ── */
+.doc{max-width:1290px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.lede{max-width:76ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:30px 0 8px}
+.cap span{font-family:var(--font);letter-spacing:0;text-transform:none;font-weight:400}
+
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:18px 0 0;padding:10px 14px;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;line-height:1;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.seg button:focus-visible{outline:2px solid var(--amber-tx);outline-offset:1px}
+
+.frame{position:relative;container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  background:var(--ground);box-shadow:var(--frame-shadow)}
+.frame.desk{height:760px}
+.phones{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.phones figure{margin:0;max-width:100%}
+.phones figcaption{font-size:13px;color:var(--ink-3);margin-top:8px}
+.frame.phone{width:375px;max-width:100%;height:700px;border-radius:28px;border-width:6px;border-color:var(--ink)}
+
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;margin-top:30px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.note h2{margin:0 0 8px;font:600 10.5px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--amber-tx)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink);font-weight:600}
+
+/* ═══ THE CONSOLE, REDRAWN ═══════════════════════════════════════════ */
+.app{position:absolute;inset:0;display:flex;background:var(--ground);color:var(--ink);font-size:15px}
+
+/* the column */
+.side{width:var(--side-w);flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column;
+  transition:width .18s ease;z-index:3}
+.brand{display:flex;align-items:center;gap:8px;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .mk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px;color:var(--ff-quiet)}
+.brand .ff{display:none;width:28px;height:28px;border-radius:7px;background:var(--amber);color:var(--amber-ink);
+  font:700 11px/28px var(--mono);text-align:center;letter-spacing:.04em}
+.ibtn{margin-left:auto;width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--ff-quiet);
+  display:grid;place-items:center;cursor:pointer;flex:none}
+.ibtn:hover{background:var(--ff-hover);color:var(--ff-ink)}
+.ibtn:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.ibtn svg.i{width:16px;height:16px}
+.ibtn.close{display:none}
+
+.snav{flex:1;overflow-y:auto;padding:10px 10px 12px;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px 6px}
+.app[data-groups="0"] .gl{display:none}
+.app[data-groups="0"] .snav{gap:2px}
+.grp.foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--ff-rule)}
+.app[data-groups="0"] .grp.foot{margin-top:auto}
+.item{position:relative;display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:var(--ff-quiet);
+  font-size:14px;font-weight:600;line-height:1;text-align:left;padding:10px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.item:hover{background:var(--ff-hover);color:var(--ff-ink)}
+.item:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.item .lb{overflow:hidden;text-overflow:ellipsis}
+
+.me{display:flex;align-items:center;gap:10px;padding:12px 12px 14px 14px;border-top:1px solid var(--ff-rule)}
+.av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--ff-on);color:var(--ff-ink);
+  font:700 11px/30px var(--mono);text-align:center;letter-spacing:.04em}
+.who{min-width:0;display:flex;flex-direction:column;gap:3px}
+.who b{font-size:13px;font-weight:600;color:var(--ff-ink);line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who i{font-style:normal;font-size:11.5px;color:var(--ff-quiet);line-height:1.1}
+.me .ibtn{margin-left:auto}
+
+/* the page */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtop{display:none}
+.page{flex:1;overflow-y:auto;padding:22px 18px 60px}
+.pin{max-width:1180px;margin:0 auto}
+.ptitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.ptitle h1{font-size:20px;margin:0;font-weight:600}
+.ptitle .right{margin-left:auto}
+.search{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;
+  font-family:inherit;font-size:13.5px;width:240px;max-width:100%}
+.search::placeholder{color:var(--ink-3)}
+.search:focus-visible{outline:2px solid var(--amber-tx);outline-offset:1px}
+
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.ccard{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.ctop{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 11px/30px var(--mono);text-align:center;letter-spacing:.05em}
+.ccard h2{margin:0;font-size:16px;font-weight:600}
+.ind{margin:0;color:var(--ink-3);font-size:12.5px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 10.5px/1.5 var(--mono);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink-2);background:var(--surface-2)}
+.tag.seat{color:var(--ff-tx);border-color:var(--ff-tx);background:var(--surface)}
+.tag.demo{color:var(--amber-tx);border-color:var(--amber);background:var(--surface)}
+.ccfg{position:absolute;top:11px;right:11px;width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:6px;background:var(--surface);color:var(--amber-tx);cursor:pointer}
+.ccfg svg.i{width:15px;height:15px}
+.mods{margin-top:auto;border-top:1px solid var(--line)}
+.mrow{display:flex;align-items:baseline;gap:8px;width:100%;padding:6px 14px;font-size:13px;text-align:left;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);cursor:pointer}
+.mrow:last-child{border-bottom:0;border-radius:0 0 11px 11px}
+.mrow:hover{background:var(--surface-2)}
+.mrow i{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-left:auto;flex:none;white-space:nowrap}
+.mrow i.alarm{color:var(--warn);font-weight:600}
+.mrow i.due{color:var(--ink-2);font-weight:600}
+.ccard.add{min-height:152px;align-items:center;justify-content:center;border-style:dashed;font-weight:600;color:var(--ink-3);box-shadow:none;cursor:pointer}
+.ccard.demo{background:var(--amber-wash);border-color:var(--amber)}
+.apart{margin-top:26px;padding-top:14px;border-top:1px solid var(--line)}
+.akey{display:block;margin-bottom:12px;font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+
+.other{display:flex;flex-direction:column;gap:10px}
+.other p{margin:0 0 6px;color:var(--ink-3);font-size:14px}
+.sk{height:12px;border-radius:6px;background:var(--line-soft)}
+.sk.w1{width:72%}.sk.w2{width:54%}.sk.w3{width:64%}.sk.blk{height:120px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+
+.scrim{display:none}
+
+/* ── ICONS ONLY: the column narrows to a rail, names show on hover ── */
+@container (min-width:720px){
+  .app[data-rail="1"] .side{width:var(--rail-w)}
+  .app[data-rail="1"] .brand{flex-direction:column;padding:14px 0 10px;gap:10px}
+  .app[data-rail="1"] .brand .mk,.app[data-rail="1"] .brand .nm{display:none}
+  .app[data-rail="1"] .brand .ff{display:block}
+  .app[data-rail="1"] .brand .ibtn{margin:0}
+  .app[data-rail="1"] .brand .ibtn svg{transform:rotate(180deg)}
+  .app[data-rail="1"] .snav{padding:10px 10px 12px}
+  .app[data-rail="1"] .gl{font-size:0;padding:0;height:1px;margin:4px 6px;background:var(--ff-rule)}
+  .app[data-rail="1"] .grp:first-child .gl{display:none}
+  .app[data-rail="1"] .item{justify-content:center;padding:11px 0}
+  .app[data-rail="1"] .item .lb{display:none}
+  .app[data-rail="1"] .me{flex-direction:column;padding:12px 0 14px;gap:8px}
+  .app[data-rail="1"] .who{display:none}
+  .app[data-rail="1"] .me .ibtn{margin:0}
+}
+
+/* ── ON A PHONE: a slim navy bar with a menu button; the same column
+   opens over the page as a drawer ── */
+@container (max-width:719px){
+  .side{position:absolute;top:0;bottom:0;left:0;width:min(84%,288px);transform:translateX(-102%);transition:transform .22s ease;
+    box-shadow:0 0 40px rgba(0,0,0,.35)}
+  .app[data-open="1"] .side{transform:none}
+  .brand .collapse{display:none}
+  .ibtn.close{display:grid}
+  .scrim{display:block;position:absolute;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:2}
+  .app[data-open="1"] .scrim{opacity:1;pointer-events:auto}
+  .mtop{display:flex;align-items:center;gap:10px;background:var(--ff);color:var(--ff-ink);padding:8px 12px;min-height:50px}
+  .mtop .ibtn{margin:0;color:var(--ff-ink)}
+  .mtop .ibtn svg.i{width:20px;height:20px}
+  .mtop .mk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+  .mtop .here{margin-left:auto;font-size:13px;font-weight:600;color:var(--ff-quiet)}
+  .page{padding:16px 12px 40px}
+  .search{width:100%}
+  .ptitle .right{margin-left:0;width:100%}
+  .item{padding:12px 10px;font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){.side,.scrim{transition:none}}
+</style>
+
+<div class="doc">
+  <h1>The console with its tabs down the left</h1>
+  <p class="lede">The eight tabs leave the navy bar across the top and become a <b>navy column on the left</b>, in today's order.
+    The white line with <b>FOREFRONT · Platform</b> and <b>Sign out</b> folds into that column too, so the page starts at its own title.
+    Every drawing below is live: press the tabs, the <b>«</b> button and the phone's menu.</p>
+
+  <div class="ctrls" role="group" aria-label="Mockup options">
+    <div class="ctrl"><span>Headings in the menu</span>
+      <span class="seg" data-ctl="groups"><button type="button" id="g1" data-v="1" aria-pressed="true">Shown</button><button type="button" id="g0" data-v="0" aria-pressed="false">Hidden</button></span></div>
+    <div class="ctrl"><span>Column</span>
+      <span class="seg" data-ctl="rail"><button type="button" id="r0" data-v="0" aria-pressed="true">Full</button><button type="button" id="r1" data-v="1" aria-pressed="false">Icons only</button></span></div>
+    <div class="ctrl"><span>Theme</span>
+      <span class="seg" data-ctl="theme"><button type="button" id="tl" data-v="light">Light</button><button type="button" id="td" data-v="dark">Dark</button></span></div>
+  </div>
+
+  <p class="cap">Proposed · computer <span>— the Clients tab, as in your screenshot</span></p>
+  <div class="frame desk" id="desk"></div>
+
+  <p class="cap">Proposed · phone <span>— replaces the tab bar that scrolls sideways today</span></p>
+  <div class="phones">
+    <figure><div class="frame phone" id="ph1"></div><figcaption>Menu shut: a slim navy bar, the page below it.</figcaption></figure>
+    <figure><div class="frame phone" id="ph2"></div><figcaption>Menu open: the same column, over the page.</figcaption></figure>
+  </div>
+
+  <div class="notes">
+    <div class="note"><h2>What moves</h2><ul>
+      <li><b>The tabs</b> go into the column in today's order. Nobody's tabs change: Consultants and Who sees what still show only for the people who may open them.</li>
+      <li><b>FOREFRONT · Platform</b> heads the column. <b>Your name, role and Sign out</b> sit at its foot.</li>
+      <li><b>The tab you are on</b> keeps the amber mark, now a short bar on its left edge with its icon in amber.</li>
+    </ul></div>
+    <div class="note"><h2>What it costs</h2><ul>
+      <li><b>Height gained:</b> about 95px. The white line (53px) and the tab bar (43px) are both gone.</li>
+      <li><b>Width spent:</b> 232px. The client cards stay four across down to a window about 1240px wide, then go to three. Icons only spends 64px instead.</li>
+      <li><b>Each tab gets an icon.</b> Eight new pictures to agree on; the client card's two-sliders mark is unchanged.</li>
+    </ul></div>
+    <div class="note"><h2>For you to decide</h2><ul>
+      <li><b>Headings:</b> Work · Team · Knowledge, with History alone at the foot. They group the tabs without reordering them. They are new words, so the switch above hides them.</li>
+      <li><b>Icons only:</b> offer the « button or not. If offered, the choice would be kept on that device.</li>
+      <li><b>Phone:</b> a menu drawer in place of the sideways tab bar from §584.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    fold:'<path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    close:'<path d="M6 6l12 12M18 6 6 18"/>',
+    out:'<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/>',
+    cfg:'<path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+
+  /* Today's eight tabs, in today's order; the headings only group them. */
+  var GROUPS = [
+    { h:"Work",      items:[["mywork","My work"],["clients","Clients"]] },
+    { h:"Team",      items:[["consultants","Consultants"],["access","Who sees what"]] },
+    { h:"Knowledge", items:[["memory","Memory"],["frameworks","Frameworks"],["copilot","Copilot"]] },
+    { h:"Record",    items:[["history","History"]], foot:true }
+  ];
+  var NAMES = {}; GROUPS.forEach(function(g){ g.items.forEach(function(t){ NAMES[t[0]] = t[1]; }); });
+
+  var CLIENTS = [
+    { mk:"EA", name:"El Abd Foods", ind:"Food & Beverage", units:5, rows:[["Strategy","No plan","alarm"],["Internal Tracker"]] },
+    { mk:"RHI", name:"Reliance Heavy Industries", ind:"Manufacturing", units:3, rows:[["Strategy"],["Processes"]] },
+    { mk:"RT", name:"Raya Trade", ind:"Retail & E-commerce", units:10, rows:[["Strategy"],["Insights"],["Internal Tracker","3 open","due"]] },
+    { mk:"WD", name:"Wander", ind:"Real Estate & Property", units:3, rows:[["Strategy"]] },
+    { mk:"FF", name:"Forefront Consulting", ind:"Technology & Software", units:3, rows:[["Strategy","No plan","alarm"]] }
+  ];
+
+  function navHtml(){
+    return GROUPS.map(function(g){
+      return '<div class="grp' + (g.foot ? ' foot' : '') + '">' + (g.foot ? '' : '<span class="gl">' + g.h + '</span>') +
+        g.items.map(function(t){
+          return '<button type="button" class="item" data-k="' + t[0] + '" title="' + t[1] + '">' + ic(t[0]) + '<span class="lb">' + t[1] + '</span></button>';
+        }).join('') + '</div>';
+    }).join('');
+  }
+  function card(c){
+    return '<div class="ccard"><div class="ctop"><span class="cmark">' + c.mk + '</span><h2>' + c.name + '</h2>' +
+      '<p class="ind">' + c.ind + '</p><div class="tags"><span class="tag seat">Super user</span><span class="tag">' + c.units + ' units</span></div></div>' +
+      '<span class="ccfg" role="button" tabindex="0" title="Settings" aria-label="Settings">' + ic('cfg') + '</span>' +
+      '<div class="mods">' + c.rows.map(function(r){
+        return '<button type="button" class="mrow">' + r[0] + (r[1] ? '<i class="' + r[2] + '">' + r[1] + '</i>' : '') + '</button>';
+      }).join('') + '</div></div>';
+  }
+  function clientsPage(){
+    return '<div class="ptitle"><h1>Clients</h1><span class="right"><input class="search" type="search" placeholder="Search clients" aria-label="Search clients"></span></div>' +
+      '<div class="cards">' + CLIENTS.map(card).join('') + '<div class="ccard add" role="button" tabindex="0">+ Add a client</div></div>' +
+      '<div class="apart"><span class="akey">The worked example</span><div class="cards">' +
+      '<div class="ccard demo"><div class="ctop"><span class="cmark">MG</span><div class="tags"><span class="tag demo">Demo</span></div></div>' +
+      '<span class="ccfg" role="button" tabindex="0" title="Settings" aria-label="Settings">' + ic('cfg') + '</span>' +
+      '<div class="mods"><button type="button" class="mrow">Strategy</button></div></div></div></div>';
+  }
+  function otherPage(k){
+    return '<div class="ptitle"><h1>' + NAMES[k] + '</h1></div><div class="other">' +
+      '<p>This page is unchanged. Only the way to reach it moves.</p>' +
+      '<div class="sk w1"></div><div class="sk w2"></div><div class="sk blk"></div><div class="sk w3"></div><div class="sk w2"></div></div>';
+  }
+
+  var apps = [];
+  function build(host, opts){
+    var a = document.createElement('div');
+    a.className = 'app';
+    a.setAttribute('data-groups','1');
+    a.setAttribute('data-rail','0');
+    a.setAttribute('data-open', opts.open ? '1' : '0');
+    a.innerHTML =
+      '<aside class="side" aria-label="Main menu">' +
+        '<div class="brand"><span class="ff" aria-hidden="true">FF</span><span class="mk">FOREFRONT</span><span class="nm">Platform</span>' +
+          '<button type="button" class="ibtn collapse" title="Icons only" aria-label="Show icons only">' + ic('fold') + '</button>' +
+          '<button type="button" class="ibtn close" aria-label="Close menu">' + ic('close') + '</button></div>' +
+        '<nav class="snav">' + navHtml() + '</nav>' +
+        '<div class="me"><span class="av" aria-hidden="true">IS</span><span class="who"><b>Islam Saadany</b><i>Super user</i></span>' +
+          '<button type="button" class="ibtn" title="Sign out" aria-label="Sign out">' + ic('out') + '</button></div>' +
+      '</aside>' +
+      '<div class="main"><div class="mtop"><button type="button" class="ibtn open" aria-label="Open menu">' + ic('menu') + '</button>' +
+        '<span class="mk">FOREFRONT</span><span class="here"></span></div>' +
+        '<div class="page"><div class="pin"></div></div></div>' +
+      '<div class="scrim"></div>';
+    host.appendChild(a);
+    var st = { el:a, tab:'clients' };
+    function show(k){
+      st.tab = k;
+      a.querySelectorAll('.item').forEach(function(b){
+        var on = b.getAttribute('data-k') === k;
+        b.classList.toggle('on', on);
+        if (on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+      });
+      a.querySelector('.here').textContent = NAMES[k];
+      a.querySelector('.pin').innerHTML = k === 'clients' ? clientsPage() : otherPage(k);
+      a.querySelector('.page').scrollTop = 0;
+    }
+    a.querySelectorAll('.item').forEach(function(b){
+      b.addEventListener('click', function(){ show(b.getAttribute('data-k')); a.setAttribute('data-open','0'); });
+    });
+    a.querySelector('.collapse').addEventListener('click', function(){
+      setRail(a.getAttribute('data-rail') === '1' ? '0' : '1');
+    });
+    a.querySelector('.open').addEventListener('click', function(){ a.setAttribute('data-open','1'); });
+    a.querySelector('.close').addEventListener('click', function(){ a.setAttribute('data-open','0'); });
+    a.querySelector('.scrim').addEventListener('click', function(){ a.setAttribute('data-open','0'); });
+    show('clients');
+    apps.push(st);
+    return st;
+  }
+  build(document.getElementById('desk'), {});
+  build(document.getElementById('ph1'), {});
+  build(document.getElementById('ph2'), { open:true });
+
+  function press(ctl, v){
+    document.querySelectorAll('[data-ctl="' + ctl + '"] button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v));
+    });
+  }
+  function setRail(v){
+    apps.forEach(function(s){ s.el.setAttribute('data-rail', v); });
+    apps.forEach(function(s){
+      var c = s.el.querySelector('.collapse');
+      c.title = v === '1' ? 'Show names' : 'Icons only';
+      c.setAttribute('aria-label', v === '1' ? 'Show names' : 'Show icons only');
+    });
+    press('rail', v);
+  }
+  document.querySelectorAll('[data-ctl] button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var ctl = b.parentNode.getAttribute('data-ctl'), v = b.getAttribute('data-v');
+      if (ctl === 'groups'){ apps.forEach(function(s){ s.el.setAttribute('data-groups', v); }); press('groups', v); }
+      if (ctl === 'rail') setRail(v);
+      if (ctl === 'theme'){ document.documentElement.setAttribute('data-theme', v); press('theme', v); }
+    });
+  });
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (!document.documentElement.hasAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  press('theme', dark ? 'dark' : 'light');
+})();
+</script>

@@ -583,7 +583,11 @@
    skips it. The built file's bytes changed, which is the whole trigger
    (§91). Proved held by no commit in any ref's history after fetching every
    ref (§94.16). */
-const SHELL = "smp-shell-v6.98-strip-stays";
+/* v6.99-score-cards-hero — §610: the pillar pane's score cards lead with the
+   score and the rail opens one gap under the chrome. Numbered v6.97 on the
+   branch; main took v6.98 while it waited. The built file's bytes changed
+   (§91). Proved held by no commit in any ref's history (§94.16). */
+const SHELL = "smp-shell-v6.99-score-cards-hero";
 const ASSETS = [
   "/",
   "/index.html",

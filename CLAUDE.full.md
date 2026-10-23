@@ -11123,7 +11123,7 @@ node smp-app/checks/rules-types.mjs # THE SHARED RULES AGREE WITH THEIR OWN
                                 # non-zero — so a break counts only when an
                                 # error points INTO the broken file
 node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
-                                # (§587) — `npm run check:pages-types`, no
+                                # (§589) — `npm run check:pages-types`, no
                                 # browser, no database, nothing in src/ edited.
                                 # build.py's list + the shell's inline script +
                                 # theme.js + route.js, handed to the checker

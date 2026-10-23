@@ -1,5 +1,5 @@
 {
- "note": "Read before recorded: none of these is a fault (§587). Rewrite with --write only after reading every new one.",
+ "note": "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
  "findings": [
   {
    "file": "chat.js",

@@ -10,7 +10,7 @@
    is built with that W() never names (§102's trap), a person handed where a
    role is wanted, a word that is not a grant, the server calling a rule
    one argument short, and the server calling a rule that does not exist
-   (missed until §588 closed the authoriser's `R` — an object written in
+   (missed until §590 closed the authoriser's `R` — an object written in
    JavaScript is open to the checker).
 
      node checks/rules-types.mjs          # run from smp-app/

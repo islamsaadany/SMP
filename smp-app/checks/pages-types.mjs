@@ -1,4 +1,4 @@
-/* THE STRATEGY PAGES, READ BY TYPESCRIPT'S CHECKER (§587) — no browser, no
+/* THE STRATEGY PAGES, READ BY TYPESCRIPT'S CHECKER (§589) — no browser, no
    database, and nothing in the pages is edited. §585 described the shared
    rules; this lets the pages see that description. They are plain scripts
    sharing one page, so the checker is handed them the way the browser runs
@@ -8,7 +8,7 @@
    page call into the rules is then checked against the rules' own types.
 
    THE PAGES ARE NOT CLEAN AND THIS DOES NOT PRETEND THEY ARE. Today the
-   checker reports 97 findings, every one READ and none a fault (§587 names
+   checker reports 97 findings, every one READ and none a fault (§589 names
    the kinds): spreadsheet layouts built from mixed pieces, a number written
    into page text, a property added to a list. They are recorded in
    pages-types.known.json — file, code and message, never a line, so an edit
@@ -160,7 +160,7 @@ if (process.argv.includes("--write")) {
     const t = tally(findings(a));
     const out = [...t].map(([k, count]) => { const [file, code, message] = k.split("\u0000"); return { file, code, message, count }; })
       .sort((x, y) => (x.file + x.code + x.message).localeCompare(y.file + y.code + y.message));
-    writeFileSync(KNOWN, JSON.stringify({ note: "Read before recorded: none of these is a fault (§587). Rewrite with --write only after reading every new one.", findings: out }, null, 1) + "\n");
+    writeFileSync(KNOWN, JSON.stringify({ note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.", findings: out }, null, 1) + "\n");
     console.log("recorded " + out.reduce((s, f) => s + f.count, 0) + " findings under " + out.length + " keys");
   } finally { rmSync(a.dir, { recursive: true, force: true }); }
   process.exit(0);

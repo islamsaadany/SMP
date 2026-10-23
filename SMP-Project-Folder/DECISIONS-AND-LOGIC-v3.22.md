@@ -68288,7 +68288,7 @@ Islam, of the last step of the simplification (spec 066 §5): *"ok"*, to *"one s
 
 **AND IT STAYS ONE.** New `checks/one-template.py`: every unit's and function's deck runs in the template's order (and an El Abd-shaped company, directions and capabilities apart); and the cover, Thank you, notes and Overall performance divider are each written in ONE place in the source — 4, 4, 2 and 2 on the live build, which is the drift it exists to catch.
 
-## §587 — The strategy pages, read by TypeScript's checker (2026-10-23)
+## §589 — The strategy pages, read by TypeScript's checker (2026-10-23)
 Islam, after §585 went live: *"now do the same for the console's own files"*. **The word was mine, and it was wrong.** §585's last note used "the console" for the strategy pages — everything inside a client, which is `SMP-Project-Folder/src`. In this project the console is `platform.html` (§584). So the question was put back to Islam, with the size of each: the strategy pages are about 88,000 lines, the console page 3,826. He chose **the strategy pages**.
 
 **NOTHING IN THE PAGES IS EDITED.** No type comment and no `// @ts-check` were added. The pages are 32 scripts sharing one page, so an editor opening one file sees none of the others, and a per-file marker would only light up names it cannot find. Not a byte the browser receives changes: no rebuild, no release stamp, no `SHELL` bump at the merge. The whole of this section is a check.
@@ -68351,12 +68351,12 @@ The declarations live in the check, never in `smp-app/`: a `.d.ts` there would w
 
 Not merged; `main` stays untouched until Islam says.
 
-## §588 — The server's authoriser stops reading a misspelt rule as `any` (2026-10-23)
-Islam, of the gap §587 named: *"fix the gap and put it live"*.
+## §590 — The server's authoriser stops reading a misspelt rule as `any` (2026-10-23)
+Islam, of the gap §589 named: *"fix the gap and put it live"*.
 
-**THE GAP, PROVED BEFORE IT WAS CLOSED.** `lib/authorize.js` loads the rules with `const R = require("./rules.js")`. The object that file returns is written in JavaScript, and the checker treats such an object as OPEN: a property it does not have reads as `any` rather than as a finding. A seventh planted fault was added to `check:rules-types --red` — the authoriser calling `R.isSMOO(w, person)` — and run against the code as it stood. **NOT RED**, exactly as §587 said.
+**THE GAP, PROVED BEFORE IT WAS CLOSED.** `lib/authorize.js` loads the rules with `const R = require("./rules.js")`. The object that file returns is written in JavaScript, and the checker treats such an object as OPEN: a property it does not have reads as `any` rather than as a finding. A seventh planted fault was added to `check:rules-types --red` — the authoriser calling `R.isSMOO(w, person)` — and run against the code as it stood. **NOT RED**, exactly as §589 said.
 
-**THE FIX IS A TYPE COMMENT AND A PAIR OF BRACKETS.** `R` is cast to `Closed<typeof import("./rules.js")>`, a mapped copy of the rules' own keys. A mapped type is closed, the same answer §587 gave the pages. Nothing runs differently:
+**THE FIX IS A TYPE COMMENT AND A PAIR OF BRACKETS.** `R` is cast to `Closed<typeof import("./rules.js")>`, a mapped copy of the rules' own keys. A mapped type is closed, the same answer §589 gave the pages. Nothing runs differently:
 - the four exports of the authoriser are character-for-character the same functions;
 - `scripts/test-authorize.js` still reads 1123 passed / 3 failed, and `npm run test:rules` 129 / 3 — the same six failures `main` already had (§585).
 
@@ -68366,4 +68366,4 @@ The carried copy, `smp-app/lib/authorize.cjs`, takes the change by the usual tra
 
 **NOTHING A BROWSER RECEIVES CHANGES.** The authoriser is not in build.py's list, so the built file, `shell.js` and the release stamp are untouched, and a merge needs no `SHELL` bump. It is server code that judges saves, but it judges them exactly as before, so no forced sign-out.
 
-**STILL NOT DONE, AS §587 LISTED.** The Next app's own TypeScript still reaches the rules through `require("./rules.cjs")` as `any`, and the pages carry no type comments of their own.
+**STILL NOT DONE, AS §589 LISTED.** The Next app's own TypeScript still reaches the rules through `require("./rules.cjs")` as `any`, and the pages carry no type comments of their own.

@@ -628,10 +628,21 @@ function rollCallSlide(u, g){
 /* ── THE GROUPS A BOX IS PRESENTED IN, FOR WHOEVER ASKS (§554.1) ───────
    Lifted out of `deckSlides` whole, so the master flow can draw the same
    roll-calls the company's own review draws rather than a second pair
-   that looks like them (§53.5). `short` is the caller's: the company's
-   review splits its two kinds, a unit's deck does not. */
-function pillarGroups(u, short){
-var capCards = !short ? "" : boardCapTargets().map(function(t){
+   that looks like them (§53.5).
+
+   §587: THE BOX'S OWN SETTING SPLITS IT, never which kind of box it is.
+   This took a `short` flag that meant "the company's review, units off", and
+   split the two kinds only there — a special case for one kind of box,
+   while Setup already carries the one answer to the question (directions
+   and capabilities shown apart, `boxSplit`). So the setting decides, for the
+   company and for any unit or function that uses it.
+
+   `records` is the one thing that IS the company's alone: capability
+   RECORDS (Setup › Capabilities, §334) are the company's, so they ride as
+   cards on its roll-call where the company is the plan (units off) and in
+   the Master presentation's group pages. */
+function pillarGroups(u, records){
+var capCards = !records ? "" : boardCapTargets().map(function(t){
   var c = capById(t.slice(4)), nm = placeLabel(t);
   return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
     '<span class="pcard-n">' + esc(nm) + '</span>' +
@@ -652,7 +663,7 @@ var capCards = !short ? "" : boardCapTargets().map(function(t){
    A GROUP WITH NOTHING IN IT IS NOT DRAWN (§45.2), so a company with
    directions and no capabilities reads exactly as it does today. */
 var groups;
-if (short && boxSplit(u)) {
+if (boxSplit(u)) {
   var dirs = [], caps = [];
   u.items.forEach(function(p, i){
     (SMPRules.pillarIsCap(p) ? caps : dirs).push({ p: p, i: i });
@@ -740,7 +751,9 @@ function deckSlides(u){
   /* §481: the company's own review is SHORT when its plan is the whole plan
      (units off): foundation, analysis, the directions and capabilities, then
      their performance. Each direction's detail is its owner's own deck. */
-  var short = !!u.topLayer && companyReviewOn();
+  /* §587: the company's capability records ride on its roll-call where it
+     is the plan (see `pillarGroups`). */
+  var records = !!u.topLayer && companyReviewOn();
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
@@ -834,9 +847,17 @@ function deckSlides(u){
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
   /* §553.6: the company's own review shows its directions and its
      capabilities apart, so the wording below has two groups to name. */
-  var capsApart = short && boxSplit(u) &&
+  var capsApart = boxSplit(u) &&
     u.items.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
     u.items.some(function(p){ return !SMPRules.pillarIsCap(p); });
+  /* §591: AND A BOX SHOWN APART THAT HOLDS ONLY ONE KIND IS CALLED BY THAT
+     KIND. Wander's company is all capabilities; since §587 its roll-call and
+     score table say Capabilities, and this slide went on saying "4 Pillars"
+     — two names for the same four things in one deck (§553.6's rule: a room
+     can check a name). */
+  var onlyCaps = boxSplit(u) && u.items.length > 0 &&
+    u.items.every(function(p){ return SMPRules.pillarIsCap(p); });
+  var kindBU = onlyCaps ? L("capability","bu") : L("pillar","bu");
   /* §553.2: the cells are this box's; the slide is everyone's. */
   var standSlide = standSlideOf(
     (u.fnKey || u.topLayer ? esc(deckBoxName(u)) : "the unit"),
@@ -855,17 +876,17 @@ function deckSlides(u){
          cell would also break a grid that goes to three. */
       standCell(capsApart
           ? L("pillar","bu") + ' &amp; ' + L("capability","bu") + ' performance'
-          : L("pillar","bu") + ' performance', pl,
+          : kindBU + ' performance', pl,
         capsApart
           ? itemsNow(u).filter(function(p){ return !SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("pillar","bu")) + ' and ' +
             itemsNow(u).filter(function(p){ return SMPRules.pillarIsCap(p); }).length +
             ' ' + esc(L("capability","bu")) + ', by their measures'
-          : itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+          : itemsNow(u).length + ' ' + esc(kindBU) + ', by their measures'),
       standCell('Execution performance', ex,
         dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
-    esc(L("pillar","bu")) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
+    esc(kindBU) + (capsApart ? ' and ' + esc(L("capability","bu")) : '') +
     ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.');
 
@@ -977,7 +998,7 @@ function deckSlides(u){
      goes on reading as the content slide it is. */
   /* The divider belongs to the deck, not to the group reader: the master
      flow draws the roll-calls without it (§554.1). */
-  var plan = pillarsPlanPart(u, short);
+  var plan = pillarsPlanPart(u, records);
 
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
@@ -1037,7 +1058,7 @@ function deckSlides(u){
     /* It announces what is BEHIND it, and §553.8 moved the two score
        tables in front of it — so where they have already been read, this
        says the one thing left (§253, §61). */
-    perfSub: "Where the " + L("pillar","bu") +
+    perfSub: "Where the " + kindBU +
       (capsApart ? " and the " + L("capability","bu") : "") + " stand, where " +
       (u.fnKey || u.topLayer ? deckBoxName(u) : "the unit") +
       " stands, and what the cycle is remembered for.",
@@ -1066,23 +1087,24 @@ function deckSlides(u){
 /* THE PLAN PART OF A PILLARS BOX (§586): its divider, each group's roll-call
    and each pillar's own slides — and the score tables, which `deckOf` says
    at the end (§254.4). */
-function pillarsPlanPart(u, short){
+function pillarsPlanPart(u, records){
   /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
   var S = [], pOn = planOn(u);
-  if (pOn && u.items.length && !short)
+  var apart = boxSplit(u);
+  if (pOn && u.items.length && !apart)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey || u.topLayer ? deckBoxName(u) : "this unit") + " committed to, and how each is going.", null));
 
-  var groups = pillarGroups(u, short);
+  var groups = pillarGroups(u, records);
 
   if (pOn) groups.forEach(function(g){
     if (!groupSize(g)) return;
     /* §557: Islam's *"before every part"* — the company's review shows its
        directions and its capabilities as two parts, so each opens with its
        own divider, as the one group of a unit's deck does above. */
-    if (short) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
+    if (apart) S.push(sectSlide(g.names === "capnames" ? "scaps" : "spillars",
       "After the " + g.plain + " divider", (g.names === "capnames" ? "" : "Strategic ") + g.plain,
       "The " + groupSize(g) + " " + g.plain + " " + deckBoxName(u) + " committed to, and how each is going.", null));
     S.push(rollCallSlide(u, g));
@@ -2721,7 +2743,11 @@ function masterKindWord(t){
   if (k === "sec") return "SECTION";
   if (k === "dir") return SMPRules.pillarIsCap((dirPillar(t) || {}).p) ? "CAP" : "DIR";
   if (k === "cap") return "CAP";
-  if (t === "group" && companyReviewOn()) return "CO";
+  /* §591: THE COMPANY IS THE COMPANY ON EITHER SHAPE. With units on and the
+     company planning too (§544, "both can be on"), `boardUnitTargets` puts
+     the company first among the units (§428) — and this chip called it a
+     business unit. */
+  if (t === "group") return "CO";
   return k === "fn" ? "FUNC" : "BU";
 }
 var MFKIND_NAME = { SECTION:"Sections", DIR:"Directions", CAP:"Capabilities",

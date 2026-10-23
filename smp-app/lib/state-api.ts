@@ -203,6 +203,26 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
       return { code: 200, body: { ok: true, office, log: rows } };
     });
   }
+  /* ── WHAT CHANGED SINCE N (§588.1): the change itself, tenant-wide ──
+     The tab holds the number of the last save it has taken in and asks for
+     everything after it, oldest first; the answer is each save's change
+     list, which the tab applies onto its own copy with the same differ the
+     server used. Nothing new is one indexed read and an empty list. The
+     asker's own saves are in it on purpose: a save of theirs that landed
+     between two of somebody else's is what makes their copy converge, and
+     applied to a copy that already holds it, it changes nothing. */
+  const after = q.get("after");
+  if (after !== null && /^\d{1,18}$/.test(after)) {
+    return withTenant(r.tenant.id, async (c) => {
+      const rows = (await c.query(
+        "SELECT id, at, person_key, person_name, changes FROM saves WHERE id > $1 ORDER BY id ASC LIMIT " + (PEEK_CAP + 1),
+        [after])).rows;
+      const page = rows.slice(0, PEEK_CAP);
+      const seq = page.length ? Number(page[page.length - 1].id) : Number(after);
+      return { code: 200, body: { ok: true, seq, more: rows.length > PEEK_CAP,
+        changes: page.map((x: any) => ({ seq: Number(x.id), by: x.person_name || x.person_key, byKey: x.person_key, at: x.at, changes: x.changes })) } };
+    });
+  }
   /* ── THE PEEK (§258): who else landed a change on this page since ── */
   const since = within(q, "since"), target = q.get("target");
   if (since && target) {
@@ -218,10 +238,18 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
       return { code: 200, body: { ok: true, changed: rows.map((x: any) => ({ by: x.by || x.by_key, at: x.at })) } };
     });
   }
-  const state = await withTenant(r.tenant.id, (c) => readState(c));
-  if (!state) return { code: 404, body: { ok: false, error: "This client holds no plan yet." } };
-  return { code: 200, body: { ok: true, person, state } };
+  /* §588.1: the graph and the number of the last save in it, read in the one
+     transaction, so the tab's first "what changed since" starts exactly
+     where this copy ends. */
+  const got = await withTenant(r.tenant.id, async (c) => ({
+    state: await readState(c),
+    seq: Number((await c.query("SELECT COALESCE(max(id), 0) AS seq FROM saves")).rows[0].seq)
+  }));
+  if (!got.state) return { code: 404, body: { ok: false, error: "This client holds no plan yet." } };
+  return { code: 200, body: { ok: true, person, state: got.state, seq: got.seq } };
 }
+/* §588.1: how many saves one ask carries; a tab that is told `more` asks again. */
+const PEEK_CAP = 50;
 
 export async function writeAnswer(r: Resolved, body: SaveBody): Promise<Answer> {
   const person = await personFor(r);

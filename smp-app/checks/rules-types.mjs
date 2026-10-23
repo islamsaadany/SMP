@@ -8,8 +8,10 @@
    passes everything, so --red makes each fault below in a copy and asserts
    the checker refuses it — a key the world does not hold, a key the world
    is built with that W() never names (§102's trap), a person handed where a
-   role is wanted, a word that is not a grant, and the server calling a rule
-   one argument short.
+   role is wanted, a word that is not a grant, the server calling a rule
+   one argument short, and the server calling a rule that does not exist
+   (missed until §590 closed the authoriser's `R` — an object written in
+   JavaScript is open to the checker).
 
      node checks/rules-types.mjs          # run from smp-app/
      node checks/rules-types.mjs --red    # every break must go red */
@@ -33,6 +35,7 @@ const BREAKS = {
   "not-a-grant": ["rules.js", 'if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";',
                   'if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "nothing";'],
   "caller-short": ["authorize.js", 'return R.grantIn(w, person, area, target) === "edit";', 'return R.grantIn(w, person, area) === "edit";'],
+  "caller-misspelt": ["authorize.js", "const smo = R.isSMO(w, person);", "const smo = R.isSMOO(w, person);"],
 };
 
 function tsc(dir) {

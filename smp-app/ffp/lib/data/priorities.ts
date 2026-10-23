@@ -40,6 +40,8 @@ export type PriorityRow = {
   code: string;
   name: string;
   department: string | null;
+  /** The main process this one sits under, when it is a sub-process. */
+  parentId: string | null;
   importance: number | null;
   complexity: number | null;
   risk: number | null;
@@ -112,6 +114,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
         id: true,
         code: true,
         name: true,
+        parentProcessId: true,
         category: { select: { name: true } },
         priorityImportance: true,
         priorityComplexity: true,
@@ -162,6 +165,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
       code: p.code,
       name: p.name,
       department: p.category?.name ?? null,
+      parentId: p.parentProcessId,
       importance: p.priorityImportance,
       complexity: p.priorityComplexity,
       risk: p.priorityRisk,

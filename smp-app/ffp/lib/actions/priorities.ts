@@ -171,6 +171,32 @@ export async function acceptSuggestedScores(input: z.infer<typeof ws>): Promise<
   return ok({ filled });
 }
 
+const KINDS = ["importance", "complexity", "risk", "why", "decision"] as const;
+const clearSchema = ws.extend({
+  kinds: z.array(z.enum(KINDS)).min(1),
+  processIds: z.array(z.string().min(1)).min(1).max(1000),
+});
+
+/** Empties the chosen kinds of entry on the chosen processes. Only what was picked is touched; the draft rule applies. */
+export async function clearPriorityEntries(input: z.infer<typeof clearSchema>): Promise<ActionResult<{ cleared: number }>> {
+  const parsed = clearSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, kinds, processIds } = parsed.data;
+  const denied = await editor(workspaceId);
+  if (denied) return denied;
+  const locked = await mustBeDraft(workspaceId);
+  if (locked) return locked;
+  const data: Record<string, null> = {};
+  if (kinds.includes("importance")) data.priorityImportance = null;
+  if (kinds.includes("complexity")) data.priorityComplexity = null;
+  if (kinds.includes("risk")) data.priorityRisk = null;
+  if (kinds.includes("why")) data.priorityWhy = null;
+  if (kinds.includes("decision")) data.deepDiveDecision = null;
+  const res = await prisma.process.updateMany({ where: { id: { in: processIds }, workspaceId, archivedAt: null }, data });
+  refresh(workspaceId);
+  return ok({ cleared: res.count });
+}
+
 /** Sets a decision for every scored process that has none, from the ranking and the team's capacity. Never changes a decision somebody made. */
 export async function fillDecisionsFromRanking(input: z.infer<typeof ws>): Promise<ActionResult<{ filled: number }>> {
   const parsed = ws.safeParse(input);

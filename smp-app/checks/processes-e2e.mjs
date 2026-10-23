@@ -272,6 +272,31 @@ const dec2 = Object.fromEntries((await q(ffp, 'select code, "deepDiveDecision" d
 check(dec2["P1.1"] === "WAVE_1" && dec2["P2.4"] === "WAVE_2", "suggesting waves never changes a decision somebody made");
 check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored processes undecided", JSON.stringify(dec2));
 
+/* The list keeps its order while scoring; sub-processes sit under their main; "Clear entries" clears only what was picked. */
+const order = () => A.page.$$eval("tbody tr td:nth-child(2) .font-mono", (e) => e.map((x) => x.textContent.trim()));
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const before = await order();
+await dot("Hire to Retire", "risk", 5); await dot("Hire to Retire", "importance", 5);
+await waitScore("Hire to Retire", "—").catch(() => {}); await A.page.waitForTimeout(1200);
+const afterOrder = await order();
+check(JSON.stringify(before) === JSON.stringify(afterOrder) && before.join() === [...before].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).join(), "scoring a process does not move any row", before.join() + " | " + afterOrder.join());
+await q(ffp, 'update processes set "parentProcessId"=(select id from processes where code=$2 and "workspaceId"=$1) where code=$3 and "workspaceId"=$1', [S, "P2.4", "P3.1"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const tree = await order();
+check(tree.indexOf("P3.1") === tree.indexOf("P2.4") + 1 && /main/i.test(await body(A.page)) && (await A.page.$$("tbody td.ps-8")).length === 1, "a sub-process sits directly under its main process, indented", tree.join());
+await q(ffp, 'update processes set "parentProcessId"=null where code=$2 and "workspaceId"=$1', [S, "P3.1"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.click("button:text-is('Clear entries…')");
+await A.page.click("[aria-label='Clear entries'] label:text-is('Risk') input");
+await A.page.click("button:text-is('Untick all')");
+await A.page.click("input[aria-label='Clear Hire to Retire']");
+A.page.once("dialog", (d) => d.accept());
+await A.page.click("button:text-is('Clear the selected')");
+await A.page.waitForSelector("[role=status]:has-text('Cleared 1')", { timeout: 20000 });
+const cl = Object.fromEntries((await q(ffp, 'select code, "priorityRisk" r, "priorityImportance" i from processes where "workspaceId"=$1', [S])).map((r) => [r.code, r]));
+check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear entries empties only the kind picked, on only the processes ticked", JSON.stringify(cl["P5.1"]) + JSON.stringify(cl["P1.1"]));
+await q(ffp, 'update processes set "priorityImportance"=null where code=$2 and "workspaceId"=$1', [S, "P5.1"]);
+
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=rank", { waitUntil: "networkidle" });
 check((await A.page.$$("svg circle")).length === 3 && /Not scored yet/.test(await body(A.page)), "the chart plots the scored processes and names the rest");
 await A.page.click("svg a >> nth=0"); await A.page.waitForURL(/sel=/, { timeout: 20000 });

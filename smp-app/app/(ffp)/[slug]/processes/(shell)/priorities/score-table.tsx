@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   acceptSuggestedScores,
+  clearPriorityEntries,
   fillDecisionsFromRanking,
   setDeepDiveDecision,
   setPlanSettings,
@@ -23,6 +24,29 @@ const DOT_ON: Record<"importance" | "complexity" | "risk", string> = {
   complexity: "border-amber-600 bg-amber-500",
   risk: "border-rose-700 bg-rose-600",
 };
+
+const CLEAR_KINDS = [
+  { key: "importance", label: "Importance" },
+  { key: "complexity", label: "Complexity" },
+  { key: "risk", label: "Risk" },
+  { key: "why", label: "Why notes" },
+  { key: "decision", label: "Decisions" },
+] as const;
+
+/** Main processes in code order, each followed by its own sub-processes; a sub whose main is not in the list stands as a main. */
+function inTree(rows: PriorityRow[]): { row: PriorityRow; sub: boolean; hasSubs: boolean }[] {
+  const ids = new Set(rows.map((r) => r.id));
+  const byCode = (a: PriorityRow, b: PriorityRow) => a.code.localeCompare(b.code, undefined, { numeric: true });
+  const kids = new Map<string, PriorityRow[]>();
+  for (const r of rows) if (r.parentId && ids.has(r.parentId)) (kids.get(r.parentId) ?? kids.set(r.parentId, []).get(r.parentId)!).push(r);
+  const out: { row: PriorityRow; sub: boolean; hasSubs: boolean }[] = [];
+  for (const m of rows.filter((r) => !r.parentId || !ids.has(r.parentId)).sort(byCode)) {
+    const subs = (kids.get(m.id) ?? []).sort(byCode);
+    out.push({ row: m, sub: false, hasSubs: subs.length > 0 });
+    for (const c of subs) out.push({ row: c, sub: true, hasSubs: false });
+  }
+  return out;
+}
 
 export function ScoreTable({
   workspaceId,
@@ -46,6 +70,22 @@ export function ScoreTable({
   const [live, setLive] = useState(weights);
   const [cap, setCap] = useState(capacity);
   const [note, setNote] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
+  const [kinds, setKinds] = useState<ReadonlySet<string>>(new Set());
+  const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
+  const tree = useMemo(() => inTree(rows), [rows]);
+
+  function openClear() {
+    setKinds(new Set());
+    setPicked(new Set(rows.map((r) => r.id)));
+    setClearing(true);
+  }
+  function toggle<T>(set: ReadonlySet<T>, v: T, on: boolean): Set<T> {
+    const next = new Set(set);
+    if (on) next.add(v);
+    else next.delete(v);
+    return next;
+  }
 
   function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string; data?: unknown }>, after?: (d: unknown) => void) {
     setError(null);
@@ -124,7 +164,48 @@ export function ScoreTable({
           >
             Suggest waves from the ranking
           </button>
+          <button
+            type="button"
+            disabled={!editable || pending}
+            onClick={() => (clearing ? setClearing(false) : openClear())}
+            aria-expanded={clearing}
+            className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-50 disabled:opacity-40"
+          >
+            Clear entries…
+          </button>
         </div>
+        {clearing && (
+          <div role="group" aria-label="Clear entries" className="mt-3 rounded-lg border border-rose-200 bg-rose-50/50 p-3 text-xs text-slate-700">
+            <p className="font-semibold text-slate-900">What do you want to clear? <span className="font-normal text-slate-500">Then tick the processes in the list (all are ticked to start).</span></p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {CLEAR_KINDS.map((k) => (
+                <label key={k.key} className="flex items-center gap-1.5">
+                  <input type="checkbox" checked={kinds.has(k.key)} onChange={(e) => setKinds(toggle(kinds, k.key, e.target.checked))} />
+                  {k.label}
+                </label>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button type="button" className="underline" onClick={() => setPicked(new Set(rows.map((r) => r.id)))}>Tick all</button>
+              <button type="button" className="underline" onClick={() => setPicked(new Set())}>Untick all</button>
+              <button
+                type="button"
+                disabled={pending || kinds.size === 0 || picked.size === 0}
+                onClick={() => {
+                  if (!window.confirm(`Clear ${[...kinds].join(", ")} on ${picked.size} process(es)? This cannot be undone.`)) return;
+                  run(() => clearPriorityEntries({ workspaceId, kinds: [...kinds] as (typeof CLEAR_KINDS)[number]["key"][], processIds: [...picked] }), (d) => {
+                    setNote(`Cleared ${(d as { cleared: number }).cleared} process(es).`);
+                    setClearing(false);
+                  });
+                }}
+                className="rounded-lg bg-rose-700 px-3 py-1.5 font-semibold text-white hover:bg-rose-800 disabled:opacity-40"
+              >
+                Clear the selected
+              </button>
+              <button type="button" className="underline" onClick={() => setClearing(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
         {note && <p role="status" className="mt-2 text-xs text-emerald-700">{note}</p>}
       </section>
 
@@ -132,6 +213,7 @@ export function ScoreTable({
         <table className="w-full min-w-[900px] text-sm">
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
             <tr>
+              {clearing && <th className="px-3 py-2"><span className="sr-only">Clear</span></th>}
               <th className="px-3 py-2">Rank</th>
               <th className="px-3 py-2">Process</th>
               <th className="px-3 py-2">Department</th>
@@ -145,13 +227,22 @@ export function ScoreTable({
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={9} className="px-3 py-6 text-center text-slate-400">No processes yet. Map the high-level processes first.</td></tr>
+              <tr><td colSpan={clearing ? 10 : 9} className="px-3 py-6 text-center text-slate-400">No processes yet. Map the high-level processes first.</td></tr>
             )}
-            {rows.map((r) => (
-              <tr key={r.id} className="border-t border-slate-100 align-top">
+            {tree.map(({ row: r, sub, hasSubs }) => (
+              <tr key={r.id} className={`border-t border-slate-100 align-top ${sub ? "" : "bg-slate-50/40"}`}>
+                {clearing && (
+                  <td className="px-3 py-2">
+                    <input type="checkbox" aria-label={`Clear ${r.name}`} checked={picked.has(r.id)} onChange={(e) => setPicked(toggle(picked, r.id, e.target.checked))} />
+                  </td>
+                )}
                 <td className="px-3 py-2 font-bold">{r.rank ?? "—"}</td>
-                <td className="px-3 py-2">
-                  <div className="font-semibold text-slate-900">{r.name}</div>
+                <td className={`px-3 py-2 ${sub ? "ps-8" : ""}`}>
+                  <div className={sub ? "font-medium text-slate-800" : "font-semibold text-slate-900"}>
+                    {sub && <span aria-hidden className="me-1 text-slate-400">↳</span>}
+                    {r.name}
+                    {hasSubs && <span className="ms-2 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-600">Main</span>}
+                  </div>
                   <div className="font-mono text-xs text-slate-500">{r.code}</div>
                 </td>
                 <td className="px-3 py-2 text-slate-600">{r.department ?? "—"}</td>

@@ -68350,3 +68350,20 @@ The declarations live in the check, never in `smp-app/`: a `.d.ts` there would w
 - **The Next app** still reaches the rules as `any`.
 
 Not merged; `main` stays untouched until Islam says.
+
+## §588 — The server's authoriser stops reading a misspelt rule as `any` (2026-10-23)
+Islam, of the gap §587 named: *"fix the gap and put it live"*.
+
+**THE GAP, PROVED BEFORE IT WAS CLOSED.** `lib/authorize.js` loads the rules with `const R = require("./rules.js")`. The object that file returns is written in JavaScript, and the checker treats such an object as OPEN: a property it does not have reads as `any` rather than as a finding. A seventh planted fault was added to `check:rules-types --red` — the authoriser calling `R.isSMOO(w, person)` — and run against the code as it stood. **NOT RED**, exactly as §587 said.
+
+**THE FIX IS A TYPE COMMENT AND A PAIR OF BRACKETS.** `R` is cast to `Closed<typeof import("./rules.js")>`, a mapped copy of the rules' own keys. A mapped type is closed, the same answer §587 gave the pages. Nothing runs differently:
+- the four exports of the authoriser are character-for-character the same functions;
+- `scripts/test-authorize.js` still reads 1123 passed / 3 failed, and `npm run test:rules` 129 / 3 — the same six failures `main` already had (§585).
+
+The carried copy, `smp-app/lib/authorize.cjs`, takes the change by the usual transform and is asserted in step. Its comment keeps `./rules.js`, because only the original is checked.
+
+**WHAT CLOSING IT FOUND: NOTHING WRONG.** With `R` closed, the authoriser still checks clean, so every rule it calls by name exists. The seventh fault is now caught (TS2551), and the other six still are.
+
+**NOTHING A BROWSER RECEIVES CHANGES.** The authoriser is not in build.py's list, so the built file, `shell.js` and the release stamp are untouched, and a merge needs no `SHELL` bump. It is server code that judges saves, but it judges them exactly as before, so no forced sign-out.
+
+**STILL NOT DONE, AS §587 LISTED.** The Next app's own TypeScript still reaches the rules through `require("./rules.cjs")` as `any`, and the pages carry no type comments of their own.

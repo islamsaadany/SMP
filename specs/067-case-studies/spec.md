@@ -1,9 +1,11 @@
 # 067 · Case studies — what we did for a client, written for the next person
 
-**Status:** **clarified 2026-10-23, not drawn, nothing built.** Eleven
-decisions are Islam's, taken the same day as three rounds of questions (§3).
-The shape below follows from them; the screens are a mockup before a source
-moves (rule 1c), and two things are left to settle on it (§10).
+**Status:** **clarified and DRAWN 2026-10-23, waiting on sign-off; nothing
+built.** Eleven decisions are Islam's, taken the same day as three rounds of
+questions (§3), and the name is his too: *"call it case studies"*.
+**Mockup:** `design-mockups/case-studies/2026-10-23_case-studies.html` — ten
+drawings in the console's own tokens and components (rule 1c, A17). Three
+things are put to him on it (§10).
 
 **Read with spec 045 (the consulting memory)**, which this changes rather than
 sits beside: a case study is the main thing and the memory's entries move
@@ -244,14 +246,24 @@ confidently from nothing.
 
 ---
 
-## 10 · Open — to settle on the mockup
+## 10 · Open — put to Islam on the mockup
 
-1. **What the tab is called** now that it holds case studies with their
-   lessons inside. *Memory*, *Case studies*, or a third word — a wording
-   question answered by drawing it (§124, §266), and the name is Islam's (A4).
-2. **That a piece of work is opened when the work starts** (§5), by an admin,
-   so lessons along the way land in it. It follows from decisions 1, 9 and 11
-   together and was not put to Islam on its own.
+**Settled:** the tab is **Case studies** (Islam, 2026-10-23, asking for the
+drawing: *"draw the mockup, call it case studies"*). It takes Memory's place
+in the column under *Knowledge*, and opens on case studies; today's list is
+one press away as **Insights** (drawings 1 and 3).
+
+1. **That a piece of work is opened when the work starts** (§5; drawings 4
+   and 5), by an admin, so insights along the way land in it. It follows from
+   decisions 1, 9 and 11 together and was not put to Islam on its own.
+2. **The small entries keep their word, *insight*.** The memory's screens say
+   it today (*Add one insight*, *Write up a period*); Islam's own word in this
+   conversation was *lessons*, which is also one of the three kinds, so a
+   section headed *Lessons* would sit over rows tagged *Lesson*. Kept, and
+   asked rather than renamed (rule 1b).
+3. **A past client's card shows its case studies** (drawing 9) — a row
+   *Case studies · 1 to write*, the only thing on an archived card that opens
+   anything. 045 allowed the card *a count and a way in*; this is that.
 
 ---
 

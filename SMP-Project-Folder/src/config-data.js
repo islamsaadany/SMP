@@ -7333,9 +7333,20 @@ function reviewAsOf(){
      rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
+  return y * 12 + (cycleEndQuarter() * 3 - 1);   /* the LAST month of that quarter */
+}
+/* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
+   `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
+   Four readers used to ask the raw field each in their own way, and on a cycle
+   whose end cannot be read and which holds no quarter they split: the quarter
+   pips said all four quarters had passed while `tacticShare()` compared
+   against `undefined` and called every tactic 0% due, the failure its own
+   comment warns of. A cycle opened in the product cannot reach this -- the
+   form has asked for its end month since §307 -- so it is an older cycle
+   whose end was written in free text with no year anywhere. */
+function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+  return (q >= 1 && q <= 4) ? q : 4;
 }
 /* Did the month come from the cycle's own end, or from one of the fallbacks
    above? The strip says which, because a review point nobody set is a guess
@@ -7441,7 +7452,7 @@ function elapsedMonths(){
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
   var a = reviewAsOf(), y = reviewYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  if (a == null || y == null) return (i + 1) <= cycleEndQuarter();
   return y * 12 + i * 3 + 2 <= a;
 }
 /* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
@@ -8015,7 +8026,7 @@ function tacticShare(t){
     for (var j = 0; j < 4; j++) {
       if (!q[j]) continue;
       tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
+      if (j + 1 <= cycleEndQuarter()) el++;
     }
     return tot ? el / tot : null;
   }
@@ -8137,7 +8148,7 @@ function tacticFirstQuarterOver(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    if (y == null || a == null) return i + 1 <= cycleEndQuarter();
     return y * 12 + i * 3 + 2 <= a;
   }
   return false;

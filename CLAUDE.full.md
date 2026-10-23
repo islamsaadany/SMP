@@ -11166,7 +11166,12 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # checked COPY only, so a misspelt member is a
                                 # finding; data-only objects and computed
                                 # names (`ROWFIND[t]`) stay open. Eighteen
-                                # breaks now
+                                # breaks now. §602: lib/state.d.ts DESCRIBES
+                                # the data (SMP.Review, SMP.Unit, Pillar…);
+                                # DESCRIBED labels REVIEW and UNITS with it in
+                                # the copy. A new field on them goes into
+                                # state.d.ts in the same edit, or this fails
+                                # naming it. Twenty breaks
 node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
                                 # — `npm run check:app-types`. A carried .cjs
                                 # loaded with `require` is `any`: load the

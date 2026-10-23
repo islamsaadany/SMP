@@ -5,6 +5,9 @@
 
 ## 2026-10-23
 
+### A theme's note runs to several lines (§613) (built, merged to `main` 2026-10-23)
+On the company level's Foundation, a theme's Note is a box that grows, where Enter starts a new line; the theme cards and the Temple's columns show the note with its line breaks.
+
 ### The company's Core Values can be added, its Capabilities section is there before the first one, and its themes are written on the Foundation while the Temple only shows (§611, §611.1) (built, merged to `main` 2026-10-23)
 On the company level, with the pen open, Core Values work as a business unit's do: a name and a definition per value, × to remove, *+ Add a value*. Once the office has switched capabilities on, the Capabilities section under Strategy shows while still empty, with its *+ Add*. The Foundation has a Themes box under Key Objectives (code, name, note, how many pillars use it, *In use* or Remove, *+ Add a theme*), and Key Objectives a Heading column where the Temple is on. The Temple has no Edit: it shows what the Foundation and the Capabilities section hold. El Abd is unchanged but for its Core Values box while editing.
 

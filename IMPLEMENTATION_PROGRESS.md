@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-23 — A theme's note runs to several lines (§613), on the branch, not merged.** On the company level's Foundation, a theme's Note is now a box that grows, where Enter starts a new line, like the Core Values' descriptions. The theme cards and the Temple's columns show the note with its line breaks.
+**2026-10-23 — A theme's note runs to several lines (§613), merged to `main` 2026-10-23 on Islam's word.** On the company level's Foundation, a theme's Note is now a box that grows, where Enter starts a new line, like the Core Values' descriptions. The theme cards and the Temple's columns show the note with its line breaks.
 
 **2026-10-23 — The two faults §602 found are fixed (§603), merged to `main` 2026-10-23 on Islam's word.** The shared rule now offers a capability only what Client set-up › Structure offers it (its brief, its North Star and, where ticked, its S&W), and a cycle whose end can't be read gives one answer everywhere for where it stands. Corrected before release: the capability faults, including the third one Islam asked to fix, could not be reached by anybody. My checks had drawn a business unit's Foundation for a capability, which the platform never does: a capability's own page shows its name, owner and definition, and the definition can be edited there. The cycle fault can only happen on an older cycle whose end was typed with no year; a cycle opened today always has one. Nothing anybody sees changes.
 

@@ -602,7 +602,10 @@
    offers; one answer for the quarter a cycle ends in. The built file's bytes
    changed (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.02-capability-parts";
+/* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
+   file's bytes changed (§91). Proved held by no commit in any ref's history
+   (§94.16). */
+const SHELL = "smp-shell-v7.03-theme-notes";
 const ASSETS = [
   "/",
   "/index.html",

@@ -1,4 +1,4 @@
-/* THE STRATEGY PAGES, READ BY TYPESCRIPT'S CHECKER (§589) — no browser, no
+/* THE STRATEGY PAGES AND THE CONSOLE, READ BY TYPESCRIPT'S CHECKER (§589, §594) — no browser, no
    database, and nothing in the pages is edited. §585 described the shared
    rules; this lets the pages see that description. They are plain scripts
    sharing one page, so the checker is handed them the way the browser runs
@@ -16,13 +16,29 @@
    them, or on a recorded one that has gone (the list stays exact, or it
    stops meaning anything).
 
+   AND THE CONSOLE PAGE (§594), read the same way as a second subject with
+   its own list (console-types.known.json): platform.html's own script, plus
+   the two scripts its tags load — the debrief splitter, declared closed
+   like the library files, and the set-up flow (client-setup.js), which the
+   console mounts for Add a client and an archived client. Most of the
+   console's findings are the set-up flow naming STRATEGY-PAGE data the
+   console does not have. Each is guarded or never reached there today, and
+   that is the point of listing them: a NEW one is a name the console may
+   reach and throw on, which is how §467's crash came about.
+
    A NEW FINDING IS READ BEFORE IT IS RECORDED. Fix it if it is real; if it
    is noise, `--write` records it — never to make a red check green unread.
 
    --red makes each fault below in a copy and asserts a NEW finding lands in
-   the broken file: a rule the pages call misspelt, a rule called one
-   argument short, the world and the viewer swapped, a function from another
-   file misspelt, a misspelt property on a page element, a misspelt global.
+   the broken file. On the strategy pages: a rule the pages call misspelt, a
+   rule called one argument short, the world and the viewer swapped, a
+   function from another file misspelt, a misspelt property on a page
+   element, a misspelt global. On the console: a function, a variable, the
+   splitter and an element's method misspelt, and the create piece reaching
+   for the strategy page's GROUP. NOT caught, on either page: a misspelt
+   member of an object a page script builds itself (CLIENTSETUP.mountCreat)
+   — an object written in JavaScript is open, and only the library names
+   are declared closed.
 
      node checks/pages-types.mjs          # run from smp-app/
      node checks/pages-types.mjs --red    # every break must go red
@@ -38,7 +54,6 @@ const APP = join(here, "..");
 const REPO = join(APP, "..");
 const SRC = join(REPO, "SMP-Project-Folder", "src");
 const TSC = join(APP, "node_modules", "typescript", "bin", "tsc");
-const KNOWN = join(here, "pages-types.known.json");
 
 /* WHAT THE PAGE HAS THAT THE CHECKER CANNOT SEE. Written into the copy the
    check runs on, never into smp-app/ — a .d.ts there would widen the Next
@@ -55,24 +70,7 @@ const KNOWN = join(here, "pages-types.known.json");
      `querySelector` as a bare Element, which has no `value` or `dataset`; the
      pages know what they looked up. Named one by one rather than opened with
      an index signature, so `el.datset` is still a finding (--red asserts it). */
-const GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
-declare var SMPRules: Closed<typeof import("./rules.js")>;
-declare var SMPDiff: Closed<typeof import("./graph-diff.js")>;
-declare var SMPAudience: Closed<typeof import("./audience.js")>;
-declare var MAIL: Closed<typeof import("./mail-html.js")>;
-declare var RECIPES: typeof import("./recipes.js").RECIPES;
-declare var recipeCount: typeof import("./recipes.js").recipeCount;
-declare var recipesFlat: typeof import("./recipes.js").recipesFlat;
-declare var focusNoScroll: (f: any) => void;
-declare var wirePersonFields: (root: any) => void;
-declare var wirePersonDialogControls: (root: any) => void;
-interface Window {
-  focusNoScroll: (f: any) => void; wirePersonFields: (root: any) => void; wirePersonDialogControls: (root: any) => void;
-  __copWaitMs: number; __copWork: any; __copSize: any; __smpRefresh: any;
-  getScreenDetails: () => Promise<any>; clipboardData: any; msCrypto: Crypto;
-}
-interface Screen { isExtended: boolean; }
-interface Element {
+const DOM = `interface Element {
   dataset: DOMStringMap; value: any; hidden: boolean | "until-found"; focus(options?: FocusOptions): void;
   style: any; click(): void; disabled: boolean; blur(): void; title: string; select(): void;
   files: FileList | null; offsetHeight: number; offsetWidth: number; offsetLeft: number;
@@ -89,8 +87,32 @@ interface Event {
   pointerId: number; clientX: number; clientY: number; button: number;
 }
 `;
+const STRATEGY_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+declare var SMPRules: Closed<typeof import("./rules.js")>;
+declare var SMPDiff: Closed<typeof import("./graph-diff.js")>;
+declare var SMPAudience: Closed<typeof import("./audience.js")>;
+declare var MAIL: Closed<typeof import("./mail-html.js")>;
+declare var RECIPES: typeof import("./recipes.js").RECIPES;
+declare var recipeCount: typeof import("./recipes.js").recipeCount;
+declare var recipesFlat: typeof import("./recipes.js").recipesFlat;
+declare var focusNoScroll: (f: any) => void;
+declare var wirePersonFields: (root: any) => void;
+declare var wirePersonDialogControls: (root: any) => void;
+interface Window {
+  focusNoScroll: (f: any) => void; wirePersonFields: (root: any) => void; wirePersonDialogControls: (root: any) => void;
+  __copWaitMs: number; __copWork: any; __copSize: any; __smpRefresh: any;
+  getScreenDetails: () => Promise<any>; clipboardData: any; msCrypto: Crypto;
+}
+interface Screen { isExtended: boolean; }
+` + DOM;
+/* The console loads the debrief splitter, a module to the checker for the
+   library files' reason, and nothing else of the frozen product's but the
+   set-up flow — whose strategy-page names it does NOT have (§594). */
+const CONSOLE_GLOBALS = `type Closed<T> = { [K in keyof T]: T[K] };
+declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
+` + DOM;
 
-const BREAKS = {
+const STRATEGY_BREAKS = {
   "rule-misspelt": ["config-data.js", "function mayDestroy(){ return SMPRules.mayDestroy(world(), viewer()); }",
                     "function mayDestroy(){ return SMPRules.mayDestory(world(), viewer()); }"],
   "rule-short": ["config-data.js", "return SMPRules.grantAtPage(world(), viewer(), pageKey, target);",
@@ -103,8 +125,22 @@ const BREAKS = {
                       'var asp = aspOn ? String(GRUOP.aspiration || "").trim() : ""'],
 };
 
+const CONSOLE_BREAKS = {
+  "function-misspelt": ["console-inline.js", 'function mpost(body) { return send("/api/memory", body); }',
+                        'function mpost(body) { return sendd("/api/memory", body); }'],
+  "variable-misspelt": ["console-inline.js", 'return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";',
+                        'return TABS_KNOW.indexOf(h) >= 0 ? h : "mywork";'],
+  "splitter-misspelt": ["console-inline.js", "var out = window.MemorySplit.split(text);", "var out = window.MemorySplit.splitt(text);"],
+  "element-method-misspelt": ["console-inline.js", 'document.getElementById("signout").addEventListener("click"',
+                              'document.getElementById("signout").addEventListner("click"'],
+  /* §467's class: the set-up flow's CREATE piece, which the console mounts,
+     reaching for a strategy-page name the console does not have. */
+  "setup-reaches-strategy-name": ["client-setup.js", 'var draft = { name:"", industry:"", size:"", notes:"" };',
+                                  'var draft = { name:"", industry:"", size:"", notes:"", group: GROUP };'],
+};
+
 /* The pages as the browser runs them, in a scratch directory. */
-function assemble() {
+function assembleStrategy() {
   const dir = mkdtempSync(join(tmpdir(), "pages-types-"));
   const buildPy = readFileSync(join(SRC, "build.py"), "utf8");
   const list = [...buildPy.matchAll(/\("([A-Z]+)","([^"]+)"\)/g)].map((m) => m[2]);
@@ -119,9 +155,42 @@ function assemble() {
   const m = /<script>\n([\s\S]*)<\/script>\s*$/.exec(readFileSync(join(SRC, "shell.html"), "utf8"));
   if (!m) throw new Error("pages-types: the shell's inline script was not found");
   writeFileSync(join(dir, "shell-inline.js"), m[1]);
-  writeFileSync(join(dir, "globals.d.ts"), GLOBALS);
+  writeFileSync(join(dir, "globals.d.ts"), STRATEGY_GLOBALS);
   return { dir, files: ["globals.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"] };
 }
+
+/* THE CONSOLE (platform.html, served unchanged by lib/shell.ts): its script
+   tags, read off the page rather than listed here, each mapped to the file
+   build-shell.mjs copies to that address — a script added to the page that
+   this does not know is a refusal, never a page quietly checked without it —
+   and its own inline script. */
+const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js") };
+function assembleConsole() {
+  const dir = mkdtempSync(join(tmpdir(), "console-types-"));
+  const page = readFileSync(join(REPO, "platform.html"), "utf8");
+  const files = ["globals.d.ts"];
+  for (const m of page.matchAll(/<script src="([^"]+)"><\/script>/g)) {
+    if (!CONSOLE_SRC[m[1]]) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    const name = basename(m[1]);
+    copyFileSync(CONSOLE_SRC[m[1]], join(dir, name));
+    if (name !== "memory-split.js") files.push(name);
+  }
+  const m = /<script>\n([\s\S]*)<\/script>\s*<\/body>/.exec(page);
+  if (!m) throw new Error("pages-types: platform.html's own script was not found");
+  writeFileSync(join(dir, "console-inline.js"), m[1]);
+  writeFileSync(join(dir, "globals.d.ts"), CONSOLE_GLOBALS);
+  files.push("console-inline.js");
+  return { dir, files };
+}
+
+const SUBJECTS = {
+  strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
+              note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
+              assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
+  console: { title: "the console page", known: join(here, "console-types.known.json"),
+             note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",
+             assemble: assembleConsole, breaks: CONSOLE_BREAKS, minFiles: 2, own: "console-inline.js" },
+};
 
 /* LOOSE, as §585's check is: TypeScript 7 defaults to strict with no
    tsconfig, and --ignoreConfig because smp-app's own would otherwise make it
@@ -140,9 +209,9 @@ function findings({ dir, files }) {
 }
 const keyOf = (f) => f.file + "\u0000" + f.code + "\u0000" + f.message;
 function tally(list) { const t = new Map(); for (const f of list) t.set(keyOf(f), (t.get(keyOf(f)) || 0) + 1); return t; }
-function known() {
+function known(path) {
   const t = new Map();
-  for (const k of JSON.parse(readFileSync(KNOWN, "utf8")).findings) t.set(keyOf(k), k.count);
+  for (const k of JSON.parse(readFileSync(path, "utf8")).findings) t.set(keyOf(k), k.count);
   return t;
 }
 /* The findings beyond what is recorded, by key: every line carrying an
@@ -155,46 +224,54 @@ function beyond(list, rec) {
 }
 
 if (process.argv.includes("--write")) {
-  const a = assemble();
-  try {
-    const t = tally(findings(a));
-    const out = [...t].map(([k, count]) => { const [file, code, message] = k.split("\u0000"); return { file, code, message, count }; })
-      .sort((x, y) => (x.file + x.code + x.message).localeCompare(y.file + y.code + y.message));
-    writeFileSync(KNOWN, JSON.stringify({ note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.", findings: out }, null, 1) + "\n");
-    console.log("recorded " + out.reduce((s, f) => s + f.count, 0) + " findings under " + out.length + " keys");
-  } finally { rmSync(a.dir, { recursive: true, force: true }); }
+  for (const sub of Object.values(SUBJECTS)) {
+    const a = sub.assemble();
+    try {
+      const t = tally(findings(a));
+      const out = [...t].map(([k, count]) => { const [file, code, message] = k.split("\u0000"); return { file, code, message, count }; })
+        .sort((x, y) => (x.file + x.code + x.message).localeCompare(y.file + y.code + y.message));
+      writeFileSync(sub.known, JSON.stringify({ note: sub.note, findings: out }, null, 1) + "\n");
+      console.log(sub.title + ": recorded " + out.reduce((n, f) => n + f.count, 0) + " findings under " + out.length + " keys");
+    } finally { rmSync(a.dir, { recursive: true, force: true }); }
+  }
   process.exit(0);
 }
 
 if (process.argv.includes("--red")) {
-  const rec = known(); let bad = 0;
-  for (const [n, [file, a, b]] of Object.entries(BREAKS)) {
-    const asm = assemble();
-    try {
-      const src = readFileSync(join(asm.dir, file), "utf8");
-      if (src.split(a).length !== 2) { console.log("BREAK DID NOT MATCH ONCE: " + n); bad++; continue; }
-      writeFileSync(join(asm.dir, file), src.replace(a, b));
-      const hit = beyond(findings(asm), rec).filter((f) => f.file === file);
-      if (!hit.length) { console.log("NOT RED: " + n); bad++; }
-      else console.log("red: " + n + " (" + [...new Set(hit.map((f) => f.code))].join(", ") + ")");
-    } finally { rmSync(asm.dir, { recursive: true, force: true }); }
+  let bad = 0;
+  for (const sub of Object.values(SUBJECTS)) {
+    const rec = known(sub.known);
+    for (const [n, [file, a, b]] of Object.entries(sub.breaks)) {
+      const asm = sub.assemble();
+      try {
+        const src = readFileSync(join(asm.dir, file), "utf8");
+        if (src.split(a).length !== 2) { console.log("BREAK DID NOT MATCH ONCE: " + sub.title + " / " + n); bad++; continue; }
+        writeFileSync(join(asm.dir, file), src.replace(a, b));
+        const hit = beyond(findings(asm), rec).filter((f) => f.file === file);
+        if (!hit.length) { console.log("NOT RED: " + sub.title + " / " + n); bad++; }
+        else console.log("red: " + sub.title + " / " + n + " (" + [...new Set(hit.map((f) => f.code))].join(", ") + ")");
+      } finally { rmSync(asm.dir, { recursive: true, force: true }); }
+    }
   }
   process.exit(bad ? 1 : 0);
 }
 
 let ok = 0; const fails = [];
 const check = (w, g, d) => { if (g) { ok++; console.log("  ok   " + w); } else { fails.push(w); console.log("  FAIL " + w + (d ? "\n" + d : "")); } };
-const asm = assemble();
-try {
-  const list = findings(asm), rec = known(), now = tally(list);
-  const total = [...rec.values()].reduce((s, n) => s + n, 0);
-  check("the pages are read as one page: " + (asm.files.length - 1) + " scripts, the shell's own among them",
-    asm.files.length > 30 && asm.files.includes("shell-inline.js"));
-  const extra = beyond(list, rec);
-  check("no finding beyond the " + total + " recorded ones (each read, none a fault)", !extra.length,
-    extra.map((f) => "       " + f.file + ":" + f.line + "  " + f.code + "  " + f.message).join("\n"));
-  const gone = [...rec].filter(([k, n]) => (now.get(k) || 0) < n).map(([k]) => k.split("\u0000").join("  "));
-  check("every recorded finding is still there, so the list stays exact", !gone.length,
-    gone.map((g) => "       " + g).join("\n") + "\n       — fixed or moved: run with --write to record the shorter list");
-} finally { rmSync(asm.dir, { recursive: true, force: true }); }
+for (const sub of Object.values(SUBJECTS)) {
+  console.log("── " + sub.title);
+  const asm = sub.assemble();
+  try {
+    const list = findings(asm), rec = known(sub.known), now = tally(list);
+    const total = [...rec.values()].reduce((n, c) => n + c, 0);
+    check(sub.title + " read as one page: " + (asm.files.length - 1) + " scripts, its own among them",
+      asm.files.length - 1 >= sub.minFiles && asm.files.includes(sub.own));
+    const extra = beyond(list, rec);
+    check("no finding beyond the " + total + " recorded ones, each read", !extra.length,
+      extra.map((f) => "       " + f.file + ":" + f.line + "  " + f.code + "  " + f.message).join("\n"));
+    const gone = [...rec].filter(([k, n]) => (now.get(k) || 0) < n).map(([k]) => k.split("\u0000").join("  "));
+    check("every recorded finding is still there, so the list stays exact", !gone.length,
+      gone.map((g) => "       " + g).join("\n") + "\n       — fixed or moved: run with --write to record the shorter list");
+  } finally { rmSync(asm.dir, { recursive: true, force: true }); }
+}
 console.log(`\n${ok} ok, ${fails.length} failed`); process.exit(fails.length ? 1 : 0);

@@ -11136,7 +11136,14 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # the pages → run this; a new finding is READ,
                                 # then fixed or recorded with `--write` — never
                                 # written to turn it green unread. `--red`: six
-                                # faults, all caught
+                                # faults, all caught. SINCE §594 IT ALSO READS
+                                # THE CONSOLE (platform.html + the scripts its
+                                # tags load), list console-types.known.json:
+                                # most of it is the set-up flow naming
+                                # STRATEGY-PAGE data the console lacks — a NEW
+                                # one there may throw on the console (§467):
+                                # show it is guarded before `--write`. Eleven
+                                # breaks across both pages, all caught
 node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)
                                 # — `npm run check:app-types`. A carried .cjs
                                 # loaded with `require` is `any`: load the

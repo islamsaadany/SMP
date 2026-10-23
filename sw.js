@@ -578,7 +578,12 @@
    comment that said seven steps. The built file's bytes changed, which is
    the whole trigger (§91). Proved held by no commit in any ref's history
    after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.96-modules-look";
+/* v6.98-strip-stays — §609: on a squeezed window the strip of directions
+   stays and the title goes. v6.97 is held twice on other branches, so this
+   skips it. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+const SHELL = "smp-shell-v6.98-strip-stays";
 const ASSETS = [
   "/",
   "/index.html",

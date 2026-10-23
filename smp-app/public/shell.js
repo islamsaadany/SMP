@@ -30544,7 +30544,10 @@ function themesBox(gpg){
         if (!nv || ts.some(function(x){ return x !== t && x.ab === nv; })) return;
         var old = t.ab; t.ab = nv; renameTheme(old, nv); }) + '</td>' +
       '<td>' + inputOr(gpg, t.name, "", function(v){ t.name = v; }) + '</td>' +
-      '<td>' + inputOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
+      /* §613: a note runs to several lines (Islam: *"allow the theme notes to
+         have multiple lines"*) — the growing box the Core Values' definitions
+         use, and the cards and the Temple's columns keep its line breaks. */
+      '<td>' + fieldOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
       '<td class="cc"><span class="mono">' + used + '</span></td>' +
       '<td class="cc acts1">' + (used
         ? '<span class="why">In use</span> ' + tip("A " + L1("pillar").toLowerCase() + " carries this " +

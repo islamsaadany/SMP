@@ -301,7 +301,7 @@
   .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;
                border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:12px 15px; }
   .themecard b { font-family:var(--serif); font-size:16px; font-weight:600; }
-  .themecard .themenote { font-size:13.5px; color:var(--ink-2); }
+  .themecard .themenote { font-size:13.5px; color:var(--ink-2); white-space:pre-line; }
   .themeband input.themecode { width:5.5em; text-align:center; }
   .themeband .why { display:inline; margin:0; }
 

@@ -6212,6 +6212,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      already announced by its heading; the line was doing the job twice. */
   .section { margin-top:26px; padding-top:0; border-top:0; }
   .section:first-of-type { margin-top:14px; }
+  /* §610: A RAIL OPENING THE PAGE SITS ONE GAP UNDER THE CHROME, NOT TWO.
+     The Directions page wrapped its rail in a headless section (§561.1 took
+     the heading away), so the section's 14px stacked on the view's 22px and
+     the rail stood 36px down where the Strategy page's stands 22px — Islam:
+     *"there is a space above the cards and the rail not needed"*. Only a
+     section with nothing before its rail; one with a heading keeps its air. */
+  .view > .section:first-child:has(> .split:first-child) { margin-top:0; }
   /* The single gap between the chrome and the page. The rail's sticky offset
      is calc(--chrome-h + this), so the rail's flow position and its pin
      position are the same number by construction and it cannot slide. */
@@ -6570,8 +6577,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  .minirow .sub-n { font-size:9.5px; color:var(--ink-3); letter-spacing:.06em;
-                    text-transform:uppercase; font-weight:700; margin-top:2px; }
+  /* §610: the pillar pane's score pair, headline first (`scorePair`). */
+  .scores.hero .card.tight { padding:18px 20px 16px; }
+  .scores.hero .card.tight .score-h { margin-bottom:10px; }
+  .scores.hero .headline { align-items:center; gap:14px; }
+  .scores.hero .headline .big { font-size:60px; letter-spacing:-.04em; }
+  .scores.hero .headline .big small { font-size:24px; margin-left:2px; }
+  .scores.hero .headline .ofplan { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .minirow { margin-top:14px; padding-top:11px; }
+  .scores.hero .minirow em { font-size:9px; }
+  .scores.hero .minirow b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
+  .scores.hero .unrep { font-size:var(--fs-small); color:var(--ink-2); background:var(--attn-bg);
+    border-radius:6px; padding:2px 8px; }
 
   .imp-checks { display:flex; flex-direction:column; gap:6px; margin:0 0 14px; }
   .chk { display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:baseline;

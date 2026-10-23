@@ -12,6 +12,9 @@
    ADD A FIELD HERE IN THE SAME EDIT AS THE CODE THAT FIRST WRITES IT. The
    check will say so if you do not.
 
+   §615 added the company's own object (GROUP) and its capabilities, the
+   same way.
+
    Written by asking the checker, not by memory: each type started small,
    every field the pages read or write that it did not name came back as a
    finding, and each one was READ before it was added — so a misspelling
@@ -45,6 +48,8 @@ declare namespace SMP {
     format?: string;
     /* The Foundation */
     clauses?: string[][];
+    /** The unit's Purpose (§478), the company's own field name. */
+    mission?: string;
     aspiration?: string;
     endInMind?: string;
     values?: { name: string; def: string }[];
@@ -101,6 +106,10 @@ declare namespace SMP {
     planned?: number;
     measures?: Measure[];
     tactics?: Tactic[];
+    /** On the company's plan only: the unit and pillar a pillar was folded
+        in from (§447.1), so a second fold does not copy it twice. */
+    fromUnit?: string;
+    fromId?: string;
   }
   interface Tactic {
     id?: string;
@@ -119,6 +128,134 @@ declare namespace SMP {
     outActual?: any;
     note?: string;
   }
+
+  /* ── THE COMPANY: its own plan, and every setting the client holds (§615) ── */
+
+  /** The company itself: the top layer's Foundation and plan, and the
+      client's settings. The server stores six fields in their own columns
+      (org, horizon, asOfQuarter, aspiration, endInMind, mission), five as
+      tables of their own (clauses, keyObjectives, themes, capabilities,
+      weighting), and EVERYTHING ELSE in the org row's `extra`, so every
+      setting the product has ever added lands here. */
+  interface Group {
+    /** The client's name. */
+    org: string;
+    horizon: string;
+    /** The quarter the plan stood as of. No page reads it any more: the review
+        point is the cycle's end (§239, §307). The server still keeps the column. */
+    asOfQuarter?: number;
+    aspiration: string;
+    endInMind: string;
+    /** The company's Purpose. */
+    mission?: string;
+    clauses: string[][];
+    keyObjectives: GroupKeyObjective[];
+    themes?: Theme[];
+    capabilities?: Capability[];
+    /** How much each unit counts in the company's score: the factors, and
+        one row per unit holding a value per factor, keyed by the factor's key. */
+    weighting?: { factors: WeightFactor[]; units: WeightRow[] };
+    values?: { name: string; def: string }[];
+    driversOn?: boolean;
+    seasons?: { id: string; name: string; start: Day; end: Day }[];
+    mainbus?: { name: string; at: any }[];
+    /** The figure sets (spec 008). */
+    sets?: { id: string; name: string; team: string; owner: string; pick: string }[];
+    claims?: any[];
+    portfolio?: { objectives?: number; exec?: number };
+    themePillars?: { [themeAb: string]: any[][] };
+    themeView?: any[];
+    /** The company's own plan when it plans in pillars (§428.2). */
+    items?: Pillar[];
+    /** Its projects when it plans in projects. */
+    topProjects?: any[];
+    swot?: Swot;
+    /** Client set-up › Structure. Read by the shared rules (lib/rules.js),
+        which take it untyped: what each level carries, its titles, its
+        exceptions and its plan details. */
+    structure?: { [level: string]: any };
+    /** Each company's (division's) own Foundation, by company key (§404). */
+    coFound?: { [companyKey: string]: CompanyFoundation };
+    /** The mark, a PNG data URL. */
+    logo?: string;
+    /** null anywhere means the shipped palette; an all-null one is dropped
+        before a save compares (sync.js normalized()). */
+    branding?: { palette: any; font: any; accent: any; bar: any };
+    /** How the platform's email reads (§72): absent until something is set. */
+    comms?: { headerName?: string; fromName?: string; replyTo?: string; eyebrow?: string; footer?: string };
+    /** The office's chat settings (§98); an absent key is its default,
+        decided by SMPRules.chatCfg / CHAT_DEFAULTS. */
+    chat?: { on?: boolean; fast?: boolean; promise?: string; shots?: boolean; mail?: boolean;
+             assistant?: boolean; ask?: boolean; notify?: boolean; popup?: any; rep?: any; away?: any };
+    /** The knowledge base's pen (§140): shipped answers overridden, and
+        questions added. `w` is the audience, absent for everyone. */
+    kb?: { ov?: { [id: string]: { q: string; a: string; w?: string } };
+           add?: { id: string; g: string; q: string; a: string; w?: string }[] };
+    /** true, or absent: line owners are on. */
+    lineOwners?: boolean;
+    naming?: boolean;
+    /** true, or absent: focus marks are off. */
+    focusOff?: boolean;
+    /** Hosts whose links play on a slide. Read by the deck; NOTHING WRITES
+        IT YET — §261.1 left the storage page's control for later. */
+    videoHosts?: string[];
+    /** Never on the company itself; its unit-like view (topAsUnit) is "group". */
+    ukey?: undefined;
+  }
+  /** A company's (division's) own Foundation (§404, §611). */
+  interface CompanyFoundation {
+    clauses: string[][];
+    mission: string;
+    aspiration: string;
+    endInMind: string;
+    keyObjectives: KeyObjective[];
+    values: { name: string; def: string }[];
+    /** Never on a company's Foundation: only a unit carries a key. */
+    ukey?: undefined;
+  }
+  interface Theme { ab: string; name: string; note?: string; }
+  interface WeightFactor { key: string; name: string; kind: string; basis?: string; weight: number; }
+  /** A unit's row: its key, its name, why it weighs what it does, and a
+      value for each factor's key (rev, prof, …), so those names are the
+      client's own and cannot be listed here. */
+  interface WeightRow { key: string; unit?: string; why?: string; [factorKey: string]: any; }
+  /** A capability: the company's (§544.13). */
+  interface Capability {
+    id?: string;
+    name: string;
+    navName?: string;
+    /** "What it is": its definition. */
+    def?: string;
+    /** Retired by §544.13: no function holds a capability. Kept as a column. */
+    fn?: string | null;
+    /** Its owner and custodian: person keys (§412). */
+    head?: string | null;
+    custodian?: string | null;
+    active?: boolean;
+    /** "projects" (the default) or "pillars" (§342). */
+    format?: string;
+    keyObjectives?: CapKeyObjective[];
+    projects?: any[];
+    /** Its plan when it plans in pillars: one row, shaped like a direction (§491). */
+    items?: Pillar[];
+    /** Written by a restore onto whatever it restores (§342); a capability
+        never plans in actions, so on one this is a list nothing reads. */
+    actions?: any[];
+    /** In memory only: cleared before scoring (config-data.js). */
+    perf?: any;
+    exec?: any;
+    /** Written by the Copilot's direction builder; read by nothing else. */
+    capKind?: string;
+    serves?: string[];
+    /** Never on a capability: only a function's or a unit's own holder
+        (holderOf…) carries these. */
+    own?: undefined;
+    unit?: undefined;
+  }
+  /** A capability's objective carries a weight among its siblings. */
+  interface CapKeyObjective extends KeyObjective { weight?: number; }
+  /** The company's objective may sit under a heading the Temple groups by (§611). */
+  interface GroupKeyObjective extends KeyObjective { group?: string | null; }
 
   /* ── THE REVIEW: the reporting cycle as it stands ─────────────────── */
 

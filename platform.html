@@ -1407,8 +1407,14 @@
     border:0; border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
   .hotask:hover{ background:var(--surface-2) }
   .hotask:last-child{ border-bottom:0 }
-  .hotask .dot{ width:9px; height:9px; margin:5px 4px 0; border-radius:50%; background:var(--amber) }
-  .hotask.late .dot{ background:var(--bad) }
+  /* the tick is My tasks' own (.mwtick), ringed in the alarm when late and
+     green when done */
+  .hotask .mwtick{ margin-top:1px }
+  .hotask.late .mwtick{ border-color:var(--bad) }
+  .hotask.done .mwtick{ background:var(--good); border-color:var(--good) }
+  .hotask.done .t{ color:var(--ink-3) }
+  .hotask[aria-busy="true"]{ cursor:progress }
+  .hosaid{ margin:8px 12px 0 }
   .hotask .bk{ width:17px; height:17px; color:var(--amber-tx) }
   .hotask .bk svg{ width:17px; height:17px }
   .hotask .t{ font-size:13.5px; line-height:1.4; overflow-wrap:anywhere }
@@ -4201,11 +4207,18 @@
   }
 
   /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
-     Tracker, or the case study to write — and finishes nothing: the tick and
-     the status stay on My tasks, where the whole list is (§61). */
-  function hoTask(r, isCase) {
-    var b = el("button", "hotask" + (r.late ? " late" : ""));
-    b.type = "button";
+     Tracker, or the case study to write — AND ITS TICK FINISHES IT (Islam:
+     "can you make the tasks check box clickable from the home?"). The tick is
+     My tasks' own: the same `workStatus` write through that client's door,
+     drawn only where the server says this person may (canChange), and the
+     row stays where the hand left it, green, until Home is read again (§583).
+     The status word stays on My tasks. A write-up has no tick: it is done on
+     the case study, never from a list (spec 067 §8). */
+  function hoTask(r, isCase, act) {
+    var done = !isCase && r.status === "done";
+    var b = el("div", "hotask" + (r.late && !done ? " late" : "") + (done ? " done" : ""));
+    b.tabIndex = 0;
+    b.setAttribute("role", "link");
     if (isCase) {
       b.setAttribute("data-case", r.id);
       var bk = el("span", "bk");
@@ -4213,7 +4226,16 @@
       b.appendChild(bk);
     } else {
       b.setAttribute("data-client", r.client);
-      b.appendChild(el("span", "dot"));
+      b.setAttribute("data-id", r.id);
+      var tick = el("button", "mwtick");
+      tick.type = "button";
+      tick.setAttribute("role", "checkbox");
+      tick.setAttribute("aria-checked", String(done));
+      tick.setAttribute("aria-label", (done ? "Mark not done: " : "Mark done: ") + (r.title || ""));
+      if (done) tick.innerHTML = MW_TICK;
+      if (r.canChange && act) tick.addEventListener("click", function (e) { e.stopPropagation(); act(r, b); });
+      else { tick.disabled = true; tick.title = "Only its owner or the client's Super user can finish this"; }
+      b.appendChild(tick);
     }
     var t = el("span", "t");
     if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
@@ -4224,10 +4246,12 @@
     t.appendChild(m);
     b.appendChild(t);
     b.appendChild(el("span", "wh", r.when || ""));
-    b.addEventListener("click", function () {
+    var open = function () {
       if (isCase) { CS.jump = { id: r.id, view: "case", fresh: true }; go("memory"); }
       else location.assign("/" + r.client + "/tracker");
-    });
+    };
+    b.addEventListener("click", function (e) { if (!e.target.closest(".mwtick")) open(); });
+    b.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target === b) open(); });
     return b;
   }
 
@@ -4249,11 +4273,41 @@
     var tabs = el("div", "hotabs");
     tabs.setAttribute("role", "tablist");
     ph.appendChild(tabs);
+    /* a refused or failed tick is said here, in words, and the row is left as it was */
+    var said = el("p", "err hosaid");
+    said.hidden = true;
+    var counts = {};
+    var recount = function () {
+      Object.keys(counts).forEach(function (k) {
+        counts[k].textContent = String(box.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask:not(.done)').length);
+      });
+    };
+    var act = function (r, row) {
+      if (row.getAttribute("aria-busy") === "true") return;
+      var done = r.status === "done";
+      var hadFocus = document.activeElement === row.querySelector(".mwtick");
+      row.setAttribute("aria-busy", "true");
+      var undo = function (msg) { row.removeAttribute("aria-busy"); said.textContent = msg; said.hidden = false; };
+      post({ action: "workStatus", client: r.client, id: r.id, status: done ? (r.was || "not_started") : "done" }).then(function (a) {
+        if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
+        var nr = a.row;
+        nr.was = done ? r.was : r.status;
+        var fresh = hoTask(nr, false, act);
+        row.parentNode.replaceChild(fresh, row);
+        said.hidden = true;
+        recount();
+        if (hadFocus) fresh.querySelector(".mwtick").focus();
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        undo("Could not reach the server. Nothing was changed — try again.");
+      });
+    };
     var all = el("button", "holink", "All tasks →");
     all.type = "button";
     all.addEventListener("click", function () { go("mywork"); });
     ph.appendChild(all);
     box.appendChild(ph);
+    box.appendChild(said);
     if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
     var bodies = {};
     panes.forEach(function (p) {
@@ -4264,14 +4318,15 @@
       t.setAttribute("aria-selected", String(p[0] === on));
       t.innerHTML = p[2];
       t.appendChild(document.createTextNode(p[1]));
-      t.appendChild(el("i", null, String(lists[p[0]].length)));
+      counts[p[0]] = el("i", null, String(lists[p[0]].length));
+      t.appendChild(counts[p[0]]);
       tabs.appendChild(t);
       var pane = el("div", "hopane");
       pane.setAttribute("role", "tabpanel");
       pane.setAttribute("data-pane", p[0]);
       pane.hidden = p[0] !== on;
       if (!lists[p[0]].length) pane.appendChild(el("p", "honone", p[4]));
-      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1])); });
+      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1], act)); });
       bodies[p[0]] = pane;
       box.appendChild(pane);
       t.addEventListener("click", function () {

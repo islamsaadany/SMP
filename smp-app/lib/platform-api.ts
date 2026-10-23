@@ -132,8 +132,15 @@ async function factsFor(t: ClientRow) {
     return await withTenant(t.id, async (c) => {
       const n = async (tbl: string) => Number((await c.query("SELECT count(*)::int AS n FROM " + tbl)).rows[0].n);
       const units = await n("units"), pillars = await n("pillars");
+      /* THE COMPANY'S OWN DIRECTIONS COUNT AS A PLAN (Islam: "why is elabd
+         showing no plan?"). `pillars` holds a unit's and a function's
+         directions only; the company's own (GROUP.items) travel in the org
+         row's extra, so a client planned at the company level read as having
+         no plan. SMP_BREAK=company-plan-unseen puts the old count back. */
+      const top = process.env.SMP_BREAK === "company-plan-unseen" ? 0 : Number((await c.query(
+        "SELECT CASE WHEN jsonb_typeof(extra->'items') = 'array' THEN jsonb_array_length(extra->'items') ELSE 0 END AS n FROM org")).rows[0]?.n || 0);
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
-      return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
+      return { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
     }).then(async (f) => {
       /* the facts a module's MARK is made of (§368) — read through the ONE
          reader that also serves the Landing line page's preview, as somebody

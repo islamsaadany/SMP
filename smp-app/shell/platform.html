@@ -1408,8 +1408,14 @@
     border:0; border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
   .hotask:hover{ background:var(--surface-2) }
   .hotask:last-child{ border-bottom:0 }
-  .hotask .dot{ width:9px; height:9px; margin:5px 4px 0; border-radius:50%; background:var(--amber) }
-  .hotask.late .dot{ background:var(--bad) }
+  /* the tick is My tasks' own (.mwtick), ringed in the alarm when late and
+     green when done */
+  .hotask .mwtick{ margin-top:1px }
+  .hotask.late .mwtick{ border-color:var(--bad) }
+  .hotask.done .mwtick{ background:var(--good); border-color:var(--good) }
+  .hotask.done .t{ color:var(--ink-3) }
+  .hotask[aria-busy="true"]{ cursor:progress }
+  .hosaid{ margin:8px 12px 0 }
   .hotask .bk{ width:17px; height:17px; color:var(--amber-tx) }
   .hotask .bk svg{ width:17px; height:17px }
   .hotask .t{ font-size:13.5px; line-height:1.4; overflow-wrap:anywhere }

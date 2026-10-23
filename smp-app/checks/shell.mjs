@@ -2481,6 +2481,20 @@ await section("4 · Forefront's own pages", async () => {
       "\u2026its tasks open on Overdue with the late one, This week holds the one due now, and the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)), "\u2026the client you have a seat on is drawn with a button into each module", JSON.stringify(h1.clients));
     check(h1.font === "14px" && h1.wrap === "none", "\u2026and the console is compact: 14px text, the whole width of the window (spec 068)", JSON.stringify({ font: h1.font, wrap: h1.wrap }));
+    /* HOME'S TICK FINISHES IT (Islam: "can you make the tasks check box
+       clickable from the home?"): the same write My tasks makes, on the
+       stored row, with the row staying ticked and the Overdue count dropping;
+       unticking puts it back. */
+    const lateId = ids["MW late one"];
+    await page.click('.hotask[data-id="' + lateId + '"] .mwtick');
+    await page.waitForSelector('.hotask[data-id="' + lateId + '"].done', { timeout: 8000 }).catch(() => {});
+    const ht = await home();
+    check((await stored("MW late one")) === "done" && ht.tabs[0] === "Overdue0*" && ht.late.length === 1,
+      "Home's tick finishes the action in the client's Tracker, the row stays, ticked, and Overdue drops to 0", JSON.stringify({ st: await stored("MW late one"), tabs: ht.tabs }));
+    await page.click('.hotask[data-id="' + lateId + '"] .mwtick');
+    await page.waitForSelector('.hotask[data-id="' + lateId + '"]:not(.done)', { timeout: 8000 }).catch(() => {});
+    check((await stored("MW late one")) === "in_progress" && (await home()).tabs[0] === "Overdue1*",
+      "\u2026and unticking puts it back as it was", await stored("MW late one"));
     await page.click('.hotabs button[data-pane="week"]');
     const h2 = await home();
     check(JSON.stringify(h2.shown) === JSON.stringify(["week"]), "\u2026pressing This week shows This week in the same place", JSON.stringify(h2.shown));
@@ -2488,6 +2502,29 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
     check(new URL(page.url()).hash === "#mywork" && (await page.locator(".mwname h1").textContent()) === "My tasks",
       "\u2026and All tasks opens My tasks", page.url());
+
+    /* A PLAN WRITTEN ON THE COMPANY IS A PLAN (Islam: "why is elabd showing
+       no plan?"): a client whose only directions are the company's own
+       (GROUP.items, in the org row) is not marked No plan; the same client
+       with none is. Made, and taken away after. */
+    await owner.query("DELETE FROM tenants WHERE key = 'plan-top'");
+    const ptId = (await owner.query("INSERT INTO tenants (key, name, industry, modules) VALUES ('plan-top','Plan Top','Healthcare','[\"strategy\"]') RETURNING id")).rows[0].id;
+    try {
+      await owner.query("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Plan Top', $2)", [ptId, JSON.stringify({ items: [{ id: "d1", name: "Grow" }] })]);
+      const markOf = () => page.evaluate(async () => {
+        const r = await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "cards" }) })).json();
+        const c = (r.cards || []).find((x) => x.key === "plan-top");
+        const m = c && (c.modules || []).find((x) => x.key === "strategy");
+        return c ? (m ? (m.mark || "") : "no strategy row") : "no card";
+      });
+      const m1 = await markOf();
+      check(m1 !== "No plan" && m1 !== "no card", "a client planned only at the company level is not marked No plan", m1);
+      await owner.query("UPDATE org SET extra = '{}'::jsonb WHERE tenant_id = $1", [ptId]);
+      const m2 = await markOf();
+      check(m2 === "No plan", "\u2026and the same client with no directions anywhere is", m2);
+    } finally {
+      await owner.query("DELETE FROM tenants WHERE key = 'plan-top'");
+    }
   } finally {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);

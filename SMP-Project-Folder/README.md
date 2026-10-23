@@ -198,6 +198,7 @@ of it was rejected — which is the point of keeping it.
 
 | File | What it asks |
 |---|---|
+| `../../design-mockups/modules-look/2026-10-23_one-look.html` | Insights, Meeting Notes, Portfolio and Processes in the Internal Tracker's look, each beside a real screenshot of the demo client today, on a computer and on a phone: the client's panel with the name, the counts and the views inside it; the underlined search line and the console's amber button; lists as the Tracker's rows under numbered headings, status words for pills; one typeface. Processes' side menu becomes the panel's tabs, so the page stops sliding on a phone. On phones every module's top bar fits one line and the Tracker's views stay on one line and slide. Strategy and Copilot left for the end, at Islam's word (*“keep the strategy till the end but adjust the rest”*). Content questions asked in chat. **Not built** |
 | `2026-08-23_deck-unit-logo/` | The unit lockup on the review deck &mdash; large on the cover, small in the footer of every other slide. Screenshots from the REAL deck, plus the patch that produces them. **Not built**; the sources are reverted and the build is byte-identical to the shipped file (&sect;52.8) |
 
 ### Settled — build status noted

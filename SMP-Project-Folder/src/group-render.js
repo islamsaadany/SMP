@@ -2990,95 +2990,17 @@ var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
    A view, not a scoreboard: roof, aspiration, key objectives with targets
    only, themes as columns, capabilities as the base.
 
-   Editing happens in tables, because a temple is a picture and a picture is
-   an awkward thing to type into. What is saved is the temple \u2014 the tables
-   write to the same objects the view renders. */
-
-function templeTables(){
-  var editing = EDIT_PAGE.temple;
-
-  var stmt =
-    '<h4 class="mini">' + L1("aspiration") + '</h4>' +
-    '<div class="tcard">' +
-      '<div class="trow"><label>Statement</label>' +
-        fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
-      '<div class="trow"><label>' + L1("endinmind") + '</label>' +
-        fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>' +
-      '<div class="trow"><label>Horizon</label>' +
-        inputOr("temple", GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</div>' +
-    '</div>';
-
-  var koRows = GROUP.keyObjectives.map(function(m, i){
-    return '<tr class="' + rmMark("trm", "ko|" + i).replace(/^ /, "") + '">' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + fieldOr("temple", m.name, "", function(v){ m.name = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.group || "", "", function(v){ m.group = v || null; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.dir, "mono", function(v){ m.dir = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.target3y || "", "mono", function(v){ m.target3y = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.target || "", "mono", function(v){ m.target = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.compile, "", function(v){ m.compile = v; }) + '</td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>' +
-      rmStripRow("trm", "ko|" + i, RMASK ? RMASK.say : "", 8);
-  }).join("");
-
-  var themeRows = GROUP.themes.map(function(t, i){
-    var used = pillarsUsingTheme(t.ab);
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
-      '<td class="cc">' + inputOr("temple", t.ab, "mono", function(v){
-        var old = t.ab; t.ab = v.toUpperCase().slice(0, 4); renameTheme(old, t.ab); }) + '</td>' +
-      '<td>' + fieldOr("temple", t.name, "", function(v){ t.name = v; }) + '</td>' +
-      '<td>' + fieldOr("temple", t.note || "", "", function(v){ t.note = v; }) + '</td>' +
-      '<td class="cc"><span class="mono">' + used + '</span></td>' +
-      '<td class="cc">' + (editing
-        ? (used
-            ? '<span class="why" style="margin:0">in use</span>'
-            : '<button class="rmbtn" data-trm="theme|' + i + '">Remove</button>')
-        : '') + '</td></tr>';
-  }).join("");
-
-  var capRows = GROUP.capabilities.map(function(c, i){
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + fieldOr("temple", c.name, "", function(v){ c.name = v; }) + '</td>' +
-      '<td>' + fieldOr("temple", c.def, "", function(v){ c.def = v; }) + '</td>' +
-      '<td class="cc"><span class="mono">' + c.keyObjectives.length + '</span></td>' +
-      '<td class="cc"><span class="mono">' + c.projects.length + '</span></td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="cap|' + i + '">Remove</button>' : '') + '</td></tr>';
-  }).join("");
-
-  var add = function(kind, label){
-    return editing ? '<div class="addrow"><button class="editbtn" data-tadd="' + kind + '">+ ' + label + '</button></div>' : '';
-  };
-
-  return '<div class="templeedit">' + stmt +
-    '<h4 class="mini">' + L("keyobj","group") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Objective</th>' +
-      '<th class="cc">Group</th><th class="cc">Dir.</th><th class="cc">3-year</th>' +
-      '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + koRows + '</tbody></table></div>' + add("ko", "Add an objective") +
-
-    '<h4 class="mini">' + L("theme","group") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th class="cc" style="width:9%">Code</th>' +
-      '<th style="width:24%">Name</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a " + L1("theme")) +
-
-    '<h4 class="mini">' + L("capability") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">' + L1("capability") + '</th>' +
-      '<th>Definition</th><th class="cc">' + L("measure") + '</th><th class="cc">' + L("tactic") + '</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a " + L1("capability")) +
-
-    '<div class="note"><b>A ' + L1("theme") + ' in use cannot be removed.</b> Its code is what every ' + L1("pillar") + ' points at; ' +
-    'renaming one carries its ' + L("pillar") + ' with it, and deleting one would leave them pointing at nothing.</div>' +
-  '</div>';
-}
+   §611.1 — AND ONLY A VIEW. Islam: *"the temple should eventually read from
+   the other areas not built on it's own"*, then, of the drawing, *"I'm ok
+   with all"*. It had an Edit of its own over four tables (the aspiration,
+   the objectives, the themes, the capabilities) writing the same objects
+   this draws; every one of them is written where it lives now — the
+   aspiration, the objectives and their Heading and the themes on the
+   Foundation, the capabilities in Strategy's Capabilities section and Setup.
+   So the tables, the pen and the two handlers behind them (`[data-tadd]`,
+   `[data-trm]`) are gone rather than left as a second door (§53.5, §325). */
 
 function renderTemple(){
-  var can = grant("g_temple") === "edit";
-  var bar = can
-    ? '<div class="pageact"><button class="editbtn" data-page="temple">' +
-      (EDIT_PAGE.temple ? "Done" : "Edit") + '</button></div>' : '';
-
-  if (EDIT_PAGE.temple) return bar + templeTables();
-
   var groups = {};
   GROUP.keyObjectives.forEach(function(m){ (groups[m.group || ""] = groups[m.group || ""] || []).push(m); });
 
@@ -3097,7 +3019,7 @@ function renderTemple(){
       return k ? '<div class="ns-group"><span class="ns-group-h">' + esc(k) + '</span><div class="ns-group-in">' + inner + '</div></div>' : inner;
     }).join("");
 
-  return bar + '<div class="temple"><div class="roof"></div>' +
+  return '<div class="temple"><div class="roof"></div>' +
     '<div class="architrave">' + esc(GROUP.aspiration) + '</div>' +
     '<div class="entablature">' + ns + '</div>' +
     '<div class="pillars">' + GROUP.themes.map(function(p){
@@ -3222,15 +3144,66 @@ function foundationBody(o, tgt, gpg){
       '</div>' +
     '</div>' +
     koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
+    /* §611.1: the themes, on the top layer only — a company's page carries
+       none (§427) — and only while the Structure step has them on. */
+    (tgt === "group" && on("theme") ? themesBox(gpg) : '') +
 
+    /* §611: with the pen open the list is the unit's own (§478) — a name and
+       a definition per value, × to remove, "+ Add a value" — because the
+       old one could only rewrite the definition of a value already there, so
+       a company that had none could never have one. Read mode is unchanged. */
     (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (gpg ? valuesEditList(tgt, o.values || [], gpg, "", "", function(){}) :
     '<div class="valgrid">' +
       (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>');
+    '</div>') + '</div>');
+}
+
+/* §611.1 — THE THEMES ARE WRITTEN ON THE FOUNDATION. Islam: *"I added themes
+   but no themes appeared in the foundation"*, and of the Temple, *"it should
+   eventually read from the other areas not built on it's own"*; then, of the
+   drawing (design-mockups/top-themes-temple/), *"I'm ok with all"*. The rows
+   are the Temple's old table moved here, unchanged in what they write: the
+   code (renaming it carries every pillar tagged with it), the name, the note,
+   how many pillars use it, and Remove only while none does — a code is what
+   every pillar points at, so deleting one in use would leave them pointing
+   at nothing. Reading, they are cards: the code, the name, the note. */
+function themesBox(gpg){
+  var ts = GROUP.themes || [];
+  if (!gpg) return '<div class="card themeband"><h2 class="sec first">' + L("theme", "group") + '</h2>' +
+    (ts.length ? '<div class="themegrid">' + ts.map(function(t){
+      return '<div class="themecard"><span class="pill theme">' + esc(t.ab) + '</span><b>' + esc(t.name) + '</b>' +
+        (t.note ? '<span class="themenote">' + esc(t.note) + '</span>' : '') + '</div>';
+    }).join("") + '</div>' : '') + '</div>';
+  var rows = ts.map(function(t, i){
+    var used = pillarsUsingTheme(t.ab);
+    return '<tr>' + idxCell(i, false) +
+      '<td class="cc">' + inputOr(gpg, t.ab, "mono themecode", function(v){
+        /* An empty code, or one another theme holds, would strand the pillars
+           tagged with this one or merge them into that one: the code stays. */
+        var nv = String(v || "").trim().toUpperCase().slice(0, 4);
+        if (!nv || ts.some(function(x){ return x !== t && x.ab === nv; })) return;
+        var old = t.ab; t.ab = nv; renameTheme(old, nv); }) + '</td>' +
+      '<td>' + inputOr(gpg, t.name, "", function(v){ t.name = v; }) + '</td>' +
+      /* §613: a note runs to several lines (Islam: *"allow the theme notes to
+         have multiple lines"*) — the growing box the Core Values' definitions
+         use, and the cards and the Temple's columns keep its line breaks. */
+      '<td>' + fieldOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
+      '<td class="cc"><span class="mono">' + used + '</span></td>' +
+      '<td class="cc acts1">' + (used
+        ? '<span class="why">In use</span> ' + tip("A " + L1("pillar").toLowerCase() + " carries this " +
+            L1("theme").toLowerCase() + ", so it cannot be removed. Changing its code carries the " +
+            L("pillar").toLowerCase() + " with it.")
+        : '<button class="rmbtn" data-themerm="' + i + '">Remove</button>') + '</td></tr>';
+  }).join("");
+  return '<div class="card themeband"><div class="boxhead"><span class="boxlab">' + L("theme", "group") + '</span></div>' +
+    '<div class="scroll"><table><thead><tr><th class="idx">#</th><th class="cc">Code</th><th>' + L1("theme") +
+    '</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="addrow"><button class="editbtn" data-themeadd="1">+ Add a ' + esc(L1("theme")) + '</button></div></div>';
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -5788,7 +5761,13 @@ function hidChip(row){
   return SMPRules.isHidden(row)
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
-function hidCls(row){ return (SMPRules.isHidden(row) || asofGone(row)) ? ' class="hiddenrow"' : ''; }
+/* `extra` is a class string from rmMark (" rmasking" or ""), so a row being
+   asked about is marked as well as hidden (§611.1: the objectives table took
+   the Temple's Remove, and the Temple's rows were marked). */
+function hidCls(row, extra){
+  var c = (((SMPRules.isHidden(row) || asofGone(row)) ? "hiddenrow" : "") + (extra || "")).trim();
+  return c ? ' class="' + c + '"' : '';
+}
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -5822,8 +5801,15 @@ function koEdit(list, page, acKey, owner){
                                 : arranging("group", null, page);
   var sortA = arr ? ' class="sortable" data-item="tr" data-kind="kos" data-kolist="' +
     li + '"' : '';
+  /* §611.1: THE HEADING THE TEMPLE GROUPS AN OBJECTIVE UNDER (`m.group`, the
+     demo's "Market share"), written here now that the Temple's own tables are
+     gone. Drawn on the top layer's table alone and only while its Temple is
+     on — exactly the reach the Temple's Edit had, so a client with no Temple
+     (El Abd: its themes are off) keeps the table it had. Called Heading, not
+     the Temple's "Group", because the top layer is called Group too. */
+  var head = owner === GROUP && templeOn("group"), cols = head ? 10 : 9;
   return '<div class="scroll"><table><thead><tr><th class="idx">#</th>' +
-    '<th>Objective</th><th class="cc">Dir.</th>' +
+    '<th>Objective</th>' + (head ? '<th>Heading</th>' : '') + '<th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th>' +
     '<th class="cc">Weight %</th><th></th></tr></thead><tbody' + sortA + '>' +
@@ -5839,9 +5825,10 @@ function koEdit(list, page, acKey, owner){
          mode says "Yes / No" where the target goes, which is the whole fact,
          and dimming something somebody is only reading says nothing. */
       var yn = isYesNoRow(m);
-      return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
+      return '<tr data-oi="' + i + '"' + hidCls(m, rmMark("korm", li + "|" + i)) + '>' + idxCell(i, arr, m.name) +
         '<td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
         (pg ? '' : hidChip(m)) + '</td>' +
+        (head ? '<td>' + inputOr(pg, m.group || "", "", function(v){ m.group = String(v || "").trim() || null; }) + '</td>' : '') +
         '<td class="cc">' + (pg && yn ? offSelect(m.dir || "\u2265")
           : gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] })) + '</td>' +
@@ -5887,8 +5874,8 @@ function koEdit(list, page, acKey, owner){
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>' +
-        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", 9) +
-        (pg && !yn ? monthlyRowFor(m, "monthly", "target", 9, m.name, pg) : "");
+        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", cols) +
+        (pg && !yn ? monthlyRowFor(m, "monthly", "target", cols, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
       '">+ Add an objective</button></div>' : '');
@@ -6181,15 +6168,7 @@ function unitValuesBox(u, upg){
   var walk = !vals.length ? " gapwalk" : "";
   return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
     (how
-      ? '<div class="uvlist">' + vals.map(function(v, i){
-          return '<div class="uvrow">' +
-            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
-            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
-            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
-            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
-        }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
-        '">+ Add a value</button></div>'
+      ? valuesEditList(u.ukey, vals, pg, pend, walk, function(){ unitValuesTouch(u, how); })
       : vals.length
         ? '<div class="valgrid">' + vals.map(function(v){
             return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
@@ -6197,6 +6176,21 @@ function unitValuesBox(u, upg){
           }).join("") + '</div>'
         : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
+}
+/* §611: THE CORE VALUES LIST WITH THE PEN OPEN — one builder for a unit's box
+   and the top layer's and a company's (§53.5), so the three cannot drift into
+   three looks. `key` is the target the two buttons carry; `touch` runs after
+   every write (a unit's stamps or lifts its gap mark, the top's has none). */
+function valuesEditList(key, vals, pg, pend, walk, touch){
+  return '<div class="uvlist">' + vals.map(function(v, i){
+      return '<div class="uvrow">' +
+        inputOr(pg, v.name || "", pend, function(x){ v.name = x; touch(); }) +
+        fieldOr(pg, v.def || "", pend, function(x){ v.def = x; touch(); }) +
+        '<button class="xbtn" data-uvalrm="' + esc(key) + '|' + i +
+        '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
+    }).join("") + '</div>' +
+    '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(key) +
+    '">+ Add a value</button></div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────

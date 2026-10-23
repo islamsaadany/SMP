@@ -96,7 +96,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             return
         # the new stack's copy is GENERATED from this one with the script moved
         # to a file — walking one copy proves one copy (§53.5, A15)
-        for name in ("platform-page.js", "memory-split.js", "client-setup.js"):
+        for name in ("platform-page.js", "memory-split.js", "case-split.js", "client-setup.js"):
             if p == "/" + name:
                 fp = os.path.join(REPO, "smp-app", "public", name)
                 if os.path.exists(fp):
@@ -163,8 +163,10 @@ with sync_playwright() as pw:
     pg = br.new_page(viewport={"width": 1440, "height": 900})
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.goto(BASE + "/platform")
-    check("the console opens on My work with its first answer", wait_for(pg, "Action answer1"), text(pg)[:120])
+    # the console opens on Home since spec 068, which reads `mywork` too; the
+    # kept copy walked here is My tasks', so the walk starts on it by address
+    pg.goto(BASE + "/platform#mywork")
+    check("the console opens on My tasks, by its address, with its first answer", wait_for(pg, "Action answer1"), text(pg)[:120])
     tab(pg, "clients")
     check("Clients arrives fresh the first time", wait_for(pg, "RHI answer"), text(pg)[:120])
 

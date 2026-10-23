@@ -2332,14 +2332,19 @@ await section("4 · Forefront's own pages", async () => {
   const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
   check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
     "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
-  check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
+  /* the memory's tab is called Case studies since spec 067 — renamed, not loosened (§218) */
+  check(ffTabs.includes("Case studies"), "…and the consulting memory, now Case studies, which every consultant reaches (spec 045, 067)", ffTabs.join("|"));
   /* \u00a7400: THE CONSOLE OPENS ON *MY WORK*, which is the first tab \u2014 so the
      cards are one press away rather than the landing. REWRITTEN, NEVER
      LOOSENED (\u00a7218): the landing is asserted as the new decision, and the
      cards are still asserted, by pressing Clients, and by the address that
      names them (a link to the cards must keep working). */
-  check(ffTabs[0] === "My work" && (await page.locator("#page").textContent()).includes("My work"),
-    "the console opens on My work, its first tab (\u00a7400)", ffTabs.join("|"));
+  /* SPEC 068: THE CONSOLE OPENS ON *HOME*, and My work is called My tasks,
+     second. Rewritten, never loosened (\u00a7218): the landing is still
+     asserted as the first tab and the page it draws. */
+  await page.waitForSelector(".hohello", { timeout: 8000 }).catch(() => {});
+  check(ffTabs[0] === "Home" && ffTabs[1] === "My tasks" && (await page.locator("#page").textContent()).includes("Your SMP Home"),
+    "the console opens on Home, its first tab, with My tasks second (spec 068)", ffTabs.join("|"));
   await page.locator("#nav button", { hasText: "Clients" }).click();
   await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
@@ -2363,7 +2368,7 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW finished", "smo", -3, "done");
   await ta("MW not mine", "mobhead", 0, "not_started");
   try {
-    await page.locator("#nav button", { hasText: "My work" }).click();
+    await page.locator("#nav button", { hasText: "My tasks" }).click();
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
     /* REWRITTEN, NOT LOOSENED (\u00a7218) FOR \u00a7583: the list left the table for
        the Tracker's own rows, so what each line is FOR \u2014 the three open
@@ -2451,6 +2456,38 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
     const card = (await page.locator(".ccard[data-client]").first().textContent()) || "";
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
+
+    /* SPEC 068 \u2014 HOME, on the same made state: three open, one late, one
+       this week, one far off. The tasks panel opens on Overdue with the late
+       one and only it; This week holds the one due now and never the far
+       one (it is My tasks' to show); the client with a seat is drawn with
+       its modules; and All tasks lands on My tasks. */
+    await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+    await page.waitForSelector(".hotask, .honone", { timeout: 8000 }).catch(() => {});
+    await page.waitForSelector('[data-home="tasks"] .hotabs', { timeout: 8000 }).catch(() => {});
+    const home = () => page.evaluate(() => {
+      const pane = (k) => Array.from(document.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask .t')).map((e) => e.firstChild ? e.firstChild.textContent : "");
+      return { tabs: Array.from(document.querySelectorAll(".hotabs button")).map((b) => b.textContent + (b.getAttribute("aria-selected") === "true" ? "*" : "")),
+        late: pane("late"), week: pane("week"), shown: Array.from(document.querySelectorAll(".hopane")).filter((p) => !p.hidden).map((p) => p.getAttribute("data-pane")),
+        clients: Array.from(document.querySelectorAll(".hocl")).map((c) => c.getAttribute("data-client") + ":" + Array.from(c.querySelectorAll(".homod")).map((m) => m.getAttribute("data-module")).join(",")),
+        heads: Array.from(document.querySelectorAll(".hosh h2")).map((h) => h.textContent),
+        font: getComputedStyle(document.body).fontSize, wrap: getComputedStyle(document.getElementById("page")).maxWidth };
+    });
+    const h1 = await home();
+    check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Case studies"]),
+      "Home draws your clients, your tasks and case studies (spec 068)", JSON.stringify(h1.heads));
+    check(JSON.stringify(h1.tabs) === JSON.stringify(["Overdue1*", "This week1"]) && JSON.stringify(h1.shown) === JSON.stringify(["late"])
+      && JSON.stringify(h1.late) === JSON.stringify(["MW late one"]) && JSON.stringify(h1.week) === JSON.stringify(["MW this week"]),
+      "\u2026its tasks open on Overdue with the late one, This week holds the one due now, and the far one is left to My tasks", JSON.stringify(h1));
+    check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)), "\u2026the client you have a seat on is drawn with a button into each module", JSON.stringify(h1.clients));
+    check(h1.font === "14px" && h1.wrap === "none", "\u2026and the console is compact: 14px text, the whole width of the window (spec 068)", JSON.stringify({ font: h1.font, wrap: h1.wrap }));
+    await page.click('.hotabs button[data-pane="week"]');
+    const h2 = await home();
+    check(JSON.stringify(h2.shown) === JSON.stringify(["week"]), "\u2026pressing This week shows This week in the same place", JSON.stringify(h2.shown));
+    await page.click('[data-home="tasks"] .holink');
+    await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
+    check(new URL(page.url()).hash === "#mywork" && (await page.locator(".mwname h1").textContent()) === "My tasks",
+      "\u2026and All tasks opens My tasks", page.url());
   } finally {
     await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
     await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);
@@ -2491,16 +2528,17 @@ await section("4 · Forefront's own pages", async () => {
   });
   await page.setViewportSize({ width: 400, height: 800 });
   try {
-    await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+    await page.goto(BASE + "/platform#mywork", { waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "networkidle" });   /* the address may differ only by its hash, which is no load */
     await page.waitForSelector(".mwstrip > div", { timeout: 8000 }).catch(() => {});
     const p1 = await chrome();
-    check(p1.pageW <= p1.vw && !p1.sideShown && p1.bar && p1.here === "My work",
+    check(p1.pageW <= p1.vw && !p1.sideShown && p1.bar && p1.here === "My tasks",
       "on a phone the page does not slide sideways, the column is put away, and the menu bar names the tab you are on (§601)", JSON.stringify(p1));
-    check(p1.tops.length === 4 && new Set(p1.tops).size === 1, "…and My work's four counts line up along their numbers (§584)", JSON.stringify(p1.tops));
+    check(p1.tops.length === 4 && new Set(p1.tops).size === 1, "…and My tasks' four counts line up along their numbers (§584)", JSON.stringify(p1.tops));
     await page.click("#sbopen", { timeout: 3000 }).catch(() => {});
     await page.waitForTimeout(400);
     const p2 = await chrome();
-    check(p2.sideShown && p2.sideL === 0 && p2.menu === "1" && p2.heights.length === 8 && new Set(p2.heights).size === 1 && p2.onIn && p2.focus === "mywork" && p2.pageW <= p2.vw,
+    check(p2.sideShown && p2.sideL === 0 && p2.menu === "1" && p2.heights.length === 9 && new Set(p2.heights).size === 1 && p2.onIn && p2.focus === "mywork" && p2.pageW <= p2.vw,
       "…the menu button opens the column over the page, every tab on one line, the one you are on in view and in hand (§601)", JSON.stringify(p2));
     check(JSON.stringify(p2.heads) === JSON.stringify(["Work", "Team", "Knowledge"]),
       "…under the three headings, History alone at the foot (§601)", JSON.stringify(p2.heads));
@@ -2537,8 +2575,8 @@ await section("4 · Forefront's own pages", async () => {
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
   await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
   const d1 = await chrome();
-  check(d1.sideShown && d1.sideW === 232 && d1.sideL === 0 && !d1.bar && d1.heights.length === 8 && new Set(d1.heights).size === 1 && d1.pageW <= d1.vw,
-    "on a computer the column stands beside the page, 232px, every tab on one line and no menu bar (§601)", JSON.stringify(d1));
+  check(d1.sideShown && d1.sideW === 212 && d1.sideL === 0 && !d1.bar && d1.heights.length === 9 && new Set(d1.heights).size === 1 && d1.pageW <= d1.vw,
+    "on a computer the column stands beside the page, 212px since the console went compact (spec 068), every tab on one line and no menu bar (§601)", JSON.stringify(d1));
   const roleWide = (await nameLine()).roleShown;
   check(roleWide === true, "…and the name line keeps the role there (§584.1)", roleWide);
   const tipOf = (k) => page.evaluate((key) => {
@@ -2565,7 +2603,7 @@ await section("4 · Forefront's own pages", async () => {
   check(d3.sideW === 64, "…kept on this device after a reload (§601)", JSON.stringify({ sideW: d3.sideW }));
   await page.click("#sbfold", { timeout: 3000 }).catch(() => {});
   const d4 = await chrome();
-  check(d4.sideW === 232, "…and pressed again, the names come back (§601)", JSON.stringify({ sideW: d4.sideW }));
+  check(d4.sideW === 212, "…and pressed again, the names come back (§601)", JSON.stringify({ sideW: d4.sideW }));
   /* §84.2 — THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
      13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
      a keyword), so the tabs drew at its own 13.33px regular — RED on the
@@ -2573,7 +2611,7 @@ await section("4 · Forefront's own pages", async () => {
      browser actually used, never of the stylesheet's text. The size is
      §601's, from the signed-off mockup: 14px in the column. */
   const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
-  check(tabFont === "14px 600", "…and the tabs are in the weight their style asks for, semibold 14px (§584.2, §601)", tabFont);
+  check(tabFont === "13.5px 600", "…and the tabs are in the weight their style asks for, semibold 13.5px since spec 068 (§584.2, §601)", tabFont);
   /* §584.3 — AND THE BUTTONS: `.btn` had the same dropped shorthand
      (`font:600 13px/1.5 inherit`), so every console button drew at the
      browser's 13.33px regular and 29px tall — RED on the build before,

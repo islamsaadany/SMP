@@ -4179,7 +4179,9 @@ function exampleDirection(){
   for (var k in top) u[k] = top[k];
   u.pillarPrefix = u.pillarCapPrefix = "EX";
   var share = elapsedShare();
-  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  /* §603: where the share cannot be read, the example stands at the quarter
+     the tactics fall back to -- one answer, not a Q2 of its own. */
+  if (share == null) share = cycleEndQuarter() / 4;
   var sales = Math.round(120 * share * 0.82 * 10) / 10;
   var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
     sub:"", owner:"Head of Restaurants", custodian:"",

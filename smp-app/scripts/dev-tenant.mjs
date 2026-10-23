@@ -40,9 +40,17 @@ export async function devTenant({ url = OWNER_URL, log = (s) => console.log(s) }
      on a developer's own insights. This is a dev script that already destroys
      the whole tenant, so it destroys those too — said here rather than left
      as a foreign-key error somebody has to work out. */
+  /* …AND SO DO CASE STUDIES (spec 067), with past clients added only to
+     carry them: those go too, and so does any case study the check's own
+     consultants opened or wrote, which RESTRICTs their logins below. */
+  const CHECK_PEOPLE = "SELECT id FROM users WHERE email LIKE '%@raya.example' OR email LIKE '%@forefront.example'";
   await owner.query(
-    "DELETE FROM memory_entries WHERE about_tenant_id IN (SELECT id FROM tenants WHERE key = 'raya-trade' OR made_here)");
-  await owner.query("DELETE FROM tenants WHERE key = 'raya-trade' OR made_here");
+    "DELETE FROM memory_entries WHERE about_tenant_id IN (SELECT id FROM tenants WHERE key = 'raya-trade' OR made_here OR past)" +
+    " OR author_id IN (" + CHECK_PEOPLE + ")");
+  await owner.query(
+    "DELETE FROM case_studies WHERE about_tenant_id IN (SELECT id FROM tenants WHERE key = 'raya-trade' OR made_here OR past)" +
+    " OR opened_by IN (" + CHECK_PEOPLE + ") OR writer_id IN (" + CHECK_PEOPLE + ")");
+  await owner.query("DELETE FROM tenants WHERE key = 'raya-trade' OR made_here OR past");
   await owner.query("DELETE FROM users WHERE email LIKE '%@raya.example' OR email LIKE '%@forefront.example'");
   await owner.query("DELETE FROM platform_access");
   const t = (await owner.query("INSERT INTO tenants (key, name, made_here) VALUES ('raya-trade', 'Raya Trade', true) RETURNING id")).rows[0];

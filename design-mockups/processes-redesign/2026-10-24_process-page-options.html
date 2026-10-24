@@ -1,0 +1,423 @@
+<title>Process Page Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one process page drawn three ways under the same navy band (the Internal Tracker's masthead), switched from the dashed drawing band.
+   Palette and type: SMP's Forefront tokens and Source Sans 3, as in the full prototype. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --stone:#16325C;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --over-bg:#FBF6E9; --over-line:#D9C489;
+  --bar:#16325C; --bar-ink:#FFFFFF; --bar-quiet:#B9C2CE; --bar-accent:#E8A33A; --bar-late:#FF9B8F; --bar-hover:rgba(255,255,255,.1);
+  --scrim:rgba(10,14,22,.45); --shadow:0 10px 28px rgba(15,23,42,.16);
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --focus:#E6C65C; --stone:#7FA3D8;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --over-bg:#2A2617; --over-line:#5E4F25;
+  --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--over-bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+p,ul,ol{margin:0}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* drawing band */
+.mk{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--over-bg);border-bottom:1px dashed var(--over-line)}
+.mk-in{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.mk-tag{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:1px 6px}
+.mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.mk-id b{font-size:14px}
+.mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-sw{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap}
+.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
+.doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
+.intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
+.intro b{color:var(--ink)}
+
+/* product frame */
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
+.tb .brand{font-weight:600;font-size:14px}
+.tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
+.tbn{font-size:11.5px;font-weight:700;background:var(--over-bg);border:1px solid var(--gold);border-radius:99px;padding:0 7px;line-height:18px}
+.tb .who{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.tb .out{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:620px){.tb .who{display:none}.tb{padding:0 12px}}
+.pg{padding:20px 24px 28px}
+@media (max-width:640px){.pg{padding:14px 12px 22px}}
+
+/* the masthead (Internal Tracker) */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.mast h1{font-size:24px;font-weight:600;line-height:1.15;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.msub{font-size:13px;color:var(--bar-quiet);margin-top:5px}
+.msub b{color:var(--bar-ink);font-weight:600}
+.mstrip{display:flex;gap:22px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mtile{text-align:right;min-height:48px}
+.mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
+.mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.mtile.late b{color:var(--bar-late)}
+.mcats{display:flex;gap:6px;margin-top:14px;padding-bottom:12px;align-items:center;flex-wrap:wrap}
+.mcats .sp{flex:1}
+.bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
+.bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
+.pill{display:inline-flex;font-size:11.5px;font-weight:600;border-radius:99px;padding:1px 9px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
+.pill.q{background:var(--surface-2);color:var(--ink-2)}
+.mast .own{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--bar-accent);color:var(--bar-accent);border-radius:4px;padding:1px 6px}
+@media (max-width:640px){.mast{padding:14px 14px 0}.mtile{text-align:left}.mstrip{gap:14px}}
+
+/* shared blocks */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.note{font-size:12px;color:var(--ink-3)}
+.chip{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.gold{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-tx)}
+.code{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--stone)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.btn:hover{border-color:var(--gold);color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
+.lnk{background:none;border:0;padding:0;font-size:12.5px;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
+.lnk:hover{color:var(--ink)}
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.seg button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.seg button.on{background:var(--panel);color:var(--panel-ink)}
+
+/* A: the flow */
+.abar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.agrid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:12px;align-items:start}
+@media (max-width:1180px){.agrid{grid-template-columns:1fr}}
+.lanes-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.lanes{position:relative;display:grid;grid-template-columns:104px repeat(7,minmax(120px,1fr));grid-template-rows:repeat(4,100px);min-width:944px}
+.lane-bg{grid-column:1/-1;border-top:1px solid var(--line-soft)}
+.lane-bg.z{background:var(--zebra)}
+.lane-l{grid-column:1;display:flex;align-items:center;padding:10px 12px;background:var(--surface-2);border-right:1px solid var(--line);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);position:sticky;left:0;z-index:1}
+.st{position:relative;z-index:2;align-self:center;justify-self:center;width:112px;text-align:left;border:1.5px solid var(--field-line);background:var(--surface);border-radius:8px;padding:7px 10px}
+.st .n{display:block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-3)}
+.st b{display:block;font-size:13px;line-height:1.25}
+.st.dec{border-style:dashed;border-color:var(--stone)}
+.st.ends{border-radius:99px;width:104px;text-align:center;background:var(--surface-2)}
+.st.on{box-shadow:0 0 0 3px var(--gold)}
+svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+svg.edges path{fill:none;stroke:var(--ink-3);stroke-width:1.5}
+svg.edges .ah{fill:var(--ink-3)}
+svg.edges rect{fill:var(--surface)}
+svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
+.drawer{padding:12px 14px;display:grid;gap:9px}
+.drawer h3{font-size:16px}
+.dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:5px 10px;font-size:13px;margin:0}
+.dl dt{color:var(--ink-3);font-size:12.5px}
+.dl dd{margin:0}
+
+/* B: the steps */
+.bgrid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.bgrid{grid-template-columns:1fr}.bidx{display:none}}
+.bidx{position:sticky;top:64px;padding:10px 12px}
+.bidx ol{padding-left:0;list-style:none;display:grid;gap:2px;margin-top:6px}
+.bidx a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;padding:5px 6px;border-radius:6px;text-decoration:none;color:var(--ink);font-size:13px}
+.bidx a:hover{background:var(--surface-2)}
+.bidx a span{font-size:11.5px;color:var(--ink-3);grid-column:2}
+.bidx a i{font-style:normal;font-weight:800;color:var(--stone)}
+.sc{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;padding:14px 16px;border-top:1px solid var(--line-soft)}
+.sc:first-child{border-top:0}
+.sc .num{width:28px;height:28px;border-radius:50%;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-weight:800;font-size:13px}
+.sc h3{font-size:15.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sc .by{font-size:12.5px;color:var(--ink-3)}
+.sc ul{padding-left:18px;margin-top:4px;font-size:13.5px;display:grid;gap:2px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px}
+.meta span{display:inline-flex;gap:5px;align-items:baseline}
+.meta em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.ctl{margin-top:6px;font-size:12.5px;color:var(--ink-2)}
+.ctl.bad{color:var(--bad-tx);font-weight:600}
+.sug{margin-top:8px}
+
+/* C: the summary */
+.cgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+@media (max-width:980px){.cgrid{grid-template-columns:1fr}}
+.cb{padding:14px 16px}
+.cb .lbl{display:block;margin-bottom:8px}
+.scope{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.scope span{font-size:12px;border:1px solid var(--line);border-radius:5px;padding:2px 8px;background:var(--zebra)}
+.scope span.out{border-style:dashed;color:var(--ink-3)}
+.health{display:grid;gap:7px}
+.hrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:start;font-size:13.5px}
+.hrow i{font-style:normal;font-weight:800;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;margin-top:2px}
+.hrow i.ok{background:var(--good-bg);color:var(--good-tx)}
+.hrow i.warn{background:var(--attn-bg);color:var(--attn-tx)}
+.hrow i.bad{background:var(--bad-bg);color:var(--bad-tx)}
+.hrow small{display:block;font-size:12px;color:var(--ink-3)}
+.wait{margin-top:12px;border:1px solid var(--gold);background:var(--over-bg);border-radius:8px;padding:10px 12px}
+.wait b{font-size:13.5px}
+.wait .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.strip{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 2px 6px}
+.sn{flex:1 0 128px;display:grid;gap:2px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:12.5px;text-align:left;position:relative}
+.sn b{font-size:13px;line-height:1.25}
+.sn .r{font-size:11.5px;color:var(--ink-3)}
+.sn.dec{border-style:dashed;border-color:var(--stone)}
+.sn .warn{position:absolute;top:-8px;right:6px}
+.arr{flex:0 0 22px;display:grid;place-items:center;color:var(--ink-3)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.kpis{grid-template-columns:1fr}}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.kpi .k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.kpi .v{font-size:20px;font-weight:700}
+.kpi .w{font-size:12px;color:var(--ink-3)}
+.compact .sc{padding:10px 14px}
+.compact .sc ul,.compact .sc .meta,.compact .sc .ctl,.compact .sc .sug{display:none}
+.compact .sc.open ul,.compact .sc.open .meta,.compact .sc.open .ctl{display:grid}
+.compact .sc.open .meta{display:flex}
+.compact .sc.open .sug{display:block}
+.compact .sc h3{cursor:pointer}
+.sect{display:flex;gap:8px;align-items:baseline;margin:16px 0 8px;flex-wrap:wrap}
+.sect .r{margin-left:auto}
+
+/* the note under each option */
+.verdict{margin-top:14px;border:1px dashed var(--over-line);background:var(--over-bg);border-radius:10px;padding:12px 16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.verdict{grid-template-columns:1fr}}
+.verdict h4{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px}
+.verdict ul{padding-left:16px;font-size:13px;color:var(--ink-2);display:grid;gap:3px}
+.verdict .rec{font-size:13px}
+
+/* dialog and toast */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:50;display:grid;place-items:center;padding:20px 16px}
+.dlg{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);width:min(520px,100%);display:grid}
+.dlg-h{padding:14px 18px;border-bottom:1px solid var(--line)}
+.dlg-h h3{font-size:17px}
+.dlg-h p{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.dlg-b{padding:14px 18px;display:grid;gap:12px}
+.fld{display:grid;gap:4px}
+.fld span{font-size:12px;font-weight:600;color:var(--ink-2)}
+.fld select,.fld textarea{border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:6px 9px;font-size:13.5px;width:100%}
+.fld textarea{min-height:80px;resize:vertical}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:60;max-width:min(560px,calc(100% - 32px))}
+</style>
+
+<div class="mk"><div class="mk-in">
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>One process, three ways to open it</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-sw" role="tablist" aria-label="Options">
+    <button type="button" data-opt="a" role="tab">A · Flow first</button>
+    <button type="button" data-opt="b" role="tab">B · Steps first</button>
+    <button type="button" data-opt="c" role="tab">C · Summary first</button>
+  </div>
+</div></div>
+
+<div class="doc">
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. The navy band is the same in all three; only what sits under it changes. <b>Suggest a change</b> works everywhere: try it on a step.</p>
+
+  <div class="frame">
+    <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">1 to approve · 1 to read</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
+    <div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div style="min-width:0">
+            <p class="wkof">Raya Trade · Processes › ORD100 · Finance</p>
+            <h1>Order-to-Cash <span class="pill good">In force · v2</span><span class="own">You own this</span></h1>
+            <p class="msub">From a confirmed customer order to cash in the bank · Approver <b>Yara Kamal</b> · v3 approved, waiting for the office to publish</p>
+          </div>
+          <div class="mstrip">
+            <div class="mtile"><b>6</b><span>Steps</span></div>
+            <div class="mtile"><b>4</b><span>Roles</span></div>
+            <div class="mtile"><b>4/5</b><span>Have read it</span></div>
+            <div class="mtile late"><b>1</b><span>Risk, no control</span></div>
+            <div class="mtile"><b>19</b><span>Days to review</span></div>
+          </div>
+        </div>
+        <div class="mcats"><span class="sp"></span><button class="bq" type="button" data-toast="Downloads the SOP in the product.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page in the product.">Print</button><button class="bgold" type="button" data-suggest="">Suggest a change</button></div>
+      </header>
+
+      <!-- ── A · FLOW FIRST ── -->
+      <section data-view="a" hidden>
+        <div class="abar"><div class="seg"><button type="button" class="on">Flow</button><button type="button" data-toast="Option B shows the steps as a list.">Steps</button></div><span class="note">Lanes are roles. Click a step for its detail.</span></div>
+        <div class="agrid">
+          <div class="lanes-wrap"><div class="lanes" id="lanes">
+            <div class="lane-bg" style="grid-row:1"></div><div class="lane-bg z" style="grid-row:2"></div><div class="lane-bg" style="grid-row:3"></div><div class="lane-bg z" style="grid-row:4"></div>
+            <div class="lane-l" style="grid-row:1">Sales coordinator</div><div class="lane-l" style="grid-row:2">Credit controller</div><div class="lane-l" style="grid-row:3">Logistics coordinator</div><div class="lane-l" style="grid-row:4">Billing clerk</div>
+            <button type="button" class="st ends" id="s0" style="grid-row:1;grid-column:2"><span class="n">START</span><b>Order received</b></button>
+            <button type="button" class="st" id="s1" data-step="1" style="grid-row:1;grid-column:3"><span class="n">STEP 1</span><b>Confirm order</b></button>
+            <button type="button" class="st dec on" id="s2" data-step="2" style="grid-row:2;grid-column:4"><span class="n">STEP 2 · DECISION</span><b>Credit check</b></button>
+            <button type="button" class="st" id="s3" data-step="3" style="grid-row:1;grid-column:5"><span class="n">STEP 3</span><b>Ask for prepayment</b></button>
+            <button type="button" class="st" id="s4" data-step="4" style="grid-row:3;grid-column:6"><span class="n">STEP 4</span><b>Deliver</b></button>
+            <button type="button" class="st" id="s5" data-step="5" style="grid-row:4;grid-column:7"><span class="n">STEP 5</span><b>Invoice</b></button>
+            <button type="button" class="st" id="s6" data-step="6" style="grid-row:2;grid-column:8"><span class="n">STEP 6</span><b>Collect payment</b></button>
+            <svg class="edges" id="edges" aria-hidden="true"></svg>
+          </div></div>
+          <aside class="box drawer" id="drawer" aria-live="polite"></aside>
+        </div>
+      </section>
+
+      <!-- ── B · STEPS FIRST ── -->
+      <section data-view="b" hidden>
+        <p style="font-size:14px;margin-bottom:12px;max-width:90ch">Take a confirmed customer order through the credit check, delivery, invoicing and collection, so that every order is delivered once and paid for within terms.</p>
+        <div class="bgrid">
+          <nav class="box bidx" aria-label="Steps"><span class="lbl">The steps</span><ol id="bindex"></ol></nav>
+          <div class="box" id="bsteps"></div>
+        </div>
+      </section>
+
+      <!-- ── C · SUMMARY FIRST ── -->
+      <section data-view="c" hidden>
+        <div class="cgrid">
+          <div class="box cb"><span class="lbl">What it is for</span>
+            <p style="font-size:14.5px">Take a confirmed customer order through the credit check, delivery, invoicing and collection, so that every order is delivered once and paid for within terms.</p>
+            <div class="scope"><span>Trade customers on credit terms</span><span>Deliveries from the central warehouse</span><span>Invoicing and collection</span><span class="out">Not: cash sales in stores</span><span class="out">Not: returns (ORD101)</span></div>
+            <div class="sect" style="margin-top:14px"><span class="lbl">Measures</span><span class="note">targets agreed for this process</span></div>
+            <div class="kpis"><div class="kpi"><div class="k">Order to invoice</div><div class="v">2 days</div><div class="w">checked weekly</div></div><div class="kpi"><div class="k">Invoice accuracy</div><div class="v">98%</div><div class="w">checked monthly</div></div><div class="kpi"><div class="k">Days to collect</div><div class="v">45 days</div><div class="w">checked monthly</div></div></div>
+          </div>
+          <div class="box cb"><span class="lbl">Is it in good shape?</span>
+            <div class="health">
+              <div class="hrow"><i class="ok">✓</i><span>v3 approved by Yara Kamal on 04 Oct<small>The office publishes it next; staff then read v3.</small></span><span></span></div>
+              <div class="hrow"><i class="ok">✓</i><span>Every step has a role, and RACI is final</span><span></span></div>
+              <div class="hrow"><i class="bad">!</i><span>Step 4 Deliver: “proof of delivery missing” has no control</span><button class="lnk" type="button" data-suggest="4">Suggest one</button></div>
+              <div class="hrow"><i class="warn">!</i><span>4 of 5 have read v2<small>Still to read: Dalia Sabry</small></span><button class="lnk" type="button" data-toast="A reminder goes to Dalia Sabry.">Remind</button></div>
+              <div class="hrow"><i class="warn">!</i><span>The SOP has no version or effective date yet</span><span></span></div>
+            </div>
+            <div class="wait"><b>Waiting on you: the yearly review is due on 12 Nov</b><p class="note" style="margin-top:2px">Read it through and say whether it still describes how the work is done.</p><div class="acts"><button class="btn gold" type="button" data-toast="Recorded: still right. The review date moves on a year.">It is still right</button><button class="btn" type="button" data-suggest="">Suggest a change</button></div></div>
+          </div>
+        </div>
+        <div class="box cb" style="margin-bottom:14px"><div class="sect" style="margin:0 0 8px"><span class="lbl">The flow at a glance</span><span class="r"><button class="lnk" type="button" data-toast="Opens the full flow, as in option A.">See it as a flow →</button></span></div>
+          <div class="strip" id="cstrip"></div>
+        </div>
+        <div class="sect"><span class="lbl">The steps</span><span class="note">click a step to open it</span><span class="r"><button class="lnk" type="button" id="openall">Open all</button></span></div>
+        <div class="box compact" id="csteps"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="verdict" id="verdict"></div>
+</div>
+<div id="layer"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
+  const STEPS = [
+    { n: 1, t: 'Confirm order', who: 'Sales coordinator', dec: false, acts: ['Check the order against the quote', 'Confirm prices, quantities and the delivery date with the customer', 'Enter the order in the ERP'], appr: null, time: null, ho: null, risk: null },
+    { n: 2, t: 'Credit check', who: 'Credit controller', dec: true, acts: ['Add this order to the customer’s balance', 'Compare it with the credit limit', 'Within the limit: release the order. Over it: ask for prepayment (step 3)'], appr: 'At or above $250,000 the CFO approves', time: '1 day, then it goes to the Finance manager', ho: null, risk: ['Goods released to a customer over the limit', 'The ERP blocks orders over the limit', 'Tested Aug 2026, passed'] },
+    { n: 3, t: 'Ask for prepayment', who: 'Sales coordinator', dec: false, acts: ['Send the pro-forma invoice', 'Chase until it is paid or cancelled'], appr: null, time: '5 days, then it goes to the Commercial manager', ho: null, risk: null },
+    { n: 4, t: 'Deliver', who: 'Logistics coordinator', dec: false, acts: ['Pick and pack', 'Deliver and bring back signed proof of delivery'], appr: null, time: null, ho: 'Hands over to Logistics & Last-mile (LOG100)', risk: ['Proof of delivery missing', null] },
+    { n: 5, t: 'Invoice', who: 'Billing clerk', dec: false, acts: ['Raise the invoice from the signed proof', 'Send it to the customer'], appr: null, time: '2 days after delivery, then it goes to the Finance manager', ho: null, risk: ['Invoice sent with the wrong price', 'Price list signed off before use', 'Not tested yet'] },
+    { n: 6, t: 'Collect payment', who: 'Credit controller', dec: false, acts: ['Match receipts to invoices', 'Chase overdue invoices every week'], appr: null, time: null, ho: 'Hands over to Record-to-Report (REC100)', risk: null },
+  ];
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const initials = (s) => s.split(' ').map((w) => w[0]).join('');
+
+  function stepCard(s) {
+    const meta = [s.appr && '<span><em>Approval</em>' + esc(s.appr) + '</span>', s.time && '<span><em>Time limit</em>' + esc(s.time) + '</span>', s.ho && '<span><em>Then</em>' + esc(s.ho) + '</span>'].filter(Boolean).join('');
+    const ctl = s.risk ? (s.risk[1] ? '<p class="ctl">Risk: ' + esc(s.risk[0]) + ' · Control: ' + esc(s.risk[1]) + ' · ' + esc(s.risk[2]) + '</p>' : '<p class="ctl bad">Risk: ' + esc(s.risk[0]) + ' · no control yet</p>') : '';
+    return '<div class="sc" id="step-' + s.n + '"><span class="num">' + s.n + '</span><div><h3 data-open="' + s.n + '">' + esc(s.t) + (s.dec ? ' <span class="chip">Decision</span>' : '') + (s.risk && !s.risk[1] ? ' <span class="chip bad">No control</span>' : '') + '</h3><p class="by">Done by: ' + esc(s.who) + '</p>' +
+      '<ul>' + s.acts.map((a) => '<li>' + esc(a) + '</li>').join('') + '</ul>' + (meta ? '<div class="meta">' + meta + '</div>' : '') + ctl +
+      '<div class="sug"><button class="lnk" type="button" data-suggest="' + s.n + '">Suggest a change to this step</button></div></div></div>';
+  }
+  $('#bsteps').innerHTML = STEPS.map(stepCard).join('');
+  $('#bindex').innerHTML = STEPS.map((s) => '<li><a href="#step-' + s.n + '" data-jump="' + s.n + '"><i>' + s.n + '</i>' + esc(s.t) + '<span>' + esc(s.who) + '</span></a></li>').join('');
+  $('#csteps').innerHTML = STEPS.map(stepCard).join('').replace(/id="step-/g, 'id="cstep-');
+  $('#cstrip').innerHTML = STEPS.map((s, i) => (i ? '<span class="arr" aria-hidden="true">→</span>' : '') + '<button type="button" class="sn' + (s.dec ? ' dec' : '') + '" data-copen="' + s.n + '">' + (s.risk && !s.risk[1] ? '<span class="chip bad warn">No control</span>' : '') + '<span class="code">' + s.n + '</span><b>' + esc(s.t) + '</b><span class="r">' + esc(s.who) + '</span></button>').join('');
+
+  function drawer(n) {
+    const s = STEPS.find((x) => x.n === n);
+    $$('.st').forEach((b) => b.classList.toggle('on', b.dataset.step === String(n)));
+    $('#drawer').innerHTML = '<span class="note" style="font-family:var(--mono);font-weight:700">STEP ' + s.n + (s.dec ? ' · DECISION' : '') + '</span><h3>' + esc(s.t) + '</h3><dl class="dl"><dt>Done by</dt><dd>' + esc(s.who) + '</dd>' + (s.appr ? '<dt>Approval</dt><dd>' + esc(s.appr) + '</dd>' : '') + (s.time ? '<dt>Time limit</dt><dd>' + esc(s.time) + '</dd>' : '') + (s.ho ? '<dt>Then</dt><dd>' + esc(s.ho) + '</dd>' : '') + '</dl>' +
+      '<ul style="padding-left:18px;font-size:13px">' + s.acts.map((a) => '<li>' + esc(a) + '</li>').join('') + '</ul>' + (s.risk ? (s.risk[1] ? '<p class="ctl">Control: ' + esc(s.risk[1]) + '</p>' : '<p class="ctl bad">“' + esc(s.risk[0]) + '” has no control</p>') : '') +
+      '<div><button class="btn" type="button" data-suggest="' + s.n + '">Suggest a change to this step</button></div>';
+  }
+
+  /* arrows measured from the boxes */
+  const EDGES = [['s0', 's1'], ['s1', 's2'], ['s2', 's4', 'within limit'], ['s2', 's3', 'over limit'], ['s3', 's4', 'once paid'], ['s4', 's5'], ['s5', 's6']];
+  function arrows() {
+    const L = $('#lanes'), svg = $('#edges'); if (!L || !L.offsetParent) return;
+    const o = L.getBoundingClientRect(); let out = '<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="ah" d="M0 0 8 4 0 8z"/></marker></defs>', lab = '';
+    EDGES.forEach(([f, t, l]) => {
+      const a = document.getElementById(f).getBoundingClientRect(), b = document.getElementById(t).getBoundingClientRect();
+      const sx = a.right - o.left, sy = a.top - o.top + a.height / 2, ex = b.left - o.left - 2, ey = b.top - o.top + b.height / 2, mx = Math.round(sx + Math.min(26, (ex - sx) / 2));
+      out += '<path d="' + (Math.abs(sy - ey) < 2 ? 'M' + sx + ' ' + sy + 'H' + ex : 'M' + sx + ' ' + sy + 'H' + mx + 'V' + ey + 'H' + ex) + '" marker-end="url(#ah)"/>';
+      if (l) { const x = mx + 5, y = (sy + ey) / 2 + 4, w = l.length * 5.7 + 8; lab += '<rect x="' + (x - 3) + '" y="' + (y - 11) + '" width="' + w + '" height="15" rx="3"/><text x="' + x + '" y="' + y + '">' + l + '</text>'; }
+    });
+    svg.innerHTML = out + lab;
+  }
+
+  const VERDICT = {
+    a: [['Good at', ['Hand-overs between roles show at a glance', 'Familiar to the consultants who build it', 'Good for a workshop on a big screen']], ['What it costs', ['A manager has to decode lanes and arrows first', 'The detail is behind a click, one step at a time', 'Hard to read on a phone', 'Nothing says whether the process is in good shape']], ['Fits', ['The builder, and a manager who already knows the process well']]],
+    b: [['Good at', ['Reads like an instruction manual, top to bottom', 'Every detail visible: who, approval, time limit, control', 'Works on a phone', 'Easy to point a change at one step']], ['What it costs', ['Long: the reader scrolls to see the whole', 'No picture of the hand-overs between roles', 'Health and what is waiting on the owner are still not shown']], ['Fits', ['Frontline staff following the procedure; the reading page they have today']]],
+    c: [['Good at', ['Answers “is it in good shape, and what do I need to do” before anything else', 'The whole flow in one line, without decoding a diagram', 'The steps are right underneath, opened one at a time', 'The full diagram stays one click away']], ['What it costs', ['Someone who only wants the steps scrolls past the summary', 'The summary is only as good as the data behind it: review dates and who has read it must be kept current, or it misleads', 'One more layout to build than B']], ['Fits', ['Managers and process owners, the people you said matter most. Staff could still land straight on the steps (B).']]],
+  };
+  function show(opt) {
+    if (['a', 'b', 'c'].indexOf(opt) < 0) opt = 'a';
+    $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== opt; });
+    $$('.mk-sw button').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('#verdict').innerHTML = VERDICT[opt].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    try { history.replaceState(null, '', '#' + opt); } catch (e) {}
+    if (opt === 'a') requestAnimationFrame(arrows);
+  }
+
+  let tt;
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2800); }
+  function suggest(n) {
+    $('#layer').innerHTML = '<div class="scrim" data-close="1"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="sg-t"><div class="dlg-h"><h3 id="sg-t">Suggest a change</h3><p>It goes to the Strategy Office, pinned to the step. You see their answer here.</p></div><div class="dlg-b">' +
+      '<label class="fld"><span>Where</span><select id="sg-where"><option value="">The whole process</option>' + STEPS.map((s) => '<option value="' + s.n + '"' + (String(s.n) === String(n) ? ' selected' : '') + '>Step ' + s.n + ' · ' + esc(s.t) + '</option>').join('') + '</select></label>' +
+      '<label class="fld"><span>What should change</span><textarea id="sg-what" placeholder="e.g. Since August the warehouse sends the proof of delivery by photo, not paper."></textarea></label>' +
+      '<label class="fld"><span>Why (optional)</span><textarea id="sg-why" style="min-height:52px"></textarea></label></div>' +
+      '<div class="dlg-f"><button class="btn" type="button" data-close="1">Cancel</button><button class="btn gold" type="button" id="sg-send">Send to the Strategy Office</button></div></div></div>';
+    setTimeout(() => $('#sg-what').focus(), 0);
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target, o = t.closest('[data-opt]'), sg = t.closest('[data-suggest]'), tst = t.closest('[data-toast]'), st = t.closest('.st[data-step]'), op = t.closest('[data-open]'), cop = t.closest('[data-copen]'), jump = t.closest('[data-jump]');
+    if (o) { show(o.dataset.opt); return; }
+    if (sg) { suggest(sg.dataset.suggest); return; }
+    if (t.id === 'sg-send') { const w = $('#sg-where').value; $('#layer').innerHTML = ''; toast('Sent to the Strategy Office' + (w ? ', pinned to step ' + w : '') + '. You will see their answer on this page.'); return; }
+    if (t.closest('[data-close]') && (t.dataset.close || t === t.closest('.scrim'))) { if (t.dataset.close) { $('#layer').innerHTML = ''; } return; }
+    if (tst) { toast(tst.dataset.toast); return; }
+    if (st) { drawer(Number(st.dataset.step)); return; }
+    if (op && op.closest('.compact')) { op.closest('.sc').classList.toggle('open'); return; }
+    if (cop) { const c = document.getElementById('cstep-' + cop.dataset.copen); c.classList.add('open'); c.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    if (jump) { e.preventDefault(); document.getElementById('step-' + jump.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (t.id === 'openall') { const all = $$('#csteps .sc'), any = all.some((x) => !x.classList.contains('open')); all.forEach((x) => x.classList.toggle('open', any)); t.textContent = any ? 'Close all' : 'Open all'; }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#layer').innerHTML = ''; });
+  window.addEventListener('resize', () => requestAnimationFrame(arrows));
+  drawer(2);
+  show((location.hash || '#a').slice(1));
+})();
+</script>

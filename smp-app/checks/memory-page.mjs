@@ -141,7 +141,7 @@ await section("3 · writing one through the form, read back from the DATA", asyn
   await pg_.waitForSelector("#m-title", { timeout: 10000 });
   /* THE CLIENT IS PICKED, not left to whichever sorts first: the shared
      database can hold other checks' clients beside the dev tenant's, and one
-     named RHI was the first option on a correct build (§622.4). Picked by its
+     named RHI was the first option on a correct build (§623.4). Picked by its
      key, so a second client that is also called Raya Trade cannot pass for it. */
   await pg_.selectOption("#m-client", "raya-trade");
   await pg_.selectOption("#m-kind", "hiccup");
@@ -235,7 +235,7 @@ await section("8 · a period debrief, end to end", async () => {
   check(loaded.t === "object", "the splitter the page loads is THERE (spec 045: its own file, so node and the browser run the same bytes)", JSON.stringify(loaded));
   await pg_.click('.ptitle .right button:has-text("Write up a period")');
   await pg_.waitForSelector("#d-paste", { timeout: 10000 });
-  await pg_.selectOption("#d-client", "raya-trade");   /* picked, as in §3 above (§622.4) */
+  await pg_.selectOption("#d-client", "raya-trade");   /* picked, as in §3 above (§623.4) */
   await pg_.fill("#d-from", "1 August 2026");
   await pg_.fill("#d-to", "11 September 2026");
   await pg_.waitForTimeout(200);

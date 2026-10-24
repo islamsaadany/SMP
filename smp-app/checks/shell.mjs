@@ -1202,7 +1202,7 @@ await section("3h · the Copilot column on Roles & access, and View on the tab (
     check(mk && mk.ok, "a chat to read is made while still at edit", JSON.stringify(mk));
     /* SINCE §621 A ROLES & ACCESS PRESS ASKS FIRST, in a box beside the cell,
        and stores only on Change it — so the press is answered here, and what
-       is asserted is still the stored row (§622.5). The box not coming is a
+       is asserted is still the stored row (§623.5). The box not coming is a
        FAIL below, not a death: the row is then still empty. */
     await page.click('[data-mac^="super|a_copilot|view"]');
     const asked = await page.waitForSelector(".askbox .askyes", { timeout: 6000 }).catch(() => null);
@@ -2469,7 +2469,7 @@ await section("4 · Forefront's own pages", async () => {
        raya-trade, and the first card is whichever client sorts first — which
        a client left in the shared database by another check's dead run
        (named RHI) took, so this read that client's "No plan" on a correct
-       build (§622.4). */
+       build (§623.4). */
     await page.waitForSelector('#page:not([inert]) .ccard[data-client="raya-trade"]', { timeout: 8000 }).catch(() => {});
     const card = (await page.locator('#page:not([inert]) .ccard[data-client="raya-trade"]').first().textContent({ timeout: 4000 }).catch(() => "")) || "";
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));

@@ -40,7 +40,7 @@
      SMP_BREAK=count-line     node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
-     SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§622.3)
+     SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§623.3)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -266,7 +266,7 @@ check("...and nothing beyond the three weeks is in the view at all",
 check("the view holds exactly the rows the three weeks hold",
   rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join("") === "abcdef", rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join(""));
 check("...so last week's finished action is in it, and nothing older", inView(mk({ status: "done", doneDay: "2026-09-08" }), "check", SUPER, TODAY) && !inView(mk({ status: "done", doneDay: "2026-08-08" }), "check", SUPER, TODAY));
-/* FINISHED AT THE WEEKEND (§622.3). The day a thing is finished is stamped as
+/* FINISHED AT THE WEEKEND (§623.3). The day a thing is finished is stamped as
    it happens, so it can be a Friday or a Saturday — and asked as "between
    Sunday and Thursday" that day sat in no week: the row ticked Done on a
    Saturday left This week under the hand that ticked it. §10 found it, but
@@ -1219,7 +1219,7 @@ try {
   failed = true;
   console.log("\n  DIED: " + (e && e.stack || e));
 } finally {
-  /* THE CLIENTS IT MADE GO WHETHER THE RUN FINISHED OR DIED (§622.4). This
+  /* THE CLIENTS IT MADE GO WHETHER THE RUN FINISHED OR DIED (§623.4). This
      sat at the end of the run itself, so every run that died left a "Raya
      Trade" and an "RHI" in the shared database — and the Memory and console
      checks, which read whichever client comes first, went red on correct

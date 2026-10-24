@@ -183,10 +183,10 @@ export function sameWeek(a: string, b: string): boolean { return weekOf(a).from 
    week at all, so a row ticked Done at the weekend left This week under the
    hand that ticked it, sat in none of the check's three cards, and was not
    counted as done this week. Decision 8 already says which week a Friday or
-   a Saturday is: the coming one (§622.3). */
+   a Saturday is: the coming one (§623.3). */
 export function finishedIn(a: Action, day: string): boolean {
   if (!a.doneDay) return false;
-  if (brk() === "weekend-done-lost") {   /* §622.3 put back */
+  if (brk() === "weekend-done-lost") {   /* §623.3 put back */
     const w = weekOf(day);
     return a.doneDay >= w.from && a.doneDay <= w.to;
   }

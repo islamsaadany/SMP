@@ -305,7 +305,7 @@ try {
   /* LONGER THAN A YEAR, so it crosses a New Year on every day this file is
      run: as D(40)–D(120) it crossed one only while today fell between early
      September and late November, and the span check below went red on a
-     correct build the rest of the year (§622.1). */
+     correct build the rest of the year (§623.1). */
   await act({ wp: W32, name: "Unit-by-unit sessions", pos: 0, s: D(40), e: D(406), status: "not_started", pct: 0 });
   /* A one-day milestone in the future — a DATE and not a stretch of work, so
      the chart draws a diamond rather than a bar (§9.9). */

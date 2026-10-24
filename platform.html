@@ -1643,6 +1643,16 @@
   /* Show done: its group in green, its empty line quiet */
   .mwlist .mwsec.done .mwsh h2{ color:var(--good) }
   .mwnone{ margin:0; padding:14px; font-size:13px }
+  /* ONE BAND, ONE SIZE, ONE PLACE on a computer (Islam: "the banner in the
+     home with its size and location stays the same when we go through the
+     modules"): Home's height, measured, and the same padding on every tab */
+  @media (min-width:1000px){
+    .hohello, .pgband, .pgband.ptitle, .mwmast{ box-sizing:border-box; min-height:113px; padding:16px 22px 17px; margin:0 0 16px }
+  }
+  /* a framework's section, a quiet pill in sentence case */
+  .fwcard .fwrow .tag{ font-family:inherit; font-weight:600; font-size:11.5px; line-height:1.4; letter-spacing:0; text-transform:none; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; border-radius:999px; padding:2px 9px }
+  .fwcard .cell button{ font-family:inherit; letter-spacing:0; text-transform:none; font-size:12px }
   /* Frameworks: one card, Search · Ask it and the box in its header */
   .fwcard{ flex:none; margin:0 0 16px }
   .fwcard .fwbox{ border:0; border-radius:0; padding:0; box-shadow:none; background:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap }
@@ -1652,7 +1662,7 @@
   .fwcard .fwchips{ margin:0; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
   .fwcard .fwcount{ margin:0; padding:8px 14px; border-bottom:1px solid var(--line-soft) }
   .fwcard .fwlist{ border:0; border-radius:0; box-shadow:none }
-  .fwcard .fwrow{ display:grid; grid-template-columns:minmax(0,1fr) 170px 18px; gap:12px; align-items:center; padding:10px 14px; border-bottom:0 }
+  .fwcard .fwrow{ display:grid; grid-template-columns:minmax(0,1fr) 230px 18px; gap:12px; align-items:center; padding:10px 14px; border-bottom:0 }
   .fwcard .fwrow[hidden]{ display:none }
   .fwcard .fwrow:nth-child(odd of .fwrow:not([hidden])){ background:var(--zebra) }
   .fwcard .fwrow:hover, .fwcard .fwrow:focus-visible{ background:var(--surface-2) }

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-24 — Round three: one band on every tab, striped rows, Show done, settings on Home, Case studies and Frameworks as cards (§622.4), on the branch, awaiting Islam's word to merge.** Every console tab now opens with Home's navy band, the same size and in the same place. Home says "Here is what needs you today across your clients." Rows alternate light grey and white, grey first. Home's client lines carry the sliders for the client's settings. My tasks can show what was done in the last week or the last 30 days. Case studies and Frameworks are each one library card with their filters in the header.
+
 **2026-10-24 — My tasks in one card with its filters in its header (§622.3), merged to `main` 2026-10-24 on Islam's word.** My tasks is now one "Open tasks" card whose header holds Show, Sort by and a new search; the groups are labelled sections inside it over a grey line, Late in red.
 
 **2026-10-24 — Titles in Georgia bold; My tasks and Clients in Home's look (§622.2), merged to `main` 2026-10-24 on Islam's word.** Card titles are Georgia, bold. My tasks has Home's band and each group in a card (by client, each client a card with a link to its Tracker). Clients has Home's band with + Add a client, one card holding the clients with the filters in its header, and quieter client cards: no boxed tags or industry, the seat and units at the foot with Settings as a word.

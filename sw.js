@@ -618,7 +618,11 @@
    way, and the Setup menu line "Planning & reporting". The built file's
    bytes changed (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.07-checks-cleared";
+/* v7.08-instant-moves — §620: every press shows something at once; the
+   files a page waits on carry their hash and are cached for good. The served
+   files' bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.08-instant-moves";
 const ASSETS = [
   "/",
   "/index.html",

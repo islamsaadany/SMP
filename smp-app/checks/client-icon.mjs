@@ -1,4 +1,4 @@
-/* ── WHICH PICTURE STANDS FOR A CLIENT IN A SMALL SQUARE (§628) ─────────────
+/* ── WHICH PICTURE STANDS FOR A CLIENT IN A SMALL SQUARE (§629) ─────────────
  * No database, no browser: lib/client-icon.ts is pure. The pictures are REAL
  * PNGs written here (a header, one IDAT, an IEND) so the size is read the way
  * the server reads a stored mark, never from a hand-typed byte string.

@@ -8271,7 +8271,7 @@ var UNITS = {
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
-/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§630) ───────────────────────
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
    Islam, of a Setup table spilling across its columns: *"I believe the page
    needs to be 80% smaller like what we did in the console page"* — and, of
    the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
@@ -8641,7 +8641,7 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
-/* ── AND THE SAME ON THE ORGANISATION TABLES (§629) ─────────────────────
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
    Islam: *"why to edit row by row why the editing doesn't happen on the cell
    level with a double click that opens the editable cells for editing?"*.
    `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
@@ -8759,7 +8759,7 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
-/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§629). */
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
 var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
@@ -40350,7 +40350,7 @@ function unitFormatSelect(k, u){
       return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
         esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
 }
-/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§629) ══
+/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§630) ══
    Islam: *"why to edit row by row why the editing doesn't happen on the cell
    level with a double click that opens the editable cells for editing?"* —
    then, of the mockup that drew it, *"go ahead with the mockup, build it"*.
@@ -40421,7 +40421,7 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
-    /* §629: every cell below that the dialog can change opens on a
+    /* §630: every cell below that the dialog can change opens on a
        double-click; none does while the rows are being arranged, for the
        menu's own reason (§261) — one act at a time. */
     var may = mayEdit && !arranging;
@@ -40490,7 +40490,7 @@ function renderUnits(){
       '<table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
         '<th style="width:18%">Unit</th>' +
-        /* §630: Plans in holds "Objectives & actions" and a count, and spilled
+        /* §631: Plans in holds "Objectives & actions" and a count, and spilled
            30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
            heading ran into Weight — measured. The short name gives up the
            room: it holds a short name. */
@@ -41208,7 +41208,7 @@ function dupeMark(dupes){
   return out;
 }
 
-/* §628: whether the register shows Forefront's consultants — kept on this
+/* §629: whether the register shows Forefront's consultants — kept on this
    device, the way the register's columns are (§47.1). Off unless asked. */
 var REGFF_KEY = "smp.register.forefront";
 function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
@@ -42330,7 +42330,7 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  /* §628: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+  /* §629: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
      option B: the register lists the client's people; *Show Forefront team*
      brings the consultants back). Only the MINTED rows hide — a consultant
      the platform wrote a row for so they can sign in and hold a seat
@@ -42893,7 +42893,7 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  /* §628: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+  /* §629: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
      people · 2 from Forefront" (§3a.1); with the consultants off the table
      by default, the one thing left to say about them is how many are behind
      the switch, and the switch says it. Drawn only where there is somebody
@@ -43640,7 +43640,7 @@ function coKebab(ck, co, on, mayEdit){
 }
 
 /* What a division's CEO sees, as a control — the dialog's and the cell's
-   (§629), one builder. */
+   (§630), one builder. */
 function coFlagSelect(ck, field, val){
   return '<select class="fld" data-coflag="' + esc(ck + "|" + field) + '">' +
     '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
@@ -43660,7 +43660,7 @@ function renderCompanies(){
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      /* §629: the page's own word, which the box had kept from before §391
+      /* §630: the page's own word, which the box had kept from before §391
          called these divisions. */
       tkBar("companies", { placeholder:"Search the " + L("division").toLowerCase() + "\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
@@ -43678,7 +43678,7 @@ function renderCompanies(){
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
           (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          /* §629: the three things the dialog changes open where they are. */
+          /* §630: the three things the dialog changes open where they are. */
           ocell("companies", ck, "name", mayEdit,
             '<b>' + esc(co.name) + '</b>' + '<span class="why mono">key ' + esc(ck) + '</span>',
             function(){ return ocellBox("data-coname", ck, co.name, { label: "Name" }); }) +
@@ -47507,7 +47507,7 @@ function renderFunctions(){
        "renders nothing at all, edit field included", so Plans in and Under
        could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-    /* §629: a cell the dialog can change opens on a double-click — the
+    /* §630: a cell the dialog can change opens on a double-click — the
        dialog's own field, so a hidden column still has its door in Edit
        details, and nothing opens while the rows are being arranged. */
     var may = mayEdit && !arranging;
@@ -47673,7 +47673,7 @@ function capsAsPillars(){
   });
   return out;
 }
-/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§629) ═════════
+/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§630) ═════════
    Islam, asked whether this page should go once El Abd's capabilities had
    become pillars of the company's plan: *"the capabilities exist why to
    remove it?"*, and then the mockup that made it a table: *"go ahead with
@@ -47748,7 +47748,7 @@ function renderCapPillars(){
         L1("capability") + '</button></div>' : ''));
 }
 function renderCaps(){
-  /* §629: where the capabilities are the company's own pillars, the page is
+  /* §630: where the capabilities are the company's own pillars, the page is
      their table — the record type below is a different thing (§542). */
   if (!GROUP.capabilities.length && capsAsPillars().length > 0) return renderCapPillars();
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
@@ -47835,7 +47835,7 @@ function renderCaps(){
           'a function to hold it is optional.</span></div>'
         : '') +
       /* §542's read-only note for a client whose capabilities are pillars
-         is gone (§629): that client gets `renderCapPillars()`, its table. */
+         is gone (§630): that client gets `renderCapPillars()`, its table. */
 
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
@@ -57651,7 +57651,7 @@ var SEARCHSEL = (function(){
      is no room below — a list that opens off the bottom of the window is a
      list you cannot reach the end of. */
   function place(btn, pop){
-    /* §630: in the page's own pixels — it is drawn at 80% on a computer, and
+    /* §631: in the page's own pixels — it is drawn at 80% on a computer, and
        a popup is placed in those while the button is measured in the
        window's. */
     var r = zRect(btn);
@@ -61524,7 +61524,7 @@ var CHAT = (function(){
   function fitInbox(){
     var root = el("chinbox");
     if (!root) return;
-    /* §630: a length the page sets is in its own pixels; the box and the
+    /* §631: a length the page sets is in its own pixels; the box and the
        scroll are the window's, 80% of them on a computer. */
     var top = (root.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     root.style.setProperty("--chin-top", Math.round(top) + "px");
@@ -62315,7 +62315,7 @@ var TOUR = (function(){
     selectorsOf(s).forEach(function(sel){
       var node = document.querySelector(sel);
       if (!node) return;
-      /* §630: the holes and the card are drawn in the page's own pixels. */
+      /* §631: the holes and the card are drawn in the page's own pixels. */
       var r = zRect(node);
       if (!r.width || !r.height) return;
       hs.push({ l:r.left - pad, t:r.top - pad, w:r.width + 2*pad, ht:r.height + 2*pad });
@@ -66113,7 +66113,7 @@ var COPILOT = (function(){
      no loop, since nothing above the pane moves when the pane changes height. */
   function fitPane(){
     var p = document.querySelector("[data-cop-pane]"); if (!p) return;
-    /* §630: in the page's own pixels, as the Platform Inbox's. */
+    /* §631: in the page's own pixels, as the Platform Inbox's. */
     var top = (p.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     if (top > 0) p.style.setProperty("--cop-top", Math.round(top) + "px");
   }
@@ -69811,7 +69811,7 @@ var CLIENTSETUP = (function () {
     return mk;
   }
 
-  /* ── ITS ICON (§628) ─────────────────────────────────────────────────
+  /* ── ITS ICON (§629) ─────────────────────────────────────────────────
      Islam: *"give me another thing beside the client mark to upload an icon
      or use the mark as an icon. and this icon view appears in the dashboard
      of your clients as some clients have a wide mark that doesn't fit in
@@ -77710,7 +77710,7 @@ var SYNC = (function () {
     if (!ASK) return;
     var a = ASK, box = a.box;
     if (!document.body.contains(a.anchor)) { askClose(); return; }
-    /* §630: measured in the page's own pixels, the scroll too, because the
+    /* §631: measured in the page's own pixels, the scroll too, because the
        box is placed in them and the page is drawn at 80% on a computer. */
     var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
     var mid = r.left + r.width / 2;
@@ -78633,7 +78633,7 @@ var SYNC = (function () {
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §630 */
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §631 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -78778,7 +78778,7 @@ var SYNC = (function () {
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
-    /* ── §629: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
        The same three things the register's cell gets above, here for the
        same reason (the button in front of a long select does not exist until
        SEARCHSEL has run): the cursor in the cell, a list opened, Escape
@@ -78950,7 +78950,7 @@ var SYNC = (function () {
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      /* §630: the inset is the page's pixels, the boxes the window's. */
+      /* §631: the inset is the page's pixels, the boxes the window's. */
       var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
@@ -79078,7 +79078,7 @@ var SYNC = (function () {
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = zRect(btn);                                        /* §630 */
+    var r = zRect(btn);                                        /* §631 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
     var left = Math.max(8, Math.min(r.left, winW() - w - 8));
     var below = winH() - r.bottom;
@@ -79141,7 +79141,7 @@ var SYNC = (function () {
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    /* §630: the scroll and the box are the window's pixels, the two custom
+    /* §631: the scroll and the box are the window's pixels, the two custom
        properties the page's — so those two are scaled, not the scroll. */
     var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
@@ -79196,7 +79196,7 @@ var SYNC = (function () {
        positioned the day it is added by being given an attribute here. */
     var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §630 */
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §631 */
     var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
@@ -79798,7 +79798,7 @@ var SYNC = (function () {
         open = null;
       };
       var place = function(btn, pop){
-        var r = zRect(btn);                                    /* §630 */
+        var r = zRect(btn);                                    /* §631 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
         var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
@@ -79901,14 +79901,14 @@ var SYNC = (function () {
       return { shut: shut };
     })();
 
-  /* §629: where an open person cell's list sits. FIXED, off the cell's
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
      own rect, for §45.5's reason: the tables sit in a box that scrolls
      sideways, which clips anything absolute to a strip of itself. Under the
      cell, or over it where the screen has no room below. */
   function ocellPlace(){
     var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
     if (!pop) return;
-    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §630 */
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §631 */
     var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
     var top = r.bottom - 2;
     if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
@@ -80265,7 +80265,7 @@ var SYNC = (function () {
     });
     wirePillars();
     wireArrange();
-    /* ══ THE ORGANISATION TABLES' CELLS (§629) ═══════════════════════════
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
        The register's block (§372) for Business units, Functions, Divisions
        and Capabilities — and BEFORE `wireSetupFields`, for that block's own
        reason: listeners on one element run in the order they were added, and
@@ -83177,7 +83177,7 @@ var SYNC = (function () {
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
-    /* §628: the Forefront switch. Kept on this device, repainted in place;
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
        a row being edited is somebody's, so it is committed by the repaint's
        own leaving rule like any other (§35). */
     document.querySelectorAll("[data-regff]").forEach(function(b){
@@ -83497,7 +83497,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* §629: the company's capability pillars — their menu, the way to the
+    /* §630: the company's capability pillars — their menu, the way to the
        plan, and Add. */
     document.querySelectorAll("[data-cpmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
@@ -84602,7 +84602,7 @@ var SYNC = (function () {
           paint();
         });
       });
-      /* §629: a capability that is a pillar of the company's plan, written
+      /* §630: a capability that is a pillar of the company's plan, written
          where the plan writes it — the pillar itself, found by its id (§48),
          and saved as the plan's pen saves (§71.2). An owner cleared is "",
          as the plan's pen writes it; a custodian cleared loses its key

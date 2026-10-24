@@ -169,7 +169,7 @@ with sync_playwright() as p:
       const tb = [...document.querySelectorAll('#modal-b .mftbl')];
       const heads = tb.map(t => [...t.tHead.rows[0].cells].map(c => c.textContent.trim()));
       return {
-        /* §630: in the page's own pixels — it is drawn at 80% on a computer,
+        /* §631: in the page's own pixels — it is drawn at 80% on a computer,
            and the 940 this is compared with is a width the page sets. */
         width: m ? Math.round(m.getBoundingClientRect().width /
                               (parseFloat(getComputedStyle(document.documentElement).zoom) || 1)) : null,

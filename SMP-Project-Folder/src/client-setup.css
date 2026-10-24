@@ -114,7 +114,7 @@
 .csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
                        padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
 .csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
-/* its icon (§628): the two choices on the left, what Home draws on the right */
+/* its icon (§629): the two choices on the left, what Home draws on the right */
 .csetup .wzicon { margin-top:22px; }
 .csetup .wzicon .iconrow { display:flex; align-items:flex-start; gap:28px; flex-wrap:wrap; margin-top:6px; }
 .csetup .wzicon .iconpick { display:flex; flex-direction:column; gap:8px; max-width:280px; }

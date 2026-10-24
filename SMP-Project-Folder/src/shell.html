@@ -3108,7 +3108,7 @@
     if (!ASK) return;
     var a = ASK, box = a.box;
     if (!document.body.contains(a.anchor)) { askClose(); return; }
-    /* §630: measured in the page's own pixels, the scroll too, because the
+    /* §631: measured in the page's own pixels, the scroll too, because the
        box is placed in them and the page is drawn at 80% on a computer. */
     var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
     var mid = r.left + r.width / 2;
@@ -4031,7 +4031,7 @@
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §630 */
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §631 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -4176,7 +4176,7 @@
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
-    /* ── §629: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
        The same three things the register's cell gets above, here for the
        same reason (the button in front of a long select does not exist until
        SEARCHSEL has run): the cursor in the cell, a list opened, Escape
@@ -4348,7 +4348,7 @@
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      /* §630: the inset is the page's pixels, the boxes the window's. */
+      /* §631: the inset is the page's pixels, the boxes the window's. */
       var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
@@ -4476,7 +4476,7 @@
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = zRect(btn);                                        /* §630 */
+    var r = zRect(btn);                                        /* §631 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
     var left = Math.max(8, Math.min(r.left, winW() - w - 8));
     var below = winH() - r.bottom;
@@ -4539,7 +4539,7 @@
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    /* §630: the scroll and the box are the window's pixels, the two custom
+    /* §631: the scroll and the box are the window's pixels, the two custom
        properties the page's — so those two are scaled, not the scroll. */
     var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
@@ -4594,7 +4594,7 @@
        positioned the day it is added by being given an attribute here. */
     var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §630 */
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §631 */
     var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
@@ -5196,7 +5196,7 @@
         open = null;
       };
       var place = function(btn, pop){
-        var r = zRect(btn);                                    /* §630 */
+        var r = zRect(btn);                                    /* §631 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
         var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
@@ -5299,14 +5299,14 @@
       return { shut: shut };
     })();
 
-  /* §629: where an open person cell's list sits. FIXED, off the cell's
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
      own rect, for §45.5's reason: the tables sit in a box that scrolls
      sideways, which clips anything absolute to a strip of itself. Under the
      cell, or over it where the screen has no room below. */
   function ocellPlace(){
     var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
     if (!pop) return;
-    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §630 */
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §631 */
     var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
     var top = r.bottom - 2;
     if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
@@ -5663,7 +5663,7 @@
     });
     wirePillars();
     wireArrange();
-    /* ══ THE ORGANISATION TABLES' CELLS (§629) ═══════════════════════════
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
        The register's block (§372) for Business units, Functions, Divisions
        and Capabilities — and BEFORE `wireSetupFields`, for that block's own
        reason: listeners on one element run in the order they were added, and
@@ -8575,7 +8575,7 @@
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
-    /* §628: the Forefront switch. Kept on this device, repainted in place;
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
        a row being edited is somebody's, so it is committed by the repaint's
        own leaving rule like any other (§35). */
     document.querySelectorAll("[data-regff]").forEach(function(b){
@@ -8895,7 +8895,7 @@
         paint();
       });
     });
-    /* §629: the company's capability pillars — their menu, the way to the
+    /* §630: the company's capability pillars — their menu, the way to the
        plan, and Add. */
     document.querySelectorAll("[data-cpmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
@@ -10000,7 +10000,7 @@
           paint();
         });
       });
-      /* §629: a capability that is a pillar of the company's plan, written
+      /* §630: a capability that is a pillar of the company's plan, written
          where the plan writes it — the pillar itself, found by its id (§48),
          and saved as the plan's pen saves (§71.2). An owner cleared is "",
          as the plan's pen writes it; a custodian cleared loses its key

@@ -99,7 +99,7 @@ var SEARCHSEL = (function(){
      is no room below — a list that opens off the bottom of the window is a
      list you cannot reach the end of. */
   function place(btn, pop){
-    /* §630: in the page's own pixels — it is drawn at 80% on a computer, and
+    /* §631: in the page's own pixels — it is drawn at 80% on a computer, and
        a popup is placed in those while the button is measured in the
        window's. */
     var r = zRect(btn);

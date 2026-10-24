@@ -194,7 +194,7 @@ with sync_playwright() as pw:
                   pad:parseFloat(cs.paddingTop), bord:parseFloat(cs.borderTopWidth),
                   z:parseFloat(getComputedStyle(document.documentElement).zoom)||1};}""")
         ck("[%s] the heading is genuinely pinned" % theme, g["pos"] == "sticky", g)
-        # §630: the page is drawn at 80% on a computer — a length the page
+        # §631: the page is drawn at 80% on a computer — a length the page
         # sets comes back to a hair (21.99px), and a box's place on screen is
         # in the window's pixels while its padding is in the page's. So the
         # fade is asked to the hundredth and the gap is asked in one unit.
@@ -205,7 +205,7 @@ with sync_playwright() as pw:
         ck("[%s] the heading sits exactly the panel's padding down" % theme,
            abs((g["HT"] - g["T"]) / g["z"] - (g["pad"] + g["bord"])) <= 1, g)
         # On screen, in the window's pixels; a row at each end is left out,
-        # because at 80% the edges fall between pixels and blend (§630).
+        # because at 80% the edges fall between pixels and blend (§631).
         top0 = g["T"] + g["bord"] * g["z"] + 1
         strip_h = int(round(g["HT"] - top0)) - 1
         if strip_h > 0:
@@ -241,7 +241,7 @@ with sync_playwright() as pw:
       t.click(); p.scrollTop=p.scrollHeight;
       const row=t.closest('.chset-row').getBoundingClientRect();
       const s=getComputedStyle(t,'::after');
-      /* §630: the note's offset and size are the page's pixels, the boxes
+      /* §631: the note's offset and size are the page's pixels, the boxes
          the window's — so the page's are scaled to the window's. */
       const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
       const top=row.bottom+7*z,
@@ -302,7 +302,7 @@ with sync_playwright() as pw:
       if(!d) return {none:true};
       const p=document.querySelector('.chset'), sum=d.querySelector('summary.chtest-h');
       const rows=[...d.querySelectorAll('.chtest-r')];
-      /* §630: heights in the page's own pixels, like scrollHeight */
+      /* §631: heights in the page's own pixels, like scrollHeight */
       const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
       const shut={open:d.open, h:Math.round(d.getBoundingClientRect().height/z),
         seen:rows.filter(r=>r.checkVisibility&&r.checkVisibility()).length,

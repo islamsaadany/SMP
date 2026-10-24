@@ -1,4 +1,4 @@
-"""THE CLIENT PLATFORM AT 80% ON A COMPUTER, AND NOTHING SPILLS (§630).
+"""THE CLIENT PLATFORM AT 80% ON A COMPUTER, AND NOTHING SPILLS (§631).
 
 Islam, of a Setup table: *"cells content is overflowing and I believe the page
 needs to be 80% smaller like what we did in the console page"* — *"by 80% I
@@ -18,7 +18,7 @@ WHAT IS ASSERTED IS THE PROBLEM (§94.8), BOTH ENDS (§94.2):
       window (measured), so the Setup list and the register's box are asked
       to end where the window ends, not 20% short of it.
   4 · WHAT IS PLACED FROM A MEASUREMENT LANDS BY ITS ANCHOR. A box reports
-      the window's pixels and is placed in the page's (§630's helper), so the
+      the window's pixels and is placed in the page's (§631's helper), so the
       row menu, the people list under a cell, a long list's popup and the ask
       box are each asked to sit beside what opened them — the place a build
       without the conversion misses by a fifth of the distance from the

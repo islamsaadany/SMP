@@ -2167,7 +2167,7 @@ function dupeMark(dupes){
   return out;
 }
 
-/* §628: whether the register shows Forefront's consultants — kept on this
+/* §629: whether the register shows Forefront's consultants — kept on this
    device, the way the register's columns are (§47.1). Off unless asked. */
 var REGFF_KEY = "smp.register.forefront";
 function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
@@ -3289,7 +3289,7 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  /* §628: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+  /* §629: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
      option B: the register lists the client's people; *Show Forefront team*
      brings the consultants back). Only the MINTED rows hide — a consultant
      the platform wrote a row for so they can sign in and hold a seat
@@ -3852,7 +3852,7 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  /* §628: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+  /* §629: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
      people · 2 from Forefront" (§3a.1); with the consultants off the table
      by default, the one thing left to say about them is how many are behind
      the switch, and the switch says it. Drawn only where there is somebody

@@ -11,7 +11,7 @@
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
-/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§630) ───────────────────────
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
    Islam, of a Setup table spilling across its columns: *"I believe the page
    needs to be 80% smaller like what we did in the console page"* — and, of
    the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
@@ -381,7 +381,7 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
-/* ── AND THE SAME ON THE ORGANISATION TABLES (§629) ─────────────────────
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
    Islam: *"why to edit row by row why the editing doesn't happen on the cell
    level with a double click that opens the editable cells for editing?"*.
    `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
@@ -499,7 +499,7 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
-/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§629). */
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
 var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────

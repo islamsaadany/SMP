@@ -167,7 +167,7 @@ def setup(pg):
 
 MEASURE = """() => {
   const q=s=>document.querySelector(s), d=document.documentElement;
-  /* §630: in the page's own pixels — the page is drawn at 80% on a computer,
+  /* §631: in the page's own pixels — the page is drawn at 80% on a computer,
      and 196, 160 and 400 are sizes the page sets. */
   const z=parseFloat(getComputedStyle(d).zoom)||1;
   const bx=e=>{const r=e.getBoundingClientRect();

@@ -76,12 +76,12 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1000)
 
-    # §628, option B: the register is the CLIENT'S people. A minted consultant
+    # §629, option B: the register is the CLIENT'S people. A minted consultant
     # is off the table until somebody asks for the Forefront team; an adopted
     # one is the client's own person and never leaves. Both ends (§113.8): a
     # build that dropped consultants entirely passes "hidden" and fails
     # "shown"; the build before this one fails "hidden".
-    print("\n2b · the register is the client's own people until asked (§628)")
+    print("\n2b · the register is the client's own people until asked (§629)")
     ON = """(k) => !!document.querySelector('[data-pmenu="'+k+'"]')"""
     SW = """() => { const b = document.querySelector('[data-regff]');
         return b ? { text: b.textContent.trim(), pressed: b.getAttribute('aria-pressed') } : null; }"""
@@ -201,14 +201,14 @@ with sync_playwright() as p:
         rows.sort((a,b) => a-b);
         return { mint: h(ks[0]), adopt: h(ks[1]), own: h(ks[2]),
                  median: rows[Math.floor(rows.length/2)] }; }""", [MINT, ADOPT, OWN])
-    # §630: WITHIN A PIXEL. The page is drawn at 80% on a computer and a row
+    # §631: WITHIN A PIXEL. The page is drawn at 80% on a computer and a row
     # snaps to the screen's pixels (31 or 32); §116.4's fault was 51 against 39.
     near = lambda k: abs((hh.get(k) or 0) - (hh.get("median") or 0)) <= 1
     ck("a minted row is the height of its neighbours", near("mint"), hh)
     ck("...and so is an adopted one, mark and all", near("adopt"), hh)
     ck("...with an ordinary person as the control (§113.8)", near("own"), hh)
 
-    print("\n7 · the old split line is gone; the switch took its place (§628)")
+    print("\n7 · the old split line is gone; the switch took its place (§629)")
     ck("no split line is drawn", ev("() => !document.querySelector('.psplit')") is True)
     c = {"total": ev("() => PEOPLE.length")}
 
@@ -225,7 +225,7 @@ with sync_playwright() as p:
        (seen.get("shown") or 0) < c.get("total", 99), seen)
     pg.fill('[data-tksearch="people"]', ""); pg.wait_for_timeout(200)
 
-    print("\n8b · the switch is remembered on this device, and goes off again (§628)")
+    print("\n8b · the switch is remembered on this device, and goes off again (§629)")
     ck("the choice is kept", ev("() => localStorage.getItem('smp.register.forefront')") == "1")
     pg.click('[data-regff]'); pg.wait_for_timeout(400)
     ck("pressing again takes the consultant off the table", ev(ON, MINT) is False)

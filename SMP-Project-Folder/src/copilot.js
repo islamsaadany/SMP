@@ -1450,7 +1450,7 @@ var COPILOT = (function(){
      no loop, since nothing above the pane moves when the pane changes height. */
   function fitPane(){
     var p = document.querySelector("[data-cop-pane]"); if (!p) return;
-    /* §630: in the page's own pixels, as the Platform Inbox's. */
+    /* §631: in the page's own pixels, as the Platform Inbox's. */
     var top = (p.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     if (top > 0) p.style.setProperty("--cop-top", Math.round(top) + "px");
   }

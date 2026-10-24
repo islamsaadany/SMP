@@ -1,4 +1,4 @@
-/* WHICH PICTURE STANDS FOR A CLIENT IN A SMALL SQUARE (§628)
+/* WHICH PICTURE STANDS FOR A CLIENT IN A SMALL SQUARE (§629)
 
    Forefront's Home draws each client in a 30px square. A square mark reads
    there; a wide one (El Abd's word-mark) shrinks to a strip nobody can read.

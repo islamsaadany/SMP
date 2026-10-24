@@ -111,12 +111,12 @@ def rgb(css):
     return tuple(int(v) for v in css[css.index("(") + 1:css.index(")")].split(",")[:3])
 
 
-# §630: THIS CHECK READS SINGLE PIXELS — a corner one in, a 1px navy outline,
+# §631: THIS CHECK READS SINGLE PIXELS — a corner one in, a 1px navy outline,
 # a gutter's ground — and at 80% a 1px line is drawn 0.8px wide and blends into
 # its neighbours, so every sample lands on a blend. What it guards is the
 # DESIGN, which the zoom only scales (checks/platform-80.py holds the scaling),
 # so it is measured at full size: the zoom is set back to 1 on this page, with
-# the window lengths that carry its correction (_shared.css, §630).
+# the window lengths that carry its correction (_shared.css, §631).
 # (the root element does not exist yet when an init script runs, so it is set
 # the moment it appears)
 ZOOM_OFF = ("new MutationObserver(function(m, o){ var d = document.documentElement; if (!d) return; "
@@ -264,7 +264,7 @@ with sync_playwright() as p:
     s = pg.evaluate(STRIP)
     ok("editing · the page scrolled", s and s["sy"] > 100, s and s["sy"])
     ok("editing · the strip pins under the chrome and stays",
-       # §630: the box is the window's pixels, its `top` the page's
+       # §631: the box is the window's pixels, its `top` the page's
        s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1)")) <= 1,
        s and s["top"])
     ok("editing · the head being edited went with the plan",
@@ -281,7 +281,7 @@ with sync_playwright() as p:
     ok("1440 · the side rail is still a list", s and s["rows"] == s["n"], s and s["rows"])
     scroll(pg, 400)
     pinned = pg.evaluate("""() => { var b = document.querySelector('.split > .pane > .pband');
-      /* §630: the sticky `top` in the window's pixels, like the box */
+      /* §631: the sticky `top` in the window's pixels, like the box */
       return [b.getBoundingClientRect().top,
               parseFloat(getComputedStyle(b).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1), scrollY]; }""")
     ok("1440 · scrolled, the title is still pinned beside it",

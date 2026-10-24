@@ -79,7 +79,7 @@ TEAM = [
 REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade.example"},
        {"key": "mobhead", "name": "Ashraf Laithy", "email": "ashraf.laithy@rayatrade.example"},
        {"key": "own_mob", "name": "Mennah Farouk", "email": "mennah.farouk@rayatrade.example"}]
-# §630: Omar's address is long enough to clip at 1600 with the page drawn at
+# §631: Omar's address is long enough to clip at 1600 with the page drawn at
 # 80% on a computer, so the fixture still holds one of each (§255).
 OFFICE = [{"email": "islam.saadany@forefront.consulting", "name": "Islam Saadany", "is_admin": True},
           {"email": "noran.essam@forefront.consulting", "name": "Noran Essam", "is_admin": False},

@@ -170,7 +170,7 @@
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
-  /* §630: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+  /* §631: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
      count drop under it when the column has no room for both — a client with
      a longer word for how it plans would otherwise run into Key Objectives
      again, at any zoom. */
@@ -1964,7 +1964,7 @@
     display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
-  /* ── §629: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
+  /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
      The register's open cell, the same rules for the same reasons (§372,
      §373): the control fills the cell's content box and stops at its edge.
      A person cell keeps its name in a button ringed as a focused box is, and
@@ -1988,7 +1988,7 @@
   .cfg td.ocellopen input.fld { width:100%; }
   .ocellpop { position:fixed; z-index:60; }
   /* The capabilities' table, at the widths its mockup was approved at
-     (§629) — set on the heads, which `.cfg`'s own first-column rule would
+     (§630) — set on the heads, which `.cfg`'s own first-column rule would
      otherwise win over a <col>. */
   .cfg table.cappcfg { table-layout:fixed; width:100%; }
   .cfg table.cappcfg th:nth-child(1) { width:5%; }
@@ -2867,7 +2867,7 @@
   .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
-  /* ── THE FOREFRONT SWITCH (§628) ─────────────────────────────────
+  /* ── THE FOREFRONT SWITCH (§629) ─────────────────────────────────
      Its neighbours' shape (+ Add, Register file), because it sits among them
      and is pressed like them; a box in front because pressing it changes
      what the table holds and the box says which way it is. Never the accent

@@ -4174,7 +4174,7 @@
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
-    /* ── §629: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
        The same three things the register's cell gets above, here for the
        same reason (the button in front of a long select does not exist until
        SEARCHSEL has run): the cursor in the cell, a list opened, Escape
@@ -5294,7 +5294,7 @@
       return { shut: shut };
     })();
 
-  /* §629: where an open person cell's list sits. FIXED, off the cell's
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
      own rect, for §45.5's reason: the tables sit in a box that scrolls
      sideways, which clips anything absolute to a strip of itself. Under the
      cell, or over it where the screen has no room below. */
@@ -5658,7 +5658,7 @@
     });
     wirePillars();
     wireArrange();
-    /* ══ THE ORGANISATION TABLES' CELLS (§629) ═══════════════════════════
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
        The register's block (§372) for Business units, Functions, Divisions
        and Capabilities — and BEFORE `wireSetupFields`, for that block's own
        reason: listeners on one element run in the order they were added, and
@@ -8570,7 +8570,7 @@
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
-    /* §628: the Forefront switch. Kept on this device, repainted in place;
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
        a row being edited is somebody's, so it is committed by the repaint's
        own leaving rule like any other (§35). */
     document.querySelectorAll("[data-regff]").forEach(function(b){
@@ -8890,7 +8890,7 @@
         paint();
       });
     });
-    /* §629: the company's capability pillars — their menu, the way to the
+    /* §630: the company's capability pillars — their menu, the way to the
        plan, and Add. */
     document.querySelectorAll("[data-cpmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
@@ -9995,7 +9995,7 @@
           paint();
         });
       });
-      /* §629: a capability that is a pillar of the company's plan, written
+      /* §630: a capability that is a pillar of the company's plan, written
          where the plan writes it — the pillar itself, found by its id (§48),
          and saved as the plan's pen saves (§71.2). An owner cleared is "",
          as the plan's pen writes it; a custodian cleared loses its key

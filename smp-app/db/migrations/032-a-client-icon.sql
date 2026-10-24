@@ -1,4 +1,4 @@
-/* A client's icon (§628)
+/* A client's icon (§629)
 
    Islam: *"in the client brand, give me another thing beside the client mark
    to upload an icon or use the mark as an icon. and this icon view appears in

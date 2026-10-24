@@ -76,6 +76,8 @@ p,ul,ol{margin:0}
 .vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
 .vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
 .vtbar .vt{margin:0}
+#vtsub{margin-top:6px}
+#vtsub .sv{margin:0}
 @media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
 
 .tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
@@ -336,10 +338,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 <div class="mk"><div class="mk-in">
   <div class="mk-id"><span class="mk-tag">Mockup</span><b>Getting into the builder, and back out</b><span>Agreed 24 Oct: the office builds in a separate builder. Nothing is built. Sample data invented for Raya Trade.</span></div>
   <div class="mk-sw" role="group" aria-label="Show a way in"><span>Show me</span><button type="button" data-door="1">1 · Top bar</button><button type="button" data-door="2">2 · From a process page</button><button type="button" data-door="3">3 · From a suggestion</button><button type="button" data-door="back">Way back out</button></div>
+  <div class="mk-sw" role="group" aria-label="Question 1: section numbers"><span>Q1 · Section numbers</span><button type="button" data-nums="boxes">Boxes under the tabs</button><button type="button" data-nums="band">In the navy band</button></div>
+  <div class="mk-sw" role="group" aria-label="Question 2: section views"><span>Q2 · Section views</span><button type="button" data-views="scroll">Scroll away</button><button type="button" data-views="stick">Stay with the tabs</button></div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place.</p>
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place. Two questions are still open, and each has a switch at the top: <b>Q1</b>, where a section’s numbers sit, and <b>Q2</b>, whether a section’s own views stay with the tabs when you scroll. Flip either one and the page jumps to a section and outlines what changed.</p>
 
   <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><button class="read" type="button" id="tb-proc" data-go="home">Processes</button><span class="who">Mona Farag</span><span class="seat">Strategy Office</span><span class="out">Sign out</span></div>
@@ -358,7 +362,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
           </div>
         </div>
       </header>
-      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div></div>
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div><div id="vtsub" hidden></div></div>
 
       <div id="homewrap"><nav class="box rail" id="hside" aria-label="Office menu" hidden></nav><div id="homemain">
       <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
@@ -460,7 +464,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
       acts: '<button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Download SOP</button><button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Print</button><button class="bgold" type="button" data-toast="Preview: the buttons do nothing here.">Suggest a change</button>',
       tiles: tiles([['6', 'Steps', ''], ['0/5', 'Have read it', ''], ['1', 'Risk, no control', 'late'], ['365', 'Days to review', '']]) },
   };
-  let OTAB = 'a', SCREEN = 'home', TAB = 'all', RVIEW = 'flow', SECT = 'map', SEL = 4, DOOR = null;
+  let OTAB = 'a', NUMS = 'boxes', VIEWS = 'scroll', FLASH = null, SCREEN = 'home', TAB = 'all', RVIEW = 'flow', SECT = 'map', SEL = 4, DOOR = null;
 
   $('#handle').innerHTML = HANDLE.map((h) => '<div class="trow"><span class="chip ' + (h.kind === 'Suggestion' ? 'gold' : h.kind === 'Returned' ? 'bad' : '') + '">' + h.kind + '</span><div class="t"><span class="code">' + h.code + '</span> <b>' + esc(h.name) + '</b><small>' + esc(h.text) + '</small>' + (h.quote ? '<blockquote>' + esc(h.quote) + '</blockquote>' : '') + '</div>' +
     '<button class="btn' + (h.go ? ' gold' : '') + '" type="button"' + (h.id ? ' id="' + h.id + '"' : '') + (h.go ? ' data-go="' + h.go + '" data-msg="' + esc(h.msg) + '"' : ' data-toast="' + esc(h.toast) + '"') + '>' + esc(h.act) + '</button></div>').join('');
@@ -519,9 +523,6 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     b: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', '']],
   };
   const SIDE = [['all', 'All processes'], ['handle', 'To handle', '3'], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']];
-  const OTAB_NOTES = {
-    a: [['Agreed 24 Oct · office sections', ['All eight are tabs, in one row: All processes, To handle, Landscape, Priorities, Governance, Org & roles, Export, Settings', 'The tab bar stays in place as you scroll, on every page of the module']], ['No title above a section', ['The highlighted tab says where you are', 'The section’s one-line description sits in the band, in place of the office summary, so it costs no space']], ['Also in this design', ['A section’s own views sit in a second, lighter row of switches under the tabs', 'Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
-  };
   /* ── the office sections, filled in so the three arrangements can be judged on full pages ── */
   const nameOf = (c) => (ALL.find((r) => r[0] === c) || [c, c])[1];
   const pn = (c) => '<span class="code">' + c + '</span> ' + esc(nameOf(c));
@@ -583,10 +584,20 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     settings: { title: 'Settings', sub: 'The workspace profile and branding, the governance profile and the categories. Admins only.', kp: null, views: [],
       body: () => '<div class="two2"><div class="blk"><span class="lbl">Client logo and colours</span><div style="display:flex;gap:10px;align-items:center"><div class="logo">No logo</div><button class="btn" type="button" data-toast="Uploads a logo, under 300 KB.">Upload logo</button></div><div class="sw">' + [['#0F6B63', 'Primary'], ['#3E7F8F', 'Secondary'], ['#C9A24D', 'Tertiary']].map(([c, l]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Used on the report and the SOP.</p></div><div class="blk"><span class="lbl">Client profile</span><dl class="dl"><dt>Industry</dt><dd>Retail & distribution</dd><dt>About</dt><dd>Distribution and retail group with stores and a business-to-business arm.</dd></dl><p class="note" style="margin-top:6px">Helps Check with AI and the drafts suit this client.</p></div><div class="blk"><span class="lbl">Governance profile</span><dl class="dl"><dt>Size</dt><dd>Mid-market</dd><dt>Jurisdiction</dt><dd>Egypt</dd></dl><p class="note" style="margin-top:6px">Grounds every governance assessment.</p></div><div class="blk"><span class="lbl">Categories</span><div style="display:flex;flex-wrap:wrap;gap:5px">' + ['Finance', 'Supply Chain', 'Retail', 'Commercial', 'Care', 'HR'].map((c) => '<span class="chip">' + c + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Shown as Department on Priorities and the list.</p></div><div class="blk"><span class="lbl">Language</span><p style="font-size:13px">English · العربية</p><p class="note" style="margin-top:6px">Each person’s own choice.</p></div><div class="blk"><span class="lbl">Who opens Processes</span><p style="font-size:13px">The Strategy Office builds. A client’s own people see only what is published, and what waits for them.</p></div></div>' },
   };
+  const svHtml = (k) => '<div class="sv" role="tablist" aria-label="' + SECS[k].title + ' views">' + SECS[k].views.map(([vk, l]) => '<button type="button" role="tab" class="' + (vk === SUBV[k] ? 'on' : '') + '" aria-selected="' + (vk === SUBV[k]) + '" data-subv="' + vk + '">' + l + '</button>').join('') + '</div>';
   function secHtml(k) {
-    const S2 = SECS[k], v = SUBV[k];
-    const sw = S2.views.length && OTAB !== 'c' ? '<div class="sv" role="tablist" aria-label="' + S2.title + ' views">' + S2.views.map(([vk, l]) => '<button type="button" role="tab" class="' + (vk === v ? 'on' : '') + '" aria-selected="' + (vk === v) + '" data-subv="' + vk + '">' + l + '</button>').join('') + '</div>' : '';
-    return (S2.kp ? kp(S2.kp()) : '') + sw + S2.body(v);
+    const S2 = SECS[k];
+    const sw = S2.views.length && OTAB !== 'c' && VIEWS !== 'stick' ? svHtml(k) : '';
+    return (S2.kp && NUMS !== 'band' ? kp(S2.kp()) : '') + sw + S2.body(SUBV[k]);
+  }
+  function notes() {
+    return [['Agreed 24 Oct', ['Office sections are tabs, and the tab bar stays in place as you scroll', 'No title above a section: the highlighted tab says where you are, and the section’s one-line description sits in the band']],
+      ['Q1 · Section numbers', NUMS === 'boxes'
+        ? ['Showing now: the navy band keeps the office’s own counts (suggestion, sent back, drafts, gaps) on every section', 'The section’s numbers sit in a row of boxes under the tabs', 'Switch to “In the navy band” to see the other way']
+        : ['Showing now: the navy band carries the open section’s numbers, in place of the office counts', 'The row of boxes under the tabs goes, so the section starts with its views and content', 'The office counts show on All processes and To handle; the gold count on the To handle tab stays on every page']],
+      ['Q2 · Section views', VIEWS === 'scroll'
+        ? ['Showing now: a section’s own views (Governance: Needs attention, Assessment, Risks…) scroll away with the page', 'Switch to “Stay with the tabs” and scroll down a long section, such as Org & roles, to see the difference']
+        : ['Showing now: a section’s own views stay under the tab bar as you scroll, so you can change view from anywhere on the page', 'The frozen bar is one row taller on sections that have views']]];
   }
   function expUpdate() {
     const n = EXP.length, b = $('#expcheck'), note = $('#expnote');
@@ -614,7 +625,13 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>' + (k === TAB && SECS[k] && SECS[k].views.length ? '<div class="subnav">' + SECS[k].views.map(([vk, vl]) => '<button type="button" class="' + (vk === SUBV[k] ? 'on' : '') + '" data-subv="' + vk + '">' + vl + '</button>').join('') + '</div>' : '')).join('');
     if (s === 'home' && SECS[TAB]) { $('#m-eyebrow').innerHTML = 'Raya Trade · Processes · Builder › ' + SECS[TAB].title; $('#m-sub').textContent = SECS[TAB].sub; }
     if (s === 'home' && TAB === 'handle') $('#m-sub').textContent = 'Suggestions from owners, drafts the approver sent back, and processes with gaps.';
-    $('#tabnote').innerHTML = OTAB_NOTES[OTAB].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    if (s === 'home' && SECS[TAB] && SECS[TAB].kp && NUMS === 'band') $('#m-tiles').innerHTML = SECS[TAB].kp().map(([n, l, c, id]) => '<div class="mtile ' + (c === 'bad' ? 'late' : '') + '"><b' + (id ? ' id="' + id + '"' : '') + '>' + n + '</b><span>' + l + '</span></div>').join('');
+    $$('[data-nums]').forEach((b) => b.classList.toggle('on', b.dataset.nums === NUMS));
+    $$('[data-views]').forEach((b) => b.classList.toggle('on', b.dataset.views === VIEWS));
+    const subOn = s === 'home' && SECS[TAB] && SECS[TAB].views.length && VIEWS === 'stick';
+    $('#vtsub').innerHTML = subOn ? svHtml(TAB) : '';
+    $('#vtsub').hidden = !subOn;
+    $('#tabnote').innerHTML = notes().map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
     const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
     const cur = s === 'home' ? TAB : RVIEW;
     $('#vt').hidden = !tabs.length;
@@ -637,6 +654,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     drawer();
     $$('.door').forEach((e) => e.classList.remove('door'));
     if (DOOR) { const el = $(DOORS[DOOR][1]); DOOR = null; if (el) { el.classList.add('door'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+    if (FLASH) { const el = $(FLASH); FLASH = null; if (el) { el.classList.add('door'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
     requestAnimationFrame(arrows);
   }
 
@@ -648,6 +666,8 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     const t = e.target, dr = t.closest('[data-door]'), go = t.closest('[data-go]'), tab = t.closest('[data-tab]'), row = t.closest('[data-row]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
     if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = d === '3' ? 'handle' : 'all'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
     if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'all'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
+    const nm = t.closest('[data-nums]'), vw = t.closest('[data-views]');
+    if (nm || vw) { if (nm) NUMS = nm.dataset.nums; if (vw) VIEWS = vw.dataset.views; SCREEN = 'home'; if (!SECS[TAB] || !SECS[TAB].views.length) TAB = 'governance'; FLASH = nm ? (NUMS === 'band' ? '#m-tiles' : '#secwrap .kp') : (VIEWS === 'stick' ? '#vtsub .sv' : '#secwrap .sv'); render(); return; }
     const ot = t.closest('[data-otab]'), hs = t.closest('[data-hside]');
     if (ot) { OTAB = ot.dataset.otab; SCREEN = 'home'; render(); return; }
     if (hs) { TAB = hs.dataset.hside; render(); return; }

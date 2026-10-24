@@ -2501,6 +2501,26 @@ await section("4 · Forefront's own pages", async () => {
     check(h1.font === "14px" && h1.wrap === "none" && h1.zoom === "0.8",
       "\u2026and the console is compact and shown at 80% on a computer: 14px text, the whole width of the window", JSON.stringify({ font: h1.font, wrap: h1.wrap, zoom: h1.zoom }));
     check(/^Strategy Management\s*Platform$/.test(h1.brand), "\u2026under the name Strategy Management Platform at the column's head", h1.brand);
+    /* SHOW MINE OR DEMO on Home's clients (2026-10-24): Mine is the seated
+       clients without the worked example, Demo the worked example alone;
+       the choice is kept. Asked against the server's own cards. */
+    {
+      const kinds = await page.evaluate(async () => {
+        const r = await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "cards" }) })).json();
+        return { mine: r.cards.filter((c) => c.seat && c.kind !== "demo").map((c) => c.key), demo: r.cards.filter((c) => c.kind === "demo").map((c) => c.key) };
+      });
+      const shown = () => page.evaluate(() => Array.from(document.querySelectorAll(".hocl")).map((c) => c.getAttribute("data-client")));
+      check(JSON.stringify(await shown()) === JSON.stringify(kinds.mine), "Home's clients open on Mine: the seated clients, never the worked example", JSON.stringify({ shown: await shown(), kinds }));
+      await page.click('[data-home="clients"] .hosort button[data-sort="demo"]');
+      const d = await shown();
+      check(JSON.stringify(d) === JSON.stringify(kinds.demo) && (d.length > 0 || (await page.locator('[data-home="clients"] .honone').count()) === 1),
+        "\u2026Demo shows the worked example alone", JSON.stringify({ d, kinds }));
+      await page.reload({ waitUntil: "networkidle" });
+      await page.waitForSelector('[data-home="clients"] .hosort', { timeout: 8000 }).catch(() => {});
+      check((await page.locator('[data-home="clients"] .hosort button[aria-pressed="true"]').textContent()) === "Demo", "\u2026and the choice is kept after a reload");
+      await page.click('[data-home="clients"] .hosort button[data-sort="mine"]');
+      await page.waitForSelector('[data-home="tasks"] .hotask', { timeout: 8000 }).catch(() => {});
+    }
     /* HOME'S TICK FINISHES IT (\u00a7614.1): the same write My tasks makes, on
        the stored row, with the row staying ticked and the card's count
        dropping; unticking puts it back. */

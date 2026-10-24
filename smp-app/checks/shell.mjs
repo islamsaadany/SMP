@@ -1118,6 +1118,9 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
           secs: vis(document.getElementById("secrow")), chrome: Math.round(document.querySelector(".chrome").getBoundingClientRect().height),
           mainH: m ? Math.round(m.getBoundingClientRect().height) : 0, gutter: Math.round(parseFloat(getComputedStyle(document.querySelector(".wrap")).paddingLeft)),
           extra: document.documentElement.scrollHeight - innerHeight }; });
+      /* since §620 the bar is drawn a moment after the chat opens (its shape
+         first), so the reading waits for the bar it is about */
+      await page.waitForSelector(".chrome > header.top", { state: "visible", timeout: 10000 }).catch(() => {});
       const f0 = await rd();
       check(f0.btn && f0.top && f0.units && f0.tabs && !f0.thin && f0.gutter <= 12,
         "the Copilot's unit row offers Fold bars, all three bars show, the thin line does not, and the page gutter is tight (§475)", JSON.stringify(f0));

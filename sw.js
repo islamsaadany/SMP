@@ -638,7 +638,12 @@
    may carry its own icon for Home's small squares. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in any
    ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.11-client-icon";
+/* v7.12-org-cells — §626: Business units, Functions and Divisions open a
+   cell on a double-click, and Setup › Capabilities is the company plan's
+   own table where capabilities are pillars. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.12-org-cells";
 const ASSETS = [
   "/",
   "/index.html",

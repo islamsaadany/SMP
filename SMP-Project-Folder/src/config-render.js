@@ -1369,6 +1369,65 @@ function unitFormatSelect(k, u){
       return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
         esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
 }
+/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§626) ══
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"* —
+   then, of the mockup that drew it, *"go ahead with the mockup, build it"*.
+
+   THE CLIENT REGISTER'S RULES, NOT A SECOND SET (§372): a double-click opens
+   the cell, leaving it or Enter keeps it, Escape puts it back, one cell at a
+   time (`OCELL`). And the CONTROL IS THE DIALOG'S: an open cell draws the
+   very field Edit details draws — `data-uname`, `data-ucomp`, the picker —
+   so the handlers that already write those fields write these, and a cell
+   cannot save differently from the form beside it (§53.5, §116).
+
+   A PERSON CELL IS OPEN WHILE ITS PICKER IS. The picker's own state
+   (`PICKING`) is what closes it — choosing, Unassign, Cancel — so the cell
+   needs no second answer to "is it still open". Its list floats under the
+   cell (`.ocellpop`, placed by the shell off the cell's own rect), because
+   these tables sit in a box that scrolls sideways and would clip it. */
+function ocellIs(t, key, f){
+  return !!(OCELL && OCELL.t === t && OCELL.key === key && OCELL.f === f);
+}
+function ocell(t, key, f, may, inner, open, cls, pick){
+  var c = cls || "";
+  if (may && ocellIs(t, key, f) && (!pick || PICKING === pick))
+    return '<td class="' + (c ? c + " " : "") + 'ocellopen">' + open() + '</td>';
+  return '<td' + (c ? ' class="' + c + '"' : '') +
+    (may ? ' data-ocell="' + esc(t + "|" + key + "|" + f) + '"' +
+           (pick ? ' data-ocellpick="' + esc(pick) + '"' : '') : '') +
+    '>' + inner + '</td>';
+}
+function ocellBox(attr, key, value, o){
+  o = o || {};
+  return '<input class="fld' + (o.mono ? ' mono' : '') + '" value="' + esc(value || "") + '" ' +
+    attr + '="' + esc(key) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') +
+    (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '>';
+}
+/* The closed button stands where the name was, ringed, and pressing it is
+   Cancel — the list under it is the dialog's own picker, unchanged. */
+function ocellPerson(where, role, current){
+  var held = personName(current);
+  return '<button type="button" class="pickbtn ocellbtn' + (held ? '' : ' empty') +
+      '" data-pick-cancel="1">' + (held ? esc(held) : 'unassigned') + '</button>' +
+    '<div class="ocellpop">' + assignPicker(where, role, current, true) + '</div>';
+}
+/* Which company a unit is in — the dialog's control and the cell's, one
+   builder (§53.5). A retired company is nowhere a unit can be MOVED to, but
+   a unit already in one still shows it — hiding it would silently read as
+   "its own company" (§49.3). */
+function unitCompanySelect(k, u){
+  return '<select class="fld" data-ucomp="' + esc(k) + '" aria-label="Which ' +
+      esc(L1("division").toLowerCase()) + ' ' + esc(u.name) + ' is in">' +
+    COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
+      .map(function(ck){
+        return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
+          '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
+      }).join("") +
+    '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
+  '</select>';
+}
+
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -1381,30 +1440,42 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
+    /* §626: every cell below that the dialog can change opens on a
+       double-click; none does while the rows are being arranged, for the
+       menu's own reason (§261) — one act at a time. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (u.active ? "active" : "retired") + '"' +
       (u.active ? '' : ' class="retired"') + '>' +
       setArrangeIdx("units", i, u.name) +
-      '<td><b>' + esc(u.name) + '</b>' +
-        '<span class="why mono">key ' + esc(k) + '</span></td>' +
+      ocell("units", k, "name", may,
+        '<b>' + esc(u.name) + '</b>' + '<span class="why mono">key ' + esc(k) + '</span>',
+        function(){ return ocellBox("data-uname", k, u.name, { label: "Name" }); }) +
       /* Short name for the navigation only — everywhere else keeps the full
          one. Empty means "use the full name", so nothing has to be filled in. */
-      '<td>' + (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
-                          : '<span class="why" style="margin:0">' + esc(u.name) + '</span>') + '</td>' +
-      '<td class="cc"><span class="mono">' + esc(u.codePrefix) + '</span></td>' +
+      ocell("units", k, "nav", may,
+        (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
+                   : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+      ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
+        function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
          counted pillars now says which way the unit plans (his *"Plans in"*),
-         with the count of that way's rows beside it. Chosen in the dialog. */
-      '<td class="cc">' + unitPlansInCell(k, u) + '</td>' +
+         with the count of that way's rows beside it. */
+      ocell("units", k, "plans", may, unitPlansInCell(k, u),
+        function(){ return unitFormatSelect(k, u); }, "cc") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
-      '<td>' + (u.company && COMPANIES[u.company]
+      ocell("units", k, "division", may, (u.company && COMPANIES[u.company]
         ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
-        : '<span class="why" style="margin:0">its own company</span>') + '</td>' +
-      '<td class="cc">' + assignPicker(k, "owner", roles.head, false) + '</td>' +
-      '<td class="cc">' + assignPicker(k, "custodian", roles.custodian, false) + '</td>' +
+        : '<span class="why" style="margin:0">its own company</span>'),
+        function(){ return unitCompanySelect(k, u); }) +
+      ocell("units", k, "head", may, assignPicker(k, "owner", roles.head, false),
+        function(){ return ocellPerson(k, "owner", roles.head); }, "cc", k + "|owner") +
+      ocell("units", k, "custodian", may, assignPicker(k, "custodian", roles.custodian, false),
+        function(){ return ocellPerson(k, "custodian", roles.custodian); }, "cc", k + "|custodian") +
       /* STATUS HOLDS A STATUS (§93.14's rule, reaching the page it was written
          about). This column was headed Status and showed four controls. */
       '<td class="cc"><span class="pill ' + (u.active ? "good" : "none") + '">' +
@@ -1542,18 +1613,7 @@ var ROWDLG_SPECS = {
         (unitFormat(u) === "pillars"
           ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
-        pdField(L1("division"),
-          '<select class="fld" data-ucomp="' + esc(k) + '">' +
-            /* A retired company is nowhere a unit can be MOVED to, but a unit
-               already in one still shows it — hiding it would silently read as
-               "its own company" (§49.3). */
-            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
-              .map(function(ck){
-                return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
-                  '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
-              }).join("") +
-            '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
-          '</select>') +
+        pdField(L1("division"), unitCompanySelect(k, u)) +
         pdField("BU head", assignPicker(k, "owner", roles.head, true)) +
         pdField("Strategy custodian", assignPicker(k, "custodian", roles.custodian, true)) +
         pdSect("The unit’s mark") +
@@ -1615,11 +1675,7 @@ var ROWDLG_SPECS = {
       return [plural(unitsOfCompany(k).length, L1("unitword"), L("unitword")), esc("key " + k)].join(" · ");
     },
     body:  function(c, k){
-      var flag = function(field, val){
-        return '<select class="fld" data-coflag="' + esc(k + "|" + field) + '">' +
-          '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
-          '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
-      };
+      var flag = function(field, val){ return coFlagSelect(k, field, val); };
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(c.name) +
                         '" data-coname="' + esc(k) + '">') +
@@ -4598,6 +4654,13 @@ function coKebab(ck, co, on, mayEdit){
     'data-comenu="' + esc(ck) + '"', CLEARING === "co|" + ck);
 }
 
+/* What a division's CEO sees, as a control — the dialog's and the cell's
+   (§626), one builder. */
+function coFlagSelect(ck, field, val){
+  return '<select class="fld" data-coflag="' + esc(ck + "|" + field) + '">' +
+    '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+    '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+}
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -4612,7 +4675,9 @@ function renderCompanies(){
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      tkBar("companies", { placeholder:"Search the companies\u2026" }) +
+      /* §626: the page's own word, which the box had kept from before §391
+         called these divisions. */
+      tkBar("companies", { placeholder:"Search the " + L("division").toLowerCase() + "\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
           return h("#", "idx", false) + h(L1("division")) + h("Units", "cc") +
@@ -4628,11 +4693,15 @@ function renderCompanies(){
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
           (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          '<td><b>' + esc(co.name) + '</b>' +
-            '<span class="why mono">key ' + esc(ck) + '</span></td>' +
+          /* §626: the three things the dialog changes open where they are. */
+          ocell("companies", ck, "name", mayEdit,
+            '<b>' + esc(co.name) + '</b>' + '<span class="why mono">key ' + esc(ck) + '</span>',
+            function(){ return ocellBox("data-coname", ck, co.name, { label: "Name" }); }) +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
-          '<td class="cc">' + flag(co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag(co.seeGroup) + '</td>' +
+          ocell("companies", ck, "seeOthers", mayEdit, flag(co.seeOthers),
+            function(){ return coFlagSelect(ck, "seeOthers", co.seeOthers); }, "cc") +
+          ocell("companies", ck, "seeGroup", mayEdit, flag(co.seeGroup),
+            function(){ return coFlagSelect(ck, "seeGroup", co.seeGroup); }, "cc") +
           /* STATUS HOLDS A STATUS HERE TOO (§261). It held a pen and, beside
              it, a dotted chip reading "holds 3 units" — which is not a fact
              about the company at all but the REFUSAL that stands in for the
@@ -8453,6 +8522,10 @@ function renderFunctions(){
        "renders nothing at all, edit field included", so Plans in and Under
        could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+    /* §626: a cell the dialog can change opens on a double-click — the
+       dialog's own field, so a hidden column still has its door in Edit
+       details, and nothing opens while the rows are being arranged. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
       (f.active === false ? ' class="retired"' : '') + '>' +
       setArrangeIdx("fns", i, f.name) +
@@ -8466,13 +8539,16 @@ function renderFunctions(){
          column renders nothing at all, edit field included" was true while the
          fields were on the row, and it is why Nav name and Code had to stay
          visible. They are drawn in the dialog now, whatever this menu says. */
-      '<td class="fnamecell"><b>' + esc(f.name) + '</b></td>' +
+      ocell("fns", fk, "name", may, '<b>' + esc(f.name) + '</b>',
+        function(){ return ocellBox("data-fname", fk, f.name, { label: "Name" }); }, "fnamecell") +
       (fnShowCol("key") ? '<td><span class="mono">' + esc(fk) + '</span></td>' : '') +
-      (fnShowCol("nav") ? '<td>' + (f.navName
+      (fnShowCol("nav") ? ocell("fns", fk, "nav", may, (f.navName
         ? '<span class="val">' + esc(f.navName) + '</span>'
-        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>') + '</td>' : '') +
-      (fnShowCol("code") ? '<td class="cc"><span class="mono">' +
-        esc(f.codePrefix || "\u2014") + '</span></td>' : '') +
+        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>'),
+        function(){ return ocellBox("data-fnav", fk, f.navName, { ph: f.name, label: "Nav name" }); }) : '') +
+      (fnShowCol("code") ? ocell("fns", fk, "code", may, '<span class="mono">' +
+        esc(f.codePrefix || "\u2014") + '</span>',
+        function(){ return ocellBox("data-fpx", fk, f.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") : '') +
       /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
          Spec 010 built both and gave neither a control: `format` and `under`
          could only be set by editing the source, so a second Merchandising was
@@ -8482,11 +8558,15 @@ function renderFunctions(){
          what is in the way rather than hiding a plan that still exists — the
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
-      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
+      (fnShowCol("plansin") ? ocell("fns", fk, "plans", may, planCell(fk, f, false),
+        function(){ return planCell(fk, f, true); }, "cc") : '') +
+      (fnShowCol("company") ? ocell("fns", fk, "division", may, fnCompanyCell(fk, f, false),
+        function(){ return fnCompanyCell(fk, f, true); }, "cc") : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
-      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
-      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
+      (fnShowCol("head") ? ocell("fns", fk, "head", may, pick("head", f.head, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "fnhead", f.head); }, "cc", "fn:" + fk + "|fnhead") : '') +
+      (fnShowCol("cust") ? ocell("fns", fk, "custodian", may, pick("custodian", f.custodian, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "custodian", f.custodian); }, "cc", "fn:" + fk + "|custodian") : '') +
       /* ── STATUS HOLDS A STATUS, AND THE ACTS HOLD A MENU (§93.14) ────
          Islam, on rows measuring 155px beside the register's 39: "learn from
          what we have done in the people table."
@@ -8608,13 +8688,88 @@ function capsAsPillars(){
   });
   return out;
 }
+/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§626) ═════════
+   Islam, asked whether this page should go once El Abd's capabilities had
+   become pillars of the company's plan: *"the capabilities exist why to
+   remove it?"*, and then the mockup that made it a table: *"go ahead with
+   the mockup, build it"*.
+
+   §542 drew this page read-only on purpose — "a second place to type them is
+   a second answer to who owns this" (§53.5). That holds for a COPY, and this
+   is not one: every cell writes the company plan's own pillar, the row the
+   Capabilities tab draws, so there is one record and two ways to reach it,
+   as a unit's name is one answer on The shape and on Business units.
+
+   WHO MAY CHANGE IT is asked of both doors: this page's own grant AND the
+   company plan's (`mayAuthor("u_plan", "group")`, the question the plan's
+   pen and the server's authoriser ask), because a write the page allowed and
+   the save refused would be §42's fault from the page's side.
+
+   THE SEATS ARE THE PLAN'S OWN LIST. A pillar's owner holds a NAME (§33, and
+   the move wrote names, §544), so the control is `ownerChoices` — the same
+   list the plan's pen draws — and a value it does not know is kept, marked,
+   rather than dropped. Removing one stays in the plan, where its measures and
+   tactics are, behind the plan's own question. */
+function capPillarById(id){
+  return (topAsUnit().items || []).filter(function(p){
+    return p && p.id === id && SMPRules.pillarIsCap(p); })[0] || null;
+}
+function mayEditCapPillars(){
+  return grant("c_caps") === "edit" && mayAuthor("u_plan", "group");
+}
+function capSeat(v){
+  var n = v ? personName(v) : "";
+  return n || String(v || "");
+}
+function capSeatSelect(id, seat, v){
+  return '<select class="fld" data-cpseat="' + esc(id + "|" + seat) + '" aria-label="' +
+      (seat === "owner" ? "Owner" : "Custodian") + '">' +
+    optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
+  '</select>';
+}
+function renderCapPillars(){
+  var u = topAsUnit();
+  var may = mayEditCapPillars();
+  var list = [];
+  (u.items || []).forEach(function(p, i){ if (SMPRules.pillarIsCap(p)) list.push({ p:p, i:i }); });
+  var none = '<span class="why" style="margin:0">unassigned</span>';
+  var rows = list.map(function(x, n){
+    var p = x.p, id = p.id, code = pillarCode(u, x.i);
+    return '<tr data-tkrow="' + (p.owner ? "assigned" : "unassigned") + '">' +
+      '<td class="idx">' + (n + 1) + '</td>' +
+      '<td><span class="mono">' + esc(code) + '</span></td>' +
+      ocell("caps", id, "name", may,
+        p.name ? '<b>' + esc(p.name) + '</b>' : '<span class="why" style="margin:0">no name yet</span>',
+        function(){ return ocellBox("data-cpname", id, p.name, { label: "Name" }); }) +
+      ocell("caps", id, "owner", may, p.owner ? esc(capSeat(p.owner)) : none,
+        function(){ return capSeatSelect(id, "owner", p.owner); }) +
+      ocell("caps", id, "custodian", may, p.custodian ? esc(capSeat(p.custodian)) : none,
+        function(){ return capSeatSelect(id, "custodian", p.custodian); }) +
+      '<td class="cc"><span class="mono">' + (p.measures || []).length + '</span></td>' +
+      '<td class="cc"><span class="mono">' + (p.tactics || []).length + '</span></td>' +
+      kebabCell(CPMENU === id, ['<button data-cpopen="' + esc(id) + '">Open in the plan</button>'],
+        "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
+    '</tr>';
+  }).join("");
+  return cfgHead(L("capability"), [], null, false) +
+    section("", L("capability"), null,
+      tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+        (function(){ var h = tkHead("caps");
+          return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
+                 h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
+        L1("capability") + '</button></div>' : ''));
+}
 function renderCaps(){
+  /* §626: where the capabilities are the company's own pillars, the page is
+     their table — the record type below is a different thing (§542). */
+  if (!GROUP.capabilities.length && capsAsPillars().length > 0) return renderCapPillars();
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
-  /* §542: this client's capabilities are pillars, not records. */
-  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
     var editable = mayEdit && rowEditIs("caps", String(i));
     return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
@@ -8689,36 +8844,14 @@ function renderCaps(){
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit && !capsAreP
+      (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
         : '') +
-      /* ── §542 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
-         A client whose capabilities have become internal pillars of the
-         company's plan (stage 3b) opened this page on an EMPTY table with an
-         Add button that would mint the very record type the move removed.
-         §61's fault twice over: a page saying nothing about the thing it is
-         named after, and the only control on it being the wrong one.
+      /* §542's read-only note for a client whose capabilities are pillars
+         is gone (§626): that client gets `renderCapPillars()`, its table. */
 
-         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
-         pillar's name, owner and custodian are edited on the plan with the
-         pen, like every other pillar's, and a second place to type them is a
-         second answer to who owns this (§53.5). The Add button goes with
-         them — there is nothing on this page left to add. */
-      (capsAreP
-        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
-            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
-            topStrategyWord() + ' \u203a ' + L("capability","bu") +
-            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
-            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
-            capsAsPillars().map(function(r){
-              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
-                ' <span class="why" style="margin:0">' +
-                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
-          '</ul></div>'
-        : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +

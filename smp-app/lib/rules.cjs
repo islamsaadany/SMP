@@ -754,9 +754,10 @@
 
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
        one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
+       reporting right cannot disagree about who is named (§42, §53.5).
+       §544.13: whichever way the business units are switched — the
+       company's own plan is the company's, and the units are irrelevant to
+       it. */
     if (ownsTopPillar(w, p)) once("dirowner", "group");
 
     /* §412: a capability's own seats, read off the capability exactly as a

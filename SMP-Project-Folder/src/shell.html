@@ -992,7 +992,7 @@
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting", title:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -3481,7 +3481,8 @@
        plan", which is the rail pointing at one name and the page showing
        another all over again. The rail's own label is the page's name whether
        or not it has sections inside it. */
-    var pageName = def ? (def.label || "") : "";
+    /* §619: a page may keep a fuller title than its menu line has room for. */
+    var pageName = def ? (def.title || def.label || "") : "";
     var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
     var secrowHTML = "";
     /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
@@ -6606,7 +6607,7 @@
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });

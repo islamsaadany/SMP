@@ -162,15 +162,32 @@ console.log("2 · the shared readers answer what they answered at " + BASE);
     targetParts: function (R, a) { return R.targetParts(WORLD.group, a); },
     levelComponents: function (R, a) { return R.levelComponents(WORLD.group, R.structLevelOf(a)); }
   };
+  /* ── ONE READER HAS DELIBERATELY MOVED SINCE, AND IT IS NAMED (§218) ──
+     §608 made How we compete a setting a function may carry, so
+     `compOffered(fn, "compete")` answers TRUE on every function address
+     where it answered false. Asserted as the move, exactly, on precisely the
+     addresses `boxRef` calls a function — every other address is still held
+     to its old answer, and the move must really have happened. */
+  const MOVED2 = { compOfferedCompete: { why: "§608", to: function (a) {
+    return NOW.rules.boxRef(a).kind === "fn" ? ["false", "true"] : null; } } };
   Object.keys(ASK).forEach(function (name) {
-    const moves = [];
+    const moves = [], kept = [], m = MOVED2[name];
     ADDRESSES.forEach(function (a) {
       let was, now;
       try { was = JSON.stringify(ASK[name](WAS.rules, a)); } catch (e) { was = "threw: " + e.message; }
       try { now = JSON.stringify(ASK[name](NOW.rules, a)); } catch (e) { now = "threw: " + e.message; }
+      const want = m ? m.to(a) : null;
+      if (want) {
+        if (was === want[0] && now === want[1]) kept.push(a);
+        else moves.push([a, "expected " + want.join(" → "), was + " → " + now]);
+        return;
+      }
       if (was !== now) moves.push([a, was, now]);
     });
-    ok(moves.length === 0, name + " · unmoved on all " + ADDRESSES.length + " addresses", moves);
+    ok(moves.length === 0, name + " · unmoved on all " + ADDRESSES.length + " addresses" +
+       (m ? " but the ones " + m.why + " moved" : ""), moves);
+    if (m) ok(kept.length > 0 && kept.length === ADDRESSES.filter(function (a) { return m.to(a); }).length,
+              name + " · and every function address moved as " + m.why + " says", kept);
   });
 }
 
@@ -387,9 +404,38 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
        asserted to have moved from false to true, in both states, which is
        exactly as strict and says why. A check loosened to pass is a check
        deleted slowly (§218); this one gained a line. */
-    const MOVED = { "plansInPillars(T)": { group: ["false", "true"] } };
+    /* §608: a function holds its own How we compete, so `competeHolder`
+       answers it for the two function addresses the corpus names.
+       §591: the company's own plan is labelled the company in the Master
+       presentation (CO), never a business unit (BU). */
+    const MOVED = {
+      "plansInPillars(T)": { group: ["false", "true"] },
+      "competeHolder(T) && (competeHolder(T).ukey || competeHolder(T).org || true)":
+        { "fn:it": ["null", "true"], "fn:merchandising": ["null", "true"] },
+      "masterKind(T)": { group: ['"<span class=\\"mfkind\\">BU</span>"', '"<span class=\\"mfkind\\">CO</span>"'] }
+    };
+    const WHY = { "plansInPillars(T)": "§542",
+      "competeHolder(T) && (competeHolder(T).ukey || competeHolder(T).org || true)": "§608",
+      "masterKind(T)": "§591" };
+    /* §564: THE PLAN DOWNLOAD IS NAMED BY ITS PLACE. It became the deck
+       without its figures, and its file takes the deck's own name for the
+       box — `placeLabel`, which section 4 holds unmoved above — where it
+       used to read only a unit's or a function's name and called every
+       other box "Plan". So it is held to AGREE with placeLabel on every
+       address, in both states: as strict as the grid, and it says why. */
+    const AGREES = { "planPptxName(T)": "(placeLabel(T) || 'Plan') + ' — Strategy plan.pptx'" };
     CALLS.forEach(function (call) {
       const moves = [], expected = MOVED[call] || {}, kept = [];
+      if (AGREES[call]) {
+        builds.forEach(function (b) {
+          ADDRESSES.forEach(function (a) {
+            const now = ask(b.now, call, a), want = ask(b.now, AGREES[call], a);
+            if (now !== want || now.indexOf("threw: ") === 0) moves.push([b.name, a, want, now]);
+          });
+        });
+        ok(moves.length === 0, call + " · agrees with " + AGREES[call] + " on every address (§564)", moves.slice(0, 6));
+        return;
+      }
       builds.forEach(function (b) {
         ADDRESSES.forEach(function (a) {
           const was = ask(b.was, call, a), now = ask(b.now, call, a);
@@ -409,7 +455,7 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
          exception above is covering for a reader that never changed. */
       if (Object.keys(expected).length)
         ok(kept.length === builds.length * Object.keys(expected).length,
-           call + " · and " + Object.keys(expected).join(", ") + " moved as §542 says, in both states", kept);
+           call + " · and " + Object.keys(expected).join(", ") + " moved as " + (WHY[call] || "named") + " says, in both states", kept);
     });
     /* BOTH ENDS AGAIN (§94.2): an agreement where every call threw in both
        builds is no agreement at all, so the run has to have produced real

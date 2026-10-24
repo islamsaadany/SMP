@@ -106,7 +106,10 @@ def drawer(pg):
       pressed: [...document.querySelectorAll('tr.mprow .mpseg button')]
         .filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.textContent),
       disabled: [...document.querySelectorAll('tr.mprow .mpseg button')]
-        .filter(b => b.disabled).map(b => b.textContent + '|' + (b.title || '')),
+        /* §538: HELD, never dead — aria-disabled with the reason on it, and
+           NOT the browser's `disabled`, which would swallow the pointer. */
+        .filter(b => b.getAttribute('aria-disabled') === 'true' && !b.disabled)
+        .map(b => b.textContent + '|' + (b.title || '')),
       msg: (document.querySelector('tr.mprow .mpmsg') || {}).textContent || "",
       note: (document.querySelector('tr.mprow .mpnote') || {}).textContent || "",
       clear: (document.querySelector('tr.mprow .mpbtn') || {}).textContent || "" })""")
@@ -279,9 +282,17 @@ with sync_playwright() as p:
     nr = ev(pg, "() => { const m = " + ACC + "; delete m.compile; paint(); return true; }")
     pg.wait_for_timeout(300)
     dn = drawer(pg)
-    ck("no compile rule: the other half is disabled and says why",
+    ck("no compile rule: the other half is held and says why",
        len(dn.get("disabled", [])) == 1 and dn.get("disabled", [""])[0].startswith("By month|Set a compile rule"),
        dn)
+    # AND THE HOLD STILL HOLDS (§538's half a conversion breaks): pressed, the
+    # held half switches nothing and the quarters stay as typed.
+    held = ev(pg, """() => { const b = [...document.querySelectorAll('tr.mprow .mpseg button')]
+        .find(x => x.getAttribute('aria-disabled') === 'true');
+      if (!b) return null; b.click();
+      return [...document.querySelectorAll('tr.mprow .mpseg button')]
+        .filter(x => x.getAttribute('aria-pressed') === 'true').map(x => x.textContent); }""")
+    ck("...and pressing it switches nothing", held == ["By quarter"], held)
     ev(pg, "() => { const m = " + ACC + "; m.compile = 'Sum'; paint(); return true; }")
     pg.wait_for_timeout(300)
 

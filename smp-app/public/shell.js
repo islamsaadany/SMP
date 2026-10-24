@@ -756,9 +756,10 @@
 
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
        one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
+       reporting right cannot disagree about who is named (§42, §53.5).
+       §544.13: whichever way the business units are switched — the
+       company's own plan is the company's, and the units are irrelevant to
+       it. */
     if (ownsTopPillar(w, p)) once("dirowner", "group");
 
     /* §412: a capability's own seats, read off the capability exactly as a
@@ -28650,14 +28651,17 @@ function scoreSpread(rows, extra){
    the same band function, so they can never contradict each other. */
 /* §610: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
    *"the main number should be bigger and the other go a bit smaller"*). The
-   `hero` class doubles the headline and quietens the three figures under it;
-   the unit Overview's cards, which share `.headline` and `.minirow`, keep
-   their size. "4 scored" is gone — Islam was *"not sure if it's useful
+   `hero` class doubles the headline and quietens the three figures under it
+   (§616: the unit Overview's own three cards wear it too). "4 scored" is gone — Islam was *"not sure if it's useful
    info"* — and the fact it carried is said the way a reader acts on it: how
    many have NOT reported, beside the number they are missing from, and only
    while there are some. Highest stays ink (it is never the worry); Lowest
    keeps its band colour only when it is out of the top band, so colour on the
    card means something to look at. */
+/* A Lowest in the top band says nothing to look at, so it stays ink. */
+function quietLow(lo){
+  return '<b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' + pct(lo) + '</b>';
+}
 function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   var r = pl ? Math.round(ex / pl * 100) : null;
   var unreported = nMeasures - nScored;
@@ -28668,8 +28672,7 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
         (unreported > 0 ? '<span class="unrep">' + unreported + ' not reported yet</span>' : '') + '</div>' +
       '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b></div>' +
         '<div><em>Highest</em><b>' + pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' +
-          pct(lo) + '</b></div></div></div>' +
+        '<div><em>Lowest</em>' + quietLow(lo) + '</div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -30790,7 +30793,9 @@ function renderUnitPerformance(u){
      solid fill, and the page keeps the row. See `group-extra.css`. */
   return perfActs(presentMenu("unit", u.ukey)) +
 
-    '<div class="scores">' +
+    /* §616: and the Overview's own cards read the same way (Islam, of the
+       three above the rail: *"why not done the same in the cards above?"*). */
+    '<div class="scores hero">' +
       /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
          BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
          so the page leads with the same number or the two disagree about one
@@ -30803,10 +30808,8 @@ function renderUnitPerformance(u){
           deltaTag(u.ukey) +
           '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu") + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
-            pct(koHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
-            pct(koLo) + '</b></div></div></div>')) +
+          '<div><em>Highest</em><b>' + pct(koHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(koLo) + '</div></div></div>')) +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
@@ -30819,10 +30822,8 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + plId + '">See the ' +
             plWord + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
-            pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(plLo) + '">' +
-            pct(plLo) + '</b></div></div></div>' +
+          '<div><em>Highest</em><b>' + pct(plHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(plLo) + '</div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -32855,7 +32856,10 @@ function monthlySeg(row, fld, q, reg){
     var on = (mode === "q") === q;
     return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
       '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
-      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      /* §538's house rule: HELD, not dead — `aria-disabled` keeps the
+         pointer and the focus, so the reason on it reaches somebody; the
+         handler declines the press. */
+      (!on && stuck ? ' aria-disabled="true" title="Set a compile rule first, so the figures can be carried across"' : '') +
       '>' + word + '</button>';
   };
   return '<span class="mpseg" role="group" aria-label="Plan this target">' +
@@ -36563,7 +36567,8 @@ function fnObjPlan(fk){
 function fnObjCards(fk){
   var ko = fnObjScore(fk), ac = fnActionsTally(fk);
   var objs = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
-  return '<div class="scores">' +
+  /* §616: the same two cards as a unit's, so the same headline. */
+  return '<div class="scores hero">' +
     '<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Objectives performance <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
@@ -50336,24 +50341,36 @@ function standDetail(rows, note){
     (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
     (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
 }
+/* §616: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
+   the slides"*, of §610). The headline was already the slide; what follows it
+   gets quieter: a line's figure keeps its band colour only when it is out of
+   the top band (`hdFig`), so colour under the number means something to look
+   at. And the measures that have not reported are SAID — the subtitle counts
+   six and the list showed four, with nothing on the slide saying where the
+   other two went. The execution side already said its own (§578). */
+function hdFig(v, txt){
+  return '<span class="hdf ' + dBand(v) + (v != null && band(v) === band(100) ? ' quiet' : '') + '">' + txt + '</span>';
+}
 function dirMeasureDetail(p){
-  var rows = scorableMeasures(p).map(function(m){
+  var scorable = scorableMeasures(p);
+  var rows = scorable.map(function(m){
     var v = measureScore(m);
-    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+    return { name:m.name, fig:hdFig(v, dPct(v)) };
   });
   if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
     var v = bdColScore(p, c);
     if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
-                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+                               fig:hdFig(v, dPct(v)) });
   });
-  return standDetail(rows, "");
+  var unrep = SMPRules.shown(p.measures || []).length - scorable.length;
+  return standDetail(rows, unrep > 0 ? unrep + " not reported yet" : "");
 }
 function dirExecDetail(p){
   var rep = reportedTactics(p), due = dueTactics(p);
   var rows = rep.map(function(t){
     var r = tacticProgress(t);
     return { name:t.name,
-             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+             fig:hdFig(r, dPct(Math.round(tacticReads(t)))) +
                  '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
   });
   var notDue = SMPRules.shown(p.tactics || []).length - due.length;
@@ -74836,7 +74853,7 @@ var SYNC = (function () {
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting", title:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -77325,7 +77342,8 @@ var SYNC = (function () {
        plan", which is the rail pointing at one name and the page showing
        another all over again. The rail's own label is the page's name whether
        or not it has sections inside it. */
-    var pageName = def ? (def.label || "") : "";
+    /* §619: a page may keep a fuller title than its menu line has room for. */
+    var pageName = def ? (def.title || def.label || "") : "";
     var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
     var secrowHTML = "";
     /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
@@ -80450,7 +80468,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });

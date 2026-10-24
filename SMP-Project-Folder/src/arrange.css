@@ -3053,7 +3053,12 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
     color:var(--ink-2); font-weight:500; }
   .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
-  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+  /* The selected section's fill is the palette's second ink, the dark grey,
+     not `--stone` (§627): `--stone` is the house navy in the navy palette and
+     the Branding page never rewrites it, so under a tenant's own chrome the
+     switch kept saying navy. The squeezed strip of directions wears the same
+     fill (group-extra.css, §609/§627) and the two must agree. */
+  .tabs .secseg button[aria-selected="true"] { background:var(--ink-2); color:var(--surface);
     font-weight:600; }
   .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 

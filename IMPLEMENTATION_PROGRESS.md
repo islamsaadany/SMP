@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-24 — The squeezed strip of directions in a neutral dark grey, with an inset hairline between directions (§627), on the branch.** On a narrow window the open direction and the strip's outline are now the palette's dark grey instead of the house navy, under the accent edge as before, so a client whose brand bar is another colour no longer sees a navy strip under their own chrome; a short light-grey hairline now shows where each closed direction ends and the next begins; and the Plan button in Foundation | SWOT | Drivers | Plan takes the same grey. Nothing grows or moves. Two mockups shown first, the second with switches to try every combination; Islam chose dark grey, inset hairline, outer line to match, switch fixed too.
+
 **2026-10-24 — My tasks in one card with its filters in its header (§622.3), merged to `main` 2026-10-24 on Islam's word.** My tasks is now one "Open tasks" card whose header holds Show, Sort by and a new search; the groups are labelled sections inside it over a grey line, Late in red.
 
 **2026-10-24 — Titles in Georgia bold; My tasks and Clients in Home's look (§622.2), merged to `main` 2026-10-24 on Islam's word.** Card titles are Georgia, bold. My tasks has Home's band and each group in a card (by client, each client a card with a link to its Tracker). Clients has Home's band with + Add a client, one card holding the clients with the filters in its header, and quieter client cards: no boxed tags or industry, the seat and units at the foot with Settings as a word.

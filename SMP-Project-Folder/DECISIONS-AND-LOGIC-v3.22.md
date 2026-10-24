@@ -69388,6 +69388,11 @@ Islam, of the console's column: *"I want the icon on the top to take me home as 
   - Shell reads 435/11; the eleven are `main`'s own, listed in §622.6's release note.
   - pages-types 10/0, instant-nav 19/0, console-boot 13/0, tab-keep, platform-cards 30/0.
 
+**§622.7 MERGED TO `main`** 2026-10-24, Islam: *"merge"*.
+- `main` had not moved (`2a7373bb`), so this was a clean fast-forward to `f45359b3`, with `sw.js` and the asset stamps regenerated. `generated-in-step` and `release-stamp` read all clear and `built-in-step` all good.
+- **PRODUCTION SERVES THIS BUILD** (§91.5): `/sw.js` release **`d855de842e56fa36`**, `/platform-page.js` **326,843** bytes and `/shell.js`, both identical to the generated copies.
+- No `SHELL` bump; no forced sign-out.
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.

@@ -2613,12 +2613,17 @@ await section("4 · Forefront's own pages", async () => {
         })();
       }));
       const moves = {}, titles = {};
+      const eyes = {};
       for (const t of ["clients", "home", "mywork", "consultants", "memory", "frameworks", "history", "home"]) {
         const w = watch();
         await page.click('.nav button[data-tab="' + t + '"]');
         moves[t] = await w;
         titles[t] = await page.evaluate(() => { const h = document.querySelector("#page .hohello, #page .mwmast, #page .pgband"), z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
-          return h ? Math.round((h.querySelector("h1").getBoundingClientRect().top - h.getBoundingClientRect().top) / z) : -1; });
+          if (!h) return -1;
+          const eye = h.querySelector(".hodate, .pgeye, .mwwk"), c = eye && getComputedStyle(eye);
+          window.__eye = eye ? [c.fontSize, c.fontWeight, c.color, c.letterSpacing, Math.round((eye.getBoundingClientRect().top - h.getBoundingClientRect().top) / z), Math.round((h.querySelector("h1").getBoundingClientRect().top - eye.getBoundingClientRect().bottom) / z)].join(" ") : "none";
+          return Math.round((h.querySelector("h1").getBoundingClientRect().top - h.getBoundingClientRect().top) / z); });
+        eyes[t] = await page.evaluate(() => window.__eye);
       }
       const all = new Set([].concat(...Object.values(moves)));
       check(all.size === 1 && !all.has("none"), "the band holds one place and one height through every tab change, the waiting shape included", JSON.stringify(moves));
@@ -2626,6 +2631,11 @@ await section("4 · Forefront's own pages", async () => {
          (Islam: "the blue banner content place shifts in the my tasks") */
       const tv = Object.values(titles);
       check(Math.max(...tv) - Math.min(...tv) <= 1 && Math.min(...tv) > 0, "\u2026with the title at one height inside the band on every tab", JSON.stringify(titles));
+      /* and the gold line over it — Home's date included (Islam: "the day and
+         date in the home is a bit stuck into the good afternoon … like the
+         other lines in the rest of the modules") — in one size, weight, ink
+         and spacing, at one place, with one gap to the title */
+      check(new Set(Object.values(eyes)).size === 1 && !Object.values(eyes).includes("none"), "\u2026and the gold line above the title is one style at one place on every tab, Home's date included", JSON.stringify(eyes));
       await page.reload({ waitUntil: "commit" });
       await page.waitForSelector("#page .hohello", { timeout: 8000 }).catch(() => {});
       const re = await page.evaluate(() => new Promise((res) => {
@@ -2639,6 +2649,60 @@ await section("4 · Forefront's own pages", async () => {
       const shapes = new Set(re.map((x) => x.split(" ")[0]));
       check(re.some((x) => / saved$/.test(x)) && shapes.size === 1, "\u2026and Home's band keeps its place and height while its saved copy says Updating\u2026 and after", JSON.stringify(re));
       await page.unroute("**/api/**");
+    }
+    /* ROUND FOUR (2026-10-24, design-mockups/home/2026-10-24_team-and-copilot.html) */
+    {
+      /* Consultants: one card, The team; a DOUBLE CLICK opens the name where
+         it is read, Enter writes it, and the row says Saved — asked of the
+         STORED row, not the screen (§96); then put back by leaving the box */
+      await page.click('.nav button[data-tab="consultants"]');
+      await page.waitForSelector(".cocard .cotable tbody tr", { timeout: 8000 }).catch(() => {});
+      const co = await page.evaluate(() => ({ title: (document.querySelector(".cocard .hochd h2") || {}).textContent, rows: document.querySelectorAll(".cocard .cotable tbody tr").length,
+        add: !!document.querySelector(".pgband .pgadd"), boxes: document.querySelectorAll(".cocard .cotable input").length }));
+      check(co.title === "The team" && co.rows > 0 && co.add && co.boxes === 0, "Consultants is one card, The team, its names read as words and not boxes, Add a consultant on the band", JSON.stringify(co));
+      const me = await page.evaluate(() => { const r = document.querySelector('.cotable tr[data-email="office@forefront.example"]'); return r ? r.querySelector(".coname").textContent : null; });
+      await page.dblclick('.cotable tr[data-email="office@forefront.example"] .coname');
+      const opened = await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("coinput") && document.activeElement.value);
+      check(opened === me, "\u2026a double click opens the name in a box holding it", JSON.stringify({ opened, me }));
+      await page.keyboard.press("End"); await page.keyboard.type(" Test"); await page.keyboard.press("Enter");
+      await page.waitForSelector(".cotable .asksaved", { timeout: 8000 }).catch(() => {});
+      const said = await page.evaluate(() => { const t = document.querySelector(".cotable .asksaved"); return t ? t.textContent + "|" + t.closest("tr").dataset.email : ""; });
+      const stored = (await owner.query("SELECT name FROM users WHERE email = 'office@forefront.example'")).rows[0];
+      check(said === "Saved|office@forefront.example" && stored && stored.name === me + " Test", "\u2026Enter writes it and the row says Saved", JSON.stringify({ said, stored }));
+      await page.dblclick('.cotable tr[data-email="office@forefront.example"] .coname');
+      await page.keyboard.press("Escape");
+      check((await page.evaluate(() => document.querySelectorAll(".cotable .coinput").length)) === 0, "\u2026Escape shuts the box and writes nothing");
+      await page.dblclick('.cotable tr[data-email="office@forefront.example"] .coname');
+      await page.fill(".cotable .coinput", me, { timeout: 4000 }).catch(() => {});
+      await page.click(".cocard .hochd h2");
+      await page.waitForTimeout(1500);
+      check((await owner.query("SELECT name FROM users WHERE email = 'office@forefront.example'")).rows[0].name === me, "\u2026and leaving the box writes it too (put back)");
+
+      /* Who sees what: each rule its own row with its switch, and Inside a client */
+      await page.click('.nav button[data-tab="access"]');
+      await page.waitForSelector(".acclient, .aclients .mwnone", { timeout: 8000 }).catch(() => {});
+      const ac = await page.evaluate(() => ({ rules: Array.from(document.querySelectorAll(".acrule")).map((r) => r.querySelector("b").textContent + ":" + r.querySelectorAll(".acsw button").length),
+        heads: Array.from(document.querySelectorAll(".actwo .hochd h2")).map((h) => h.textContent), clients: document.querySelectorAll(".acclient").length }));
+      check(ac.rules.length === 4 && ac.rules.every((r) => /:[23]$/.test(r)) && JSON.stringify(ac.heads) === JSON.stringify(["Across the platform", "Inside a client"]) && ac.clients > 0,
+        "Who sees what draws each rule as its own row with its switch, and the clients Inside a client", JSON.stringify(ac));
+
+      /* Copilot: The parts, and its header with the section tabs stays at the
+         top of the window while the method scrolls (Islam: "the title and the
+         subtabs below to stay freezed on scrolling down") */
+      await page.click('.nav button[data-tab="copilot"]');
+      await page.waitForSelector(".cpcard [data-cpsec]", { timeout: 8000 }).catch(() => {});
+      await page.evaluate(() => window.scrollTo(0, 1600));
+      await page.waitForTimeout(300);
+      const cp = await page.evaluate(() => { const st = document.querySelector(".cpstick"); const r = st ? st.getBoundingClientRect() : null;
+        return { title: (document.querySelector(".cpcard .hochd h2") || {}).textContent, tabs: document.querySelectorAll(".cpstick [data-cpsec]").length, top: r ? Math.round(r.top) : null, scrolled: Math.round(scrollY),
+          tiles: document.querySelectorAll(".cplim div").length }; });
+      check(cp.title === "The parts" && cp.tabs === 5 && cp.top === 0 && cp.scrolled > 500 && cp.tiles === 6,
+        "Copilot is one card, The parts, its header and five section tabs frozen at the top while the method scrolls, the limits as tiles", JSON.stringify(cp));
+      await page.evaluate(() => window.scrollTo(0, 0));
+      /* back to Home, drawn, for what follows */
+      await page.goto("about:blank");
+      await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
+      await page.waitForSelector('[data-home="clients"] .hocl', { timeout: 8000 }).catch(() => {});
     }
     /* SHOW MINE OR DEMO on Home's clients (2026-10-24): Mine is the seated
        clients without the worked example, Demo the worked example alone;

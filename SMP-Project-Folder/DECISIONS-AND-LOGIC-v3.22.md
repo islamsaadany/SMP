@@ -69283,6 +69283,80 @@ Islam asked for six things in one message: the settings button at the far right 
 - **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`d32a1ea24c6dfe22`** (was `2cd7c3a5be23adeb`), `/platform-page.js` **312,398** bytes and `/shell.js` **5,247,154**, both identical to the generated copies.
 - No `SHELL` bump (the client platform's built file is untouched); no forced sign-out.
 
+## §622.5 — The band never moves, and every band reads alike (2026-10-24)
+
+Islam, after §622.4 went live:
+- *"when I move from home to another module first the banner appear to be lower and then adjusts itself"*
+- *"and same for home .. stats a bit low and then adjusts higher"*
+- *"the blue banner content place shifts in the my tasks to be a bit up let's make it centered like the rest. is my note true?"*
+- *"the day and date in the home is a bit stuck into the good afternoon if you can make it like the other lines in the rest of the modules? in terms of place and formatting"*
+
+All four were true, and each was measured before it was changed.
+
+**TWO CAUSES OF THE JUMP.** Each was measured frame by frame with the server's replies held back, so the waiting state stayed on screen long enough to read.
+1. **A tab's waiting shape (§620) had no band.** Clients drew a bare title; Consultants, Case studies, Frameworks, Copilot and History drew grey bars. The band appeared only when the page arrived. **Fix:** `tabSkel` now draws the tab's real band first, with its name and its sentence (`BAND_SAYS`, Home's `hoHello`, My tasks' `mwMast`), so only what is under the band waits. The skeleton's own title bars and grey band boxes are gone.
+2. **A saved copy (§620) put its *Updating…* pill on a line of its own above the band** wherever the band was not a `.ptitle` (Home's greeting, My tasks' panel, Clients' band). That pushed the band down 26px until the latest copy replaced it. **Fix:** `staleMark` puts the pill in the band's corner, absolutely placed (`.stale.onband`), so the band keeps its place and height.
+
+**MY TASKS AND HOME SAT DIFFERENTLY IN THE BAND.**
+- Every `.pgband` puts its words at its foot. My tasks' panel and Home's greeting started at the top, so their titles sat 6px and 5px higher.
+- Both are now flex columns ending at the foot, on a computer.
+- Home's date also carried the sentence's size, ink and spacing: `.hohello p` was more specific than `.hodate`, so the date sat tight on *Good afternoon*.
+- The gold line is now ONE rule for `.pgeye`, `.hodate` and `.mwwk`: 10.5px, 700, amber, .16em, the same place, and a 4px gap to the title.
+
+**CHECKED** (`checks/shell.mjs`). Every reply is held back 700ms, and the band's top and height are read on every frame from the press until the page has drawn.
+- **One place and one height** through eight tab changes, the waiting shapes included.
+- **Home's band stays put** while its saved copy says *Updating…* and after.
+- **The title sits at one height inside the band** on every tab.
+- **The gold line is one style at one place** on every tab.
+- **Red runs:**
+  - The old shape and pill read clients 16→49, consultants 16→none, and a saved Home at 49→16.
+  - Before the alignment fix, the title read Home 36 against 41 everywhere else, and the gold line Home 16 against 21.
+
+## §622.6 — Round four: Consultants, Who sees what and Copilot in the console's look (2026-10-24)
+
+Islam: *"can we work on refining the design of the consultants and who sees what and the copilot tabs with the same look and feel?"* It was drawn in `design-mockups/home/2026-10-24_team-and-copilot.html` (before and after for each, and two options for Copilot). His answers:
+- *"for the consultants table we need to make double click open the cells for editing and on closing the save banner appears it's a common behavior we have already"*
+- *"who sees what is ok"*
+- *"for the copilot go with A but make the title Foundation to be The parts and the title and the subtabs below to stay freezed on scrolling down"*
+
+**CONSULTANTS:**
+- **The band** counts the consultants and super users and carries *+ Add a consultant*, which takes the cursor to the add line.
+- **One card, *The team*.** Its header holds *Show: Active · Retired* (drawn only when somebody is retired) and a search that hides rows in place (§35).
+- **Each person is a striped row:**
+  - Their initials, the name in bold and the address under it.
+  - The platform standing as one pill: *Super user* in amber, *Consultant* dashed. Whoever may can press it to change it, as the old chip did.
+  - Their seats as quiet pills.
+  - The password as a dot (green Set, amber Temporary).
+  - *Issue password · Retire · Delete* as quiet words at the far right.
+- **The name and the address are no longer boxes.** A DOUBLE CLICK opens one where it is read, holding its value, selected: the register's own gesture (§372). Enter or leaving it writes it; Escape shuts it and writes nothing.
+- **The row then says *Saved*,** or *Not saved — the reason*, as the register's cells do (§621's `asksaved`). A changed address still says, after the redraw, that the old address is signed out.
+- *Added* and the temporary password are now said AFTER the redraw. Before, the redraw took the password line away with the page it replaced (§63).
+
+**WHO SEES WHAT, as drawn:**
+- **The band's gold line** says who it applies to, *Everyone but the super user*, and its counts are the rules and the clients.
+- ***Across the platform*** has each rule as its own striped row: its name, the server's own line on it (`AREAS[].note`), and its switch at the right in sentence case. Navy marks the state in force; amber marks one that widens access, as before. Pressing the lit one still clears it (§37).
+- ***Inside a client*** lists the clients from the cards' own answer, with their seat counts (from the consultants list, when it can be read). The sliders open each one's settings (shown only where `canConfig`), because a seat is written there and nowhere else.
+
+**COPILOT, option A, with his two changes:**
+- **One card titled *The parts*,** with the number of parts in the section. The five sections are numbered tabs under the title.
+- **The title and the tabs are frozen at the top of the window** while the method scrolls (`.cpstick`, sticky). On a phone they stop under the column's bar.
+- **Each part has its number, title, *Edited* and *Edit* on one line,** and the text at a reading width. Its `###` sections are labelled over a grey rule like My tasks' groups.
+- **A part's *limits* list becomes tiles** when every line is "**What:** how many": the same words, nothing derived.
+- **Templates sits in the same card,** *The templates*, with striped rows.
+
+**CHECKED** (`checks/shell.mjs`, new):
+- **Consultants:** one card, *The team*, names as words, Add on the band.
+- **Double-click editing:**
+  - A double click opens the name in a box holding it.
+  - Enter writes it and the row says *Saved*, asked of the STORED `users.name` (§96).
+  - Escape shuts the box.
+  - Leaving the box writes it, which puts the name back.
+- **Who sees what:** four rule rows each with its switch, and the clients under *Inside a client*.
+- **Copilot:** *The parts*, five tabs, the frozen header at top 0 after a 1,600px scroll, and six limit tiles.
+- **Red runs:**
+  - Without the double-click handler the three editing lines fail.
+  - With the header not sticky the Copilot line fails (top −1483).
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.

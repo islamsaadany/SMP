@@ -4801,57 +4801,152 @@
   }
 
   /* ── Consultants ─────────────────────────────────────────────── */
+  /* which of the team the card shows: those who can sign in, or the retired */
+  var CO = { show: "active" };
   function drawConsultants(quiet) {
     lead(quiet, "Reading…");
     return post({ action: "consultants" }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not read the list.", true); return; }
       settle(function () {
-      pageBand("Consultants", null, nOf((j.people || j.consultants || []).length, "consultant"), "The office's people, their seats and what each may open.");
+      /* ROUND FOUR (Islam, 2026-10-24, design-mockups/home/2026-10-24_team-and-copilot.html):
+         the band counts the team and its super users and carries Add a
+         consultant; one card, The team, holds them, Show and a search in
+         its header, the people as striped rows, the add line at its foot. */
+      var people = j.people || [];
+      var active = people.filter(function (p) { return p.status !== "retired"; });
+      var retired = people.filter(function (p) { return p.status === "retired"; });
+      var supers = active.filter(function (p) { return p.isAdmin; }).length;
+      if (CO.show === "retired" && !retired.length) CO.show = "active";
+      var right = null, name = null;
+      if (j.canEdit) {
+        right = el("span");
+        var go = el("button", "btn amber pgadd", "+ Add a consultant");
+        go.type = "button";
+        go.addEventListener("click", function () { if (name) { name.scrollIntoView({ block: "center" }); name.focus(); } });
+        right.appendChild(go);
+      }
+      pageBand("Consultants", right, nOf(active.length, "consultant") + " · " + nOf(supers, "super user"),
+        "The office's people, their seats and what each may open.");
+
+      var card = el("section", "hocard cocard");
+      var hd = el("div", "hochd");
+      var hic = el("span", "hocic");
+      hic.innerHTML = NAV_ICON.consultants;
+      hd.appendChild(hic);
+      hd.appendChild(el("h2", null, "The team"));
+      var shown = CO.show === "retired" ? retired : active;
+      hd.appendChild(el("span", "hocnt", String(shown.length)));
+      hd.appendChild(el("span", "sp"));
+      if (retired.length) hd.appendChild(hoSwitch("Show", [["active", "Active"], ["retired", "Retired"]], CO.show, function (v) { CO.show = v; drawConsultants(true); }));
+      var search = el("input", "fld cosearch");
+      search.type = "search";
+      search.placeholder = "Search by name or email";
+      search.setAttribute("aria-label", "Search consultants");
+      hd.appendChild(search);
+      card.appendChild(hd);
 
       var box = el("div", "tscroll");
-      var t = el("table");
+      var t = el("table", "cotable");
       var head = el("tr");
-      ["Name", "Email", "Platform", "Clients and seats", "Password", ""].forEach(function (h) {
+      ["Person", "Platform", "Clients and seats", "Password", ""].forEach(function (h) {
         head.appendChild(el("th", null, h));
       });
       var thead = el("thead"); thead.appendChild(head); t.appendChild(thead);
       var body = el("tbody");
-      j.people.forEach(function (p) { body.appendChild(consultantRow(p, j)); });
+      shown.forEach(function (p) { body.appendChild(consultantRow(p, j)); });
       t.appendChild(body);
       box.appendChild(t);
-      page.appendChild(box);
+      card.appendChild(box);
+      /* typing never repaints (§35): the search hides rows in place */
+      search.addEventListener("input", function () {
+        var q = search.value.trim().toLowerCase();
+        Array.prototype.forEach.call(body.querySelectorAll("tr"), function (r) {
+          r.hidden = !!q && r.textContent.toLowerCase().indexOf(q) < 0;
+        });
+      });
 
       if (j.canEdit) {
-        var row = el("div", "row");
-        var name = el("input", "fld"); name.placeholder = "Name";
-        var mail = el("input", "fld"); mail.placeholder = "name@forefront.consulting";
+        var row = el("div", "coadd");
+        row.appendChild(el("span", "coav add", "+"));
+        name = el("input", "fld"); name.placeholder = "Name"; name.setAttribute("aria-label", "Name");
+        var mail = el("input", "fld"); mail.placeholder = "name@forefront.consulting"; mail.setAttribute("aria-label", "Email");
         var add = el("button", "btn amber", "Add a consultant");
         add.type = "button";
         add.addEventListener("click", function () {
           post({ action: "saveConsultant", email: mail.value.trim(), name: name.value.trim() })
             .then(function (r) {
               if (!r.ok) { say(r.error || "Not added.", true); return; }
-              drawConsultants(true);
-              if (r.password) {
+              /* said after the redraw, or the redraw takes it away (§63) */
+              var who = mail.value.trim();
+              drawConsultants(true).then(function () {
+                coSaid(who.toLowerCase(), true);
+                if (!r.password) return;
                 var s = say("");
-                s.appendChild(document.createTextNode("Temporary password for " + mail.value.trim() + ": "));
+                s.appendChild(document.createTextNode("Temporary password for " + who + ": "));
                 s.appendChild(el("b", null, r.password));
                 s.appendChild(document.createTextNode(" — they must change it on first use."));
-              }
+              });
             });
         });
         row.appendChild(name); row.appendChild(mail); row.appendChild(add);
-        page.appendChild(row);
+        card.appendChild(row);
       }
-      page.appendChild(el("p", "note",
+      card.appendChild(el("p", "cofoot",
         "The seats are read here and set on each client's own configuration — " +
         "one place writes them. Somebody on no client can sign in and has " +
         "nothing to open, which is what a new joiner looks like."));
+      page.appendChild(card);
       });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
+  }
+
+  /* A CELL OPENED BY A DOUBLE CLICK (§372's register, round four): the
+     words become a box holding them, selected; Enter or leaving it writes
+     (`commit` answers null when nothing changed), Escape puts the words back
+     untouched. Only one box at a time is ever open on the row. */
+  function coCell(span, value, label, mono, commit) {
+    span.classList.add("coed");
+    span.title = "Double-click to change";
+    span.addEventListener("dblclick", function () {
+      if (span.hidden) return;
+      try { window.getSelection().removeAllRanges(); } catch (e) { /* nothing selected */ }
+      var box = el("input", "fld coinput" + (mono ? " mono" : ""));
+      box.value = value;
+      box.setAttribute("aria-label", label);
+      var done = false;
+      var shut = function () { if (box.parentNode) box.parentNode.removeChild(box); span.hidden = false; };
+      var finish = function (keep) {
+        if (done) return;
+        done = true;
+        if (!keep) { shut(); return; }
+        var w = commit(box.value);
+        if (!w) { shut(); return; }
+        box.disabled = true;
+        w.then(shut, shut);
+      };
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); finish(true); }
+        else if (e.key === "Escape") { e.preventDefault(); finish(false); }
+      });
+      box.addEventListener("blur", function () { finish(true); });
+      span.hidden = true;
+      span.parentNode.insertBefore(box, span.nextSibling);
+      box.focus();
+      box.select();
+    });
+  }
+  /* THE ROW SAYS WHAT THE SERVER ANSWERED, on the row (§621's rule): Saved
+     for a moment, or Not saved with the reason, longer. */
+  function coSaid(email, ok, why) {
+    var row = page.querySelector('.cotable tr[data-email="' + String(email).replace(/"/g, "") + '"] .cowho');
+    if (!row) { if (!ok) say(why || "Not saved.", true); return; }
+    var tag = el("span", "asksaved" + (ok ? "" : " bad"), ok ? "Saved" : "Not saved" + (why ? " — " + why : ""));
+    tag.setAttribute("role", "status");
+    row.appendChild(tag);
+    setTimeout(function () { if (tag.parentNode) tag.parentNode.removeChild(tag); }, ok ? 1800 : 5000);
   }
 
   function consultantRow(p, j) {
@@ -4871,55 +4966,56 @@
 
        AND THE ADDRESS IS THE SIGN-IN, so changing it ends that person's
        sessions and is said on the page rather than left to be discovered. */
-    var edit = j.canEdit;
-    var nameTd = el("td");
-    if (edit) {
-      var nm = el("input", "fld");
-      nm.value = p.name || "";
-      nm.placeholder = "Name";
-      nm.addEventListener("change", function () {
-        var v = nm.value.trim();
-        if (v === (p.name || "")) return;
-        post({ action: "saveConsultant", email: p.email, name: v })
-          .then(function (r) { r.ok ? drawConsultants(true)
-                                    : say(r.error || "Not changed.", true); });
-      });
-      nameTd.appendChild(nm);
-    } else {
-      nameTd.textContent = p.name || "—";
-    }
-    /* A RETIRED ROW SAYS SO (§35, §124, §338). Nothing else on this line
-       differs — same name, same address, same seats — so without this the
-       one state that stops somebody signing in is invisible, and Delete
-       appears beside rows that look exactly like the ones it does not. */
-    if (p.status === "retired") nameTd.appendChild(el("span", "tag", "Retired"));
-    tr.appendChild(nameTd);
+    /* ── THE PERSON: THEIR MARK, THE NAME IN BOLD AND THE ADDRESS UNDER IT
+       (round four, 2026-10-24). Both are still edited where they are read,
+       now the way the client's register opens a cell (§372): a DOUBLE
+       CLICK opens it (Islam: "double click open the cells for editing and
+       on closing the save banner appears it's a common behavior we have
+       already"), leaving it or Enter writes it, Escape puts it back — and
+       the row then says Saved, or Not saved with the reason, as the
+       register's cells do (§621's `asksaved`).
 
-    var mailTd = el("td", "mono");
+       AND THE ADDRESS IS THE SIGN-IN, so changing it ends that person's
+       sessions and is said on the page rather than left to be discovered
+       (§313.27). */
+    var edit = j.canEdit;
+    tr.setAttribute("data-email", p.email);
+    var who = el("td", "coperson");
+    who.appendChild(el("span", "coav" + (p.status === "retired" ? " ret" : ""), initials(p.name || p.email)));
+    var words = el("span", "cowho");
+    var nmS = el("b", "coname", p.name || "—");
+    var emS = el("span", "coemail mono", p.email);
+    words.appendChild(nmS);
+    /* A RETIRED ROW SAYS SO (§35, §124, §338): the one state that stops
+       somebody signing in is otherwise invisible. */
+    if (p.status === "retired") { words.appendChild(document.createTextNode(" ")); words.appendChild(el("span", "tag", "Retired")); }
+    words.appendChild(emS);
+    who.appendChild(words);
     if (edit) {
-      var em = el("input", "fld mono");
-      em.value = p.email;
-      em.addEventListener("change", function () {
-        var v = em.value.trim().toLowerCase();
-        if (!v || v === p.email) { em.value = p.email; return; }
-        post({ action: "saveConsultant", email: p.email, newEmail: v })
-          .then(function (r) {
-            if (!r.ok) { em.value = p.email; say(r.error || "Not changed.", true); return; }
-            /* SAID AFTER THE REDRAW THAT REPORTS IT (§63). Said before, the
-               sentence is appended to a page `settle()` is about to replace —
-               so the rename lands, the outcome is written, and a moment later
-               it is gone, which reads exactly like nothing happened. */
-            drawConsultants(true).then(function () {
-              say(v + " signs in with that address now. Any tab they had open " +
-                  "has been signed out — the old address no longer exists.");
-            });
-          });
+      coCell(nmS, p.name || "", "Name", false, function (v) {
+        v = v.trim();
+        if (v === (p.name || "")) return null;
+        return post({ action: "saveConsultant", email: p.email, name: v }).then(function (r) {
+          return r.ok ? drawConsultants(true).then(function () { coSaid(p.email, true); })
+                      : coSaid(p.email, false, r.error || "Not changed.");
+        });
       });
-      mailTd.appendChild(em);
-    } else {
-      mailTd.textContent = p.email;
+      coCell(emS, p.email, "Email", true, function (v) {
+        v = v.trim().toLowerCase();
+        if (!v || v === p.email) return null;
+        return post({ action: "saveConsultant", email: p.email, newEmail: v }).then(function (r) {
+          if (!r.ok) return coSaid(p.email, false, r.error || "Not changed.");
+          /* SAID AFTER THE REDRAW THAT REPORTS IT (§63): said before, the
+             sentence goes with the page the redraw replaces. */
+          return drawConsultants(true).then(function () {
+            coSaid(v, true);
+            say(v + " signs in with that address now. Any tab they had open " +
+                "has been signed out — the old address no longer exists.");
+          });
+        });
+      });
     }
-    tr.appendChild(mailTd);
+    tr.appendChild(who);
 
     /* ── SUPER USER, IN A COLUMN THAT SAYS WHERE (Islam, option B) ──
        The role was always here and read "Platform admin: Yes", which is not
@@ -4937,12 +5033,14 @@
        keep their spelling, because renaming a stored field is a migration for
        a word nobody reads (§30.2, §58). */
     var adminTd = el("td");
-    var cell = el("span", "cell" + (j.canSetAdmin && p.email !== j.me ? "" : " locked"));
-    var yes = el("button", null, "Super user");
+    /* round four: one pill that says the standing — Super user (amber) or
+       Consultant — and changes it when pressed, for whoever may */
+    var cell = el("span", "corole" + (j.canSetAdmin && p.email !== j.me ? "" : " locked"));
+    var yes = el("button", p.isAdmin ? "on hi" : null, p.isAdmin ? "Super user" : "Consultant");
     yes.type = "button";
-    if (p.isAdmin) yes.className = "on hi";
+    yes.setAttribute("aria-pressed", String(!!p.isAdmin));
     if (j.canSetAdmin && p.email !== j.me) {
-      yes.title = "Adding clients and consultants, and setting Who sees what";
+      yes.title = (p.isAdmin ? "Press to make them a consultant again. " : "Press to make them a super user: ") + "adding clients and consultants, and setting Who sees what";
       yes.addEventListener("click", function () {
         post({ action: "saveConsultant", email: p.email, isAdmin: !p.isAdmin })
           .then(function (r) { r.ok ? drawConsultants(true) : say(r.error || "Not changed.", true); });
@@ -4959,15 +5057,16 @@
     var seatsTd = el("td", "seats");
     if (!p.seats || !p.seats.length) seatsTd.appendChild(el("span", "muted", "On no client yet"));
     else p.seats.forEach(function (s) {
-      seatsTd.appendChild(el("span", "tag",
-        s.client + " · " + (s.seat === "super" ? "Super user" : "SMO team")));
+      var pill = el("span", "seat", s.client + " ");
+      pill.appendChild(el("i", null, "· " + (s.seat === "super" ? "Super user" : "SMO team")));
+      seatsTd.appendChild(pill);
     });
     tr.appendChild(seatsTd);
 
-    tr.appendChild(el("td", null, p.password === "none" ? "—"
-      : p.password === "temporary" ? "Temporary" : "Set"));
+    tr.appendChild(el("td", null, p.password === "none" ? "—" : null)).appendChild(p.password === "none" ? document.createTextNode("")
+      : el("span", "copw" + (p.password === "temporary" ? " tmp" : ""), p.password === "temporary" ? "Temporary" : "Set"));
 
-    var act = el("td");
+    var act = el("td", "coacts");
     if (j.canEdit && p.email !== j.me && !p.isAdmin) {
       var b = el("button", "btn", "Issue password");
       b.type = "button";
@@ -5183,25 +5282,39 @@
     post({ action: "access" }).then(function (j) {
       clear();
       if (!j.ok) { say(j.error || "Could not read the table.", true); return; }
-      pageBand("Who sees what", null, "Seats and pages", "Which pages each seat may open, and who may change them.");
-      page.appendChild(el("p", "note",
-        "What somebody may do INSIDE a client is the seat they hold on it, set " +
-        "on that client's configuration. What is here is the rest — and it is " +
-        "asked of everybody who is not the platform's super user."));
+      /* ROUND FOUR (Islam, 2026-10-24: "who sees what is ok", of the
+         drawing): each rule its own striped row — what it is, the server's
+         one line on it, its switch at the right — in a card, Across the
+         platform; beside it, Inside a client, the clients with the sliders
+         to each one's own seats. */
+      var right = el("div", "mwstrip");
+      [[j.areas.length, j.areas.length === 1 ? "Rule" : "Rules"]].forEach(function (x) {
+        var d = el("div"); d.appendChild(el("b", null, String(x[0]))); d.appendChild(el("span", null, x[1])); right.appendChild(d);
+      });
+      var clientsCnt = el("div"); clientsCnt.hidden = true; right.appendChild(clientsCnt);
+      pageBand("Who sees what", right, "Everyone but the super user", "Which pages each seat may open, and who may change them.");
 
-      var box = el("div", "tscroll");
-      var t = el("table");
-      var thead = el("thead"), head = el("tr");
-      head.appendChild(el("th", null, "Everybody who is not the super user"));
-      j.areas.forEach(function (a) { head.appendChild(el("th", null, a.name)); });
-      thead.appendChild(head); t.appendChild(thead);
-
-      var body = el("tbody"), tr = el("tr");
-      tr.appendChild(el("td", null, "Every consultant, whatever seats they hold"));
+      var two = el("div", "actwo");
+      var card = el("section", "hocard accard");
+      var hd = el("div", "hochd");
+      var hic = el("span", "hocic");
+      hic.innerHTML = NAV_ICON.access;
+      hd.appendChild(hic);
+      hd.appendChild(el("h2", null, "Across the platform"));
+      hd.appendChild(el("span", "hocnt", String(j.areas.length)));
+      card.appendChild(hd);
+      var list = el("div", "acrules");
       j.areas.forEach(function (a) {
-        var td = el("td");
+        var row = el("div", "acrule");
+        row.setAttribute("data-area", a.key);
+        var words = el("span");
+        words.appendChild(el("b", null, a.name));
+        words.appendChild(el("span", "p", a.note));
+        row.appendChild(words);
         var now = Object.prototype.hasOwnProperty.call(j.stored, a.key) ? j.stored[a.key] : j.defaults[a.key];
-        var cell = el("span", "cell" + (j.canEdit ? "" : " locked"));
+        var cell = el("span", "cell acsw" + (j.canEdit ? "" : " locked"));
+        cell.setAttribute("role", "group");
+        cell.setAttribute("aria-label", a.name);
         a.states.forEach(function (st) {
           if (st === "none" && a.states.length > 2) return;   /* nothing lit IS none (§37) */
           /* the word is the shared rules' (§487.1), sent with the table, so the
@@ -5221,13 +5334,62 @@
           }
           cell.appendChild(b);
         });
-        td.appendChild(cell);
-        tr.appendChild(td);
+        row.appendChild(cell);
+        list.appendChild(row);
       });
-      body.appendChild(tr); t.appendChild(body);
-      box.appendChild(t);
-      page.appendChild(box);
-      page.appendChild(el("p", "note", "Nothing lit means nothing at all."));
+      card.appendChild(list);
+      card.appendChild(el("p", "cofoot", "Applies to every consultant, whatever seats they hold; the platform's super user is never limited by it. Nothing lit means nothing at all."));
+      two.appendChild(card);
+
+      /* INSIDE A CLIENT: what somebody may do there is the seat they hold on
+         it, set on that client's own configuration — so this card is the
+         way to each, never a second place that writes a seat (§53.5). The
+         clients and who may configure each are the cards' own answer
+         (canConfig, §42); the seat counts are the consultants list's. */
+      var inside = el("section", "hocard accard");
+      var ih = el("div", "hochd");
+      var iic = el("span", "hocic");
+      iic.innerHTML = NAV_ICON.clients;
+      ih.appendChild(iic);
+      ih.appendChild(el("h2", null, "Inside a client"));
+      var icnt = el("span", "hocnt");
+      icnt.hidden = true;
+      ih.appendChild(icnt);
+      inside.appendChild(ih);
+      var ilist = el("div", "aclients");
+      ilist.appendChild(el("p", "muted mwnone", "Reading the clients…"));
+      inside.appendChild(ilist);
+      inside.appendChild(el("p", "cofoot", "What somebody may do inside a client is the seat they hold on it, set in that client's own settings."));
+      two.appendChild(inside);
+      page.appendChild(two);
+      Promise.all([post({ action: "cards" }), post({ action: "consultants" }).catch(function () { return null; })]).then(function (rs) {
+        var cards = (rs[0] && rs[0].cards) || [], people = (rs[1] && rs[1].ok && rs[1].people) || null;
+        var seats = {};
+        if (people) people.forEach(function (p) { if (p.status !== "retired") (p.seats || []).forEach(function (st) { seats[st.key] = (seats[st.key] || 0) + 1; }); });
+        var mine = cards.filter(function (c) { return c.kind !== "demo" && c.state !== "archived" && c.state !== "past"; });
+        ilist.textContent = "";
+        icnt.textContent = String(mine.length); icnt.hidden = false;
+        if (!mine.length) ilist.appendChild(el("p", "muted mwnone", "No clients yet."));
+        mine.forEach(function (c) {
+          var line = el("div", "acclient");
+          line.setAttribute("data-client", c.key);
+          line.appendChild(clientMark(c.key, c.name));
+          var w = el("span");
+          w.appendChild(el("b", null, c.name));
+          if (people) w.appendChild(el("span", "muted", " · " + nOf(seats[c.key] || 0, "seat")));
+          line.appendChild(w);
+          if (c.canConfig) {
+            var cog = settingsChip(c.name);
+            cog.setAttribute("role", "button"); cog.tabIndex = 0;
+            var setup = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+            cog.addEventListener("click", setup);
+            cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") setup(e); });
+            line.appendChild(cog);
+          }
+          ilist.appendChild(line);
+        });
+        clientsCnt.textContent = ""; clientsCnt.appendChild(el("b", null, String(mine.length))); clientsCnt.appendChild(el("span", null, mine.length === 1 ? "Client" : "Clients")); clientsCnt.hidden = false;
+      }).catch(function () { ilist.textContent = ""; ilist.appendChild(el("p", "muted mwnone", "Could not read the clients.")); });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
@@ -5362,18 +5524,40 @@
     if (CP.mode === "templates") cpTemplates(d, canEdit); else cpParts(d, canEdit);
   }
 
+  /* ROUND FOUR, OPTION A (Islam, 2026-10-24: "for the copilot go with A
+     but make the title Foundation to be The parts and the title and the
+     subtabs below to stay freezed on scrolling down"): one card, The parts,
+     whose header and the five sections as numbered tabs under it stay at the
+     top of the window while the method is scrolled; each part reads at a
+     reading width, its sections labelled over a grey rule, and a part's
+     limits as tiles. */
   function cpParts(d, canEdit) {
-    var secs = el("div", "seg2 cpsecs");
+    var card = el("section", "hocard cpcard");
+    var stick = el("div", "cpstick");
+    var hd = el("div", "hochd");
+    var hic = el("span", "hocic");
+    hic.innerHTML = NAV_ICON.copilot;
+    hd.appendChild(hic);
+    hd.appendChild(el("h2", null, "The parts"));
+    var mine = (d.parts || []).filter(function (p) { return p.section === CP.section; });
+    hd.appendChild(el("span", "hocnt", nOf(mine.length, "part")));
+    stick.appendChild(hd);
+    var secs = el("div", "cpsecs cptabs");
+    secs.setAttribute("role", "tablist");
     secs.setAttribute("aria-label", "Section");
-    (d.sections || []).forEach(function (s) {
-      var b = el("button", CP.section === s.key ? "on" : null, s.title);
+    (d.sections || []).forEach(function (sc, i) {
+      var b = el("button", CP.section === sc.key ? "on" : null);
       b.type = "button";
-      b.setAttribute("data-cpsec", s.key);
-      b.addEventListener("click", function () { if (CP.section !== s.key) { CP.section = s.key; CP.editing = null; CP.flash = null; cpRepaint(); } });
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", String(CP.section === sc.key));
+      b.setAttribute("data-cpsec", sc.key);
+      b.appendChild(el("i", null, String(i + 1)));
+      b.appendChild(document.createTextNode(sc.title));
+      b.addEventListener("click", function () { if (CP.section !== sc.key) { CP.section = sc.key; CP.editing = null; CP.flash = null; cpRepaint(); } });
       secs.appendChild(b);
     });
-    page.appendChild(secs);
-    var mine = (d.parts || []).filter(function (p) { return p.section === CP.section; });
+    stick.appendChild(secs);
+    card.appendChild(stick);
     var box = el("div", "parts");
     mine.forEach(function (p) {
       var row = el("div", "part");
@@ -5393,7 +5577,11 @@
         r.appendChild(ed);
       }
       head.appendChild(r);
-      head.addEventListener("click", function () { if (editing) return; CP.open[p.key] = !CP.open[p.key]; cpRepaint(); });
+      if (mine.length > 1) {
+        head.classList.add("fold");
+        head.setAttribute("aria-expanded", String(open));
+        head.addEventListener("click", function () { if (editing) return; CP.open[p.key] = !CP.open[p.key]; cpRepaint(); });
+      }
       row.appendChild(head);
       if (editing) {
         var body = el("div", "pb");
@@ -5417,7 +5605,7 @@
         body.appendChild(acts);
         row.appendChild(body);
       } else if (open) {
-        var md = cpMd(p.text);
+        var md = cpTiles(cpMd(p.text));
         if (canEdit && p.edited) {
           var back = el("div", "row");
           var put = el("button", "btn", "Put back the shipped text");
@@ -5431,9 +5619,35 @@
       }
       box.appendChild(row);
     });
-    page.appendChild(box);
-    page.appendChild(el("p", "cpwhy", "What the Copilot is told for this section, read on every message. " +
+    card.appendChild(box);
+    card.appendChild(el("p", "cpwhy cofoot", "What the Copilot is told for this section, read on every message. " +
       (canEdit ? "An edit here changes it for every client." : "Only a Forefront super user can change it.")));
+    page.appendChild(card);
+  }
+  /* A PART'S LIMITS AS TILES: a heading that names limits, followed by a
+     list whose every line is "**What:** how many", reads at a glance as
+     tiles — the same words, nothing derived. Any other list stays a list. */
+  function cpTiles(box) {
+    Array.prototype.forEach.call(box.querySelectorAll("h3"), function (h) {
+      var ul = h.nextElementSibling;
+      if (!/limits/i.test(h.textContent) || !ul || ul.tagName !== "UL") return;
+      var items = Array.prototype.map.call(ul.children, function (li) {
+        var st = li.firstChild;
+        if (!st || st.nodeName !== "STRONG" || li.childNodes.length !== 2) return null;
+        var v = String(li.lastChild.textContent || "").trim();
+        return v.length <= 12 ? [st.textContent.replace(/:\s*$/, ""), v] : null;
+      });
+      if (!items.length || items.some(function (x) { return !x; })) return;
+      var tiles = el("div", "cplim");
+      items.forEach(function (x) {
+        var t = el("div");
+        t.appendChild(el("b", null, x[1].replace(/-/g, "\u2013")));
+        t.appendChild(el("span", null, x[0]));
+        tiles.appendChild(t);
+      });
+      ul.parentNode.replaceChild(tiles, ul);
+    });
+    return box;
   }
 
   function cpTemplates(d, canEdit) {
@@ -5500,9 +5714,20 @@
     });
     t.appendChild(tb);
     wrap.appendChild(t);
-    page.appendChild(wrap);
-    page.appendChild(el("p", "cpwhy", "A filled template attached in a Copilot chat is read as that section's input." +
+    /* the same card as the parts (round four) */
+    var card = el("section", "hocard cpcard cptpl");
+    var hd = el("div", "hochd");
+    var hic = el("span", "hocic");
+    hic.innerHTML = NAV_ICON.copilot;
+    hd.appendChild(hic);
+    hd.appendChild(el("h2", null, "The templates"));
+    hd.appendChild(el("span", "hocnt", String((d.templates || []).length)));
+    card.appendChild(hd);
+    wrap.style.marginTop = "0";
+    card.appendChild(wrap);
+    card.appendChild(el("p", "cpwhy cofoot", "A filled template attached in a Copilot chat is read as that section's input." +
       (canEdit ? " A replaced file is what every client downloads." : "")));
+    page.appendChild(card);
   }
 
   function drawFrameworks() {

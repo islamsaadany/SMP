@@ -69230,6 +69230,59 @@ Checks, rewritten never loosened (§218): `shell.mjs` 428/0 (new lines for both 
 
 Islam: *"don't we have filters like the clients which can be a header like in the active clients?"* — drawn four ways (`design-mockups/home/2026-10-24_my-tasks-filters-header.html`: A, A2, C with and without icons, B), and *"build A2"*. My tasks is **one card, "Open tasks"** (Georgia bold, with its count), whose header carries **Show** (whose tasks, for an admin — moved off the navy band), **Sort by** and a new **Search tasks**, as Clients' Active clients card carries its filters. The groups (Late in red, This week, Next week and later; or each client, with Internal Tracker → on its line) are labelled sections inside the card, each over a **grey rule the card's whole width**, as the heavy rule under each heading ran on My tasks before the cards. The band keeps the week, the name, its sentence and the counts. The search finds a task by its words or its client, and a group with nothing found is left out; it is applied again when Sort by changes. Ticks, statuses and rows are unchanged. `shell.mjs` 429/0: one card titled Open tasks in Georgia bold with its count, its filters in its header, three groups over a grey rule (its width asked as at least a pixel, since the console's 80% zoom reports 2px as 1.25px), the search finding "MW far off" alone, Sort by pressed in the card's header. `tab-keep`, `console-boot`, case-page, pages-types green. Not merged.
 
+## §622.4 — Round three: one band on every tab, striped rows, Show done, settings on Home, Case studies and Frameworks as cards (2026-10-24)
+
+Islam asked for six things in one message: the settings button at the far right of Home's clients; rows alternating light grey and white, starting with light grey, on Home's clients and tasks and in My tasks; Case studies and Frameworks redesigned in this look; Home's band staying the same size and in the same place on every module; a better sentence than "your SMP Home"; and a button on My tasks to show done tasks. Drawn in `design-mockups/home/2026-10-24_one-band-everywhere.html`. His answers: *"What needs you today"*, the band on *every console tab*, done *"last week and done in the last 30 days but last week is the important one"*, the *sliders icon*; then *"ok for all proceed"*.
+
+**ONE BAND, ONE SIZE, ONE PLACE.** `pageBand(text, right, eye, sub)` draws Home's navy band (gold eyebrow, Georgia title, quiet sentence, the two circles, the page's acts on the right) on Clients, Consultants, Who sees what, Case studies, Insights, Frameworks, Copilot settings and History; My tasks keeps its own band, now with the same padding. On a computer every band is Home's measured height (113px before the 80% zoom) with the same padding and margin, so its top, height and title stay where they were when you change tab. A phone lets the band grow with its contents.
+
+**HOME'S SENTENCE:** *"Here is what needs you today across your clients."* The shell check that asserted the old words now asserts these (rewritten, not loosened, §218).
+
+**STRIPED ROWS, GREY FIRST,** with a new `--zebra` token (light #F4F6F9; dark #1F2531). They apply to Home's client lines and tasks, every group of My tasks (restarting under each group), On the desk, Insights and Frameworks. Hover still uses `--surface-2`.
+
+**SETTINGS AT THE FAR RIGHT OF A CLIENT LINE ON HOME:** the sliders mark (`settingsChip`), shown only where the server says this person may configure the client (`canConfig`). It opens the client's Setup, as the client card's Settings does.
+
+**SHOW DONE ON MY TASKS.** The Open tasks header gains *Done: Hide · Last week · 30 days*, kept on the device (`smp.tasks.done`), Hide by default. `lib/my-work.ts` now also sends this person's actions finished in the last 30 days, with the Cairo day each was finished (`done_at`), and the open count leaves them out. The finished ones are a green group at the foot of the card, *Done in the last week* or *Done in the last 30 days*, newest first. A tick undone from there moves the task back into the open groups.
+
+**CASE STUDIES:**
+- The library is one card, *The library*. Its header holds Case studies · Insights and the search.
+- The industries are chips in a row under the header. Each shelf is labelled over a grey rule, as My tasks' groups are.
+- *On the desk* is its own card with striped rows.
+- The band carries *Ask a question* (it opens the ask box at the top of the library) and *Open a piece of work* for those who may.
+- Insights is the same card with its filters in a row and the insights striped.
+
+**FRAMEWORKS:**
+- The band's eyebrow says *N frameworks · K sections*.
+- One card, *The library*, carries Search · Ask it and the box in its header, with the section chips in a row under it.
+- Each framework is a striped row: its name, one line of what it is for, its section as a pill in sentence case, and a chevron.
+- The count shows in the header and in a line above the rows. Asking still draws its answer under the card.
+
+**WHERE.** `platform.html` (`pageBand`, `hoHello`, `hoClient`, `drawMyWork`'s `drawDone` and the Done switch, `drawCases`, `drawMemList`, `fwPaint`, the round-three CSS block), `smp-app/lib/my-work.ts` (done rows of the last 30 days, `doneDay`).
+
+**CHECKED.** Every built copy was regenerated and `next build` was run before each run.
+- **New in `checks/shell.mjs`:**
+  - Each My tasks group starts light grey.
+  - Done is hidden until asked for.
+  - *Last week* lists the action finished 3 days ago and not the one finished 20 days ago (new in the made state, with `done_at` stamped), and never somebody else's.
+  - *30 days* lists both, newest first.
+  - *Hide* puts them away again.
+  - Home's client lines start light grey and alternate.
+  - The sliders sit at the far right of the line.
+- **Red run:** with the stripes removed and the week cut-off made 30 days, those lines fail (4 red, against 1 red with them in place); the code was then put back.
+- **`checks/case-page.mjs`:** "one search" is now the search in the library card's header, with Case studies · Insights beside it and Ask a question on the band.
+- **Results:**
+  - shell 433/1, the one red being `main`'s own (§624's Copilot row).
+  - door-landing 136/5, `main`'s own five (the owner row's Insights eye).
+  - case-page 62/0, memory-page 42/0, frameworks-page 64/0.
+  - console-record, insights-tab 24/0, module-look 138/0, view-as 33/0, viewing-as-bar 54/0, pages-types 10/0, instant-nav 19/0, quick-open 19/0, office-standing 7/0.
+- **Screenshots:** every tab at 1440px and 390px. Each band sits at the same top with the same height on a computer, no tab scrolls sideways on a phone, and no page error.
+
+**§622.4 MERGED TO `main`** 2026-10-24, Islam: *"merge it and put it live"*.
+- `main` had not moved (`c983218f`), so this was a clean fast-forward to `5c2d889c`.
+- Before the merge, `sw.js` and the asset stamps were regenerated for this build and committed. Then `generated-in-step` and `release-stamp` read all clear, `built-in-step` read all good, and `sw.js` parses.
+- **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`d32a1ea24c6dfe22`** (was `2cd7c3a5be23adeb`), `/platform-page.js` **312,398** bytes and `/shell.js` **5,247,154**, both identical to the generated copies.
+- No `SHELL` bump (the client platform's built file is untouched); no forced sign-out.
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.

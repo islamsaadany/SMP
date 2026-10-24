@@ -29,6 +29,8 @@
   :root{
     --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
     --line:#D8DEE8; --line-soft:#E6EAF1;
+    /* the light grey of an alternate row (2026-10-24), a step off white */
+    --zebra:#F4F6F9;
     /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
        (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
        nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
@@ -57,7 +59,7 @@
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
-      --line:#333B4A; --line-soft:#2A313E;
+      --line:#333B4A; --line-soft:#2A313E; --zebra:#1F2531;
       --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
       --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
       --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
@@ -77,7 +79,7 @@
      happens without it. */
   :root[data-theme="dark"]{
     --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
-    --line:#333B4A; --line-soft:#2A313E;
+    --line:#333B4A; --line-soft:#2A313E; --zebra:#1F2531;
     --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
     --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
     --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
@@ -1569,17 +1571,25 @@
      titles share Home's one title rule, so the font Islam settles on is one
      change. */
   .pgband, .mwmast{ position:relative; overflow:hidden; background:var(--ff); color:var(--ff-ink); border-radius:14px;
-    padding:15px 22px 16px; box-shadow:none }
+    padding:16px 22px 17px; box-shadow:none; min-height:106px }
   .pgband{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin:0 0 16px }
   .pgband::before, .mwmast::before{ content:""; position:absolute; width:300px; height:300px; right:-90px; top:-120px; border-radius:50%;
     border:1.5px solid rgba(255,255,255,.07); background:rgba(255,255,255,.035); pointer-events:none }
   .pgband > *, .mwmast > *{ position:relative }
   .pgband .sp{ flex:1 }
   .pgeye{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); min-height:14px }
-  .pgband h1, .mwname h1{ margin:0; font-size:24px; font-weight:650; letter-spacing:-.01em; line-height:1.15; color:var(--ff-ink) }
-  .pgsub{ margin:3px 0 0; font-size:13px; color:var(--ff-quiet) }
+  /* the title is the greeting's: Georgia at its size, regular */
+  .pgband h1, .pgband.ptitle h1, .mwname h1{ margin:0; font-family:Georgia, "Times New Roman", serif; font-size:27px; font-weight:400;
+    letter-spacing:0; line-height:1.15; color:var(--ff-ink) }
+  .pgsub{ margin:4px 0 0; font-size:13.5px; color:var(--ff-quiet) }
+  .pgband.ptitle{ border-bottom:0; padding:16px 22px 17px; margin:0 0 16px; align-items:flex-end; gap:16px }
+  .pgband.ptitle .right{ margin-left:auto; position:relative; display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+  .pgband .tag{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); color:var(--ff-ink) }
+  .pgband .fld{ background:var(--surface); color:var(--ink) }
   .pgadd{ padding:8px 14px; font-weight:700 }
-  .mwmast{ margin:0 0 12px }
+  .mwmast{ margin:0 0 16px }
+  .pgband::after, .mwmast::after{ content:""; position:absolute; width:210px; height:210px; right:-20px; top:-70px; border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.07); pointer-events:none }
   /* My tasks: one card, the groups labelled inside it over a grey rule (A2) */
   .mwlist{ margin:0 0 16px }
   .mwlist .mwsec{ margin:0 }
@@ -1621,6 +1631,78 @@
   .ccfg.word{ position:static; display:inline-flex; align-items:center; min-height:24px; border:0; background:none; padding:0 2px;
     font:600 12.5px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing:0; text-transform:none; color:var(--amber-tx); cursor:pointer }
   .ccfg.word:hover, .ccfg.word:focus-visible{ text-decoration:underline; outline:none }
+
+  /* ── ROUND THREE (2026-10-24, design-mockups/home/2026-10-24_one-band-everywhere.html) ──
+     Rows alternate light grey and white, grey first (Islam: "an alternation
+     of light grey and white, starting with light grey"), on Home's clients
+     and tasks and in every group of My tasks, restarting under each group. */
+  .hocl:nth-child(odd of .hocl), .hotask:nth-child(odd of .hotask){ background:var(--zebra) }
+  .mwlist .mwrow:nth-child(odd of .mwrow){ background:var(--zebra) }
+  .hotask:hover, .mwlist .mwrow:hover{ background:var(--surface-2) }
+  .hocl{ grid-template-columns:30px minmax(0,1fr) auto }
+  .hocl .ccfg.ico{ position:static; align-self:center }
+  /* Show done: its group in green, its empty line quiet */
+  .mwlist .mwsec.done .mwsh h2{ color:var(--good) }
+  .mwnone{ margin:0; padding:14px; font-size:13px }
+  /* ONE BAND, ONE SIZE, ONE PLACE on a computer (Islam: "the banner in the
+     home with its size and location stays the same when we go through the
+     modules"): Home's height, measured, and the same padding on every tab */
+  @media (min-width:1000px){
+    .hohello, .pgband, .pgband.ptitle, .mwmast{ box-sizing:border-box; min-height:113px; padding:16px 22px 17px; margin:0 0 16px }
+  }
+  /* a framework's section, a quiet pill in sentence case */
+  .fwcard .fwrow .tag{ font-family:inherit; font-weight:600; font-size:11.5px; line-height:1.4; letter-spacing:0; text-transform:none; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; border-radius:999px; padding:2px 9px }
+  .fwcard .cell button{ font-family:inherit; letter-spacing:0; text-transform:none; font-size:12px }
+  /* Frameworks: one card, Search · Ask it and the box in its header */
+  .fwcard{ flex:none; margin:0 0 16px }
+  .fwcard .fwbox{ border:0; border-radius:0; padding:0; box-shadow:none; background:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+  .fwcard .fwbox .cell{ margin:0 }
+  .fwcard .fwask{ margin:0 }
+  .fwcard .fwask .fld{ width:280px; flex:0 1 280px }
+  .fwcard .fwchips{ margin:0; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  .fwcard .fwcount{ margin:0; padding:8px 14px; border-bottom:1px solid var(--line-soft) }
+  .fwcard .fwlist{ border:0; border-radius:0; box-shadow:none }
+  .fwcard .fwrow{ display:grid; grid-template-columns:minmax(0,1fr) 230px 18px; gap:12px; align-items:center; padding:10px 14px; border-bottom:0 }
+  .fwcard .fwrow[hidden]{ display:none }
+  .fwcard .fwrow:nth-child(odd of .fwrow:not([hidden])){ background:var(--zebra) }
+  .fwcard .fwrow:hover, .fwcard .fwrow:focus-visible{ background:var(--surface-2) }
+  .fwcard .fwrow .tx{ min-width:0 }
+  .fwcard .fwrow .nm{ display:block; font-size:14px }
+  .fwcard .fwrow .pp{ display:block; margin:1px 0 0; font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .fwcard .fwrow .tag{ justify-self:start; max-width:100% }
+  .fwcard .fwrow .go{ color:var(--ink-3); font-size:16px }
+  @media (max-width:760px){ .fwcard .fwrow{ grid-template-columns:minmax(0,1fr) 18px } .fwcard .fwrow .tag{ display:none } .fwcard .fwask .fld{ width:100%; flex-basis:100% } }
+  /* Case studies: the library is one card; its industries are chips in a
+     row under the header; each shelf is labelled over a grey rule */
+  #page[data-tab="memory"] .hocard{ flex:none; margin:0 0 16px }
+  #page[data-tab="memory"] .hochd .fld{ width:280px; max-width:100% }
+  #page[data-tab="memory"] .hochd .csseg button{ font-size:12px; padding:3px 9px }
+  #page[data-tab="memory"] .cslib .catrow{ gap:6px; margin:0; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  #page[data-tab="memory"] .cslib .catrow button{ border:1px solid var(--line); border-radius:999px; margin:0; padding:4px 10px; font-size:12px;
+    color:var(--ink-2); background:var(--surface) }
+  #page[data-tab="memory"] .cslib .catrow button.on{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  #page[data-tab="memory"] .cslib .catrow button i{ font-size:11.5px; opacity:.75 }
+  #page[data-tab="memory"] .cslib .shelf{ margin:0; padding:0 14px 14px }
+  #page[data-tab="memory"] .cslib .shh{ margin:0 -14px 14px; padding:14px 14px 7px; border-bottom:2px solid var(--line) }
+  #page[data-tab="memory"] .cslib .shh h2{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; line-height:1.4; color:var(--ink-3) }
+  #page[data-tab="memory"] .cslib .shh .n{ font-size:11.5px; font-weight:600 }
+  #page[data-tab="memory"] .cslib .shh .textlink{ font-size:12px }
+  #page[data-tab="memory"] .cslib > .empty{ margin:14px }
+  #page[data-tab="memory"] .askbox.inlib{ margin:0; padding:12px 14px; border-bottom:1px solid var(--line-soft) }
+  /* On the desk: its own card, its rows striped */
+  #page[data-tab="memory"] .desk{ border:1px solid var(--line); border-radius:12px; padding:0; background:var(--surface) }
+  #page[data-tab="memory"] .desk .hochd h2{ margin:0; font-size:19px }
+  #page[data-tab="memory"] .desk .drow{ padding:8px 14px; border-top:0 }
+  #page[data-tab="memory"] .desk .drow:nth-child(odd of .drow){ background:var(--zebra) }
+  #page[data-tab="memory"] .desk .drow:hover{ background:var(--surface-2) }
+  /* Insights: the same card, the filters in a row, the insights striped */
+  #page[data-tab="memory"] .cslib .filters{ margin:0; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  #page[data-tab="memory"] .cslib .elist{ border-top:0 }
+  #page[data-tab="memory"] .cslib .erow{ padding:10px 14px }
+  #page[data-tab="memory"] .cslib .erow:nth-child(odd of .erow){ background:var(--zebra) }
+  #page[data-tab="memory"] .cslib .erow:hover{ background:var(--surface-2) }
+  #page[data-tab="memory"] .cslib .erow:last-child{ border-bottom:0 }
 
   /* ONLY THE TAB YOU ARE ON IS BOLD (Islam, 2026-10-24: "make the names of
      the modules not bold only the selected module is highlighted is

@@ -103,13 +103,16 @@ p,ul,ol{margin:0}
 .mwait button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--bar-ink);text-decoration:underline;text-underline-offset:2px}
 @media (max-width:640px){.mast{padding:14px 14px 16px}.mtile{text-align:left}.mstrip{gap:14px}.mside{align-items:flex-start}}
 
-/* view tabs, under the band (style 1 from the process page) */
-.vt{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 16px;overflow-x:auto}
-.vt button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 14px 11px;font-size:15px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:8px;align-items:baseline}
-.vt button.on{color:var(--stone);border-bottom-color:var(--gold)}
-.vt button:hover{color:var(--ink)}
+/* view tabs, under the band: style 2 (buttons), agreed 24 Oct */
+.vt{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;margin:0 0 16px;flex-wrap:wrap}
+.vt button{border:0;background:none;border-radius:7px;padding:8px 18px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:8px;align-items:baseline}
+.vt button.on{background:var(--panel);color:var(--panel-ink)}
 .vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
-@media (max-width:640px){.vt button{padding:10px 10px 11px;font-size:14px}}
+.vt button.on .ct{color:var(--bar-quiet)}
+.vt .ct.hot,.vt button.on .ct.hot{background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px;font-weight:700}
+@media (max-width:640px){.vt button{padding:7px 12px;font-size:14px}}
+.inl{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.v1 .inl{display:none}
 
 /* shared blocks */
 .box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
@@ -219,39 +222,38 @@ p,ul,ol{margin:0}
 </style>
 
 <div class="mk"><div class="mk-in">
-  <div class="mk-id"><span class="mk-tag">Mockup</span><b>Opening the Processes module, three ways</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
-  <div class="mk-sw" role="tablist" aria-label="Options">
-    <button type="button" data-opt="a" role="tab">A · My processes</button>
-    <button type="button" data-opt="b" role="tab">B · Company map</button>
-    <button type="button" data-opt="c" role="tab">C · To-do only</button>
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>Opening the Processes module: My processes</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-sw" role="tablist" aria-label="Where the to-do goes">
+    <button type="button" data-var="1" role="tab">1 · To-do on the same page</button>
+    <button type="button" data-var="2" role="tab">2 · To-do on its own tab</button>
   </div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Hend Mourad</b>, Finance manager. You own two processes, approve one your team wrote, and have a step in three more. This is what you see when you click <b>Processes</b>. Click any process to open it; that page is the other mockup.</p>
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager. You own two processes, approve one your team wrote, and have a step in three more. Agreed 24 Oct: the module opens on <b>My processes</b> (option A), with the tabs drawn as buttons. Still open: does what is waiting on you sit on the same page as your processes, or on its own tab, as in option C? Switch between the two at the top right.</p>
 
-  <div class="frame">
+  <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">4 waiting on you</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
     <div class="pg">
       <header class="mast">
         <div class="mrow">
           <div style="min-width:0">
             <p class="wkof">Raya Trade · Processes</p>
-            <h1 id="m-title"></h1>
-            <p class="msub" id="m-sub"></p>
-            <p class="mwait" id="m-wait" hidden><b>Waiting on you</b><span>4 things, the oldest from 21 Oct</span><button type="button" data-toast="In option B this opens the to-do list, as in option C.">See them</button></p>
+            <h1>My processes</h1>
+            <p class="msub">Hend Mourad · Finance manager · <b>2</b> you own · <b>1</b> you approve · <b>3</b> you have a step in</p>
+            <p class="mwait" id="m-wait"><b>Waiting on you</b><span>4 things, the oldest from 21 Oct</span><button type="button" data-tab="todo">See them</button></p>
           </div>
           <div class="mside">
             <div class="macts"><button class="bq" type="button" data-toast="Searches every process, step and role.">Search</button><button class="bgold" type="button" data-toast="Asks the Strategy Office for a new process. They draw it with you.">Ask for a new process</button></div>
-            <div class="mstrip" id="m-tiles"></div>
+            <div class="mstrip"><div class="mtile"><b>2</b><span>You own</span></div><div class="mtile"><b>1</b><span>You approve</span></div><div class="mtile hot"><b>4</b><span>Waiting on you</span></div><div class="mtile late"><b>1</b><span>Risk, no control</span></div></div>
           </div>
         </div>
       </header>
       <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
 
-      <!-- ── A · MY PROCESSES ── -->
-      <section data-view="a" hidden>
-        <div class="wt">
+      <!-- ── MY PROCESSES ── -->
+      <section data-view="mine" hidden>
+        <div class="wt" id="a-wait-box" style="margin-bottom:18px">
           <h2>Waiting on you <span class="note">4</span></h2>
           <div id="a-wait"></div>
         </div>
@@ -261,23 +263,23 @@ p,ul,ol{margin:0}
         <div class="box"><table class="ptab"><thead><tr><th>Process</th><th>Your step</th><th>Where it is</th><th>For you</th></tr></thead><tbody id="a-part"></tbody></table></div>
       </section>
 
-      <!-- ── B · COMPANY MAP ── -->
-      <section data-view="b" hidden>
-        <div class="legend"><span><i class="y"></i>Yours: you own or approve it</span><span><i class="s"></i>You have a step in it</span><span><i></i>Others</span><label style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" id="only-mine"> Only mine</label></div>
-        <div class="bgrid">
-          <div id="map"></div>
-          <aside class="box side" id="side" aria-live="polite"></aside>
-        </div>
-      </section>
-
-      <!-- ── C · TO-DO ONLY ── -->
-      <section data-view="c" hidden>
+      <!-- ── TO DO (choice 2 only) ── -->
+      <section data-view="todo" hidden>
         <div class="cgrid">
           <div id="c-todo"></div>
           <div>
             <div class="box done"><span class="lbl">Done lately</span><ul><li>You read Record-to-Report v2.0 · 2 Oct</li><li>You answered the office on Customer credit setup · 28 Sep</li><li>You confirmed Order-to-Cash v2 still right · 12 Nov 2025</li></ul></div>
-            <p class="note" style="margin-top:12px">That is everything waiting on you. Your processes and the company map are one click away under <button class="lnk" type="button" data-toast="Opens the full list of processes, as today.">All processes</button>.</p>
+            <p class="note" style="margin-top:12px">That is everything waiting on you. When it is empty, this tab says you are up to date.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- ── MAP ── -->
+      <section data-view="map" hidden>
+        <div class="legend"><span><i class="y"></i>Yours: you own or approve it</span><span><i class="s"></i>You have a step in it</span><span><i></i>Others</span><label style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" id="only-mine"> Only mine</label></div>
+        <div class="bgrid">
+          <div id="map"></div>
+          <aside class="box side" id="side" aria-live="polite"></aside>
         </div>
       </section>
     </div>
@@ -292,22 +294,24 @@ p,ul,ol{margin:0}
   const $ = (s) => document.querySelector(s), $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const OPEN = (code) => 'Opens ' + code + ' on its Flow tab: the process page mockup.';
+  const REVIEW = 'Opens Order-to-Cash on its Summary tab, where you confirm it is still right or suggest a change.';
+  const REPLY = 'Opens the office’s question, pinned to step 4 of Order-to-Cash.';
 
   const TODO = [
-    { kind: 'Approve', code: 'ORD101', name: 'Returns & refunds', what: 'Version 1 is ready for your approval', meta: 'Sent by Salma Adel, Credit controller, on 21 Oct', act: 'Open and approve', more: 'Read it', why: 'You approve the processes your team writes.' },
-    { kind: 'Review', code: 'ORD100', name: 'Order-to-Cash', what: 'The yearly review is due on 12 Nov', meta: 'Say whether it still describes how the work is done', act: 'Review it', more: '', why: 'You own it.' },
-    { kind: 'Read', code: 'CRE100', name: 'Credit & Collections', what: 'Version 1.1 is in force since 20 Oct', meta: 'Your step changed: Finance manager now signs write-offs above $10,000', act: 'Read the change', more: '', why: 'You have a step in it.' },
-    { kind: 'Answer', code: 'ORD100', name: 'Order-to-Cash', what: 'The office answered your suggestion on step 4, Deliver', meta: 'Mona Farag, Strategy Office · 23 Oct', quote: 'Does the photo replace the signed paper, or come with it? We will draft it in v3 once we know.', act: 'Reply', more: '', why: 'You suggested a change.' },
+    { kind: 'Approve', code: 'ORD101', name: 'Returns & refunds', what: 'Version 1 is ready for your approval', meta: 'Sent by Salma Adel, Credit controller, on 21 Oct', act: 'Open and approve', more: 'Read it', why: 'You approve the processes your team writes.', go: OPEN('ORD101') },
+    { kind: 'Review', code: 'ORD100', name: 'Order-to-Cash', what: 'The yearly review is due on 12 Nov', meta: 'Say whether it still describes how the work is done', act: 'Review it', more: '', why: 'You own it.', go: REVIEW },
+    { kind: 'Read', code: 'CRE100', name: 'Credit & Collections', what: 'Version 1.1 is in force since 20 Oct', meta: 'Your step changed: Finance manager now signs write-offs above $10,000', act: 'Read the change', more: '', why: 'You have a step in it.', go: OPEN('CRE100') },
+    { kind: 'Answer', code: 'ORD100', name: 'Order-to-Cash', what: 'The office answered your suggestion on step 4, Deliver', meta: 'Mona Farag, Strategy Office · 23 Oct', quote: 'Does the photo replace the signed paper, or come with it? We will draft it in v3 once we know.', act: 'Reply', more: '', why: 'You suggested a change.', go: REPLY },
   ];
   const MINE = [
-    { code: 'ORD100', name: 'Order-to-Cash', area: 'Finance', part: 'Owner', st: ['good', 'In force · v2'], st2: 'v3 approved, waiting for the office to publish', flags: [['bad', '1 risk with no control'], ['warn', '4 of 5 have read it'], ['', 'Review in 19 days']] },
-    { code: 'ORD102', name: 'Customer credit setup', area: 'Finance', part: 'Owner', st: ['q', 'Being drawn'], st2: 'The office is drawing it with your team; 2 of 6 marks done', flags: [['', 'Nothing for you yet']] },
-    { code: 'ORD101', name: 'Returns & refunds', area: 'Finance', part: 'Approver', st: ['attn', 'Waiting for you'], st2: 'Owner Salma Adel · sent 21 Oct', flags: [['warn', 'Your approval']] },
+    { code: 'ORD100', name: 'Order-to-Cash', area: 'Finance', part: 'Owner', st: ['good', 'In force · v2'], st2: 'v3 approved, waiting for the office to publish', flags: [['bad', '1 risk with no control'], ['warn', '4 of 5 have read it'], ['', 'Review in 19 days']], inl: [['Review by 12 Nov', REVIEW, false], ['Reply to the office', REPLY, false]] },
+    { code: 'ORD102', name: 'Customer credit setup', area: 'Finance', part: 'Owner', st: ['q', 'Being drawn'], st2: 'The office is drawing it with your team; 2 of 6 marks done', flags: [['', 'Nothing for you yet']], inl: [] },
+    { code: 'ORD101', name: 'Returns & refunds', area: 'Finance', part: 'Approver', st: ['attn', 'Waiting for you'], st2: 'Owner Salma Adel · sent 21 Oct', flags: [['warn', 'Your approval']], inl: [['Open and approve', OPEN('ORD101'), true]] },
   ];
   const PART = [
-    { code: 'CRE100', name: 'Credit & Collections', step: 'Approve write-offs above $10,000', st: ['good', 'In force · v1.1'], owner: 'Hala Mansour', flags: [['warn', 'Your step changed: read it']] },
-    { code: 'REC100', name: 'Record-to-Report', step: 'Sign off the month-end close', st: ['good', 'In force · v2.0'], owner: 'Hala Mansour', flags: [['', 'Read · nothing new']] },
-    { code: 'PRO100', name: 'Procure-to-Pay', step: 'Approve invoices above $50,000', st: ['attn', 'In review'], owner: 'Karim Fouad', flags: [['', 'Changes coming: you will be asked to read']] },
+    { code: 'CRE100', name: 'Credit & Collections', step: 'Approve write-offs above $10,000', st: ['good', 'In force · v1.1'], owner: 'Hala Mansour', flags: [['warn', 'Your step changed: read it']], inl: [['Read the change', OPEN('CRE100'), false]] },
+    { code: 'REC100', name: 'Record-to-Report', step: 'Sign off the month-end close', st: ['good', 'In force · v2.0'], owner: 'Hala Mansour', flags: [['', 'Read · nothing new']], inl: [] },
+    { code: 'PRO100', name: 'Procure-to-Pay', step: 'Approve invoices above $50,000', st: ['attn', 'In review'], owner: 'Karim Fouad', flags: [['', 'Changes coming: you will be asked to read']], inl: [] },
   ];
   const MAP = [
     { area: 'How we sell and deliver', chev: true, p: [['PRI100', 'Pricing & Promotions', 'Being drawn', '', 'Omar Fathy'], ['ORD100', 'Order-to-Cash', 'In force · v2', 'y', 'Hend Mourad'], ['LOG100', 'Logistics & Last-mile', 'Being drawn', '', 'Karim Fouad'], ['CUS100', 'Customer Complaints', 'Not started', '', 'Nour Samir']] },
@@ -325,11 +329,16 @@ p,ul,ol{margin:0}
   };
 
   const flags = (f) => '<div class="flags">' + f.map(([c, t]) => '<span class="' + c + '">' + esc(t) + '</span>').join('') + '</div>';
+  const inl = (list) => list.length ? '<div class="inl">' + list.map(([l, m, g]) => '<button class="btn' + (g ? ' gold' : '') + '" type="button" data-toast="' + esc(m) + '">' + esc(l) + '</button>').join('') + '</div>' : '';
   const kindChip = (k) => '<span class="chip ' + (k === 'Approve' || k === 'Review' ? 'gold' : 'navy') + '">' + k + '</span>';
 
-  $('#a-wait').innerHTML = TODO.map((t) => '<div class="wrow">' + kindChip(t.kind) + '<div class="t"><span class="code">' + t.code + '</span> <b>' + esc(t.name) + '</b> · ' + esc(t.what) + '<small>' + esc(t.meta) + '</small></div><button class="btn' + (t.kind === 'Approve' ? ' gold' : '') + '" type="button" data-toast="' + esc(OPEN(t.code)) + '">' + esc(t.act) + '</button></div>').join('');
-  $('#a-mine').innerHTML = MINE.map((p) => '<tr data-go="' + p.code + '"><td><div class="nm"><span class="code">' + p.code + '</span> ' + esc(p.name) + '<small>' + esc(p.area) + '</small></div></td><td><span class="chip ' + (p.part === 'Owner' ? 'gold' : 'navy') + '">' + p.part + '</span></td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span><div class="note" style="margin-top:3px">' + esc(p.st2) + '</div></td><td>' + flags(p.flags) + '</td></tr>').join('');
-  $('#a-part').innerHTML = PART.map((p) => '<tr data-go="' + p.code + '"><td><div class="nm"><span class="code">' + p.code + '</span> ' + esc(p.name) + '<small>Owner ' + esc(p.owner) + '</small></div></td><td>' + esc(p.step) + '</td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span></td><td>' + flags(p.flags) + '</td></tr>').join('');
+  $('#a-wait').innerHTML = TODO.map((t) => '<div class="wrow">' + kindChip(t.kind) + '<div class="t"><span class="code">' + t.code + '</span> <b>' + esc(t.name) + '</b> · ' + esc(t.what) + '<small>' + esc(t.meta) + '</small></div><button class="btn' + (t.kind === 'Approve' ? ' gold' : '') + '" type="button" data-toast="' + esc(t.go) + '">' + esc(t.act) + '</button></div>').join('');
+  $('#a-mine').innerHTML = MINE.map((p) => '<tr data-go="' + p.code + '"><td><div class="nm"><span class="code">' + p.code + '</span> ' + esc(p.name) + '<small>' + esc(p.area) + '</small></div></td><td><span class="chip ' + (p.part === 'Owner' ? 'gold' : 'navy') + '">' + p.part + '</span></td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span><div class="note" style="margin-top:3px">' + esc(p.st2) + '</div></td><td>' + flags(p.flags) + inl(p.inl) + '</td></tr>').join('');
+  $('#a-part').innerHTML = PART.map((p) => '<tr data-go="' + p.code + '"><td><div class="nm"><span class="code">' + p.code + '</span> ' + esc(p.name) + '<small>Owner ' + esc(p.owner) + '</small></div></td><td>' + esc(p.step) + '</td><td><span class="pill ' + p.st[0] + '">' + esc(p.st[1]) + '</span></td><td>' + flags(p.flags) + inl(p.inl) + '</td></tr>').join('');
+
+  const tgroup = (k, title) => { const items = TODO.filter((t) => t.kind === k); return '<div class="tgroup"><div class="sect" style="margin:0 0 2px"><span class="lbl">' + title + '</span><span class="note">' + items.length + '</span></div>' +
+    items.map((t) => '<div class="tcard"><div><h3><span class="code">' + t.code + '</span> ' + esc(t.name) + '</h3><p>' + esc(t.what) + '</p><p class="note">' + esc(t.meta) + ' · ' + esc(t.why) + '</p>' + (t.quote ? '<blockquote>' + esc(t.quote) + '</blockquote>' : '') + '</div><div class="acts">' + (t.more ? '<button class="btn" type="button" data-toast="' + esc(OPEN(t.code)) + '">' + esc(t.more) + '</button>' : '') + '<button class="btn gold" type="button" data-toast="' + esc(t.go) + '">' + esc(t.act) + '</button></div></div>').join('') + '</div>'; };
+  $('#c-todo').innerHTML = tgroup('Approve', 'To approve') + tgroup('Review', 'To review') + tgroup('Read', 'To read') + tgroup('Answer', 'Answers to your suggestions');
 
   $('#map').innerHTML = MAP.map((a) => '<div class="area"><div class="area-h"><b>' + esc(a.area) + '</b>' + (a.chev ? '<span class="note">left to right, as the work flows</span>' : '') + '</div><div class="lane' + (a.chev ? ' chev' : '') + '">' +
     a.p.map(([code, name, st, mine, , warn]) => '<button type="button" class="pc ' + mine + '" data-pick="' + code + '">' + (mine === 'y' ? '<span class="chip gold tag">Yours</span>' : mine === 's' ? '<span class="chip navy tag">Your step</span>' : '') + '<span class="code">' + code + '</span><b>' + esc(name) + '</b><span class="st"' + (warn === 'bad' ? ' style="color:var(--bad-tx);font-weight:600"' : warn === 'gold' ? ' style="color:var(--attn-tx);font-weight:600"' : '') + '>' + esc(st) + '</span></button>').join('') + '</div></div>').join('');
@@ -340,50 +349,41 @@ p,ul,ol{margin:0}
     $('#side').innerHTML = '<span class="code">' + c + '</span><h3>' + esc(name) + '</h3><dl class="dl"><dt>Owner</dt><dd>' + esc(owner) + '</dd><dt>Where it is</dt><dd>' + esc(st) + '</dd><dt>You</dt><dd>' + (mine === 'y' ? 'Own or approve it' : mine === 's' ? 'Have a step in it' : 'No part in it') + '</dd></dl><p style="font-size:13px;color:var(--ink-2)">' + esc(ABOUT[c] || 'Owned by ' + owner + '. You can read it; you have no step in it.') + '</p><div><button class="btn gold" type="button" data-toast="' + esc(OPEN(c)) + '">Open</button></div>';
   }
 
-  const tgroup = (k, title) => { const items = TODO.filter((t) => t.kind === k); return '<div class="tgroup"><div class="sect" style="margin:0 0 2px"><span class="lbl">' + title + '</span><span class="note">' + items.length + '</span></div>' +
-    items.map((t) => '<div class="tcard"><div><h3><span class="code">' + t.code + '</span> ' + esc(t.name) + '</h3><p>' + esc(t.what) + '</p><p class="note">' + esc(t.meta) + ' · ' + esc(t.why) + '</p>' + (t.quote ? '<blockquote>' + esc(t.quote) + '</blockquote>' : '') + '</div><div class="acts">' + (t.more ? '<button class="btn" type="button" data-toast="' + esc(OPEN(t.code)) + '">' + esc(t.more) + '</button>' : '') + '<button class="btn gold" type="button" data-toast="' + esc(t.kind === 'Answer' ? 'Your reply goes to Mona Farag, pinned to step 4.' : OPEN(t.code)) + '">' + esc(t.act) + '</button></div></div>').join('') + '</div>'; };
-  $('#c-todo').innerHTML = tgroup('Approve', 'To approve') + tgroup('Review', 'To review') + tgroup('Read', 'To read') + tgroup('Answer', 'Answers to your suggestions');
-
-  const OPT = {
-    a: { title: 'My processes', sub: 'Hend Mourad · Finance manager · <b>2</b> you own · <b>1</b> you approve · <b>3</b> you have a step in', wait: false,
-      tiles: [['2', 'You own', ''], ['1', 'You approve', ''], ['4', 'Waiting on you', 'hot'], ['1', 'Risk, no control', 'late']],
-      tabs: [['a', 'My processes', ''], ['all', 'All processes', '13'], ['b', 'Map', '']],
-      notes: [['Good at', ['What needs you is on top; the state of your processes is right under it', 'Shows your part in each: own, approve, or have a step in', 'One page answers both “what do I do” and “how are mine doing”']], ['What it costs', ['Does not show how your processes connect to the rest of the company (that is the Map tab)', 'Longer than a to-do list']], ['Fits', ['Owners and managers who look after a few processes and come in weekly: the people you said matter most']]] },
-    b: { title: 'Raya Trade’s processes', sub: '<b>13</b> processes in 4 areas · <b>3</b> yours · you have a step in <b>3</b> more', wait: true,
-      tiles: [['13', 'Processes', ''], ['5', 'In force', ''], ['3', 'Yours', 'hot'], ['1', 'Review late', 'late']],
-      tabs: [['b', 'Map', ''], ['a', 'My processes', ''], ['all', 'All processes', '13']],
-      notes: [['Good at', ['The big picture: where your process sits and who it hands over to', 'Good for a new manager, or a leadership meeting on a screen', 'Close to the Landscape view the office already uses']], ['What it costs', ['What needs you shrinks to one line in the band', 'Someone in the office has to keep the areas and the order right', 'On a phone the map becomes a long list']], ['Fits', ['Executives and new managers; the office in workshops']]] },
-    c: { title: 'What needs you', sub: '<b>4</b> things · the oldest has waited since 21 Oct', wait: false,
-      tiles: [['1', 'To approve', 'hot'], ['1', 'To review', ''], ['1', 'To read', ''], ['1', 'Answer', '']],
-      tabs: [['c', 'To do', '4'], ['all', 'All processes', '13']],
-      notes: [['Good at', ['No hunting: open, do it, leave', 'Best on a phone and from an email link', 'An empty list tells you that you are up to date']], ['What it costs', ['Says nothing about the state of your processes until something is due, so a risk with no control stays out of sight', 'Managers who want to browse go one click further', 'On a quiet week the module looks empty']], ['Fits', ['People who only come in when asked: approvers and readers']]] },
+  const TABS = {
+    1: [['mine', 'My processes', ''], ['map', 'Map', ''], ['all', 'All processes', '13']],
+    2: [['mine', 'My processes', ''], ['todo', 'To do', '4', 'hot'], ['map', 'Map', ''], ['all', 'All processes', '13']],
   };
-  let cur = 'a';
-  function show(opt) {
-    if (!OPT[opt]) opt = 'a';
-    cur = opt; const o = OPT[opt];
-    $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== opt; });
-    $$('.mk-sw button').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-    $('#m-title').textContent = o.title; $('#m-sub').innerHTML = o.sub; $('#m-wait').hidden = !o.wait;
-    $('#m-tiles').innerHTML = o.tiles.map(([n, l, c]) => '<div class="mtile ' + c + '"><b>' + n + '</b><span>' + l + '</span></div>').join('');
-    $('#vt').innerHTML = o.tabs.map(([k, l, n], i) => '<button type="button" role="tab" aria-selected="' + (i === 0) + '" class="' + (i === 0 ? 'on' : '') + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct">' + n + '</span>' : '') + '</button>').join('');
-    $('#verdict').innerHTML = o.notes.map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
-    try { history.replaceState(null, '', '#' + opt); } catch (e) {}
+  const NOTES = {
+    1: [['Good at', ['Impossible to miss: it is the first thing on the page', 'One page answers both “what do I do” and “how are mine doing”']], ['What it costs', ['The list pushes your processes down, and a busy week pushes them off the screen', 'The page changes shape as things come and go', 'Each item shows twice: in the list and in its process row']], ['Fits', ['Someone with a few processes and one or two things a week']]],
+    2: [['Good at', ['My processes keeps the same shape every visit: a steady picture of how yours are doing', 'To do is a clean list that empties, as in option C', 'Nothing hides: the line in the band, the gold count on the tab and the button in each row all point at it']], ['What it costs', ['One click to see the whole list', 'Two places to act on the same thing, the row and the To do tab; they must stay in step']], ['Fits', ['Managers with several processes, and busy weeks. It is also how the process page works: a line in the band, the detail on a tab']]],
+  };
+  let VAR = '2', VIEW = 'mine';
+  function render() {
+    $('#frame').className = 'frame v' + VAR;
+    $$('.mk-sw [data-var]').forEach((b) => { const on = b.dataset.var === VAR; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('#m-wait').hidden = VAR === '1';
+    $('#a-wait-box').hidden = VAR === '2';
+    if (VAR === '1' && VIEW === 'todo') VIEW = 'mine';
+    $('#vt').innerHTML = TABS[VAR].map(([k, l, n, hot]) => '<button type="button" role="tab" aria-selected="' + (k === VIEW) + '" class="' + (k === VIEW ? 'on' : '') + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct' + (hot ? ' hot' : '') + '">' + n + '</span>' : '') + '</button>').join('');
+    $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== VIEW; });
+    $('#verdict').innerHTML = NOTES[VAR].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    try { history.replaceState(null, '', '#' + VAR + '-' + VIEW); } catch (e) {}
   }
-  const TABNOTE = { a: 'In this option, My processes is a tab. It is drawn as option A.', b: 'In this option, Map is a tab. It is drawn as option B.', c: 'Drawn as option C.', all: 'The full list of processes, with search and filters, as today. Not drawn here.' };
 
   let tt;
   function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2800); }
   document.addEventListener('click', (e) => {
-    const t = e.target, o = t.closest('[data-opt]'), tab = t.closest('[data-tab]'), tst = t.closest('[data-toast]'), go = t.closest('[data-go]'), pk = t.closest('[data-pick]');
-    if (o) { show(o.dataset.opt); return; }
-    if (tab) { if (tab.classList.contains('on')) return; toast(TABNOTE[tab.dataset.tab]); return; }
+    const t = e.target, v = t.closest('[data-var]'), tab = t.closest('[data-tab]'), tst = t.closest('[data-toast]'), go = t.closest('[data-go]'), pk = t.closest('[data-pick]');
+    if (v) { VAR = v.dataset.var; render(); return; }
+    if (tab) { if (tab.dataset.tab === 'all') { toast('The full list of processes, with search and filters, as today. Not drawn here.'); return; } VIEW = tab.dataset.tab; render(); return; }
     if (tst) { toast(tst.dataset.toast); return; }
     if (go) { toast(OPEN(go.dataset.go)); return; }
     if (pk) { pick(pk.dataset.pick); return; }
   });
   $('#only-mine').addEventListener('change', (e) => { $('#map').classList.toggle('dim', e.target.checked); });
   pick('ORD100');
-  show((location.hash || '#a').slice(1));
+  const m = /^#([12])-(mine|todo|map)$/.exec(location.hash);
+  if (m) { VAR = m[1]; VIEW = m[2]; }
+  render();
 })();
 </script>

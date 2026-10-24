@@ -63,10 +63,6 @@ p,ul,ol{margin:0}
 .mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .mk-id b{font-size:14px}
 .mk-id span{font-size:12px;color:var(--ink-2)}
-.mk-sw{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap;align-items:center}
-.mk-sw>span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);padding:0 8px 0 6px}
-.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
-.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
 .doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
 .intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
 .intro b{color:var(--ink)}
@@ -98,26 +94,13 @@ p,ul,ol{margin:0}
 .mtile.late b{color:var(--bar-late)}
 .macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
-/* the view tabs, under the band: three styles to choose from */
-.vt{margin:0 0 14px}
-.vt b{font-weight:inherit;display:inline-flex;gap:8px;align-items:baseline}
+/* the view tabs, under the band: style 2 (buttons), agreed 24 Oct */
+.vt{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;overflow-x:auto;margin:0 0 14px}
+.vt button{border:0;background:none;border-radius:7px;padding:8px 18px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;display:inline-flex;gap:8px;align-items:baseline}
+.vt button.on{background:var(--panel);color:var(--panel-ink)}
 .vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
-.vt .hint{display:none}
-.vt.s1{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
-.vt.s1 button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 14px 11px;font-size:15px;font-weight:600;color:var(--ink-2);white-space:nowrap}
-.vt.s1 button.on{color:var(--stone);border-bottom-color:var(--gold)}
-.vt.s1 button:hover{color:var(--ink)}
-.vt.s2{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;overflow-x:auto}
-.vt.s2 button{border:0;background:none;border-radius:7px;padding:8px 18px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
-.vt.s2 button.on{background:var(--panel);color:var(--panel-ink)}
-.vt.s2 button.on .ct{color:var(--bar-quiet)}
-.vt.s3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.vt.s3 button{text-align:left;display:grid;gap:2px;align-content:start;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 14px 13px;color:var(--ink-2)}
-.vt.s3 button b{font-size:16px;font-weight:700;color:var(--ink)}
-.vt.s3 .hint{display:block;font-size:12.5px}
-.vt.s3 button.on{background:var(--surface);border-color:var(--gold);box-shadow:inset 0 -3px 0 var(--gold)}
-.vt.s3 button:hover{border-color:var(--gold)}
-@media (max-width:640px){.vt.s1 button{padding:10px 10px 11px;font-size:14px}.vt.s2 button{padding:7px 12px;font-size:14px}.vt.s3{gap:6px}.vt.s3 .hint{display:none}.vt.s3 button{padding:9px 10px 11px}.vt.s3 button b{font-size:14.5px;flex-wrap:wrap;gap:0 6px}}
+.vt button.on .ct{color:var(--bar-quiet)}
+@media (max-width:640px){.vt button{padding:7px 12px;font-size:14px}}
 .mwait{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:9px;font-size:13px;color:var(--bar-ink);background:rgba(232,163,58,.14);border:1px solid rgba(232,163,58,.45);border-radius:6px;padding:4px 10px}
 .mwait b{color:var(--bar-accent);font-weight:700}
 .mwait button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--bar-ink);text-decoration:underline;text-underline-offset:2px}
@@ -261,11 +244,10 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 
 <div class="mk"><div class="mk-in">
   <div class="mk-id"><span class="mk-tag">Mockup</span><b>A process page: opens on the flow, steps and summary as tabs</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
-  <div class="mk-sw" role="group" aria-label="Tab style"><span>Tab style</span><button type="button" data-style="1">1 · Underline</button><button type="button" data-style="2">2 · Buttons</button><button type="button" data-style="3">3 · Cards</button></div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. It opens on <b>Flow</b>; <b>Steps</b> and <b>Summary</b> are tabs, now under the navy band so they are easier to see. Switch between three tab styles at the top right. <b>Download</b>, <b>Print</b> and <b>Suggest a change</b> sit at the top right of the band.</p>
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. It opens on <b>Flow</b>; <b>Steps</b> and <b>Summary</b> are tabs, now under the navy band so they are easier to see. They are drawn as buttons, style 2. <b>Download</b>, <b>Print</b> and <b>Suggest a change</b> sit at the top right of the band.</p>
 
   <div class="frame">
     <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">1 to approve · 1 to read</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
@@ -290,10 +272,10 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
           </div>
         </div>
       </header>
-      <div class="vt s1" id="vt" role="tablist" aria-label="Views">
-        <button type="button" role="tab" data-opt="a"><b>Flow</b><span class="hint">Who hands over to whom</span></button>
-        <button type="button" role="tab" data-opt="b"><b>Steps <span class="ct">6</span></b><span class="hint">What each role does, in order</span></button>
-        <button type="button" role="tab" data-opt="c"><b>Summary <span class="ct">3 to look at</span></b><span class="hint">Is it in good shape, what is waiting on you</span></button>
+      <div class="vt" id="vt" role="tablist" aria-label="Views">
+        <button type="button" role="tab" data-opt="a">Flow</button>
+        <button type="button" role="tab" data-opt="b">Steps <span class="ct">6</span></button>
+        <button type="button" role="tab" data-opt="c">Summary <span class="ct">3 to look at</span></button>
       </div>
 
       <!-- ── A · FLOW FIRST ── -->
@@ -355,9 +337,9 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   </div>
 
   <div class="verdict">
-    <div><h4>Agreed 24 Oct</h4><ul><li>A process opens on the flow, lanes per role</li><li>Steps and Summary are tabs, under the band</li><li>Download, Print and Suggest a change at the top right</li><li>Suggest a change on every tab, pinned to a step; the office makes the change</li></ul></div>
-    <div id="stylenote"></div>
+    <div><h4>Agreed 24 Oct</h4><ul><li>A process opens on the flow, lanes per role</li><li>Steps and Summary are tabs under the band, drawn as buttons</li><li>Download, Print and Suggest a change at the top right</li><li>Suggest a change on every tab, pinned to a step; the office makes the change</li></ul></div>
     <div><h4>Added here, to agree</h4><ul><li>The “Waiting on you” line sits in the band on every tab, so opening on the flow does not hide it</li><li>On a phone it opens on Steps: the flow needs sideways scrolling there</li></ul></div>
+    <div><h4>Earlier versions of this page</h4><ul><li>Version 1: options A, B and C side by side</li><li>Version 3: three tab styles (underline, buttons, cards)</li></ul></div>
   </div>
 </div>
 <div id="layer"></div>
@@ -419,19 +401,6 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     try { history.replaceState(null, '', '#' + HASH[opt]); } catch (e) {}
     if (opt === 'a') requestAnimationFrame(arrows);
   }
-  const STYLES = {
-    1: ['Underline', ['The same tabs as the rest of SMP, only bigger and on white', 'Quiet: leaves the most room for the flow'], ['The easiest of the three to overlook']],
-    2: ['Buttons', ['Reads clearly as a switch between three views of one process', 'The same control as the switch at the top of this mockup'], ['A new pattern on SMP pages, where tabs are underlined']],
-    3: ['Cards', ['Hardest to miss, and each card says what you will find behind it', 'Helps someone who opens a process once a month'], ['About 40px more height above the flow', 'The hints are words to read every time']],
-  };
-  function tabStyle(n) {
-    if (!STYLES[n]) n = '1';
-    $('#vt').className = 'vt s' + n;
-    $$('.mk-sw [data-style]').forEach((b) => b.classList.toggle('on', b.dataset.style === String(n)));
-    const s = STYLES[n];
-    $('#stylenote').innerHTML = '<h4>Tab style ' + n + ' · ' + s[0] + '</h4><ul>' + s[1].map((x) => '<li>' + x + '</li>').join('') + s[2].map((x) => '<li>Costs: ' + x + '</li>').join('') + '</ul>';
-    requestAnimationFrame(arrows);
-  }
 
   let tt;
   function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2800); }
@@ -446,8 +415,6 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   document.addEventListener('click', (e) => {
     const t = e.target, o = t.closest('[data-opt]'), sg = t.closest('[data-suggest]'), tst = t.closest('[data-toast]'), st = t.closest('.st[data-step]'), op = t.closest('[data-open]'), cop = t.closest('[data-copen]'), jump = t.closest('[data-jump]');
     if (o) { show(o.dataset.opt); return; }
-    const sty = t.closest('[data-style]');
-    if (sty) { tabStyle(sty.dataset.style); return; }
     if (sg) { suggest(sg.dataset.suggest); return; }
     if (t.id === 'sg-send') { const w = $('#sg-where').value; $('#layer').innerHTML = ''; toast('Sent to the Strategy Office' + (w ? ', pinned to step ' + w : '') + '. You will see their answer on this page.'); return; }
     if (t.closest('[data-close]') && (t.dataset.close || t === t.closest('.scrim'))) { if (t.dataset.close) { $('#layer').innerHTML = ''; } return; }
@@ -462,7 +429,6 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   window.addEventListener('resize', () => requestAnimationFrame(arrows));
   drawer(2);
   const asked = Object.keys(HASH).find((k) => '#' + HASH[k] === location.hash);
-  tabStyle('1');
   show(asked || (window.innerWidth < 640 ? 'b' : 'a'));
 })();
 </script>

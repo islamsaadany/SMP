@@ -30,6 +30,7 @@ mockup it was given against is named after it.
 14. The darker table header: *"keep it here now and I will think later"*.
 15. The four prototype questions left open (§5.1): *"B, A, B, B"*. Keep the three empty tabs, readiness marks on every process, the picker on the process name, and Check with AI as its own section.
 16. The way out of the builder: *"can we have it somewhere more visible maybe an x on the top right below the navy bar or exit builder writing or save and exit something like this"*.
+17. Its style: *"C"*, **Save and exit**.
 
 ## 1. The shape
 
@@ -121,7 +122,7 @@ edit, because that is answer 3's "B now".
 3. **Start a draft from this.** This sits on a suggestion and opens the builder on that process with a draft started and the step selected. **Open in builder** on a draft the approver sent back does the same.
 
 **Ways back out:**
-- **Exit builder ✕** sits at the top right, just under the navy band, with "All changes saved · 10:42" on the left. It stays in view as you scroll. It takes you back to where you came from: the process page if you came through Open in builder, otherwise All processes. Everything already saves as you type, so nothing is lost. *(Q16; the style is still open, §5.)*
+- **Save and exit** sits at the top right, just under the navy band, as a gold button, with "All changes saved · 10:42" on the left. It stays in view as you scroll. It saves anything still pending and takes you back to where you came from: the process page if you came through Open in builder, otherwise All processes. *(Q16, Q17.)*
 - **Preview as manager** shows the draft exactly as the owner will read it. A gold strip says it is a preview and offers **Back to the builder**.
 - **Open the staff view** shows Processes as client staff see it.
 
@@ -161,7 +162,7 @@ On a section's page:
 
 The band shows the process and its draft, for example "Draft v4 · started from Hend
 Mourad's suggestion on step 4". Its actions are **Preview as manager** and
-**Send for approval**. **Exit builder ✕** sits just under the band, top right (§4.1).
+**Send for approval**. **Save and exit** sits just under the band, top right (§4.1).
 
 **The process name in the band is a picker.** Click it, find another process, and
 it opens on the same section, with no page in between. *(Q15.)*
@@ -181,11 +182,8 @@ Connections · Check with AI**.
 
 ## 5. Still open
 
-**One question: how the way out of the builder looks** (§4.1). It is drawn on the
-builder mockup with all three styles to try:
-- **Exit builder ✕**: words and a cross, so nobody has to guess what it does. *(Recommended.)*
-- **✕ only**: the smallest. The words show when you point at it, but a lone cross can read as "throw away my changes".
-- **Save and exit**: reassuring, but everything already saves as you type, so it hints at unsaved work when there is none.
+**No design question is open.** The last one, the way out of the builder, was answered
+*"C"*: Save and exit (Q17). Exit builder ✕ was recommended, and ✕ alone was the third option.
 
 ### 5.1 The seven decisions on the 2026-10-23 prototype: all settled
 
@@ -225,7 +223,7 @@ in `design-mockups/processes-redesign/`.
 | A process page | https://claude.ai/artifact/SHQYtVxi7jJEiKyXr4PWpG | `2026-10-24_process-page-options.html` |
 | Opening the module (reading side) | https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB | `2026-10-24_module-landing-options.html` |
 | Where the office builds (options compared) | https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb | `2026-10-24_builder-options.html` |
-| The builder: ways in and out, the builder home, every section, the way out's three styles | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
+| The builder: ways in and out, the builder home, every section | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
 
 Earlier versions of each page, holding the options that were not chosen, are in the
 page's history and in git.

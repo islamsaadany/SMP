@@ -701,7 +701,10 @@ for (const k of OWN_PAGE) {
      the switch would be drawn and dead (§96). */
   check("it wears the shared top bar, trail and all — " + k,
     /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
-    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) &&
+    /* §620: REWRITTEN, NEVER LOOSENED (§218) — the bar's script by its
+       stamped address, which is what lets the page paint without asking */
+    /<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>/.test(doc));
   check("...and the navy module bar it replaces is gone — " + k,
     !/class="bar"|class="msw"|class="mmenu"/.test(doc));
   check("...and the page's dark colours answer the switch, not only the device — " + k,

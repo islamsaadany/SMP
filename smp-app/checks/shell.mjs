@@ -163,10 +163,13 @@ await section("1 · the document and its policy", async () => {
   await fresh(); await signIn("office@forefront.example");
   const r = await fetch(BASE + "/raya-trade/strategy/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") } });
   const html = await r.text(), csp = r.headers.get("content-security-policy") || "";
-  check(r.status === 200 && /<script src="\/shell\.js"><\/script>/.test(html) && /<script src="\/theme\.js"><\/script>/.test(html), "the shell is served as its own document with the product's scripts as FILES", r.status);
+  /* §620: REWRITTEN, NEVER LOOSENED (§218) — the files by their stamped
+     addresses (`?v=` and their hash), which is what lets the page paint
+     without asking about them again */
+  check(r.status === 200 && /<script src="\/shell\.js\?v=[0-9a-f]{12}"><\/script>/.test(html) && /<script src="\/theme\.js\?v=[0-9a-f]{12}"><\/script>/.test(html), "the shell is served as its own document with the product's scripts as FILES, by stamped address", r.status);
   check(!/<script>/.test(html) && !/ on[a-z]+=/i.test(html.replace(/<!--[\s\S]*?-->/g, "")), "…and no inline script or handler anywhere in it");
   check(/script-src 'self';/.test(csp) && !/unsafe-inline'[^;]*;\s*style/.test(csp.split("script-src")[1] || "x"), "the policy is script-src 'self' — no hash, no unsafe-inline (§238's net, tighter)", csp.slice(0, 80));
-  check(/<link rel="stylesheet" href="\/platform\.css">/.test(html) && /<title>Raya Trade — Strategy Management Platform<\/title>/.test(html), "the product's stylesheet is linked and the title is the tenant's");
+  check(/<link rel="stylesheet" href="\/platform\.css\?v=[0-9a-f]{12}">/.test(html) && /<title>Raya Trade — Strategy Management Platform<\/title>/.test(html), "the product's stylesheet is linked and the title is the tenant's");
   await open("/raya-trade/strategy/mobile/strategy");
   const pwned = await page.evaluate(async () => { window.__pwned = 0; const d = document.createElement("div"); d.innerHTML = '<img src="x" onerror="window.__pwned=1">'; document.body.appendChild(d); await new Promise((r) => setTimeout(r, 400)); return window.__pwned; });
   check(pwned === 0, "an injected inline handler does NOT run (§235's hole, closed by the policy)", pwned);
@@ -2453,8 +2456,10 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
     check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
-    await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
-    const card = (await page.locator(".ccard[data-client]").first().textContent()) || "";
+    /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
+       the latest — the card is read off the latest, never the saved one */
+    await page.waitForSelector("#page:not([inert]) .ccard[data-client]", { timeout: 8000 }).catch(() => {});
+    const card = (await page.locator("#page:not([inert]) .ccard[data-client]").first().textContent()) || "";
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
 
     /* SPEC 068 \u2014 HOME, on the same made state: three open, one late, one

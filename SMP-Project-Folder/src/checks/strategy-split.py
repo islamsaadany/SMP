@@ -213,6 +213,8 @@ with sync_playwright() as p:
     ck("the strategy cell offers the pen (Islam: the SMO can open it)", cell is not None)
     if cell:
         cell.click(); pg.wait_for_timeout(350)
+        # §621: Roles & access asks first; answered, because this file is about the grant
+        pg.click(".askbox .askyes"); pg.wait_for_timeout(350)
     after = asks(pg, who)
     ck("opened: the rule now allows the custodian the plan", after["rule"] is True, after)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
@@ -233,6 +235,7 @@ with sync_playwright() as p:
     # The merged cell has no separate None button (an empty cell IS none), so
     # closing it back to the shipped default is one press of View.
     pg.click('[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|view"]'); pg.wait_for_timeout(300)
+    pg.click(".askbox .askyes"); pg.wait_for_timeout(300)
     closed = asks(pg, who)
     ck("closed again: the rule refuses once more", closed["rule"] is False, closed)
     be(pg, who["cust"], who["unit"], "strategy", "plan")

@@ -11,10 +11,11 @@ What is asserted, and why each end matters (§94.2):
   - THE THIRTEEN ROWS, in his order, with his descriptions and defaults,
     asserted against the shipped list (LABEL_DEFAULTS) rather than typed out
     a second time here, except the order and count, which are his decision.
-  - THE PAGE: two boxes per row, the default beside them, Reset drawn EXACTLY
-    where a row differs (both ends — a Reset on every row satisfies "it is
-    there"), pressing it puts both words back, and emptying a box does the
-    same for that box. Every write read back off LABELS (§96).
+  - THE PAGE LEFT SETUP (§621, Islam: "yes remove terminology"): no def,
+    and End in Mind — the one word the shape screen did not name — has its
+    row and its tick there. Its two boxes, Reset and the emptied-box rule
+    went with the page; the words below are written straight into LABELS,
+    the store every screen reads, which is what the page wrote.
   - ONE WORD EVERYWHERE: the aspiration's word for one is the heading on the
     group's Foundation AND a unit's, and it is the SAME word (the old build
     said Vision on one and Winning Aspiration on the other).
@@ -24,7 +25,7 @@ What is asserted, and why each end matters (§94.2):
     Functions page.
   - THE NAVIGATION: on the default words the switch keeps its short "Units";
     a client word replaces it.
-  - A SHARED WORD SHOUTS, and only then.
+  - A SHARED WORD SHOUTS, and only then — on the shape screen now (§621).
 
 THE STATE IS MADE and nothing is left behind (§94.2). Every probe degrades
 (§215). SMP_BUILT points it at another build (§276).
@@ -55,8 +56,11 @@ ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "va
          # §513: the End in Mind gained a word of its own, last in the order
          "endinmind"]
 
-def setup_labels(pg):
-    js(pg, "current='setup'; currentSub='labels'; paint()"); pg.wait_for_timeout(250)
+def shape_step(pg):
+    # §621: the words are named on Getting started's shape screen now
+    js(pg, "current='setup'; currentSub='start'; paint()"); pg.wait_for_timeout(300)
+    js(pg, "(function(){var b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();})()")
+    pg.wait_for_timeout(400)
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("SMP_CHROME") or None,
@@ -80,23 +84,16 @@ with sync_playwright() as p:
     d = js(pg, "LABEL_DEFAULTS.filter(function(x){return x.key==='division'})[0]", {})
     ck("the division layer defaults to Division / Divisions", d == {"key": "division", "one": "Division", "many": "Divisions"}, d)
 
-    print("\n§2  the page")
-    setup_labels(pg)
-    rows = js(pg, "document.querySelectorAll('table.lbltable tbody tr').length", 0)
-    ck("the page draws one row per word", rows == len(ORDER), rows)
-    boxes = js(pg, "[...document.querySelectorAll('table.lbltable tbody tr')].map(function(r){return r.querySelectorAll('input.lbl').length})", [])
-    ck("each row has two boxes", boxes and all(n == 2 for n in boxes), boxes)
-    resets = js(pg, "document.querySelectorAll('[data-lblreset]').length", -1)
-    ck("on the defaults no row offers Reset", resets == 0, resets)
+    print("\n§2  the page left Setup; the words are named on the shape screen (§621)")
+    ck("Terminology is not a Setup page any more (§24: deleted, not hidden)",
+       js(pg, "!setupDefsAll().some(function(d){ return d.k === 'labels'; })", False))
+    shape_step(pg)
+    ck("End in Mind, the one word the shape screen did not name, has its row and its tick there",
+       js(pg, "!!document.querySelector('.csetup [data-steim=\"top\"] .sttick') && " +
+              "!!document.querySelector('.csetup [data-stlw=\"top|endinmind|one\"]')", False))
     i = ORDER.index("division")
-    pg.fill('input.lbl[data-lbl="%d"][data-scope="bu"]' % i, "Sectors")
-    pg.press('input.lbl[data-lbl="%d"][data-scope="bu"]' % i, "Tab"); pg.wait_for_timeout(200)
-    pg.fill('input.lbl[data-lbl="%d"][data-scope="group"]' % i, "Sector")
-    pg.press('input.lbl[data-lbl="%d"][data-scope="group"]' % i, "Tab"); pg.wait_for_timeout(200)
-    e = js(pg, "LABELS.entries[%d]" % i, {})
-    ck("typing writes both words", e.get("group") == "Sector" and e.get("bu") == "Sectors", e)
-    rr = js(pg, "[...document.querySelectorAll('[data-lblreset]')].map(function(b){return +b.dataset.lblreset})", [])
-    ck("Reset appears on that row and only that row", rr == [i], rr)
+    js(pg, "LABELS.entries[%d].group='Sector'; LABELS.entries[%d].bu='Sectors'; paint()" % (i, i))
+    pg.wait_for_timeout(250)
 
     print("\n§3  the new words are read")
     rail = js(pg, "[...document.querySelectorAll('[data-setupgo]')].map(function(b){return b.textContent.trim()})", [])
@@ -140,22 +137,15 @@ with sync_playwright() as p:
     nav = js(pg, NAV, [])
     ck("a client's word replaces it", any(t == "Brands" for t in nav) and not any(t == "Units" for t in nav), nav)
 
-    print("\n§6  Reset, an emptied box, and a shared word")
-    setup_labels(pg)
-    j = ORDER.index("unitword")
-    pg.click('[data-lblreset="%d"]' % j); pg.wait_for_timeout(200)
-    e = js(pg, "LABELS.entries[%d]" % j, {})
-    ck("Reset puts both words back", e.get("group") == "Business unit" and e.get("bu") == "Business units", e)
+    print("\n§6  a shared word is said where the words are named (§621)")
+    shape_step(pg)
     k = ORDER.index("tactic")
-    pg.fill('input.lbl[data-lbl="%d"][data-scope="bu"]' % k, "")
-    pg.press('input.lbl[data-lbl="%d"][data-scope="bu"]' % k, "Tab"); pg.wait_for_timeout(200)
-    ck("an emptied box goes back to the default", js(pg, "LABELS.entries[%d].bu" % k, "") == "Tactics")
-    warn0 = js(pg, "!!document.querySelector('#panel .bad-note')", True)
+    warn0 = js(pg, "!!document.querySelector('.csetup .wzclash')", True)
     ck("no warning while every word is its own", not warn0)
-    pg.fill('input.lbl[data-lbl="%d"][data-scope="bu"]' % k, "Pillars")
-    pg.press('input.lbl[data-lbl="%d"][data-scope="bu"]' % k, "Tab"); pg.wait_for_timeout(200)
-    warn1 = js(pg, "(document.querySelector('#panel .bad-note')||{}).textContent||''", "")
+    js(pg, "LABELS.entries[%d].bu='Pillars'; paint()" % k); pg.wait_for_timeout(300)
+    warn1 = js(pg, "(document.querySelector('.csetup .wzclash')||{}).textContent||''", "")
     ck("two things sharing a word are named", "Pillars" in warn1, warn1)
+    js(pg, "LABELS.entries[%d].bu='Tactics'; paint()" % k)
 
     ck("no page errors", not errs, errs[:3])
     b.close()

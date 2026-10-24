@@ -36,11 +36,22 @@ def ev(pg, js, d=None):
     except Exception as e:
         errs.append("PROBE: " + str(e)[:160]); return d
 
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel, wait=400):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(wait); return True
+        el.click(); pg.wait_for_timeout(wait); answer(pg); return True
     except Exception as e:
         errs.append("PRESS %s: %s" % (sel, str(e)[:90])); return False
 

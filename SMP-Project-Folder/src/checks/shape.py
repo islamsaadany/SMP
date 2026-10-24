@@ -64,11 +64,22 @@ def ev(pg, js, d=None):
         errs.append("PROBE: " + str(e)[:150]); return d
 
 
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel, wait=350):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(wait); return True
+        el.click(); pg.wait_for_timeout(wait); answer(pg); return True
     except Exception as e:
         errs.append("PRESS %s: %s" % (sel, str(e)[:80])); return False
 
@@ -189,9 +200,12 @@ with sync_playwright() as p:
     press(pg, ".csetup [data-shlvl=top]", 300)
     ck("…and one plan line shuts it", ev(pg, "()=>__smpHoldsNow().plans", -1) == 1,
        ev(pg, "()=>__smpHoldsNow().plans"))
-    ck("the banner says the shape is set from here on",
-       "shape is set from here on" in (ev(pg, "()=>{var b=document.querySelector('.csetup .wzarched');"
-                                            " return b? b.innerText : ''}", "") or ""))
+    # REWRITTEN, never loosened (§218): §621 cut the notice to one line — what
+    # stands and what is yours — and moved its reasons onto the hover.
+    ck("the banner says rows can't be added here, and that names and switches still change",
+       all(w in (ev(pg, "()=>{var b=document.querySelector('.csetup .wzarched');"
+                        " return b? b.innerText : ''}", "") or "")
+           for w in ("rows can’t be added here", "Names and switches still change")))
     ck("…and ADDING a row is gone, which is the half that would lose work",
        ev(pg, "()=>document.querySelectorAll('.csetup .shadd').length", -1) == 0,
        ev(pg, "()=>document.querySelectorAll('.csetup .shadd').length"))

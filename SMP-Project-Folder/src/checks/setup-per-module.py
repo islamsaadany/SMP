@@ -165,7 +165,10 @@ with sync_playwright() as p:
        ev(pg, "()=>!setupDefsAll().some(d=>d.k==='brand') && !SETUP_GROUPS.some(g=>g.k==='look')", False),
        ev(pg, "()=>setupDefsAll().filter(d=>d.k==='brand').length + '/' + SETUP_GROUPS.filter(g=>g.k==='look').length"))
     ck("the cycle, the inbox, the measures, the import and the knowledge base are Strategy's",
-       ev(pg, "()=>['cycle','chat','history','send','myfig','import','sets','focusset','bands','labels','kb'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='strategy';})", False))
+       ev(pg, "()=>['cycle','chat','history','send','myfig','import','sets','focusset','bands','kb'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='strategy';})", False))
+    # §621: Terminology left Setup — its words are named on the shape screen
+    ck("the Terminology page is gone — no def, and no page anybody could land on (§621, §24)",
+       ev(pg, "()=>!setupDefsAll().some(d=>d.k==='labels')", False))
     ck("every group a def names is a group the rail knows (§113.8's silent direction)",
        ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
        ev(pg, "()=>setupDefsAll().filter(d=>!SETUP_GROUPS.some(g=>g.k===d.grp)).map(d=>d.k)"))
@@ -316,6 +319,9 @@ with sync_playwright() as p:
     wrote = ev(pg, """()=>{const b=document.querySelector(".acgrid button[data-acm]:not(.on)");
                          if(!b) return 'no control'; b.click(); return 'pressed';}""")
     pg.wait_for_timeout(300)
+    # §621: Roles & access asks first; answered, because this line is about the write
+    ev(pg, "()=>{const y=document.querySelector('.askbox .askyes'); if(y) y.click();}")
+    pg.wait_for_timeout(300)
     after = ev(pg, "()=>JSON.stringify(ACCESS)")
     ck("Roles & access, in its new group, still writes the matrix", wrote == "pressed" and before != after, wrote)
     # REWRITTEN (§218, §360): the knowledge base is on STRATEGY's rail now.
@@ -397,6 +403,14 @@ with sync_playwright() as p:
               ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('start')>=0", False),
        ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
               ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).join(',')"))
+    # §621: AND SO DOES THE WORDS ERRAND — Terminology's keywords moved onto
+    # the same def when the page left Setup (setup-search §2 records it).
+    ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='terminology';"
+           "q.dispatchEvent(new Event('input',{bubbles:true}));}")
+    pg.wait_for_timeout(300)
+    ck("…and the terminology errand finds it too (§621)",
+       ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
+              ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('start')>=0", False))
     ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='';"
            "q.dispatchEvent(new Event('input',{bubbles:true}));}")
     ev(pg, "()=>{delete GROUP[SMPRules.SETUP_DONE]; localStorage.removeItem('smp.setup.groups'); paint();}")

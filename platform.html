@@ -495,6 +495,38 @@
      question — how tall is a card in this grid before there is a client in
      it — and two spellings of one answer is how they come to differ. */
   .ccard.add, .ccard.skel{ min-height:152px }
+
+  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ───────────────────────────
+     Islam: "the navigation between the apges needs to be momentairly", and
+     of the mockup (design-mockups/instant-navigation/): "yes build it". A tab
+     pressed for the first time used to say "Reading…" in a blank page for a
+     round trip; it shows its own shape in grey now, in the bars the
+     platform's boot skeleton already uses (§94.10: --line, a 6px corner, the
+     slow pulse), and the real page replaces it when the answers land.
+     Clients keeps the waiting cards it has had since §371. */
+  .tsk{ display:flex; flex-direction:column; gap:14px }
+  .tsk .b{ display:block; flex:none; height:13px; border-radius:6px; background:var(--line); animation:tskpulse 1.5s ease-in-out infinite }
+  .tsk .q{ background:var(--surface-2) }
+  .tsk .t{ height:20px } .tsk .p{ height:24px; border-radius:999px } .tsk .k{ height:32px; border-radius:8px }
+  .tsk .r{ display:flex; align-items:center; gap:12px; min-width:0 } .tsk .c{ display:flex; flex-direction:column; gap:10px; min-width:0 }
+  .tsk .grow{ flex:1; min-width:0 }
+  .tsk .box{ border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 16px }
+  .tsk .head{ padding-bottom:12px; border-bottom:1px solid var(--line) }
+  .tsk .th{ height:34px; border-radius:8px 8px 0 0; background:var(--surface-2); border:1px solid var(--line) }
+  .tsk .tr{ display:flex; align-items:center; gap:18px; padding:12px 14px; border:1px solid var(--line); border-top:0; background:var(--surface) }
+  .tsk .ln{ padding:11px 0; border-bottom:1px solid var(--line-soft) }
+  @keyframes tskpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
+  @media (prefers-reduced-motion:reduce){ .tsk .b{ animation:none; opacity:.75 } }
+  @media (max-width:760px){ .tsk .hide-narrow{ display:none } }
+
+  /* ── A TAB AS YOU LEFT IT (§620) — the console's saved copy, shown at once
+     on arriving and on a tab's first visit, until the latest copy replaces
+     it: the client page's own mark (§431's "Updating…"), and nothing on it
+     can be pressed meanwhile (`inert`). */
+  .stale{ display:inline-flex; align-items:center; font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--ink-3);
+    border:1px solid var(--line); border-radius:999px; padding:2px 10px; white-space:nowrap; background:var(--surface) }
+  .staleline{ display:flex; justify-content:flex-end; margin:0 0 10px }
+  #page[inert]{ cursor:progress }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -1581,6 +1613,8 @@
      than a second copy that could drift — it is the one piece of the memory
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
+<!-- §620: the next page's shape, drawn at the press (smp-app/lib/navskel.ts) -->
+<script src="/navskel.js"></script>
 <script src="/memory-split.js"></script>
 <script src="/case-split.js"></script>
 <!-- The client set-up flow (§360, spec 057): one file for this page and the
@@ -1604,9 +1638,19 @@
        in when the last answer has landed; and anything that CHANGES something
        drops every kept copy, so the next look at a tab never shows a state
        this page has just altered. */
+    /* §620: A SAVED COPY IS DRAWN BY THE TAB'S OWN DRAWING, fed the answers
+       it was given last time — never a second drawing of the same page that
+       could disagree with the first. A read with no saved answer waits
+       forever here: the latest copy replaces whatever was drawn. */
+    var key = path + " " + JSON.stringify(body || {});
+    var reading = !!body && READS.indexOf(body.action) >= 0;
+    if (REPLAY && reading) {
+      return Object.prototype.hasOwnProperty.call(REPLAY, key) ? Promise.resolve(REPLAY[key]) : new Promise(function () {});
+    }
+    var rec = reading ? RECORD : null;
     var rv = REVAL;
     if (rv) rv.pending++;
-    if (!body || READS.indexOf(body.action) < 0) KEPT = {};
+    if (!reading) KEPT = {};
     var landed = function () { if (rv) { rv.pending--; setTimeout(function () { revalSettle(rv); }, 0); } };
     return fetch(path, { method: "POST", cache: "no-store",
       headers: { "Content-Type": "application/json" },
@@ -1621,7 +1665,11 @@
         }
         return r.json();
       })
-      .then(function (v) { landed(); return v; }, function (e) { landed(); throw e; });
+      .then(function (v) {
+        /* kept for next time: what this tab read, as it read it */
+        if (rec && v && v.ok !== false && rec === RECORD) { rec.answers[key] = v; saveTab(rec); }
+        landed(); return v;
+      }, function (e) { landed(); throw e; });
   }
   /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
      401-is-the-door rule above is not written twice for it. */
@@ -1749,7 +1797,7 @@
       /* the icon is this page's own constant, never a typed word */
       b.innerHTML = NAV_ICON[t[0]] || "";
       b.appendChild(el("span", "lb", t[1]));
-      b.addEventListener("click", function () { menu(false); go(t[0], true); });
+      b.addEventListener("click", function () { menu(false); go(t[0], "row"); });
       box.appendChild(b);
     });
     document.getElementById("sbhere").textContent = here;
@@ -1857,10 +1905,20 @@
   var ONLIST = null;
   var REVAL = null;
   var READS = ["me", "cards", "mywork", "home", "consultants", "access", "list", "one", "library", "client", "history", "read", "case", "options"];
-  function revalStop() {
-    if (!REVAL) return;
+  /* §620: what a tab's drawing is fed from its saved copy (REPLAY), and the
+     record of what its latest reading was given, kept for next time
+     (RECORD). Both are the request's own business: see send(). */
+  var REPLAY = null;
+  var RECORD = null;
+  /* A HAND ON THE PAGE WINS (§400.2) — over a kept copy, which is real and
+     can be worked on. Never over a skeleton or a saved copy (`hold`): there
+     is nothing on either to protect, and abandoning the reading would leave
+     the shape standing in for a page that never comes. */
+  function revalStop(e) {
+    if (!REVAL || (e && REVAL.hold)) return;
     REVAL = null;
     page = SHOWN;
+    unhold();
   }
   function revalSettle(rv) {
     if (REVAL !== rv || rv.pending > 0) return;
@@ -1868,17 +1926,152 @@
     page = SHOWN;
     var y = window.scrollY;
     SHOWN.textContent = "";
+    unhold();
     while (rv.next.firstChild) SHOWN.appendChild(rv.next.firstChild);
     window.scrollTo(0, y);
+  }
+  function unhold() {
+    SHOWN.removeAttribute("inert");
+    SHOWN.removeAttribute("aria-busy");
+    SHOWN.removeAttribute("data-saved");
   }
   ["pointerdown", "keydown"].forEach(function (ev) {
     SHOWN.addEventListener(ev, revalStop, true);
   });
-  function go(tab, fromTabRow) {
+
+  /* ── A TAB'S SAVED COPY (§620) ─────────────────────────────────────────
+     Islam chose it: "Should the console remember its tabs between visits
+     (kept in your browser, wiped when you sign out)" — "Yes". What each tab
+     read last time is kept in this browser under the client page's own
+     prefix (§431: `smp.cache.`, which signing in and signing out both wipe),
+     with the person it was read for. Coming back to the console, or opening
+     a tab for the first time since, draws that copy at once through the
+     tab's own drawing, marked "Updating…" and taking no input, while the
+     latest copy is read behind it and swapped in. A copy that is somebody
+     else's is never drawn, and is dropped. */
+  var SAVEKEY = "smp.cache.console.";
+  function savedOf(tab, email) {
+    try {
+      var s = JSON.parse(localStorage.getItem(SAVEKEY + tab) || "null");
+      if (!s || !s.answers || !s.email) return null;
+      if (email && s.email !== email) { wipeSaved(); return null; }
+      return s;
+    } catch (e) { return null; }
+  }
+  function saveTab(rec) {
+    try { localStorage.setItem(SAVEKEY + rec.tab, JSON.stringify({ email: rec.email, at: Date.now(), answers: rec.answers })); }
+    catch (e) { /* a full or blocked store keeps nothing, and the page is the same */ }
+  }
+  function wipeSaved() {
+    try { for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && k.indexOf(SAVEKEY) === 0) localStorage.removeItem(k); } } catch (e) {}
+  }
+  /* The tab's own drawing, fed the saved answers, into the visible page; the
+     answers arrive at once, so the copy is complete before anything paints.
+     Then the mark, and the lock. */
+  function drawSaved(tab, saved, done) {
+    page = SHOWN;
+    REPLAY = saved.answers;
+    try { redraw(); } catch (e) { /* a copy that no longer draws is simply not shown */ }
+    /* its answers are already there, so its drawing has finished by the
+       next turn; only then does anything else write into the page */
+    setTimeout(function () {
+      REPLAY = null;
+      page = REVAL ? REVAL.next : SHOWN;
+      if (TAB === tab && SHOWN.getAttribute("data-saved") === tab) staleMark();
+      if (done) done();
+    }, 0);
+    SHOWN.setAttribute("data-saved", tab);
+    SHOWN.setAttribute("inert", "");
+    SHOWN.setAttribute("aria-busy", "true");
+  }
+  function staleMark() {
+    var pill = el("span", "stale", "Updating…");
+    pill.setAttribute("role", "status");
+    pill.title = "Showing what you saw last time while the latest copy loads. Nothing can be changed until it has.";
+    var right = SHOWN.querySelector(".ptitle .right"), head = SHOWN.querySelector(".ptitle");
+    if (right) right.insertBefore(pill, right.firstChild);
+    else if (head) { pill.style.marginLeft = "auto"; head.appendChild(pill); }
+    else { var line = el("div", "staleline"); line.appendChild(pill); SHOWN.insertBefore(line, SHOWN.firstChild); }
+  }
+
+  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ─────────────────────────
+     The mockup's shapes, in the boot skeleton's bars. Clients keeps §371's
+     waiting cards. Nothing here is a word anybody typed. */
+  function tabSkel(tab) {
+    if (tab === "clients") {
+      var box = el("div");
+      var h = el("div", "ptitle"); h.appendChild(el("h1", null, "Clients")); box.appendChild(h);
+      box.appendChild(skelCards());
+      return box;
+    }
+    var b = function (w, cls) { return '<span class="b' + (cls ? " " + cls : "") + '" style="width:' + w + '"></span>'; };
+    var n = function (k, f) { var s = ""; for (var i = 0; i < k; i++) s += f(i); return s; };
+    var head = function (w, right) { return '<div class="r head">' + b(w, "t") + '<span class="grow"></span>' + (right || "") + "</div>"; };
+    var table = function (rows, cells) { return "<div><div class=\"th\"></div>" + n(rows, function (i) { return '<div class="tr">' + cells(i) + "</div>"; }) + "</div>"; };
+    var S = {
+      mywork: function () {
+        return '<div class="box" style="background:var(--surface-2);padding:18px 20px"><div class="r" style="align-items:flex-end"><div class="c">' + b("150px", "q") + b("120px", "t") +
+          '</div><span class="grow"></span>' + n(4, function () { return '<div class="c hide-narrow" style="align-items:flex-end;gap:6px">' + b("26px", "t") + b("70px", "q") + "</div>"; }) + "</div></div>" +
+          n(2, function () {
+            return '<div><div class="r" style="padding-bottom:8px;border-bottom:2px solid var(--line)">' + b("110px", "t") + b("60px", "q") + "</div>" +
+              n(3, function (i) { return '<div class="r ln">' + b("16px") + b((52 - i * 9) + "%") + '<span class="grow"></span>' + b("110px", "p q hide-narrow") + b("80px", "q hide-narrow") + b("90px") + "</div>"; }) + "</div>";
+          });
+      },
+      consultants: function () {
+        return head("130px") + table(4, function (i) { return b("150px") + b("190px", "q hide-narrow") + b("80px", "p") + b((180 - i * 30) + "px", "q hide-narrow") + b("40px", "q"); }) +
+          '<div class="r">' + b("240px", "k q") + b("260px", "k q hide-narrow") + b("140px", "k") + "</div>";
+      },
+      access: function () {
+        return head("150px") + b("70%", "q") + table(2, function () { return b("220px") + '<span class="grow"></span>' + n(4, function () { return b("90px", "p q hide-narrow"); }); });
+      },
+      /* Home (spec 068): the greeting band, your clients and your tasks side
+         by side, and the two boxes under them */
+      home: function () {
+        var col = function (k) { return '<div class="box c grow">' + b("110px", "t") + n(k, function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 8) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; }) + "</div>"; };
+        return '<div class="box c" style="background:var(--surface-2);padding:20px 22px">' + b("120px", "q") + b("280px", "t") + b("140px", "q") + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(2) + col(2) + "</div>";
+      },
+      /* Case studies (spec 067), the memory's tab: the title and its count,
+         the big search line, the categories, the shelf of studies */
+      memory: function () {
+        return head("140px", b("90px", "q hide-narrow") + b("150px", "k q") + b("170px", "k")) + '<div class="r">' + b("100%", "k q") + b("150px", "k q hide-narrow") + "</div>" +
+          '<div class="r" style="flex-wrap:wrap">' + n(5, function (i) { return b((90 + (i % 3) * 24) + "px", "p q"); }) + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:14px;flex-wrap:wrap">' + n(3, function (i) { return '<div class="box c grow" style="min-width:200px">' + b("70px", "p q") + b((70 - i * 8) + "%", "t") + b("90%", "q") + b("60%", "q") + "</div>"; }) + "</div>";
+      },
+      frameworks: function () {
+        return head("130px", b("160px", "k")) + '<div class="box c">' + b("100%", "k q") + '<div class="r" style="flex-wrap:wrap">' + n(6, function (i) { return b((90 + (i % 3) * 30) + "px", "p q"); }) + "</div></div>" +
+          '<div class="box c" style="gap:0;padding:0">' + n(5, function (i) { return '<div class="c" style="gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft)"><div class="r">' + b((140 + i * 18) + "px") + b("120px", "p q") + "</div>" + b((70 - i * 5) + "%", "q") + "</div>"; }) + "</div>";
+      },
+      copilot: function () {
+        return head("160px", b("220px", "k q")) + '<div class="r">' + n(5, function () { return b("80px", "k q"); }) + "</div>" +
+          '<div class="box c"><div class="r">' + b("16px") + b("120px", "t") + '<span class="grow"></span>' + b("50px", "k q") + "</div>" + n(7, function (i) { return b((88 - (i % 4) * 12) + "%", i % 3 ? "q" : ""); }) + "</div>";
+      },
+      history: function () {
+        return head("100px", b("200px", "k q") + b("60px", "p q")) + table(8, function (i) { return b("44px", "q") + b("120px") + b("90px", "q") + b((260 - (i % 3) * 50) + "px", "q hide-narrow"); });
+      }
+    };
+    var d = el("div", "tsk");
+    d.setAttribute("aria-hidden", "true");
+    d.innerHTML = (S[tab] || S.history)();
+    return d;
+  }
+
+  /* `how` says how the tab is being reached: "row" (its press in the
+     column), "boot" (arriving at the console), or nothing (one of the six
+     ways that follow a change, which read fresh — §369, §48.2).
+     WHAT SHOWS AT ONCE, in this order: the tab as it was left on this visit
+     (§400.2's kept copy, "row" only), else its saved copy ("row" and "boot"),
+     else its shape. WHAT IS READ, always: the tab's own drawing into a box
+     nobody sees, swapped in when its answers have landed. */
+  function go(tab, how) {
+    /* what is on screen is the tab's own page — never its shape or its saved
+       copy still waiting for the latest one, which are not kept (§620) */
+    var real = !REVAL || !REVAL.hold;
     revalStop();
     /* Only the tab's own list is kept, never a form or a reading view
        opened inside it — go() below puts the tab back on its list. */
-    if (ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "lib" && FW.view === "list") {
+    if (real && ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "lib" && FW.view === "list") {
       var f = document.createDocumentFragment();
       while (SHOWN.firstChild) f.appendChild(SHOWN.firstChild);
       KEPT[TAB] = f;
@@ -1887,28 +2080,38 @@
     TAB = tab;
     /* THE CLIENTS PAGE OPENS ON ACTIVE, every visit (Islam: "default is
        active"); only a press inside the page moves it. */
-    if (tab === "clients" && fromTabRow) CL.which = "active";
+    if (tab === "clients" && how === "row") CL.which = "active";
     try { history.replaceState(null, "", tab === "home" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "lib";
     FW.view = "list";
     CP.editing = null;
     CP.flash = null;
     drawNav();
-    clear();
-    var kept = fromTabRow ? KEPT[tab] : null;
+    var kept = how === "row" ? KEPT[tab] : null;
     delete KEPT[tab];
-    if (!kept) {
-      var r = redraw();
-      ONLIST = tab;
-      return r;
+    var hold = !kept;
+    if (how === "boot" && SHOWN.getAttribute("data-saved") === tab) {
+      /* already drawn from its saved copy while `me` was being asked */
+    } else {
+      unhold();
+      SHOWN.textContent = "";
+      var saved = !kept && (how === "row" || how === "boot") ? savedOf(tab, ME.email) : null;
+      if (kept) SHOWN.appendChild(kept);
+      else if (saved) drawSaved(tab, saved);
+      else SHOWN.appendChild(tabSkel(tab));
     }
-    SHOWN.appendChild(kept);
-    var rv = { pending: 0, next: document.createElement("div") };
+    var rv = { pending: 0, next: document.createElement("div"), hold: hold };
     REVAL = rv;
-    page = rv.next;
-    redraw();
-    ONLIST = tab;
-    setTimeout(function () { revalSettle(rv); }, 0);
+    RECORD = { tab: tab, email: ME.email, answers: {} };
+    /* the saved copy's own answers arrive first; the fresh reading starts
+       on the next turn, so the two never write into one box */
+    setTimeout(function () {
+      if (REVAL !== rv) return;
+      page = rv.next;
+      redraw();
+      ONLIST = tab;
+      setTimeout(function () { revalSettle(rv); }, 0);
+    }, 0);
   }
 
   /* ── A SILENT REFRESH (§313.28) ───────────────────────────────────
@@ -3893,13 +4096,14 @@
      after another is noise, and what a screen reader gets here is what it
      gets today: the page, and then the cards when they land. */
   function drawWaiting() {
-    /* Opening on another tab (§400), the waiting page is that tab's title
-       and nothing it would have to take back (§94.10) — on My work, its
-       panel with the name and no counts yet (§583). */
-    if (TAB === "home") { hoHello(); document.body.classList.add("ready"); return; }
-    if (TAB === "mywork") { mwMast(); document.body.classList.add("ready"); return; }
-    if (TAB !== "clients") { title(""); document.body.classList.add("ready"); return; }
-    title("Clients");
+    /* §620: every tab arrives on its own shape (tabSkel), the way Clients
+       has since §371 — My work's panel without its counts and a bare title
+       elsewhere (§583, §400) gave way to the mockup's grey shapes. */
+    SHOWN.appendChild(tabSkel(TAB));
+    document.body.classList.add("ready");
+  }
+  /* §371's waiting cards, now drawn for Clients' shape (tabSkel) */
+  function skelCards() {
     var grid = el("div", "cards");
     grid.setAttribute("aria-hidden", "true");
     for (var i = 0; i < 3; i++) {
@@ -3914,8 +4118,7 @@
       c.appendChild(el("div", "mods"));
       grid.appendChild(c);
     }
-    page.appendChild(grid);
-    document.body.classList.add("ready");
+    return grid;
   }
 
   /* ── MY WORK (§400) ───────────────────────────────────────────────
@@ -4528,11 +4731,11 @@
     var top = el("div", "hotop");
     page.appendChild(top);
     var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
-    cc.head.appendChild(hoLink("All clients →", function () { go("clients", true); }));
+    cc.head.appendChild(hoLink("All clients →", function () { go("clients", "row"); }));
     var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
     var sc = hoCard(page, "Case studies", NAV_ICON.memory, "cases");
     sc.card.classList.add("hosec");
-    sc.head.appendChild(hoLink("The library →", function () { go("memory", true); }));
+    sc.head.appendChild(hoLink("The library →", function () { go("memory", "row"); }));
 
     /* the boot's `cards`, once (§369), as the Clients tab takes it; the
        tasks wait for it, so a group under Sort by client wears the
@@ -7286,28 +7489,22 @@
      two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
      than loosened: they recorded this state on purpose so that the day it
      moved they would go red (§214.3, §218). */
-  drawWaiting();
-  Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
-    var j = r[0], c = r[1];
-    if (!j || !j.ok) { location.replace("/"); return; }
-    ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
-           canConsultants: true, canAccess: !!j.account.isAdmin };
-    /* What the navigation may show is asked of the same rules the pages ask —
-       `cards` answers it for this account, so the row cannot offer a page the
-       next request refuses. */
-    if (c && c.ok) {
-      ME.canConsultants = !!c.canConsultants;
-      ME.canAccess = !!c.canAccess;
-      BOOTCARDS = c;
-    }
-    /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
-       after renaming the column is exactly the twins this rename avoided. */
-    /* the name, then the role as a span of its own so a phone can leave it
-       for a wider screen (§584.1); the whole line on a hover, for a name
-       that had to end in "…" */
-    /* §601: at the column's foot the role sits under the name, so its dot
-       is a span of its own that is not drawn — the line's words, and what
-       it reads as, are unchanged */
+  /* What the column may show is asked of the same rules the pages ask —
+     `cards` answers it for this account, so the row cannot offer a page the
+     next request refuses. */
+  function meFrom(j, c) {
+    var me = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
+               canConsultants: true, canAccess: !!j.account.isAdmin };
+    if (c && c.ok) { me.canConsultants = !!c.canConsultants; me.canAccess = !!c.canAccess; }
+    return me;
+  }
+  /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+     after renaming the column is exactly the twins this rename avoided.
+     The name, then the role as a span of its own (§584.1); the whole line on
+     a hover, for a name that had to end in "…". §601: at the column's foot
+     the role sits under the name, so its dot is a span of its own that is
+     not drawn — the line's words, and what it reads as, are unchanged. */
+  function drawWho() {
     var who = document.getElementById("who");
     who.textContent = "";
     who.appendChild(el("span", null, ME.name));
@@ -7322,16 +7519,55 @@
     av.textContent = initials(ME.name);
     /* with the column icons wide, the initials name the person on a hover */
     av.setAttribute("data-tip", who.textContent);
+  }
+  var gated = function (me, tab) {
+    if (!me.canConsultants && tab === "consultants") return "home";
+    if (!me.canAccess && tab === "access") return "home";
+    return tab;
+  };
+
+  /* §620: THE TWO QUESTIONS GO FIRST, recorded as the console's own saved
+     copy ("boot"), and before anything is drawn from a saved copy — so no
+     saved answer can ever stand in for them. */
+  RECORD = { tab: "boot", email: "", answers: {} };
+  var bootRec = RECORD;
+  var asked = Promise.all([post({ action: "me" }), post({ action: "cards" })]);
+  /* THEN WHAT ARRIVING CAN SHOW AT ONCE: the column and the tab the address
+     names, from the copy saved for this person last time; else that tab's
+     shape. */
+  var BOOT = savedOf("boot");
+  var KME = '/api/platform {"action":"me"}', KCARDS = '/api/platform {"action":"cards"}';
+  var early = null;
+  if (BOOT && BOOT.answers[KME] && BOOT.answers[KME].ok) {
+    var sme = meFrom(BOOT.answers[KME], BOOT.answers[KCARDS]);
+    var stab = gated(sme, TAB), saved = savedOf(stab, sme.email);
+    if (saved) { early = sme; ME = sme; TAB = stab; drawNav(); drawWho(); drawSaved(TAB, saved); document.body.classList.add("ready"); }
+  }
+  if (!early) drawWaiting();
+  asked.then(function (r) {
+    var j = r[0], c = r[1];
+    if (!j || !j.ok) { location.replace("/"); return; }
+    ME = meFrom(j, c);
+    if (c && c.ok) BOOTCARDS = c;
+    /* a saved copy that turns out to be somebody else's is dropped, and so
+       is anything it drew */
+    if (BOOT && BOOT.email !== ME.email) {
+      wipeSaved();
+      if (SHOWN.hasAttribute("data-saved")) { unhold(); SHOWN.textContent = ""; SHOWN.appendChild(tabSkel(TAB)); }
+    }
+    bootRec.email = ME.email;
+    if (bootRec.answers[KME]) saveTab(bootRec);
+    drawWho();
     document.body.classList.add("ready");
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a
        later visit as a stale list (§48.2). */
     if (TAB !== "clients" && TAB !== "home") BOOTCARDS = null;
-    if (!ME.canConsultants && TAB === "consultants") TAB = "home";
-    if (!ME.canAccess && TAB === "access") TAB = "home";
-    go(TAB);
+    TAB = gated(ME, TAB);
+    go(TAB, "boot");
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
+    unhold();
     document.body.classList.add("ready");
     /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
        skeleton is a promise that something is arriving, and `say` APPENDS —

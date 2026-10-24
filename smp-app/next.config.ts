@@ -73,12 +73,25 @@ if (!sw) throw new Error("next.config: the carried /sw.js block is missing");
 const man = frozen.manifest;
 if (!man) throw new Error("next.config: the carried /manifest.webmanifest block is missing");
 
+/* §620 — A STAMPED ADDRESS IS CACHED FOR GOOD. The files a page waits on are
+   written with their own hash in the address (lib/shell.ts `versioned`, from
+   shell/asset-stamps.json, which scripts/build-sw.mjs writes), so the
+   address changes whenever the file does and the browser never has to ask
+   about one it already holds. Only WITH `?v=`: a plain address (a page from
+   before, a file nobody stamped) is asked about every time, as before. The
+   file names come from the same list, so there is one list, never two. */
+let STAMPED: string[] = [];
+try { STAMPED = Object.keys(JSON.parse(readFileSync(join(process.cwd(), "shell", "asset-stamps.json"), "utf8"))); } catch { STAMPED = []; }
+const STAMPED_SOURCE = STAMPED.length
+  ? "/:file(" + STAMPED.map((p) => p.slice(1).replace(/[.]/g, "\\.")).join("|") + ")"
+  : null;
+
 const nextConfig: NextConfig = {
   /* The Prisma client and the pg driver must stay server-side. */
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
   /* lib/frozen.cjs reads the frozen product's sources at runtime (D4): they
      are part of the server's files wherever it is packed. */
-  outputFileTracingIncludes: { "/**": ["../SMP-Project-Folder/src/*.js", "./lib/rules.cjs", "./shell/body.html", "./shell/platform.html", "../db/seed-state.json"] },
+  outputFileTracingIncludes: { "/**": ["../SMP-Project-Folder/src/*.js", "./lib/rules.cjs", "./shell/body.html", "./shell/platform.html", "./shell/asset-stamps.json", "../db/seed-state.json"] },
   async headers() {
     return [
       { source: "/(.*)", headers: EVERYWHERE },
@@ -87,6 +100,8 @@ const nextConfig: NextConfig = {
       { source: SLUG + "/sign-in", headers: DOOR },
       { source: "/sw.js", headers: sw.headers.filter((h: { key: string }) => h.key.toLowerCase() === "cache-control") },
       { source: "/manifest.webmanifest", headers: man.headers },
+      ...(STAMPED_SOURCE ? [{ source: STAMPED_SOURCE, has: [{ type: "query" as const, key: "v" }],
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] }] : []),
     ];
   },
 };

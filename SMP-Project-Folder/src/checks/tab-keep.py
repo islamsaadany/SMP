@@ -13,10 +13,11 @@ different words on the screen and the swap is visible rather than inferred
       tab still ASKS, and the fresh answer replaces the kept one
   §2  a hand on the kept copy wins: typing into the kept search box stops the
       re-read, so the box and its filter are not swapped away (§35)
-  §3  every other way in reads fresh — changing whose work you look at says
-      "Reading…" as it always did (§369, §48.2)
+  §3  every other way in reads fresh — changing whose work you look at shows
+      My work's grey shape while it reads (§620; it said "Reading…" before)
   §4  a tab left mid-re-read does not write into the next one
-  §5  a refresh starts clean: nothing is kept across a page load
+  §5  a refresh shows the saved copy (§620): at once, marked Updating… and
+      taking no input, then read fresh; and never a copy that is somebody else's
 
 Run:  SMP_CHROME=… python3 qa-run.py checks/tab-keep.py [--break=no-keep|no-refresh|no-hand]
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's copy
@@ -199,7 +200,10 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(int(LAG * 1000) + 300)
     pg.select_option("select[data-workwho]", "b@f.example")
     pg.wait_for_timeout(100)
-    check("changing whose work you look at says Reading, as before", "Reading your actions" in text(pg), text(pg)[:120])
+    # §620, REWRITTEN, NEVER LOOSENED (§218): it still reads fresh — what
+    # stands in the meantime is My work's grey shape, never a "Reading…" line
+    check("changing whose work you look at shows My work's shape while it reads fresh (§620)",
+          pg.evaluate("() => !!document.querySelector('#page .tsk')") and "Reading" not in text(pg), text(pg)[:120])
     wait_for(pg, "Action answer")
 
     print("§4 · a tab left mid-re-read does not write into the next")
@@ -209,10 +213,29 @@ with sync_playwright() as pw:
     t4 = text(pg)
     check("My work is on screen, not the clients' late answer", "Action answer" in t4 and "RHI answer" not in t4, t4[:160])
 
-    print("§5 · a refresh starts clean")
+    # §620, REWRITTEN, NEVER LOOSENED (§218): Islam chose that the console
+    # remembers its tabs between visits. Nothing KEPT crosses a reload (the
+    # kept copy is the page's own nodes); what crosses it is the SAVED copy,
+    # shown at once, marked, taking no input — and still read fresh.
+    print("§5 · a refresh shows the saved copy, then reads fresh")
     pg.reload(); wait_for(pg, "Action answer")
     tab(pg, "clients"); pg.wait_for_timeout(120)
-    check("after a reload Clients reads fresh, nothing kept", "Reading your clients" in text(pg) or not "RHI" in text(pg), text(pg)[:120])
+    s5 = pg.evaluate("() => ({ t: document.getElementById('page').innerText, inert: document.getElementById('page').hasAttribute('inert') })")
+    check("after a reload Clients shows its saved copy at once, marked Updating… and taking no input (§620)",
+          "RHI" in s5["t"] and "Updating" in s5["t"] and s5["inert"], s5["t"][:120])
+    pg.wait_for_timeout(int(LAG * 1000) + 400)
+    s5b = pg.evaluate("() => ({ t: document.getElementById('page').innerText, inert: document.getElementById('page').hasAttribute('inert') })")
+    check("and the latest copy replaces it, unmarked and pressable", "RHI" in s5b["t"] and "Updating" not in s5b["t"] and not s5b["inert"], s5b["t"][:120])
+    # A COPY THAT IS SOMEBODY ELSE'S IS NEVER DRAWN (§620): the saved copy
+    # is relabelled as another person's, and the next arrival must not show it
+    pg.evaluate("""() => { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i);
+      if (k.indexOf('smp.cache.console.') === 0) { const v = JSON.parse(localStorage.getItem(k)); v.email = 'someone.else@f.example'; localStorage.setItem(k, JSON.stringify(v)); } } }""")
+    pg.reload(); pg.wait_for_timeout(120)
+    s5c = pg.evaluate("() => ({ t: document.getElementById('page').innerText, kept: Object.keys(localStorage).filter(k => k.indexOf('smp.cache.console.') === 0).map(k => JSON.parse(localStorage.getItem(k)).email) })")
+    check("a saved copy that is somebody else's is never drawn (§620)", "Updating" not in s5c["t"] and "Action answer" not in s5c["t"], s5c["t"][:120])
+    wait_for(pg, "Action answer")
+    s5d = pg.evaluate("() => Object.keys(localStorage).filter(k => k.indexOf('smp.cache.console.') === 0).map(k => JSON.parse(localStorage.getItem(k)).email)")
+    check("and it is dropped, the console keeping only this person's", len(s5d) > 0 and "someone.else@f.example" not in s5d, s5d)
 
     check("no page errors", not errs, errs)
     br.close()

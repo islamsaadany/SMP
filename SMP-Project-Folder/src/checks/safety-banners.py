@@ -505,17 +505,20 @@ with sync_playwright() as p:
     peek(pg)
     ck("an edit landing does not displace it", "newer version" in banner(pg).lower(), banner(pg))
     # ── 6b · RELOAD SAVES THE FIELD UNDER THE CURSOR FIRST (§258.2) ──────
-    # Setup › Terminology has plain bound inputs; the version caution is drawn
-    # on Setup too, since a stale build is stale everywhere.
+    # §621: Setup › Terminology STOOD HERE and left Setup. The shape screen's
+    # name boxes are the same kind of control — plain bound inputs that write
+    # on change — so the check types into one of those instead; the version
+    # caution is drawn on Setup too, since a stale build is stale everywhere.
     import time as _time
     press(pg, 'button[title="Setup"]'); pg.wait_for_timeout(500)
-    press(pg, "text=Terminology"); pg.wait_for_timeout(600)
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=start]'); if(r) r.click();}"); pg.wait_for_timeout(800)
+    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();}"); pg.wait_for_timeout(900)
     mark = "TYPED-%d" % int(_time.time())
-    box = pg.locator("input.lbl").first
+    box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     ck("a field to type in", box.count() > 0)
     box.click(); box.fill(""); box.type(mark)
     ck("...and it still has the cursor (never blurred)",
-       pg.evaluate("()=>document.activeElement && document.activeElement.classList.contains('lbl')"))
+       pg.evaluate("()=>document.activeElement && document.activeElement.matches('input[data-stlw]')"))
     ck("the version caution is still up on Setup", "newer version" in banner(pg).lower(), banner(pg))
     SEEN["post_delay"] = 0.9; SEEN["post_answered"] = None
     loads0, posts0 = SEEN["loads"], SEEN["posts"]
@@ -537,7 +540,13 @@ with sync_playwright() as p:
     # a failed save keeps the page
     pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
     SEEN["post_status"] = 500; loads0 = SEEN["loads"]
-    box = pg.locator("input.lbl").first
+    # The reload above returns to Getting started (§173) with the flow on its
+    # first step — a step is the flow's own state, never the address — so the
+    # shape screen is opened again before its box is typed into.
+    pg.wait_for_timeout(800)
+    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();}")
+    pg.wait_for_timeout(900)
+    box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     box.click(); box.fill(""); box.type(mark + "-b")
     press(pg, "#safety [data-safety-reload]")
     pg.wait_for_timeout(2000)

@@ -92,6 +92,31 @@ A drift between specs and code is a documentation bug — report it before silen
 - Existing pages keep theirs until Islam asks for a sweep; this rule governs
   what is BUILT from now on.
 
+### 1b-v. HOW A SETUP CHANGE IS MADE: AS YOU GO, ASKED FIRST, OR APPLIED (2026-10-23, §621)
+- **Islam: *"make this a general rule of colors elements"*, and of Setup:
+  *"it should act as per the adjustment unless we are removing something that
+  has data"*.** Three rules, for every Setup page built from now on:
+- **A change takes effect when it is made.** No Save button on a Setup page.
+  A page that already opens with its own Edit keeps it.
+- **ANYTHING THAT SETS A COLOUR WAITS FOR APPLY** — the tenant's colours, the
+  scoring bands, and any colour control built later. Nothing on the page
+  changes before Apply; the row under the area reads *Apply · Discard · N
+  changes not applied yet: …*; after Apply, *Applied · Undo* for about ten
+  seconds; Reset (where there is one) waits for Apply too. Leaving with a
+  colour picked but not applied asks *Apply and continue / Discard changes /
+  Keep editing*. One mechanism: a new colour area is one more entry in
+  `APPLY_AREAS` (config-data.js, wired in shell.html), never a second copy.
+- **THE FLOATING BOX ASKS FIRST, WITH THE IMPACT** (`askFirst`, shell.html):
+  before any change to who may see or do what, giving or taking; and before
+  anything is removed or switched off that holds something written. It
+  names who or what and how many, sits beside the control, is sized to its
+  sentence, and Keep is the safe default. A change that hides nothing
+  written applies at once — asking then is noise.
+- **AND THE SETUP PAGES LOSE THE PARAGRAPHS THEY DON'T NEED, AS EACH IS
+  TOUCHED** (1b-ii, now a sweep that travels with the work): a sentence with
+  a fact in it becomes a hover or goes into the asking box; one that only
+  explains goes; a status (what a switch did, what needs you) stays.
+
 ### 1c. CRITICAL: UI Changes Require Explicit Approval
 - **NEVER change any UI design, layout, styling, or visual element without explicit user approval.**
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**
@@ -122,6 +147,41 @@ A drift between specs and code is a documentation bug — report it before silen
   rows exist and what each means are agreed here, in plain words, first. The
   mockup comes after, and only for how it looks.
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
+
+### 1d. UX RULE: EVERY PRESS SHOWS SOMETHING AT ONCE (2026-10-23, §620)
+- **Islam: *"the navigation between the pages needs to be momentarily we already
+  have this practice of grey skeleton and cashing and background refresh ...
+  apply it here and anywhere else in the platform ... keeping it as a UX rule
+  in claude md"*.** Moving between pages — a console tab, a client, a module,
+  Client settings, back to the console — **never leaves the old page standing
+  still after the press, and never shows a blank page.**
+- **WHAT SHOWS AT ONCE, IN THIS ORDER — the platform's one practice, never a
+  second one:**
+  1. **The page as you left it** — on this visit (the console's kept copy,
+     §400.2) or as you last saw it (a saved copy in this browser, per person,
+     under `smp.cache.`, which sign-in and sign-out wipe: §431 for a client's
+     Strategy, §620 for the console) — marked **Updating…** and taking no input.
+  2. **Else the page's own grey skeleton**, shaped like the page, in the
+     platform's skeleton bars (§94.10: `--line` / `--surface-2`, a 6px corner,
+     the slow pulse).
+  3. **The real page replaces it** the moment its answers land, read behind
+     it — never a "Reading…" line, never an empty frame.
+- **A MOVE THAT LOADS ANOTHER DOCUMENT draws the next page's skeleton AT THE
+  PRESS** (`smp-app/lib/navskel.ts`, on every page type), and **the files a
+  page waits on carry their content hash in their address and are cached for
+  good** (`VERSIONED` in `smp-app/scripts/release-stamp.mjs`, the top bar's
+  and the press drawing's own stamps), so a page paints the moment it arrives
+  instead of asking the server about files that did not change.
+- **NEW WORK INHERITS THIS, IT DOES NOT OPT IN**: a new console tab adds its
+  shape to `tabSkel()` and draws through `go()` (which keeps, saves and swaps);
+  a new module page loads the shared top bar (which carries the press drawing)
+  and adds its shape to `SHAPE` in `lib/navskel.ts`; a new file a page waits
+  on joins `VERSIONED`; a new Processes area sits under `loading.tsx`.
+- **MEASURED, NEVER JUDGED BY EYE**: `smp-app/checks/instant-nav.mjs` presses
+  every move in a real browser throttled to production's round trip (§369's
+  600ms) and reads what the screen shows from the press until the page
+  settles. "Nothing happens" for more than a moment, or "blank" at any point,
+  is a defect — and the check goes red on it.
 
 ### 2. Think Before Acting
 - **Don't follow commands blindly** — analyze requests and challenge if something seems incorrect or risky.

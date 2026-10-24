@@ -85,6 +85,27 @@
     page.appendChild(p);
     return p;
   }
+  /* ── EVERY TAB'S BAND IS HOME'S (Islam, 2026-10-24: "the banner in the
+     home with its size and location stays the same when we go through the
+     modules … with the different content") ────────────────────────────
+     The gold line says what the page holds now, the title is the page's
+     name in the greeting's Georgia, the sentence what it is for, and the
+     right side its counts or its buttons. It keeps the title's own shape
+     (`.ptitle`, an h1, a `.right`) so every control a page puts there, and
+     every check that finds one, is where it was. */
+  function pageBand(text, right, eye, sub) {
+    var h = el("header", "ptitle pgband");
+    var l = el("div", "pgl");
+    var e = el("p", "pgeye", eye || "");
+    l.appendChild(e);
+    l.appendChild(el("h1", null, text));
+    if (sub) l.appendChild(el("p", "pgsub", sub));
+    h.appendChild(l);
+    if (right) { right.className = (right.className ? right.className + " " : "") + "right"; h.appendChild(right); }
+    h.eye = e;
+    page.appendChild(h);
+    return h;
+  }
   function title(text, right) {
     var h = el("div", "ptitle");
     h.appendChild(el("h1", null, text));
@@ -598,7 +619,6 @@
         (j.clients || []).forEach(function (c) { MEM.clientNames[c.key] = c.name; });
         settle(function () {
           var right = el("span");
-          right.appendChild(csSwitch());
           var add = el("button", "btn", "Add one insight");
           add.type = "button";
           add.addEventListener("click", function () { memGo("wiz", { draft: null }); });
@@ -606,7 +626,7 @@
           deb.type = "button";
           deb.addEventListener("click", function () { memGo("deb", { deb: null }); });
           right.appendChild(add); right.appendChild(deb);
-          title("Case studies", right);
+          pageBand("Case studies", right, nOf((j.entries || []).length, "insight"), "What we did for each client, and what we learned doing it.");
 
           /* NOTHING YET — the one sentence on the page, and it is a fact the
              screen does not otherwise state rather than a description of
@@ -628,11 +648,27 @@
           }
 
           page.appendChild(memAskBox());
-          page.appendChild(memFilters(j));
-          if (!j.entries.length) { page.appendChild(el("p", "muted", "Nothing matches that.")); return; }
-          var list = el("div", "elist");
-          j.entries.forEach(function (e) { list.appendChild(memRow(e)); });
-          page.appendChild(list);
+          /* THE SAME CARD AS THE LIBRARY (round three): Case studies ·
+             Insights in its header, the filters in a row under it, the
+             insights as striped rows. */
+          var card = el("section", "hocard cslib");
+          var hd = el("div", "hochd");
+          var hic = el("span", "hocic");
+          hic.innerHTML = NAV_ICON.memory;
+          hd.appendChild(hic);
+          hd.appendChild(el("h2", null, "Insights"));
+          hd.appendChild(el("span", "hocnt", String(j.entries.length)));
+          hd.appendChild(el("span", "sp"));
+          hd.appendChild(csSwitch());
+          card.appendChild(hd);
+          card.appendChild(memFilters(j));
+          if (!j.entries.length) card.appendChild(el("p", "muted mwnone", "Nothing matches that."));
+          else {
+            var list = el("div", "elist");
+            j.entries.forEach(function (e) { list.appendChild(memRow(e)); });
+            card.appendChild(list);
+          }
+          page.appendChild(card);
         });
       });
   }
@@ -1140,40 +1176,50 @@
       if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the case studies.", true); return; }
       settle(function () {
         var right = el("span");
-        right.appendChild(csSwitch());
+        /* THE BAND CARRIES THE TWO ACTS (round three): Ask a question, and
+           Open a piece of work for those who may; Case studies · Insights and
+           the search go to the library card's header. */
+        var askb = el("button", "btn ask", CS.ask ? "Search instead" : "Ask a question");
+        askb.type = "button";
+        askb.addEventListener("click", function () { CS.ask = !CS.ask; drawCases(true); });
+        right.appendChild(askb);
         if (j.canOpen) {
           var add = el("button", "btn amber", "Open a piece of work");
           add.type = "button";
           add.addEventListener("click", function () { memGo("open", { opened: null }); });
           right.appendChild(add);
         }
-        var head = title("Case studies", right);
+        var head = pageBand("Case studies", right, "", "What we did for each client, and what we learned doing it.");
         var done = j.cases.filter(function (c) { return c.state === "done"; });
         var desk = j.cases.filter(function (c) { return c.state !== "done"; });
-        head.insertBefore(el("span", "cscount", nOf(done.length, "case study", "case studies") + " on the shelves"), head.children[1] || null);
+        head.eye.textContent = done.length + " on the shelves" + (desk.length ? " · " + desk.length + " on the desk" : "");
 
-        /* ONE SEARCH ACROSS EVERY CASE STUDY, and Ask beside it (the
-           memory's assistant, over the insights, until it reads case studies
-           too — spec 067 §9). Typing never repaints (§35): the search runs
-           when the box is left or Enter is pressed. */
-        var sb = el("div", "bigsearch");
-        sb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>';
-        var q = el("input");
+        /* THE LIBRARY IS ONE CARD (Islam, 2026-10-24, round three of
+           design-mockups/home/2026-10-24_one-band-everywhere.html): its header
+           holds Case studies · Insights and the search; the industries sit in
+           a row under it; each shelf is labelled over a grey rule, as My
+           tasks' groups are. One search across every case study; typing never
+           repaints (§35): it runs when the box is left or Enter is pressed. */
+        var card = el("section", "hocard cslib");
+        var hd = el("div", "hochd");
+        var hic = el("span", "hocic");
+        hic.innerHTML = NAV_ICON.memory;
+        hd.appendChild(hic);
+        hd.appendChild(el("h2", null, "The library"));
+        hd.appendChild(el("span", "hocnt", String(done.length)));
+        hd.appendChild(el("span", "sp"));
+        hd.appendChild(csSwitch());
+        var q = el("input", "fld");
         q.type = "search"; q.id = "cs-q"; q.value = CS.q;
         q.placeholder = "Search by client, industry, or what we did";
         q.setAttribute("aria-label", "Search case studies");
         q.addEventListener("change", function () { CS.q = q.value.trim(); CS.cat = ""; drawCases(true); });
-        sb.appendChild(q);
-        var askb = el("button", "ask", CS.ask ? "Search instead" : "Ask a question instead");
-        askb.type = "button";
-        askb.addEventListener("click", function () { CS.ask = !CS.ask; drawCases(true); });
-        sb.appendChild(askb);
-        page.appendChild(sb);
-        if (CS.ask) page.appendChild(memAskBox());
-
-        /* THE INDUSTRIES ARE THE SECOND ROW (spec 053's rule for a library),
-           drawn from what is on the shelves, never from every industry there
-           is: a tab that empties the page is not a choice (§61). */
+        hd.appendChild(q);
+        card.appendChild(hd);
+        if (CS.ask) { var ab = memAskBox(); ab.classList.add("inlib"); card.appendChild(ab); }
+        /* THE INDUSTRIES ARE TABS, drawn from what is on the shelves, never
+           from every industry there is: a tab that empties the page is not a
+           choice (§61). */
         var counts = {};
         done.forEach(function (c) { var k = c.client.industry || "No industry set"; counts[k] = (counts[k] || 0) + 1; });
         var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
@@ -1189,32 +1235,38 @@
             a.addEventListener("click", function () { CS.cat = t[0]; drawCases(true); });
             row.appendChild(a);
           });
-          page.appendChild(row);
+          card.appendChild(row);
         }
-
         if (!done.length) {
           var box = el("div", "empty");
           box.appendChild(el("b", null, CS.q ? "Nothing on the shelves matches that" : "No case studies on the shelves yet"));
           box.appendChild(document.createTextNode(CS.q
             ? "Try a client's name, an industry, or a word from the story."
             : "A case study goes on its industry's shelf when its writer marks it done."));
-          page.appendChild(box);
+          card.appendChild(box);
         } else if (CS.cat) {
-          page.appendChild(csShelf(CS.cat, counts[CS.cat], done.filter(function (c) {
+          card.appendChild(csShelf(CS.cat, counts[CS.cat], done.filter(function (c) {
             return (c.client.industry || "No industry set") === CS.cat; }), null));
         } else {
-          page.appendChild(csShelf("Newest", Math.min(4, done.length), done.slice(0, 4), null));
+          card.appendChild(csShelf("Newest", Math.min(4, done.length), done.slice(0, 4), null));
           cats.forEach(function (k) {
-            page.appendChild(csShelf(k, counts[k], done.filter(function (c) {
+            card.appendChild(csShelf(k, counts[k], done.filter(function (c) {
               return (c.client.industry || "No industry set") === k; }), function () { CS.cat = k; drawCases(true); }));
           });
         }
+        page.appendChild(card);
 
-        /* THE DESK: not on the shelves yet. Its rows name the work and who is
-           writing it; the story inside a draft stays the writer's. */
+        /* ON THE DESK IS ITS OWN CARD, its rows striped: work running or being
+           written; the story inside a draft stays the writer's. */
         if (desk.length) {
-          var d = el("section", "desk");
-          d.appendChild(el("h2", null, "On the desk"));
+          var d = el("section", "hocard desk");
+          var dh = el("div", "hochd");
+          var dic = el("span", "hocic");
+          dic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 10v9M19 10v9"/><path d="M8 10V6h8v4"/></svg>';
+          dh.appendChild(dic);
+          dh.appendChild(el("h2", null, "On the desk"));
+          dh.appendChild(el("span", "hocnt", String(desk.length)));
+          d.appendChild(dh);
           desk.forEach(function (c) {
             var r = el("button", "drow");
             r.type = "button";
@@ -2535,6 +2587,7 @@
     name.appendChild(el("h1", null, "My tasks"));
     left.appendChild(wk);
     left.appendChild(name);
+    left.appendChild(el("p", "pgsub", "Your actions across every client's Internal Tracker."));
     var strip = el("div", "mwstrip");
     top.appendChild(left);
     top.appendChild(strip);
@@ -2672,8 +2725,9 @@
       body.textContent = "";
       if (!j.ok) { body.appendChild(el("p", "err", j.error || "Could not read the actions.")); return; }
       m.wk.textContent = j.weekLine || "";
+      var pick = null;
       if (j.people && j.people.length > 1) {
-        var pick = el("label", "mwwho");
+        pick = el("label", "mwwho");
         pick.appendChild(document.createTextNode("Show"));
         var sel = el("select");
         sel.setAttribute("data-workwho", "");
@@ -2685,9 +2739,12 @@
         });
         sel.addEventListener("change", function () { WORK.who = sel.value; go("mywork"); });
         pick.appendChild(sel);
-        m.name.appendChild(pick);
       }
-      var rows = j.rows || [];
+      /* WHAT WAS FINISHED IN THE LAST 30 DAYS comes with the open rows since
+         2026-10-24, for Show done; it is kept apart from them, so nothing
+         that counts or groups what is open ever sees it. */
+      var doneRows = (j.rows || []).filter(function (r) { return r.status === "done"; });
+      var rows = (j.rows || []).filter(function (r) { return r.status !== "done"; });
       /* THE CASE STUDIES THIS PERSON IS WRITING UP (spec 067): My work's
          second source, drawn among the actions by their due date and counted
          with them (lib/my-work.ts writeUps). */
@@ -2697,11 +2754,48 @@
       if (j.unanswered && j.unanswered.length) {
         body.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + " — nothing has been lost; try again shortly."));
       }
-      if (!rows.length && !cases.length) {
-        body.appendChild(el("p", "muted", (j.who && !j.who.self ? j.who.name + " has" : "You have") +
-          " no open actions in any client's Tracker."));
+      var noneOpen = (j.who && !j.who.self ? j.who.name + " has" : "You have") + " no open actions in any client's Tracker.";
+      if (!rows.length && !cases.length && !doneRows.length) {
+        body.appendChild(el("p", "muted", noneOpen));
         return;
       }
+
+      /* ONE CARD, ITS FILTERS IN ITS HEADER (Islam, 2026-10-24, option A2 of
+         design-mockups/home/2026-10-24_my-tasks-filters-header.html: "build
+         A2"), as Clients' Active clients card has them: Show (whose tasks,
+         for an admin), Sort by and a search. The groups are labelled
+         sections inside it, each with a grey rule the card's whole width. */
+      var card = el("section", "hocard mwlist");
+      var hd = el("div", "hochd mwcardhd");
+      var hic = el("span", "hocic");
+      hic.innerHTML = HO_TASKS;
+      hd.appendChild(hic);
+      hd.appendChild(el("h2", null, "Open tasks"));
+      var hcnt = el("span", "hocnt");
+      hd.appendChild(hcnt);
+      hd.appendChild(el("span", "sp"));
+      var setCnt = function () {
+        hcnt.textContent = String(rows.filter(function (r) { return r.status !== "done"; }).length + cases.length);
+      };
+      var search = el("input", "fld mwsearch");
+      search.type = "search";
+      search.placeholder = "Search tasks";
+      search.setAttribute("aria-label", "Search tasks");
+      /* a task found by its words or its client; a group with nothing found is left out */
+      var find = function () {
+        var q = search.value.trim().toLowerCase();
+        Array.prototype.forEach.call(card.querySelectorAll(".mwsec"), function (sec) {
+          var any = false;
+          Array.prototype.forEach.call(sec.querySelectorAll(".mwrow"), function (r) {
+            var hit = !q || r.textContent.toLowerCase().indexOf(q) >= 0 || (sec.getAttribute("data-name") || "").indexOf(q) >= 0;
+            r.hidden = !hit;
+            if (hit) any = true;
+          });
+          sec.hidden = !!q && !any;
+        });
+      };
+      search.addEventListener("input", find);
+      card.appendChild(hd);
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
          (aria-busy) until the server's write lands, and is then drawn again
@@ -2724,12 +2818,25 @@
           var nr = a.row;
           /* what the row was before Done, for the untick */
           nr.was = r.status === "done" ? r.was : r.status;
+          /* A ROW FROM THE DONE GROUP, UNTICKED, goes back among the open
+             ones (and one ticked there again stays): the list is drawn again */
+          var di = doneRows.indexOf(r);
+          if (di >= 0) {
+            doneRows.splice(di, 1);
+            if (nr.status === "done") doneRows.splice(di, 0, nr); else rows.push(nr);
+            mwCount(m.strip, rows);
+            setCnt();
+            said.hidden = true;
+            draw(); find();
+            return;
+          }
           rows[rows.indexOf(r)] = nr;
           var focused = ctl && document.activeElement === ctl;
           var fresh = mwRow(nr, statuses, act);
           row.parentNode.replaceChild(fresh, row);
           mwMeta(fresh.parentNode);
           mwCount(m.strip, rows);
+          setCnt();
           said.hidden = true;
           if (focused) {
             var f = fresh.querySelector(via === "tick" ? ".mwtick" : ".mwst select");
@@ -2743,11 +2850,20 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
-      var head = function (sec, n, name) {
+      /* A GROUP'S LABEL (A2): its name (Late in red), how many are open, and
+         by client a way straight into that client's Internal Tracker, over a
+         grey rule the card's whole width. */
+      var head = function (sec, n, name, late, client) {
+        if (late) sec.classList.add("late");
         var sh = el("div", "mwsh");
-        sh.appendChild(el("span", "ix", (n < 10 ? "0" : "") + n));
         sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
+        if (client) {
+          sh.appendChild(el("span", "sp"));
+          var to = el("a", "holink", "Internal Tracker →");
+          to.href = "/" + client + "/tracker";
+          sh.appendChild(to);
+        }
         sec.appendChild(sh);
       };
       /* BY DATE (Late · This week · Next week and later) or BY CLIENT, one
@@ -2757,6 +2873,7 @@
       var draw = function () {
         list.textContent = "";
         var n = 0;
+        if (!rows.length && !cases.length) list.appendChild(el("p", "muted mwnone", noneOpen));
         /* in date order with the actions, a write-up with no date last */
         var all = rows.map(function (r) { return [r.due || "9999", 0, r]; })
           .concat(cases.map(function (r) { return [r.due || "9999", 1, r]; })).sort(byDue);
@@ -2766,11 +2883,13 @@
             var sec = el("section", "mwsec byc");
             sec.setAttribute("data-client", g.key);
             /* the client's name alone (Islam: "no need for the logo to appear") */
-            head(sec, n, el("h2", null, g.name));
+            sec.setAttribute("data-name", String(g.name || "").toLowerCase());
+            head(sec, n, el("h2", null, g.name), false, g.key);
             g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
             mwMeta(sec);
             list.appendChild(sec);
           });
+          drawDone();
           return;
         }
         ["late", "week", "later"].forEach(function (b) {
@@ -2779,17 +2898,46 @@
           n++;
           var sec = el("section", "mwsec");
           sec.setAttribute("data-bucket", b);
-          head(sec, n, el("h2", null, MW_HEAD[b]));
+          head(sec, n, el("h2", null, MW_HEAD[b]), b === "late");
           mine.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
           mwMeta(sec);
           list.appendChild(sec);
         });
+        drawDone();
       };
-      var bar = el("div", "mwbar");
-      bar.appendChild(sortSwitch(draw));
-      body.appendChild(bar);
-      body.appendChild(list);
+      /* SHOW DONE (Islam, 2026-10-24: "done last week and done in the last
+         30 days but last week is the important one"): a green group at the
+         foot of the card, newest first, each row ticked with the day it was
+         finished; unticking one puts it back among the open ones. */
+      var drawDone = function () {
+        if (TDONE.show === "hide") return;
+        var back = new Date();
+        back.setDate(back.getDate() - (TDONE.show === "week" ? 7 : 30));
+        var from = back.getFullYear() + "-" + ("0" + (back.getMonth() + 1)).slice(-2) + "-" + ("0" + back.getDate()).slice(-2);
+        var got = doneRows.filter(function (r) { return (r.doneDay || "") >= from; })
+          .sort(function (a, b) { return (b.doneDay || "").localeCompare(a.doneDay || ""); });
+        var sec = el("section", "mwsec done");
+        sec.setAttribute("data-bucket", "done");
+        var sh = el("div", "mwsh");
+        sh.appendChild(el("h2", null, TDONE.show === "week" ? "Done in the last week" : "Done in the last 30 days"));
+        sh.appendChild(el("span", "meta", String(got.length)));
+        sec.appendChild(sh);
+        if (!got.length) sec.appendChild(el("p", "muted mwnone", "Nothing finished in that time."));
+        got.forEach(function (r) { sec.appendChild(mwRow(r, statuses, act)); });
+        list.appendChild(sec);
+      };
+      if (pick) hd.appendChild(pick);
+      hd.appendChild(sortSwitch(function () { draw(); find(); }));
+      hd.appendChild(hoSwitch("Done", [["hide", "Hide"], ["week", "Last week"], ["month", "30 days"]], TDONE.show, function (v) {
+        TDONE.show = v;
+        try { localStorage.setItem("smp.tasks.done", v); } catch (e) { /* this device only */ }
+        draw(); find();
+      }));
+      hd.appendChild(search);
+      card.appendChild(list);
+      body.appendChild(card);
       draw();
+      setCnt();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -2847,6 +2995,9 @@
     });
   }
   var HOCL = { show: "mine" };
+  /* My tasks' Show done: hide, the last week or the last 30 days, kept on this device */
+  var TDONE = { show: "hide" };
+  try { var td = localStorage.getItem("smp.tasks.done"); if (td === "week" || td === "month") TDONE.show = td; } catch (e) { /* this device only */ }
   try { if (localStorage.getItem("smp.home.clients") === "demo") HOCL.show = "demo"; } catch (e) { /* this device only */ }
   /* GROUPED BY CLIENT: clients with something late first, then by their
      earliest date, then by name; inside a client, by date. `list` is
@@ -2880,7 +3031,8 @@
     band.appendChild(el("p", "hodate", date));
     var first = ME && ME.name ? String(ME.name).trim().split(/\s+/)[0] : "";
     band.appendChild(el("h1", null, (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "")));
-    band.appendChild(el("p", null, "Your SMP Home."));
+    /* Islam, 2026-10-24, of four sentences: "What needs you today" */
+    band.appendChild(el("p", null, "Here is what needs you today across your clients."));
     page.appendChild(band);
   }
 
@@ -2936,6 +3088,17 @@
     });
     who.appendChild(words);
     row.appendChild(who);
+    /* SETTINGS AT THE FAR RIGHT (Islam, 2026-10-24: "add the settings
+       button on the far right of the table", the sliders mark): the
+       client's own Setup, as the card's Settings on Clients opens it */
+    if (c.canConfig) {
+      var cog = settingsChip(c.name);
+      cog.setAttribute("role", "button"); cog.tabIndex = 0;
+      var setup = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+      cog.addEventListener("click", setup);
+      cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") setup(e); });
+      row.appendChild(cog);
+    }
     return row;
   }
 
@@ -3187,7 +3350,6 @@
     var grid = el("div", "cards");
     grid.dataset.grid = "clients";
 
-    var right = el("div");
     var search = el("input", "fld");
     search.placeholder = "Search clients"; search.style.width = "190px";
     /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
@@ -3201,8 +3363,18 @@
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
-    right.appendChild(search);
-    title("Clients", right);
+    /* THE PAGE'S BAND, Home's (2026-10-24, Islam: "build both as drawn"):
+       what is here in the gold line, the name, a sentence, and + Add a
+       client as its one button. The search moves into the clients' card. */
+    var band = el("header", "pgband");
+    var bl = el("div");
+    var eye = el("p", "pgeye");
+    bl.appendChild(eye);
+    bl.appendChild(el("h1", null, "Clients"));
+    bl.appendChild(el("p", "pgsub", "Every client the office works with, and the way into each module."));
+    band.appendChild(bl);
+    band.appendChild(el("span", "sp"));
+    page.appendChild(band);
 
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
@@ -3248,7 +3420,15 @@
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast });
+      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length ? (archived.length + past.length) + " ended" : "",
+        demos.length ? nOf(demos.length, "demo") : ""].filter(Boolean).join(" · ");
+      if (j.canAdd) {
+        var add = el("button", "btn amber pgadd", "+ Add a client");
+        add.type = "button";
+        add.addEventListener("click", function () { drawNewClient(); });
+        band.appendChild(add);
+      }
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
@@ -3283,10 +3463,20 @@
   }
 
   function clFill(host, d) {
-    var bar = el("div", "clbar");
-    host.parentNode.insertBefore(bar, host);
-    var body = el("div");
-    host.parentNode.insertBefore(body, host);
+    /* ONE CARD HOLDS THE CLIENTS (2026-10-24): its header carries everything
+       that filters them — which, Mine, the search, cards or a list. */
+    var card = el("section", "hocard clcard");
+    var hd = el("div", "hochd");
+    var hic = el("span", "hocic");
+    hic.innerHTML = NAV_ICON.clients;
+    var hname = el("h2");
+    var hcnt = el("span", "hocnt");
+    var bar = el("span", "clbar");
+    hd.appendChild(hic); hd.appendChild(hname); hd.appendChild(hcnt); hd.appendChild(el("span", "sp")); hd.appendChild(bar);
+    card.appendChild(hd);
+    var body = el("div", "clbody");
+    card.appendChild(body);
+    host.parentNode.insertBefore(card, host);
     host.parentNode.removeChild(host);
     var mineOf = function (list, f) { return CL.mine ? list.filter(f) : list; };
     var seat = function (c) { return !!c.seat; };
@@ -3342,14 +3532,17 @@
         });
         view.appendChild(b);
       });
+      if (d.search) bar.appendChild(d.search);
       bar.appendChild(view);
+      hname.textContent = CL.which === "ended" ? "Ended clients" : CL.which === "demo" ? "Demo" : "Active clients";
+      hcnt.textContent = String(CL.which === "ended" ? end.length : CL.which === "demo" ? dem.length : act.length);
 
+      /* + Add a client is the band's button now, so neither view draws it */
       if (CL.which === "ended") body.appendChild(clEnded(end, d.canAddPast));
       else if (CL.which === "demo") body.appendChild(clActive(dem, false, "demo"));
-      else body.appendChild(clActive(act, d.canAdd, "clients"));
+      else body.appendChild(clActive(act, false, "clients"));
       /* a search typed before the switch still applies to what is drawn */
-      var s = page.querySelector(".ptitle .right input");
-      if (s && s.value) s.dispatchEvent(new Event("input"));
+      if (d.search && d.search.value) d.search.dispatchEvent(new Event("input"));
     };
     draw();
   }
@@ -3553,7 +3746,14 @@
      The rows come from the server (lib/modules.ts moduleRows), so the console
      cannot spell a module differently from the switch or from Setup. */
   /* The platform's Settings mark (shell.html ICON_MANAGE), drawn the same here. */
-  function settingsChip(name) {
+  function settingsChip(name, word) {
+    /* on a live card, the word at the foot (2026-10-24); elsewhere the mark */
+    if (word) {
+      var w = el("span", "ccfg word", "Settings");
+      w.title = "Settings";
+      w.setAttribute("aria-label", "Settings for " + name);
+      return w;
+    }
     var cog = el("span", "ccfg ico");
     cog.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
       '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
@@ -3566,6 +3766,10 @@
     var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    /* IN HOME'S LOOK (2026-10-24, Islam: "build both as drawn"): the mark
+       and the name on one line, the modules under them, and the facts in a
+       quiet line at the foot with Settings as a word — the boxed tags and
+       the industry are gone from the card's face. */
     var top = el("div", "ctop");
     if (c.mark) {
       var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; top.appendChild(im);
@@ -3573,17 +3777,16 @@
       top.appendChild(el("div", "cmark", initials(c.name)));
       top.appendChild(el("h2", null, c.name));
     }
-    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    b.appendChild(top);
     var foot = el("div", "foot");
-    var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
-    if (c.kind === "demo") tag("Demo", "demo");
+    var facts = el("span", "facts");
     /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
        to know, and the thing that decides what they can do when they arrive. */
-    if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
-    if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
-    if (!c.canOpen) tag("Listed only");
-    top.appendChild(foot);
-    b.appendChild(top);
+    facts.textContent = [c.seat ? (c.seat === "super" ? "Super user" : "SMO team") : "",
+      c.units != null && c.units > 0 ? c.units + (c.units === 1 ? " unit" : " units") : "",
+      c.canOpen ? "" : "Listed only"].filter(Boolean).join(" · ");
+    if (c.kind === "demo") foot.appendChild(el("span", "tag demo", "Demo"));
+    foot.appendChild(facts);
 
     /* A CLIENT THIS PERSON MAY NOT OPEN GETS NO ROWS AT ALL — there is no way
        in, so there is nothing to draw (§61); "Listed only" already says it. */
@@ -3620,8 +3823,9 @@
       b.appendChild(mods);
     }
 
+    b.appendChild(foot);
     if (c.canConfig) {
-      var cog = settingsChip(c.name);
+      var cog = settingsChip(c.name, true);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
@@ -3630,7 +3834,7 @@
       var open = function (e) { e.stopPropagation(); e.preventDefault(); location.assign("/" + c.key + "/setup"); };
       cog.addEventListener("click", open);
       cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
-      b.appendChild(cog);
+      foot.appendChild(cog);
     }
     return b;
   }
@@ -4583,7 +4787,7 @@
     return post({ action: "consultants" }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not read the list.", true); return; }
       settle(function () {
-      title("Consultants");
+      pageBand("Consultants", null, nOf((j.people || j.consultants || []).length, "consultant"), "The office's people, their seats and what each may open.");
 
       var box = el("div", "tscroll");
       var t = el("table");
@@ -4881,7 +5085,7 @@
          here. Saying so is cheaper than letting an empty page imply that
          nothing has ever been done (§35, §124). */
       if (!acts.length) {
-        title("History");
+        pageBand("History", null, "Nothing recorded yet", "What was done to the clients you can open, and by whom.");
         page.appendChild(el("p", "note",
           "Nothing recorded yet. Every act in this console is recorded from the day " +
           "this page went in \u2014 anything done before that is not here."));
@@ -4897,7 +5101,7 @@
       var count = el("span", "tag", nOf(acts.length, "act"));
       right.appendChild(search);
       right.appendChild(count);
-      title("History", right);
+      pageBand("History", right, nOf(acts.length, "change"), "What was done to the clients you can open, and by whom.");
 
       var box = el("div", "tscroll");
       var t = el("table", "work");
@@ -4960,7 +5164,7 @@
     post({ action: "access" }).then(function (j) {
       clear();
       if (!j.ok) { say(j.error || "Could not read the table.", true); return; }
-      title("Who sees what");
+      pageBand("Who sees what", null, "Seats and pages", "Which pages each seat may open, and who may change them.");
       page.appendChild(el("p", "note",
         "What somebody may do INSIDE a client is the seat they hold on it, set " +
         "on that client's configuration. What is here is the rest — and it is " +
@@ -5132,7 +5336,7 @@
       seg.appendChild(b);
     });
     right.appendChild(seg);
-    var h = title("Copilot settings", right);
+    var h = pageBand("Copilot settings", right, "The method", "How the Copilot thinks and what it may do, the same for every client.");
     h.insertBefore(el("span", "tag", "Same for every client"), h.lastChild);
     if (!canEdit) h.insertBefore(el("span", "tag", "Read only"), h.lastChild);
     if (CP.flash) say(CP.flash.text, CP.flash.bad).setAttribute("role", "status");
@@ -5320,8 +5524,22 @@
       add.addEventListener("click", function () { fwGo("add", { add: fwAddState() }); });
       right.appendChild(add);
     }
-    title("Frameworks", right);
+    pageBand("Frameworks", right, nOf(FW.rows.length, "framework") + " · " + nOf(FW.sections.length, "section"),
+      "The strategy frameworks the office works with, to read or to ask.");
 
+    /* THE LIBRARY IS ONE CARD (Islam, 2026-10-24, round three): Search · Ask
+       it and the box in its header, the section chips in a row under it, the
+       frameworks as striped rows. */
+    var card = el("section", "hocard fwcard");
+    var chd = el("div", "hochd");
+    var hic = el("span", "hocic");
+    hic.innerHTML = NAV_ICON.frameworks;
+    chd.appendChild(hic);
+    chd.appendChild(el("h2", null, "The library"));
+    var hcnt = el("span", "hocnt", String(FW.rows.length));
+    chd.appendChild(hcnt);
+    chd.appendChild(el("span", "sp"));
+    card.appendChild(chd);
     var box = el("div", "fwbox");
 
     /* ONE BOX, TWO QUESTIONS, SWITCHED (decision 2). Searching narrows what is
@@ -5355,8 +5573,9 @@
     box.appendChild(field);
 
     var chips = el("div", "fwchips");
-    if (!asking) box.appendChild(chips);
-    page.appendChild(box);
+    chd.appendChild(box);
+    if (!asking) card.appendChild(chips);
+    page.appendChild(card);
 
     var count = el("p", "fwcount");
     var list = el("div", "fwlist");
@@ -5414,8 +5633,8 @@
       return;
     }
 
-    page.appendChild(count);
-    page.appendChild(list);
+    card.appendChild(count);
+    card.appendChild(list);
 
     /* Every row carries what it is searched on, lowercased once here rather
        than on every keystroke — the same five fields the server sends and,
@@ -5427,11 +5646,13 @@
       b.dataset.hay = [f.name, f.section, f.purpose, f.keyQuestions, f.whenToUse]
         .join(" ").toLowerCase();
       b.dataset.section = f.section;
-      var hd = el("div", "hd");
-      hd.appendChild(el("span", "nm", f.name));
-      hd.appendChild(el("span", "tag", f.section));
-      b.appendChild(hd);
-      if (f.purpose) b.appendChild(el("p", "pp", f.purpose));
+      /* the name with one line of what it is for, its section as a pill, a chevron */
+      var tx = el("span", "tx");
+      tx.appendChild(el("span", "nm", f.name));
+      if (f.purpose) tx.appendChild(el("span", "pp", f.purpose));
+      b.appendChild(tx);
+      b.appendChild(el("span", "tag", f.section));
+      b.appendChild(el("span", "go", "›"));
       b.addEventListener("click", function () { fwGo("one", { one: f.id }); });
       list.appendChild(b);
     });
@@ -5455,6 +5676,7 @@
       });
       /* IT SAYS WHAT IT FOUND, and when it found nothing it says that rather
          than leaving an empty box to be read as a page that failed (§45.2). */
+      hcnt.textContent = String(shown);
       count.textContent = !shown ? "Nothing matches that."
         : shown === FW.rows.length ? nOf(shown, "framework")
         : nOf(shown, "framework") + " of " + FW.rows.length;

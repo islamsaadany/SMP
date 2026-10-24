@@ -297,8 +297,9 @@ with sync_playwright() as p:
     # ── 3 · ADD A CLIENT DRAWS THE CREATE PIECE, POSTS, AND GOES IN ──────
     print("\n§3 · Add a client")
     console(pg)
-    ck("the clients page offers Add a client", bool(q(pg, ".ccard.add")))
-    ck("pressing it draws the create piece on this page", press(pg, ".ccard.add") and bool(q(pg, ".csetup")) and path(pg) == "/platform", path(pg))
+    # the band's button since 2026-10-24 (Home's look), where it was the grid's last card
+    ck("the clients page offers Add a client", bool(q(pg, ".pgband .pgadd")))
+    ck("pressing it draws the create piece on this page", press(pg, ".pgband .pgadd") and bool(q(pg, ".csetup")) and path(pg) == "/platform", path(pg))
     ck("…the client's name is asked", bool(q(pg, ".csetup .rowset input.fld")))
     ck("…the industry is the searchable standard list", bool(q(pg, ".csetup .wzpick .fld")))
     bands = pg.eval_on_selector_all(".csetup .wzband button", "els => els.map(e => e.textContent)")

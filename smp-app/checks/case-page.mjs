@@ -127,7 +127,9 @@ await section("1 · the tab, and the front of the library", async () => {
   await openTab(reader);
   const view = await reader.$eval('.csseg button[aria-pressed="true"]', (b) => b.textContent.trim()).catch(() => "");
   check(view === "Case studies", "it opens on the library, with Insights one press away", view);
-  check(await reader.$(".bigsearch input") !== null, "the front has one search", "");
+  check(await reader.$(".cslib .hochd #cs-q") !== null, "the front has one search, in the library card's header (round three)", "");
+  check((await reader.$$(".cslib .hochd .csseg")).length === 1, "…and Case studies · Insights beside it", "");
+  check(!!(await reader.$('.pgband button:has-text("Ask a question")')), "…and Ask a question on the band", "");
   check(/No case studies on the shelves yet/.test(await reader.textContent("#page")), "with nothing finished, the shelves say so rather than standing empty (§61)", "");
   check(!(await reader.$('.ptitle button:has-text("Open a piece of work")')), "a consultant is not offered Open a piece of work (decision 11)", "");
   boss = await as("boss@forefront.example");

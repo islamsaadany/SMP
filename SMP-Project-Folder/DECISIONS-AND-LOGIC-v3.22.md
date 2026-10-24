@@ -69214,6 +69214,75 @@ Islam, after §620 went live: *"fix the failing tests too"* — the five that §
 
 **§622.1 MERGED TO `main`** 2026-10-24, Islam: *"merge it and put it live"*. `main` had taken §623 (five checks red on correct builds, and a Tracker fault) while this waited; it was merged INTO the branch, the record files COMBINED in number order (§318.7), and the served copies REGENERATED. On the merged tree: `generated-in-step` and `release-stamp` all clear, `built-in-step` all good, `sw.js` parses; shell **426/0** (§623 cleared its two View reds), pages-types 10/0, case-page 60/0, memory-page 42/0, console-record all good; door-landing 141/5, the five identical on `main` (the owner row's Insights eye). Then a clean fast-forward of `main` alone. **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`ed06219e7a3a7532`** (was `419042dbcb16f081`), `/platform-page.js` **299,592** bytes, identical to the generated copy. No `SHELL` bump (the client platform's built file is unchanged); no forced sign-out.
 
+## §622.2 — Titles in Georgia bold; My tasks and Clients in Home's look (2026-10-24)
+
+Islam, of the card titles: *"I don't like it because the font is similar to the notes below can we make the serif bold? and maybe option A with a bigger font"*, then of the three drawn more (`design-mockups/home/2026-10-24_fonts-and-one-look.html`): *"I like the georgia bold option"*. Home's card titles, and the new ones on My tasks, are **Georgia, bold, 19px**; the greeting keeps Georgia at its regular weight. Georgia is on every computer and looks the same on each, which the first serif (Iowan Old Style on a Mac, Palatino on Windows) did not. One rule carries it, so a later change is one line.
+
+And *"for the other modules build both as drawn"*:
+
+**MY TASKS.** The band is Home's greeting band (the week as its gold line, "My tasks", a sentence, the circles at its right, the counts); each group is a card with its header inside — an icon (red for Late), the name and its count — and, sorted by client, each client is a card with **Internal Tracker →** straight into that client's Tracker. The rows are unchanged. Sort by stays on its own line under the band.
+
+**CLIENTS.** The band names the page, says what is here ("4 active clients · 1 ended · 1 demo") and carries **+ Add a client** as its one amber button — the dashed card at the end of the grid, and the list's own Add button, are gone. **One card holds the clients**, its header carrying Active · Ended · Demo, Mine, the search and cards or list, its title saying which ("Active clients", "Ended clients", "Demo") with the count. **A client card** is the mark (or the logo, still drawn larger) and the name on one line, its modules, and a quiet foot: "Super user · 10 units" and **Settings as a word**; the boxed tags and the industry are gone from its face (the search still finds a client by its industry). Every card's top is the logo's height, so a card with a logo and one without line up.
+
+Checks, rewritten never loosened (§218): `shell.mjs` 428/0 (new lines for both pages and the font, asked of the computed style; + Add a client pressed on the band); `platform-cards.py` 30/0 (the way to add is the band's button and not a card among the clients; Settings is the word at the foot, a target 24px tall; the search typed in the card's header); `client-setup-outside.py`, `multi-client.py` press the band's button; `client-card-modules` 23/0, `client-archive`, `tab-keep`, `console-boot` 13/0, case-page 60/0, memory-page 42/0, pages-types 10/0, console-record green. Not merged.
+
+## §622.3 — My tasks: one card, its filters in its header (option A2) (2026-10-24)
+
+Islam: *"don't we have filters like the clients which can be a header like in the active clients?"* — drawn four ways (`design-mockups/home/2026-10-24_my-tasks-filters-header.html`: A, A2, C with and without icons, B), and *"build A2"*. My tasks is **one card, "Open tasks"** (Georgia bold, with its count), whose header carries **Show** (whose tasks, for an admin — moved off the navy band), **Sort by** and a new **Search tasks**, as Clients' Active clients card carries its filters. The groups (Late in red, This week, Next week and later; or each client, with Internal Tracker → on its line) are labelled sections inside the card, each over a **grey rule the card's whole width**, as the heavy rule under each heading ran on My tasks before the cards. The band keeps the week, the name, its sentence and the counts. The search finds a task by its words or its client, and a group with nothing found is left out; it is applied again when Sort by changes. Ticks, statuses and rows are unchanged. `shell.mjs` 429/0: one card titled Open tasks in Georgia bold with its count, its filters in its header, three groups over a grey rule (its width asked as at least a pixel, since the console's 80% zoom reports 2px as 1.25px), the search finding "MW far off" alone, Sort by pressed in the card's header. `tab-keep`, `console-boot`, case-page, pages-types green. Not merged.
+
+## §622.4 — Round three: one band on every tab, striped rows, Show done, settings on Home, Case studies and Frameworks as cards (2026-10-24)
+
+Islam asked for six things in one message: the settings button at the far right of Home's clients; rows alternating light grey and white, starting with light grey, on Home's clients and tasks and in My tasks; Case studies and Frameworks redesigned in this look; Home's band staying the same size and in the same place on every module; a better sentence than "your SMP Home"; and a button on My tasks to show done tasks. Drawn in `design-mockups/home/2026-10-24_one-band-everywhere.html`. His answers: *"What needs you today"*, the band on *every console tab*, done *"last week and done in the last 30 days but last week is the important one"*, the *sliders icon*; then *"ok for all proceed"*.
+
+**ONE BAND, ONE SIZE, ONE PLACE.** `pageBand(text, right, eye, sub)` draws Home's navy band (gold eyebrow, Georgia title, quiet sentence, the two circles, the page's acts on the right) on Clients, Consultants, Who sees what, Case studies, Insights, Frameworks, Copilot settings and History; My tasks keeps its own band, now with the same padding. On a computer every band is Home's measured height (113px before the 80% zoom) with the same padding and margin, so its top, height and title stay where they were when you change tab. A phone lets the band grow with its contents.
+
+**HOME'S SENTENCE:** *"Here is what needs you today across your clients."* The shell check that asserted the old words now asserts these (rewritten, not loosened, §218).
+
+**STRIPED ROWS, GREY FIRST,** with a new `--zebra` token (light #F4F6F9; dark #1F2531). They apply to Home's client lines and tasks, every group of My tasks (restarting under each group), On the desk, Insights and Frameworks. Hover still uses `--surface-2`.
+
+**SETTINGS AT THE FAR RIGHT OF A CLIENT LINE ON HOME:** the sliders mark (`settingsChip`), shown only where the server says this person may configure the client (`canConfig`). It opens the client's Setup, as the client card's Settings does.
+
+**SHOW DONE ON MY TASKS.** The Open tasks header gains *Done: Hide · Last week · 30 days*, kept on the device (`smp.tasks.done`), Hide by default. `lib/my-work.ts` now also sends this person's actions finished in the last 30 days, with the Cairo day each was finished (`done_at`), and the open count leaves them out. The finished ones are a green group at the foot of the card, *Done in the last week* or *Done in the last 30 days*, newest first. A tick undone from there moves the task back into the open groups.
+
+**CASE STUDIES:**
+- The library is one card, *The library*. Its header holds Case studies · Insights and the search.
+- The industries are chips in a row under the header. Each shelf is labelled over a grey rule, as My tasks' groups are.
+- *On the desk* is its own card with striped rows.
+- The band carries *Ask a question* (it opens the ask box at the top of the library) and *Open a piece of work* for those who may.
+- Insights is the same card with its filters in a row and the insights striped.
+
+**FRAMEWORKS:**
+- The band's eyebrow says *N frameworks · K sections*.
+- One card, *The library*, carries Search · Ask it and the box in its header, with the section chips in a row under it.
+- Each framework is a striped row: its name, one line of what it is for, its section as a pill in sentence case, and a chevron.
+- The count shows in the header and in a line above the rows. Asking still draws its answer under the card.
+
+**WHERE.** `platform.html` (`pageBand`, `hoHello`, `hoClient`, `drawMyWork`'s `drawDone` and the Done switch, `drawCases`, `drawMemList`, `fwPaint`, the round-three CSS block), `smp-app/lib/my-work.ts` (done rows of the last 30 days, `doneDay`).
+
+**CHECKED.** Every built copy was regenerated and `next build` was run before each run.
+- **New in `checks/shell.mjs`:**
+  - Each My tasks group starts light grey.
+  - Done is hidden until asked for.
+  - *Last week* lists the action finished 3 days ago and not the one finished 20 days ago (new in the made state, with `done_at` stamped), and never somebody else's.
+  - *30 days* lists both, newest first.
+  - *Hide* puts them away again.
+  - Home's client lines start light grey and alternate.
+  - The sliders sit at the far right of the line.
+- **Red run:** with the stripes removed and the week cut-off made 30 days, those lines fail (4 red, against 1 red with them in place); the code was then put back.
+- **`checks/case-page.mjs`:** "one search" is now the search in the library card's header, with Case studies · Insights beside it and Ask a question on the band.
+- **Results:**
+  - shell 433/1, the one red being `main`'s own (§624's Copilot row).
+  - door-landing 136/5, `main`'s own five (the owner row's Insights eye).
+  - case-page 62/0, memory-page 42/0, frameworks-page 64/0.
+  - console-record, insights-tab 24/0, module-look 138/0, view-as 33/0, viewing-as-bar 54/0, pages-types 10/0, instant-nav 19/0, quick-open 19/0, office-standing 7/0.
+- **Screenshots:** every tab at 1440px and 390px. Each band sits at the same top with the same height on a computer, no tab scrolls sideways on a phone, and no page error.
+
+**§622.4 MERGED TO `main`** 2026-10-24, Islam: *"merge it and put it live"*.
+- `main` had not moved (`c983218f`), so this was a clean fast-forward to `5c2d889c`.
+- Before the merge, `sw.js` and the asset stamps were regenerated for this build and committed. Then `generated-in-step` and `release-stamp` read all clear, `built-in-step` read all good, and `sw.js` parses.
+- **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`d32a1ea24c6dfe22`** (was `2cd7c3a5be23adeb`), `/platform-page.js` **312,398** bytes and `/shell.js` **5,247,154**, both identical to the generated copies.
+- No `SHELL` bump (the client platform's built file is untouched); no forced sign-out.
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.
@@ -69241,6 +69310,117 @@ Islam, of Client set-up: *"I recommend for the client setup to have them as 3 se
 **CHECKED.** New: `checks/client-group.py` (own server, the client's rail scoped as the client settings link scopes it) — the rail's three groups and their rows; Profile's tabs and what each holds; Brand's what-follows and readable once a colour is applied; a tab switch with a colour waiting asks and Keep editing stays; the word in the box both ways and clearing writing the product's word; Capabilities on the rail with a record and off without; the Caps column and its chooser line both ways — **0 red here, 20 on main's build**. Rewritten to the decision (§218, what each line was for kept): `client-setup` (§1 the group and its count at both ends, probed; §2 Profile's tabs; §3 the Brand tab; §4–§6 leaving writes, is refused by name, and lets go once the row is named; §7 no Done) — 0 red here, 16 on main's; `team-page` §6 (one page, in People & access, and a refusal the stand-in server makes is SAID on it); `setup-per-module`, `setup-rail`, `structure`, `setup-live-rows`, `ask-and-apply`, `brand-served`, `wave3` (the Brand and Modules tabs); `smp-app/checks/modules.mjs` (the band on the Modules tab); the shape step reached through the rail in `detail-layers`, `direction-overview`, `fn-sw-default`, `functions-compete`, `how-we-compete`, `pillar-split`, `plan-level`, `plan-switch`, `safety-banners`, `several-outcomes`, `shape`, `single-company`, `tactic-requirements`, `terminology`, `top-plan`, `top-projects`, `years`. Type lists re-recorded after the console's reach walk read every new name as guarded: +3 `LABELS`, +2 `labelDefault`, and four gone with the removed `isDone` and the office count. Also `deck-dividers` (the Brand tab) and `smp-app/checks/door-landing.mjs` §7 (the client group first and its count, Profile's tabs, the Brand and Modules tabs, no Done, the old mark moving nothing) — **door-landing needs a database and was NOT run here** (§54.5); its syntax is checked and nothing more. **On this tree:** 62 browser checks — this change's and the 35 main added or changed since §621 — **60 green**; `setup-live-rows` 2 red (the Capabilities lines), identical on main's own build. `qa.py` ERRORS none; `check:pages-types` 10/0, `check:rules-types` 2/0, `check:app-types` 4/0, `check:modules` 234/0, `generated-in-step` all clear; `check:setup` 1 red, main's. `check:shell`, `check:state`, `check:unsaved`, `check:saves`, `check:look`, `check:instant` and `door-landing` need a database. `SHELL` `smp-shell-v7.09-ask-and-apply` → **`smp-shell-v7.10-client-group`**, held by no commit in any ref.
 
 **§624 MERGED TO `main`** 2026-10-24, Islam: *"merge to main"*. `main` had moved while this waited — §622.1 and another session's §623 (five checks red on correct builds), which took this entry's number — so it was renumbered §623 → §624 BEFORE the merge (§264.3; every §623 on the branch was this work's, the branch having been cut before main's), `main` merged INTO the branch, the record files COMBINED in order (§318.7), the built file, the served copies and the asset stamps REGENERATED (§329). Main's changes were the console's and the Tracker's; the strategy page's built file differs from the one the sweep above ran on only by the renumbered comments. Re-run on the merged tree: `client-group`, `client-setup`, `team-page`, `client-setup-outside`, `console-boot`, `setup-per-module`, `setup-rail`, `ask-and-apply`, `brand-served` green; `check:pages-types` 10/0, `rules-types` 2/0, `app-types` 4/0, `modules` 234/0, `generated-in-step` all clear; `check:setup` 1 red, main's. `SHELL` **`smp-shell-v7.10-client-group`**, past main's `v7.09`. Migrations 031 / 051 apply at the deploy. No forced sign-out: no rule about who may save what changed. Whether production serves it is not read from here.
+
+## §625 — The company's own data described, and its capabilities (2026-10-23)
+*Numbered §615 on the branch; `main` took §615–§624 while it waited, so it is §625 (§264.3).*
+
+Islam: *"now describe the company's own data too"*, then, asked what that meant and told in plain words, *"go ahead"*. It is §602's NOT DONE, first item.
+
+**WHY IT MATTERED MORE HERE THAN ANYWHERE.** `GROUP` is declared as an object literal in a JavaScript file, and to the checker such a literal is OPEN: any name read or written on it was accepted. So **a misspelt company setting was never caught**, and the server keeps whatever arrives (`org.extra`, §52). Every setting the product has added since the first version lives on this one object.
+
+**WHAT IS DESCRIBED** (`lib/state.d.ts`, types only, the pages untouched; the page check labels `GROUP` as `SMP.Group` in the copy it reads):
+- **`Group`**: the six fields the server keeps in columns (`org`, `horizon`, `asOfQuarter`, `aspiration`, `endInMind`, `mission`); the five it keeps as tables (`clauses`, `keyObjectives`, `themes`, `capabilities`, `weighting`); and everything found riding `extra`: the company's own plan (`items`, `topProjects`, `swot`), Client set-up › Structure (`structure`), each division's Foundation (`coFound`), the mark and the palette (`logo`, `branding`), the email wording (`comms`), the chat (`chat`), the knowledge base's pen (`kb`), four switches (`lineOwners`, `naming`, `focusOff`, `driversOn`), `seasons`, `mainbus`, figure `sets`, `claims`, `values`, the demo's portfolio and theme read-outs, and `videoHosts`.
+- **`Capability`**: its columns (`id`, `name`, `def`, `fn`) and what it carries in `extra`: owner and custodian (`head`, `custodian`), `navName`, `active`, `format`, `items` (its pillars-format plan), `projects`, `actions`, `capKind`, `serves`, and the two in-memory scores (`perf`, `exec`).
+- **`CompanyFoundation`**, **`Theme`**, **`WeightFactor`**, and **`WeightRow`** (a unit's row carries a value per factor KEY, which is the client's own word, so those names are open by design).
+- **Objectives**: a capability's carry a `weight` (a column), the company's a `group` (the Temple's heading, §611).
+- **Two gaps in §602's own description**: a unit's Purpose is stored as `mission` (§478), which §602 missed because the pages reach it as a quoted name; and a pillar folded into the company's plan records `fromUnit` and `fromId` (§447.1).
+- **`structure` is described as a map of levels, not field by field**: the shared rules read it, untyped. Its inside belongs with `lib/rules.js`, where it is used.
+
+**WRITTEN BY ASKING THE CHECKER, AS §602 WAS.** It started from the server's columns and the demo literal's twenty fields. The first run gave **182 findings**, and every field was READ at its sites before it was listed. Three more rounds left 30.
+
+**WHAT REMAINS, READ AND RECORDED: TWO HABITS OF THE PAGES, NOT MISSING FIELDS.**
+- **13**: a reader handing back a shared frozen empty (`comms()`), or a writer minting `{}` and filling it on the next line (`coFound`, `branding`).
+- **17**: a list or a target mixing real records with the unit-like views and the holders built for a function, a capability or the company. Those are still not described.
+- **8 recorded findings went**: the checker guessing the company's shape from the demo sample, the weighting rows among them.
+- The strategy list is 128 findings (106 before: 30 in, 8 out). The list's note says which habit is which.
+
+**PROVED.** Two planted faults, a misspelt company setting (`GROUP.chatt`) and a misspelt capability field (`c.custodain`). **With the check as it stood before today, NEITHER is caught. With the description, both are**, and the checker names the right word (TS2551, *did you mean*). `--red`: 22 of 22, run after the new list was recorded, so each is red for its own break and not for an unread finding. Rules-types and app-types are unchanged and green.
+
+**WHAT READING THE SITES TURNED UP. Nothing was changed; these are for Islam.**
+1. **The Copilot's Directions chat stores a capability's chosen owner in `fn`**, the field §544.13 retired ("no function holds a capability"). Spec 064 §8 named that field `ownedBy`.
+   - `fn` still decides three things on the function's side: Setup's capability count for a function; whether an otherwise empty function shows in the navigation; and **"Clear all plans" on a function, which also clears a capability whose `fn` names it**. The plan is archived first, so Restore brings it back.
+   - **Measured by calling the code in the page, not through the chat's screens:** a capability given Finance took Finance's count from 0 to 1. Clearing Finance's plans then emptied the capability's objectives (1 → 0).
+   - The demo build sets `fn` on every capability as it loads (`CAP_FUNCTION`), so in the demo *Product Mindset* is Marketing's.
+   - The same chat stores a direction's owner as `ownedBy`, as the spec says, and a capability's `capKind` and `serves`. **Nothing on the plan reads any of the three yet.**
+2. **`videoHosts` is read by the deck and written by nothing**: §261.1 left the storage page's control for later. Harmless (the list is empty), but the comment above its reader says Setup sets it.
+3. **A restore writes `actions` onto any holder it restores**, so a capability can carry an empty `actions` list that nothing reads.
+
+**WHAT IT COSTS FROM NOW ON.** A new company setting goes into `lib/state.d.ts` in the same edit as the code that first writes it, or the check fails and names it.
+
+**NOT DONE.** The unit-like views and holders (the 17 above); `FUNCTIONS`, `PEOPLE` and `COMPANIES`; the server and the app reading `lib/state.d.ts` themselves.
+
+Not merged; `main` stays untouched until Islam says.
+
+## §626 — The Copilot sets a capability's Owner, a person, never a function (2026-10-24)
+Islam: *"fix the copilot owner as you recommend and put it live"*. The recommendation (§625's first finding): a capability's owner, chosen in the Copilot's Directions chat, is **the person its page shows as Owner**, written through Setup's own door. It is not a function written into `fn`, which §544.13 retired.
+
+**WHAT CHANGED.**
+- **The chat's Capabilities table picks an Owner from the register**: every active person, the same pool Setup › Capabilities' picker offers. The column says *Owner*. A Direction's row still picks a function, as spec 064 §8 has it.
+- **The model still names a function, and it arrives as that function's head** (`modelCaps`; the page now sends each function's head with its key). Where the function has no head, the row has no owner, and the to-do says *owners to set* rather than claiming one.
+- **The save writes the Owner with `grantPersonRole(person, "capowner", "cap:<id>")`**, Setup's own door (§33, §412), and **never writes `fn`**.
+- **The saved record names the person** (the page sends the owners' names with the save).
+- **The Execution chat lists a capability by its Owner.**
+- **A row saved in an open chat before today holds a function's key.** It reads as that function's head, so the pick is not lost.
+- **Who may save is unchanged.** The authoriser files a capability's `fn` and `head` in the same class (`CAP_SETUP`).
+
+**WHAT IS NOT CHANGED, SAID SO IT IS NOT MISTAKEN FOR DONE.** A capability that already carries an `fn` keeps it (§405: hidden, never cleared). The demo build still sets one on every capability as it loads (`CAP_FUNCTION`). So **"Clear all plans" on a function still clears a capability whose `fn` names it** (archived first), and Setup still counts it under that function. That coupling is §544.13's to finish, not the Copilot's.
+
+**PROVED, ON A REAL DATABASE.** A local Postgres 16, built from scratch by `db/apply.mjs` (roles, schema and every migration), so the two checks that need one ran here for the first time this session.
+- **`checks/copilot.mjs`: 335 passed, 0 failed** (332 before, three added).
+  - the model's function becomes its head, and none where it has no head or is off the list;
+  - the same through the server's own `capSuggest`;
+  - the saved record names the person (*Noran Hassan* in the check), not a key.
+  - **With the server files as they were: 332 passed, 3 failed**, each of the three. The record read *"· IT"*, a function.
+- **`checks/shell.mjs`: 412 ok, 0 failed** (409 before). It drives the real chat in a browser:
+  - the Owner picker offers the register's active people, every one and nothing else (33);
+  - the person picked is stored on the row;
+  - after Save, the capability's Owner is that person and `fn` is not written.
+  - **With the old `copilot.js`: 2 failed.** The picker offered 8 functions, and the capability came back `{"head":null,"fn":"finance"}`.
+- **The first draft of the picker assertion was wrong, and was rewritten, not loosened.** It also demanded "no option is a function's key", but the seed's person `smo` has the same key as the SMO function. It compares with the register now.
+- The type checks are clean: the page check 10/10, app-types, rules-types, and the app's own `tsc`.
+
+**A LESSON FROM THE MERGED RUN: `checks/shell.mjs` SERVES THE APP'S LAST PRODUCTION BUILD.** It runs `next start`, which reads `.next`. The `.next` here was a day old, so every run above put today's browser code (the served `shell.js`, read from disk) in front of yesterday's server. The browser half of §626 is what those assertions test, so they stand: they failed with the old `copilot.js` and passed with the new one. But the first run of the merged tree **read 5 failures that were the old build, not the code**. After `next build` of the merged tree: **423 ok, 1 failed**.
+
+**THAT ONE IS `main`'s, PROVED, NOT ASSUMED.** `main` alone, in its own worktree with its own fresh build, reads **420 ok, 1 failed, the same assertion**: *"the client's settings draw the Copilot row with its switch"*. §624 put the module switches behind Profile's **Modules** tab (`client-setup.js` draws the rows when that tab is open), and the check still looks for them on the page without opening it. **The product is fine** (by reading the code); the check is stale. No fix for it exists yet, and it is not this change's to widen into.
+
+**MERGED TREE** (`main` §613–§624 merged INTO the branch; records combined in number order; built file and served copies regenerated):
+- `pages-types` 10/10 with no new findings from `main`'s work;
+- rules-types, app-types and `tsc` clean;
+- `copilot.mjs` 335/0;
+- `shell.mjs` 423/1, the 1 `main`'s;
+- 18 browser checks (structure, capabilities, values, compete, proration, the cycle, the tours), all green;
+- `qa.py` no errors; `built-in-step` all good; `release-stamp` all clear;
+- `test:rules` 152/3 and `setup-shape` 48/1, both as before (§603).
+
+Not merged; `main` stays untouched until the release below.
+
+**§625 AND §626 MERGED TO `main`** 2026-10-24, Islam: *"fix the copilot owner as you recommend and put it live"*. §625 (the company's data described) was on the branch unreleased and goes with it; it changes nothing anybody sees. `main` moved while this waited, §613 to §624, which took both numbers this went in under (§615, §616), so the branch was renumbered §625 and §626 before the merge (§264.3). `main` was merged INTO the branch; the record files were COMBINED in number order, never picked (§318.7); the built file, `shell.js` and `smp-app`'s `sw.js` were REGENERATED. SHELL `v7.11-capability-owner`, held by no commit in any ref's history (§94.16). The one red on the merged tree, `shell.mjs`'s Copilot-row assertion, is `main`'s (above), named here so the release does not carry it as its own.
+
+**LIVE, READ AS SEEN** (§91.5): about a minute after the push, `https://smp-orpin-tau.vercel.app/sw.js` serves release `a24d7c0e1cc8daf3`, the local build's own; `/shell.js` is **5,247,154 bytes**, the local build's exact count, and carries `dvCapOwner`; `/api/state` with no client answers *"That client is not available."*, as it should. The server half (the chat's owner mapping) rides the same deployment and cannot be read from outside without signing in.
+
+**§622.2 AND §622.3 MERGED TO `main`** 2026-10-24, Islam: *"merge it and put it live"*. `main` had taken §623–§626 while this waited; it was merged INTO the branch, the record files COMBINED (§318.7), and the built file and served copies REGENERATED. On the merged tree: `generated-in-step`, `release-stamp` all clear, `built-in-step` all good, `sw.js` parses; shell 426/1 and door-landing 136/5, every red identical on `main` built alone (shell's "the client's settings draw the Copilot row with its switch", which §624 moved; door-landing's owner-row Insights eye); pages-types 10/0, case-page 60/0, memory-page 42/0, console-record, tab-keep, client-card-modules 23/0, client-archive, platform-cards 30/0, client-setup-outside, console-boot 13/0 green. Then a clean fast-forward of `main` alone. **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`2cd7c3a5be23adeb`** (was `a24d7c0e1cc8daf3`), `/platform-page.js` **304,381** bytes and `/shell.js` **5,247,154**, both identical to the generated copies. No `SHELL` bump (the client platform's built file is `main`'s own); no forced sign-out.
+
+## §627 — The squeezed strip in a neutral grey, its directions told apart by an inset hairline (2026-10-24)
+
+Islam, of the strip of directions on a squeezed window (§609, §618): *"the highlighting color should be relevant to the customer brand colors, and for the banner with the directions or any other rail element an enhanced design to show somehow a separator between the directions, maybe we have them in separate cards or a light grey separator"*.
+
+**WHY IT IGNORED THE BRAND.** The open item's fill and the strip's outline were `--stone`, which the navy palette sets to the house navy and which `brandTokens()` never rewrites (it writes only the `--gold*`, `--on-accent`, `--accent-glow` and `--panel*` families). In the shipped navy palette `--stone` and `--panel` happen to be the same navy, which is why nothing looked wrong until a tenant's bar was another colour: drawn with a green bar, the chrome went green and the strip stayed navy. The Plan switch in Foundation | SWOT | Drivers | Plan (§409.3) borrowed the same token and had the same fault.
+
+**DRAWN** (design-mockups/brand-strip/2026-10-24_strip-in-tenant-colours.html, nine options on the real Plan page under a green-and-amber tenant; then design-mockups/brand-strip-live/2026-10-24_strip-options-live.html, the same page with a panel of switches so every combination could be pressed, Islam: *"please create a working mockup with switches with the options to see it more live"*). Fills: the tenant's bar colour, a dark grey, a light grey, type only, the accent. Separation: none, a full-height hairline, an inset hairline, separate cards. The outer line matching the fill or a hairline; the Plan switch fixed the same way or not.
+
+**CHOSEN.** Islam, first: *"the actual color of the client might be too much .. suggest other neutral colors as well. like dark grey or something"*; then: *"dark grey with the accent line beneath, separation hairline inset, outerline same as fill, fix the plan switch the same way"*.
+
+**THE RULE.**
+- The open item's fill and the strip's outer line are `--ink-2`, the palette's second ink — body text's own grey — with `--surface` type, under the accent edge the item always had. Neutral under any tenant's colour; the tenant shows where it already does, in the chrome above and the accent edge beneath. In the dark palettes the second ink is light and `--surface` dark, so the fill inverts with the theme, as the switch's does.
+- Between every closed direction and its neighbour, a 1px hairline in `--line` stopped 9px short of the strip's top and bottom, drawn as the item's own `::before`; the items' 2px gap closes to nothing. None beside the open item on either side: its fill is its edge.
+- The Plan switch's selected segment takes the same `--ink-2` fill (arrange.css, `.secseg`), so the two selected states agree as §609 intended.
+- With no branding set, in the slate palette, nothing visible changes: there `--stone` and `--ink-2` were already the same grey.
+
+**NOT TAKEN.** The tenant's bar colour as the fill: correct in principle, too much inside the page under a strong brand. Separate cards: the clearest separation, but their gaps and borders cost each name about 30px, so at 1100 every name wrapped and the pinned strip grew from 46px to 80px. The accent as the fill: the accent is the platform's attention colour (the Reporting button, a cycle asking for something), so an accent-filled direction read as a warning. Type only: walked back §609's clearer highlight.
+
+**CHECKED.** `strip-stays` reads the open item's ground and the pinned outline as `--ink-2` now, and the closed items' ground as not it; green at 1100, 900 and 760, editing, and 1440. `tab-row` green in both themes. The served `platform.css` regenerated by `sync-css.mjs`, `sw.js` restamped, `release-stamp` green. Branch only; not merged.
+
+**§627 MERGED TO `main`** 2026-10-24, Islam: *"merge and put live"*. `main` had taken §622.4 while this waited (five commits); it was merged INTO the branch, the record files COMBINED (§318.7: the progress file's two newest entries kept in order, the decisions log merged clean with §627 still last), and the built file, `platform.css`, `shell.js` and `sw.js` REGENERATED. On the merged tree: `generated-in-step` and `release-stamp` all clear, `built-in-step` all good, `strip-stays` all good at 1100, 900, 760, editing and 1440, `tab-row` all good in both themes. Then a clean fast-forward of `main` alone, `cbad7ea` to `3e62fe1`. **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site about forty seconds after the push: `/sw.js` release **`0c489c8462e46f64`** (was `d32a1ea24c6dfe22`); `/platform.css` **871,736** bytes, `/shell.js` **5,247,154** and `/platform-page.js` **312,398**, all three byte-identical to the generated copies, and the served stylesheet carries the inset hairline's rule and the switch's grey. No `SHELL` bump (no script changed); no forced sign-out.
 
 ## §628 — The Client register, with Forefront one switch away; a client's own icon (2026-10-24)
 Islam, of the mockup *Client register and icon* (`design-mockups/client-register-icon/`): *"1. ok 2. B 3. ok for the client icon"* — the People register renamed, its Forefront rows behind a switch, and an icon of the client's own for the console Home's small squares. His items 4 and 5 were questions, answered by a second mockup and not built (below).

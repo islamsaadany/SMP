@@ -1,0 +1,158 @@
+<title>My Tasks Filters Header</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* My tasks with its filters in a card header, as Clients' Active clients
+   card has them (Islam, 2026-10-24). Today's built page beside two ways. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--title:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1180px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:88ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:0 0 20px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.opt{margin:0 0 32px}
+.lab{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.lab.after{color:var(--good)}
+.rec{font-size:10px;letter-spacing:.08em;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 8px}
+.why{margin:8px 0 0;font-size:13px;color:var(--ink-2);max-width:92ch}
+.why b{color:var(--ink)}
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:12px;background:var(--ground);box-shadow:var(--frame-shadow);padding:16px 18px 6px}
+
+.band{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:15px 22px 16px;margin:0 0 14px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035)}
+.band > *{position:relative}
+.eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font-size:24px;font-weight:650;letter-spacing:-.01em;line-height:1.15}
+.band .who{font-size:13px;font-weight:500;color:var(--ff-quiet);margin-left:10px;vertical-align:4px}
+.band .who b{color:var(--ff-ink);font-weight:600}
+.band p{margin:3px 0 0;font-size:13px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.strip{display:flex;gap:20px}
+.strip div{text-align:right}
+.strip b{display:block;font-size:19px;line-height:1}
+.strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.strip .lt b{color:var(--ff-late)}
+
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sort{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.pick{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.pick::after{content:"";border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--ink-3)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:170px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 14px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.cic.late{background:var(--bad-bg);color:var(--bad)}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.chd.sub{background:var(--surface-2);border-top:1px solid var(--line-soft);padding:8px 14px}
+.chd.sub .cic{width:26px;height:26px}
+.chd.sub h2{font-size:17px}
+.chd.sub.late h2{color:var(--bad)}
+.grp.ruled{border-top:0;border-bottom:2px solid var(--line);padding:14px 14px 7px;margin:0}
+.grp.ruled:first-of-type{padding-top:10px}
+/* groups inside one card */
+.grp{display:flex;align-items:center;gap:8px;padding:10px 14px 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);border-top:1px solid var(--line-soft)}
+.grp:first-of-type{border-top:0}
+.grp.late{color:var(--bad)}
+.grp i{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.grp a{margin-left:auto;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--amber-tx);text-decoration:none}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 120px 90px 120px;gap:12px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line-soft);font-size:14px}
+.row:last-child{border-bottom:0}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.row.late .tick{border-color:var(--bad)}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.when{font-size:13px;color:var(--ink-2)} .row.late .when{color:var(--bad);font-weight:600}
+.st{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}.st.p{color:var(--amber-tx)}
+@container (max-width:700px){ .row{grid-template-columns:20px minmax(0,1fr) auto} .row .pill,.row .st{display:none} .strip{gap:12px} }
+</style>
+
+<div class="doc">
+  <h1>My tasks: the filters in a card's header</h1>
+  <p class="lede">Clients keeps its filters in the header of its one card ("Active clients"). My tasks has two filters, <b>Show</b> (whose tasks, for an admin) and <b>Sort by</b>, sitting on their own line. Two ways to give them a header, beside what is built.</p>
+  <span class="flag">A drawing · nothing is built · the tasks are invented</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+  <div id="opts"></div>
+</div>
+
+<script>
+(function(){
+  var P = { alert:'<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/>', cal:'<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    later:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>' };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24">' + P[k] + '</svg>'; }
+  var R = [
+    {c:"Raya Trade",t:"Send the Q3 scorecard to the Head of Strategy",w:"Late 1 w",s:"In progress",late:1,b:"late"},
+    {c:"ElAbd",t:"Chase the plant managers' Q3 figures",w:"Late 2 d",s:"Not started",late:1,b:"late"},
+    {c:"ElAbd",t:"Prepare the plant managers' scoring session",w:"Thu 29 Oct",s:"Not started",b:"week"},
+    {c:"Raya Trade",t:"Review the unit heads' draft targets",w:"Fri 30 Oct",s:"In progress",b:"week"},
+    {c:"RHI",t:"Book the board offsite",w:"W2 Nov",s:"Not started",b:"later"}
+  ];
+  var B = [["late","Late","alert"],["week","This week","cal"],["later","Next week and later","later"]];
+  function row(r){ return '<div class="row' + (r.late ? ' late' : '') + '"><span class="tick"></span><span>' + r.t + '</span><span class="pill">' + r.c + '</span><span class="when">' + r.w + '</span><span class="st' + (/progress/.test(r.s) ? ' p' : '') + '">— ' + r.s + '</span></div>'; }
+  function band(withWho){ return '<div class="band"><div><p class="eye">This week · 26 Oct – 30 Oct</p><h1>My tasks' + (withWho ? '<span class="who">Show <b>Me ▾</b></span>' : '') + '</h1><p>Your actions across every client\'s Internal Tracker.</p></div><span class="sp"></span>' +
+    '<div class="strip"><div><b>5</b><span>Open</span></div><div class="lt"><b>2</b><span>Late</span></div><div><b>2</b><span>This week</span></div><div><b>3</b><span>Clients</span></div></div></div>'; }
+  var sort = '<span class="sort">Sort by <span class="sw"><span class="on">Date</span><span>Client</span></span></span>';
+  var show = '<span class="sort">Show <span class="pick">Me</span></span>';
+  var search = '<span class="search">Search tasks</span>';
+  var built = band(true) + '<div class="bar">' + sort + '</div>' + B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
+    return '<div class="card"><div class="chd"><span class="cic' + (b[0] === "late" ? ' late' : '') + '">' + ic(b[2]) + '</span><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join("") + '</div>'; }).join("");
+  var A = band(false) + '<div class="card"><div class="chd"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div>' +
+    B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
+      return '<div class="grp' + (b[0] === "late" ? ' late' : '') + '">' + b[1] + ' <i>· ' + rs.length + '</i></div>' + rs.map(row).join(""); }).join("") + '</div>';
+  /* A2: A with a grey rule under each group's label, the full width of the card */
+  var A2 = band(false) + '<div class="card"><div class="chd"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div>' +
+    B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
+      return '<div class="grp ruled' + (b[0] === "late" ? ' late' : '') + '">' + b[1] + ' <i>· ' + rs.length + '</i></div>' + rs.map(row).join(""); }).join("") + '</div>';
+  /* C: A's one card, its groups keeping today's icon and title */
+  var C = band(false) + '<div class="card"><div class="chd"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div>' +
+    B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
+      return '<div class="chd sub' + (b[0] === "late" ? ' late' : '') + '"><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join(""); }).join("") + '</div>';
+  var Bopt = band(false) + '<div class="card" style="box-shadow:none;background:transparent;border:0;margin:0 0 6px"><div class="chd" style="background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div></div>' +
+    B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
+      return '<div class="card"><div class="chd"><span class="cic' + (b[0] === "late" ? ' late' : '') + '">' + ic(b[2]) + '</span><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join("") + '</div>'; }).join("");
+  var O = [
+    ["Built today", built, "Sort by on its own line under the band; Show sits in the band beside the title.", false],
+    ["A · One card, the filters in its header", A, "Exactly the Clients pattern: one card titled <b>Open tasks</b> with its count, and in its header <b>Show</b> (whose tasks, for an admin), <b>Sort by</b> and a <b>search</b> for a task by its words or client. The groups (Late in red, This week, Next week and later; or each client, sorted by client) become labelled sections inside the card, the way Home's tasks group by client. The band keeps only the week and the counts.", true],
+    ["A2 · A, with a grey rule under each group", A2, "A as it is, with a grey rule under each group's label running the whole width of the card, as the heavy rule under each heading did on My tasks before the cards. The rule is the card's grey line, two pixels, so the groups read as sections without a band of colour.", false],
+    ["C · A's one card, the groups keeping today's titles, no icons", C, "A's single card with the filters in its header; each group keeps today's title in Georgia bold and its count, as a band inside the card on a light tint and divided by a hairline, with no icon (Islam: “for option C can you remove the icons”). Late's title is in red, since its red icon is gone. More presence for each group than A, still one card.", false],
+    ["B · A header bar above the group cards", Bopt, "The same filters in a header bar of their own, and the groups stay as separate cards under it. Keeps today's cards, at the cost of a bar that looks like a card with nothing in it.", false]
+  ];
+  document.getElementById("opts").innerHTML = O.map(function(o, i){
+    return '<section class="opt"><p class="lab' + (i ? ' after' : '') + '">' + o[0] + (o[3] ? ' <span class="rec">my pick</span>' : '') + '</p><div class="frame">' + o[1] + '</div><p class="why">' + o[2] + '</p></section>';
+  }).join("");
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.getAttribute("data-v")); press(b.getAttribute("data-v")); }); });
+  press(document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+})();
+</script>

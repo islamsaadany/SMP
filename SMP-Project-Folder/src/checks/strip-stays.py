@@ -29,7 +29,8 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
       because a pseudo-element is invisible to every DOM probe (band-corner's
       rule). The screenshot is decoded by the browser's own canvas, so the
       suite still needs no image library.
-  6b · THE STRIP IS ITS OWN CARD (§618). Pinned, its navy outline is unbroken
+  6b · THE STRIP IS ITS OWN CARD (§618). Pinned, its outline — the open
+      item's own dark grey since §627, navy before — is unbroken
       on all four sides and a gutter of page ground lies under it.
   7 · ABOVE 1200 NOTHING MOVES (§94.2). The vertical rail is a list, and the
       band beside it is still pinned once scrolled.
@@ -88,7 +89,7 @@ STRIP = r"""() => {
 TOKENS = r"""() => {
   var p = document.createElement('i'); document.body.appendChild(p);
   var out = {};
-  ['--stone', '--surface', '--ink-3', '--ground'].forEach(function(t){
+  ['--ink-2', '--surface', '--ink-3', '--ground', '--line'].forEach(function(t){
     p.style.color = 'var(' + t + ')'; out[t] = getComputedStyle(p).color; });
   p.remove(); return out;
 }"""
@@ -198,10 +199,10 @@ with sync_playwright() as p:
         on = [i for i in rest["items"] if i["on"]]
         off = [i for i in rest["items"] if not i["on"]]
         ok("%d · the open direction wears the section switch's selected ground and type" % w,
-           len(on) == 1 and on[0]["bg"] == tok["--stone"] and on[0]["ink"] == tok["--surface"],
-           on and (on[0]["bg"], on[0]["ink"], tok["--stone"], tok["--surface"]))
+           len(on) == 1 and on[0]["bg"] == tok["--ink-2"] and on[0]["ink"] == tok["--surface"],
+           on and (on[0]["bg"], on[0]["ink"], tok["--ink-2"], tok["--surface"]))
         ok("%d · the other directions step back to the quiet ink" % w,
-           off and all(i["ink"] == tok["--ink-3"] and i["bg"] != tok["--stone"] for i in off),
+           off and all(i["ink"] == tok["--ink-3"] and i["bg"] != tok["--ink-2"] for i in off),
            [(i["ink"], i["bg"]) for i in off])
         scroll(pg, 450)
         s = pg.evaluate(STRIP)
@@ -218,10 +219,10 @@ with sync_playwright() as p:
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in c.values()),
                {"ground": g, **c})
             line, gutter = edges(pg, s)
-            st = rgb(tok["--stone"])
-            ok("1100 · pinned, the strip's outline runs round all four sides in the navy (§618)",
+            st = rgb(tok["--ink-2"])
+            ok("1100 · pinned, the strip's outline runs round all four sides in the open item's grey (§618, §627)",
                all(max(abs(a - b2) for a, b2 in zip(v, st)) <= 40 for v in line.values()),
-               {"stone": st, **line})
+               {"grey": st, **line})
             ok("1100 · pinned, the plan stops a gutter short of the strip — page ground under it (§618)",
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in gutter), {"ground": g, "gutter": gutter})
         if pg._errs:

@@ -138,6 +138,9 @@ const STRATEGY_BREAKS = {
   /* §602: a field of the described data, misspelt — the review's, then the plan's */
   "review-field-misspelt": ["config-data.js", 'return !!((REVIEW.parked || {})[String(target || "")]);', 'return !!((REVIEW.parkd || {})[String(target || "")]);'],
   "plan-field-misspelt": ["config-data.js", "if (p.by === fk) carried.push(UNITS[k].name", "if (p.byy === fk) carried.push(UNITS[k].name"],
+  /* §625: the company's own data, described (SMP.Group, SMP.Capability) */
+  "company-field-misspelt": ["config-data.js", "function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }", "function chatCfg(){ return SMPRules.chatCfg(GROUP.chatt); }"],
+  "capability-field-misspelt": ["config-data.js", "var head = personBy(c.head), cust = personBy(c.custodian);", "var head = personBy(c.head), cust = personBy(c.custodain);"],
   /* §599: a plain object of behaviour — a `{ … }` holding functions — read wrongly */
   "plain-object-member-misspelt": ["shell-inline.js", ': null, def.k === MY_TAB.k) : null;', ': null, def.k === MY_TAB.kk) : null;'],
 };
@@ -206,6 +209,7 @@ function closeObjects(dir, files) {
 const DESCRIBED = {
   REVIEW: "SMP.Review",
   UNITS: "{ [key: string]: SMP.Unit }",
+  GROUP: "SMP.Group",
 };
 function describeData(dir, files) {
   copyFileSync(join(REPO, "lib", "state.d.ts"), join(dir, "state.d.ts"));
@@ -440,7 +444,7 @@ const CONSOLE_PATH_BREAKS = {
 };
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
-              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
+              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). Since §625 the company's own object is described too (SMP.Group, SMP.Capability), so what remains is two habits of the pages, not missing fields: (1) a reader that hands back a shared frozen empty, or a writer that mints `{}` and fills it on the next line (comms, coFound, branding); (2) a list or a target that mixes real records with the unit-like views and holders built for a function, a capability or the company (topAsUnit, fnAsUnit, capAsUnit, a function's own holder), which are not described yet. Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",

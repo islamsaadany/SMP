@@ -2390,8 +2390,13 @@ html[data-client-settings] .viewer { display:none; }
        strip while it is pinned, so the plan slides away into page ground
        rather than up against the strip. The gutter is the corner layer below
        reaching one `--split-gap` further down; at rest that band is the
-       split's own gap, already ground, so nothing at rest moves. */
-    .rail:not(.setuprail) { border-color:var(--stone); }
+       split's own gap, already ground, so nothing at rest moves.
+
+       THE LINE IS THE OPEN ITEM'S OWN COLOUR — WHICH IS NOW THE DARK GREY
+       (§627), see the open item below. `--stone` was navy in the navy
+       palette and the Branding page never rewrites it, so under a tenant's
+       green chrome the strip stayed navy. */
+    .rail:not(.setuprail) { border-color:var(--ink-2); }
     /* ITS FOUR ROUNDED CORNERS TAKE THE PAGE'S GROUND (§130.3's fill, on the
        strip). Pinned, the plan's rows slide past behind them. At rest the
        strip stands on that same ground — unlike the band, which sits in the
@@ -2451,10 +2456,24 @@ html[data-client-settings] .viewer { display:none; }
       white-space:nowrap; }
     .rail:not(.setuprail) .ritem .rsub { display:none; }
     /* THE OPEN ONE WEARS THE SECTION SWITCH'S "SELECTED" (§609): the same
-       `--stone` fill and `--surface` type as Plan in Foundation | SWOT | Plan,
-       over the gold edge it always had. The others step back to `--ink-3` and
-       come up to `--ink` under the pointer. Islam: *"the highlighting needs to
-       be more clear and the other directions titles to be dimmed"*.
+       fill and `--surface` type as Plan in Foundation | SWOT | Plan, over the
+       gold edge it always had. The others step back to `--ink-3` and come up
+       to `--ink` under the pointer. Islam: *"the highlighting needs to be more
+       clear and the other directions titles to be dimmed"*.
+
+       AND THAT FILL IS THE DARK GREY, NOT THE PALETTE'S NAVY (§627). It was
+       `--stone`, which the navy palette sets to the house navy and which the
+       Branding page never rewrites — so a tenant whose bar is green got a
+       green chrome and a navy strip. Of the fills drawn (the tenant's bar
+       colour, a dark grey, a light grey, type only, the accent;
+       design-mockups/brand-strip/ and the live one beside it), Islam: *"the
+       actual color of the client might be too much"*, then *"dark grey with
+       the accent line beneath"*. `--ink-2` is the palette's second ink — body
+       text's own grey — so the fill is neutral under any tenant's colour and
+       the tenant shows where it already does: the chrome above and the accent
+       edge under the open item. In the dark palettes the second ink is light
+       and `--surface` dark, so the fill inverts with the theme as the switch's
+       does. The switch takes the same grey (arrange.css, `.secseg`).
 
        §41 took a solid fill OFF this row once, so that a score keeps its
        scoring colour — and it still does: on the filled item the score, the
@@ -2463,7 +2482,7 @@ html[data-client-settings] .viewer { display:none; }
        report's tally already is a chip and is left alone. The vertical rail
        keeps §41's quiet ground; only the strip fills. */
     .rail:not(.setuprail) button.ritem.on,
-    .rail:not(.setuprail) button.ritem.on:hover { background:var(--stone);
+    .rail:not(.setuprail) button.ritem.on:hover { background:var(--ink-2);
       border-bottom-color:var(--gold); }
     .rail:not(.setuprail) .ritem.on .rcode,
     .rail:not(.setuprail) .ritem.on b { color:var(--surface); }
@@ -2476,6 +2495,23 @@ html[data-client-settings] .viewer { display:none; }
     .rail:not(.setuprail) .ritem:not(.on) b { color:var(--ink-3); }
     .rail:not(.setuprail) .ritem:not(.on):hover .rcode,
     .rail:not(.setuprail) .ritem:not(.on):hover b { color:var(--ink); }
+    /* WHERE ONE CLOSED DIRECTION ENDS AND THE NEXT BEGINS (§627). Islam:
+       *"an enhanced design to show somehow a separator between the
+       directions, maybe we have them in separate cards or a light grey
+       separator"*; of the four drawn (none, a full-height hairline, an inset
+       hairline, separate cards), *"separation hairline inset"*. A 1px hairline
+       in `--line`, stopped 9px short of the strip's top and bottom, before
+       every item but the first — drawn as the item's own ::before so the
+       items' 2px gap closes to nothing and the hairline is the only thing
+       between them. None beside the open item, on either side: its fill is
+       its edge. Separate cards were drawn and not taken: their gaps and
+       borders cost each name about 30px, so at 1100 every name wrapped and
+       the pinned strip grew from 46px to 80px. */
+    .rail:not(.setuprail) .sortable { gap:0; }
+    .rail:not(.setuprail) .sortable > button.ritem:not(:first-child)::before { content:"";
+      position:absolute; left:0; top:9px; bottom:9px; width:1px; background:var(--line); }
+    .rail:not(.setuprail) .sortable > button.ritem.on::before,
+    .rail:not(.setuprail) .sortable > button.ritem.on + button.ritem::before { display:none; }
     /* AND THE TITLE UNDER IT SCROLLS WITH THE PLAN (§609), reading or
        editing — the band §53.7 pinned and the head §194 pinned in its place.
        Not sticky means it never leaves its flow position, so `pinWatch()`
@@ -8853,7 +8889,12 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
     color:var(--ink-2); font-weight:500; }
   .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
-  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+  /* The selected section's fill is the palette's second ink, the dark grey,
+     not `--stone` (§627): `--stone` is the house navy in the navy palette and
+     the Branding page never rewrites it, so under a tenant's own chrome the
+     switch kept saying navy. The squeezed strip of directions wears the same
+     fill (group-extra.css, §609/§627) and the two must agree. */
+  .tabs .secseg button[aria-selected="true"] { background:var(--ink-2); color:var(--surface);
     font-weight:600; }
   .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 

@@ -633,21 +633,28 @@
    something, and a client's old word shows in its box. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-/* v7.11-client-icon — §628: the register is the Client register and lists
+/* v7.11-capability-owner — §625 and §626: the company's own data described
+   for the page check; the Copilot's Directions chat sets a capability's
+   Owner, a person, never a function. The built file's bytes changed (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v7.12-client-icon — §628: the register is the Client register and lists
    the client's own people, Forefront's consultants one switch away; a client
    may carry its own icon for Home's small squares. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in any
    ref's history after fetching every ref (§94.16). */
-/* v7.12-org-cells — §629: Business units, Functions and Divisions open a
+/* v7.13-org-cells — §629: Business units, Functions and Divisions open a
    cell on a double-click, and Setup › Capabilities is the company plan's
    own table where capabilities are pillars. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-/* v7.13-platform-80 — §630: the client platform is drawn at 80% on a
+/* v7.14-platform-80 — §630: the client platform is drawn at 80% on a
    computer, as the console is, and Business units' Plans in never spills.
    The built file's bytes changed, which is the whole trigger (§91). Proved
    held by no commit in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.13-platform-80";
+/* §628–§630 were numbered v7.11–v7.13 on the branch; main took v7.11 for
+   §625–§626 while they waited, so they are v7.12–v7.14 here. */
+const SHELL = "smp-shell-v7.14-platform-80";
 const ASSETS = [
   "/",
   "/index.html",

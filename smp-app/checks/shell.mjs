@@ -2087,6 +2087,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     capabilities: [{ title: "Data-led stock", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "" }],
   });
   const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'directions' s from copilot_chats where section = 'directions' order by created_at desc limit 1"))).rows[0] || null;
+  let CAP_OWNER = "";
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
@@ -2132,6 +2133,20 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
       r = await row();
       check((r.s.caps || []).length === 1 && r.s.caps[0].serves.join() === "Upper Egypt", "Capabilities follow the chosen Directions, each serving one of them", JSON.stringify(r.s.caps));
+      /* §626: a Capability's owner is picked from the register, a person —
+         never a function (§544.13). Picked here, stored, and below written
+         as the capability's Owner. */
+      const ownSel = '[data-cop-dv-own="c|0"]';
+      const pick = await page.$$eval(ownSel + " option", (os) => os.map((o) => o.value).filter(Boolean));
+      /* Compared with the register itself: a person's key may equal a
+         function's (the seed's `smo` is both), so "is not a function key"
+         would be the wrong test. */
+      const people = await page.evaluate(() => PEOPLE.filter((p) => p && p.key && p.name && personActive(p)).map((p) => p.key).sort());
+      check(pick.length > 0 && JSON.stringify(pick.slice().sort()) === JSON.stringify(people), "a Capability's Owner is chosen from the register's active people, every one and nothing else", pick.length + " options, " + people.length + " people");
+      CAP_OWNER = pick[0] || "";
+      await page.selectOption(ownSel, CAP_OWNER); await page.waitForTimeout(800);
+      r = await row();
+      check(!!CAP_OWNER && r.s.caps[0].ownedBy === CAP_OWNER, "…and the person picked is stored on the row", JSON.stringify(r.s.caps[0]));
     }
     await page.click("[data-cop-dv-finish]");
     await page.waitForTimeout(2000);
@@ -2144,6 +2159,8 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (withCaps) {
       const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? [c.capKind, (c.serves || []).length] : null; });
       check(JSON.stringify(cap) === JSON.stringify(["enabler", 1]), "a kept Capability is written with its kind and the Direction it serves", JSON.stringify(cap));
+      const own = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? { head: c.head || null, fn: c.fn || null } : null; });
+      check(!!own && own.head === CAP_OWNER && !own.fn, "§626 …and its Owner is the person picked, written as its owner and not as a function", JSON.stringify(own) + " want " + CAP_OWNER);
     }
     check(!(await page.$("[data-cop-dv-finish]")), "a saved chat offers no Save again");
     check(goN > 0, "something went ahead", goN);
@@ -2354,14 +2371,30 @@ await section("4 · Forefront's own pages", async () => {
      names them (a link to the cards must keep working). */
   /* SPEC 068: THE CONSOLE OPENS ON *HOME*, and My work is called My tasks,
      second. Rewritten, never loosened (\u00a7218): the landing is still
-     asserted as the first tab and the page it draws. */
+     asserted as the first tab and the page it draws — its band's sentence
+     since round three (Islam, 2026-10-24: "What needs you today"). */
   await page.waitForSelector(".hohello", { timeout: 8000 }).catch(() => {});
-  check(ffTabs[0] === "Home" && ffTabs[1] === "My tasks" && (await page.locator("#page").textContent()).includes("Your SMP Home"),
+  check(ffTabs[0] === "Home" && ffTabs[1] === "My tasks" && (await page.locator("#page").textContent()).includes("Here is what needs you today across your clients."),
     "the console opens on Home, its first tab, with My tasks second (spec 068)", ffTabs.join("|"));
   await page.locator("#nav button", { hasText: "Clients" }).click();
   await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
   check(new URL(page.url()).hash === "#clients", "\u2026and the address names the cards, so a link back to them lands there", page.url());
+  /* CLIENTS IN HOME'S LOOK (2026-10-24): the page's band names it and
+     carries + Add a client; one card holds the clients with the filters in
+     its header; a client card says its facts at its foot with Settings as a
+     word; and the titles are Georgia, bold. */
+  const cl = await page.evaluate(() => {
+    const card = document.querySelector('.ccard[data-client="raya-trade"]');
+    return { band: (document.querySelector(".pgband h1") || {}).textContent || "", add: !!document.querySelector(".pgband .pgadd"),
+      head: !!document.querySelector(".clcard .hochd .clwhich") && !!document.querySelector(".clcard .hochd input.fld"),
+      title: (document.querySelector(".clcard .hochd h2") || {}).textContent || "",
+      font: (() => { const h = document.querySelector(".clcard .hochd h2"); return h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : ""; })(),
+      foot: card ? ((card.querySelector(".foot .facts") || {}).textContent || "") : "", word: card ? ((card.querySelector(".foot .ccfg") || {}).textContent || "") : "",
+      tags: card ? card.querySelectorAll(".ctop .tag").length : -1 };
+  });
+  check(cl.band === "Clients" && cl.add && cl.head && cl.title === "Active clients" && /Super user/.test(cl.foot) && cl.word === "Settings" && cl.tags === 0 && cl.font === "Georgia 700",
+    "Clients in Home's look: the band with + Add a client, one card with the filters in its header, the facts and Settings at a card's foot, titles in Georgia bold", JSON.stringify(cl));
 
   /* \u00a74b \u2014 MY WORK (\u00a7400). The state is MADE (\u00a7255): the dev tenant
      holds no Tracker actions and no tracker module, so every assertion below
@@ -2379,6 +2412,10 @@ await section("4 · Forefront's own pages", async () => {
   await ta("MW this week", "smo", 0, "not_started");
   await ta("MW far off", "smo", 30, "not_started");
   await ta("MW finished", "smo", -3, "done");
+  /* when each was finished, as the Tracker stamps it: one this week, one
+     three weeks ago (for My tasks' Show done, round three) */
+  await ta("MW done in the month", "smo", -21, "done");
+  await owner.query("UPDATE tracker_actions SET done_at = now() - (CASE title WHEN 'MW finished' THEN 3 ELSE 20 END) * interval '1 day' WHERE tenant_id = $1 AND title IN ('MW finished', 'MW done in the month')", [tenantId]);
   await ta("MW not mine", "mobhead", 0, "not_started");
   try {
     await page.locator("#nav button", { hasText: "My tasks" }).click();
@@ -2398,6 +2435,42 @@ await section("4 · Forefront's own pages", async () => {
     const w = await mw();
     check(w.rows.length === 3 && w.rows.includes("MW late one") && w.rows.includes("MW this week") && w.rows.includes("MW far off"),
       "My work lists the office's three open actions on this client", JSON.stringify(w.rows));
+    /* MY TASKS IN HOME'S LOOK, OPTION A2 (2026-10-24): one card titled Open
+       tasks in Georgia bold, its count, Show/Sort by/search in its header,
+       the three groups labelled inside it over a grey rule */
+    const mwc = await page.evaluate(() => { const card = document.querySelector(".mwlist"), h = card && card.querySelector(".mwcardhd h2"), rule = card && card.querySelector(".mwsh");
+      return { cards: document.querySelectorAll(".mwlist").length, secs: card ? card.querySelectorAll(".mwsec").length : 0, title: h ? h.textContent : "",
+        count: card ? (card.querySelector(".mwcardhd .hocnt") || {}).textContent : "", ctl: card ? !!card.querySelector(".mwcardhd .hosort") && !!card.querySelector(".mwcardhd input.mwsearch") : false,
+        rule: rule ? getComputedStyle(rule).borderBottomWidth + " " + getComputedStyle(rule).borderBottomStyle : "",
+        sub: (document.querySelector(".mwmast .pgsub") || {}).textContent || "",
+        font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
+    check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
+      "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    await page.fill(".mwsearch", "far off");
+    const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
+    check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
+    await page.fill(".mwsearch", "");
+    /* ROUND THREE (2026-10-24): rows alternate light grey and white, grey
+       first; and Show done brings the finished tasks back, the last week by
+       default of the two (Islam: "last week is the important one") */
+    const zebra = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwsec:not(.done)")).map((sec) =>
+      Array.from(sec.querySelectorAll(".mwrow")).map((r) => getComputedStyle(r).backgroundColor)));
+    const z0 = zebra.length ? zebra[0][0] : "";
+    check(zebra.length === 3 && z0 && !/rgba\(0, 0, 0, 0\)|transparent/.test(z0) && zebra.every((g) => g[0] === z0),
+      "\u2026each group's rows start light grey (the alternation restarts under each group)", JSON.stringify(zebra));
+    const doneOf = () => page.evaluate(() => { const sec = document.querySelector(".mwlist .mwsec.done");
+      return sec ? { h: sec.querySelector(".mwsh h2").textContent, rows: Array.from(sec.querySelectorAll(".mwrow .t")).map((t) => t.textContent) } : null; });
+    check((await doneOf()) === null && !!(await page.$('.mwcardhd button[data-sort="hide"][aria-pressed="true"]')),
+      "\u2026finished tasks are hidden until asked for", "");
+    await page.click('.mwcardhd button[data-sort="week"]');
+    const dw = await doneOf();
+    check(!!dw && dw.h === "Done in the last week" && dw.rows.includes("MW finished") && !dw.rows.includes("MW done in the month") && !dw.rows.includes("MW not mine"),
+      "\u2026Show done \u00b7 Last week lists the one finished this week, under its own heading, not the older one, and never somebody else's", JSON.stringify(dw));
+    await page.click('.mwcardhd button[data-sort="month"]');
+    const dm = await doneOf();
+    check(!!dm && dm.h === "Done in the last 30 days" && JSON.stringify(dm.rows) === JSON.stringify(["MW finished", "MW done in the month"]), "\u2026and 30 days lists it and the one three weeks back, newest first", JSON.stringify(dm));
+    await page.click('.mwcardhd button[data-sort="hide"]');
+    check((await doneOf()) === null, "\u2026and Hide puts them away again", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
     check(JSON.stringify(w.groups) === JSON.stringify(["Late", "This week", "Next week and later"]) && w.rows[0] === "MW late one" && w.late === 1,
@@ -2513,6 +2586,16 @@ await section("4 · Forefront's own pages", async () => {
     check(h1.font === "14px" && h1.wrap === "none" && h1.zoom === "0.8",
       "\u2026and the console is compact and shown at 80% on a computer: 14px text, the whole width of the window", JSON.stringify({ font: h1.font, wrap: h1.wrap, zoom: h1.zoom }));
     check(/^Strategy Management\s*Platform$/.test(h1.brand), "\u2026under the name Strategy Management Platform at the column's head", h1.brand);
+    /* ROUND THREE: Home's client lines are striped, grey first, and each
+       client you may configure carries the sliders at the far right, opening
+       its Setup */
+    const hz = await page.evaluate(() => { const ls = Array.from(document.querySelectorAll(".hocl")), cfg = document.querySelector(".hocl .ccfg.ico");
+      const r = cfg && cfg.getBoundingClientRect(), row = cfg && cfg.closest(".hocl").getBoundingClientRect();
+      return { first: ls[0] ? getComputedStyle(ls[0]).backgroundColor : "", second: ls[1] ? getComputedStyle(ls[1]).backgroundColor : null,
+        cfg: !!cfg, right: r ? Math.round(row.right - r.right) : -1, svg: cfg ? !!cfg.querySelector("svg") : false }; });
+    check(hz.first && !/rgba\(0, 0, 0, 0\)|transparent/.test(hz.first) && (hz.second === null || hz.second !== hz.first),
+      "\u2026Home's client lines alternate, light grey first", JSON.stringify(hz));
+    check(hz.cfg && hz.svg && hz.right >= 0 && hz.right <= 24, "\u2026with the sliders for a client's settings at the far right of its line", JSON.stringify(hz));
     /* SHOW MINE OR DEMO on Home's clients (2026-10-24): Mine is the seated
        clients without the worked example, Demo the worked example alone;
        the choice is kept. Asked against the server's own cards. */
@@ -2561,11 +2644,11 @@ await section("4 · Forefront's own pages", async () => {
       "\u2026and All tasks opens My tasks", page.url());
     /* MY TASKS' SORT BY CLIENT (2026-10-24): one numbered section for the
        client, its three open rows in it, the client pill left off them */
-    await page.click('.mwbar .hosort button[data-sort="client"]');
+    await page.click('.mwcardhd .hosort button[data-sort="client"]');
     const mc = await page.evaluate(() => ({ secs: Array.from(document.querySelectorAll(".mwsec.byc")).map((x) => x.getAttribute("data-client") + ":" + x.querySelectorAll(".mwrow").length),
       pill: Array.from(document.querySelectorAll(".mwsec.byc .mwcl")).some((p) => getComputedStyle(p).display !== "none") }));
     check(JSON.stringify(mc.secs) === JSON.stringify(["raya-trade:3"]) && !mc.pill, "My tasks sorted by Client: one section for the client with its three rows, no client pill on them", JSON.stringify(mc));
-    await page.click('.mwbar .hosort button[data-sort="date"]');
+    await page.click('.mwcardhd .hosort button[data-sort="date"]');
 
     /* A PLAN WRITTEN ON THE COMPANY IS A PLAN (Islam: "why is elabd showing
        no plan?"): a client whose only directions are the company's own
@@ -2752,8 +2835,9 @@ await section("4 · Forefront's own pages", async () => {
   check(near(fldT, "14px 400 39") && near(chipT, "12px 600 26"), "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
   await page.goto("about:blank");
   await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
-  await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
-  await page.locator(".ccard.add").first().click();
+  /* + Add a client is the page band's button since 2026-10-24 */
+  await page.waitForSelector(".pgband .pgadd", { timeout: 8000 }).catch(() => {});
+  await page.locator(".pgband .pgadd").first().click();
   await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
   const bandT = await typeOf(".wzband button");
   check(near(bandT, "12.5px 600 48"), "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);

@@ -69324,3 +69324,5 @@ Islam: *"fix the copilot owner as you recommend and put it live"*. The recommend
 - `test:rules` 152/3 and `setup-shape` 48/1, both as before (§603).
 
 Not merged; `main` stays untouched until the release below.
+
+**§625 AND §626 MERGED TO `main`** 2026-10-24, Islam: *"fix the copilot owner as you recommend and put it live"*. §625 (the company's data described) was on the branch unreleased and goes with it; it changes nothing anybody sees. `main` moved while this waited, §613 to §624, which took both numbers this went in under (§615, §616), so the branch was renumbered §625 and §626 before the merge (§264.3). `main` was merged INTO the branch; the record files were COMBINED in number order, never picked (§318.7); the built file, `shell.js` and `smp-app`'s `sw.js` were REGENERATED. SHELL `v7.11-capability-owner`, held by no commit in any ref's history (§94.16). The one red on the merged tree, `shell.mjs`'s Copilot-row assertion, is `main`'s (above), named here so the release does not carry it as its own.

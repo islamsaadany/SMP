@@ -98,6 +98,7 @@ p,ul,ol{margin:0}
 .macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
 .bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
+.bq.on{background:var(--bar-hover);color:var(--bar-ink)}
 .bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
 .tog{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:4px 10px 4px 5px;background:none;color:var(--bar-ink);font-size:13px;font-weight:600}
 .tog i{width:30px;height:18px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;transition:background .15s}
@@ -224,6 +225,67 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 @media (max-width:900px){#homewrap.side{grid-template-columns:minmax(0,1fr)}}
 .rail .ct{font-size:11.5px;font-weight:700;background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px}
 
+/* the office sections */
+.sec-h{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin-bottom:10px}
+.sec-h h2{font-size:19px}
+.sec-h p{font-size:13px;color:var(--ink-3);flex-basis:100%}
+.sv{display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;margin:0 0 12px;flex-wrap:wrap;max-width:100%}
+.sv button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.sv button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.14)}
+.kp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.kp div{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;min-width:104px}
+.kp b{display:block;font-size:18px;line-height:1.15}
+.kp span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.kp .bad b{color:var(--bad-tx)}
+.tw{overflow-x:auto}
+.t{width:100%;border-collapse:collapse}
+.t th{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--head);white-space:nowrap}
+.t td{padding:9px 12px;border-top:1px solid var(--line-soft);font-size:13px;vertical-align:middle}
+.t th+th,.t td+td{border-left:1px solid var(--line-soft)}
+.t tbody tr:nth-child(even) td{background:var(--zebra)}
+.dots{letter-spacing:1px;color:var(--stone);font-size:12px;white-space:nowrap}
+.dots i{font-style:normal;color:var(--line)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.col{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 12px}
+.col h4{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.card{border:1px solid var(--line);border-left:3px solid var(--stone);border-radius:6px;padding:7px 9px;margin-top:6px;font-size:13px;background:var(--surface)}
+.card small{display:block;color:var(--ink-3);font-size:11.5px}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:10px;overflow-x:auto;padding-bottom:4px}
+.chain .col h4{border-bottom:3px solid var(--gold);padding-bottom:5px}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.blk{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 14px;min-width:0}
+.blk .lbl{display:block;margin-bottom:6px}
+.calrow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;font-size:13px;padding:2px 0}
+.aspects{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chk{display:flex;gap:7px;align-items:flex-start;font-size:13px;padding:3px 0}
+.chk small{display:block;font-size:11.5px;color:var(--ink-3)}
+.rk{display:grid;grid-template-columns:24px minmax(120px,230px) minmax(0,1fr) 34px;gap:10px;align-items:center;padding:5px 0;font-size:13px}
+.rk .bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.rk .bar i{display:block;height:100%}
+.mil{display:grid;gap:14px}
+.mrow2{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr);gap:10px;align-items:start;font-size:13px}
+.rail2{display:flex;overflow-x:auto;padding:6px 0 2px}
+.rail2 span{flex:1 0 74px;border-top:2px solid var(--line);position:relative;height:30px}
+.rail2 span::before{content:"";position:absolute;left:0;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--field-line)}
+.rail2 span.m::before{background:var(--gold);border-color:var(--gold-deep)}
+.rail2 span em{position:absolute;left:0;top:9px;font-style:normal;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.tree ul{list-style:none;padding-left:18px;margin:0;border-left:1px solid var(--line)}
+.tree>ul{border-left:0;padding-left:0}
+.tree li{padding:3px 0 3px 12px;position:relative;font-size:13px}
+.tree li::before{content:"";position:absolute;left:0;top:14px;width:9px;border-top:1px solid var(--line)}
+.tree>ul>li{padding-left:0}
+.tree>ul>li::before{display:none}
+.tree span{color:var(--ink-3);font-size:12px}
+.row3{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.row3 .btn:disabled{opacity:.5;cursor:not-allowed}
+.logo{width:64px;height:40px;border:1px dashed var(--line);border-radius:6px;display:grid;place-items:center;font-size:11px;color:var(--ink-3)}
+.sw{display:flex;gap:12px;margin-top:10px;font-size:12.5px;flex-wrap:wrap}
+.sw span{display:inline-flex;gap:6px;align-items:center}
+.sw i{width:16px;height:16px;border-radius:4px;display:inline-block}
+.rail .subnav{display:grid;gap:1px;margin:2px 0 6px 12px;padding-left:8px;border-left:2px solid var(--gold)}
+.rail .subnav button{font-size:12.5px;padding:5px 8px}
+.rail .subnav button.on{background:var(--surface-2);color:var(--ink)}
+
 /* getting in and out */
 .tb button.read{border:0;cursor:pointer}
 @media (max-width:620px){.tb .out{display:none}}
@@ -275,7 +337,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back.</p>
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. Switch <b>Office sections</b> to compare A, B and C on full pages: every section and its views are filled in, and the section you have open stays open when you switch.</p>
 
   <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><button class="read" type="button" id="tb-proc" data-go="home">Processes</button><span class="who">Mona Farag</span><span class="seat">Strategy Office</span><span class="out">Sign out</span></div>
@@ -302,6 +364,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
         <div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="q" placeholder="Search by code, name, owner or state" autocomplete="off"></label><span class="note" id="qcount"></span></div>
         <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
       </section>
+      <section data-screen="home-sec" hidden><div id="secwrap"></div></section>
       </div></div>
       <section data-screen="builder" hidden>
         <div class="bld">
@@ -449,42 +512,115 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     svg.innerHTML = out + lab;
   }
 
-  const TABMSG = {
-    landscape: 'The value chain and the map of every process: today’s Value chain and Helicopter, merged. As in the full prototype.',
-    priorities: 'Which processes to work on first, scored and sent to the client for sign-off. As in the full prototype.',
-    governance: 'Governance assessments, risks and policies. As in the full prototype.',
-    org: 'The roles and people the processes use. As in the full prototype.',
-    export: 'Pick processes and build the SOP pack. As in the full prototype.',
-    overview: 'Today’s dashboard. In this design All processes and the tiles in the band do its job.',
-    settings: 'The workspace profile and branding, for Admins.',
-  };
   const HOME_TABS = {
-    a: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', ''], ['export', 'Export', '']],
+    a: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', ''], ['export', 'Export', ''], ['settings', 'Settings', '']],
     b: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', '']],
   };
   const SIDE = [['all', 'All processes'], ['handle', 'To handle', '3'], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']];
   const OTAB_NOTES = {
-    a: [['A · All as tabs', ['Every office section one click away, in one row of tabs', 'Same tab pattern as the rest of the module']], ['What it costs', ['Export is something you do, not a place, yet it sits with the places', 'Settings still needs a home somewhere', 'All seven fit one row on a 1280px laptop; on a phone they take three rows, as B’s six do']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
-    b: [['B · Tabs, plus actions top right', ['Six places fit one row of tabs', 'Export and Settings are occasional actions, so they sit top right, as Download and Print do on the process page', 'Same tab pattern as the rest of the module']], ['What it costs', ['Export moves from the side menu to a button: the office has to learn where it went']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
-    c: [['C · Side menu, as today', ['What the office knows today', 'Room for any number of sections']], ['What it costs', ['The only part of the module with a side menu; managers never see one', 'The menu takes width from the table and the map', 'On a phone it becomes a row of chips']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    a: [['A · All as tabs', ['Every office section one click away, in one row of tabs', 'Same tab pattern as the rest of the module']], ['What it costs', ['Landscape, Priorities, Governance and Org & roles have views of their own, so they show a second row of switches under the tabs', 'Export and Settings are things you do now and then, yet they sit with the places', 'All eight fit one row from 1024px wide up; on a phone they take three rows, as B’s six do']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    b: [['B · Tabs, plus actions top right', ['Six places fit one row of tabs', 'Export and Settings are occasional actions, so they sit top right, as Download and Print do on the process page', 'Same tab pattern as the rest of the module']], ['What it costs', ['Landscape, Priorities, Governance and Org & roles show a second row of switches under the tabs, as in A', 'Export moves from the side menu to a button: the office has to learn where it went']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    c: [['C · Side menu, as today', ['What the office knows today', 'Each section’s own views sit in the menu under it, so there is only one set of switches', 'Room for any number of sections']], ['What it costs', ['The only part of the module with a side menu; managers never see one', 'The menu takes width from the table and the map', 'On a phone it becomes a row of chips']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
   };
+  /* ── the office sections, filled in so the three arrangements can be judged on full pages ── */
+  const nameOf = (c) => (ALL.find((r) => r[0] === c) || [c, c])[1];
+  const pn = (c) => '<span class="code">' + c + '</span> ' + esc(nameOf(c));
+  const pill = (k, t) => '<span class="pill ' + k + '">' + esc(t) + '</span>';
+  const dots = (v) => '<span class="dots" aria-label="' + v + ' of 5">' + '●'.repeat(v) + '<i>' + '●'.repeat(5 - v) + '</i></span>';
+  const tbl = (head, rows) => '<div class="box tw" style="overflow:hidden"><table class="t"><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows.map((r) => '<tr>' + r.map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const kp = (items) => '<div class="kp">' + items.map(([n, l, c, id]) => '<div class="' + (c || '') + '"><b' + (id ? ' id="' + id + '"' : '') + '>' + n + '</b><span>' + l + '</span></div>').join('') + '</div>';
+
+  const CHAIN = [['Order intake', [['Receive the order', 'ORD100'], ['Confirm the order', 'ORD100'], ['Check credit', 'CRE100'], ['Set the price', 'PRI100']]], ['Fulfilment', [['Buy stock', 'PRO100'], ['Count stock', 'INV100'], ['Pick and pack', 'ORD100'], ['Deliver', 'LOG100']]], ['Billing & cash', [['Invoice', 'ORD100'], ['Collect payment', 'CRE100'], ['Pay suppliers', 'PRO100'], ['Bank store cash', 'STO100']]], ['Close & report', [['Close the month', 'REC100'], ['Report to the board', 'REC100']]]];
+  const LINKS = [['PRI100', ['ORD100']], ['ORD100', ['LOG100', 'CRE100', 'REC100']], ['PRO100', ['INV100', 'REC100']], ['INV100', ['REC100']], ['LOG100', []], ['CRE100', ['REC100']], ['STO100', ['REC100']], ['NEW100', ['STO100', 'HIR100']], ['REC100', []], ['HIR100', []], ['CUS100', ['ORD101']]];
+  const MIL = [['ORD100', [['Order received'], ['Confirm'], ['Credit check', 1], ['Prepayment'], ['Deliver', 1], ['Invoice'], ['Collect', 1]]], ['PRO100', [['Request'], ['Approve', 1], ['Order'], ['Receive', 1], ['Match'], ['Pay', 1]]], ['REC100', [['Close books', 1], ['Reconcile'], ['Review'], ['Report', 1]]], ['STO100', [['Count', 1], ['Record'], ['Bank', 1]]]];
+  const W = { imp: 35, risk: 40, cx: 25 };
+  // [code, department, importance, complexity, risk, why, decision]
+  const PRIO = [['ORD100', 'Finance', 5, 4, 4, 'Every sale runs through it; one gap in delivery proof', 'W1'], ['PRO100', 'Supply Chain', 4, 4, 4, 'Approval levels unclear above $50,000', 'W1'], ['INV100', 'Supply Chain', 4, 5, 3, 'Stock counts disagree with the books', 'W1'], ['CRE100', 'Finance', 4, 3, 4, 'Write-offs signed by one person', 'W1'], ['PRI100', 'Commercial', 5, 3, 3, 'Margin impact, but it works today', 'W2'], ['NEW100', 'Retail', 4, 3, 3, 'Review is late; four openings next year', 'W2'], ['REC100', 'Finance', 4, 3, 3, 'Close is on time; written down once', 'W2'], ['LOG100', 'Supply Chain', 3, 3, 3, 'Waits for Order-to-Cash to settle', 'W2'], ['STO100', 'Retail', 3, 2, 4, 'Cash differences small but frequent', 'LATER'], ['HIR100', 'HR', 3, 3, 2, 'Handled by HR, low risk', 'LATER'], ['CUS100', 'Care', 3, 2, 2, 'Handled well by the call centre', 'HIGH']];
+  const sc = (r) => Math.round((r[2] * W.imp + r[4] * W.risk + r[3] * W.cx) / 5);
+  const ranked = PRIO.slice().sort((a, b) => sc(b) - sc(a));
+  const DEC = { W1: 'Wave 1', W2: 'Wave 2', LATER: 'Later', HIGH: 'Stays high-level' };
+  const RISKS = [['Customer credit exposure above appetite', 'Risk & controls', 'High', 'High', 'High', 'Mitigating', 'Hend Mourad'], ['Stock shrinkage in stores', 'Risk & controls', 'Medium', 'High', 'High', 'Open', 'Karim Fouad'], ['Supplier paid twice', 'Risk & controls', 'Low', 'High', 'Medium', 'Mitigating', 'Hala Mansour'], ['Board decisions without a written mandate', 'Board structure', 'Medium', 'Medium', 'Medium', 'Open', 'Tarek Samy'], ['Customer data shared without consent', 'Data integrity', 'Low', 'Critical', 'High', 'Open', 'No owner yet'], ['Late month-end close', '—', 'Medium', 'Low', 'Low', 'Accepted', 'Hala Mansour'], ['Cash shortfall at store close', '—', 'Low', 'Low', 'Low', 'Closed', 'Amr Hassan']];
+  const lvl = (l) => pill(l === 'High' ? 'bad' : l === 'Medium' ? 'attn' : 'q', l);
+  const POLS = [['Risk Management Policy', 'Risk & controls', 'Published', '1 Sep 2026', '1 Sep 2027', '3 of 5'], ['Board Charter', 'Board structure', 'Draft', '—', '—', '—'], ['Code of Conduct', 'Ethics', 'In review', '—', '—', '—'], ['Data Protection Policy', 'Data integrity', 'Approved', '—', '—', '—']];
+  const stage = (s) => pill(s === 'Published' || s === 'Approved' ? 'good' : s === 'In review' ? 'attn' : 'q', s);
+  const CTLS = [['ORD100', '2 · Credit check', 'Goods released over the limit', 'The ERP blocks orders over the limit', ['good', 'Passed · Aug 2026']], ['ORD100', '4 · Deliver', 'Proof of delivery missing', '', ['bad', 'No control']], ['ORD100', '5 · Invoice', 'Invoice sent with the wrong price', 'Price list signed off before use', ['q', 'Not tested']], ['PRO100', '5 · Match', 'Supplier paid twice', 'Three-way match before payment', ['good', 'Passed · Jul 2026']], ['INV100', '3 · Count', 'Stock shrinkage', 'Second count signed by the supervisor', ['bad', 'Failed · Sep 2026']], ['STO100', '1 · Count', 'Cash shortfall at close', 'Two people count the till', ['good', 'Passed · Jun 2026']]];
+  const CK = [['Give internal audit a line to the audit committee', 'Immediate', 'Yara Kamal', '15 Oct', false, true], ['Name a second owner for the three high risks', 'Immediate', 'Tarek Samy', '15 Nov', false], ['Publish the risk management policy', 'Near-term', 'Hala Mansour', '30 Sep', true], ['Run a yearly risk workshop with every unit head', 'Long-term', 'No owner yet', '', false]];
+  const ACTIV = [['23 Oct', 'Hend Mourad suggested a change to Order-to-Cash, step 4'], ['22 Oct', 'Yara Kamal sent Procure-to-Pay v3 back'], ['20 Oct', 'Credit & Collections v1.1 published'], ['15 Oct', 'Checklist item went overdue: a line from internal audit to the audit committee'], ['12 Oct', 'Risk & controls assessment generated'], ['9 Oct', 'NC-07 raised on Order-to-Cash: wrong price on 4 invoices']];
+  const PEOPLE = [['Yara Kamal', 'CFO', '—'], ['Tarek Samy', 'Chief operating officer', '—'], ['Hend Mourad', 'Finance manager', 'Yara Kamal'], ['Hala Mansour', 'Finance manager', 'Yara Kamal'], ['Karim Fouad', 'Supply chain manager', 'Tarek Samy'], ['Omar Fathy', 'Commercial manager', 'Tarek Samy'], ['Amr Hassan', 'Retail operations manager', 'Tarek Samy'], ['Nour Samir', 'Customer service lead', 'Tarek Samy'], ['Laila Zaki', 'HR business partner', 'Tarek Samy'], ['Salma Adel', 'Credit controller', 'Hend Mourad'], ['Sherif Adel', 'Accounts payable clerk', 'Hala Mansour'], ['Dina Shawky', 'Billing clerk', 'Hend Mourad'], ['Dalia Sabry', 'Sales coordinator', 'Omar Fathy'], ['Nadia Fouad', 'Sales coordinator', 'Omar Fathy'], ['Mai Sobhy', 'Logistics coordinator', 'Karim Fouad'], ['Ramy Behairy', 'Warehouse supervisor', 'Karim Fouad'], ['Kareem Hafez', 'Inventory controller', 'Karim Fouad'], ['Heba Salem', 'Procurement officer', 'Karim Fouad'], ['Rania Fahmy', 'Customer service agent', 'Nour Samir'], ['Mostafa Deif', 'Store manager', 'Amr Hassan'], ['Amaka Eze', 'Accountant', 'Hala Mansour']];
+  const ROLEUSE = { 'Finance manager': 7, 'Credit controller': 3, 'Sales coordinator': 3, CFO: 4, 'Billing clerk': 2, 'Logistics coordinator': 2, 'Procurement officer': 2, 'Accounts payable clerk': 2, 'Store manager': 2, 'Inventory controller': 2, 'Warehouse supervisor': 2 };
+  const mail = (n) => n.toLowerCase().replace(/[^a-z]+/g, '.') + '@rayatrade.example';
+  function orgTree(mgr) { const kids = PEOPLE.filter((p) => p[2] === mgr); return kids.length ? '<ul>' + kids.map((p) => '<li><b>' + esc(p[0]) + '</b> <span>' + esc(p[1]) + '</span>' + orgTree(p[0]) + '</li>').join('') + '</ul>' : ''; }
+  let EXP = ['ORD100', 'PRO100', 'CRE100', 'REC100'];
+
+  const SUBV = { landscape: 'chain', priorities: 'score', governance: 'attention', org: 'people' };
+  const SECS = {
+    landscape: { title: 'Landscape', sub: 'How Raya Trade’s processes fit together: today’s Value chain and Helicopter views in one place.', kp: () => [['13', 'Processes'], ['4', 'Phases'], ['14', 'Activities'], ['11', 'Hand-overs']],
+      views: [['chain', 'Value chain'], ['cards', 'Hand-overs'], ['milestones', 'Milestones']],
+      body: (v) => v === 'chain' ? '<div class="chain">' + CHAIN.map(([ph, acts]) => '<div class="col"><h4>' + ph + '<span class="note">' + acts.length + '</span></h4>' + acts.map(([a, c]) => '<div class="card">' + esc(a) + '<small>' + pn(c) + '</small></div>').join('') + '</div>').join('') + '</div>'
+        : v === 'cards' ? '<div class="cols">' + LINKS.map(([c, to]) => { const from = LINKS.filter((l) => l[1].indexOf(c) >= 0).map((l) => l[0]); return '<div class="col"><b>' + pn(c) + '</b><p class="note" style="margin-top:4px">' + (from.length ? 'Picks up from ' + from.map(nameOf).join(', ') : 'Starts here') + '</p><p class="note">' + (to.length ? 'Hands over to ' + to.map(nameOf).join(', ') : 'Ends here') + '</p></div>'; }).join('') + '</div>'
+        : '<div class="box" style="padding:14px 16px"><div class="mil">' + MIL.map(([c, st]) => '<div class="mrow2"><div>' + pn(c) + '</div><div class="rail2">' + st.map(([l, m]) => '<span class="' + (m ? 'm' : '') + '"><em>' + esc(l) + '</em></span>').join('') + '</div></div>').join('') + '</div><p class="note" style="margin-top:10px">Gold marks a milestone step.</p></div>' },
+    priorities: { title: 'Deep-dive priorities', sub: 'Which processes the office takes deep next: full steps, RACI, controls and an SOP.', kp: () => [['11/11', 'Scored'], ['4', 'Wave 1'], ['4', 'Wave 2'], ['Draft', 'The plan']],
+      views: [['score', '1 · Score'], ['rank', '2 · Rank'], ['plan', '3 · Plan'], ['signoff', '4 · Sign-off']],
+      body: (v) => v === 'score' ? '<div class="blk" style="margin-bottom:12px"><span class="lbl">What counts, and how much</span><p style="font-size:13px">Importance <b>35%</b> · Risk if it goes wrong <b>40%</b> · Complexity <b>25%</b> · the team runs <b>4</b> deep dives at once</p></div>' + tbl(['Rank', 'Process', 'Department', 'Importance', 'Complexity', 'Risk', 'Score', 'Why', 'Decision'], ranked.map((r, i) => [String(i + 1), pn(r[0]), esc(r[1]), dots(r[2]), dots(r[3]), dots(r[4]), '<b>' + sc(r) + '</b>', esc(r[5]), esc(DEC[r[6]])]))
+        : v === 'rank' ? '<div class="box" style="padding:12px 16px">' + ranked.map((r, i) => '<div class="rk"><b>' + (i + 1) + '</b><span>' + pn(r[0]) + '</span><span class="bar"><i style="width:' + sc(r) + '%;background:' + (r[6] === 'W1' ? 'var(--gold)' : 'var(--stone)') + '"></i></span><b>' + sc(r) + '</b></div>').join('') + '<p class="note" style="margin-top:6px">Gold: Wave 1. Score out of 100, from the weights on Score.</p></div>'
+        : v === 'plan' ? '<div class="cols">' + ['W1', 'W2', 'LATER', 'HIGH'].map((k) => { const rs = ranked.filter((r) => r[6] === k); return '<div class="col"><h4>' + DEC[k] + '<span class="note">' + rs.length + (k === 'W1' ? ' of 4' : '') + '</span></h4>' + rs.map((r) => '<div class="card">' + pn(r[0]) + '<small>Score ' + sc(r) + ' · ' + esc(r[1]) + '</small></div>').join('') + '</div>'; }).join('') + '</div>'
+        : '<div class="two2"><div class="blk"><span class="lbl">The page the client signs</span><p style="font-size:14px;margin-bottom:6px"><b>Deep-dive plan for Raya Trade</b></p><p class="note">Wave 1 starts now: Order-to-Cash, Procure-to-Pay, Inventory & Stock Count, Credit & Collections. Wave 2 follows: Pricing & Promotions, New Store Opening, Record-to-Report, Logistics & Last-mile.</p><p class="note" style="margin-top:6px">Weights: importance 35%, risk 40%, complexity 25%.</p></div><div class="blk"><span class="lbl">Where it is</span><p>' + pill('q', 'Draft') + ' Not sent yet</p><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn gold" type="button" data-toast="Sends the plan to Yara Kamal, CFO, for sign-off. Scores lock while she has it.">Send to Yara Kamal for sign-off</button><button class="btn" type="button" data-toast="Opens the one-page plan as the client will read it.">Preview the page</button></div></div></div>' },
+    governance: { title: 'Governance', sub: 'The assessment, risks, policies, and the controls that come from each process.', kp: () => [['3', 'High risks', 'bad'], ['6', 'Open risks'], ['4', 'Policies'], ['1/4', 'Checklist done'], ['1', 'Overdue', 'bad']],
+      views: [['attention', 'Needs attention'], ['assessment', 'Assessment'], ['risks', 'Risks'], ['policies', 'Policies'], ['controls', 'Controls'], ['activity', 'Activity']],
+      body: (v) => v === 'attention' ? '<div class="two2"><div class="blk"><span class="lbl">Process review calendar</span>' + [['Overdue', 'bad-tx', [['20 Sep 2026', 'NEW100']]], ['Next 30 days', 'attn-tx', [['10 Nov', 'STO100'], ['12 Nov', 'ORD100']]], ['Later', 'ink-2', [['14 Mar 2027', 'REC100'], ['20 Oct 2027', 'CRE100']]]].map(([h, c, rs]) => '<h4 style="font-size:12px;margin:8px 0 4px;color:var(--' + c + ')">' + h + ' · ' + rs.length + '</h4>' + rs.map(([d, cd]) => '<div class="calrow"><span class="note">' + d + '</span><span>' + pn(cd) + '</span></div>').join('')).join('') + '</div><div class="blk"><span class="lbl">Overdue on the checklist</span>' + CK.filter((c) => c[5]).map((c) => '<p style="font-size:13.5px"><b>' + esc(c[0]) + '</b></p><p class="note">' + esc(c[2]) + ' · was due ' + c[3] + '</p>').join('') + '</div></div>'
+        : v === 'assessment' ? '<div class="aspects">' + ['Board structure', 'Risk & controls', 'Ethics', 'Compensation', 'ESG', 'Data integrity', 'Accessibility'].map((a, i) => '<button type="button" class="btn' + (i === 1 ? ' gold' : '') + '" data-toast="Shows the assessment for ' + a + '.">' + a + '</button>').join('') + '</div><div class="two2" style="margin-bottom:12px"><div class="blk"><span class="lbl">Executive summary · Risk & controls</span><p style="font-size:13px">Risk owners are named for the main processes, but treatment actions are often late. Finance alone reviews the risk register each month. Three high risks sit with one person. Internal audit reports to the CFO rather than to the audit committee.</p><p class="note" style="margin-top:6px">Generated 12 Oct with AI help</p></div><div class="blk"><span class="lbl">Governing policy</span><p style="font-size:13.5px"><b>Risk Management Policy</b> ' + stage('Published') + '</p><p class="note">Effective 1 Sep 2026 · approved by Yara Kamal</p></div></div><div class="cols">' + ['Immediate', 'Near-term', 'Long-term'].map((w) => { const rs = CK.filter((c) => c[1] === w); return '<div class="col"><h4>' + w + '<span class="note">' + rs.length + '</span></h4>' + rs.map((c) => '<label class="chk"><input type="checkbox"' + (c[4] ? ' checked' : '') + '> <span>' + esc(c[0]) + '<small>' + esc(c[2]) + (c[3] ? ' · due ' + c[3] : '') + '</small></span></label>').join('') + '</div>'; }).join('') + '</div>'
+        : v === 'risks' ? tbl(['Risk', 'Aspect', 'Likelihood', 'Impact', 'Level', 'Status', 'Owner'], RISKS.map((r) => [esc(r[0]), esc(r[1]), r[2], r[3], lvl(r[4]), esc(r[5]), esc(r[6])]))
+        : v === 'policies' ? tbl(['Policy', 'Governs', 'Stage', 'Effective', 'Review due', 'Read by'], POLS.map((p) => ['<b>' + esc(p[0]) + '</b>', esc(p[1]), stage(p[2]), p[3], p[4], p[5]]))
+        : v === 'controls' ? tbl(['Process', 'Step', 'Risk', 'Control', 'Last test'], CTLS.map((c) => [pn(c[0]), esc(c[1]), esc(c[2]), c[3] ? esc(c[3]) : '<span class="ctl bad">None yet</span>', pill(c[4][0], c[4][1])]))
+        : '<div class="box">' + ACTIV.map(([d, t]) => '<div class="trow" style="grid-template-columns:70px minmax(0,1fr)"><span class="note">' + d + '</span><span class="t">' + esc(t) + '</span></div>').join('') + '</div>' },
+    org: { title: 'Org & roles', sub: 'The roles and people every map, RACI and authority rule uses. People come from the client’s People register.', kp: () => [['21', 'People'], ['19', 'Roles'], ['20', 'From the register']],
+      views: [['people', 'People'], ['roles', 'Roles'], ['chart', 'Chart']],
+      body: (v) => v === 'people' ? tbl(['Name', 'Email', 'Role', 'Reports to'], PEOPLE.map(([n, r, m]) => ['<b>' + esc(n) + '</b>' + (n === 'Amaka Eze' ? ' <span class="chip">Added here</span>' : ''), n === 'Amaka Eze' ? '<span class="note">—</span>' : esc(mail(n)), esc(r), esc(m)]))
+        : v === 'roles' ? tbl(['Role', 'People', 'Used in'], PEOPLE.map((p) => p[1]).filter((r, i, a) => a.indexOf(r) === i).map((r) => ['<b>' + esc(r) + '</b>', esc(PEOPLE.filter((p) => p[1] === r).map((p) => p[0]).join(', ')), (ROLEUSE[r] || 1) + ' process' + ((ROLEUSE[r] || 1) > 1 ? 'es' : '')]))
+        : '<div class="box tree" style="padding:12px 16px">' + orgTree('—') + '</div>' },
+    export: { title: 'Export', sub: 'Pick processes and build the SOP pack: the company, a summary, the org structure, then each process.', kp: () => [[String(EXP.length), 'Ticked', '', 'expn'], ['13', 'Processes']], views: [],
+      body: () => '<div class="two2"><div class="blk"><span class="lbl">Pack sections</span>' + ['Cover', 'Contents', 'Executive summary', 'Org structure', 'The processes', 'Appendix: glossary'].map((p) => '<label class="chk"><input type="checkbox" checked> <span>' + p + '</span></label>').join('') + '<span class="lbl" style="margin-top:10px">Inside each process</span>' + ['Executive summary', 'Process map & narrative', 'RACI & authority', 'Governance, controls & metrics'].map((p, i) => '<label class="chk"><input type="checkbox" checked> <span>' + (i + 1) + '.0 ' + p + '</span></label>').join('') + '</div><div><div class="box tw" style="overflow:hidden"><table class="t"><thead><tr><th><input type="checkbox" id="expall" aria-label="Tick all"></th><th>Process</th><th>Where it is</th></tr></thead><tbody>' + ALL.map((r) => '<tr><td><input type="checkbox" class="expck" value="' + r[0] + '" aria-label="Include ' + esc(r[1]) + '"' + (EXP.indexOf(r[0]) >= 0 ? ' checked' : '') + '></td><td>' + pn(r[0]) + '</td><td>' + pill(r[3], r[4]) + '</td></tr>').join('') + '</tbody></table></div><div class="row3"><button class="btn gold" type="button" data-toast="Opens the report as a clean, printable document.">Preview report</button><button class="btn" type="button" data-toast="Opens the SOP for the ticked processes.">SOP</button><button class="btn" type="button" id="expcheck" data-toast="Reads the ticked processes end to end and lists the gaps.">Check end to end</button></div><p class="note" id="expnote" style="margin-top:6px"></p></div></div>' },
+    settings: { title: 'Settings', sub: 'The workspace profile and branding, the governance profile and the categories. Admins only.', kp: null, views: [],
+      body: () => '<div class="two2"><div class="blk"><span class="lbl">Client logo and colours</span><div style="display:flex;gap:10px;align-items:center"><div class="logo">No logo</div><button class="btn" type="button" data-toast="Uploads a logo, under 300 KB.">Upload logo</button></div><div class="sw">' + [['#0F6B63', 'Primary'], ['#3E7F8F', 'Secondary'], ['#C9A24D', 'Tertiary']].map(([c, l]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Used on the report and the SOP.</p></div><div class="blk"><span class="lbl">Client profile</span><dl class="dl"><dt>Industry</dt><dd>Retail & distribution</dd><dt>About</dt><dd>Distribution and retail group with stores and a business-to-business arm.</dd></dl><p class="note" style="margin-top:6px">Helps Check with AI and the drafts suit this client.</p></div><div class="blk"><span class="lbl">Governance profile</span><dl class="dl"><dt>Size</dt><dd>Mid-market</dd><dt>Jurisdiction</dt><dd>Egypt</dd></dl><p class="note" style="margin-top:6px">Grounds every governance assessment.</p></div><div class="blk"><span class="lbl">Categories</span><div style="display:flex;flex-wrap:wrap;gap:5px">' + ['Finance', 'Supply Chain', 'Retail', 'Commercial', 'Care', 'HR'].map((c) => '<span class="chip">' + c + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Shown as Department on Priorities and the list.</p></div><div class="blk"><span class="lbl">Language</span><p style="font-size:13px">English · العربية</p><p class="note" style="margin-top:6px">Each person’s own choice.</p></div><div class="blk"><span class="lbl">Who opens Processes</span><p style="font-size:13px">The Strategy Office builds. A client’s own people see only what is published, and what waits for them.</p></div></div>' },
+  };
+  function secHtml(k) {
+    const S2 = SECS[k], v = SUBV[k];
+    const sw = S2.views.length && OTAB !== 'c' ? '<div class="sv" role="tablist" aria-label="' + S2.title + ' views">' + S2.views.map(([vk, l]) => '<button type="button" role="tab" class="' + (vk === v ? 'on' : '') + '" aria-selected="' + (vk === v) + '" data-subv="' + vk + '">' + l + '</button>').join('') + '</div>' : '';
+    return '<div class="sec-h"><h2>' + S2.title + '</h2><p>' + S2.sub + '</p></div>' + (S2.kp ? kp(S2.kp()) : '') + sw + S2.body(v);
+  }
+  function expUpdate() {
+    const n = EXP.length, b = $('#expcheck'), note = $('#expnote');
+    if (!b) return;
+    $('#expn').textContent = n;
+    b.disabled = n < 1 || n > 12;
+    note.textContent = n < 1 ? 'Tick at least one process.' : n > 12 ? 'The check reads up to 12 processes at a time and ' + n + ' are ticked. Untick ' + (n - 12) + ' to run it.' : 'The check is optional, and a warning only: the report opens either way.';
+    note.style.color = n > 12 ? 'var(--attn-tx)' : '';
+    note.style.fontWeight = n > 12 ? '600' : '';
+    $('#expall').checked = n === ALL.length;
+  }
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'expall') { EXP = e.target.checked ? ALL.map((r) => r[0]) : []; $$('.expck').forEach((c) => { c.checked = e.target.checked; }); expUpdate(); }
+    else if (e.target.classList.contains('expck')) { EXP = $$('.expck').filter((c) => c.checked).map((c) => c.value); expUpdate(); }
+  });
   const DOORS = { 1: ['home', '#tb-proc'], 2: ['read', '#door2'], 3: ['home', '#door3'], back: ['builder', '#doorback'] };
   function render() {
     const s = SCREEN, b = BAND[s];
     $('#pstrip').hidden = s !== 'preview';
     $('#m-eyebrow').innerHTML = b.eyebrow; $('#m-title').innerHTML = b.title; $('#m-sub').innerHTML = b.sub; $('#m-acts').innerHTML = b.acts; $('#m-tiles').innerHTML = b.tiles;
-    if (s === 'home') $('#m-acts').innerHTML = '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button>' + (OTAB === 'b' ? '<button class="bq" type="button" data-toast="' + TABMSG.export + '">Export</button><button class="bq" type="button" data-toast="' + TABMSG.settings + '">Settings</button>' : '') + '<button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>';
+    if (s === 'home') $('#m-acts').innerHTML = '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button>' + (OTAB === 'b' ? '<button class="bq' + (TAB === 'export' ? ' on' : '') + '" type="button" data-tab="export">Export</button><button class="bq' + (TAB === 'settings' ? ' on' : '') + '" type="button" data-tab="settings">Settings</button>' : '') + '<button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>';
     const side = s === 'home' && OTAB === 'c';
     $('#homewrap').classList.toggle('side', side);
     $('#hside').hidden = !side;
-    if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>').join('');
+    if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>' + (k === TAB && SECS[k] && SECS[k].views.length ? '<div class="subnav">' + SECS[k].views.map(([vk, vl]) => '<button type="button" class="' + (vk === SUBV[k] ? 'on' : '') + '" data-subv="' + vk + '">' + vl + '</button>').join('') + '</div>' : '')).join('');
+    if (s === 'home' && SECS[TAB]) $('#m-eyebrow').innerHTML = 'Raya Trade · Processes · Builder › ' + SECS[TAB].title;
     $$('[data-otab]').forEach((b) => b.classList.toggle('on', b.dataset.otab === OTAB));
     $('#tabnote').innerHTML = OTAB_NOTES[OTAB].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
     const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
     const cur = s === 'home' ? TAB : RVIEW;
     $('#vt').hidden = !tabs.length;
     $('#vt').innerHTML = tabs.map(([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === cur ? 'on' : '') + '" aria-selected="' + (k === cur) + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>').join('');
-    const scr = s === 'home' ? 'home-' + TAB : s === 'builder' ? 'builder' : 'read';
+    const scr = s === 'home' ? (SECS[TAB] ? 'home-sec' : 'home-' + TAB) : s === 'builder' ? 'builder' : 'read';
+    if (scr === 'home-sec') { $('#secwrap').innerHTML = secHtml(TAB); expUpdate(); }
     $$('[data-screen]').forEach((v) => { v.hidden = v.dataset.screen !== scr; });
     const fb = $('#flowblock'), rb = $('#raciblock'), park = $('#park');
     park.appendChild(fb); park.appendChild(rb);
@@ -512,9 +648,11 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = d === '3' ? 'handle' : 'all'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
     if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'all'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
     const ot = t.closest('[data-otab]'), hs = t.closest('[data-hside]');
-    if (ot) { OTAB = ot.dataset.otab; SCREEN = 'home'; TAB = 'all'; render(); return; }
-    if (hs) { const k = hs.dataset.hside; if (k === 'all' || k === 'handle') { TAB = k; render(); } else toast(TABMSG[k]); return; }
-    if (tab) { const k = tab.dataset.tab; if (TABMSG[k]) { toast(TABMSG[k]); return; } if (k === 'steps' || k === 'summary') { toast('As on the process page mockup.'); return; } if (SCREEN === 'home') TAB = k; else RVIEW = k; render(); return; }
+    if (ot) { OTAB = ot.dataset.otab; SCREEN = 'home'; render(); return; }
+    if (hs) { TAB = hs.dataset.hside; render(); return; }
+    const sv = t.closest('[data-subv]');
+    if (sv) { SUBV[TAB] = sv.dataset.subv; render(); return; }
+    if (tab) { const k = tab.dataset.tab; if (k === 'steps' || k === 'summary') { toast('As on the process page mockup.'); return; } if (SCREEN === 'home') TAB = k; else RVIEW = k; render(); return; }
     if (row) { if (row.dataset.row === 'ORD100') { SCREEN = 'builder'; SECT = 'map'; SEL = 4; render(); } else toast('Opens ' + row.dataset.row + ' in the builder.'); return; }
     if (sc) { SECT = sc.dataset.sect; render(); return; }
     if (st) { SEL = Number(st.dataset.step); drawer(); return; }

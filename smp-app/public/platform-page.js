@@ -226,9 +226,12 @@
   function tipShow(t) {
     if (t.closest("#nav, .sbav") && !railOn()) { tipHide(); return; }
     var r = t.getBoundingClientRect();
+    /* the box is in the window's pixels, the place is set in the page's,
+       and the console is zoomed on a computer (80%, below) */
+    var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;
     tip.textContent = t.getAttribute("data-tip");
-    tip.style.left = Math.round(r.right + 10) + "px";
-    tip.style.top = Math.round(r.top + r.height / 2) + "px";
+    tip.style.left = Math.round((r.right + 10) / z) + "px";
+    tip.style.top = Math.round((r.top + r.height / 2) / z) + "px";
     tip.classList.add("on");
   }
   function tipHide() { tip.classList.remove("on"); }
@@ -2740,28 +2743,55 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
-      var n = 0;
-      ["late", "week", "later"].forEach(function (b) {
-        var mine = rows.filter(function (r) { return r.bucket === b; });
-        var ups = cases.filter(function (r) { return r.bucket === b; });
-        if (!mine.length && !ups.length) return;
-        n++;
-        var sec = el("section", "mwsec");
-        sec.setAttribute("data-bucket", b);
+      var head = function (sec, n, name) {
         var sh = el("div", "mwsh");
         sh.appendChild(el("span", "ix", (n < 10 ? "0" : "") + n));
-        sh.appendChild(el("h2", null, MW_HEAD[b]));
+        sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
         sec.appendChild(sh);
+      };
+      /* BY DATE (Late · This week · Next week and later) or BY CLIENT, one
+         numbered section a client with its mark (Islam, 2026-10-24: "a sort
+         by so it shows by client"). The rows are the same rows, read from
+         `rows` at the press, so a tick made under one order is in the other. */
+      var draw = function () {
+        list.textContent = "";
+        var n = 0;
         /* in date order with the actions, a write-up with no date last */
-        var all = mine.map(function (r) { return [r.due || "9999", 0, r]; })
-          .concat(ups.map(function (r) { return [r.due || "9999", 1, r]; }))
-          .sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]; });
-        all.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
-        mwMeta(sec);
-        list.appendChild(sec);
-      });
+        var all = rows.map(function (r) { return [r.due || "9999", 0, r]; })
+          .concat(cases.map(function (r) { return [r.due || "9999", 1, r]; })).sort(byDue);
+        if (TSORT.by === "client") {
+          byClient(all).forEach(function (g) {
+            n++;
+            var sec = el("section", "mwsec byc");
+            sec.setAttribute("data-client", g.key);
+            var h = el("h2");
+            h.appendChild(clientMark(g.key, g.name, true));
+            h.appendChild(document.createTextNode(g.name));
+            head(sec, n, h);
+            g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
+            mwMeta(sec);
+            list.appendChild(sec);
+          });
+          return;
+        }
+        ["late", "week", "later"].forEach(function (b) {
+          var mine = all.filter(function (x) { return x[2].bucket === b; });
+          if (!mine.length) return;
+          n++;
+          var sec = el("section", "mwsec");
+          sec.setAttribute("data-bucket", b);
+          head(sec, n, el("h2", null, MW_HEAD[b]));
+          mine.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
+          mwMeta(sec);
+          list.appendChild(sec);
+        });
+      };
+      var bar = el("div", "mwbar");
+      bar.appendChild(sortSwitch(draw));
+      body.appendChild(bar);
       body.appendChild(list);
+      draw();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -2780,8 +2810,60 @@
      boot already holds, narrowed to a seat; the tasks are My tasks' own
      `mywork` rows; the case studies are /api/cases `home`. So every word and
      mark here is the one the page it opens says (§53.5). */
-  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
-  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
+  var HO_TASKS = NAV_SVG + '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>';
+
+  /* SORT BY DATE OR BY CLIENT (Islam, 2026-10-24: "for the tasks in the
+     dashboard and in the my tasks module can we add a sort by so it shows by
+     client in both areas"). One choice for both places, kept on this device
+     the column's own way (§601). */
+  var TSORT = { by: "date" };
+  try { if (localStorage.getItem("smp.tasks.sort") === "client") TSORT.by = "client"; } catch (e) { /* this device only */ }
+  function sortSwitch(onChange) {
+    var w = el("span", "hosort");
+    w.appendChild(document.createTextNode("Sort by"));
+    var sw = el("span", "sw");
+    sw.setAttribute("role", "group");
+    sw.setAttribute("aria-label", "Sort by");
+    [["date", "Date"], ["client", "Client"]].forEach(function (o) {
+      var b = el("button", null, o[1]);
+      b.type = "button";
+      b.setAttribute("data-sort", o[0]);
+      b.setAttribute("aria-pressed", String(TSORT.by === o[0]));
+      b.addEventListener("click", function () {
+        if (TSORT.by === o[0]) return;
+        TSORT.by = o[0];
+        try { localStorage.setItem("smp.tasks.sort", o[0]); } catch (e) { /* this device only */ }
+        sw.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        onChange();
+      });
+      sw.appendChild(b);
+    });
+    w.appendChild(sw);
+    return w;
+  }
+  /* GROUPED BY CLIENT: clients with something late first, then by their
+     earliest date, then by name; inside a client, by date. `list` is
+     [due, isCase, row]. */
+  function byClient(list) {
+    var g = {}, order = [];
+    list.forEach(function (x) {
+      var k = x[2].client;
+      if (!g[k]) { g[k] = { key: k, name: x[2].clientName, rows: [], late: 0, first: "9999" }; order.push(k); }
+      g[k].rows.push(x);
+      if (x[2].late) g[k].late++;
+      if (x[0] < g[k].first) g[k].first = x[0];
+    });
+    return order.map(function (k) { return g[k]; }).sort(function (a, b) {
+      return (b.late > 0 ? 1 : 0) - (a.late > 0 ? 1 : 0) || (a.first < b.first ? -1 : a.first > b.first ? 1 : 0) || String(a.name).localeCompare(String(b.name));
+    });
+  }
+  function byDue(a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; }
+  /* a client's mark: its logo where it has one (from the cards), else initials */
+  var MARKS = {};
+  function clientMark(key, name, small) {
+    if (MARKS[key]) { var im = el("img", "cmk" + (small ? " xs" : "")); im.src = MARKS[key]; im.alt = ""; return im; }
+    return el("span", "cmk" + (small ? " xs" : ""), initials(name));
+  }
 
   function hoHello() {
     var band = el("header", "hohello");
@@ -2795,57 +2877,69 @@
     page.appendChild(band);
   }
 
-  function hoHead(host, eye, name, link, press) {
-    var h = el("div", "hosh");
-    var d = el("div");
-    d.appendChild(el("p", "hoeye", eye));
-    d.appendChild(el("h2", null, name));
-    h.appendChild(d);
-    if (link) {
-      var a = el("button", "holink", link);
-      a.type = "button";
-      a.addEventListener("click", press);
-      h.appendChild(a);
-    }
-    host.appendChild(h);
+  /* A CARD WITH ITS HEADER INSIDE IT (Islam's option A, 2026-10-24): the
+     icon, the title, a count, and on the right the card's own controls. */
+  function hoCard(host, name, icon, home) {
+    var card = el("section", "hocard");
+    card.setAttribute("data-home", home);
+    var hd = el("div", "hochd");
+    var ic = el("span", "hocic");
+    ic.innerHTML = icon;
+    hd.appendChild(ic);
+    hd.appendChild(el("h2", null, name));
+    var cnt = el("span", "hocnt");
+    cnt.hidden = true;
+    hd.appendChild(cnt);
+    hd.appendChild(el("span", "sp"));
+    card.appendChild(hd);
+    var body = el("div", "hobody");
+    body.appendChild(el("p", "honone", "Reading…"));
+    card.appendChild(body);
+    host.appendChild(card);
+    return { card: card, head: hd, body: body, count: function (n) { cnt.textContent = String(n); cnt.hidden = false; } };
+  }
+  function hoLink(words, press) {
+    var a = el("button", "holink", words);
+    a.type = "button";
+    a.addEventListener("click", press);
+    return a;
   }
 
+  /* YOUR CLIENTS, ONE LINE EACH (Islam's option B): the mark, the name, and
+     the modules as words under it. No industry and no seat. */
   function hoClient(c) {
     var row = el("div", "hocl");
     row.setAttribute("data-client", c.key);
-    if (c.mark) { var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; row.appendChild(im); }
-    else row.appendChild(el("span", "cmark", initials(c.name)));
+    row.appendChild(clientMark(c.key, c.name));
     var who = el("span");
     who.appendChild(el("b", null, c.name));
-    who.appendChild(el("span", "s", [c.industry, c.seat === "super" ? "Super user" : "SMO team"].filter(Boolean).join(" · ")));
-    row.appendChild(who);
-    var mods = el("span", "homods");
+    var words = el("span", "howords");
     if (c.canOpen) (c.modules || []).forEach(function (m) {
-      var b = el("button", "homod");
+      var b = el("button", "howd");
       b.type = "button";
       b.setAttribute("data-module", m.key);
-      b.appendChild(document.createTextNode(m.label));
+      b.appendChild(el("u", null, m.label));
       if (m.mark) {
         var mk = el("i", m.alarm ? "alarm" : null, m.mark);
         if (m.tip) mk.title = m.tip;
         b.appendChild(mk);
       }
       b.addEventListener("click", function () { moduleGo(c, m); });
-      mods.appendChild(b);
+      words.appendChild(b);
     });
-    row.appendChild(mods);
+    who.appendChild(words);
+    row.appendChild(who);
     return row;
   }
 
   /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
-     Tracker, or the case study to write — AND ITS TICK FINISHES IT (Islam:
-     "can you make the tasks check box clickable from the home?"). The tick is
-     My tasks' own: the same `workStatus` write through that client's door,
-     drawn only where the server says this person may (canChange), and the
-     row stays where the hand left it, green, until Home is read again (§583).
-     The status word stays on My tasks. A write-up has no tick: it is done on
-     the case study, never from a list (spec 067 §8). */
-  function hoTask(r, isCase, act) {
+     Tracker, or the case study to write — AND ITS TICK FINISHES IT (§614.1):
+     My tasks' own `workStatus` write, drawn live only where the server says
+     this person may (canChange), the row staying where the hand left it,
+     green, until Home is read again (§583). A write-up has no tick: it is
+     done on the case study, never from a list (spec 067 §8). Under a client's
+     heading the row does not name the client again. */
+  function hoTask(r, isCase, act, noClient) {
     var done = !isCase && r.status === "done";
     var b = el("div", "hotask" + (r.late && !done ? " late" : "") + (done ? " done" : ""));
     b.tabIndex = 0;
@@ -2872,8 +2966,8 @@
     if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
     else t.appendChild(document.createTextNode(r.title || "(untitled)"));
     var m = el("span", "m");
-    m.appendChild(el("span", "c", r.clientName));
-    m.appendChild(document.createTextNode(" · " + (isCase ? "Case study" : r.statusWord || "")));
+    if (!noClient) { m.appendChild(el("span", "c", r.clientName)); m.appendChild(document.createTextNode(" · ")); }
+    m.appendChild(document.createTextNode(isCase ? "Case study" : r.statusWord || ""));
     t.appendChild(m);
     b.appendChild(t);
     b.appendChild(el("span", "wh", r.when || ""));
@@ -2886,33 +2980,21 @@
     return b;
   }
 
-  function hoTasks(box, j) {
+  /* YOUR TASKS: ONE LIST, overdue first (its date in red), then this week —
+     the two tabs are gone (Islam: "remove the overdue and this week
+     filters"). Next week and later stay on My tasks. */
+  function hoTasks(c, j) {
+    var box = c.body;
     box.textContent = "";
     if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read your tasks.")); return; }
-    var open = (j.rows || []).filter(function (r) { return r.status !== "done"; });
-    var cases = j.cases || [];
-    var pick = function (b) {
-      return open.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 0, r]; })
-        .concat(cases.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 1, r]; }))
-        .sort(function (a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; });
-    };
-    var panes = [["late", "Overdue", HO_ALERT, "l", "No overdue tasks."], ["week", "This week", HO_CAL, "w", "Nothing due this week."]];
-    var lists = { late: pick("late"), week: pick("week") };
-    /* It opens on Overdue when anything is, otherwise on This week. */
-    var on = lists.late.length ? "late" : "week";
-    var ph = el("div", "hoph");
-    var tabs = el("div", "hotabs");
-    tabs.setAttribute("role", "tablist");
-    ph.appendChild(tabs);
+    var near = function (r) { return r.bucket === "late" || r.bucket === "week"; };
+    var list = (j.rows || []).filter(function (r) { return r.status !== "done" && near(r); }).map(function (r) { return [r.due || "9999", 0, r]; })
+      .concat((j.cases || []).filter(near).map(function (r) { return [r.due || "9999", 1, r]; }));
     /* a refused or failed tick is said here, in words, and the row is left as it was */
     var said = el("p", "err hosaid");
     said.hidden = true;
-    var counts = {};
-    var recount = function () {
-      Object.keys(counts).forEach(function (k) {
-        counts[k].textContent = String(box.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask:not(.done)').length);
-      });
-    };
+    var rows = el("div");
+    var recount = function () { c.count(rows.querySelectorAll(".hotask:not(.done)").length); };
     var act = function (r, row) {
       if (row.getAttribute("aria-busy") === "true") return;
       var done = r.status === "done";
@@ -2923,7 +3005,10 @@
         if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
         var nr = a.row;
         nr.was = done ? r.was : r.status;
-        var fresh = hoTask(nr, false, act);
+        /* the row keeps its place in the list, so a re-sort keeps the tick */
+        list.forEach(function (x) { if (x[2] === r) x[2] = nr; });
+        var fresh = hoTask(nr, false, act, row.getAttribute("data-noclient") === "1");
+        if (row.getAttribute("data-noclient") === "1") fresh.setAttribute("data-noclient", "1");
         row.parentNode.replaceChild(fresh, row);
         said.hidden = true;
         recount();
@@ -2933,66 +3018,65 @@
         undo("Could not reach the server. Nothing was changed — try again.");
       });
     };
-    var all = el("button", "holink", "All tasks →");
-    all.type = "button";
-    all.addEventListener("click", function () { go("mywork"); });
-    ph.appendChild(all);
-    box.appendChild(ph);
+    var draw = function () {
+      rows.textContent = "";
+      if (!list.length) { rows.appendChild(el("p", "honone", "Nothing overdue or due this week.")); return; }
+      list.sort(byDue);
+      if (TSORT.by === "client") {
+        byClient(list).forEach(function (g) {
+          var h = el("div", "hogrp");
+          h.setAttribute("data-group", g.key);
+          h.appendChild(clientMark(g.key, g.name, true));
+          h.appendChild(document.createTextNode(g.name));
+          var meta = el("i", null, " · " + g.rows.length);
+          if (g.late) { meta.appendChild(document.createTextNode(", ")); meta.appendChild(el("span", "late", g.late + " late")); }
+          h.appendChild(meta);
+          rows.appendChild(h);
+          g.rows.forEach(function (x) { var t = hoTask(x[2], !!x[1], act, true); t.setAttribute("data-noclient", "1"); rows.appendChild(t); });
+        });
+      } else list.forEach(function (x) { rows.appendChild(hoTask(x[2], !!x[1], act)); });
+      recount();
+    };
+    c.head.appendChild(sortSwitch(draw));
+    c.head.appendChild(hoLink("All tasks →", function () { go("mywork"); }));
     box.appendChild(said);
     if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
-    var bodies = {};
-    panes.forEach(function (p) {
-      var t = el("button", p[3]);
-      t.type = "button";
-      t.setAttribute("role", "tab");
-      t.setAttribute("data-pane", p[0]);
-      t.setAttribute("aria-selected", String(p[0] === on));
-      t.innerHTML = p[2];
-      t.appendChild(document.createTextNode(p[1]));
-      counts[p[0]] = el("i", null, String(lists[p[0]].length));
-      t.appendChild(counts[p[0]]);
-      tabs.appendChild(t);
-      var pane = el("div", "hopane");
-      pane.setAttribute("role", "tabpanel");
-      pane.setAttribute("data-pane", p[0]);
-      pane.hidden = p[0] !== on;
-      if (!lists[p[0]].length) pane.appendChild(el("p", "honone", p[4]));
-      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1], act)); });
-      bodies[p[0]] = pane;
-      box.appendChild(pane);
-      t.addEventListener("click", function () {
-        tabs.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-selected", String(o === t)); });
-        Object.keys(bodies).forEach(function (k) { bodies[k].hidden = k !== p[0]; });
-      });
-    });
+    box.appendChild(rows);
+    draw();
   }
 
-  function hoCases(left, right, j) {
-    left.textContent = ""; right.textContent = "";
+  function hoCases(c, j) {
+    var box = c.body;
+    box.textContent = "";
+    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
+    var two = el("div", "hotwo"), left = el("div"), right = el("div");
+    left.setAttribute("data-home", "writing");
+    right.setAttribute("data-home", "fresh");
+    two.appendChild(left); two.appendChild(right);
+    box.appendChild(two);
     left.appendChild(el("p", "hobxh", "Your write-ups · in progress"));
     right.appendChild(el("p", "hobxh", "Newly finished"));
-    if (!j || !j.ok) { left.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
     if (!j.writing.length) left.appendChild(el("p", "honone", "No case study is waiting on you to write it."));
-    j.writing.forEach(function (c) {
+    j.writing.forEach(function (w) {
       var row = el("div", "hocase");
-      row.setAttribute("data-case", c.id);
+      row.setAttribute("data-case", w.id);
       var ring = el("span", "horing");
-      ring.style.setProperty("--p", String(Math.round(c.filled / 8 * 100)));
-      ring.appendChild(el("span", null, c.filled + "/8"));
+      ring.style.setProperty("--p", String(Math.round(w.filled / 8 * 100)));
+      ring.appendChild(el("span", null, w.filled + "/8"));
       row.appendChild(ring);
       var t = el("span");
-      t.appendChild(el("b", null, c.name));
-      var s = el("span", "s", c.client.name + " · " + (c.filled ? c.filled + " of 8 sections" : "not started"));
-      if (c.due) {
-        var late = c.due < new Date().toISOString().slice(0, 10);
+      t.appendChild(el("b", null, w.name));
+      var s = el("span", "s", w.client.name + " · " + (w.filled ? w.filled + " of 8 sections" : "not started"));
+      if (w.due) {
+        var late = w.due < new Date().toISOString().slice(0, 10);
         s.appendChild(document.createTextNode(" · "));
-        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(c.due + "T12:00:00")));
+        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(w.due + "T12:00:00")));
       }
       t.appendChild(s);
       row.appendChild(t);
-      var b = el("button", c.filled ? "btn solid" : "btn", c.filled ? "Continue" : "Start");
+      var b = el("button", w.filled ? "btn solid" : "btn", w.filled ? "Continue" : "Start");
       b.type = "button";
-      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case", fresh: true }; go("memory"); });
+      b.addEventListener("click", function () { CS.jump = { id: w.id, view: "case", fresh: true }; go("memory"); });
       row.appendChild(b);
       left.appendChild(row);
     });
@@ -3003,18 +3087,18 @@
       left.appendChild(f);
     }
     if (!j.fresh.length) right.appendChild(el("p", "honone", "Nothing finished in the last 30 days."));
-    j.fresh.forEach(function (c) {
+    j.fresh.forEach(function (k) {
       var b = el("button", "hobook");
       b.type = "button";
-      b.setAttribute("data-case", c.id);
-      b.appendChild(el("span", "hospine", initials(c.client.name)));
+      b.setAttribute("data-case", k.id);
+      b.appendChild(el("span", "hospine", initials(k.client.name)));
       var t = el("span");
-      var nm = el("b", null, c.name);
+      var nm = el("b", null, k.name);
       nm.appendChild(el("span", "new", "New"));
       t.appendChild(nm);
-      t.appendChild(el("span", "s", c.client.name + " · " + nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
+      t.appendChild(el("span", "s", k.client.name + " · " + nOf(k.deliverables, "deliverable") + " · " + nOf(k.insights, "insight")));
       b.appendChild(t);
-      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case" }; go("memory"); });
+      b.addEventListener("click", function () { CS.jump = { id: k.id, view: "case" }; go("memory"); });
       right.appendChild(b);
     });
   }
@@ -3022,45 +3106,35 @@
   function drawHome() {
     hoHello();
     var top = el("div", "hotop");
-    var cs = el("section"), ts = el("section");
-    cs.setAttribute("data-home", "clients");
-    ts.setAttribute("data-home", "tasks");
-    hoHead(cs, "Where you have a seat", "Your clients");
-    hoHead(ts, "Overdue and this week", "Your tasks");
-    var cbox = el("div", "hobox hoclients"), tbox = el("div", "hobox");
-    cbox.appendChild(el("p", "honone", "Reading your clients…"));
-    tbox.appendChild(el("p", "honone", "Reading your tasks…"));
-    cs.appendChild(cbox); ts.appendChild(tbox);
-    top.appendChild(cs); top.appendChild(ts);
     page.appendChild(top);
-    var sec = el("section", "hosec");
-    sec.setAttribute("data-home", "cases");
-    hoHead(sec, "What we have learned", "Case studies", "Go to Case studies →", function () { go("memory", true); });
-    var two = el("div", "hotwo"), left = el("div", "hobox"), right = el("div", "hobox");
-    left.setAttribute("data-home", "writing");
-    right.setAttribute("data-home", "fresh");
-    left.appendChild(el("p", "honone", "Reading…"));
-    two.appendChild(left); two.appendChild(right);
-    sec.appendChild(two);
-    page.appendChild(sec);
+    var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
+    cc.head.appendChild(hoLink("All clients →", function () { go("clients", "row"); }));
+    var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
+    var sc = hoCard(page, "Case studies", NAV_ICON.memory, "cases");
+    sc.card.classList.add("hosec");
+    sc.head.appendChild(hoLink("The library →", function () { go("memory", "row"); }));
 
-    /* the boot's `cards`, once (§369), as the Clients tab takes it */
+    /* the boot's `cards`, once (§369), as the Clients tab takes it; the
+       tasks wait for it, so a group under Sort by client wears the
+       client's logo */
     var handed = BOOTCARDS; BOOTCARDS = null;
     var fail = function (box) { return function (e) {
       if (String(e && e.message) === "sign in") return;
       box.textContent = ""; box.appendChild(el("p", "honone", "Could not reach the server."));
     }; };
-    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
-      cbox.textContent = "";
-      if (!j || !j.ok) { cbox.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+    var cards = (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+      cc.body.textContent = "";
+      if (!j || !j.ok) { cc.body.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+      (j.cards || []).forEach(function (c) { if (c.mark) MARKS[c.key] = c.mark; });
       /* A SEAT, FOR AN ADMIN TOO (Islam: "the admin also sees his clients"):
          the whole list is one press away under Clients. */
       var mine = j.cards.filter(function (c) { return !!c.seat; });
-      if (!mine.length) cbox.appendChild(el("p", "honone", "You have no seat on any client yet."));
-      mine.forEach(function (c) { cbox.appendChild(hoClient(c)); });
-    }).catch(fail(cbox));
-    post({ action: "mywork" }).then(function (j) { hoTasks(tbox, j); }).catch(fail(tbox));
-    cpostCases({ action: "home" }).then(function (j) { hoCases(left, right, j); }).catch(fail(left));
+      cc.count(mine.length);
+      if (!mine.length) cc.body.appendChild(el("p", "honone", "You have no seat on any client yet."));
+      mine.forEach(function (c) { cc.body.appendChild(hoClient(c)); });
+    }, fail(cc.body));
+    Promise.all([post({ action: "mywork" }), cards]).then(function (r) { hoTasks(tc, r[0]); }).catch(fail(tc.body));
+    cpostCases({ action: "home" }).then(function (j) { hoCases(sc, j); }).catch(fail(sc.body));
   }
 
   function drawClients() {

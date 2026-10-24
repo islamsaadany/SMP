@@ -1118,6 +1118,9 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
           secs: vis(document.getElementById("secrow")), chrome: Math.round(document.querySelector(".chrome").getBoundingClientRect().height),
           mainH: m ? Math.round(m.getBoundingClientRect().height) : 0, gutter: Math.round(parseFloat(getComputedStyle(document.querySelector(".wrap")).paddingLeft)),
           extra: document.documentElement.scrollHeight - innerHeight }; });
+      /* since §620 the bar is drawn a moment after the chat opens (its shape
+         first), so the reading waits for the bar it is about */
+      await page.waitForSelector(".chrome > header.top", { state: "visible", timeout: 10000 }).catch(() => {});
       const f0 = await rd();
       check(f0.btn && f0.top && f0.units && f0.tabs && !f0.thin && f0.gutter <= 12,
         "the Copilot's unit row offers Fold bars, all three bars show, the thin line does not, and the page gutter is tight (§475)", JSON.stringify(f0));
@@ -2463,50 +2466,74 @@ await section("4 · Forefront's own pages", async () => {
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
 
     /* SPEC 068 \u2014 HOME, on the same made state: three open, one late, one
-       this week, one far off. The tasks panel opens on Overdue with the late
-       one and only it; This week holds the one due now and never the far
-       one (it is My tasks' to show); the client with a seat is drawn with
-       its modules; and All tasks lands on My tasks. */
+       this week, one far off. Since 2026-10-24 ("remove the overdue and this
+       week filters", "a sort by so it shows by client") the tasks are ONE
+       list in a card with its header inside it: the late one first in the
+       alarm, then the one due now, and never the far one (it is My tasks' to
+       show); Sort by Client groups them under the client and is kept on the
+       device; the client with a seat is one line with its modules as words;
+       and All tasks lands on My tasks. Rewritten, never loosened (\u00a7218). */
+    await page.evaluate(() => { try { localStorage.removeItem("smp.tasks.sort"); } catch (e) {} });
     await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
-    await page.waitForSelector(".hotask, .honone", { timeout: 8000 }).catch(() => {});
-    await page.waitForSelector('[data-home="tasks"] .hotabs', { timeout: 8000 }).catch(() => {});
+    await page.waitForSelector('[data-home="tasks"] .hotask, [data-home="tasks"] .honone', { timeout: 8000 }).catch(() => {});
     const home = () => page.evaluate(() => {
-      const pane = (k) => Array.from(document.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask .t')).map((e) => e.firstChild ? e.firstChild.textContent : "");
-      return { tabs: Array.from(document.querySelectorAll(".hotabs button")).map((b) => b.textContent + (b.getAttribute("aria-selected") === "true" ? "*" : "")),
-        late: pane("late"), week: pane("week"), shown: Array.from(document.querySelectorAll(".hopane")).filter((p) => !p.hidden).map((p) => p.getAttribute("data-pane")),
-        clients: Array.from(document.querySelectorAll(".hocl")).map((c) => c.getAttribute("data-client") + ":" + Array.from(c.querySelectorAll(".homod")).map((m) => m.getAttribute("data-module")).join(",")),
-        heads: Array.from(document.querySelectorAll(".hosh h2")).map((h) => h.textContent),
-        font: getComputedStyle(document.body).fontSize, wrap: getComputedStyle(document.getElementById("page")).maxWidth };
+      const tasks = document.querySelector('[data-home="tasks"]');
+      return { rows: Array.from(document.querySelectorAll('[data-home="tasks"] .hotask .t')).map((e) => e.firstChild ? e.firstChild.textContent : ""),
+        late: Array.from(document.querySelectorAll('[data-home="tasks"] .hotask.late')).length,
+        count: tasks ? (tasks.querySelector(".hocnt") || {}).textContent : null,
+        groups: Array.from(document.querySelectorAll('[data-home="tasks"] .hogrp')).map((g) => g.getAttribute("data-group")),
+        sort: (document.querySelector('[data-home="tasks"] .hosort button[aria-pressed="true"]') || {}).textContent || "",
+        tabs: document.querySelectorAll(".hotabs").length,
+        clients: Array.from(document.querySelectorAll(".hocl")).map((c) => c.getAttribute("data-client") + ":" + Array.from(c.querySelectorAll(".howd")).map((m) => m.getAttribute("data-module")).join(",")),
+        industry: Array.from(document.querySelectorAll(".hocl")).some((c) => /Super user|SMO team|Retail|Trade &/.test(c.textContent.replace(c.querySelector("b").textContent, ""))),
+        heads: Array.from(document.querySelectorAll(".hochd h2")).map((h) => h.textContent),
+        brand: (document.querySelector(".sbname") || {}).textContent || "",
+        font: getComputedStyle(document.body).fontSize, wrap: getComputedStyle(document.getElementById("page")).maxWidth,
+        zoom: getComputedStyle(document.documentElement).zoom };
     });
     const h1 = await home();
     check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Case studies"]),
-      "Home draws your clients, your tasks and case studies (spec 068)", JSON.stringify(h1.heads));
-    check(JSON.stringify(h1.tabs) === JSON.stringify(["Overdue1*", "This week1"]) && JSON.stringify(h1.shown) === JSON.stringify(["late"])
-      && JSON.stringify(h1.late) === JSON.stringify(["MW late one"]) && JSON.stringify(h1.week) === JSON.stringify(["MW this week"]),
-      "\u2026its tasks open on Overdue with the late one, This week holds the one due now, and the far one is left to My tasks", JSON.stringify(h1));
-    check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)), "\u2026the client you have a seat on is drawn with a button into each module", JSON.stringify(h1.clients));
-    check(h1.font === "14px" && h1.wrap === "none", "\u2026and the console is compact: 14px text, the whole width of the window (spec 068)", JSON.stringify({ font: h1.font, wrap: h1.wrap }));
-    /* HOME'S TICK FINISHES IT (Islam: "can you make the tasks check box
-       clickable from the home?"): the same write My tasks makes, on the
-       stored row, with the row staying ticked and the Overdue count dropping;
-       unticking puts it back. */
+      "Home draws your clients, your tasks and case studies, each a card with its header inside it (spec 068, 2026-10-24)", JSON.stringify(h1.heads));
+    check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
+      "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
+    check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,
+      "\u2026the client you have a seat on is one line with a door into each module, and no industry or seat", JSON.stringify(h1.clients));
+    check(h1.font === "14px" && h1.wrap === "none" && h1.zoom === "0.8",
+      "\u2026and the console is compact and shown at 80% on a computer: 14px text, the whole width of the window", JSON.stringify({ font: h1.font, wrap: h1.wrap, zoom: h1.zoom }));
+    check(/^Strategy Management\s*Platform$/.test(h1.brand), "\u2026under the name Strategy Management Platform at the column's head", h1.brand);
+    /* HOME'S TICK FINISHES IT (\u00a7614.1): the same write My tasks makes, on
+       the stored row, with the row staying ticked and the card's count
+       dropping; unticking puts it back. */
     const lateId = ids["MW late one"];
     await page.click('.hotask[data-id="' + lateId + '"] .mwtick');
     await page.waitForSelector('.hotask[data-id="' + lateId + '"].done', { timeout: 8000 }).catch(() => {});
     const ht = await home();
-    check((await stored("MW late one")) === "done" && ht.tabs[0] === "Overdue0*" && ht.late.length === 1,
-      "Home's tick finishes the action in the client's Tracker, the row stays, ticked, and Overdue drops to 0", JSON.stringify({ st: await stored("MW late one"), tabs: ht.tabs }));
+    check((await stored("MW late one")) === "done" && ht.count === "1" && ht.rows.length === 2,
+      "Home's tick finishes the action in the client's Tracker, the row stays, ticked, and the count drops", JSON.stringify({ st: await stored("MW late one"), count: ht.count }));
     await page.click('.hotask[data-id="' + lateId + '"] .mwtick');
     await page.waitForSelector('.hotask[data-id="' + lateId + '"]:not(.done)', { timeout: 8000 }).catch(() => {});
-    check((await stored("MW late one")) === "in_progress" && (await home()).tabs[0] === "Overdue1*",
+    check((await stored("MW late one")) === "in_progress" && (await home()).count === "2",
       "\u2026and unticking puts it back as it was", await stored("MW late one"));
-    await page.click('.hotabs button[data-pane="week"]');
-    const h2 = await home();
-    check(JSON.stringify(h2.shown) === JSON.stringify(["week"]), "\u2026pressing This week shows This week in the same place", JSON.stringify(h2.shown));
+    /* SORT BY CLIENT, in the same card, kept on the device */
+    await page.click('[data-home="tasks"] .hosort button[data-sort="client"]');
+    const hc = await home();
+    check(hc.sort === "Client" && JSON.stringify(hc.groups) === JSON.stringify(["raya-trade"]) && JSON.stringify(hc.rows) === JSON.stringify(["MW late one", "MW this week"]),
+      "\u2026Sort by Client groups the same tasks under the client, late first", JSON.stringify(hc));
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector('[data-home="tasks"] .hogrp', { timeout: 8000 }).catch(() => {});
+    check((await home()).sort === "Client", "\u2026and the choice is kept after a reload", (await home()).sort);
+    await page.click('[data-home="tasks"] .hosort button[data-sort="date"]');
     await page.click('[data-home="tasks"] .holink');
     await page.waitForSelector(".mwrow", { timeout: 8000 }).catch(() => {});
     check(new URL(page.url()).hash === "#mywork" && (await page.locator(".mwname h1").textContent()) === "My tasks",
       "\u2026and All tasks opens My tasks", page.url());
+    /* MY TASKS' SORT BY CLIENT (2026-10-24): one numbered section for the
+       client, its three open rows in it, the client pill left off them */
+    await page.click('.mwbar .hosort button[data-sort="client"]');
+    const mc = await page.evaluate(() => ({ secs: Array.from(document.querySelectorAll(".mwsec.byc")).map((x) => x.getAttribute("data-client") + ":" + x.querySelectorAll(".mwrow").length),
+      pill: Array.from(document.querySelectorAll(".mwsec.byc .mwcl")).some((p) => getComputedStyle(p).display !== "none") }));
+    check(JSON.stringify(mc.secs) === JSON.stringify(["raya-trade:3"]) && !mc.pill, "My tasks sorted by Client: one section for the client with its three rows, no client pill on them", JSON.stringify(mc));
+    await page.click('.mwbar .hosort button[data-sort="date"]');
 
     /* A PLAN WRITTEN ON THE COMPANY IS A PLAN (Islam: "why is elabd showing
        no plan?"): a client whose only directions are the company's own
@@ -2549,8 +2576,11 @@ await section("4 · Forefront's own pages", async () => {
   const chrome = () => page.evaluate(() => {
     const nav = document.getElementById("nav"), side = document.getElementById("side") || nav, on = nav.querySelector("button.on");
     const sr = side.getBoundingClientRect(), or = on ? on.getBoundingClientRect() : null, mt = document.querySelector(".mtop");
+    /* the console is zoomed to 80% on a computer (2026-10-24), and a box is
+       reported in the window's pixels; its width is asked in the page's */
+    const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
     return { pageW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth,
-      sideW: Math.round(sr.width), sideL: Math.round(sr.left), sideShown: getComputedStyle(side).visibility === "visible" && sr.right > 0,
+      sideW: Math.round(sr.width / z), sideL: Math.round(sr.left), sideShown: getComputedStyle(side).visibility === "visible" && sr.right > 0,
       heights: Array.from(nav.querySelectorAll("button")).map((b) => b.offsetHeight),
       heads: Array.from(nav.querySelectorAll(".sbgl")).map((s) => s.textContent),
       onIn: !!or && or.height > 0 && or.top >= sr.top - 1 && or.bottom <= sr.bottom + 1,
@@ -2617,8 +2647,8 @@ await section("4 · Forefront's own pages", async () => {
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" });
   await page.waitForSelector("#nav button.on", { timeout: 8000 }).catch(() => {});
   const d1 = await chrome();
-  check(d1.sideShown && d1.sideW === 212 && d1.sideL === 0 && !d1.bar && d1.heights.length === 9 && new Set(d1.heights).size === 1 && d1.pageW <= d1.vw,
-    "on a computer the column stands beside the page, 212px since the console went compact (spec 068), every tab on one line and no menu bar (§601)", JSON.stringify(d1));
+  check(d1.sideShown && d1.sideW === 224 && d1.sideL === 0 && !d1.bar && d1.heights.length === 9 && new Set(d1.heights).size === 1 && d1.pageW <= d1.vw,
+    "on a computer the column stands beside the page, 224px since the name became Strategy Management Platform (spec 068), every tab on one line and no menu bar (§601)", JSON.stringify(d1));
   const roleWide = (await nameLine()).roleShown;
   check(roleWide === true, "…and the name line keeps the role there (§584.1)", roleWide);
   const tipOf = (k) => page.evaluate((key) => {
@@ -2645,15 +2675,20 @@ await section("4 · Forefront's own pages", async () => {
   check(d3.sideW === 64, "…kept on this device after a reload (§601)", JSON.stringify({ sideW: d3.sideW }));
   await page.click("#sbfold", { timeout: 3000 }).catch(() => {});
   const d4 = await chrome();
-  check(d4.sideW === 212, "…and pressed again, the names come back (§601)", JSON.stringify({ sideW: d4.sideW }));
+  check(d4.sideW === 224, "…and pressed again, the names come back (§601)", JSON.stringify({ sideW: d4.sideW }));
   /* §84.2 — THE TABS IN THE WEIGHT THEIR STYLE ASKS FOR. `font:600
      13.5px/1 inherit` was dropped whole by the browser (a shorthand ending in
      a keyword), so the tabs drew at its own 13.33px regular — RED on the
      build before, measured. Asked of the computed style, which is what the
      browser actually used, never of the stylesheet's text. The size is
      §601's, from the signed-off mockup: 14px in the column. */
-  const tabFont = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#nav button")); return c.fontSize + " " + c.fontWeight; });
-  check(tabFont === "13.5px 600", "…and the tabs are in the weight their style asks for, semibold 13.5px since spec 068 (§584.2, §601)", tabFont);
+  /* AND SINCE 2026-10-24 ONLY THE TAB YOU ARE ON IS SEMIBOLD (Islam: "make
+     the names of the modules not bold only the selected module is
+     highlighted"): the others are regular. Rewritten, not loosened (§218):
+     both weights are asserted. */
+  const tabFont = await page.evaluate(() => { const f = (b) => { const c = getComputedStyle(b); return c.fontSize + " " + c.fontWeight; };
+    return { on: f(document.querySelector("#nav button.on")), off: f(document.querySelector("#nav button:not(.on)")) }; });
+  check(tabFont.on === "13.5px 600" && tabFont.off === "13.5px 400", "…and the tabs are in the weight their style asks for: 13.5px, the one you are on semibold and the rest regular (§584.2, §601)", JSON.stringify(tabFont));
   /* §584.3 — AND THE BUTTONS: `.btn` had the same dropped shorthand
      (`font:600 13px/1.5 inherit`), so every console button drew at the
      browser's 13.33px regular and 29px tall — RED on the build before,
@@ -2664,28 +2699,32 @@ await section("4 · Forefront's own pages", async () => {
   await page.goto(BASE + "/platform#memory", { waitUntil: "networkidle" });
   await page.waitForSelector("#page .btn", { timeout: 8000 }).catch(() => {});
   const btnFont = await page.evaluate(() => { const b = Array.from(document.querySelectorAll("#page .btn")).find((x) => x.offsetParent);
-    if (!b) return "none"; const c = getComputedStyle(b); return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height); });
+    if (!b) return "none"; const c = getComputedStyle(b); return c.fontSize + " " + c.fontWeight + " " + Math.round(b.getBoundingClientRect().height / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1)); });
   check(btnFont === "13px 600 34", "…and the console's buttons too, semibold 13px, Memory's among them (§584.3)", btnFont);
   /* \u00a7584.4 \u2014 AND THE LAST THREE WITH THE SAME DROPPED SHORTHAND: the text
      boxes (`.fld`), Frameworks' chips and client set-up's size band, each
      at the browser's 13.33px regular on the build before \u2014 RED there,
      measured (33, 29 and 44px tall). Asked of what the browser drew. */
   const typeOf = (sel) => page.evaluate((s) => { const e = Array.from(document.querySelectorAll(s)).find((x) => x.offsetParent);
-    if (!e) return "none"; const c = getComputedStyle(e); return c.fontSize + " " + c.fontWeight + " " + Math.round(e.getBoundingClientRect().height); }, sel);
+    if (!e) return "none"; const c = getComputedStyle(e); return c.fontSize + " " + c.fontWeight + " " + Math.round(e.getBoundingClientRect().height / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1)); }, sel);
   /* a blank page first: from /platform, an address differing only in its
      hash is the same document and does not load the tab (measured: "none") */
   await page.goto("about:blank");
   await page.goto(BASE + "/platform#frameworks", { waitUntil: "networkidle" });
   await page.waitForSelector(".fwchip", { timeout: 8000 }).catch(() => {});
   const fldT = await typeOf(".fld"), chipT = await typeOf(".fwchip");
-  check(fldT === "14px 400 39" && chipT === "12px 600 26", "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
+  /* AT 80% (2026-10-24) a box's height snaps to the screen's pixels at the
+     zoomed size, so it reads back within a pixel of its CSS height; the
+     sizes and weights stay exact */
+  const near = (got, want) => { const g = String(got).split(" "), w = want.split(" "); return g[0] === w[0] && g[1] === w[1] && Math.abs(+g[2] - +w[2]) <= 1; };
+  check(near(fldT, "14px 400 39") && near(chipT, "12px 600 26"), "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
   await page.goto("about:blank");
   await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
   await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
   await page.locator(".ccard.add").first().click();
   await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
   const bandT = await typeOf(".wzband button");
-  check(bandT === "12.5px 600 48", "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);
+  check(near(bandT, "12.5px 600 48"), "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);
 
   /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7400): they do not travel
      between clients or modules, so their bar names their company and nothing

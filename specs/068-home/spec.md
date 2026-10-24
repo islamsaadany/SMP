@@ -66,3 +66,7 @@ All in `design-mockups/home/`, published as artifacts:
 
 - Hours and recent activity from ClientPlus: the console keeps no hours, and
   History holds what happened.
+
+## Second round (2026-10-24, §622)
+
+Drawn before and after in `design-mockups/home/2026-10-24_home-round-2.html`; Islam: "A, A, B build it with the 80% default". Built on the branch: the name Strategy Management Platform with the north-star mark (A), the column 224px with only the tab you are on bold, Home's cards with their header inside (A) and no Overdue/This week tabs, Sort by Date or Client on Home and My tasks, your clients one line each with modules as words and no industry (B), and the console zoomed to 80% on a computer.

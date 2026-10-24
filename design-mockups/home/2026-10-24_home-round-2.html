@@ -1,0 +1,481 @@
+<title>Home Round Two</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Before and after for Islam's second round on Home (2026-10-24): the
+   name and its icon, the left column's weight, Home's cards (a header
+   inside each card, no Overdue/This week tabs, a Sort by), quieter client
+   tiles, and Sort by client on My tasks. Tokens and sizes are the live
+   console's compact ones (platform.html, spec 068). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8FA3C9;--ff-late:#FF9B8F;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1480px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:90ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:0 0 6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:13px}
+.toc a{color:var(--amber-tx);font-weight:600;text-decoration:none}
+section.part{margin-top:44px}
+.ph2{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+.ph2 .n{font:600 12px var(--mono);color:var(--amber-tx)}
+.ph2 h2{margin:0;font-size:19px;font-weight:600}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px;align-items:start}
+.lab{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.lab.after{color:var(--good)}
+.lab::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.why{margin:10px 0 0;font-size:13px;color:var(--ink-2);max-width:80ch}
+.why b{color:var(--ink)}
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+
+/* the column */
+.side{width:212px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.sbhead{display:flex;align-items:center;gap:9px;min-height:58px;padding:12px 12px 12px 16px;border-bottom:1px solid var(--ff-rule)}
+.sbhead .mk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.sbhead .nm{font-weight:600;font-size:14px;color:var(--ff-quiet)}
+.brand2{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand2 b{font-size:13px;font-weight:700;color:var(--ff-ink);letter-spacing:.005em}
+.brand2 span{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ff-quiet);margin-top:2px}
+.logo{width:30px;height:30px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--amber);color:var(--ff)}
+.logo svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.nav{padding:10px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:13.5px;padding:8px 10px;border-radius:8px;white-space:nowrap}
+.bold .item{font-weight:600}
+.light .item{font-weight:400;color:#C3CFE4}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.light .item.on{font-weight:600}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.app{display:flex;min-height:100%}
+.main{flex:1;min-width:0}
+.pg{padding:16px 20px 26px}
+
+/* the name: options */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.opt .demo{display:flex;gap:14px;align-items:stretch;background:var(--ground);padding:14px}
+.opt .col{width:212px;border-radius:10px;overflow:hidden;background:var(--ff)}
+.opt .rail{width:64px;border-radius:10px;background:var(--ff);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:12px}
+.opt .fav{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;font-size:11px;color:var(--ink-3)}
+.opt .fav .logo{width:22px;height:22px;border-radius:6px}
+.opt .fav .logo svg{width:15px;height:15px}
+.opt .foot{padding:10px 14px 12px;border-top:1px solid var(--line)}
+.opt .foot b{display:block;font-size:14px}
+.opt .foot span{font-size:12.5px;color:var(--ink-3)}
+.rec{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 7px;vertical-align:2px}
+
+/* Home, as live today */
+.hello{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:16px 22px 17px;margin:0 0 16px}
+.hello::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035)}
+.hdate{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.hello h1{margin:0;font:500 27px/1.15 var(--serif)}
+.hello p{margin:4px 0 0;font-size:13.5px;color:var(--ff-quiet)}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:0 0 22px;align-items:stretch}
+.top>section{display:flex;flex-direction:column;min-width:0}
+.sh{display:flex;align-items:flex-end;gap:16px;margin:0 0 8px}
+.eye{margin:0 0 2px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber-tx)}
+.sh h2{margin:0;font:500 20px/1.15 var(--serif)}
+.link{margin-left:auto;border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--amber-tx);cursor:pointer;white-space:nowrap}
+.box{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.cl{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
+.cl:last-child{border-bottom:0}
+.cm{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 10.5px/30px var(--mono);text-align:center}
+.cl b{display:block;font-size:14px;font-weight:600}
+.cl .s{display:block;font-size:12px;color:var(--ink-3)}
+.mods{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.mod{display:inline-flex;gap:5px;align-items:center;border:0;border-radius:7px;background:var(--surface-2);font-size:12px;font-weight:600;padding:5px 9px;color:var(--ink)}
+.mod i{font-style:normal;font-size:11px;color:var(--amber-tx)}
+.mod i.al{color:var(--warn)}
+.tabsr{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line-soft)}
+.tabs{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px}
+.tabs span{display:inline-flex;gap:7px;align-items:center;font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:8px;color:var(--ink-3)}
+.tabs span.on{background:var(--surface);color:var(--ink)}
+.tabs i{font-style:normal;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 6px;background:var(--surface);color:var(--ink-2)}
+.tabs span.on i{background:var(--bad);color:#fff}
+.task{display:grid;grid-template-columns:17px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
+.task:last-child{border-bottom:0}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);margin-top:1px}
+.task.late .tick{border-color:var(--bad)}
+.task .t{font-size:13.5px;line-height:1.4}
+.task .t b{font-weight:600}
+.task .m{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+.task .m .c{font-weight:600;color:var(--ink-2)}
+.wh{font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.task.late .wh{color:var(--bad)}
+.bk{color:var(--amber-tx)}
+.bk svg{width:17px;height:17px}
+.two{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:16px;align-items:start}
+.two .box{padding:12px 16px 14px}
+.bxh{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.wu{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 0}
+.ring{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--amber) 38%,var(--surface-2) 0)}
+.ring span{width:33px;height:33px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:11px;font-weight:600}
+.wu b,.bkr b{display:block;font-size:14px;font-weight:600}
+.wu .s,.bkr .s{display:block;font-size:12px;color:var(--ink-3)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:5px 12px;font-size:12.5px;font-weight:600}
+.btn.solid{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.bkr{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;align-items:center;padding:7px 0}
+.spine{width:32px;height:42px;border-radius:3px 7px 7px 3px;background:linear-gradient(160deg,var(--ff),color-mix(in srgb,var(--ff) 75%,#000));box-shadow:inset 4px 0 0 rgba(0,0,0,.2),inset 0 -3px 0 var(--amber);color:var(--ff-ink);font:700 9.5px/42px var(--mono);text-align:center}
+.new{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 6px;vertical-align:2px}
+
+/* AFTER: one card with its header inside it */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx);flex:none}
+.cic svg{width:17px;height:17px}
+.chd h2{margin:0;font:500 18px/1.15 var(--serif);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.sort{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3)}
+.sort .seg button{padding:4px 9px;font-size:12px}
+.chd .link{margin-left:0}
+.cbody{flex:1}
+/* B: the header as a navy strip */
+.cardB .chd{background:var(--ff);border-bottom:0;box-shadow:inset 0 -2px 0 var(--amber)}
+.cardB .chd h2{color:var(--ff-ink)}
+.cardB .cic{background:rgba(255,255,255,.12);color:var(--amber)}
+.cardB .cnt{background:rgba(255,255,255,.14);color:var(--ff-ink)}
+.cardB .link{color:var(--amber)}
+.cardB .sort{color:var(--ff-quiet)}
+.cardB .sort .seg{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18)}
+.cardB .sort .seg button{color:var(--ff-quiet)}
+.cardB .sort .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+/* tasks, one list: overdue first in red, then this week; grouped by client when asked */
+.grph{display:flex;align-items:center;gap:8px;padding:8px 14px 4px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.grph .cm{width:20px;height:20px;border-radius:5px;font-size:8.5px;line-height:20px;letter-spacing:0}
+.grph i{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.grph.late{color:var(--bad)}
+.chip{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.task.late .chip{background:var(--bad-bg);color:var(--bad)}
+/* client tiles: no industry, quieter */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,175px),1fr));gap:10px;padding:12px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.tile .hd{display:flex;align-items:center;gap:9px}
+.tile .hd b{font-size:14px;font-weight:600;line-height:1.25}
+.tile .ln{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line-soft);padding-top:8px}
+.tile .ln > span{display:flex;gap:8px;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-2);padding:3px 0;border-radius:6px}
+.tile .ln > span:hover{color:var(--ink)}
+.dotm{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;font-weight:600;color:var(--amber-tx)}
+.dotm::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.dotm.al{color:var(--bad)}
+/* client option 2: one line each, modules as plain words */
+.crow2{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.crow2:last-child{border-bottom:0}
+.crow2 .cm{width:28px;height:28px;line-height:28px;font-size:10px}
+.crow2 b{font-size:14px;font-weight:600}
+.crow2 .w{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:2px;font-size:12.5px;color:var(--ink-2)}
+.crow2 .w span{display:inline-flex;gap:5px;align-items:center}
+.crow2 .w span u{text-decoration:none;border-bottom:1px solid var(--line)}
+
+/* My tasks */
+.mast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:12px 18px 14px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--amber);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.mwk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 6px}
+.mast h1{margin:0;font-size:21px;font-weight:600}
+.strip{display:flex;gap:20px}
+.strip div{text-align:right}
+.strip b{display:block;font-size:19px;line-height:1}
+.strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.strip .lt b{color:var(--ff-late)}
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:12.5px;color:var(--ink-3)}
+.mwsh{display:flex;align-items:baseline;gap:12px;padding:0 0 7px;border-bottom:2px solid var(--ink);margin-top:14px}
+.mwsh .ix{font-size:12px;font-weight:600;color:var(--amber-tx)}
+.mwsh h2{margin:0;font-size:15.5px;font-weight:600;display:flex;gap:8px;align-items:center}
+.mwsh h2 .cm{width:22px;height:22px;border-radius:6px;font-size:9px;line-height:22px}
+.mwsh .meta{font-size:13px;color:var(--ink-3)}
+.mwrow{display:grid;grid-template-columns:20px minmax(0,1fr) 150px 100px 120px 22px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.mwrow.byc{grid-template-columns:20px minmax(0,1fr) 100px 120px 22px}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.mwwhen{font-size:13px;color:var(--ink-2)}
+.mwwhen.late{color:var(--bad);font-weight:600}
+.st{white-space:nowrap;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.st.p{color:var(--amber-tx)}
+.go{color:var(--ink-3)}
+.go svg{width:14px;height:14px}
+
+@container (max-width:860px){
+  .top,.two{grid-template-columns:1fr}
+  .mwrow,.mwrow.byc{grid-template-columns:20px minmax(0,1fr) auto auto}
+  .mwrow .pill,.mwrow .go{display:none}
+}
+@container (max-width:640px){
+  .side{display:none}
+  .cl{grid-template-columns:30px minmax(0,1fr)}.cl .mods{grid-column:2;justify-content:flex-start}
+  .mwrow .st{display:none}
+}
+</style>
+
+<div class="doc">
+  <h1>Home, second round</h1>
+  <p class="lede">Before and after for each request: <b>the name and its icon</b>, <b>the left column's weight</b>, <b>Home's cards</b> (the header inside the card, no Overdue/This week tabs, a Sort by), <b>quieter client cards</b> with no industry, and <b>Sort by client on My tasks</b>. "Before" is what is live today.</p>
+  <span class="flag">Nothing here is built · the clients, tasks and case studies are invented for the drawing</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+  <nav class="toc"><a href="#p1">1 · Name and icon</a><a href="#p2">2 · Left column</a><a href="#p3">3 · Home</a><a href="#p4">4 · Home sorted by client</a><a href="#p5">5 · Client cards</a><a href="#p6">6 · My tasks</a></nav>
+
+  <!-- 1 -->
+  <section class="part" id="p1">
+    <div class="ph2"><span class="n">01</span><h2>The name, and an icon for it</h2><p>"FOREFRONT Platform" becomes Strategy Management Platform</p></div>
+    <div class="pair">
+      <div><p class="lab">Before</p>
+        <div class="frame" style="max-width:420px"><div style="display:flex;gap:14px;padding:14px">
+          <div style="width:212px;background:var(--ff);border-radius:10px;overflow:hidden"><div class="sbhead"><span class="mk">FOREFRONT</span><span class="nm">Platform</span></div></div>
+          <div style="width:64px;background:var(--ff);border-radius:10px;display:flex;justify-content:center;padding:14px 0"><span class="logo" style="font:700 11px var(--mono);color:var(--amber-ink)">FF</span></div>
+        </div></div>
+      </div>
+      <div><p class="lab after">After · four icons to choose from</p>
+        <div class="opts" id="icons"></div>
+      </div>
+    </div>
+    <p class="why">The name sits on two lines in the column, <b>Strategy Management</b> over <b>PLATFORM</b>, because the whole name does not fit 212px on one. The icon is what shows when the column is folded to icons, in the browser tab, and on a phone's home screen. My pick is <b>A · North star</b>: one direction everything points to, and it reads at 16px. The phone's top bar says <b>Strategy Management Platform</b> in full.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="part" id="p2">
+    <div class="ph2"><span class="n">02</span><h2>The left column: only the tab you are on is bold</h2></div>
+    <div class="pair">
+      <div><p class="lab">Before · every name bold</p><div class="frame" style="max-width:250px;container-type:normal"><div class="side bold" data-side="home" data-brand="old"></div></div></div>
+      <div><p class="lab after">After · names regular, the one you are on bold and lit</p><div class="frame" style="max-width:250px;container-type:normal"><div class="side light" data-side="home" data-brand="new"></div></div></div>
+    </div>
+    <p class="why">The names go to regular weight in a slightly brighter ink so they stay easy to read on the navy. The tab you are on keeps everything it has today: the lit background, the amber bar on its left, the amber icon, and it alone is bold.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="part" id="p3">
+    <div class="ph2"><span class="n">03</span><h2>Home: the header inside each card</h2><p>no Overdue / This week tabs; a Sort by on the tasks</p></div>
+    <p class="lab">Before · live today</p>
+    <div class="frame"><div class="app"><aside class="side bold" data-side="home" data-brand="old"></aside><div class="main"><div class="pg">
+      <header class="hello"><p class="hdate">Saturday, 24 Oct 2026</p><h1>Good morning, Islam</h1><p>Your SMP Home.</p></header>
+      <div class="top">
+        <section><div class="sh"><div><p class="eye">Where you have a seat</p><h2>Your clients</h2></div></div>
+          <div class="box">
+            <div class="cl"><span class="cm">EA</span><span><b>ElAbd</b><span class="s">Food &amp; Beverage · Super user</span></span><span class="mods"><span class="mod">Strategy</span><span class="mod">Internal Tracker <i>2 open</i></span></span></div>
+            <div class="cl"><span class="cm">RHI</span><span><b>RHI</b><span class="s">Manufacturing · Super user</span></span><span class="mods"><span class="mod">Strategy</span><span class="mod">Processes</span></span></div>
+            <div class="cl"><span class="cm">RT</span><span><b>Raya Trade</b><span class="s">Retail &amp; E-commerce · SMO team</span></span><span class="mods"><span class="mod">Strategy <i>13 of 19</i></span><span class="mod">Insights</span><span class="mod">Internal Tracker <i>4 open · 1 late</i></span></span></div>
+          </div></section>
+        <section><div class="sh"><div><p class="eye">Overdue and this week</p><h2>Your tasks</h2></div></div>
+          <div class="box">
+            <div class="tabsr"><span class="tabs"><span class="on">Overdue <i>1</i></span><span>This week <i>3</i></span></span><button class="link" type="button">All tasks →</button></div>
+            <div class="task late"><span class="tick"></span><span class="t">Send the Q3 scorecard to the Head of Strategy<span class="m"><span class="c">Raya Trade</span> · In progress</span></span><span class="wh">Late 1 w</span></div>
+          </div></section>
+      </div>
+      <section><div class="sh"><div><p class="eye">What we have learned</p><h2>Case studies</h2></div><button class="link" type="button">Go to Case studies →</button></div>
+        <div class="two">
+          <div class="box"><p class="bxh">Your write-ups · in progress</p><div class="wu"><span class="ring"><span>3/8</span></span><span><b>Operating model 2025</b><span class="s">Raya Trade · 3 of 8 sections · due 30 Oct</span></span><button class="btn solid" type="button">Continue</button></div></div>
+          <div class="box"><p class="bxh">Newly finished</p><div class="bkr"><span class="spine">RT</span><span><b>Reporting set-up 2024<span class="new">New</span></b><span class="s">Raya Trade · 5 deliverables · 6 insights</span></span></div></div>
+        </div></section>
+    </div></div></div></div>
+
+    <p class="lab after" style="margin-top:22px">After · option A, a white header inside the card <span class="rec">my pick</span></p>
+    <div class="frame"><div class="app"><aside class="side light" data-side="home" data-brand="new"></aside><div class="main"><div class="pg" data-home="A"></div></div></div></div>
+
+    <p class="lab after" style="margin-top:22px">After · option B, the same cards with a navy header</p>
+    <div class="frame"><div class="app"><aside class="side light" data-side="home" data-brand="new"></aside><div class="main"><div class="pg" data-home="B"></div></div></div></div>
+    <p class="why"><b>The header is the card's own top line</b>: an icon, the title, a count, and its control on the right (Sort by on tasks; All tasks, All clients and the library as links), so each block reads as one object rather than a heading floating above a box. <b>The tasks are one list</b> without the two tabs: overdue first, its date in red, then this week, by date. The case studies' two halves sit in <b>one card</b> with a divider. <b>A</b> keeps the page light and lets the band stay the only navy; <b>B</b> is bolder and repeats the Tracker's navy, which with three cards is a lot of navy, so I would take A.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="part" id="p4">
+    <div class="ph2"><span class="n">04</span><h2>Home's tasks, sorted by client</h2><p>the same card with Sort by on Client</p></div>
+    <div class="pair">
+      <div><p class="lab">By date (opens this way)</p><div class="frame"><div class="pg" style="padding:14px" data-tasks="date"></div></div></div>
+      <div><p class="lab after">By client</p><div class="frame"><div class="pg" style="padding:14px" data-tasks="client"></div></div></div>
+    </div>
+    <p class="why">By client groups the same tasks under each client's mark and name with its count, clients with something overdue first; inside a client, by date. The choice is remembered on your device, and the same switch sits on My tasks (6).</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="part" id="p5">
+    <div class="ph2"><span class="n">05</span><h2>Client cards: no industry, less noise</h2></div>
+    <div class="pair">
+      <div><p class="lab">Before</p><div class="frame"><div class="pg" style="padding:14px"><div class="box">
+        <div class="cl"><span class="cm">EA</span><span><b>ElAbd</b><span class="s">Food &amp; Beverage · Super user</span></span><span class="mods"><span class="mod">Strategy</span><span class="mod">Internal Tracker <i>2 open</i></span></span></div>
+        <div class="cl"><span class="cm">RHI</span><span><b>RHI</b><span class="s">Manufacturing · Super user</span></span><span class="mods"><span class="mod">Strategy</span><span class="mod">Processes</span></span></div>
+        <div class="cl"><span class="cm">RT</span><span><b>Raya Trade</b><span class="s">Retail &amp; E-commerce · SMO team</span></span><span class="mods"><span class="mod">Strategy <i>13 of 19</i></span><span class="mod">Insights</span><span class="mod">Internal Tracker <i>4 open · 1 late</i></span></span></div>
+      </div></div></div></div>
+      <div><p class="lab after">After · option A, tiles <span class="rec">my pick</span></p><div class="frame"><div class="pg" style="padding:14px"><div class="card" data-clients="tiles"></div></div></div></div>
+    </div>
+    <div class="pair" style="margin-top:16px">
+      <div><p class="lab after">After · option B, one line each, the modules as words</p><div class="frame"><div class="pg" style="padding:14px"><div class="card" data-clients="lines"></div></div></div></div>
+      <div><p class="why" style="margin-top:28px"><b>Both drop the industry and the seat</b> (the seat is on the client's own card under Clients). <b>A</b> gives each client a small tile: its mark and name on top, then its modules as a quiet list, where a module with something outstanding carries a small dot and the fact (amber for work owed, red for late or no plan) and the rest carry nothing. <b>B</b> keeps one line per client with the modules as plain words underneath, the mark only where there is one. A reads best with up to six clients; B is the better fit past that.</p></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="part" id="p6">
+    <div class="ph2"><span class="n">06</span><h2>My tasks: Sort by date or by client</h2></div>
+    <p class="lab">Before · live today, by date only</p>
+    <div class="frame"><div class="app"><aside class="side bold" data-side="mywork" data-brand="old"></aside><div class="main"><div class="pg" data-mt="before"></div></div></div></div>
+    <div class="pair" style="margin-top:22px">
+      <div><p class="lab after">After · Sort by: Date (as today)</p><div class="frame"><div class="pg" data-mt="date"></div></div></div>
+      <div><p class="lab after">After · Sort by: Client</p><div class="frame"><div class="pg" data-mt="client"></div></div></div>
+    </div>
+    <p class="why"><b>A Sort by switch</b> sits on its own line under the band, beside Show (the admins' "whose tasks"). <b>By date</b> is today's Late / This week / Next week and later. <b>By client</b> makes each client a numbered section with its mark, its open count and its late count, clients with something late first; the client pill leaves the rows (the section says it) and the date column says Late in red where it is. The tick and the status work the same in both.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    go:'<path d="m9 6 6 6-6 6"/>',
+    tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>'
+  };
+  var LOGO = {
+    A:{n:"North star",d:"One direction everything points to.",s:'<path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/>'},
+    B:{n:"Pillars",d:"The strategy house: a roof on its pillars.",s:'<path d="M3.5 9 12 4l8.5 5z"/><path d="M6 11v7M10 11v7M14 11v7M18 11v7"/><path d="M4 20.5h16"/>'},
+    C:{n:"Ascent",d:"Results climbing quarter on quarter.",s:'<path d="M5 19v-4M10 19v-7M15 19v-5M20 19V8"/><path d="m4 10 5-4 4 3 6-5"/><path d="M16 4h3v3"/>'},
+    D:{n:"Target",d:"Objectives hit, measured.",s:'<circle cx="11" cy="13" r="7.5"/><circle cx="11" cy="13" r="4"/><circle cx="11" cy="13" r="1"/><path d="m11 13 8-8M16 5h3v3"/>'}
+  };
+  var CHOSEN = "A";
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  function logo(k){ return '<span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true">' + LOGO[k].s + '</svg></span>'; }
+  function brand(kind){
+    if (kind === "old") return '<div class="sbhead"><span class="mk">FOREFRONT</span><span class="nm">Platform</span></div>';
+    return '<div class="sbhead">' + logo(CHOSEN) + '<span class="brand2"><b>Strategy Management</b><span>Platform</span></span></div>';
+  }
+  /* 1 · icon options */
+  document.getElementById("icons").innerHTML = Object.keys(LOGO).map(function(k){
+    return '<div class="opt"><div class="demo"><div class="col">' + '<div class="sbhead">' + logo(k) + '<span class="brand2"><b>Strategy Management</b><span>Platform</span></span></div></div>' +
+      '<div class="rail">' + logo(k) + '</div><div class="fav">' + logo(k) + '<span>tab</span></div></div>' +
+      '<div class="foot"><b>' + k + ' · ' + LOGO[k].n + (k === CHOSEN ? '<span class="rec">my pick</span>' : '') + '</b><span>' + LOGO[k].d + '</span></div></div>';
+  }).join("");
+  /* the column */
+  var G = [{h:"Work",items:[["home","Home"],["mywork","My tasks"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["memory","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll("[data-side]").forEach(function(s){
+    var on = s.getAttribute("data-side");
+    s.innerHTML = brand(s.getAttribute("data-brand")) + '<nav class="nav">' + G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') +
+      g.items.map(function(t){ return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join("") + '</div>'; }).join("") + '</nav>';
+  });
+
+  /* the made data */
+  var C = { EA:"ElAbd", RHI:"RHI", RT:"Raya Trade", WD:"Wander" };
+  var T = [
+    {c:"RT",t:"Send the Q3 scorecard to the Head of Strategy",s:"In progress",w:"Late 1 w",late:1,d:0},
+    {c:"EA",t:"Chase the plant managers' Q3 figures",s:"Not started",w:"Late 2 d",late:1,d:1},
+    {c:"EA",t:"Prepare the plant managers' scoring session",s:"Not started",w:"Thu 29 Oct",d:2},
+    {c:"RT",t:"Review the unit heads' draft targets",s:"In progress",w:"Fri 30 Oct",d:3},
+    {c:"RT",case:1,t:"Operating model 2025",s:"Case study",w:"Fri 30 Oct",d:3},
+    {c:"WD",t:"Agree the cycle dates with the CFO",s:"Not started",w:"Fri 30 Oct",d:3}
+  ];
+  var LATER = [{c:"RHI",t:"Book the board offsite",s:"Not started",w:"W2 Nov"},{c:"WD",t:"Draft the portfolio charter",s:"Not started",w:"W3 Nov"}];
+  function trow(r, showClient){
+    var mk = r.case ? '<span class="bk">' + ic("memory") + '</span>' : '<span class="tick"></span>';
+    var title = r.case ? 'Write up the case study · <b>' + r.t + '</b>' : r.t;
+    return '<div class="task' + (r.late ? ' late' : '') + '">' + mk + '<span class="t">' + title + '<span class="m">' + (showClient ? '<span class="c">' + C[r.c] + '</span> · ' : '') + r.s + '</span></span><span class="wh"><span class="chip">' + r.w + '</span></span></div>';
+  }
+  function sortSeg(on){ return '<span class="sort">Sort by <span class="seg"><button type="button" aria-pressed="' + (on === "date") + '">Date</button><button type="button" aria-pressed="' + (on === "client") + '">Client</button></span></span>'; }
+  function tasksCard(mode, cls){
+    var body = "";
+    if (mode === "date") body = T.map(function(r){ return trow(r, true); }).join("");
+    else {
+      var order = ["RT","EA","WD"];
+      body = order.map(function(k){
+        var rows = T.filter(function(r){ return r.c === k; });
+        var late = rows.filter(function(r){ return r.late; }).length;
+        return '<div class="grph"><span class="cm">' + k + '</span>' + C[k] + ' <i>· ' + rows.length + (late ? ', ' + late + ' late' : '') + '</i></div>' + rows.map(function(r){ return trow(r, false); }).join("");
+      }).join("");
+    }
+    return '<div class="card' + (cls || "") + '"><div class="chd"><span class="cic">' + ic("tasks") + '</span><h2>Your tasks</h2><span class="cnt">6</span><span class="sp"></span>' + sortSeg(mode) + '<button class="link" type="button">All tasks →</button></div><div class="cbody">' + body + '</div></div>';
+  }
+  var CL = [
+    {k:"EA",mods:[["Strategy",""],["Internal Tracker","2 open"]]},
+    {k:"RHI",mods:[["Strategy",""],["Processes",""]]},
+    {k:"RT",mods:[["Strategy","13 of 19"],["Insights",""],["Internal Tracker","4 open · 1 late","al"]]},
+    {k:"WD",mods:[["Strategy","No plan","al"],["Portfolio",""]]}
+  ];
+  function clientsCard(kind, cls){
+    var body;
+    if (kind === "lines") body = CL.map(function(c){
+      return '<div class="crow2"><span class="cm">' + c.k + '</span><span><b>' + C[c.k] + '</b><span class="w">' + c.mods.map(function(m){
+        return '<span><u>' + m[0] + '</u>' + (m[1] ? '<span class="dotm' + (m[2] ? ' al' : '') + '">' + m[1] + '</span>' : '') + '</span>'; }).join("") + '</span></span></div>'; }).join("");
+    else body = '<div class="tiles">' + CL.map(function(c){
+      return '<div class="tile"><div class="hd"><span class="cm">' + c.k + '</span><b>' + C[c.k] + '</b></div><div class="ln">' + c.mods.map(function(m){
+        return '<span>' + m[0] + (m[1] ? '<span class="dotm' + (m[2] ? ' al' : '') + '">' + m[1] + '</span>' : '') + '</span>'; }).join("") + '</div></div>'; }).join("") + '</div>';
+    return '<div class="card' + (cls || "") + '"><div class="chd"><span class="cic">' + ic("clients") + '</span><h2>Your clients</h2><span class="cnt">4</span><span class="sp"></span><button class="link" type="button">All clients →</button></div><div class="cbody">' + body + '</div></div>';
+  }
+  function casesCard(cls){
+    return '<div class="card' + (cls || "") + '"><div class="chd"><span class="cic">' + ic("memory") + '</span><h2>Case studies</h2><span class="sp"></span><button class="link" type="button">The library →</button></div>' +
+      '<div class="cbody two" style="gap:0"><div style="padding:12px 16px 14px;border-right:1px solid var(--line-soft)"><p class="bxh">Your write-ups · in progress</p><div class="wu"><span class="ring"><span>3/8</span></span><span><b>Operating model 2025</b><span class="s">Raya Trade · 3 of 8 sections · due 30 Oct</span></span><button class="btn solid" type="button">Continue</button></div></div>' +
+      '<div style="padding:12px 16px 14px"><p class="bxh">Newly finished</p><div class="bkr"><span class="spine">RT</span><span><b>Reporting set-up 2024<span class="new">New</span></b><span class="s">Raya Trade · 5 deliverables · 6 insights</span></span></div><div class="bkr"><span class="spine">WD</span><span><b>Strategy build 2025<span class="new">New</span></b><span class="s">Wander · 6 deliverables · 4 insights</span></span></div></div></div></div>';
+  }
+  document.querySelectorAll("[data-home]").forEach(function(pg){
+    var cls = pg.getAttribute("data-home") === "B" ? " cardB" : "";
+    pg.innerHTML = '<header class="hello"><p class="hdate">Saturday, 24 Oct 2026</p><h1>Good morning, Islam</h1><p>Your SMP Home.</p></header>' +
+      '<div class="top"><section>' + clientsCard("tiles", cls) + '</section><section>' + tasksCard("date", cls) + '</section></div>' + casesCard(cls);
+  });
+  document.querySelectorAll("[data-tasks]").forEach(function(pg){ pg.innerHTML = tasksCard(pg.getAttribute("data-tasks")); });
+  document.querySelectorAll("[data-clients]").forEach(function(b){ b.outerHTML = clientsCard(b.getAttribute("data-clients")); });
+
+  /* 6 · My tasks */
+  function mrow(r, byc){
+    var mk = r.case ? '<span class="bk">' + ic("memory") + '</span>' : '<span class="tick"' + (r.late ? ' style="border-color:var(--bad)"' : '') + '></span>';
+    var title = r.case ? 'Write up the case study · <b>' + r.t + '</b>' : r.t;
+    return '<div class="mwrow' + (byc ? ' byc' : '') + '">' + mk + '<span>' + title + '</span>' + (byc ? '' : '<span class="pill">' + C[r.c] + '</span>') +
+      '<span class="mwwhen' + (r.late ? ' late' : '') + '">' + r.w + '</span><span class="st' + (/progress|Case/.test(r.s) ? ' p' : '') + '">— ' + r.s + '</span><span class="go">' + ic("go") + '</span></div>';
+  }
+  function mast(){ return '<div class="mast"><div><p class="mwk">This week · 26 Oct – 30 Oct</p><h1>My tasks</h1></div><div class="strip"><div><b>8</b><span>Open</span></div><div class="lt"><b>2</b><span>Late</span></div><div><b>4</b><span>This week</span></div><div><b>4</b><span>Clients</span></div></div></div>'; }
+  function sec(n, head, meta, rows){ return '<div class="mwsh"><span class="ix">0' + n + '</span><h2>' + head + '</h2><span class="meta">' + meta + '</span></div>' + rows; }
+  var ALL = T.concat(LATER);
+  function byDate(byc){
+    return sec(1, "Late", "2 open", T.filter(function(r){ return r.late; }).map(function(r){ return mrow(r); }).join("")) +
+      sec(2, "This week", "4 open", T.filter(function(r){ return !r.late; }).map(function(r){ return mrow(r); }).join("")) +
+      sec(3, "Next week and later", "2 open", LATER.map(function(r){ return mrow(r); }).join(""));
+  }
+  function byClient(){
+    var order = ["RT","EA","WD","RHI"], n = 0;
+    return order.map(function(k){
+      var rows = ALL.filter(function(r){ return r.c === k; }), late = rows.filter(function(r){ return r.late; }).length; n++;
+      return sec(n, '<span class="cm">' + k + '</span>' + C[k], rows.length + " open" + (late ? ' · <span style="color:var(--bad);font-weight:600">' + late + ' late</span>' : ''), rows.map(function(r){ return mrow(r, true); }).join(""));
+    }).join("");
+  }
+  document.querySelectorAll("[data-mt]").forEach(function(pg){
+    var m = pg.getAttribute("data-mt");
+    pg.innerHTML = mast() + (m === "before" ? "" : '<div class="bar">' + sortSeg(m) + '</div>') + (m === "client" ? byClient() : byDate());
+  });
+
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.getAttribute("data-v")); press(b.getAttribute("data-v")); }); });
+  press(document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+})();
+</script>

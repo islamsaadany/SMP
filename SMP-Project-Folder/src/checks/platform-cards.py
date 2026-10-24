@@ -387,8 +387,11 @@ def run():
         # two-sliders mark, the word on the hover and the accessible name.
         cog = pg.evaluate("""() => { const e = document.querySelector(".ccard[data-client='raya-trade'] .ccfg");
           if (!e) return null; const r = e.getBoundingClientRect();
+          // the console is shown at 80% on a computer (2026-10-24); the box is
+          // asked in the page's own pixels, which is what the style sets
+          const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
           return { text: e.textContent.trim(), svg: !!e.querySelector('svg circle'), title: e.title,
-                   label: e.getAttribute('aria-label'), w: Math.round(r.width), h: Math.round(r.height) } }""")
+                   label: e.getAttribute('aria-label'), w: Math.round(r.width / z), h: Math.round(r.height / z) } }""")
         check("Settings on a card is the sliders mark with no word", bool(cog) and cog["text"] == "" and cog["svg"], cog)
         check("…named Settings on the hover and for a screen reader",
               bool(cog) and cog["title"] == "Settings" and cog["label"] == "Settings for Raya Trade", cog)

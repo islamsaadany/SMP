@@ -5,7 +5,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forefront — Strategy Management Platform</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<!-- the console's own mark (Islam's pick A, the north star, 2026-10-24); the
+     door and the client platforms keep /favicon.svg -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23F5A623'/%3E%3Cpath d='M12 3.6 13.6 10.4 20.4 12 13.6 13.6 12 20.4 10.4 13.6 3.6 12 10.4 10.4z' fill='none' stroke='%230F2C69' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E" type="image/svg+xml">
 <link rel="icon" href="/favicon.png" sizes="32x32">
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
@@ -116,11 +118,15 @@
     border-bottom:1px solid var(--ff-rule) }
   /* THE MARK IS TYPE ON THE NAVY NOW, so it is the bar's ink rather than
      --ff-tx, which was measured for a white line (§38.4). */
-  .sbhead .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
-  .sbhead .nm{ font-weight:600; font-size:14px; color:var(--ff-quiet) }
-  /* the mark the column wears when it is only icons wide */
-  .sbff{ display:none; width:28px; height:28px; border-radius:7px; background:var(--amber); color:var(--amber-ink);
-    font:700 11px/28px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
+  /* THE NAME AND ITS MARK (Islam, 2026-10-24: "the naming at the top should
+     be Strategy management Platform", and of four icons drawn, A, the north
+     star): the mark on amber, the name on two lines because the whole of it
+     does not fit the column on one. Folded to icons, the mark alone. */
+  .sblogo{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--amber); color:#0F2C69 }
+  .sblogo svg{ width:20px; height:20px }
+  .sbname{ display:flex; flex-direction:column; min-width:0; line-height:1.15 }
+  .sbname b{ font-size:12px; font-weight:700; color:var(--ff-ink); white-space:nowrap }
+  .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ff-quiet) }
   /* ICON BUTTONS ON THE NAVY: « (icons only), × (close, on a phone), the
      menu (on a phone) and Sign out. Each says what it does in its
      accessible name and in the hover label below. */
@@ -186,8 +192,7 @@
   @media (min-width:1000px){
     html[data-rail="1"] .side{ width:64px }
     html[data-rail="1"] .sbhead{ flex-direction:column; gap:10px; padding:14px 0 10px }
-    html[data-rail="1"] .sbhead .mk, html[data-rail="1"] .sbhead .nm{ display:none }
-    html[data-rail="1"] .sbff{ display:block }
+    html[data-rail="1"] .sbhead .sbname{ display:none }
     html[data-rail="1"] .sbhead .sbbtn{ margin:0 }
     html[data-rail="1"] #sbfold svg{ transform:rotate(180deg) }
     html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--ff-rule) }
@@ -222,7 +227,9 @@
       background:var(--ff); color:var(--ff-ink) }
     .mtop .sbbtn{ margin:0; color:var(--ff-ink) }
     .mtop .sbbtn svg{ width:20px; height:20px }
-    .mtop .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
+    .mtop .sblogo{ width:26px; height:26px; border-radius:7px }
+    .mtop .sblogo svg{ width:17px; height:17px }
+    .mtop .mtname{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:700; color:var(--ff-ink) }
     #sbhere{ margin-left:auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
       font-size:13px; font-weight:600; color:var(--ff-quiet) }
     .nav button{ padding:12px 10px; font-size:15px }
@@ -1395,47 +1402,59 @@
   .hohello::before{ width:300px; height:300px; right:-90px; top:-120px; background:rgba(255,255,255,.035) }
   .hohello::after{ width:210px; height:210px; right:-20px; top:-70px }
   .hodate{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); min-height:14px }
-  .hohello h1, .hosh h2{ font-family:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight:500 }
+  .hohello h1, .hochd h2{ font-family:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight:500 }
   .hohello h1{ margin:0; font-size:27px; line-height:1.15; color:var(--ff-ink) }
   .hohello p{ margin:4px 0 0; font-size:13.5px; color:var(--ff-quiet) }
   .hotop{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:stretch; margin:0 0 24px }
   .hotop > section{ display:flex; flex-direction:column; min-width:0 }
   .hosec{ margin:0 0 24px }
-  .hosh{ display:flex; align-items:flex-end; gap:16px; margin:0 0 8px }
-  .hoeye{ margin:0 0 2px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber-tx) }
-  .hosh h2{ margin:0; font-size:20px; line-height:1.15 }
-  .holink{ margin-left:auto; margin-bottom:3px; border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600;
+  /* A CARD WITH ITS HEADER INSIDE IT (Islam, 2026-10-24, option A of
+     design-mockups/home/2026-10-24_home-round-2.html): an icon, the title in
+     the band's serif, a count, and the card's control on the right. */
+  .hocard{ flex:1; display:flex; flex-direction:column; min-width:0; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; box-shadow:var(--shadow); overflow:hidden }
+  .hochd{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocic{ flex:none; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--amber-wash); color:var(--amber-tx) }
+  .hocic svg{ width:17px; height:17px }
+  .hochd h2{ margin:0; font-size:18px; line-height:1.15; white-space:nowrap }
+  .hocnt{ font-size:11.5px; font-weight:700; border-radius:999px; padding:1px 8px; background:var(--surface-2); color:var(--ink-2); font-variant-numeric:tabular-nums }
+  .hochd .sp{ flex:1 }
+  .hobody{ flex:1 }
+  .holink{ border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600;
     color:var(--amber-tx); cursor:pointer; white-space:nowrap }
   .holink:hover{ text-decoration:underline }
-  .holink:focus-visible, .homod:focus-visible, .hotabs button:focus-visible, .hotask:focus-visible, .hocase:focus-visible, .hobook:focus-visible{
+  .holink:focus-visible, .howd:focus-visible, .hosort button:focus-visible, .hotask:focus-visible, .hocase:focus-visible, .hobook:focus-visible{
     outline:2px solid var(--amber-tx); outline-offset:1px }
-  .hobox{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow) }
-  .hoclients{ padding:2px 14px }
-  .hocl{ display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft) }
-  .hocl:last-child{ border-bottom:0 }
-  .hocl .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber); text-align:center;
+  /* Sort by: Date or Client, the same switch here and on My tasks */
+  .hosort{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3) }
+  .hosort .sw{ display:inline-flex; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--surface-2) }
+  .hosort button{ border:0; background:transparent; color:var(--ink-2); font-family:inherit; font-size:12px; font-weight:600; line-height:1.4;
+    padding:3px 9px; border-radius:6px; cursor:pointer }
+  .hosort button[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.08) }
+  .hogrp{ display:flex; align-items:center; gap:8px; padding:9px 14px 3px; font-size:11px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .hogrp i{ font-style:normal; font-weight:600; letter-spacing:0; text-transform:none }
+  .hogrp i .late{ color:var(--bad) }
+  .cmk{ flex:none; width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber); text-align:center; object-fit:contain;
     font:700 10.5px/30px ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em }
-  .hocl img.cmark{ object-fit:contain; background:#fff; padding:2px; box-sizing:border-box }
+  img.cmk{ background:#fff; padding:2px; box-sizing:border-box }
+  .cmk.xs{ width:20px; height:20px; border-radius:5px; font-size:8.5px; line-height:20px; letter-spacing:0 }
+  /* YOUR CLIENTS, ONE LINE EACH (option B): the mark, the name, and the
+     modules as words under it — no industry and no seat (Islam: "remove the
+     client industry … it's so noisy"). A module with something outstanding
+     carries a dot and the fact, red where it is an alarm. */
+  .hocl{ display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocl:last-child{ border-bottom:0 }
   .hocl b{ display:block; font-size:14px; font-weight:600; line-height:1.3 }
-  .hocl .s{ display:block; font-size:12px; color:var(--ink-3) }
-  .homods{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end }
-  .homod{ display:inline-flex; align-items:center; gap:5px; border:0; border-radius:7px; background:var(--surface-2); color:var(--ink);
-    font-family:inherit; font-size:12px; font-weight:600; line-height:1.4; padding:5px 9px; cursor:pointer; white-space:nowrap }
-  .homod:hover{ background:var(--line-soft) }
-  .homod i{ font-style:normal; font-size:11px; font-weight:600; color:var(--amber-tx) }
-  .homod i.alarm{ color:var(--warn) }
-  .hoph{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:9px 12px; border-bottom:1px solid var(--line-soft) }
-  .hotabs{ display:inline-flex; background:var(--surface-2); border-radius:10px; padding:3px }
-  .hotabs button{ display:inline-flex; align-items:center; gap:7px; border:0; background:transparent; color:var(--ink-3); font-family:inherit;
-    font-size:12.5px; font-weight:600; line-height:1.4; padding:6px 10px; border-radius:8px; cursor:pointer; white-space:nowrap }
-  .hotabs button svg{ width:15px; height:15px }
-  .hotabs button[aria-selected="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.08) }
-  .hotabs button i{ font-style:normal; font-size:11.5px; font-weight:700; border-radius:999px; padding:0 6px; background:var(--surface); color:var(--ink-2) }
-  .hotabs button[aria-selected="true"] i{ background:var(--ink); color:var(--surface) }
-  .hotabs button.l[aria-selected="true"] i{ background:var(--bad); color:var(--bad-ink) }
-  .hotabs button.l svg{ color:var(--bad) }
-  .hotabs button.w svg{ color:var(--amber-tx) }
-  .hoph .holink{ margin-bottom:0 }
+  .howords{ display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:1px }
+  .howd{ display:inline-flex; align-items:center; gap:6px; border:0; background:none; padding:1px 0; font-family:inherit; font-size:12.5px;
+    color:var(--ink-2); cursor:pointer; white-space:nowrap }
+  .howd u{ text-decoration:none; border-bottom:1px solid var(--line) }
+  .howd:hover{ color:var(--ink) }
+  .howd:hover u{ border-bottom-color:var(--amber-tx) }
+  .howd i{ display:inline-flex; align-items:center; gap:4px; font-style:normal; font-size:11px; font-weight:600; color:var(--amber-tx) }
+  .howd i::before{ content:""; width:5px; height:5px; border-radius:50%; background:currentColor }
+  .howd i.alarm{ color:var(--bad) }
   .hotask{ display:grid; grid-template-columns:17px minmax(0,1fr) auto; gap:10px; align-items:start; width:100%; padding:9px 14px;
     border:0; border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
   .hotask:hover{ background:var(--surface-2) }
@@ -1456,10 +1475,11 @@
   .hotask .m .c{ font-weight:600; color:var(--ink-2) }
   .hotask .wh{ font-size:12px; font-weight:600; color:var(--ink-2); white-space:nowrap; padding-top:1px }
   .hotask.late .wh{ color:var(--bad) }
-  .hopane[hidden]{ display:none }
   .honone{ margin:0; padding:16px; text-align:center; font-size:13px; color:var(--ink-3) }
-  .hotwo{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; align-items:start }
-  .hotwo .hobox{ padding:12px 16px 14px }
+  /* case studies: one card, its two halves side by side with a hairline */
+  .hotwo{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch }
+  .hotwo > div{ padding:12px 16px 14px; min-width:0 }
+  .hotwo > div + div{ border-left:1px solid var(--line-soft) }
   .hobxh{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
   .hocase{ display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:12px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft) }
   .hocase:last-of-type{ border-bottom:0 }
@@ -1484,11 +1504,9 @@
     box-shadow:inset 4px 0 0 rgba(0,0,0,.2), inset 0 -3px 0 var(--amber) }
   .hobook .new{ display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
     color:var(--amber-ink); background:var(--amber); border-radius:999px; padding:1px 6px; vertical-align:2px }
-  @media (max-width:1180px){ .hotop, .hotwo{ grid-template-columns:minmax(0,1fr) } }
+  @media (max-width:999px){ .hotop, .hotwo{ grid-template-columns:minmax(0,1fr) } .hotwo > div + div{ border-left:0; border-top:1px solid var(--line-soft) } }
   @media (max-width:640px){
     .hohello{ padding:14px 16px 15px }
-    .hocl{ grid-template-columns:30px minmax(0,1fr) }
-    .homods{ grid-column:2; justify-content:flex-start }
     .hocase{ grid-template-columns:42px minmax(0,1fr) }
     .hocase .btn{ grid-column:2; justify-self:start }
   }
@@ -1502,7 +1520,10 @@
      window, tighter rows. A reading page keeps a measure of its own (the
      case study's prose stays in 66ch), so the width is for lists and grids. */
   body{ font-size:14px; line-height:1.5 }
-  .side{ width:212px }
+  /* 224px since the name became Strategy Management Platform (2026-10-24):
+     the mark, the name's longer line and the « button need it */
+  .side{ width:224px }
+  .sbhead{ gap:8px; padding:12px 8px 12px 14px }
   .nav button{ padding:8px 10px; font-size:13.5px }
   .nav{ gap:12px }
   .wrap{ max-width:none; padding:16px 22px 56px }
@@ -1526,6 +1547,36 @@
   #page[data-tab="memory"] .rsec > p{ font-size:15px }
   #page[data-tab="memory"] .icard .ih{ font-size:14px }
   @media (max-width:999px){ .nav button{ padding:11px 10px; font-size:14.5px } .wrap{ padding:14px 14px 50px } }
+
+  /* MY TASKS' SORT BY (2026-10-24): the switch on its own line under the
+     band; by client, each section is a client with its mark, and the rows
+     drop the client pill the heading already says. */
+  .mwbar{ display:flex; align-items:center; gap:12px; margin:-4px 0 12px }
+  .mwsh h2{ display:flex; align-items:center; gap:8px }
+  .mwsec.byc .mwcl{ display:none }
+  @media (min-width:761px){ .mwsec.byc .mwrow{ grid-template-columns:20px minmax(0,1fr) 108px 128px 26px } }
+
+  /* ONLY THE TAB YOU ARE ON IS BOLD (Islam, 2026-10-24: "make the names of
+     the modules not bold only the selected module is highlighted is
+     enough"). The names go to regular weight in an ink a step brighter than
+     the quiet one, so they keep their contrast on the navy; the one you are
+     on keeps its wash, its amber bar and icon, and alone is semibold. */
+  .nav button{ font-weight:400; color:color-mix(in srgb, var(--ff-ink) 78%, var(--ff)) }
+  .nav button.on{ font-weight:600; color:var(--ff-ink) }
+
+  /* THE CONSOLE AT 80% ON A COMPUTER (Islam, 2026-10-24: "I made the page
+     80% smaller it became more visible and neat. can we make the default 80%
+     smaller"). The whole page is zoomed, as his browser's own zoom did, so
+     every size keeps its proportion; a phone keeps 100%, where 80% would
+     put the words under a readable size. Two things a zoom changes are put
+     back: the window's height (a zoomed 100vh is 80% of the window, so the
+     column would stop short) and a hover label's place (the box the
+     browser reports is zoomed, the place it is set at is not — tipShow). */
+  @media (min-width:1000px){
+    html{ zoom:.8 }
+    .shell{ min-height:calc(100vh / .8) }
+    .side{ height:calc(100vh / .8); height:calc(100dvh / .8) }
+  }
 </style>
 </head>
 <body>
@@ -1533,10 +1584,10 @@
      from the menu button in .mtop. The tabs are drawn into #nav once `me`
      answers (§45.2), as they always were. -->
 <div class="shell">
-<aside class="side" id="side" aria-label="Forefront Platform">
+<aside class="side" id="side" aria-label="Strategy Management Platform">
   <div class="sbhead">
-    <span class="sbff" aria-hidden="true">FF</span>
-    <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
+    <span class="sbname"><b>Strategy Management</b><span>Platform</span></span>
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
@@ -1551,7 +1602,7 @@
 <div class="main">
   <div class="mtop">
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <span class="mk">FOREFRONT</span><span id="sbhere"></span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
   <div class="wrap" id="page"></div>
 </div>

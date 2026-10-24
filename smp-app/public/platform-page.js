@@ -413,23 +413,25 @@
     history: ["History", "What was done to the clients you can open, and by whom."]
   };
   function tabSkel(tab) {
-    var f = document.createDocumentFragment();
+    /* drawn into a box nobody sees, then handed over as a fragment, so the
+       band and the shape land in the page side by side as they always did */
+    var box = el("div"), f = document.createDocumentFragment();
     var was = page;
-    page = f;
+    page = box;
     try {
       if (tab === "home") hoHello();
       else if (tab === "mywork") mwMast();
       else { var says = BAND_SAYS[tab] || BAND_SAYS.history; pageBand(says[0], null, "", says[1]); }
     } finally { page = was; }
-    if (tab === "clients") { f.appendChild(skelCards()); return f; }
-    f.appendChild(tabSkelBody(tab));
+    box.appendChild(tab === "clients" ? skelCards() : tabSkelBody(tab));
+    while (box.firstChild) f.appendChild(box.firstChild);
     return f;
   }
   function tabSkelBody(tab) {
     var b = function (w, cls) { return '<span class="b' + (cls ? " " + cls : "") + '" style="width:' + w + '"></span>'; };
     var n = function (k, f) { var s = ""; for (var i = 0; i < k; i++) s += f(i); return s; };
     /* the title line is the band now, drawn above */
-    var head = function () { return ""; };
+    var head = function (w, right) { return ""; };
     var table = function (rows, cells) { return "<div><div class=\"th\"></div>" + n(rows, function (i) { return '<div class="tr">' + cells(i) + "</div>"; }) + "</div>"; };
     var S = {
       mywork: function () {

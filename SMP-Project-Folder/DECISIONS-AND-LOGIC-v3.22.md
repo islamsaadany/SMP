@@ -69356,6 +69356,13 @@ Islam: *"can we work on refining the design of the consultants and who sees what
 - **Red runs:**
   - Without the double-click handler the three editing lines fail.
   - With the header not sticky the Copilot line fails (top −1483).
+- **`pages-types` caught one fault in this change before it shipped:** the waiting shape was drawn into a DocumentFragment through `page`, which is typed as an element, and the emptied title helper was called with arguments it no longer declared. Both were fixed: the shape is drawn into a box and handed over as a fragment. The check then reads 10/0.
+- **Results on the final tree:**
+  - shell 444/1, the red being `main`'s own Copilot row (§624).
+  - door-landing 136/5, `main`'s own five.
+  - copilot 335/0, frameworks-page 64/0, case-page 62/0, memory-page 42/0, module-look 138/0, view-as 33/0, viewing-as-bar 54/0, instant-nav 19/0, quick-open 19/0, insights-tab 24/0, office-standing 7/0, console-record green.
+  - Python: platform-cards 30/0, tab-keep, client-card-modules 23/0, client-archive, client-setup-outside, console-boot 13/0 green.
+  - `multi-client.py` did not run: its fixture needs a rehearsal database that this container does not hold.
 
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*

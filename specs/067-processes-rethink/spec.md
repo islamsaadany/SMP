@@ -224,6 +224,7 @@ in `design-mockups/processes-redesign/`.
 | Opening the module (reading side) | https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB | `2026-10-24_module-landing-options.html` |
 | Where the office builds (options compared) | https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb | `2026-10-24_builder-options.html` |
 | The builder: ways in and out, the builder home, every section | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
+| **The whole design, working, for the team:** both sides, four people to look as, one suggestion followed from owner to staff | https://claude.ai/artifact/5t9hhW9VtctGqprNH64yyb | `2026-10-24_processes-prototype-v2.html` (source in `prototype-v2/`) |
 
 Earlier versions of each page, holding the options that were not chosen, are in the
 page's history and in git.

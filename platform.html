@@ -50,6 +50,16 @@
        phone's open menu lays over the page */
     --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
     --ff-label:#8FA3C9; --scrim:rgba(20,28,43,.45);
+    /* THE LEFT COLUMN IS WHITE (Islam, 2026-10-24, of
+       design-mockups/left-nav/2026-10-24_white-sidebar.html: "apply it").
+       Its own set, so the navy that still carries the buttons, the bands and
+       the table heads is untouched. On white: the tab you are on 12.1:1 on
+       its wash, the other names 7.9:1, the headings and the role 4.8:1, and
+       the on-tab icon in the darker amber, 5.27:1, because #F5A623 is 2.03:1
+       as a mark on white. The hairline on its right edge is what tells it
+       from the page, which is a shade off white. */
+    --sb:#FFFFFF; --sb-ink:#0F2C69; --sb-text:#465268; --sb-quiet:#5E6E85; --sb-label:#5E6E85;
+    --sb-wash:#F1F4F9; --sb-on:#E8EEF8; --sb-rule:#D8DEE8; --sb-mark:#9C5D08; --sb-edge:#D8DEE8;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
     --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
@@ -64,6 +74,8 @@
       --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
       --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
       --ff-label:#8197BE; --scrim:rgba(0,0,0,.55);
+      --sb:#1A1F29; --sb-ink:#E7EBF2; --sb-text:#AAB4C6; --sb-quiet:#8590A3; --sb-label:#8590A3;
+      --sb-wash:#222834; --sb-on:#28303E; --sb-rule:#333B4A; --sb-mark:#F5A623; --sb-edge:#333B4A;
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
       --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -84,6 +96,8 @@
     --ff-late:#FF9B8F; --ff-hover:rgba(255,255,255,.12);
     --ff-wash:rgba(255,255,255,.08); --ff-on:rgba(255,255,255,.13); --ff-rule:rgba(255,255,255,.12);
     --ff-label:#8197BE; --scrim:rgba(0,0,0,.55);
+    --sb:#1A1F29; --sb-ink:#E7EBF2; --sb-text:#AAB4C6; --sb-quiet:#8590A3; --sb-label:#8590A3;
+    --sb-wash:#222834; --sb-on:#28303E; --sb-rule:#333B4A; --sb-mark:#F5A623; --sb-edge:#333B4A;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
     --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
@@ -103,7 +117,7 @@
      build it, keep the headings and the « button, but make the names of the
      module appear on hovering when they are collapsed". The two lines that
      ran across the top — the white one with the mark and Sign out (§2.9),
-     and the navy tab bar (§584) — are ONE navy column now: the mark at its
+     and the navy tab bar (§584) — are ONE column now (white since 2026-10-24): the mark at its
      head, the tabs in today's order under three headings with History alone
      at the foot, and the name, the role and Sign out under that.
      THE WINDOW STILL SCROLLS, NOT THE PAGE'S OWN BOX: the column stands
@@ -113,12 +127,11 @@
      and only on a window too short for eight tabs. */
   .shell{ display:flex; align-items:flex-start; min-height:100vh }
   .side{ position:sticky; top:0; z-index:20; flex:none; width:232px; height:100vh; height:100dvh;
-    display:flex; flex-direction:column; background:var(--ff); color:var(--ff-quiet) }
+    display:flex; flex-direction:column; background:var(--sb); color:var(--sb-quiet);
+    border-right:1px solid var(--sb-edge) }
   .main{ flex:1; min-width:0 }
   .sbhead{ display:flex; align-items:center; gap:8px; min-height:58px; padding:12px 12px 12px 18px;
-    border-bottom:1px solid var(--ff-rule) }
-  /* THE MARK IS TYPE ON THE NAVY NOW, so it is the bar's ink rather than
-     --ff-tx, which was measured for a white line (§38.4). */
+    border-bottom:1px solid var(--sb-rule) }
   /* THE NAME AND ITS MARK (Islam, 2026-10-24: "the naming at the top should
      be Strategy management Platform", and of four icons drawn, A, the north
      star): the mark on amber, the name on two lines because the whole of it
@@ -126,15 +139,15 @@
   .sblogo{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--amber); color:#0F2C69 }
   .sblogo svg{ width:20px; height:20px }
   .sbname{ display:flex; flex-direction:column; min-width:0; line-height:1.15 }
-  .sbname b{ font-size:12px; font-weight:700; color:var(--ff-ink); white-space:nowrap }
-  .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ff-quiet) }
-  /* ICON BUTTONS ON THE NAVY: « (icons only), × (close, on a phone), the
+  .sbname b{ font-size:12px; font-weight:700; color:var(--sb-ink); white-space:nowrap }
+  .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--sb-quiet) }
+  /* ICON BUTTONS IN THE COLUMN: « (icons only), × (close, on a phone), the
      menu (on a phone) and Sign out. Each says what it does in its
      accessible name and in the hover label below. */
   .sbbtn{ flex:none; width:30px; height:30px; display:grid; place-items:center; margin-left:auto; padding:0;
-    border:0; border-radius:7px; background:transparent; color:var(--ff-quiet); cursor:pointer }
-  .sbbtn:hover{ background:var(--ff-wash); color:var(--ff-ink) }
-  .sbbtn:focus-visible{ outline:2px solid var(--amber); outline-offset:1px }
+    border:0; border-radius:7px; background:transparent; color:var(--sb-quiet); cursor:pointer }
+  .sbbtn:hover{ background:var(--sb-wash); color:var(--sb-ink) }
+  .sbbtn:focus-visible{ outline:2px solid var(--sb-mark); outline-offset:1px }
   .sbbtn svg{ width:16px; height:16px }
   #sbclose{ display:none }
 
@@ -143,20 +156,20 @@
   .nav{ flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:10px 10px 12px;
     scrollbar-width:thin }
   .sbgrp{ display:flex; flex-direction:column; gap:2px }
-  .sbgrp.foot{ margin-top:auto; padding-top:10px; border-top:1px solid var(--ff-rule) }
+  .sbgrp.foot{ margin-top:auto; padding-top:10px; border-top:1px solid var(--sb-rule) }
   .sbgl{ font:600 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--ff-label); padding:6px 10px }
+    color:var(--sb-label); padding:6px 10px }
   .nav button{ position:relative; display:flex; align-items:center; gap:11px; width:100%; padding:10px; border:0; border-radius:8px;
-    background:transparent; color:var(--ff-quiet); font-family:inherit; font-size:14px; font-weight:600; line-height:1;
+    background:transparent; color:var(--sb-text); font-family:inherit; font-size:14px; font-weight:600; line-height:1;
     text-align:left; white-space:nowrap; cursor:pointer }
   .nav button svg{ width:18px; height:18px; flex:none }
   .nav button .lb{ min-width:0; overflow:hidden; text-overflow:ellipsis }
-  .nav button:hover{ background:var(--ff-wash); color:var(--ff-ink) }
-  .nav button:focus-visible{ outline:2px solid var(--amber); outline-offset:-2px }
+  .nav button:hover{ background:var(--sb-wash); color:var(--sb-ink) }
+  .nav button:focus-visible{ outline:2px solid var(--sb-mark); outline-offset:-2px }
   /* THE TAB YOU ARE ON keeps the amber that underlined it: a short bar on
      its left edge, and its icon in amber (the mockup's). */
-  .nav button.on{ background:var(--ff-on); color:var(--ff-ink) }
-  .nav button.on svg{ color:var(--amber) }
+  .nav button.on{ background:var(--sb-on); color:var(--sb-ink) }
+  .nav button.on svg{ color:var(--sb-mark) }
   .nav button.on::before{ content:""; position:absolute; left:-10px; top:8px; bottom:8px; width:3px;
     border-radius:0 3px 3px 0; background:var(--amber) }
 
@@ -164,12 +177,12 @@
      the role under it, Sign out. `#who` keeps its words — the role span
      still carries " · Super user", its dot drawn only where the two share a
      line — so the line reads the same to anybody who asks it. */
-  .sbfoot{ display:flex; align-items:center; gap:10px; padding:12px 12px 14px 14px; border-top:1px solid var(--ff-rule) }
-  .sbav{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--ff-on); color:var(--ff-ink);
+  .sbfoot{ display:flex; align-items:center; gap:10px; padding:12px 12px 14px 14px; border-top:1px solid var(--sb-rule) }
+  .sbav{ flex:none; width:30px; height:30px; border-radius:50%; background:var(--sb-on); color:var(--sb-ink);
     font:700 11px/30px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
   #who{ min-width:0; display:flex; flex-direction:column; gap:3px; line-height:1.15 }
-  #who > span:first-child{ font-size:13px; font-weight:600; color:var(--ff-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-  #who .role{ font-size:11.5px; color:var(--ff-quiet); white-space:nowrap }
+  #who > span:first-child{ font-size:13px; font-weight:600; color:var(--sb-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  #who .role{ font-size:11.5px; color:var(--sb-quiet); white-space:nowrap }
   #who .role .sep{ display:none }
 
   /* THE NAME A HIDDEN LABEL STANDS FOR, on a hover or a key (Islam: "make
@@ -196,7 +209,7 @@
     html[data-rail="1"] .sbhead .sbname{ display:none }
     html[data-rail="1"] .sbhead .sbbtn{ margin:0 }
     html[data-rail="1"] #sbfold svg{ transform:rotate(180deg) }
-    html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--ff-rule) }
+    html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--sb-rule) }
     html[data-rail="1"] .sbgrp:first-child .sbgl{ display:none }
     html[data-rail="1"] .nav button{ justify-content:center; padding:11px 0 }
     html[data-rail="1"] .nav button .lb{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%) }
@@ -206,7 +219,7 @@
   }
 
   /* ── ON A PHONE OR A TABLET (§601, replacing §584's sideways tab bar): a
-     slim navy bar with the menu button, the mark and the tab you are on;
+     slim white bar with the menu button, the mark and the tab you are on;
      the same column opens over the page from the left, and pressing a tab,
      the ×, the shade or Esc closes it. Hidden when shut, not only moved, so
      a key cannot walk into a menu nobody can see.
@@ -225,14 +238,14 @@
       transition:opacity .22s ease }
     html[data-menu="1"] .sbscrim{ opacity:1; pointer-events:auto }
     .mtop{ position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:10px; min-height:50px; padding:8px 12px;
-      background:var(--ff); color:var(--ff-ink) }
-    .mtop .sbbtn{ margin:0; color:var(--ff-ink) }
+      background:var(--sb); color:var(--sb-ink); border-bottom:1px solid var(--sb-edge) }
+    .mtop .sbbtn{ margin:0; color:var(--sb-ink) }
     .mtop .sbbtn svg{ width:20px; height:20px }
     .mtop .sblogo{ width:26px; height:26px; border-radius:7px }
     .mtop .sblogo svg{ width:17px; height:17px }
-    .mtop .mtname{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:700; color:var(--ff-ink) }
+    .mtop .mtname{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:700; color:var(--sb-ink) }
     #sbhere{ margin-left:auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-      font-size:13px; font-weight:600; color:var(--ff-quiet) }
+      font-size:13px; font-weight:600; color:var(--sb-quiet) }
     .nav button{ padding:12px 10px; font-size:15px }
   }
   @media (prefers-reduced-motion:reduce){ .side, .sbscrim{ transition:none } }
@@ -1705,11 +1718,11 @@
 
   /* ONLY THE TAB YOU ARE ON IS BOLD (Islam, 2026-10-24: "make the names of
      the modules not bold only the selected module is highlighted is
-     enough"). The names go to regular weight in an ink a step brighter than
-     the quiet one, so they keep their contrast on the navy; the one you are
+     enough"). The names go to regular weight in --sb-text, a step darker
+     than the quiet grey, so they keep their contrast on the white; the one you are
      on keeps its wash, its amber bar and icon, and alone is semibold. */
-  .nav button{ font-weight:400; color:color-mix(in srgb, var(--ff-ink) 78%, var(--ff)) }
-  .nav button.on{ font-weight:600; color:var(--ff-ink) }
+  .nav button{ font-weight:400; color:var(--sb-text) }
+  .nav button.on{ font-weight:600; color:var(--sb-ink) }
 
   /* THE CONSOLE AT 80% ON A COMPUTER (Islam, 2026-10-24: "I made the page
      80% smaller it became more visible and neat. can we make the default 80%
@@ -1727,7 +1740,7 @@
 </style>
 </head>
 <body>
-<!-- §601: the chrome is one navy column on the left; on a phone it opens
+<!-- §601: the chrome is one white column on the left; on a phone it opens
      from the menu button in .mtop. The tabs are drawn into #nav once `me`
      answers (§45.2), as they always were. -->
 <div class="shell">

@@ -4751,7 +4751,10 @@
     (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
       cc.body.textContent = "";
       if (!j || !j.ok) { cc.body.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
-      (j.cards || []).forEach(function (c) { if (c.mark) MARKS[c.key] = c.mark; });
+      /* §625: the SQUARE, not the mark — the client's own icon, or its mark
+         where the mark is not wide; nothing means initials. The server
+         decides (lib/client-icon.ts), so Home and the Brand tab agree. */
+      (j.cards || []).forEach(function (c) { if (c.square) MARKS[c.key] = c.square; });
       /* MINE OR DEMO (Islam, 2026-10-24: "for the clients we can have a
          filter like the tasks between Mine and Demo"). Mine is the clients
          this person has a SEAT on, an admin too ("the admin also sees his

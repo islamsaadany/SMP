@@ -24,6 +24,7 @@ CREATE TABLE tenants (
   kind        text NOT NULL DEFAULT 'client',
   status      text NOT NULL DEFAULT 'active',
   mark        text,                            -- PNG data URI only (§52)
+  icon        text,                            -- §625: the small square on Home; NULL = use the mark
   colors      jsonb NOT NULL DEFAULT '{}'::jsonb,
   industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§322)
   size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§322)

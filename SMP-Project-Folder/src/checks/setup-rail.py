@@ -314,7 +314,7 @@ with sync_playwright() as p:
     # organization not people and access"*), so the register is all that
     # follows the store here — and the list is asserted where it went.
     ck("...and then the register, alone (§624: the BU list is the organisation's now)",
-       [x for x in order if x != "Forefront team"] == ["People register"], order)
+       [x for x in order if x != "Forefront team"] == ["Client register"], order)
     ck("...the Official BU list is in The organisation, last",
        pg.evaluate("()=>{const r=[...document.querySelectorAll('.setuprail [data-railitems=\"run\"] .ritem')]; return r.length>0 && r[r.length-1].dataset.setupgo==='mainbu';}"))
     access = pg.evaluate("""()=>{

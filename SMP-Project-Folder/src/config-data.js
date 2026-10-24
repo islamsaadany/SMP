@@ -5020,7 +5020,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;

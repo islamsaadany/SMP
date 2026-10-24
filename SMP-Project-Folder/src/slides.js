@@ -924,7 +924,7 @@ var SL_THUMB = 0.105;
 
 /* ── THE COLUMNS MENU (§571) ───────────────────────────────────────────
    Islam: *"give me the option to hide the owner and collabs in the slides if
-   needed"*, *"one switch for everything"*. The People register's own Columns
+   needed"*, *"one switch for everything"*. The Client register's own Columns
    menu (§53.5: no second control for one idea), in the slide view's bar
    beside Grid, and the office's alone — the same person who hides a slide,
    judged on the server as the same act (`deckHide`). The words are the

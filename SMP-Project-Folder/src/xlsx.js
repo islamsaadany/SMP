@@ -2001,7 +2001,7 @@ function peopleReadme(){
   var lines = [
     ["People workbook", ""],
     ["", ""],
-    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → Client register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
     ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
@@ -2013,7 +2013,7 @@ function peopleReadme(){
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
-    ["When you are done", "Save as .xlsx and upload it on Setup → People register."]
+    ["When you are done", "Save as .xlsx and upload it on Setup → Client register."]
   ];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };

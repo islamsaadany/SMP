@@ -114,6 +114,23 @@
 .csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
                        padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
 .csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* its icon (§625): the two choices on the left, what Home draws on the right */
+.csetup .wzicon { margin-top:22px; }
+.csetup .wzicon .iconrow { display:flex; align-items:flex-start; gap:28px; flex-wrap:wrap; margin-top:6px; }
+.csetup .wzicon .iconpick { display:flex; flex-direction:column; gap:8px; max-width:280px; }
+.csetup .wzicon .iconopt { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-body); color:var(--ink); cursor:pointer; }
+.csetup .wzicon .iconopt input:disabled + * { cursor:default; }
+.csetup .wzicon .iconown { display:flex; align-items:center; gap:12px; }
+.csetup .wzicon .iconsaid { margin:2px 0 0; font-size:var(--fs-small); line-height:1.5; color:var(--gold-deep); }
+.csetup .wzicon .iconprev { display:flex; gap:18px; padding:12px 16px; border:1px solid var(--line);
+                            border-radius:var(--r-md); background:var(--surface); }
+.csetup .wzicon .icontile { margin:0; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.csetup .wzicon .icontile img,
+.csetup .wzicon .icontile .iconinit { width:56px; height:56px; border-radius:12px; box-sizing:border-box; }
+.csetup .wzicon .icontile img { object-fit:contain; background:#fff; padding:3px; border:1px solid var(--line); }
+.csetup .wzicon .icontile .iconinit { display:flex; align-items:center; justify-content:center;
+                                      background:var(--panel); color:var(--gold); font:700 20px/1 var(--sans); }
+.csetup .wzicon .icontile figcaption { font-size:var(--fs-micro); color:var(--ink-3); }
 /* the branding, drawn by its own renderer inside the first step */
 .csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
 

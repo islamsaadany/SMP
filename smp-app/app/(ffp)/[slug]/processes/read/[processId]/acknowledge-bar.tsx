@@ -38,7 +38,7 @@ export function AcknowledgeBar(p: { workspaceId: string; processId: string; vers
             </button>
           </>
         ) : (
-          <span className="text-sm text-slate-500">You are looking at this as the office, which is not on the People register, so there is nothing to acknowledge.</span>
+          <span className="text-sm text-slate-500">You are looking at this as the office, which is not on the Client register, so there is nothing to acknowledge.</span>
         )}
         {error && <span role="alert" className="w-full text-sm text-rose-700">{error}</span>}
       </div>

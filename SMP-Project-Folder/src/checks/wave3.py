@@ -260,7 +260,7 @@ with sync_playwright() as p:
        all(s["want"] is None or s["val"] == s["want"] for s in sw), sw)
 
     print("— 5 · one name column by default —")
-    setup_page(pg, "people register")
+    setup_page(pg, "client register")
     cols = pg.evaluate("""() => [...document.querySelectorAll('.peoplecfg thead th')]
       .map(function(t){ return (t.textContent||'').trim(); })""")
     ck("the register is on screen", len(cols) > 4, cols[:4])

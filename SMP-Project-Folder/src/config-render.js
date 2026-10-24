@@ -2167,6 +2167,11 @@ function dupeMark(dupes){
   return out;
 }
 
+/* §625: whether the register shows Forefront's consultants — kept on this
+   device, the way the register's columns are (§47.1). Off unless asked. */
+var REGFF_KEY = "smp.register.forefront";
+function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
+function setRegShowsFf(on){ try { if (on) localStorage.setItem(REGFF_KEY, "1"); else localStorage.removeItem(REGFF_KEY); } catch (e) {} }
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -3284,7 +3289,15 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  var rows = PEOPLE.map(function(p, i){
+  /* §625: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+     option B: the register lists the client's people; *Show Forefront team*
+     brings the consultants back). Only the MINTED rows hide — a consultant
+     the platform wrote a row for so they can sign in and hold a seat
+     (§362.2). An ADOPTED row is the client's own person who is also on the
+     account team, so it stays. Nothing about anybody's access moves: the
+     rows are there underneath, and every count above the table still reads
+     them all. */
+  var rows = PEOPLE.filter(function(p){ return regShowsFf() || !SMPRules.isMintedRow(p); }).map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
     /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
@@ -3839,20 +3852,19 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
-  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
-  var splitChip = !ffRows.length ? "" :
-    '<span class="psplit" title="' +
-      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
-          "this table reads from it, so everybody who can touch this client is on one screen." +
-          (ffAdopted.length
-            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
-              " also the client\u2019s own person, matched by their address, and stay editable here: " +
-              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
-            : "")) + '">' +
-      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
-             "of the client\u2019s own people") +
-      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
+  /* §625: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+     people · 2 from Forefront" (§3a.1); with the consultants off the table
+     by default, the one thing left to say about them is how many are behind
+     the switch, and the switch says it. Drawn only where there is somebody
+     to show (§61). */
+  var ffMinted = PEOPLE.filter(function(p){ return SMPRules.isMintedRow(p); }).length;
+  var splitChip = !ffMinted ? "" :
+    '<button type="button" class="regff' + (regShowsFf() ? " on" : "") + '" data-regff="1" aria-pressed="' +
+      (regShowsFf() ? "true" : "false") + '" title="' +
+      esc("Forefront's consultants on this client. They are here so they can sign in and hold their seat; " +
+          "they are added, given a seat or removed on Forefront team.") + '">' +
+      '<span class="box" aria-hidden="true">' + (regShowsFf() ? "\u2713" : "") + '</span>' +
+      'Show Forefront team (' + ffMinted + ')</button>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -3868,7 +3880,7 @@ function renderPeople(){
      not a removal: with nothing between the row and the table, `section("")`
      is what puts the table there, and the header's own 14px bottom margin is
      the whole of the gap. */
-  return cfgHead("People register",
+  return cfgHead("Client register",
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
@@ -7211,7 +7223,7 @@ var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per
    was built to prevent, in the one place nobody would ever see it disagree.
 
    SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
+   at the Client register — custodians, passwords, declarations — and "7 things
    waiting on the register" is exactly what somebody wants from a rail badge.
    Nothing new is counted here, which is the whole point.
 

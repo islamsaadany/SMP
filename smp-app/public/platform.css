@@ -5392,6 +5392,23 @@ html[data-client-settings] .viewer { display:none; }
   .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── THE FOREFRONT SWITCH (§625) ─────────────────────────────────
+     Its neighbours' shape (+ Add, Register file), because it sits among them
+     and is pressed like them; a box in front because pressing it changes
+     what the table holds and the box says which way it is. Never the accent
+     (§94.8): showing consultants is a look, not an alarm. Not scoped under
+     `.phead2` — the register's title row is `.setuphead` now, and a rule
+     scoped to the old row draws nothing (measured). */
+  .regff { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    font:600 12.5px/1 var(--sans); padding:8px 12px; border-radius:var(--r-pill);
+    white-space:nowrap; }
+  .regff:hover { border-color:var(--gold); color:var(--ink); }
+  .regff .box { width:13px; height:13px; border:1.5px solid var(--ink-3);
+    border-radius:3px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:10px; line-height:1; background:var(--surface); }
+  .regff.on { color:var(--ink); }
+  .regff.on .box { background:var(--ink); border-color:var(--ink); color:var(--surface); }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -11871,6 +11888,23 @@ body.presenting #buildband { display:none; }
 .csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
                        padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
 .csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* its icon (§625): the two choices on the left, what Home draws on the right */
+.csetup .wzicon { margin-top:22px; }
+.csetup .wzicon .iconrow { display:flex; align-items:flex-start; gap:28px; flex-wrap:wrap; margin-top:6px; }
+.csetup .wzicon .iconpick { display:flex; flex-direction:column; gap:8px; max-width:280px; }
+.csetup .wzicon .iconopt { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-body); color:var(--ink); cursor:pointer; }
+.csetup .wzicon .iconopt input:disabled + * { cursor:default; }
+.csetup .wzicon .iconown { display:flex; align-items:center; gap:12px; }
+.csetup .wzicon .iconsaid { margin:2px 0 0; font-size:var(--fs-small); line-height:1.5; color:var(--gold-deep); }
+.csetup .wzicon .iconprev { display:flex; gap:18px; padding:12px 16px; border:1px solid var(--line);
+                            border-radius:var(--r-md); background:var(--surface); }
+.csetup .wzicon .icontile { margin:0; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.csetup .wzicon .icontile img,
+.csetup .wzicon .icontile .iconinit { width:56px; height:56px; border-radius:12px; box-sizing:border-box; }
+.csetup .wzicon .icontile img { object-fit:contain; background:#fff; padding:3px; border:1px solid var(--line); }
+.csetup .wzicon .icontile .iconinit { display:flex; align-items:center; justify-content:center;
+                                      background:var(--panel); color:var(--gold); font:700 20px/1 var(--sans); }
+.csetup .wzicon .icontile figcaption { font-size:var(--fs-micro); color:var(--ink-3); }
 /* the branding, drawn by its own renderer inside the first step */
 .csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
 

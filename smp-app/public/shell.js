@@ -474,7 +474,7 @@
     { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
     { key:"c_bands",  area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
     { key:"c_units",  area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
-    { key:"c_people", area:"a_setup", scope:"setup", label:"People register", note:"Everyone the platform knows, and what they hold" },
+    { key:"c_people", area:"a_setup", scope:"setup", label:"Client register", note:"Everyone the platform knows, and what they hold" },
     { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
     /* Sending mail OUT of the platform (§72). Setup, and the same argument
        branding makes: an email leaves over the organisation's name, so who may
@@ -13280,7 +13280,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;
@@ -25701,7 +25701,7 @@ function peopleReadme(){
   var lines = [
     ["People workbook", ""],
     ["", ""],
-    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → Client register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
     ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
@@ -25713,7 +25713,7 @@ function peopleReadme(){
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
-    ["When you are done", "Save as .xlsx and upload it on Setup → People register."]
+    ["When you are done", "Save as .xlsx and upload it on Setup → Client register."]
   ];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
@@ -41110,6 +41110,11 @@ function dupeMark(dupes){
   return out;
 }
 
+/* §625: whether the register shows Forefront's consultants — kept on this
+   device, the way the register's columns are (§47.1). Off unless asked. */
+var REGFF_KEY = "smp.register.forefront";
+function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
+function setRegShowsFf(on){ try { if (on) localStorage.setItem(REGFF_KEY, "1"); else localStorage.removeItem(REGFF_KEY); } catch (e) {} }
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -42227,7 +42232,15 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  var rows = PEOPLE.map(function(p, i){
+  /* §625: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+     option B: the register lists the client's people; *Show Forefront team*
+     brings the consultants back). Only the MINTED rows hide — a consultant
+     the platform wrote a row for so they can sign in and hold a seat
+     (§362.2). An ADOPTED row is the client's own person who is also on the
+     account team, so it stays. Nothing about anybody's access moves: the
+     rows are there underneath, and every count above the table still reads
+     them all. */
+  var rows = PEOPLE.filter(function(p){ return regShowsFf() || !SMPRules.isMintedRow(p); }).map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
     /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
@@ -42782,20 +42795,19 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
-  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
-  var splitChip = !ffRows.length ? "" :
-    '<span class="psplit" title="' +
-      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
-          "this table reads from it, so everybody who can touch this client is on one screen." +
-          (ffAdopted.length
-            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
-              " also the client\u2019s own person, matched by their address, and stay editable here: " +
-              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
-            : "")) + '">' +
-      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
-             "of the client\u2019s own people") +
-      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
+  /* §625: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+     people · 2 from Forefront" (§3a.1); with the consultants off the table
+     by default, the one thing left to say about them is how many are behind
+     the switch, and the switch says it. Drawn only where there is somebody
+     to show (§61). */
+  var ffMinted = PEOPLE.filter(function(p){ return SMPRules.isMintedRow(p); }).length;
+  var splitChip = !ffMinted ? "" :
+    '<button type="button" class="regff' + (regShowsFf() ? " on" : "") + '" data-regff="1" aria-pressed="' +
+      (regShowsFf() ? "true" : "false") + '" title="' +
+      esc("Forefront's consultants on this client. They are here so they can sign in and hold their seat; " +
+          "they are added, given a seat or removed on Forefront team.") + '">' +
+      '<span class="box" aria-hidden="true">' + (regShowsFf() ? "\u2713" : "") + '</span>' +
+      'Show Forefront team (' + ffMinted + ')</button>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -42811,7 +42823,7 @@ function renderPeople(){
      not a removal: with nothing between the row and the table, `section("")`
      is what puts the table there, and the header's own 14px bottom margin is
      the whole of the gap. */
-  return cfgHead("People register",
+  return cfgHead("Client register",
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
@@ -46154,7 +46166,7 @@ var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per
    was built to prevent, in the one place nobody would ever see it disagree.
 
    SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
+   at the Client register — custodians, passwords, declarations — and "7 things
    waiting on the register" is exactly what somebody wants from a rail badge.
    Nothing new is counted here, which is the whole point.
 
@@ -56168,7 +56180,7 @@ var SL_THUMB = 0.105;
 
 /* ── THE COLUMNS MENU (§571) ───────────────────────────────────────────
    Islam: *"give me the option to hide the owner and collabs in the slides if
-   needed"*, *"one switch for everything"*. The People register's own Columns
+   needed"*, *"one switch for everything"*. The Client register's own Columns
    menu (§53.5: no second control for one idea), in the slide view's bar
    beside Grid, and the office's alone — the same person who hides a slide,
    judged on the server as the same act (`deckHide`). The words are the
@@ -69338,7 +69350,7 @@ var CLIENTSETUP = (function () {
   function saveReg(patch, then){
     return post(Object.assign({ action:"saveClient", key:S.key }, patch)).then(function (r) {
       if (!r.ok) { say(r.error || "Not saved.", true); return false; }
-      say(""); if (then) then(); return true;
+      say(""); if (then) then(r); return true;
     }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
   }
   /* §621: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
@@ -69516,6 +69528,7 @@ var CLIENTSETUP = (function () {
      (§53.5). */
   function brandTab(box, c){
     if (c) box.appendChild(markBlock(c));
+    if (c) box.appendChild(iconBlock(c));
     if (typeof brandingBody === "function") {
       var bb = el("div", "wzbrand");
       bb.innerHTML = brandingBody();
@@ -69554,7 +69567,7 @@ var CLIENTSETUP = (function () {
       var drop = el("button", "btn", "Remove"); drop.type = "button";
       drop.hidden = !c.mark;
       drop.addEventListener("click", function () {
-        saveReg({ mark:"" }, function () { c.mark = null; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+        saveReg({ mark:"" }, function () { c.mark = null; c.markWide = false; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; iconRepaint(); });
       });
       file.addEventListener("change", function () {
         var f = file.files && file.files[0];
@@ -69572,7 +69585,7 @@ var CLIENTSETUP = (function () {
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           var out = cv.toDataURL("image/png");
           if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          saveReg({ mark:out }, function () { c.mark = out; tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; });
+          saveReg({ mark:out }, function (r) { c.mark = out; c.markWide = !!(r && r.markWide); tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; iconRepaint(); });
         };
         img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
         img.src = url;
@@ -69581,6 +69594,114 @@ var CLIENTSETUP = (function () {
     }
     mk.appendChild(mrow);
     return mk;
+  }
+
+  /* ── ITS ICON (§625) ─────────────────────────────────────────────────
+     Islam: *"give me another thing beside the client mark to upload an icon
+     or use the mark as an icon. and this icon view appears in the dashboard
+     of your clients as some clients have a wide mark that doesn't fit in
+     that view"*. Two choices under the mark, and beside them exactly what
+     Home's small square will draw — and, when the mark is wide, the mark
+     squeezed into that square, so the difference is seen before choosing.
+
+     WHETHER THE MARK IS WIDE IS THE SERVER'S ANSWER (`markWide`), the same
+     rule the cards use to decide what Home draws, so this line can never
+     warn about a mark Home is drawing happily, or the reverse (§53.5).
+     "Use the mark" with an icon on file takes the icon off, as Remove takes
+     the mark off: a picture is put back by choosing it again. */
+  var iconRepaint = function(){};
+  function initialsOf(name){
+    var w = String(name || "?").trim().split(/\s+/);
+    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
+  }
+  function iconBlock(c){
+    var ib = el("div", "wzicon");
+    ib.dataset.wzicon = "1";
+    ib.appendChild(labTip("Its icon", "The small square that stands for this client on Forefront's Home. " +
+      "A square mark can stand there as it is; a wide one would be a strip too small to read."));
+    var row = el("div", "iconrow");
+    ib.appendChild(row);
+    var file = el("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp"; file.hidden = true;
+    file.dataset.iconfile = "1";
+    ib.appendChild(file);
+    function tile(label, src, initials){
+      var t = el("figure", "icontile");
+      if (src) { var im = el("img"); im.src = src; im.alt = ""; t.appendChild(im); }
+      else t.appendChild(el("span", "iconinit", initials));
+      t.appendChild(el("figcaption", null, label));
+      return t;
+    }
+    function paint(){
+      row.textContent = "";
+      var pick = el("div", "iconpick");
+      var name = "wzicon-" + (S.key || "c");
+      function choice(label, on, val){
+        var l = el("label", "iconopt");
+        var r = el("input"); r.type = "radio"; r.name = name; r.checked = on; r.value = val;
+        r.disabled = !canEdit();
+        l.appendChild(r); l.appendChild(document.createTextNode(" " + label));
+        return { l: l, r: r };
+      }
+      var useMark = choice("Use the mark", !c.icon, "mark");
+      var own = choice("Its own icon", !!c.icon, "own");
+      pick.appendChild(useMark.l);
+      var ownLine = el("div", "iconown");
+      ownLine.appendChild(own.l);
+      if (canEdit()) {
+        var up = el("button", "btn", c.icon ? "Replace" : "Choose a picture"); up.type = "button";
+        up.dataset.iconup = "1";
+        up.addEventListener("click", function () { file.click(); });
+        ownLine.appendChild(up);
+        useMark.r.addEventListener("change", function () {
+          if (!c.icon) return;
+          saveReg({ icon:"" }, function () { c.icon = null; paint(); }).then(function (ok) { if (!ok) paint(); });
+        });
+        own.r.addEventListener("change", function () { if (!c.icon) file.click(); });
+      }
+      pick.appendChild(ownLine);
+      /* the one sentence the choice needs, and only where it needs one */
+      var said = c.markWide
+        ? (c.icon ? "This mark is wide, so it would be too small to read in the square. An icon of its own is clearer."
+                  : "This mark is wide, so it would be too small to read in the square. Until it has an icon of its own, Home shows its initials.")
+        : (!c.mark && !c.icon ? "With no mark yet, Home shows its initials." : "");
+      if (said) pick.appendChild(el("p", "iconsaid", said));
+      row.appendChild(pick);
+      /* WHAT HOME WILL DRAW, then the squeezed mark when that is the point */
+      var prev = el("div", "iconprev");
+      var shown = c.icon || (c.mark && !c.markWide ? c.mark : null);
+      prev.appendChild(tile(c.icon ? "Its icon" : shown ? "The mark" : "Its initials", shown, initialsOf(c.name)));
+      if (c.mark && c.markWide) prev.appendChild(tile("The mark, squeezed", c.mark));
+      row.appendChild(prev);
+    }
+    iconRepaint = paint;
+    file.addEventListener("cancel", paint);
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0];
+      file.value = "";
+      if (!f) { paint(); return; }
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { say("The icon must be a PNG, JPEG or WebP picture.", true); paint(); return; }
+      var url = URL.createObjectURL(f);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        /* A 256px square, the picture fitted inside it whole on a clear
+           background: a picture that is not quite square is padded, never
+           cropped, because cropping somebody's logo is choosing what of it
+           to throw away. */
+        var N = 256, cv = document.createElement("canvas");
+        cv.width = N; cv.height = N;
+        var k = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+        var w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+        cv.getContext("2d").drawImage(img, Math.round((N - w) / 2), Math.round((N - h) / 2), w, h);
+        var out = cv.toDataURL("image/png");
+        if (out.length > 200000) { say("That picture is too large even shrunk — try a simpler one.", true); paint(); return; }
+        saveReg({ icon:out }, function () { c.icon = out; paint(); }).then(function (ok) { if (!ok) paint(); });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); paint(); };
+      img.src = url;
+    });
+    paint();
+    return ib;
   }
 
   /* ── WHICH MODULES THIS CLIENT HAS (§320.4, carried whole) ───────────
@@ -71417,7 +71538,7 @@ var CLIENTSETUP = (function () {
     "These are Forefront's people, not the client's. A seat is held on THIS client: " +
     "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
     "cycles and corrects plans. The client's own register — its heads, custodians and their " +
-    "passwords — is built on the People register beside this page.";
+    "passwords — is built on the Client register beside this page.";
   /* Which row on the client's register this consultant is, in words, for
      somebody who may read the page and not edit it. Absent is said (§35),
      never left as an empty cell that reads as a control that failed. */
@@ -73651,7 +73772,7 @@ var SYNC = (function () {
         " is signed in but is not on this register.";
       lost.appendChild(document.createTextNode(
         "Nothing is shown rather than somebody else\u2019s view. Ask the SMO to " +
-        "check the People register."));
+        "check the Client register."));
       var panel = document.getElementById("panel");
       if (panel) { panel.textContent = ""; panel.appendChild(lost); }
       box.hidden = true;
@@ -74129,7 +74250,7 @@ var SYNC = (function () {
        rule about one copy of a rule, on the chrome. */
     maySimulateSession: function () { return maySimulateSession(); },
     /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
-       switcher and the People register's row menu both fill their lists
+       switcher and the Client register's row menu both fill their lists
        from this, so neither offers a view the save would turn down (§61). */
     maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
@@ -75089,7 +75210,7 @@ var SYNC = (function () {
           return cfgHead("Forefront team", [], null, false, null) +
             '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
         } },
-      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"Client register", glyph:"☰", find:"client register people register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -76304,7 +76425,7 @@ var SYNC = (function () {
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 056 §4.4). `help` holds the knowledge base on
+       Client register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
     /* §359.4 (spec 056 §4.5): a module's own group — what it says about
@@ -76528,7 +76649,7 @@ var SYNC = (function () {
     /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
+       Branding, "where do I reset a password" is the Client register. So each
        row carries the words somebody would actually type, in `find` on the def
        beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
@@ -82709,6 +82830,14 @@ var SYNC = (function () {
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+      });
+    });
+    /* §625: the Forefront switch. Kept on this device, repainted in place;
+       a row being edited is somebody's, so it is committed by the repaint's
+       own leaving rule like any other (§35). */
+    document.querySelectorAll("[data-regff]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
     /* A tick repaints the table but MUST NOT close the menu — you come here to

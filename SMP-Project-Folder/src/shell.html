@@ -823,7 +823,7 @@
           return cfgHead("Forefront team", [], null, false, null) +
             '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
         } },
-      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"Client register", glyph:"☰", find:"client register people register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -2038,7 +2038,7 @@
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 056 §4.4). `help` holds the knowledge base on
+       Client register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
     /* §359.4 (spec 056 §4.5): a module's own group — what it says about
@@ -2262,7 +2262,7 @@
     /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
+       Branding, "where do I reset a password" is the Client register. So each
        row carries the words somebody would actually type, in `find` on the def
        beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
@@ -8443,6 +8443,14 @@
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+      });
+    });
+    /* §625: the Forefront switch. Kept on this device, repainted in place;
+       a row being edited is somebody's, so it is committed by the repaint's
+       own leaving rule like any other (§35). */
+    document.querySelectorAll("[data-regff]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
       });
     });
     /* A tick repaints the table but MUST NOT close the menu — you come here to

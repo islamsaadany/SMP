@@ -117,7 +117,7 @@ export function LifecyclePanel(p: PanelProps) {
               className={field}
             >
               <option value="" disabled>
-                Choose from the People register…
+                Choose from the Client register…
               </option>
               {p.people.map((x) => {
                 const missing = !x.email ? "no email" : !x.role ? "no role" : null;

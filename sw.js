@@ -633,7 +633,12 @@
    something, and a client's old word shows in its box. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.10-client-group";
+/* v7.11-client-icon — §625: the register is the Client register and lists
+   the client's own people, Forefront's consultants one switch away; a client
+   may carry its own icon for Home's small squares. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.11-client-icon";
 const ASSETS = [
   "/",
   "/index.html",

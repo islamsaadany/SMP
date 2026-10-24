@@ -104,7 +104,7 @@ export async function GET(req: Request, { params }: P) {
     return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
   const open = await openableModules(ans.tenant.id, who.seat, who.personKey, ans.tenant.modules);
   /* WHAT THE BAR SAYS ABOUT THE PERSON (lib/bar-extras.ts): for a client's own
-     person on the People register, the staff reading link and how many
+     person on the Client register, the staff reading link and how many
      processes wait for them. A page load only — the saves behind it do not
      draw a bar — and never an error: a count that cannot be read draws no link. */
   const processesRead =

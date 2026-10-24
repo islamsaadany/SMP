@@ -59,6 +59,8 @@
     "check:propose:red": "node --experimental-strip-types checks/review-propose-step.mjs --red",
     "check:sop": "node --experimental-strip-types checks/process-sop.mjs",
     "check:pick": "node --experimental-strip-types checks/helicopter-pick.mjs",
+    "check:icon": "node --experimental-strip-types checks/client-icon.mjs",
+    "check:icon:red": "node --experimental-strip-types checks/client-icon.mjs --red",
     "check:pick:red": "node --experimental-strip-types checks/helicopter-pick.mjs --red",
     "check:handoff": "node --experimental-strip-types checks/process-handoff.mjs",
     "check:handoff:red": "node --experimental-strip-types checks/process-handoff.mjs --red",

@@ -71,7 +71,13 @@ p,ul,ol{margin:0}
 .intro b{color:var(--ink)}
 
 /* product frame */
-.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow:clip;background:var(--ground)}
+/* the tab bar stays in place on scroll (agreed 24 Oct); it sits under the drawing band here, under SMP's top bar in the product */
+.vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
+.vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
+.vtbar .vt{margin:0}
+@media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
+
 .tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
 .tb .brand{font-weight:600;font-size:14px}
 .tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
@@ -191,7 +197,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 /* separate builder (C) */
 .bld{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:900px){.bld{grid-template-columns:minmax(0,1fr)}}
-.rail{padding:8px;display:grid;gap:2px;position:sticky;top:60px}
+.rail{padding:8px;display:grid;gap:2px;position:sticky;top:calc(var(--stick,0px) + 12px)}
 .rail button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;border:0;background:none;border-radius:6px;padding:8px 10px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
 .rail button:hover{background:var(--surface-2)}
 .rail button.on{background:var(--panel);color:var(--panel-ink)}
@@ -226,9 +232,6 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 .rail .ct{font-size:11.5px;font-weight:700;background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px}
 
 /* the office sections */
-.sec-h{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin-bottom:10px}
-.sec-h h2{font-size:19px}
-.sec-h p{font-size:13px;color:var(--ink-3);flex-basis:100%}
 .sv{display:inline-flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;margin:0 0 12px;flex-wrap:wrap;max-width:100%}
 .sv button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
 .sv button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(15,23,42,.14)}
@@ -333,11 +336,10 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 <div class="mk"><div class="mk-in">
   <div class="mk-id"><span class="mk-tag">Mockup</span><b>Getting into the builder, and back out</b><span>Agreed 24 Oct: the office builds in a separate builder. Nothing is built. Sample data invented for Raya Trade.</span></div>
   <div class="mk-sw" role="group" aria-label="Show a way in"><span>Show me</span><button type="button" data-door="1">1 · Top bar</button><button type="button" data-door="2">2 · From a process page</button><button type="button" data-door="3">3 · From a suggestion</button><button type="button" data-door="back">Way back out</button></div>
-  <div class="mk-sw" role="group" aria-label="Office sections"><span>Office sections</span><button type="button" data-otab="a">A · All as tabs</button><button type="button" data-otab="b">B · Tabs + top right</button><button type="button" data-otab="c">C · Side menu</button></div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. Switch <b>Office sections</b> to compare A, B and C on full pages: every section and its views are filled in, and the section you have open stays open when you switch.</p>
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place.</p>
 
   <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><button class="read" type="button" id="tb-proc" data-go="home">Processes</button><span class="who">Mona Farag</span><span class="seat">Strategy Office</span><span class="out">Sign out</span></div>
@@ -356,7 +358,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
           </div>
         </div>
       </header>
-      <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div></div>
 
       <div id="homewrap"><nav class="box rail" id="hside" aria-label="Office menu" hidden></nav><div id="homemain">
       <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
@@ -518,9 +520,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   };
   const SIDE = [['all', 'All processes'], ['handle', 'To handle', '3'], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']];
   const OTAB_NOTES = {
-    a: [['A · All as tabs', ['Every office section one click away, in one row of tabs', 'Same tab pattern as the rest of the module']], ['What it costs', ['Landscape, Priorities, Governance and Org & roles have views of their own, so they show a second row of switches under the tabs', 'Export and Settings are things you do now and then, yet they sit with the places', 'All eight fit one row from 1024px wide up; on a phone they take three rows, as B’s six do']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
-    b: [['B · Tabs, plus actions top right', ['Six places fit one row of tabs', 'Export and Settings are occasional actions, so they sit top right, as Download and Print do on the process page', 'Same tab pattern as the rest of the module']], ['What it costs', ['Landscape, Priorities, Governance and Org & roles show a second row of switches under the tabs, as in A', 'Export moves from the side menu to a button: the office has to learn where it went']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
-    c: [['C · Side menu, as today', ['What the office knows today', 'Each section’s own views sit in the menu under it, so there is only one set of switches', 'Room for any number of sections']], ['What it costs', ['The only part of the module with a side menu; managers never see one', 'The menu takes width from the table and the map', 'On a phone it becomes a row of chips']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    a: [['Agreed 24 Oct · office sections', ['All eight are tabs, in one row: All processes, To handle, Landscape, Priorities, Governance, Org & roles, Export, Settings', 'The tab bar stays in place as you scroll, on every page of the module']], ['No title above a section', ['The highlighted tab says where you are', 'The section’s one-line description sits in the band, in place of the office summary, so it costs no space']], ['Also in this design', ['A section’s own views sit in a second, lighter row of switches under the tabs', 'Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
   };
   /* ── the office sections, filled in so the three arrangements can be judged on full pages ── */
   const nameOf = (c) => (ALL.find((r) => r[0] === c) || [c, c])[1];
@@ -586,7 +586,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   function secHtml(k) {
     const S2 = SECS[k], v = SUBV[k];
     const sw = S2.views.length && OTAB !== 'c' ? '<div class="sv" role="tablist" aria-label="' + S2.title + ' views">' + S2.views.map(([vk, l]) => '<button type="button" role="tab" class="' + (vk === v ? 'on' : '') + '" aria-selected="' + (vk === v) + '" data-subv="' + vk + '">' + l + '</button>').join('') + '</div>' : '';
-    return '<div class="sec-h"><h2>' + S2.title + '</h2><p>' + S2.sub + '</p></div>' + (S2.kp ? kp(S2.kp()) : '') + sw + S2.body(v);
+    return (S2.kp ? kp(S2.kp()) : '') + sw + S2.body(v);
   }
   function expUpdate() {
     const n = EXP.length, b = $('#expcheck'), note = $('#expnote');
@@ -612,12 +612,13 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     $('#homewrap').classList.toggle('side', side);
     $('#hside').hidden = !side;
     if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>' + (k === TAB && SECS[k] && SECS[k].views.length ? '<div class="subnav">' + SECS[k].views.map(([vk, vl]) => '<button type="button" class="' + (vk === SUBV[k] ? 'on' : '') + '" data-subv="' + vk + '">' + vl + '</button>').join('') + '</div>' : '')).join('');
-    if (s === 'home' && SECS[TAB]) $('#m-eyebrow').innerHTML = 'Raya Trade · Processes · Builder › ' + SECS[TAB].title;
-    $$('[data-otab]').forEach((b) => b.classList.toggle('on', b.dataset.otab === OTAB));
+    if (s === 'home' && SECS[TAB]) { $('#m-eyebrow').innerHTML = 'Raya Trade · Processes · Builder › ' + SECS[TAB].title; $('#m-sub').textContent = SECS[TAB].sub; }
+    if (s === 'home' && TAB === 'handle') $('#m-sub').textContent = 'Suggestions from owners, drafts the approver sent back, and processes with gaps.';
     $('#tabnote').innerHTML = OTAB_NOTES[OTAB].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
     const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
     const cur = s === 'home' ? TAB : RVIEW;
     $('#vt').hidden = !tabs.length;
+    $('#vtbar').hidden = !tabs.length;
     $('#vt').innerHTML = tabs.map(([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === cur ? 'on' : '') + '" aria-selected="' + (k === cur) + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>').join('');
     const scr = s === 'home' ? (SECS[TAB] ? 'home-sec' : 'home-' + TAB) : s === 'builder' ? 'builder' : 'read';
     if (scr === 'home-sec') { $('#secwrap').innerHTML = secHtml(TAB); expUpdate(); }
@@ -660,5 +661,18 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   });
   window.addEventListener('resize', () => requestAnimationFrame(arrows));
   render();
+})();
+</script>
+<script>
+/* keeps the tab bar just under the drawing band, and marks it once it is holding on */
+(function () {
+  const mk = document.querySelector('.mk'), bar = document.querySelector('.vtbar');
+  if (!bar) return;
+  const top = () => (mk ? mk.getBoundingClientRect().height : 0);
+  const place = () => document.documentElement.style.setProperty('--stick', top() + 'px');
+  const mark = () => bar.classList.toggle('stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= top() + 1);
+  place(); mark();
+  window.addEventListener('resize', () => { place(); mark(); });
+  window.addEventListener('scroll', mark, { passive: true });
 })();
 </script>

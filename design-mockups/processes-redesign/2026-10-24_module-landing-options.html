@@ -69,7 +69,13 @@ p,ul,ol{margin:0}
 .intro b{color:var(--ink)}
 
 /* product frame */
-.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow:clip;background:var(--ground)}
+/* the tab bar stays in place on scroll (agreed 24 Oct); it sits under the drawing band here, under SMP's top bar in the product */
+.vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
+.vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
+.vtbar .vt{margin:0}
+@media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
+
 .tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
 .tb .brand{font-weight:600;font-size:14px}
 .tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
@@ -196,7 +202,7 @@ p,ul,ol{margin:0}
 .pc .tag{position:absolute;top:8px;right:10px}
 .lane.chev .pc .tag{right:22px}
 .dim .pc:not(.y):not(.s){opacity:.35}
-.side{padding:14px 16px;display:grid;gap:9px;position:sticky;top:60px}
+.side{padding:14px 16px;display:grid;gap:9px;position:sticky;top:calc(var(--stick,0px) + 72px)}
 .side h3{font-size:17px}
 .dl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:4px 10px;font-size:13px;margin:0}
 .dl dt{color:var(--ink-3);font-size:12.5px}
@@ -249,7 +255,7 @@ p,ul,ol{margin:0}
           </div>
         </div>
       </header>
-      <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div></div>
 
       <!-- ── MY PROCESSES ── -->
       <section data-view="mine" hidden>
@@ -385,5 +391,18 @@ p,ul,ol{margin:0}
   const m = /^#([12])-(mine|todo|map)$/.exec(location.hash);
   if (m) { VAR = m[1]; VIEW = m[2]; }
   render();
+})();
+</script>
+<script>
+/* keeps the tab bar just under the drawing band, and marks it once it is holding on */
+(function () {
+  const mk = document.querySelector('.mk'), bar = document.querySelector('.vtbar');
+  if (!bar) return;
+  const top = () => (mk ? mk.getBoundingClientRect().height : 0);
+  const place = () => document.documentElement.style.setProperty('--stick', top() + 'px');
+  const mark = () => bar.classList.toggle('stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= top() + 1);
+  place(); mark();
+  window.addEventListener('resize', () => { place(); mark(); });
+  window.addEventListener('scroll', mark, { passive: true });
 })();
 </script>

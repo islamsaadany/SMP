@@ -68,7 +68,13 @@ p,ul,ol{margin:0}
 .intro b{color:var(--ink)}
 
 /* product frame */
-.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow:clip;background:var(--ground)}
+/* the tab bar stays in place on scroll (agreed 24 Oct); it sits under the drawing band here, under SMP's top bar in the product */
+.vtbar{position:sticky;top:calc(var(--stick,0px) + env(safe-area-inset-top,0px));z-index:20;background:var(--ground);margin:0 -24px 14px;padding:6px 24px;transition:box-shadow .15s}
+.vtbar.stuck{box-shadow:0 1px 0 var(--line),0 8px 12px -10px rgba(15,23,42,.35)}
+.vtbar .vt{margin:0}
+@media (max-width:640px){.vtbar{margin:0 -12px 12px;padding:6px 12px}}
+
 .tb{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 20px;min-height:40px}
 .tb .brand{font-weight:600;font-size:14px}
 .tb .read{display:inline-flex;gap:7px;align-items:center;font-size:13.5px;font-weight:600;padding:3px 8px;border-radius:7px;background:var(--surface-2)}
@@ -161,13 +167,13 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 /* B: the steps */
 .bgrid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:900px){.bgrid{grid-template-columns:1fr}.bidx{display:none}}
-.bidx{position:sticky;top:64px;padding:10px 12px}
+.bidx{position:sticky;top:calc(var(--stick,0px) + 72px);padding:10px 12px}
 .bidx ol{padding-left:0;list-style:none;display:grid;gap:2px;margin-top:6px}
 .bidx a{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;padding:5px 6px;border-radius:6px;text-decoration:none;color:var(--ink);font-size:13px}
 .bidx a:hover{background:var(--surface-2)}
 .bidx a span{font-size:11.5px;color:var(--ink-3);grid-column:2}
 .bidx a i{font-style:normal;font-weight:800;color:var(--stone)}
-.sc{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;padding:14px 16px;border-top:1px solid var(--line-soft)}
+.sc{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;padding:14px 16px;border-top:1px solid var(--line-soft);scroll-margin-top:calc(var(--stick,0px) + 76px)}
 .sc:first-child{border-top:0}
 .sc .num{width:28px;height:28px;border-radius:50%;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-weight:800;font-size:13px}
 .sc h3{font-size:15.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -272,11 +278,11 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
           </div>
         </div>
       </header>
-      <div class="vt" id="vt" role="tablist" aria-label="Views">
+      <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views">
         <button type="button" role="tab" data-opt="a">Flow</button>
         <button type="button" role="tab" data-opt="b">Steps <span class="ct">6</span></button>
         <button type="button" role="tab" data-opt="c">Summary <span class="ct">3 to look at</span></button>
-      </div>
+      </div></div>
 
       <!-- ── A · FLOW FIRST ── -->
       <section data-view="a" hidden>
@@ -430,5 +436,18 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   drawer(2);
   const asked = Object.keys(HASH).find((k) => '#' + HASH[k] === location.hash);
   show(asked || (window.innerWidth < 640 ? 'b' : 'a'));
+})();
+</script>
+<script>
+/* keeps the tab bar just under the drawing band, and marks it once it is holding on */
+(function () {
+  const mk = document.querySelector('.mk'), bar = document.querySelector('.vtbar');
+  if (!bar) return;
+  const top = () => (mk ? mk.getBoundingClientRect().height : 0);
+  const place = () => document.documentElement.style.setProperty('--stick', top() + 'px');
+  const mark = () => bar.classList.toggle('stuck', window.scrollY > 0 && bar.getBoundingClientRect().top <= top() + 1);
+  place(); mark();
+  window.addEventListener('resize', () => { place(); mark(); });
+  window.addEventListener('scroll', mark, { passive: true });
 })();
 </script>

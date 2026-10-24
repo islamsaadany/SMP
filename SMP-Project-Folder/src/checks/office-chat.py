@@ -263,7 +263,10 @@ with sync_playwright() as p:
     print("\n1 · the corner")
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
-    r = pg.eval_on_selector("#chatbtn", "e => e.getBoundingClientRect()")
+    # §627: in the page's own pixels — the page is drawn at 80% on a computer.
+    r = pg.eval_on_selector("#chatbtn", """e => { const q=e.getBoundingClientRect(),
+        z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+        return {width:q.width/z, height:q.height/z, top:q.top, bottom:q.bottom}; }""")
     ck("the bubble has a real box", r["width"] > 40 and r["height"] > 40, r)
     # PRESENT IS NOT PRESSABLE (§70, §93.4 — twice, both found by a person
     # trying to use the product rather than by a check asking `is not None`).
@@ -898,10 +901,13 @@ with sync_playwright() as p:
             const s=getComputedStyle(t,'::after'), own=getComputedStyle(t);
             const cb=(own.position==='static' ? t.closest('.chset-row') : t)
                        .getBoundingClientRect();
-            const w=parseFloat(s.width)+parseFloat(s.paddingLeft)+parseFloat(s.paddingRight);
-            let left=cb.left+parseFloat(s.left||0);
+            /* §627: the note's size and offsets are the page's pixels, the
+               boxes the window's — so the page's are scaled to the window's. */
+            const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
+            const w=(parseFloat(s.width)+parseFloat(s.paddingLeft)+parseFloat(s.paddingRight))*z;
+            let left=cb.left+parseFloat(s.left||0)*z;
             const m=/matrix\(([^)]+)\)/.exec(s.transform||"");
-            if (m) left += parseFloat(m[1].split(',')[4]||0);
+            if (m) left += parseFloat(m[1].split(',')[4]||0)*z;
             const panel=document.querySelector('.chset').getBoundingClientRect();
             return { shown: s.display === 'block',
                      text: (t.dataset.tip||'').length,

@@ -201,9 +201,12 @@ with sync_playwright() as p:
         rows.sort((a,b) => a-b);
         return { mint: h(ks[0]), adopt: h(ks[1]), own: h(ks[2]),
                  median: rows[Math.floor(rows.length/2)] }; }""", [MINT, ADOPT, OWN])
-    ck("a minted row is the height of its neighbours", hh.get("mint") == hh.get("median"), hh)
-    ck("...and so is an adopted one, mark and all", hh.get("adopt") == hh.get("median"), hh)
-    ck("...with an ordinary person as the control (§113.8)", hh.get("own") == hh.get("median"), hh)
+    # §627: WITHIN A PIXEL. The page is drawn at 80% on a computer and a row
+    # snaps to the screen's pixels (31 or 32); §116.4's fault was 51 against 39.
+    near = lambda k: abs((hh.get(k) or 0) - (hh.get("median") or 0)) <= 1
+    ck("a minted row is the height of its neighbours", near("mint"), hh)
+    ck("...and so is an adopted one, mark and all", near("adopt"), hh)
+    ck("...with an ordinary person as the control (§113.8)", near("own"), hh)
 
     print("\n7 · the old split line is gone; the switch took its place (§625)")
     ck("no split line is drawn", ev("() => !document.querySelector('.psplit')") is True)

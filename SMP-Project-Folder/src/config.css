@@ -170,6 +170,16 @@
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
+  /* §627: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+     count drop under it when the column has no room for both — a client with
+     a longer word for how it plans would otherwise run into Key Objectives
+     again, at any zoom. */
+  .unitcfg td.cc.plansin { white-space:normal; line-height:1.9; }
+  /* …and in a window too narrow even for the word, the word wraps inside its
+     own tag rather than past the cell's edge. Measured: at 1280 and wider it
+     never has to. */
+  .unitcfg td.cc.plansin .pill { display:inline-block; max-width:100%; line-height:1.35;
+    vertical-align:middle; white-space:normal; }
   .unitcfg td.cc .linkbu { margin-left:8px; }
 
   .rolechip { display:inline-flex; align-items:baseline; gap:5px; margin:0 5px 3px 0;
@@ -512,7 +522,7 @@
   /* Inside a settings table the field fills its column, the same as the
      select it replaced (`.cfg .fld { width:100% }`). */
   .cfg .ssbtn { width:100%; }
-  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(100vw - 16px));
+  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(var(--winw) - 16px));
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
@@ -647,7 +657,7 @@
      against the flow position instead would need JS and would waste 33px of
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
+               max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                       - var(--rail-gap, 22px)
                                       - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
@@ -1163,7 +1173,7 @@
      the top of the TABLE'S box rather than the window — which is what is
      wanted: the toolbar above it is not sticky, and a header that outran its
      own table would float over the note beneath it. */
-  .cfg.srctable { max-height:calc(100vh - 320px); overflow:auto; }
+  .cfg.srctable { max-height:calc(var(--winh) - 320px); overflow:auto; }
   .cfg.srctable table { min-width:820px; }
   .cfg.srctable thead th { position:sticky; top:0; z-index:2; }
   .cfg.srctable tbody td { padding-top:5px; padding-bottom:5px; }
@@ -1283,9 +1293,9 @@
 
      `overflow:auto` and a height are still what the sticky header pins to:
      without a scroll container `top:0` does nothing at all (§69.19). */
-  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  .cfg.peoplebox { overflow:auto; max-height:calc(var(--winh) - 300px); }
   .panefill { display:flex; flex-direction:column;
-              max-height:calc(100dvh - var(--chrome-h, 118px)
+              max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                      - var(--rail-gap, 22px)
                                      - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
@@ -2283,7 +2293,7 @@
                 font-size:11px; font-weight:700; }
   .ddbtn.has .ddlab { font-weight:600; color:var(--ink); }
   .ddcar { color:var(--ink-3); font-size:10px; }
-  .ddpop { position:fixed; z-index:60; width:280px; max-width:92vw;
+  .ddpop { position:fixed; z-index:60; width:280px; max-width:calc(var(--winw) * 0.92);
            background:var(--surface); border:1px solid var(--line);
            border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.18);
            padding:8px; display:flex; flex-direction:column; gap:6px; }
@@ -2408,7 +2418,7 @@
   .hmenu.open .hcount { background:var(--surface); }
   /* Wide enough for a table of headings and dates, and capped so a long list
      scrolls inside the panel instead of running off the window. */
-  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+  .hmenu-panel.wide { width:min(600px, calc(var(--winw) * 0.76)); max-height:calc(var(--winh) * 0.64); overflow:auto;
                       padding:4px 13px 13px; }
   .hmenu-panel.wide .section { margin:0; }
   /* §88's 150px cap exists so ONE long value cannot hold a whole table open.

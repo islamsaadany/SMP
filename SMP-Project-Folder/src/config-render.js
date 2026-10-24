@@ -1462,7 +1462,7 @@ function renderUnits(){
          counted pillars now says which way the unit plans (his *"Plans in"*),
          with the count of that way's rows beside it. */
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
-        function(){ return unitFormatSelect(k, u); }, "cc") +
+        function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
@@ -1509,9 +1509,13 @@ function renderUnits(){
       '<table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
         '<th style="width:18%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
+        /* §627: Plans in holds "Objectives & actions" and a count, and spilled
+           30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
+           heading ran into Weight — measured. The short name gives up the
+           room: it holds a short name. */
+        '<th style="width:11%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
+        '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +

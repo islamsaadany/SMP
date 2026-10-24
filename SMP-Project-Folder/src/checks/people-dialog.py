@@ -427,7 +427,9 @@ with sync_playwright() as p:
           document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
             const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
           return hs;}""")
-        ck("%s: every row is the same one line" % label, len(heights) == 1, heights)
+        # §627: within a pixel — a zoomed row snaps to the screen's pixels.
+        ks = [int(k) for k in heights]
+        ck("%s: every row is the same one line" % label, max(ks) - min(ks) <= 1, heights)
         # NOTHING CUT WITHOUT A HOVER — §88's actual contract, which a clipped
         # value satisfies and a clipped value with no title does not.
         ck("%s: nothing is cut without a hover" % label,
@@ -656,6 +658,7 @@ with sync_playwright() as p:
         const cs=getComputedStyle(e), r=e.getBoundingClientRect();
         const o={w:Math.round(r.width),h:Math.round(r.height),
                  border:parseFloat(cs.borderTopWidth),
+                 z:parseFloat(getComputedStyle(document.documentElement).zoom)||1,
                  round:cs.borderTopLeftRadius,
                  ink:cs.borderTopColor,
                  filled:cs.backgroundColor!=='rgba(0, 0, 0, 0)'};
@@ -663,7 +666,9 @@ with sync_playwright() as p:
       return {waiting:one(''), answered:one('done')};}""")
     w, a = marks["waiting"], marks["answered"]
     ck("the mark is a drawn ring, not a character that may not exist",
-       w["w"] >= 7 and w["border"] >= 1.5 and w["round"] == "50%", w)
+       # §627: a 1.5px ring at 80% snaps to one screen pixel (read back as
+       # 1.25) — still a drawn ring, which is what this asks.
+       w["w"] >= 7 and w["border"] >= 1.5 * w["z"] - 0.01 and w["round"] == "50%", w)
     ck("...and the two are the SAME size, so the row cannot move",
        (w["w"], w["h"]) == (a["w"], a["h"]), marks)
     ck("...and the same weight of ring, so neither is the faint one",

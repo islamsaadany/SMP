@@ -3358,7 +3358,9 @@ var CHAT = (function(){
   function fitInbox(){
     var root = el("chinbox");
     if (!root) return;
-    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    /* §627: a length the page sets is in its own pixels; the box and the
+       scroll are the window's, 80% of them on a computer. */
+    var top = (root.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     root.style.setProperty("--chin-top", Math.round(top) + "px");
   }
 

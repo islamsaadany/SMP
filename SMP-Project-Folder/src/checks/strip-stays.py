@@ -110,9 +110,24 @@ def rgb(css):
     return tuple(int(v) for v in css[css.index("(") + 1:css.index(")")].split(",")[:3])
 
 
+# §627: THIS CHECK READS SINGLE PIXELS — a corner one in, a 1px navy outline,
+# a gutter's ground — and at 80% a 1px line is drawn 0.8px wide and blends into
+# its neighbours, so every sample lands on a blend. What it guards is the
+# DESIGN, which the zoom only scales (checks/platform-80.py holds the scaling),
+# so it is measured at full size: the zoom is set back to 1 on this page, with
+# the window lengths that carry its correction (_shared.css, §627).
+# (the root element does not exist yet when an init script runs, so it is set
+# the moment it appears)
+ZOOM_OFF = ("new MutationObserver(function(m, o){ var d = document.documentElement; if (!d) return; "
+            "d.style.setProperty('zoom','1'); d.style.setProperty('--winw','100vw'); "
+            "d.style.setProperty('--winh','100vh'); d.style.setProperty('--wind','100dvh'); "
+            "o.disconnect(); }).observe(document, { childList: true });")
+
+
 def page(b, w, h=760):
     pg = b.new_page(viewport={"width": w, "height": h})
     pg.add_init_script(INIT)
+    pg.add_init_script(ZOOM_OFF)
     pg._errs = []
     pg.on("pageerror", lambda e: pg._errs.append(str(e)))
     pg.goto("file://" + F)
@@ -248,7 +263,8 @@ with sync_playwright() as p:
     s = pg.evaluate(STRIP)
     ok("editing · the page scrolled", s and s["sy"] > 100, s and s["sy"])
     ok("editing · the strip pins under the chrome and stays",
-       s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top)")) <= 1,
+       # §627: the box is the window's pixels, its `top` the page's
+       s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1)")) <= 1,
        s and s["top"])
     ok("editing · the head being edited went with the plan",
        s and rest and s["band"] is not None and abs((rest["band"] - (s["sy"] - rest["sy"])) - s["band"]) <= 1,
@@ -264,7 +280,9 @@ with sync_playwright() as p:
     ok("1440 · the side rail is still a list", s and s["rows"] == s["n"], s and s["rows"])
     scroll(pg, 400)
     pinned = pg.evaluate("""() => { var b = document.querySelector('.split > .pane > .pband');
-      return [b.getBoundingClientRect().top, parseFloat(getComputedStyle(b).top), scrollY]; }""")
+      /* §627: the sticky `top` in the window's pixels, like the box */
+      return [b.getBoundingClientRect().top,
+              parseFloat(getComputedStyle(b).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1), scrollY]; }""")
     ok("1440 · scrolled, the title is still pinned beside it",
        pinned[2] > 100 and abs(pinned[0] - pinned[1]) <= 1, pinned)
     pg.close()

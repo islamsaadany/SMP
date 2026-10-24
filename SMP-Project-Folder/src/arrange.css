@@ -646,7 +646,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      nowrap keeps column titles on one line, the tooltip inherited it too and
      ran off the edge as a single line. It sets its own wrapping. */
   .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
-                font-weight:400; width:min(320px,70vw); }
+                font-weight:400; width:min(320px,calc(var(--winw) * 0.7)); }
 
   /* A tooltip on the last column would open past the right edge, so tips near
      an edge anchor to it instead of centring on the icon. */
@@ -2181,7 +2181,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      would cover the navigation (§165's rule, at the other edge). */
   .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
     transform:none; bottom:auto; top:calc(100% + 8px);
-    width:max-content; max-width:min(300px, 60vw); }
+    width:max-content; max-width:min(300px, calc(var(--winw) * 0.6)); }
 
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
@@ -2934,7 +2934,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      is the one thing somebody opens this page to read. */
   .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
             margin:0 0 16px; }
-  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+  .drvtot-n { font:650 clamp(26px, calc(var(--winw) * 0.032), 34px)/1 var(--sans); color:var(--ink);
               letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
   /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection

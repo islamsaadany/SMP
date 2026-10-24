@@ -99,11 +99,14 @@ var SEARCHSEL = (function(){
      is no room below — a list that opens off the bottom of the window is a
      list you cannot reach the end of. */
   function place(btn, pop){
-    var r = btn.getBoundingClientRect();
+    /* §627: in the page's own pixels — it is drawn at 80% on a computer, and
+       a popup is placed in those while the button is measured in the
+       window's. */
+    var r = zRect(btn);
     var h = pop.offsetHeight, w = pop.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-    var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+    var left = Math.min(r.left, Math.max(8, winW() - w - 8));
     pop.style.top = Math.max(8, top) + "px";
     pop.style.left = left + "px";
   }

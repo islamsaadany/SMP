@@ -8271,6 +8271,34 @@ var UNITS = {
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§627) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
@@ -40415,7 +40443,7 @@ function renderUnits(){
          counted pillars now says which way the unit plans (his *"Plans in"*),
          with the count of that way's rows beside it. */
       ocell("units", k, "plans", may, unitPlansInCell(k, u),
-        function(){ return unitFormatSelect(k, u); }, "cc") +
+        function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
@@ -40462,9 +40490,13 @@ function renderUnits(){
       '<table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
         '<th style="width:18%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
+        /* §627: Plans in holds "Objectives & actions" and a count, and spilled
+           30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
+           heading ran into Weight — measured. The short name gives up the
+           room: it holds a short name. */
+        '<th style="width:11%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
+        '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
@@ -57619,11 +57651,14 @@ var SEARCHSEL = (function(){
      is no room below — a list that opens off the bottom of the window is a
      list you cannot reach the end of. */
   function place(btn, pop){
-    var r = btn.getBoundingClientRect();
+    /* §627: in the page's own pixels — it is drawn at 80% on a computer, and
+       a popup is placed in those while the button is measured in the
+       window's. */
+    var r = zRect(btn);
     var h = pop.offsetHeight, w = pop.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-    var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+    var left = Math.min(r.left, Math.max(8, winW() - w - 8));
     pop.style.top = Math.max(8, top) + "px";
     pop.style.left = left + "px";
   }
@@ -61489,7 +61524,9 @@ var CHAT = (function(){
   function fitInbox(){
     var root = el("chinbox");
     if (!root) return;
-    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    /* §627: a length the page sets is in its own pixels; the box and the
+       scroll are the window's, 80% of them on a computer. */
+    var top = (root.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     root.style.setProperty("--chin-top", Math.round(top) + "px");
   }
 
@@ -62278,7 +62315,8 @@ var TOUR = (function(){
     selectorsOf(s).forEach(function(sel){
       var node = document.querySelector(sel);
       if (!node) return;
-      var r = node.getBoundingClientRect();
+      /* §627: the holes and the card are drawn in the page's own pixels. */
+      var r = zRect(node);
       if (!r.width || !r.height) return;
       hs.push({ l:r.left - pad, t:r.top - pad, w:r.width + 2*pad, ht:r.height + 2*pad });
     });
@@ -62302,7 +62340,7 @@ var TOUR = (function(){
        dock is the last resort and is why the card is translucent. */
     var h = hs[hs.length - 1],
         cw = card.offsetWidth, ch = card.offsetHeight,
-        W = window.innerWidth, H = window.innerHeight, g = 14, m = 8;
+        W = winW(), H = winH(), g = 14, m = 8;
     function fits(c){ return c.l >= m && c.t >= m && c.l + cw <= W - m && c.t + ch <= H - m; }
     function clears(c){
       return hs.every(function(x){
@@ -66075,7 +66113,8 @@ var COPILOT = (function(){
      no loop, since nothing above the pane moves when the pane changes height. */
   function fitPane(){
     var p = document.querySelector("[data-cop-pane]"); if (!p) return;
-    var top = p.getBoundingClientRect().top + (window.pageYOffset || 0);
+    /* §627: in the page's own pixels, as the Platform Inbox's. */
+    var top = (p.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     if (top > 0) p.style.setProperty("--cop-top", Math.round(top) + "px");
   }
   /* THE BOX GROWS WITH WHAT IS TYPED. It never sizes below one line: a page
@@ -77638,13 +77677,15 @@ var SYNC = (function () {
     if (!ASK) return;
     var a = ASK, box = a.box;
     if (!document.body.contains(a.anchor)) { askClose(); return; }
-    var r = a.anchor.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
+    /* §627: measured in the page's own pixels, the scroll too, because the
+       box is placed in them and the page is drawn at 80% on a computer. */
+    var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
     var mid = r.left + r.width / 2;
-    var left = Math.max(16, Math.min(window.innerWidth - bw - 16, mid - 28));
-    var below = r.bottom + 10 + bh <= window.innerHeight - 8 || r.top - 10 - bh < 8;
+    var left = Math.max(16, Math.min(winW() - bw - 16, mid - 28));
+    var below = r.bottom + 10 + bh <= winH() - 8 || r.top - 10 - bh < 8;
     box.classList.toggle("above", !below);
-    box.style.left = (left + window.pageXOffset) + "px";
-    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset) + "px";
+    box.style.left = (left + window.pageXOffset / z) + "px";
+    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
     box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
   }
   function askFirst(anchor, o){
@@ -78559,7 +78600,7 @@ var SYNC = (function () {
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §627 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -78876,7 +78917,8 @@ var SYNC = (function () {
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      var flow = r.pane.getBoundingClientRect().top + r.inset;
+      /* §627: the inset is the page's pixels, the boxes the window's. */
+      var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
     }
@@ -79003,10 +79045,10 @@ var SYNC = (function () {
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = btn.getBoundingClientRect();
+    var r = zRect(btn);                                        /* §627 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var below = window.innerHeight - r.bottom;
+    var left = Math.max(8, Math.min(r.left, winW() - w - 8));
+    var below = winH() - r.bottom;
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
@@ -79066,7 +79108,9 @@ var SYNC = (function () {
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
+    /* §627: the scroll and the box are the window's pixels, the two custom
+       properties the page's — so those two are scaled, not the scroll. */
+    var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
   }
 
@@ -79119,11 +79163,11 @@ var SYNC = (function () {
        positioned the day it is added by being given an attribute here. */
     var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §627 */
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
-    m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
+    m.style.left = Math.max(8, Math.min(r.right - w, winW() - w - 8)) + "px";
   }
 
   function fieldSaved(){
@@ -79721,11 +79765,11 @@ var SYNC = (function () {
         open = null;
       };
       var place = function(btn, pop){
-        var r = btn.getBoundingClientRect();
+        var r = zRect(btn);                                    /* §627 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
-        var below = window.innerHeight - r.bottom - 8;
+        var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        var left = Math.min(r.left, Math.max(8, winW() - w - 8));
         pop.style.top = Math.max(8, top) + "px";
         pop.style.left = left + "px";
       };
@@ -79831,10 +79875,10 @@ var SYNC = (function () {
   function ocellPlace(){
     var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
     if (!pop) return;
-    var r = oc.getBoundingClientRect(), w = Math.max(280, Math.round(r.width));
-    var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §627 */
+    var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
     var top = r.bottom - 2;
-    if (top + h > window.innerHeight - 8 && r.top - h > 8) top = r.top - h + 2;
+    if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
     pop.style.left = Math.round(left) + "px"; pop.style.top = Math.round(top) + "px";
     pop.style.width = w + "px";
   }

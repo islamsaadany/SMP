@@ -606,7 +606,8 @@ var TOUR = (function(){
     selectorsOf(s).forEach(function(sel){
       var node = document.querySelector(sel);
       if (!node) return;
-      var r = node.getBoundingClientRect();
+      /* §627: the holes and the card are drawn in the page's own pixels. */
+      var r = zRect(node);
       if (!r.width || !r.height) return;
       hs.push({ l:r.left - pad, t:r.top - pad, w:r.width + 2*pad, ht:r.height + 2*pad });
     });
@@ -630,7 +631,7 @@ var TOUR = (function(){
        dock is the last resort and is why the card is translucent. */
     var h = hs[hs.length - 1],
         cw = card.offsetWidth, ch = card.offsetHeight,
-        W = window.innerWidth, H = window.innerHeight, g = 14, m = 8;
+        W = winW(), H = winH(), g = 14, m = 8;
     function fits(c){ return c.l >= m && c.t >= m && c.l + cw <= W - m && c.t + ch <= H - m; }
     function clears(c){
       return hs.every(function(x){

@@ -11,6 +11,34 @@
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§627) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",

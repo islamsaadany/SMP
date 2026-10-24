@@ -270,6 +270,29 @@
      reports a width of 0, so the check that finds this is the page HEIGHT
      crossing the viewport, not the shift itself. */
   html { scrollbar-gutter: stable; }
+  /* ── THE PAGE AT 80% ON A COMPUTER (§627) ───────────────────────────────
+     Islam, of a Setup table spilling across its columns: *"I believe the page
+     needs to be 80% smaller like what we did in the console page"*, then
+     *"proceed"*. The console's rule (§601): the whole page zoomed at 1000px
+     and up, so every size keeps its proportion; a phone keeps 100%, where 80%
+     would put the words under a readable size.
+
+     A DECK BEING SHOWN STAYS AT 100%: it fills the screen and scales its own
+     slides to it (present.js), and a projection drawn at 80% of the window
+     would be a smaller deck on the same wall.
+
+     AND THE WINDOW'S SIZE IS SAID IN THE PAGE'S PIXELS. Under a zoom, `100vh`
+     is 80% of the window (measured: a fixed 100vh box drew 720 of 900), so a
+     panel meant to reach the bottom stops short. Every length taken from the
+     window reads these three instead — `var(--winh)` for `100vh` — and they
+     carry the one correction. Lengths the script measures are converted the
+     same way, once (`pageZoom`, config-data.js). */
+  :root { --winw:100vw; --winh:100vh; --wind:100dvh; }
+  @media (min-width:1000px) {
+    html:not(:has(> body.presenting)) { zoom:.8; }
+    :root:not(:has(> body.presenting)) {
+      --winw:calc(100vw / .8); --winh:calc(100vh / .8); --wind:calc(100dvh / .8); }
+  }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
   /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
@@ -439,7 +462,7 @@
      gold edge is the platform's ask-first colour (.hist-confirm's); the
      arrow is the box's own corner turned to point at the control. */
   .askbox { position:absolute; z-index:70; box-sizing:border-box;
-            width:max-content; max-width:min(360px, calc(100vw - 32px));
+            width:max-content; max-width:min(360px, calc(var(--winw) - 32px));
             padding:12px 14px; border-radius:10px;
             border:1px solid var(--attn); background:var(--surface); color:var(--ink);
             box-shadow:0 12px 32px rgba(10,20,40,.18);
@@ -1243,7 +1266,7 @@ html[data-client-settings] .viewer { display:none; }
     left:auto; right:0; transform:none; }
   /* The cell before it can overflow too once the pane is narrow, and that one
      has room on both sides — so it is capped rather than re-anchored. */
-  .hasnote::after { max-width:min(255px, 60vw); }
+  .hasnote::after { max-width:min(255px, calc(var(--winw) * 0.6)); }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
@@ -1402,7 +1425,7 @@ html[data-client-settings] .viewer { display:none; }
   .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
   .overlay.on { transition:opacity .12s ease, visibility 0s; }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
-           width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
+           width:min(940px,100%); max-height:calc(var(--winh) * 0.88); display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
   .modal-h { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
              border-bottom:1px solid var(--line); }
@@ -1454,7 +1477,7 @@ html[data-client-settings] .viewer { display:none; }
     .ks-k { text-align:left; }
     .ks-v { margin-bottom:7px; }
   }
-  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
+  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:var(--winh); border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
      The dialog carries the weight the quiet words in the head do not: what
@@ -2741,6 +2764,16 @@ html[data-client-settings] .viewer { display:none; }
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
+  /* §627: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+     count drop under it when the column has no room for both — a client with
+     a longer word for how it plans would otherwise run into Key Objectives
+     again, at any zoom. */
+  .unitcfg td.cc.plansin { white-space:normal; line-height:1.9; }
+  /* …and in a window too narrow even for the word, the word wraps inside its
+     own tag rather than past the cell's edge. Measured: at 1280 and wider it
+     never has to. */
+  .unitcfg td.cc.plansin .pill { display:inline-block; max-width:100%; line-height:1.35;
+    vertical-align:middle; white-space:normal; }
   .unitcfg td.cc .linkbu { margin-left:8px; }
 
   .rolechip { display:inline-flex; align-items:baseline; gap:5px; margin:0 5px 3px 0;
@@ -3083,7 +3116,7 @@ html[data-client-settings] .viewer { display:none; }
   /* Inside a settings table the field fills its column, the same as the
      select it replaced (`.cfg .fld { width:100% }`). */
   .cfg .ssbtn { width:100%; }
-  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(100vw - 16px));
+  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(var(--winw) - 16px));
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
@@ -3218,7 +3251,7 @@ html[data-client-settings] .viewer { display:none; }
      against the flow position instead would need JS and would waste 33px of
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
+               max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                       - var(--rail-gap, 22px)
                                       - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
@@ -3734,7 +3767,7 @@ html[data-client-settings] .viewer { display:none; }
      the top of the TABLE'S box rather than the window — which is what is
      wanted: the toolbar above it is not sticky, and a header that outran its
      own table would float over the note beneath it. */
-  .cfg.srctable { max-height:calc(100vh - 320px); overflow:auto; }
+  .cfg.srctable { max-height:calc(var(--winh) - 320px); overflow:auto; }
   .cfg.srctable table { min-width:820px; }
   .cfg.srctable thead th { position:sticky; top:0; z-index:2; }
   .cfg.srctable tbody td { padding-top:5px; padding-bottom:5px; }
@@ -3854,9 +3887,9 @@ html[data-client-settings] .viewer { display:none; }
 
      `overflow:auto` and a height are still what the sticky header pins to:
      without a scroll container `top:0` does nothing at all (§69.19). */
-  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  .cfg.peoplebox { overflow:auto; max-height:calc(var(--winh) - 300px); }
   .panefill { display:flex; flex-direction:column;
-              max-height:calc(100dvh - var(--chrome-h, 118px)
+              max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                      - var(--rail-gap, 22px)
                                      - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
@@ -4854,7 +4887,7 @@ html[data-client-settings] .viewer { display:none; }
                 font-size:11px; font-weight:700; }
   .ddbtn.has .ddlab { font-weight:600; color:var(--ink); }
   .ddcar { color:var(--ink-3); font-size:10px; }
-  .ddpop { position:fixed; z-index:60; width:280px; max-width:92vw;
+  .ddpop { position:fixed; z-index:60; width:280px; max-width:calc(var(--winw) * 0.92);
            background:var(--surface); border:1px solid var(--line);
            border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.18);
            padding:8px; display:flex; flex-direction:column; gap:6px; }
@@ -4979,7 +5012,7 @@ html[data-client-settings] .viewer { display:none; }
   .hmenu.open .hcount { background:var(--surface); }
   /* Wide enough for a table of headings and dates, and capped so a long list
      scrolls inside the panel instead of running off the window. */
-  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+  .hmenu-panel.wide { width:min(600px, calc(var(--winw) * 0.76)); max-height:calc(var(--winh) * 0.64); overflow:auto;
                       padding:4px 13px 13px; }
   .hmenu-panel.wide .section { margin:0; }
   /* §88's 150px cap exists so ONE long value cannot hold a whole table open.
@@ -6413,7 +6446,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      nowrap keeps column titles on one line, the tooltip inherited it too and
      ran off the edge as a single line. It sets its own wrapping. */
   .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
-                font-weight:400; width:min(320px,70vw); }
+                font-weight:400; width:min(320px,calc(var(--winw) * 0.7)); }
 
   /* A tooltip on the last column would open past the right edge, so tips near
      an edge anchor to it instead of centring on the icon. */
@@ -7948,7 +7981,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      would cover the navigation (§165's rule, at the other edge). */
   .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
     transform:none; bottom:auto; top:calc(100% + 8px);
-    width:max-content; max-width:min(300px, 60vw); }
+    width:max-content; max-width:min(300px, calc(var(--winw) * 0.6)); }
 
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
@@ -8701,7 +8734,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      is the one thing somebody opens this page to read. */
   .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
             margin:0 0 16px; }
-  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+  .drvtot-n { font:650 clamp(26px, calc(var(--winw) * 0.032), 34px)/1 var(--sans); color:var(--ink);
               letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
   /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection
@@ -10737,7 +10770,7 @@ body.presenting .chatdock { display:none; }
                 font-variant-numeric:tabular-nums; }
 
 /* ── THE PANEL ─────────────────────────────────────────────────────────── */
-.chatpanel { width:376px; max-width:calc(100vw - 32px);
+.chatpanel { width:376px; max-width:calc(var(--winw) - 32px);
              background:var(--surface); border:1px solid var(--line); border-radius:12px;
              overflow:hidden; box-shadow:0 6px 26px rgba(0,0,0,.18);
              display:flex; flex-direction:column; }
@@ -10781,7 +10814,7 @@ body.presenting .chatdock { display:none; }
    CAPPED TO THE WINDOW for the reason `.chinbox` is: a fixed height on a
    short laptop puts the composer off the bottom of the screen, which is the
    one control somebody opened the panel to use. */
-.chatpanel { height:531px; max-height:calc(100dvh - 96px); }
+.chatpanel { height:531px; max-height:calc(var(--wind) - 96px); }
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
             background:var(--ground); flex:1 1 auto; min-height:0;
             overflow-y:auto; }
@@ -10906,7 +10939,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
+           height:calc(var(--wind) - var(--chin-top, 190px) - var(--pane-foot, 20px));
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -11032,7 +11065,7 @@ body.presenting .chatdock { display:none; }
    panel's padding and nothing else — asserted as the PROPERTY (no content
    above the heading, none below the fade) rather than as the number, so a
    later change to that padding goes red rather than silent (§94.8). */
-.hmenu-panel.chset { max-height:64vh; overflow-y:auto; overscroll-behavior:contain;
+.hmenu-panel.chset { max-height:calc(var(--winh) * 0.64); overflow-y:auto; overscroll-behavior:contain;
                      scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
 .chset .chset-h { position:sticky; top:0; z-index:2;
                   box-shadow:0 -6px 0 var(--surface); }
@@ -11445,7 +11478,7 @@ body.presenting .tourdock { display:none; }
    in general"): where the card has no clear space and must dock over the
    page, what is under it stays readable through it. */
 .tourdock .tcard {
-  position:absolute; width:310px; max-width:calc(100vw - 24px);
+  position:absolute; width:310px; max-width:calc(var(--winw) - 24px);
   background:color-mix(in srgb, var(--surface) 92%, transparent);
   -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
   border:1px solid var(--line); border-radius:10px;
@@ -12248,7 +12281,7 @@ body.presenting #buildband { display:none; }
           color:var(--ink); background:var(--surface); border:1px solid var(--line);
           border-radius:var(--r-sm, 6px); padding:4px 10px; cursor:pointer; }
 .copnew:hover, .copnew:focus-visible { border-color:var(--gold); outline:none; }
-.coplist { display:flex; flex-direction:column; max-height:42vh; overflow-y:auto; }
+.coplist { display:flex; flex-direction:column; max-height:calc(var(--winh) * 0.42); overflow-y:auto; }
 .copitem { display:flex; flex-direction:column; gap:2px; text-align:left; width:100%;
            background:transparent; border:0; border-bottom:1px solid var(--line);
            padding:9px 12px; cursor:pointer; font:inherit; color:var(--ink); }
@@ -12278,7 +12311,7 @@ body.presenting #buildband { display:none; }
 .copask { background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
           padding:10px 12px; margin-bottom:10px; font-size:var(--fs-note, 13.5px); color:var(--ink);
           display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;
+.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:calc(var(--winh) * 0.52); overflow-y:auto;
            padding:4px 2px 10px; }
 /* §470: the conversation's text size. CSS zoom on a wrapper INSIDE the
    scrolling box, so the box keeps its own height and only what is in it
@@ -12382,7 +12415,7 @@ body.presenting #buildband { display:none; }
      that already fitted — the window moved and the chat did not. A page sized
      to the window takes the small foot, as Setup's does (§167). */
   .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
-  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
+  .coppane { height:calc(var(--wind) - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
   .coprails { min-height:0; }
   .coprail { display:flex; flex-direction:column; min-height:0; }
   .coprail.copchats { flex:1 1 auto; }

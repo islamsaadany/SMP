@@ -643,7 +643,11 @@
    own table where capabilities are pillars. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.12-org-cells";
+/* v7.13-platform-80 — §627: the client platform is drawn at 80% on a
+   computer, as the console is, and Business units' Plans in never spills.
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.13-platform-80";
 const ASSETS = [
   "/",
   "/index.html",

@@ -255,7 +255,7 @@
     left:auto; right:0; transform:none; }
   /* The cell before it can overflow too once the pane is narrow, and that one
      has room on both sides — so it is capped rather than re-anchored. */
-  .hasnote::after { max-width:min(255px, 60vw); }
+  .hasnote::after { max-width:min(255px, calc(var(--winw) * 0.6)); }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
@@ -414,7 +414,7 @@
   .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
   .overlay.on { transition:opacity .12s ease, visibility 0s; }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
-           width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
+           width:min(940px,100%); max-height:calc(var(--winh) * 0.88); display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
   .modal-h { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
              border-bottom:1px solid var(--line); }
@@ -466,7 +466,7 @@
     .ks-k { text-align:left; }
     .ks-v { margin-bottom:7px; }
   }
-  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
+  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:var(--winh); border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
      The dialog carries the weight the quiet words in the head do not: what

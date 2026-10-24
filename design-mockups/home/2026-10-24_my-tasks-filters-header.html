@@ -78,6 +78,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .chd.sub{background:var(--surface-2);border-top:1px solid var(--line-soft);padding:8px 14px}
 .chd.sub .cic{width:26px;height:26px}
 .chd.sub h2{font-size:17px}
+.chd.sub.late h2{color:var(--bad)}
 /* groups inside one card */
 .grp{display:flex;align-items:center;gap:8px;padding:10px 14px 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);border-top:1px solid var(--line-soft)}
 .grp:first-of-type{border-top:0}
@@ -130,14 +131,14 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
   /* C: A's one card, its groups keeping today's icon and title */
   var C = band(false) + '<div class="card"><div class="chd"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div>' +
     B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
-      return '<div class="chd sub"><span class="cic' + (b[0] === "late" ? ' late' : '') + '">' + ic(b[2]) + '</span><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join(""); }).join("") + '</div>';
+      return '<div class="chd sub' + (b[0] === "late" ? ' late' : '') + '"><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join(""); }).join("") + '</div>';
   var Bopt = band(false) + '<div class="card" style="box-shadow:none;background:transparent;border:0;margin:0 0 6px"><div class="chd" style="background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)"><span class="cic">' + ic("tasks") + '</span><h2>Open tasks</h2><span class="cnt">5</span><span class="sp"></span>' + show + sort + search + '</div></div>' +
     B.map(function(b){ var rs = R.filter(function(r){ return r.b === b[0]; });
       return '<div class="card"><div class="chd"><span class="cic' + (b[0] === "late" ? ' late' : '') + '">' + ic(b[2]) + '</span><h2>' + b[1] + '</h2><span class="cnt">' + rs.length + ' open</span></div>' + rs.map(row).join("") + '</div>'; }).join("");
   var O = [
     ["Built today", built, "Sort by on its own line under the band; Show sits in the band beside the title.", false],
     ["A · One card, the filters in its header", A, "Exactly the Clients pattern: one card titled <b>Open tasks</b> with its count, and in its header <b>Show</b> (whose tasks, for an admin), <b>Sort by</b> and a <b>search</b> for a task by its words or client. The groups (Late in red, This week, Next week and later; or each client, sorted by client) become labelled sections inside the card, the way Home's tasks group by client. The band keeps only the week and the counts.", true],
-    ["C · A's one card, the groups keeping today's icons and titles", C, "A's single card with the filters in its header, but each group keeps the header it has today — its icon (red for Late), its title in Georgia bold and its count — as a band inside the card, on a light tint and divided by a hairline, rather than A's small label. More presence for each group than A, still one card.", false],
+    ["C · A's one card, the groups keeping today's titles, no icons", C, "A's single card with the filters in its header; each group keeps today's title in Georgia bold and its count, as a band inside the card on a light tint and divided by a hairline, with no icon (Islam: “for option C can you remove the icons”). Late's title is in red, since its red icon is gone. More presence for each group than A, still one card.", false],
     ["B · A header bar above the group cards", Bopt, "The same filters in a header bar of their own, and the groups stay as separate cards under it. Keeps today's cards, at the cost of a bar that looks like a card with nothing in it.", false]
   ];
   document.getElementById("opts").innerHTML = O.map(function(o, i){

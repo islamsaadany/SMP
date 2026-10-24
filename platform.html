@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forefront — Strategy Management Platform</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<!-- the console's own mark (Islam's pick A, the north star, 2026-10-24); the
+     door and the client platforms keep /favicon.svg -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23F5A623'/%3E%3Cpath d='M12 3.6 13.6 10.4 20.4 12 13.6 13.6 12 20.4 10.4 13.6 3.6 12 10.4 10.4z' fill='none' stroke='%230F2C69' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E" type="image/svg+xml">
 <link rel="icon" href="/favicon.png" sizes="32x32">
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
@@ -115,11 +117,15 @@
     border-bottom:1px solid var(--ff-rule) }
   /* THE MARK IS TYPE ON THE NAVY NOW, so it is the bar's ink rather than
      --ff-tx, which was measured for a white line (§38.4). */
-  .sbhead .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
-  .sbhead .nm{ font-weight:600; font-size:14px; color:var(--ff-quiet) }
-  /* the mark the column wears when it is only icons wide */
-  .sbff{ display:none; width:28px; height:28px; border-radius:7px; background:var(--amber); color:var(--amber-ink);
-    font:700 11px/28px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
+  /* THE NAME AND ITS MARK (Islam, 2026-10-24: "the naming at the top should
+     be Strategy management Platform", and of four icons drawn, A, the north
+     star): the mark on amber, the name on two lines because the whole of it
+     does not fit the column on one. Folded to icons, the mark alone. */
+  .sblogo{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--amber); color:#0F2C69 }
+  .sblogo svg{ width:20px; height:20px }
+  .sbname{ display:flex; flex-direction:column; min-width:0; line-height:1.15 }
+  .sbname b{ font-size:12px; font-weight:700; color:var(--ff-ink); white-space:nowrap }
+  .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ff-quiet) }
   /* ICON BUTTONS ON THE NAVY: « (icons only), × (close, on a phone), the
      menu (on a phone) and Sign out. Each says what it does in its
      accessible name and in the hover label below. */
@@ -185,8 +191,7 @@
   @media (min-width:1000px){
     html[data-rail="1"] .side{ width:64px }
     html[data-rail="1"] .sbhead{ flex-direction:column; gap:10px; padding:14px 0 10px }
-    html[data-rail="1"] .sbhead .mk, html[data-rail="1"] .sbhead .nm{ display:none }
-    html[data-rail="1"] .sbff{ display:block }
+    html[data-rail="1"] .sbhead .sbname{ display:none }
     html[data-rail="1"] .sbhead .sbbtn{ margin:0 }
     html[data-rail="1"] #sbfold svg{ transform:rotate(180deg) }
     html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--ff-rule) }
@@ -221,7 +226,9 @@
       background:var(--ff); color:var(--ff-ink) }
     .mtop .sbbtn{ margin:0; color:var(--ff-ink) }
     .mtop .sbbtn svg{ width:20px; height:20px }
-    .mtop .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
+    .mtop .sblogo{ width:26px; height:26px; border-radius:7px }
+    .mtop .sblogo svg{ width:17px; height:17px }
+    .mtop .mtname{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:700; color:var(--ff-ink) }
     #sbhere{ margin-left:auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
       font-size:13px; font-weight:600; color:var(--ff-quiet) }
     .nav button{ padding:12px 10px; font-size:15px }
@@ -1362,47 +1369,59 @@
   .hohello::before{ width:300px; height:300px; right:-90px; top:-120px; background:rgba(255,255,255,.035) }
   .hohello::after{ width:210px; height:210px; right:-20px; top:-70px }
   .hodate{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); min-height:14px }
-  .hohello h1, .hosh h2{ font-family:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight:500 }
+  .hohello h1, .hochd h2{ font-family:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight:500 }
   .hohello h1{ margin:0; font-size:27px; line-height:1.15; color:var(--ff-ink) }
   .hohello p{ margin:4px 0 0; font-size:13.5px; color:var(--ff-quiet) }
   .hotop{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:stretch; margin:0 0 24px }
   .hotop > section{ display:flex; flex-direction:column; min-width:0 }
   .hosec{ margin:0 0 24px }
-  .hosh{ display:flex; align-items:flex-end; gap:16px; margin:0 0 8px }
-  .hoeye{ margin:0 0 2px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber-tx) }
-  .hosh h2{ margin:0; font-size:20px; line-height:1.15 }
-  .holink{ margin-left:auto; margin-bottom:3px; border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600;
+  /* A CARD WITH ITS HEADER INSIDE IT (Islam, 2026-10-24, option A of
+     design-mockups/home/2026-10-24_home-round-2.html): an icon, the title in
+     the band's serif, a count, and the card's control on the right. */
+  .hocard{ flex:1; display:flex; flex-direction:column; min-width:0; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; box-shadow:var(--shadow); overflow:hidden }
+  .hochd{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocic{ flex:none; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--amber-wash); color:var(--amber-tx) }
+  .hocic svg{ width:17px; height:17px }
+  .hochd h2{ margin:0; font-size:18px; line-height:1.15; white-space:nowrap }
+  .hocnt{ font-size:11.5px; font-weight:700; border-radius:999px; padding:1px 8px; background:var(--surface-2); color:var(--ink-2); font-variant-numeric:tabular-nums }
+  .hochd .sp{ flex:1 }
+  .hobody{ flex:1 }
+  .holink{ border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600;
     color:var(--amber-tx); cursor:pointer; white-space:nowrap }
   .holink:hover{ text-decoration:underline }
-  .holink:focus-visible, .homod:focus-visible, .hotabs button:focus-visible, .hotask:focus-visible, .hocase:focus-visible, .hobook:focus-visible{
+  .holink:focus-visible, .howd:focus-visible, .hosort button:focus-visible, .hotask:focus-visible, .hocase:focus-visible, .hobook:focus-visible{
     outline:2px solid var(--amber-tx); outline-offset:1px }
-  .hobox{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow) }
-  .hoclients{ padding:2px 14px }
-  .hocl{ display:grid; grid-template-columns:30px minmax(0,1fr) auto; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft) }
-  .hocl:last-child{ border-bottom:0 }
-  .hocl .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber); text-align:center;
+  /* Sort by: Date or Client, the same switch here and on My tasks */
+  .hosort{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3) }
+  .hosort .sw{ display:inline-flex; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--surface-2) }
+  .hosort button{ border:0; background:transparent; color:var(--ink-2); font-family:inherit; font-size:12px; font-weight:600; line-height:1.4;
+    padding:3px 9px; border-radius:6px; cursor:pointer }
+  .hosort button[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.08) }
+  .hogrp{ display:flex; align-items:center; gap:8px; padding:9px 14px 3px; font-size:11px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .hogrp i{ font-style:normal; font-weight:600; letter-spacing:0; text-transform:none }
+  .hogrp i .late{ color:var(--bad) }
+  .cmk{ flex:none; width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber); text-align:center; object-fit:contain;
     font:700 10.5px/30px ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em }
-  .hocl img.cmark{ object-fit:contain; background:#fff; padding:2px; box-sizing:border-box }
+  img.cmk{ background:#fff; padding:2px; box-sizing:border-box }
+  .cmk.xs{ width:20px; height:20px; border-radius:5px; font-size:8.5px; line-height:20px; letter-spacing:0 }
+  /* YOUR CLIENTS, ONE LINE EACH (option B): the mark, the name, and the
+     modules as words under it — no industry and no seat (Islam: "remove the
+     client industry … it's so noisy"). A module with something outstanding
+     carries a dot and the fact, red where it is an alarm. */
+  .hocl{ display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocl:last-child{ border-bottom:0 }
   .hocl b{ display:block; font-size:14px; font-weight:600; line-height:1.3 }
-  .hocl .s{ display:block; font-size:12px; color:var(--ink-3) }
-  .homods{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end }
-  .homod{ display:inline-flex; align-items:center; gap:5px; border:0; border-radius:7px; background:var(--surface-2); color:var(--ink);
-    font-family:inherit; font-size:12px; font-weight:600; line-height:1.4; padding:5px 9px; cursor:pointer; white-space:nowrap }
-  .homod:hover{ background:var(--line-soft) }
-  .homod i{ font-style:normal; font-size:11px; font-weight:600; color:var(--amber-tx) }
-  .homod i.alarm{ color:var(--warn) }
-  .hoph{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:9px 12px; border-bottom:1px solid var(--line-soft) }
-  .hotabs{ display:inline-flex; background:var(--surface-2); border-radius:10px; padding:3px }
-  .hotabs button{ display:inline-flex; align-items:center; gap:7px; border:0; background:transparent; color:var(--ink-3); font-family:inherit;
-    font-size:12.5px; font-weight:600; line-height:1.4; padding:6px 10px; border-radius:8px; cursor:pointer; white-space:nowrap }
-  .hotabs button svg{ width:15px; height:15px }
-  .hotabs button[aria-selected="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.08) }
-  .hotabs button i{ font-style:normal; font-size:11.5px; font-weight:700; border-radius:999px; padding:0 6px; background:var(--surface); color:var(--ink-2) }
-  .hotabs button[aria-selected="true"] i{ background:var(--ink); color:var(--surface) }
-  .hotabs button.l[aria-selected="true"] i{ background:var(--bad); color:var(--bad-ink) }
-  .hotabs button.l svg{ color:var(--bad) }
-  .hotabs button.w svg{ color:var(--amber-tx) }
-  .hoph .holink{ margin-bottom:0 }
+  .howords{ display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:1px }
+  .howd{ display:inline-flex; align-items:center; gap:6px; border:0; background:none; padding:1px 0; font-family:inherit; font-size:12.5px;
+    color:var(--ink-2); cursor:pointer; white-space:nowrap }
+  .howd u{ text-decoration:none; border-bottom:1px solid var(--line) }
+  .howd:hover{ color:var(--ink) }
+  .howd:hover u{ border-bottom-color:var(--amber-tx) }
+  .howd i{ display:inline-flex; align-items:center; gap:4px; font-style:normal; font-size:11px; font-weight:600; color:var(--amber-tx) }
+  .howd i::before{ content:""; width:5px; height:5px; border-radius:50%; background:currentColor }
+  .howd i.alarm{ color:var(--bad) }
   .hotask{ display:grid; grid-template-columns:17px minmax(0,1fr) auto; gap:10px; align-items:start; width:100%; padding:9px 14px;
     border:0; border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
   .hotask:hover{ background:var(--surface-2) }
@@ -1423,10 +1442,11 @@
   .hotask .m .c{ font-weight:600; color:var(--ink-2) }
   .hotask .wh{ font-size:12px; font-weight:600; color:var(--ink-2); white-space:nowrap; padding-top:1px }
   .hotask.late .wh{ color:var(--bad) }
-  .hopane[hidden]{ display:none }
   .honone{ margin:0; padding:16px; text-align:center; font-size:13px; color:var(--ink-3) }
-  .hotwo{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:16px; align-items:start }
-  .hotwo .hobox{ padding:12px 16px 14px }
+  /* case studies: one card, its two halves side by side with a hairline */
+  .hotwo{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch }
+  .hotwo > div{ padding:12px 16px 14px; min-width:0 }
+  .hotwo > div + div{ border-left:1px solid var(--line-soft) }
   .hobxh{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
   .hocase{ display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:12px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft) }
   .hocase:last-of-type{ border-bottom:0 }
@@ -1451,11 +1471,9 @@
     box-shadow:inset 4px 0 0 rgba(0,0,0,.2), inset 0 -3px 0 var(--amber) }
   .hobook .new{ display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
     color:var(--amber-ink); background:var(--amber); border-radius:999px; padding:1px 6px; vertical-align:2px }
-  @media (max-width:1180px){ .hotop, .hotwo{ grid-template-columns:minmax(0,1fr) } }
+  @media (max-width:999px){ .hotop, .hotwo{ grid-template-columns:minmax(0,1fr) } .hotwo > div + div{ border-left:0; border-top:1px solid var(--line-soft) } }
   @media (max-width:640px){
     .hohello{ padding:14px 16px 15px }
-    .hocl{ grid-template-columns:30px minmax(0,1fr) }
-    .homods{ grid-column:2; justify-content:flex-start }
     .hocase{ grid-template-columns:42px minmax(0,1fr) }
     .hocase .btn{ grid-column:2; justify-self:start }
   }
@@ -1469,7 +1487,10 @@
      window, tighter rows. A reading page keeps a measure of its own (the
      case study's prose stays in 66ch), so the width is for lists and grids. */
   body{ font-size:14px; line-height:1.5 }
-  .side{ width:212px }
+  /* 224px since the name became Strategy Management Platform (2026-10-24):
+     the mark, the name's longer line and the « button need it */
+  .side{ width:224px }
+  .sbhead{ gap:8px; padding:12px 8px 12px 14px }
   .nav button{ padding:8px 10px; font-size:13.5px }
   .nav{ gap:12px }
   .wrap{ max-width:none; padding:16px 22px 56px }
@@ -1493,6 +1514,36 @@
   #page[data-tab="memory"] .rsec > p{ font-size:15px }
   #page[data-tab="memory"] .icard .ih{ font-size:14px }
   @media (max-width:999px){ .nav button{ padding:11px 10px; font-size:14.5px } .wrap{ padding:14px 14px 50px } }
+
+  /* MY TASKS' SORT BY (2026-10-24): the switch on its own line under the
+     band; by client, each section is a client with its mark, and the rows
+     drop the client pill the heading already says. */
+  .mwbar{ display:flex; align-items:center; gap:12px; margin:-4px 0 12px }
+  .mwsh h2{ display:flex; align-items:center; gap:8px }
+  .mwsec.byc .mwcl{ display:none }
+  @media (min-width:761px){ .mwsec.byc .mwrow{ grid-template-columns:20px minmax(0,1fr) 108px 128px 26px } }
+
+  /* ONLY THE TAB YOU ARE ON IS BOLD (Islam, 2026-10-24: "make the names of
+     the modules not bold only the selected module is highlighted is
+     enough"). The names go to regular weight in an ink a step brighter than
+     the quiet one, so they keep their contrast on the navy; the one you are
+     on keeps its wash, its amber bar and icon, and alone is semibold. */
+  .nav button{ font-weight:400; color:color-mix(in srgb, var(--ff-ink) 78%, var(--ff)) }
+  .nav button.on{ font-weight:600; color:var(--ff-ink) }
+
+  /* THE CONSOLE AT 80% ON A COMPUTER (Islam, 2026-10-24: "I made the page
+     80% smaller it became more visible and neat. can we make the default 80%
+     smaller"). The whole page is zoomed, as his browser's own zoom did, so
+     every size keeps its proportion; a phone keeps 100%, where 80% would
+     put the words under a readable size. Two things a zoom changes are put
+     back: the window's height (a zoomed 100vh is 80% of the window, so the
+     column would stop short) and a hover label's place (the box the
+     browser reports is zoomed, the place it is set at is not — tipShow). */
+  @media (min-width:1000px){
+    html{ zoom:.8 }
+    .shell{ min-height:calc(100vh / .8) }
+    .side{ height:calc(100vh / .8); height:calc(100dvh / .8) }
+  }
 </style>
 </head>
 <body>
@@ -1500,10 +1551,10 @@
      from the menu button in .mtop. The tabs are drawn into #nav once `me`
      answers (§45.2), as they always were. -->
 <div class="shell">
-<aside class="side" id="side" aria-label="Forefront Platform">
+<aside class="side" id="side" aria-label="Strategy Management Platform">
   <div class="sbhead">
-    <span class="sbff" aria-hidden="true">FF</span>
-    <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
+    <span class="sbname"><b>Strategy Management</b><span>Platform</span></span>
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
@@ -1518,7 +1569,7 @@
 <div class="main">
   <div class="mtop">
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <span class="mk">FOREFRONT</span><span id="sbhere"></span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
   <div class="wrap" id="page"></div>
 </div>
@@ -1750,9 +1801,12 @@
   function tipShow(t) {
     if (t.closest("#nav, .sbav") && !railOn()) { tipHide(); return; }
     var r = t.getBoundingClientRect();
+    /* the box is in the window's pixels, the place is set in the page's,
+       and the console is zoomed on a computer (80%, below) */
+    var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;
     tip.textContent = t.getAttribute("data-tip");
-    tip.style.left = Math.round(r.right + 10) + "px";
-    tip.style.top = Math.round(r.top + r.height / 2) + "px";
+    tip.style.left = Math.round((r.right + 10) / z) + "px";
+    tip.style.top = Math.round((r.top + r.height / 2) / z) + "px";
     tip.classList.add("on");
   }
   function tipHide() { tip.classList.remove("on"); }
@@ -4109,28 +4163,55 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
-      var n = 0;
-      ["late", "week", "later"].forEach(function (b) {
-        var mine = rows.filter(function (r) { return r.bucket === b; });
-        var ups = cases.filter(function (r) { return r.bucket === b; });
-        if (!mine.length && !ups.length) return;
-        n++;
-        var sec = el("section", "mwsec");
-        sec.setAttribute("data-bucket", b);
+      var head = function (sec, n, name) {
         var sh = el("div", "mwsh");
         sh.appendChild(el("span", "ix", (n < 10 ? "0" : "") + n));
-        sh.appendChild(el("h2", null, MW_HEAD[b]));
+        sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
         sec.appendChild(sh);
+      };
+      /* BY DATE (Late · This week · Next week and later) or BY CLIENT, one
+         numbered section a client with its mark (Islam, 2026-10-24: "a sort
+         by so it shows by client"). The rows are the same rows, read from
+         `rows` at the press, so a tick made under one order is in the other. */
+      var draw = function () {
+        list.textContent = "";
+        var n = 0;
         /* in date order with the actions, a write-up with no date last */
-        var all = mine.map(function (r) { return [r.due || "9999", 0, r]; })
-          .concat(ups.map(function (r) { return [r.due || "9999", 1, r]; }))
-          .sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]; });
-        all.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
-        mwMeta(sec);
-        list.appendChild(sec);
-      });
+        var all = rows.map(function (r) { return [r.due || "9999", 0, r]; })
+          .concat(cases.map(function (r) { return [r.due || "9999", 1, r]; })).sort(byDue);
+        if (TSORT.by === "client") {
+          byClient(all).forEach(function (g) {
+            n++;
+            var sec = el("section", "mwsec byc");
+            sec.setAttribute("data-client", g.key);
+            var h = el("h2");
+            h.appendChild(clientMark(g.key, g.name, true));
+            h.appendChild(document.createTextNode(g.name));
+            head(sec, n, h);
+            g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
+            mwMeta(sec);
+            list.appendChild(sec);
+          });
+          return;
+        }
+        ["late", "week", "later"].forEach(function (b) {
+          var mine = all.filter(function (x) { return x[2].bucket === b; });
+          if (!mine.length) return;
+          n++;
+          var sec = el("section", "mwsec");
+          sec.setAttribute("data-bucket", b);
+          head(sec, n, el("h2", null, MW_HEAD[b]));
+          mine.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
+          mwMeta(sec);
+          list.appendChild(sec);
+        });
+      };
+      var bar = el("div", "mwbar");
+      bar.appendChild(sortSwitch(draw));
+      body.appendChild(bar);
       body.appendChild(list);
+      draw();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -4149,8 +4230,60 @@
      boot already holds, narrowed to a seat; the tasks are My tasks' own
      `mywork` rows; the case studies are /api/cases `home`. So every word and
      mark here is the one the page it opens says (§53.5). */
-  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
-  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
+  var HO_TASKS = NAV_SVG + '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>';
+
+  /* SORT BY DATE OR BY CLIENT (Islam, 2026-10-24: "for the tasks in the
+     dashboard and in the my tasks module can we add a sort by so it shows by
+     client in both areas"). One choice for both places, kept on this device
+     the column's own way (§601). */
+  var TSORT = { by: "date" };
+  try { if (localStorage.getItem("smp.tasks.sort") === "client") TSORT.by = "client"; } catch (e) { /* this device only */ }
+  function sortSwitch(onChange) {
+    var w = el("span", "hosort");
+    w.appendChild(document.createTextNode("Sort by"));
+    var sw = el("span", "sw");
+    sw.setAttribute("role", "group");
+    sw.setAttribute("aria-label", "Sort by");
+    [["date", "Date"], ["client", "Client"]].forEach(function (o) {
+      var b = el("button", null, o[1]);
+      b.type = "button";
+      b.setAttribute("data-sort", o[0]);
+      b.setAttribute("aria-pressed", String(TSORT.by === o[0]));
+      b.addEventListener("click", function () {
+        if (TSORT.by === o[0]) return;
+        TSORT.by = o[0];
+        try { localStorage.setItem("smp.tasks.sort", o[0]); } catch (e) { /* this device only */ }
+        sw.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        onChange();
+      });
+      sw.appendChild(b);
+    });
+    w.appendChild(sw);
+    return w;
+  }
+  /* GROUPED BY CLIENT: clients with something late first, then by their
+     earliest date, then by name; inside a client, by date. `list` is
+     [due, isCase, row]. */
+  function byClient(list) {
+    var g = {}, order = [];
+    list.forEach(function (x) {
+      var k = x[2].client;
+      if (!g[k]) { g[k] = { key: k, name: x[2].clientName, rows: [], late: 0, first: "9999" }; order.push(k); }
+      g[k].rows.push(x);
+      if (x[2].late) g[k].late++;
+      if (x[0] < g[k].first) g[k].first = x[0];
+    });
+    return order.map(function (k) { return g[k]; }).sort(function (a, b) {
+      return (b.late > 0 ? 1 : 0) - (a.late > 0 ? 1 : 0) || (a.first < b.first ? -1 : a.first > b.first ? 1 : 0) || String(a.name).localeCompare(String(b.name));
+    });
+  }
+  function byDue(a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; }
+  /* a client's mark: its logo where it has one (from the cards), else initials */
+  var MARKS = {};
+  function clientMark(key, name, small) {
+    if (MARKS[key]) { var im = el("img", "cmk" + (small ? " xs" : "")); im.src = MARKS[key]; im.alt = ""; return im; }
+    return el("span", "cmk" + (small ? " xs" : ""), initials(name));
+  }
 
   function hoHello() {
     var band = el("header", "hohello");
@@ -4164,57 +4297,69 @@
     page.appendChild(band);
   }
 
-  function hoHead(host, eye, name, link, press) {
-    var h = el("div", "hosh");
-    var d = el("div");
-    d.appendChild(el("p", "hoeye", eye));
-    d.appendChild(el("h2", null, name));
-    h.appendChild(d);
-    if (link) {
-      var a = el("button", "holink", link);
-      a.type = "button";
-      a.addEventListener("click", press);
-      h.appendChild(a);
-    }
-    host.appendChild(h);
+  /* A CARD WITH ITS HEADER INSIDE IT (Islam's option A, 2026-10-24): the
+     icon, the title, a count, and on the right the card's own controls. */
+  function hoCard(host, name, icon, home) {
+    var card = el("section", "hocard");
+    card.setAttribute("data-home", home);
+    var hd = el("div", "hochd");
+    var ic = el("span", "hocic");
+    ic.innerHTML = icon;
+    hd.appendChild(ic);
+    hd.appendChild(el("h2", null, name));
+    var cnt = el("span", "hocnt");
+    cnt.hidden = true;
+    hd.appendChild(cnt);
+    hd.appendChild(el("span", "sp"));
+    card.appendChild(hd);
+    var body = el("div", "hobody");
+    body.appendChild(el("p", "honone", "Reading…"));
+    card.appendChild(body);
+    host.appendChild(card);
+    return { card: card, head: hd, body: body, count: function (n) { cnt.textContent = String(n); cnt.hidden = false; } };
+  }
+  function hoLink(words, press) {
+    var a = el("button", "holink", words);
+    a.type = "button";
+    a.addEventListener("click", press);
+    return a;
   }
 
+  /* YOUR CLIENTS, ONE LINE EACH (Islam's option B): the mark, the name, and
+     the modules as words under it. No industry and no seat. */
   function hoClient(c) {
     var row = el("div", "hocl");
     row.setAttribute("data-client", c.key);
-    if (c.mark) { var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; row.appendChild(im); }
-    else row.appendChild(el("span", "cmark", initials(c.name)));
+    row.appendChild(clientMark(c.key, c.name));
     var who = el("span");
     who.appendChild(el("b", null, c.name));
-    who.appendChild(el("span", "s", [c.industry, c.seat === "super" ? "Super user" : "SMO team"].filter(Boolean).join(" · ")));
-    row.appendChild(who);
-    var mods = el("span", "homods");
+    var words = el("span", "howords");
     if (c.canOpen) (c.modules || []).forEach(function (m) {
-      var b = el("button", "homod");
+      var b = el("button", "howd");
       b.type = "button";
       b.setAttribute("data-module", m.key);
-      b.appendChild(document.createTextNode(m.label));
+      b.appendChild(el("u", null, m.label));
       if (m.mark) {
         var mk = el("i", m.alarm ? "alarm" : null, m.mark);
         if (m.tip) mk.title = m.tip;
         b.appendChild(mk);
       }
       b.addEventListener("click", function () { moduleGo(c, m); });
-      mods.appendChild(b);
+      words.appendChild(b);
     });
-    row.appendChild(mods);
+    who.appendChild(words);
+    row.appendChild(who);
     return row;
   }
 
   /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
-     Tracker, or the case study to write — AND ITS TICK FINISHES IT (Islam:
-     "can you make the tasks check box clickable from the home?"). The tick is
-     My tasks' own: the same `workStatus` write through that client's door,
-     drawn only where the server says this person may (canChange), and the
-     row stays where the hand left it, green, until Home is read again (§583).
-     The status word stays on My tasks. A write-up has no tick: it is done on
-     the case study, never from a list (spec 067 §8). */
-  function hoTask(r, isCase, act) {
+     Tracker, or the case study to write — AND ITS TICK FINISHES IT (§614.1):
+     My tasks' own `workStatus` write, drawn live only where the server says
+     this person may (canChange), the row staying where the hand left it,
+     green, until Home is read again (§583). A write-up has no tick: it is
+     done on the case study, never from a list (spec 067 §8). Under a client's
+     heading the row does not name the client again. */
+  function hoTask(r, isCase, act, noClient) {
     var done = !isCase && r.status === "done";
     var b = el("div", "hotask" + (r.late && !done ? " late" : "") + (done ? " done" : ""));
     b.tabIndex = 0;
@@ -4241,8 +4386,8 @@
     if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
     else t.appendChild(document.createTextNode(r.title || "(untitled)"));
     var m = el("span", "m");
-    m.appendChild(el("span", "c", r.clientName));
-    m.appendChild(document.createTextNode(" · " + (isCase ? "Case study" : r.statusWord || "")));
+    if (!noClient) { m.appendChild(el("span", "c", r.clientName)); m.appendChild(document.createTextNode(" · ")); }
+    m.appendChild(document.createTextNode(isCase ? "Case study" : r.statusWord || ""));
     t.appendChild(m);
     b.appendChild(t);
     b.appendChild(el("span", "wh", r.when || ""));
@@ -4255,33 +4400,21 @@
     return b;
   }
 
-  function hoTasks(box, j) {
+  /* YOUR TASKS: ONE LIST, overdue first (its date in red), then this week —
+     the two tabs are gone (Islam: "remove the overdue and this week
+     filters"). Next week and later stay on My tasks. */
+  function hoTasks(c, j) {
+    var box = c.body;
     box.textContent = "";
     if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read your tasks.")); return; }
-    var open = (j.rows || []).filter(function (r) { return r.status !== "done"; });
-    var cases = j.cases || [];
-    var pick = function (b) {
-      return open.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 0, r]; })
-        .concat(cases.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 1, r]; }))
-        .sort(function (a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; });
-    };
-    var panes = [["late", "Overdue", HO_ALERT, "l", "No overdue tasks."], ["week", "This week", HO_CAL, "w", "Nothing due this week."]];
-    var lists = { late: pick("late"), week: pick("week") };
-    /* It opens on Overdue when anything is, otherwise on This week. */
-    var on = lists.late.length ? "late" : "week";
-    var ph = el("div", "hoph");
-    var tabs = el("div", "hotabs");
-    tabs.setAttribute("role", "tablist");
-    ph.appendChild(tabs);
+    var near = function (r) { return r.bucket === "late" || r.bucket === "week"; };
+    var list = (j.rows || []).filter(function (r) { return r.status !== "done" && near(r); }).map(function (r) { return [r.due || "9999", 0, r]; })
+      .concat((j.cases || []).filter(near).map(function (r) { return [r.due || "9999", 1, r]; }));
     /* a refused or failed tick is said here, in words, and the row is left as it was */
     var said = el("p", "err hosaid");
     said.hidden = true;
-    var counts = {};
-    var recount = function () {
-      Object.keys(counts).forEach(function (k) {
-        counts[k].textContent = String(box.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask:not(.done)').length);
-      });
-    };
+    var rows = el("div");
+    var recount = function () { c.count(rows.querySelectorAll(".hotask:not(.done)").length); };
     var act = function (r, row) {
       if (row.getAttribute("aria-busy") === "true") return;
       var done = r.status === "done";
@@ -4292,7 +4425,10 @@
         if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
         var nr = a.row;
         nr.was = done ? r.was : r.status;
-        var fresh = hoTask(nr, false, act);
+        /* the row keeps its place in the list, so a re-sort keeps the tick */
+        list.forEach(function (x) { if (x[2] === r) x[2] = nr; });
+        var fresh = hoTask(nr, false, act, row.getAttribute("data-noclient") === "1");
+        if (row.getAttribute("data-noclient") === "1") fresh.setAttribute("data-noclient", "1");
         row.parentNode.replaceChild(fresh, row);
         said.hidden = true;
         recount();
@@ -4302,66 +4438,65 @@
         undo("Could not reach the server. Nothing was changed — try again.");
       });
     };
-    var all = el("button", "holink", "All tasks →");
-    all.type = "button";
-    all.addEventListener("click", function () { go("mywork"); });
-    ph.appendChild(all);
-    box.appendChild(ph);
+    var draw = function () {
+      rows.textContent = "";
+      if (!list.length) { rows.appendChild(el("p", "honone", "Nothing overdue or due this week.")); return; }
+      list.sort(byDue);
+      if (TSORT.by === "client") {
+        byClient(list).forEach(function (g) {
+          var h = el("div", "hogrp");
+          h.setAttribute("data-group", g.key);
+          h.appendChild(clientMark(g.key, g.name, true));
+          h.appendChild(document.createTextNode(g.name));
+          var meta = el("i", null, " · " + g.rows.length);
+          if (g.late) { meta.appendChild(document.createTextNode(", ")); meta.appendChild(el("span", "late", g.late + " late")); }
+          h.appendChild(meta);
+          rows.appendChild(h);
+          g.rows.forEach(function (x) { var t = hoTask(x[2], !!x[1], act, true); t.setAttribute("data-noclient", "1"); rows.appendChild(t); });
+        });
+      } else list.forEach(function (x) { rows.appendChild(hoTask(x[2], !!x[1], act)); });
+      recount();
+    };
+    c.head.appendChild(sortSwitch(draw));
+    c.head.appendChild(hoLink("All tasks →", function () { go("mywork"); }));
     box.appendChild(said);
     if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
-    var bodies = {};
-    panes.forEach(function (p) {
-      var t = el("button", p[3]);
-      t.type = "button";
-      t.setAttribute("role", "tab");
-      t.setAttribute("data-pane", p[0]);
-      t.setAttribute("aria-selected", String(p[0] === on));
-      t.innerHTML = p[2];
-      t.appendChild(document.createTextNode(p[1]));
-      counts[p[0]] = el("i", null, String(lists[p[0]].length));
-      t.appendChild(counts[p[0]]);
-      tabs.appendChild(t);
-      var pane = el("div", "hopane");
-      pane.setAttribute("role", "tabpanel");
-      pane.setAttribute("data-pane", p[0]);
-      pane.hidden = p[0] !== on;
-      if (!lists[p[0]].length) pane.appendChild(el("p", "honone", p[4]));
-      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1], act)); });
-      bodies[p[0]] = pane;
-      box.appendChild(pane);
-      t.addEventListener("click", function () {
-        tabs.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-selected", String(o === t)); });
-        Object.keys(bodies).forEach(function (k) { bodies[k].hidden = k !== p[0]; });
-      });
-    });
+    box.appendChild(rows);
+    draw();
   }
 
-  function hoCases(left, right, j) {
-    left.textContent = ""; right.textContent = "";
+  function hoCases(c, j) {
+    var box = c.body;
+    box.textContent = "";
+    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
+    var two = el("div", "hotwo"), left = el("div"), right = el("div");
+    left.setAttribute("data-home", "writing");
+    right.setAttribute("data-home", "fresh");
+    two.appendChild(left); two.appendChild(right);
+    box.appendChild(two);
     left.appendChild(el("p", "hobxh", "Your write-ups · in progress"));
     right.appendChild(el("p", "hobxh", "Newly finished"));
-    if (!j || !j.ok) { left.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
     if (!j.writing.length) left.appendChild(el("p", "honone", "No case study is waiting on you to write it."));
-    j.writing.forEach(function (c) {
+    j.writing.forEach(function (w) {
       var row = el("div", "hocase");
-      row.setAttribute("data-case", c.id);
+      row.setAttribute("data-case", w.id);
       var ring = el("span", "horing");
-      ring.style.setProperty("--p", String(Math.round(c.filled / 8 * 100)));
-      ring.appendChild(el("span", null, c.filled + "/8"));
+      ring.style.setProperty("--p", String(Math.round(w.filled / 8 * 100)));
+      ring.appendChild(el("span", null, w.filled + "/8"));
       row.appendChild(ring);
       var t = el("span");
-      t.appendChild(el("b", null, c.name));
-      var s = el("span", "s", c.client.name + " · " + (c.filled ? c.filled + " of 8 sections" : "not started"));
-      if (c.due) {
-        var late = c.due < new Date().toISOString().slice(0, 10);
+      t.appendChild(el("b", null, w.name));
+      var s = el("span", "s", w.client.name + " · " + (w.filled ? w.filled + " of 8 sections" : "not started"));
+      if (w.due) {
+        var late = w.due < new Date().toISOString().slice(0, 10);
         s.appendChild(document.createTextNode(" · "));
-        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(c.due + "T12:00:00")));
+        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(w.due + "T12:00:00")));
       }
       t.appendChild(s);
       row.appendChild(t);
-      var b = el("button", c.filled ? "btn solid" : "btn", c.filled ? "Continue" : "Start");
+      var b = el("button", w.filled ? "btn solid" : "btn", w.filled ? "Continue" : "Start");
       b.type = "button";
-      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case", fresh: true }; go("memory"); });
+      b.addEventListener("click", function () { CS.jump = { id: w.id, view: "case", fresh: true }; go("memory"); });
       row.appendChild(b);
       left.appendChild(row);
     });
@@ -4372,18 +4507,18 @@
       left.appendChild(f);
     }
     if (!j.fresh.length) right.appendChild(el("p", "honone", "Nothing finished in the last 30 days."));
-    j.fresh.forEach(function (c) {
+    j.fresh.forEach(function (k) {
       var b = el("button", "hobook");
       b.type = "button";
-      b.setAttribute("data-case", c.id);
-      b.appendChild(el("span", "hospine", initials(c.client.name)));
+      b.setAttribute("data-case", k.id);
+      b.appendChild(el("span", "hospine", initials(k.client.name)));
       var t = el("span");
-      var nm = el("b", null, c.name);
+      var nm = el("b", null, k.name);
       nm.appendChild(el("span", "new", "New"));
       t.appendChild(nm);
-      t.appendChild(el("span", "s", c.client.name + " · " + nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
+      t.appendChild(el("span", "s", k.client.name + " · " + nOf(k.deliverables, "deliverable") + " · " + nOf(k.insights, "insight")));
       b.appendChild(t);
-      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case" }; go("memory"); });
+      b.addEventListener("click", function () { CS.jump = { id: k.id, view: "case" }; go("memory"); });
       right.appendChild(b);
     });
   }
@@ -4391,45 +4526,35 @@
   function drawHome() {
     hoHello();
     var top = el("div", "hotop");
-    var cs = el("section"), ts = el("section");
-    cs.setAttribute("data-home", "clients");
-    ts.setAttribute("data-home", "tasks");
-    hoHead(cs, "Where you have a seat", "Your clients");
-    hoHead(ts, "Overdue and this week", "Your tasks");
-    var cbox = el("div", "hobox hoclients"), tbox = el("div", "hobox");
-    cbox.appendChild(el("p", "honone", "Reading your clients…"));
-    tbox.appendChild(el("p", "honone", "Reading your tasks…"));
-    cs.appendChild(cbox); ts.appendChild(tbox);
-    top.appendChild(cs); top.appendChild(ts);
     page.appendChild(top);
-    var sec = el("section", "hosec");
-    sec.setAttribute("data-home", "cases");
-    hoHead(sec, "What we have learned", "Case studies", "Go to Case studies →", function () { go("memory", true); });
-    var two = el("div", "hotwo"), left = el("div", "hobox"), right = el("div", "hobox");
-    left.setAttribute("data-home", "writing");
-    right.setAttribute("data-home", "fresh");
-    left.appendChild(el("p", "honone", "Reading…"));
-    two.appendChild(left); two.appendChild(right);
-    sec.appendChild(two);
-    page.appendChild(sec);
+    var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
+    cc.head.appendChild(hoLink("All clients →", function () { go("clients", true); }));
+    var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
+    var sc = hoCard(page, "Case studies", NAV_ICON.memory, "cases");
+    sc.card.classList.add("hosec");
+    sc.head.appendChild(hoLink("The library →", function () { go("memory", true); }));
 
-    /* the boot's `cards`, once (§369), as the Clients tab takes it */
+    /* the boot's `cards`, once (§369), as the Clients tab takes it; the
+       tasks wait for it, so a group under Sort by client wears the
+       client's logo */
     var handed = BOOTCARDS; BOOTCARDS = null;
     var fail = function (box) { return function (e) {
       if (String(e && e.message) === "sign in") return;
       box.textContent = ""; box.appendChild(el("p", "honone", "Could not reach the server."));
     }; };
-    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
-      cbox.textContent = "";
-      if (!j || !j.ok) { cbox.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+    var cards = (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+      cc.body.textContent = "";
+      if (!j || !j.ok) { cc.body.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+      (j.cards || []).forEach(function (c) { if (c.mark) MARKS[c.key] = c.mark; });
       /* A SEAT, FOR AN ADMIN TOO (Islam: "the admin also sees his clients"):
          the whole list is one press away under Clients. */
       var mine = j.cards.filter(function (c) { return !!c.seat; });
-      if (!mine.length) cbox.appendChild(el("p", "honone", "You have no seat on any client yet."));
-      mine.forEach(function (c) { cbox.appendChild(hoClient(c)); });
-    }).catch(fail(cbox));
-    post({ action: "mywork" }).then(function (j) { hoTasks(tbox, j); }).catch(fail(tbox));
-    cpostCases({ action: "home" }).then(function (j) { hoCases(left, right, j); }).catch(fail(left));
+      cc.count(mine.length);
+      if (!mine.length) cc.body.appendChild(el("p", "honone", "You have no seat on any client yet."));
+      mine.forEach(function (c) { cc.body.appendChild(hoClient(c)); });
+    }, fail(cc.body));
+    Promise.all([post({ action: "mywork" }), cards]).then(function (r) { hoTasks(tc, r[0]); }).catch(fail(tc.body));
+    cpostCases({ action: "home" }).then(function (j) { hoCases(sc, j); }).catch(fail(sc.body));
   }
 
   function drawClients() {

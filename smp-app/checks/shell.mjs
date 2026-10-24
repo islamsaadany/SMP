@@ -2456,8 +2456,10 @@ await section("4 · Forefront's own pages", async () => {
     await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
     check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
-    await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
-    const card = (await page.locator(".ccard[data-client]").first().textContent()) || "";
+    /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
+       the latest — the card is read off the latest, never the saved one */
+    await page.waitForSelector("#page:not([inert]) .ccard[data-client]", { timeout: 8000 }).catch(() => {});
+    const card = (await page.locator("#page:not([inert]) .ccard[data-client]").first().textContent()) || "";
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
 
     /* SPEC 068 \u2014 HOME, on the same made state: three open, one late, one

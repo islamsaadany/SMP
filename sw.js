@@ -618,12 +618,16 @@
    way, and the Setup menu line "Planning & reporting". The built file's
    bytes changed (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-/* v7.08-ask-and-apply — §621: a floating box asks first with the impact;
+/* v7.08-instant-moves — §620: every press shows something at once; the
+   files a page waits on carry their hash and are cached for good. The served
+   files' bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v7.09-ask-and-apply — §621: a floating box asks first with the impact;
    colours and scoring bands wait for Apply with an Undo; End in Mind has its
    own tick; the Terminology page is gone. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.08-ask-and-apply";
+const SHELL = "smp-shell-v7.09-ask-and-apply";
 const ASSETS = [
   "/",
   "/index.html",

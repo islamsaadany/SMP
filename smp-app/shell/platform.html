@@ -489,6 +489,38 @@
      question — how tall is a card in this grid before there is a client in
      it — and two spellings of one answer is how they come to differ. */
   .ccard.add, .ccard.skel{ min-height:152px }
+
+  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ───────────────────────────
+     Islam: "the navigation between the apges needs to be momentairly", and
+     of the mockup (design-mockups/instant-navigation/): "yes build it". A tab
+     pressed for the first time used to say "Reading…" in a blank page for a
+     round trip; it shows its own shape in grey now, in the bars the
+     platform's boot skeleton already uses (§94.10: --line, a 6px corner, the
+     slow pulse), and the real page replaces it when the answers land.
+     Clients keeps the waiting cards it has had since §371. */
+  .tsk{ display:flex; flex-direction:column; gap:14px }
+  .tsk .b{ display:block; flex:none; height:13px; border-radius:6px; background:var(--line); animation:tskpulse 1.5s ease-in-out infinite }
+  .tsk .q{ background:var(--surface-2) }
+  .tsk .t{ height:20px } .tsk .p{ height:24px; border-radius:999px } .tsk .k{ height:32px; border-radius:8px }
+  .tsk .r{ display:flex; align-items:center; gap:12px; min-width:0 } .tsk .c{ display:flex; flex-direction:column; gap:10px; min-width:0 }
+  .tsk .grow{ flex:1; min-width:0 }
+  .tsk .box{ border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 16px }
+  .tsk .head{ padding-bottom:12px; border-bottom:1px solid var(--line) }
+  .tsk .th{ height:34px; border-radius:8px 8px 0 0; background:var(--surface-2); border:1px solid var(--line) }
+  .tsk .tr{ display:flex; align-items:center; gap:18px; padding:12px 14px; border:1px solid var(--line); border-top:0; background:var(--surface) }
+  .tsk .ln{ padding:11px 0; border-bottom:1px solid var(--line-soft) }
+  @keyframes tskpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
+  @media (prefers-reduced-motion:reduce){ .tsk .b{ animation:none; opacity:.75 } }
+  @media (max-width:760px){ .tsk .hide-narrow{ display:none } }
+
+  /* ── A TAB AS YOU LEFT IT (§620) — the console's saved copy, shown at once
+     on arriving and on a tab's first visit, until the latest copy replaces
+     it: the client page's own mark (§431's "Updating…"), and nothing on it
+     can be pressed meanwhile (`inert`). */
+  .stale{ display:inline-flex; align-items:center; font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--ink-3);
+    border:1px solid var(--line); border-radius:999px; padding:2px 10px; white-space:nowrap; background:var(--surface) }
+  .staleline{ display:flex; justify-content:flex-end; margin:0 0 10px }
+  #page[inert]{ cursor:progress }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -1531,6 +1563,8 @@
      than a second copy that could drift — it is the one piece of the memory
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
+<!-- §620: the next page's shape, drawn at the press (smp-app/lib/navskel.ts) -->
+<script src="/navskel.js"></script>
 <script src="/memory-split.js"></script>
 <script src="/case-split.js"></script>
 <!-- The client set-up flow (§360, spec 057): one file for this page and the

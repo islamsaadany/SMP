@@ -44,6 +44,23 @@ export function stampedFiles(root = APP){
     .sort();
 }
 
+/* §620 — THE FILES A PAGE WAITS ON, EACH BY WHAT IT HOLDS. Islam: "the
+   navigation between the pages needs to be momentarily". Every one of these
+   was served `max-age=0`, so every page load asked the server about each of
+   them again before it could paint — one more round trip (about half a
+   second on production) on every move between pages, for files that had not
+   changed. Each gets its own hash, the server writes it into the address
+   (lib/shell.ts `versioned`), and an address that carries one is cached for
+   good (next.config.ts): a release changes the hash, so nobody ever runs a
+   stale copy, and nobody asks again about one that did not change.
+   Per file, not the release stamp: a release that changes only the console
+   must not make every Strategy page download its 5 MB script again. */
+export const VERSIONED = ["platform.css", "theme.js", "shell.js", "platform-page.js", "client-setup.js", "memory-split.js", "case-split.js"];
+export function assetStamps(root = APP){
+  const out = {};
+  for (const f of VERSIONED) out["/" + f] = createHash("sha256").update(readFileSync(join(root, "public", f))).digest("hex").slice(0, 12);
+  return out;
+}
 export function releaseStamp(root = APP){
   const h = createHash("sha256");
   for (const r of stampedFiles(root)) {

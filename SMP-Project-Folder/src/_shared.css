@@ -714,7 +714,7 @@
      accent itself is chosen to work as a fill on the page, and on the panel it
      is 2.84:1 — the same pairing .banner strong already had to solve. */
   .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
-  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; white-space:pre-line; }
   .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
                border-top:3px solid var(--gold); background:var(--surface); }
   .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);

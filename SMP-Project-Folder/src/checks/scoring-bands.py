@@ -225,6 +225,16 @@ with sync_playwright() as p:
         grants[g] = (grants[g] || 0) + 1;
         if (g !== "edit" && !found) found = p.key;
       }
+      /* Prefer somebody who DOES hold Setup but not this page: for them the
+         rail is drawn and the bands entry's absence is a real answer. Only
+         when nobody is like that does the first one without the grant stand. */
+      for (const p of PEOPLE) {
+        if (p.active === false) continue;
+        VIEWER = p.key;
+        if ((grant("c_bands") || "none") === "edit") continue;
+        leaveModes(); paint();
+        if (document.querySelector('[data-md="setup"]')) { found = p.key; break; }
+      }
       VIEWER = keep; paint();
       return {who: found, grants: grants}; }""")
     ck("the scale is one person's to set, not everybody's",
@@ -232,8 +242,14 @@ with sync_playwright() as p:
     if who["who"]:
         pg.evaluate("(k)=>{ VIEWER = k; leaveModes(); paint(); }", who["who"])
         pg.wait_for_timeout(600)
-        pg.evaluate("()=>document.querySelector('[data-md=\"setup\"]').click()")
+        # The first person found without the grant may hold no Setup page at
+        # all, and then the Setup button is not drawn for them (§42: a door
+        # nobody may use is not drawn). That is the page out of their reach a
+        # fortiori — so the button is pressed when it is there, and the three
+        # absences below are asserted either way, never skipped.
+        had_setup = pg.evaluate("()=>{ const b = document.querySelector('[data-md=\"setup\"]'); if (b) b.click(); return !!b; }")
         pg.wait_for_timeout(700)
+        print("      (%s)" % ("Setup opened for them" if had_setup else "they hold no Setup at all"))
         ck("the page is not in their rail at all",
            pg.eval_on_selector_all('[data-setupgo="bands"]', "n=>n.length") == 0)
         ck("no colour picker anywhere", pg.eval_on_selector_all(".bcol", "n=>n.length") == 0)

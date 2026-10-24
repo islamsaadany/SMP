@@ -1,0 +1,676 @@
+<title>Case Studies, Tracker Look</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: stacked drawings of the console, each a frame with the navy column
+   on the left and one Case studies page on the right, drawn in the Internal
+   Tracker's own language (smp-app/modules/tracker/page.ts, "the ledger"):
+   the navy band with its counts and view tabs, the gold write line, numbered
+   sections under a heavy rule, one-line rows, a row that opens in place.
+   Tokens are the console's (smp-app/shell/platform.html); the Tracker's gold
+   is the console's --amber-tx, as My work already translated it (§583). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-tx:#0F2C69;--ff-late:#FF9B8F;--ff-hover:rgba(255,255,255,.12);
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-late:#FF9B8F;--ff-hover:rgba(255,255,255,.12);
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-tx:#95A9CC;--ff-late:#FF9B8F;--ff-hover:rgba(255,255,255,.12);
+  --ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the review page ── */
+.doc{max-width:1240px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.lede{max-width:80ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flag{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:16px 0 0}
+.ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;line-height:1;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.changes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;margin-top:22px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.note h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink);font-weight:600}
+.cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:42px 0 10px}
+.cap .n{font-size:12px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums}
+.cap h2{margin:0;font-size:17px;font-weight:600}
+.cap p{margin:0;flex-basis:100%;color:var(--ink-2);font-size:14px;max-width:84ch}
+.cap p b{color:var(--ink);font-weight:600}
+
+/* ═══ THE CONSOLE FRAME (§601) ═══ */
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.app{display:flex;background:var(--ground);color:var(--ink);font-size:15px}
+.side{width:232px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:8px;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px;color:var(--ff-quiet)}
+.snav{padding:10px 10px 12px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;color:var(--ff-quiet);font-size:14px;font-weight:600;line-height:1;padding:10px;border-radius:8px;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 12px 14px 14px;border-top:1px solid var(--ff-rule)}
+.av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--ff-on);color:var(--ff-ink);font:700 11px/30px var(--mono);text-align:center}
+.swho{min-width:0;display:flex;flex-direction:column;gap:3px}
+.swho b{font-size:13px;font-weight:600;color:var(--ff-ink);line-height:1.1}
+.swho i{font-style:normal;font-size:11.5px;color:var(--ff-quiet);line-height:1.1}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtop{display:none}
+.pg{padding:20px 22px 40px;max-width:1040px;width:100%}
+
+/* ═══ THE TRACKER'S LEDGER, in the console's tokens ═══ */
+/* the band: what this is, the counts, the views */
+.mast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;box-shadow:inset 0 -3px 0 var(--amber)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font-size:11px;font-weight:600;line-height:1.3;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 7px}
+.mast h1{margin:0;font-size:24px;font-weight:600;line-height:1.15;letter-spacing:-.01em;color:var(--ff-ink);text-wrap:balance}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.tile{text-align:right;min-height:48px}
+.tile b{display:block;font-size:22px;font-weight:600;line-height:1;color:var(--ff-ink)}
+.tile span{display:block;font-size:10.5px;font-weight:600;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px;white-space:nowrap}
+.tile.hot b{color:var(--amber)}
+.tile.late b{color:var(--ff-late)}
+.cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
+.cats a{font-size:13.5px;font-weight:600;line-height:1;color:var(--ff-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none;white-space:nowrap}
+.cats a[aria-current="true"]{color:var(--ff-ink);border-bottom-color:var(--amber)}
+.cats a:hover,.cats a:focus-visible{color:var(--ff-ink);outline:none}
+.cats .sp{flex:1}
+.cats .who-line{align-self:center;margin-bottom:9px;font-size:13px;color:var(--ff-quiet);padding:0 4px}
+.cats .who-line b{color:var(--ff-ink);font-weight:600}
+.mb{align-self:center;margin-bottom:9px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;line-height:1;color:var(--ff-quiet);padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer;white-space:nowrap}
+.mb b{color:var(--ff-ink);font-weight:600}
+.mb svg.i{width:12px;height:12px}
+.mb:hover,.mb:focus-visible{background:var(--ff-hover);color:var(--ff-ink);outline:none}
+.mb.gold{color:var(--amber);font-weight:600}
+.mb.fill{background:var(--amber);color:var(--amber-ink);font-weight:600;padding:7px 12px}
+.mb.fill:hover{background:var(--amber);color:var(--amber-ink);filter:brightness(1.05)}
+/* the tools: the gold write line, and the search */
+.tools{display:flex;gap:18px;align-items:stretch;margin:0 0 24px;flex-wrap:wrap}
+.write{flex:1 1 380px;min-width:0;display:flex;align-items:center;gap:10px;border-bottom:1.5px solid var(--gold);padding:6px 2px}
+.write svg.i{width:16px;height:16px;color:var(--gold)}
+.write input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;line-height:1.35;padding:2px 0;outline:none}
+.write input::placeholder{color:var(--ink-3)}
+.find{display:flex;align-items:center;gap:8px;flex:0 1 240px;min-width:0;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--ink-3)}
+.find svg.i{width:14px;height:14px}
+.find input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:14px;padding:2px 0;outline:none}
+.find input::placeholder{color:var(--ink-3)}
+.find .go{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+/* the opening line: the write line with its details arrived (Tracker §356.16) */
+.addrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto auto auto;gap:14px;align-items:center;padding:6px 0;border-bottom:1.5px solid var(--gold)}
+.addrow .plus{color:var(--gold);display:grid;place-items:center}
+.addrow .plus svg.i{width:15px;height:15px}
+.addrow input{border:0;background:transparent;color:var(--ink);font-size:15px;line-height:1.35;padding:2px 0;width:100%;min-width:0;outline:none}
+.pk{font-size:13px;font-weight:600;line-height:1.4;color:var(--ink-3);white-space:nowrap;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:6px;cursor:pointer}
+.pk .w{text-decoration:underline dotted;text-underline-offset:3px}
+.pk.set{color:var(--gold)}
+.pk.set .w{text-decoration:underline solid 1.5px}
+.pk:hover,.pk:focus-visible{background:var(--surface-2);outline:none}
+.addhint{font-size:12.5px;line-height:1.5;color:var(--ink-3);padding:7px 0 0 34px;margin:0 0 24px}
+/* a section: a numbered head under a heavy rule */
+.sec{margin:0 0 26px}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font-size:12px;font-weight:600;line-height:1;color:var(--gold);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.sh h2{margin:0;font-size:17px;font-weight:600;line-height:1.2;min-width:0}
+.sh .meta{font-size:13px;line-height:1;color:var(--ink-3)}
+.sh .end{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.sh.quiet{border-bottom-color:var(--line)}
+.sh.quiet h2{color:var(--ink-2);font-weight:500;font-style:italic}
+.foot{display:flex;gap:16px;padding:10px 0 0 32px;font-size:13px;font-weight:500;line-height:1.4;color:var(--ink-3)}
+.foot b{color:var(--gold);font-weight:600}
+.asleep{font-size:13.5px;line-height:1.5;color:var(--ink-3);font-style:italic;padding:10px 0 0;margin:0}
+.textlink{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--gold);cursor:pointer;text-decoration:none;white-space:nowrap}
+.textlink:hover{text-decoration:underline}
+/* the pieces every row is made of */
+.tc{display:inline-flex;align-items:center;gap:6px;max-width:100%;overflow:hidden;white-space:nowrap;font-size:12.5px;font-weight:500;line-height:1;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px;justify-self:end}
+.tc span{overflow:hidden;text-overflow:ellipsis}
+.tc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+.tc.ff::before{background:var(--ff-tx)}
+.tc.arch{background:transparent;border:1px dashed var(--line)}
+.when{font-size:13px;font-weight:500;line-height:1.4;color:var(--ink-2);white-space:nowrap}
+.when.due{color:var(--gold);font-weight:600}
+.when.late{color:var(--bad);font-weight:600}
+.who{font-size:13px;font-weight:500;line-height:1.4;color:var(--ink-2);white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:7px;height:26px;font-size:11px;font-weight:600;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.st::before{content:"";width:12px;height:2px;background:currentColor;flex:none}
+.st.prog{color:var(--gold)}
+.st.done{color:var(--good)}
+.more{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--ink-3);justify-self:end}
+.more svg.i{width:14px;height:14px}
+.on-row .more svg{transform:rotate(180deg)}
+.mk{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3)}
+.mk svg.i{width:16px;height:16px}
+.t{min-width:0;font-size:15px;line-height:1.35;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;overflow-wrap:anywhere}
+.t small{font-size:12.5px;color:var(--ink-3)}
+/* a piece of work: mark · name · client · when · writer · state · way in */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 168px 112px 70px 104px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.row:hover,.irow:hover{background:var(--surface-2);box-shadow:-8px 0 0 var(--surface-2),8px 0 0 var(--surface-2)}
+/* an insight: name · client · month · author · kind · open */
+.irow{display:grid;grid-template-columns:minmax(0,1fr) 168px 76px 70px 96px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.irow.inside{grid-template-columns:minmax(0,1fr) 76px 70px 96px 26px}
+.on-row{background:var(--surface);border-bottom-color:transparent}
+.open{display:grid;grid-template-columns:1.5fr 1fr;gap:22px;padding:6px 4px 16px 0;border-bottom:1px solid var(--line-soft);background:var(--surface);box-shadow:-8px 0 0 var(--surface),8px 0 0 var(--surface)}
+.open .lab{display:block;font-size:10.5px;font-weight:600;line-height:1.7;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 3px}
+.open .lab:first-child{margin-top:4px}
+.open p{margin:0;font-size:14.5px;line-height:1.6;max-width:62ch}
+.open .side-facts p{font-size:14px;color:var(--ink-2)}
+.open .acts{display:flex;gap:14px;padding-top:14px;flex-wrap:wrap}
+/* the case study's own sections */
+.prose{padding:12px 0 0}
+.prose p{margin:0;font-size:15px;line-height:1.65;max-width:68ch}
+.prose p.lead{font-size:17px;line-height:1.6}
+.prow{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 150px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.prow .nm{font-size:15px;font-weight:600}
+.prow .rl{font-size:14px;color:var(--ink-2)}
+.trow{display:grid;grid-template-columns:132px minmax(0,1fr);gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.trow .st-name{font-size:15px}
+.drow{display:grid;grid-template-columns:20px minmax(0,1fr) 84px 228px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.drow .nm{display:block;font-size:15px;line-height:1.35}
+.drow .wh{display:block;font-size:13px;color:var(--ink-3);line-height:1.45;margin-top:1px}
+.file{justify-self:end;display:inline-flex;align-items:center;gap:7px;max-width:100%;min-width:0;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--surface);color:var(--ink-2);font-size:12.5px;font-weight:500;line-height:1.2;cursor:pointer}
+.file:hover{border-color:var(--gold);color:var(--ink)}
+.file span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file svg.i{width:14px;height:14px;color:var(--gold)}
+.nofile{justify-self:end;font-size:13px;color:var(--warn);font-style:italic}
+.attach{justify-self:end;display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--gold);border-radius:999px;padding:5px 11px;background:transparent;color:var(--gold);font-size:12.5px;font-weight:600;cursor:pointer}
+.attach svg.i{width:14px;height:14px}
+.qrow{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.qrow .nm{font-size:15px;font-weight:600}
+.qrow .rl{font-size:14px;color:var(--ink-2)}
+/* the write-up: the prompt, the paste, the draft's boxes */
+.box{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 16px}
+.prompt{margin:0;font:400 12.5px/1.65 var(--mono);color:var(--ink-2);white-space:pre-wrap;overflow-x:auto;max-height:300px;overflow-y:auto}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;line-height:1.5;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--gold)}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.btn.solid{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.acts-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.muted{color:var(--ink-3);font-size:13px}
+.ta{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:9px 12px;font-size:14.5px;line-height:1.55;resize:vertical;margin-top:12px}
+.ta:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.ta.mono{font:400 13px/1.6 var(--mono);min-height:120px}
+.ta.empty{border-color:var(--warn);background:var(--warn-bg)}
+.inl{border:0;border-bottom:1px solid transparent;background:transparent;color:var(--ink);font:inherit;padding:1px 0;width:100%;min-width:0;outline:none}
+.inl:hover{border-bottom-color:var(--line)}
+.inl:focus-visible{border-bottom-color:var(--gold)}
+.said{margin:0 0 18px;padding:9px 13px;border:1px solid var(--good);border-radius:8px;background:var(--good-bg);color:var(--ink-2);font-size:13.5px}
+.said b{color:var(--good)}
+.warnline{font-size:13px;color:var(--warn);margin:8px 0 0}
+
+/* My work, verbatim from the console (§583) */
+.mwmast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:16px 20px 19px;margin:0 0 24px;box-shadow:inset 0 -3px 0 var(--amber)}
+.mwrow{display:grid;grid-template-columns:20px minmax(0,1fr) 160px 108px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.mwrow .t{display:block}
+.mwtick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);padding:0}
+.mwrow.late .mwtick{border-color:var(--bad)}
+.mwdoc{width:17px;height:17px;display:grid;place-items:center;color:var(--gold)}
+.mwdoc svg.i{width:17px;height:17px}
+.mwrow .st{width:128px}
+.mwrow .tc{justify-self:end}
+
+/* ── narrow: the console's slim bar, and the Tracker's two-line rows ── */
+@container (max-width:719px){
+  .side{display:none}
+  .mtop{display:flex;align-items:center;gap:10px;background:var(--ff);color:var(--ff-ink);padding:8px 12px;min-height:50px}
+  .mtop svg.i{width:20px;height:20px}
+  .mtop .mk2{font:700 12px/1 var(--mono);letter-spacing:.16em}
+  .mtop .here{margin-left:auto;font-size:13px;font-weight:600;color:var(--ff-quiet)}
+  .pg{padding:14px 12px 28px}
+  .mast,.mwmast{padding-left:16px;padding-right:16px}
+  .strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .tile{text-align:left;min-height:0}
+  .tile span{white-space:normal;line-height:1.3}
+  .row{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"mk t st more" ". when tc more";row-gap:7px;column-gap:10px}
+  .row .mk{grid-area:mk}.row .t{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when}.row .tc{grid-area:tc;justify-self:start}.row .more{grid-area:more}.row .who{display:none}
+  .irow,.irow.inside{grid-template-columns:minmax(0,1fr) auto 26px;grid-template-areas:"t st more" "when tc more";row-gap:7px;column-gap:10px}
+  .irow .t{grid-area:t}.irow .st{grid-area:st}.irow .when{grid-area:when}.irow .tc{grid-area:tc;justify-self:start}.irow .more{grid-area:more}.irow .who{display:none}
+  .irow.inside{grid-template-areas:"t st more" "when who more"}.irow.inside .who{display:block;grid-area:who}
+  .mwrow{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t st go" ". when tc go";row-gap:7px;column-gap:10px}
+  .mwrow > :first-child{grid-area:tick}.mwrow .t{grid-area:t}.mwrow .when{grid-area:when}.mwrow .tc{grid-area:tc;justify-self:start}.mwrow .st{grid-area:st;width:auto}.mwrow .more{grid-area:go}
+  .open{grid-template-columns:1fr;gap:4px}
+  .prow,.qrow{grid-template-columns:minmax(0,1fr) auto}
+  .prow .rl,.qrow .rl{grid-column:1 / -1;grid-row:2}
+  .trow{grid-template-columns:1fr;gap:2px}
+  .drow{grid-template-columns:20px minmax(0,1fr);row-gap:6px}
+  .drow .when{grid-column:2}
+  .drow .file,.drow .nofile,.drow .attach{grid-column:2;justify-self:start}
+  .addrow{grid-template-columns:20px minmax(0,1fr);row-gap:8px}
+  .addrow .pk{grid-column:2;justify-self:start}
+  .cats .who-line{flex-basis:100%;margin:0 0 6px}
+}
+</style>
+
+<div class="doc">
+  <h1>Case studies, in the Internal Tracker's look</h1>
+  <p class="lede">The same content as the first drawing, redrawn in the Internal Tracker's way of laying out a page: <b>the navy band</b> with the counts and the views, <b>the gold write line</b>, <b>numbered sections</b>, and <b>one-line rows that open in place</b>. Your three answers are in it: a piece of work is opened when it starts, the small entries stay <b>insights</b>, and a past client's card shows its case studies.</p>
+  <span class="flag">Nothing here is built · every client detail, name and file is invented for the drawing</span>
+  <div class="ctrls"><div class="ctrl"><span>Theme</span>
+    <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div></div>
+
+  <div class="changes">
+    <div class="note"><h2>What changes from the first drawing</h2><ul>
+      <li><b>Every page opens on the navy band</b>, as the Tracker and My work do: what it is, four counts, and the views as tabs.</li>
+      <li><b>Lists are one-line rows under numbered headings</b>, in place of cards and boxed labels. Done, To write and Running are the Tracker's status words.</li>
+      <li><b>One gold line does the writing.</b> On the list it asks the case studies. Under Insights, and inside a case study, it writes an insight. For an admin it opens a piece of work.</li>
+    </ul></div>
+    <div class="note"><h2>And inside a case study</h2><ul>
+      <li><b>The eight sections are numbered</b> like the Tracker's groups, so the order reads at a glance.</li>
+      <li><b>Team, timeline, deliverables and who to ask are rows</b>, not paragraphs. Each deliverable's file sits at the end of its line.</li>
+      <li><b>An insight opens under its own row</b>, as a Tracker action does, rather than on a page of its own.</li>
+    </ul></div>
+  </div>
+
+  <!-- ═══ 1 · THE LIST ═══ -->
+  <div class="cap" id="s1"><span class="n">1</span><h2>The list</h2>
+    <p>Grouped by where each piece of work is: to write, running, done. <b>Group by</b> also offers client and industry. <b>+ Open a piece of work</b> shows for admins only.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Every client · as of 23 Oct 2026</div><h1>Case studies</h1></div>
+          <div class="strip"><div class="tile"><b>2</b><span>To write</span></div><div class="tile"><b>1</b><span>Running</span></div><div class="tile"><b>2</b><span>Done</span></div><div class="tile hot"><b>12</b><span>To place</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s1" aria-current="true">Case studies</a><a href="#s2">Insights</a><a href="#s1">Mine</a><span class="sp"></span>
+          <button type="button" class="mb gold">+ Open a piece of work</button>
+          <button type="button" class="mb">Group by <b>State</b><svg class="i" viewBox="0 0 12 12"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button></nav>
+      </header>
+      <div class="tools">
+        <label class="write"><svg class="i" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></svg><input id="ask1" type="text" placeholder="Ask the case studies: we have hit this before, what happened?"></label>
+        <label class="find"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="f1" type="search" placeholder="Search"><span class="go">Search</span></label>
+      </div>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>To write</h2><span class="meta">2 · 1 due this week</span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Operating model 2023</span><span class="tc arch"><span>Nile Logistics</span></span><span class="when due">Due Fri 13 Nov</span><span class="who">Islam</span><span class="st prog">To write</span><span class="more" data-i="go"></span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Reporting cycle 2026, first half <small>7 insights</small></span><span class="tc"><span>Raya Trade</span></span><span class="when due">Due Fri 30 Oct</span><span class="who">Mohamed</span><span class="st prog">To write</span><span class="more" data-i="go"></span></div>
+      </section>
+      <section class="sec"><div class="sh"><span class="ix">02</span><h2>Running</h2><span class="meta">1</span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Capability review <small>3 insights so far</small></span><span class="tc"><span>El Abd Foods</span></span><span class="when">Since Aug 2026</span><span class="who">—</span><span class="st">Running</span><span class="more" data-i="go"></span></div>
+      </section>
+      <section class="sec"><div class="sh"><span class="ix">03</span><h2>Done</h2><span class="meta">2</span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Strategy build 2025 <small>6 deliverables · 4 insights</small></span><span class="tc"><span>Wander</span></span><span class="when">Jan – Jun 2025</span><span class="who">Islam</span><span class="st done">Done</span><span class="more" data-i="go"></span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Strategy refresh 2024 <small>5 deliverables · 2 insights</small></span><span class="tc"><span>Reliance Heavy Ind.</span></span><span class="when">Feb – May 2024</span><span class="who">Mohamed</span><span class="st done">Done</span><span class="more" data-i="go"></span></div>
+      </section>
+      <section class="sec"><div class="sh quiet"><h2>Insights not yet in a case study</h2><span class="meta">12</span><span class="end"><button type="button" class="textlink">Place them ›</button></span></div>
+        <p class="asleep">Raya Trade 8 · El Abd Foods 3 · Reliance Heavy Industries 1 — written before case studies existed.</p>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 2 · INSIGHTS ═══ -->
+  <div class="cap" id="s2"><span class="n">2</span><h2>Insights</h2>
+    <p>Today's Memory list, as the second tab. Grouped by case study, so the twelve still to place sit together at the end. The gold line writes a new insight with its title, and the row opens for the four answers. One is shown open.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Every client · as of 23 Oct 2026</div><h1>Case studies</h1></div>
+          <div class="strip"><div class="tile"><b>26</b><span>Insights</span></div><div class="tile"><b>9</b><span>Hiccups</span></div><div class="tile"><b>10</b><span>Practices</span></div><div class="tile hot"><b>12</b><span>To place</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s1">Case studies</a><a href="#s2" aria-current="true">Insights</a><a href="#s2">Mine</a><span class="sp"></span>
+          <button type="button" class="mb gold">Write up a period</button>
+          <button type="button" class="mb">Group by <b>Case study</b><svg class="i" viewBox="0 0 12 12"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button></nav>
+      </header>
+      <div class="tools">
+        <label class="write"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg><input id="w2" type="text" placeholder="Write an insight and press Enter"></label>
+        <label class="find"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="f2" type="search" placeholder="Search"><span class="go">Search</span></label>
+      </div>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>Strategy build 2025</h2><span class="meta">Wander · 4</span></div>
+        <div class="irow on-row"><span class="t">The weighting workshop ran twice because the CEO was not in the first one</span><span class="tc"><span>Wander</span></span><span class="when">Feb 2025</span><span class="who">Islam</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <div class="open">
+          <div><span class="lab">What happened</span><p>We agreed the pillar weights with the unit heads, and the CEO changed two of them the following week.</p>
+            <span class="lab">What we did</span><p>Ran it again with the CEO in the room, and sent the agenda to his office first.</p>
+            <span class="lab">What came of it</span><p>Two weeks lost, and the unit heads stopped treating the first workshop as final.</p>
+            <span class="lab">What the next person should know</span><p>Do not run a weighting session without the person who signs off on the weights.</p></div>
+          <div class="side-facts"><span class="lab">Written by</span><p>Islam Saadany</p><span class="lab">In</span><p>Strategy build 2025</p>
+            <div class="acts"><button type="button" class="textlink">Ask Islam</button><button type="button" class="textlink">Edit</button></div></div>
+        </div>
+        <div class="irow"><span class="t">Interview the CFO before the first workshop, not after it</span><span class="tc"><span>Wander</span></span><span class="when">Jan 2025</span><span class="who">Mohamed</span><span class="st">Practice</span><span class="more" data-i="down"></span></div>
+        <div class="irow"><span class="t">Unit heads accept group targets faster when they draft their own first</span><span class="tc"><span>Wander</span></span><span class="when">Apr 2025</span><span class="who">Mohamed</span><span class="st">Lesson</span><span class="more" data-i="down"></span></div>
+        <p class="foot"><button type="button" class="textlink" style="color:var(--ink-3)"><b>1 more</b> ›</button></p>
+      </section>
+      <section class="sec"><div class="sh"><span class="ix">02</span><h2>Reporting cycle 2026, first half</h2><span class="meta">Raya Trade · 7</span></div>
+        <div class="irow"><span class="t">Unit heads reported late in the first cycle because the reminder went to their assistants</span><span class="tc"><span>Raya Trade</span></span><span class="when">Mar 2026</span><span class="who">Mohamed</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <p class="foot"><button type="button" class="textlink" style="color:var(--ink-3)"><b>6 more</b> ›</button></p>
+      </section>
+      <section class="sec"><div class="sh quiet"><h2>Not yet in a case study</h2><span class="meta">12</span></div>
+        <div class="irow"><span class="t">Two units used different definitions of on-time delivery</span><span class="tc"><span>Raya Trade</span></span><span class="when">Sep 2025</span><span class="who">Islam</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <p class="foot"><button type="button" class="textlink" style="color:var(--ink-3)"><b>11 more</b> ›</button></p>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 3 · ONE CASE STUDY ═══ -->
+  <div class="cap" id="s3"><span class="n">3</span><h2>One case study</h2>
+    <p>The page a new joiner reads, top to bottom. The tabs in the band jump to a section. The column's Case studies tab is the way back, as the top bar is on the Tracker.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Wander · Real Estate &amp; Property · Jan – Jun 2025</div><h1>Strategy build 2025</h1></div>
+          <div class="strip"><div class="tile"><b>6</b><span>Months</span></div><div class="tile"><b>6</b><span>Deliverables</span></div><div class="tile"><b>4</b><span>Insights</span></div><div class="tile"><b>5</b><span>People</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s3" aria-current="true">The story</a><a href="#s3">Team</a><a href="#s3">Deliverables</a><a href="#s3">Who to ask</a><a href="#s3">Insights</a><span class="sp"></span>
+          <span class="who-line">Done · written by <b>Islam Saadany</b>, 14 Jul 2025</span><button type="button" class="mb">Edit</button></nav>
+      </header>
+
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>In short</h2></div>
+        <div class="prose"><p class="lead">Wander asked us for a five-year strategy after two years of fast growth had left each business unit planning on its own. Over six months we built one group strategy with three business-unit plans under it, a scorecard of 24 measures, and the reporting routine. The board approved it in June 2025, and Wander ran its first quarterly review in September without us.</p></div></section>
+      <section class="sec"><div class="sh"><span class="ix">02</span><h2>The client and why they came to us</h2></div>
+        <div class="prose"><p>Wander develops and manages residential and holiday property. Growth had come project by project, and by 2024 each business unit set its own targets. The new CEO wanted one direction the board could hold the units to.</p></div></section>
+      <section class="sec"><div class="sh"><span class="ix">03</span><h2>What we were asked to do</h2></div>
+        <div class="prose"><p>Build the group strategy and the three business-unit plans under it, agree the measures the board would track, and set up quarterly reporting so the team could run it alone.</p></div></section>
+      <section class="sec"><div class="sh"><span class="ix">04</span><h2>The team</h2><span class="meta">2 of ours · 3 of theirs</span></div>
+        <div class="prow"><span class="nm">Islam Saadany</span><span class="rl">Engagement lead</span><span class="tc ff"><span>Forefront</span></span></div>
+        <div class="prow"><span class="nm">Mohamed Essam</span><span class="rl">Strategy consultant</span><span class="tc ff"><span>Forefront</span></span></div>
+        <div class="prow"><span class="nm">Karim A.</span><span class="rl">CEO, the sponsor</span><span class="tc"><span>Wander</span></span></div>
+        <div class="prow"><span class="nm">Dina M.</span><span class="rl">Head of Strategy, owned it day to day</span><span class="tc"><span>Wander</span></span></div>
+        <div class="prow"><span class="nm">Omar S.</span><span class="rl">CFO, owned the targets</span><span class="tc"><span>Wander</span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">05</span><h2>Timeline</h2><span class="meta">January to June 2025</span></div>
+        <div class="trow"><span class="when">Jan</span><span class="st-name">Interviews and the current-state review</span></div>
+        <div class="trow"><span class="when">Feb – Mar</span><span class="st-name">Group direction and pillars, two board workshops</span></div>
+        <div class="trow"><span class="when">Apr – May</span><span class="st-name">Business-unit plans and the scorecard</span></div>
+        <div class="trow"><span class="when">Jun</span><span class="st-name">Board approval and handover</span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">06</span><h2>Deliverables</h2><span class="meta">6 · 1 with no file</span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Current-state review</span><span class="wh">Findings from 22 interviews and three years of financials</span></span><span class="when">Jan 2025</span><span class="file" data-f="current-state-review.pdf"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Group strategy</span><span class="wh">Direction, four pillars and the five-year targets, as approved</span></span><span class="when">Mar 2025</span><span class="file" data-f="group-strategy-board.pptx"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Business-unit plans</span><span class="wh">One plan per unit, under the group pillars</span></span><span class="when">May 2025</span><span class="file" data-f="unit-plans-2025.pdf"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Scorecard</span><span class="wh">24 measures, each with an owner and a target</span></span><span class="when">May 2025</span><span class="file" data-f="scorecard-2025.xlsx"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Board approval pack</span><span class="wh">The pack the board signed off on 18 June</span></span><span class="when">Jun 2025</span><span class="file" data-f="board-pack-june.pdf"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><span class="nm">Reporting playbook</span><span class="wh">How to run a quarterly review, step by step</span></span><span class="when">Jun 2025</span><span class="nofile">No file attached</span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">07</span><h2>What came of it</h2></div>
+        <div class="prose"><p>The board approved the strategy on 18 June 2025. Wander ran its first quarterly review in September without us, and 21 of the 24 measures were reported on time.</p></div></section>
+      <section class="sec"><div class="sh"><span class="ix">08</span><h2>Who to ask</h2></div>
+        <div class="qrow"><span class="nm">Islam Saadany</span><span class="rl">The board workshops, and how the targets were agreed with the CFO</span><button type="button" class="textlink">Ask Islam</button></div>
+        <div class="qrow"><span class="nm">Mohamed Essam</span><span class="rl">The business-unit plans, and how the scorecard was built</span><button type="button" class="textlink">Ask Mohamed</button></div></section>
+      <section class="sec"><div class="sh"><span class="ix">09</span><h2>Insights from this work</h2><span class="meta">4</span></div>
+        <div class="irow inside"><span class="t">The weighting workshop ran twice because the CEO was not in the first one</span><span class="when">Feb 2025</span><span class="who">Islam</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Interview the CFO before the first workshop, not after it</span><span class="when">Jan 2025</span><span class="who">Mohamed</span><span class="st">Practice</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Unit heads accept group targets faster when they draft their own first</span><span class="when">Apr 2025</span><span class="who">Mohamed</span><span class="st">Lesson</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Hand the reporting playbook over a month before the end</span><span class="when">Jun 2025</span><span class="who">Islam</span><span class="st">Practice</span><span class="more" data-i="down"></span></div></section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 4 · WHILE THE WORK RUNS ═══ -->
+  <div class="cap" id="s4"><span class="n">4</span><h2>While the work runs</h2>
+    <p>Opened when the work starts (your answer 1). The eight sections wait for the end, as one quiet line. Insights are written here with the gold line as the work goes. An admin presses <b>Ask for the write-up</b> when it ends.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">El Abd Foods · Food &amp; Beverage · since Aug 2026</div><h1>Capability review</h1></div>
+          <div class="strip"><div class="tile"><b>3</b><span>Months so far</span></div><div class="tile"><b>3</b><span>Insights</span></div><div class="tile"><b>2</b><span>Of ours</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s4" aria-current="true">Insights</a><a href="#s4">Team</a><span class="sp"></span>
+          <span class="who-line">Running · opened by <b>Mohamed Essam</b></span><button type="button" class="mb">Edit</button><button type="button" class="mb fill">Ask for the write-up</button></nav>
+      </header>
+      <div class="tools">
+        <label class="write"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg><input id="w4" type="text" placeholder="Write an insight and press Enter"></label>
+      </div>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>Insights so far</h2><span class="meta">3</span></div>
+        <div class="irow inside"><span class="t">Agree which capabilities are strategic before scoring any of them</span><span class="when">Oct 2026</span><span class="who">Mohamed</span><span class="st">Lesson</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">The maturity scale meant different things to sales and to operations</span><span class="when">Sep 2026</span><span class="who">Mohamed</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Score each capability with the plant managers in the room, not from the reports</span><span class="when">Sep 2026</span><span class="who">Islam</span><span class="st">Practice</span><span class="more" data-i="down"></span></div>
+      </section>
+      <section class="sec"><div class="sh quiet"><h2>The case study</h2><span class="meta">eight sections</span></div>
+        <p class="asleep">Written when the work ends.</p></section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 5 · OPENING A PIECE OF WORK ═══ -->
+  <div class="cap" id="s5"><span class="n">5</span><h2>Opening a piece of work</h2>
+    <p>Admins only. <b>+ Open a piece of work</b> turns the gold line into the opening line: type the name, and the client, the months and the writer arrive beside it, as the Tracker's topic, week and owner do. For past work, set a writer and it goes straight onto their My work.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Every client · as of 23 Oct 2026</div><h1>Case studies</h1></div>
+          <div class="strip"><div class="tile"><b>2</b><span>To write</span></div><div class="tile"><b>1</b><span>Running</span></div><div class="tile"><b>2</b><span>Done</span></div><div class="tile hot"><b>12</b><span>To place</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s1" aria-current="true">Case studies</a><a href="#s2">Insights</a><a href="#s1">Mine</a><span class="sp"></span>
+          <button type="button" class="mb">Cancel</button>
+          <button type="button" class="mb">Group by <b>State</b><svg class="i" viewBox="0 0 12 12"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button></nav>
+      </header>
+      <div class="addrow"><span class="plus" data-i="plus"></span><input id="o1" type="text" value="Operating model 2023" aria-label="Name of the work">
+        <button type="button" class="pk set"><span class="w">Nile Logistics</span> ⌄</button>
+        <button type="button" class="pk set"><span class="w">Mar – Nov 2023</span></button>
+        <button type="button" class="pk set">Writer <span class="w">Islam</span></button>
+        <button type="button" class="pk set">Due <span class="w">Fri 13 Nov</span></button></div>
+      <p class="addhint">Press Enter to open it. Leave the writer empty while the work is still running. The client list includes archived clients.</p>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>To write</h2><span class="meta">1</span></div>
+        <div class="row"><span class="mk" data-i="book"></span><span class="t">Reporting cycle 2026, first half <small>7 insights</small></span><span class="tc"><span>Raya Trade</span></span><span class="when due">Due Fri 30 Oct</span><span class="who">Mohamed</span><span class="st prog">To write</span><span class="more" data-i="go"></span></div>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 6 · ON MY WORK ═══ -->
+  <div class="cap" id="s6"><span class="n">6</span><h2>On My work</h2>
+    <p>Unchanged from the first drawing, because My work is already in the Tracker's look. A write-up sits among your actions by its due date, with a page mark where the tick is: it is finished on the case study.</p></div>
+  <div class="frame"><div class="app" data-on="mywork">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mwmast"><div class="mrow">
+        <div><div class="wkof">Week of 19 Oct 2026</div><h1 style="margin:0;font-size:24px;font-weight:600;line-height:1.15;color:var(--ff-ink)">My work <span style="font-size:13px;color:var(--ff-quiet);margin-left:8px">Islam Saadany</span></h1></div>
+        <div class="strip"><div class="tile"><b>6</b><span>Open actions</span></div><div class="tile late"><b>1</b><span>Late</span></div><div class="tile"><b>3</b><span>Due this week</span></div><div class="tile"><b>4</b><span>Clients</span></div></div>
+      </div></header>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>This week</h2><span class="meta">3</span></div>
+        <div class="mwrow"><button type="button" class="mwtick" aria-label="Done"></button><span class="t">Prepare the plant managers' scoring session</span><span class="tc"><span>El Abd Foods</span></span><span class="when">Thu 22 Oct</span><span class="st">Not started</span><span class="more" data-i="go"></span></div>
+        <div class="mwrow"><span class="mwdoc" data-i="book" title="A case study to write"></span><span class="t">Write up the case study · <b>Operating model 2023</b></span><span class="tc"><span>Nile Logistics</span></span><span class="when">Fri 23 Oct</span><span class="st prog">Case study</span><span class="more" data-i="go"></span></div>
+        <div class="mwrow"><button type="button" class="mwtick" aria-label="Done"></button><span class="t">Review the unit heads' draft targets</span><span class="tc"><span>Wander</span></span><span class="when">Sun 25 Oct</span><span class="st prog">In progress</span><span class="more" data-i="go"></span></div>
+      </section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 7 · WRITING IT UP ═══ -->
+  <div class="cap" id="s7"><span class="n">7</span><h2>Writing it up</h2>
+    <p>Opened from My work. Two numbered steps on one page: copy the prompt and talk it through with any assistant, then paste the whole answer back. The prompt already holds the client, the months and the team, and ends by asking for the insights too.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Nile Logistics · archived · Mar – Nov 2023</div><h1>Operating model 2023</h1></div>
+          <div class="strip"><div class="tile"><b>9</b><span>Months</span></div><div class="tile"><b>2</b><span>Of ours</span></div><div class="tile hot"><b>21</b><span>Days left</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s7" aria-current="true">Interview</a><a href="#s8">Draft</a><span class="sp"></span>
+          <span class="who-line">To write · asked by <b>Mohamed Essam</b>, due Fri 13 Nov</span><button type="button" class="mb">Type it in instead</button></nav>
+      </header>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>Copy the prompt, and talk it through</h2></div>
+        <div class="box" style="margin-top:12px"><pre class="prompt" id="pr">I am writing up a case study for my consulting firm about a piece of
+work we finished. It will be read by consultants who have just joined
+and were not there.
+
+  Client:    Nile Logistics (Transportation)
+  The work:  Operating model 2023
+  When:      March 2023 to November 2023
+  Our team:  Islam Saadany, Mohamed Essam
+
+Interview me. Ask ONE question at a time and wait for my answer before
+asking the next one. Push back when my answer is vague, and do not move
+on until it would make sense to somebody who was not there.
+
+Ask me about, in this order:
+  · the client, and why they came to us
+  · what we were asked to do
+  · the client's people we worked with, and the role of each
+  · the main stages of the work, with the month of each
+  · every deliverable: its name, what it was, the month we handed it over
+  · what came of it
+  · for each of us on the team, what a new joiner should ask them about
+  · and last, one paragraph a new joiner should read first
+
+Then ask what went better than expected, what cost us time, what I know
+now that I did not at the start, and what I would warn the next
+consultant about. For each, ask what happened, what we did, what came of
+it, and what the next person should know.
+
+When I say I am done, write it back in exactly this shape and nothing else:
+
+=== IN SHORT
+=== THE CLIENT AND WHY THEY CAME TO US
+=== WHAT WE WERE ASKED TO DO
+=== THEIR TEAM            (one line each: name · role)
+=== TIMELINE              (one line each: month · stage)
+=== DELIVERABLES          (one line each: name · what it was · month)
+=== WHAT CAME OF IT
+=== WHO TO ASK            (one line each: name · what to ask them about)
+
+and then each insight as a block:
+
+===
+KIND: hiccup | practice | lesson
+TITLE: one line, the thing itself
+WHEN: the month
+WHAT HAPPENED: ...
+WHAT WE DID: ...
+WHAT CAME OF IT: ...
+WHAT THE NEXT PERSON SHOULD KNOW: ...
+===
+
+Use my words, not yours. If I only half answered something, leave that
+line out rather than filling it in.</pre></div>
+        <div class="acts-row"><button type="button" class="btn solid" id="copy">Copy the prompt</button><span class="muted" id="copied"></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">02</span><h2>Paste what came back</h2></div>
+        <textarea class="ta mono" id="paste" aria-label="Paste what came back">=== IN SHORT
+Nile Logistics asked us to redesign how its three regional depots were run after two years of missed delivery targets. We moved planning to one central team, set five shared measures and…
+=== THE CLIENT AND WHY THEY CAME TO US
+…</textarea>
+        <div class="acts-row"><button type="button" class="btn amber">Read it into the draft</button></div></section>
+    </div></div>
+  </div></div>
+
+  <!-- ═══ 8 · THE DRAFT ═══ -->
+  <div class="cap" id="s8"><span class="n">8</span><h2>The draft</h2>
+    <p>The same numbered sections as the finished case study, each ready to change, so the writer sees the page a new joiner will read. Files are attached on each deliverable's line. Nothing is saved until <b>Save the draft</b>, and nobody else sees it until <b>Mark it done</b>.</p></div>
+  <div class="frame"><div class="app" data-on="cases">
+    <aside class="side"></aside>
+    <div class="main"><div class="mtop"></div><div class="pg">
+      <header class="mast">
+        <div class="mrow">
+          <div><div class="wkof">Nile Logistics · archived · Mar – Nov 2023</div><h1>Operating model 2023</h1></div>
+          <div class="strip"><div class="tile"><b>7<small style="font-size:14px;color:var(--ff-quiet)">/8</small></b><span>Sections</span></div><div class="tile"><b>4</b><span>Deliverables</span></div><div class="tile late"><b>2</b><span>No file</span></div><div class="tile"><b>3</b><span>Insights</span></div></div>
+        </div>
+        <nav class="cats"><a href="#s7">Interview</a><a href="#s8" aria-current="true">Draft</a><span class="sp"></span>
+          <button type="button" class="mb">Save the draft</button><button type="button" class="mb fill">Mark it done</button></nav>
+      </header>
+      <p class="said"><b>Read 7 of 8 sections and 3 insights.</b> What came of it came back empty, and two deliverables have no file yet.</p>
+      <section class="sec"><div class="sh"><span class="ix">01</span><h2>In short</h2></div>
+        <textarea class="ta" id="d1" rows="3" aria-label="In short">Nile Logistics asked us to redesign how its three regional depots were run after two years of missed delivery targets. We moved planning to one central team, set five shared measures and ran the first two monthly reviews with them. On-time delivery went from 71% to 88% by the end of the year.</textarea></section>
+      <section class="sec"><div class="sh"><span class="ix">02</span><h2>The client and why they came to us</h2><span class="meta">62 words</span><span class="end"><span class="more" data-i="down"></span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">03</span><h2>What we were asked to do</h2><span class="meta">48 words</span><span class="end"><span class="more" data-i="down"></span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">04</span><h2>The team</h2><span class="meta">2 of ours · 3 of theirs</span><span class="end"><span class="more" data-i="down"></span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">05</span><h2>Timeline</h2><span class="meta">4 stages</span><span class="end"><span class="more" data-i="down"></span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">06</span><h2>Deliverables</h2><span class="meta">4 · 2 with no file</span><span class="end"><button type="button" class="textlink">+ Add one</button></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><input class="inl" id="dn1" value="Depot diagnostic" aria-label="Name" style="font-size:15px"><input class="inl" id="dw1" value="Visits and figures from all three depots" aria-label="What it was" style="font-size:13px;color:var(--ink-3)"></span><span class="when">Apr 2023</span><span class="file" data-f="depot-diagnostic.pdf"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><input class="inl" id="dn2" value="Operating model design" aria-label="Name" style="font-size:15px"><input class="inl" id="dw2" value="Central planning team, roles and the weekly rhythm" aria-label="What it was" style="font-size:13px;color:var(--ink-3)"></span><span class="when">Jul 2023</span><button type="button" class="attach"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Attach the file</button></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><input class="inl" id="dn3" value="Five shared measures" aria-label="Name" style="font-size:15px"><input class="inl" id="dw3" value="Definitions, owners and targets" aria-label="What it was" style="font-size:13px;color:var(--ink-3)"></span><span class="when">Aug 2023</span><span class="file" data-f="shared-measures.xlsx"></span></div>
+        <div class="drow"><span class="mk" data-i="doc"></span><span><input class="inl" id="dn4" value="Monthly review pack" aria-label="Name" style="font-size:15px"><input class="inl" id="dw4" value="The template the depots now report on" aria-label="What it was" style="font-size:13px;color:var(--ink-3)"></span><span class="when">Oct 2023</span><button type="button" class="attach"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Attach the file</button></div></section>
+      <section class="sec"><div class="sh"><span class="ix">07</span><h2>What came of it</h2></div>
+        <textarea class="ta empty" id="d7" rows="2" aria-label="What came of it" placeholder="Nothing came back for this. Type it in, or leave it empty and it will not be shown."></textarea></section>
+      <section class="sec"><div class="sh"><span class="ix">08</span><h2>Who to ask</h2><span class="meta">2</span><span class="end"><span class="more" data-i="down"></span></span></div></section>
+      <section class="sec"><div class="sh"><span class="ix">09</span><h2>Insights from the interview</h2><span class="meta">3 · saved with the case study</span></div>
+        <div class="irow inside"><span class="t">The depot managers heard about central planning from their drivers first</span><span class="when">May 2023</span><span class="who">Islam</span><span class="st prog">Hiccup</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Run the first monthly review in a depot, not at head office</span><span class="when">Sep 2023</span><span class="who">Islam</span><span class="st">Practice</span><span class="more" data-i="down"></span></div>
+        <div class="irow inside"><span class="t">Five measures was the most the depot managers would look at</span><span class="when">Aug 2023</span><span class="who">Islam</span><span class="st">Lesson</span><span class="more" data-i="down"></span></div></section>
+    </div></div>
+  </div></div>
+
+  <p class="cap" style="margin-top:34px"><span class="n">·</span><span style="font-size:14px;color:var(--ink-2)">Adding a past client stays on the Clients page as in the first drawing: name, industry and size, created already archived, with a <b>Case studies</b> row on its card.</span></p>
+</div>
+
+<script>
+(function(){
+  var P = {
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    cases:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    book:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+    go:'<path d="m9 6 6 6-6 6"/>',
+    down:'<path d="m6 9 6 6 6-6"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')); });
+  document.querySelectorAll('[data-f]').forEach(function(e){ e.innerHTML = ic('doc') + '<span>' + e.getAttribute('data-f') + '</span>'; e.setAttribute('role','button'); e.setAttribute('tabindex','0'); });
+
+  /* Today's column (§601), with Memory renamed Case studies in its own place */
+  var GROUPS = [
+    { h:"Work",      items:[["mywork","My work"],["clients","Clients"]] },
+    { h:"Team",      items:[["consultants","Consultants"],["access","Who sees what"]] },
+    { h:"Knowledge", items:[["cases","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]] },
+    { items:[["history","History"]] }
+  ];
+  var NAMES = {}; GROUPS.forEach(function(g){ g.items.forEach(function(t){ NAMES[t[0]] = t[1]; }); });
+  document.querySelectorAll('.app').forEach(function(a){
+    var on = a.getAttribute('data-on');
+    a.querySelector('.side').innerHTML =
+      '<div class="brand"><span class="bmk">FOREFRONT</span><span class="nm">Platform</span></div>' +
+      '<nav class="snav" aria-label="Main menu">' + GROUPS.map(function(g){
+        return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){
+          return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>';
+        }).join('') + '</div>';
+      }).join('') + '</nav>' +
+      '<div class="me"><span class="av" aria-hidden="true">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
+    a.querySelector('.mtop').innerHTML = ic('menu') + '<span class="mk2">FOREFRONT</span><span class="here">' + NAMES[on] + '</span>';
+  });
+
+  var copy = document.getElementById('copy'), said = document.getElementById('copied');
+  copy.addEventListener('click', function(){
+    var pre = document.getElementById('pr');
+    function sel(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); said.textContent = 'Selected. Copy it with your keyboard.'; }
+    try { navigator.clipboard.writeText(pre.textContent).then(function(){ said.textContent = 'Copied.'; }, sel); } catch (e) { sel(); }
+  });
+
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){
+    b.addEventListener('click', function(){ document.documentElement.setAttribute('data-theme', b.getAttribute('data-v')); press(b.getAttribute('data-v')); });
+  });
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (!document.documentElement.hasAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  press(dark ? 'dark' : 'light');
+})();
+</script>

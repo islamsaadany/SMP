@@ -71,8 +71,19 @@ with sync_playwright() as p:
     ck("before: the layer is on and units are active", before.get("exists") is True and before.get("units", 0) > 1, before)
     ck("…the navigation carries units", navUnits() > 0, navUnits())
     ck("…and the company page holds no plan of its own", before.get("top") == 0, before)
-    # §449, the other end: a group with no plan of its own is untouched
-    ck("§449 before: the group still opens on Performance", safe(pg, "()=>entrySub('group')") == "performance")
+    # §449, the other end: a group with no plan of its own is untouched.
+    # §520.11 / §544.13: the worked example now holds a CAPABILITY, which is
+    # part of the company's own plan, so it opens on Strategy › Capabilities —
+    # asserted as such. "No plan of its own" is then made true (the
+    # capability layer off, restored after) and must open on Performance.
+    # REWRITTEN, NEVER LOOSENED (§218): both ends, each asserted exactly.
+    ck("§449/§520.11 before: holding a capability, the group opens on Strategy › Capabilities",
+       safe(pg, "()=>[entrySub('group'), CURSEC.strategy]") == ["strategy", "caps"],
+       safe(pg, "()=>[entrySub('group'), CURSEC.strategy]"))
+    ck("§449 before: with no plan of its own at all, the group still opens on Performance",
+       safe(pg, """()=>{var had='structure' in GROUP, s=GROUP.structure;
+         GROUP.structure=Object.assign({},s||{},{cap:Object.assign({},(s||{}).cap||{},{exists:false})});
+         var r=entrySub('group'); if(!had) delete GROUP.structure; else GROUP.structure=s; return r}""") == "performance")
     secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)

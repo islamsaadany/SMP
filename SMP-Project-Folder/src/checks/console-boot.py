@@ -187,7 +187,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             return
         # the new stack's copy is GENERATED from this one with the script moved
         # to a file — walking one copy proves one copy (§53.5, A15)
-        for name in ("platform-page.js", "memory-split.js", "client-setup.js"):
+        for name in ("platform-page.js", "memory-split.js", "case-split.js", "client-setup.js"):
             if p == "/" + name:
                 fp = os.path.join(REPO, "smp-app", "public", name)
                 if os.path.exists(fp):
@@ -244,7 +244,10 @@ with sync_playwright() as pw:
     for _ in range(40):
         time.sleep(0.05)
         st = pg.evaluate("""() => {
-          const bar = document.querySelector('.top'), wrap = document.getElementById('page');
+          /* §601: the white top line and the navy tab bar became ONE navy
+             column on the left (#side), carrying the name and Sign out —
+             the chrome that stands up while the page waits is that column. */
+          const bar = document.getElementById('side'), wrap = document.getElementById('page');
           const box = wrap ? wrap.getBoundingClientRect() : null;
           let at = null;
           if (box) {
@@ -297,7 +300,7 @@ with sync_playwright() as pw:
     empty = [s for s in dead if s["ready"] and not s["cards"] and not s["skel"]]
     check("no window in which the page is up and the grid holds nothing",
           len(empty) == 0, "%d of %d samples" % (len(empty), len(dead)))
-    check("the bar is drawn the whole time — the window always looked open",
+    check("the side column is drawn the whole time — the window always looked open",
           all(s["bar"] for s in dead), dead[0] if dead else None)
 
     print("§3 · the hand-over is one-shot, both ends")

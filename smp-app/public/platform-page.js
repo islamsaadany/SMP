@@ -2535,6 +2535,7 @@
     name.appendChild(el("h1", null, "My tasks"));
     left.appendChild(wk);
     left.appendChild(name);
+    left.appendChild(el("p", "pgsub", "Your actions across every client's Internal Tracker."));
     var strip = el("div", "mwstrip");
     top.appendChild(left);
     top.appendChild(strip);
@@ -2743,11 +2744,24 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
-      var head = function (sec, n, name) {
+      /* EACH GROUP IS A CARD WITH ITS HEADER INSIDE (Home's look,
+         2026-10-24): an icon (red for Late), the name, its count, and by
+         client a way straight into that client's Internal Tracker. */
+      var MW_IC = { late: HO_ALERT, week: HO_CAL, later: HO_CLOCK };
+      var head = function (sec, n, name, icon, late, client) {
+        sec.classList.add("hocard", "mwcard");
         var sh = el("div", "mwsh");
-        sh.appendChild(el("span", "ix", (n < 10 ? "0" : "") + n));
+        var ic = el("span", "hocic" + (late ? " late" : ""));
+        ic.innerHTML = icon;
+        sh.appendChild(ic);
         sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
+        if (client) {
+          sh.appendChild(el("span", "sp"));
+          var to = el("a", "holink", "Internal Tracker →");
+          to.href = "/" + client + "/tracker";
+          sh.appendChild(to);
+        }
         sec.appendChild(sh);
       };
       /* BY DATE (Late · This week · Next week and later) or BY CLIENT, one
@@ -2766,7 +2780,7 @@
             var sec = el("section", "mwsec byc");
             sec.setAttribute("data-client", g.key);
             /* the client's name alone (Islam: "no need for the logo to appear") */
-            head(sec, n, el("h2", null, g.name));
+            head(sec, n, el("h2", null, g.name), NAV_ICON.clients, g.late > 0, g.key);
             g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
             mwMeta(sec);
             list.appendChild(sec);
@@ -2779,7 +2793,7 @@
           n++;
           var sec = el("section", "mwsec");
           sec.setAttribute("data-bucket", b);
-          head(sec, n, el("h2", null, MW_HEAD[b]));
+          head(sec, n, el("h2", null, MW_HEAD[b]), MW_IC[b], b === "late");
           mine.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
           mwMeta(sec);
           list.appendChild(sec);
@@ -2808,6 +2822,9 @@
      boot already holds, narrowed to a seat; the tasks are My tasks' own
      `mywork` rows; the case studies are /api/cases `home`. So every word and
      mark here is the one the page it opens says (§53.5). */
+  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
+  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
+  var HO_CLOCK = NAV_SVG + '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
   var HO_TASKS = NAV_SVG + '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>';
 
   /* SORT BY DATE OR BY CLIENT (Islam, 2026-10-24: "for the tasks in the
@@ -3184,7 +3201,6 @@
     var grid = el("div", "cards");
     grid.dataset.grid = "clients";
 
-    var right = el("div");
     var search = el("input", "fld");
     search.placeholder = "Search clients"; search.style.width = "190px";
     /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
@@ -3198,8 +3214,18 @@
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
-    right.appendChild(search);
-    title("Clients", right);
+    /* THE PAGE'S BAND, Home's (2026-10-24, Islam: "build both as drawn"):
+       what is here in the gold line, the name, a sentence, and + Add a
+       client as its one button. The search moves into the clients' card. */
+    var band = el("header", "pgband");
+    var bl = el("div");
+    var eye = el("p", "pgeye");
+    bl.appendChild(eye);
+    bl.appendChild(el("h1", null, "Clients"));
+    bl.appendChild(el("p", "pgsub", "Every client the office works with, and the way into each module."));
+    band.appendChild(bl);
+    band.appendChild(el("span", "sp"));
+    page.appendChild(band);
 
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
@@ -3245,7 +3271,15 @@
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast });
+      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length ? (archived.length + past.length) + " ended" : "",
+        demos.length ? nOf(demos.length, "demo") : ""].filter(Boolean).join(" · ");
+      if (j.canAdd) {
+        var add = el("button", "btn amber pgadd", "+ Add a client");
+        add.type = "button";
+        add.addEventListener("click", function () { drawNewClient(); });
+        band.appendChild(add);
+      }
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
@@ -3280,10 +3314,20 @@
   }
 
   function clFill(host, d) {
-    var bar = el("div", "clbar");
-    host.parentNode.insertBefore(bar, host);
-    var body = el("div");
-    host.parentNode.insertBefore(body, host);
+    /* ONE CARD HOLDS THE CLIENTS (2026-10-24): its header carries everything
+       that filters them — which, Mine, the search, cards or a list. */
+    var card = el("section", "hocard clcard");
+    var hd = el("div", "hochd");
+    var hic = el("span", "hocic");
+    hic.innerHTML = NAV_ICON.clients;
+    var hname = el("h2");
+    var hcnt = el("span", "hocnt");
+    var bar = el("span", "clbar");
+    hd.appendChild(hic); hd.appendChild(hname); hd.appendChild(hcnt); hd.appendChild(el("span", "sp")); hd.appendChild(bar);
+    card.appendChild(hd);
+    var body = el("div", "clbody");
+    card.appendChild(body);
+    host.parentNode.insertBefore(card, host);
     host.parentNode.removeChild(host);
     var mineOf = function (list, f) { return CL.mine ? list.filter(f) : list; };
     var seat = function (c) { return !!c.seat; };
@@ -3339,14 +3383,17 @@
         });
         view.appendChild(b);
       });
+      if (d.search) bar.appendChild(d.search);
       bar.appendChild(view);
+      hname.textContent = CL.which === "ended" ? "Ended clients" : CL.which === "demo" ? "Demo" : "Active clients";
+      hcnt.textContent = String(CL.which === "ended" ? end.length : CL.which === "demo" ? dem.length : act.length);
 
+      /* + Add a client is the band's button now, so neither view draws it */
       if (CL.which === "ended") body.appendChild(clEnded(end, d.canAddPast));
       else if (CL.which === "demo") body.appendChild(clActive(dem, false, "demo"));
-      else body.appendChild(clActive(act, d.canAdd, "clients"));
+      else body.appendChild(clActive(act, false, "clients"));
       /* a search typed before the switch still applies to what is drawn */
-      var s = page.querySelector(".ptitle .right input");
-      if (s && s.value) s.dispatchEvent(new Event("input"));
+      if (d.search && d.search.value) d.search.dispatchEvent(new Event("input"));
     };
     draw();
   }
@@ -3550,7 +3597,14 @@
      The rows come from the server (lib/modules.ts moduleRows), so the console
      cannot spell a module differently from the switch or from Setup. */
   /* The platform's Settings mark (shell.html ICON_MANAGE), drawn the same here. */
-  function settingsChip(name) {
+  function settingsChip(name, word) {
+    /* on a live card, the word at the foot (2026-10-24); elsewhere the mark */
+    if (word) {
+      var w = el("span", "ccfg word", "Settings");
+      w.title = "Settings";
+      w.setAttribute("aria-label", "Settings for " + name);
+      return w;
+    }
     var cog = el("span", "ccfg ico");
     cog.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
       '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
@@ -3563,6 +3617,10 @@
     var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    /* IN HOME'S LOOK (2026-10-24, Islam: "build both as drawn"): the mark
+       and the name on one line, the modules under them, and the facts in a
+       quiet line at the foot with Settings as a word — the boxed tags and
+       the industry are gone from the card's face. */
     var top = el("div", "ctop");
     if (c.mark) {
       var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; top.appendChild(im);
@@ -3570,17 +3628,16 @@
       top.appendChild(el("div", "cmark", initials(c.name)));
       top.appendChild(el("h2", null, c.name));
     }
-    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    b.appendChild(top);
     var foot = el("div", "foot");
-    var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
-    if (c.kind === "demo") tag("Demo", "demo");
+    var facts = el("span", "facts");
     /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
        to know, and the thing that decides what they can do when they arrive. */
-    if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
-    if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
-    if (!c.canOpen) tag("Listed only");
-    top.appendChild(foot);
-    b.appendChild(top);
+    facts.textContent = [c.seat ? (c.seat === "super" ? "Super user" : "SMO team") : "",
+      c.units != null && c.units > 0 ? c.units + (c.units === 1 ? " unit" : " units") : "",
+      c.canOpen ? "" : "Listed only"].filter(Boolean).join(" · ");
+    if (c.kind === "demo") foot.appendChild(el("span", "tag demo", "Demo"));
+    foot.appendChild(facts);
 
     /* A CLIENT THIS PERSON MAY NOT OPEN GETS NO ROWS AT ALL — there is no way
        in, so there is nothing to draw (§61); "Listed only" already says it. */
@@ -3617,8 +3674,9 @@
       b.appendChild(mods);
     }
 
+    b.appendChild(foot);
     if (c.canConfig) {
-      var cog = settingsChip(c.name);
+      var cog = settingsChip(c.name, true);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
@@ -3627,7 +3685,7 @@
       var open = function (e) { e.stopPropagation(); e.preventDefault(); location.assign("/" + c.key + "/setup"); };
       cog.addEventListener("click", open);
       cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
-      b.appendChild(cog);
+      foot.appendChild(cog);
     }
     return b;
   }

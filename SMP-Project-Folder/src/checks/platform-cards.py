@@ -197,7 +197,8 @@ def run():
           return {
             grid: names(grid),
             addInGrid: !!grid.querySelector('.ccard.add'),
-            addLast: grid.lastElementChild ? grid.lastElementChild.classList.contains('add') : false,
+            // since 2026-10-24 + Add a client is the page band's button (Home's look)
+            addLast: !!document.querySelector('.pgband .pgadd'),
             opensOn: pressed ? pressed.dataset.which : null,
             demoOffer: demoBtn ? demoBtn.textContent : null,
             clientGround: ccard ? getComputedStyle(ccard).backgroundColor : null,
@@ -207,8 +208,11 @@ def run():
         }""")
         check("the client grid holds the clients and not the demo",
               shape["grid"] == ["Raya Trade", "RHI", "El Abd"], shape["grid"])
-        check("…and the way to add a client comes after the last real one",
-              shape["addInGrid"] and shape["addLast"], shape)
+        # REWRITTEN, NEVER LOOSENED (§218): the way to add a client moved from
+        # the grid's last card to the page band's button (2026-10-24, Home's
+        # look); it is still asserted to be there, and no longer among the clients
+        check("…and the way to add a client is the band's button, not a card among the clients",
+              (not shape["addInGrid"]) and shape["addLast"], shape)
         check("the page opens on Active", shape["opensOn"] == "active", shape["opensOn"])
         # BOTH ENDS: a build that deleted the demo passes the assertion above.
         check("the demo is offered, under Demo, counted", shape["demoOffer"] == "Demo1", shape["demoOffer"])
@@ -237,7 +241,7 @@ def run():
 
         # ══ 2 · the search says "Search clients" and means it ═══════════
         print("\n2 · the search")
-        pg.fill(".ptitle .fld", "demo")
+        pg.fill(".clcard .clbar .fld", "demo")
         found = pg.eval_on_selector_all("[data-grid='clients'] .ccard[data-client]",
                                         "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
         check("a search for the demo turns up no client", found == [], found)
@@ -246,12 +250,12 @@ def run():
                                         "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
         check("…and under Demo the same search still finds the worked example", found == ["demo"], found)
         pg.click('.clwhich button[data-which="active"]'); pg.wait_for_timeout(250)
-        pg.fill(".ptitle .fld", "rhi")
+        pg.fill(".clcard .clbar .fld", "rhi")
         one = pg.eval_on_selector_all(
             "[data-grid='clients'] .ccard[data-client]",
             "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
         check("…and a search for a client still finds it", one == ["rhi"], one)
-        pg.fill(".ptitle .fld", "")
+        pg.fill(".clcard .clbar .fld", "")
 
         # ══ 3 · the state a real deployment cannot show (§255) ══════════
         print("\n3 · the worked example seeded, and no clients yet")
@@ -260,7 +264,7 @@ def run():
         pg.wait_for_selector(".clwhich", timeout=9000)
         empty = pg.evaluate("""() => ({
           said: Array.from(document.querySelectorAll('#page .said, #page .err')).map(e => e.textContent),
-          add: !!document.querySelector("[data-grid='clients'] .ccard.add"),
+          add: !!document.querySelector(".pgband .pgadd"),
           demoOffer: (document.querySelector('.clwhich button[data-which="demo"]') || {}).textContent || null,
           gridClients: document.querySelectorAll("[data-grid='clients'] .ccard[data-client]").length
         })""")
@@ -392,10 +396,14 @@ def run():
           const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
           return { text: e.textContent.trim(), svg: !!e.querySelector('svg circle'), title: e.title,
                    label: e.getAttribute('aria-label'), w: Math.round(r.width / z), h: Math.round(r.height / z) } }""")
-        check("Settings on a card is the sliders mark with no word", bool(cog) and cog["text"] == "" and cog["svg"], cog)
+        # REWRITTEN, NEVER LOOSENED (§218): since 2026-10-24 (Home's look,
+        # "build both as drawn") Settings is the WORD at the card's foot, not
+        # the sliders mark in its corner; it is still asserted to be there,
+        # named for the hover and for a screen reader, and a target to press
+        check("Settings on a card is the word at its foot", bool(cog) and cog["text"] == "Settings" and not cog["svg"], cog)
         check("…named Settings on the hover and for a screen reader",
               bool(cog) and cog["title"] == "Settings" and cog["label"] == "Settings for Raya Trade", cog)
-        check("…and a square button", bool(cog) and cog["w"] == cog["h"] and cog["w"] >= 24, cog)
+        check("…and a target at least 24px tall", bool(cog) and cog["h"] >= 24, cog)
         SCENE["cards"] = CLIENTS + [DEMO]
 
         check("no page error anywhere", errs == [], errs)

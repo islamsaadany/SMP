@@ -2362,6 +2362,21 @@ await section("4 · Forefront's own pages", async () => {
   await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
   check(new URL(page.url()).hash === "#clients", "\u2026and the address names the cards, so a link back to them lands there", page.url());
+  /* CLIENTS IN HOME'S LOOK (2026-10-24): the page's band names it and
+     carries + Add a client; one card holds the clients with the filters in
+     its header; a client card says its facts at its foot with Settings as a
+     word; and the titles are Georgia, bold. */
+  const cl = await page.evaluate(() => {
+    const card = document.querySelector('.ccard[data-client="raya-trade"]');
+    return { band: (document.querySelector(".pgband h1") || {}).textContent || "", add: !!document.querySelector(".pgband .pgadd"),
+      head: !!document.querySelector(".clcard .hochd .clwhich") && !!document.querySelector(".clcard .hochd input.fld"),
+      title: (document.querySelector(".clcard .hochd h2") || {}).textContent || "",
+      font: (() => { const h = document.querySelector(".clcard .hochd h2"); return h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : ""; })(),
+      foot: card ? ((card.querySelector(".foot .facts") || {}).textContent || "") : "", word: card ? ((card.querySelector(".foot .ccfg") || {}).textContent || "") : "",
+      tags: card ? card.querySelectorAll(".ctop .tag").length : -1 };
+  });
+  check(cl.band === "Clients" && cl.add && cl.head && cl.title === "Active clients" && /Super user/.test(cl.foot) && cl.word === "Settings" && cl.tags === 0 && cl.font === "Georgia 700",
+    "Clients in Home's look: the band with + Add a client, one card with the filters in its header, the facts and Settings at a card's foot, titles in Georgia bold", JSON.stringify(cl));
 
   /* \u00a74b \u2014 MY WORK (\u00a7400). The state is MADE (\u00a7255): the dev tenant
      holds no Tracker actions and no tracker module, so every assertion below
@@ -2398,6 +2413,12 @@ await section("4 · Forefront's own pages", async () => {
     const w = await mw();
     check(w.rows.length === 3 && w.rows.includes("MW late one") && w.rows.includes("MW this week") && w.rows.includes("MW far off"),
       "My work lists the office's three open actions on this client", JSON.stringify(w.rows));
+    /* MY TASKS IN HOME'S LOOK (2026-10-24): each group a card, its title Georgia bold */
+    const mwc = await page.evaluate(() => ({ cards: document.querySelectorAll(".mwsec.mwcard").length, secs: document.querySelectorAll(".mwsec").length,
+      sub: (document.querySelector(".mwmast .pgsub") || {}).textContent || "",
+      font: (() => { const h = document.querySelector(".mwsec.mwcard .mwsh h2"); return h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : ""; })() }));
+    check(mwc.cards === 3 && mwc.secs === 3 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
+      "\u2026each group a card with its header inside, under a band in Home's look, titled in Georgia bold", JSON.stringify(mwc));
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
     check(JSON.stringify(w.groups) === JSON.stringify(["Late", "This week", "Next week and later"]) && w.rows[0] === "MW late one" && w.late === 1,
@@ -2752,8 +2773,9 @@ await section("4 · Forefront's own pages", async () => {
   check(near(fldT, "14px 400 39") && near(chipT, "12px 600 26"), "\u2026and the text boxes are 14px, Frameworks' chips semibold 12px (\u00a7584.4)", JSON.stringify({ fldT, chipT }));
   await page.goto("about:blank");
   await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
-  await page.waitForSelector(".ccard.add", { timeout: 8000 }).catch(() => {});
-  await page.locator(".ccard.add").first().click();
+  /* + Add a client is the page band's button since 2026-10-24 */
+  await page.waitForSelector(".pgband .pgadd", { timeout: 8000 }).catch(() => {});
+  await page.locator(".pgband .pgadd").first().click();
   await page.waitForSelector(".wzband button", { timeout: 8000 }).catch(() => {});
   const bandT = await typeOf(".wzband button");
   check(near(bandT, "12.5px 600 48"), "\u2026and client set-up's size band semibold 12.5px (\u00a7584.4)", bandT);

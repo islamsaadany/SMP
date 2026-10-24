@@ -99,6 +99,10 @@ section.part{margin-top:44px}
 :root[data-theme="dark"] .fC h2{color:var(--ink)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fC h2{color:var(--ink)}}
 .fD h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:18px}
+/* round two (Islam: "can we make the serif bold? and maybe option A with a bigger font") */
+.fSB h2{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:-.005em}
+.fSB2 h2{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:19px}
+.fAL h2{font-family:var(--font);font-weight:700;font-size:19px;letter-spacing:-.015em}
 
 /* rows */
 .task{display:grid;grid-template-columns:17px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
@@ -199,6 +203,7 @@ section.part{margin-top:44px}
   <section class="part" id="p1">
     <div class="ph2"><span class="n">01</span><h2>The card titles</h2><p>the same two cards in each font</p></div>
     <div class="grid2" id="fonts"></div>
+    <p class="why"><b>Round two:</b> the serif in bold (19px), the same in Georgia bold (it looks alike on a Mac and on Windows), and A at 19px bold. The bold serif is my pick: it keeps Home's character and no longer reads like the rows under it.</p>
     <p class="why"><b>Why the serif looks off:</b> it is the only serif on the platform, and on a Mac and on Windows it is a different typeface (Iowan Old Style or Palatino), so it never quite matches the system font around it. <b>A</b> uses the platform's own font, as every other title does, a touch heavier so the card still has a heading; I would also take the greeting's "Good morning" into it, so Home has one font. <b>B</b> makes the title a quiet label, like the column's headings. <b>C</b> is A in the navy, a little larger, for more presence. <b>D</b> keeps a serif but one that looks the same on every computer (Georgia). All four use fonts already on every computer, so nothing new is downloaded.</p>
   </section>
 
@@ -257,7 +262,7 @@ section.part{margin-top:44px}
   });
 
   /* 1 · fonts */
-  var F = [["fS","Today · the serif"],["fA","A · The platform's own font, semibold",1],["fB","B · A small label"],["fC","C · Semibold in navy"],["fD","D · Georgia, the same serif everywhere"]];
+  var F = [["fS","Today · the serif"],["fSB","New · The serif, bold",1],["fSB2","New · Georgia, bold"],["fAL","New · A, bigger and bolder"],["fA","A · The platform's own font, semibold"],["fB","B · A small label"],["fC","C · Semibold in navy"],["fD","D · Georgia, the same serif everywhere"]];
   function sort(on){ return '<span class="sort">Sort by <span class="sw"><span' + (on === "date" ? ' class="on"' : '') + '>Date</span><span' + (on === "client" ? ' class="on"' : '') + '>Client</span></span></span>'; }
   function head(icon, title, n, right, iccls, ncls){ return '<div class="chd"><span class="cic' + (iccls ? ' ' + iccls : '') + '">' + ic(icon) + '</span><h2>' + title + '</h2>' + (n != null ? '<span class="cnt' + (ncls ? ' ' + ncls : '') + '">' + n + '</span>' : '') + '<span class="sp"></span>' + (right || "") + '</div>'; }
   var CL = '<div class="cl"><span class="cm">RT</span><span><b>Raya Trade</b><span class="words"><span>Strategy</span><i>13 of 19</i><span>Insights</span><span>Internal Tracker</span><i class="al">4 open · 1 late</i></span></span></div>' +

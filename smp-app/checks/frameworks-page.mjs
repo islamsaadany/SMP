@@ -131,7 +131,12 @@ try {
   await page.waitForSelector("body.ready", { timeout: 20000 });
 
   await section("the tab, and what it opens on", async () => {
-    const tab = await page.$('.nav button[data-tab="frameworks"]');
+    /* WAITED FOR, NOT READ AT ONCE: the console puts up its grey shape and
+       says `ready` before it knows who is signed in (§371, §620), and the nav
+       is drawn from that answer — so read at `ready` the tab is not there
+       yet on a correct build. Twenty seconds without it is still a FAIL
+       (§623.2). */
+    const tab = await page.waitForSelector('.nav button[data-tab="frameworks"]', { timeout: 20000 }).catch(() => null);
     check(!!tab, "Frameworks is in the console's nav");
     await tab.click();
     await page.waitForSelector(".fwlist .fwrow", { timeout: 20000 });

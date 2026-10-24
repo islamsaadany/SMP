@@ -176,6 +176,22 @@ export function weekInMonth(day: string): string {
   return "W" + Math.ceil(thu.getUTCDate() / 7) + " " + MONTH[thu.getUTCMonth()];
 }
 export function sameWeek(a: string, b: string): boolean { return weekOf(a).from === weekOf(b).from; }
+/* FINISHED IN THE WEEK `day` BELONGS TO — asked of the day it was finished,
+   through weekOf, and never as "between that week's Sunday and Thursday".
+   The day a thing is finished is stamped as it happens, and it can be a
+   Friday or a Saturday; tested against Sunday-to-Thursday it fell inside no
+   week at all, so a row ticked Done at the weekend left This week under the
+   hand that ticked it, sat in none of the check's three cards, and was not
+   counted as done this week. Decision 8 already says which week a Friday or
+   a Saturday is: the coming one (§623.3). */
+export function finishedIn(a: Action, day: string): boolean {
+  if (!a.doneDay) return false;
+  if (brk() === "weekend-done-lost") {   /* §623.3 put back */
+    const w = weekOf(day);
+    return a.doneDay >= w.from && a.doneDay <= w.to;
+  }
+  return sameWeek(a.doneDay, day);
+}
 /* The picker's rows: this week and the weeks after it, each with its days —
    and its word is weekWord's, so pressing "Next week" gives a row that reads
    "Next week" and one week is never spelt two ways on one screen (§53.5).
@@ -258,7 +274,7 @@ export function inView(a: Action, view: View, who: Who, today: string): boolean 
   if (view === "mine") return isMine(a, who);
   if (view === "check") return checkWeek(a, today) !== null;
   if (view === "undated") return a.status !== "done" && !a.due;
-  if (a.status === "done") return !!a.doneDay && a.doneDay >= w.from && a.doneDay <= w.to;
+  if (a.status === "done") return finishedIn(a, today);
   /* AN OPEN ACTION WITH NO DATE IS ON THIS WEEK. The spec first wrote the
      opposite ("never on This week, so it needs a view of its own or it is
      lost") and checks/tracker.mjs §10 found the loss that rule makes: the
@@ -301,10 +317,9 @@ export function checkWeeks(today: string): Record<CheckWeek, Week> {
 }
 export function checkWeek(a: Action, today: string): CheckWeek | null {
   const w = checkWeeks(today);
-  const inside = (k: CheckWeek, day: string) => day >= w[k].from && day <= w[k].to;
   if (a.status === "done") {
     if (!a.doneDay) return null;
-    return (CHECK_WEEKS as readonly CheckWeek[]).find((k) => inside(k, a.doneDay!)) || null;
+    return (CHECK_WEEKS as readonly CheckWeek[]).find((k) => finishedIn(a, w[k].from)) || null;
   }
   if (!a.due) return "now";
   /* §532 put back: an action still open that was due last week filed under
@@ -341,7 +356,7 @@ export function summary(all: Action[], today: string): Summary {
     open: open.length,
     late: open.filter((a) => isLate(a.due, today)).length,
     dueWeek: dueWeek.length,
-    doneWeek: all.filter((a) => a.status === "done" && !!a.doneDay && a.doneDay >= w.from && a.doneDay <= w.to).length,
+    doneWeek: all.filter((a) => a.status === "done" && finishedIn(a, today)).length,
   };
 }
 

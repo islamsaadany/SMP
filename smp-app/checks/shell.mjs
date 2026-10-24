@@ -1203,7 +1203,14 @@ await section("3h · the Copilot column on Roles & access, and View on the tab (
     const mk = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ act: "newChat", place: "mobile", section: "foundation", title: "Read me" }) })).json());
     check(mk && mk.ok, "a chat to read is made while still at edit", JSON.stringify(mk));
+    /* SINCE §621 A ROLES & ACCESS PRESS ASKS FIRST, in a box beside the cell,
+       and stores only on Change it — so the press is answered here, and what
+       is asserted is still the stored row (§623.5). The box not coming is a
+       FAIL below, not a death: the row is then still empty. */
     await page.click('[data-mac^="super|a_copilot|view"]');
+    const asked = await page.waitForSelector(".askbox .askyes", { timeout: 6000 }).catch(() => null);
+    check(!!asked && (await grantRow()).length === 0, "the press asks first, and nothing is stored before the answer (§621)", String(!!asked));
+    if (asked) await asked.click();
     await page.waitForTimeout(1500);
     const g = await grantRow();
     check(g.length === 1 && g[0].role_key === "super" && g[0].grant_ === "view", "pressing View on the Super user's row stores exactly that", JSON.stringify(g));
@@ -2461,8 +2468,13 @@ await section("4 · Forefront's own pages", async () => {
     await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
     /* §620: arriving shows the tab's SAVED copy first, marked and inert, then
        the latest — the card is read off the latest, never the saved one */
-    await page.waitForSelector("#page:not([inert]) .ccard[data-client]", { timeout: 8000 }).catch(() => {});
-    const card = (await page.locator("#page:not([inert]) .ccard[data-client]").first().textContent()) || "";
+    /* RAYA'S CARD, BY ITS KEY, not the first card: the state above was made on
+       raya-trade, and the first card is whichever client sorts first — which
+       a client left in the shared database by another check's dead run
+       (named RHI) took, so this read that client's "No plan" on a correct
+       build (§623.4). */
+    await page.waitForSelector('#page:not([inert]) .ccard[data-client="raya-trade"]', { timeout: 8000 }).catch(() => {});
+    const card = (await page.locator('#page:not([inert]) .ccard[data-client="raya-trade"]').first().textContent({ timeout: 4000 }).catch(() => "")) || "";
     check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
 
     /* SPEC 068 \u2014 HOME, on the same made state: three open, one late, one

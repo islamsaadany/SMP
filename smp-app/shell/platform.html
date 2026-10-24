@@ -1407,7 +1407,7 @@
      computer and looks the same on each, which the first serif (Iowan Old
      Style on a Mac, Palatino on Windows) did not; the greeting keeps its
      regular weight, the card titles are bold. */
-  .hohello h1, .hochd h2, .mwsec.mwcard .mwsh h2{ font-family:Georgia, "Times New Roman", serif; font-weight:700 }
+  .hohello h1, .hochd h2{ font-family:Georgia, "Times New Roman", serif; font-weight:700 }
   .hohello h1{ font-weight:400 }
   .hohello h1{ margin:0; font-size:27px; line-height:1.15; color:var(--ff-ink) }
   .hohello p{ margin:4px 0 0; font-size:13.5px; color:var(--ff-quiet) }
@@ -1580,15 +1580,25 @@
   .pgsub{ margin:3px 0 0; font-size:13px; color:var(--ff-quiet) }
   .pgadd{ padding:8px 14px; font-weight:700 }
   .mwmast{ margin:0 0 12px }
-  /* My tasks: each group a card */
-  .mwsec.mwcard{ margin:0 0 14px }
-  .mwsec.mwcard .mwsh{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
-  .mwsec.mwcard .mwsh h2{ font-size:19px; line-height:1.15 }
-  .mwsec.mwcard .mwsh .meta{ font-size:11.5px; font-weight:700; line-height:1.5; border-radius:999px; padding:1px 8px; background:var(--surface-2); color:var(--ink-2) }
-  .mwsec.mwcard .mwsh .sp{ flex:1 }
-  .mwsec.mwcard .mwrow{ padding:8px 14px }
-  .mwsec.mwcard .mwrow:hover{ box-shadow:none }
-  .mwsec.mwcard .mwrow:last-child{ border-bottom:0 }
+  /* My tasks: one card, the groups labelled inside it over a grey rule (A2) */
+  .mwlist{ margin:0 0 16px }
+  .mwlist .mwsec{ margin:0 }
+  .mwlist .mwsec[hidden], .mwlist .mwrow[hidden]{ display:none }
+  .mwlist .mwsh{ display:flex; align-items:baseline; gap:8px; padding:14px 14px 7px; border-bottom:2px solid var(--line) }
+  .mwlist .mwsh h2{ margin:0; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; line-height:1.4; color:var(--ink-3) }
+  .mwlist .mwsec.late .mwsh h2{ color:var(--bad) }
+  .mwlist .mwsh .meta{ font-size:11.5px; font-weight:600; line-height:1.4; color:var(--ink-3) }
+  .mwlist .mwsh .sp{ flex:1 }
+  .mwlist .mwsh .holink{ font-size:12px; align-self:center; text-decoration:none }
+  .mwlist .mwrow{ padding:8px 14px }
+  .mwlist .mwrow:hover{ box-shadow:none }
+  .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
+  .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* Show sits in a white header now, not on the navy */
+  .mwcardhd .mwwho{ color:var(--ink-3); font-size:12px }
+  .mwcardhd .mwwho select{ color:var(--ink); border:1px solid var(--line); background:var(--surface); padding:4px 24px 4px 9px; margin-left:6px; font-size:12.5px }
+  .mwcardhd .mwwho select:hover, .mwcardhd .mwwho select:focus-visible{ background:var(--surface-2) }
+  .mwcardhd .mwwho::after{ color:var(--ink-3) }
   .hocic.late{ background:var(--bad-bg); color:var(--bad) }
   /* Clients: one card, its filters in the header */
   .clcard{ margin:0 0 16px }

@@ -2413,12 +2413,21 @@ await section("4 · Forefront's own pages", async () => {
     const w = await mw();
     check(w.rows.length === 3 && w.rows.includes("MW late one") && w.rows.includes("MW this week") && w.rows.includes("MW far off"),
       "My work lists the office's three open actions on this client", JSON.stringify(w.rows));
-    /* MY TASKS IN HOME'S LOOK (2026-10-24): each group a card, its title Georgia bold */
-    const mwc = await page.evaluate(() => ({ cards: document.querySelectorAll(".mwsec.mwcard").length, secs: document.querySelectorAll(".mwsec").length,
-      sub: (document.querySelector(".mwmast .pgsub") || {}).textContent || "",
-      font: (() => { const h = document.querySelector(".mwsec.mwcard .mwsh h2"); return h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : ""; })() }));
-    check(mwc.cards === 3 && mwc.secs === 3 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
-      "\u2026each group a card with its header inside, under a band in Home's look, titled in Georgia bold", JSON.stringify(mwc));
+    /* MY TASKS IN HOME'S LOOK, OPTION A2 (2026-10-24): one card titled Open
+       tasks in Georgia bold, its count, Show/Sort by/search in its header,
+       the three groups labelled inside it over a grey rule */
+    const mwc = await page.evaluate(() => { const card = document.querySelector(".mwlist"), h = card && card.querySelector(".mwcardhd h2"), rule = card && card.querySelector(".mwsh");
+      return { cards: document.querySelectorAll(".mwlist").length, secs: card ? card.querySelectorAll(".mwsec").length : 0, title: h ? h.textContent : "",
+        count: card ? (card.querySelector(".mwcardhd .hocnt") || {}).textContent : "", ctl: card ? !!card.querySelector(".mwcardhd .hosort") && !!card.querySelector(".mwcardhd input.mwsearch") : false,
+        rule: rule ? getComputedStyle(rule).borderBottomWidth + " " + getComputedStyle(rule).borderBottomStyle : "",
+        sub: (document.querySelector(".mwmast .pgsub") || {}).textContent || "",
+        font: h ? getComputedStyle(h).fontFamily.split(",")[0].replace(/"/g, "") + " " + getComputedStyle(h).fontWeight : "" }; });
+    check(mwc.cards === 1 && mwc.secs === 3 && mwc.title === "Open tasks" && mwc.count === "3" && mwc.ctl && /^[\d.]+px solid$/.test(mwc.rule) && parseFloat(mwc.rule) >= 1 && /Internal Tracker/.test(mwc.sub) && mwc.font === "Georgia 700",
+      "\u2026in one card titled Open tasks (Georgia bold) with its filters in its header, the groups labelled over a grey rule, under Home's band", JSON.stringify(mwc));
+    await page.fill(".mwsearch", "far off");
+    const found = await page.evaluate(() => Array.from(document.querySelectorAll(".mwlist .mwrow")).filter((r) => !r.hidden).map((r) => r.querySelector(".t").textContent));
+    check(JSON.stringify(found) === JSON.stringify(["MW far off"]), "\u2026and its search finds a task by its words", JSON.stringify(found));
+    await page.fill(".mwsearch", "");
     check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
       "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
     check(JSON.stringify(w.groups) === JSON.stringify(["Late", "This week", "Next week and later"]) && w.rows[0] === "MW late one" && w.late === 1,
@@ -2582,11 +2591,11 @@ await section("4 · Forefront's own pages", async () => {
       "\u2026and All tasks opens My tasks", page.url());
     /* MY TASKS' SORT BY CLIENT (2026-10-24): one numbered section for the
        client, its three open rows in it, the client pill left off them */
-    await page.click('.mwbar .hosort button[data-sort="client"]');
+    await page.click('.mwcardhd .hosort button[data-sort="client"]');
     const mc = await page.evaluate(() => ({ secs: Array.from(document.querySelectorAll(".mwsec.byc")).map((x) => x.getAttribute("data-client") + ":" + x.querySelectorAll(".mwrow").length),
       pill: Array.from(document.querySelectorAll(".mwsec.byc .mwcl")).some((p) => getComputedStyle(p).display !== "none") }));
     check(JSON.stringify(mc.secs) === JSON.stringify(["raya-trade:3"]) && !mc.pill, "My tasks sorted by Client: one section for the client with its three rows, no client pill on them", JSON.stringify(mc));
-    await page.click('.mwbar .hosort button[data-sort="date"]');
+    await page.click('.mwcardhd .hosort button[data-sort="date"]');
 
     /* A PLAN WRITTEN ON THE COMPANY IS A PLAN (Islam: "why is elabd showing
        no plan?"): a client whose only directions are the company's own

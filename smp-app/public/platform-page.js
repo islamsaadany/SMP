@@ -2673,8 +2673,9 @@
       body.textContent = "";
       if (!j.ok) { body.appendChild(el("p", "err", j.error || "Could not read the actions.")); return; }
       m.wk.textContent = j.weekLine || "";
+      var pick = null;
       if (j.people && j.people.length > 1) {
-        var pick = el("label", "mwwho");
+        pick = el("label", "mwwho");
         pick.appendChild(document.createTextNode("Show"));
         var sel = el("select");
         sel.setAttribute("data-workwho", "");
@@ -2686,7 +2687,6 @@
         });
         sel.addEventListener("change", function () { WORK.who = sel.value; go("mywork"); });
         pick.appendChild(sel);
-        m.name.appendChild(pick);
       }
       var rows = j.rows || [];
       /* THE CASE STUDIES THIS PERSON IS WRITING UP (spec 067): My work's
@@ -2703,6 +2703,43 @@
           " no open actions in any client's Tracker."));
         return;
       }
+
+      /* ONE CARD, ITS FILTERS IN ITS HEADER (Islam, 2026-10-24, option A2 of
+         design-mockups/home/2026-10-24_my-tasks-filters-header.html: "build
+         A2"), as Clients' Active clients card has them: Show (whose tasks,
+         for an admin), Sort by and a search. The groups are labelled
+         sections inside it, each with a grey rule the card's whole width. */
+      var card = el("section", "hocard mwlist");
+      var hd = el("div", "hochd mwcardhd");
+      var hic = el("span", "hocic");
+      hic.innerHTML = HO_TASKS;
+      hd.appendChild(hic);
+      hd.appendChild(el("h2", null, "Open tasks"));
+      var hcnt = el("span", "hocnt");
+      hd.appendChild(hcnt);
+      hd.appendChild(el("span", "sp"));
+      var setCnt = function () {
+        hcnt.textContent = String(rows.filter(function (r) { return r.status !== "done"; }).length + cases.length);
+      };
+      var search = el("input", "fld mwsearch");
+      search.type = "search";
+      search.placeholder = "Search tasks";
+      search.setAttribute("aria-label", "Search tasks");
+      /* a task found by its words or its client; a group with nothing found is left out */
+      var find = function () {
+        var q = search.value.trim().toLowerCase();
+        Array.prototype.forEach.call(card.querySelectorAll(".mwsec"), function (sec) {
+          var any = false;
+          Array.prototype.forEach.call(sec.querySelectorAll(".mwrow"), function (r) {
+            var hit = !q || r.textContent.toLowerCase().indexOf(q) >= 0 || (sec.getAttribute("data-name") || "").indexOf(q) >= 0;
+            r.hidden = !hit;
+            if (hit) any = true;
+          });
+          sec.hidden = !any;
+        });
+      };
+      search.addEventListener("input", find);
+      card.appendChild(hd);
 
       /* A PRESS IS ANSWERED BEFORE THE ROW CHANGES (§124): the row holds
          (aria-busy) until the server's write lands, and is then drawn again
@@ -2731,6 +2768,7 @@
           row.parentNode.replaceChild(fresh, row);
           mwMeta(fresh.parentNode);
           mwCount(m.strip, rows);
+          setCnt();
           said.hidden = true;
           if (focused) {
             var f = fresh.querySelector(via === "tick" ? ".mwtick" : ".mwst select");
@@ -2744,16 +2782,12 @@
 
       var list = el("div");
       list.setAttribute("data-grid", "mywork");
-      /* EACH GROUP IS A CARD WITH ITS HEADER INSIDE (Home's look,
-         2026-10-24): an icon (red for Late), the name, its count, and by
-         client a way straight into that client's Internal Tracker. */
-      var MW_IC = { late: HO_ALERT, week: HO_CAL, later: HO_CLOCK };
-      var head = function (sec, n, name, icon, late, client) {
-        sec.classList.add("hocard", "mwcard");
+      /* A GROUP'S LABEL (A2): its name (Late in red), how many are open, and
+         by client a way straight into that client's Internal Tracker, over a
+         grey rule the card's whole width. */
+      var head = function (sec, n, name, late, client) {
+        if (late) sec.classList.add("late");
         var sh = el("div", "mwsh");
-        var ic = el("span", "hocic" + (late ? " late" : ""));
-        ic.innerHTML = icon;
-        sh.appendChild(ic);
         sh.appendChild(name);
         sh.appendChild(el("span", "meta"));
         if (client) {
@@ -2780,7 +2814,8 @@
             var sec = el("section", "mwsec byc");
             sec.setAttribute("data-client", g.key);
             /* the client's name alone (Islam: "no need for the logo to appear") */
-            head(sec, n, el("h2", null, g.name), NAV_ICON.clients, g.late > 0, g.key);
+            sec.setAttribute("data-name", String(g.name || "").toLowerCase());
+            head(sec, n, el("h2", null, g.name), false, g.key);
             g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
             mwMeta(sec);
             list.appendChild(sec);
@@ -2793,17 +2828,19 @@
           n++;
           var sec = el("section", "mwsec");
           sec.setAttribute("data-bucket", b);
-          head(sec, n, el("h2", null, MW_HEAD[b]), MW_IC[b], b === "late");
+          head(sec, n, el("h2", null, MW_HEAD[b]), b === "late");
           mine.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
           mwMeta(sec);
           list.appendChild(sec);
         });
       };
-      var bar = el("div", "mwbar");
-      bar.appendChild(sortSwitch(draw));
-      body.appendChild(bar);
-      body.appendChild(list);
+      if (pick) hd.appendChild(pick);
+      hd.appendChild(sortSwitch(function () { draw(); find(); }));
+      hd.appendChild(search);
+      card.appendChild(list);
+      body.appendChild(card);
       draw();
+      setCnt();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
@@ -2822,9 +2859,6 @@
      boot already holds, narrowed to a seat; the tasks are My tasks' own
      `mywork` rows; the case studies are /api/cases `home`. So every word and
      mark here is the one the page it opens says (§53.5). */
-  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
-  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
-  var HO_CLOCK = NAV_SVG + '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
   var HO_TASKS = NAV_SVG + '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>';
 
   /* SORT BY DATE OR BY CLIENT (Islam, 2026-10-24: "for the tasks in the

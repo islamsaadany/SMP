@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-24 — My tasks in one card with its filters in its header (§622.3), on the branch, not merged.** My tasks is now one "Open tasks" card whose header holds Show, Sort by and a new search; the groups are labelled sections inside it over a grey line, Late in red.
+
 **2026-10-24 — Titles in Georgia bold; My tasks and Clients in Home's look (§622.2), on the branch, not merged.** Card titles are Georgia, bold. My tasks has Home's band and each group in a card (by client, each client a card with a link to its Tracker). Clients has Home's band with + Add a client, one card holding the clients with the filters in its header, and quieter client cards: no boxed tags or industry, the seat and units at the foot with Settings as a word.
 
 **2026-10-24 — No logo on the by-client headings; Home's clients Show Mine or Demo (§622.1), merged to `main` 2026-10-24 on Islam's word.** Sorted by client, My tasks and Home's tasks name each client without its logo. Home's Your clients has a Show switch: Mine (your clients) or Demo (the worked example), remembered on your device. The ochre band for My tasks was drawn and dropped.

@@ -131,6 +131,11 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             with open(os.path.join(REPO, "smp-app", "public", "platform-page.js"), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")
             return
+        # the shapes drawn before the answers (§620) are served by the app itself
+        # (app/navskel.js), not from public/; a page here draws without them
+        if path == "/navskel.js":
+            self._send("", "application/javascript; charset=utf-8")
+            return
         if path in ("/memory-split.js", "/case-split.js"):
             with open(os.path.join(REPO, "smp-app", "public", path[1:]), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")

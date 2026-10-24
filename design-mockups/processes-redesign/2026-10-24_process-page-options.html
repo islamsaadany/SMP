@@ -63,9 +63,6 @@ p,ul,ol{margin:0}
 .mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .mk-id b{font-size:14px}
 .mk-id span{font-size:12px;color:var(--ink-2)}
-.mk-sw{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap}
-.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
-.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
 .doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
 .intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
 .intro b{color:var(--ink)}
@@ -94,8 +91,15 @@ p,ul,ol{margin:0}
 .mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
 .mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
 .mtile.late b{color:var(--bar-late)}
-.mcats{display:flex;gap:6px;margin-top:14px;padding-bottom:12px;align-items:center;flex-wrap:wrap}
+.mcats{display:flex;gap:2px;margin-top:14px;align-items:flex-end;flex-wrap:wrap}
+.mtab{font-size:13.5px;font-weight:600;line-height:1;color:var(--bar-quiet);background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 12px;white-space:nowrap}
+.mtab.on{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.mtab:hover{color:var(--bar-ink)}
 .mcats .sp{flex:1}
+.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-bottom:9px}
+.mwait{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:9px;font-size:13px;color:var(--bar-ink);background:rgba(232,163,58,.14);border:1px solid rgba(232,163,58,.45);border-radius:6px;padding:4px 10px}
+.mwait b{color:var(--bar-accent);font-weight:700}
+.mwait button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--bar-ink);text-decoration:underline;text-underline-offset:2px}
 .bq{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:500;color:var(--bar-quiet);padding:6px 9px;border-radius:7px;background:none;border:0}
 .bq:hover{background:var(--bar-hover);color:var(--bar-ink)}
 .bgold{background:var(--bar-accent);color:var(--bar);border:0;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:700}
@@ -235,16 +239,11 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 </style>
 
 <div class="mk"><div class="mk-in">
-  <div class="mk-id"><span class="mk-tag">Mockup</span><b>One process, three ways to open it</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
-  <div class="mk-sw" role="tablist" aria-label="Options">
-    <button type="button" data-opt="a" role="tab">A · Flow first</button>
-    <button type="button" data-opt="b" role="tab">B · Steps first</button>
-    <button type="button" data-opt="c" role="tab">C · Summary first</button>
-  </div>
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>A process page: opens on the flow, steps and summary as tabs</b><span>Agreed 24 Oct 2026. Nothing is built. Sample data invented for Raya Trade.</span></div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. The navy band is the same in all three; only what sits under it changes. <b>Suggest a change</b> works everywhere: try it on a step.</p>
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. It opens on <b>Flow</b>; <b>Steps</b> and <b>Summary</b> are tabs in the navy band, as in the Internal Tracker. <b>Suggest a change</b> works on every tab: try it on a step.</p>
 
   <div class="frame">
     <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">1 to approve · 1 to read</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
@@ -255,6 +254,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
             <p class="wkof">Raya Trade · Processes › ORD100 · Finance</p>
             <h1>Order-to-Cash <span class="pill good">In force · v2</span><span class="own">You own this</span></h1>
             <p class="msub">From a confirmed customer order to cash in the bank · Approver <b>Yara Kamal</b> · v3 approved, waiting for the office to publish</p>
+            <p class="mwait"><b>Waiting on you</b><span>The yearly review is due on 12 Nov</span><button type="button" data-opt="c">Open the summary</button></p>
           </div>
           <div class="mstrip">
             <div class="mtile"><b>6</b><span>Steps</span></div>
@@ -264,12 +264,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
             <div class="mtile"><b>19</b><span>Days to review</span></div>
           </div>
         </div>
-        <div class="mcats"><span class="sp"></span><button class="bq" type="button" data-toast="Downloads the SOP in the product.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page in the product.">Print</button><button class="bgold" type="button" data-suggest="">Suggest a change</button></div>
+        <div class="mcats" role="tablist" aria-label="Views"><button type="button" class="mtab" role="tab" data-opt="a">Flow</button><button type="button" class="mtab" role="tab" data-opt="b">Steps</button><button type="button" class="mtab" role="tab" data-opt="c">Summary</button><span class="sp"></span><span class="macts"><button class="bq" type="button" data-toast="Downloads the SOP in the product.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page in the product.">Print</button><button class="bgold" type="button" data-suggest="">Suggest a change</button></span></div>
       </header>
 
       <!-- ── A · FLOW FIRST ── -->
       <section data-view="a" hidden>
-        <div class="abar"><div class="seg"><button type="button" class="on">Flow</button><button type="button" data-toast="Option B shows the steps as a list.">Steps</button></div><span class="note">Lanes are roles. Click a step for its detail.</span></div>
+        <div class="abar"><span class="note">Lanes are roles. Click a step for its detail.</span></div>
         <div class="agrid">
           <div class="lanes-wrap"><div class="lanes" id="lanes">
             <div class="lane-bg" style="grid-row:1"></div><div class="lane-bg z" style="grid-row:2"></div><div class="lane-bg" style="grid-row:3"></div><div class="lane-bg z" style="grid-row:4"></div>
@@ -316,7 +316,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
             <div class="wait"><b>Waiting on you: the yearly review is due on 12 Nov</b><p class="note" style="margin-top:2px">Read it through and say whether it still describes how the work is done.</p><div class="acts"><button class="btn gold" type="button" data-toast="Recorded: still right. The review date moves on a year.">It is still right</button><button class="btn" type="button" data-suggest="">Suggest a change</button></div></div>
           </div>
         </div>
-        <div class="box cb" style="margin-bottom:14px"><div class="sect" style="margin:0 0 8px"><span class="lbl">The flow at a glance</span><span class="r"><button class="lnk" type="button" data-toast="Opens the full flow, as in option A.">See it as a flow →</button></span></div>
+        <div class="box cb" style="margin-bottom:14px"><div class="sect" style="margin:0 0 8px"><span class="lbl">The flow at a glance</span><span class="r"><button class="lnk" type="button" data-opt="a">See the full flow →</button></span></div>
           <div class="strip" id="cstrip"></div>
         </div>
         <div class="sect"><span class="lbl">The steps</span><span class="note">click a step to open it</span><span class="r"><button class="lnk" type="button" id="openall">Open all</button></span></div>
@@ -325,7 +325,11 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     </div>
   </div>
 
-  <div class="verdict" id="verdict"></div>
+  <div class="verdict">
+    <div><h4>Agreed 24 Oct</h4><ul><li>A process opens on the flow, lanes per role</li><li>Steps and Summary are tabs in the navy band</li><li>Suggest a change on every tab, pinned to a step; the office makes the change</li></ul></div>
+    <div><h4>Added here, to agree</h4><ul><li>The “Waiting on you” line sits in the band on every tab, so opening on the flow does not hide it</li><li>On a phone it opens on Steps: the flow needs sideways scrolling there</li></ul></div>
+    <div><h4>Earlier</h4><ul><li>The three options compared side by side are version 1 of this page</li></ul></div>
+  </div>
 </div>
 <div id="layer"></div>
 <div class="toast" id="toast" hidden></div>
@@ -378,17 +382,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     svg.innerHTML = out + lab;
   }
 
-  const VERDICT = {
-    a: [['Good at', ['Hand-overs between roles show at a glance', 'Familiar to the consultants who build it', 'Good for a workshop on a big screen']], ['What it costs', ['A manager has to decode lanes and arrows first', 'The detail is behind a click, one step at a time', 'Hard to read on a phone', 'Nothing says whether the process is in good shape']], ['Fits', ['The builder, and a manager who already knows the process well']]],
-    b: [['Good at', ['Reads like an instruction manual, top to bottom', 'Every detail visible: who, approval, time limit, control', 'Works on a phone', 'Easy to point a change at one step']], ['What it costs', ['Long: the reader scrolls to see the whole', 'No picture of the hand-overs between roles', 'Health and what is waiting on the owner are still not shown']], ['Fits', ['Frontline staff following the procedure; the reading page they have today']]],
-    c: [['Good at', ['Answers “is it in good shape, and what do I need to do” before anything else', 'The whole flow in one line, without decoding a diagram', 'The steps are right underneath, opened one at a time', 'The full diagram stays one click away']], ['What it costs', ['Someone who only wants the steps scrolls past the summary', 'The summary is only as good as the data behind it: review dates and who has read it must be kept current, or it misleads', 'One more layout to build than B']], ['Fits', ['Managers and process owners, the people you said matter most. Staff could still land straight on the steps (B).']]],
-  };
+  const HASH = { a: 'flow', b: 'steps', c: 'summary' };
   function show(opt) {
-    if (['a', 'b', 'c'].indexOf(opt) < 0) opt = 'a';
+    if (!HASH[opt]) opt = 'a';
     $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== opt; });
-    $$('.mk-sw button').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
-    $('#verdict').innerHTML = VERDICT[opt].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
-    try { history.replaceState(null, '', '#' + opt); } catch (e) {}
+    $$('.mtab').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    try { history.replaceState(null, '', '#' + HASH[opt]); } catch (e) {}
     if (opt === 'a') requestAnimationFrame(arrows);
   }
 
@@ -418,6 +417,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#layer').innerHTML = ''; });
   window.addEventListener('resize', () => requestAnimationFrame(arrows));
   drawer(2);
-  show((location.hash || '#a').slice(1));
+  const asked = Object.keys(HASH).find((k) => '#' + HASH[k] === location.hash);
+  show(asked || (window.innerWidth < 640 ? 'b' : 'a'));
 })();
 </script>

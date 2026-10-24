@@ -40,6 +40,7 @@
      SMP_BREAK=count-line     node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=tabs-reload    node checks/tracker.mjs   # must go red (§566)
      SMP_BREAK=keep-picks     node checks/tracker.mjs   # must go red (§567)
+     SMP_BREAK=weekend-done-lost node checks/tracker.mjs # must go red (§622.3)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -265,6 +266,25 @@ check("...and nothing beyond the three weeks is in the view at all",
 check("the view holds exactly the rows the three weeks hold",
   rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join("") === "abcdef", rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join(""));
 check("...so last week's finished action is in it, and nothing older", inView(mk({ status: "done", doneDay: "2026-09-08" }), "check", SUPER, TODAY) && !inView(mk({ status: "done", doneDay: "2026-08-08" }), "check", SUPER, TODAY));
+/* FINISHED AT THE WEEKEND (§622.3). The day a thing is finished is stamped as
+   it happens, so it can be a Friday or a Saturday — and asked as "between
+   Sunday and Thursday" that day sat in no week: the row ticked Done on a
+   Saturday left This week under the hand that ticked it. §10 found it, but
+   only on a Friday or a Saturday, because §10 presses on the real day; these
+   are written on fixed days so they ask it every day of the week. Decision
+   8's answer is the week a Friday or a Saturday already belongs to: the
+   coming one. Both ends: Thursday's finish stays last week's. */
+const SAT = "2026-09-19", FRI = "2026-09-18", doneOn = (d) => mk({ status: "done", doneDay: d });
+check("a row finished on a Saturday is on This week that Saturday, and so is Friday's — it does not leave under the hand that ticked it",
+  inView(doneOn(SAT), "week", SUPER, SAT) && inView(doneOn(FRI), "week", SUPER, SAT),
+  inView(doneOn(SAT), "week", SUPER, SAT) + " " + inView(doneOn(FRI), "week", SUPER, SAT));
+check("...the strip counts it as done this week, and the check puts it under This week that day and Last week the next Sunday",
+  summary([doneOn(SAT)], SAT).doneWeek === 1 && checkWeek(doneOn(SAT), SAT) === "now" && checkWeek(doneOn(SAT), "2026-09-27") === "last",
+  summary([doneOn(SAT)], SAT).doneWeek + " " + checkWeek(doneOn(SAT), SAT) + " " + checkWeek(doneOn(SAT), "2026-09-27"));
+check("...last Saturday's finish is this week's, and last Thursday's is still last week's, never this one's",
+  inView(doneOn("2026-09-12"), "week", SUPER, TODAY) && cw({ status: "done", doneDay: "2026-09-12" }) === "now" &&
+  !inView(doneOn("2026-09-10"), "week", SUPER, TODAY) && cw({ status: "done", doneDay: "2026-09-10" }) === "last",
+  cw({ status: "done", doneDay: "2026-09-12" }) + " " + cw({ status: "done", doneDay: "2026-09-10" }));
 /* WHAT MAY BE CARRIED, both ends (§94.2). Only an open row under THIS week:
    a finished one has nothing to carry, and one already under next week is
    where it was going — pressing it there would push it a week further than
@@ -377,9 +397,9 @@ async function asTenant(tenantId, fn) {
 }
 
 let failed = false;
+const stamp = "trk" + Date.now().toString(36);
 try {
   await owner("SET search_path TO " + SCHEMA);
-  const stamp = "trk" + Date.now().toString(36);
   const [{ id: A }] = await owner("INSERT INTO tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-a", "Raya Trade"]);
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-b", "RHI"]);
   /* THE REGISTER: two office rows and one of the client's own people on A;
@@ -1195,13 +1215,17 @@ try {
     await browser.close();
   }
   srv.close();
-
-  await owner("DELETE FROM tenants WHERE id = ANY($1)", [[A, B]]);
-  await owner("DELETE FROM users WHERE email LIKE $1", [stamp + "-%"]);
 } catch (e) {
   failed = true;
   console.log("\n  DIED: " + (e && e.stack || e));
 } finally {
+  /* THE CLIENTS IT MADE GO WHETHER THE RUN FINISHED OR DIED (§622.4). This
+     sat at the end of the run itself, so every run that died left a "Raya
+     Trade" and an "RHI" in the shared database — and the Memory and console
+     checks, which read whichever client comes first, went red on correct
+     builds against clients this file had made. */
+  await owner("DELETE FROM tenants WHERE key LIKE $1", [stamp + "-%"]).catch((e) => console.log("  note: its clients were not removed — " + e.message));
+  await owner("DELETE FROM users WHERE email LIKE $1", [stamp + "-%"]).catch(() => {});
   await pool.end().catch(() => {});
   await appPool.end().catch(() => {});
 }

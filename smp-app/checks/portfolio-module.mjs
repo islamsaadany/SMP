@@ -50,7 +50,7 @@ import {
   progressFromSubs,
 } from "../lib/portfolio.ts";
 import { planRows, oneActivity } from "../lib/portfolio-io.ts";
-import { todayIn, readableDay, shortDay } from "../lib/day.ts";
+import { todayIn, readableDay, shortDay, monthWord } from "../lib/day.ts";
 
 let ok = 0;
 const bad = [];
@@ -302,7 +302,11 @@ try {
               rs: D(-5), who: "hend", status: "in_progress", pct: 40, ms: true });
   await act({ wp: W31, name: "Employee engagement resources", pos: 1, s: D(18), e: D(36), status: "not_started", pct: 0 });
   const W32 = await wp(P3, "Leadership-led rollout", 1);
-  await act({ wp: W32, name: "Unit-by-unit sessions", pos: 0, s: D(40), e: D(120), status: "not_started", pct: 0 });
+  /* LONGER THAN A YEAR, so it crosses a New Year on every day this file is
+     run: as D(40)–D(120) it crossed one only while today fell between early
+     September and late November, and the span check below went red on a
+     correct build the rest of the year (§622.1). */
+  await act({ wp: W32, name: "Unit-by-unit sessions", pos: 0, s: D(40), e: D(406), status: "not_started", pct: 0 });
   /* A one-day milestone in the future — a DATE and not a stretch of work, so
      the chart draws a diamond rather than a bar (§9.9). */
   await act({ wp: W32, name: "Embed in the performance cycle", pos: 1, s: D(150), e: D(150), status: "not_started", pct: 0, ms: true });
@@ -382,8 +386,18 @@ try {
   check("a one-day commitment reads as one date, never '27 \u2013 27 Feb'",
     marks.includes('class="win">' + oneDay + "<") && !marks.includes(oneDay + " \u2013 " + oneDay),
     oneDay + " \u2014 " + (marks.match(/class="win">[^<]*/g) || []).join(" | "));
+  /* THE SAME FAULT A SECOND TIME, in the line after the one fixed above: this
+     asked for `Sep 26 \u2013 Feb 27` from a window that is 40 and 120 days
+     ahead, so it went red the day the window moved into December (\u00a7622.1).
+     The expected text is built from the window's own dates; the year on both
+     ends is written out here rather than borrowed from the page, because the
+     year is what this line is about. */
+  const across = { s: D(40), e: D(406) };
+  const bothYears = monthWord(across.s) + " " + across.s.slice(2, 4) + " \u2013 " +
+    monthWord(across.e) + " " + across.e.slice(2, 4);
   check("a span that crosses a year says BOTH years, or 'Sep \u2013 Feb 27' reads as though September were 2027 too",
-    /Sep 26 \u2013 Feb 27/.test(marks), (marks.match(/class="win">[^<]*/g) || []).join(" | "));
+    across.s.slice(0, 4) !== across.e.slice(0, 4) && marks.includes('class="win">' + bothYears + "<"),
+    bothYears + " \u2014 " + (marks.match(/class="win">[^<]*/g) || []).join(" | "));
   check("the two counts at the top are the rules' own", /waiting for sign-off/.test(marks) && /past their date|past its date/.test(marks));
 
   /* ══ the timeline ══ */

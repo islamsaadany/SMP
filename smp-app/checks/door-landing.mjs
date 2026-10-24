@@ -569,8 +569,12 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
       progress: (typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.progress) ? CLIENTSETUP.progress() : null,
       groups: [...document.querySelectorAll(".setuprail [data-railgrp]")].map((e) => e.dataset.railgrp),
       startRow: start ? { grp: (start.closest("[data-railitems]") || { dataset: {} }).dataset.railitems, label: (start.querySelector(".rilab") || {}).textContent } : null,
-      csetup: !!q(".csetup"), step: (q('.wzstep[aria-current="step"]') || { dataset: {} }).dataset.step,
-      steps: [...document.querySelectorAll(".wzstep")].map((e) => e.dataset.step),
+      csetup: !!q(".csetup"), step: (typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.at) ? CLIENTSETUP.at() : null,
+      /* §624: the client's own pages are rows of the rail's first group,
+         and Profile opens in three tabs. */
+      clientRows: [...document.querySelectorAll('.setuprail [data-railitems="client"] .ritem')].map((e) => e.dataset.setupgo),
+      count: t('.setuprail .rgroup[data-railgrp="client"] .rgprog'),
+      tabs: [...document.querySelectorAll(".csetup [data-cstab]")].map((e) => e.dataset.cstab),
       wzdone: !!q("[data-wzdone]"), brand: document.querySelectorAll(".csetup [data-brand]").length, glogo: document.querySelectorAll(".csetup [data-glogo]").length, dmark: document.querySelectorAll(".csetup [data-doormark]").length,
       band: t(".csetup .band .lab"), name: (q(".csetup .rowset input.fld") || {}).value,
       done: (typeof GROUP !== "undefined" && GROUP) ? GROUP.setupDone : undefined, head: t("#panel .secttl, #panel h1") };
@@ -607,66 +611,58 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   /* AND IT STAYS AT THE TOP (§360.9): a back link is where this rail was
      opened from, so it reads first — the other end of the foot row below. */
   check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§360.9)", JSON.stringify(r.back));
-  check(!!r.strip && r.strip.go === "start" && r.strip.lab === "Getting started", "…and Getting started is a STRIP under the head while the set-up is not done", JSON.stringify(r.strip));
-  check(!!r.strip && !!r.progress && r.strip.prog.startsWith(r.progress.done + " of " + r.progress.total + " done"), "…counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.strip && r.strip.prog, r.progress]));
-  /* REWRITTEN, NEVER LOOSENED (§218), FOR §544 (spec 066 §6, Islam: "the
-     shape is good, let's build stage 4"): Structure, the divisions, the
-     units, the functions and the capabilities became ONE screen, the shape,
-     so the flow has three steps. This line asked for seven and read red on
-     the right build at every run since (§538.2's fault, in this file); it is
-     still an exact count, so a step added or lost reads red again. */
-  check(!!r.progress && r.progress.total === 3, "…out of the flow's three steps (§544)", JSON.stringify(r.progress));
-  check(r.startRow === null && !r.groups.includes("look"), "…with the start def OUT of the groups, and no Branding group (it lives inside the flow now)", JSON.stringify([r.startRow, r.groups]));
-  /* THE STRIP OPENS THE FLOW */
-  const strip = page.locator('.setuprail .railstart[data-setupgo="start"]');
-  if (await strip.count()) { await strip.click(); await page.waitForTimeout(1200); }
-  else fail("pressing the strip", "no strip to press");
+  /* REWRITTEN TO THE DECISION (§218, §624; Islam: *"have them as 3 section
+     under the client on the side rail rather than 3 pills"*). Getting started
+     was a strip under the head until Done with set-up (§360); the client's
+     two pages are rows of the rail's FIRST group now, and the group's heading
+     counts what is left — AGREEMENT with CLIENTSETUP.progress(), never a
+     number (§94.8, §129), and nothing said once both are done. */
+  check(r.strip === null && r.groups[0] === "client" && r.clientRows.join(",") === "start,shape",
+    "…and the client's own pages, Profile and The shape, are the FIRST group, with no strip (§624)", JSON.stringify([r.strip, r.groups, r.clientRows]));
+  check(!!r.progress && (r.progress.done < r.progress.total
+      ? r.count === r.progress.done + " of " + r.progress.total + " done" : r.count === null),
+    "…the heading counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.count, r.progress]));
+  check(!!r.progress && r.progress.total === 2, "…out of the client's two pages (§624: the office step went; Forefront team is its page)", JSON.stringify(r.progress));
+  check(!r.groups.includes("look"), "…and no Branding group (it lives on Profile's Brand tab)", JSON.stringify(r.groups));
+  /* PROFILE OPENS THE CLIENT'S PAGE */
+  const prof = page.locator('.setuprail .ritem[data-setupgo="start"]');
+  if (await prof.count()) { await prof.click(); await page.waitForTimeout(1200); }
+  else fail("pressing Profile", "no row to press");
   r = await readRail();
-  check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing it opens the flow at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
-  check(r.steps.join(",") === "client,shape,office" && r.step === "client",
-    /* REWRITTEN, NEVER LOOSENED (§218): §404.4 put Structure second, the
-       divisions before the units, and asked the words on Structure's cards
-       rather than a Words step of their own. §544 then made those five one
-       step, the shape: three now, still client first, still the whole list
-       asked in order, never a count alone. */
-    "…on step 1 of three, the client itself (§404.4's order, §544)", JSON.stringify([r.steps, r.step]));
-  check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
-  /* §489: REWRITTEN, NEVER LOOSENED (§218, §214.3). §461 made the client's
-     door mark the decks' mark too and DELETED Branding's group-mark upload
-     (`data-glogo`), so this asked for a control a decision removed. What it
-     was for — the colours AND a mark are set inside the flow — still holds:
-     the mark is the client's own (`data-doormark`), on the same step. Both
-     ends (§94.2): the old upload is asserted GONE, or a build drawing two
-     marks again would pass. */
-  check(r.brand > 0 && r.dmark > 0, "Branding's colours and the client's mark are inside the flow (the brand def is gone)", JSON.stringify([r.brand, r.dmark]));
-  check(r.glogo === 0, "…and the group's separate mark upload is gone (§461: one mark per client)", JSON.stringify(r.glogo));
-  check(r.band === "Modules this client has", "…and so is the modules band, on step 1", r.band);
-  check(r.wzdone, "…and Done with set-up is offered while it is not done");
+  check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing Profile opens it at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
+  check(r.tabs.join(",") === "details,brand,modules" && r.step === "details",
+    "…in three tabs, Details open (§624)", JSON.stringify([r.tabs, r.step]));
+  check(r.name === nameBefore, "Details shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
+  check(!r.wzdone, "…and there is no Done with set-up (§624)");
   /* STEP 1 WRITES THE REGISTRY: a typed name, blurred, posts saveClient */
   const nameBox = page.locator(".csetup .rowset input.fld").first();
   try {
     if (await nameBox.count()) {
       await nameBox.fill(nameBefore + " (renamed)"); await nameBox.press("Tab"); await page.waitForTimeout(1500);
-      check((await regName()) === nameBefore + " (renamed)", "a name typed into step 1 and left is the registry's (saveClient on change, §35)", await regName());
-    } else fail("typing a name into step 1", "no name box");
+      check((await regName()) === nameBefore + " (renamed)", "a name typed into Details and left is the registry's (saveClient on change, §35)", await regName());
+    } else fail("typing a name into Details", "no name box");
   } finally { await owner.query("UPDATE tenants SET name = $2 WHERE id = $1", [tenant.id, nameBefore]); }
-  /* DONE WITH SET-UP */
+  /* §489, §624: THE BRAND TAB holds the colours and the client's own mark,
+     and the group's separate upload is GONE — both ends (§94.2). */
+  const brandTab = page.locator('.csetup [data-cstab="brand"]');
+  if (await brandTab.count()) { await brandTab.click(); await page.waitForTimeout(800); }
+  else fail("opening the Brand tab", "no tab");
+  r = await readRail();
+  check(r.brand > 0 && r.dmark > 0, "Branding's colours and the client's mark are on Profile's Brand tab (the brand def is gone)", JSON.stringify([r.brand, r.dmark]));
+  check(r.glogo === 0, "…and the group's separate mark upload is gone (§461: one mark per client)", JSON.stringify(r.glogo));
+  const modTab = page.locator('.csetup [data-cstab="modules"]');
+  if (await modTab.count()) { await modTab.click(); await page.waitForTimeout(800); }
+  else fail("opening the Modules tab", "no tab");
+  r = await readRail();
+  check(r.band === "Modules this client has", "…and the modules band is the Modules tab", r.band);
+  /* NO DONE (§624): a stored mark from before moves and renames nothing —
+     a fresh paint draws the same client group, first, named Profile. */
   try {
-    const done = page.locator("[data-wzdone]");
-    if (await done.count()) { await done.click(); await page.waitForTimeout(800); }
-    else fail("pressing Done with set-up", "no button");
-    r = await readRail();
-    check(r.done === true, "Done with set-up marks the group in the page (SMPRules.SETUP_DONE)", String(r.done));
-    let st = null;
-    for (let i = 0; i < 16 && st !== true; i++) { await page.waitForTimeout(500); st = await storedDone(); }
-    check(st === true, "…and the autosave carries it to the store (read off the state API)", String(st));
-    check(r.strip === null && !!r.startRow && r.startRow.grp === "client" && r.startRow.label === "Client set-up", "…so the strip is gone and the def is a row in the last group, The client, named Client set-up", JSON.stringify([r.strip, r.startRow, r.groups]));
-    check(r.groups[r.groups.length - 1] === "client", "…which is the LAST group on the rail", JSON.stringify(r.groups));
-    check(!r.wzdone && r.head === "Client set-up", "…and the page wears its second name with no Done to press again", JSON.stringify([r.wzdone, r.head]));
-    /* the next PAINT reads it — a reload draws the rail from the store */
+    await owner.query(`UPDATE org SET extra = extra || '{"setupDone":true}'::jsonb WHERE tenant_id = $1`, [tenant.id]).catch(() => {});
     await goto("/raya-trade/setup/people");
     r = await readRail();
-    check(r.strip === null && !!r.startRow && r.startRow.label === "Client set-up", "…and a fresh paint draws the same, from the store", JSON.stringify([r.strip, r.startRow]));
+    check(r.strip === null && r.groups[0] === "client" && !!r.startRow && r.startRow.label === "Profile",
+      "…and with the old Done mark stored, a fresh paint still draws Profile in the first group", JSON.stringify([r.strip, r.groups, r.startRow]));
   } finally {
     await owner.query("UPDATE org SET extra = extra - 'setupDone' WHERE tenant_id = $1", [tenant.id]).catch(() => {});
   }

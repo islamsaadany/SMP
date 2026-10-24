@@ -112,7 +112,7 @@ with sync_playwright() as p:
     # rewritten to the new rule, never loosened; and the new rule, that off
     # copies nothing, is asserted first).
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
+        and press(pg, '[data-setupgo="shape"]') and press(pg, '[data-shlvl="top"]')
     ck("Client set-up › the shape, on the top level, opens", ok)
     ck("the top card no longer asks where the strategy is planned (§544.4)",
        safe(pg, "()=>!document.querySelector('[data-stplan]')") is True)

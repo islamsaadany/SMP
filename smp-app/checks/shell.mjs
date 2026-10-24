@@ -2087,6 +2087,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     capabilities: [{ title: "Data-led stock", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "" }],
   });
   const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'directions' s from copilot_chats where section = 'directions' order by created_at desc limit 1"))).rows[0] || null;
+  let CAP_OWNER = "";
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
@@ -2132,6 +2133,20 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
       r = await row();
       check((r.s.caps || []).length === 1 && r.s.caps[0].serves.join() === "Upper Egypt", "Capabilities follow the chosen Directions, each serving one of them", JSON.stringify(r.s.caps));
+      /* §626: a Capability's owner is picked from the register, a person —
+         never a function (§544.13). Picked here, stored, and below written
+         as the capability's Owner. */
+      const ownSel = '[data-cop-dv-own="c|0"]';
+      const pick = await page.$$eval(ownSel + " option", (os) => os.map((o) => o.value).filter(Boolean));
+      /* Compared with the register itself: a person's key may equal a
+         function's (the seed's `smo` is both), so "is not a function key"
+         would be the wrong test. */
+      const people = await page.evaluate(() => PEOPLE.filter((p) => p && p.key && p.name && personActive(p)).map((p) => p.key).sort());
+      check(pick.length > 0 && JSON.stringify(pick.slice().sort()) === JSON.stringify(people), "a Capability's Owner is chosen from the register's active people, every one and nothing else", pick.length + " options, " + people.length + " people");
+      CAP_OWNER = pick[0] || "";
+      await page.selectOption(ownSel, CAP_OWNER); await page.waitForTimeout(800);
+      r = await row();
+      check(!!CAP_OWNER && r.s.caps[0].ownedBy === CAP_OWNER, "…and the person picked is stored on the row", JSON.stringify(r.s.caps[0]));
     }
     await page.click("[data-cop-dv-finish]");
     await page.waitForTimeout(2000);
@@ -2144,6 +2159,8 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (withCaps) {
       const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? [c.capKind, (c.serves || []).length] : null; });
       check(JSON.stringify(cap) === JSON.stringify(["enabler", 1]), "a kept Capability is written with its kind and the Direction it serves", JSON.stringify(cap));
+      const own = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? { head: c.head || null, fn: c.fn || null } : null; });
+      check(!!own && own.head === CAP_OWNER && !own.fn, "§626 …and its Owner is the person picked, written as its owner and not as a function", JSON.stringify(own) + " want " + CAP_OWNER);
     }
     check(!(await page.$("[data-cop-dv-finish]")), "a saved chat offers no Save again");
     check(goN > 0, "something went ahead", goN);

@@ -62,7 +62,8 @@ def pick(pg, sel, value, wait=500):
         and (pg.wait_for_timeout(wait) or True)
 
 def step(pg, k):
-    return press(pg, ".csetup .wzstep[data-step=%s]" % k, 500)
+    # §624: a step is a page of the rail now — Profile is `start`.
+    return press(pg, "[data-setupgo=%s]" % ("start" if k == "client" else k), 500)
 
 def shape(pg):
     """§544: the four list steps are the shape screen's tree."""
@@ -98,7 +99,7 @@ with sync_playwright() as p:
     print("\n§0 · the state")
     ck("(fixture) the worked example holds a plan, so the shape is frozen",
        ev(pg, "()=>{var h=__smpHoldsNow(); return h.plans>0}", False), ev(pg, "()=>__smpHoldsNow()"))
-    ck("(fixture) the set-up flow is on the page", ev(pg, "()=>!!document.querySelector('.csetup .wzrail')", False))
+    ck("(fixture) the set-up flow is on the page", ev(pg, "()=>!!document.querySelector('.csetup[data-csetup]')", False))
     cos = ev(pg, "()=>COMPANY_KEYS.map(k=>COMPANIES[k].name)", [])
     ck("(fixture) there are at least two divisions to move between", len(cos) >= 2, cos)
 
@@ -169,7 +170,7 @@ with sync_playwright() as p:
     ck("(fixture) there is a capability", bool(cid))
     shape(pg)
     ck("the flow no longer carries a Capabilities step",
-       ev(pg, "()=>!document.querySelector('.csetup .wzstep[data-step=caps]')", False))
+       ev(pg, "()=>!CLIENTSETUP.STEPS.some(s=>s.k==='caps')", False))
     ck("…and the shape screen says where they are managed",
        "Setup" in (ev(pg, "()=>{var p=[...document.querySelectorAll('.csetup .shwhy')].map(x=>x.textContent).join(' '); return p}", "") or ""))
     ev(pg, "()=>{ current='setup'; currentSub='caps'; paint(); }"); pg.wait_for_timeout(500)
@@ -212,7 +213,8 @@ with sync_playwright() as p:
     ck("ticked back: counted again", ev(pg, "()=>fnKoCounted('fn:%s')" % pf) is True)
 
     print("\n§6 · a business unit says how it plans (§438)")
-    ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
+    # §624: the shape is a page of its own now, not a step of `start`.
+    ev(pg, "()=>{ current='setup'; currentSub='shape'; paint(); }"); pg.wait_for_timeout(400)
     # §544: one box's panel at a time, so "every unit row carries one" is
     # asserted by opening every unit in the tree and finding its select.
     # The tree shows one division's boxes at a time (the signed-off mockup:

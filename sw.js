@@ -627,7 +627,18 @@
    own tick; the Terminology page is gone. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.09-ask-and-apply";
+/* v7.10-client-group — §624: the client's own pages are the rail's first
+   group (Profile in three tabs, The shape), the Official BU list joins The
+   organisation, Capabilities and the Caps column only where they list
+   something, and a client's old word shows in its box. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.11-capability-owner — §625 and §626: the company's own data described
+   for the page check; the Copilot's Directions chat sets a capability's
+   Owner, a person, never a function. The built file's bytes changed (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v7.11-capability-owner";
 const ASSETS = [
   "/",
   "/index.html",

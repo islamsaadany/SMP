@@ -87,7 +87,7 @@ with sync_playwright() as p:
 
     print("\n4 · the shape screen's level cards: the switch and the split, pressed (§544)")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]')
+        and press(pg, '[data-setupgo="shape"]')
     ck("the set-up flow's shape screen opens", ok)
     # §544: one card at a time, opened from the tree (§218: rewritten to
     # where the card is, never loosened about what it holds).

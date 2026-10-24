@@ -5186,7 +5186,7 @@ function renderKB(){
       { h: "One label, two places",
         p: 'A level can read differently at group and at business unit — what the group ' +
            'calls a ' + plW + ' a unit may call something else — and both ' +
-           'are named on Client set-up › The shape, layer by layer.' },
+           'are named on Setup › The shape, layer by layer.' },
       { h: "No collisions",
         p: 'Every display label at each level is unique, so no two entities can render ' +
            'under the same word. A collision is named on the shape screen until one of them ' +
@@ -8295,7 +8295,16 @@ function setFnCol(k, on){
   fnCols()[k] = on;
   try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
 }
-function fnShowCol(k){ return fnCols()[k] !== false; }
+/* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
+   capabilities filed under a function, and since §544.13 nothing files one
+   there — a capability is the company's — so on every live client it was a
+   column of zeros. It stays where an old record still sits under a function
+   (the worked example's Marketing), and leaves the chooser with it. */
+function fnCapsHeld(){
+  return (FUNCTION_KEYS || []).some(function(fk){ return capsOfFunction(fk).length > 0; });
+}
+function fnColOffered(k){ return k !== "caps" || fnCapsHeld(); }
+function fnShowCol(k){ return fnColOffered(k) && fnCols()[k] !== false; }
 
 /* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
    The register's kebab, on the table §69.22's argument had not reached. The
@@ -8502,7 +8511,7 @@ function renderFunctions(){
             '<div class="hmenu-h"><span>Show columns</span>' +
               '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
               '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
-            FN_COLS.map(function(c){
+            FN_COLS.filter(function(c){ return fnColOffered(c.k); }).map(function(c){
               return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
                 (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
             }).join("") +

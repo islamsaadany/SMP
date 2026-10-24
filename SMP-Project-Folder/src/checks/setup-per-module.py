@@ -157,10 +157,13 @@ with sync_playwright() as p:
     # started, `start`), so `brand` is asserted ABSENT beside `start` present.
     ck("the knowledge base is Strategy's (§360 — kept where the questions are asked) and in the Help group",
        ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='kb');return d && d.mod==='strategy' && d.grp==='help';}", False))
-    ck("the people, the organisation and Getting started are the client's",
-       ev(pg, "()=>['people','mainbu','units','companies','fns','caps','start'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='client';})", False))
-    ck("…and Getting started sits in The client, the last group, gated by the branding grant it absorbed",
-       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='start');return d && d.grp==='client' && d.ac==='c_brand' && SETUP_GROUPS[SETUP_GROUPS.length-1].k==='client';}", False))
+    ck("the people, the organisation and the client's two pages are the client's",
+       ev(pg, "()=>['people','mainbu','units','companies','fns','caps','start','shape'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='client';})", False))
+    # REWRITTEN (§218, §624): Getting started sat in The client, the LAST group,
+    # until Done with set-up. The client is the FIRST group now, holding
+    # Profile and The shape, both still gated by the branding grant (§360).
+    ck("…and Profile and The shape sit in The client, the first group, gated by the branding grant it absorbed",
+       ev(pg, "()=>['start','shape'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.grp==='client' && d.ac==='c_brand';}) && SETUP_GROUPS[0].k==='client'", False))
     ck("the Branding page is gone — no def, and no page anybody could land on (§24)",
        ev(pg, "()=>!setupDefsAll().some(d=>d.k==='brand') && !SETUP_GROUPS.some(g=>g.k==='look')", False),
        ev(pg, "()=>setupDefsAll().filter(d=>d.k==='brand').length + '/' + SETUP_GROUPS.filter(g=>g.k==='look').length"))
@@ -194,9 +197,12 @@ with sync_playwright() as p:
     ck("the head says Setup and nothing more", head(pg) == "Setup", head(pg))
     ck("no way out is drawn — unscoped, there is no console and no client address to point at (§360)",
        pg.query_selector(".setuprail .railback") is None)
-    ck("…and Getting started is a strip under the head, not a row in a group (§360)",
-       ev(pg, "()=>{const s=document.querySelector('.setuprail .railstart[data-setupgo=\"start\"]');"
-              "return !!s && !document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && !document.querySelector('.setuprail .rgroup[data-railgrp=\"client\"]');}", False))
+    # §624: no strip under the head any more — the client's pages are rows.
+    ck("…and the client's pages are rows of the first group, with no strip under the head (§624)",
+       ev(pg, "()=>!document.querySelector('.setuprail .railstart') && "
+              "document.querySelector('.setuprail .rgroup').dataset.railgrp==='client' && "
+              "!!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && "
+              "!!document.querySelector('.setuprail .ritem[data-setupgo=\"shape\"]')", False))
 
     print("\n── 3 · scoped, the rail is the module's own — asserted as AGREEMENT, both ends ──")
     set_scope(pg, "strategy", "cycle")
@@ -240,8 +246,14 @@ with sync_playwright() as p:
     cli = rail(pg)
     ck("the client's rail is exactly the defs marked client", same(cli, defs_of(pg, "client")), (cli, defs_of(pg, "client")))
     ck("…and none of Strategy's", not any(k in cli for k in ("cycle", "bands", "access", "sets", "kb")), cli)
-    ck("…it holds Getting started, as the strip (§360)", "start" in cli and
-       ev(pg, "()=>!!document.querySelector('.setuprail .railstart[data-setupgo=\"start\"]')", False), cli)
+    ck("…it holds Profile and The shape, as rows (§624)", "start" in cli and "shape" in cli and
+       ev(pg, "()=>!!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]')", False), cli)
+    # §624: Islam's own picture of this rail — People & access holds Forefront
+    # team and the register; the Official BU list joined The organisation.
+    ck("…People & access holds Forefront team and the register, and the BU list is the organisation's (§624)",
+       ev(pg, "()=>{const g=k=>[...document.querySelectorAll('.setuprail [data-railitems=\"'+k+'\"] .ritem')].map(r=>r.dataset.setupgo).join(',');"
+              "return g('who')==='team,people' && /,mainbu$/.test(g('run'));}", False),
+       ev(pg, "()=>['who','run'].map(k=>[...document.querySelectorAll('.setuprail [data-railitems=\"'+k+'\"] .ritem')].map(r=>r.dataset.setupgo).join(','))"))
     ck("the head says Client · Setup", head(pg) == "Client · Setup", head(pg))
     ck("the two rails between them are the whole list, and share nothing",
        sorted(strat + cli) == sorted(everything) and not set(strat) & set(cli), (len(strat), len(cli), len(everything)))
@@ -348,14 +360,16 @@ with sync_playwright() as p:
     # key of the list (agreement, §94.8), so a group added tomorrow stays
     # green and a def pointing at no group goes red.
     keys = ev(pg, "()=>SETUP_GROUPS.map(g=>g.k)")
-    ck("the four groups a browser already folds are keyed as before, in place",
-       keys[:4] == ["cycle", "who", "run", "meas"], keys)
+    # REWRITTEN (§218, §624): The client went FIRST. The four keys a browser
+    # already folds by are unchanged (§30.2) — only their place moved down one.
+    ck("the four groups a browser already folds are keyed as before, after The client",
+       keys[0] == "client" and keys[1:5] == ["cycle", "who", "run", "meas"], keys)
     # REWRITTEN (§218, §360): `look` went with the Branding page it held,
     # and *The client* is LAST — the set-up, once done, is the thing you come
     # back to least. The tail is asserted in ORDER because the order is the
     # decision, and `look` as an absence beside it (§94.2).
-    ck("...and the tail is access, landing, help, client — in that order, client last (§360)",
-       keys[4:] == ["access", "landing", "help", "client"] and "look" not in keys, keys)
+    ck("...and the tail is access, landing, help — in that order, with client first, not last (§624)",
+       keys[5:] == ["access", "landing", "help"] and "look" not in keys, keys)
     ck("...and every def's group is one of them",
        ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
        ev(pg, "()=>setupDefsAll().filter(d=>!SETUP_GROUPS.some(g=>g.k===d.grp)).map(d=>d.k)"))
@@ -382,14 +396,16 @@ with sync_playwright() as p:
         # served, the reload lands back on the client's rail by its address
         pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
         set_scope(pg, "client", "people")
-    ck("before Done with set-up, The client is no heading at all — its only page is the strip (§360)",
-       ev(pg, "()=>!document.querySelector('.rgroup[data-railgrp=\"client\"]') && !!document.querySelector('.railstart[data-setupgo=\"start\"]')", False))
-    ev(pg, "()=>{GROUP[SMPRules.SETUP_DONE]=true; paint();}")
+    # REWRITTEN (§218, §624): The client is a heading from the start now —
+    # there is no strip and no Done with set-up — so the fold stored for it
+    # folds it on the first draw. Unless you are standing on one of its pages:
+    # the page you are on is never folded away (here).
+    ev(pg, "()=>{const r=document.querySelector('[data-setupgo=\"people\"]'); if(r) r.click();}")
     pg.wait_for_timeout(350)
-    ck("done, a fold stored for the client group folds it",
+    ck("a fold stored for the client group folds it",
        ev(pg, "()=>{const g=document.querySelector('.rgroup[data-railgrp=\"client\"]');return !!g && g.classList.contains('shut');}", False))
-    ck("…and the strip is gone, with Client set-up a row inside that group (§94.2)",
-       ev(pg, "()=>!document.querySelector('.railstart') && !!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && /Client set-up/.test(document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]').textContent)", False))
+    ck("…and there is no strip, and Profile is a row inside that group (§94.2)",
+       ev(pg, "()=>!document.querySelector('.railstart') && !!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && /Profile/.test(document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]').textContent)", False))
     # AND THE BRANDING ERRAND STILL LANDS SOMEWHERE (§108.13, §360): "where do
     # I change the logo" was the Branding page, which the flow absorbed — so
     # the words moved onto the `start` def, and once it is a ROW the search
@@ -408,9 +424,10 @@ with sync_playwright() as p:
     ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='terminology';"
            "q.dispatchEvent(new Event('input',{bubbles:true}));}")
     pg.wait_for_timeout(300)
-    ck("…and the terminology errand finds it too (§621)",
+    # §624: the words are named on The shape, so that is where it lands now.
+    ck("…and the terminology errand finds The shape, where the words are named (§621, §624)",
        ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
-              ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('start')>=0", False))
+              ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('shape')>=0", False))
     ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='';"
            "q.dispatchEvent(new Event('input',{bubbles:true}));}")
     ev(pg, "()=>{delete GROUP[SMPRules.SETUP_DONE]; localStorage.removeItem('smp.setup.groups'); paint();}")

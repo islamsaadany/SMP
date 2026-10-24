@@ -17,13 +17,15 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   is cleared out of a COPY of the graph and the platform rebound to it,
   exactly as the served client that has just been created stands.
 
-· THE STRIP'S COUNT IS AGREEMENT, NEVER A LITERAL (§94.8): it is compared
-  with `CLIENTSETUP.progress()`, the one reader the rail asks, and the total
-  with the steps the flow draws — a "3 of 7" typed into this file would
-  outlive the next step added.
+· §624 — THE CLIENT IS THE RAIL'S FIRST GROUP: Profile and The shape are
+  rows of it, with no strip, no pills and no Back, Next or Done. Its count
+  is AGREEMENT, NEVER A LITERAL (§94.8): compared with
+  `CLIENTSETUP.progress()`, the one reader the rail asks, at both ends — a
+  shape still to do (probed) and none.
 
 · WHAT THE STORED GRAPH HOLDS, NOT WHAT THE STEP DRAWS (§96): a unit typed
-  and Next pressed is read back off UNIT_KEYS and UNITS; a removal refused
+  and the shape page LEFT (§624: leaving does what Next did) is read back
+  off UNIT_KEYS and UNITS; a removal refused
   is read back as the row count AND the key list unchanged. A flow that
   draws the row and writes nothing renders perfectly.
 
@@ -37,14 +39,14 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   very next Next proceeds — a refusal that held the person on the step for
   ever was the first build's fault.
 
-· BOTH ENDS OF DONE (§94.2): before, the strip and the Done button; after,
-  neither, and the same def under its new name in the last group — found in
-  `setupDefsAll()` AND in the rail's DOM, because a label resolved in one
-  place and not the other is §53.5's drift.
+· NO DONE (§624): the stored setupDone no longer moves or renames anything —
+  Profile is Profile and the group stays first, asked in `setupDefsAll()`
+  AND in the rail's DOM (§53.5).
 
-· THE BRANDING IS ABSORBED, NOT LOST: the first step holds the colour and
-  mark controls the Branding page held, they are WIRED (a colour set writes
-  `branding()`), and the old def is asserted absent (§24).
+· THE BRANDING IS ABSORBED, NOT LOST: Profile's Brand tab holds the colour
+  and mark controls the Branding page held, with what follows from them,
+  they are WIRED (a colour set writes `branding()` on Apply), and the old
+  def is asserted absent (§24).
 
 · THE SHAPE FREEZES WITH A PLAN: a plan line put back takes the Add button
   away and the step says why, with the unfrozen state asserted first.
@@ -115,7 +117,18 @@ def rows(pg):
 # the functions, the capabilities) became one, so what was "press the units
 # step and read its rows" is "press the shape, read the tree, press a box".
 def shape(pg):
-    return press(pg, ".csetup .wzstep[data-step=shape]", 500)
+    # §624: The shape is a page of the rail now.
+    return press(pg, '[data-setupgo="shape"]', 500)
+
+
+def leave(pg):
+    """§624: leaving the shape page does what Next did — writes the rows, or
+    refuses and keeps the person on it. Left for Profile."""
+    return press(pg, '[data-setupgo="start"]', 600)
+
+
+def page(pg):
+    return ev(pg, "()=>currentSub", None)
 
 
 def count(pg, lvl):
@@ -161,53 +174,69 @@ with sync_playwright() as p:
     holds = ev(pg, BARE, {})
     ck("(fixture) the client holds no plan line and no capability with anything in it",
        isinstance(holds, dict) and holds.get("plans") == 0 and holds.get("capabilities") == 0, holds)
-    ck("(fixture) set-up is not done on the worked example", ev(pg, "()=>!SMPRules.setupDone(GROUP)", False))
-    ck("(fixture) the page stands on a Setup page that is not Getting started", ev(pg, "()=>current==='setup' && currentSub==='people'", False))
+    ck("(fixture) the page stands on a Setup page that is not one of the client's own", ev(pg, "()=>current==='setup' && currentSub==='people'", False))
 
-    # ── 1 · THE STRIP, AND ITS COUNT ──────────────────────────────────────
-    print("\n§1 · Getting started is a strip under the rail's head")
-    strip = q(pg, '.setuprail .railstart[data-setupgo="start"]')
-    ck("the strip is drawn under the head, before the search", bool(strip) and
-       ev(pg, "()=>{const s=document.querySelector('.setuprail .railstart');const f=document.querySelector('.setuprail .railfind');"
-              "return !!s && !!f && !!(s.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_FOLLOWING);}", False))
-    ck("…labelled Getting started", ev(pg, "()=>(document.querySelector('.railstart .rslab')||{}).textContent", "") == "Getting started",
-       ev(pg, "()=>(document.querySelector('.railstart .rslab')||{}).textContent"))
+    # ── 1 · THE CLIENT, THE RAIL'S FIRST GROUP, AND ITS COUNT (§624) ──────
+    # REWRITTEN TO THE DECISION (§218): Getting started was a strip under the
+    # head until Done with set-up (§360). Islam: *"have them as 3 section under
+    # the client on the side rail rather than 3 pills"*. What the strip's
+    # assertions were FOR — the count agrees with the data and names what is
+    # left, and the client's pages are found in one place — is asserted of
+    # the group.
+    print("\n§1 · The client is the rail's first group, with Profile and The shape")
+    ck("there is no strip under the head", q(pg, ".setuprail .railstart") is None)
+    grp = ev(pg, "()=>[...document.querySelectorAll('.setuprail .rgroup')].map(g=>g.dataset.railgrp)", [])
+    ck("The client is the FIRST group", bool(grp) and grp[0] == "client", grp)
+    items = ev(pg, "()=>[...document.querySelectorAll('.setuprail [data-railitems=client] .ritem')].map(r=>r.dataset.setupgo+'='+r.querySelector('.rilab').textContent)", [])
+    ck("…holding Profile, then The shape", items == ["start=Profile", "shape=The shape"], items)
     pr = ev(pg, "()=>CLIENTSETUP.progress()", {}) or {}
-    prog = ev(pg, "()=>(document.querySelector('.railstart .rsprog')||{}).textContent||''", "")
-    ck("…its count AGREES with CLIENTSETUP.progress() (never a literal)",
-       isinstance(pr, dict) and pr.get("total") and prog.startswith("%s of %s done" % (pr.get("done"), pr.get("total"))), (prog, pr))
-    ck("…the total is the number of steps the flow draws",
-       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 3, pr)
-    ck("…and it names what is left", isinstance(pr, dict) and bool(pr.get("todo")) and all(t in prog for t in pr["todo"][:2]), (prog, pr))
-    ck("…and the def is NOT a row in any group while the strip stands",
-       q(pg, '.setuprail .ritem[data-setupgo="start"]') is None and q(pg, '.setuprail .rgroup[data-railgrp="client"]') is None)
+    ck("…the count's total is the steps the flow declares, two",
+       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 2, pr)
+    head = ev(pg, "()=>(document.querySelector('.setuprail .rgroup[data-railgrp=client] .rgprog')||{}).textContent||''", "")
+    ck("with both done (the worked example has its boxes), the heading counts nothing and no row is marked",
+       pr.get("done") == pr.get("total") and head == "" and q(pg, ".setuprail .ritodo") is None and q(pg, ".setuprail .ridone") is None,
+       (pr, head))
+    # THE OTHER END (§94.2), probed: with no box at all the shape is still to
+    # do. The lists are emptied for one paint and put straight back.
+    probe = ev(pg, """()=>{ const k=[UNIT_KEYS,FUNCTION_KEYS,COMPANY_KEYS]; UNIT_KEYS=[];FUNCTION_KEYS=[];COMPANY_KEYS=[]; paint();
+      const pr=CLIENTSETUP.progress();
+      const r={pr:pr, head:(document.querySelector('.setuprail .rgroup[data-railgrp=client] .rgprog')||{}).textContent||'',
+        todo:!!document.querySelector('.setuprail .ritem[data-setupgo=shape] .ritodo'),
+        done:!!document.querySelector('.setuprail .ritem[data-setupgo=start] .ridone')};
+      UNIT_KEYS=k[0];FUNCTION_KEYS=k[1];COMPANY_KEYS=k[2]; paint(); return r; }""", {}) or {}
+    ppr = probe.get("pr") or {}
+    ck("…with the shape still to do, the heading's count AGREES with progress() (never a literal)",
+       probe.get("head") == "%s of %s done" % (ppr.get("done"), ppr.get("total")) and ppr.get("done") == 1, probe)
+    ck("…The shape wears the dot and Profile the tick", probe.get("todo") is True and probe.get("done") is True, probe)
+    ck("…and the landing is the page still to do",
+       ppr.get("todoKeys") == ["shape"], ppr.get("todoKeys"))
     ck("the old Branding def is gone from the list (§24)", ev(pg, "()=>!setupDefsAll().some(d=>d.k==='brand')", False))
 
-    # ── 2 · PRESSING IT OPENS THE FLOW ────────────────────────────────────
-    print("\n§2 · pressing the strip")
-    ck("the strip opens Getting started", press(pg, '.setuprail .railstart[data-setupgo="start"]', 500)
-       and ev(pg, "()=>currentSub", None) == "start" and bool(q(pg, ".csetup")), ev(pg, "()=>currentSub"))
-    ck("…headed Getting started", ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent", "") == "Getting started",
+    # ── 2 · PRESSING PROFILE OPENS IT ─────────────────────────────────────
+    print("\n§2 · pressing Profile")
+    ck("Profile opens the client's page", press(pg, '.setuprail .ritem[data-setupgo="start"]', 500)
+       and page(pg) == "start" and bool(q(pg, ".csetup")), page(pg))
+    ck("…headed Profile", ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent", "") == "Profile",
        ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent"))
-    ck("…and the strip is lit as the page you are on",
-       ev(pg, "()=>{const s=document.querySelector('.railstart');return !!s && s.classList.contains('on') && s.getAttribute('aria-current')==='page';}", False))
-    steps = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup .wzstep')).map(e=>e.dataset.step)", [])
-    # §544, spec 066 §6: THE SEVEN STEPS ARE THREE. Structure and the four
-    # list steps are one screen — the shape — and every answer they held is
-    # asserted below on the level or the box it is about.
-    ck("three steps, in order — the client, the shape, the office (§544)",
-       steps == ["client", "shape", "office"], steps)
-    ck("…the same three the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
-    ck("standing on the first", at(pg) == "client" and ev(pg, "()=>(document.querySelector('.csetup .wzstep[aria-current=step]')||{}).dataset.step", None) == "client")
-    ck("Done with set-up is offered", bool(q(pg, ".csetup [data-wzdone]")))
-    ck("…Next too, and Back is shut on the first step", bool(q(pg, ".csetup [data-wznext]")) and
-       ev(pg, "()=>{const b=document.querySelector('.csetup [data-wzback]');return !!b && b.disabled;}", False))
+    ck("…and lit as the page you are on",
+       ev(pg, "()=>{const s=document.querySelector('.setuprail .ritem[data-setupgo=start]');return !!s && s.classList.contains('on');}", False))
+    tabs = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup [data-cstab]')).map(e=>e.dataset.cstab)", [])
+    ck("three tabs, in order — Details, Brand, Modules (§624)", tabs == ["details", "brand", "modules"], tabs)
+    ck("standing on Details", at(pg) == "details" and
+       ev(pg, "()=>(document.querySelector('.csetup [data-cstab][aria-selected=true]')||{}).dataset.cstab", None) == "details")
+    ck("no pills, and no Back, Next or Done with set-up (§624)",
+       q(pg, ".csetup .wzrail") is None and q(pg, ".csetup [data-wznext]") is None and
+       q(pg, ".csetup [data-wzback]") is None and q(pg, ".csetup [data-wzdone]") is None)
     ck("over file:// the client's own record is said to be the served platform's, in words",
        ev(pg, "()=>/served platform/.test(document.querySelector('.csetup').textContent)", False))
+    ck("Details holds no colour and no module — they are their own tabs",
+       q(pg, ".csetup [data-brand]") is None and q(pg, ".csetup [data-module]") is None)
 
     # ── 3 · THE BRANDING IS ABSORBED INTO STEP ONE ─────────────────────────
-    print("\n§3 · the branding lives on the first step")
-    ck("the colour controls are inside the flow", bool(q(pg, ".csetup .wzbrand [data-brand]")))
+    print("\n§3 · the branding lives on Profile's Brand tab")
+    press(pg, ".csetup [data-cstab=brand]", 500)
+    ck("the Brand tab opens", at(pg) == "brand", at(pg))
+    ck("the colour controls are on it", bool(q(pg, ".csetup .wzbrand [data-brand]")))
     # §461 REVERSED this, never loosened it (§218): there is ONE mark, the
     # client's (the door's), so the branding block carries no second upload.
     ck("…and NO second, group mark upload (§461: one mark, the client's)", not q(pg, ".csetup .wzbrand [data-glogo]"))
@@ -225,13 +254,17 @@ with sync_playwright() as p:
         after = ev(pg, "()=>branding()[%r]" % key, None)
     ck("…and a colour set there WRITES the tenant's branding on Apply, not before (§96, §621)",
        wrote == "set" and held == before and after == "#123456" and after != before, (key, before, held, after, wrote))
+    # Islam: *"we have more colors choice called what follows from them they
+    # will be part of the brand tab right?"* — yes, with whether it reads.
+    ck("…and what follows from them, and whether it reads, are on the same tab (§624)",
+       ev(pg, "()=>{const t=document.querySelector('.csetup .wzbrand').textContent; return /What follows from them/.test(t) && /Is it readable/.test(t);}", False))
     if key:
         ev(pg, "()=>{branding()[%r]=%s; applyBrand(); paint();}" % (key, json.dumps(before)))   # put back (§94.2)
     pg.wait_for_timeout(300)
 
     # ── 4 · THE UNITS STEP: ADD, TYPE, NEXT — READ BACK OFF THE GRAPH ─────
     print("\n§4 · a business unit is added")
-    ck("the shape opens", shape(pg) and at(pg) == "shape", at(pg))
+    ck("the shape opens", shape(pg) and page(pg) == "shape" and at(pg) == "shape", (page(pg), at(pg)))
     n_units = ev(pg, "()=>UNIT_KEYS.length", -1)
     head0 = ev(pg, "()=>({key:UNIT_KEYS[0], head:(UNIT_ROLES[UNIT_KEYS[0]]||{}).head, mob:(UNIT_ROLES.mobile||{}).head})", {})
     ck("(fixture) the first unit has somebody in charge — the refusal below needs one (§113.8)",
@@ -242,50 +275,53 @@ with sync_playwright() as p:
        press(pg, ".csetup [data-shrow=bu] .shadd", 400) and count(pg, "bu") == n_units + 1 and
        ev(pg, "()=>{const b=document.querySelector('.csetup [data-shname]');return !!b && document.activeElement===b;}", False),
        ev(pg, "()=>document.activeElement && document.activeElement.className"))
-    ck("…and nothing is written until Next", ev(pg, "()=>UNIT_KEYS.length", -1) == n_units)
+    ck("…and nothing is written until the page is left", ev(pg, "()=>UNIT_KEYS.length", -1) == n_units)
     try:
         pg.fill(".csetup [data-shname]", "Test Unit X"); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("FILL: " + str(e)[:90])
-    ck("Next writes the unit into the STORED graph", press(pg, ".csetup [data-wznext]", 500) and
+    # §624: a status while it is true — the rows wait for the page to be left.
+    shape(pg)
+    ck("…and the page says the rows are written when you leave it",
+       ev(pg, "()=>/written when you leave this page/.test((document.querySelector('.csetup .wzpend')||{}).textContent||'')", False))
+    ck("leaving the page writes the unit into the STORED graph (§624: what Next did)", leave(pg) and
        ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1 and
        ev(pg, "()=>UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name", None) == "Test Unit X",
        ev(pg, "()=>[UNIT_KEYS.length, UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name]"))
-    ck("…and moves on to the office, the last of the three", at(pg) == "office", at(pg))
+    ck("…and the page asked for opens", page(pg) == "start", page(pg))
     ck("the heads survive the pass (§346): who runs Mobile before is who runs it after",
        ev(pg, "()=>(UNIT_ROLES.mobile||{}).head", None) == head0.get("mob") and bool(head0.get("mob")),
        (head0.get("mob"), ev(pg, "()=>(UNIT_ROLES.mobile||{}).head")))
     ck("…and the weighting rows are one per unit — never a second row per pass (§346.1)",
        ev(pg, "()=>GROUP.weighting.units.length===UNIT_KEYS.length && new Set(GROUP.weighting.units.map(r=>r.key)).size===UNIT_KEYS.length", False),
        ev(pg, "()=>[GROUP.weighting.units.length, UNIT_KEYS.length]"))
-    ck("…and the strip's count moved with the data", ev(pg, "()=>(document.querySelector('.railstart .rsprog')||{}).textContent||''", "")
-       .startswith("%s of %s done" % (ev(pg, "()=>CLIENTSETUP.progress().done"), ev(pg, "()=>CLIENTSETUP.progress().total"))))
+
 
     # ── 5 · REMOVING A HEADED UNIT IS REFUSED BY NAME, AND THE ROW IS BACK ─
     print("\n§5 · a headed unit cannot be removed here")
     shape(pg)
     c1 = count(pg, "bu"); keys1 = ev(pg, "()=>UNIT_KEYS.slice()", None)
     name0 = ev(pg, "()=>UNITS[UNIT_KEYS[0]].name", "")
-    ck("(fixture) the first box is the headed unit", at(pg) == "shape" and c1 == n_units + 1 and bool(name0), (at(pg), c1))
+    ck("(fixture) the first box is the headed unit", page(pg) == "shape" and c1 == n_units + 1 and bool(name0), (page(pg), c1))
     ck("Remove takes the box off the tree",
        openbox(pg, "bu", 0) and press(pg, ".csetup [data-shremove='bu:0']", 300) and count(pg, "bu") == c1 - 1, count(pg, "bu"))
-    press(pg, ".csetup [data-wznext]", 500)
+    leave(pg)
     s = said(pg)
-    ck("Next is refused, naming the unit somebody is in charge of", "Somebody is in charge of" in s and name0 in s, s[:120])
+    ck("leaving is refused, naming the unit somebody is in charge of", "Somebody is in charge of" in s and name0 in s, s[:120])
     ck("…and saying the row is back", "back as it was" in s, s[:160])
     ck("…the box IS back on the tree", count(pg, "bu") == c1, (count(pg, "bu"), c1))
-    ck("…the flow stays on the shape", at(pg) == "shape", at(pg))
+    ck("…the person stays on the shape page", page(pg) == "shape", page(pg))
     ck("…and the stored graph is untouched", ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1 and
        ev(pg, "()=>(UNIT_ROLES[UNIT_KEYS[0]]||{}).head", None) == head0.get("head"))
-    ck("the very next Next then proceeds (§360.3 — the person is not held on the step)",
-       press(pg, ".csetup [data-wznext]", 500) and at(pg) == "office" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
+    ck("the very next try then leaves (§360.3 — the person is not held on the page)",
+       leave(pg) and page(pg) == "start" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (page(pg), said(pg)[:80]))
 
     # ── 6 · A ROW WITH NO NAME ─────────────────────────────────────────────
     print("\n§6 · a box with no name")
     shape(pg)
     c2 = count(pg, "bu")
     press(pg, ".csetup [data-shrow=bu] .shadd", 300)
-    press(pg, ".csetup [data-wznext]", 400)
+    leave(pg)
     s = said(pg)
     # §395: the sentence names the thing in the CLIENT's word, so it is asked
     # as an agreement with the label and never as the platform's literal.
@@ -294,30 +330,28 @@ with sync_playwright() as p:
     # whose rest is already lower case (so an acronym is left alone) — the
     # same rule, worked out here rather than read back from the product.
     one = " ".join(x if x[1:] != x[1:].lower() else x[:1].lower() + x[1:] for x in one.split())
-    ck("Next with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
-    ck("…and nothing is written", at(pg) == "shape" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
-    ck("taking the empty box off lets Next through",
+    ck("leaving with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
+    ck("…and nothing is written", page(pg) == "shape" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
+    ck("taking the empty box off lets the page be left",
        press(pg, ".csetup [data-shremove='bu:%d']" % c2, 300) and count(pg, "bu") == c2
-       and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "office", (count(pg, "bu"), at(pg), said(pg)[:60]))
+       and leave(pg) and page(pg) == "start", (count(pg, "bu"), page(pg), said(pg)[:60]))
 
-    # ── 7 · DONE WITH SET-UP ───────────────────────────────────────────────
-    print("\n§7 · Done with set-up")
-    ck("(before) the strip stands and the button is there", bool(q(pg, ".railstart")) and bool(q(pg, ".csetup [data-wzdone]")))
-    press(pg, ".csetup [data-wzdone]", 700)
-    ck("the mark is written on the group — SMPRules.setupDone(GROUP)", ev(pg, "()=>SMPRules.setupDone(GROUP)", False))
-    ck("the strip is gone", q(pg, ".setuprail .railstart") is None)
-    ck("…and the button with it", q(pg, ".csetup [data-wzdone]") is None)
-    ck("the def is now Client set-up, in the client group (setupDefsAll)",
-       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='start');return !!d && d.label==='Client set-up' && d.grp==='client';}", False),
+    # ── 7 · NO DONE WITH SET-UP (§624) ─────────────────────────────────────
+    # REWRITTEN TO THE DECISION (§218): Done with set-up moved Getting started
+    # to the bottom of the rail as Client set-up. The group is first from the
+    # start now, and the stored mark — kept on clients that pressed it —
+    # moves and renames nothing. Asked in setupDefsAll() AND the DOM (§53.5).
+    print("\n§7 · no Done with set-up, and the stored mark changes nothing")
+    ck("there is no Done button anywhere", q(pg, "[data-wzdone]") is None)
+    ev(pg, "()=>{GROUP[SMPRules.SETUP_DONE]=true; paint();}")
+    pg.wait_for_timeout(400)
+    ck("with the old mark stored, the def is still Profile in the client group",
+       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='start');return !!d && d.label==='Profile' && d.grp==='client';}", False),
        ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='start');return d && [d.label,d.grp];}"))
-    ck("…and drawn as a row of the LAST group in the rail's DOM",
-       ev(pg, """()=>{const it=document.querySelector('.setuprail .ritem[data-setupgo="start"]');
-         const g=document.querySelector('.setuprail .rgroup[data-railgrp="client"]');
-         const groups=Array.from(document.querySelectorAll('.setuprail .rgroup'));
-         return !!it && !!g && /Client set-up/.test(it.textContent) && groups[groups.length-1]===g &&
-           !!(g.compareDocumentPosition(it) & Node.DOCUMENT_POSITION_FOLLOWING);}""", False))
-    ck("…the page's head reads Client set-up too", ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent", "") == "Client set-up")
-    ck("…and every answer stays editable — the steps are still there", ev(pg, "()=>document.querySelectorAll('.csetup .wzstep').length", -1) == ev(pg, "()=>CLIENTSETUP.STEPS.length"))
+    ck("…and the group is still the rail's first",
+       ev(pg, "()=>{const g=[...document.querySelectorAll('.setuprail .rgroup')]; return g.length>0 && g[0].dataset.railgrp==='client';}", False))
+    ev(pg, "()=>{delete GROUP[SMPRules.SETUP_DONE]; paint();}")
+    pg.wait_for_timeout(300)
 
     # ── 8 · THE SHAPE FREEZES WITH A PLAN ──────────────────────────────────
     print("\n§8 · a client with a plan in it")
@@ -382,7 +416,7 @@ with sync_playwright() as p:
         pg.select_option(".csetup [data-wzdiv=unit]", coname); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
-    press(pg, ".csetup [data-wznext]", 500)
+    leave(pg)
     ck("…and picking one WRITES the unit's division (§96)",
        ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk)), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
        ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk))))
@@ -394,7 +428,7 @@ with sync_playwright() as p:
         pg.select_option(".csetup [data-wzdiv=fn]", coname); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
-    press(pg, ".csetup [data-wznext]", 500); shape(pg)
+    leave(pg); shape(pg)
     ck("…and picking one WRITES the function's division (§391's field)",
        ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
        ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk)))
@@ -410,7 +444,7 @@ with sync_playwright() as p:
         pg.select_option(".csetup [data-wzdiv=fn]", ""); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
-    press(pg, ".csetup [data-wznext]", 500); shape(pg)
+    leave(pg); shape(pg)
     ck("…and choosing none takes it off again (the key DELETED, §50.6)",
        ev(pg, "()=>!('company' in FUNCTIONS[%s])" % json.dumps(fk), False))
     ck("…and the functions' layer goes with it",
@@ -433,9 +467,9 @@ with sync_playwright() as p:
        all(q(pg, '.csetup [data-stcard="dir"] [data-stlw="top|pillar|%s"]' % f) for f in ("one", "many")) and
        all(q(pg, '.csetup [data-stway="top|pillars"] [data-stlw="top|%s|%s"]' % (p, f)) for p in ("measure", "tactic") for f in ("one", "many")))
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)')
-    ck("there is no Words step", q(pg, ".csetup .wzstep[data-step=words]") is None)
-    ck("…and no Structure, divisions, units, functions or capabilities step either (§544)",
-       all(q(pg, ".csetup .wzstep[data-step=%s]" % k) is None for k in ("structure", "cos", "units", "fns", "caps")))
+    ck("there is no Words step", not ev(pg, "()=>CLIENTSETUP.STEPS.some(s=>s.k==='words')", True))
+    ck("…and no Structure, divisions, units, functions, capabilities or office step either (§544, §624)",
+       ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k).join(',')", "") == "client,shape")
     # no second layer: the tree draws no layer row at all, and a box's panel
     # offers no division (§61: a control with nothing behind it)
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));st.mid=Object.assign({},st.mid||{},{exists:false});GROUP[SMPRules.STRUCTURE]=st;paint();}")

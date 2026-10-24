@@ -182,6 +182,11 @@ check("each section's guidance carries the house rules; the roads only where the
   const c = dvCaps([{ title: "Supply chain", kind: "gap", serves: ["win families", "Made up"], ownedBy: "commercial" }, { title: "X", kind: "weird", serves: [], ownedBy: "" }], fns, ["Win families"], [], true);
   check("...a Capability serves only Directions on the table, spelt as they are, and a kind not on the list is none",
     c[0].serves.join() === "Win families" && c[0].kind === "gap" && c[1].kind === "" && c[0].keep === true, JSON.stringify(c));
+  /* §626: a Capability's owner is a person, never a function (§544.13). */
+  const ch = dvCaps([{ title: "A", kind: "gap", serves: [], ownedBy: "commercial" }, { title: "B", kind: "gap", serves: [], ownedBy: "it" }, { title: "C", kind: "gap", serves: [], ownedBy: "nobody" }],
+    [{ key: "commercial", name: "Commercial", head: "noranh" }, { key: "it", name: "IT", head: "" }], [], [], true);
+  check("§626 ...a Capability's owner is the HEAD of the function the model names; none where it has no head or is not on the list",
+    ch[0].ownedBy === "noranh" && ch[1].ownedBy === "" && ch[2].ownedBy === "", JSON.stringify(ch.map((x) => x.ownedBy)));
 }
 /* §495: Execution — the period, its quarters, and what blocks the save. */
 {
@@ -1071,11 +1076,21 @@ try {
     check("a Capabilities chat starts with nothing to choose first", nc.st === 200 && nc.j.chat?.section === "capabilities" && nc.j.dirs?.start === "fresh" && nc.j.dirs?.withCaps === false && nc.j.dirsTodo?.length === 3);
     const cfin0 = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
     check("...nothing kept, nothing saved", cfin0.st === 400 && /Keep at least one Capability/.test(cfin0.j.why));
-    NEXT = { answer: { reply: "From the saved Directions.", capabilities: [{ title: "One retail system", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "it" }] } };
-    const cc = await call("POST", "api", { act: "capSuggest", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS, dirTitles: ["Upper Egypt"] }, NORAN);
+    /* §626: the page sends each function's head, and the function the model
+       names for a Capability arrives as that person. */
+    const FNS_H = [{ key: "commercial", name: "Commercial", head: "noranh" }, { key: "it", name: "IT" }];
+    NEXT = { answer: { reply: "From the saved Directions.", capabilities: [{ title: "One retail system", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "it" },
+      { title: "Key accounts", kind: "gap", serves: ["Upper Egypt"], ownedBy: "commercial" }] } };
+    const cc = await call("POST", "api", { act: "capSuggest", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS_H, dirTitles: ["Upper Egypt"] }, NORAN);
     check("...suggested from the saved Directions the page sends", cc.st === 200 && cc.j.dirs?.caps[0]?.serves.join() === "Upper Egypt" && cc.j.dirs.caps[0].kind === "enabler");
-    const cfin = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
+    const ka = (cc.j.dirs?.caps || []).find((x) => x.title === "Key accounts"), rs = (cc.j.dirs?.caps || []).find((x) => x.title === "One retail system");
+    check("§626 ...a Capability's suggested owner is the head of the function named, a person; none where the function has no head",
+      ka?.ownedBy === "noranh" && rs?.ownedBy === "", JSON.stringify([ka?.ownedBy, rs?.ownedBy]));
+    const cfin = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS_H, owners: [{ key: "noranh", name: "Noran Hassan" }] }, NORAN);
     check("...and saves as Capabilities — Mobile", cfin.st === 200 && cfin.j.saved?.title === "Capabilities \u2014 Mobile");
+    const crow = cfin.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [cfin.j.saved.deliverableId]))).rows : [];
+    check("§626 ...the record names a Capability's owner by the person's name, not a key",
+      crow.length === 1 && /Key accounts .*· Noran Hassan/.test(crow[0].body.text) && !/noranh/.test(crow[0].body.text), String(JSON.stringify(crow[0] && crow[0].body.text)).slice(0, 300));
     const notDv = await call("POST", "api", { act: "dirSave", id: ch.id, dirs: {} }, NORAN);
     check("a chat that is not Directions is refused", notDv.st === 400 && /not a Directions/.test(notDv.j.why));
     NEXT = null;

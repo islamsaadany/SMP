@@ -110,7 +110,7 @@ with sync_playwright() as p:
     # §544: Client set-up › Structure is the shape screen — the same seven
     # cards, one at a time, opened by pressing a level in the tree. Every
     # claim below about what a card HOLDS is unchanged (§218).
-    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]')
+    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '[data-setupgo="shape"]')
     ck("Client set-up › the shape opens", ok)
     def lvl(k):
         return press(pg, '[data-shlvl="%s"]' % k)
@@ -208,10 +208,13 @@ with sync_playwright() as p:
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
     ck("the set-up flow opens", ok)
-    ck("it is three steps: the client, the shape, the office",
-       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')") == "client,shape,office",
-       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')"))
-    ck("pressing the shape", press(pg, '.wzstep[data-step="shape"]'))
+    # §624: the steps are pages of the rail's first group now, The client —
+    # Profile and The shape — and the office step went (Forefront team is
+    # its page). Asserted as the rail draws them, in order.
+    ck("the client's own pages are two: Profile, then The shape",
+       safe(pg, "()=>[...document.querySelectorAll('.setuprail [data-railitems=client] .ritem')].map(b=>b.dataset.setupgo).join(',')") == "start,shape",
+       safe(pg, "()=>[...document.querySelectorAll('.setuprail [data-railitems=client] .ritem')].map(b=>b.dataset.setupgo).join(',')"))
+    ck("pressing the shape", press(pg, '[data-setupgo="shape"]'))
     # the tree's four rows, and the card each one opens
     LVLS = [("top", "top"), ("bu@g", "mid"), ("bu", "bu"), ("fn", "fn")]
     ck("the tree carries a row per level",

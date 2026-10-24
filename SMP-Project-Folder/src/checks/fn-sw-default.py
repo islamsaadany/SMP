@@ -65,7 +65,7 @@ with sync_playwright() as p:
 
     print("2. the shape screen's cards agree, and a press elsewhere does not switch it on")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]')
+        and press(pg, '[data-setupgo="shape"]')
     ck(ok, "the shape screen opens")
     # §544: a level's card opens from the tree, one at a time.
     def lvl(k):

@@ -223,14 +223,10 @@ p,ul,ol{margin:0}
 
 <div class="mk"><div class="mk-in">
   <div class="mk-id"><span class="mk-tag">Mockup</span><b>Opening the Processes module: My processes</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
-  <div class="mk-sw" role="tablist" aria-label="Where the to-do goes">
-    <button type="button" data-var="1" role="tab">1 · To-do on the same page</button>
-    <button type="button" data-var="2" role="tab">2 · To-do on its own tab</button>
-  </div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Hend Mourad</b>, Finance manager. You own two processes, approve one your team wrote, and have a step in three more. Agreed 24 Oct: the module opens on <b>My processes</b> (option A), with the tabs drawn as buttons. Still open: does what is waiting on you sit on the same page as your processes, or on its own tab, as in option C? Switch between the two at the top right.</p>
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager. You own two processes, approve one your team wrote, and have a step in three more. Agreed 24 Oct: the module opens on <b>My processes</b> (option A), with the tabs drawn as buttons. What is waiting on you has its own tab, <b>To do</b>, second in the row; the line in the band, the gold count and the button in each row point at it.</p>
 
   <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">4 waiting on you</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
@@ -355,7 +351,7 @@ p,ul,ol{margin:0}
   };
   const NOTES = {
     1: [['Good at', ['Impossible to miss: it is the first thing on the page', 'One page answers both “what do I do” and “how are mine doing”']], ['What it costs', ['The list pushes your processes down, and a busy week pushes them off the screen', 'The page changes shape as things come and go', 'Each item shows twice: in the list and in its process row']], ['Fits', ['Someone with a few processes and one or two things a week']]],
-    2: [['Good at', ['My processes keeps the same shape every visit: a steady picture of how yours are doing', 'To do is a clean list that empties, as in option C', 'Nothing hides: the line in the band, the gold count on the tab and the button in each row all point at it']], ['What it costs', ['One click to see the whole list', 'Two places to act on the same thing, the row and the To do tab; they must stay in step']], ['Fits', ['Managers with several processes, and busy weeks. It is also how the process page works: a line in the band, the detail on a tab']]],
+    2: [['Agreed 24 Oct', ['Opens on My processes: yours, then the ones you have a step in', 'To do is its own tab, second in the row, with a gold count', 'Tabs drawn as buttons, as on the process page']], ['So it never hides', ['A “Waiting on you” line in the band opens To do', 'Each process row carries its own button: approve, review, read', 'The row and the To do tab must stay in step: acting in one clears the other']], ['Earlier versions of this page', ['Version 1: options A, B and C (my processes, company map, to-do only)', 'Version 2: to-do on the same page or on its own tab']]],
   };
   let VAR = '2', VIEW = 'mine';
   function render() {

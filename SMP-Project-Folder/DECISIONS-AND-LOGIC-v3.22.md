@@ -69364,6 +69364,20 @@ Islam: *"can we work on refining the design of the consultants and who sees what
   - Python: platform-cards 30/0, tab-keep, client-card-modules 23/0, client-archive, client-setup-outside, console-boot 13/0 green.
   - `multi-client.py` did not run: its fixture needs a rehearsal database that this container does not hold.
 
+**§622.5 AND §622.6 MERGED TO `main`** 2026-10-24, Islam: *"merge it and put it live"*.
+- **The merge.** `main` had taken §627–§631 while this waited. It was merged INTO the branch with the record files COMBINED (§318.7; only the progress log conflicted), and the built file and served copies were REGENERATED. `generated-in-step` and `release-stamp` read all clear, `built-in-step` all good, `pages-types` 10/0.
+- **Results on the merged tree:**
+  - Green: case-page 62/0, frameworks-page 64/0, memory-page 42/0, console-record, instant-nav 19/0, copilot 335/0, platform-cards 30/0, tab-keep, console-boot 13/0, client-card-modules 23/0.
+  - shell 434/11 and door-landing 136/5.
+  - `main`'s new `platform-80`, `client-icon` and `org-cells` were red.
+- **Every red there is `main`'s, PROVED, NOT ASSUMED.** `main` alone (`dfdf5c11`), checked out and built on its own, reads:
+  - shell 423/11, the same eleven assertions: the Copilot row (§624) and ten on the client platform's Copilot chat measured since §631 put it at 80%.
+  - platform-80, client-icon and org-cells red the same way.
+  - door-landing's five, as before.
+- Then a clean fast-forward of `main` to `812130b7`.
+- **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`fb84c61f678e5a5b`**, `/platform-page.js` **326,470** bytes and `/shell.js` **5,275,731**, both identical to the generated copies.
+- No `SHELL` bump (the client platform's built file is `main`'s own); no forced sign-out.
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.

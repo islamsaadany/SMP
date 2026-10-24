@@ -1,0 +1,256 @@
+<title>Processes Rethink</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* Layout: a design brief the team reads top to bottom, in SMP's Forefront navy and gold; a navy masthead like the Internal Tracker's, then plain sections with one diagram of the two sides. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --head:#E4E9F0;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#B9C2CE; --band-accent:#E8A33A;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --gold-bg:#FBF6E9; --gold-line:#D9C489;
+  --good-tx:#1F6248; --good-bg:#E4F0EA; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --stone:#16325C; --focus:#8A6B22;
+  --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#B9C2CE; --band-accent:#E8A33A;
+  --gold:#D9B665; --gold-deep:#D9B665; --gold-bg:#2A2617; --gold-line:#5E4F25;
+  --good-tx:#8FD3B0; --good-bg:#1B3129; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --stone:#7FA3D8; --focus:#E6C65C;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#B9C2CE; --band-accent:#E8A33A;
+  --gold:#D9B665; --gold-deep:#D9B665; --gold-bg:#2A2617; --gold-line:#5E4F25;
+  --good-tx:#8FD3B0; --good-bg:#1B3129; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --stone:#7FA3D8; --focus:#E6C65C;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--stone);text-underline-offset:2px}
+a:hover{color:var(--gold-deep)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.2}
+p,ul,ol{margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px;display:grid;gap:34px}
+
+/* masthead */
+.mast{background:var(--navy);color:var(--navy-ink);border-radius:12px;padding:22px 24px 24px;box-shadow:inset 0 -3px 0 var(--band-accent);display:grid;gap:10px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--band-accent)}
+.mast h1{font-size:32px;font-weight:700}
+.mast p{color:var(--navy-quiet);font-size:16.5px;max-width:64ch}
+.mast p b{color:var(--navy-ink);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{font-size:12px;font-weight:700;letter-spacing:.04em;border-radius:99px;padding:2px 11px;background:rgba(255,255,255,.12);color:var(--navy-ink)}
+.chip.gold{background:var(--band-accent);color:#16325C}
+
+/* sections */
+section{display:grid;gap:12px}
+.kicker{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep)}
+h2{font-size:24px;font-weight:700}
+h3{font-size:17.5px;font-weight:700;margin-top:6px}
+.lead{color:var(--ink-2);max-width:68ch}
+section p,section li{max-width:70ch}
+ul.b{padding-left:20px;display:grid;gap:6px}
+ul.b li::marker{color:var(--gold)}
+.q{font-style:italic;color:var(--ink-2)}
+.ref{font-size:12.5px;font-weight:700;color:var(--gold-deep);white-space:nowrap}
+.see{display:inline-flex;gap:6px;align-items:center;font-size:14px;font-weight:600}
+
+/* the two sides */
+.sides{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);gap:0;align-items:stretch}
+.side{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.side h3{margin:0;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.side h3 span{font-size:12px;font-weight:600;color:var(--ink-3)}
+.side .who{font-size:13.5px;color:var(--ink-2)}
+.tabsx{display:flex;flex-wrap:wrap;gap:4px}
+.tabsx span{font-size:12.5px;font-weight:600;border-radius:6px;padding:2px 8px;background:var(--surface-2);color:var(--ink-2)}
+.tabsx span.on{background:var(--navy);color:var(--navy-ink)}
+.side ul{padding-left:18px;font-size:14px;display:grid;gap:3px;color:var(--ink-2)}
+.bridge{display:grid;align-content:center;gap:10px;padding:0 8px}
+.arrow{font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;line-height:1.3}
+.arrow i{display:block;font-style:normal;color:var(--gold-deep);font-size:16px;line-height:1}
+.gate{grid-column:1/-1;display:flex;justify-content:center;margin-bottom:10px}
+.gate span{font-size:13px;font-weight:700;border:1px dashed var(--gold-line);background:var(--gold-bg);color:var(--attn-tx);border-radius:8px;padding:5px 12px}
+@media (max-width:720px){.sides{grid-template-columns:minmax(0,1fr)}.bridge{grid-auto-flow:column;padding:10px 0}.arrow i{transform:rotate(90deg)}}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:9px 14px;background:var(--head);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--line-soft);vertical-align:top}
+th+th,td+td{border-left:1px solid var(--line-soft)}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td code{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);word-break:break-all}
+
+/* decisions */
+ol.dec{list-style:none;padding:0;display:grid;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);counter-reset:d}
+ol.dec li{counter-increment:d;display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;padding:11px 16px;border-top:1px solid var(--line-soft);max-width:none}
+ol.dec li:first-child{border-top:0}
+ol.dec li:nth-child(even){background:var(--zebra)}
+ol.dec li::before{content:counter(d);font-weight:800;color:var(--gold-deep);font-variant-numeric:tabular-nums}
+ol.dec .what{font-weight:600}
+ol.dec .q{grid-column:2}
+
+/* open items */
+.open{display:grid;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:11px 14px;display:grid;gap:4px}
+.item b{font-size:15.5px}
+.item p{font-size:14.5px;color:var(--ink-2)}
+.tag{justify-self:start;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 7px;background:var(--attn-bg);color:var(--attn-tx)}
+.tag.q2{background:var(--surface-2);color:var(--ink-2)}
+.foot{font-size:13.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px}
+.foot code{font-family:var(--mono);font-size:12.5px}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <span class="eyebrow">SMP · Processes · Design agreed 24 Oct 2026</span>
+    <h1>Processes, rethought</h1>
+    <p>A <b>reading side</b> for managers and process owners, and a <b>builder</b> for the Strategy Office. Islam agreed this design in mockups. <b>Nothing is built yet</b>: this is what the team checks before the build plan is written.</p>
+    <div class="chips"><span class="chip gold">Agreed in mockups</span><span class="chip">Nothing built</span><span class="chip">Next: a staged build plan</span></div>
+  </header>
+
+  <section>
+    <span class="kicker">The shape</span>
+    <h2>Two sides, and who you are decides which opens</h2>
+    <p class="lead">There is no switch to remember. An office seat lands in the builder; a client’s own person lands on their processes. SMP already sends people this way today; what changes is what each side looks like.</p>
+    <div class="sides" role="img" aria-label="Reading side on the left, builder on the right, linked by Suggest a change and Open in builder one way and Preview as manager the other">
+      <div class="gate"><span>Processes in the top bar · the seat decides</span></div>
+      <div class="side">
+        <h3>Reading side <span>a client’s own people</span></h3>
+        <p class="who">Managers, process owners, approvers, staff. They see only the version in force.</p>
+        <div class="tabsx"><span class="on">My processes</span><span>To do 4</span><span>Map</span><span>All processes</span></div>
+        <ul><li>A process opens on <b>Flow</b>, with Steps and Summary as tabs</li><li>Read, approve, review, acknowledge</li><li><b>Suggest a change</b>, pinned to a step</li></ul>
+      </div>
+      <div class="bridge">
+        <span class="arrow"><i>→</i>Suggest a change</span>
+        <span class="arrow"><i>→</i>Open in builder</span>
+        <span class="arrow"><i>←</i>Preview as manager</span>
+      </div>
+      <div class="side">
+        <h3>Builder <span>the Strategy Office</span></h3>
+        <p class="who">The Super user and SMO team seats. They see every version, drafts included.</p>
+        <div class="tabsx"><span class="on">All processes</span><span>To handle 3</span><span>Landscape</span><span>Priorities</span><span>Governance</span><span>Org &amp; roles</span><span>Export</span><span>Settings</span></div>
+        <ul><li>Draw, write, check and publish processes</li><li>One process is built on its own page, section by section</li><li>Priorities, governance, the org directory and the export</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">On every page</span>
+    <h2>What holds everywhere</h2>
+    <ul class="b">
+      <li><b>The navy band</b> is the Internal Tracker’s masthead: a gold path, a white title, one line of description, count tiles on the right.</li>
+      <li><b>Actions sit at the top right of the band</b>: Download SOP, Print, Suggest a change, New process, Send for approval. The main one is gold.</li>
+      <li><b>Tabs are navy buttons under the band</b>, with counts; a gold count marks what is waiting.</li>
+      <li><b>The tab bar stays in place as you scroll.</b></li>
+      <li><b>No title above a section.</b> The highlighted tab says where you are, and the section’s one-line description takes the band’s subtitle.</li>
+      <li><b>Tables</b> alternate white then light grey under a slightly darker header, with no row hover; long ones can be searched and sorted by any column.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="kicker">Reading side</span>
+    <h2>What a manager sees</h2>
+    <h3>Opening the module: My processes</h3>
+    <ul class="b">
+      <li><b>Yours</b>: the processes they own or approve, with their part, where each is, and what needs attention, such as a risk with no control, who has read it, or the review date.</li>
+      <li><b>You have a step in</b>: processes someone else owns where their role does part of the work.</li>
+      <li>Every row carries its own button: <i>Open and approve</i>, <i>Review by 12 Nov</i>, <i>Read the change</i>, <i>Reply to the office</i>.</li>
+      <li><b>To do</b> is the second tab, with a gold count: what to approve, review and read, and the office’s answers to their suggestions. A “Waiting on you” line in the band opens it. Acting in a row or on To do clears it in both.</li>
+      <li><b>Map</b>: every process by area, theirs in gold, the ones they have a step in dashed.</li>
+    </ul>
+    <a class="see" href="https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB" target="_blank" rel="noopener">See the mockup →</a>
+    <h3>A process</h3>
+    <ul class="b">
+      <li>Opens on <b>Flow</b>: lanes per role, arrows, decisions; click a step for its detail. <b>Steps</b> and <b>Summary</b> are tabs. On a phone it opens on Steps.</li>
+      <li><b>Summary</b> answers “is it in good shape?”: approval, risks with no control, who has not read it, a missing SOP version, and what is waiting on them.</li>
+      <li><b>Suggest a change</b> works on every tab, pinned to a step. It goes to the Strategy Office, and the answer comes back on the page and in To do.</li>
+    </ul>
+    <a class="see" href="https://claude.ai/artifact/SHQYtVxi7jJEiKyXr4PWpG" target="_blank" rel="noopener">See the mockup →</a>
+  </section>
+
+  <section>
+    <span class="kicker">Builder</span>
+    <h2>What the Strategy Office sees</h2>
+    <h3>Ways in, and back out</h3>
+    <ul class="b">
+      <li><b>Processes in the top bar</b> lands an office seat on the builder home.</li>
+      <li><b>Open in builder</b> sits at the top right of any process page, for office seats only.</li>
+      <li><b>Start a draft from this</b> on a suggestion opens the builder on that process, with the draft started and the step selected.</li>
+      <li><b>Preview as manager</b> shows the draft exactly as the owner will read it, under a gold strip with Back to the builder.</li>
+    </ul>
+    <h3>The builder home</h3>
+    <ul class="b">
+      <li>Opens on <b>All processes</b>: every process with its owner, where it is and its gaps, searchable, and sortable by any heading. “Where it is” sorts what needs the office first.</li>
+      <li><b>To handle</b> is second: owners’ suggestions, drafts the approver sent back, processes with gaps.</li>
+      <li><b>Landscape</b> (today’s Value chain and Helicopter, merged), <b>Priorities</b>, <b>Governance</b>, <b>Org &amp; roles</b>, <b>Export</b>, <b>Settings</b>. Today’s Dashboard goes.</li>
+      <li>On a section, its numbers sit in boxes under the tabs, and its own views stay under the tab bar as you scroll.</li>
+    </ul>
+    <h3>Building one process</h3>
+    <ul class="b">
+      <li>A menu on the left: <b>Map · RACI · Authority · Risks &amp; controls · Quality · Lifecycle</b>, each with a status dot.</li>
+      <li>The map is edited in place: add a step or a decision, connect steps; the selected step opens as a form with who does it, what they do, who is involved, approval, time limit, risk and control. Gaps show as red marks.</li>
+      <li>When the draft came from a suggestion, the owner’s words sit at the top of the step.</li>
+    </ul>
+    <a class="see" href="https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA" target="_blank" rel="noopener">See the mockup →</a>
+  </section>
+
+  <section>
+    <span class="kicker">What Islam decided</span>
+    <h2>The answers this rests on, in order</h2>
+    <ol class="dec">
+      <li><span class="what">Rethink what people expect when they open Processes, for the viewer and the builder</span><span class="q">“when someone opens a process module what do they expect to see and what is the right structure to have for the viewer and the builder .. think with me”</span></li>
+      <li><span class="what">Who it is for</span><span class="q">“D, mainly managers and process owners”</span></li>
+      <li><span class="what">What owners may do: ask for changes now; edit drafts with office review later</span><span class="q">“B now, built so C can follow”</span></li>
+      <li><span class="what">A process opens on the flow</span><span class="q">“flow first and the steps and summary comes as tabs as you did”</span></li>
+      <li><span class="what">Actions top right; tabs under the band, as buttons</span><span class="q">“take download, pring and suggest a change in top right” · tab style “2”</span></li>
+      <li><span class="what">The module opens on My processes; To do is its own tab, second</span><span class="q">“A” · “2, keep To do as the second tab”</span></li>
+      <li><span class="what">The office builds in a separate builder</span><span class="q">“separate builder but how can the office enter the builder part?” · ways in drawn: “ok”</span></li>
+      <li><span class="what">The process table is searchable, sortable, striped, with a darker header</span><span class="q">“needs to be serachable and sortable with alternating light grey and white starting with white”</span></li>
+      <li><span class="what">The builder home opens on All processes, To handle second</span><span class="q">“ok proceed”</span></li>
+      <li><span class="what">Office sections as tabs; the bar stays on scroll; no section titles</span><span class="q">“go with A noting that the bar needs to be freezed on scrlling down and I don't we need the title on each page”</span></li>
+      <li><span class="what">The mockups as drawn</span><span class="q">“I'm ok with the mockups”</span></li>
+      <li><span class="what">Section numbers in boxes; section views stay with the tabs</span><span class="q">“Q1 A” · “Q2 B”</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <span class="kicker">Still open</span>
+    <h2>For the team to settle before the build plan</h2>
+    <div class="open">
+      <div class="item"><span class="tag">Needs a yes</span><b>On a phone, only the tabs stay in place</b><p>The eight office tabs already take three rows on a phone, so a section’s views would scroll with the page there.</p></div>
+      <div class="item"><span class="tag">Needs a yes</span><b>Does the darker table header become SMP’s header everywhere?</b><p>SMP’s other tables use a slightly lighter one today.</p></div>
+      <div class="item"><span class="tag q2">Later stage</span><b>Owners editing their own drafts</b><p>With a separate builder, owners need either a limited way into it for their own drafts or a lighter editor. Nothing here blocks either.</p></div>
+      <div class="item"><span class="tag">To reconcile</span><b>The seven decisions on the 23 Oct prototype</b><p>Some are answered by this design, such as where the tabs go and what the module opens on. The rest need settling first.</p></div>
+      <div class="item"><span class="tag q2">Not drawn yet</span><b>Three screens</b><p>The reading side’s All processes list; what frontline staff with no ownership see; the approver’s full approval screen.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Mockups</span>
+    <h2>Every page, clickable</h2>
+    <p class="lead">The data in them is invented for a sample client, Raya Trade. Earlier versions of each page keep the options that were not chosen.</p>
+    <div class="tw"><table>
+      <thead><tr><th>What</th><th>Open</th><th>In the repo</th></tr></thead>
+      <tbody>
+        <tr><td>A process page</td><td><a href="https://claude.ai/artifact/SHQYtVxi7jJEiKyXr4PWpG" target="_blank" rel="noopener">Open</a></td><td><code>design-mockups/processes-redesign/2026-10-24_process-page-options.html</code></td></tr>
+        <tr><td>Opening the module, reading side</td><td><a href="https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB" target="_blank" rel="noopener">Open</a></td><td><code>design-mockups/processes-redesign/2026-10-24_module-landing-options.html</code></td></tr>
+        <tr><td>Where the office builds, options compared</td><td><a href="https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb" target="_blank" rel="noopener">Open</a></td><td><code>design-mockups/processes-redesign/2026-10-24_builder-options.html</code></td></tr>
+        <tr><td>The builder: ways in and out, the home, every section</td><td><a href="https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA" target="_blank" rel="noopener">Open</a></td><td><code>design-mockups/processes-redesign/2026-10-24_builder-entry.html</code></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <p class="foot">The full write-up, with notes for the build plan, is <code>specs/067-processes-rethink/spec.md</code> on branch <code>claude/admiring-clarke-f11ae0</code>. Each mockup page is private until it is shared from its Share menu.</p>
+</div>

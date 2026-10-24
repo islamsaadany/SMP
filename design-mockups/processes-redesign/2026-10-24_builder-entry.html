@@ -218,6 +218,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 .verdict ul{padding-left:16px;font-size:13px;color:var(--ink-2);display:grid;gap:3px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);color:var(--panel-ink);font-size:13px;padding:9px 14px;border-radius:8px;box-shadow:var(--shadow);z-index:60;max-width:min(560px,calc(100% - 32px))}
 
+/* option C: the office's side menu beside the home */
+#homewrap.side{display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:start}
+#homemain{min-width:0}
+@media (max-width:900px){#homewrap.side{grid-template-columns:minmax(0,1fr)}}
+.rail .ct{font-size:11.5px;font-weight:700;background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px}
+
 /* getting in and out */
 .tb button.read{border:0;cursor:pointer}
 @media (max-width:620px){.tb .out{display:none}}
@@ -265,6 +271,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 <div class="mk"><div class="mk-in">
   <div class="mk-id"><span class="mk-tag">Mockup</span><b>Getting into the builder, and back out</b><span>Agreed 24 Oct: the office builds in a separate builder. Nothing is built. Sample data invented for Raya Trade.</span></div>
   <div class="mk-sw" role="group" aria-label="Show a way in"><span>Show me</span><button type="button" data-door="1">1 · Top bar</button><button type="button" data-door="2">2 · From a process page</button><button type="button" data-door="3">3 · From a suggestion</button><button type="button" data-door="back">Way back out</button></div>
+  <div class="mk-sw" role="group" aria-label="Office sections"><span>Office sections</span><button type="button" data-otab="a">A · All as tabs</button><button type="button" data-otab="b">B · Tabs + top right</button><button type="button" data-otab="c">C · Side menu</button></div>
 </div></div>
 
 <div class="doc">
@@ -289,11 +296,13 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
       </header>
       <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
 
+      <div id="homewrap"><nav class="box rail" id="hside" aria-label="Office menu" hidden></nav><div id="homemain">
       <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
       <section data-screen="home-all" hidden>
         <div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="q" placeholder="Search by code, name, owner or state" autocomplete="off"></label><span class="note" id="qcount"></span></div>
         <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
       </section>
+      </div></div>
       <section data-screen="builder" hidden>
         <div class="bld">
           <nav class="box rail" id="rail" aria-label="Builder sections"></nav>
@@ -326,8 +335,9 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     </div>
   </div>
 
+  <div class="verdict" id="tabnote" style="margin-bottom:12px"></div>
   <div class="verdict">
-    <div><h4>Ways in</h4><ul><li><b>Processes in the top bar.</b> An office seat lands in the builder; a client’s own person lands on My processes. The seat decides, so there is no switch to forget. SMP works this way today.</li><li><b>From any process page.</b> Office seats see “Open in builder” at the top right; staff never do.</li><li><b>From a suggestion or a returned approval.</b> The button opens the builder on the right process, with a draft started and the step selected.</li></ul></div>
+    <div><h4>Ways in</h4><ul><li><b>Processes in the top bar.</b> An office seat lands in the builder, on All processes, with To handle as the second tab; a client’s own person lands on My processes. The seat decides, so there is no switch to forget. SMP works this way today.</li><li><b>From any process page.</b> Office seats see “Open in builder” at the top right; staff never do.</li><li><b>From a suggestion or a returned approval.</b> The button opens the builder on the right process, with a draft started and the step selected.</li></ul></div>
     <div><h4>Way back out</h4><ul><li><b>Preview as manager</b> shows the draft exactly as the owner will read it, under a gold strip with “Back to the builder”</li><li><b>Open the staff view</b> on the builder home opens Processes as client staff see it today</li></ul></div>
     <div><h4>Not chosen</h4><ul><li>A Read / Build switch in the top bar for office seats: one more thing to forget, and the seat already says who builds</li><li>A second “Process builder” entry in the top bar: two doors to one module, and client staff would ask why they cannot open it</li></ul></div>
   </div>
@@ -385,7 +395,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
       acts: '<button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Download SOP</button><button class="bq" type="button" data-toast="Preview: the buttons do nothing here.">Print</button><button class="bgold" type="button" data-toast="Preview: the buttons do nothing here.">Suggest a change</button>',
       tiles: tiles([['6', 'Steps', ''], ['0/5', 'Have read it', ''], ['1', 'Risk, no control', 'late'], ['365', 'Days to review', '']]) },
   };
-  let SCREEN = 'home', TAB = 'handle', RVIEW = 'flow', SECT = 'map', SEL = 4, DOOR = null;
+  let OTAB = 'a', SCREEN = 'home', TAB = 'all', RVIEW = 'flow', SECT = 'map', SEL = 4, DOOR = null;
 
   $('#handle').innerHTML = HANDLE.map((h) => '<div class="trow"><span class="chip ' + (h.kind === 'Suggestion' ? 'gold' : h.kind === 'Returned' ? 'bad' : '') + '">' + h.kind + '</span><div class="t"><span class="code">' + h.code + '</span> <b>' + esc(h.name) + '</b><small>' + esc(h.text) + '</small>' + (h.quote ? '<blockquote>' + esc(h.quote) + '</blockquote>' : '') + '</div>' +
     '<button class="btn' + (h.go ? ' gold' : '') + '" type="button"' + (h.id ? ' id="' + h.id + '"' : '') + (h.go ? ' data-go="' + h.go + '" data-msg="' + esc(h.msg) + '"' : ' data-toast="' + esc(h.toast) + '"') + '>' + esc(h.act) + '</button></div>').join('');
@@ -439,12 +449,38 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     svg.innerHTML = out + lab;
   }
 
+  const TABMSG = {
+    landscape: 'The value chain and the map of every process: today’s Value chain and Helicopter, merged. As in the full prototype.',
+    priorities: 'Which processes to work on first, scored and sent to the client for sign-off. As in the full prototype.',
+    governance: 'Governance assessments, risks and policies. As in the full prototype.',
+    org: 'The roles and people the processes use. As in the full prototype.',
+    export: 'Pick processes and build the SOP pack. As in the full prototype.',
+    overview: 'Today’s dashboard. In this design All processes and the tiles in the band do its job.',
+    settings: 'The workspace profile and branding, for Admins.',
+  };
+  const HOME_TABS = {
+    a: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', ''], ['export', 'Export', '']],
+    b: [['all', 'All processes', '13'], ['handle', 'To handle', '3', 'hot'], ['landscape', 'Landscape', ''], ['priorities', 'Priorities', ''], ['governance', 'Governance', ''], ['org', 'Org & roles', '']],
+  };
+  const SIDE = [['all', 'All processes'], ['handle', 'To handle', '3'], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']];
+  const OTAB_NOTES = {
+    a: [['A · All as tabs', ['Every office section one click away, in one row of tabs', 'Same tab pattern as the rest of the module']], ['What it costs', ['Export is something you do, not a place, yet it sits with the places', 'Settings still needs a home somewhere', 'All seven fit one row on a 1280px laptop; on a phone they take three rows, as B’s six do']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    b: [['B · Tabs, plus actions top right', ['Six places fit one row of tabs', 'Export and Settings are occasional actions, so they sit top right, as Download and Print do on the process page', 'Same tab pattern as the rest of the module']], ['What it costs', ['Export moves from the side menu to a button: the office has to learn where it went']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+    c: [['C · Side menu, as today', ['What the office knows today', 'Room for any number of sections']], ['What it costs', ['The only part of the module with a side menu; managers never see one', 'The menu takes width from the table and the map', 'On a phone it becomes a row of chips']], ['In all three', ['Today’s Dashboard goes: All processes and the tiles in the band do its job', 'Value chain and Helicopter merge into Landscape']]],
+  };
   const DOORS = { 1: ['home', '#tb-proc'], 2: ['read', '#door2'], 3: ['home', '#door3'], back: ['builder', '#doorback'] };
   function render() {
     const s = SCREEN, b = BAND[s];
     $('#pstrip').hidden = s !== 'preview';
     $('#m-eyebrow').innerHTML = b.eyebrow; $('#m-title').innerHTML = b.title; $('#m-sub').innerHTML = b.sub; $('#m-acts').innerHTML = b.acts; $('#m-tiles').innerHTML = b.tiles;
-    const tabs = s === 'home' ? [['handle', 'To handle', '3', 'hot'], ['all', 'All processes', '13'], ['landscape', 'Landscape', ''], ['org', 'Org & roles', '']] : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
+    if (s === 'home') $('#m-acts').innerHTML = '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button>' + (OTAB === 'b' ? '<button class="bq" type="button" data-toast="' + TABMSG.export + '">Export</button><button class="bq" type="button" data-toast="' + TABMSG.settings + '">Settings</button>' : '') + '<button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>';
+    const side = s === 'home' && OTAB === 'c';
+    $('#homewrap').classList.toggle('side', side);
+    $('#hside').hidden = !side;
+    if (side) $('#hside').innerHTML = SIDE.map(([k, l, n]) => '<button type="button" class="' + (k === TAB ? 'on' : '') + '" data-hside="' + k + '">' + l + (n ? '<span class="ct">' + n + '</span>' : '') + '</button>').join('');
+    $$('[data-otab]').forEach((b) => b.classList.toggle('on', b.dataset.otab === OTAB));
+    $('#tabnote').innerHTML = OTAB_NOTES[OTAB].map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
+    const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
     const cur = s === 'home' ? TAB : RVIEW;
     $('#vt').hidden = !tabs.length;
     $('#vt').innerHTML = tabs.map(([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === cur ? 'on' : '') + '" aria-selected="' + (k === cur) + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>').join('');
@@ -473,9 +509,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     const so = e.target.closest('[data-sort]');
     if (so) { const k = so.dataset.sort; if (SORT === k) DIR = -DIR; else { SORT = k; DIR = k === 'gaps' ? -1 : 1; } renderAll(); return; }
     const t = e.target, dr = t.closest('[data-door]'), go = t.closest('[data-go]'), tab = t.closest('[data-tab]'), row = t.closest('[data-row]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
-    if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = 'handle'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
-    if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'handle'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
-    if (tab) { const k = tab.dataset.tab; if (k === 'landscape' || k === 'org') { toast(k === 'landscape' ? 'The value chain and every process on it, as in the full prototype.' : 'The roles and people the processes use, as in the full prototype.'); return; } if (k === 'steps' || k === 'summary') { toast('As on the process page mockup.'); return; } if (SCREEN === 'home') TAB = k; else RVIEW = k; render(); return; }
+    if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = d === '3' ? 'handle' : 'all'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
+    if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'all'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
+    const ot = t.closest('[data-otab]'), hs = t.closest('[data-hside]');
+    if (ot) { OTAB = ot.dataset.otab; SCREEN = 'home'; TAB = 'all'; render(); return; }
+    if (hs) { const k = hs.dataset.hside; if (k === 'all' || k === 'handle') { TAB = k; render(); } else toast(TABMSG[k]); return; }
+    if (tab) { const k = tab.dataset.tab; if (TABMSG[k]) { toast(TABMSG[k]); return; } if (k === 'steps' || k === 'summary') { toast('As on the process page mockup.'); return; } if (SCREEN === 'home') TAB = k; else RVIEW = k; render(); return; }
     if (row) { if (row.dataset.row === 'ORD100') { SCREEN = 'builder'; SECT = 'map'; SEL = 4; render(); } else toast('Opens ' + row.dataset.row + ' in the builder.'); return; }
     if (sc) { SECT = sc.dataset.sect; render(); return; }
     if (st) { SEL = Number(st.dataset.step); drawer(); return; }

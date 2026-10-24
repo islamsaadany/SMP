@@ -28,6 +28,8 @@ mockup it was given against is named after it.
 12. A section's numbers: *"Q1 A"*, boxes under the tabs. A section's views: *"Q2 B"*, they stay with the tabs as you scroll.
 13. On a phone only the tabs stay: *"ok for a phone not likely to open from a phone very much anyway"*.
 14. The darker table header: *"keep it here now and I will think later"*.
+15. The four prototype questions left open (§5.1): *"B, A, B, B"*. Keep the three empty tabs, readiness marks on every process, the picker on the process name, and Check with AI as its own section.
+16. The way out of the builder: *"can we have it somewhere more visible maybe an x on the top right below the navy bar or exit builder writing or save and exit something like this"*.
 
 ## 1. The shape
 
@@ -119,6 +121,7 @@ edit, because that is answer 3's "B now".
 3. **Start a draft from this.** This sits on a suggestion and opens the builder on that process with a draft started and the step selected. **Open in builder** on a draft the approver sent back does the same.
 
 **Ways back out:**
+- **Exit builder ✕** sits at the top right, just under the navy band, with "All changes saved · 10:42" on the left. It stays in view as you scroll. It takes you back to where you came from: the process page if you came through Open in builder, otherwise All processes. Everything already saves as you type, so nothing is lost. *(Q16; the style is still open, §5.)*
 - **Preview as manager** shows the draft exactly as the owner will read it. A gold strip says it is a preview and offers **Back to the builder**.
 - **Open the staff view** shows Processes as client staff see it.
 
@@ -135,7 +138,8 @@ drafts sent back, open drafts, and gaps. Its actions are **Open the staff view**
 The eight tabs sit in one row, with All processes first: **All processes · To handle ·
 Landscape · Priorities · Governance · Org & roles · Export · Settings**.
 
-- **All processes** is a table of every process: name, owner, where it is, gaps, and Open in builder.
+- **All processes** is a table of every process: name, owner, where it is, how ready it is, gaps, and Open in builder.
+  - **Ready** shows the six marks (Map, RACI, Authority, Controls, SOP, Approved) on every process, high-level ones included. *(Q15.)*
   - A search box matches the code, name, owner or state, and shows "3 of 13" while filtering.
   - Every column heading sorts. "Where it is" sorts by what needs the office first: sent back, review late, waiting for approval, then being drawn.
 - **To handle** lists suggestions from owners, drafts the approver sent back, and processes with gaps. It carries a gold count.
@@ -157,10 +161,14 @@ On a section's page:
 
 The band shows the process and its draft, for example "Draft v4 · started from Hend
 Mourad's suggestion on step 4". Its actions are **Preview as manager** and
-**Send for approval**.
+**Send for approval**. **Exit builder ✕** sits just under the band, top right (§4.1).
+
+**The process name in the band is a picker.** Click it, find another process, and
+it opens on the same section, with no page in between. *(Q15.)*
 
 A menu on the left lists the sections, each with a status dot: **Map · RACI ·
-Authority · Risks & controls · Quality · Lifecycle**.
+Authority · Risks & controls · Quality · Lifecycle · People · Compliance ·
+Connections · Check with AI**.
 
 - **Map** is the flow with a toolbar (+ Step, + Decision, Connect two steps, Undo) and "Saved as you type".
   - Gaps show as red marks on the steps.
@@ -168,12 +176,20 @@ Authority · Risks & controls · Quality · Lifecycle**.
   - When the draft came from a suggestion, the owner's words sit at the top.
 - **RACI** is the full grid. A step with no one accountable is marked.
 - **Authority, Risks & controls, Quality and Lifecycle** keep the designs of the 2026-10-23 prototype. They are not redrawn here.
+- **People, Compliance and Connections** stay, as signed off on 14 Oct. Until each has something to hold, it says "Nothing recorded yet" on every process. *(Q15.)*
+- **Check with AI** is its own section. It lists suggestions, such as a risk with no control, a step with no one accountable, or a missing step. Each has its own button (Add a control, Make the Finance manager accountable, Add as a step), and nothing changes until one is pressed. *(Q15.)*
 
 ## 5. Still open
 
-### 5.1 The seven decisions on the 2026-10-23 prototype
+**One question: how the way out of the builder looks** (§4.1). It is drawn on the
+builder mockup with all three styles to try:
+- **Exit builder ✕**: words and a cross, so nobody has to guess what it does. *(Recommended.)*
+- **✕ only**: the smallest. The words show when you point at it, but a lone cross can read as "throw away my changes".
+- **Save and exit**: reassuring, but everything already saves as you type, so it hints at unsaved work when there is none.
 
-Three are settled by this design:
+### 5.1 The seven decisions on the 2026-10-23 prototype: all settled
+
+Three were settled by this design:
 
 | # | Prototype question | Settled as | By |
 |---|---|---|---|
@@ -181,14 +197,14 @@ Three are settled by this design:
 | 2 | Swap the left menu for tabs? | Yes, as eight tabs under the band. Unlike the prototype, Export and Settings are tabs too, not a button and a menu item. | Q10 |
 | 3 | Helicopter View and Value Chain together as Landscape? | Yes, as Landscape's views. The name can still change. | The office-section mockups, Q10 and Q11 |
 
-Four are still open. Each is drawn on the builder mockup with its answers to try:
+The other four were answered on 24 Oct, as *"B, A, B, B"* (Q15):
 
-| # | Question | Answers | Recommended |
+| # | Question | Answer | Note |
 |---|---|---|---|
-| 4 | **The empty tabs.** People, Compliance and Connections were signed off on 14 Oct but hold nothing and offer no way to fill them. | Off for now, each back when it has content (changes what was signed off) · keep them | Off for now |
-| 5 | **Readiness marks** (Map, RACI, Authority, Controls, SOP, Approved). | On every process · on deep dives only, with "High-level" on the rest | On every process |
-| 6 | **Moving to another process inside the builder.** This replaces the prototype's "rail" question, because the builder page already has a section menu on the left. | Back to the list (two clicks and a page between) · a picker on the process name in the band (two clicks, stays on the same section) · a list beside the section menu (one click; it folds on Map) | The picker on the name |
-| 7 | **Check with AI.** | A panel beside whatever section is open, from a button in the band · its own section in the menu | A panel |
+| 4 | **The empty tabs.** People, Compliance and Connections were signed off on 14 Oct but hold nothing and offer no way to fill them. | **Keep them**, saying "Nothing recorded yet" until each has content | What was signed off stays; the recommendation was to take them off for now |
+| 5 | **Readiness marks** (Map, RACI, Authority, Controls, SOP, Approved) | **On every process**, high-level ones included | As recommended |
+| 6 | **Moving to another process inside the builder.** This replaced the prototype's "rail" question, because the builder page already has a section menu. | **A picker on the process name** in the band; it stays on the same section | As recommended |
+| 7 | **Check with AI** | **Its own section** in the builder's menu | The recommendation was a panel beside any section |
 
 ### 5.2 Other open points
 
@@ -209,7 +225,7 @@ in `design-mockups/processes-redesign/`.
 | A process page | https://claude.ai/artifact/SHQYtVxi7jJEiKyXr4PWpG | `2026-10-24_process-page-options.html` |
 | Opening the module (reading side) | https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB | `2026-10-24_module-landing-options.html` |
 | Where the office builds (options compared) | https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb | `2026-10-24_builder-options.html` |
-| The builder: ways in and out, the builder home, every section, the four open questions | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
+| The builder: ways in and out, the builder home, every section, the way out's three styles | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
 
 Earlier versions of each page, holding the options that were not chosen, are in the
 page's history and in git.

@@ -8295,7 +8295,7 @@ function setFnCol(k, on){
   fnCols()[k] = on;
   try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
 }
-/* §623: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
+/* §624: THE CAPS COLUMN ONLY WHERE A FUNCTION HOLDS ONE. It counts the
    capabilities filed under a function, and since §544.13 nothing files one
    there — a capability is the company's — so on every live client it was a
    column of zeros. It stays where an old record still sits under a function

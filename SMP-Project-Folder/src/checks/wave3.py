@@ -240,7 +240,7 @@ with sync_playwright() as p:
         el = pg.query_selector(sel)
         if el and el.is_visible():
             el.click(); pg.wait_for_timeout(600); break
-    # §623: the colours are on Profile's Brand tab.
+    # §624: the colours are on Profile's Brand tab.
     tab = pg.query_selector('.csetup [data-cstab="brand"]')
     if tab: tab.click(); pg.wait_for_timeout(500)
     sw = pg.evaluate("""() => {

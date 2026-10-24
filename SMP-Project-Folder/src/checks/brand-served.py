@@ -135,7 +135,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     ev(pg, "()=>{const r=document.querySelector('[data-setupgo=start]'); if(r) r.click();}")
     pg.wait_for_timeout(80)
-    # §623: the colours are on Profile's Brand tab — opened at once, so they
+    # §624: the colours are on Profile's Brand tab — opened at once, so they
     # are still drawn before the record lands, which is this file's case.
     ev(pg, "()=>{const t=document.querySelector('.csetup [data-cstab=brand]'); if(t) t.click();}")
     pg.wait_for_timeout(80)

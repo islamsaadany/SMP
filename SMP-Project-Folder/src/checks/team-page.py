@@ -139,7 +139,7 @@ class H(http.server.BaseHTTPRequestHandler):
                 }).encode(), "application/json")
                 return
             STATE["posts"].append(body)
-            # §623: one refusal on demand, so the page is seen to SAY it.
+            # §624: one refusal on demand, so the page is seen to SAY it.
             if body.get("action") == "setTeam" and STATE.get("refuse"):
                 self._s(200, json.dumps({"ok": False, "error": STATE["refuse"]}).encode(), "application/json")
                 return
@@ -362,7 +362,7 @@ with sync_playwright() as p:
     pg.close()
     STATE["made_here"] = False
 
-    # ── 6 · ONE PAGE, ONE PLACE (§623) ──────────────────────────────────
+    # ── 6 · ONE PAGE, ONE PLACE (§624) ──────────────────────────────────
     # REWRITTEN TO THE DECISION (§218): this section asserted the flow's own
     # office step drew the same table in its column — one renderer, two
     # hosts (§364). Islam took the second host away (*"forefront team keep it

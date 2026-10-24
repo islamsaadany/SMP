@@ -489,7 +489,7 @@ var RECIPES = [
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
     /* §360: the Branding page is gone — the mark and the colours are the
-       first step of the client's own set-up — §623: Setup › Profile, on its
+       first step of the client's own set-up — §624: Setup › Profile, on its
        Brand tab (§104.8: prose that names a page that no longer exists is
        corrected in the edit that removes it). */
     a: "Go to Setup › Profile and open its Brand tab — the mark and the colours " +

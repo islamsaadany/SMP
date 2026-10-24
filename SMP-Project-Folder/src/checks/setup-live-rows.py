@@ -62,7 +62,7 @@ def pick(pg, sel, value, wait=500):
         and (pg.wait_for_timeout(wait) or True)
 
 def step(pg, k):
-    # §623: a step is a page of the rail now — Profile is `start`.
+    # §624: a step is a page of the rail now — Profile is `start`.
     return press(pg, "[data-setupgo=%s]" % ("start" if k == "client" else k), 500)
 
 def shape(pg):
@@ -213,7 +213,7 @@ with sync_playwright() as p:
     ck("ticked back: counted again", ev(pg, "()=>fnKoCounted('fn:%s')" % pf) is True)
 
     print("\n§6 · a business unit says how it plans (§438)")
-    # §623: the shape is a page of its own now, not a step of `start`.
+    # §624: the shape is a page of its own now, not a step of `start`.
     ev(pg, "()=>{ current='setup'; currentSub='shape'; paint(); }"); pg.wait_for_timeout(400)
     # §544: one box's panel at a time, so "every unit row carries one" is
     # asserted by opening every unit in the tree and finding its select.

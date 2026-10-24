@@ -570,7 +570,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
       groups: [...document.querySelectorAll(".setuprail [data-railgrp]")].map((e) => e.dataset.railgrp),
       startRow: start ? { grp: (start.closest("[data-railitems]") || { dataset: {} }).dataset.railitems, label: (start.querySelector(".rilab") || {}).textContent } : null,
       csetup: !!q(".csetup"), step: (typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.at) ? CLIENTSETUP.at() : null,
-      /* §623: the client's own pages are rows of the rail's first group,
+      /* §624: the client's own pages are rows of the rail's first group,
          and Profile opens in three tabs. */
       clientRows: [...document.querySelectorAll('.setuprail [data-railitems="client"] .ritem')].map((e) => e.dataset.setupgo),
       count: t('.setuprail .rgroup[data-railgrp="client"] .rgprog'),
@@ -611,18 +611,18 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   /* AND IT STAYS AT THE TOP (§360.9): a back link is where this rail was
      opened from, so it reads first — the other end of the foot row below. */
   check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§360.9)", JSON.stringify(r.back));
-  /* REWRITTEN TO THE DECISION (§218, §623; Islam: *"have them as 3 section
+  /* REWRITTEN TO THE DECISION (§218, §624; Islam: *"have them as 3 section
      under the client on the side rail rather than 3 pills"*). Getting started
      was a strip under the head until Done with set-up (§360); the client's
      two pages are rows of the rail's FIRST group now, and the group's heading
      counts what is left — AGREEMENT with CLIENTSETUP.progress(), never a
      number (§94.8, §129), and nothing said once both are done. */
   check(r.strip === null && r.groups[0] === "client" && r.clientRows.join(",") === "start,shape",
-    "…and the client's own pages, Profile and The shape, are the FIRST group, with no strip (§623)", JSON.stringify([r.strip, r.groups, r.clientRows]));
+    "…and the client's own pages, Profile and The shape, are the FIRST group, with no strip (§624)", JSON.stringify([r.strip, r.groups, r.clientRows]));
   check(!!r.progress && (r.progress.done < r.progress.total
       ? r.count === r.progress.done + " of " + r.progress.total + " done" : r.count === null),
     "…the heading counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.count, r.progress]));
-  check(!!r.progress && r.progress.total === 2, "…out of the client's two pages (§623: the office step went; Forefront team is its page)", JSON.stringify(r.progress));
+  check(!!r.progress && r.progress.total === 2, "…out of the client's two pages (§624: the office step went; Forefront team is its page)", JSON.stringify(r.progress));
   check(!r.groups.includes("look"), "…and no Branding group (it lives on Profile's Brand tab)", JSON.stringify(r.groups));
   /* PROFILE OPENS THE CLIENT'S PAGE */
   const prof = page.locator('.setuprail .ritem[data-setupgo="start"]');
@@ -631,9 +631,9 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   r = await readRail();
   check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing Profile opens it at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
   check(r.tabs.join(",") === "details,brand,modules" && r.step === "details",
-    "…in three tabs, Details open (§623)", JSON.stringify([r.tabs, r.step]));
+    "…in three tabs, Details open (§624)", JSON.stringify([r.tabs, r.step]));
   check(r.name === nameBefore, "Details shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
-  check(!r.wzdone, "…and there is no Done with set-up (§623)");
+  check(!r.wzdone, "…and there is no Done with set-up (§624)");
   /* STEP 1 WRITES THE REGISTRY: a typed name, blurred, posts saveClient */
   const nameBox = page.locator(".csetup .rowset input.fld").first();
   try {
@@ -642,7 +642,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
       check((await regName()) === nameBefore + " (renamed)", "a name typed into Details and left is the registry's (saveClient on change, §35)", await regName());
     } else fail("typing a name into Details", "no name box");
   } finally { await owner.query("UPDATE tenants SET name = $2 WHERE id = $1", [tenant.id, nameBefore]); }
-  /* §489, §623: THE BRAND TAB holds the colours and the client's own mark,
+  /* §489, §624: THE BRAND TAB holds the colours and the client's own mark,
      and the group's separate upload is GONE — both ends (§94.2). */
   const brandTab = page.locator('.csetup [data-cstab="brand"]');
   if (await brandTab.count()) { await brandTab.click(); await page.waitForTimeout(800); }
@@ -655,7 +655,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   else fail("opening the Modules tab", "no tab");
   r = await readRail();
   check(r.band === "Modules this client has", "…and the modules band is the Modules tab", r.band);
-  /* NO DONE (§623): a stored mark from before moves and renames nothing —
+  /* NO DONE (§624): a stored mark from before moves and renames nothing —
      a fresh paint draws the same client group, first, named Profile. */
   try {
     await owner.query(`UPDATE org SET extra = extra || '{"setupDone":true}'::jsonb WHERE tenant_id = $1`, [tenant.id]).catch(() => {});

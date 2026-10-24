@@ -886,7 +886,7 @@
       { k:"companies", ac:"c_units", grp:"run", mod:"client", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
       { k:"fns",    ac:"c_fns",    grp:"run", mod:"client", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
       { k:"caps",   ac:"c_caps",   grp:"run", mod:"client", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
-      /* §623: THE OFFICIAL BU LIST JOINS THE ORGANISATION, last (Islam: *"the
+      /* §624: THE OFFICIAL BU LIST JOINS THE ORGANISATION, last (Islam: *"the
          official BU list should come under organization not people and
          access"*). It was placed with People because the register was its
          only reader (§54.1); the sign-in short list, the people file and the
@@ -972,7 +972,7 @@
          this host and the console (§360). Its render is a box the module
          fills from paint(), before wire() so the colour controls it draws
          are wired like any other. */
-      /* §623: TWO PAGES IN THE RAIL'S FIRST GROUP, NOT ONE PAGE OF PILLS
+      /* §624: TWO PAGES IN THE RAIL'S FIRST GROUP, NOT ONE PAGE OF PILLS
          (Islam: *"have them as 3 section under the client on the side rail
          rather than 3 pills"*, then *"forefront team keep it under people &
          Access"*). Profile is the client step — its details, its brand and its
@@ -1870,7 +1870,7 @@
      client's. Resolved at render time instead, in the one function that
      builds this list, so the rail and the page it opens cannot disagree. */
   function setupDefsAll(){
-    /* §623: CAPABILITIES ONLY WHERE THERE IS ONE TO SHOW (Islam: *"capability
+    /* §624: CAPABILITIES ONLY WHERE THERE IS ONE TO SHOW (Islam: *"capability
        is empty"*, then *"go with your recommendations"*). No live client holds
        a capability record any more (§544.13) — their capabilities are pillars
        — so the page drew an empty table with an Add for a record type stage 3b
@@ -1980,7 +1980,7 @@
      work). */
   function setupLandingKey(scope){
     var own = reachable(setupDefsFor(scope), "setup", "setup");
-    /* §623: the first of the client's own pages still to do, while any is. */
+    /* §624: the first of the client's own pages still to do, while any is. */
     var pr = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { todoKeys: [] };
     var first = own.filter(function(d){ return (pr.todoKeys || []).indexOf(d.k) > -1; })[0]
              || own.filter(function(d){ return d.primary; })[0] || own[0];
@@ -2021,7 +2021,7 @@
      everybody who has ever touched one (§30.2). The label is the only thing
      that changes here. */
   var SETUP_GROUPS = [
-    /* §623: THE CLIENT'S OWN GROUP COMES FIRST (Islam: *"3 section under the
+    /* §624: THE CLIENT'S OWN GROUP COMES FIRST (Islam: *"3 section under the
        client on the side rail"*). It held Client set-up at the bottom once it
        was done (§360); its two pages — Profile and The shape — are where a
        client starts, and where its name, mark and modules are changed. */
@@ -2172,7 +2172,7 @@
     /* Asked ONCE for the whole rail rather than per row: every row would
        otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
-    /* ── THE CLIENT'S OWN PAGES SAY WHAT IS LEFT (§623). Getting started was
+    /* ── THE CLIENT'S OWN PAGES SAY WHAT IS LEFT (§624). Getting started was
        a strip under the head until Done with set-up was pressed (§360); its
        two pages are rows of the first group now, and the group's heading
        says how many of them the data holds an answer for (client-setup.js
@@ -3243,7 +3243,7 @@
     try { strip.querySelector('[data-leave="stay"]').focus({ preventScroll: true }); } catch (e) {}
   }
   window.addEventListener("beforeunload", function(e){
-    /* §623: and rows on the shape not yet written, which leaving the page
+    /* §624: and rows on the shape not yet written, which leaving the page
        would have written — closing the tab cannot, so it asks. */
     var shapeOpen = typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.dirty && CLIENTSETUP.dirty();
     if (!applyWaiting() && !shapeOpen) return;
@@ -3463,7 +3463,7 @@
   var LASTPLACE = null;
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
-    /* §623: LEAVING THE SHAPE WRITES IT, as Next and Back did when it was a
+    /* §624: LEAVING THE SHAPE WRITES IT, as Next and Back did when it was a
        step (§322's rule kept). The same door as the colours below: a paint
        somewhere else while the shape page was the last one drawn asks the
        flow to commit, and a refusal (a row with no name, somebody in charge
@@ -3471,7 +3471,7 @@
        reason said there. */
     /* The PAGE is compared, never the flow's inner place: the first draw of
        the shape records it before the flow has mounted, so a step compared
-       here read a row being added as leaving (found by a probe, §623). */
+       here read a row being added as leaving (found by a probe, §624). */
     if (LASTPLACE && LASTPLACE.s === "shape" && current &&
         (current !== LASTPLACE.d || currentSub !== "shape") &&
         typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.leave && !CLIENTSETUP.leave()) {
@@ -3932,7 +3932,7 @@
     var cteam = _panel.querySelector("[data-cteam]");
     if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);
     var csetup = _panel.querySelector("[data-csetup]");
-    /* §623: the page says which step it holds — Profile or The shape. */
+    /* §624: the page says which step it holds — Profile or The shape. */
     if (csetup && typeof CLIENTSETUP !== "undefined")
       CLIENTSETUP.mount(csetup, Object.assign({}, _csOpts, { step: csetup.getAttribute("data-csetup") }));
 

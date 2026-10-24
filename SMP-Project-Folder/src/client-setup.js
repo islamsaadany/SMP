@@ -317,7 +317,7 @@ var CLIENTSETUP = (function () {
      box it is about. Nothing was dropped: the capabilities step's answers
      live on the top level's own card, where §428 already drew them, and on
      Setup › Capabilities, which is unchanged. */
-  /* §623: TWO PAGES ON THE RAIL, NOT THREE PILLS (Islam: *"for the client
+  /* §624: TWO PAGES ON THE RAIL, NOT THREE PILLS (Islam: *"for the client
      setup to have them as 3 section under the client on the side rail rather
      than 3 pills"*, then *"forefront team keep it under people & Access"*).
      Each step is a Setup page of its own in the rail's first group, The
@@ -330,7 +330,7 @@ var CLIENTSETUP = (function () {
     { k:"shape",  key:"The organisation", label:"The shape",
       q:"How is this client built?" }
   ];
-  /* §623: the Profile page's three tabs, in the order drawn on the mockup.
+  /* §624: the Profile page's three tabs, in the order drawn on the mockup.
      The mark goes with the colours, so that tab is Brand. */
   var TABS = [["details", "Details"], ["brand", "Brand"], ["modules", "Modules"]];
   var SHAPE_STEPS = ["shape"];
@@ -475,7 +475,7 @@ var CLIENTSETUP = (function () {
      answer for. Counted, never remembered — the data IS the progress
      (§129), so there is no second record of it to fall out of step. The
      client and its words always count (the client exists; a word left as
-     it is keeps the platform's own). §623: the office is not counted any
+     it is keeps the platform's own). §624: the office is not counted any
      more — its step went, and Forefront team is a page like any other. */
   function progress(){
     /* §544: the shape counts once the client holds a box of its own — a
@@ -486,7 +486,7 @@ var CLIENTSETUP = (function () {
       shape:  (UNIT_KEYS || []).length > 0 || (FUNCTION_KEYS || []).length > 0 ||
               (COMPANY_KEYS || []).length > 0
     };
-    /* §623: and the rail's page keys, so the group heading and the landing
+    /* §624: and the rail's page keys, so the group heading and the landing
        name a page rather than a step (Profile is `start`, §30.2). */
     var PAGE = { client: "start", shape: "shape" };
     var done = 0, todo = [], todoKeys = [];
@@ -510,7 +510,7 @@ var CLIENTSETUP = (function () {
                and, per kind, which division's boxes its row is showing. */
             sel:{ lvl:"top" }, under:{} };
     }
-    /* §623: the page says which step it is — Profile or The shape. */
+    /* §624: the page says which step it is — Profile or The shape. */
     if (OPTS.step) S.at = stepIdx(OPTS.step);
     if (S.at > STEPS.length - 1) S.at = 0;
     if (!S.tab) S.tab = "details";
@@ -577,7 +577,7 @@ var CLIENTSETUP = (function () {
     var box = el("div");
     officeStep(box, "note");
     host.appendChild(box);
-    /* §623: AND ITS OWN LINE FOR WHAT THE SERVER SAID. say() writes into the
+    /* §624: AND ITS OWN LINE FOR WHAT THE SERVER SAID. say() writes into the
        host's [data-cssaid] and this page drew none, so a refused add or seat
        ("Not added.", "Say who they are on this client's register…") said
        nothing here and surfaced later on the set-up flow instead. With the
@@ -650,7 +650,7 @@ var CLIENTSETUP = (function () {
 
     /* §418, §544: the shape lays the tree and a level's three sections side
        by side, which a 760px column cannot hold; that one step takes the
-       page's width. §623: no step pills and no Back / Next / Done with
+       page's width. §624: no step pills and no Back / Next / Done with
        set-up under it — each step is its own page on the rail, and the
        page's own heading names it, so the step's eyebrow went too. The
        shape keeps its question, which carries the hover on what a level's
@@ -662,7 +662,7 @@ var CLIENTSETUP = (function () {
       col.appendChild(q2);
     }
     col.appendChild(stepBody(s.k));
-    /* §623: A STATUS WHILE IT IS TRUE (1b-ii). Rows added, renamed or removed
+    /* §624: A STATUS WHILE IT IS TRUE (1b-ii). Rows added, renamed or removed
        here are written when the page is left — what Next used to do — so
        while some wait, the page says so; otherwise nothing is said. */
     if (s.k === "shape" && S.shapeDirty && canShape())
@@ -688,7 +688,7 @@ var CLIENTSETUP = (function () {
     if (!bad.length) return null;
     return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. A row with no name is not saved.";
   }
-  /* §623: LEAVING THE SHAPE COMMITS IT, as Next and Back did (§322's rule
+  /* §624: LEAVING THE SHAPE COMMITS IT, as Next and Back did (§322's rule
      kept). The shell asks this before any paint that would take the shape
      page off the screen; false keeps the person on it, with the reason said
      in place. A shape nobody touched has nothing to write. */
@@ -726,7 +726,7 @@ var CLIENTSETUP = (function () {
       say("Somebody is in charge of " + res.dropped.join(", ") + ", and set-up cannot carry that across a rename or a removal, so " +
           (one ? "its row is back as it was" : "their rows are back as they were") + ". " +
           "Rename or retire " + (one ? "it" : "them") + " on its own Setup page instead.", true);
-      /* §623: leaving is asked from inside the shell's paint, which draws
+      /* §624: leaving is asked from inside the shell's paint, which draws
          the page again itself — a redraw from here would paint twice. */
       if (!quiet) redraw();
       return false;
@@ -781,7 +781,7 @@ var CLIENTSETUP = (function () {
   /* The registry half, then the graph half: the mark on the door, the
      group's mark and the brand colours (Branding, absorbed here — spec 057),
      the modules this client has, and the way to archive it. */
-  /* §623: THE PROFILE IN THREE TABS (Islam: *"for the first pill suggest a
+  /* §624: THE PROFILE IN THREE TABS (Islam: *"for the first pill suggest a
      better structure of the page … different navigation elements at the
      top for basic info, colors, and modules"*; option A of the mockup,
      taken with *"go with your recommendations"*). One tab at a time: the
@@ -914,11 +914,11 @@ var CLIENTSETUP = (function () {
     aw.appendChild(a);
     rs.appendChild(aw);
     box.appendChild(rs);
-    /* Archiving sits at the foot of Details (§623), behind its own question. */
+    /* Archiving sits at the foot of Details (§624), behind its own question. */
     if (c) box.appendChild(archiveBlock());
     return box;
   }
-  /* ── THE BRAND TAB (§623): the mark, then the colours — and what follows
+  /* ── THE BRAND TAB (§624): the mark, then the colours — and what follows
      from them and whether it reads, because brandingBody() is the one
      renderer of all three (Islam: *"we have more colors choice called what
      follows from them they will be part of the brand tab right?"*). Drawn by
@@ -1097,7 +1097,7 @@ var CLIENTSETUP = (function () {
       wrap.textContent = "";
       var a = el("div", "wzend");
       var row = el("div", "wzendrow");
-      /* §623: the foot of Details says it as a question, as drawn. */
+      /* §624: the foot of Details says it as a question, as drawn. */
       row.appendChild(el("span", "wzendq", "No longer working with " + name + "?"));
       var go = el("button", "btn risk", "Archive this client");
       go.type = "button"; go.dataset.archive = "ask";
@@ -1393,7 +1393,7 @@ var CLIENTSETUP = (function () {
   function fallbackWord(key, form){
     return typeof labelWord === "function" ? labelWord(key, form === "one" ? "group" : "bu") : key;
   }
-  /* §623: THE PRODUCT'S OWN WORD, AND THE CLIENT'S OLD ONE. Terminology
+  /* §624: THE PRODUCT'S OWN WORD, AND THE CLIENT'S OLD ONE. Terminology
      (gone, §621) saved one word for the whole client, and an empty box here
      showed it in grey — so a client's word looked like the platform's
      default, and nothing could change it (El Abd's "Key Measures", which
@@ -3083,13 +3083,13 @@ var CLIENTSETUP = (function () {
 
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, STEPS:STEPS, leave:leave,
-           /* §623: rows on the shape not yet written — the tab closing asks */
+           /* §624: rows on the shape not yet written — the tab closing asks */
            dirty: function () { return !!(S && S.shapeDirty); },
            /* the standard industry list and the size bands, ONE copy (§322):
               the console's case studies add a past client with them (spec 067) */
            INDUSTRIES:INDUSTRIES, SIZES:SIZES,
            /* for the checks and the shell's leave question: where on the page
-              the flow stands, never its DOM. §623: a step is a page now, so
+              the flow stands, never its DOM. §624: a step is a page now, so
               what is left to say is the Profile's tab — a colour waits on
               Brand, and moving to Details is leaving it. */
            at: function () { return S ? (STEPS[S.at].k === "client" ? S.tab : STEPS[S.at].k) : null; },

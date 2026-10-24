@@ -17,14 +17,14 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   is cleared out of a COPY of the graph and the platform rebound to it,
   exactly as the served client that has just been created stands.
 
-· §623 — THE CLIENT IS THE RAIL'S FIRST GROUP: Profile and The shape are
+· §624 — THE CLIENT IS THE RAIL'S FIRST GROUP: Profile and The shape are
   rows of it, with no strip, no pills and no Back, Next or Done. Its count
   is AGREEMENT, NEVER A LITERAL (§94.8): compared with
   `CLIENTSETUP.progress()`, the one reader the rail asks, at both ends — a
   shape still to do (probed) and none.
 
 · WHAT THE STORED GRAPH HOLDS, NOT WHAT THE STEP DRAWS (§96): a unit typed
-  and the shape page LEFT (§623: leaving does what Next did) is read back
+  and the shape page LEFT (§624: leaving does what Next did) is read back
   off UNIT_KEYS and UNITS; a removal refused
   is read back as the row count AND the key list unchanged. A flow that
   draws the row and writes nothing renders perfectly.
@@ -39,7 +39,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   very next Next proceeds — a refusal that held the person on the step for
   ever was the first build's fault.
 
-· NO DONE (§623): the stored setupDone no longer moves or renames anything —
+· NO DONE (§624): the stored setupDone no longer moves or renames anything —
   Profile is Profile and the group stays first, asked in `setupDefsAll()`
   AND in the rail's DOM (§53.5).
 
@@ -117,12 +117,12 @@ def rows(pg):
 # the functions, the capabilities) became one, so what was "press the units
 # step and read its rows" is "press the shape, read the tree, press a box".
 def shape(pg):
-    # §623: The shape is a page of the rail now.
+    # §624: The shape is a page of the rail now.
     return press(pg, '[data-setupgo="shape"]', 500)
 
 
 def leave(pg):
-    """§623: leaving the shape page does what Next did — writes the rows, or
+    """§624: leaving the shape page does what Next did — writes the rows, or
     refuses and keeps the person on it. Left for Profile."""
     return press(pg, '[data-setupgo="start"]', 600)
 
@@ -176,7 +176,7 @@ with sync_playwright() as p:
        isinstance(holds, dict) and holds.get("plans") == 0 and holds.get("capabilities") == 0, holds)
     ck("(fixture) the page stands on a Setup page that is not one of the client's own", ev(pg, "()=>current==='setup' && currentSub==='people'", False))
 
-    # ── 1 · THE CLIENT, THE RAIL'S FIRST GROUP, AND ITS COUNT (§623) ──────
+    # ── 1 · THE CLIENT, THE RAIL'S FIRST GROUP, AND ITS COUNT (§624) ──────
     # REWRITTEN TO THE DECISION (§218): Getting started was a strip under the
     # head until Done with set-up (§360). Islam: *"have them as 3 section under
     # the client on the side rail rather than 3 pills"*. What the strip's
@@ -221,10 +221,10 @@ with sync_playwright() as p:
     ck("…and lit as the page you are on",
        ev(pg, "()=>{const s=document.querySelector('.setuprail .ritem[data-setupgo=start]');return !!s && s.classList.contains('on');}", False))
     tabs = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup [data-cstab]')).map(e=>e.dataset.cstab)", [])
-    ck("three tabs, in order — Details, Brand, Modules (§623)", tabs == ["details", "brand", "modules"], tabs)
+    ck("three tabs, in order — Details, Brand, Modules (§624)", tabs == ["details", "brand", "modules"], tabs)
     ck("standing on Details", at(pg) == "details" and
        ev(pg, "()=>(document.querySelector('.csetup [data-cstab][aria-selected=true]')||{}).dataset.cstab", None) == "details")
-    ck("no pills, and no Back, Next or Done with set-up (§623)",
+    ck("no pills, and no Back, Next or Done with set-up (§624)",
        q(pg, ".csetup .wzrail") is None and q(pg, ".csetup [data-wznext]") is None and
        q(pg, ".csetup [data-wzback]") is None and q(pg, ".csetup [data-wzdone]") is None)
     ck("over file:// the client's own record is said to be the served platform's, in words",
@@ -256,7 +256,7 @@ with sync_playwright() as p:
        wrote == "set" and held == before and after == "#123456" and after != before, (key, before, held, after, wrote))
     # Islam: *"we have more colors choice called what follows from them they
     # will be part of the brand tab right?"* — yes, with whether it reads.
-    ck("…and what follows from them, and whether it reads, are on the same tab (§623)",
+    ck("…and what follows from them, and whether it reads, are on the same tab (§624)",
        ev(pg, "()=>{const t=document.querySelector('.csetup .wzbrand').textContent; return /What follows from them/.test(t) && /Is it readable/.test(t);}", False))
     if key:
         ev(pg, "()=>{branding()[%r]=%s; applyBrand(); paint();}" % (key, json.dumps(before)))   # put back (§94.2)
@@ -280,11 +280,11 @@ with sync_playwright() as p:
         pg.fill(".csetup [data-shname]", "Test Unit X"); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("FILL: " + str(e)[:90])
-    # §623: a status while it is true — the rows wait for the page to be left.
+    # §624: a status while it is true — the rows wait for the page to be left.
     shape(pg)
     ck("…and the page says the rows are written when you leave it",
        ev(pg, "()=>/written when you leave this page/.test((document.querySelector('.csetup .wzpend')||{}).textContent||'')", False))
-    ck("leaving the page writes the unit into the STORED graph (§623: what Next did)", leave(pg) and
+    ck("leaving the page writes the unit into the STORED graph (§624: what Next did)", leave(pg) and
        ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1 and
        ev(pg, "()=>UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name", None) == "Test Unit X",
        ev(pg, "()=>[UNIT_KEYS.length, UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name]"))
@@ -336,7 +336,7 @@ with sync_playwright() as p:
        press(pg, ".csetup [data-shremove='bu:%d']" % c2, 300) and count(pg, "bu") == c2
        and leave(pg) and page(pg) == "start", (count(pg, "bu"), page(pg), said(pg)[:60]))
 
-    # ── 7 · NO DONE WITH SET-UP (§623) ─────────────────────────────────────
+    # ── 7 · NO DONE WITH SET-UP (§624) ─────────────────────────────────────
     # REWRITTEN TO THE DECISION (§218): Done with set-up moved Getting started
     # to the bottom of the rail as Client set-up. The group is first from the
     # start now, and the stored mark — kept on clients that pressed it —
@@ -468,7 +468,7 @@ with sync_playwright() as p:
        all(q(pg, '.csetup [data-stway="top|pillars"] [data-stlw="top|%s|%s"]' % (p, f)) for p in ("measure", "tactic") for f in ("one", "many")))
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)')
     ck("there is no Words step", not ev(pg, "()=>CLIENTSETUP.STEPS.some(s=>s.k==='words')", True))
-    ck("…and no Structure, divisions, units, functions, capabilities or office step either (§544, §623)",
+    ck("…and no Structure, divisions, units, functions, capabilities or office step either (§544, §624)",
        ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k).join(',')", "") == "client,shape")
     # no second layer: the tree draws no layer row at all, and a box's panel
     # offers no division (§61: a control with nothing behind it)

@@ -208,7 +208,7 @@ with sync_playwright() as p:
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
     ck("the set-up flow opens", ok)
-    # §623: the steps are pages of the rail's first group now, The client —
+    # §624: the steps are pages of the rail's first group now, The client —
     # Profile and The shape — and the office step went (Forefront team is
     # its page). Asserted as the rail draws them, in order.
     ck("the client's own pages are two: Profile, then The shape",

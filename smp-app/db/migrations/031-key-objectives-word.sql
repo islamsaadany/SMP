@@ -1,4 +1,4 @@
-/* KEY OBJECTIVES, NOT KEY MEASURES (§623) — per tenant; the frozen stack's 051.
+/* KEY OBJECTIVES, NOT KEY MEASURES (§624) — per tenant; the frozen stack's 051.
    Islam, of El Abd's shape screen, where the many box for Key Objective read
    "Key Measures" in grey: "key measures is not the default on the
    foundation, it should be Key Objectives."

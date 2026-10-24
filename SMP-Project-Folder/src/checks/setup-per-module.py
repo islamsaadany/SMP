@@ -159,7 +159,7 @@ with sync_playwright() as p:
        ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='kb');return d && d.mod==='strategy' && d.grp==='help';}", False))
     ck("the people, the organisation and the client's two pages are the client's",
        ev(pg, "()=>['people','mainbu','units','companies','fns','caps','start','shape'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='client';})", False))
-    # REWRITTEN (§218, §623): Getting started sat in The client, the LAST group,
+    # REWRITTEN (§218, §624): Getting started sat in The client, the LAST group,
     # until Done with set-up. The client is the FIRST group now, holding
     # Profile and The shape, both still gated by the branding grant (§360).
     ck("…and Profile and The shape sit in The client, the first group, gated by the branding grant it absorbed",
@@ -197,8 +197,8 @@ with sync_playwright() as p:
     ck("the head says Setup and nothing more", head(pg) == "Setup", head(pg))
     ck("no way out is drawn — unscoped, there is no console and no client address to point at (§360)",
        pg.query_selector(".setuprail .railback") is None)
-    # §623: no strip under the head any more — the client's pages are rows.
-    ck("…and the client's pages are rows of the first group, with no strip under the head (§623)",
+    # §624: no strip under the head any more — the client's pages are rows.
+    ck("…and the client's pages are rows of the first group, with no strip under the head (§624)",
        ev(pg, "()=>!document.querySelector('.setuprail .railstart') && "
               "document.querySelector('.setuprail .rgroup').dataset.railgrp==='client' && "
               "!!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && "
@@ -246,11 +246,11 @@ with sync_playwright() as p:
     cli = rail(pg)
     ck("the client's rail is exactly the defs marked client", same(cli, defs_of(pg, "client")), (cli, defs_of(pg, "client")))
     ck("…and none of Strategy's", not any(k in cli for k in ("cycle", "bands", "access", "sets", "kb")), cli)
-    ck("…it holds Profile and The shape, as rows (§623)", "start" in cli and "shape" in cli and
+    ck("…it holds Profile and The shape, as rows (§624)", "start" in cli and "shape" in cli and
        ev(pg, "()=>!!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]')", False), cli)
-    # §623: Islam's own picture of this rail — People & access holds Forefront
+    # §624: Islam's own picture of this rail — People & access holds Forefront
     # team and the register; the Official BU list joined The organisation.
-    ck("…People & access holds Forefront team and the register, and the BU list is the organisation's (§623)",
+    ck("…People & access holds Forefront team and the register, and the BU list is the organisation's (§624)",
        ev(pg, "()=>{const g=k=>[...document.querySelectorAll('.setuprail [data-railitems=\"'+k+'\"] .ritem')].map(r=>r.dataset.setupgo).join(',');"
               "return g('who')==='team,people' && /,mainbu$/.test(g('run'));}", False),
        ev(pg, "()=>['who','run'].map(k=>[...document.querySelectorAll('.setuprail [data-railitems=\"'+k+'\"] .ritem')].map(r=>r.dataset.setupgo).join(','))"))
@@ -360,7 +360,7 @@ with sync_playwright() as p:
     # key of the list (agreement, §94.8), so a group added tomorrow stays
     # green and a def pointing at no group goes red.
     keys = ev(pg, "()=>SETUP_GROUPS.map(g=>g.k)")
-    # REWRITTEN (§218, §623): The client went FIRST. The four keys a browser
+    # REWRITTEN (§218, §624): The client went FIRST. The four keys a browser
     # already folds by are unchanged (§30.2) — only their place moved down one.
     ck("the four groups a browser already folds are keyed as before, after The client",
        keys[0] == "client" and keys[1:5] == ["cycle", "who", "run", "meas"], keys)
@@ -368,7 +368,7 @@ with sync_playwright() as p:
     # and *The client* is LAST — the set-up, once done, is the thing you come
     # back to least. The tail is asserted in ORDER because the order is the
     # decision, and `look` as an absence beside it (§94.2).
-    ck("...and the tail is access, landing, help — in that order, with client first, not last (§623)",
+    ck("...and the tail is access, landing, help — in that order, with client first, not last (§624)",
        keys[5:] == ["access", "landing", "help"] and "look" not in keys, keys)
     ck("...and every def's group is one of them",
        ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
@@ -396,7 +396,7 @@ with sync_playwright() as p:
         # served, the reload lands back on the client's rail by its address
         pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
         set_scope(pg, "client", "people")
-    # REWRITTEN (§218, §623): The client is a heading from the start now —
+    # REWRITTEN (§218, §624): The client is a heading from the start now —
     # there is no strip and no Done with set-up — so the fold stored for it
     # folds it on the first draw. Unless you are standing on one of its pages:
     # the page you are on is never folded away (here).
@@ -424,8 +424,8 @@ with sync_playwright() as p:
     ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='terminology';"
            "q.dispatchEvent(new Event('input',{bubbles:true}));}")
     pg.wait_for_timeout(300)
-    # §623: the words are named on The shape, so that is where it lands now.
-    ck("…and the terminology errand finds The shape, where the words are named (§621, §623)",
+    # §624: the words are named on The shape, so that is where it lands now.
+    ck("…and the terminology errand finds The shape, where the words are named (§621, §624)",
        ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
               ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('shape')>=0", False))
     ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='';"

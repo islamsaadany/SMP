@@ -772,7 +772,7 @@ const CS = "function clientStep(";
 check("the set-up flow still has a step about the client itself to hang it on", cs.includes(CS));
 const step = cs.slice(cs.indexOf(CS), cs.indexOf("function modulesBlock("));
 check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
-/* REWRITTEN TO THE DECISION (§218, §623): the client step is Profile now, in
+/* REWRITTEN TO THE DECISION (§218, §624): the client step is Profile now, in
    three tabs, and the band is the Modules tab's whole body — Islam took the
    mockup's tabs (*"go with your recommendations"*). What the order asserted
    was that the band belongs to the client's own page and not its

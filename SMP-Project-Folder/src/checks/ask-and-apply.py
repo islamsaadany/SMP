@@ -199,7 +199,7 @@ with sync_playwright() as p:
     # ── 2 · THE TENANT'S COLOURS ────────────────────────────────────────
     print("\n2 · a colour waits for Apply; leaving asks; Undo puts it back")
     setup_go(pg, "start", 1600)
-    click(pg, ".csetup [data-cstab=brand]", 800)   # §623: the colours are on Profile's Brand tab
+    click(pg, ".csetup [data-cstab=brand]", 800)   # §624: the colours are on Profile's Brand tab
     gold = "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold').trim().toUpperCase()"
     g0, a0, saves0 = ev(pg, gold), ev(pg, "()=>branding().accent"), len(SAVES)
     ev(pg, """()=>{const i=document.querySelector('.csetup [data-brand=accent]'); if(!i) return;
@@ -323,14 +323,14 @@ with sync_playwright() as p:
     # ── 6 · MODULES AND ARCHIVE ─────────────────────────────────────────
     print("\n6 · turning a module off, and archiving, ask in the box")
     click(pg, "[data-setupgo=start]", 900)
-    click(pg, ".csetup [data-cstab=modules]", 800)   # §623: Profile's Modules tab
+    click(pg, ".csetup [data-cstab=modules]", 800)   # §624: Profile's Modules tab
     posts0 = len(PLATFORM)
     click(pg, '.csetup [data-module="insights"] button', 400)
     bx = box(pg) or {}
     ck("Turn off asks, saying what it takes away", "Insights" in bx.get("t", "") and "Nothing in it is deleted" in bx.get("t", ""), bx.get("t"))
     click(pg, ".askbox .askno", 300)
     ck("…and Keep posts nothing", len(PLATFORM) == posts0, PLATFORM[posts0:])
-    click(pg, ".csetup [data-cstab=details]", 800)   # §623: archiving is at the foot of Details
+    click(pg, ".csetup [data-cstab=details]", 800)   # §624: archiving is at the foot of Details
     click(pg, '.csetup [data-archive="ask"]', 400)
     bx = box(pg) or {}
     ck("Archive asks in the box", "Archive Raya Trade?" in bx.get("t", "") and "Everything they have is kept" in bx.get("t", ""), bx.get("t"))
@@ -346,7 +346,7 @@ with sync_playwright() as p:
                  "the door this client's people sign in at", "The tenant’s face is set", "Branding is the tenant’s",
                  "Turning one on gives this client the module", "Archiving takes Raya Trade off"]:
         ck("…gone from Getting started: %s…" % gone[:34], gone not in txt)
-    # §623: the facts are split across Profile's tabs now — the name and the
+    # §624: the facts are split across Profile's tabs now — the name and the
     # address on Details, the mark and the colours on Brand.
     TIPS = "()=>document.querySelectorAll('.csetup .tip, #panel .section-h .tip').length"
     t_details = ev(pg, TIPS, 0) or 0

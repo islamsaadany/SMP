@@ -1,4 +1,4 @@
-"""THE CLIENT'S OWN PAGES ON THE RAIL (§623).
+"""THE CLIENT'S OWN PAGES ON THE RAIL (§624).
 
 qa-run: own-server — Profile's Details, Brand and Modules read the client's
 record from /api/platform, so this file serves it, and records what is saved.

@@ -113,7 +113,7 @@ with sync_playwright() as p:
     print("\n0 · the state is made")
     holds = ev(pg, BARE, {})
     ck("(fixture) the shape is open — no plan line anywhere", isinstance(holds, dict) and holds.get("plans") == 0, holds)
-    ck("the shape step opens", press(pg, ".csetup .wzstep[data-step=shape]", 500) and bool(pg.query_selector(".csetup .shtree")))
+    ck("the shape step opens", press(pg, "[data-setupgo=shape]", 500) and bool(pg.query_selector(".csetup .shtree")))
     ck("(fixture) the worked example is Raya's shape: a layer above the units, none above the functions",
        lvls(pg) == ["top", "bu@g", "bu", "fn"], lvls(pg))
     ck("the top box carries the client's own name",
@@ -278,7 +278,7 @@ with sync_playwright() as p:
          var r=document.querySelector('#units'); return r ? r.textContent.indexOf(%s)<0 : null}"""
           % __import__("json").dumps(fnword), None) is True)
     ev(pg, "()=>{current='setup'; currentSub='start'; paint();}"); pg.wait_for_timeout(400)
-    press(pg, ".csetup .wzstep[data-step=shape]", 400)
+    press(pg, "[data-setupgo=shape]", 400)
     ck("ticking it back brings the row back exactly as it was",
        press(pg, ".csetup [data-shnav=fn]", 400) and
        ev(pg, "()=>navSides().map(s=>s.label).join(',')", "") == sides0, ev(pg, "()=>navSides().map(s=>s.label).join(',')"))
@@ -310,7 +310,7 @@ with sync_playwright() as p:
     # So: the either/or is gone, and the state it could not express — the
     # company planning AND the units planning — is reachable and real.
     ev(pg, "()=>{current='setup'; currentSub='start'; paint();}"); pg.wait_for_timeout(400)
-    press(pg, ".csetup .wzstep[data-step=shape]", 400)
+    press(pg, "[data-setupgo=shape]", 400)
     press(pg, ".csetup [data-shlvl=top]", 350)
     ck("the top card asks no where-planned question",
        ev(pg, "()=>!document.querySelector('.csetup [data-stplan]')", False))

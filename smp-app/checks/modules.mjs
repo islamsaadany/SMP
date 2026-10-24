@@ -772,10 +772,18 @@ const CS = "function clientStep(";
 check("the set-up flow still has a step about the client itself to hang it on", cs.includes(CS));
 const step = cs.slice(cs.indexOf(CS), cs.indexOf("function modulesBlock("));
 check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
-check("...after the client's own fields and before the ending block",
-  step.indexOf("The client's name") < step.indexOf("modulesBlock()")
-  && step.indexOf("modulesBlock()") < step.indexOf("archiveBlock()"),
-  "name at " + step.indexOf("The client's name") + ", band at " + step.indexOf("modulesBlock()")
+/* REWRITTEN TO THE DECISION (§218, §623): the client step is Profile now, in
+   three tabs, and the band is the Modules tab's whole body — Islam took the
+   mockup's tabs (*"go with your recommendations"*). What the order asserted
+   was that the band belongs to the client's own page and not its
+   organisation's; asserted as: the band is drawn on the Modules tab, and
+   the client's own fields and the archive block are drawn on Details. */
+const modTab = step.indexOf('S.tab === "modules"');
+check("...on Profile's Modules tab, apart from the client's own fields and the archive block",
+  modTab > -1 && step.indexOf("modulesBlock()") > modTab
+  && step.indexOf("The client's name") > step.indexOf("modulesBlock()")
+  && step.indexOf("archiveBlock()") > step.indexOf("The client's name"),
+  "modules tab at " + modTab + ", band at " + step.indexOf("modulesBlock()") + ", name at " + step.indexOf("The client's name")
   + ", end at " + step.indexOf("archiveBlock()"));
 check("and drawn ONCE — a band on two steps is two places to set one thing",
   (cs.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,

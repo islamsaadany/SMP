@@ -71,7 +71,7 @@
    "file": "client-setup.js",
    "code": "TS2304",
    "message": "Cannot find name 'GROUP'.",
-   "count": 56
+   "count": 54
   },
   {
    "file": "client-setup.js",
@@ -82,8 +82,14 @@
   {
    "file": "client-setup.js",
    "code": "TS2304",
+   "message": "Cannot find name 'labelDefault'.",
+   "count": 2
+  },
+  {
+   "file": "client-setup.js",
+   "code": "TS2304",
    "message": "Cannot find name 'LABELS'.",
-   "count": 4
+   "count": 7
   },
   {
    "file": "client-setup.js",
@@ -100,12 +106,6 @@
   {
    "file": "client-setup.js",
    "code": "TS2304",
-   "message": "Cannot find name 'PEOPLE'.",
-   "count": 1
-  },
-  {
-   "file": "client-setup.js",
-   "code": "TS2304",
    "message": "Cannot find name 'setCompOver'.",
    "count": 1
   },
@@ -113,7 +113,7 @@
    "file": "client-setup.js",
    "code": "TS2304",
    "message": "Cannot find name 'SMPRules'.",
-   "count": 69
+   "count": 68
   },
   {
    "file": "client-setup.js",

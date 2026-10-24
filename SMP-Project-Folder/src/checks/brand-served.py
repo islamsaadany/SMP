@@ -134,7 +134,11 @@ with sync_playwright() as p:
         errs.append("PROBE: no Setup button")
     pg.wait_for_timeout(300)
     ev(pg, "()=>{const r=document.querySelector('[data-setupgo=start]'); if(r) r.click();}")
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(80)
+    # §623: the colours are on Profile's Brand tab — opened at once, so they
+    # are still drawn before the record lands, which is this file's case.
+    ev(pg, "()=>{const t=document.querySelector('.csetup [data-cstab=brand]'); if(t) t.click();}")
+    pg.wait_for_timeout(80)
     marked = ev(pg, "()=>{const i=document.querySelector('.csetup [data-brand=accent]');"
                     "if(!i) return false; i.__beforeRecord=1; return true;}", False)
     ck("the colour controls are on the step before the record lands", marked)

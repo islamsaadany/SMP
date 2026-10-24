@@ -81,7 +81,7 @@ with sync_playwright() as p:
     # about the STACK's order and pairing are claims about the TREE's order
     # and about which cards each level brings — and every claim below about
     # what a card holds is unchanged and still asserted.
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]')
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '[data-setupgo="shape"]')
     ck("the shape screen opens", ok)
     def lvl(k):
         return press(pg, '[data-shlvl="%s"]' % k)

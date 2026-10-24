@@ -139,6 +139,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 }).encode(), "application/json")
                 return
             STATE["posts"].append(body)
+            # §623: one refusal on demand, so the page is seen to SAY it.
+            if body.get("action") == "setTeam" and STATE.get("refuse"):
+                self._s(200, json.dumps({"ok": False, "error": STATE["refuse"]}).encode(), "application/json")
+                return
         self._s(200, b'{"ok":true}', "application/json")
 
 
@@ -358,8 +362,16 @@ with sync_playwright() as p:
     pg.close()
     STATE["made_here"] = False
 
-    # ── 6 · ONE RENDERER, TWO HOSTS (§53.5) ─────────────────────────────
-    print("\n6 · the flow's own step draws the same table, in its own column")
+    # ── 6 · ONE PAGE, ONE PLACE (§623) ──────────────────────────────────
+    # REWRITTEN TO THE DECISION (§218): this section asserted the flow's own
+    # office step drew the same table in its column — one renderer, two
+    # hosts (§364). Islam took the second host away (*"forefront team keep it
+    # under people & Access"*): the step went, the page stays where it is.
+    # What the two-host check was FOR still holds — one renderer, so the
+    # table cannot drift — and is asserted as: no step carries it, the
+    # People & access group does, and the page now has the line a refusal
+    # is said on, which only the flow's column used to have.
+    print("\n6 · the team is one page, in People & access, and says what the server refused")
     pg = b.new_page(viewport={"width": 1600, "height": 950})
     pg.add_init_script(INIT)
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -370,33 +382,32 @@ with sync_playwright() as p:
     except Exception:
         errs.append("PROBE: no Setup button")
     pg.wait_for_timeout(400)
-    pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"
-                ".find(x=>x.dataset.setupgo==='start'); if(r) r.click();}")
+    f = ev(pg, """() => ({
+      steps: (typeof CLIENTSETUP !== 'undefined') ? CLIENTSETUP.STEPS.map(s => s.k).join(',') : null,
+      grp: (function(){ const r = document.querySelector('.setuprail [data-setupgo="team"]');
+                        const g = r && r.closest('[data-railitems]'); return g ? g.dataset.railitems : null; })(),
+      clientPages: [...document.querySelectorAll('.setuprail [data-railitems="client"] .ritem')].map(r => r.dataset.setupgo).join(',')
+    })""") or {}
+    ck("the set-up flow has no office step any more", f.get("steps") == "client,shape", f.get("steps"))
+    ck("...Forefront team stays in People & access", f.get("grp") == "who", f.get("grp"))
+    ck("...and is not one of the client's own pages", "team" not in (f.get("clientPages") or "").split(","), f.get("clientPages"))
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=\"start\"]'); if(r) r.click();}")
     pg.wait_for_timeout(1200)
-    pg.evaluate("()=>{const s=[...document.querySelectorAll('.wzrail .wzstep')];"
-                " if(s.length) s[s.length-1].click();}")
-    pg.wait_for_timeout(1000)
-    f = ev(pg, """() => {
-      const host = document.querySelector('[data-csetup]');
-      const cfg = host && host.querySelector('.cfg');
-      const t = cfg && cfg.querySelector('table.teamcfg');
-      const col = host && host.querySelector('.wzcol');
-      const lines = (e) => new Set([...e.getClientRects()].filter(r => r.width > 0)
-                                    .map(r => Math.round(r.top))).size;
-      return { at: (typeof CLIENTSETUP !== 'undefined') ? CLIENTSETUP.at() : null,
-               table: !!t,
-               colW: col ? Math.round(col.getBoundingClientRect().width) : null,
-               fits: cfg ? (cfg.scrollWidth <= cfg.clientWidth) : null,
-               multi: [...(t ? t.querySelectorAll('td') : [])].filter(c => lines(c) > 1).length,
-               notes: [...(host ? host.querySelectorAll('p.wzwhy') : [])].map(p => p.className) };
-    }""")
-    ck("the flow stands on its office step", f.get("at") == "office", f.get("at"))
-    ck("...and draws the very same table", f.get("table") is True, f)
-    ck("...inside the flow's own column, fitting it",
-       f.get("fits") is True and (f.get("colW") or 0) <= 760, {"fits": f.get("fits"), "col": f.get("colW")})
-    ck("...one line a row there too", f.get("multi") == 0, f.get("multi"))
-    ck("...and its note is the flow's quiet line, not the page's block",
-       len(f.get("notes") or []) >= 1, f.get("notes"))
+    ck("...nor drawn on Profile", ev(pg, "()=>!document.querySelector('[data-csetup] table.teamcfg')", False))
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=\"team\"]'); if(r) r.click();}")
+    pg.wait_for_timeout(1500)
+    ck("the page carries its own line for what the server says",
+       ev(pg, "()=>!!document.querySelector('[data-cteam] [data-cssaid]')", False))
+    # BOTH ENDS (§94.2): a line that exists proves nothing until a refusal
+    # lands in it. A seat change is refused, and the page must say so.
+    STATE["refuse"] = "Not changed: the stand-in refused it."
+    pressed = ev(pg, """()=>{const b=[...document.querySelectorAll('[data-cteam] table.teamcfg button')]
+      .find(x=>/^(Super user|SMO team)$/.test(x.textContent.trim()) && !x.classList.contains('on'));
+      if(!b) return false; b.click(); return true;}""", False)
+    pg.wait_for_timeout(900)
+    STATE["refuse"] = None
+    said = ev(pg, "()=>{const n=document.querySelector('[data-cteam] [data-cssaid]'); return n && !n.hidden ? n.textContent : ''}", "") or ""
+    ck("...and a refused change is said there", pressed and "stand-in refused" in said, (pressed, said))
     pg.close()
 
     # ── 7 · BELOW THE WIDTH IT FITS AT, IT SCROLLS RATHER THAN CUTS ─────

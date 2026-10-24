@@ -255,7 +255,7 @@ with sync_playwright() as p:
     # §544: the Structure step is the shape screen now, and the top level's
     # card opens from the tree.
     opened = ((press('.setuprail [data-setupgo="start"]') or press('[data-setupgo="start"]')) and
-              press('.wzstep[data-step="shape"]') and press('[data-shlvl="top"]'))
+              press('[data-setupgo="shape"]') and press('[data-shlvl="top"]'))
     ck("the shape screen's top level opens", opened)
     ck("with the company's plan off, no row is drawn",
        ev(pg, "() => !document.querySelector('[data-wztopsplit]')", None) is True)

@@ -199,6 +199,7 @@ with sync_playwright() as p:
     # ── 2 · THE TENANT'S COLOURS ────────────────────────────────────────
     print("\n2 · a colour waits for Apply; leaving asks; Undo puts it back")
     setup_go(pg, "start", 1600)
+    click(pg, ".csetup [data-cstab=brand]", 800)   # §623: the colours are on Profile's Brand tab
     gold = "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold').trim().toUpperCase()"
     g0, a0, saves0 = ev(pg, gold), ev(pg, "()=>branding().accent"), len(SAVES)
     ev(pg, """()=>{const i=document.querySelector('.csetup [data-brand=accent]'); if(!i) return;
@@ -274,7 +275,7 @@ with sync_playwright() as p:
     # ── 4 · END IN MIND ─────────────────────────────────────────────────
     print("\n4 · End in Mind has a tick of its own, and unticking it where written asks")
     setup_go(pg, "start", 1200)
-    click(pg, ".csetup .wzstep[data-step=shape]", 1000)
+    click(pg, "[data-setupgo=shape]", 1000)
     ck("the top card has End in Mind, ticked, under Winning Aspiration",
        ev(pg, "()=>{const r=document.querySelector('.csetup [data-steim=top]'); const p=r&&r.previousElementSibling;"
               "return !!r && r.querySelector('.sttick').getAttribute('aria-pressed')==='true' &&"
@@ -321,13 +322,15 @@ with sync_playwright() as p:
 
     # ── 6 · MODULES AND ARCHIVE ─────────────────────────────────────────
     print("\n6 · turning a module off, and archiving, ask in the box")
-    click(pg, ".csetup .wzstep[data-step=client]", 900)
+    click(pg, "[data-setupgo=start]", 900)
+    click(pg, ".csetup [data-cstab=modules]", 800)   # §623: Profile's Modules tab
     posts0 = len(PLATFORM)
     click(pg, '.csetup [data-module="insights"] button', 400)
     bx = box(pg) or {}
     ck("Turn off asks, saying what it takes away", "Insights" in bx.get("t", "") and "Nothing in it is deleted" in bx.get("t", ""), bx.get("t"))
     click(pg, ".askbox .askno", 300)
     ck("…and Keep posts nothing", len(PLATFORM) == posts0, PLATFORM[posts0:])
+    click(pg, ".csetup [data-cstab=details]", 800)   # §623: archiving is at the foot of Details
     click(pg, '.csetup [data-archive="ask"]', 400)
     bx = box(pg) or {}
     ck("Archive asks in the box", "Archive Raya Trade?" in bx.get("t", "") and "Everything they have is kept" in bx.get("t", ""), bx.get("t"))
@@ -343,8 +346,15 @@ with sync_playwright() as p:
                  "the door this client's people sign in at", "The tenant’s face is set", "Branding is the tenant’s",
                  "Turning one on gives this client the module", "Archiving takes Raya Trade off"]:
         ck("…gone from Getting started: %s…" % gone[:34], gone not in txt)
-    ck("…and their facts are hovers", (ev(pg, "()=>document.querySelectorAll('.csetup .tip, #panel .section-h .tip').length", 0) or 0) >= 4)
-    click(pg, ".csetup .wzstep[data-step=shape]", 900)
+    # §623: the facts are split across Profile's tabs now — the name and the
+    # address on Details, the mark and the colours on Brand.
+    TIPS = "()=>document.querySelectorAll('.csetup .tip, #panel .section-h .tip').length"
+    t_details = ev(pg, TIPS, 0) or 0
+    click(pg, ".csetup [data-cstab=brand]", 700)
+    t_brand = ev(pg, TIPS, 0) or 0
+    click(pg, ".csetup [data-cstab=details]", 700)
+    ck("…and their facts are hovers, on the tab each belongs to", t_details >= 2 and t_brand >= 2, (t_details, t_brand))
+    click(pg, "[data-setupgo=shape]", 900)
     note = ev(pg, "()=>(document.querySelector('.csetup .wzarched')||{}).innerText||''", "") or ""
     ck("the shape's notice is one line", "rows can’t be added here" in note and "§544.14" not in note and len(note) < 140, note)
 

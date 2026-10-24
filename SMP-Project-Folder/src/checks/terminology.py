@@ -59,7 +59,7 @@ ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "va
 def shape_step(pg):
     # §621: the words are named on Getting started's shape screen now
     js(pg, "current='setup'; currentSub='start'; paint()"); pg.wait_for_timeout(300)
-    js(pg, "(function(){var b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();})()")
+    js(pg, "(function(){var b=document.querySelector('[data-setupgo=shape]'); if(b) b.click();})()")
     pg.wait_for_timeout(400)
 
 with sync_playwright() as p:

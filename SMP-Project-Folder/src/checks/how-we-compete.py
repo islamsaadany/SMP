@@ -52,7 +52,7 @@ with sync_playwright() as p:
 
     print("\n2 · the Structure step: pressed")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]')
+        and press(pg, '[data-setupgo="shape"]')
     ck("the set-up flow's shape screen opens", ok)
     # §544: a level's card opens from the tree, one at a time.
     def lvl(k):

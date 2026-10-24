@@ -25,21 +25,19 @@
 .csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
 .csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
 
-/* the step rail */
-.csetup .wzrail { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 20px; }
-.csetup .wzstep { display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
-                  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface);
-                  color:var(--ink-2); font:600 12.5px/1.5 var(--sans); cursor:pointer; }
-.csetup .wzstep:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
-.csetup .wzstep .n { width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
-                     background:var(--surface-2); color:var(--ink-3); font:600 11px/1 var(--mono);
-                     flex:none; font-variant-numeric:tabular-nums; }
-.csetup .wzstep[aria-current="step"] { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
-.csetup .wzstep[aria-current="step"] .n { background:var(--cs-acc); color:var(--cs-acc-ink); }
-.csetup .wzstep.done { color:var(--ink-3); }
-.csetup .wzstep.done .n { background:var(--good-bg); color:var(--good-tx); }
+/* §623: the Profile's three tabs. The step pills went: each step is a page
+   on the rail now. Underlined, the platform's accent under the one that is
+   on, so a tab reads as where you are rather than as a button to press. */
+.csetup .wztabs { display:flex; gap:28px; border-bottom:1px solid var(--line); margin:4px 0 22px; max-width:760px; }
+.csetup .wztab { all:unset; cursor:pointer; font:600 14px/1 var(--sans); color:var(--ink-3);
+                 padding:10px 0 12px; border-bottom:3px solid transparent; margin-bottom:-1px; }
+.csetup .wztab:hover { color:var(--ink); }
+.csetup .wztab:focus-visible { outline:2px solid var(--cs-acc-tx); outline-offset:3px; border-radius:2px; }
+.csetup .wztab.on { color:var(--ink); border-bottom-color:var(--cs-acc); }
+.csetup .wztab .ct { font-weight:500; color:var(--ink-3); margin-left:6px; font-size:12.5px; }
 
 .csetup .wzcol { max-width:760px; }
+.csetup .wzpend { margin:14px 0 0; font-size:var(--fs-small); color:var(--attn-tx); }
 .csetup .wzq { font:600 20px/1.3 var(--sans); margin:4px 0 12px; text-wrap:balance; }
 .csetup .wzwhy { color:var(--ink-3); font-size:var(--fs-small); margin:14px 0 0; max-width:62ch; }
 .csetup .wzempty { color:var(--ink-3); font-size:var(--fs-small); font-style:italic; margin:0 0 10px; }
@@ -148,19 +146,22 @@
                     color:var(--ink-3); margin-bottom:8px; }
 .csetup .wzendwhy { margin:0 0 12px; font-size:var(--fs-small); color:var(--ink-3); max-width:62ch; }
 .csetup .wzendrow { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.csetup .wzendq { color:var(--ink-3); font-size:var(--fs-small); margin-right:5px; }
 .csetup .wzask { border:1px solid var(--bad); background:var(--bad-bg); border-radius:var(--r-md); padding:13px 15px; }
 .csetup .wzask p { margin:0 0 11px; font-size:var(--fs-small); color:var(--ink); }
 .csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
 .csetup .wzask .row { margin-top:12px; }
 
-/* ── the rail's strip (§360): Getting started, under the head ─────────── */
-.setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
-                        padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
-                        background:var(--surface); color:var(--ink); font:inherit; }
-.setuprail .railstart:hover { background:var(--surface-2); }
-.setuprail .railstart.on { box-shadow:inset 3px 0 0 var(--gold); }
-.setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
-.setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
+/* ── §623: the client group's count and marks. The strip that was here
+   (Getting started under the head, §360) went: its two pages are rows of the
+   rail's first group. The count sits where a folded group's number does; a
+   tick is the platform's done green, the dot the accent of something still
+   to do — neither ever a pill, which on this rail means "waiting". */
+.setuprail .rgroup .rgprog { margin-left:auto; font:500 10.5px/1 var(--sans); letter-spacing:0;
+                             text-transform:none; color:var(--ink-3); }
+.setuprail .ritem .ridone { margin-left:auto; flex:none; color:var(--good-tx); font:700 12px/1 var(--sans); }
+.setuprail .ritem .ritodo { margin-left:auto; flex:none; width:7px; height:7px; border-radius:50%;
+                            background:var(--gold); }
 .setuprail .railback.railfwd { display:inline-block; }
 
 /* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════

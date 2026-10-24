@@ -627,7 +627,13 @@
    own tick; the Terminology page is gone. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.09-ask-and-apply";
+/* v7.10-client-group — §623: the client's own pages are the rail's first
+   group (Profile in three tabs, The shape), the Official BU list joins The
+   organisation, Capabilities and the Caps column only where they list
+   something, and a client's old word shows in its box. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+const SHELL = "smp-shell-v7.10-client-group";
 const ASSETS = [
   "/",
   "/index.html",

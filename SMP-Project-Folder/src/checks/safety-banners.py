@@ -512,7 +512,7 @@ with sync_playwright() as p:
     import time as _time
     press(pg, 'button[title="Setup"]'); pg.wait_for_timeout(500)
     pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=start]'); if(r) r.click();}"); pg.wait_for_timeout(800)
-    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();}"); pg.wait_for_timeout(900)
+    pg.evaluate("()=>{const b=document.querySelector('[data-setupgo=shape]'); if(b) b.click();}"); pg.wait_for_timeout(900)
     mark = "TYPED-%d" % int(_time.time())
     box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     ck("a field to type in", box.count() > 0)
@@ -544,7 +544,7 @@ with sync_playwright() as p:
     # first step — a step is the flow's own state, never the address — so the
     # shape screen is opened again before its box is typed into.
     pg.wait_for_timeout(800)
-    pg.evaluate("()=>{const b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();}")
+    pg.evaluate("()=>{const b=document.querySelector('[data-setupgo=shape]'); if(b) b.click();}")
     pg.wait_for_timeout(900)
     box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     box.click(); box.fill(""); box.type(mark + "-b")

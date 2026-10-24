@@ -317,14 +317,22 @@ var CLIENTSETUP = (function () {
      box it is about. Nothing was dropped: the capabilities step's answers
      live on the top level's own card, where §428 already drew them, and on
      Setup › Capabilities, which is unchanged. */
+  /* §623: TWO PAGES ON THE RAIL, NOT THREE PILLS (Islam: *"for the client
+     setup to have them as 3 section under the client on the side rail rather
+     than 3 pills"*, then *"forefront team keep it under people & Access"*).
+     Each step is a Setup page of its own in the rail's first group, The
+     client, so there is no Back, Next or Done with set-up any more. The
+     office step went: it was Setup › Forefront team drawn a second time —
+     one renderer, one record, two places (§362.2) — and the team stays where
+     its page is. */
   var STEPS = [
-    { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
+    { k:"client", key:"The client",       label:"Profile",        q:"Which client is this?" },
     { k:"shape",  key:"The organisation", label:"The shape",
-      q:"How is this client built?" },
-    /* §404.4: no Words step. Every word it asked for is asked on the
-       shape screen now, beside the level or component it names. */
-    { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
+      q:"How is this client built?" }
   ];
+  /* §623: the Profile page's three tabs, in the order drawn on the mockup.
+     The mark goes with the colours, so that tab is Brand. */
+  var TABS = [["details", "Details"], ["brand", "Brand"], ["modules", "Modules"]];
   var SHAPE_STEPS = ["shape"];
   /* §404: the components a level may carry, in the mockup's order, each with
      its fixed title (what it IS) — the client's word goes in the box beside
@@ -462,28 +470,28 @@ var CLIENTSETUP = (function () {
     return g;
   }
   function holdsNow(){ return __smpHoldsNow(); }
-  function isDone(){ return !!(typeof SMPRules !== "undefined" && SMPRules.setupDone(GROUP)); }
 
   /* ── WHAT THE RAIL'S STRIP SAYS (spec 057): which steps the data holds an
      answer for. Counted, never remembered — the data IS the progress
      (§129), so there is no second record of it to fall out of step. The
      client and its words always count (the client exists; a word left as
-     it is keeps the platform's own); the office counts when a Forefront
-     row is on the register (§339 writes the creator's). */
+     it is keeps the platform's own). §623: the office is not counted any
+     more — its step went, and Forefront team is a page like any other. */
   function progress(){
-    var ff = (PEOPLE || []).some(function (p) { return p && (p.forefront || (p.extra && p.extra.forefront)); });
     /* §544: the shape counts once the client holds a box of its own — a
        unit where the units plan, a function where they are what there is.
        Counted, never remembered (§129). */
     var tests = {
       client: true,
       shape:  (UNIT_KEYS || []).length > 0 || (FUNCTION_KEYS || []).length > 0 ||
-              (COMPANY_KEYS || []).length > 0,
-      office: ff
+              (COMPANY_KEYS || []).length > 0
     };
-    var done = 0, todo = [];
-    STEPS.forEach(function (s) { if (tests[s.k]) done++; else todo.push(s.label); });
-    return { done: done, total: STEPS.length, todo: todo };
+    /* §623: and the rail's page keys, so the group heading and the landing
+       name a page rather than a step (Profile is `start`, §30.2). */
+    var PAGE = { client: "start", shape: "shape" };
+    var done = 0, todo = [], todoKeys = [];
+    STEPS.forEach(function (s) { if (tests[s.k]) done++; else { todo.push(s.label); todoKeys.push(PAGE[s.k]); } });
+    return { done: done, total: STEPS.length, todo: todo, todoKeys: todoKeys };
   }
 
   /* ── MOUNTING IN THE PLATFORM ────────────────────────────────────────
@@ -502,7 +510,10 @@ var CLIENTSETUP = (function () {
                and, per kind, which division's boxes its row is showing. */
             sel:{ lvl:"top" }, under:{} };
     }
+    /* §623: the page says which step it is — Profile or The shape. */
+    if (OPTS.step) S.at = stepIdx(OPTS.step);
     if (S.at > STEPS.length - 1) S.at = 0;
+    if (!S.tab) S.tab = "details";
     /* §436: a list nobody is editing is re-read off the graph, so a change
        written straight into it (below, on a client with a plan) shows. */
     if (!S.shapeDirty) S.shape = liveShape();
@@ -566,6 +577,14 @@ var CLIENTSETUP = (function () {
     var box = el("div");
     officeStep(box, "note");
     host.appendChild(box);
+    /* §623: AND ITS OWN LINE FOR WHAT THE SERVER SAID. say() writes into the
+       host's [data-cssaid] and this page drew none, so a refused add or seat
+       ("Not added.", "Say who they are on this client's register…") said
+       nothing here and surfaced later on the set-up flow instead. With the
+       office step gone this is the team's only page, so it says it here. */
+    var said = el("p", "cssaid"); said.dataset.cssaid = "1"; said.hidden = true;
+    if (S.said) { said.textContent = S.said.msg; said.className = "cssaid " + (S.said.bad ? "err" : "said"); said.hidden = false; }
+    host.appendChild(said);
     /* THE HOVER IS MEASURED, NEVER WRITTEN (§88), and `clipTitles()` runs at
        the end of paint() — which on the FIRST visit is before the client's
        record has landed, because `ensureReg` fills this box again when it
@@ -592,26 +611,10 @@ var CLIENTSETUP = (function () {
     if (!HOST) return;
     HOST.textContent = "";
     var s = STEPS[S.at];
-    var done = isDone();
-
-    var rail = el("nav", "wzrail");
-    rail.setAttribute("aria-label", "Set-up steps");
-    STEPS.forEach(function (st, i) {
-      var seen = S.seen.indexOf(i) >= 0 && i !== S.at;
-      var b = el("button", "wzstep" + (seen ? " done" : ""));
-      b.type = "button";
-      b.dataset.step = st.k;
-      if (i === S.at) b.setAttribute("aria-current", "step");
-      b.appendChild(el("span", "n", seen ? "✓" : String(i + 1)));
-      b.appendChild(document.createTextNode(st.label));
-      b.addEventListener("click", function () { goStep(i); });
-      rail.appendChild(b);
-    });
-    HOST.appendChild(rail);
 
     if (S.regErr) {
       var rb = el("p", "wzarched");
-      rb.appendChild(document.createTextNode("The client's own record — its name on the door, its mark, its modules and the office team — could not be read: " + S.regErr + " The pages below that live in the platform still work."));
+      rb.appendChild(document.createTextNode("The client's own record — its name on the door, its mark and its modules — could not be read: " + S.regErr + " The pages below that live in the platform still work."));
       HOST.appendChild(rb);
     }
     /* §421, §544: ONE NOTICE ON THE FROZEN SHAPE, because there is one
@@ -647,37 +650,23 @@ var CLIENTSETUP = (function () {
 
     /* §418, §544: the shape lays the tree and a level's three sections side
        by side, which a 760px column cannot hold; that one step takes the
-       page's width. */
+       page's width. §623: no step pills and no Back / Next / Done with
+       set-up under it — each step is its own page on the rail, and the
+       page's own heading names it, so the step's eyebrow went too. The
+       shape keeps its question, which carries the hover on what a level's
+       answers apply to. */
     var col = el("div", "wzcol" + (s.k === "shape" ? " wzwide" : ""));
-    col.appendChild(el("span", "lab", s.key));
-    var q2 = el("h2", "wzq", s.q);
-    if (s.k === "shape") { q2.appendChild(document.createTextNode(" ")); q2.appendChild(tipEl(SHAPE_TIP)); }
-    col.appendChild(q2);
+    if (s.k === "shape") {
+      var q2 = el("h2", "wzq", s.q);
+      q2.appendChild(document.createTextNode(" ")); q2.appendChild(tipEl(SHAPE_TIP));
+      col.appendChild(q2);
+    }
     col.appendChild(stepBody(s.k));
-
-    var foot = el("div", "wzfoot");
-    var back = el("button", "btn", "‹ Back");
-    back.type = "button"; back.disabled = S.at === 0; back.dataset.wzback = "1";
-    back.addEventListener("click", function () { goStep(S.at - 1); });
-    foot.appendChild(back);
-    if (S.at < STEPS.length - 1) {
-      var next = el("button", "btn amber", "Next ›");
-      next.type = "button"; next.dataset.wznext = "1";
-      next.addEventListener("click", function () { goStep(S.at + 1); });
-      foot.appendChild(next);
-    }
-    if (!done) {
-      var fin = el("button", "btn solid", "Done with set-up");
-      fin.type = "button"; fin.dataset.wzdone = "1";
-      fin.title = "Marks the set-up finished: this page moves to the bottom of the rail as Client set-up, and every answer stays editable there.";
-      fin.addEventListener("click", markDone);
-      foot.appendChild(fin);
-    }
-    var fn = el("span", "wzfnote", done
-      ? "Every answer here stays editable."
-      : "Rows are written when you press Next, Back or Done with set-up. Nothing is final.");
-    foot.appendChild(fn);
-    col.appendChild(foot);
+    /* §623: A STATUS WHILE IT IS TRUE (1b-ii). Rows added, renamed or removed
+       here are written when the page is left — what Next used to do — so
+       while some wait, the page says so; otherwise nothing is said. */
+    if (s.k === "shape" && S.shapeDirty && canShape())
+      col.appendChild(el("p", "wzpend", "These rows are written when you leave this page."));
     var said = el("p", "cssaid"); said.dataset.cssaid = "1"; said.hidden = true;
     if (S.said) { said.textContent = S.said.msg; said.className = "cssaid " + (S.said.bad ? "err" : "said"); said.hidden = false; }
     col.appendChild(said);
@@ -699,15 +688,15 @@ var CLIENTSETUP = (function () {
     if (!bad.length) return null;
     return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. A row with no name is not saved.";
   }
-  function goStep(i){
-    if (i < 0 || i > STEPS.length - 1) return;
+  /* §623: LEAVING THE SHAPE COMMITS IT, as Next and Back did (§322's rule
+     kept). The shell asks this before any paint that would take the shape
+     page off the screen; false keeps the person on it, with the reason said
+     in place. A shape nobody touched has nothing to write. */
+  function leave(){
+    if (!S || !S.shapeDirty) return true;
     var why = unnamed();
-    if (why) { say(why, true); return; }
-    if (!commitShape()) return;
-    if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
-    S.at = i; S.said = null;
-    redraw();
-    window.scrollTo({ top:0 });
+    if (why) { say(why, true); return false; }
+    return commitShape(true);
   }
 
   /* ── WRITING THE SHAPE INTO THE LIVE GRAPH ───────────────────────────
@@ -717,7 +706,7 @@ var CLIENTSETUP = (function () {
      Then the shell's paint() runs and the autosave carries every row it
      minted (§210). Over file:// the same thing happens to the baked data,
      which is what the offline copy is for. */
-  function commitShape(){
+  function commitShape(quiet){
     if (!S.shapeDirty) return true;
     if (!canShape()) { say("This client has a plan in it, so its shape is not rewritten from here.", true); return false; }
     if (typeof SYNC === "undefined" || !SYNC.graph || !SYNC.hydrate) { say("The shape cannot be written here.", true); return false; }
@@ -737,7 +726,9 @@ var CLIENTSETUP = (function () {
       say("Somebody is in charge of " + res.dropped.join(", ") + ", and set-up cannot carry that across a rename or a removal, so " +
           (one ? "its row is back as it was" : "their rows are back as they were") + ". " +
           "Rename or retire " + (one ? "it" : "them") + " on its own Setup page instead.", true);
-      redraw();
+      /* §623: leaving is asked from inside the shell's paint, which draws
+         the page again itself — a redraw from here would paint twice. */
+      if (!quiet) redraw();
       return false;
     }
     S.shapeDirty = false;
@@ -745,18 +736,6 @@ var CLIENTSETUP = (function () {
     S.said = null;
     return true;
   }
-  /* Done with set-up (spec 057): the shape written, then the mark. ONE key
-     on the group (SMPRules.SETUP_DONE), stored as an absence until pressed
-     (§50.6); the rail reads it on the next paint. */
-  function markDone(){
-    var why = unnamed();
-    if (why) { say(why, true); return; }
-    if (!commitShape()) return;
-    GROUP[SMPRules.SETUP_DONE] = true;
-    redraw();
-    window.scrollTo({ top:0 });
-  }
-
   /* ── Each step ───────────────────────────────────────────────────── */
   function stepBody(k){
     var box = el("div");
@@ -802,8 +781,42 @@ var CLIENTSETUP = (function () {
   /* The registry half, then the graph half: the mark on the door, the
      group's mark and the brand colours (Branding, absorbed here — spec 057),
      the modules this client has, and the way to archive it. */
+  /* §623: THE PROFILE IN THREE TABS (Islam: *"for the first pill suggest a
+     better structure of the page … different navigation elements at the
+     top for basic info, colors, and modules"*; option A of the mockup,
+     taken with *"go with your recommendations"*). One tab at a time: the
+     page is short, and the colours keep their Apply row right under them.
+     A tab is a place to the shell's leave question, so switching away with
+     a colour not applied asks first, as leaving the page does. */
+  function tabBar(){
+    var bar = el("div", "wztabs");
+    bar.setAttribute("role", "tablist");
+    bar.setAttribute("aria-label", "Profile");
+    var on = (S.reg && S.reg.modules) ? S.reg.modules.length : null;
+    TABS.forEach(function (t) {
+      var b = el("button", "wztab" + (S.tab === t[0] ? " on" : ""), t[1]);
+      b.type = "button"; b.dataset.cstab = t[0];
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", S.tab === t[0] ? "true" : "false");
+      if (t[0] === "modules" && on != null) b.appendChild(el("span", "ct", on + " on"));
+      b.addEventListener("click", function () {
+        if (S.tab === t[0]) return;
+        S.tab = t[0]; S.said = null;
+        redraw();
+      });
+      bar.appendChild(b);
+    });
+    return bar;
+  }
   function clientStep(box){
     var reg = S.reg, c = reg && reg.client;
+    box.appendChild(tabBar());
+    if (S.tab === "brand") return brandTab(box, c);
+    if (S.tab === "modules") {
+      if (c) box.appendChild(modulesBlock());
+      else box.appendChild(el("p", "note", "The client's modules are kept by the served platform."));
+      return box;
+    }
     var ed = canEdit();
     var rs = el("div", "rowset");
     if (c) {
@@ -900,19 +913,25 @@ var CLIENTSETUP = (function () {
     a.readOnly = true;
     aw.appendChild(a);
     rs.appendChild(aw);
-    if (c) rs.appendChild(markBlock(c));
     box.appendChild(rs);
-
-    /* ── THE BRANDING, ABSORBED (spec 057): the group's mark and the two
-       colours, drawn by the one renderer Branding always had and wired by
-       the shell's own handlers after this mounts — no second answer to what
-       a colour does (§53.5). */
+    /* Archiving sits at the foot of Details (§623), behind its own question. */
+    if (c) box.appendChild(archiveBlock());
+    return box;
+  }
+  /* ── THE BRAND TAB (§623): the mark, then the colours — and what follows
+     from them and whether it reads, because brandingBody() is the one
+     renderer of all three (Islam: *"we have more colors choice called what
+     follows from them they will be part of the brand tab right?"*). Drawn by
+     the one renderer Branding always had and wired by the shell's own
+     handlers after this mounts — no second answer to what a colour does
+     (§53.5). */
+  function brandTab(box, c){
+    if (c) box.appendChild(markBlock(c));
     if (typeof brandingBody === "function") {
       var bb = el("div", "wzbrand");
       bb.innerHTML = brandingBody();
       box.appendChild(bb);
     }
-    if (c) { box.appendChild(modulesBlock()); box.appendChild(archiveBlock()); }
     return box;
   }
 
@@ -1077,8 +1096,9 @@ var CLIENTSETUP = (function () {
     function draw(){
       wrap.textContent = "";
       var a = el("div", "wzend");
-      a.appendChild(el("span", "wzendkey", "Archiving"));
       var row = el("div", "wzendrow");
+      /* §623: the foot of Details says it as a question, as drawn. */
+      row.appendChild(el("span", "wzendq", "No longer working with " + name + "?"));
       var go = el("button", "btn risk", "Archive this client");
       go.type = "button"; go.dataset.archive = "ask";
       /* §621: the platform asks in its floating box, with what the paragraph
@@ -1373,9 +1393,32 @@ var CLIENTSETUP = (function () {
   function fallbackWord(key, form){
     return typeof labelWord === "function" ? labelWord(key, form === "one" ? "group" : "bu") : key;
   }
+  /* §623: THE PRODUCT'S OWN WORD, AND THE CLIENT'S OLD ONE. Terminology
+     (gone, §621) saved one word for the whole client, and an empty box here
+     showed it in grey — so a client's word looked like the platform's
+     default, and nothing could change it (El Abd's "Key Measures", which
+     §392's merge carried over from its old business-unit word). Now the
+     grey hint is always the product's own word (LABEL_DEFAULTS is read
+     from the shipped list before a client's words arrive), and a client-
+     wide word that differs is shown IN the box, as the word it is. */
+  function productWord(key, form){
+    var d = typeof labelDefault === "function" ? labelDefault(key) : null;
+    if (d && (form === "one" ? d.one : d.many)) return form === "one" ? d.one : d.many;
+    var pd = SMPRules.PART_DEFAULTS && SMPRules.PART_DEFAULTS[key];
+    if (pd) return form === "one" ? pd[0] : pd[1];
+    return fallbackWord(key, form);
+  }
+  function clientWord(key, form){
+    if (typeof LABELS === "undefined" || !LABELS.entries) return "";
+    var e = LABELS.entries.filter(function (x) { return x.key === key; })[0];
+    var v = e && (form === "one" ? e.group : e.bu);
+    v = typeof v === "string" ? v.trim() : "";
+    if (!v || v === "\u2014" || v === productWord(key, form)) return "";
+    return v;
+  }
   function nameBox(k, key, form, aria){
-    var i = el("input", "fld"); i.type = "text"; i.value = lvWord(k, key, form);
-    i.setAttribute("placeholder", fallbackWord(key, form));
+    var i = el("input", "fld"); i.type = "text"; i.value = lvWord(k, key, form) || clientWord(key, form);
+    i.setAttribute("placeholder", productWord(key, form));
     i.setAttribute("aria-label", aria);
     i.setAttribute("data-stlw", k + "|" + key + "|" + form);
     i.addEventListener("change", function () {
@@ -1383,7 +1426,12 @@ var CLIENTSETUP = (function () {
       l.words = l.words || {};
       var cur = l.words[key] || {};
       var v = i.value.trim();
-      if (v) cur[form] = v; else delete cur[form];
+      /* Cleared while the client holds a word of its own: an empty layer word
+         falls back to that word, so the product's is written for this layer
+         — what an empty box promises, the grey word, is what it then says. */
+      if (v) cur[form] = v;
+      else if (clientWord(key, form)) cur[form] = productWord(key, form);
+      else delete cur[form];
       if (Object.keys(cur).length) l.words[key] = cur; else delete l.words[key];
       if (!Object.keys(l.words).length) delete l.words;
       structWrite(nx);
@@ -3034,14 +3082,23 @@ var CLIENTSETUP = (function () {
   }
 
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
-           progress:progress, isDone:isDone, STEPS:STEPS,
+           progress:progress, STEPS:STEPS, leave:leave,
+           /* §623: rows on the shape not yet written — the tab closing asks */
+           dirty: function () { return !!(S && S.shapeDirty); },
            /* the standard industry list and the size bands, ONE copy (§322):
               the console's case studies add a past client with them (spec 067) */
            INDUSTRIES:INDUSTRIES, SIZES:SIZES,
-           /* for the checks: the step the flow stands on, never its DOM */
-           at: function () { return S ? STEPS[S.at].k : null; },
+           /* for the checks and the shell's leave question: where on the page
+              the flow stands, never its DOM. §623: a step is a page now, so
+              what is left to say is the Profile's tab — a colour waits on
+              Brand, and moving to Details is leaving it. */
+           at: function () { return S ? (STEPS[S.at].k === "client" ? S.tab : STEPS[S.at].k) : null; },
            /* §621: and for the shell's leave question, which puts the flow back
-              on the step a colour is waiting on — no commit, no redraw of its
-              own: the shell's paint that follows draws it. */
-           toStep: function (k) { if (S) S.at = stepIdx(k); } };
+              where a colour is waiting — no commit, no redraw of its own: the
+              shell's paint that follows draws it. */
+           toStep: function (k) {
+             if (!S) return;
+             if (TABS.some(function (t) { return t[0] === k; })) { S.at = stepIdx("client"); S.tab = k; }
+             else S.at = stepIdx(k);
+           } };
 })();

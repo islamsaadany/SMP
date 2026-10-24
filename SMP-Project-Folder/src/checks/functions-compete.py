@@ -52,7 +52,7 @@ with sync_playwright() as p:
 
     print("\n2 · ticked on the functions' card, pressed")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="fn"]')
+        and press(pg, '[data-setupgo="shape"]') and press(pg, '[data-shlvl="fn"]')
     ck("the functions' card opens", ok)
     press(pg, '[data-stsec="fn|compete"] button:nth-child(1)')
     ck("pressing On stores it on the functions' layer",

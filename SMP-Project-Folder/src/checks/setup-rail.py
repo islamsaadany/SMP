@@ -309,8 +309,14 @@ with sync_playwright() as p:
     # leads, and the two the mockup drew keep the order it drew them in.
     ck("the store leads its reader (§9, spec 058 §3a)",
        order[:1] == ["Forefront team"], order)
-    ck("...and then the mockup's own pair, in its order (§120.3)",
-       [x for x in order if x != "Forefront team"] == ["People register", "Official BU list"], order)
+    # REWRITTEN (§218, §624): the Official BU list left People & access for
+    # The organisation (Islam: *"the official BU list should come under
+    # organization not people and access"*), so the register is all that
+    # follows the store here — and the list is asserted where it went.
+    ck("...and then the register, alone (§624: the BU list is the organisation's now)",
+       [x for x in order if x != "Forefront team"] == ["People register"], order)
+    ck("...the Official BU list is in The organisation, last",
+       pg.evaluate("()=>{const r=[...document.querySelectorAll('.setuprail [data-railitems=\"run\"] .ritem')]; return r.length>0 && r[r.length-1].dataset.setupgo==='mainbu';}"))
     access = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/^\\S*Access/.test(x.textContent.trim().replace(/^[\\u25b8\\u25be]\\s*/,'')));

@@ -27,9 +27,20 @@ def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception as e: return dflt       # §215: degrade, never die
 
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
-        pg.click(sel, timeout=4000); pg.wait_for_timeout(200); return True
+        pg.click(sel, timeout=4000); pg.wait_for_timeout(200); answer(pg); return True
     except Exception:
         return False
 
@@ -99,7 +110,7 @@ with sync_playwright() as p:
     # §544: Client set-up › Structure is the shape screen — the same seven
     # cards, one at a time, opened by pressing a level in the tree. Every
     # claim below about what a card HOLDS is unchanged (§218).
-    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]')
+    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '[data-setupgo="shape"]')
     ck("Client set-up › the shape opens", ok)
     def lvl(k):
         return press(pg, '[data-shlvl="%s"]' % k)
@@ -197,10 +208,13 @@ with sync_playwright() as p:
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
     ck("the set-up flow opens", ok)
-    ck("it is three steps: the client, the shape, the office",
-       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')") == "client,shape,office",
-       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')"))
-    ck("pressing the shape", press(pg, '.wzstep[data-step="shape"]'))
+    # §624: the steps are pages of the rail's first group now, The client —
+    # Profile and The shape — and the office step went (Forefront team is
+    # its page). Asserted as the rail draws them, in order.
+    ck("the client's own pages are two: Profile, then The shape",
+       safe(pg, "()=>[...document.querySelectorAll('.setuprail [data-railitems=client] .ritem')].map(b=>b.dataset.setupgo).join(',')") == "start,shape",
+       safe(pg, "()=>[...document.querySelectorAll('.setuprail [data-railitems=client] .ritem')].map(b=>b.dataset.setupgo).join(',')"))
+    ck("pressing the shape", press(pg, '[data-setupgo="shape"]'))
     # the tree's four rows, and the card each one opens
     LVLS = [("top", "top"), ("bu@g", "mid"), ("bu", "bu"), ("fn", "fn")]
     ck("the tree carries a row per level",
@@ -404,8 +418,9 @@ with sync_playwright() as p:
        safe(pg, "()=>{var b=[...document.querySelectorAll('.stcard')][0].querySelector('.wzband button[aria-pressed=true]'); return b&&b.textContent}") == "Company")
     # §544: the two frozen-shape notices were about one screen and are one
     # notice now — what is set, then what is still yours.
+    # REWRITTEN, never loosened (§218): §621 cut the notice to one line.
     ck("the screen says what is still changeable on a client with a plan",
-       safe(pg, "()=>/Every name and switch on this screen can still be changed/.test(document.body.innerText)") is True)
+       safe(pg, "()=>/Names and switches still change/.test(document.body.innerText)") is True)
     safe(pg, "()=>{var e=LABELS.entries.filter(x=>x.key==='topword')[0]; e.group=e.bu=%r; paint();}" % wasT)
 
     ck("no page errors", not errs, errs[:3])

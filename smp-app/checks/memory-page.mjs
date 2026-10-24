@@ -104,14 +104,19 @@ await pg_.waitForSelector(".nav button", { timeout: 15000 });
 const api = (body) => pg_.evaluate((b) =>
   fetch("/api/memory", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }).then((r) => r.json()), body);
 const rows = async () => (await owner.query("SELECT count(*)::int n FROM memory_entries")).rows[0].n;
+/* THE MEMORY IS NOW THE INSIGHTS HALF OF CASE STUDIES (spec 067): the tab
+   opens on the library, and the list this check walks is one press further,
+   on the switch in the title. Rewritten for the rename, not loosened (§218). */
 const openMemory = async () => {
   await pg_.click('.nav button[data-tab="memory"]');
+  await pg_.waitForTimeout(600);
+  await pg_.click('.csseg button[data-view="list"]');
   await pg_.waitForTimeout(600);
 };
 
 await section("1 · the tab a consultant with no admin flag can reach", async () => {
   const tabs = await pg_.$$eval(".nav button", (bs) => bs.map((b) => b.textContent.trim()));
-  check(tabs.includes("Memory"), "Memory is in the navigation — decision 1: no gate", JSON.stringify(tabs));
+  check(tabs.includes("Case studies"), "the memory's tab, Case studies since spec 067, is in the navigation — decision 1: no gate", JSON.stringify(tabs));
   /* THE CONTROL IS THE TAB THAT IS ACTUALLY GATED. Written first as "neither
      Consultants nor Who sees what", which was the CHECK being wrong rather
      than the product: any office account may read the consultants list, so
@@ -134,6 +139,11 @@ await section("2 · nothing yet", async () => {
 await section("3 · writing one through the form, read back from the DATA", async () => {
   await pg_.click('.ptitle .right button:has-text("Add one insight")');
   await pg_.waitForSelector("#m-title", { timeout: 10000 });
+  /* THE CLIENT IS PICKED, not left to whichever sorts first: the shared
+     database can hold other checks' clients beside the dev tenant's, and one
+     named RHI was the first option on a correct build (§623.4). Picked by its
+     key, so a second client that is also called Raya Trade cannot pass for it. */
+  await pg_.selectOption("#m-client", "raya-trade");
   await pg_.selectOption("#m-kind", "hiccup");
   await pg_.fill("#m-title", "The workshop ran twice");
   await pg_.fill("#m-when", "August 2026");
@@ -143,9 +153,10 @@ await section("3 · writing one through the form, read back from the DATA", asyn
   await pg_.waitForTimeout(1200);
   const after = await rows();
   check(after === before + 1, "the press writes a row", before + " → " + after);
-  const stored = (await owner.query("SELECT kind, title, occurred, happened, did FROM memory_entries ORDER BY created_at DESC LIMIT 1")).rows[0];
+  const stored = (await owner.query("SELECT e.kind, e.title, e.occurred, e.happened, e.did, t.key AS client FROM memory_entries e " +
+    "LEFT JOIN tenants t ON t.id = e.about_tenant_id ORDER BY e.created_at DESC LIMIT 1")).rows[0];
   check(stored && stored.title === "The workshop ran twice" && stored.kind === "hiccup" && stored.occurred === "August 2026"
-        && stored.happened === "ran it without the CEO in the room",
+        && stored.happened === "ran it without the CEO in the room" && stored.client === "raya-trade",
     "…and every field reaches the STORED row, not just the screen (§96)", JSON.stringify(stored));
   check(stored && stored.did === "", "…with the three unanswered questions stored empty rather than invented", JSON.stringify(stored && stored.did));
 });
@@ -224,6 +235,7 @@ await section("8 · a period debrief, end to end", async () => {
   check(loaded.t === "object", "the splitter the page loads is THERE (spec 045: its own file, so node and the browser run the same bytes)", JSON.stringify(loaded));
   await pg_.click('.ptitle .right button:has-text("Write up a period")');
   await pg_.waitForSelector("#d-paste", { timeout: 10000 });
+  await pg_.selectOption("#d-client", "raya-trade");   /* picked, as in §3 above (§623.4) */
   await pg_.fill("#d-from", "1 August 2026");
   await pg_.fill("#d-to", "11 September 2026");
   await pg_.waitForTimeout(200);

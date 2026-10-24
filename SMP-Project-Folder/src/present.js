@@ -291,7 +291,7 @@ function unitAimSlides(u, bare){
     (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + (u.aspiration || !DECK_PLAN ? esc(u.aspiration) : PLAN_MISS) + '</p></div>' +
-      (u.endInMind
+      (u.endInMind && eimOn(u.ukey)
         ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
     (aimRows
@@ -499,24 +499,36 @@ function standDetail(rows, note){
     (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
     (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
 }
+/* §616: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
+   the slides"*, of §610). The headline was already the slide; what follows it
+   gets quieter: a line's figure keeps its band colour only when it is out of
+   the top band (`hdFig`), so colour under the number means something to look
+   at. And the measures that have not reported are SAID — the subtitle counts
+   six and the list showed four, with nothing on the slide saying where the
+   other two went. The execution side already said its own (§578). */
+function hdFig(v, txt){
+  return '<span class="hdf ' + dBand(v) + (v != null && band(v) === band(100) ? ' quiet' : '') + '">' + txt + '</span>';
+}
 function dirMeasureDetail(p){
-  var rows = scorableMeasures(p).map(function(m){
+  var scorable = scorableMeasures(p);
+  var rows = scorable.map(function(m){
     var v = measureScore(m);
-    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+    return { name:m.name, fig:hdFig(v, dPct(v)) };
   });
   if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
     var v = bdColScore(p, c);
     if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
-                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+                               fig:hdFig(v, dPct(v)) });
   });
-  return standDetail(rows, "");
+  var unrep = SMPRules.shown(p.measures || []).length - scorable.length;
+  return standDetail(rows, unrep > 0 ? unrep + " not reported yet" : "");
 }
 function dirExecDetail(p){
   var rep = reportedTactics(p), due = dueTactics(p);
   var rows = rep.map(function(t){
     var r = tacticProgress(t);
     return { name:t.name,
-             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+             fig:hdFig(r, dPct(Math.round(tacticReads(t)))) +
                  '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
   });
   var notDue = SMPRules.shown(p.tactics || []).length - due.length;
@@ -1516,7 +1528,7 @@ function companyReviewOn(){
 function companyFoundationSlides(){
   /* §557: what the company's structure switches on, and nothing it does not. */
   var aspOn = compOn("group", "aspiration");
-  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
+  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn && eimOn("group") ? String(GROUP.endInMind || "").trim() : "";
   var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
   var rows = (!compOn("group", "keyobj") ? [] : deckRows(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])).map(function(m, i){

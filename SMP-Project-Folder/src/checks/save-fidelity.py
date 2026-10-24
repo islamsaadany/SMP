@@ -122,8 +122,13 @@ with sync_playwright() as pw:
 
     print("\nC · adding a row, then removing one")
     n0 = pg.evaluate("() => UNITS.mobile.items[0].measures.length")
-    pg.evaluate("""() => { const b=[...document.querySelectorAll('#panel button')]
-      .find(x=>/add a measure/i.test(x.textContent||'')); if(b) b.click(); }""")
+    # The button carries the client's own word ("Add a Key measure" on the
+    # demo since its terminology named measures so), so it is found by WHAT
+    # IT ADDS — the measure row of pillar 0 — never by its label, and its
+    # absence is a failure of its own rather than a silent no-press.
+    pressed = pg.evaluate("""() => { const b=document.querySelector('#panel [data-rowadd="measure|mobile|0"]');
+      if(b) b.click(); return !!b; }""")
+    ck("the pillar's add-a-measure control is on the page", pressed is True, pressed)
     pg.wait_for_timeout(600); settle()
     n1 = pg.evaluate("() => UNITS.mobile.items[0].measures.length")
     srvN = len(((STORED[0]["units"].get("mobile") or {}).get("items") or [{}])[0].get("measures") or [])

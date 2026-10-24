@@ -5,7 +5,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forefront — Strategy Management Platform</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<!-- the console's own mark (Islam's pick A, the north star, 2026-10-24); the
+     door and the client platforms keep /favicon.svg -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23F5A623'/%3E%3Cpath d='M12 3.6 13.6 10.4 20.4 12 13.6 13.6 12 20.4 10.4 13.6 3.6 12 10.4 10.4z' fill='none' stroke='%230F2C69' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E" type="image/svg+xml">
 <link rel="icon" href="/favicon.png" sizes="32x32">
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
@@ -116,11 +118,15 @@
     border-bottom:1px solid var(--ff-rule) }
   /* THE MARK IS TYPE ON THE NAVY NOW, so it is the bar's ink rather than
      --ff-tx, which was measured for a white line (§38.4). */
-  .sbhead .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
-  .sbhead .nm{ font-weight:600; font-size:14px; color:var(--ff-quiet) }
-  /* the mark the column wears when it is only icons wide */
-  .sbff{ display:none; width:28px; height:28px; border-radius:7px; background:var(--amber); color:var(--amber-ink);
-    font:700 11px/28px ui-monospace, SFMono-Regular, Menlo, monospace; text-align:center; letter-spacing:.04em }
+  /* THE NAME AND ITS MARK (Islam, 2026-10-24: "the naming at the top should
+     be Strategy management Platform", and of four icons drawn, A, the north
+     star): the mark on amber, the name on two lines because the whole of it
+     does not fit the column on one. Folded to icons, the mark alone. */
+  .sblogo{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--amber); color:#0F2C69 }
+  .sblogo svg{ width:20px; height:20px }
+  .sbname{ display:flex; flex-direction:column; min-width:0; line-height:1.15 }
+  .sbname b{ font-size:12px; font-weight:700; color:var(--ff-ink); white-space:nowrap }
+  .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ff-quiet) }
   /* ICON BUTTONS ON THE NAVY: « (icons only), × (close, on a phone), the
      menu (on a phone) and Sign out. Each says what it does in its
      accessible name and in the hover label below. */
@@ -186,8 +192,7 @@
   @media (min-width:1000px){
     html[data-rail="1"] .side{ width:64px }
     html[data-rail="1"] .sbhead{ flex-direction:column; gap:10px; padding:14px 0 10px }
-    html[data-rail="1"] .sbhead .mk, html[data-rail="1"] .sbhead .nm{ display:none }
-    html[data-rail="1"] .sbff{ display:block }
+    html[data-rail="1"] .sbhead .sbname{ display:none }
     html[data-rail="1"] .sbhead .sbbtn{ margin:0 }
     html[data-rail="1"] #sbfold svg{ transform:rotate(180deg) }
     html[data-rail="1"] .sbgl{ font-size:0; height:1px; padding:0; margin:4px 6px; background:var(--ff-rule) }
@@ -222,7 +227,9 @@
       background:var(--ff); color:var(--ff-ink) }
     .mtop .sbbtn{ margin:0; color:var(--ff-ink) }
     .mtop .sbbtn svg{ width:20px; height:20px }
-    .mtop .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing:.16em; color:var(--ff-ink) }
+    .mtop .sblogo{ width:26px; height:26px; border-radius:7px }
+    .mtop .sblogo svg{ width:17px; height:17px }
+    .mtop .mtname{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13.5px; font-weight:700; color:var(--ff-ink) }
     #sbhere{ margin-left:auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
       font-size:13px; font-weight:600; color:var(--ff-quiet) }
     .nav button{ padding:12px 10px; font-size:15px }
@@ -489,6 +496,38 @@
      question — how tall is a card in this grid before there is a client in
      it — and two spellings of one answer is how they come to differ. */
   .ccard.add, .ccard.skel{ min-height:152px }
+
+  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ───────────────────────────
+     Islam: "the navigation between the apges needs to be momentairly", and
+     of the mockup (design-mockups/instant-navigation/): "yes build it". A tab
+     pressed for the first time used to say "Reading…" in a blank page for a
+     round trip; it shows its own shape in grey now, in the bars the
+     platform's boot skeleton already uses (§94.10: --line, a 6px corner, the
+     slow pulse), and the real page replaces it when the answers land.
+     Clients keeps the waiting cards it has had since §371. */
+  .tsk{ display:flex; flex-direction:column; gap:14px }
+  .tsk .b{ display:block; flex:none; height:13px; border-radius:6px; background:var(--line); animation:tskpulse 1.5s ease-in-out infinite }
+  .tsk .q{ background:var(--surface-2) }
+  .tsk .t{ height:20px } .tsk .p{ height:24px; border-radius:999px } .tsk .k{ height:32px; border-radius:8px }
+  .tsk .r{ display:flex; align-items:center; gap:12px; min-width:0 } .tsk .c{ display:flex; flex-direction:column; gap:10px; min-width:0 }
+  .tsk .grow{ flex:1; min-width:0 }
+  .tsk .box{ border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 16px }
+  .tsk .head{ padding-bottom:12px; border-bottom:1px solid var(--line) }
+  .tsk .th{ height:34px; border-radius:8px 8px 0 0; background:var(--surface-2); border:1px solid var(--line) }
+  .tsk .tr{ display:flex; align-items:center; gap:18px; padding:12px 14px; border:1px solid var(--line); border-top:0; background:var(--surface) }
+  .tsk .ln{ padding:11px 0; border-bottom:1px solid var(--line-soft) }
+  @keyframes tskpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
+  @media (prefers-reduced-motion:reduce){ .tsk .b{ animation:none; opacity:.75 } }
+  @media (max-width:760px){ .tsk .hide-narrow{ display:none } }
+
+  /* ── A TAB AS YOU LEFT IT (§620) — the console's saved copy, shown at once
+     on arriving and on a tab's first visit, until the latest copy replaces
+     it: the client page's own mark (§431's "Updating…"), and nothing on it
+     can be pressed meanwhile (`inert`). */
+  .stale{ display:inline-flex; align-items:center; font-size:11px; font-weight:600; letter-spacing:.04em; color:var(--ink-3);
+    border:1px solid var(--line); border-radius:999px; padding:2px 10px; white-space:nowrap; background:var(--surface) }
+  .staleline{ display:flex; justify-content:flex-end; margin:0 0 10px }
+  #page[inert]{ cursor:progress }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -940,6 +979,323 @@
   .asksrc button.tag:hover{ border-color:var(--amber-tx) }
   @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
 
+  /* ── THE CLIENTS FILTER (spec 067's drawing, clients-filter) ─────────
+     One row: which clients, Mine, cards or list. The list is the card's
+     facts on one line. `cl`-prefixed: a class is one global namespace (§65.9). */
+  .clbar{ display:flex; gap:10px 14px; align-items:center; flex-wrap:wrap; margin:0 0 18px }
+  .clwhich{ display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clwhich button{ border:0; border-right:1px solid var(--line); background:transparent; color:var(--ink-2); font-family:inherit;
+    font-size:13px; font-weight:600; padding:7px 13px; cursor:pointer; white-space:nowrap }
+  .clwhich button:last-child{ border-right:0 }
+  .clwhich button i{ font-style:normal; font-weight:500; color:var(--ink-3); margin-left:6px; font-size:12px }
+  .clwhich button[aria-pressed="true"]{ background:var(--ff); color:var(--ff-ink) }
+  .clwhich button[aria-pressed="true"] i{ color:var(--ff-quiet) }
+  .clwhich button:focus-visible, .clmine:focus-visible, .clview button:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  .clmine{ display:inline-flex; align-items:center; gap:8px; border:0; background:none; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--ink-2); cursor:pointer; padding:4px 2px; border-radius:6px }
+  .clmine .sw{ position:relative; width:32px; height:18px; border-radius:999px; background:var(--line); flex:none }
+  .clmine .sw::after{ content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--surface);
+    box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .15s }
+  .clmine.on{ color:var(--ink) }
+  .clmine.on .sw{ background:var(--ff) }
+  .clmine.on .sw::after{ left:16px }
+  .clview{ margin-left:auto; display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface) }
+  .clview button{ border:0; background:transparent; color:var(--ink-3); padding:6px 9px; display:grid; place-items:center; cursor:pointer }
+  .clview button + button{ border-left:1px solid var(--line) }
+  .clview button[aria-pressed="true"]{ background:var(--surface-2); color:var(--ink) }
+  .clview svg{ width:17px; height:17px }
+  .cltable{ border:1px solid var(--line); border-radius:12px; background:var(--surface); overflow-x:auto }
+  .cltable table{ width:100%; border-collapse:collapse; min-width:720px }
+  .cltable th{ text-align:left; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); padding:11px 14px; border-bottom:1px solid var(--line); white-space:nowrap }
+  .cltable td{ padding:10px 14px; border-bottom:1px solid var(--line-soft); font-size:14px; vertical-align:middle }
+  .cltable tr:last-child td{ border-bottom:0 }
+  .cltable tbody tr:hover{ background:var(--surface-2) }
+  .cltable td.num{ font-variant-numeric:tabular-nums }
+  .clwho{ display:flex; gap:10px; align-items:center }
+  .clwho b{ font-weight:600 }
+  .clwho .cmark{ width:26px; height:26px; line-height:26px; font-size:10px; flex:none }
+  .clwho .cmark.arch{ background:var(--surface-2); color:var(--ink-3) }
+  .clmods{ display:flex; gap:6px; flex-wrap:wrap }
+  .clmod{ border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:var(--surface); color:var(--ink);
+    font-family:inherit; font-size:12.5px; font-weight:600; white-space:nowrap; cursor:pointer }
+  .clmod:hover{ border-color:var(--amber-tx) }
+  .clmod i{ font-style:normal; margin-left:5px; color:var(--ink-3) }
+  .clmod i.alarm{ color:var(--warn) }
+  .clmod i.due{ color:var(--ink-2) }
+  .clgo{ width:1%; white-space:nowrap; text-align:right }
+  .clgo > * + *{ margin-left:8px }
+  .clgo .ccfg{ position:static; display:inline-grid; vertical-align:middle }
+  .cladd{ margin-top:12px }
+  .clnone{ margin:12px 0 0 }
+  @media (max-width:700px){ .clview{ margin-left:0 } }
+  @media (prefers-reduced-motion:reduce){ .clmine .sw::after{ transition:none } }
+
+  /* ── CASE STUDIES (spec 067) ─────────────────────────────────────────
+     The library from the signed-off drawing (design-mockups/case-studies/
+     2026-10-23_case-studies-library.html), in this page's own tokens and
+     nothing else. EVERY RULE IS SCOPED TO THE TAB (#page[data-tab]): its
+     names are common words — .cover, .open, .chip, .state — and a class is
+     one global namespace on this page (§65.9). New shapes, said: the cover
+     and the shelf, the report header, the month strip, the file tile and the
+     index card. */
+  #page[data-tab="memory"] .csseg{ display:inline-flex; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--surface-2) }
+  #page[data-tab="memory"] .csseg button{ border:0; background:transparent; color:var(--ink-2); font-family:inherit; font-size:12.5px; font-weight:600;
+    line-height:1; padding:7px 11px; border-radius:6px; cursor:pointer }
+  #page[data-tab="memory"] .csseg button.on{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.12) }
+  #page[data-tab="memory"] .csseg button:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:1px }
+  #page[data-tab="memory"] .cscount{ font-size:14px; color:var(--ink-3) }
+  #page[data-tab="memory"] .textlink{ background:none; border:0; padding:0; font-family:inherit; font-size:13px; font-weight:600; color:var(--amber-tx); cursor:pointer; white-space:nowrap }
+  #page[data-tab="memory"] .textlink:hover{ text-decoration:underline }
+  #page[data-tab="memory"] .textlink:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:2px; border-radius:3px }
+  /* the front: one search, the industries as the second row */
+  #page[data-tab="memory"] .bigsearch{ display:flex; align-items:center; gap:12px; border:1px solid var(--line); background:var(--surface);
+    border-radius:14px; padding:12px 16px; box-shadow:var(--shadow); margin:0 0 4px }
+  #page[data-tab="memory"] .bigsearch svg{ width:18px; height:18px; color:var(--ink-3); flex:none }
+  #page[data-tab="memory"] .bigsearch input{ flex:1; min-width:0; border:0; background:transparent; font-family:inherit; font-size:16px; color:var(--ink); outline:none }
+  #page[data-tab="memory"] .bigsearch input::placeholder{ color:var(--ink-3) }
+  #page[data-tab="memory"] .bigsearch .ask{ border:0; border-left:1px solid var(--line); background:none; padding:2px 0 2px 14px; font-family:inherit;
+    font-size:13.5px; font-weight:600; color:var(--amber-tx); white-space:nowrap; cursor:pointer }
+  #page[data-tab="memory"] .bigsearch:focus-within{ border-color:var(--amber-tx) }
+  #page[data-tab="memory"] .bigsearch + .askbox{ margin-top:12px }
+  #page[data-tab="memory"] .catrow{ display:flex; gap:4px 22px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin:16px 0 26px }
+  #page[data-tab="memory"] .catrow button{ background:none; border:0; border-bottom:2px solid transparent; margin-bottom:-1px; padding:10px 0 11px;
+    font-family:inherit; font-size:14px; font-weight:600; color:var(--ink-3); cursor:pointer; white-space:nowrap }
+  #page[data-tab="memory"] .catrow button i{ font-style:normal; font-weight:500; margin-left:5px; font-size:12.5px }
+  #page[data-tab="memory"] .catrow button.on{ color:var(--ink); border-bottom-color:var(--amber-tx) }
+  #page[data-tab="memory"] .catrow button:hover{ color:var(--ink) }
+  /* a shelf: its name, how many, the covers standing on a board */
+  #page[data-tab="memory"] .shelf{ margin:0 0 32px }
+  #page[data-tab="memory"] .shh{ display:flex; align-items:baseline; gap:10px; margin:0 0 14px }
+  #page[data-tab="memory"] .shh h2{ margin:0; font-size:17px; font-weight:600 }
+  #page[data-tab="memory"] .shh .n{ font-size:13px; color:var(--ink-3) }
+  #page[data-tab="memory"] .shh .textlink{ margin-left:auto }
+  #page[data-tab="memory"] .books{ position:relative; display:grid; grid-template-columns:repeat(auto-fill,minmax(186px,1fr)); gap:22px 18px; padding:0 6px 16px }
+  #page[data-tab="memory"] .books::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:9px; border-radius:3px;
+    background:var(--line-soft); box-shadow:inset 0 -2px 0 var(--line) }
+  #page[data-tab="memory"] .cover{ position:relative; z-index:1; display:flex; flex-direction:column; text-align:left; padding:0; font-family:inherit; color:inherit;
+    border:1px solid var(--line); border-radius:6px 10px 10px 6px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow);
+    cursor:pointer; transition:transform .18s ease, box-shadow .18s ease }
+  #page[data-tab="memory"] .cover:hover{ transform:translateY(-4px); box-shadow:0 2px 4px rgba(20,28,43,.10), 0 14px 30px rgba(20,28,43,.14) }
+  #page[data-tab="memory"] .cover:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:3px }
+  #page[data-tab="memory"] .cover:disabled{ cursor:default; transform:none }
+  #page[data-tab="memory"] .cv{ position:relative; display:flex; flex-direction:column; gap:8px; min-height:178px; padding:14px 14px 15px 18px; color:var(--ff-ink);
+    background:linear-gradient(160deg, var(--ff) 0%, color-mix(in srgb, var(--ff) 78%, #000) 100%); box-shadow:inset 0 -3px 0 var(--amber) }
+  #page[data-tab="memory"] .cv::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:rgba(0,0,0,.18) }
+  #page[data-tab="memory"] .logo{ width:36px; height:36px; flex:none; border-radius:9px; background:var(--surface); color:var(--ff);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; object-fit:contain }
+  #page[data-tab="memory"] .newtag{ position:absolute; top:12px; right:12px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--amber-ink); background:var(--amber); border-radius:999px; padding:2px 7px }
+  #page[data-tab="memory"] .cind{ margin-top:auto; font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:var(--ff-quiet); line-height:1.4 }
+  #page[data-tab="memory"] .ctitle{ font-size:17px; font-weight:600; line-height:1.25; color:var(--ff-ink); text-wrap:balance; overflow-wrap:anywhere }
+  #page[data-tab="memory"] .cyr{ font-size:12px; font-weight:600; color:var(--amber) }
+  #page[data-tab="memory"] .cmeta{ display:flex; flex-direction:column; gap:2px; padding:10px 12px 12px 18px }
+  #page[data-tab="memory"] .cmeta b{ font-size:14px; font-weight:600; line-height:1.3 }
+  #page[data-tab="memory"] .cmeta span{ font-size:12.5px; color:var(--ink-3); line-height:1.4 }
+  /* the desk: running and being-written work, off the shelves */
+  #page[data-tab="memory"] .desk{ border:1px dashed var(--line); border-radius:14px; padding:16px 18px 6px; background:var(--surface); margin:0 0 18px }
+  #page[data-tab="memory"] .desk h2{ margin:0 0 6px; font-size:16px; font-weight:600 }
+  #page[data-tab="memory"] .drow{ display:grid; grid-template-columns:34px minmax(0,1fr) auto; gap:12px; align-items:center; width:100%; padding:10px 0;
+    border:0; border-top:1px solid var(--line-soft); background:none; font-family:inherit; color:inherit; text-align:left; cursor:pointer }
+  #page[data-tab="memory"] .drow:hover .tx b{ color:var(--amber-tx) }
+  #page[data-tab="memory"] .spine{ width:34px; height:44px; border-radius:3px 6px 6px 3px; background:var(--surface-2); border:1px solid var(--line);
+    display:grid; place-items:center; color:var(--ink-3); font:700 10px/1 ui-monospace, SFMono-Regular, monospace }
+  #page[data-tab="memory"] .spine.run{ border-style:dashed }
+  #page[data-tab="memory"] .drow .tx{ min-width:0 }
+  #page[data-tab="memory"] .drow .tx b{ display:block; font-size:14.5px; font-weight:600 }
+  #page[data-tab="memory"] .drow .tx span{ display:block; font-size:13px; color:var(--ink-3) }
+  #page[data-tab="memory"] .state{ font-size:12px; font-weight:600; border-radius:999px; padding:3px 9px; white-space:nowrap }
+  #page[data-tab="memory"] .state.write{ color:var(--warn); background:var(--warn-bg) }
+  #page[data-tab="memory"] .state.run{ color:var(--ink-2); background:var(--surface-2) }
+  #page[data-tab="memory"] .toplace{ font-size:13.5px; color:var(--ink-2); margin:0 }
+  /* a case study, as a report */
+  #page[data-tab="memory"] .crumb{ display:flex; gap:6px; flex-wrap:wrap; align-items:baseline; font-size:13px; color:var(--ink-3); margin:0 0 14px }
+  #page[data-tab="memory"] .crumb .here{ color:var(--ink-2) }
+  #page[data-tab="memory"] .rhead{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:20px; align-items:start; padding:24px 26px 26px; border-radius:14px;
+    color:var(--ff-ink); background:linear-gradient(160deg, var(--ff) 0%, color-mix(in srgb, var(--ff) 78%, #000) 100%); box-shadow:inset 0 -3px 0 var(--amber) }
+  #page[data-tab="memory"] .rhead .logo{ width:58px; height:58px; border-radius:12px; font-size:16px; line-height:58px }
+  #page[data-tab="memory"] .rhead .eb{ font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); margin:2px 0 8px }
+  #page[data-tab="memory"] .rhead h1{ margin:0; font-size:30px; font-weight:600; line-height:1.15; letter-spacing:-.015em; color:var(--ff-ink); text-wrap:balance; overflow-wrap:anywhere }
+  #page[data-tab="memory"] .rhead .cl{ margin:8px 0 0; font-size:15px; color:var(--ff-quiet) }
+  #page[data-tab="memory"] .rhead .cl b{ color:var(--ff-ink); font-weight:600 }
+  #page[data-tab="memory"] .rhead .acts{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center }
+  #page[data-tab="memory"] .rhead .btn{ background:transparent; border-color:var(--ff-rule); color:var(--ff-ink) }
+  #page[data-tab="memory"] .rhead .btn:hover{ border-color:var(--amber) }
+  #page[data-tab="memory"] .rhead .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  #page[data-tab="memory"] .chip{ display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; border-radius:999px; padding:3px 9px }
+  #page[data-tab="memory"] .chip.done{ background:var(--good-bg); color:var(--good) }
+  #page[data-tab="memory"] .chip.writing{ background:var(--amber); color:var(--amber-ink) }
+  #page[data-tab="memory"] .chip.running{ background:var(--ff-on); color:var(--ff-quiet) }
+  #page[data-tab="memory"] .stand{ margin:24px 0 0; font-size:19px; line-height:1.6; color:var(--ink); max-width:64ch; white-space:pre-line }
+  #page[data-tab="memory"] .stand.later{ font-size:16px; color:var(--ink-3); font-style:italic }
+  #page[data-tab="memory"] .rgrid{ display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:40px; align-items:start }
+  #page[data-tab="memory"] .rgrid.solo{ grid-template-columns:minmax(0,1fr) }
+  #page[data-tab="memory"] .rsec{ padding-top:20px; margin-top:26px; border-top:1px solid var(--line) }
+  #page[data-tab="memory"] .rsec h2{ margin:0 0 12px; font-size:18px; font-weight:600; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap }
+  #page[data-tab="memory"] .rsec h2 .no{ font-size:12px; font-weight:600; color:var(--amber-tx) }
+  #page[data-tab="memory"] .rsec h2 .ct{ font-size:13px; font-weight:500; color:var(--ink-3) }
+  #page[data-tab="memory"] .rsec > p{ margin:0; font-size:16px; line-height:1.7; max-width:66ch; white-space:pre-line }
+  #page[data-tab="memory"] .glance{ position:sticky; top:16px; margin-top:26px; display:flex; flex-direction:column; gap:14px }
+  #page[data-tab="memory"] .gbox{ border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:15px 16px }
+  #page[data-tab="memory"] .gbox h3{ margin:0 0 10px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3) }
+  #page[data-tab="memory"] .gbox dl{ margin:0; display:grid; grid-template-columns:auto minmax(0,1fr); gap:7px 12px; font-size:13.5px }
+  #page[data-tab="memory"] .gbox dt{ color:var(--ink-3) }
+  #page[data-tab="memory"] .gbox dd{ margin:0; font-weight:600; text-align:right; overflow-wrap:anywhere }
+  #page[data-tab="memory"] .toc{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px }
+  #page[data-tab="memory"] .toc button{ display:flex; gap:9px; align-items:baseline; width:100%; padding:5px 6px; margin:0 -6px; border:0; border-radius:6px;
+    background:none; font-family:inherit; font-size:13.5px; color:var(--ink-2); text-align:left; cursor:pointer }
+  #page[data-tab="memory"] .toc button:hover{ background:var(--surface-2); color:var(--ink) }
+  #page[data-tab="memory"] .toc i{ font-style:normal; font-size:11.5px; font-weight:600; color:var(--amber-tx); width:16px }
+  #page[data-tab="memory"] .people{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:18px 30px }
+  #page[data-tab="memory"] .people h4{ margin:0 0 10px; font-size:13px; font-weight:600; color:var(--ink-3) }
+  #page[data-tab="memory"] .plist{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px }
+  #page[data-tab="memory"] .plist li{ display:flex; gap:11px; align-items:center }
+  #page[data-tab="memory"] .av{ width:34px; height:34px; flex:none; border-radius:50%; display:grid; place-items:center;
+    font:700 11.5px/1 ui-monospace, SFMono-Regular, monospace; background:var(--ff); color:var(--ff-ink) }
+  #page[data-tab="memory"] .av.them{ background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line) }
+  #page[data-tab="memory"] .plist b{ display:block; font-size:14.5px; font-weight:600; line-height:1.3 }
+  #page[data-tab="memory"] .plist span span, #page[data-tab="memory"] .plist li > span > span{ display:block; font-size:13px; color:var(--ink-3); line-height:1.35 }
+  #page[data-tab="memory"] .tl{ --m:1; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 16px 8px }
+  #page[data-tab="memory"] .tlm, #page[data-tab="memory"] .tlbar{ display:grid; grid-template-columns:repeat(var(--m),minmax(0,1fr)) }
+  #page[data-tab="memory"] .tlm span{ font-size:11.5px; font-weight:600; color:var(--ink-3); padding:0 0 8px 6px; border-left:1px solid var(--line-soft) }
+  #page[data-tab="memory"] .tls{ padding:6px 0 }
+  #page[data-tab="memory"] .tls .lb{ display:block; font-size:13.5px; margin:0 0 5px; color:var(--ink) }
+  #page[data-tab="memory"] .tls .lb small{ color:var(--ink-3); font-size:12px; margin-left:6px }
+  #page[data-tab="memory"] .tlbar i{ height:9px; border-radius:5px; background:var(--ff-tx) }
+  #page[data-tab="memory"] .tlbar i.end{ background:var(--amber) }
+  #page[data-tab="memory"] .files{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px }
+  #page[data-tab="memory"] .ftile{ display:flex; flex-direction:column; gap:6px; min-width:0; border:1px solid var(--line); border-radius:4px 12px 12px 12px;
+    background:var(--surface); padding:13px 14px 12px }
+  #page[data-tab="memory"] .ftop{ display:flex; justify-content:space-between; align-items:center }
+  #page[data-tab="memory"] .ftype{ font:700 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em; padding:4px 6px; border-radius:4px; background:var(--surface-2); color:var(--ink-2) }
+  #page[data-tab="memory"] .ftype.pdf{ color:var(--bad); background:var(--bad-bg) }
+  #page[data-tab="memory"] .ftype.ppt{ color:var(--warn); background:var(--warn-bg) }
+  #page[data-tab="memory"] .ftype.xls{ color:var(--good); background:var(--good-bg) }
+  #page[data-tab="memory"] .fmon{ font-size:12px; color:var(--ink-3) }
+  #page[data-tab="memory"] .ftile b{ font-size:14.5px; font-weight:600; line-height:1.3; overflow-wrap:anywhere }
+  #page[data-tab="memory"] .ftile p{ margin:0; font-size:13px; color:var(--ink-3); line-height:1.45 }
+  #page[data-tab="memory"] .ftile .open{ margin-top:auto; padding:8px 0 0; border:0; background:none; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--amber-tx); text-align:left; cursor:pointer }
+  #page[data-tab="memory"] .ftile .open:hover{ text-decoration:underline }
+  #page[data-tab="memory"] .ftile.missing{ border-style:dashed; background:transparent }
+  #page[data-tab="memory"] .ftile.missing span.open{ color:var(--warn); font-weight:500; font-style:italic; cursor:default }
+  #page[data-tab="memory"] .askers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:12px }
+  #page[data-tab="memory"] .asker{ display:flex; gap:12px; align-items:flex-start; border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px }
+  #page[data-tab="memory"] .asker .t{ min-width:0; flex:1 }
+  #page[data-tab="memory"] .asker b{ display:block; font-size:14.5px; font-weight:600 }
+  #page[data-tab="memory"] .asker p{ margin:2px 0 10px; font-size:13.5px; color:var(--ink-2); line-height:1.45 }
+  #page[data-tab="memory"] .asker a.btn{ display:inline-block; text-decoration:none }
+  /* insights as index cards — inside a case study, and on the Insights tab */
+  #page[data-tab="memory"] .icards{ columns:2 250px; column-gap:14px; margin-top:14px }
+  #page[data-tab="memory"] .icard{ display:block; width:100%; break-inside:avoid; margin:0 0 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface);
+    padding:14px 16px 13px; font-family:inherit; color:inherit; text-align:left; cursor:pointer }
+  #page[data-tab="memory"] .icard:hover{ border-color:var(--amber-tx) }
+  #page[data-tab="memory"] .kind{ display:block; font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase }
+  #page[data-tab="memory"] .kind.hiccup{ color:var(--warn) }
+  #page[data-tab="memory"] .kind.practice{ color:var(--good) }
+  #page[data-tab="memory"] .kind.lesson{ color:var(--ff-tx) }
+  #page[data-tab="memory"] .icard .ih{ display:block; margin:6px 0 8px; font-size:15px; font-weight:600; line-height:1.38 }
+  #page[data-tab="memory"] .icard q{ display:block; font-size:13.5px; line-height:1.5; color:var(--ink-2) }
+  #page[data-tab="memory"] .icard .by{ display:block; margin-top:11px; font-size:12px; color:var(--ink-3) }
+  #page[data-tab="memory"] .addline{ display:flex; align-items:center; gap:10px; border:1px dashed var(--line); border-radius:10px; padding:11px 14px; background:var(--surface) }
+  #page[data-tab="memory"] .addline svg{ width:16px; height:16px; color:var(--amber-tx); flex:none }
+  #page[data-tab="memory"] .addline input{ flex:1; min-width:0; border:0; background:transparent; font-family:inherit; font-size:14.5px; color:var(--ink); outline:none }
+  #page[data-tab="memory"] .addline:focus-within{ border-color:var(--amber-tx); border-style:solid }
+  #page[data-tab="memory"] .elist{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; border-top:0 }
+  #page[data-tab="memory"] .elist .erow{ flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:14px 16px 13px }
+  #page[data-tab="memory"] .elist .erow:hover, #page[data-tab="memory"] .elist .erow:focus-visible{ border-color:var(--amber-tx); background:var(--surface) }
+  #page[data-tab="memory"] .erow .loose{ color:var(--warn); font-weight:600 }
+  #page[data-tab="memory"] .askpanel{ margin:16px 0 0; border:1px solid var(--amber); border-radius:14px; background:var(--surface); padding:16px 18px 14px; max-width:760px }
+  #page[data-tab="memory"] .askpanel h2{ margin:0 0 12px; font-size:16px; font-weight:600 }
+  #page[data-tab="memory"] .csfoot{ margin-top:30px; padding-top:14px; border-top:1px solid var(--line) }
+  #page[data-tab="memory"] .placebox{ margin-top:16px; max-width:360px }
+  /* opening a piece of work: the form beside the cover it makes */
+  #page[data-tab="memory"] .opengrid{ display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:34px; align-items:start }
+  #page[data-tab="memory"] .formcard{ min-width:0; border:1px solid var(--line); border-radius:14px; background:var(--surface); padding:22px 24px; box-shadow:var(--shadow) }
+  #page[data-tab="memory"] .formcard h2{ margin:0 0 18px; font-size:20px; font-weight:600 }
+  #page[data-tab="memory"] .fpair{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr)); gap:14px; margin:0 0 16px }
+  #page[data-tab="memory"] .fone{ margin:0 0 16px }
+  #page[data-tab="memory"] .pastbox{ border-left:3px solid var(--amber); padding-left:14px; margin:0 0 16px }
+  #page[data-tab="memory"] .pastbox .fpair{ margin:0 }
+  #page[data-tab="memory"] .fsec{ margin:22px 0 14px; padding-top:18px; border-top:1px solid var(--line) }
+  #page[data-tab="memory"] .fsec h3{ margin:0; font-size:15px; font-weight:600 }
+  #page[data-tab="memory"] .pills{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+  #page[data-tab="memory"] .pill{ display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:999px; padding:3px 6px 3px 3px;
+    background:var(--surface); font-size:13.5px; font-weight:600 }
+  #page[data-tab="memory"] .pill .av{ width:26px; height:26px; font-size:9.5px }
+  #page[data-tab="memory"] .x{ border:0; background:none; color:var(--ink-3); font-size:16px; line-height:1; padding:2px 6px; border-radius:6px; cursor:pointer }
+  #page[data-tab="memory"] .x:hover{ color:var(--bad); background:var(--bad-bg) }
+  #page[data-tab="memory"] .addsel{ width:auto; max-width:240px }
+  #page[data-tab="memory"] .factions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:22px; padding-top:16px; border-top:1px solid var(--line) }
+  #page[data-tab="memory"] .preview{ position:sticky; top:16px; display:flex; flex-direction:column; gap:10px }
+  #page[data-tab="memory"] .preview .where{ margin:0; font-size:13px; color:var(--ink-3); line-height:1.45 }
+  /* the interview: where you are, then the two steps side by side */
+  #page[data-tab="memory"] .steps{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:22px 0 16px; font-size:13.5px; color:var(--ink-3) }
+  #page[data-tab="memory"] .steps .st{ display:inline-flex; align-items:center; gap:8px }
+  #page[data-tab="memory"] .steps .st.on{ color:var(--ink); font-weight:600 }
+  #page[data-tab="memory"] .dot{ width:24px; height:24px; flex:none; border-radius:50%; display:inline-grid; place-items:center; font-size:12px; font-weight:700;
+    border:1.5px solid var(--line); color:var(--ink-3); background:var(--surface) }
+  #page[data-tab="memory"] .on > .dot, #page[data-tab="memory"] .dot.on{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  #page[data-tab="memory"] .steps .bar{ width:34px; height:1.5px; background:var(--line) }
+  #page[data-tab="memory"] .twostep{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; align-items:stretch }
+  #page[data-tab="memory"] .stepcard{ min-width:0; display:flex; flex-direction:column; gap:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface);
+    padding:18px 20px; box-shadow:var(--shadow) }
+  #page[data-tab="memory"] .stepcard h3{ margin:0; font-size:16px; font-weight:600; display:flex; gap:10px; align-items:center; line-height:1.3 }
+  #page[data-tab="memory"] .stepcard .prompt{ max-height:360px; overflow:auto }
+  #page[data-tab="memory"] .stepcard .pastebox{ flex:1; min-height:300px }
+  /* the draft: the report with every part open to change */
+  #page[data-tab="memory"] .draftbar{ position:sticky; top:0; z-index:5; display:flex; gap:12px; align-items:center; flex-wrap:wrap; background:var(--amber-wash);
+    border:1px solid var(--amber); border-radius:12px; padding:10px 14px; margin:0 0 16px; font-size:13.5px; color:var(--ink-2) }
+  #page[data-tab="memory"] .draftbar b{ color:var(--ink); font-weight:600 }
+  #page[data-tab="memory"] .draftbar .right{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+  #page[data-tab="memory"] .ed{ display:block; width:100%; margin-top:8px; border:1px dashed var(--line); border-radius:10px; background:var(--surface); color:var(--ink);
+    padding:10px 12px; font-family:inherit; font-size:15px; line-height:1.6; resize:vertical; outline:none }
+  #page[data-tab="memory"] .ed:hover{ border-color:var(--ink-3) }
+  #page[data-tab="memory"] .ed:focus-visible{ border-style:solid; border-color:var(--amber-tx) }
+  #page[data-tab="memory"] .ed.stand{ font-size:18px; max-width:none; margin-top:6px; white-space:normal }
+  #page[data-tab="memory"] .ed.lack{ border-color:var(--warn); background:var(--warn-bg) }
+  #page[data-tab="memory"] .ed.lack::placeholder{ color:var(--warn) }
+  #page[data-tab="memory"] .edrows{ display:flex; flex-direction:column; gap:8px; align-items:flex-start }
+  #page[data-tab="memory"] .edrow{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr) auto; gap:8px; align-items:center; width:100% }
+  #page[data-tab="memory"] .edrow .who{ font-size:14.5px; font-weight:600 }
+  #page[data-tab="memory"] .ftile.edit{ gap:4px }
+  #page[data-tab="memory"] .ftile.attach{ border:1.5px dashed var(--amber-tx); background:var(--amber-wash) }
+  #page[data-tab="memory"] .inl{ border:0; border-bottom:1px solid transparent; background:transparent; color:var(--ink-3); font-family:inherit; font-size:13px; padding:2px 0; width:100%; min-width:0; outline:none }
+  #page[data-tab="memory"] .inl.big{ color:var(--ink); font-size:15px; font-weight:600 }
+  #page[data-tab="memory"] .inl:hover{ border-bottom-color:var(--line) }
+  #page[data-tab="memory"] .inl:focus-visible{ border-bottom-color:var(--amber-tx) }
+  #page[data-tab="memory"] .frow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:auto; padding-top:6px }
+  #page[data-tab="memory"] .frow .fname{ font-size:12.5px; color:var(--ink-2); overflow-wrap:anywhere; min-width:0 }
+  #page[data-tab="memory"] .frow .open{ padding:0; margin:0 }
+  #page[data-tab="memory"] .frow .x{ margin-left:auto }
+  #page[data-tab="memory"] .draftart > .rsec > .btn{ margin-top:12px }
+  #page[data-tab="memory"] .dcard .dq{ font-size:13.5px; color:var(--ink-2); margin:6px 0 0; white-space:pre-line }
+  #page[data-tab="memory"] .mwcase .t b{ font-weight:600 }
+  @media (max-width:860px){
+    #page[data-tab="memory"] .rgrid, #page[data-tab="memory"] .opengrid, #page[data-tab="memory"] .twostep{ grid-template-columns:1fr }
+    #page[data-tab="memory"] .glance, #page[data-tab="memory"] .preview{ position:static }
+    #page[data-tab="memory"] .rhead{ grid-template-columns:auto minmax(0,1fr); padding:18px 16px 20px; gap:14px }
+    #page[data-tab="memory"] .rhead .acts{ grid-column:1 / -1; justify-content:flex-start }
+    #page[data-tab="memory"] .rhead h1{ font-size:24px }
+    #page[data-tab="memory"] .rhead .logo{ width:44px; height:44px; line-height:44px; font-size:13px }
+    #page[data-tab="memory"] .stand{ font-size:17px }
+    #page[data-tab="memory"] .books{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 12px; padding:0 2px 14px }
+    #page[data-tab="memory"] .cv{ min-height:150px; padding:12px 10px 12px 14px }
+    #page[data-tab="memory"] .ctitle{ font-size:15px }
+    #page[data-tab="memory"] .bigsearch{ flex-wrap:wrap }
+    #page[data-tab="memory"] .bigsearch .ask{ border-left:0; padding-left:0; flex-basis:100% }
+    #page[data-tab="memory"] .drow{ grid-template-columns:34px minmax(0,1fr) }
+    #page[data-tab="memory"] .drow .state{ grid-column:2; justify-self:start }
+    #page[data-tab="memory"] .edrow{ grid-template-columns:minmax(0,1fr) auto }
+    #page[data-tab="memory"] .edrow > :nth-child(2){ grid-column:1; grid-row:2 }
+    #page[data-tab="memory"] .formcard{ padding:16px 14px }
+  }
+  @media (prefers-reduced-motion:reduce){ #page[data-tab="memory"] .cover{ transition:none } #page[data-tab="memory"] .cover:hover{ transform:none } }
+  /* the write-up's row on My work — a book where the tick is (spec 067 §8) */
+  .mwdoc{ width:17px; height:17px; display:grid; place-items:center; color:var(--amber-tx) }
+  .mwdoc svg{ width:17px; height:17px }
+  .mwcase .t b{ font-weight:600 }
+
   /* ── The strategy frameworks library (spec 052) ───────────────────
      Every class here is prefixed `fw`, because a class name is one global
      namespace and this page already holds .tag, .cell, .row and .band
@@ -1032,6 +1388,194 @@
   .part textarea.fld{ min-height:320px; font:13px/1.5 ui-monospace, SFMono-Regular, monospace; resize:vertical }
   .part .row{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap }
   .cpwhy{ color:var(--ink-3); font-size:13px; margin-top:12px }
+
+  /* ── HOME (spec 068) ──────────────────────────────────────────────
+     Islam, of design-mockups/home/2026-10-23_home-v4.html: "build it
+     compact, for all console". The greeting band, then your clients beside
+     your tasks, then case studies' two cards. Every class is `ho`, because
+     `.ph`, `.row`, `.cl` and `.list` already mean something here (§65.9).
+     THE SERIF IS HOME'S AND NOWHERE ELSE'S: the greeting and the section
+     titles, Islam's "keep the serif". */
+  .hohello{ position:relative; overflow:hidden; background:var(--ff); color:var(--ff-ink); border-radius:14px;
+    padding:16px 22px 17px; margin:0 0 16px }
+  .hohello::before, .hohello::after{ content:""; position:absolute; border-radius:50%; border:1.5px solid rgba(255,255,255,.07); pointer-events:none }
+  .hohello::before{ width:300px; height:300px; right:-90px; top:-120px; background:rgba(255,255,255,.035) }
+  .hohello::after{ width:210px; height:210px; right:-20px; top:-70px }
+  .hodate{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); min-height:14px }
+  .hohello h1, .hochd h2{ font-family:"Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; font-weight:500 }
+  .hohello h1{ margin:0; font-size:27px; line-height:1.15; color:var(--ff-ink) }
+  .hohello p{ margin:4px 0 0; font-size:13.5px; color:var(--ff-quiet) }
+  .hotop{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:stretch; margin:0 0 24px }
+  .hotop > section{ display:flex; flex-direction:column; min-width:0 }
+  .hosec{ margin:0 0 24px }
+  /* A CARD WITH ITS HEADER INSIDE IT (Islam, 2026-10-24, option A of
+     design-mockups/home/2026-10-24_home-round-2.html): an icon, the title in
+     the band's serif, a count, and the card's control on the right. */
+  .hocard{ flex:1; display:flex; flex-direction:column; min-width:0; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; box-shadow:var(--shadow); overflow:hidden }
+  .hochd{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px; padding:10px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocic{ flex:none; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--amber-wash); color:var(--amber-tx) }
+  .hocic svg{ width:17px; height:17px }
+  .hochd h2{ margin:0; font-size:18px; line-height:1.15; white-space:nowrap }
+  .hocnt{ font-size:11.5px; font-weight:700; border-radius:999px; padding:1px 8px; background:var(--surface-2); color:var(--ink-2); font-variant-numeric:tabular-nums }
+  .hochd .sp{ flex:1 }
+  .hobody{ flex:1 }
+  .holink{ border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--amber-tx); cursor:pointer; white-space:nowrap }
+  .holink:hover{ text-decoration:underline }
+  .holink:focus-visible, .howd:focus-visible, .hosort button:focus-visible, .hotask:focus-visible, .hocase:focus-visible, .hobook:focus-visible{
+    outline:2px solid var(--amber-tx); outline-offset:1px }
+  /* Sort by: Date or Client, the same switch here and on My tasks */
+  .hosort{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-3) }
+  .hosort .sw{ display:inline-flex; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--surface-2) }
+  .hosort button{ border:0; background:transparent; color:var(--ink-2); font-family:inherit; font-size:12px; font-weight:600; line-height:1.4;
+    padding:3px 9px; border-radius:6px; cursor:pointer }
+  .hosort button[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(20,28,43,.08) }
+  .hogrp{ display:flex; align-items:center; gap:8px; padding:9px 14px 3px; font-size:11px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .hogrp i{ font-style:normal; font-weight:600; letter-spacing:0; text-transform:none }
+  .hogrp i .late{ color:var(--bad) }
+  .cmk{ flex:none; width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber); text-align:center; object-fit:contain;
+    font:700 10.5px/30px ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em }
+  img.cmk{ background:#fff; padding:2px; box-sizing:border-box }
+  /* YOUR CLIENTS, ONE LINE EACH (option B): the mark, the name, and the
+     modules as words under it — no industry and no seat (Islam: "remove the
+     client industry … it's so noisy"). A module with something outstanding
+     carries a dot and the fact, red where it is an alarm. */
+  .hocl{ display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:center; padding:9px 14px; border-bottom:1px solid var(--line-soft) }
+  .hocl:last-child{ border-bottom:0 }
+  .hocl b{ display:block; font-size:14px; font-weight:600; line-height:1.3 }
+  .howords{ display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:1px }
+  .howd{ display:inline-flex; align-items:center; gap:6px; border:0; background:none; padding:1px 0; font-family:inherit; font-size:12.5px;
+    color:var(--ink-2); cursor:pointer; white-space:nowrap }
+  .howd u{ text-decoration:none; border-bottom:1px solid var(--line) }
+  .howd:hover{ color:var(--ink) }
+  .howd:hover u{ border-bottom-color:var(--amber-tx) }
+  .howd i{ display:inline-flex; align-items:center; gap:4px; font-style:normal; font-size:11px; font-weight:600; color:var(--amber-tx) }
+  .howd i::before{ content:""; width:5px; height:5px; border-radius:50%; background:currentColor }
+  .howd i.alarm{ color:var(--bad) }
+  .hotask{ display:grid; grid-template-columns:17px minmax(0,1fr) auto; gap:10px; align-items:start; width:100%; padding:9px 14px;
+    border:0; border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
+  .hotask:hover{ background:var(--surface-2) }
+  .hotask:last-child{ border-bottom:0 }
+  /* the tick is My tasks' own (.mwtick), ringed in the alarm when late and
+     green when done */
+  .hotask .mwtick{ margin-top:1px }
+  .hotask.late .mwtick{ border-color:var(--bad) }
+  .hotask.done .mwtick{ background:var(--good); border-color:var(--good) }
+  .hotask.done .t{ color:var(--ink-3) }
+  .hotask[aria-busy="true"]{ cursor:progress }
+  .hosaid{ margin:8px 12px 0 }
+  .hotask .bk{ width:17px; height:17px; color:var(--amber-tx) }
+  .hotask .bk svg{ width:17px; height:17px }
+  .hotask .t{ font-size:13.5px; line-height:1.4; overflow-wrap:anywhere }
+  .hotask .t b{ font-weight:600 }
+  .hotask .m{ display:block; font-size:12px; color:var(--ink-3); margin-top:1px }
+  .hotask .m .c{ font-weight:600; color:var(--ink-2) }
+  .hotask .wh{ font-size:12px; font-weight:600; color:var(--ink-2); white-space:nowrap; padding-top:1px }
+  .hotask.late .wh{ color:var(--bad) }
+  .honone{ margin:0; padding:16px; text-align:center; font-size:13px; color:var(--ink-3) }
+  /* case studies: one card, its two halves side by side with a hairline */
+  .hotwo{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:stretch }
+  .hotwo > div{ padding:12px 16px 14px; min-width:0 }
+  .hotwo > div + div{ border-left:1px solid var(--line-soft) }
+  .hobxh{ margin:0 0 4px; font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+  .hocase{ display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:12px; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft) }
+  .hocase:last-of-type{ border-bottom:0 }
+  .horing{ width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
+    background:conic-gradient(var(--amber) calc(var(--p) * 1%), var(--surface-2) 0) }
+  .horing span{ width:33px; height:33px; border-radius:50%; background:var(--surface); display:grid; place-items:center;
+    font-size:11px; font-weight:600; line-height:1; color:var(--ink); font-variant-numeric:tabular-nums }
+  .hocase b, .hobook b{ display:block; font-size:14px; font-weight:600; line-height:1.3 }
+  .hocase .s, .hobook .s{ display:block; font-size:12px; color:var(--ink-3); margin-top:1px }
+  .hocase .s .late{ color:var(--bad); font-weight:600 }
+  .hocase .btn{ padding:5px 12px; font-size:12.5px }
+  .hofoot{ display:inline-block; margin-top:6px; border:0; background:none; padding:0; font-family:inherit; font-size:12.5px; font-weight:600;
+    color:var(--amber-tx); cursor:pointer; text-align:left }
+  .hofoot:hover{ text-decoration:underline }
+  .hobook{ display:grid; grid-template-columns:32px minmax(0,1fr); gap:10px; align-items:center; width:100%; padding:7px 0; border:0;
+    border-bottom:1px solid var(--line-soft); background:transparent; color:var(--ink); font-family:inherit; text-align:left; cursor:pointer }
+  .hobook:last-of-type{ border-bottom:0 }
+  .hobook:hover b{ text-decoration:underline }
+  .hospine{ width:32px; height:42px; border-radius:3px 7px 7px 3px; color:var(--ff-ink); text-align:center;
+    font-size:9.5px; font-weight:700; line-height:42px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+    background:linear-gradient(160deg, var(--ff), color-mix(in srgb, var(--ff) 75%, #000));
+    box-shadow:inset 4px 0 0 rgba(0,0,0,.2), inset 0 -3px 0 var(--amber) }
+  .hobook .new{ display:inline-block; margin-left:6px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--amber-ink); background:var(--amber); border-radius:999px; padding:1px 6px; vertical-align:2px }
+  @media (max-width:999px){ .hotop, .hotwo{ grid-template-columns:minmax(0,1fr) } .hotwo > div + div{ border-left:0; border-top:1px solid var(--line-soft) } }
+  @media (max-width:640px){
+    .hohello{ padding:14px 16px 15px }
+    .hocase{ grid-template-columns:42px minmax(0,1fr) }
+    .hocase .btn{ grid-column:2; justify-self:start }
+  }
+
+  /* ── COMPACT, ACROSS THE CONSOLE (spec 068) ─────────────────────────
+     Islam, of ClientPlus beside the console: "why is client plus a bit
+     smaller in view than this dashboard?", then of the drawing that answered
+     it, "build it compact, for all console". Said here, after every rule it
+     narrows, so the earlier rules keep their reasons and this block holds
+     the one decision: 14px text, a narrower column, the whole width of the
+     window, tighter rows. A reading page keeps a measure of its own (the
+     case study's prose stays in 66ch), so the width is for lists and grids. */
+  body{ font-size:14px; line-height:1.5 }
+  /* 224px since the name became Strategy Management Platform (2026-10-24):
+     the mark, the name's longer line and the « button need it */
+  .side{ width:224px }
+  .sbhead{ gap:8px; padding:12px 8px 12px 14px }
+  .nav button{ padding:8px 10px; font-size:13.5px }
+  .nav{ gap:12px }
+  .wrap{ max-width:none; padding:16px 22px 56px }
+  .ptitle{ padding-bottom:10px; margin-bottom:14px }
+  .ptitle h1{ font-size:19px }
+  .mwmast{ padding:12px 18px 14px; margin-bottom:18px }
+  .mwname h1{ font-size:21px }
+  .mwstrip{ min-height:38px }
+  .mwstrip b{ font-size:19px }
+  .mwsec{ margin-bottom:22px }
+  .mwsh h2{ font-size:15.5px }
+  .mwrow{ padding:8px 0 }
+  .mwrow .t{ font-size:14px }
+  .ccard h2{ font-size:15px }
+  .erow h3{ font-size:14px }
+  .ecard h2{ font-size:19px }
+  #page[data-tab="memory"] .ctitle{ font-size:15.5px }
+  #page[data-tab="memory"] .shh h2{ font-size:16px }
+  #page[data-tab="memory"] .stand{ font-size:17px }
+  #page[data-tab="memory"] .rsec h2{ font-size:16.5px }
+  #page[data-tab="memory"] .rsec > p{ font-size:15px }
+  #page[data-tab="memory"] .icard .ih{ font-size:14px }
+  @media (max-width:999px){ .nav button{ padding:11px 10px; font-size:14.5px } .wrap{ padding:14px 14px 50px } }
+
+  /* MY TASKS' SORT BY (2026-10-24): the switch on its own line under the
+     band; by client, each section is a client with its mark, and the rows
+     drop the client pill the heading already says. */
+  .mwbar{ display:flex; align-items:center; gap:12px; margin:-4px 0 12px }
+  .mwsh h2{ display:flex; align-items:center; gap:8px }
+  .mwsec.byc .mwcl{ display:none }
+  @media (min-width:761px){ .mwsec.byc .mwrow{ grid-template-columns:20px minmax(0,1fr) 108px 128px 26px } }
+
+  /* ONLY THE TAB YOU ARE ON IS BOLD (Islam, 2026-10-24: "make the names of
+     the modules not bold only the selected module is highlighted is
+     enough"). The names go to regular weight in an ink a step brighter than
+     the quiet one, so they keep their contrast on the navy; the one you are
+     on keeps its wash, its amber bar and icon, and alone is semibold. */
+  .nav button{ font-weight:400; color:color-mix(in srgb, var(--ff-ink) 78%, var(--ff)) }
+  .nav button.on{ font-weight:600; color:var(--ff-ink) }
+
+  /* THE CONSOLE AT 80% ON A COMPUTER (Islam, 2026-10-24: "I made the page
+     80% smaller it became more visible and neat. can we make the default 80%
+     smaller"). The whole page is zoomed, as his browser's own zoom did, so
+     every size keeps its proportion; a phone keeps 100%, where 80% would
+     put the words under a readable size. Two things a zoom changes are put
+     back: the window's height (a zoomed 100vh is 80% of the window, so the
+     column would stop short) and a hover label's place (the box the
+     browser reports is zoomed, the place it is set at is not — tipShow). */
+  @media (min-width:1000px){
+    html{ zoom:.8 }
+    .shell{ min-height:calc(100vh / .8) }
+    .side{ height:calc(100vh / .8); height:calc(100dvh / .8) }
+  }
 </style>
 </head>
 <body>
@@ -1039,10 +1583,10 @@
      from the menu button in .mtop. The tabs are drawn into #nav once `me`
      answers (§45.2), as they always were. -->
 <div class="shell">
-<aside class="side" id="side" aria-label="Forefront Platform">
+<aside class="side" id="side" aria-label="Strategy Management Platform">
   <div class="sbhead">
-    <span class="sbff" aria-hidden="true">FF</span>
-    <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
+    <span class="sbname"><b>Strategy Management</b><span>Platform</span></span>
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
@@ -1057,7 +1601,7 @@
 <div class="main">
   <div class="mtop">
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <span class="mk">FOREFRONT</span><span id="sbhere"></span>
+    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
   <div class="wrap" id="page"></div>
 </div>
@@ -1069,7 +1613,10 @@
      than a second copy that could drift — it is the one piece of the memory
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
+<!-- §620: the next page's shape, drawn at the press (smp-app/lib/navskel.ts) -->
+<script src="/navskel.js"></script>
 <script src="/memory-split.js"></script>
+<script src="/case-split.js"></script>
 <!-- The client set-up flow (§360, spec 057): one file for this page and the
      client platform, generated to this address by scripts/build-shell.mjs,
      which refuses the build if this tag ever goes. -->

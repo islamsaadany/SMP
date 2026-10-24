@@ -424,9 +424,18 @@ with sync_playwright() as pw:
     CAP = pg.evaluate("()=>(GROUP.capabilities[0]||{}).id || ''")
     for key, what in (("fn:marketing", "the function's own work"),
                       ("cap:" + CAP, "the capability it holds")):
-        caps(pg) if key.startswith("cap:") else fns(pg)
-        if not dest(pg, key):
-            ck("%s is reachable" % what, False, key); continue
+        # §544.13 REWROTE WHERE A CAPABILITY IS REACHED, never loosened
+        # (§218): the row has no capabilities side any more, so the box is
+        # opened by its own address and must then BE that address.
+        if key.startswith("cap:"):
+            at = pg.evaluate("(k)=>{ current=k; currentSub='fnstrat'; paint(); return TARGET; }", key)
+            pg.wait_for_timeout(400)
+            if at != key:
+                ck("%s is reachable" % what, False, [key, at]); continue
+        else:
+            fns(pg)
+            if not dest(pg, key):
+                ck("%s is reachable" % what, False, key); continue
         tab(pg, "fnstrat"); sec(pg, "proj")
         d = pg.evaluate("""() => ({
           panes: document.querySelectorAll('#panel .pane').length,

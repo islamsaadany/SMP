@@ -701,7 +701,10 @@ for (const k of OWN_PAGE) {
      the switch would be drawn and dead (§96). */
   check("it wears the shared top bar, trail and all — " + k,
     /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
-    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) &&
+    /* §620: REWRITTEN, NEVER LOOSENED (§218) — the bar's script by its
+       stamped address, which is what lets the page paint without asking */
+    /<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>/.test(doc));
   check("...and the navy module bar it replaces is gone — " + k,
     !/class="bar"|class="msw"|class="mmenu"/.test(doc));
   check("...and the page's dark colours answer the switch, not only the device — " + k,
@@ -769,10 +772,18 @@ const CS = "function clientStep(";
 check("the set-up flow still has a step about the client itself to hang it on", cs.includes(CS));
 const step = cs.slice(cs.indexOf(CS), cs.indexOf("function modulesBlock("));
 check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
-check("...after the client's own fields and before the ending block",
-  step.indexOf("The client's name") < step.indexOf("modulesBlock()")
-  && step.indexOf("modulesBlock()") < step.indexOf("archiveBlock()"),
-  "name at " + step.indexOf("The client's name") + ", band at " + step.indexOf("modulesBlock()")
+/* REWRITTEN TO THE DECISION (§218, §624): the client step is Profile now, in
+   three tabs, and the band is the Modules tab's whole body — Islam took the
+   mockup's tabs (*"go with your recommendations"*). What the order asserted
+   was that the band belongs to the client's own page and not its
+   organisation's; asserted as: the band is drawn on the Modules tab, and
+   the client's own fields and the archive block are drawn on Details. */
+const modTab = step.indexOf('S.tab === "modules"');
+check("...on Profile's Modules tab, apart from the client's own fields and the archive block",
+  modTab > -1 && step.indexOf("modulesBlock()") > modTab
+  && step.indexOf("The client's name") > step.indexOf("modulesBlock()")
+  && step.indexOf("archiveBlock()") > step.indexOf("The client's name"),
+  "modules tab at " + modTab + ", band at " + step.indexOf("modulesBlock()") + ", name at " + step.indexOf("The client's name")
   + ", end at " + step.indexOf("archiveBlock()"));
 check("and drawn ONCE — a band on two steps is two places to set one thing",
   (cs.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,

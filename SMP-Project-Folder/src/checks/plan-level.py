@@ -33,11 +33,22 @@ def ck(name, ok, detail=""):
 def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception: return dflt
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(250); return True
+        el.click(); pg.wait_for_timeout(250); answer(pg); return True
     except Exception: return False
 
 TAGS = "()=>[...document.querySelectorAll('.stcard')].map(c=>c.getAttribute('data-stcard')||'-')"
@@ -70,7 +81,7 @@ with sync_playwright() as p:
     # about the STACK's order and pairing are claims about the TREE's order
     # and about which cards each level brings — and every claim below about
     # what a card holds is unchanged and still asserted.
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]')
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '[data-setupgo="shape"]')
     ck("the shape screen opens", ok)
     def lvl(k):
         return press(pg, '[data-shlvl="%s"]' % k)

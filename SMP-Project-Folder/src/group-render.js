@@ -1264,14 +1264,17 @@ function scoreSpread(rows, extra){
    the same band function, so they can never contradict each other. */
 /* §610: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
    *"the main number should be bigger and the other go a bit smaller"*). The
-   `hero` class doubles the headline and quietens the three figures under it;
-   the unit Overview's cards, which share `.headline` and `.minirow`, keep
-   their size. "4 scored" is gone — Islam was *"not sure if it's useful
+   `hero` class doubles the headline and quietens the three figures under it
+   (§616: the unit Overview's own three cards wear it too). "4 scored" is gone — Islam was *"not sure if it's useful
    info"* — and the fact it carried is said the way a reader acts on it: how
    many have NOT reported, beside the number they are missing from, and only
    while there are some. Highest stays ink (it is never the worry); Lowest
    keeps its band colour only when it is out of the top band, so colour on the
    card means something to look at. */
+/* A Lowest in the top band says nothing to look at, so it stays ink. */
+function quietLow(lo){
+  return '<b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' + pct(lo) + '</b>';
+}
 function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   var r = pl ? Math.round(ex / pl * 100) : null;
   var unreported = nMeasures - nScored;
@@ -1282,8 +1285,7 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
         (unreported > 0 ? '<span class="unrep">' + unreported + ' not reported yet</span>' : '') + '</div>' +
       '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b></div>' +
         '<div><em>Highest</em><b>' + pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' +
-          pct(lo) + '</b></div></div></div>' +
+        '<div><em>Lowest</em>' + quietLow(lo) + '</div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -3187,7 +3189,10 @@ function themesBox(gpg){
         if (!nv || ts.some(function(x){ return x !== t && x.ab === nv; })) return;
         var old = t.ab; t.ab = nv; renameTheme(old, nv); }) + '</td>' +
       '<td>' + inputOr(gpg, t.name, "", function(v){ t.name = v; }) + '</td>' +
-      '<td>' + inputOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
+      /* §613: a note runs to several lines (Islam: *"allow the theme notes to
+         have multiple lines"*) — the growing box the Core Values' definitions
+         use, and the cards and the Temple's columns keep its line breaks. */
+      '<td>' + fieldOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
       '<td class="cc"><span class="mono">' + used + '</span></td>' +
       '<td class="cc acts1">' + (used
         ? '<span class="why">In use</span> ' + tip("A " + L1("pillar").toLowerCase() + " carries this " +
@@ -3401,7 +3406,9 @@ function renderUnitPerformance(u){
      solid fill, and the page keeps the row. See `group-extra.css`. */
   return perfActs(presentMenu("unit", u.ukey)) +
 
-    '<div class="scores">' +
+    /* §616: and the Overview's own cards read the same way (Islam, of the
+       three above the rail: *"why not done the same in the cards above?"*). */
+    '<div class="scores hero">' +
       /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
          BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
          so the page leads with the same number or the two disagree about one
@@ -3414,10 +3421,8 @@ function renderUnitPerformance(u){
           deltaTag(u.ukey) +
           '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu") + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
-            pct(koHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
-            pct(koLo) + '</b></div></div></div>')) +
+          '<div><em>Highest</em><b>' + pct(koHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(koLo) + '</div></div></div>')) +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
@@ -3430,10 +3435,8 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + plId + '">See the ' +
             plWord + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
-            pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(plLo) + '">' +
-            pct(plLo) + '</b></div></div></div>' +
+          '<div><em>Highest</em><b>' + pct(plHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(plLo) + '</div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -5466,7 +5469,10 @@ function monthlySeg(row, fld, q, reg){
     var on = (mode === "q") === q;
     return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
       '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
-      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      /* §538's house rule: HELD, not dead — `aria-disabled` keeps the
+         pointer and the focus, so the reason on it reaches somebody; the
+         handler declines the press. */
+      (!on && stuck ? ' aria-disabled="true" title="Set a compile rule first, so the figures can be carried across"' : '') +
       '>' + word + '</button>';
   };
   return '<span class="mpseg" role="group" aria-label="Plan this target">' +
@@ -6021,7 +6027,9 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        \u2014 an empty labelled block asserts that something is missing when the
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
-    (endInMind || editing
+    /* §621: and only where the layer's End in Mind is ticked (the shape
+       screen), whatever is written — unticked hides it and keeps it. */
+    (eimOn(tgt) && (endInMind || editing)
       ? '<div class="endin"><span class="boxlab">' + L1("endinmind") + '</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
@@ -9174,7 +9182,8 @@ function fnObjPlan(fk){
 function fnObjCards(fk){
   var ko = fnObjScore(fk), ac = fnActionsTally(fk);
   var objs = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
-  return '<div class="scores">' +
+  /* §616: the same two cards as a unit's, so the same headline. */
+  return '<div class="scores hero">' +
     '<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Objectives performance <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +

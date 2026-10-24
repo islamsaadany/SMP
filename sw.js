@@ -602,7 +602,43 @@
    offers; one answer for the quarter a cycle ends in. The built file's bytes
    changed (§91). Proved held by no commit in any ref's history after
    fetching every ref (§94.16). */
-const SHELL = "smp-shell-v7.02-capability-parts";
+/* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
+   file's bytes changed (§91). Proved held by no commit in any ref's history
+   (§94.16). */
+/* v7.05-cards-overview-slides — §616: the unit Overview's cards and the
+   direction slide's "where it stands" read like §610's cards. Numbered v7.01
+   on the branch; main took v7.01–v7.04 while it waited. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history (§94.16). */
+/* v7.06-strip-card — §618: the squeezed strip is its own card, a navy
+   outline and the gutter kept under it. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v7.07-checks-cleared — §619: the checks already red on live cleared, the
+   Presentation button on white, the month/quarter switch held the platform's
+   way, and the Setup menu line "Planning & reporting". The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.08-instant-moves — §620: every press shows something at once; the
+   files a page waits on carry their hash and are cached for good. The served
+   files' bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v7.09-ask-and-apply — §621: a floating box asks first with the impact;
+   colours and scoring bands wait for Apply with an Undo; End in Mind has its
+   own tick; the Terminology page is gone. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v7.10-client-group — §624: the client's own pages are the rail's first
+   group (Profile in three tabs, The shape), the Official BU list joins The
+   organisation, Capabilities and the Caps column only where they list
+   something, and a client's old word shows in its box. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.11-capability-owner — §625 and §626: the company's own data described
+   for the page check; the Copilot's Directions chat sets a capability's
+   Owner, a person, never a function. The built file's bytes changed (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+const SHELL = "smp-shell-v7.11-capability-owner";
 const ASSETS = [
   "/",
   "/index.html",

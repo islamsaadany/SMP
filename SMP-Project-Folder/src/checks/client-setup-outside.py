@@ -108,8 +108,13 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             return self._file(PAGE, "text/html; charset=utf-8")
         if path == "/platform-page.js":
             return self._file(os.path.join(REPO, "smp-app", "public", "platform-page.js"), "application/javascript; charset=utf-8")
-        if path == "/memory-split.js":
-            return self._file(os.path.join(REPO, "smp-app", "public", "memory-split.js"), "application/javascript; charset=utf-8")
+        # the shapes drawn before the answers (§620) are served by the app itself
+        # (app/navskel.js), not from public/; a page here draws without them
+        if path == "/navskel.js":
+            self._send("", "application/javascript; charset=utf-8")
+            return
+        if path in ("/memory-split.js", "/case-split.js"):
+            return self._file(os.path.join(REPO, "smp-app", "public", path[1:]), "application/javascript; charset=utf-8")
         if path == "/client-setup.js":
             return self._file(CSJS, "application/javascript; charset=utf-8")
         if path in ("/favicon.svg", "/favicon.png"):
@@ -263,9 +268,13 @@ with sync_playwright() as p:
     ck("…and loads the one client set-up module instead", '<script src="/client-setup.js">' in SRC)
     ck("…which the page holds, with the console's two pieces and the platform's one on it",
        ev(pg, "()=>typeof CLIENTSETUP==='object' && ['mount','mountCreate','mountArchived'].every(k=>typeof CLIENTSETUP[k]==='function')", False))
-    ck("the clients grid is drawn, with the live card and the archived band",
-       bool(q(pg, '[data-grid="clients"] .ccard[data-client="elabd-foods"]')) and
-       bool(q(pg, '[data-grid="archived"] .ccard[data-client="nile-mills"]')))
+    # THE ARCHIVED BAND IS THE ENDED CHOICE NOW (spec 067's Clients filter) —
+    # rewritten to that truth, never loosened (§218).
+    live = bool(q(pg, '[data-grid="clients"] .ccard[data-client="elabd-foods"]'))
+    press(pg, '.clwhich button[data-which="ended"]', 400)
+    ck("the clients grid is drawn with the live card, and Ended holds the archived one",
+       live and bool(q(pg, '[data-grid="archived"] .ccard[data-client="nile-mills"]')))
+    press(pg, '.clwhich button[data-which="active"]', 400)
     ck("and no step rail is on the page", q(pg, ".wzstep") is None and q(pg, ".wzrail") is None)
 
     # ── 2 · A LIVE CARD'S SETTINGS IS A DOOR ─────────────────────────────
@@ -336,6 +345,7 @@ with sync_playwright() as p:
     # ── 4 · AN ARCHIVED CARD'S SETTINGS STAYS HERE ───────────────────────
     print("\n§4 · an archived card's Settings draws the archived piece, on this page")
     console(pg)
+    press(pg, '.clwhich button[data-which="ended"]', 400)
     n_client = count("client")
     ck("the archived card carries Settings beside Bring back",
        bool(q(pg, '[data-grid="archived"] .ccard[data-client="nile-mills"] .ccfg')) and

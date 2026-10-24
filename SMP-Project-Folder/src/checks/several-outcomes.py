@@ -86,7 +86,7 @@ with sync_playwright() as p:
         pg.wait_for_timeout(250)
         # §544: the Structure step is the shape screen, and the units' card
         # opens from the tree — one level at a time.
-        pg.click('.wzstep[data-step="shape"]', timeout=4000); pg.wait_for_timeout(250)
+        pg.click('[data-setupgo="shape"]', timeout=4000); pg.wait_for_timeout(250)
         pg.click('[data-shlvl="bu"]', timeout=4000); pg.wait_for_timeout(250)
         okp = True
     except Exception as e: okp = str(e)[:120]

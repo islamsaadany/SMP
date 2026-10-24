@@ -158,6 +158,8 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §621: whether a layer shows its End in Mind — the shape screen's tick, inside the aspiration. */
+function eimOn(target){ return SMPRules.endInMindOn(GROUP, target); }
 /* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
    and Core Values are owed (Missing) only while Client set-up › Structure
    carries them for this unit; off, they are not drawn and not counted, and
@@ -899,6 +901,33 @@ function branding(){
     if (!(k in b)) b[k] = BRAND_DEFAULT[k];
   });
   return b;
+}
+
+/* ══ A COLOUR WAITS FOR APPLY (§621) ════════════════════════════════════
+   Islam: *"the color shouldn't change before apply; the undo is just a temp
+   button that appears shortly after the application so the user can get
+   back, and reset can revert it back to shipped palette"* — and then *"make
+   this a general rule of colors elements"*.
+
+   A picked colour is held HERE, never in the graph, so nothing on the page
+   and nothing in a save can carry it before Apply: the boxes show it, the
+   page does not. A key PRESENT means it changed — a value is the new
+   colour, null is cleared (the palette's own). Apply writes it into the
+   graph and keeps what it replaced for UNDO_MS; Undo puts that back.
+
+   EACH COLOUR AREA IS ONE ENTRY IN APPLY_AREAS, so the row under it, the
+   leave question and the Undo window are written once for every area that
+   sets a colour — the tenant's two today, the scoring bands beside them,
+   and whatever colour control comes next (the rule, not a list of pages). */
+var UNDO_MS = 10000;
+var BRAND_PEND = {};
+var BRAND_UNDO = null;
+var APPLY_AREAS = {};
+function brandPendKeys(){ return Object.keys(BRAND_PEND); }
+var BRAND_WORD = { accent: "the accent", bar: "the navigation bar" };
+function brandWaiting(){
+  if ("reset" in BRAND_PEND) return ["the shipped palette"];
+  return brandPendKeys().map(function(k){ return BRAND_WORD[k] || k; });
 }
 
 /* ══ COMMUNICATION (§72) ═══════════════════════════════════════════
@@ -7237,8 +7266,10 @@ var BAND_COLOURS = [
    starts at 0 by construction, so the new one goes immediately above it,
    halfway between 0 and the band above — which descends by arithmetic rather
    than by hoping somebody types a number in order. */
-function addBand(){
-  var b = BANDS.bands;
+/* §621: both act on the list they are handed — the bands being edited
+   (bandsEdit, below) on the Setup page, the stored ones by default. */
+function addBand(list){
+  var b = list || BANDS.bands;
   var above = b.length > 1 ? b[b.length - 2].floor : 100;
   var used = {};
   b.forEach(function(x){ used[x.key] = 1; });
@@ -7253,11 +7284,73 @@ function addBand(){
 /* AND REMOVING ONE PUTS THE FLOOR BACK. Every figure has to land somewhere, so
    whatever ends up last starts at 0 — take the bottom band away and the one
    above it inherits that, or a figure of 12 would belong to no band at all. */
-function removeBand(i){
-  var b = BANDS.bands;
+function removeBand(i, list){
+  var b = list || BANDS.bands;
   if (b.length <= 2) return;
   b.splice(i, 1);
   b[b.length - 1].floor = 0;
+}
+
+/* ══ THE BANDS ARE A COLOUR AREA (§621) ═══════════════════════════════════
+   Islam: *"for any colors adjustment like the bands as well let's use the
+   same concept of apply discard and undo"*. A band's key IS its colour
+   (§168), and its floor decides which colour every figure in the tenant
+   wears — so the whole table waits for Apply, not only the swatches: an
+   edit goes into BANDS_DRAFT, a copy, and BANDS is untouched until Apply.
+   Every pill, gauge and deck keeps today's bands meanwhile, because they
+   all read BANDS through bandOf(). */
+var BANDS_DRAFT = null;
+var BANDS_UNDO = null;
+function bandsEdit(){
+  if (!BANDS_DRAFT) BANDS_DRAFT = JSON.parse(JSON.stringify(BANDS.bands));
+  return BANDS_DRAFT;
+}
+/* What waits, in the page's words — one line per kind of change, named by
+   the level it is on as the table shows it. */
+function bandsWaiting(){
+  var d = BANDS_DRAFT, s = BANDS.bands, out = [];
+  if (!d) return out;
+  if (d.length > s.length) out.push(d.length - s.length === 1 ? "a level added" : (d.length - s.length) + " levels added");
+  if (d.length < s.length) out.push(s.length - d.length === 1 ? "a level removed" : (s.length - d.length) + " levels removed");
+  if (d.length === s.length) d.forEach(function(x, i){
+    var o = s[i], name = x.label || o.label;
+    if (x.key !== o.key) out.push("the colour for " + name);
+    if (x.floor !== o.floor) out.push("the floor for " + name);
+    if (x.label !== o.label) out.push("the name " + o.label);
+  });
+  return out;
+}
+function bandsOrdered(list){
+  for (var i = 1; i < list.length; i++) if (list[i].floor >= list[i-1].floor) return false;
+  return true;
+}
+/* WHAT A NEW SET OF BANDS WOULD MOVE: every scored measure on every unit and
+   function, read with the platform's own score (measureScore), and the band it
+   lands in now against the band it would land in. A count of things that
+   change colour with no figure having changed — the sentence the page used
+   to print in red, made exact and moved to the moment it is true. */
+function bandShift(next){
+  var of = 0, moved = 0;
+  var bandIn = function(v, list){
+    for (var i = 0; i < list.length; i++) if (v >= list[i].floor) return list[i].key + "|" + list[i].label;
+    var z = list[list.length - 1]; return z.key + "|" + z.label;
+  };
+  /* Only a measure WITH a score has a band to move; one with no data reads
+     "No data" under any floors, so it is not counted among the scored. */
+  var count = function(s){
+    ((s && s.items) || []).forEach(function(p){
+      scorableMeasures(p).forEach(function(m){
+        var v = measureScore(m);
+        if (v == null || isNaN(v)) return;
+        of++;
+        if (bandIn(v, BANDS.bands) !== bandIn(v, next)) moved++;
+      });
+    });
+  };
+  count(GROUP);
+  (UNIT_KEYS || []).forEach(function(k){ count(UNITS[k]); });
+  (FUNCTION_KEYS || []).forEach(function(k){ count(FUNCTIONS[k]); });
+  return { moved: moved, of: of };
 }
 
 function bandOf(v){

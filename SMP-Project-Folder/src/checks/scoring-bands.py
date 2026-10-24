@@ -38,6 +38,13 @@ def ck(w, ok, x=""):
 
 
 def bands(pg):
+    # §621: THE PEN EDITS A DRAFT and Apply stores it (the bands are a colour
+    # area). This reads what the TABLE holds — the draft while there is one —
+    # and §6b presses Apply and reads what was STORED (§96).
+    return pg.evaluate("()=>JSON.parse(JSON.stringify(BANDS_DRAFT || BANDS.bands))")
+
+
+def stored(pg):
     return pg.evaluate("()=>JSON.parse(JSON.stringify(BANDS.bands))")
 
 
@@ -139,8 +146,8 @@ with sync_playwright() as p:
     pg.keyboard.press("Tab")
     pg.wait_for_timeout(500)
     got = bands(pg)
-    ck("the name is stored", got[i]["label"] == "Slipping", got[i])
-    ck("the floor is stored", got[i]["floor"] == 45, got[i])
+    ck("the name is held for Apply", got[i]["label"] == "Slipping", got[i])
+    ck("the floor is held for Apply", got[i]["floor"] == 45, got[i])
     rng = pg.eval_on_selector_all(ROWS + " td:nth-child(3)", "n=>n.map(x=>x.textContent.trim())")
     ck("the range beside it is live", rng[i].startswith("45%"), rng)
     # AND THE ONE UNDER IT MOVED WITH IT: a floor is the boundary between two
@@ -172,6 +179,20 @@ with sync_playwright() as p:
     ck("...with the reason on the page",
        "at least two" in pg.eval_on_selector("#panel", "e=>e.innerHTML"))
 
+    # ── 6b · NOTHING WAS STORED UNTIL APPLY, AND APPLY STORES IT (§621) ──
+    print("\n6b · Apply")
+    ck("the stored scale is still the shipped one while the draft waits", stored(pg) == start, stored(pg))
+    pg.evaluate("()=>document.querySelector('[data-applygo=\"bands\"]').click()")
+    pg.wait_for_timeout(400)
+    asked = pg.evaluate("()=>(document.querySelector('.askbox')||{}).innerText||''")
+    ck("Apply asks first, with what the change re-bands", "would show a different band" in asked, asked)
+    pg.evaluate("()=>{const y=document.querySelector('.askbox .askyes'); if(y) y.click();}")
+    pg.wait_for_timeout(600)
+    ck("…and stores the two levels", [x["label"] for x in stored(pg)] == [x["label"] for x in two], stored(pg))
+    pg.evaluate("()=>document.querySelector('[data-applyundo=\"bands\"]').click()")
+    pg.wait_for_timeout(500)
+    ck("Undo puts the shipped scale back", stored(pg) == start, stored(pg))
+
     # ── 7 · THE TWO STALE NOTES ARE GONE, THE WARNING IS NOT ─────────────
     # BOTH ENDS (§90): a removal is the easiest thing to half-do, and the note
     # that matters sits in the same block as the two that went.
@@ -181,8 +202,11 @@ with sync_playwright() as p:
        "scoring.ts" not in txt)
     ck("the note naming thresholds the product no longer ships is gone",
        "70 and 50 match" not in txt)
-    ck("...but the warning that a change rewrites history stays",
-       "rewrites history" in txt)
+    # REVERSED AT §621, NOT LOOSENED: the warning is said at Apply now, with
+    # the number it moves (6b asserts the box), and the page no longer prints
+    # it on every visit — the agreed paragraph table.
+    ck("...and the history warning moved into Apply's box",
+       "rewrites history" not in txt and "would show a different band" in asked)
 
     # ── 8 · WITHOUT THE GRANT, NOTHING AT ALL ────────────────────────────
     # MEASURED RATHER THAN ASSUMED: `c_bands` is only ever `edit` or `none` in
@@ -201,6 +225,16 @@ with sync_playwright() as p:
         grants[g] = (grants[g] || 0) + 1;
         if (g !== "edit" && !found) found = p.key;
       }
+      /* Prefer somebody who DOES hold Setup but not this page: for them the
+         rail is drawn and the bands entry's absence is a real answer. Only
+         when nobody is like that does the first one without the grant stand. */
+      for (const p of PEOPLE) {
+        if (p.active === false) continue;
+        VIEWER = p.key;
+        if ((grant("c_bands") || "none") === "edit") continue;
+        leaveModes(); paint();
+        if (document.querySelector('[data-md="setup"]')) { found = p.key; break; }
+      }
       VIEWER = keep; paint();
       return {who: found, grants: grants}; }""")
     ck("the scale is one person's to set, not everybody's",
@@ -208,8 +242,14 @@ with sync_playwright() as p:
     if who["who"]:
         pg.evaluate("(k)=>{ VIEWER = k; leaveModes(); paint(); }", who["who"])
         pg.wait_for_timeout(600)
-        pg.evaluate("()=>document.querySelector('[data-md=\"setup\"]').click()")
+        # The first person found without the grant may hold no Setup page at
+        # all, and then the Setup button is not drawn for them (§42: a door
+        # nobody may use is not drawn). That is the page out of their reach a
+        # fortiori — so the button is pressed when it is there, and the three
+        # absences below are asserted either way, never skipped.
+        had_setup = pg.evaluate("()=>{ const b = document.querySelector('[data-md=\"setup\"]'); if (b) b.click(); return !!b; }")
         pg.wait_for_timeout(700)
+        print("      (%s)" % ("Setup opened for them" if had_setup else "they hold no Setup at all"))
         ck("the page is not in their rail at all",
            pg.eval_on_selector_all('[data-setupgo="bands"]', "n=>n.length") == 0)
         ck("no colour picker anywhere", pg.eval_on_selector_all(".bcol", "n=>n.length") == 0)

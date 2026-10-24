@@ -73,7 +73,7 @@ TEAM = [
      "seat": "super", "person_key": "ff_islam"},
     {"email": "noran.essam@forefront.consulting", "name": "Noran Essam",
      "seat": "smoteam", "person_key": "smo"},
-    {"email": "omar.abdelhamid@forefront.consulting", "name": "Omar Abdel Hamid",
+    {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid",
      "seat": "smoteam", "person_key": None},
 ]
 REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade.example"},
@@ -81,7 +81,7 @@ REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade
        {"key": "own_mob", "name": "Mennah Farouk", "email": "mennah.farouk@rayatrade.example"}]
 OFFICE = [{"email": "islam.saadany@forefront.consulting", "name": "Islam Saadany", "is_admin": True},
           {"email": "noran.essam@forefront.consulting", "name": "Noran Essam", "is_admin": False},
-          {"email": "omar.abdelhamid@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
+          {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
           {"email": "hana.zaki@forefront.consulting", "name": "Hana Zaki", "is_admin": False}]
 
 # The two client shapes, switched between runs — `made_here` is what decides
@@ -139,6 +139,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 }).encode(), "application/json")
                 return
             STATE["posts"].append(body)
+            # §624: one refusal on demand, so the page is seen to SAY it.
+            if body.get("action") == "setTeam" and STATE.get("refuse"):
+                self._s(200, json.dumps({"ok": False, "error": STATE["refuse"]}).encode(), "application/json")
+                return
         self._s(200, b'{"ok":true}', "application/json")
 
 
@@ -281,9 +285,17 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: errs.append(str(e)))
     open_team(pg)
     n = ev(pg, MEASURE)
-    ck("at 1100 every address clips, and every one is on its own hover",
-       hover_rule(n.get("mailTitles"))
-       and all(c["clipped"] for c in (n.get("mailTitles") or [])), n.get("mailTitles"))
+    # REWRITTEN TO THE RULE (§218, §94.8). "At 1100 every address clips" was a
+    # width fact about the column as it stood; the table now gives the address
+    # more room, so at 1100 only the long one clips. What §88 says is the
+    # agreement — a hover exactly where the value did not fit — and a narrower
+    # window can only clip MORE, never fewer. Both asserted, with the long
+    # address clipping here as it already did at 1600.
+    n_clip = sum(1 for c in (n.get("mailTitles") or []) if c["clipped"])
+    m_clip = sum(1 for c in (m.get("mailTitles") or []) if c["clipped"])
+    ck("at 1100 a hover exactly where an address clips, and no fewer clip than at 1600",
+       hover_rule(n.get("mailTitles")) and n_clip >= max(1, m_clip),
+       {"1100": n.get("mailTitles"), "clipped at 1600": m_clip})
     ck("...and a control cell still carries none",
        all(x == "" for x in (n.get("asTitles") or []) + (n.get("seatTitles") or [])),
        {"as": n.get("asTitles"), "seat": n.get("seatTitles")})
@@ -327,7 +339,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     rm = [p for p in STATE["posts"] if p.get("action") == "setTeam" and p.get("on") is False]
     ck("Remove posts that person off this client",
-       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid@forefront.consulting",
+       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid.elsayed.office@forefront.consulting",
        {"pressed": ok_rm, "posts": STATE["posts"]})
     pg.close()
 
@@ -350,8 +362,16 @@ with sync_playwright() as p:
     pg.close()
     STATE["made_here"] = False
 
-    # ── 6 · ONE RENDERER, TWO HOSTS (§53.5) ─────────────────────────────
-    print("\n6 · the flow's own step draws the same table, in its own column")
+    # ── 6 · ONE PAGE, ONE PLACE (§624) ──────────────────────────────────
+    # REWRITTEN TO THE DECISION (§218): this section asserted the flow's own
+    # office step drew the same table in its column — one renderer, two
+    # hosts (§364). Islam took the second host away (*"forefront team keep it
+    # under people & Access"*): the step went, the page stays where it is.
+    # What the two-host check was FOR still holds — one renderer, so the
+    # table cannot drift — and is asserted as: no step carries it, the
+    # People & access group does, and the page now has the line a refusal
+    # is said on, which only the flow's column used to have.
+    print("\n6 · the team is one page, in People & access, and says what the server refused")
     pg = b.new_page(viewport={"width": 1600, "height": 950})
     pg.add_init_script(INIT)
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -362,33 +382,32 @@ with sync_playwright() as p:
     except Exception:
         errs.append("PROBE: no Setup button")
     pg.wait_for_timeout(400)
-    pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"
-                ".find(x=>x.dataset.setupgo==='start'); if(r) r.click();}")
+    f = ev(pg, """() => ({
+      steps: (typeof CLIENTSETUP !== 'undefined') ? CLIENTSETUP.STEPS.map(s => s.k).join(',') : null,
+      grp: (function(){ const r = document.querySelector('.setuprail [data-setupgo="team"]');
+                        const g = r && r.closest('[data-railitems]'); return g ? g.dataset.railitems : null; })(),
+      clientPages: [...document.querySelectorAll('.setuprail [data-railitems="client"] .ritem')].map(r => r.dataset.setupgo).join(',')
+    })""") or {}
+    ck("the set-up flow has no office step any more", f.get("steps") == "client,shape", f.get("steps"))
+    ck("...Forefront team stays in People & access", f.get("grp") == "who", f.get("grp"))
+    ck("...and is not one of the client's own pages", "team" not in (f.get("clientPages") or "").split(","), f.get("clientPages"))
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=\"start\"]'); if(r) r.click();}")
     pg.wait_for_timeout(1200)
-    pg.evaluate("()=>{const s=[...document.querySelectorAll('.wzrail .wzstep')];"
-                " if(s.length) s[s.length-1].click();}")
-    pg.wait_for_timeout(1000)
-    f = ev(pg, """() => {
-      const host = document.querySelector('[data-csetup]');
-      const cfg = host && host.querySelector('.cfg');
-      const t = cfg && cfg.querySelector('table.teamcfg');
-      const col = host && host.querySelector('.wzcol');
-      const lines = (e) => new Set([...e.getClientRects()].filter(r => r.width > 0)
-                                    .map(r => Math.round(r.top))).size;
-      return { at: (typeof CLIENTSETUP !== 'undefined') ? CLIENTSETUP.at() : null,
-               table: !!t,
-               colW: col ? Math.round(col.getBoundingClientRect().width) : null,
-               fits: cfg ? (cfg.scrollWidth <= cfg.clientWidth) : null,
-               multi: [...(t ? t.querySelectorAll('td') : [])].filter(c => lines(c) > 1).length,
-               notes: [...(host ? host.querySelectorAll('p.wzwhy') : [])].map(p => p.className) };
-    }""")
-    ck("the flow stands on its office step", f.get("at") == "office", f.get("at"))
-    ck("...and draws the very same table", f.get("table") is True, f)
-    ck("...inside the flow's own column, fitting it",
-       f.get("fits") is True and (f.get("colW") or 0) <= 760, {"fits": f.get("fits"), "col": f.get("colW")})
-    ck("...one line a row there too", f.get("multi") == 0, f.get("multi"))
-    ck("...and its note is the flow's quiet line, not the page's block",
-       len(f.get("notes") or []) >= 1, f.get("notes"))
+    ck("...nor drawn on Profile", ev(pg, "()=>!document.querySelector('[data-csetup] table.teamcfg')", False))
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=\"team\"]'); if(r) r.click();}")
+    pg.wait_for_timeout(1500)
+    ck("the page carries its own line for what the server says",
+       ev(pg, "()=>!!document.querySelector('[data-cteam] [data-cssaid]')", False))
+    # BOTH ENDS (§94.2): a line that exists proves nothing until a refusal
+    # lands in it. A seat change is refused, and the page must say so.
+    STATE["refuse"] = "Not changed: the stand-in refused it."
+    pressed = ev(pg, """()=>{const b=[...document.querySelectorAll('[data-cteam] table.teamcfg button')]
+      .find(x=>/^(Super user|SMO team)$/.test(x.textContent.trim()) && !x.classList.contains('on'));
+      if(!b) return false; b.click(); return true;}""", False)
+    pg.wait_for_timeout(900)
+    STATE["refuse"] = None
+    said = ev(pg, "()=>{const n=document.querySelector('[data-cteam] [data-cssaid]'); return n && !n.hidden ? n.textContent : ''}", "") or ""
+    ck("...and a refused change is said there", pressed and "stand-in refused" in said, (pressed, said))
     pg.close()
 
     # ── 7 · BELOW THE WIDTH IT FITS AT, IT SCROLLS RATHER THAN CUTS ─────
@@ -396,13 +415,25 @@ with sync_playwright() as p:
     # and a table overflowing a box with `overflow:visible` is the reported
     # fault one size down. BOTH ENDS (§94.2): the box must be able to scroll
     # AND the whole table must be reachable inside it.
+    # REWRITTEN TO THE RULE (§218): the 1000px window no longer squeezes the
+    # table — its box is wider there now — so "at 1000 it is wider" stopped
+    # exercising anything. The width is FOUND rather than written: walk down
+    # until the table is wider than its box (it must happen above phone
+    # width, or the scroll path is never exercised), and assert the scroll
+    # there.
     print("\n7 · below the width it fits at, the box scrolls (§88)")
-    pg = b.new_page(viewport={"width": 1000, "height": 950})
-    pg.add_init_script(INIT)
-    pg.on("pageerror", lambda e: errs.append(str(e)))
-    open_team(pg)
-    sc = ev(pg, SCROLLBOX)
-    ck("at 1000 the table is wider than its box", sc.get("wider") is True, sc)
+    sc, at = {}, None
+    for w in (1000, 900, 800, 700, 600):
+        pg = b.new_page(viewport={"width": w, "height": 950})
+        pg.add_init_script(INIT)
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        open_team(pg)
+        sc = ev(pg, SCROLLBOX)
+        if sc.get("wider") is True:
+            at = w
+            break
+        pg.close()
+    ck("somewhere above phone width the table is wider than its box (%s)" % at, at is not None, sc)
     ck("...so the box scrolls, and the last column can be reached",
        sc.get("canScroll") is True and sc.get("reached", 0) >= sc.get("need", 1), sc)
     ck("...every row still one line, and the PAGE gains no sideways scroll",

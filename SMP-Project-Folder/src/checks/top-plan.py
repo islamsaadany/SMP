@@ -30,11 +30,22 @@ def ck(name, ok, detail=""):
 def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception as e: return dflt
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(250); return True
+        el.click(); pg.wait_for_timeout(250); answer(pg); return True
     except Exception: return False
 
 with sync_playwright() as p:
@@ -106,7 +117,9 @@ with sync_playwright() as p:
     ck("…and not the builder or the workbook, which cannot address the top layer",
        safe(pg, "()=>!document.querySelector('#panel .bempty [data-buildplan]') && !/Import/.test(document.querySelector('#panel .bempty').innerText)") is True)
     ck("pressing it adds the first pillar to the group's own row", press(pg, '[data-rowadd="pillar|group"]')
-       and safe(pg, "()=>GROUP.items.length===1 && GROUP.items[0].id==='group-P1'") is True,
+       # §588 mints a short random tag after the number (`group-P1-x7k2`), so
+       # two tabs adding at once cannot collide — rewritten, never loosened.
+       and safe(pg, "()=>GROUP.items.length===1 && /^group-P1-[0-9a-z]{4}$/.test(GROUP.items[0].id)") is True,
        safe(pg, "()=>JSON.stringify(GROUP.items)"))
     ck("…with its code D001 — a direction's own letter (§482)",
        safe(pg, "()=>pillarCode(topAsUnit(), 0)", "") == "D001", safe(pg, "()=>pillarCode(topAsUnit(), 0)"))
@@ -175,7 +188,7 @@ with sync_playwright() as p:
     # card rides with the top level's (§218: the card and everything it
     # holds are unchanged; only the way in is).
     ck("the set-up flow opens on the shape screen",
-       ok and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]'))
+       ok and press(pg, '[data-setupgo="shape"]') and press(pg, '[data-shlvl="top"]'))
     ck("the top level brings the capabilities' card", safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"]')") is True)
     ck("…whose plan names pillars and projects only",
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects")

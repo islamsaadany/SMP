@@ -160,7 +160,8 @@ with sync_playwright() as pw:
     ev(pg, SET, ["#panel .themeband tbody tr:nth-child(4) input.themecode", "xy"])
     ck("a free code is stored, upper case", ev(pg, "() => GROUP.themes[3].ab") == "XY")
     ev(pg, SET, ["#panel .themeband tbody tr:nth-child(4) td:nth-child(3) input", "Customer obsession"])
-    ev(pg, SET, ["#panel .themeband tbody tr:nth-child(4) td:nth-child(4) input", "New for 2027"])
+    # §613: the note is a box of several lines now, so it is reached as the field it is
+    ev(pg, SET, ["#panel .themeband tbody tr:nth-child(4) td:nth-child(4) .fld", "New for 2027"])
     ck("its name and note are stored",
        ev(pg, "() => [GROUP.themes[3].name, GROUP.themes[3].note]") == ["Customer obsession", "New for 2027"])
     n_ot = ev(pg, "() => pillarsUsingTheme('OT')")
@@ -236,6 +237,33 @@ with sync_playwright() as pw:
     t = ev(pg, "() => { EDIT_PAGE.temple = true; paint(); const r = { tables: document.querySelectorAll('#panel table').length, fields: document.querySelectorAll('#panel .fld').length, temple: !!document.querySelector('#panel .temple') }; EDIT_PAGE.temple = false; paint(); return r; }")
     ck("the old flag forced on still draws the picture, with no table and no field",
        t.get("temple") and t.get("tables") == 0 and t.get("fields") == 0, t)
+
+    # ── 3b · A THEME'S NOTE RUNS TO SEVERAL LINES (§613) ──────────────
+    # Islam: "allow the theme notes to have multiple lines". The box is the
+    # Core Values' definition box, where Enter is a new line and not a commit
+    # (§229's two kinds); the cards and the Temple's columns keep the breaks.
+    print("3b · a theme's note runs to several lines")
+    ev(pg, "() => { current = 'group'; currentSub = 'strategy'; CURSEC.strategy = 'found'; EDIT_PAGE.foundation = true; paint(); }")
+    box = ev(pg, """() => { const f = document.querySelector('#panel .themeband tbody tr:nth-child(1) td:nth-child(4) .fld');
+      return f ? { tag: f.tagName, grow: f.classList.contains('grow') } : null; }""")
+    ck("the note is a box of several lines, not a one-line field",
+       isinstance(box, dict) and box.get("tag") == "TEXTAREA" and box.get("grow") is False, box)
+    sel = "#panel .themeband tbody tr:nth-child(1) td:nth-child(4) textarea"
+    if pg.query_selector(sel):
+        pg.click(sel); pg.keyboard.press("End"); pg.keyboard.press("Control+End")
+        pg.keyboard.type("Economy of scale"); pg.keyboard.press("Enter"); pg.keyboard.type("Second line")
+        pg.click("#panel .themeband .boxlab"); pg.wait_for_timeout(200)
+    note = ev(pg, "() => GROUP.themes[0].note")
+    ck("Enter starts a new line, and both lines are stored",
+       isinstance(note, str) and note.endswith("Economy of scale\nSecond line"), note)
+    ev(pg, "() => { EDIT_PAGE.foundation = false; paint(); }")
+    card = ev(pg, """() => { const n = document.querySelector('#panel .themecard .themenote');
+      return n ? { ws: getComputedStyle(n).whiteSpace, lines: Math.round(n.getBoundingClientRect().height / parseFloat(getComputedStyle(n).lineHeight)) } : null; }""")
+    ck("the card keeps the line break", isinstance(card, dict) and card.get("ws") == "pre-line" and card.get("lines", 0) >= 2, card)
+    ev(pg, "() => { currentSub = 'temple'; paint(); }")
+    col = ev(pg, """() => { const n = document.querySelector('#panel .pillars .pillar em');
+      return n ? getComputedStyle(n).whiteSpace : null; }""")
+    ck("...and so does the Temple's column", col == "pre-line", col)
 
     # ── 4 · EL ABD'S SHAPE ────────────────────────────────────────────
     print("4 · El Abd's shape: units off, its capabilities in its plan, themes off")

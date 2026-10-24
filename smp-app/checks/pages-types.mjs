@@ -119,6 +119,7 @@ interface Screen { isExtended: boolean; }
    set-up flow — whose strategy-page names it does NOT have (§594). */
 const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
+declare var CaseSplit: Closed<typeof import("./case-split.js")>;
 ` + DOM;
 
 const STRATEGY_BREAKS = {
@@ -260,16 +261,25 @@ function assembleStrategy() {
    build-shell.mjs copies to that address — a script added to the page that
    this does not know is a refusal, never a page quietly checked without it —
    and its own inline script. */
-const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js") };
+/* §620: /navskel.js is KNOWN and left out of the page read: it is the
+   press drawing (lib/navskel.ts), one closed function that names nothing of
+   the console's and that the console names nothing of — the same script
+   every client page loads — so it is not part of the console's page. */
+const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/case-split.js": join(APP, "lib", "case-split.cjs"),
+                      "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
 function assembleConsole() {
   const dir = mkdtempSync(join(tmpdir(), "console-types-"));
   const page = readFileSync(join(REPO, "platform.html"), "utf8");
   const files = ["globals.d.ts"];
   for (const m of page.matchAll(/<script src="([^"]+)"><\/script>/g)) {
-    if (!CONSOLE_SRC[m[1]]) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (!(m[1] in CONSOLE_SRC)) throw new Error("pages-types: platform.html loads " + m[1] + ", which this check does not know");
+    if (CONSOLE_SRC[m[1]] === null) continue;
     const name = basename(m[1]);
     copyFileSync(CONSOLE_SRC[m[1]], join(dir, name));
-    if (name !== "memory-split.js") files.push(name);
+    /* case-split requires the memory's splitter by its .cjs name in node */
+    if (name === "memory-split.js") copyFileSync(CONSOLE_SRC[m[1]], join(dir, "memory-split.cjs"));
+    /* the two splitters are UMD modules, read as the globals they define */
+    if (name !== "memory-split.js" && name !== "case-split.js") files.push(name);
   }
   const m = /<script>\n([\s\S]*)<\/script>\s*<\/body>/.exec(page);
   if (!m) throw new Error("pages-types: platform.html's own script was not found");

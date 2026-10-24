@@ -77,7 +77,7 @@ with sync_playwright() as p:
     print("\n4 · the shape screen's level cards: the rows, pressed (§544)")
     safe(pg, "()=>{delete GROUP.structure}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]')
+        and press(pg, '[data-setupgo="shape"]')
     ck("the set-up flow's shape screen opens", ok)
     # §544: the Structure step's seven cards are the shape screen's panel,
     # one at a time — press the level in the tree, then read its card.

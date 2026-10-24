@@ -63,6 +63,10 @@ p,ul,ol{margin:0}
 .mk-id{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .mk-id b{font-size:14px}
 .mk-id span{font-size:12px;color:var(--ink-2)}
+.mk-sw{margin-left:auto;display:inline-flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--over-line);border-radius:8px;flex-wrap:wrap;align-items:center}
+.mk-sw>span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);padding:0 8px 0 6px}
+.mk-sw button{border:0;background:none;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.mk-sw button.on{background:var(--panel);color:var(--panel-ink)}
 .doc{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 60px}
 .intro{font-size:13.5px;color:var(--ink-2);max-width:92ch;margin-bottom:12px}
 .intro b{color:var(--ink)}
@@ -80,8 +84,9 @@ p,ul,ol{margin:0}
 @media (max-width:640px){.pg{padding:14px 12px 22px}}
 
 /* the masthead (Internal Tracker) */
-.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
-.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 18px;margin:0 0 14px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:stretch;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.mside{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:14px}
 .wkof{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
 .mast h1{font-size:24px;font-weight:600;line-height:1.15;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .msub{font-size:13px;color:var(--bar-quiet);margin-top:5px}
@@ -91,12 +96,28 @@ p,ul,ol{margin:0}
 .mtile b{display:block;font-size:22px;font-weight:600;line-height:1}
 .mtile span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
 .mtile.late b{color:var(--bar-late)}
-.mcats{display:flex;gap:2px;margin-top:14px;align-items:flex-end;flex-wrap:wrap}
-.mtab{font-size:13.5px;font-weight:600;line-height:1;color:var(--bar-quiet);background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px 12px;white-space:nowrap}
-.mtab.on{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
-.mtab:hover{color:var(--bar-ink)}
-.mcats .sp{flex:1}
-.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-bottom:9px}
+.macts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+/* the view tabs, under the band: three styles to choose from */
+.vt{margin:0 0 14px}
+.vt b{font-weight:inherit;display:inline-flex;gap:8px;align-items:baseline}
+.vt .ct{font-size:12px;font-weight:600;color:var(--ink-3)}
+.vt .hint{display:none}
+.vt.s1{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.vt.s1 button{background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 14px 11px;font-size:15px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.vt.s1 button.on{color:var(--stone);border-bottom-color:var(--gold)}
+.vt.s1 button:hover{color:var(--ink)}
+.vt.s2{display:inline-flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:100%;overflow-x:auto}
+.vt.s2 button{border:0;background:none;border-radius:7px;padding:8px 18px;font-size:14.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.vt.s2 button.on{background:var(--panel);color:var(--panel-ink)}
+.vt.s2 button.on .ct{color:var(--bar-quiet)}
+.vt.s3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.vt.s3 button{text-align:left;display:grid;gap:2px;align-content:start;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 14px 13px;color:var(--ink-2)}
+.vt.s3 button b{font-size:16px;font-weight:700;color:var(--ink)}
+.vt.s3 .hint{display:block;font-size:12.5px}
+.vt.s3 button.on{background:var(--surface);border-color:var(--gold);box-shadow:inset 0 -3px 0 var(--gold)}
+.vt.s3 button:hover{border-color:var(--gold)}
+@media (max-width:640px){.vt.s1 button{padding:10px 10px 11px;font-size:14px}.vt.s2 button{padding:7px 12px;font-size:14px}.vt.s3{gap:6px}.vt.s3 .hint{display:none}.vt.s3 button{padding:9px 10px 11px}.vt.s3 button b{font-size:14.5px;flex-wrap:wrap;gap:0 6px}}
 .mwait{display:inline-flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:9px;font-size:13px;color:var(--bar-ink);background:rgba(232,163,58,.14);border:1px solid rgba(232,163,58,.45);border-radius:6px;padding:4px 10px}
 .mwait b{color:var(--bar-accent);font-weight:700}
 .mwait button{background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--bar-ink);text-decoration:underline;text-underline-offset:2px}
@@ -109,7 +130,7 @@ p,ul,ol{margin:0}
 .pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
 .pill.q{background:var(--surface-2);color:var(--ink-2)}
 .mast .own{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--bar-accent);color:var(--bar-accent);border-radius:4px;padding:1px 6px}
-@media (max-width:640px){.mast{padding:14px 14px 0}.mtile{text-align:left}.mstrip{gap:14px}}
+@media (max-width:640px){.mast{padding:14px 14px 16px}.mtile{text-align:left}.mstrip{gap:14px}.mside{align-items:flex-start}}
 
 /* shared blocks */
 .box{background:var(--surface);border:1px solid var(--line);border-radius:8px}
@@ -239,11 +260,12 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 </style>
 
 <div class="mk"><div class="mk-in">
-  <div class="mk-id"><span class="mk-tag">Mockup</span><b>A process page: opens on the flow, steps and summary as tabs</b><span>Agreed 24 Oct 2026. Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-id"><span class="mk-tag">Mockup</span><b>A process page: opens on the flow, steps and summary as tabs</b><span>Nothing is built. Sample data invented for Raya Trade.</span></div>
+  <div class="mk-sw" role="group" aria-label="Tab style"><span>Tab style</span><button type="button" data-style="1">1 · Underline</button><button type="button" data-style="2">2 · Buttons</button><button type="button" data-style="3">3 · Cards</button></div>
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. It opens on <b>Flow</b>; <b>Steps</b> and <b>Summary</b> are tabs in the navy band, as in the Internal Tracker. <b>Suggest a change</b> works on every tab: try it on a step.</p>
+  <p class="intro">You are <b>Hend Mourad</b>, Finance manager and owner of <b>Order-to-Cash</b>, opening it from your Processes page. It opens on <b>Flow</b>; <b>Steps</b> and <b>Summary</b> are tabs, now under the navy band so they are easier to see. Switch between three tab styles at the top right. <b>Download</b>, <b>Print</b> and <b>Suggest a change</b> sit at the top right of the band.</p>
 
   <div class="frame">
     <div class="tb"><span class="brand">Raya Trade</span><span class="read">Processes <span class="tbn">1 to approve · 1 to read</span></span><span class="who">Hend Mourad</span><span class="out">Sign out</span></div>
@@ -256,16 +278,23 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
             <p class="msub">From a confirmed customer order to cash in the bank · Approver <b>Yara Kamal</b> · v3 approved, waiting for the office to publish</p>
             <p class="mwait"><b>Waiting on you</b><span>The yearly review is due on 12 Nov</span><button type="button" data-opt="c">Open the summary</button></p>
           </div>
-          <div class="mstrip">
-            <div class="mtile"><b>6</b><span>Steps</span></div>
-            <div class="mtile"><b>4</b><span>Roles</span></div>
-            <div class="mtile"><b>4/5</b><span>Have read it</span></div>
-            <div class="mtile late"><b>1</b><span>Risk, no control</span></div>
-            <div class="mtile"><b>19</b><span>Days to review</span></div>
+          <div class="mside">
+            <div class="macts"><button class="bq" type="button" data-toast="Downloads the SOP in the product.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page in the product.">Print</button><button class="bgold" type="button" data-suggest="">Suggest a change</button></div>
+            <div class="mstrip">
+              <div class="mtile"><b>6</b><span>Steps</span></div>
+              <div class="mtile"><b>4</b><span>Roles</span></div>
+              <div class="mtile"><b>4/5</b><span>Have read it</span></div>
+              <div class="mtile late"><b>1</b><span>Risk, no control</span></div>
+              <div class="mtile"><b>19</b><span>Days to review</span></div>
+            </div>
           </div>
         </div>
-        <div class="mcats" role="tablist" aria-label="Views"><button type="button" class="mtab" role="tab" data-opt="a">Flow</button><button type="button" class="mtab" role="tab" data-opt="b">Steps</button><button type="button" class="mtab" role="tab" data-opt="c">Summary</button><span class="sp"></span><span class="macts"><button class="bq" type="button" data-toast="Downloads the SOP in the product.">Download SOP</button><button class="bq" type="button" data-toast="Prints the page in the product.">Print</button><button class="bgold" type="button" data-suggest="">Suggest a change</button></span></div>
       </header>
+      <div class="vt s1" id="vt" role="tablist" aria-label="Views">
+        <button type="button" role="tab" data-opt="a"><b>Flow</b><span class="hint">Who hands over to whom</span></button>
+        <button type="button" role="tab" data-opt="b"><b>Steps <span class="ct">6</span></b><span class="hint">What each role does, in order</span></button>
+        <button type="button" role="tab" data-opt="c"><b>Summary <span class="ct">3 to look at</span></b><span class="hint">Is it in good shape, what is waiting on you</span></button>
+      </div>
 
       <!-- ── A · FLOW FIRST ── -->
       <section data-view="a" hidden>
@@ -326,9 +355,9 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   </div>
 
   <div class="verdict">
-    <div><h4>Agreed 24 Oct</h4><ul><li>A process opens on the flow, lanes per role</li><li>Steps and Summary are tabs in the navy band</li><li>Suggest a change on every tab, pinned to a step; the office makes the change</li></ul></div>
+    <div><h4>Agreed 24 Oct</h4><ul><li>A process opens on the flow, lanes per role</li><li>Steps and Summary are tabs, under the band</li><li>Download, Print and Suggest a change at the top right</li><li>Suggest a change on every tab, pinned to a step; the office makes the change</li></ul></div>
+    <div id="stylenote"></div>
     <div><h4>Added here, to agree</h4><ul><li>The “Waiting on you” line sits in the band on every tab, so opening on the flow does not hide it</li><li>On a phone it opens on Steps: the flow needs sideways scrolling there</li></ul></div>
-    <div><h4>Earlier</h4><ul><li>The three options compared side by side are version 1 of this page</li></ul></div>
   </div>
 </div>
 <div id="layer"></div>
@@ -386,9 +415,22 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   function show(opt) {
     if (!HASH[opt]) opt = 'a';
     $$('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== opt; });
-    $$('.mtab').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $$('#vt [data-opt]').forEach((b) => { const on = b.dataset.opt === opt; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
     try { history.replaceState(null, '', '#' + HASH[opt]); } catch (e) {}
     if (opt === 'a') requestAnimationFrame(arrows);
+  }
+  const STYLES = {
+    1: ['Underline', ['The same tabs as the rest of SMP, only bigger and on white', 'Quiet: leaves the most room for the flow'], ['The easiest of the three to overlook']],
+    2: ['Buttons', ['Reads clearly as a switch between three views of one process', 'The same control as the switch at the top of this mockup'], ['A new pattern on SMP pages, where tabs are underlined']],
+    3: ['Cards', ['Hardest to miss, and each card says what you will find behind it', 'Helps someone who opens a process once a month'], ['About 40px more height above the flow', 'The hints are words to read every time']],
+  };
+  function tabStyle(n) {
+    if (!STYLES[n]) n = '1';
+    $('#vt').className = 'vt s' + n;
+    $$('.mk-sw [data-style]').forEach((b) => b.classList.toggle('on', b.dataset.style === String(n)));
+    const s = STYLES[n];
+    $('#stylenote').innerHTML = '<h4>Tab style ' + n + ' · ' + s[0] + '</h4><ul>' + s[1].map((x) => '<li>' + x + '</li>').join('') + s[2].map((x) => '<li>Costs: ' + x + '</li>').join('') + '</ul>';
+    requestAnimationFrame(arrows);
   }
 
   let tt;
@@ -404,6 +446,8 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   document.addEventListener('click', (e) => {
     const t = e.target, o = t.closest('[data-opt]'), sg = t.closest('[data-suggest]'), tst = t.closest('[data-toast]'), st = t.closest('.st[data-step]'), op = t.closest('[data-open]'), cop = t.closest('[data-copen]'), jump = t.closest('[data-jump]');
     if (o) { show(o.dataset.opt); return; }
+    const sty = t.closest('[data-style]');
+    if (sty) { tabStyle(sty.dataset.style); return; }
     if (sg) { suggest(sg.dataset.suggest); return; }
     if (t.id === 'sg-send') { const w = $('#sg-where').value; $('#layer').innerHTML = ''; toast('Sent to the Strategy Office' + (w ? ', pinned to step ' + w : '') + '. You will see their answer on this page.'); return; }
     if (t.closest('[data-close]') && (t.dataset.close || t === t.closest('.scrim'))) { if (t.dataset.close) { $('#layer').innerHTML = ''; } return; }
@@ -418,6 +462,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   window.addEventListener('resize', () => requestAnimationFrame(arrows));
   drawer(2);
   const asked = Object.keys(HASH).find((k) => '#' + HASH[k] === location.hash);
+  tabStyle('1');
   show(asked || (window.innerWidth < 640 ? 'b' : 'a'));
 })();
 </script>

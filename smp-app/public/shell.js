@@ -66651,9 +66651,34 @@ var COPILOT = (function(){
   function dvTitle(mode){ return (mode === "capabilities" ? "Capabilities — " : "Directions — ") + placeWord(); }
   function dvFns(){
     var ks = []; try { ks = typeof activeFunctionKeys === "function" ? activeFunctionKeys() : []; } catch (e) { ks = []; }
-    return ks.map(function(k){ return { key: k, name: (FUNCTIONS[k] && FUNCTIONS[k].name) || k }; });
+    return ks.map(function(k){ return { key: k, name: (FUNCTIONS[k] && FUNCTIONS[k].name) || k, head: (FUNCTIONS[k] && FUNCTIONS[k].head) || "" }; });
   }
   function dvFnName(k){ var f = dvFns().filter(function(x){ return x.key === k; })[0]; return f ? f.name : ""; }
+  /* §626: A CAPABILITY'S OWNER IS A PERSON, the one its page shows (Islam:
+     *"fix the copilot owner as you recommend"*). The chat stored a FUNCTION
+     and the save wrote it into `c.fn`, the field §544.13 retired — nothing
+     showed it as the owner, and "Clear all plans" on that function still
+     emptied the capability. So a capability's row picks from the register
+     (Setup's own pool, every active person), the model's suggested function
+     arrives as that function's head (the server maps it), and the save
+     writes the Owner through Setup's own door, grantPersonRole (§33). A
+     Direction's owner is still a function, as spec 064 §8 has it. */
+  function dvPeople(){
+    var ps = []; try { ps = (PEOPLE || []).filter(function(p){ return p && p.key && p.name && personActive(p); }); } catch (e) { ps = []; }
+    return ps.map(function(p){ return { key: p.key, name: p.name }; })
+      .sort(function(a, b){ return a.name.localeCompare(b.name); });
+  }
+  /* A row saved before §626 holds a function's key: read it as that
+     function's head, so an open chat does not lose the pick it made. */
+  function dvCapOwner(k){
+    if (!k) return "";
+    try {
+      if (personBy(k)) return k;
+      var f = FUNCTIONS[k];
+      return f && f.head && personBy(f.head) ? f.head : "";
+    } catch (e) { return ""; }
+  }
+  function dvPersonName(k){ try { return k ? personName(k) : ""; } catch (e) { return ""; } }
   function dvHolder(){ try { return typeof unitLikeWritable === "function" ? unitLikeWritable(place()) : null; } catch (e) { return null; } }
   /* The plan's Directions as they stand — what the chat may start from, and
      what a Capabilities chat says it serves. */
@@ -66707,6 +66732,12 @@ var COPILOT = (function(){
   var DV_MARK = { plan:"Plan", yours:"Yours", "new":"New" };
   function dvMark(m){ return DV_MARK[m] ? ' <span class="copdv-mk ' + E(m) + '">' + DV_MARK[m] + '</span>' : ''; }
   function dvOwnerCell(kind, i, k, ed){
+    if (kind === "c") {
+      var who = dvCapOwner(k);
+      if (!ed) return E(dvPersonName(who) || "—");
+      return '<select class="fld copdv-own" data-cop-dv-own="c|' + i + '" aria-label="Owner"><option value="">—</option>' +
+        dvPeople().map(function(p){ return '<option value="' + E(p.key) + '"' + (p.key === who ? ' selected' : '') + '>' + E(p.name) + '</option>'; }).join("") + '</select>';
+    }
     if (!ed) return E(dvFnName(k) || "—");
     return '<select class="fld copdv-own" data-cop-dv-own="' + kind + '|' + i + '" aria-label="Owned by"><option value="">—</option>' +
       dvFns().map(function(f){ return '<option value="' + E(f.key) + '"' + (f.key === k ? ' selected' : '') + '>' + E(f.name) + '</option>'; }).join("") + '</select>';
@@ -66735,7 +66766,7 @@ var COPILOT = (function(){
   }
   function dvCapsHtml(ed){
     var s = PANE.dirs, W = PANE.dirsWords || {}, kinds = W.kinds || ["gap","transformation","enabler"], kw = W.kindWord || {};
-    return '<div class="copcp-wrap"><table class="copcp-tab copdv-tab"><thead><tr><th scope="col">Capability</th><th scope="col">Kind</th><th scope="col">Serves</th><th scope="col">Owned by</th><th scope="col">Keep</th></tr></thead><tbody>' +
+    return '<div class="copcp-wrap"><table class="copcp-tab copdv-tab"><thead><tr><th scope="col">Capability</th><th scope="col">Kind</th><th scope="col">Serves</th><th scope="col">Owner</th><th scope="col">Keep</th></tr></thead><tbody>' +
       s.caps.map(function(x, i){
         var kind = ed ? '<select class="fld copdv-own" data-cop-dv-kind="' + i + '" aria-label="Kind of ' + E(x.title) + '"><option value="">—</option>' +
             kinds.map(function(k){ return '<option value="' + E(k) + '"' + (k === x.kind ? ' selected' : '') + '>' + E(kw[k] || k) + '</option>'; }).join("") + '</select>'
@@ -66826,7 +66857,8 @@ var COPILOT = (function(){
         if (!c) c = addCapability();
         if (!c) return;
         c.name = x.title;
-        if (x.ownedBy) c.fn = x.ownedBy;
+        var owner = dvCapOwner(x.ownedBy);
+        if (owner && typeof grantPersonRole === "function") grantPersonRole(owner, "capowner", "cap:" + c.id);
         if (x.kind) c.capKind = x.kind; else delete c.capKind;
         var sv = x.serves.map(function(t){ return idOf[String(t).trim().toLowerCase()]; }).filter(Boolean);
         if (sv.length) c.serves = sv; else delete c.serves;
@@ -66902,7 +66934,8 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-dv-finish]"))) {
       if (THINKING) return true;
       if (PANE.dirsBlocker) { SAY = PANE.dirsBlocker; draw(); return true; }
-      act({ act:"dirFinish", id:id, placeWord:placeWord(), fns:dvFns() }, function(j){
+      var owners = ((PANE.dirs && PANE.dirs.caps) || []).map(function(x){ var k = dvCapOwner(x.ownedBy); return k ? { key: k, name: dvPersonName(k) } : null; }).filter(Boolean);
+      act({ act:"dirFinish", id:id, placeWord:placeWord(), fns:dvFns(), owners:owners }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === id) dvView(j);
         dvProgress(id);
         var r = dvWritePlan(PANE.dirs);
@@ -66957,7 +66990,7 @@ var COPILOT = (function(){
       return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
     });
     if (place() === "group" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
-      GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: c.fn ? dvFnName(c.fn) : "" }); });
+      GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: dvPersonName(c.head) }); });
     return out;
   }
   function exSave(patch){

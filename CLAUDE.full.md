@@ -11171,7 +11171,7 @@ node smp-app/checks/pages-types.mjs # THE STRATEGY PAGES, READ AS ONE PAGE
                                 # DESCRIBED labels REVIEW and UNITS with it in
                                 # the copy. A new field on them goes into
                                 # state.d.ts in the same edit, or this fails
-                                # naming it. §615: GROUP too (SMP.Group, with
+                                # naming it. §625: GROUP too (SMP.Group, with
                                 # SMP.Capability), every client setting on it
                                 # read before it was listed. Twenty-two breaks
 node smp-app/checks/app-types.mjs # THE APP SEES THE RULE MODULES' TYPES (§592)

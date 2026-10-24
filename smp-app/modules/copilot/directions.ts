@@ -28,9 +28,18 @@ const NOT_DIRS = "This is not a Directions or Capabilities chat.";
 /* The functions the page offers as owners, cut to shape. They are the
    tenant's own names, sent by the page that draws them; an owner the model
    names that is not on this list is dropped rather than guessed at. */
+const KEYED = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 function fnsOf(raw: unknown): Fn[] {
+  return (Array.isArray(raw) ? raw : []).map((x: any) => {
+    const head = String(x && x.head || "").trim();
+    return { key: String(x && x.key || "").trim(), name: oneLine(x && x.name).slice(0, 120), head: KEYED.test(head) ? head : "" };
+  }).filter((f) => KEYED.test(f.key) && f.name).slice(0, 60);
+}
+/* §626: the people a save names as Capability owners, so the record says a
+   name rather than a key. */
+function ownersOf(raw: unknown): { key: string; name: string }[] {
   return (Array.isArray(raw) ? raw : []).map((x: any) => ({ key: String(x && x.key || "").trim(), name: oneLine(x && x.name).slice(0, 120) }))
-    .filter((f) => /^[a-z0-9][a-z0-9_-]{0,63}$/.test(f.key) && f.name).slice(0, 60);
+    .filter((p) => KEYED.test(p.key) && p.name).slice(0, MAX_CAPS);
 }
 const titlesOf = (raw: unknown, n: number) => (Array.isArray(raw) ? raw : []).map((t) => oneLine(t).slice(0, 160)).filter(Boolean).slice(0, n);
 
@@ -95,7 +104,9 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
     const fns = fnsOf(b.fns);
     const name = (k: string) => (fns.find((f) => f.key === k) || { name: k }).name;
-    const r = await saveDirs(c, chat, stored, placeWord, name, by);
+    const owners = ownersOf(b.owners);
+    const ownerName = (k: string) => (owners.find((p) => p.key === k) || { name: k }).name;
+    const r = await saveDirs(c, chat, stored, placeWord, name, by, ownerName);
     const s: Dirs = { ...stored, saved: { deliverableId: r.deliverableId, n: r.n, title: r.title } };
     await writeDirs(c, id, s);
     return out(200, { ok: true, saved: s.saved, ...(await dirsView(c, chat)) });

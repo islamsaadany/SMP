@@ -68985,8 +68985,8 @@ Islam, of §611's drawing (`design-mockups/top-themes-temple/2026-10-23_themes-o
 
 **§611 AND §611.1 MERGED TO `main`** 2026-10-23, Islam: *"put it live"*. `main` had moved three times while this waited: §609 and §610 first, which took the number this went in under while other branches held §606–§608, so the branch was renumbered to §611 BEFORE the merge (§264.3), with the built file and served copies regenerated because the comments carry the number; then §595, §601, §602 and §606–§608 (another session's release, mid-flight), and then that release's own note. Main was merged INTO the branch all three times; the record files were COMBINED, never picked (§318.7) — decisions in number order, progress lines newest first, both mockup rows kept — and the built file, `shell.js`, `platform.css` and `smp-app`'s `sw.js` were REGENERATED, never resolved by hand. On the final merged tree: `built-in-step` all good, `generated-in-step` and `release-stamp` all clear, `sw.js` parses; `top-values-caps`, `themes-temple`, `remove-a-line`, `capability-remove`, the landed release's own `company-execution`, `functions-compete`, `functions-no-units`, `how-we-compete` and `fn-pillars`, and `structure`, `direction-part`, `unit-purpose-values`, `foundation-objectives` green; `top-plan` and `plan-edit-line` one red each, as before; `qa.py` **33 viewers / 181 destinations / ERRORS none**. Then a clean fast-forward, and this note with the `SHELL` bump `smp-shell-v7.00-company-reading` → **`smp-shell-v7.01-foundation-themes`** as a commit `main` alone holds (§91), the name held by no commit in any ref's history after fetching every ref (§94.16). Pages only, and no rule about who may save what: themes, values and objectives were already the group's own strategy on the server (`a_group`), so no forced sign-out. Live witnesses before the push: `/sw.js` release **`2035d04a9c9d67ad`**, `/shell.js` **5,196,450** bytes, `/platform.css` **860,312**; after it they should read **`2f1e5b27c73b5866`**, **5,197,093** and **860,994**. **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site about a minute after the push and never the dashboard: `/sw.js` release **`2f1e5b27c73b5866`**, `/shell.js` **5,197,093** bytes, `/platform.css` **860,994** — all three as predicted. The branch was moved to the release commit only after that read (§91).
 
-## §615 — The company's own data described, and its capabilities (2026-10-23)
-*Numbered §615: `main` holds up to §613 and other branches hold §612 and §614 (§264.3).*
+## §625 — The company's own data described, and its capabilities (2026-10-23)
+*Numbered §615 on the branch; `main` took §615–§624 while it waited, so it is §625 (§264.3).*
 
 Islam: *"now describe the company's own data too"*, then, asked what that meant and told in plain words, *"go ahead"*. It is §602's NOT DONE, first item.
 
@@ -69024,3 +69024,33 @@ Islam: *"now describe the company's own data too"*, then, asked what that meant 
 **NOT DONE.** The unit-like views and holders (the 17 above); `FUNCTIONS`, `PEOPLE` and `COMPANIES`; the server and the app reading `lib/state.d.ts` themselves.
 
 Not merged; `main` stays untouched until Islam says.
+
+## §626 — The Copilot sets a capability's Owner, a person, never a function (2026-10-24)
+Islam: *"fix the copilot owner as you recommend and put it live"*. The recommendation (§625's first finding): a capability's owner, chosen in the Copilot's Directions chat, is **the person its page shows as Owner**, written through Setup's own door. It is not a function written into `fn`, which §544.13 retired.
+
+**WHAT CHANGED.**
+- **The chat's Capabilities table picks an Owner from the register**: every active person, the same pool Setup › Capabilities' picker offers. The column says *Owner*. A Direction's row still picks a function, as spec 064 §8 has it.
+- **The model still names a function, and it arrives as that function's head** (`modelCaps`; the page now sends each function's head with its key). Where the function has no head, the row has no owner, and the to-do says *owners to set* rather than claiming one.
+- **The save writes the Owner with `grantPersonRole(person, "capowner", "cap:<id>")`**, Setup's own door (§33, §412), and **never writes `fn`**.
+- **The saved record names the person** (the page sends the owners' names with the save).
+- **The Execution chat lists a capability by its Owner.**
+- **A row saved in an open chat before today holds a function's key.** It reads as that function's head, so the pick is not lost.
+- **Who may save is unchanged.** The authoriser files a capability's `fn` and `head` in the same class (`CAP_SETUP`).
+
+**WHAT IS NOT CHANGED, SAID SO IT IS NOT MISTAKEN FOR DONE.** A capability that already carries an `fn` keeps it (§405: hidden, never cleared). The demo build still sets one on every capability as it loads (`CAP_FUNCTION`). So **"Clear all plans" on a function still clears a capability whose `fn` names it** (archived first), and Setup still counts it under that function. That coupling is §544.13's to finish, not the Copilot's.
+
+**PROVED, ON A REAL DATABASE.** A local Postgres 16, built from scratch by `db/apply.mjs` (roles, schema and every migration), so the two checks that need one ran here for the first time this session.
+- **`checks/copilot.mjs`: 335 passed, 0 failed** (332 before, three added).
+  - the model's function becomes its head, and none where it has no head or is off the list;
+  - the same through the server's own `capSuggest`;
+  - the saved record names the person (*Noran Hassan* in the check), not a key.
+  - **With the server files as they were: 332 passed, 3 failed**, each of the three. The record read *"· IT"*, a function.
+- **`checks/shell.mjs`: 412 ok, 0 failed** (409 before). It drives the real chat in a browser:
+  - the Owner picker offers the register's active people, every one and nothing else (33);
+  - the person picked is stored on the row;
+  - after Save, the capability's Owner is that person and `fn` is not written.
+  - **With the old `copilot.js`: 2 failed.** The picker offered 8 functions, and the capability came back `{"head":null,"fn":"finance"}`.
+- **The first draft of the picker assertion was wrong, and was rewritten, not loosened.** It also demanded "no option is a function's key", but the seed's person `smo` has the same key as the SMO function. It compares with the register now.
+- The type checks are clean: the page check 10/10, app-types, rules-types, and the app's own `tsc`.
+
+Not merged; `main` stays untouched until the release below.

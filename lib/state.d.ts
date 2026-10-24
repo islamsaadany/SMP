@@ -12,7 +12,7 @@
    ADD A FIELD HERE IN THE SAME EDIT AS THE CODE THAT FIRST WRITES IT. The
    check will say so if you do not.
 
-   §615 added the company's own object (GROUP) and its capabilities, the
+   §625 added the company's own object (GROUP) and its capabilities, the
    same way.
 
    Written by asking the checker, not by memory: each type started small,
@@ -129,7 +129,7 @@ declare namespace SMP {
     note?: string;
   }
 
-  /* ── THE COMPANY: its own plan, and every setting the client holds (§615) ── */
+  /* ── THE COMPANY: its own plan, and every setting the client holds (§625) ── */
 
   /** The company itself: the top layer's Foundation and plan, and the
       client's settings. The server stores six fields in their own columns

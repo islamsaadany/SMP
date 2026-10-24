@@ -270,7 +270,7 @@
      reports a width of 0, so the check that finds this is the page HEIGHT
      crossing the viewport, not the shift itself. */
   html { scrollbar-gutter: stable; }
-  /* ── THE PAGE AT 80% ON A COMPUTER (§627) ───────────────────────────────
+  /* ── THE PAGE AT 80% ON A COMPUTER (§630) ───────────────────────────────
      Islam, of a Setup table spilling across its columns: *"I believe the page
      needs to be 80% smaller like what we did in the console page"*, then
      *"proceed"*. The console's rule (§601): the whole page zoomed at 1000px
@@ -2764,7 +2764,7 @@ html[data-client-settings] .viewer { display:none; }
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
-  /* §627: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+  /* §630: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
      count drop under it when the column has no room for both — a client with
      a longer word for how it plans would otherwise run into Key Objectives
      again, at any zoom. */
@@ -4558,7 +4558,7 @@ html[data-client-settings] .viewer { display:none; }
     display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
-  /* ── §626: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
+  /* ── §629: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
      The register's open cell, the same rules for the same reasons (§372,
      §373): the control fills the cell's content box and stops at its edge.
      A person cell keeps its name in a button ringed as a focused box is, and
@@ -4582,7 +4582,7 @@ html[data-client-settings] .viewer { display:none; }
   .cfg td.ocellopen input.fld { width:100%; }
   .ocellpop { position:fixed; z-index:60; }
   /* The capabilities' table, at the widths its mockup was approved at
-     (§626) — set on the heads, which `.cfg`'s own first-column rule would
+     (§629) — set on the heads, which `.cfg`'s own first-column rule would
      otherwise win over a <col>. */
   .cfg table.cappcfg { table-layout:fixed; width:100%; }
   .cfg table.cappcfg th:nth-child(1) { width:5%; }
@@ -5461,7 +5461,7 @@ html[data-client-settings] .viewer { display:none; }
   .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
-  /* ── THE FOREFRONT SWITCH (§625) ─────────────────────────────────
+  /* ── THE FOREFRONT SWITCH (§628) ─────────────────────────────────
      Its neighbours' shape (+ Add, Register file), because it sits among them
      and is pressed like them; a box in front because pressing it changes
      what the table holds and the box says which way it is. Never the accent
@@ -11957,7 +11957,7 @@ body.presenting #buildband { display:none; }
 .csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
                        padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
 .csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
-/* its icon (§625): the two choices on the left, what Home draws on the right */
+/* its icon (§628): the two choices on the left, what Home draws on the right */
 .csetup .wzicon { margin-top:22px; }
 .csetup .wzicon .iconrow { display:flex; align-items:flex-start; gap:28px; flex-wrap:wrap; margin-top:6px; }
 .csetup .wzicon .iconpick { display:flex; flex-direction:column; gap:8px; max-width:280px; }

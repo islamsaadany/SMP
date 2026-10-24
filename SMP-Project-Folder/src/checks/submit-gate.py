@@ -91,7 +91,7 @@ def bar_state(pg):
            class, because the class is what was asked for and the border is
            what a reader actually meets (§93.11). */
         roQuiet:  (() => { const b = document.querySelector('.rc-reopen');
-                           /* §627: on the screen — at 80% a 1px border is one
+                           /* §630: on the screen — at 80% a 1px border is one
                               screen pixel, read back as 1.25 of the page's */
                            const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
                            return b ? Math.round(parseFloat(getComputedStyle(b).borderTopWidth) * z * 100) / 100 + 'px' : null; })(),

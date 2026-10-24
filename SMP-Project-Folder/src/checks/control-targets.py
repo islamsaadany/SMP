@@ -112,7 +112,7 @@ MEASURE = r"""() => {
                                                      visibilityProperty: true })) continue;
     if (el.disabled || el.getAttribute('aria-disabled') === 'true') continue;
     if (getComputedStyle(el).pointerEvents === 'none') continue;
-    const r = ((e)=>{ /* §627: in the page's own pixels — the page is drawn at 80% on a computer, and the 24px the standard names is a size the page sets */ const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1, q=e.getBoundingClientRect(); return {left:q.left/z, top:q.top/z, right:q.right/z, bottom:q.bottom/z, width:q.width/z, height:q.height/z}; })(el);
+    const r = ((e)=>{ /* §630: in the page's own pixels — the page is drawn at 80% on a computer, and the 24px the standard names is a size the page sets */ const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1, q=e.getBoundingClientRect(); return {left:q.left/z, top:q.top/z, right:q.right/z, bottom:q.bottom/z, width:q.width/z, height:q.height/z}; })(el);
     if (!r.width || !r.height) continue;
     live.push({ el: el, r: r });
   }
@@ -187,7 +187,7 @@ PAIR = r"""() => {
   const row = eye.closest('tr');
   const x = row && [...row.querySelectorAll('button.xbtn')].filter(e => e.checkVisibility())[0];
   if (!x) return { missing: 'no cross beside it' };
-  const pr = ((e)=>{ /* §627: in the page's own pixels — the page is drawn at 80% on a computer, and the 24px the standard names is a size the page sets */ const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1, q=e.getBoundingClientRect(); return {left:q.left/z, top:q.top/z, right:q.right/z, bottom:q.bottom/z, width:q.width/z, height:q.height/z}; });
+  const pr = ((e)=>{ /* §630: in the page's own pixels — the page is drawn at 80% on a computer, and the 24px the standard names is a size the page sets */ const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1, q=e.getBoundingClientRect(); return {left:q.left/z, top:q.top/z, right:q.right/z, bottom:q.bottom/z, width:q.width/z, height:q.height/z}; });
   const a = pr(eye), b = pr(x);
   const d = Math.hypot((a.left+a.width/2)-(b.left+b.width/2), (a.top+a.height/2)-(b.top+b.height/2));
   let pairs = 0;

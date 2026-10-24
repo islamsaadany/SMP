@@ -197,7 +197,7 @@ with sync_playwright() as p:
     # this section measured an unscrolled page three times and reported the
     # broken build clean. A short window is what gives it something to scroll,
     # and the scroll is asserted before anything is read off it.
-    # §627: SHORTER, because the page is drawn at 80% on a computer and at 560
+    # §630: SHORTER, because the page is drawn at 80% on a computer and at 560
     # the matrix nearly fits — 52px of room, too little to stand at 60 and
     # 140. The state this measures has to exist (§255), so the window is
     # made short enough for it.
@@ -525,7 +525,7 @@ with sync_playwright() as p:
     for k in ("focusset", "units"):
         go(pg, k)
         m = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
-          /* §627: in the page's own pixels — the page is drawn at 80% */
+          /* §630: in the page's own pixels — the page is drawn at 80% */
           return {h:Math.round(h.getBoundingClientRect().height /
                     (parseFloat(getComputedStyle(document.documentElement).zoom)||1)),
                   v:getComputedStyle(document.documentElement)

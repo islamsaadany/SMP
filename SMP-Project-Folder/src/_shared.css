@@ -267,7 +267,7 @@
      reports a width of 0, so the check that finds this is the page HEIGHT
      crossing the viewport, not the shift itself. */
   html { scrollbar-gutter: stable; }
-  /* ── THE PAGE AT 80% ON A COMPUTER (§627) ───────────────────────────────
+  /* ── THE PAGE AT 80% ON A COMPUTER (§630) ───────────────────────────────
      Islam, of a Setup table spilling across its columns: *"I believe the page
      needs to be 80% smaller like what we did in the console page"*, then
      *"proceed"*. The console's rule (§601): the whole page zoomed at 1000px

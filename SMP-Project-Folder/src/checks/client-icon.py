@@ -1,4 +1,4 @@
-"""A CLIENT'S ICON: CHOSEN ON THE BRAND TAB, DRAWN IN HOME'S SQUARES (§625).
+"""A CLIENT'S ICON: CHOSEN ON THE BRAND TAB, DRAWN IN HOME'S SQUARES (§628).
 
 qa-run: own-server — both ends need a server: the Brand tab reads the client's
 record from /api/platform and writes through saveClient, and Forefront's Home

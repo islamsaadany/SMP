@@ -1369,7 +1369,7 @@ function unitFormatSelect(k, u){
       return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
         esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
 }
-/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§626) ══
+/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§629) ══
    Islam: *"why to edit row by row why the editing doesn't happen on the cell
    level with a double click that opens the editable cells for editing?"* —
    then, of the mockup that drew it, *"go ahead with the mockup, build it"*.
@@ -1440,7 +1440,7 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
-    /* §626: every cell below that the dialog can change opens on a
+    /* §629: every cell below that the dialog can change opens on a
        double-click; none does while the rows are being arranged, for the
        menu's own reason (§261) — one act at a time. */
     var may = mayEdit && !arranging;
@@ -2223,7 +2223,7 @@ function dupeMark(dupes){
   return out;
 }
 
-/* §625: whether the register shows Forefront's consultants — kept on this
+/* §628: whether the register shows Forefront's consultants — kept on this
    device, the way the register's columns are (§47.1). Off unless asked. */
 var REGFF_KEY = "smp.register.forefront";
 function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
@@ -3345,7 +3345,7 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  /* §625: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+  /* §628: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
      option B: the register lists the client's people; *Show Forefront team*
      brings the consultants back). Only the MINTED rows hide — a consultant
      the platform wrote a row for so they can sign in and hold a seat
@@ -3908,7 +3908,7 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  /* §625: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+  /* §628: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
      people · 2 from Forefront" (§3a.1); with the consultants off the table
      by default, the one thing left to say about them is how many are behind
      the switch, and the switch says it. Drawn only where there is somebody
@@ -4655,7 +4655,7 @@ function coKebab(ck, co, on, mayEdit){
 }
 
 /* What a division's CEO sees, as a control — the dialog's and the cell's
-   (§626), one builder. */
+   (§629), one builder. */
 function coFlagSelect(ck, field, val){
   return '<select class="fld" data-coflag="' + esc(ck + "|" + field) + '">' +
     '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
@@ -4675,7 +4675,7 @@ function renderCompanies(){
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      /* §626: the page's own word, which the box had kept from before §391
+      /* §629: the page's own word, which the box had kept from before §391
          called these divisions. */
       tkBar("companies", { placeholder:"Search the " + L("division").toLowerCase() + "\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
@@ -4693,7 +4693,7 @@ function renderCompanies(){
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
           (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          /* §626: the three things the dialog changes open where they are. */
+          /* §629: the three things the dialog changes open where they are. */
           ocell("companies", ck, "name", mayEdit,
             '<b>' + esc(co.name) + '</b>' + '<span class="why mono">key ' + esc(ck) + '</span>',
             function(){ return ocellBox("data-coname", ck, co.name, { label: "Name" }); }) +
@@ -8522,7 +8522,7 @@ function renderFunctions(){
        "renders nothing at all, edit field included", so Plans in and Under
        could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-    /* §626: a cell the dialog can change opens on a double-click — the
+    /* §629: a cell the dialog can change opens on a double-click — the
        dialog's own field, so a hidden column still has its door in Edit
        details, and nothing opens while the rows are being arranged. */
     var may = mayEdit && !arranging;
@@ -8688,7 +8688,7 @@ function capsAsPillars(){
   });
   return out;
 }
-/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§626) ═════════
+/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§629) ═════════
    Islam, asked whether this page should go once El Abd's capabilities had
    become pillars of the company's plan: *"the capabilities exist why to
    remove it?"*, and then the mockup that made it a table: *"go ahead with
@@ -8763,7 +8763,7 @@ function renderCapPillars(){
         L1("capability") + '</button></div>' : ''));
 }
 function renderCaps(){
-  /* §626: where the capabilities are the company's own pillars, the page is
+  /* §629: where the capabilities are the company's own pillars, the page is
      their table — the record type below is a different thing (§542). */
   if (!GROUP.capabilities.length && capsAsPillars().length > 0) return renderCapPillars();
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
@@ -8850,7 +8850,7 @@ function renderCaps(){
           'a function to hold it is optional.</span></div>'
         : '') +
       /* §542's read-only note for a client whose capabilities are pillars
-         is gone (§626): that client gets `renderCapPillars()`, its table. */
+         is gone (§629): that client gets `renderCapPillars()`, its table. */
 
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +

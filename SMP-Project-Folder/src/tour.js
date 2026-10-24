@@ -606,7 +606,7 @@ var TOUR = (function(){
     selectorsOf(s).forEach(function(sel){
       var node = document.querySelector(sel);
       if (!node) return;
-      /* §627: the holes and the card are drawn in the page's own pixels. */
+      /* §630: the holes and the card are drawn in the page's own pixels. */
       var r = zRect(node);
       if (!r.width || !r.height) return;
       hs.push({ l:r.left - pad, t:r.top - pad, w:r.width + 2*pad, ht:r.height + 2*pad });

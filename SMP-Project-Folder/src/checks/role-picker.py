@@ -512,7 +512,7 @@ with sync_playwright() as p:
             ck("%d: %s opens its list, in its own cell" % (w, what),
                o.get("open") == 1 and o.get("btn") and o.get("list")
                and o.get("fits"), o)
-            # §627: WITHIN A PIXEL. The page is drawn at 80% on a computer and a
+            # §630: WITHIN A PIXEL. The page is drawn at 80% on a computer and a
             # zoomed row snaps to the screen's pixels, so rows of one height
             # read 31 or 32; a row that GREW is a line taller, far past that.
             oth = o.get("others") or []
@@ -570,7 +570,7 @@ with sync_playwright() as p:
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
-             /* §627: within a pixel — a zoomed row snaps to the screen's pixels */
+             /* §630: within a pixel — a zoomed row snaps to the screen's pixels */
              const k=Object.keys(hs).map(Number); return Math.max(...k)-Math.min(...k)<=1;}"""),
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{

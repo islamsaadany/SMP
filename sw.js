@@ -633,17 +633,17 @@
    something, and a client's old word shows in its box. The built file's
    bytes changed, which is the whole trigger (§91). Proved held by no commit
    in any ref's history after fetching every ref (§94.16). */
-/* v7.11-client-icon — §625: the register is the Client register and lists
+/* v7.11-client-icon — §628: the register is the Client register and lists
    the client's own people, Forefront's consultants one switch away; a client
    may carry its own icon for Home's small squares. The built file's bytes
    changed, which is the whole trigger (§91). Proved held by no commit in any
    ref's history after fetching every ref (§94.16). */
-/* v7.12-org-cells — §626: Business units, Functions and Divisions open a
+/* v7.12-org-cells — §629: Business units, Functions and Divisions open a
    cell on a double-click, and Setup › Capabilities is the company plan's
    own table where capabilities are pillars. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-/* v7.13-platform-80 — §627: the client platform is drawn at 80% on a
+/* v7.13-platform-80 — §630: the client platform is drawn at 80% on a
    computer, as the console is, and Business units' Plans in never spills.
    The built file's bytes changed, which is the whole trigger (§91). Proved
    held by no commit in any ref's history after fetching every ref (§94.16). */

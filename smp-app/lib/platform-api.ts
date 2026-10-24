@@ -190,7 +190,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const work = await myWork(shown, world.mine, account.email);
     for (const row of shown) {
       const facts = await factsFor(row);
-      /* `square` is what Home's small square draws (§625): the client's own
+      /* `square` is what Home's small square draws (§628): the client's own
          icon, else its mark if the mark is not wide, else nothing — and
          nothing means initials. Worked out here, by the same rule the Brand
          tab warns with, so the two cannot disagree. */
@@ -560,7 +560,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.mark) && body.mark.length <= 400000) mark = body.mark;
       else return no(400, "The mark must be a PNG under 300 KB.");
     }
-    /* §625: the icon, the mark's rules exactly — a PNG data URI or "" to go
+    /* §628: the icon, the mark's rules exactly — a PNG data URI or "" to go
        back to using the mark. Smaller, because it is drawn at 30px and the
        Brand tab hands over a 256px square. */
     let icon: string | null = null;
@@ -592,7 +592,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       await logAct(pool, account, row, renamed ? "client.renamed" : "client.mark",
         moved.join(" and ").replace(/^./, (ch) => ch.toUpperCase()));
     }
-    /* §625: whether the mark AS IT NOW STANDS is wide, so a Brand tab that
+    /* §628: whether the mark AS IT NOW STANDS is wide, so a Brand tab that
        has just uploaded one can say so without a rule of its own. */
     const now = mark === null ? row.mark : mark === "" ? null : mark;
     return ok({ markWide: markIsWide(now) });

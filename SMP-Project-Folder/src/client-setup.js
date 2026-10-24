@@ -995,7 +995,7 @@ var CLIENTSETUP = (function () {
     return mk;
   }
 
-  /* ── ITS ICON (§625) ─────────────────────────────────────────────────
+  /* ── ITS ICON (§628) ─────────────────────────────────────────────────
      Islam: *"give me another thing beside the client mark to upload an icon
      or use the mark as an icon. and this icon view appears in the dashboard
      of your clients as some clients have a wide mark that doesn't fit in

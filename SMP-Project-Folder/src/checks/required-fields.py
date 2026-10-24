@@ -223,7 +223,7 @@ with sync_playwright() as p:
       if(!f) return null; const s=getComputedStyle(f);
       return {style:s.outlineStyle, w:parseFloat(s.outlineWidth),
               z:parseFloat(getComputedStyle(document.documentElement).zoom)||1}}""")
-    # §627: the 2px ring is drawn at 80% on a computer and snapped to the
+    # §630: the 2px ring is drawn at 80% on a computer and snapped to the
     # screen's pixels (measured 1.25), so it is asked in the page's own
     # pixels with that snap allowed — still nothing a hairline could pass.
     ck("the ring is PAINTED, not just a class", bool(ring) and ring["style"] == "solid"

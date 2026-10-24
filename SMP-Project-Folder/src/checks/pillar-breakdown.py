@@ -181,7 +181,7 @@ with sync_playwright() as pw:
          that scrolls contains everything by definition, so measuring against
          `bx.getBoundingClientRect().right` passes on the very build this
          section exists to catch (§113.8). */
-      /* §627: the page is drawn at 80% on a computer — a box's place is in the
+      /* §630: the page is drawn at 80% on a computer — a box's place is in the
          window's pixels and its clientWidth and --tw in the page's, so each
          is put in one unit before they meet. */
       const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;

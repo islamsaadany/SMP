@@ -1,4 +1,4 @@
-"""THE ORGANISATION TABLES OPEN A CELL ON A DOUBLE-CLICK (§626).
+"""THE ORGANISATION TABLES OPEN A CELL ON A DOUBLE-CLICK (§629).
 
 Islam: *"why to edit row by row why the editing doesn't happen on the cell
 level with a double click that opens the editable cells for editing?"* and

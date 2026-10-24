@@ -263,7 +263,7 @@ with sync_playwright() as p:
     print("\n1 · the corner")
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
-    # §627: in the page's own pixels — the page is drawn at 80% on a computer.
+    # §630: in the page's own pixels — the page is drawn at 80% on a computer.
     r = pg.eval_on_selector("#chatbtn", """e => { const q=e.getBoundingClientRect(),
         z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
         return {width:q.width/z, height:q.height/z, top:q.top, bottom:q.bottom}; }""")
@@ -901,7 +901,7 @@ with sync_playwright() as p:
             const s=getComputedStyle(t,'::after'), own=getComputedStyle(t);
             const cb=(own.position==='static' ? t.closest('.chset-row') : t)
                        .getBoundingClientRect();
-            /* §627: the note's size and offsets are the page's pixels, the
+            /* §630: the note's size and offsets are the page's pixels, the
                boxes the window's — so the page's are scaled to the window's. */
             const z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;
             const w=(parseFloat(s.width)+parseFloat(s.paddingLeft)+parseFloat(s.paddingRight))*z;

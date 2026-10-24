@@ -7335,17 +7335,21 @@ function bandShift(next){
     for (var i = 0; i < list.length; i++) if (v >= list[i].floor) return list[i].key + "|" + list[i].label;
     var z = list[list.length - 1]; return z.key + "|" + z.label;
   };
-  [GROUP].concat((UNIT_KEYS || []).map(function(k){ return UNITS[k]; }))
-    .concat((FUNCTION_KEYS || []).map(function(k){ return FUNCTIONS[k]; }))
-    .forEach(function(s){
-      ((s && s.items) || []).forEach(function(p){
-        scorableMeasures(p).forEach(function(m){
-          var v = measureScore(m);
-          of++;
-          if (bandIn(v, BANDS.bands) !== bandIn(v, next)) moved++;
-        });
+  /* Only a measure WITH a score has a band to move; one with no data reads
+     "No data" under any floors, so it is not counted among the scored. */
+  var count = function(s){
+    ((s && s.items) || []).forEach(function(p){
+      scorableMeasures(p).forEach(function(m){
+        var v = measureScore(m);
+        if (v == null || isNaN(v)) return;
+        of++;
+        if (bandIn(v, BANDS.bands) !== bandIn(v, next)) moved++;
       });
     });
+  };
+  count(GROUP);
+  (UNIT_KEYS || []).forEach(function(k){ count(UNITS[k]); });
+  (FUNCTION_KEYS || []).forEach(function(k){ count(FUNCTIONS[k]); });
   return { moved: moved, of: of };
 }
 

@@ -7,7 +7,7 @@
 /* Layout: how the Strategy Office gets into the separate builder and back out, drawn as clickable screens.
    Palette and type: SMP's Forefront tokens and Source Sans 3, as in the other process mockups. */
 :root{
-  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA; --head:#E4E9F0;
   --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
   --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
   --panel:#16325C; --panel-ink:#FFFFFF;
@@ -22,7 +22,7 @@
   --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
   --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
   --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
   --panel:#0E1014; --panel-ink:#EAF0FA;
@@ -34,7 +34,7 @@
   --scrim:rgba(0,0,0,.6); --shadow:0 10px 28px rgba(0,0,0,.5);
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --zebra:#212630; --head:#2C333E;
   --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
   --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
   --panel:#0E1014; --panel-ink:#EAF0FA;
@@ -175,7 +175,8 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 /* RACI grid */
 .raci-wrap{overflow-x:auto}
 .raci{width:100%;border-collapse:collapse;min-width:640px}
-.raci th{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center;padding:8px 6px;border-bottom:1px solid var(--line);background:var(--zebra)}
+.raci th{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);text-align:center;padding:8px 6px;border-bottom:1px solid var(--line);background:var(--head)}
+.raci tbody tr:nth-child(even) td{background:var(--zebra)}
 .raci th:first-child{text-align:left;padding-left:14px}
 .raci td{border-top:1px solid var(--line-soft);text-align:center;padding:7px 6px;font-size:13px}
 .raci td:first-child{text-align:left;padding-left:14px;font-weight:600}
@@ -236,13 +237,26 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 .trow .chip{justify-self:start}
 @media (max-width:640px){.trow{grid-template-columns:minmax(0,1fr)}.trow .btn{justify-self:start}}
 .ptab{width:100%;border-collapse:collapse}
-.ptab th{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--zebra)}
+.ptab th{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:0;border-bottom:1px solid var(--line);background:var(--head);white-space:nowrap}
+.ptab th>span{display:block;padding:9px 14px}
+.ptab th button{display:flex;gap:6px;align-items:center;width:100%;background:none;border:0;padding:9px 14px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;text-align:left}
+.ptab th button:hover{color:var(--ink)}
+.ptab th button i{font-style:normal;font-size:11px;color:var(--ink-3)}
+.ptab th[aria-sort] button i{color:var(--gold-deep)}
 .ptab td{padding:10px 14px;border-top:1px solid var(--line-soft);vertical-align:middle;font-size:13.5px}
-.ptab tr[data-row]{cursor:pointer}
-.ptab tr[data-row]:hover td{background:var(--zebra)}
-.ptab .nm{font-weight:700}
+.ptab th+th,.ptab td+td{border-left:1px solid var(--line-soft)}
+.ptab tbody tr:nth-child(even) td{background:var(--zebra)}
+.ptab .pn{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);border-bottom:1px solid transparent;cursor:pointer}
+.ptab .pn:hover{border-bottom-color:var(--gold)}
 .ptab .gaps{color:var(--bad-tx);font-weight:600}
-@media (max-width:760px){.ptab thead{display:none}.ptab,.ptab tbody,.ptab tr,.ptab td{display:block;width:100%}.ptab tr{padding:10px 12px;border-top:1px solid var(--line-soft)}.ptab tr:first-child{border-top:0}.ptab td{border:0;padding:2px 0}}
+.tbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:10px}
+.srch{position:relative;flex:0 1 380px;min-width:220px}
+.srch input{width:100%;border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:7px 10px 7px 32px;font-size:13.5px}
+.srch::before{content:"";position:absolute;left:11px;top:50%;width:10px;height:10px;border:2px solid var(--ink-3);border-radius:50%;transform:translateY(-62%)}
+.srch::after{content:"";position:absolute;left:21px;top:58%;width:6px;height:2px;background:var(--ink-3);transform:rotate(45deg)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.empty{padding:18px 16px;font-size:13.5px;color:var(--ink-2)}
+@media (max-width:760px){.ptab thead{display:none}.ptab,.ptab tbody,.ptab tr,.ptab td{display:block;width:100%}.ptab tr{padding:10px 12px;border-top:1px solid var(--line-soft)}.ptab tr:first-child{border-top:0}.ptab td{border:0!important;padding:2px 0}.ptab tbody tr:nth-child(even){background:var(--zebra)}.ptab tbody tr:nth-child(even) td{background:none}}
 .pill.q{background:var(--surface-2);color:var(--ink-2)}
 .pill.bad{background:var(--bad-bg);color:var(--bad-tx)}
 .vt .ct.hot,.vt button.on .ct.hot{background:var(--bar-accent);color:#16325C;border-radius:99px;padding:0 7px;line-height:18px;font-weight:700}
@@ -276,7 +290,10 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
       <div class="vt" id="vt" role="tablist" aria-label="Views"></div>
 
       <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
-      <section data-screen="home-all" hidden><div class="box"><table class="ptab"><thead><tr><th>Process</th><th>Owner</th><th>Where it is</th><th>Gaps</th><th></th></tr></thead><tbody id="all"></tbody></table></div></section>
+      <section data-screen="home-all" hidden>
+        <div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="q" placeholder="Search by code, name, owner or state" autocomplete="off"></label><span class="note" id="qcount"></span></div>
+        <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
+      </section>
       <section data-screen="builder" hidden>
         <div class="bld">
           <nav class="box rail" id="rail" aria-label="Builder sections"></nav>
@@ -335,15 +352,21 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     { kind: 'Returned', code: 'PRO100', name: 'Procure-to-Pay', text: 'Yara Kamal sent v3 back · 22 Oct', quote: 'The $50,000 rule needs a deputy for when the Finance manager is away.', act: 'Open in builder', toast: 'Opens Procure-to-Pay in the builder, on its Authority section.' },
     { kind: 'Gaps', code: 'ORD102', name: 'Customer credit setup', text: 'Being drawn · 4 of 6 marks missing: RACI, authority, controls, SOP version', act: 'Open in builder', toast: 'Opens Customer credit setup in the builder, on its Map.' },
   ];
+  // [code, name, owner, pill, state, gaps, rank]: rank orders "Where it is" by what needs the office first
   const ALL = [
-    ['ORD100', 'Order-to-Cash', 'Hend Mourad', 'good', 'In force · v2 · draft v4 open', 2],
-    ['ORD101', 'Returns & refunds', 'Salma Adel', 'attn', 'Waiting for approval', 0],
-    ['ORD102', 'Customer credit setup', 'Hend Mourad', 'q', 'Being drawn', 4],
-    ['PRO100', 'Procure-to-Pay', 'Karim Fouad', 'bad', 'Returned by the approver', 1],
-    ['CRE100', 'Credit & Collections', 'Hala Mansour', 'good', 'In force · v1.1', 0],
-    ['REC100', 'Record-to-Report', 'Hala Mansour', 'good', 'In force · v2.0', 0],
-    ['NEW100', 'New Store Opening', 'Amr Hassan', 'bad', 'Review late', 0],
-    ['STO100', 'Store Cash Handling', 'Amr Hassan', 'good', 'In force · v1.0', 0],
+    ['ORD100', 'Order-to-Cash', 'Hend Mourad', 'good', 'In force · v2 · draft v4 open', 2, 4],
+    ['ORD101', 'Returns & refunds', 'Salma Adel', 'attn', 'Waiting for approval', 0, 3],
+    ['ORD102', 'Customer credit setup', 'Hend Mourad', 'q', 'Being drawn', 4, 5],
+    ['PRO100', 'Procure-to-Pay', 'Karim Fouad', 'bad', 'Returned by the approver', 1, 1],
+    ['CRE100', 'Credit & Collections', 'Hala Mansour', 'good', 'In force · v1.1', 0, 7],
+    ['REC100', 'Record-to-Report', 'Hala Mansour', 'good', 'In force · v2.0', 0, 7],
+    ['NEW100', 'New Store Opening', 'Amr Hassan', 'bad', 'Review late', 0, 2],
+    ['STO100', 'Store Cash Handling', 'Amr Hassan', 'good', 'In force · v1.0', 0, 7],
+    ['PRI100', 'Pricing & Promotions', 'Omar Fathy', 'q', 'Being drawn', 3, 5],
+    ['LOG100', 'Logistics & Last-mile', 'Karim Fouad', 'q', 'Being drawn', 2, 5],
+    ['INV100', 'Inventory & Stock Count', 'Karim Fouad', 'q', 'Being drawn', 3, 5],
+    ['HIR100', 'Hire-to-Retire', 'Laila Zaki', 'q', 'Being drawn', 4, 5],
+    ['CUS100', 'Customer Complaints', 'Nour Samir', 'q', 'Not started', 0, 6],
   ];
   const SECTS = [['map', 'Map', 'bad'], ['raci', 'RACI', 'bad'], ['authority', 'Authority', ''], ['controls', 'Risks & controls', 'bad'], ['quality', 'Quality', ''], ['life', 'Lifecycle', 'q']];
   const SECT_PH = { authority: ['Authority', 'Who may approve what, and up to which amount.'], controls: ['Risks & controls', 'Every risk, its control, the evidence and the last test.'], quality: ['Quality', 'Measures, non-conformances and corrective actions.'], life: ['Lifecycle', 'Draft, review, approval, publish, and every version.'] };
@@ -351,7 +374,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   const BAND = {
     home: { eyebrow: 'Raya Trade · Processes · Builder', title: 'Process builder', sub: 'Strategy Office · <b>13</b> processes · <b>2</b> drafts open · you see every process, in every state',
       acts: '<button class="bq" type="button" data-toast="Opens Processes as client staff see it: My processes, To do, Map. That is the landing mockup.">Open the staff view</button><button class="bgold" type="button" data-toast="Starts a new process: name, owner, area. Its code is made for you.">New process</button>',
-      tiles: tiles([['1', 'Suggestion', 'hot'], ['1', 'Returned', 'late'], ['2', 'Drafts', ''], ['7', 'Gaps', 'late']]) },
+      tiles: tiles([['1', 'Suggestion', 'hot'], ['1', 'Returned', 'late'], ['2', 'Drafts', ''], ['19', 'Gaps', 'late']]) },
     builder: { eyebrow: 'Raya Trade · Processes › <button type="button" data-go="home">Builder</button> › ORD100', title: 'Order-to-Cash <span class="pill good">In force · v2</span><span class="pill attn">Draft v4</span>', sub: 'Draft v4 started 24 Oct from Hend Mourad’s suggestion on step 4 · Owner <b>Hend Mourad</b> · Approver <b>Yara Kamal</b>',
       acts: '<button class="bq" type="button" id="doorback" data-go="preview">Preview as manager</button><button class="bgold" type="button" data-toast="Sends draft v4 to Yara Kamal for approval.">Send for approval</button>',
       tiles: tiles([['6', 'Steps', ''], ['2', 'Gaps', 'late'], ['4/6', 'Marks', ''], ['1', 'Suggestion', '']]) },
@@ -366,7 +389,20 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 
   $('#handle').innerHTML = HANDLE.map((h) => '<div class="trow"><span class="chip ' + (h.kind === 'Suggestion' ? 'gold' : h.kind === 'Returned' ? 'bad' : '') + '">' + h.kind + '</span><div class="t"><span class="code">' + h.code + '</span> <b>' + esc(h.name) + '</b><small>' + esc(h.text) + '</small>' + (h.quote ? '<blockquote>' + esc(h.quote) + '</blockquote>' : '') + '</div>' +
     '<button class="btn' + (h.go ? ' gold' : '') + '" type="button"' + (h.id ? ' id="' + h.id + '"' : '') + (h.go ? ' data-go="' + h.go + '" data-msg="' + esc(h.msg) + '"' : ' data-toast="' + esc(h.toast) + '"') + '>' + esc(h.act) + '</button></div>').join('');
-  $('#all').innerHTML = ALL.map(([c, n, o, k, st, g]) => '<tr data-row="' + c + '"><td><span class="code">' + c + '</span> <span class="nm">' + esc(n) + '</span></td><td>' + esc(o) + '</td><td><span class="pill ' + k + '">' + esc(st) + '</span></td><td class="' + (g ? 'gaps' : 'note') + '">' + (g || '—') + '</td><td><button class="btn" type="button" data-row="' + c + '">Open in builder</button></td></tr>').join('');
+  let SORT = 'name', DIR = 1;
+  const KEY = { name: (r) => r[1], owner: (r) => r[2], state: (r) => r[6], gaps: (r) => r[5] };
+  function renderAll() {
+    const q = $('#q').value.trim().toLowerCase();
+    const rows = ALL.filter((r) => !q || [r[0], r[1], r[2], r[4]].join(' ').toLowerCase().indexOf(q) >= 0)
+      .sort((a, b) => { const x = KEY[SORT](a), y = KEY[SORT](b); return (typeof x === 'number' ? x - y : x.localeCompare(y)) * DIR || a[1].localeCompare(b[1]); });
+    $('#all').innerHTML = rows.map(([c, n, o, k, st, g]) => '<tr><td><span class="code">' + c + '</span> <button class="pn" type="button" data-row="' + c + '">' + esc(n) + '</button></td><td>' + esc(o) + '</td><td><span class="pill ' + k + '">' + esc(st) + '</span></td><td class="' + (g ? 'gaps' : 'note') + '">' + (g || '—') + '</td><td><button class="btn" type="button" data-row="' + c + '">Open in builder</button></td></tr>').join('');
+    $$('#alltab th[data-col]').forEach((th) => { const on = th.dataset.col === SORT; if (on) th.setAttribute('aria-sort', DIR > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); th.querySelector('i').textContent = on ? (DIR > 0 ? '↑' : '↓') : '↕'; });
+    $('#qcount').textContent = q ? rows.length + ' of ' + ALL.length + ' processes' : ALL.length + ' processes · click a heading to sort';
+    $('#qempty').hidden = rows.length > 0;
+    $('#qempty').textContent = 'No process matches “' + $('#q').value.trim() + '”. Search looks at the code, name, owner and state.';
+  }
+  renderAll();
+  $('#q').addEventListener('input', renderAll);
   $('#raci').innerHTML = '<thead><tr><th>Step</th>' + ROLES.map((r) => '<th>' + esc(r) + '</th>').join('') + '</tr></thead><tbody>' +
     STEPS.map((s) => '<tr><td class="' + (s.gap && /accountable/.test(s.gap) ? 'gaprow' : '') + '">' + s.n + ' · ' + esc(s.t) + (s.gap && /accountable/.test(s.gap) ? ' <span class="chip bad">No A</span>' : '') + '</td>' + s.raci.map((v) => '<td><button type="button" class="rc ' + (v || 'empty') + '" data-toast="Cycles through R, A, C, I and empty.">' + (v || '') + '</button></td>').join('') + '</tr>').join('') + '</tbody>';
 
@@ -434,6 +470,8 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   let tt;
   function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 3000); }
   document.addEventListener('click', (e) => {
+    const so = e.target.closest('[data-sort]');
+    if (so) { const k = so.dataset.sort; if (SORT === k) DIR = -DIR; else { SORT = k; DIR = k === 'gaps' ? -1 : 1; } renderAll(); return; }
     const t = e.target, dr = t.closest('[data-door]'), go = t.closest('[data-go]'), tab = t.closest('[data-tab]'), row = t.closest('[data-row]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
     if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = 'handle'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
     if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'handle'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }

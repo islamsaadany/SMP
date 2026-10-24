@@ -11782,7 +11782,7 @@ body.presenting #buildband { display:none; }
 .csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
 .csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
 
-/* §623: the Profile's three tabs. The step pills went: each step is a page
+/* §624: the Profile's three tabs. The step pills went: each step is a page
    on the rail now. Underlined, the platform's accent under the one that is
    on, so a tab reads as where you are rather than as a button to press. */
 .csetup .wztabs { display:flex; gap:28px; border-bottom:1px solid var(--line); margin:4px 0 22px; max-width:760px; }
@@ -11909,7 +11909,7 @@ body.presenting #buildband { display:none; }
 .csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
 .csetup .wzask .row { margin-top:12px; }
 
-/* ── §623: the client group's count and marks. The strip that was here
+/* ── §624: the client group's count and marks. The strip that was here
    (Getting started under the head, §360) went: its two pages are rows of the
    rail's first group. The count sits where a folded group's number does; a
    tick is the platform's done green, the dot the accent of something still

@@ -2751,7 +2751,7 @@
         sec.appendChild(sh);
       };
       /* BY DATE (Late · This week · Next week and later) or BY CLIENT, one
-         numbered section a client with its mark (Islam, 2026-10-24: "a sort
+         numbered section a client, by its name (Islam, 2026-10-24: "a sort
          by so it shows by client"). The rows are the same rows, read from
          `rows` at the press, so a tick made under one order is in the other. */
       var draw = function () {
@@ -2765,10 +2765,8 @@
             n++;
             var sec = el("section", "mwsec byc");
             sec.setAttribute("data-client", g.key);
-            var h = el("h2");
-            h.appendChild(clientMark(g.key, g.name, true));
-            h.appendChild(document.createTextNode(g.name));
-            head(sec, n, h);
+            /* the client's name alone (Islam: "no need for the logo to appear") */
+            head(sec, n, el("h2", null, g.name));
             g.rows.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
             mwMeta(sec);
             list.appendChild(sec);
@@ -2818,29 +2816,38 @@
      the column's own way (§601). */
   var TSORT = { by: "date" };
   try { if (localStorage.getItem("smp.tasks.sort") === "client") TSORT.by = "client"; } catch (e) { /* this device only */ }
-  function sortSwitch(onChange) {
+  /* A WORD AND A PAIR OF CHOICES, one pressed: Sort by Date · Client, and
+     Home's clients' Show Mine · Demo */
+  function hoSwitch(word, opts, on, pick) {
     var w = el("span", "hosort");
-    w.appendChild(document.createTextNode("Sort by"));
+    w.appendChild(document.createTextNode(word));
     var sw = el("span", "sw");
     sw.setAttribute("role", "group");
-    sw.setAttribute("aria-label", "Sort by");
-    [["date", "Date"], ["client", "Client"]].forEach(function (o) {
+    sw.setAttribute("aria-label", word);
+    opts.forEach(function (o) {
       var b = el("button", null, o[1]);
       b.type = "button";
       b.setAttribute("data-sort", o[0]);
-      b.setAttribute("aria-pressed", String(TSORT.by === o[0]));
+      b.setAttribute("aria-pressed", String(on === o[0]));
       b.addEventListener("click", function () {
-        if (TSORT.by === o[0]) return;
-        TSORT.by = o[0];
-        try { localStorage.setItem("smp.tasks.sort", o[0]); } catch (e) { /* this device only */ }
+        if (b.getAttribute("aria-pressed") === "true") return;
         sw.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
-        onChange();
+        pick(o[0]);
       });
       sw.appendChild(b);
     });
     w.appendChild(sw);
     return w;
   }
+  function sortSwitch(onChange) {
+    return hoSwitch("Sort by", [["date", "Date"], ["client", "Client"]], TSORT.by, function (v) {
+      TSORT.by = v;
+      try { localStorage.setItem("smp.tasks.sort", v); } catch (e) { /* this device only */ }
+      onChange();
+    });
+  }
+  var HOCL = { show: "mine" };
+  try { if (localStorage.getItem("smp.home.clients") === "demo") HOCL.show = "demo"; } catch (e) { /* this device only */ }
   /* GROUPED BY CLIENT: clients with something late first, then by their
      earliest date, then by name; inside a client, by date. `list` is
      [due, isCase, row]. */
@@ -2860,9 +2867,9 @@
   function byDue(a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; }
   /* a client's mark: its logo where it has one (from the cards), else initials */
   var MARKS = {};
-  function clientMark(key, name, small) {
-    if (MARKS[key]) { var im = el("img", "cmk" + (small ? " xs" : "")); im.src = MARKS[key]; im.alt = ""; return im; }
-    return el("span", "cmk" + (small ? " xs" : ""), initials(name));
+  function clientMark(key, name) {
+    if (MARKS[key]) { var im = el("img", "cmk"); im.src = MARKS[key]; im.alt = ""; return im; }
+    return el("span", "cmk", initials(name));
   }
 
   function hoHello() {
@@ -3026,7 +3033,6 @@
         byClient(list).forEach(function (g) {
           var h = el("div", "hogrp");
           h.setAttribute("data-group", g.key);
-          h.appendChild(clientMark(g.key, g.name, true));
           h.appendChild(document.createTextNode(g.name));
           var meta = el("i", null, " · " + g.rows.length);
           if (g.late) { meta.appendChild(document.createTextNode(", ")); meta.appendChild(el("span", "late", g.late + " late")); }
@@ -3114,26 +3120,41 @@
     sc.card.classList.add("hosec");
     sc.head.appendChild(hoLink("The library →", function () { go("memory", "row"); }));
 
-    /* the boot's `cards`, once (§369), as the Clients tab takes it; the
-       tasks wait for it, so a group under Sort by client wears the
-       client's logo */
+    /* the boot's `cards`, once (§369), as the Clients tab takes it */
     var handed = BOOTCARDS; BOOTCARDS = null;
     var fail = function (box) { return function (e) {
       if (String(e && e.message) === "sign in") return;
       box.textContent = ""; box.appendChild(el("p", "honone", "Could not reach the server."));
     }; };
-    var cards = (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
       cc.body.textContent = "";
       if (!j || !j.ok) { cc.body.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
       (j.cards || []).forEach(function (c) { if (c.mark) MARKS[c.key] = c.mark; });
-      /* A SEAT, FOR AN ADMIN TOO (Islam: "the admin also sees his clients"):
-         the whole list is one press away under Clients. */
-      var mine = j.cards.filter(function (c) { return !!c.seat; });
-      cc.count(mine.length);
-      if (!mine.length) cc.body.appendChild(el("p", "honone", "You have no seat on any client yet."));
-      mine.forEach(function (c) { cc.body.appendChild(hoClient(c)); });
+      /* MINE OR DEMO (Islam, 2026-10-24: "for the clients we can have a
+         filter like the tasks between Mine and Demo"). Mine is the clients
+         this person has a SEAT on, an admin too ("the admin also sees his
+         clients"); Demo is the worked example, whoever sits on it. The
+         choice is kept on this device, as the tasks' Sort by is. */
+      var lists = {
+        mine: j.cards.filter(function (c) { return !!c.seat && c.kind !== "demo"; }),
+        demo: j.cards.filter(function (c) { return c.kind === "demo"; })
+      };
+      var draw = function () {
+        cc.body.textContent = "";
+        var list = lists[HOCL.show];
+        cc.count(list.length);
+        if (!list.length) cc.body.appendChild(el("p", "honone", HOCL.show === "demo" ? "There is no demo client here." : "You have no seat on any client yet."));
+        list.forEach(function (c) { cc.body.appendChild(hoClient(c)); });
+      };
+      var link = cc.head.querySelector(".holink");
+      cc.head.insertBefore(hoSwitch("Show", [["mine", "Mine"], ["demo", "Demo"]], HOCL.show, function (v) {
+        HOCL.show = v;
+        try { localStorage.setItem("smp.home.clients", v); } catch (e) { /* this device only */ }
+        draw();
+      }), link);
+      draw();
     }, fail(cc.body));
-    Promise.all([post({ action: "mywork" }), cards]).then(function (r) { hoTasks(tc, r[0]); }).catch(fail(tc.body));
+    post({ action: "mywork" }).then(function (j) { hoTasks(tc, j); }).catch(fail(tc.body));
     cpostCases({ action: "home" }).then(function (j) { hoCases(sc, j); }).catch(fail(sc.body));
   }
 

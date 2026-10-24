@@ -167,12 +167,15 @@ def setup(pg):
 
 MEASURE = """() => {
   const q=s=>document.querySelector(s), d=document.documentElement;
+  /* §631: in the page's own pixels — the page is drawn at 80% on a computer,
+     and 196, 160 and 400 are sizes the page sets. */
+  const z=parseFloat(getComputedStyle(d).zoom)||1;
   const bx=e=>{const r=e.getBoundingClientRect();
-    return [Math.round(r.width), Math.round(r.height)];};
+    return [Math.round(r.width/z), Math.round(r.height/z)];};
   const box=q('#chinbox');
   return { rail:bx(q('.setuprail')), pane:bx(q('.setuppane')),
     chinbox: box ? bx(box) : [0,0],
-    titleTop: Math.round(q('.setupttl').getBoundingClientRect().top + scrollY),
+    titleTop: Math.round((q('.setupttl').getBoundingClientRect().top + scrollY)/z),
     scroll: d.scrollHeight - d.clientHeight };
 }"""
 

@@ -28,6 +28,7 @@ import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } fro
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
+import { markIsWide, squareFor } from "./client-icon.ts";
 import type { PlatformRules } from "./shared-types.ts";
 
 const require = createRequire(import.meta.url);
@@ -51,9 +52,9 @@ const NO_CLIENT = "That client is not available.";
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
 type ClientRow = Tenant & { industry: string; notes: string; size: string;
-  archived_at: string | null; archived_by: string | null; modules?: unknown; past?: boolean };
+  archived_at: string | null; archived_by: string | null; modules?: unknown; past?: boolean; icon?: string | null };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by, modules, past";
+const CLIENT_COLS = "id, key, name, kind, status, mark, icon, industry, notes, size, made_here, archived_at, archived_by, modules, past";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -189,7 +190,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const work = await myWork(shown, world.mine, account.email);
     for (const row of shown) {
       const facts = await factsFor(row);
-      cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
+      /* `square` is what Home's small square draws (§629): the client's own
+         icon, else its mark if the mark is not wide, else nothing — and
+         nothing means initials. Worked out here, by the same rule the Brand
+         tab warns with, so the two cannot disagree. */
+      cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, square: squareFor(row), mine: FF.isMine(world, row.key),
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
         /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
@@ -532,7 +537,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        in this list the day it is built, and one that is not built is not
        offered at all, because a switch for a module with nothing behind it
        opens the Strategy platform wearing another name (§61). */
-    return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
+    return ok({ client: { ...client, markWide: markIsWide(row.mark) }, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
       shape, holds, goes,
       canArchive: FF.mayArchiveClient(world, account, row), canDelete: FF.mayDeleteClient(world, account, row),
       modules: modulesFor(row.modules),
@@ -555,6 +560,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.mark) && body.mark.length <= 400000) mark = body.mark;
       else return no(400, "The mark must be a PNG under 300 KB.");
     }
+    /* §629: the icon, the mark's rules exactly — a PNG data URI or "" to go
+       back to using the mark. Smaller, because it is drawn at 30px and the
+       Brand tab hands over a 256px square. */
+    let icon: string | null = null;
+    if (typeof body.icon === "string") {
+      if (body.icon === "") icon = "";
+      else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.icon) && body.icon.length <= 200000) icon = body.icon;
+      else return no(400, "The icon must be a PNG under 150 KB.");
+    }
+    if (icon !== null) await pool.query(
+      "UPDATE tenants SET icon = CASE WHEN $2 = '' THEN NULL ELSE $2 END WHERE id = $1", [row.id, icon]);
     await pool.query(
       "UPDATE tenants SET name = COALESCE($2,name), industry = COALESCE($3,industry), notes = COALESCE($4,notes), " +
       "size = COALESCE($6,size), " +
@@ -571,11 +587,15 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const moved: string[] = [];
     if (renamed) moved.push("renamed it " + String(body.name).trim());
     if (mark !== null) moved.push(mark === "" ? "took its mark off" : "changed its mark");
+    if (icon !== null) moved.push(icon === "" ? "went back to its mark as its icon" : "gave it an icon of its own");
     if (moved.length) {
       await logAct(pool, account, row, renamed ? "client.renamed" : "client.mark",
         moved.join(" and ").replace(/^./, (ch) => ch.toUpperCase()));
     }
-    return ok({});
+    /* §629: whether the mark AS IT NOW STANDS is wide, so a Brand tab that
+       has just uploaded one can say so without a rule of its own. */
+    const now = mark === null ? row.mark : mark === "" ? null : mark;
+    return ok({ markWide: markIsWide(now) });
   }
 
   /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§322) ────────────────────

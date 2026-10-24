@@ -73,15 +73,17 @@ TEAM = [
      "seat": "super", "person_key": "ff_islam"},
     {"email": "noran.essam@forefront.consulting", "name": "Noran Essam",
      "seat": "smoteam", "person_key": "smo"},
-    {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid",
+    {"email": "omar.abdelhamid.elsayed.strategy.management.office@forefront.consulting", "name": "Omar Abdel Hamid",
      "seat": "smoteam", "person_key": None},
 ]
 REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade.example"},
        {"key": "mobhead", "name": "Ashraf Laithy", "email": "ashraf.laithy@rayatrade.example"},
        {"key": "own_mob", "name": "Mennah Farouk", "email": "mennah.farouk@rayatrade.example"}]
+# §631: Omar's address is long enough to clip at 1600 with the page drawn at
+# 80% on a computer, so the fixture still holds one of each (§255).
 OFFICE = [{"email": "islam.saadany@forefront.consulting", "name": "Islam Saadany", "is_admin": True},
           {"email": "noran.essam@forefront.consulting", "name": "Noran Essam", "is_admin": False},
-          {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
+          {"email": "omar.abdelhamid.elsayed.strategy.management.office@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
           {"email": "hana.zaki@forefront.consulting", "name": "Hana Zaki", "is_admin": False}]
 
 # The two client shapes, switched between runs — `made_here` is what decides
@@ -339,7 +341,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     rm = [p for p in STATE["posts"] if p.get("action") == "setTeam" and p.get("on") is False]
     ck("Remove posts that person off this client",
-       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid.elsayed.office@forefront.consulting",
+       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid.elsayed.strategy.management.office@forefront.consulting",
        {"pressed": ok_rm, "posts": STATE["posts"]})
     pg.close()
 

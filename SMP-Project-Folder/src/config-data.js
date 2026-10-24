@@ -11,6 +11,34 @@
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
@@ -353,6 +381,14 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"*.
+   `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
+   key and the column — or null. The register's rules exactly: one cell at a
+   time, leaving it or Enter keeps it, Escape puts it back. A person cell is
+   open while its picker is (`PICKING`), so choosing somebody shuts it. */
+var OCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -463,6 +499,8 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
+var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
@@ -5020,7 +5058,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;

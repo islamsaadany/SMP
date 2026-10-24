@@ -29,7 +29,8 @@ WHAT IS ASSERTED IS THE PROMISE, NOT THE MECHANISM (§94.8):
       because a pseudo-element is invisible to every DOM probe (band-corner's
       rule). The screenshot is decoded by the browser's own canvas, so the
       suite still needs no image library.
-  6b · THE STRIP IS ITS OWN CARD (§618). Pinned, its navy outline is unbroken
+  6b · THE STRIP IS ITS OWN CARD (§618). Pinned, its outline — the open
+      item's own dark grey since §627, navy before — is unbroken
       on all four sides and a gutter of page ground lies under it.
   7 · ABOVE 1200 NOTHING MOVES (§94.2). The vertical rail is a list, and the
       band beside it is still pinned once scrolled.
@@ -88,7 +89,7 @@ STRIP = r"""() => {
 TOKENS = r"""() => {
   var p = document.createElement('i'); document.body.appendChild(p);
   var out = {};
-  ['--stone', '--surface', '--ink-3', '--ground'].forEach(function(t){
+  ['--ink-2', '--surface', '--ink-3', '--ground', '--line'].forEach(function(t){
     p.style.color = 'var(' + t + ')'; out[t] = getComputedStyle(p).color; });
   p.remove(); return out;
 }"""
@@ -110,9 +111,24 @@ def rgb(css):
     return tuple(int(v) for v in css[css.index("(") + 1:css.index(")")].split(",")[:3])
 
 
+# §631: THIS CHECK READS SINGLE PIXELS — a corner one in, a 1px navy outline,
+# a gutter's ground — and at 80% a 1px line is drawn 0.8px wide and blends into
+# its neighbours, so every sample lands on a blend. What it guards is the
+# DESIGN, which the zoom only scales (checks/platform-80.py holds the scaling),
+# so it is measured at full size: the zoom is set back to 1 on this page, with
+# the window lengths that carry its correction (_shared.css, §631).
+# (the root element does not exist yet when an init script runs, so it is set
+# the moment it appears)
+ZOOM_OFF = ("new MutationObserver(function(m, o){ var d = document.documentElement; if (!d) return; "
+            "d.style.setProperty('zoom','1'); d.style.setProperty('--winw','100vw'); "
+            "d.style.setProperty('--winh','100vh'); d.style.setProperty('--wind','100dvh'); "
+            "o.disconnect(); }).observe(document, { childList: true });")
+
+
 def page(b, w, h=760):
     pg = b.new_page(viewport={"width": w, "height": h})
     pg.add_init_script(INIT)
+    pg.add_init_script(ZOOM_OFF)
     pg._errs = []
     pg.on("pageerror", lambda e: pg._errs.append(str(e)))
     pg.goto("file://" + F)
@@ -183,10 +199,10 @@ with sync_playwright() as p:
         on = [i for i in rest["items"] if i["on"]]
         off = [i for i in rest["items"] if not i["on"]]
         ok("%d · the open direction wears the section switch's selected ground and type" % w,
-           len(on) == 1 and on[0]["bg"] == tok["--stone"] and on[0]["ink"] == tok["--surface"],
-           on and (on[0]["bg"], on[0]["ink"], tok["--stone"], tok["--surface"]))
+           len(on) == 1 and on[0]["bg"] == tok["--ink-2"] and on[0]["ink"] == tok["--surface"],
+           on and (on[0]["bg"], on[0]["ink"], tok["--ink-2"], tok["--surface"]))
         ok("%d · the other directions step back to the quiet ink" % w,
-           off and all(i["ink"] == tok["--ink-3"] and i["bg"] != tok["--stone"] for i in off),
+           off and all(i["ink"] == tok["--ink-3"] and i["bg"] != tok["--ink-2"] for i in off),
            [(i["ink"], i["bg"]) for i in off])
         scroll(pg, 450)
         s = pg.evaluate(STRIP)
@@ -203,10 +219,10 @@ with sync_playwright() as p:
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in c.values()),
                {"ground": g, **c})
             line, gutter = edges(pg, s)
-            st = rgb(tok["--stone"])
-            ok("1100 · pinned, the strip's outline runs round all four sides in the navy (§618)",
+            st = rgb(tok["--ink-2"])
+            ok("1100 · pinned, the strip's outline runs round all four sides in the open item's grey (§618, §627)",
                all(max(abs(a - b2) for a, b2 in zip(v, st)) <= 40 for v in line.values()),
-               {"stone": st, **line})
+               {"grey": st, **line})
             ok("1100 · pinned, the plan stops a gutter short of the strip — page ground under it (§618)",
                all(max(abs(a - b2) for a, b2 in zip(v, g)) <= 3 for v in gutter), {"ground": g, "gutter": gutter})
         if pg._errs:
@@ -248,7 +264,8 @@ with sync_playwright() as p:
     s = pg.evaluate(STRIP)
     ok("editing · the page scrolled", s and s["sy"] > 100, s and s["sy"])
     ok("editing · the strip pins under the chrome and stays",
-       s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top)")) <= 1,
+       # §631: the box is the window's pixels, its `top` the page's
+       s and abs(s["top"] - pg.evaluate("()=>parseFloat(getComputedStyle(document.querySelector('.split > .rail')).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1)")) <= 1,
        s and s["top"])
     ok("editing · the head being edited went with the plan",
        s and rest and s["band"] is not None and abs((rest["band"] - (s["sy"] - rest["sy"])) - s["band"]) <= 1,
@@ -264,7 +281,9 @@ with sync_playwright() as p:
     ok("1440 · the side rail is still a list", s and s["rows"] == s["n"], s and s["rows"])
     scroll(pg, 400)
     pinned = pg.evaluate("""() => { var b = document.querySelector('.split > .pane > .pband');
-      return [b.getBoundingClientRect().top, parseFloat(getComputedStyle(b).top), scrollY]; }""")
+      /* §631: the sticky `top` in the window's pixels, like the box */
+      return [b.getBoundingClientRect().top,
+              parseFloat(getComputedStyle(b).top) * (parseFloat(getComputedStyle(document.documentElement).zoom)||1), scrollY]; }""")
     ok("1440 · scrolled, the title is still pinned beside it",
        pinned[2] > 100 and abs(pinned[0] - pinned[1]) <= 1, pinned)
     pg.close()

@@ -170,7 +170,7 @@ export async function updatePersonManager(
   return ok({ id: person.id });
 }
 
-const REGISTER_OWNS = "Name and email come from the client's People register — change them there.";
+const REGISTER_OWNS = "Name and email come from the Client register — change them there.";
 
 const updatePersonSchema = z.object({
   workspaceId: z.string().min(1),
@@ -239,7 +239,7 @@ export async function archivePerson(
 
   const existing = await prisma.person.findUnique({ where: { id: parsed.data.personId } });
   if (!existing || existing.workspaceId !== parsed.data.workspaceId) return notFound();
-  if (existing.smpKey) return validationError("This person is on the client's People register — retire them there.");
+  if (existing.smpKey) return validationError("This person is on the Client register — retire them there.");
 
   const person = await prisma.person.update({
     where: { id: parsed.data.personId },

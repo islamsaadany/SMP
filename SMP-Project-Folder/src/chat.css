@@ -62,7 +62,7 @@ body.presenting .chatdock { display:none; }
                 font-variant-numeric:tabular-nums; }
 
 /* ── THE PANEL ─────────────────────────────────────────────────────────── */
-.chatpanel { width:376px; max-width:calc(100vw - 32px);
+.chatpanel { width:376px; max-width:calc(var(--winw) - 32px);
              background:var(--surface); border:1px solid var(--line); border-radius:12px;
              overflow:hidden; box-shadow:0 6px 26px rgba(0,0,0,.18);
              display:flex; flex-direction:column; }
@@ -106,7 +106,7 @@ body.presenting .chatdock { display:none; }
    CAPPED TO THE WINDOW for the reason `.chinbox` is: a fixed height on a
    short laptop puts the composer off the bottom of the screen, which is the
    one control somebody opened the panel to use. */
-.chatpanel { height:531px; max-height:calc(100dvh - 96px); }
+.chatpanel { height:531px; max-height:calc(var(--wind) - 96px); }
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
             background:var(--ground); flex:1 1 auto; min-height:0;
             overflow-y:auto; }
@@ -231,7 +231,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
+           height:calc(var(--wind) - var(--chin-top, 190px) - var(--pane-foot, 20px));
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -357,7 +357,7 @@ body.presenting .chatdock { display:none; }
    panel's padding and nothing else — asserted as the PROPERTY (no content
    above the heading, none below the fade) rather than as the number, so a
    later change to that padding goes red rather than silent (§94.8). */
-.hmenu-panel.chset { max-height:64vh; overflow-y:auto; overscroll-behavior:contain;
+.hmenu-panel.chset { max-height:calc(var(--winh) * 0.64); overflow-y:auto; overscroll-behavior:contain;
                      scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
 .chset .chset-h { position:sticky; top:0; z-index:2;
                   box-shadow:0 -6px 0 var(--surface); }

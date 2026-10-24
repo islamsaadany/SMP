@@ -233,7 +233,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
               <Card title="Link for staff">
                 <StaffLink label="Send this to the people who should read it" path={`/${workspaceId}/processes/read/${processId}`} />
                 <p className="mt-2 text-xs text-slate-500">
-                  They sign in as usual and need to be on the People register. They see only the published version and can confirm they have read it.
+                  They sign in as usual and need to be on the Client register. They see only the published version and can confirm they have read it.
                 </p>
               </Card>
             )}
@@ -241,7 +241,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
               <Card title={`Read and acknowledged · v${inForce.number}`}>
                 {progress.total === 0 ? (
                   <p className="text-sm text-slate-500">
-                    No step is given to a role that anybody on the People register holds, so nobody is expected to acknowledge yet.
+                    No step is given to a role that anybody on the Client register holds, so nobody is expected to acknowledge yet.
                   </p>
                 ) : (
                   <>

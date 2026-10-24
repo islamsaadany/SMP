@@ -474,7 +474,7 @@
     { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
     { key:"c_bands",  area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
     { key:"c_units",  area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
-    { key:"c_people", area:"a_setup", scope:"setup", label:"People register", note:"Everyone the platform knows, and what they hold" },
+    { key:"c_people", area:"a_setup", scope:"setup", label:"Client register", note:"Everyone the platform knows, and what they hold" },
     { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
     /* Sending mail OUT of the platform (§72). Setup, and the same argument
        branding makes: an email leaves over the organisation's name, so who may
@@ -8271,6 +8271,34 @@ var UNITS = {
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
@@ -8613,6 +8641,14 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"*.
+   `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
+   key and the column — or null. The register's rules exactly: one cell at a
+   time, leaving it or Enter keeps it, Escape puts it back. A person cell is
+   open while its picker is (`PICKING`), so choosing somebody shuts it. */
+var OCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -8723,6 +8759,8 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
+var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
@@ -13280,7 +13318,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;
@@ -25701,7 +25739,7 @@ function peopleReadme(){
   var lines = [
     ["People workbook", ""],
     ["", ""],
-    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → Client register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
     ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
@@ -25713,7 +25751,7 @@ function peopleReadme(){
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
-    ["When you are done", "Save as .xlsx and upload it on Setup → People register."]
+    ["When you are done", "Save as .xlsx and upload it on Setup → Client register."]
   ];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
@@ -40312,6 +40350,65 @@ function unitFormatSelect(k, u){
       return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
         esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
 }
+/* ══ ONE CELL, OPENED WHERE IT IS READ — THE ORGANISATION TABLES (§630) ══
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"* —
+   then, of the mockup that drew it, *"go ahead with the mockup, build it"*.
+
+   THE CLIENT REGISTER'S RULES, NOT A SECOND SET (§372): a double-click opens
+   the cell, leaving it or Enter keeps it, Escape puts it back, one cell at a
+   time (`OCELL`). And the CONTROL IS THE DIALOG'S: an open cell draws the
+   very field Edit details draws — `data-uname`, `data-ucomp`, the picker —
+   so the handlers that already write those fields write these, and a cell
+   cannot save differently from the form beside it (§53.5, §116).
+
+   A PERSON CELL IS OPEN WHILE ITS PICKER IS. The picker's own state
+   (`PICKING`) is what closes it — choosing, Unassign, Cancel — so the cell
+   needs no second answer to "is it still open". Its list floats under the
+   cell (`.ocellpop`, placed by the shell off the cell's own rect), because
+   these tables sit in a box that scrolls sideways and would clip it. */
+function ocellIs(t, key, f){
+  return !!(OCELL && OCELL.t === t && OCELL.key === key && OCELL.f === f);
+}
+function ocell(t, key, f, may, inner, open, cls, pick){
+  var c = cls || "";
+  if (may && ocellIs(t, key, f) && (!pick || PICKING === pick))
+    return '<td class="' + (c ? c + " " : "") + 'ocellopen">' + open() + '</td>';
+  return '<td' + (c ? ' class="' + c + '"' : '') +
+    (may ? ' data-ocell="' + esc(t + "|" + key + "|" + f) + '"' +
+           (pick ? ' data-ocellpick="' + esc(pick) + '"' : '') : '') +
+    '>' + inner + '</td>';
+}
+function ocellBox(attr, key, value, o){
+  o = o || {};
+  return '<input class="fld' + (o.mono ? ' mono' : '') + '" value="' + esc(value || "") + '" ' +
+    attr + '="' + esc(key) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') +
+    (o.label ? ' aria-label="' + esc(o.label) + '"' : '') + '>';
+}
+/* The closed button stands where the name was, ringed, and pressing it is
+   Cancel — the list under it is the dialog's own picker, unchanged. */
+function ocellPerson(where, role, current){
+  var held = personName(current);
+  return '<button type="button" class="pickbtn ocellbtn' + (held ? '' : ' empty') +
+      '" data-pick-cancel="1">' + (held ? esc(held) : 'unassigned') + '</button>' +
+    '<div class="ocellpop">' + assignPicker(where, role, current, true) + '</div>';
+}
+/* Which company a unit is in — the dialog's control and the cell's, one
+   builder (§53.5). A retired company is nowhere a unit can be MOVED to, but
+   a unit already in one still shows it — hiding it would silently read as
+   "its own company" (§49.3). */
+function unitCompanySelect(k, u){
+  return '<select class="fld" data-ucomp="' + esc(k) + '" aria-label="Which ' +
+      esc(L1("division").toLowerCase()) + ' ' + esc(u.name) + ' is in">' +
+    COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
+      .map(function(ck){
+        return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
+          '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
+      }).join("") +
+    '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
+  '</select>';
+}
+
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -40324,30 +40421,42 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
+    /* §630: every cell below that the dialog can change opens on a
+       double-click; none does while the rows are being arranged, for the
+       menu's own reason (§261) — one act at a time. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (u.active ? "active" : "retired") + '"' +
       (u.active ? '' : ' class="retired"') + '>' +
       setArrangeIdx("units", i, u.name) +
-      '<td><b>' + esc(u.name) + '</b>' +
-        '<span class="why mono">key ' + esc(k) + '</span></td>' +
+      ocell("units", k, "name", may,
+        '<b>' + esc(u.name) + '</b>' + '<span class="why mono">key ' + esc(k) + '</span>',
+        function(){ return ocellBox("data-uname", k, u.name, { label: "Name" }); }) +
       /* Short name for the navigation only — everywhere else keeps the full
          one. Empty means "use the full name", so nothing has to be filled in. */
-      '<td>' + (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
-                          : '<span class="why" style="margin:0">' + esc(u.name) + '</span>') + '</td>' +
-      '<td class="cc"><span class="mono">' + esc(u.codePrefix) + '</span></td>' +
+      ocell("units", k, "nav", may,
+        (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
+                   : '<span class="why" style="margin:0">' + esc(u.name) + '</span>'),
+        function(){ return ocellBox("data-unav", k, u.navName, { ph: u.name, label: "Shown in the nav" }); }) +
+      ocell("units", k, "code", may, '<span class="mono">' + esc(u.codePrefix) + '</span>',
+        function(){ return ocellBox("data-upx", k, u.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") +
       /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
          counted pillars now says which way the unit plans (his *"Plans in"*),
-         with the count of that way's rows beside it. Chosen in the dialog. */
-      '<td class="cc">' + unitPlansInCell(k, u) + '</td>' +
+         with the count of that way's rows beside it. */
+      ocell("units", k, "plans", may, unitPlansInCell(k, u),
+        function(){ return unitFormatSelect(k, u); }, "cc plansin") +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
          is an explicit choice rather than an empty cell, because an empty cell
          reads as somebody having forgotten and standing alone is a decision. */
-      '<td>' + (u.company && COMPANIES[u.company]
+      ocell("units", k, "division", may, (u.company && COMPANIES[u.company]
         ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
-        : '<span class="why" style="margin:0">its own company</span>') + '</td>' +
-      '<td class="cc">' + assignPicker(k, "owner", roles.head, false) + '</td>' +
-      '<td class="cc">' + assignPicker(k, "custodian", roles.custodian, false) + '</td>' +
+        : '<span class="why" style="margin:0">its own company</span>'),
+        function(){ return unitCompanySelect(k, u); }) +
+      ocell("units", k, "head", may, assignPicker(k, "owner", roles.head, false),
+        function(){ return ocellPerson(k, "owner", roles.head); }, "cc", k + "|owner") +
+      ocell("units", k, "custodian", may, assignPicker(k, "custodian", roles.custodian, false),
+        function(){ return ocellPerson(k, "custodian", roles.custodian); }, "cc", k + "|custodian") +
       /* STATUS HOLDS A STATUS (§93.14's rule, reaching the page it was written
          about). This column was headed Status and showed four controls. */
       '<td class="cc"><span class="pill ' + (u.active ? "good" : "none") + '">' +
@@ -40381,9 +40490,13 @@ function renderUnits(){
       '<table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:' + (arranging ? 54 : 38) + 'px">#</th>' +
         '<th style="width:18%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
+        /* §631: Plans in holds "Objectives & actions" and a count, and spilled
+           30px into its neighbour at 1440 (46px at 1280) while Key Objectives'
+           heading ran into Weight — measured. The short name gives up the
+           room: it holds a short name. */
+        '<th style="width:11%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
+        '<th class="cc" style="width:13%">Plans in</th><th class="cc" style="width:10%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
@@ -40485,18 +40598,7 @@ var ROWDLG_SPECS = {
         (unitFormat(u) === "pillars"
           ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
-        pdField(L1("division"),
-          '<select class="fld" data-ucomp="' + esc(k) + '">' +
-            /* A retired company is nowhere a unit can be MOVED to, but a unit
-               already in one still shows it — hiding it would silently read as
-               "its own company" (§49.3). */
-            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
-              .map(function(ck){
-                return '<option value="' + esc(ck) + '"' + (u.company === ck ? " selected" : "") +
-                  '>' + esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
-              }).join("") +
-            '<option value=""' + (u.company ? "" : " selected") + '>— its own company —</option>' +
-          '</select>') +
+        pdField(L1("division"), unitCompanySelect(k, u)) +
         pdField("BU head", assignPicker(k, "owner", roles.head, true)) +
         pdField("Strategy custodian", assignPicker(k, "custodian", roles.custodian, true)) +
         pdSect("The unit’s mark") +
@@ -40558,11 +40660,7 @@ var ROWDLG_SPECS = {
       return [plural(unitsOfCompany(k).length, L1("unitword"), L("unitword")), esc("key " + k)].join(" · ");
     },
     body:  function(c, k){
-      var flag = function(field, val){
-        return '<select class="fld" data-coflag="' + esc(k + "|" + field) + '">' +
-          '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
-          '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
-      };
+      var flag = function(field, val){ return coFlagSelect(k, field, val); };
       return pdSect("What it is") +
         pdField("Name", '<input class="fld tk-firstfield" value="' + esc(c.name) +
                         '" data-coname="' + esc(k) + '">') +
@@ -41110,6 +41208,11 @@ function dupeMark(dupes){
   return out;
 }
 
+/* §629: whether the register shows Forefront's consultants — kept on this
+   device, the way the register's columns are (§47.1). Off unless asked. */
+var REGFF_KEY = "smp.register.forefront";
+function regShowsFf(){ try { return localStorage.getItem(REGFF_KEY) === "1"; } catch (e) { return false; } }
+function setRegShowsFf(on){ try { if (on) localStorage.setItem(REGFF_KEY, "1"); else localStorage.removeItem(REGFF_KEY); } catch (e) {} }
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -42227,7 +42330,15 @@ function renderPeople(){
       ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
   }
 
-  var rows = PEOPLE.map(function(p, i){
+  /* §629: THE CLIENT'S OWN PEOPLE, WITH FOREFRONT ONE PRESS AWAY (Islam,
+     option B: the register lists the client's people; *Show Forefront team*
+     brings the consultants back). Only the MINTED rows hide — a consultant
+     the platform wrote a row for so they can sign in and hold a seat
+     (§362.2). An ADOPTED row is the client's own person who is also on the
+     account team, so it stays. Nothing about anybody's access moves: the
+     rows are there underneath, and every count above the table still reads
+     them all. */
+  var rows = PEOPLE.filter(function(p){ return regShowsFf() || !SMPRules.isMintedRow(p); }).map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
     /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
@@ -42782,20 +42893,19 @@ function renderPeople(){
      lists at once and the sentence must not pretend otherwise — they are
      counted with Forefront and the hover says they are the client's own
      person too (§3a.1). */
-  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
-  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
-  var splitChip = !ffRows.length ? "" :
-    '<span class="psplit" title="' +
-      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
-          "this table reads from it, so everybody who can touch this client is on one screen." +
-          (ffAdopted.length
-            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
-              " also the client\u2019s own person, matched by their address, and stay editable here: " +
-              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
-            : "")) + '">' +
-      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
-             "of the client\u2019s own people") +
-      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
+  /* §629: THE SPLIT LINE BECAME THE SWITCH. It said "33 of the client's own
+     people · 2 from Forefront" (§3a.1); with the consultants off the table
+     by default, the one thing left to say about them is how many are behind
+     the switch, and the switch says it. Drawn only where there is somebody
+     to show (§61). */
+  var ffMinted = PEOPLE.filter(function(p){ return SMPRules.isMintedRow(p); }).length;
+  var splitChip = !ffMinted ? "" :
+    '<button type="button" class="regff' + (regShowsFf() ? " on" : "") + '" data-regff="1" aria-pressed="' +
+      (regShowsFf() ? "true" : "false") + '" title="' +
+      esc("Forefront's consultants on this client. They are here so they can sign in and hold their seat; " +
+          "they are added, given a seat or removed on Forefront team.") + '">' +
+      '<span class="box" aria-hidden="true">' + (regShowsFf() ? "\u2713" : "") + '</span>' +
+      'Show Forefront team (' + ffMinted + ')</button>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -42811,7 +42921,7 @@ function renderPeople(){
      not a removal: with nothing between the row and the table, `section("")`
      is what puts the table there, and the header's own 14px bottom margin is
      the whole of the gap. */
-  return cfgHead("People register",
+  return cfgHead("Client register",
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
@@ -43529,6 +43639,13 @@ function coKebab(ck, co, on, mayEdit){
     'data-comenu="' + esc(ck) + '"', CLEARING === "co|" + ck);
 }
 
+/* What a division's CEO sees, as a control — the dialog's and the cell's
+   (§630), one builder. */
+function coFlagSelect(ck, field, val){
+  return '<select class="fld" data-coflag="' + esc(ck + "|" + field) + '">' +
+    '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+    '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+}
 function renderCompanies(){
   /* §85's pen per row became a dialog per row (§261): what a company is called
      and what its CEO sees are three fields, and they are opened from the row's
@@ -43543,7 +43660,9 @@ function renderCompanies(){
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      tkBar("companies", { placeholder:"Search the companies\u2026" }) +
+      /* §630: the page's own word, which the box had kept from before §391
+         called these divisions. */
+      tkBar("companies", { placeholder:"Search the " + L("division").toLowerCase() + "\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
           return h("#", "idx", false) + h(L1("division")) + h("Units", "cc") +
@@ -43559,11 +43678,15 @@ function renderCompanies(){
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
           (on ? '' : ' class="retired"') +
           '><td class="idx">' + (i+1) + '</td>' +
-          '<td><b>' + esc(co.name) + '</b>' +
-            '<span class="why mono">key ' + esc(ck) + '</span></td>' +
+          /* §630: the three things the dialog changes open where they are. */
+          ocell("companies", ck, "name", mayEdit,
+            '<b>' + esc(co.name) + '</b>' + '<span class="why mono">key ' + esc(ck) + '</span>',
+            function(){ return ocellBox("data-coname", ck, co.name, { label: "Name" }); }) +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
-          '<td class="cc">' + flag(co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag(co.seeGroup) + '</td>' +
+          ocell("companies", ck, "seeOthers", mayEdit, flag(co.seeOthers),
+            function(){ return coFlagSelect(ck, "seeOthers", co.seeOthers); }, "cc") +
+          ocell("companies", ck, "seeGroup", mayEdit, flag(co.seeGroup),
+            function(){ return coFlagSelect(ck, "seeGroup", co.seeGroup); }, "cc") +
           /* STATUS HOLDS A STATUS HERE TOO (§261). It held a pen and, beside
              it, a dotted chip reading "holds 3 units" — which is not a fact
              about the company at all but the REFUSAL that stands in for the
@@ -46154,7 +46277,7 @@ var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per
    was built to prevent, in the one place nobody would ever see it disagree.
 
    SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
+   at the Client register — custodians, passwords, declarations — and "7 things
    waiting on the register" is exactly what somebody wants from a rail badge.
    Nothing new is counted here, which is the whole point.
 
@@ -47384,6 +47507,10 @@ function renderFunctions(){
        "renders nothing at all, edit field included", so Plans in and Under
        could not be reached with that column turned off. */
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+    /* §630: a cell the dialog can change opens on a double-click — the
+       dialog's own field, so a hidden column still has its door in Edit
+       details, and nothing opens while the rows are being arranged. */
+    var may = mayEdit && !arranging;
     return '<tr data-oi="' + i + '" data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
       (f.active === false ? ' class="retired"' : '') + '>' +
       setArrangeIdx("fns", i, f.name) +
@@ -47397,13 +47524,16 @@ function renderFunctions(){
          column renders nothing at all, edit field included" was true while the
          fields were on the row, and it is why Nav name and Code had to stay
          visible. They are drawn in the dialog now, whatever this menu says. */
-      '<td class="fnamecell"><b>' + esc(f.name) + '</b></td>' +
+      ocell("fns", fk, "name", may, '<b>' + esc(f.name) + '</b>',
+        function(){ return ocellBox("data-fname", fk, f.name, { label: "Name" }); }, "fnamecell") +
       (fnShowCol("key") ? '<td><span class="mono">' + esc(fk) + '</span></td>' : '') +
-      (fnShowCol("nav") ? '<td>' + (f.navName
+      (fnShowCol("nav") ? ocell("fns", fk, "nav", may, (f.navName
         ? '<span class="val">' + esc(f.navName) + '</span>'
-        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>') + '</td>' : '') +
-      (fnShowCol("code") ? '<td class="cc"><span class="mono">' +
-        esc(f.codePrefix || "\u2014") + '</span></td>' : '') +
+        : '<span class="why" style="margin:0">' + esc(f.name) + '</span>'),
+        function(){ return ocellBox("data-fnav", fk, f.navName, { ph: f.name, label: "Nav name" }); }) : '') +
+      (fnShowCol("code") ? ocell("fns", fk, "code", may, '<span class="mono">' +
+        esc(f.codePrefix || "\u2014") + '</span>',
+        function(){ return ocellBox("data-fpx", fk, f.codePrefix, { mono: true, label: "Code prefix" }); }, "cc") : '') +
       /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
          Spec 010 built both and gave neither a control: `format` and `under`
          could only be set by editing the source, so a second Merchandising was
@@ -47413,11 +47543,15 @@ function renderFunctions(){
          what is in the way rather than hiding a plan that still exists — the
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
-      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
+      (fnShowCol("plansin") ? ocell("fns", fk, "plans", may, planCell(fk, f, false),
+        function(){ return planCell(fk, f, true); }, "cc") : '') +
+      (fnShowCol("company") ? ocell("fns", fk, "division", may, fnCompanyCell(fk, f, false),
+        function(){ return fnCompanyCell(fk, f, true); }, "cc") : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
-      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
-      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
+      (fnShowCol("head") ? ocell("fns", fk, "head", may, pick("head", f.head, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "fnhead", f.head); }, "cc", "fn:" + fk + "|fnhead") : '') +
+      (fnShowCol("cust") ? ocell("fns", fk, "custodian", may, pick("custodian", f.custodian, fk, false),
+        function(){ return ocellPerson("fn:" + fk, "custodian", f.custodian); }, "cc", "fn:" + fk + "|custodian") : '') +
       /* ── STATUS HOLDS A STATUS, AND THE ACTS HOLD A MENU (§93.14) ────
          Islam, on rows measuring 155px beside the register's 39: "learn from
          what we have done in the people table."
@@ -47539,13 +47673,88 @@ function capsAsPillars(){
   });
   return out;
 }
+/* ══ THE COMPANY'S CAPABILITIES, WHERE THEY ARE PILLARS (§630) ═════════
+   Islam, asked whether this page should go once El Abd's capabilities had
+   become pillars of the company's plan: *"the capabilities exist why to
+   remove it?"*, and then the mockup that made it a table: *"go ahead with
+   the mockup, build it"*.
+
+   §542 drew this page read-only on purpose — "a second place to type them is
+   a second answer to who owns this" (§53.5). That holds for a COPY, and this
+   is not one: every cell writes the company plan's own pillar, the row the
+   Capabilities tab draws, so there is one record and two ways to reach it,
+   as a unit's name is one answer on The shape and on Business units.
+
+   WHO MAY CHANGE IT is asked of both doors: this page's own grant AND the
+   company plan's (`mayAuthor("u_plan", "group")`, the question the plan's
+   pen and the server's authoriser ask), because a write the page allowed and
+   the save refused would be §42's fault from the page's side.
+
+   THE SEATS ARE THE PLAN'S OWN LIST. A pillar's owner holds a NAME (§33, and
+   the move wrote names, §544), so the control is `ownerChoices` — the same
+   list the plan's pen draws — and a value it does not know is kept, marked,
+   rather than dropped. Removing one stays in the plan, where its measures and
+   tactics are, behind the plan's own question. */
+function capPillarById(id){
+  return (topAsUnit().items || []).filter(function(p){
+    return p && p.id === id && SMPRules.pillarIsCap(p); })[0] || null;
+}
+function mayEditCapPillars(){
+  return grant("c_caps") === "edit" && mayAuthor("u_plan", "group");
+}
+function capSeat(v){
+  var n = v ? personName(v) : "";
+  return n || String(v || "");
+}
+function capSeatSelect(id, seat, v){
+  return '<select class="fld" data-cpseat="' + esc(id + "|" + seat) + '" aria-label="' +
+      (seat === "owner" ? "Owner" : "Custodian") + '">' +
+    optionsHtml(ownerChoices(v, true), function(x){ return String(v == null ? "" : v) === x; }) +
+  '</select>';
+}
+function renderCapPillars(){
+  var u = topAsUnit();
+  var may = mayEditCapPillars();
+  var list = [];
+  (u.items || []).forEach(function(p, i){ if (SMPRules.pillarIsCap(p)) list.push({ p:p, i:i }); });
+  var none = '<span class="why" style="margin:0">unassigned</span>';
+  var rows = list.map(function(x, n){
+    var p = x.p, id = p.id, code = pillarCode(u, x.i);
+    return '<tr data-tkrow="' + (p.owner ? "assigned" : "unassigned") + '">' +
+      '<td class="idx">' + (n + 1) + '</td>' +
+      '<td><span class="mono">' + esc(code) + '</span></td>' +
+      ocell("caps", id, "name", may,
+        p.name ? '<b>' + esc(p.name) + '</b>' : '<span class="why" style="margin:0">no name yet</span>',
+        function(){ return ocellBox("data-cpname", id, p.name, { label: "Name" }); }) +
+      ocell("caps", id, "owner", may, p.owner ? esc(capSeat(p.owner)) : none,
+        function(){ return capSeatSelect(id, "owner", p.owner); }) +
+      ocell("caps", id, "custodian", may, p.custodian ? esc(capSeat(p.custodian)) : none,
+        function(){ return capSeatSelect(id, "custodian", p.custodian); }) +
+      '<td class="cc"><span class="mono">' + (p.measures || []).length + '</span></td>' +
+      '<td class="cc"><span class="mono">' + (p.tactics || []).length + '</span></td>' +
+      kebabCell(CPMENU === id, ['<button data-cpopen="' + esc(id) + '">Open in the plan</button>'],
+        "", p.name || code, 'data-cpmenu="' + esc(id) + '"') +
+    '</tr>';
+  }).join("");
+  return cfgHead(L("capability"), [], null, false) +
+    section("", L("capability"), null,
+      tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
+      '<div class="cfg"><table class="cappcfg" data-tktable="caps"><thead><tr>' +
+        (function(){ var h = tkHead("caps");
+          return h("#", "idx", false) + h("Code") + h(L1("capability")) + h("Owner") + h("Custodian") +
+                 h(L("measure","bu"), "cc") + h(L("tactic","bu"), "cc") + h("", "cc kebcell", false); })() +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (may ? '<div class="addrow"><button class="editbtn" id="addcappillar">+ Add a ' +
+        L1("capability") + '</button></div>' : ''));
+}
 function renderCaps(){
+  /* §630: where the capabilities are the company's own pillars, the page is
+     their table — the record type below is a different thing (§542). */
+  if (!GROUP.capabilities.length && capsAsPillars().length > 0) return renderCapPillars();
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
-  /* §542: this client's capabilities are pillars, not records. */
-  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
     var editable = mayEdit && rowEditIs("caps", String(i));
     return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
@@ -47620,36 +47829,14 @@ function renderCaps(){
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit && !capsAreP
+      (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
         : '') +
-      /* ── §542 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
-         A client whose capabilities have become internal pillars of the
-         company's plan (stage 3b) opened this page on an EMPTY table with an
-         Add button that would mint the very record type the move removed.
-         §61's fault twice over: a page saying nothing about the thing it is
-         named after, and the only control on it being the wrong one.
+      /* §542's read-only note for a client whose capabilities are pillars
+         is gone (§630): that client gets `renderCapPillars()`, its table. */
 
-         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
-         pillar's name, owner and custodian are edited on the plan with the
-         pen, like every other pillar's, and a second place to type them is a
-         second answer to who owns this (§53.5). The Add button goes with
-         them — there is nothing on this page left to add. */
-      (capsAreP
-        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
-            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
-            'They are named, owned and planned on ' + (buExists() ? '' : topNavWord() + ' \u203a ') +
-            topStrategyWord() + ' \u203a ' + L("capability","bu") +
-            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
-            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
-            capsAsPillars().map(function(r){
-              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
-                ' <span class="why" style="margin:0">' +
-                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
-          '</ul></div>'
-        : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +
@@ -56168,7 +56355,7 @@ var SL_THUMB = 0.105;
 
 /* ── THE COLUMNS MENU (§571) ───────────────────────────────────────────
    Islam: *"give me the option to hide the owner and collabs in the slides if
-   needed"*, *"one switch for everything"*. The People register's own Columns
+   needed"*, *"one switch for everything"*. The Client register's own Columns
    menu (§53.5: no second control for one idea), in the slide view's bar
    beside Grid, and the office's alone — the same person who hides a slide,
    judged on the server as the same act (`deckHide`). The words are the
@@ -57464,11 +57651,14 @@ var SEARCHSEL = (function(){
      is no room below — a list that opens off the bottom of the window is a
      list you cannot reach the end of. */
   function place(btn, pop){
-    var r = btn.getBoundingClientRect();
+    /* §631: in the page's own pixels — it is drawn at 80% on a computer, and
+       a popup is placed in those while the button is measured in the
+       window's. */
+    var r = zRect(btn);
     var h = pop.offsetHeight, w = pop.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-    var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+    var left = Math.min(r.left, Math.max(8, winW() - w - 8));
     pop.style.top = Math.max(8, top) + "px";
     pop.style.left = left + "px";
   }
@@ -61334,7 +61524,9 @@ var CHAT = (function(){
   function fitInbox(){
     var root = el("chinbox");
     if (!root) return;
-    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    /* §631: a length the page sets is in its own pixels; the box and the
+       scroll are the window's, 80% of them on a computer. */
+    var top = (root.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     root.style.setProperty("--chin-top", Math.round(top) + "px");
   }
 
@@ -62123,7 +62315,8 @@ var TOUR = (function(){
     selectorsOf(s).forEach(function(sel){
       var node = document.querySelector(sel);
       if (!node) return;
-      var r = node.getBoundingClientRect();
+      /* §631: the holes and the card are drawn in the page's own pixels. */
+      var r = zRect(node);
       if (!r.width || !r.height) return;
       hs.push({ l:r.left - pad, t:r.top - pad, w:r.width + 2*pad, ht:r.height + 2*pad });
     });
@@ -62147,7 +62340,7 @@ var TOUR = (function(){
        dock is the last resort and is why the card is translucent. */
     var h = hs[hs.length - 1],
         cw = card.offsetWidth, ch = card.offsetHeight,
-        W = window.innerWidth, H = window.innerHeight, g = 14, m = 8;
+        W = winW(), H = winH(), g = 14, m = 8;
     function fits(c){ return c.l >= m && c.t >= m && c.l + cw <= W - m && c.t + ch <= H - m; }
     function clears(c){
       return hs.every(function(x){
@@ -65920,7 +66113,8 @@ var COPILOT = (function(){
      no loop, since nothing above the pane moves when the pane changes height. */
   function fitPane(){
     var p = document.querySelector("[data-cop-pane]"); if (!p) return;
-    var top = p.getBoundingClientRect().top + (window.pageYOffset || 0);
+    /* §631: in the page's own pixels, as the Platform Inbox's. */
+    var top = (p.getBoundingClientRect().top + (window.pageYOffset || 0)) / pageZoom();
     if (top > 0) p.style.setProperty("--cop-top", Math.round(top) + "px");
   }
   /* THE BOX GROWS WITH WHAT IS TYPED. It never sizes below one line: a page
@@ -69371,7 +69565,7 @@ var CLIENTSETUP = (function () {
   function saveReg(patch, then){
     return post(Object.assign({ action:"saveClient", key:S.key }, patch)).then(function (r) {
       if (!r.ok) { say(r.error || "Not saved.", true); return false; }
-      say(""); if (then) then(); return true;
+      say(""); if (then) then(r); return true;
     }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
   }
   /* §621: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
@@ -69549,6 +69743,7 @@ var CLIENTSETUP = (function () {
      (§53.5). */
   function brandTab(box, c){
     if (c) box.appendChild(markBlock(c));
+    if (c) box.appendChild(iconBlock(c));
     if (typeof brandingBody === "function") {
       var bb = el("div", "wzbrand");
       bb.innerHTML = brandingBody();
@@ -69587,7 +69782,7 @@ var CLIENTSETUP = (function () {
       var drop = el("button", "btn", "Remove"); drop.type = "button";
       drop.hidden = !c.mark;
       drop.addEventListener("click", function () {
-        saveReg({ mark:"" }, function () { c.mark = null; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+        saveReg({ mark:"" }, function () { c.mark = null; c.markWide = false; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; iconRepaint(); });
       });
       file.addEventListener("change", function () {
         var f = file.files && file.files[0];
@@ -69605,7 +69800,7 @@ var CLIENTSETUP = (function () {
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           var out = cv.toDataURL("image/png");
           if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          saveReg({ mark:out }, function () { c.mark = out; tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; });
+          saveReg({ mark:out }, function (r) { c.mark = out; c.markWide = !!(r && r.markWide); tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; iconRepaint(); });
         };
         img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
         img.src = url;
@@ -69614,6 +69809,114 @@ var CLIENTSETUP = (function () {
     }
     mk.appendChild(mrow);
     return mk;
+  }
+
+  /* ── ITS ICON (§629) ─────────────────────────────────────────────────
+     Islam: *"give me another thing beside the client mark to upload an icon
+     or use the mark as an icon. and this icon view appears in the dashboard
+     of your clients as some clients have a wide mark that doesn't fit in
+     that view"*. Two choices under the mark, and beside them exactly what
+     Home's small square will draw — and, when the mark is wide, the mark
+     squeezed into that square, so the difference is seen before choosing.
+
+     WHETHER THE MARK IS WIDE IS THE SERVER'S ANSWER (`markWide`), the same
+     rule the cards use to decide what Home draws, so this line can never
+     warn about a mark Home is drawing happily, or the reverse (§53.5).
+     "Use the mark" with an icon on file takes the icon off, as Remove takes
+     the mark off: a picture is put back by choosing it again. */
+  var iconRepaint = function(){};
+  function initialsOf(name){
+    var w = String(name || "?").trim().split(/\s+/);
+    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
+  }
+  function iconBlock(c){
+    var ib = el("div", "wzicon");
+    ib.dataset.wzicon = "1";
+    ib.appendChild(labTip("Its icon", "The small square that stands for this client on Forefront's Home. " +
+      "A square mark can stand there as it is; a wide one would be a strip too small to read."));
+    var row = el("div", "iconrow");
+    ib.appendChild(row);
+    var file = el("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp"; file.hidden = true;
+    file.dataset.iconfile = "1";
+    ib.appendChild(file);
+    function tile(label, src, initials){
+      var t = el("figure", "icontile");
+      if (src) { var im = el("img"); im.src = src; im.alt = ""; t.appendChild(im); }
+      else t.appendChild(el("span", "iconinit", initials));
+      t.appendChild(el("figcaption", null, label));
+      return t;
+    }
+    function paint(){
+      row.textContent = "";
+      var pick = el("div", "iconpick");
+      var name = "wzicon-" + (S.key || "c");
+      function choice(label, on, val){
+        var l = el("label", "iconopt");
+        var r = el("input"); r.type = "radio"; r.name = name; r.checked = on; r.value = val;
+        r.disabled = !canEdit();
+        l.appendChild(r); l.appendChild(document.createTextNode(" " + label));
+        return { l: l, r: r };
+      }
+      var useMark = choice("Use the mark", !c.icon, "mark");
+      var own = choice("Its own icon", !!c.icon, "own");
+      pick.appendChild(useMark.l);
+      var ownLine = el("div", "iconown");
+      ownLine.appendChild(own.l);
+      if (canEdit()) {
+        var up = el("button", "btn", c.icon ? "Replace" : "Choose a picture"); up.type = "button";
+        up.dataset.iconup = "1";
+        up.addEventListener("click", function () { file.click(); });
+        ownLine.appendChild(up);
+        useMark.r.addEventListener("change", function () {
+          if (!c.icon) return;
+          saveReg({ icon:"" }, function () { c.icon = null; paint(); }).then(function (ok) { if (!ok) paint(); });
+        });
+        own.r.addEventListener("change", function () { if (!c.icon) file.click(); });
+      }
+      pick.appendChild(ownLine);
+      /* the one sentence the choice needs, and only where it needs one */
+      var said = c.markWide
+        ? (c.icon ? "This mark is wide, so it would be too small to read in the square. An icon of its own is clearer."
+                  : "This mark is wide, so it would be too small to read in the square. Until it has an icon of its own, Home shows its initials.")
+        : (!c.mark && !c.icon ? "With no mark yet, Home shows its initials." : "");
+      if (said) pick.appendChild(el("p", "iconsaid", said));
+      row.appendChild(pick);
+      /* WHAT HOME WILL DRAW, then the squeezed mark when that is the point */
+      var prev = el("div", "iconprev");
+      var shown = c.icon || (c.mark && !c.markWide ? c.mark : null);
+      prev.appendChild(tile(c.icon ? "Its icon" : shown ? "The mark" : "Its initials", shown, initialsOf(c.name)));
+      if (c.mark && c.markWide) prev.appendChild(tile("The mark, squeezed", c.mark));
+      row.appendChild(prev);
+    }
+    iconRepaint = paint;
+    file.addEventListener("cancel", paint);
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0];
+      file.value = "";
+      if (!f) { paint(); return; }
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { say("The icon must be a PNG, JPEG or WebP picture.", true); paint(); return; }
+      var url = URL.createObjectURL(f);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        /* A 256px square, the picture fitted inside it whole on a clear
+           background: a picture that is not quite square is padded, never
+           cropped, because cropping somebody's logo is choosing what of it
+           to throw away. */
+        var N = 256, cv = document.createElement("canvas");
+        cv.width = N; cv.height = N;
+        var k = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+        var w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+        cv.getContext("2d").drawImage(img, Math.round((N - w) / 2), Math.round((N - h) / 2), w, h);
+        var out = cv.toDataURL("image/png");
+        if (out.length > 200000) { say("That picture is too large even shrunk — try a simpler one.", true); paint(); return; }
+        saveReg({ icon:out }, function () { c.icon = out; paint(); }).then(function (ok) { if (!ok) paint(); });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); paint(); };
+      img.src = url;
+    });
+    paint();
+    return ib;
   }
 
   /* ── WHICH MODULES THIS CLIENT HAS (§320.4, carried whole) ───────────
@@ -71450,7 +71753,7 @@ var CLIENTSETUP = (function () {
     "These are Forefront's people, not the client's. A seat is held on THIS client: " +
     "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
     "cycles and corrects plans. The client's own register — its heads, custodians and their " +
-    "passwords — is built on the People register beside this page.";
+    "passwords — is built on the Client register beside this page.";
   /* Which row on the client's register this consultant is, in words, for
      somebody who may read the page and not edit it. Absent is said (§35),
      never left as an empty cell that reads as a control that failed. */
@@ -73684,7 +73987,7 @@ var SYNC = (function () {
         " is signed in but is not on this register.";
       lost.appendChild(document.createTextNode(
         "Nothing is shown rather than somebody else\u2019s view. Ask the SMO to " +
-        "check the People register."));
+        "check the Client register."));
       var panel = document.getElementById("panel");
       if (panel) { panel.textContent = ""; panel.appendChild(lost); }
       box.hidden = true;
@@ -74162,7 +74465,7 @@ var SYNC = (function () {
        rule about one copy of a rule, on the chrome. */
     maySimulateSession: function () { return maySimulateSession(); },
     /* AND WHICH PEOPLE THAT SESSION MAY LOOK THROUGH (§554) — the shell's
-       switcher and the People register's row menu both fill their lists
+       switcher and the Client register's row menu both fill their lists
        from this, so neither offers a view the save would turn down (§61). */
     maySimulatePerson: function (p) { return maySimulatePerson(p); },
     /* The three password operations, all SMO-only and all checked again on
@@ -75122,7 +75425,7 @@ var SYNC = (function () {
           return cfgHead("Forefront team", [], null, false, null) +
             '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
         } },
-      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"Client register", glyph:"☰", find:"client register people register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -76337,7 +76640,7 @@ var SYNC = (function () {
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 056 §4.4). `help` holds the knowledge base on
+       Client register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
     /* §359.4 (spec 056 §4.5): a module's own group — what it says about
@@ -76561,7 +76864,7 @@ var SYNC = (function () {
     /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
+       Branding, "where do I reset a password" is the Client register. So each
        row carries the words somebody would actually type, in `find` on the def
        beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
@@ -77407,13 +77710,15 @@ var SYNC = (function () {
     if (!ASK) return;
     var a = ASK, box = a.box;
     if (!document.body.contains(a.anchor)) { askClose(); return; }
-    var r = a.anchor.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
+    /* §631: measured in the page's own pixels, the scroll too, because the
+       box is placed in them and the page is drawn at 80% on a computer. */
+    var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
     var mid = r.left + r.width / 2;
-    var left = Math.max(16, Math.min(window.innerWidth - bw - 16, mid - 28));
-    var below = r.bottom + 10 + bh <= window.innerHeight - 8 || r.top - 10 - bh < 8;
+    var left = Math.max(16, Math.min(winW() - bw - 16, mid - 28));
+    var below = r.bottom + 10 + bh <= winH() - 8 || r.top - 10 - bh < 8;
     box.classList.toggle("above", !below);
-    box.style.left = (left + window.pageXOffset) + "px";
-    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset) + "px";
+    box.style.left = (left + window.pageXOffset / z) + "px";
+    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
     box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
   }
   function askFirst(anchor, o){
@@ -78328,7 +78633,7 @@ var SYNC = (function () {
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §631 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -78473,6 +78778,13 @@ var SYNC = (function () {
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+       The same three things the register's cell gets above, here for the
+       same reason (the button in front of a long select does not exist until
+       SEARCHSEL has run): the cursor in the cell, a list opened, Escape
+       shutting it. A person cell's list floats under the cell and the cursor
+       goes into its search box. */
+    if (OCELL) ocellFocus();
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -78638,7 +78950,8 @@ var SYNC = (function () {
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      var flow = r.pane.getBoundingClientRect().top + r.inset;
+      /* §631: the inset is the page's pixels, the boxes the window's. */
+      var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
     }
@@ -78765,10 +79078,10 @@ var SYNC = (function () {
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = btn.getBoundingClientRect();
+    var r = zRect(btn);                                        /* §631 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var below = window.innerHeight - r.bottom;
+    var left = Math.max(8, Math.min(r.left, winW() - w - 8));
+    var below = winH() - r.bottom;
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
@@ -78828,7 +79141,9 @@ var SYNC = (function () {
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
+    /* §631: the scroll and the box are the window's pixels, the two custom
+       properties the page's — so those two are scaled, not the scroll. */
+    var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
   }
 
@@ -78879,13 +79194,13 @@ var SYNC = (function () {
        a selector that no longer covers everything it is asked about does not
        fail, it silently does nothing. A menu added to a third table is
        positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §631 */
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
-    m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
+    m.style.left = Math.max(8, Math.min(r.right - w, winW() - w - 8)) + "px";
   }
 
   function fieldSaved(){
@@ -79483,11 +79798,11 @@ var SYNC = (function () {
         open = null;
       };
       var place = function(btn, pop){
-        var r = btn.getBoundingClientRect();
+        var r = zRect(btn);                                    /* §631 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
-        var below = window.innerHeight - r.bottom - 8;
+        var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        var left = Math.min(r.left, Math.max(8, winW() - w - 8));
         pop.style.top = Math.max(8, top) + "px";
         pop.style.left = left + "px";
       };
@@ -79585,6 +79900,64 @@ var SYNC = (function () {
       });
       return { shut: shut };
     })();
+
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
+     own rect, for §45.5's reason: the tables sit in a box that scrolls
+     sideways, which clips anything absolute to a strip of itself. Under the
+     cell, or over it where the screen has no room below. */
+  function ocellPlace(){
+    var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
+    if (!pop) return;
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §631 */
+    var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
+    var top = r.bottom - 2;
+    if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
+    pop.style.left = Math.round(left) + "px"; pop.style.top = Math.round(top) + "px";
+    pop.style.width = w + "px";
+  }
+  function ocellShut(){
+    if (document.querySelector("td.ocellopen .ocellpop")) { PICKING = null; PICKQ = ""; }
+    OCELL = null; paint();
+  }
+  function ocellFocus(){
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc) return;
+    var esc = function(e){
+      if (e.key !== "Escape") return;
+      e.preventDefault(); e.stopPropagation(); ocellShut();
+    };
+    if (oc.querySelector(".ocellpop")) {
+      ocellPlace();
+      var q = document.getElementById("pickQ");
+      if (q && oc.contains(q)) { focusNoScroll(q); q.addEventListener("keydown", esc); }
+      return;
+    }
+    var of = oc.querySelector(".fld");
+    var ob = of && of.tagName === "SELECT" ? of.previousElementSibling : null;
+    ob = ob && ob.classList && ob.classList.contains("ssbtn") ? ob : null;
+    if (!(ob && SEARCHSEL.openOn(of))) {
+      focusNoScroll(ob || of);
+      if (of && of.tagName === "INPUT" && of.select) of.select();
+    }
+    if (ob) ob.addEventListener("keydown", esc);
+  }
+  /* A press anywhere else lets go of a cell whose control is not a plain
+     box — a person's list, or a long list's button — since neither is
+     left by a `blur` the cell can hear. Deferred, so the press itself still
+     lands (§30.1); a list that is open keeps its own presses. */
+  /* Attached once, at load: this is the page's own level, not `wire()`,
+     which runs on every paint (§24). */
+  document.addEventListener("mousedown", function(e){
+    var t = e.target;
+    if (!OCELL || !(t instanceof Element)) return;
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc || oc.contains(t)) return;
+    if (t.closest(".sspop, #modal-b")) return;
+    if (!oc.querySelector(".ocellpop, .ssbtn")) return;
+    setTimeout(function(){ if (OCELL && document.querySelector("td.ocellopen")) ocellShut(); }, 0);
+  }, true);
+  window.addEventListener("scroll", function(){ if (OCELL) ocellPlace(); }, true);
+  window.addEventListener("resize", function(){ if (OCELL) ocellPlace(); });
 
   function wire(){
     /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
@@ -79892,6 +80265,66 @@ var SYNC = (function () {
     });
     wirePillars();
     wireArrange();
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
+       The register's block (§372) for Business units, Functions, Divisions
+       and Capabilities — and BEFORE `wireSetupFields`, for that block's own
+       reason: listeners on one element run in the order they were added, and
+       a field handler that paints must find the cell already let go, or the
+       paint draws it open with the answer already chosen. */
+    (function(){
+      document.querySelectorAll("tbody").forEach(function(tb){
+        if (!tb.querySelector("[data-ocell]")) return;
+        tb.addEventListener("dblclick", function(e){
+          var td = e.target && e.target.closest && e.target.closest("[data-ocell]");
+          if (!td || !tb.contains(td)) return;
+          var at = String(td.dataset.ocell).split("|");
+          try { window.getSelection().removeAllRanges(); } catch (err) {}
+          OCELL = { t: at[0], key: at[1], f: at.slice(2).join("|") };
+          /* A person cell opens its list in the same press (§372.14: a shut
+             box that has to be pressed again is a third act for nothing). */
+          PICKING = td.dataset.ocellpick || null; PICKQ = "";
+          paint();
+        });
+      });
+      if (!OCELL) return;
+      var cell = document.querySelector("td.ocellopen");
+      /* Nothing drawn open — the row went, the picker shut, the viewer may no
+         longer edit — so nothing is held open either (§61). */
+      if (!cell) { OCELL = null; return; }
+      /* A person cell is the picker's, wired by `wirePicker` like the dialog's. */
+      if (cell.querySelector(".ocellpop")) return;
+      cell.querySelectorAll(".fld").forEach(function(fld){
+        /* LEAVING IT IS WHAT COMMITS IT (§35): `change` lets the cell go and
+           the field's own handler, registered next, writes the value. A
+           handler that does not paint leaves the cell drawn open, so one
+           paint is queued — never inside the event (§30.1). */
+        fld.addEventListener("change", function(){
+          OCELL = null;
+          setTimeout(function(){ if (!OCELL && document.querySelector("td.ocellopen")) paint(); }, 0);
+        });
+        /* A repaint that removed the box is not somebody leaving it (§372.14),
+           and a cell holding two controls (how a function plans, and under
+           what) is left only when the focus leaves the CELL. */
+        fld.addEventListener("blur", function(){
+          setTimeout(function(){
+            if (!fld.isConnected || !document.querySelector("td.ocellopen")) return;
+            if (cell.contains(document.activeElement)) return;
+            OCELL = null; paint();
+          }, 0);
+        });
+        /* Escape puts the VALUE back before the node goes, so whatever the
+           removal fires writes what was already there (§372). */
+        var was = fld.value;
+        fld.addEventListener("keydown", function(e){
+          if (e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation();
+            fld.value = was; OCELL = null; paint();
+          } else if (e.key === "Enter" && fld.tagName === "INPUT") {
+            e.preventDefault(); fld.blur();
+          }
+        });
+      });
+    })();
     wireSetupFields(document);
     /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
        save that will not happen has to say so where the save is (§42). */
@@ -82744,6 +83177,14 @@ var SYNC = (function () {
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
+       a row being edited is somebody's, so it is committed by the repaint's
+       own leaving rule like any other (§35). */
+    document.querySelectorAll("[data-regff]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
+      });
+    });
     /* A tick repaints the table but MUST NOT close the menu — you come here to
        set several columns, and a chooser that shuts after each one is a chooser
        you reopen six times. */
@@ -83055,6 +83496,45 @@ var SYNC = (function () {
         CLEARING = null;
         paint();
       });
+    });
+    /* §630: the company's capability pillars — their menu, the way to the
+       plan, and Add. */
+    document.querySelectorAll("[data-cpmenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        CPMENU = CPMENU === b.dataset.cpmenu ? null : b.dataset.cpmenu;
+        paint();
+      });
+    });
+    /* OPEN IN THE PLAN: the company page, the tab that draws it (§542's
+       `pillarSecKey`, which knows a split box draws capabilities on their own
+       tab) and the rail on its row — the deep link the walk already makes. */
+    document.querySelectorAll("[data-cpopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var u = topAsUnit(), p = capPillarById(b.dataset.cpopen);
+        CPMENU = null;
+        if (!p) { paint(); return; }
+        RAIL[pillarRailKey(u, p)] = pillarRailId(p);
+        placeGo({ d: "group", s: "strategy", c: pillarSecKey(u, p, "plan") });
+        paint();
+      });
+    });
+    /* ADD MAKES THE NEXT ONE IN THE COMPANY'S PLAN, with the plan's own
+       minter (`addPillar`, §48: an id of its own, nothing renumbered), marked
+       a capability so it takes the next C code — and its name cell opens, so
+       the press that made it is followed by the word it is called. */
+    var addcp = document.getElementById("addcappillar");
+    if (addcp) addcp.addEventListener("click", function(){
+      if (!mayEditCapPillars()) return;
+      var it = addPillar(unitLikeWritable("group"));
+      if (!it) return;
+      it.kind = SMPRules.PILLAR_CAP;
+      /* The button lets go of the cursor first: a paint puts the cursor back
+         where it was (`putFocus`), which would take it out of the new name. */
+      addcp.blur();
+      OCELL = { t: "caps", key: it.id, f: "name" }; PICKING = null;
+      fieldSaved();
+      paint();
     });
     /* ── ARRANGING A SETUP TABLE (§272) ────────────────────────────────
        THE FILTER AND THE SORT GO WITH THE PRESS, and that is not tidiness: a
@@ -84120,6 +84600,28 @@ var SYNC = (function () {
           var p = el.dataset.coflag.split("|");
           COMPANIES[p[0]][p[1]] = el.value === "yes";
           paint();
+        });
+      });
+      /* §630: a capability that is a pillar of the company's plan, written
+         where the plan writes it — the pillar itself, found by its id (§48),
+         and saved as the plan's pen saves (§71.2). An owner cleared is "",
+         as the plan's pen writes it; a custodian cleared loses its key
+         (§50.6), as the plan's pen does too. */
+      root.querySelectorAll("input[data-cpname]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var p = capPillarById(inp.dataset.cpname);
+          if (!p || !mayEditCapPillars()) return;
+          p.name = inp.value;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("select[data-cpseat]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var a = sel.dataset.cpseat.split("|"), p = capPillarById(a[0]);
+          if (!p || !mayEditCapPillars()) return;
+          if (a[1] === "owner") p.owner = sel.value;
+          else if (sel.value) p.custodian = sel.value; else delete p.custodian;
+          fieldSaved();
         });
       });
       root.querySelectorAll("input[data-coname]").forEach(function(inp){
@@ -87361,6 +87863,10 @@ var SYNC = (function () {
     if (typeof COMENU !== "undefined" && COMENU !== null &&
         !(e.target.closest && e.target.closest(".kmenu, [data-comenu]"))) {
       COMENU = null; paint();
+    }
+    if (typeof CPMENU !== "undefined" && CPMENU !== null &&
+        !(e.target.closest && e.target.closest(".kmenu, [data-cpmenu]"))) {
+      CPMENU = null; paint();
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */

@@ -35,7 +35,7 @@ body.presenting .tourdock { display:none; }
    in general"): where the card has no clear space and must dock over the
    page, what is under it stays readable through it. */
 .tourdock .tcard {
-  position:absolute; width:310px; max-width:calc(100vw - 24px);
+  position:absolute; width:310px; max-width:calc(var(--winw) - 24px);
   background:color-mix(in srgb, var(--surface) 92%, transparent);
   -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
   border:1px solid var(--line); border-radius:10px;

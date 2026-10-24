@@ -304,7 +304,7 @@ await section("3 · the office's addresses, and a change that reaches the server
   await open("/raya-trade/strategy/group/performance"); p = await place();
   check(p[0] === "group" && p[1] === "performance", "/strategy/group/performance opens the group", JSON.stringify(p));
   await open("/raya-trade/setup/people"); p = await place();
-  check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("People register"), "/setup/people opens the register", JSON.stringify(p));
+  check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("Client register"), "/setup/people opens the register", JSON.stringify(p));
   /* REWRITTEN, NEVER LOOSENED (§218, §400). The way back was a pill
      (#clientback) reading "Save & close" here and the client's name on a
      module page; §400 replaces it with the TRAIL — Forefront › client ›

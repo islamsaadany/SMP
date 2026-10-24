@@ -170,6 +170,16 @@
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
+  /* §631: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+     count drop under it when the column has no room for both — a client with
+     a longer word for how it plans would otherwise run into Key Objectives
+     again, at any zoom. */
+  .unitcfg td.cc.plansin { white-space:normal; line-height:1.9; }
+  /* …and in a window too narrow even for the word, the word wraps inside its
+     own tag rather than past the cell's edge. Measured: at 1280 and wider it
+     never has to. */
+  .unitcfg td.cc.plansin .pill { display:inline-block; max-width:100%; line-height:1.35;
+    vertical-align:middle; white-space:normal; }
   .unitcfg td.cc .linkbu { margin-left:8px; }
 
   .rolechip { display:inline-flex; align-items:baseline; gap:5px; margin:0 5px 3px 0;
@@ -512,7 +522,7 @@
   /* Inside a settings table the field fills its column, the same as the
      select it replaced (`.cfg .fld { width:100% }`). */
   .cfg .ssbtn { width:100%; }
-  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(100vw - 16px));
+  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(var(--winw) - 16px));
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
@@ -647,7 +657,7 @@
      against the flow position instead would need JS and would waste 33px of
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
+               max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                       - var(--rail-gap, 22px)
                                       - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
@@ -1163,7 +1173,7 @@
      the top of the TABLE'S box rather than the window — which is what is
      wanted: the toolbar above it is not sticky, and a header that outran its
      own table would float over the note beneath it. */
-  .cfg.srctable { max-height:calc(100vh - 320px); overflow:auto; }
+  .cfg.srctable { max-height:calc(var(--winh) - 320px); overflow:auto; }
   .cfg.srctable table { min-width:820px; }
   .cfg.srctable thead th { position:sticky; top:0; z-index:2; }
   .cfg.srctable tbody td { padding-top:5px; padding-bottom:5px; }
@@ -1283,9 +1293,9 @@
 
      `overflow:auto` and a height are still what the sticky header pins to:
      without a scroll container `top:0` does nothing at all (§69.19). */
-  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  .cfg.peoplebox { overflow:auto; max-height:calc(var(--winh) - 300px); }
   .panefill { display:flex; flex-direction:column;
-              max-height:calc(100dvh - var(--chrome-h, 118px)
+              max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                      - var(--rail-gap, 22px)
                                      - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
@@ -1954,6 +1964,42 @@
     display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
+  /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
+     The register's open cell, the same rules for the same reasons (§372,
+     §373): the control fills the cell's content box and stops at its edge.
+     A person cell keeps its name in a button ringed as a focused box is, and
+     its list floats over the rows below (`.ocellpop`, placed by the shell). */
+  .cfg td.ocellopen { overflow:visible; }
+  .cfg td.ocellopen .fld,
+  .cfg td.ocellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:100%;
+    box-sizing:border-box; }
+  .cfg td.ocellopen .ocellbtn { outline:2px solid var(--gold); outline-offset:1px;
+    border-color:var(--gold); }
+  /* A box takes the page's type unless it is a code (`.mono`): a plain
+     `.cfg` table inherits the typewriter face into its cells, and a name
+     typed in that face reads as a different kind of value. */
+  .cfg td.ocellopen input.fld:not(.mono) { font-family:var(--sans); }
+  /* AND THE BOX FILLS THE CELL. A text box's own width stops at about 170px,
+     which a 30% column leaves half empty. These four tables are all fixed
+     layout, where a percentage resolves against the content box — measured,
+     every box ends on its cell's content edge — so the register's warning
+     about `width:100%` (an AUTO table, §372) does not reach them. */
+  .cfg td.ocellopen input.fld { width:100%; }
+  .ocellpop { position:fixed; z-index:60; }
+  /* The capabilities' table, at the widths its mockup was approved at
+     (§630) — set on the heads, which `.cfg`'s own first-column rule would
+     otherwise win over a <col>. */
+  .cfg table.cappcfg { table-layout:fixed; width:100%; }
+  .cfg table.cappcfg th:nth-child(1) { width:5%; }
+  .cfg table.cappcfg th:nth-child(2) { width:8%; }
+  .cfg table.cappcfg th:nth-child(3) { width:30%; }
+  .cfg table.cappcfg th:nth-child(4) { width:17%; }
+  .cfg table.cappcfg th:nth-child(5) { width:16%; }
+  .cfg table.cappcfg th:nth-child(6) { width:10%; }
+  .cfg table.cappcfg th:nth-child(7) { width:9%; }
+  .cfg table.cappcfg th:nth-child(8) { width:44px; }
+  .ocellpop .picker { box-shadow:0 10px 28px rgba(15,23,42,.18); }
   /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
      Islam: "on opening something the arrow appears, no need for the arrow.
      and for the roles as well no need for the arrow showng the the box is a
@@ -2247,7 +2293,7 @@
                 font-size:11px; font-weight:700; }
   .ddbtn.has .ddlab { font-weight:600; color:var(--ink); }
   .ddcar { color:var(--ink-3); font-size:10px; }
-  .ddpop { position:fixed; z-index:60; width:280px; max-width:92vw;
+  .ddpop { position:fixed; z-index:60; width:280px; max-width:calc(var(--winw) * 0.92);
            background:var(--surface); border:1px solid var(--line);
            border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.18);
            padding:8px; display:flex; flex-direction:column; gap:6px; }
@@ -2372,7 +2418,7 @@
   .hmenu.open .hcount { background:var(--surface); }
   /* Wide enough for a table of headings and dates, and capped so a long list
      scrolls inside the panel instead of running off the window. */
-  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+  .hmenu-panel.wide { width:min(600px, calc(var(--winw) * 0.76)); max-height:calc(var(--winh) * 0.64); overflow:auto;
                       padding:4px 13px 13px; }
   .hmenu-panel.wide .section { margin:0; }
   /* §88's 150px cap exists so ONE long value cannot hold a whole table open.
@@ -2821,6 +2867,23 @@
   .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── THE FOREFRONT SWITCH (§629) ─────────────────────────────────
+     Its neighbours' shape (+ Add, Register file), because it sits among them
+     and is pressed like them; a box in front because pressing it changes
+     what the table holds and the box says which way it is. Never the accent
+     (§94.8): showing consultants is a look, not an alarm. Not scoped under
+     `.phead2` — the register's title row is `.setuphead` now, and a rule
+     scoped to the old row draws nothing (measured). */
+  .regff { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    font:600 12.5px/1 var(--sans); padding:8px 12px; border-radius:var(--r-pill);
+    white-space:nowrap; }
+  .regff:hover { border-color:var(--gold); color:var(--ink); }
+  .regff .box { width:13px; height:13px; border:1.5px solid var(--ink-3);
+    border-radius:3px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:10px; line-height:1; background:var(--surface); }
+  .regff.on { color:var(--ink); }
+  .regff.on .box { background:var(--ink); border-color:var(--ink); color:var(--surface); }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;

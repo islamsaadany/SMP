@@ -750,7 +750,7 @@ var CLIENTSETUP = (function () {
   function saveReg(patch, then){
     return post(Object.assign({ action:"saveClient", key:S.key }, patch)).then(function (r) {
       if (!r.ok) { say(r.error || "Not saved.", true); return false; }
-      say(""); if (then) then(); return true;
+      say(""); if (then) then(r); return true;
     }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
   }
   /* §621: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
@@ -928,6 +928,7 @@ var CLIENTSETUP = (function () {
      (§53.5). */
   function brandTab(box, c){
     if (c) box.appendChild(markBlock(c));
+    if (c) box.appendChild(iconBlock(c));
     if (typeof brandingBody === "function") {
       var bb = el("div", "wzbrand");
       bb.innerHTML = brandingBody();
@@ -966,7 +967,7 @@ var CLIENTSETUP = (function () {
       var drop = el("button", "btn", "Remove"); drop.type = "button";
       drop.hidden = !c.mark;
       drop.addEventListener("click", function () {
-        saveReg({ mark:"" }, function () { c.mark = null; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+        saveReg({ mark:"" }, function () { c.mark = null; c.markWide = false; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; iconRepaint(); });
       });
       file.addEventListener("change", function () {
         var f = file.files && file.files[0];
@@ -984,7 +985,7 @@ var CLIENTSETUP = (function () {
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           var out = cv.toDataURL("image/png");
           if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          saveReg({ mark:out }, function () { c.mark = out; tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; });
+          saveReg({ mark:out }, function (r) { c.mark = out; c.markWide = !!(r && r.markWide); tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; iconRepaint(); });
         };
         img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
         img.src = url;
@@ -993,6 +994,114 @@ var CLIENTSETUP = (function () {
     }
     mk.appendChild(mrow);
     return mk;
+  }
+
+  /* ── ITS ICON (§629) ─────────────────────────────────────────────────
+     Islam: *"give me another thing beside the client mark to upload an icon
+     or use the mark as an icon. and this icon view appears in the dashboard
+     of your clients as some clients have a wide mark that doesn't fit in
+     that view"*. Two choices under the mark, and beside them exactly what
+     Home's small square will draw — and, when the mark is wide, the mark
+     squeezed into that square, so the difference is seen before choosing.
+
+     WHETHER THE MARK IS WIDE IS THE SERVER'S ANSWER (`markWide`), the same
+     rule the cards use to decide what Home draws, so this line can never
+     warn about a mark Home is drawing happily, or the reverse (§53.5).
+     "Use the mark" with an icon on file takes the icon off, as Remove takes
+     the mark off: a picture is put back by choosing it again. */
+  var iconRepaint = function(){};
+  function initialsOf(name){
+    var w = String(name || "?").trim().split(/\s+/);
+    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
+  }
+  function iconBlock(c){
+    var ib = el("div", "wzicon");
+    ib.dataset.wzicon = "1";
+    ib.appendChild(labTip("Its icon", "The small square that stands for this client on Forefront's Home. " +
+      "A square mark can stand there as it is; a wide one would be a strip too small to read."));
+    var row = el("div", "iconrow");
+    ib.appendChild(row);
+    var file = el("input"); file.type = "file"; file.accept = "image/png,image/jpeg,image/webp"; file.hidden = true;
+    file.dataset.iconfile = "1";
+    ib.appendChild(file);
+    function tile(label, src, initials){
+      var t = el("figure", "icontile");
+      if (src) { var im = el("img"); im.src = src; im.alt = ""; t.appendChild(im); }
+      else t.appendChild(el("span", "iconinit", initials));
+      t.appendChild(el("figcaption", null, label));
+      return t;
+    }
+    function paint(){
+      row.textContent = "";
+      var pick = el("div", "iconpick");
+      var name = "wzicon-" + (S.key || "c");
+      function choice(label, on, val){
+        var l = el("label", "iconopt");
+        var r = el("input"); r.type = "radio"; r.name = name; r.checked = on; r.value = val;
+        r.disabled = !canEdit();
+        l.appendChild(r); l.appendChild(document.createTextNode(" " + label));
+        return { l: l, r: r };
+      }
+      var useMark = choice("Use the mark", !c.icon, "mark");
+      var own = choice("Its own icon", !!c.icon, "own");
+      pick.appendChild(useMark.l);
+      var ownLine = el("div", "iconown");
+      ownLine.appendChild(own.l);
+      if (canEdit()) {
+        var up = el("button", "btn", c.icon ? "Replace" : "Choose a picture"); up.type = "button";
+        up.dataset.iconup = "1";
+        up.addEventListener("click", function () { file.click(); });
+        ownLine.appendChild(up);
+        useMark.r.addEventListener("change", function () {
+          if (!c.icon) return;
+          saveReg({ icon:"" }, function () { c.icon = null; paint(); }).then(function (ok) { if (!ok) paint(); });
+        });
+        own.r.addEventListener("change", function () { if (!c.icon) file.click(); });
+      }
+      pick.appendChild(ownLine);
+      /* the one sentence the choice needs, and only where it needs one */
+      var said = c.markWide
+        ? (c.icon ? "This mark is wide, so it would be too small to read in the square. An icon of its own is clearer."
+                  : "This mark is wide, so it would be too small to read in the square. Until it has an icon of its own, Home shows its initials.")
+        : (!c.mark && !c.icon ? "With no mark yet, Home shows its initials." : "");
+      if (said) pick.appendChild(el("p", "iconsaid", said));
+      row.appendChild(pick);
+      /* WHAT HOME WILL DRAW, then the squeezed mark when that is the point */
+      var prev = el("div", "iconprev");
+      var shown = c.icon || (c.mark && !c.markWide ? c.mark : null);
+      prev.appendChild(tile(c.icon ? "Its icon" : shown ? "The mark" : "Its initials", shown, initialsOf(c.name)));
+      if (c.mark && c.markWide) prev.appendChild(tile("The mark, squeezed", c.mark));
+      row.appendChild(prev);
+    }
+    iconRepaint = paint;
+    file.addEventListener("cancel", paint);
+    file.addEventListener("change", function () {
+      var f = file.files && file.files[0];
+      file.value = "";
+      if (!f) { paint(); return; }
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { say("The icon must be a PNG, JPEG or WebP picture.", true); paint(); return; }
+      var url = URL.createObjectURL(f);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        /* A 256px square, the picture fitted inside it whole on a clear
+           background: a picture that is not quite square is padded, never
+           cropped, because cropping somebody's logo is choosing what of it
+           to throw away. */
+        var N = 256, cv = document.createElement("canvas");
+        cv.width = N; cv.height = N;
+        var k = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+        var w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+        cv.getContext("2d").drawImage(img, Math.round((N - w) / 2), Math.round((N - h) / 2), w, h);
+        var out = cv.toDataURL("image/png");
+        if (out.length > 200000) { say("That picture is too large even shrunk — try a simpler one.", true); paint(); return; }
+        saveReg({ icon:out }, function () { c.icon = out; paint(); }).then(function (ok) { if (!ok) paint(); });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); paint(); };
+      img.src = url;
+    });
+    paint();
+    return ib;
   }
 
   /* ── WHICH MODULES THIS CLIENT HAS (§320.4, carried whole) ───────────
@@ -2829,7 +2938,7 @@ var CLIENTSETUP = (function () {
     "These are Forefront's people, not the client's. A seat is held on THIS client: " +
     "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
     "cycles and corrects plans. The client's own register — its heads, custodians and their " +
-    "passwords — is built on the People register beside this page.";
+    "passwords — is built on the Client register beside this page.";
   /* Which row on the client's register this consultant is, in words, for
      somebody who may read the page and not edit it. Absent is said (§35),
      never left as an empty cell that reads as a control that failed. */

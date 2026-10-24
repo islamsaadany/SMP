@@ -823,7 +823,7 @@
           return cfgHead("Forefront team", [], null, false, null) +
             '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
         } },
-      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"Client register", glyph:"☰", find:"client register people register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -2038,7 +2038,7 @@
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 056 §4.4). `help` holds the knowledge base on
+       Client register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
     /* §359.4 (spec 056 §4.5): a module's own group — what it says about
@@ -2262,7 +2262,7 @@
     /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
+       Branding, "where do I reset a password" is the Client register. So each
        row carries the words somebody would actually type, in `find` on the def
        beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
@@ -3108,13 +3108,15 @@
     if (!ASK) return;
     var a = ASK, box = a.box;
     if (!document.body.contains(a.anchor)) { askClose(); return; }
-    var r = a.anchor.getBoundingClientRect(), bw = box.offsetWidth, bh = box.offsetHeight;
+    /* §631: measured in the page's own pixels, the scroll too, because the
+       box is placed in them and the page is drawn at 80% on a computer. */
+    var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
     var mid = r.left + r.width / 2;
-    var left = Math.max(16, Math.min(window.innerWidth - bw - 16, mid - 28));
-    var below = r.bottom + 10 + bh <= window.innerHeight - 8 || r.top - 10 - bh < 8;
+    var left = Math.max(16, Math.min(winW() - bw - 16, mid - 28));
+    var below = r.bottom + 10 + bh <= winH() - 8 || r.top - 10 - bh < 8;
     box.classList.toggle("above", !below);
-    box.style.left = (left + window.pageXOffset) + "px";
-    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset) + "px";
+    box.style.left = (left + window.pageXOffset / z) + "px";
+    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
     box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
   }
   function askFirst(anchor, o){
@@ -4029,7 +4031,7 @@
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §631 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -4174,6 +4176,13 @@
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+       The same three things the register's cell gets above, here for the
+       same reason (the button in front of a long select does not exist until
+       SEARCHSEL has run): the cursor in the cell, a list opened, Escape
+       shutting it. A person cell's list floats under the cell and the cursor
+       goes into its search box. */
+    if (OCELL) ocellFocus();
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -4339,7 +4348,8 @@
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      var flow = r.pane.getBoundingClientRect().top + r.inset;
+      /* §631: the inset is the page's pixels, the boxes the window's. */
+      var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
     }
@@ -4466,10 +4476,10 @@
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = btn.getBoundingClientRect();
+    var r = zRect(btn);                                        /* §631 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var below = window.innerHeight - r.bottom;
+    var left = Math.max(8, Math.min(r.left, winW() - w - 8));
+    var below = winH() - r.bottom;
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
@@ -4529,7 +4539,9 @@
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
+    /* §631: the scroll and the box are the window's pixels, the two custom
+       properties the page's — so those two are scaled, not the scroll. */
+    var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
   }
 
@@ -4580,13 +4592,13 @@
        a selector that no longer covers everything it is asked about does not
        fail, it silently does nothing. A menu added to a third table is
        positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §631 */
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
-    m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
+    m.style.left = Math.max(8, Math.min(r.right - w, winW() - w - 8)) + "px";
   }
 
   function fieldSaved(){
@@ -5184,11 +5196,11 @@
         open = null;
       };
       var place = function(btn, pop){
-        var r = btn.getBoundingClientRect();
+        var r = zRect(btn);                                    /* §631 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
-        var below = window.innerHeight - r.bottom - 8;
+        var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        var left = Math.min(r.left, Math.max(8, winW() - w - 8));
         pop.style.top = Math.max(8, top) + "px";
         pop.style.left = left + "px";
       };
@@ -5286,6 +5298,64 @@
       });
       return { shut: shut };
     })();
+
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
+     own rect, for §45.5's reason: the tables sit in a box that scrolls
+     sideways, which clips anything absolute to a strip of itself. Under the
+     cell, or over it where the screen has no room below. */
+  function ocellPlace(){
+    var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
+    if (!pop) return;
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §631 */
+    var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
+    var top = r.bottom - 2;
+    if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
+    pop.style.left = Math.round(left) + "px"; pop.style.top = Math.round(top) + "px";
+    pop.style.width = w + "px";
+  }
+  function ocellShut(){
+    if (document.querySelector("td.ocellopen .ocellpop")) { PICKING = null; PICKQ = ""; }
+    OCELL = null; paint();
+  }
+  function ocellFocus(){
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc) return;
+    var esc = function(e){
+      if (e.key !== "Escape") return;
+      e.preventDefault(); e.stopPropagation(); ocellShut();
+    };
+    if (oc.querySelector(".ocellpop")) {
+      ocellPlace();
+      var q = document.getElementById("pickQ");
+      if (q && oc.contains(q)) { focusNoScroll(q); q.addEventListener("keydown", esc); }
+      return;
+    }
+    var of = oc.querySelector(".fld");
+    var ob = of && of.tagName === "SELECT" ? of.previousElementSibling : null;
+    ob = ob && ob.classList && ob.classList.contains("ssbtn") ? ob : null;
+    if (!(ob && SEARCHSEL.openOn(of))) {
+      focusNoScroll(ob || of);
+      if (of && of.tagName === "INPUT" && of.select) of.select();
+    }
+    if (ob) ob.addEventListener("keydown", esc);
+  }
+  /* A press anywhere else lets go of a cell whose control is not a plain
+     box — a person's list, or a long list's button — since neither is
+     left by a `blur` the cell can hear. Deferred, so the press itself still
+     lands (§30.1); a list that is open keeps its own presses. */
+  /* Attached once, at load: this is the page's own level, not `wire()`,
+     which runs on every paint (§24). */
+  document.addEventListener("mousedown", function(e){
+    var t = e.target;
+    if (!OCELL || !(t instanceof Element)) return;
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc || oc.contains(t)) return;
+    if (t.closest(".sspop, #modal-b")) return;
+    if (!oc.querySelector(".ocellpop, .ssbtn")) return;
+    setTimeout(function(){ if (OCELL && document.querySelector("td.ocellopen")) ocellShut(); }, 0);
+  }, true);
+  window.addEventListener("scroll", function(){ if (OCELL) ocellPlace(); }, true);
+  window.addEventListener("resize", function(){ if (OCELL) ocellPlace(); });
 
   function wire(){
     /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
@@ -5593,6 +5663,66 @@
     });
     wirePillars();
     wireArrange();
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
+       The register's block (§372) for Business units, Functions, Divisions
+       and Capabilities — and BEFORE `wireSetupFields`, for that block's own
+       reason: listeners on one element run in the order they were added, and
+       a field handler that paints must find the cell already let go, or the
+       paint draws it open with the answer already chosen. */
+    (function(){
+      document.querySelectorAll("tbody").forEach(function(tb){
+        if (!tb.querySelector("[data-ocell]")) return;
+        tb.addEventListener("dblclick", function(e){
+          var td = e.target && e.target.closest && e.target.closest("[data-ocell]");
+          if (!td || !tb.contains(td)) return;
+          var at = String(td.dataset.ocell).split("|");
+          try { window.getSelection().removeAllRanges(); } catch (err) {}
+          OCELL = { t: at[0], key: at[1], f: at.slice(2).join("|") };
+          /* A person cell opens its list in the same press (§372.14: a shut
+             box that has to be pressed again is a third act for nothing). */
+          PICKING = td.dataset.ocellpick || null; PICKQ = "";
+          paint();
+        });
+      });
+      if (!OCELL) return;
+      var cell = document.querySelector("td.ocellopen");
+      /* Nothing drawn open — the row went, the picker shut, the viewer may no
+         longer edit — so nothing is held open either (§61). */
+      if (!cell) { OCELL = null; return; }
+      /* A person cell is the picker's, wired by `wirePicker` like the dialog's. */
+      if (cell.querySelector(".ocellpop")) return;
+      cell.querySelectorAll(".fld").forEach(function(fld){
+        /* LEAVING IT IS WHAT COMMITS IT (§35): `change` lets the cell go and
+           the field's own handler, registered next, writes the value. A
+           handler that does not paint leaves the cell drawn open, so one
+           paint is queued — never inside the event (§30.1). */
+        fld.addEventListener("change", function(){
+          OCELL = null;
+          setTimeout(function(){ if (!OCELL && document.querySelector("td.ocellopen")) paint(); }, 0);
+        });
+        /* A repaint that removed the box is not somebody leaving it (§372.14),
+           and a cell holding two controls (how a function plans, and under
+           what) is left only when the focus leaves the CELL. */
+        fld.addEventListener("blur", function(){
+          setTimeout(function(){
+            if (!fld.isConnected || !document.querySelector("td.ocellopen")) return;
+            if (cell.contains(document.activeElement)) return;
+            OCELL = null; paint();
+          }, 0);
+        });
+        /* Escape puts the VALUE back before the node goes, so whatever the
+           removal fires writes what was already there (§372). */
+        var was = fld.value;
+        fld.addEventListener("keydown", function(e){
+          if (e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation();
+            fld.value = was; OCELL = null; paint();
+          } else if (e.key === "Enter" && fld.tagName === "INPUT") {
+            e.preventDefault(); fld.blur();
+          }
+        });
+      });
+    })();
     wireSetupFields(document);
     /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
        save that will not happen has to say so where the save is (§42). */
@@ -8445,6 +8575,14 @@
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
+       a row being edited is somebody's, so it is committed by the repaint's
+       own leaving rule like any other (§35). */
+    document.querySelectorAll("[data-regff]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
+      });
+    });
     /* A tick repaints the table but MUST NOT close the menu — you come here to
        set several columns, and a chooser that shuts after each one is a chooser
        you reopen six times. */
@@ -8756,6 +8894,45 @@
         CLEARING = null;
         paint();
       });
+    });
+    /* §630: the company's capability pillars — their menu, the way to the
+       plan, and Add. */
+    document.querySelectorAll("[data-cpmenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        CPMENU = CPMENU === b.dataset.cpmenu ? null : b.dataset.cpmenu;
+        paint();
+      });
+    });
+    /* OPEN IN THE PLAN: the company page, the tab that draws it (§542's
+       `pillarSecKey`, which knows a split box draws capabilities on their own
+       tab) and the rail on its row — the deep link the walk already makes. */
+    document.querySelectorAll("[data-cpopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var u = topAsUnit(), p = capPillarById(b.dataset.cpopen);
+        CPMENU = null;
+        if (!p) { paint(); return; }
+        RAIL[pillarRailKey(u, p)] = pillarRailId(p);
+        placeGo({ d: "group", s: "strategy", c: pillarSecKey(u, p, "plan") });
+        paint();
+      });
+    });
+    /* ADD MAKES THE NEXT ONE IN THE COMPANY'S PLAN, with the plan's own
+       minter (`addPillar`, §48: an id of its own, nothing renumbered), marked
+       a capability so it takes the next C code — and its name cell opens, so
+       the press that made it is followed by the word it is called. */
+    var addcp = document.getElementById("addcappillar");
+    if (addcp) addcp.addEventListener("click", function(){
+      if (!mayEditCapPillars()) return;
+      var it = addPillar(unitLikeWritable("group"));
+      if (!it) return;
+      it.kind = SMPRules.PILLAR_CAP;
+      /* The button lets go of the cursor first: a paint puts the cursor back
+         where it was (`putFocus`), which would take it out of the new name. */
+      addcp.blur();
+      OCELL = { t: "caps", key: it.id, f: "name" }; PICKING = null;
+      fieldSaved();
+      paint();
     });
     /* ── ARRANGING A SETUP TABLE (§272) ────────────────────────────────
        THE FILTER AND THE SORT GO WITH THE PRESS, and that is not tidiness: a
@@ -9821,6 +9998,28 @@
           var p = el.dataset.coflag.split("|");
           COMPANIES[p[0]][p[1]] = el.value === "yes";
           paint();
+        });
+      });
+      /* §630: a capability that is a pillar of the company's plan, written
+         where the plan writes it — the pillar itself, found by its id (§48),
+         and saved as the plan's pen saves (§71.2). An owner cleared is "",
+         as the plan's pen writes it; a custodian cleared loses its key
+         (§50.6), as the plan's pen does too. */
+      root.querySelectorAll("input[data-cpname]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var p = capPillarById(inp.dataset.cpname);
+          if (!p || !mayEditCapPillars()) return;
+          p.name = inp.value;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("select[data-cpseat]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var a = sel.dataset.cpseat.split("|"), p = capPillarById(a[0]);
+          if (!p || !mayEditCapPillars()) return;
+          if (a[1] === "owner") p.owner = sel.value;
+          else if (sel.value) p.custodian = sel.value; else delete p.custodian;
+          fieldSaved();
         });
       });
       root.querySelectorAll("input[data-coname]").forEach(function(inp){
@@ -13062,6 +13261,10 @@
     if (typeof COMENU !== "undefined" && COMENU !== null &&
         !(e.target.closest && e.target.closest(".kmenu, [data-comenu]"))) {
       COMENU = null; paint();
+    }
+    if (typeof CPMENU !== "undefined" && CPMENU !== null &&
+        !(e.target.closest && e.target.closest(".kmenu, [data-cpmenu]"))) {
+      CPMENU = null; paint();
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */

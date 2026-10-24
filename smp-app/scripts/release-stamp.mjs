@@ -44,7 +44,7 @@ export function stampedFiles(root = APP){
     .sort();
 }
 
-/* §606 — THE FILES A PAGE WAITS ON, EACH BY WHAT IT HOLDS. Islam: "the
+/* §620 — THE FILES A PAGE WAITS ON, EACH BY WHAT IT HOLDS. Islam: "the
    navigation between the pages needs to be momentarily". Every one of these
    was served `max-age=0`, so every page load asked the server about each of
    them again before it could paint — one more round trip (about half a

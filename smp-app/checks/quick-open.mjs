@@ -43,7 +43,7 @@ const errs = [];
 page.on("pageerror", (e) => errs.push(e.message));
 
 /* the breaks, on the served bytes */
-/* §606: shell.js is served at its stamped address (`?v=`), so the break
+/* §620: shell.js is served at its stamped address (`?v=`), so the break
    matches the file whatever follows its name */
 if (brk) await page.route(/\/shell\.js(\?|$)/, async (route) => {
   const r = await route.fetch(); let body = await r.text(); const orig = body;

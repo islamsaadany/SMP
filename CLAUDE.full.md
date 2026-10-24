@@ -123,7 +123,7 @@ A drift between specs and code is a documentation bug — report it before silen
   mockup comes after, and only for how it looks.
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
-### 1d. UX RULE: EVERY PRESS SHOWS SOMETHING AT ONCE (2026-10-23, §606)
+### 1d. UX RULE: EVERY PRESS SHOWS SOMETHING AT ONCE (2026-10-23, §620)
 - **Islam: *"the navigation between the pages needs to be momentarily we already
   have this practice of grey skeleton and cashing and background refresh ...
   apply it here and anywhere else in the platform ... keeping it as a UX rule
@@ -135,7 +135,7 @@ A drift between specs and code is a documentation bug — report it before silen
   1. **The page as you left it** — on this visit (the console's kept copy,
      §400.2) or as you last saw it (a saved copy in this browser, per person,
      under `smp.cache.`, which sign-in and sign-out wipe: §431 for a client's
-     Strategy, §606 for the console) — marked **Updating…** and taking no input.
+     Strategy, §620 for the console) — marked **Updating…** and taking no input.
   2. **Else the page's own grey skeleton**, shaped like the page, in the
      platform's skeleton bars (§94.10: `--line` / `--surface-2`, a 6px corner,
      the slow pulse).

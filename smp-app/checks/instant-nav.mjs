@@ -1,4 +1,4 @@
-/* §606 — EVERY PRESS SHOWS SOMETHING AT ONCE (CLAUDE.md 1d), MEASURED.
+/* §620 — EVERY PRESS SHOWS SOMETHING AT ONCE (CLAUDE.md 1d), MEASURED.
 
    Islam: "the navigation between the pages needs to be momentarily". Starts
    the BUILT app on its own port, signs the office in, throttles the browser

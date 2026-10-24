@@ -702,7 +702,7 @@ for (const k of OWN_PAGE) {
   check("it wears the shared top bar, trail and all — " + k,
     /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
     /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) &&
-    /* §606: REWRITTEN, NEVER LOOSENED (§218) — the bar's script by its
+    /* §620: REWRITTEN, NEVER LOOSENED (§218) — the bar's script by its
        stamped address, which is what lets the page paint without asking */
     /<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>/.test(doc));
   check("...and the navy module bar it replaces is gone — " + k,

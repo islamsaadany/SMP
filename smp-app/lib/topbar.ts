@@ -362,12 +362,12 @@ export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/t
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })();
-` + NAVSKEL_SCRIPT;   /* §606: the press draws the next page's shape (lib/navskel.ts) */
+` + NAVSKEL_SCRIPT;   /* §620: the press draws the next page's shape (lib/navskel.ts) */
 
 /* The script is a file, never inline: the shell's policy is `script-src
    'self'` (lib/shell.ts SHELL_CSP), so an inline handler would render
    perfectly and never run. Loaded in the HEAD so the theme lands before the
-   body paints — which is why it must never cost a round trip (§606): its
+   body paints — which is why it must never cost a round trip (§620): its
    address carries its own hash, the route caches that address for good, and
    a change to the script changes the address. */
 export const TOPBAR_STAMP = createHash("sha256").update(TOPBAR_SCRIPT).digest("hex").slice(0, 12);

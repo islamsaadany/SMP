@@ -1,4 +1,4 @@
-/* §606 — A PRESS INSIDE PROCESSES SHOWS THE PAGE'S SHAPE AT ONCE. Moving
+/* §620 — A PRESS INSIDE PROCESSES SHOWS THE PAGE'S SHAPE AT ONCE. Moving
    between Processes' own pages does not load a new document (Next draws the
    next page in place), so the shape drawn at the press elsewhere
    (lib/navskel.ts) never runs here; this is the same promise in Next's own

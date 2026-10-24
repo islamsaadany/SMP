@@ -220,7 +220,7 @@ function assembleStrategy() {
    build-shell.mjs copies to that address — a script added to the page that
    this does not know is a refusal, never a page quietly checked without it —
    and its own inline script. */
-/* §606: /navskel.js is KNOWN and left out of the page read: it is the
+/* §620: /navskel.js is KNOWN and left out of the page read: it is the
    press drawing (lib/navskel.ts), one closed function that names nothing of
    the console's and that the console names nothing of — the same script
    every client page loads — so it is not part of the console's page. */

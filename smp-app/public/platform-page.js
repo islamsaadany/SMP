@@ -15,7 +15,7 @@
        in when the last answer has landed; and anything that CHANGES something
        drops every kept copy, so the next look at a tab never shows a state
        this page has just altered. */
-    /* §606: A SAVED COPY IS DRAWN BY THE TAB'S OWN DRAWING, fed the answers
+    /* §620: A SAVED COPY IS DRAWN BY THE TAB'S OWN DRAWING, fed the answers
        it was given last time — never a second drawing of the same page that
        could disagree with the first. A read with no saved answer waits
        forever here: the latest copy replaces whatever was drawn. */
@@ -271,7 +271,7 @@
   var ONLIST = null;
   var REVAL = null;
   var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client", "history", "read"];
-  /* §606: what a tab's drawing is fed from its saved copy (REPLAY), and the
+  /* §620: what a tab's drawing is fed from its saved copy (REPLAY), and the
      record of what its latest reading was given, kept for next time
      (RECORD). Both are the request's own business: see send(). */
   var REPLAY = null;
@@ -305,7 +305,7 @@
     SHOWN.addEventListener(ev, revalStop, true);
   });
 
-  /* ── A TAB'S SAVED COPY (§606) ─────────────────────────────────────────
+  /* ── A TAB'S SAVED COPY (§620) ─────────────────────────────────────────
      Islam chose it: "Should the console remember its tabs between visits
      (kept in your browser, wiped when you sign out)" — "Yes". What each tab
      read last time is kept in this browser under the client page's own
@@ -360,7 +360,7 @@
     else { var line = el("div", "staleline"); line.appendChild(pill); SHOWN.insertBefore(line, SHOWN.firstChild); }
   }
 
-  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§606) ─────────────────────────
+  /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ─────────────────────────
      The mockup's shapes, in the boot skeleton's bars. Clients keeps §371's
      waiting cards. Nothing here is a word anybody typed. */
   function tabSkel(tab) {
@@ -421,7 +421,7 @@
      nobody sees, swapped in when its answers have landed. */
   function go(tab, how) {
     /* what is on screen is the tab's own page — never its shape or its saved
-       copy still waiting for the latest one, which are not kept (§606) */
+       copy still waiting for the latest one, which are not kept (§620) */
     var real = !REVAL || !REVAL.hold;
     revalStop();
     /* Only the tab's own list is kept, never a form or a reading view
@@ -1268,7 +1268,7 @@
      after another is noise, and what a screen reader gets here is what it
      gets today: the page, and then the cards when they land. */
   function drawWaiting() {
-    /* §606: every tab arrives on its own shape (tabSkel), the way Clients
+    /* §620: every tab arrives on its own shape (tabSkel), the way Clients
        has since §371 — My work's panel without its counts and a bare title
        elsewhere (§583, §400) gave way to the mockup's grey shapes. */
     SHOWN.appendChild(tabSkel(TAB));
@@ -4050,7 +4050,7 @@
     return tab;
   };
 
-  /* §606: THE TWO QUESTIONS GO FIRST, recorded as the console's own saved
+  /* §620: THE TWO QUESTIONS GO FIRST, recorded as the console's own saved
      copy ("boot"), and before anything is drawn from a saved copy — so no
      saved answer can ever stand in for them. */
   RECORD = { tab: "boot", email: "", answers: {} };

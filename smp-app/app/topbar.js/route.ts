@@ -5,7 +5,7 @@
    A file, never inline: the module pages' policy is `script-src 'self'`. */
 import { TOPBAR_SCRIPT, TOPBAR_STAMP } from "../../lib/topbar.ts";
 
-/* §606: the address the pages write carries the script's own hash, and THAT
+/* §620: the address the pages write carries the script's own hash, and THAT
    address is cached for good; any other (a page from before, a stale hash)
    is asked about every time, as every address was before. */
 export function GET(req: Request) {

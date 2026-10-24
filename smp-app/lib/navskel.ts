@@ -1,4 +1,4 @@
-/* §606 — A PRESS THAT LEAVES THE PAGE SHOWS WHERE IT IS GOING, AT ONCE.
+/* §620 — A PRESS THAT LEAVES THE PAGE SHOWS WHERE IT IS GOING, AT ONCE.
    Islam: "the navigation between the pages needs to be momentarily", and of
    the mockup (design-mockups/instant-navigation/2026-10-23_skeletons.html):
    "yes build it". Measured before (a 600ms round trip, §369's production
@@ -42,7 +42,7 @@ const LABELS: Record<string, string> = Object.fromEntries(Object.entries(MODULE_
 
 /* SMP_BREAK=no-navskel serves the script empty, so checks/instant-nav.mjs
    can be proved able to fail. Never set on a deployment. */
-export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §606: switched off for a check */\n" : `/* §606 — the next page's shape, drawn at the press (lib/navskel.ts). */
+export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620: switched off for a check */\n" : `/* §620 — the next page's shape, drawn at the press (lib/navskel.ts). */
 (function () {
   if (window.__navskel) return;
   window.__navskel = 1;

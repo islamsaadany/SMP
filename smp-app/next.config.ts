@@ -73,7 +73,7 @@ if (!sw) throw new Error("next.config: the carried /sw.js block is missing");
 const man = frozen.manifest;
 if (!man) throw new Error("next.config: the carried /manifest.webmanifest block is missing");
 
-/* §606 — A STAMPED ADDRESS IS CACHED FOR GOOD. The files a page waits on are
+/* §620 — A STAMPED ADDRESS IS CACHED FOR GOOD. The files a page waits on are
    written with their own hash in the address (lib/shell.ts `versioned`, from
    shell/asset-stamps.json, which scripts/build-sw.mjs writes), so the
    address changes whenever the file does and the browser never has to ask

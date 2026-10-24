@@ -186,7 +186,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
     "</head>\n<body>\n" + shellBody() + '\n<script src="' + versioned("/shell.js") + '"></script>\n</body>\n</html>\n';
 }
 
-/* §606 — A FILE'S ADDRESS CARRIES WHAT IT HOLDS. The list is
+/* §620 — A FILE'S ADDRESS CARRIES WHAT IT HOLDS. The list is
    shell/asset-stamps.json, written by scripts/build-sw.mjs from the files
    themselves; an address with `?v=` is cached for good (next.config.ts), so
    a page that arrives paints without asking the server about any of them
@@ -234,7 +234,7 @@ export function shellHeaders(): Record<string, string> {
 /* Forefront's own page (§313.3), served as it is. */
 let platformPage: string | null = null;
 export function platformDocument(): string {
-  /* its three scripts take their stamped addresses too (§606) */
+  /* its three scripts take their stamped addresses too (§620) */
   if (platformPage === null) platformPage = readFileSync(join(process.cwd(), "shell", "platform.html"), "utf8")
     .replace(/<script src="(\/[a-z-]+\.js)"><\/script>/g, (m, p: string) => '<script src="' + versioned(p) + '"></script>');
   return platformPage;

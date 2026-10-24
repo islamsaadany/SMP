@@ -75,7 +75,7 @@ must(!/caches/.test(carried), "the carried half touches `caches` — it would de
 must(!/SHELL/.test(carried), "the carried half names SHELL — it would depend on the half being dropped");
 must(!/addEventListener\("fetch"/.test(carried), "the carried half holds a fetch handler — nothing here may serve from disk");
 
-/* §606: each file a page waits on, by its hash — the list the server
+/* §620: each file a page waits on, by its hash — the list the server
    writes into their addresses. Written BEFORE the release stamp, which
    counts it among the files a tab holds (shell/). Built last for the same
    reason the stamp is: every generator that writes those files has run. */

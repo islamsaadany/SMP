@@ -1,4 +1,4 @@
-/* §606 — THE NEXT PAGE'S SHAPE, DRAWN AT THE PRESS (lib/navskel.ts), for the
+/* §620 — THE NEXT PAGE'S SHAPE, DRAWN AT THE PRESS (lib/navskel.ts), for the
    two documents that do not load the shared top bar: the console and the
    Strategy document. Served from the app rather than written into public/,
    for /topbar.js's own reason (app/topbar.js/route.ts). The address the

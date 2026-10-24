@@ -163,7 +163,7 @@ await section("1 · the document and its policy", async () => {
   await fresh(); await signIn("office@forefront.example");
   const r = await fetch(BASE + "/raya-trade/strategy/mobile/strategy", { headers: { cookie: (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ") } });
   const html = await r.text(), csp = r.headers.get("content-security-policy") || "";
-  /* §606: REWRITTEN, NEVER LOOSENED (§218) — the files by their stamped
+  /* §620: REWRITTEN, NEVER LOOSENED (§218) — the files by their stamped
      addresses (`?v=` and their hash), which is what lets the page paint
      without asking about them again */
   check(r.status === 200 && /<script src="\/shell\.js\?v=[0-9a-f]{12}"><\/script>/.test(html) && /<script src="\/theme\.js\?v=[0-9a-f]{12}"><\/script>/.test(html), "the shell is served as its own document with the product's scripts as FILES, by stamped address", r.status);

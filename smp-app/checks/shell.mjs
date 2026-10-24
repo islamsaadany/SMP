@@ -2596,6 +2596,50 @@ await section("4 · Forefront's own pages", async () => {
     check(hz.first && !/rgba\(0, 0, 0, 0\)|transparent/.test(hz.first) && (hz.second === null || hz.second !== hz.first),
       "\u2026Home's client lines alternate, light grey first", JSON.stringify(hz));
     check(hz.cfg && hz.svg && hz.right >= 0 && hz.right <= 24, "\u2026with the sliders for a client's settings at the far right of its line", JSON.stringify(hz));
+    /* THE BAND NEVER MOVES (Islam, 2026-10-24: "when I move from home to
+       another module first the banner appear to be lower and then adjusts
+       itself", "and same for home"). Every reply is held back so the waiting
+       shape and the saved copy are on screen long enough to be seen; the
+       band's place and height are read on every frame, from the press until
+       the page has drawn, and must be one place and one height throughout. */
+    {
+      await page.route("**/api/**", async (r) => { await new Promise((x) => setTimeout(x, 700)); await r.continue(); });
+      const watch = () => page.evaluate(() => new Promise((res) => {
+        const seen = new Set(), t0 = performance.now();
+        (function tick() {
+          const h = document.querySelector("#page .hohello, #page .mwmast, #page .pgband"), z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+          if (h) { const r = h.getBoundingClientRect(); seen.add(Math.round(r.top / z) + "/" + Math.round(r.height / z)); } else seen.add("none");
+          if (performance.now() - t0 < 1600) requestAnimationFrame(tick); else res(Array.from(seen));
+        })();
+      }));
+      const moves = {}, titles = {};
+      for (const t of ["clients", "home", "mywork", "consultants", "memory", "frameworks", "history", "home"]) {
+        const w = watch();
+        await page.click('.nav button[data-tab="' + t + '"]');
+        moves[t] = await w;
+        titles[t] = await page.evaluate(() => { const h = document.querySelector("#page .hohello, #page .mwmast, #page .pgband"), z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+          return h ? Math.round((h.querySelector("h1").getBoundingClientRect().top - h.getBoundingClientRect().top) / z) : -1; });
+      }
+      const all = new Set([].concat(...Object.values(moves)));
+      check(all.size === 1 && !all.has("none"), "the band holds one place and one height through every tab change, the waiting shape included", JSON.stringify(moves));
+      /* and its title sits at one height inside it, My tasks' included
+         (Islam: "the blue banner content place shifts in the my tasks") */
+      const tv = Object.values(titles);
+      check(Math.max(...tv) - Math.min(...tv) <= 1 && Math.min(...tv) > 0, "\u2026with the title at one height inside the band on every tab", JSON.stringify(titles));
+      await page.reload({ waitUntil: "commit" });
+      await page.waitForSelector("#page .hohello", { timeout: 8000 }).catch(() => {});
+      const re = await page.evaluate(() => new Promise((res) => {
+        const seen = new Set(), t0 = performance.now();
+        (function tick() {
+          const h = document.querySelector("#page .hohello"), z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+          if (h) { const r = h.getBoundingClientRect(); seen.add(Math.round(r.top / z) + "/" + Math.round(r.height / z) + (document.querySelector("#page .stale") ? " saved" : "")); }
+          if (performance.now() - t0 < 2500) requestAnimationFrame(tick); else res(Array.from(seen));
+        })();
+      })).catch(() => []);
+      const shapes = new Set(re.map((x) => x.split(" ")[0]));
+      check(re.some((x) => / saved$/.test(x)) && shapes.size === 1, "\u2026and Home's band keeps its place and height while its saved copy says Updating\u2026 and after", JSON.stringify(re));
+      await page.unroute("**/api/**");
+    }
     /* SHOW MINE OR DEMO on Home's clients (2026-10-24): Mine is the seated
        clients without the worked example, Demo the worked example alone;
        the choice is kept. Asked against the server's own cards. */

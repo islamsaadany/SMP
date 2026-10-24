@@ -386,31 +386,54 @@
     var pill = el("span", "stale", "Updating…");
     pill.setAttribute("role", "status");
     pill.title = "Showing what you saw last time while the latest copy loads. Nothing can be changed until it has.";
-    var right = SHOWN.querySelector(".ptitle .right"), head = SHOWN.querySelector(".ptitle");
+    var right = SHOWN.querySelector(".ptitle .right"), head = SHOWN.querySelector(".ptitle"), band = SHOWN.querySelector(".hohello, .mwmast, .pgband");
     if (right) right.insertBefore(pill, right.firstChild);
     else if (head) { pill.style.marginLeft = "auto"; head.appendChild(pill); }
+    /* Home's and My tasks' bands hold it in their corner, so the band
+       stays where the page will draw it (2026-10-24) */
+    else if (band) { pill.classList.add("onband"); band.appendChild(pill); }
     else { var line = el("div", "staleline"); line.appendChild(pill); SHOWN.insertBefore(line, SHOWN.firstChild); }
   }
 
   /* ── EVERY TAB'S SHAPE, THE FIRST TIME (§620) ─────────────────────────
      The mockup's shapes, in the boot skeleton's bars. Clients keeps §371's
      waiting cards. Nothing here is a word anybody typed. */
+  /* THE BAND IS DRAWN AT ONCE, AND NEVER MOVES (Islam, 2026-10-24: "when I
+     move from home to another module first the banner appear to be lower
+     and then adjusts itself"). The waiting shape starts with the tab's own
+     band, its real name and sentence, at the place and height the page will
+     draw it, so only what is under it waits. */
+  var BAND_SAYS = {
+    clients: ["Clients", "Every client the office works with, and the way into each module."],
+    consultants: ["Consultants", "The office's people, their seats and what each may open."],
+    access: ["Who sees what", "Which pages each seat may open, and who may change them."],
+    memory: ["Case studies", "What we did for each client, and what we learned doing it."],
+    frameworks: ["Frameworks", "The strategy frameworks the office works with, to read or to ask."],
+    copilot: ["Copilot settings", "How the Copilot thinks and what it may do, the same for every client."],
+    history: ["History", "What was done to the clients you can open, and by whom."]
+  };
   function tabSkel(tab) {
-    if (tab === "clients") {
-      var box = el("div");
-      var h = el("div", "ptitle"); h.appendChild(el("h1", null, "Clients")); box.appendChild(h);
-      box.appendChild(skelCards());
-      return box;
-    }
+    var f = document.createDocumentFragment();
+    var was = page;
+    page = f;
+    try {
+      if (tab === "home") hoHello();
+      else if (tab === "mywork") mwMast();
+      else { var says = BAND_SAYS[tab] || BAND_SAYS.history; pageBand(says[0], null, "", says[1]); }
+    } finally { page = was; }
+    if (tab === "clients") { f.appendChild(skelCards()); return f; }
+    f.appendChild(tabSkelBody(tab));
+    return f;
+  }
+  function tabSkelBody(tab) {
     var b = function (w, cls) { return '<span class="b' + (cls ? " " + cls : "") + '" style="width:' + w + '"></span>'; };
     var n = function (k, f) { var s = ""; for (var i = 0; i < k; i++) s += f(i); return s; };
-    var head = function (w, right) { return '<div class="r head">' + b(w, "t") + '<span class="grow"></span>' + (right || "") + "</div>"; };
+    /* the title line is the band now, drawn above */
+    var head = function () { return ""; };
     var table = function (rows, cells) { return "<div><div class=\"th\"></div>" + n(rows, function (i) { return '<div class="tr">' + cells(i) + "</div>"; }) + "</div>"; };
     var S = {
       mywork: function () {
-        return '<div class="box" style="background:var(--surface-2);padding:18px 20px"><div class="r" style="align-items:flex-end"><div class="c">' + b("150px", "q") + b("120px", "t") +
-          '</div><span class="grow"></span>' + n(4, function () { return '<div class="c hide-narrow" style="align-items:flex-end;gap:6px">' + b("26px", "t") + b("70px", "q") + "</div>"; }) + "</div></div>" +
-          n(2, function () {
+        return n(2, function () {
             return '<div><div class="r" style="padding-bottom:8px;border-bottom:2px solid var(--line)">' + b("110px", "t") + b("60px", "q") + "</div>" +
               n(3, function (i) { return '<div class="r ln">' + b("16px") + b((52 - i * 9) + "%") + '<span class="grow"></span>' + b("110px", "p q hide-narrow") + b("80px", "q hide-narrow") + b("90px") + "</div>"; }) + "</div>";
           });
@@ -426,8 +449,7 @@
          by side, and the two boxes under them */
       home: function () {
         var col = function (k) { return '<div class="box c grow">' + b("110px", "t") + n(k, function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 8) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; }) + "</div>"; };
-        return '<div class="box c" style="background:var(--surface-2);padding:20px 22px">' + b("120px", "q") + b("280px", "t") + b("140px", "q") + "</div>" +
-          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
+        return '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
           '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(2) + col(2) + "</div>";
       },
       /* Case studies (spec 067), the memory's tab: the title and its count,

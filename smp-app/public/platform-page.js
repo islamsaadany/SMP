@@ -220,6 +220,12 @@
   };
   var ROOT = document.documentElement;
   var side = document.getElementById("side");
+  /* THE MARK AT THE TOP GOES HOME (Islam, 2026-10-24: "I want the icon on
+     the top to take me home as well"), in the column and on a phone's bar,
+     the same press as Home's own row */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-home-logo]"), function (b) {
+    b.addEventListener("click", function () { menu(false); go("home", "row"); });
+  });
   var fold = document.getElementById("sbfold");
   var opener = document.getElementById("sbopen");
   var tip = document.getElementById("sbtip");

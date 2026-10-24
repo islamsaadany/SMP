@@ -69378,6 +69378,16 @@ Islam: *"can we work on refining the design of the consultants and who sees what
 - **PRODUCTION SERVES THIS BUILD** (§91.5), read off the live site: `/sw.js` release **`fb84c61f678e5a5b`**, `/platform-page.js` **326,470** bytes and `/shell.js` **5,275,731**, both identical to the generated copies.
 - No `SHELL` bump (the client platform's built file is `main`'s own); no forced sign-out.
 
+## §622.7 — The mark at the top goes home (2026-10-24)
+
+Islam, of the console's column: *"I want the icon on the top to take me home as well."*
+- **The mark is now a button labelled Home,** at the head of the column and on a phone's top bar (`[data-home-logo]`). It makes the same press as Home's own row (`go("home", "row")`) and shuts the phone's menu on the way.
+- **In the icons-only column its tip says Home.** Before, it was drawn `aria-hidden` and did nothing.
+- **CHECKED** (`checks/shell.mjs`): pressed from Copilot, it lands on Home, with Home's band drawn and Home the current tab.
+  - Red run: without its handler, it stays on Copilot.
+  - Shell reads 435/11; the eleven are `main`'s own, listed in §622.6's release note.
+  - pages-types 10/0, instant-nav 19/0, console-boot 13/0, tab-keep, platform-cards 30/0.
+
 ## §624 — The client's own pages: Profile and The shape, first on the rail (2026-10-24)
 *Numbered §623 on the branch; main took §623 (five checks red on correct builds) while it waited, so it is §624 (§264.3).*
 Islam, of Client set-up: *"I recommend for the client setup to have them as 3 section under the client on the side rail rather than 3 pills and suggest another name for the first pill and for the first pill suggest a better structure of the page combinations maybe different navigation elements at the top for basic info, colors, and modules share with me mockup options"*; then three more: Forefront team and the office *"which to remove? if they are doing the same job"*, the organisation tables *"either we find good use of it or remove it"*, and *"the official BU list should come under organization not people and access"*. Drawn on the live page (`design-mockups/client-setup-rail/2026-10-24_client-setup-options.html`). His answer: *"go with your recommendations, build it but for the colors we have more colors choice called what follows from them they will be part of the brand tab right? forefront team keep it under people & Access. key measures is not the default on the foundation, it should be Key Objectives. division combining with business units is tricky as the levels can be for business units or functions and my question is what are we using these tables for the divisions, functions & units?"* — and, with a picture of the real rail, *"noting that you got the client settings wrong"*.

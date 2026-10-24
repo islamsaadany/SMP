@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-24 — The mark at the top of the console's column opens Home (§622.7), on the branch, awaiting Islam's word to merge.** On a computer and on a phone.
+
 **2026-10-24 — Consultants, Who sees what and Copilot in the console's look; the band never moves (§622.5, §622.6), merged to `main` 2026-10-24 on Islam's word.**
 - **The band** stays put when you change tab or reload, and every band's date or gold line and title sit in the same place.
 - **Consultants** is one card where a double click edits a name or address and the row says Saved.

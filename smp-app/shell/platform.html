@@ -139,6 +139,9 @@
      does not fit the column on one. Folded to icons, the mark alone. */
   .sblogo{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--amber); color:#0F2C69 }
   .sblogo svg{ width:20px; height:20px }
+  button.sblogo{ border:0; padding:0; cursor:pointer; font:inherit }
+  button.sblogo:hover{ filter:brightness(1.06) }
+  button.sblogo:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:2px }
   .sbname{ display:flex; flex-direction:column; min-width:0; line-height:1.15 }
   .sbname b{ font-size:12px; font-weight:700; color:var(--sb-ink); white-space:nowrap }
   .sbname span{ margin-top:2px; font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--sb-quiet) }
@@ -1870,7 +1873,7 @@
 <div class="shell">
 <aside class="side" id="side" aria-label="Strategy Management Platform">
   <div class="sbhead">
-    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
+    <button class="sblogo" type="button" data-home-logo aria-label="Home" data-tip="Home"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></button>
     <span class="sbname"><b>Strategy Management</b><span>Platform</span></span>
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -1886,7 +1889,7 @@
 <div class="main">
   <div class="mtop">
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <span class="sblogo" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
+    <button class="sblogo" type="button" data-home-logo aria-label="Home" data-tip="Home"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></button><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
   <div class="wrap" id="page"></div>
 </div>

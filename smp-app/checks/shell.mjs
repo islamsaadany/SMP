@@ -2699,6 +2699,12 @@ await section("4 · Forefront's own pages", async () => {
       check(cp.title === "The parts" && cp.tabs === 5 && cp.top === 0 && cp.scrolled > 500 && cp.tiles === 6,
         "Copilot is one card, The parts, its header and five section tabs frozen at the top while the method scrolls, the limits as tiles", JSON.stringify(cp));
       await page.evaluate(() => window.scrollTo(0, 0));
+      /* THE MARK AT THE TOP GOES HOME (Islam, 2026-10-24: "I want the icon
+         on the top to take me home as well") — pressed from Copilot */
+      await page.click(".sbhead [data-home-logo]");
+      await page.waitForSelector("#page .hohello", { timeout: 8000 }).catch(() => {});
+      const homeAgain = await page.evaluate(() => ({ band: !!document.querySelector("#page .hohello"), on: (document.querySelector('.nav button[aria-current="page"]') || {}).getAttribute ? document.querySelector('.nav button[aria-current="page"]').getAttribute("data-tab") : null, label: document.querySelector(".sbhead [data-home-logo]").getAttribute("aria-label") }));
+      check(homeAgain.band && homeAgain.on === "home" && homeAgain.label === "Home", "the mark at the top of the column is a button that opens Home", JSON.stringify(homeAgain));
       /* back to Home, drawn, for what follows */
       await page.goto("about:blank");
       await page.goto(BASE + "/platform", { waitUntil: "networkidle" });

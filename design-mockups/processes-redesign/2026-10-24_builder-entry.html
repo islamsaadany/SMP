@@ -291,6 +291,43 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 .rail .subnav button{font-size:12.5px;padding:5px 8px}
 .rail .subnav button.on{background:var(--surface-2);color:var(--ink)}
 
+/* the four questions still open, and what each answer adds */
+.openq{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0 0 14px}
+.oqh{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.oq{background:var(--surface);border:1px solid var(--over-line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;align-content:start}
+.oq h3{font-size:14.5px;display:flex;gap:8px;align-items:baseline}
+.oq h3 i{font-style:normal;font-weight:800;color:var(--gold-deep)}
+.oq p{font-size:12.5px;color:var(--ink-2)}
+.oq .ch{display:flex;flex-wrap:wrap;gap:4px}
+.oq .ch button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 9px;font-size:12.5px;font-weight:600;color:var(--ink-2);display:inline-flex;gap:5px;align-items:baseline}
+.oq .ch button.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.oq .ch .r{font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-deep)}
+.oq .ch button.on .r{color:var(--bar-accent)}
+.oq .now{font-size:12.5px;color:var(--ink);background:var(--over-bg);border-radius:6px;padding:6px 8px}
+.mk6{display:inline-flex;gap:2px}
+.mk6 i{width:17px;height:17px;border-radius:4px;border:1px solid var(--line);font-style:normal;font-size:9.5px;font-weight:800;display:grid;place-items:center;color:var(--ink-3);background:var(--surface)}
+.mk6 i.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.pg,.mast{position:relative}
+.tpick{background:none;border:0;padding:0;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.45)}
+.tpick i{font-style:normal;font-size:15px;color:var(--bar-accent)}
+.pmenu{position:absolute;left:20px;top:80px;z-index:25;width:min(340px,calc(100% - 40px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px;display:grid;gap:4px}
+.pmenu input{border:1px solid var(--field-line);border-radius:6px;padding:6px 9px;font-size:13px;width:100%;background:var(--surface);color:var(--ink)}
+.pmenu .pl{max-height:260px;overflow:auto;display:grid}
+.pmenu .pl button{display:flex;gap:8px;text-align:left;border:0;background:none;border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink)}
+.pmenu .pl button:hover,.pmenu .pl button.on{background:var(--surface-2)}
+.bld.wrail{grid-template-columns:200px 190px minmax(0,1fr)}
+.bld.wrail.fold{grid-template-columns:52px 190px minmax(0,1fr)}
+@media (max-width:1180px){.bld.wrail,.bld.wrail.fold{grid-template-columns:minmax(0,1fr)}}
+.rail button.on .code{color:var(--bar-accent)}
+.prail .code{font-size:11px}
+.prail .ph2{display:flex;justify-content:space-between;align-items:baseline;padding:2px 6px 6px}
+.prail .unfold{justify-content:center;font-size:16px;padding:8px 0}
+.aip{position:absolute;right:24px;z-index:22;width:min(360px,calc(100% - 48px));background:var(--surface);border:1px solid var(--gold);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;display:grid;gap:10px}
+.aip h3{font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.aif{border-top:1px solid var(--line-soft);padding-top:8px;display:grid;gap:5px;font-size:13px}
+.aif b{font-size:11.5px;color:var(--ink-3);font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+@media (max-width:640px){.aip{right:12px;width:calc(100% - 24px)}}
+
 /* getting in and out */
 .tb button.read{border:0;cursor:pointer}
 @media (max-width:620px){.tb .out{display:none}}
@@ -341,7 +378,9 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 </div></div>
 
 <div class="doc">
-  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place. A section’s numbers sit in boxes under the tabs, and its own views stay with the tabs as you scroll.</p>
+  <p class="intro">You are <b>Mona Farag</b>, Strategy Office. Pick a way in from <b>Show me</b> at the top: the page jumps to where it starts and a gold outline marks the door. Every button works, so you can also walk it yourself: Processes in the top bar, a suggestion, the builder, Preview as manager, and back. On the builder home, every office section and its views are filled in; scroll down any of them and the tab bar stays in place. A section’s numbers sit in boxes under the tabs, and its own views stay with the tabs as you scroll. Four questions from the 23 Oct prototype are still open: try each answer in the boxes just below.</p>
+
+  <div class="openq" id="openq"></div>
 
   <div class="frame" id="frame">
     <div class="tb"><span class="brand">Raya Trade</span><button class="read" type="button" id="tb-proc" data-go="home">Processes</button><span class="who">Mona Farag</span><span class="seat">Strategy Office</span><span class="out">Sign out</span></div>
@@ -359,19 +398,22 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
             <div class="mstrip" id="m-tiles"></div>
           </div>
         </div>
+        <div class="pmenu" id="pmenu" hidden></div>
       </header>
+      <aside class="aip" id="aip" aria-label="Check with AI" hidden></aside>
       <div class="vtbar" id="vtbar"><div class="vt" id="vt" role="tablist" aria-label="Views"></div><div id="vtsub" hidden></div></div>
 
       <div id="homewrap"><nav class="box rail" id="hside" aria-label="Office menu" hidden></nav><div id="homemain">
       <section data-screen="home-handle" hidden><div class="box" id="handle"></div></section>
       <section data-screen="home-all" hidden>
         <div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="q" placeholder="Search by code, name, owner or state" autocomplete="off"></label><span class="note" id="qcount"></span></div>
-        <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
+        <div class="box" style="overflow:hidden"><table class="ptab" id="alltab"><thead><tr><th data-col="name"><button type="button" data-sort="name">Process <i></i></button></th><th data-col="owner"><button type="button" data-sort="owner">Owner <i></i></button></th><th data-col="state"><button type="button" data-sort="state">Where it is <i></i></button></th><th data-col="ready"><button type="button" data-sort="ready">Ready <i></i></button></th><th data-col="gaps"><button type="button" data-sort="gaps">Gaps <i></i></button></th><th><span><span class="sr">Open</span></span></th></tr></thead><tbody id="all"></tbody></table><p class="empty" id="qempty" hidden></p></div>
       </section>
       <section data-screen="home-sec" hidden><div id="secwrap"></div></section>
       </div></div>
       <section data-screen="builder" hidden>
-        <div class="bld">
+        <div class="bld" id="bld">
+          <nav class="box rail prail" id="prail" aria-label="Processes" hidden></nav>
           <nav class="box rail" id="rail" aria-label="Builder sections"></nav>
           <div id="bmain"></div>
         </div>
@@ -429,21 +471,21 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     { kind: 'Returned', code: 'PRO100', name: 'Procure-to-Pay', text: 'Yara Kamal sent v3 back · 22 Oct', quote: 'The $50,000 rule needs a deputy for when the Finance manager is away.', act: 'Open in builder', toast: 'Opens Procure-to-Pay in the builder, on its Authority section.' },
     { kind: 'Gaps', code: 'ORD102', name: 'Customer credit setup', text: 'Being drawn · 4 of 6 marks missing: RACI, authority, controls, SOP version', act: 'Open in builder', toast: 'Opens Customer credit setup in the builder, on its Map.' },
   ];
-  // [code, name, owner, pill, state, gaps, rank]: rank orders "Where it is" by what needs the office first
+  // [code, name, owner, pill, state, gaps, rank, readiness marks, deep dive]: rank orders "Where it is" by what needs the office first
   const ALL = [
-    ['ORD100', 'Order-to-Cash', 'Hend Mourad', 'good', 'In force · v2 · draft v4 open', 2, 4],
-    ['ORD101', 'Returns & refunds', 'Salma Adel', 'attn', 'Waiting for approval', 0, 3],
-    ['ORD102', 'Customer credit setup', 'Hend Mourad', 'q', 'Being drawn', 4, 5],
-    ['PRO100', 'Procure-to-Pay', 'Karim Fouad', 'bad', 'Returned by the approver', 1, 1],
-    ['CRE100', 'Credit & Collections', 'Hala Mansour', 'good', 'In force · v1.1', 0, 7],
-    ['REC100', 'Record-to-Report', 'Hala Mansour', 'good', 'In force · v2.0', 0, 7],
-    ['NEW100', 'New Store Opening', 'Amr Hassan', 'bad', 'Review late', 0, 2],
-    ['STO100', 'Store Cash Handling', 'Amr Hassan', 'good', 'In force · v1.0', 0, 7],
-    ['PRI100', 'Pricing & Promotions', 'Omar Fathy', 'q', 'Being drawn', 3, 5],
-    ['LOG100', 'Logistics & Last-mile', 'Karim Fouad', 'q', 'Being drawn', 2, 5],
-    ['INV100', 'Inventory & Stock Count', 'Karim Fouad', 'q', 'Being drawn', 3, 5],
-    ['HIR100', 'Hire-to-Retire', 'Laila Zaki', 'q', 'Being drawn', 4, 5],
-    ['CUS100', 'Customer Complaints', 'Nour Samir', 'q', 'Not started', 0, 6],
+    ['ORD100', 'Order-to-Cash', 'Hend Mourad', 'good', 'In force · v2 · draft v4 open', 2, 4, [1, 1, 1, 1, 0, 1], true],
+    ['ORD101', 'Returns & refunds', 'Salma Adel', 'attn', 'Waiting for approval', 0, 3, [1, 1, 0, 0, 0, 0], true],
+    ['ORD102', 'Customer credit setup', 'Hend Mourad', 'q', 'Being drawn', 4, 5, [1, 1, 0, 0, 0, 0], true],
+    ['PRO100', 'Procure-to-Pay', 'Karim Fouad', 'bad', 'Returned by the approver', 1, 1, [1, 1, 1, 1, 0, 0], true],
+    ['CRE100', 'Credit & Collections', 'Hala Mansour', 'good', 'In force · v1.1', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['REC100', 'Record-to-Report', 'Hala Mansour', 'good', 'In force · v2.0', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['NEW100', 'New Store Opening', 'Amr Hassan', 'bad', 'Review late', 0, 2, [1, 1, 1, 1, 1, 1], true],
+    ['STO100', 'Store Cash Handling', 'Amr Hassan', 'good', 'In force · v1.0', 0, 7, [1, 1, 1, 1, 1, 1], true],
+    ['PRI100', 'Pricing & Promotions', 'Omar Fathy', 'q', 'Being drawn', 3, 5, [1, 0, 0, 0, 0, 0], false],
+    ['LOG100', 'Logistics & Last-mile', 'Karim Fouad', 'q', 'Being drawn', 2, 5, [1, 0, 0, 0, 0, 0], false],
+    ['INV100', 'Inventory & Stock Count', 'Karim Fouad', 'q', 'Being drawn', 3, 5, [1, 1, 0, 1, 0, 0], true],
+    ['HIR100', 'Hire-to-Retire', 'Laila Zaki', 'q', 'Being drawn', 4, 5, [1, 0, 0, 0, 0, 0], false],
+    ['CUS100', 'Customer Complaints', 'Nour Samir', 'q', 'Not started', 0, 6, [0, 0, 0, 0, 0, 0], false],
   ];
   const SECTS = [['map', 'Map', 'bad'], ['raci', 'RACI', 'bad'], ['authority', 'Authority', ''], ['controls', 'Risks & controls', 'bad'], ['quality', 'Quality', ''], ['life', 'Lifecycle', 'q']];
   const SECT_PH = { authority: ['Authority', 'Who may approve what, and up to which amount.'], controls: ['Risks & controls', 'Every risk, its control, the evidence and the last test.'], quality: ['Quality', 'Measures, non-conformances and corrective actions.'], life: ['Lifecycle', 'Draft, review, approval, publish, and every version.'] };
@@ -467,18 +509,17 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   $('#handle').innerHTML = HANDLE.map((h) => '<div class="trow"><span class="chip ' + (h.kind === 'Suggestion' ? 'gold' : h.kind === 'Returned' ? 'bad' : '') + '">' + h.kind + '</span><div class="t"><span class="code">' + h.code + '</span> <b>' + esc(h.name) + '</b><small>' + esc(h.text) + '</small>' + (h.quote ? '<blockquote>' + esc(h.quote) + '</blockquote>' : '') + '</div>' +
     '<button class="btn' + (h.go ? ' gold' : '') + '" type="button"' + (h.id ? ' id="' + h.id + '"' : '') + (h.go ? ' data-go="' + h.go + '" data-msg="' + esc(h.msg) + '"' : ' data-toast="' + esc(h.toast) + '"') + '>' + esc(h.act) + '</button></div>').join('');
   let SORT = 'name', DIR = 1;
-  const KEY = { name: (r) => r[1], owner: (r) => r[2], state: (r) => r[6], gaps: (r) => r[5] };
+  const KEY = { name: (r) => r[1], owner: (r) => r[2], state: (r) => r[6], gaps: (r) => r[5], ready: (r) => r[7].reduce((a, b) => a + b, 0) };
   function renderAll() {
     const q = $('#q').value.trim().toLowerCase();
     const rows = ALL.filter((r) => !q || [r[0], r[1], r[2], r[4]].join(' ').toLowerCase().indexOf(q) >= 0)
       .sort((a, b) => { const x = KEY[SORT](a), y = KEY[SORT](b); return (typeof x === 'number' ? x - y : x.localeCompare(y)) * DIR || a[1].localeCompare(b[1]); });
-    $('#all').innerHTML = rows.map(([c, n, o, k, st, g]) => '<tr><td><span class="code">' + c + '</span> <button class="pn" type="button" data-row="' + c + '">' + esc(n) + '</button></td><td>' + esc(o) + '</td><td><span class="pill ' + k + '">' + esc(st) + '</span></td><td class="' + (g ? 'gaps' : 'note') + '">' + (g || '—') + '</td><td><button class="btn" type="button" data-row="' + c + '">Open in builder</button></td></tr>').join('');
+    $('#all').innerHTML = rows.map((r) => { const [c, n, o, k, st, g] = r; return '<tr><td><span class="code">' + c + '</span> <button class="pn" type="button" data-row="' + c + '">' + esc(n) + '</button></td><td>' + esc(o) + '</td><td><span class="pill ' + k + '">' + esc(st) + '</span></td><td>' + marksCell(r) + '</td><td class="' + (g ? 'gaps' : 'note') + '">' + (g || '—') + '</td><td><button class="btn" type="button" data-row="' + c + '">Open in builder</button></td></tr>'; }).join('');
     $$('#alltab th[data-col]').forEach((th) => { const on = th.dataset.col === SORT; if (on) th.setAttribute('aria-sort', DIR > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); th.querySelector('i').textContent = on ? (DIR > 0 ? '↑' : '↓') : '↕'; });
     $('#qcount').textContent = q ? rows.length + ' of ' + ALL.length + ' processes' : ALL.length + ' processes · click a heading to sort';
     $('#qempty').hidden = rows.length > 0;
     $('#qempty').textContent = 'No process matches “' + $('#q').value.trim() + '”. Search looks at the code, name, owner and state.';
   }
-  renderAll();
   $('#q').addEventListener('input', renderAll);
   $('#raci').innerHTML = '<thead><tr><th>Step</th>' + ROLES.map((r) => '<th>' + esc(r) + '</th>').join('') + '</tr></thead><tbody>' +
     STEPS.map((s) => '<tr><td class="' + (s.gap && /accountable/.test(s.gap) ? 'gaprow' : '') + '">' + s.n + ' · ' + esc(s.t) + (s.gap && /accountable/.test(s.gap) ? ' <span class="chip bad">No A</span>' : '') + '</td>' + s.raci.map((v) => '<td><button type="button" class="rc ' + (v || 'empty') + '" data-toast="Cycles through R, A, C, I and empty.">' + (v || '') + '</button></td>').join('') + '</tr>').join('') + '</tbody>';
@@ -592,7 +633,7 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
   function notes() {
     return [['Agreed 24 Oct · office sections', ['All eight are tabs, in one row', 'The tab bar stays in place as you scroll, on every page of the module']],
       ['A section’s page', ['No title: the highlighted tab says where you are, and the section’s one-line description sits in the band', 'Its numbers sit in boxes under the tabs; the band keeps the office’s own counts', 'Its own views stay under the tab bar as you scroll']],
-      ['On a phone', ['The eight tabs take three rows, so only the tabs stay; a section’s views scroll with the page']]];
+      ['Also agreed 24 Oct', ['On a phone only the tabs stay; a section’s views scroll with the page (“not likely to open from a phone very much anyway”)', 'The darker table header stays in Processes for now; whether it goes SMP-wide is for later']]];
   }
   function expUpdate() {
     const n = EXP.length, b = $('#expcheck'), note = $('#expnote');
@@ -608,6 +649,37 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     if (e.target.id === 'expall') { EXP = e.target.checked ? ALL.map((r) => r[0]) : []; $$('.expck').forEach((c) => { c.checked = e.target.checked; }); expUpdate(); }
     else if (e.target.classList.contains('expck')) { EXP = $$('.expck').filter((c) => c.checked).map((c) => c.value); expUpdate(); }
   });
+  /* ── the four questions from the 23 Oct prototype that are still open, each switchable ── */
+  const QS = { etabs: 'off', marks: 'all', switch: 'picker', ai: 'panel' };
+  let PICK = false, RAILOPEN = false, AIOPEN = false;
+  const OQ = [
+    ['etabs', 'Empty tabs on a process', 'People, Compliance and Connections were in the structure signed off on 14 Oct. Today they hold nothing and offer no way to fill them in.', [['off', 'Off for now', 1, 'The builder’s menu has six sections. Each of the three comes back once it has something to hold. This changes what was signed off on 14 Oct.'], ['on', 'Keep them', 0, 'The menu has nine sections, and three of them say “Nothing recorded yet” on every process.']]],
+    ['marks', 'Readiness marks', 'Six marks show how far a process is: Map, RACI, Authority, Controls, SOP, Approved. See the Ready column on All processes.', [['all', 'On every process', 1, 'A high-level process shows mostly empty marks. That is true, and its state (Being drawn, Not started) sits beside it.'], ['deep', 'Deep dives only', 0, 'High-level processes show “High-level” instead of marks: quieter, but two kinds of row.']]],
+    ['switch', 'Moving to another process in the builder', 'You are building Order-to-Cash and need to look at Procure-to-Pay.', [['list', 'Back to the list', 0, 'Click Builder in the path at the top of the band, then pick from All processes: two clicks and a page in between, and you land on Map.'], ['picker', 'Picker on the name', 1, 'Click the process name in the band, find the other one, pick it: two clicks, no page in between, and you stay on the same section.'], ['rail', 'List beside the menu', 0, 'A list of processes beside the section menu: one click. It folds away on Map so the drawing keeps its width.']]],
+    ['ai', 'Check with AI', 'The AI reads the draft and suggests missing steps, owners and controls.', [['panel', 'A panel', 1, 'A button in the band opens the suggestions beside whatever section you are on, each with its own Add button.'], ['section', 'Its own section', 0, 'A seventh item in the menu: you leave the section you were on to read it.']]],
+  ];
+  const AIF = [['Step 4 · Deliver', '“Proof of delivery missing” has no control.', 'Add a control', 'Adds “Photo of the signed proof checked before invoicing” as the control on step 4.'], ['Step 3 · Ask for prepayment', 'No one is accountable for this step.', 'Make the Finance manager accountable', 'Sets the Finance manager as accountable on step 3.'], ['Between steps 5 and 6', 'Nothing says what happens when a customer disputes an invoice.', 'Add as a step', 'Adds “Handle a disputed invoice” after step 5, done by the Credit controller.']];
+  const aiFindings = () => AIF.map(([w, tx, a, r]) => '<div class="aif"><b>' + w + '</b><span>' + esc(tx) + '</span><div><button class="btn gold" type="button" data-toast="' + esc(r) + '">' + esc(a) + '</button></div></div>').join('');
+  const sects = () => SECTS.concat(QS.etabs === 'on' ? [['people', 'People', 'q'], ['compliance', 'Compliance', 'q'], ['connections', 'Connections', 'q']] : []).concat(QS.ai === 'section' ? [['ai', 'Check with AI', '']] : []);
+  const plist = (q) => ALL.filter((r) => !q || (r[0] + ' ' + r[1]).toLowerCase().indexOf(q.toLowerCase()) >= 0).map((r) => '<button type="button" class="' + (r[0] === 'ORD100' ? 'on' : '') + '" data-pk="' + r[0] + '"><span class="code">' + r[0] + '</span> ' + esc(r[1]) + '</button>').join('') || '<p class="note" style="padding:6px 8px">No process matches.</p>';
+  const marksCell = (r) => QS.marks === 'deep' && !r[8] ? '<span class="chip">High-level</span>' : '<span class="mk6" title="Map, RACI, Authority, Controls, SOP, Approved">' + ['M', 'R', 'A', 'C', 'S', '✓'].map((L, i) => '<i class="' + (r[7][i] ? 'on' : '') + '">' + L + '</i>').join('') + '</span>';
+  function renderOQ() {
+    $('#openq').innerHTML = '<div class="oqh"><span class="lbl">Still open from the 23 Oct prototype</span><span class="note">Pick an answer in each box; the page jumps to what it changes and outlines it.</span></div>' + OQ.map(([k, h, p, opts], i) => {
+      const cur = opts.find((o) => o[0] === QS[k]);
+      return '<div class="oq"><h3><i>' + (i + 1) + '</i>' + h + '</h3><p>' + p + '</p><div class="ch" role="group" aria-label="' + h + '">' + opts.map(([v, l, rec]) => '<button type="button" class="' + (QS[k] === v ? 'on' : '') + '" aria-pressed="' + (QS[k] === v) + '" data-q="' + k + '" data-v="' + v + '">' + l + (rec ? '<span class="r">Recommended</span>' : '') + '</button>').join('') + '</div><div class="now">' + cur[3] + '</div></div>';
+    }).join('');
+  }
+  function jump(k) {
+    if (k === 'marks') { SCREEN = 'home'; TAB = 'all'; FLASH = '#alltab th[data-col="ready"]'; }
+    else {
+      SCREEN = 'builder';
+      if (k === 'etabs') { SECT = QS.etabs === 'on' ? 'people' : 'map'; FLASH = '#rail'; }
+      if (k === 'switch') { PICK = QS.switch === 'picker'; RAILOPEN = false; FLASH = QS.switch === 'list' ? '#m-eyebrow button' : QS.switch === 'picker' ? '#pmenu' : '#prail'; }
+      if (k === 'ai') { if (QS.ai === 'panel') { AIOPEN = true; if (SECT === 'ai') SECT = 'map'; FLASH = '#aip'; } else { AIOPEN = false; SECT = 'ai'; FLASH = '#rail [data-sect="ai"]'; } }
+    }
+    render();
+  }
+  document.addEventListener('input', (e) => { if (e.target.id === 'psearch') $('#plist').innerHTML = plist(e.target.value.trim()); });
   const DOORS = { 1: ['home', '#tb-proc'], 2: ['read', '#door2'], 3: ['home', '#door3'], back: ['builder', '#doorback'] };
   function render() {
     const s = SCREEN, b = BAND[s];
@@ -626,6 +698,17 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     const subOn = s === 'home' && SECS[TAB] && SECS[TAB].views.length && VIEWS === 'stick' && !PHONE.matches;
     $('#vtsub').innerHTML = subOn ? svHtml(TAB) : '';
     $('#vtsub').hidden = !subOn;
+    if (s === 'builder') {
+      if (QS.switch === 'picker') $('#m-title').innerHTML = '<button type="button" class="tpick" data-picker aria-haspopup="listbox" aria-expanded="' + PICK + '">Order-to-Cash <i>▾</i></button><span class="pill good">In force · v2</span><span class="pill attn">Draft v4</span>';
+      $('#m-acts').innerHTML = (QS.ai === 'panel' ? '<button class="bq' + (AIOPEN ? ' on' : '') + '" type="button" data-ai>Check with AI</button>' : '') + b.acts;
+    }
+    const pkOn = s === 'builder' && QS.switch === 'picker' && PICK;
+    $('#pmenu').hidden = !pkOn;
+    if (pkOn) $('#pmenu').innerHTML = '<input id="psearch" type="search" placeholder="Find a process" aria-label="Find a process" autocomplete="off"><div class="pl" id="plist" role="listbox">' + plist('') + '</div>';
+    const aiOn = s === 'builder' && QS.ai === 'panel' && AIOPEN;
+    $('#aip').hidden = !aiOn;
+    if (aiOn) { $('#aip').innerHTML = '<h3>Check with AI <button class="lnk" type="button" data-aiclose>Close</button></h3><p class="note">Order-to-Cash, draft v4. Suggestions only: nothing changes until you add one.</p>' + aiFindings(); const mast = document.querySelector('.mast'); $('#aip').style.top = (mast.offsetTop + mast.offsetHeight + 10) + 'px'; }
+    renderOQ();
     $('#tabnote').innerHTML = notes().map(([h, items]) => '<div><h4>' + h + '</h4><ul>' + items.map((x) => '<li>' + x + '</li>').join('') + '</ul></div>').join('');
     const tabs = s === 'home' ? (side ? [] : HOME_TABS[OTAB]) : s === 'builder' ? [] : [['flow', 'Flow', ''], ['steps', 'Steps', '6'], ['summary', 'Summary', '']];
     const cur = s === 'home' ? TAB : RVIEW;
@@ -634,15 +717,23 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     $('#vt').innerHTML = tabs.map(([k, l, n, c]) => '<button type="button" role="tab" class="' + (k === cur ? 'on' : '') + '" aria-selected="' + (k === cur) + '" data-tab="' + k + '">' + l + (n ? ' <span class="ct ' + (c || '') + '">' + n + '</span>' : '') + '</button>').join('');
     const scr = s === 'home' ? (SECS[TAB] ? 'home-sec' : 'home-' + TAB) : s === 'builder' ? 'builder' : 'read';
     if (scr === 'home-sec') { $('#secwrap').innerHTML = secHtml(TAB); expUpdate(); }
+    if (scr === 'home-all') renderAll();
     $$('[data-screen]').forEach((v) => { v.hidden = v.dataset.screen !== scr; });
     const fb = $('#flowblock'), rb = $('#raciblock'), park = $('#park');
     park.appendChild(fb); park.appendChild(rb);
     if (s === 'builder') {
-      $('#rail').innerHTML = SECTS.map(([k, l, c]) => '<button type="button" class="' + (k === SECT ? 'on' : '') + '" data-sect="' + k + '">' + l + '<span class="dot ' + c + '"></span></button>').join('');
+      const list = sects(); if (!list.some((x) => x[0] === SECT)) SECT = 'map';
+      $('#rail').innerHTML = list.map(([k, l, c]) => '<button type="button" class="' + (k === SECT ? 'on' : '') + '" data-sect="' + k + '">' + l + '<span class="dot ' + c + '"></span></button>').join('');
       const m = $('#bmain');
       if (SECT === 'map') { m.innerHTML = '<div class="bh"><h2>Map</h2><span class="note">Draft v4 · 2 gaps</span></div>'; m.appendChild(fb); }
       else if (SECT === 'raci') { m.innerHTML = '<div class="bh"><h2>RACI</h2><span class="note">1 step with no one accountable</span></div>'; m.appendChild(rb); }
+      else if (SECT === 'ai') m.innerHTML = '<div class="bh"><h2>Check with AI</h2><span class="note">Draft v4 · suggestions only: nothing changes until you add one</span></div><div class="box" style="padding:4px 14px 12px">' + aiFindings() + '</div>';
+      else if (['people', 'compliance', 'connections'].indexOf(SECT) >= 0) m.innerHTML = '<div class="bh"><h2>' + list.find((x) => x[0] === SECT)[1] + '</h2></div><div class="ph"><b>Nothing recorded yet</b>There is no way to fill this in yet, so it says the same on every process.</div>';
       else m.innerHTML = '<div class="bh"><h2>' + SECT_PH[SECT][0] + '</h2></div><div class="ph">' + SECT_PH[SECT][1] + ' As in the full prototype.</div>';
+      const railOn = QS.switch === 'rail', fold = railOn && SECT === 'map' && !RAILOPEN;
+      $('#bld').className = 'bld' + (railOn ? ' wrail' : '') + (fold ? ' fold' : '');
+      $('#prail').hidden = !railOn;
+      if (railOn) $('#prail').innerHTML = fold ? '<button type="button" class="unfold" data-rail title="Show the list of processes" aria-label="Show the list of processes">☰</button>' : '<div class="ph2"><span class="lbl">Processes</span>' + (SECT === 'map' ? '<button type="button" class="lnk" data-rail>Fold</button>' : '') + '</div>' + ALL.map((r) => '<button type="button" class="' + (r[0] === 'ORD100' ? 'on' : '') + '" data-pk="' + r[0] + '"><span><span class="code">' + r[0] + '</span> ' + esc(r[1]) + '</span></button>').join('');
     } else if (s !== 'home') $('#slot-read').appendChild(fb);
     fb.classList.toggle('reading', s !== 'builder');
     $('#ftool').hidden = s !== 'builder';
@@ -661,6 +752,15 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
     const t = e.target, dr = t.closest('[data-door]'), go = t.closest('[data-go]'), tab = t.closest('[data-tab]'), row = t.closest('[data-row]'), sc = t.closest('[data-sect]'), st = t.closest('.st[data-step]'), tst = t.closest('[data-toast]');
     if (dr) { const d = dr.dataset.door; SCREEN = DOORS[d][0]; TAB = d === '3' ? 'handle' : 'all'; RVIEW = 'flow'; SECT = 'map'; SEL = 4; DOOR = d; render(); return; }
     if (go) { SCREEN = go.dataset.go; if (SCREEN === 'home') TAB = 'all'; if (SCREEN === 'builder') { SECT = 'map'; SEL = 4; } RVIEW = 'flow'; render(); if (go.dataset.msg) toast(go.dataset.msg); return; }
+    if (PICK && !t.closest('#pmenu') && !t.closest('[data-picker]')) { PICK = false; $('#pmenu').hidden = true; }
+    const qb = t.closest('[data-q]');
+    if (qb) { QS[qb.dataset.q] = qb.dataset.v; jump(qb.dataset.q); return; }
+    if (t.closest('[data-picker]')) { PICK = !PICK; render(); if (PICK) $('#psearch').focus(); return; }
+    const pk = t.closest('[data-pk]');
+    if (pk) { PICK = false; if (pk.dataset.pk !== 'ORD100') { const nm2 = ALL.find((r) => r[0] === pk.dataset.pk)[1], sn = (sects().find((x) => x[0] === SECT) || ['', 'Map'])[1]; toast('Opens ' + nm2 + ' in the builder, on ' + sn + ', the section you were on.'); } render(); return; }
+    if (t.closest('[data-rail]')) { RAILOPEN = !RAILOPEN; render(); return; }
+    if (t.closest('[data-ai]')) { AIOPEN = !AIOPEN; render(); return; }
+    if (t.closest('[data-aiclose]')) { AIOPEN = false; render(); return; }
     const nm = t.closest('[data-nums]'), vw = t.closest('[data-views]');
     if (nm || vw) { if (nm) NUMS = nm.dataset.nums; if (vw) VIEWS = vw.dataset.views; SCREEN = 'home'; if (!SECS[TAB] || !SECS[TAB].views.length) TAB = 'governance'; FLASH = nm ? (NUMS === 'band' ? '#m-tiles' : '#secwrap .kp') : (VIEWS === 'stick' ? '#vtsub .sv' : '#secwrap .sv'); render(); return; }
     const ot = t.closest('[data-otab]'), hs = t.closest('[data-hside]');

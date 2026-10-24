@@ -26,6 +26,8 @@ mockup it was given against is named after it.
 10. The office sections, after the fuller mockup: *"go with A noting that the bar needs to be freezed on scrlling down and I don't we need the title on each page given we have the box highlighted in the bar"*.
 11. *"I'm ok with the mockups"*.
 12. A section's numbers: *"Q1 A"*, boxes under the tabs. A section's views: *"Q2 B"*, they stay with the tabs as you scroll.
+13. On a phone only the tabs stay: *"ok for a phone not likely to open from a phone very much anyway"*.
+14. The darker table header: *"keep it here now and I will think later"*.
 
 ## 1. The shape
 
@@ -149,7 +151,7 @@ Landscape · Priorities · Governance · Org & roles · Export · Settings**.
 On a section's page:
 - There is no title; its description sits in the band.
 - **Its numbers sit in boxes under the tabs**, while the band keeps the office's counts. *(Q12, Q1 A.)*
-- **Its own views sit in a second, lighter row of switches that stays under the tab bar as you scroll.** *(Q12, Q2 B.)* On a phone the eight tabs already take three rows, so there only the tabs stay and the views scroll with the page. This phone rule is proposed and not yet confirmed.
+- **Its own views sit in a second, lighter row of switches that stays under the tab bar as you scroll.** *(Q12, Q2 B.)* On a phone the eight tabs already take three rows, so there only the tabs stay and the views scroll with the page. *(Q13.)*
 
 ### 4.3 Building one process  *(Q7)*
 
@@ -169,11 +171,30 @@ Authority · Risks & controls · Quality · Lifecycle**.
 
 ## 5. Still open
 
-1. **The phone rule for the views row** (§4.2) is proposed and needs a yes.
-2. **The darker table header.** SMP's other tables use a slightly lighter one. Does Processes' header become the platform's header?
-3. **Owners editing drafts later** (answer 3's "C"). With a separate builder, owners need either a limited way into the builder for their own drafts or a lighter editor of their own. This is to be designed when that stage comes; nothing here blocks it.
-4. **The seven decisions on the 2026-10-23 prototype** are still with the team. Some are answered by this design, for example where the tabs go and what the module opens on. They need reconciling before the build plan.
-5. **Not drawn yet:**
+### 5.1 The seven decisions on the 2026-10-23 prototype
+
+Three are settled by this design:
+
+| # | Prototype question | Settled as | By |
+|---|---|---|---|
+| 1 | Should Processes take SMP's look? | Yes: the navy band with a gold rule, Source Sans, SMP's tables. The client's colour stays on the report and the SOP. This **reverses** spec 065's *"keep its design"* (2026-10-01) and is recorded as a reversal when built. | *"design it in our colors like navy and gold … check the internal tracker"* (2026-10-23), and every mockup since |
+| 2 | Swap the left menu for tabs? | Yes, as eight tabs under the band. Unlike the prototype, Export and Settings are tabs too, not a button and a menu item. | Q10 |
+| 3 | Helicopter View and Value Chain together as Landscape? | Yes, as Landscape's views. The name can still change. | The office-section mockups, Q10 and Q11 |
+
+Four are still open. Each is drawn on the builder mockup with its answers to try:
+
+| # | Question | Answers | Recommended |
+|---|---|---|---|
+| 4 | **The empty tabs.** People, Compliance and Connections were signed off on 14 Oct but hold nothing and offer no way to fill them. | Off for now, each back when it has content (changes what was signed off) · keep them | Off for now |
+| 5 | **Readiness marks** (Map, RACI, Authority, Controls, SOP, Approved). | On every process · on deep dives only, with "High-level" on the rest | On every process |
+| 6 | **Moving to another process inside the builder.** This replaces the prototype's "rail" question, because the builder page already has a section menu on the left. | Back to the list (two clicks and a page between) · a picker on the process name in the band (two clicks, stays on the same section) · a list beside the section menu (one click; it folds on Map) | The picker on the name |
+| 7 | **Check with AI.** | A panel beside whatever section is open, from a button in the band · its own section in the menu | A panel |
+
+### 5.2 Other open points
+
+1. **The darker table header** stays in Processes for now. Whether it becomes SMP's header everywhere is Islam's call, later (Q14).
+2. **Owners editing drafts later** (answer 3's "C"). With a separate builder, owners need either a limited way into the builder for their own drafts or a lighter editor of their own. This is to be designed when that stage comes; nothing here blocks it.
+3. **Not drawn yet:**
    - the reading side's All processes tab;
    - what frontline staff with no ownership see, assumed to be My processes, made mostly of "You have a step in", plus To do;
    - the approver's full approval screen.
@@ -188,7 +209,7 @@ in `design-mockups/processes-redesign/`.
 | A process page | https://claude.ai/artifact/SHQYtVxi7jJEiKyXr4PWpG | `2026-10-24_process-page-options.html` |
 | Opening the module (reading side) | https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB | `2026-10-24_module-landing-options.html` |
 | Where the office builds (options compared) | https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb | `2026-10-24_builder-options.html` |
-| The builder: ways in and out, the builder home, every section | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
+| The builder: ways in and out, the builder home, every section, the four open questions | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
 
 Earlier versions of each page, holding the options that were not chosen, are in the
 page's history and in git.

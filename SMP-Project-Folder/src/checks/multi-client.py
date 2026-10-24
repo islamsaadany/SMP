@@ -624,10 +624,10 @@ def main():
                               body='{"ok":true,"cards":[],"canAdd":true,'
                                    '"canConsultants":true,"canAccess":true}')
                 if b'"cards"' in (route.request.post_data_buffer or b'') else route.continue_()))
-            pg.goto(BASE + "/platform", wait_until="networkidle")
+            pg.goto(BASE + "/platform#clients", wait_until="networkidle")
             pg.wait_for_timeout(1400)
             empty = pg.evaluate("""() => ({
-              add: document.querySelectorAll('.ccard.add').length,
+              add: document.querySelectorAll('.pgband .pgadd').length,
               words: (document.getElementById('page') || {}).innerText || '' })""")
             check("with no clients at all, the way in is still drawn", empty["add"] == 1, empty)
             check("…and the words say what this reader can do about it",

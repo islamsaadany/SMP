@@ -384,7 +384,27 @@
      company's, so the company's plan is where it shows (`capAtTop`). What is
      left to ask is only whether this client has any and whether this viewer
      reaches them. */
-  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §611: AND WHILE THERE ARE NONE YET, THE SECTION IS STILL THERE (§61).
+     Islam: *"I added capabilities as well but nothing appeared to add the
+     capabilities."* Its "+ Add" lives inside it, so a client that switched
+     capabilities on and had none was offered no way to the first one here.
+     Empty, it is drawn for whoever sees the whole company — never for a part
+     owner, who reaches no capability that is not theirs (§517, §520) — and
+     never where the company's plan already holds its capabilities as pillars
+     (stage 3b): there `plancap` is the Capabilities tab, and two would stand.
+     AND ONLY ONCE THE OFFICE HAS SAID SO on the Structure step (the
+     capabilities card, or the top level's own ticks): unsaid, "capabilities
+     on" is §404's everything-on fallback rather than anybody's choice, and a
+     client set up before the step opens exactly as it did — the company
+     Foundation tab's own rule (§404). */
+  function topCapsOn(){
+    if (!SMPRules.capExists(GROUP)) return false;
+    if (capsReachable().length) return true;
+    var st = SMPRules.structureOf(GROUP);
+    var said = !!(st && ((st.cap && typeof st.cap.exists === "boolean") || (st.top && Array.isArray(st.top.on))));
+    return said && !GROUP.capabilities.length && !partOnly() &&
+      !(topAsUnit().items || []).some(function(p){ return SMPRules.pillarIsCap(p); });
+  }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
@@ -583,6 +603,9 @@
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* §608: How we compete, once the office ticks it on. */
+                  { k:"compete", ac:"k_found", label:"Competitive Discipline", render:renderFnCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -800,7 +823,7 @@
           return cfgHead("Forefront team", [], null, false, null) +
             '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
         } },
-      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"Client register", glyph:"☰", find:"client register people register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -840,7 +863,6 @@
       { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
         when: function(){ return moduleWord() === "insights" && inOffice(); },
         render:renderLandingLine },
-      { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
          Islam picked the placement: a rail entry under *The organisation*,
@@ -864,6 +886,14 @@
       { k:"companies", ac:"c_units", grp:"run", mod:"client", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
       { k:"fns",    ac:"c_fns",    grp:"run", mod:"client", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
       { k:"caps",   ac:"c_caps",   grp:"run", mod:"client", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      /* §624: THE OFFICIAL BU LIST JOINS THE ORGANISATION, last (Islam: *"the
+         official BU list should come under organization not people and
+         access"*). It was placed with People because the register was its
+         only reader (§54.1); the sign-in short list, the people file and the
+         owner pickers read it now, and what it says is where the parts of the
+         business are. Its grant stays `c_people` (§54.1's reason holds: the
+         person who keeps the register keeps the names it carries). */
+      { k:"mainbu", ac:"c_people", grp:"run", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping hr organisation",      render:renderMainbus },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -914,12 +944,14 @@
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
-      /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
-         calls a pillar, a theme, an aspiration — its vocabulary, and the one
-         contract every other screen reads its words from. "Labels" is what a
-         developer calls that; to everybody else it sounds like stickers on a
-         chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
+         Client set-up › The shape names every word, layer by layer — End in
+         Mind, the one it did not, included — and an empty box there shows
+         the stored word as its fallback, which is all this page still did.
+         Deleted rather than hidden (§24). The stored map (LABELS) and the
+         grant key `c_labels` are untouched: the set-up flow still writes the
+         levels' words into LABELS (§417), and the authoriser still classifies
+         that write by its key. Its search words moved onto Getting started. */
 
       /* ── GETTING STARTED, THEN CLIENT SET-UP (§360, spec 057) ─────────
          Islam: *"the getting started with the client setup to stay at the
@@ -940,12 +972,26 @@
          this host and the console (§360). Its render is a box the module
          fills from paint(), before wire() so the colour controls it draws
          are wired like any other. */
-      { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Getting started", glyph:"◐",
-        find:"getting started set up setup client name mark logo colour color colours branding units companies functions capabilities words office team archive modules",
+      /* §624: TWO PAGES IN THE RAIL'S FIRST GROUP, NOT ONE PAGE OF PILLS
+         (Islam: *"have them as 3 section under the client on the side rail
+         rather than 3 pills"*, then *"forefront team keep it under people &
+         Access"*). Profile is the client step — its details, its brand and its
+         modules, in three tabs — and The shape is the shape step. The key
+         `start` stays on Profile so every link and address that opened
+         Getting started still lands on the client (§30.2). No "Getting
+         started" and no "Client set-up": the group heading counts what is
+         still to do, and setupDone is no longer read. */
+      { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Profile", glyph:"◧",
+        find:"profile getting started set up setup client name industry size notes address mark logo colour color colours branding brand archive modules",
         render:function(){
-          var done = SMPRules.setupDone(GROUP);
-          return cfgHead(done ? "Client set-up" : "Getting started", [], null, false, null) +
-            '<div class="csetup" data-csetup="1"><p class="why">Opening…</p></div>';
+          return cfgHead("Profile", [], null, false, null) +
+            '<div class="csetup" data-csetup="client"><p class="why">Opening…</p></div>';
+        } },
+      { k:"shape",  ac:"c_brand",  grp:"client", mod:"client", label:"The shape", glyph:"⌗",
+        find:"shape structure organisation organization levels layers units divisions companies functions capabilities words terminology vocabulary wording rename naming end in mind sections parts",
+        render:function(){
+          return cfgHead("The shape", [], null, false, null) +
+            '<div class="csetup" data-csetup="shape"><p class="why">Opening…</p></div>';
         } }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
@@ -969,7 +1015,7 @@
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting", title:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -1824,16 +1870,24 @@
      client's. Resolved at render time instead, in the one function that
      builds this list, so the rail and the page it opens cannot disagree. */
   function setupDefsAll(){
-    return SUBS.manage.concat(SUBS.setup).map(function(d){
+    /* §624: CAPABILITIES ONLY WHERE THERE IS ONE TO SHOW (Islam: *"capability
+       is empty"*, then *"go with your recommendations"*). No live client holds
+       a capability record any more (§544.13) — their capabilities are pillars
+       — so the page drew an empty table with an Add for a record type stage 3b
+       retired. It stays where it still lists something: a record (the worked
+       example's Product Mindset, §334) or the company's capability pillars,
+       read-only (§542). The same test the page draws by. Asked here, the one
+       list, so the rail, the landing and the search cannot disagree (§53.5). */
+    var capsShown = (GROUP.capabilities || []).length > 0 ||
+      (typeof capsAsPillars === "function" && capsAsPillars().length > 0);
+    return SUBS.manage.concat(SUBS.setup).filter(function(d){
+      return d.k !== "caps" || capsShown;
+    }).map(function(d){
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
       /* §392: and the three rows Terminology gained, the same way. */
       if (d.k === "companies") return Object.assign({}, d, { label:L("division") });
       if (d.k === "fns") return Object.assign({}, d, { label:navWord("fnword", "Functions") });
       if (d.k === "caps") return Object.assign({}, d, { label:L("capability") });
-      /* §360: one def, two names — Getting started until Done with set-up
-         is pressed, Client set-up after (SMPRules.setupDone, stored as an
-         absence on the group). */
-      if (d.k === "start") return Object.assign({}, d, { label: SMPRules.setupDone(GROUP) ? "Client set-up" : "Getting started" });
       return d;
     });
   }
@@ -1926,7 +1980,9 @@
      work). */
   function setupLandingKey(scope){
     var own = reachable(setupDefsFor(scope), "setup", "setup");
-    var first = own.filter(function(d){ return d.k === "start" && !SMPRules.setupDone(GROUP); })[0]
+    /* §624: the first of the client's own pages still to do, while any is. */
+    var pr = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { todoKeys: [] };
+    var first = own.filter(function(d){ return (pr.todoKeys || []).indexOf(d.k) > -1; })[0]
              || own.filter(function(d){ return d.primary; })[0] || own[0];
     return first ? first.k : null;
   }
@@ -1965,6 +2021,11 @@
      everybody who has ever touched one (§30.2). The label is the only thing
      that changes here. */
   var SETUP_GROUPS = [
+    /* §624: THE CLIENT'S OWN GROUP COMES FIRST (Islam: *"3 section under the
+       client on the side rail"*). It held Client set-up at the bottom once it
+       was done (§360); its two pages — Profile and The shape — are where a
+       client starts, and where its name, mark and modules are changed. */
+    { k:"client", label:"The client",     note:"Who this client is, and how it is built" },
     { k:"cycle", label:"Running the cycle", note:"What you do while a cycle is open" },
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
@@ -1977,20 +2038,17 @@
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 056 §4.4). `help` holds the knowledge base on
+       Client register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
     /* §359.4 (spec 056 §4.5): a module's own group — what it says about
        itself on the client landing. Drawn on a module's rail and never the
        client's, because the def below carries the module. */
     { k:"landing", label:"The landing",     note:"What this module says on the landing" },
-    { k:"help", label:"Help",             note:"How the platform works, in its own words" },
-    /* §360 (spec 057): the client's own group, LAST — it holds the set-up
-       once it is done, which is the thing you come back to least. The `look`
-       group went with the Branding page it held; its fold key is left in
-       whatever localStorage holds it, read by nothing (§30.2's cost, paid the
-       cheap way). */
-    { k:"client", label:"The client",     note:"How this client was set up, and what it wears" }
+    { k:"help", label:"Help",             note:"How the platform works, in its own words" }
+    /* The `look` group went with the Branding page it held (§360); its fold
+       key is left in whatever localStorage holds it, read by nothing (§30.2's
+       cost, paid the cheap way). */
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -2114,26 +2172,14 @@
     /* Asked ONCE for the whole rail rather than per row: every row would
        otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
-    /* ── GETTING STARTED IS A STRIP, NOT A ROW, UNTIL IT IS DONE (§360,
-       spec 057). The def sits in the last group; while the set-up is not
-       done it is taken OUT of the groups and drawn under the head, saying
-       how many of its steps the data holds an answer for (client-setup.js
-       progress — counted, never remembered, §129) and which are still to
-       do. Once Done with set-up is pressed it stays where its def is, at the
-       bottom, as Client set-up. One def either way, so the page cannot be
-       reachable from one and not the other. */
-    var startDef = defs.filter(function(d){ return d.k === "start"; })[0];
-    var startStrip = "";
-    if (startDef && !SMPRules.setupDone(GROUP)) {
-      defs = defs.filter(function(d){ return d.k !== "start"; });
-      var pr = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { done:0, total:0, todo:[] };
-      var todo = pr.todo.slice(0, 2).join(", ") + (pr.todo.length > 2 ? " +" + (pr.todo.length - 2) : "");
-      startStrip = '<button type="button" class="railstart' + (activeKey === "start" ? " on" : "") +
-        '" data-setupgo="start" aria-current="' + (activeKey === "start" ? "page" : "false") + '">' +
-        '<span class="rslab">' + esc(startDef.label) + '</span>' +
-        '<span class="rsprog">' + pr.done + ' of ' + pr.total + ' done' +
-          (pr.todo.length ? ' · ' + esc(todo) : '') + ' ▸</span></button>';
-    }
+    /* ── THE CLIENT'S OWN PAGES SAY WHAT IS LEFT (§624). Getting started was
+       a strip under the head until Done with set-up was pressed (§360); its
+       two pages are rows of the first group now, and the group's heading
+       says how many of them the data holds an answer for (client-setup.js
+       progress — counted, never remembered, §129), with a tick or a dot on
+       each, only while one is still to do. */
+    var CPR = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { done: 0, total: 0, todo: [], todoKeys: [] };
+    var cleft = CPR.done < CPR.total;
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
@@ -2155,6 +2201,8 @@
           'aria-expanded="' + (!shut) + '">' +
           '<span class="rgtw" aria-hidden="true">' + (shut ? "\u25b8" : "\u25be") + '</span>' +
           esc(g.label) +
+          (g.k === "client" && cleft
+            ? '<span class="rgprog">' + CPR.done + ' of ' + CPR.total + ' done</span>' : '') +
           /* ONLY WHILE FOLDED, and that is not a detail: an open group's rows
              carry their own pills, so a heading repeating their sum would be
              the same number twice. Folded, the rows cannot speak, and this is
@@ -2199,6 +2247,11 @@
                  thing and reads at a glance. */
               (w ? '<span class="riwait" title="' + w +
                    ' waiting on this page">' + w + '</span>' : '') +
+              (d.grp === "client" && cleft && (d.k === "start" || d.k === "shape")
+                ? ((CPR.todoKeys || []).indexOf(d.k) > -1
+                    ? '<span class="ritodo" title="Still to do"></span>'
+                    : '<span class="ridone" title="Done">\u2713</span>')
+                : '') +
               '</button>';
           }).join("") + '</div>';
     }).join("");
@@ -2209,7 +2262,7 @@
     /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
+       Branding, "where do I reset a password" is the Client register. So each
        row carries the words somebody would actually type, in `find` on the def
        beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
@@ -2315,7 +2368,7 @@
     return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back + startStrip +
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back +
       '<div class="railfind">' +
         '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
           'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
@@ -3020,6 +3073,242 @@
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
 
+  /* ══ THE ASKING BOX (§621) ═════════════════════════════════════════
+     Islam, of a Setup change that gives or takes access: *"giving more or
+     less needs the confirmation … with the impact of the change, and I
+     suggest it comes as a floating box not a bar"*; of the drawing, *"make
+     the floating boxes fit the content, not too extended"*; and of Client
+     set-up, *"it should act as per the adjustment unless we are removing
+     something that has data"*.
+
+     ONE BOX FOR EVERY SETUP CHANGE THAT ASKS FIRST. Nothing has changed while
+     it is open: the press that opened it only described itself, and `o.go` is
+     the write. Keep, Esc and a press anywhere else leave the page as it was.
+
+     SIZED TO WHAT IT SAYS (`width: max-content`, capped) and placed under what
+     was pressed with its arrow on it — above, where there is no room below.
+     In the BODY, never in #panel: paint() replaces the panel, and a box inside
+     it would go with the press that confirms it. It follows its control while
+     anything scrolls, and closes if a repaint takes the control away, which
+     reads as Keep — the safe answer.
+
+     `o.body` is HTML its caller built from escaped parts; the title and the
+     two words are escaped here. */
+  var ASK = null;
+  function askClose(){
+    if (!ASK) return;
+    var a = ASK; ASK = null;
+    if (a.box.parentNode) a.box.parentNode.removeChild(a.box);
+    document.removeEventListener("mousedown", a.away, true);
+    document.removeEventListener("keydown", a.key, true);
+    window.removeEventListener("scroll", a.move, true);
+    window.removeEventListener("resize", a.move);
+  }
+  function askPlace(){
+    if (!ASK) return;
+    var a = ASK, box = a.box;
+    if (!document.body.contains(a.anchor)) { askClose(); return; }
+    /* §631: measured in the page's own pixels, the scroll too, because the
+       box is placed in them and the page is drawn at 80% on a computer. */
+    var r = zRect(a.anchor), bw = box.offsetWidth, bh = box.offsetHeight, z = pageZoom();
+    var mid = r.left + r.width / 2;
+    var left = Math.max(16, Math.min(winW() - bw - 16, mid - 28));
+    var below = r.bottom + 10 + bh <= winH() - 8 || r.top - 10 - bh < 8;
+    box.classList.toggle("above", !below);
+    box.style.left = (left + window.pageXOffset / z) + "px";
+    box.style.top = ((below ? r.bottom + 10 : r.top - 10 - bh) + window.pageYOffset / z) + "px";
+    box.querySelector(".askarrow").style.left = Math.max(10, Math.min(bw - 24, mid - left - 7)) + "px";
+  }
+  function askFirst(anchor, o){
+    askClose();
+    var box = document.createElement("div");
+    box.className = "askbox";
+    box.setAttribute("role", "alertdialog");
+    box.setAttribute("aria-label", o.title);
+    box.innerHTML = '<span class="askarrow" aria-hidden="true"></span>' +
+      '<div class="asktitle">' + esc(o.title) + '</div>' +
+      '<div class="askbody">' + o.body + '</div>' +
+      '<div class="askacts"><button type="button" class="askyes">' + esc(o.yes || "Change it") + '</button>' +
+      '<button type="button" class="askno">' + esc(o.no || "Keep as it was") + '</button></div>';
+    document.body.appendChild(box);
+    var a = ASK = {
+      box: box, anchor: anchor,
+      away: function(e){ if (!box.contains(e.target)) askClose(); },
+      key: function(e){ if (e.key === "Escape") { e.stopPropagation(); askClose(); } },
+      move: function(){ askPlace(); }
+    };
+    document.addEventListener("mousedown", a.away, true);
+    document.addEventListener("keydown", a.key, true);
+    window.addEventListener("scroll", a.move, true);
+    window.addEventListener("resize", a.move);
+    box.querySelector(".askno").addEventListener("click", askClose);
+    box.querySelector(".askyes").addEventListener("click", function(){ askClose(); o.go(); });
+    askPlace();
+    /* The safe answer under the cursor: Enter keeps. */
+    try { box.querySelector(".askno").focus({ preventScroll: true }); } catch (e) {}
+  }
+  /* AND THE ANSWER IS SAID ON WHAT WAS PRESSED (§621): HR_ERP's rule for a
+     row of switches (Admin › Notifications) — *"shows Saved on that row"*.
+     The corner's word is a screen away from the cell. The save is asked for
+     by name, so this says what the SERVER answered rather than what was
+     drawn (§96); `find` looks the control up again because the repaint
+     replaced it. Offline there is nothing to say, and nothing is said. */
+  function askSaved(find, quietWhenOk){
+    if (typeof SYNC === "undefined" || !SYNC.isLive || !SYNC.isLive() || !SYNC.saveNow) return;
+    SYNC.saveNow(function(state){
+      var ok = state === "saved" || state === "clean";
+      if (!ok && state !== "failed" && state !== "refused") return;
+      /* A row that already says Applied needs no second word for success. */
+      if (ok && quietWhenOk) return;
+      var at = find();
+      if (!at) return;
+      var tag = document.createElement("span");
+      tag.className = "asksaved" + (ok ? "" : " bad");
+      tag.setAttribute("role", "status");
+      tag.textContent = ok ? "Saved" : "Not saved";
+      at.appendChild(tag);
+      setTimeout(function(){ if (tag.parentNode) tag.parentNode.removeChild(tag); }, ok ? 1800 : 5000);
+    });
+  }
+
+  /* ══ A COLOUR WAITS FOR APPLY — THE AREAS, THE UNDO, THE LEAVE QUESTION ══
+     (§621). Each area in APPLY_AREAS answers four things — what waits, Apply,
+     Discard, Undo — and remembers WHERE its wait began (`at`). Everything
+     else is written once here: the row's three buttons, the Undo window, and
+     the question asked on the way out.
+
+     LEAVING IS CAUGHT IN paint(), because every way off a page in this shell
+     ends in one: the rail, the units bar, a tab, Jump to, the set-up flow's
+     own steps, and Back (route.js's popstate). A paint whose place is not the
+     place the wait began puts the old place back, draws it, and asks — Apply
+     and continue, Discard changes, Keep editing — at the foot of the window,
+     where the agreed strip stood in the mockup. Closing the tab gets the
+     browser's own question (beforeunload): the only thing a page may show
+     then. */
+  function placeNow(){
+    return { d: current, s: currentSub || null, c: currentSub ? (CURSEC[currentSub] || null) : null,
+             step: (currentSub === "start" || currentSub === "shape") && typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.at
+               ? CLIENTSETUP.at() : null };
+  }
+  function placeSame(a, b){ return a.d === b.d && a.s === b.s && a.step === b.step; }
+  function placeGo(p){
+    current = p.d; currentSub = p.s;
+    if (p.s && p.c) CURSEC[p.s] = p.c;
+    if (p.step && typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.toStep) CLIENTSETUP.toStep(p.step);
+  }
+  function applyWaiting(){
+    for (var k in APPLY_AREAS) if (APPLY_AREAS[k].waiting().length) return k;
+    return null;
+  }
+  /* Called after every change an area holds: the first one marks where the
+     wait began, and any change ends the Undo window of the Apply before it. */
+  function applyChanged(k){
+    var a = APPLY_AREAS[k];
+    if (!a.waiting().length) { a.at = null; a.discard(); }
+    else if (!a.at) a.at = placeNow();
+    a.undoEnd();
+    paint();
+  }
+  /* The Undo button lives for UNDO_MS and then goes without a repaint, which
+     would move somebody's cursor for the sake of a button they did not ask
+     for (§75). */
+  function applyUndoLater(k){
+    var a = APPLY_AREAS[k], stamp = a.undoStamp();
+    setTimeout(function(){
+      if (a.undoStamp() !== stamp) return;
+      a.undoEnd();
+      var row = document.querySelector('[data-applyrow="' + k + '"]');
+      if (row && !a.waiting().length) row.parentNode.removeChild(row);
+    }, UNDO_MS);
+  }
+  var LEAVE = null;
+  function leaveClose(){
+    if (LEAVE && LEAVE.parentNode) LEAVE.parentNode.removeChild(LEAVE);
+    LEAVE = null;
+  }
+  function leaveAsk(k, target){
+    leaveClose();
+    var a = APPLY_AREAS[k], strip = document.createElement("div");
+    strip.className = "leavestrip";
+    strip.setAttribute("role", "alertdialog");
+    strip.innerHTML = '<div class="lsay"><b>“' + esc(a.title) + '” has changes that aren’t applied:</b> ' +
+      esc(a.waiting().join(", ")) + '.</div><div class="lacts">' +
+      '<button type="button" class="askyes" data-leave="go">Apply and continue</button>' +
+      '<button type="button" class="askno" data-leave="drop">Discard changes</button>' +
+      '<button type="button" class="askno" data-leave="stay">Keep editing</button></div>';
+    document.body.appendChild(strip);
+    LEAVE = strip;
+    var on = function(){ leaveClose(); placeGo(target); leaveModes(); paint(); };
+    strip.querySelector('[data-leave="go"]').addEventListener("click", function(){ a.apply(this, on); });
+    strip.querySelector('[data-leave="drop"]').addEventListener("click", function(){ a.at = null; a.discard(); on(); });
+    strip.querySelector('[data-leave="stay"]').addEventListener("click", leaveClose);
+    try { strip.querySelector('[data-leave="stay"]').focus({ preventScroll: true }); } catch (e) {}
+  }
+  window.addEventListener("beforeunload", function(e){
+    /* §624: and rows on the shape not yet written, which leaving the page
+       would have written — closing the tab cannot, so it asks. */
+    var shapeOpen = typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.dirty && CLIENTSETUP.dirty();
+    if (!applyWaiting() && !shapeOpen) return;
+    e.preventDefault(); e.returnValue = "";
+  });
+
+  /* THE TENANT'S TWO COLOURS (§39 → §621). Reset to the shipped palette is a
+     colour change like any other, so it waits for Apply too. */
+  APPLY_AREAS.brand = {
+    title: "The tenant’s colours", at: null,
+    waiting: brandWaiting,
+    discard: function(){ BRAND_PEND = {}; },
+    undoEnd: function(){ BRAND_UNDO = null; },
+    undoStamp: function(){ return BRAND_UNDO; },
+    apply: function(btn, then){
+      var b = branding(), prev = { accent: b.accent, bar: b.bar, palette: b.palette, font: b.font };
+      if ("reset" in BRAND_PEND) GROUP.branding = {};
+      else brandPendKeys().forEach(function(k){ b[k] = BRAND_PEND[k]; });
+      BRAND_PEND = {}; this.at = null;
+      BRAND_UNDO = { prev: prev, until: Date.now() + UNDO_MS };
+      applyBrand(); leaveClose(); applyUndoLater("brand");
+      if (then) then(); else paint();
+      askSaved(function(){ return document.querySelector('[data-applyrow="brand"]'); }, true);
+    },
+    undo: function(){
+      if (!BRAND_UNDO) return;
+      var p = BRAND_UNDO.prev, b = branding();
+      for (var k in p) b[k] = p[k];
+      BRAND_UNDO = null;
+      applyBrand();
+    }
+  };
+  /* THE SCORING BANDS. A new floor or a removed level re-bands what is already
+     scored, so Apply asks first with the number it moves; a colour or a name
+     alone moves nothing and applies at once. */
+  APPLY_AREAS.bands = {
+    title: "Scoring bands", at: null,
+    waiting: bandsWaiting,
+    discard: function(){ BANDS_DRAFT = null; },
+    undoEnd: function(){ BANDS_UNDO = null; },
+    undoStamp: function(){ return BANDS_UNDO; },
+    apply: function(btn, then){
+      var area = this;
+      if (!BANDS_DRAFT || !bandsOrdered(BANDS_DRAFT)) return;
+      var go = function(){
+        BANDS_UNDO = { prev: JSON.parse(JSON.stringify(BANDS.bands)), until: Date.now() + UNDO_MS };
+        BANDS.bands = BANDS_DRAFT; BANDS_DRAFT = null; area.at = null; EDITING.bands = false;
+        leaveClose(); applyUndoLater("bands");
+        if (then) then(); else paint();
+        askSaved(function(){ return document.querySelector('[data-applyrow="bands"]'); }, true);
+      };
+      var sh = bandShift(BANDS_DRAFT);
+      if (!sh.moved || !btn) { go(); return; }
+      askFirst(btn, { title: "Scoring bands",
+        body: "<b>" + sh.moved + " of " + sh.of + "</b> scored measures would show a different band, though no figure has changed.",
+        yes: "Apply", go: go });
+    },
+    undo: function(){
+      if (!BANDS_UNDO) return;
+      BANDS.bands = BANDS_UNDO.prev; BANDS_UNDO = null;
+    }
+  };
+
   /* The tenant's branding, handed to THEME. One function, called on boot and
      after every change on the Branding page, so the applied colours and the
      page's own preview cannot drift apart (§39). */
@@ -3173,8 +3462,35 @@
       '</details></div>';
   }
 
+  var LASTPLACE = null;
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
+    /* §624: LEAVING THE SHAPE WRITES IT, as Next and Back did when it was a
+       step (§322's rule kept). The same door as the colours below: a paint
+       somewhere else while the shape page was the last one drawn asks the
+       flow to commit, and a refusal (a row with no name, somebody in charge
+       of a row being dropped) keeps the person on the shape page with the
+       reason said there. */
+    /* The PAGE is compared, never the flow's inner place: the first draw of
+       the shape records it before the flow has mounted, so a step compared
+       here read a row being added as leaving (found by a probe, §624). */
+    if (LASTPLACE && LASTPLACE.s === "shape" && current &&
+        (current !== LASTPLACE.d || currentSub !== "shape") &&
+        typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.leave && !CLIENTSETUP.leave()) {
+      placeGo(LASTPLACE);
+    }
+    /* §621: A PAINT SOMEWHERE ELSE WHILE A COLOUR WAITS IS A WAY OUT, and it
+       is held here — the one door every navigation passes. The old place is
+       put back before anything is drawn, so the page under the question is
+       the page with the colour on it, and the place asked for is kept for
+       Apply and continue / Discard changes. */
+    var waitK = applyWaiting();
+    if (waitK && APPLY_AREAS[waitK].at && current && !placeSame(APPLY_AREAS[waitK].at, placeNow())) {
+      var asked = placeNow();
+      placeGo(APPLY_AREAS[waitK].at);
+      setTimeout(function(){ leaveAsk(waitK, asked); }, 0);
+    }
+    LASTPLACE = placeNow();
     var _panel = document.getElementById("panel");
     var _keep = { y: window.pageYOffset || 0, boxes: scrollsIn(_panel), focus: focusMark() };
     /* WHAT THIS PAINT IS ABOUT, set before anything renders. Every grant() with
@@ -3458,7 +3774,8 @@
        plan", which is the rail pointing at one name and the page showing
        another all over again. The rail's own label is the page's name whether
        or not it has sections inside it. */
-    var pageName = def ? (def.label || "") : "";
+    /* §619: a page may keep a fuller title than its menu line has room for. */
+    var pageName = def ? (def.title || def.label || "") : "";
     var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
     var secrowHTML = "";
     /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
@@ -3604,6 +3921,10 @@
          flow on a client with a plan, goes through the one switch Setup's own
          rows use — its warning, and hide-and-keep (§405). */
       switchWay: function(kind, key, value, sel){ switchPlanWay(kind, key, value, sel); },
+      /* §621: the platform's floating box, for a press that would hide or take
+         away something written. The console passes none, and a press there
+         applies as it always did. */
+      ask: function(anchor, o){ askFirst(anchor, o); },
       /* §364: the team page draws a setup table, and a setup table's hover
          is MEASURED after it is on the screen (§88). paint() ends in
          clipTitles(), which is too early for a box the client's record fills
@@ -3613,7 +3934,9 @@
     var cteam = _panel.querySelector("[data-cteam]");
     if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);
     var csetup = _panel.querySelector("[data-csetup]");
-    if (csetup && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mount(csetup, _csOpts);
+    /* §624: the page says which step it holds — Profile or The shape. */
+    if (csetup && typeof CLIENTSETUP !== "undefined")
+      CLIENTSETUP.mount(csetup, Object.assign({}, _csOpts, { step: csetup.getAttribute("data-csetup") }));
 
     /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the
@@ -3708,7 +4031,7 @@
        how two frozen columns come to disagree. */
     _panel.querySelectorAll(".tblscroll").forEach(function(w){
       var first = w.querySelector("thead th.idx, tbody td.idx");
-      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+      if (first) w.style.setProperty("--frozen-1", zRect(first).width + "px");   /* §631 */
     });
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -3853,6 +4176,13 @@
       PCELL = null; PROLEPICK = null; ROLESTOP = null;
       paint();
     });
+    /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ────────────────────
+       The same three things the register's cell gets above, here for the
+       same reason (the button in front of a long select does not exist until
+       SEARCHSEL has run): the cursor in the cell, a list opened, Escape
+       shutting it. A person cell's list floats under the cell and the cursor
+       goes into its search box. */
+    if (OCELL) ocellFocus();
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -4018,7 +4348,8 @@
     for (var i = 0; i < PINROWS.length; i++) {
       var r = PINROWS[i];
       if (!r.band.isConnected || !r.pane.isConnected) continue;
-      var flow = r.pane.getBoundingClientRect().top + r.inset;
+      /* §631: the inset is the page's pixels, the boxes the window's. */
+      var flow = r.pane.getBoundingClientRect().top + r.inset * pageZoom();
       r.band.classList.toggle("pinned",
         r.band.getBoundingClientRect().top > flow + 0.5);
     }
@@ -4145,10 +4476,10 @@
     if (!pop) return;
     var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
     if (!btn) return;
-    var r = btn.getBoundingClientRect();
+    var r = zRect(btn);                                        /* §631 */
     var w = pop.offsetWidth, h = pop.offsetHeight;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var below = window.innerHeight - r.bottom;
+    var left = Math.max(8, Math.min(r.left, winW() - w - 8));
+    var below = winH() - r.bottom;
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
@@ -4208,7 +4539,9 @@
     var cs = getComputedStyle(document.documentElement);
     var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
+    /* §631: the scroll and the box are the window's pixels, the two custom
+       properties the page's — so those two are scaled, not the scroll. */
+    var want = split.getBoundingClientRect().top + window.scrollY - (chrome + gap) * pageZoom();
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
   }
 
@@ -4259,13 +4592,13 @@
        a selector that no longer covers everything it is asked about does not
        fail, it silently does nothing. A menu added to a third table is
        positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu],[data-umenu],[data-comenu],[data-cpmenu]");
     if (!btn) return;
-    var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
+    var r = zRect(btn), h = m.offsetHeight, w = m.offsetWidth;   /* §631 */
+    var below = winH() - r.bottom - 8;
     var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
     m.style.top  = Math.max(8, top) + "px";
-    m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
+    m.style.left = Math.max(8, Math.min(r.right - w, winW() - w - 8)) + "px";
   }
 
   function fieldSaved(){
@@ -4863,11 +5196,11 @@
         open = null;
       };
       var place = function(btn, pop){
-        var r = btn.getBoundingClientRect();
+        var r = zRect(btn);                                    /* §631 */
         var h = pop.offsetHeight, w = pop.offsetWidth;
-        var below = window.innerHeight - r.bottom - 8;
+        var below = winH() - r.bottom - 8;
         var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        var left = Math.min(r.left, Math.max(8, winW() - w - 8));
         pop.style.top = Math.max(8, top) + "px";
         pop.style.left = left + "px";
       };
@@ -4965,6 +5298,64 @@
       });
       return { shut: shut };
     })();
+
+  /* §630: where an open person cell's list sits. FIXED, off the cell's
+     own rect, for §45.5's reason: the tables sit in a box that scrolls
+     sideways, which clips anything absolute to a strip of itself. Under the
+     cell, or over it where the screen has no room below. */
+  function ocellPlace(){
+    var oc = document.querySelector("td.ocellopen"), pop = oc && oc.querySelector(".ocellpop");
+    if (!pop) return;
+    var r = zRect(oc), w = Math.max(280, Math.round(r.width));   /* §631 */
+    var h = pop.offsetHeight, left = Math.min(Math.max(8, r.left), winW() - w - 8);
+    var top = r.bottom - 2;
+    if (top + h > winH() - 8 && r.top - h > 8) top = r.top - h + 2;
+    pop.style.left = Math.round(left) + "px"; pop.style.top = Math.round(top) + "px";
+    pop.style.width = w + "px";
+  }
+  function ocellShut(){
+    if (document.querySelector("td.ocellopen .ocellpop")) { PICKING = null; PICKQ = ""; }
+    OCELL = null; paint();
+  }
+  function ocellFocus(){
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc) return;
+    var esc = function(e){
+      if (e.key !== "Escape") return;
+      e.preventDefault(); e.stopPropagation(); ocellShut();
+    };
+    if (oc.querySelector(".ocellpop")) {
+      ocellPlace();
+      var q = document.getElementById("pickQ");
+      if (q && oc.contains(q)) { focusNoScroll(q); q.addEventListener("keydown", esc); }
+      return;
+    }
+    var of = oc.querySelector(".fld");
+    var ob = of && of.tagName === "SELECT" ? of.previousElementSibling : null;
+    ob = ob && ob.classList && ob.classList.contains("ssbtn") ? ob : null;
+    if (!(ob && SEARCHSEL.openOn(of))) {
+      focusNoScroll(ob || of);
+      if (of && of.tagName === "INPUT" && of.select) of.select();
+    }
+    if (ob) ob.addEventListener("keydown", esc);
+  }
+  /* A press anywhere else lets go of a cell whose control is not a plain
+     box — a person's list, or a long list's button — since neither is
+     left by a `blur` the cell can hear. Deferred, so the press itself still
+     lands (§30.1); a list that is open keeps its own presses. */
+  /* Attached once, at load: this is the page's own level, not `wire()`,
+     which runs on every paint (§24). */
+  document.addEventListener("mousedown", function(e){
+    var t = e.target;
+    if (!OCELL || !(t instanceof Element)) return;
+    var oc = document.querySelector("td.ocellopen");
+    if (!oc || oc.contains(t)) return;
+    if (t.closest(".sspop, #modal-b")) return;
+    if (!oc.querySelector(".ocellpop, .ssbtn")) return;
+    setTimeout(function(){ if (OCELL && document.querySelector("td.ocellopen")) ocellShut(); }, 0);
+  }, true);
+  window.addEventListener("scroll", function(){ if (OCELL) ocellPlace(); }, true);
+  window.addEventListener("resize", function(){ if (OCELL) ocellPlace(); });
 
   function wire(){
     /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
@@ -5194,24 +5585,7 @@
       });
     });
 
-    /* Labels */
-    document.querySelectorAll("input.lbl").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        /* An emptied box goes back to the default (§392), which is what the
-           Reset beside it does for both at once. */
-        var e = LABELS.entries[+inp.dataset.lbl], d = labelDefault(e.key);
-        var v = inp.value.trim();
-        e[inp.dataset.scope] = v || (d ? (inp.dataset.scope === "group" ? d.one : d.many) : e.internal);
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-lblreset]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = LABELS.entries[+b.dataset.lblreset], d = labelDefault(e.key);
-        if (d) { e.group = d.one; e.bu = d.many; }
-        paint();
-      });
-    });
+    /* §621: Terminology's two handlers went with its page. */
     /* The "titles at this level" field went with LEVELS in 3.8. A title is
        information about a person, not a rung anyone is standing on. */
 
@@ -5223,21 +5597,39 @@
        already on that state keeps its absence (§50.6), so a tenant's stored
        map grows by exactly the answers somebody changed, and an untouched
        pair goes on following the shipped default. */
+    /* §621: EVERY PRESS HERE ASKS FIRST, giving or taking (Islam: *"giving
+       more or less needs the confirmation … with the impact"*). The press
+       only describes itself; the write below is unchanged and runs on Change
+       it, after which the cell says whether the server took it. */
+    function accessAsk(b, to, go, findCell){
+      var d = b.dataset;
+      askFirst(b, { title: d.askwho || "This role",
+        body: to === "part"
+          ? "Will only see <b>their own directions</b> and the Foundation, not the whole plan."
+          : to === "full" ? "Will see the <b>whole plan</b> again, not only their own directions."
+          : accessImpact(d.askfrom, to, d.askwhat || "this"),
+        go: function(){ go(); paint(); askSaved(findCell); } });
+    }
+    function accessPartCell(){ var x = document.querySelector("[data-dirscope]"); return x && x.closest("td"); }
     document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.acm.split("|"), st = p[1];
-        p[0].split(",").forEach(function(pair){
-          var ra = pair.split(":");
-          if (grantFor(ra[0], ra[1]) === st) return;
-          /* The row may not exist yet: a migrated tenant starts with an empty
-             map and every answer coming from the shipped default. Writing a
-             cell is the moment that role gets a row of its own. */
-          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        accessAsk(b, st, function(){
+          p[0].split(",").forEach(function(pair){
+            var ra = pair.split(":");
+            if (grantFor(ra[0], ra[1]) === st) return;
+            /* The row may not exist yet: a migrated tenant starts with an empty
+               map and every answer coming from the shipped default. Writing a
+               cell is the moment that role gets a row of its own. */
+            (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+          });
+          /* §517: the eye or the pen pressed while the half eye is lit is the
+             same one choice made the other way — the full plan again. */
+          if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        }, function(){
+          var x = document.querySelector('[data-acm^="' + p[0] + '|"]');
+          return x && x.closest("td");
         });
-        /* §517: the eye or the pen pressed while the half eye is lit is the
-           same one choice made the other way — the full plan again. */
-        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
-        paint();
       });
     });
     /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
@@ -5248,11 +5640,12 @@
        eye would light over a page they cannot open (§61). */
     document.querySelectorAll("[data-dirscope]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (b.dataset.dirscope === "part") {
-          GROUP[SMPRules.DIR_SCOPE] = "part";
-          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
-        } else delete GROUP[SMPRules.DIR_SCOPE];
-        paint();
+        accessAsk(b, b.dataset.dirscope, function(){
+          if (b.dataset.dirscope === "part") {
+            GROUP[SMPRules.DIR_SCOPE] = "part";
+            if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+          } else delete GROUP[SMPRules.DIR_SCOPE];
+        }, accessPartCell);
       });
     });
     /* A MODULE'S OWN CELL (§359.5): the same press through its own writer,
@@ -5262,12 +5655,74 @@
     document.querySelectorAll("[data-mac]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.mac.split("|");
-        setModuleGrant(p[0], p[1], p[2], p[3]);
-        paint();
+        accessAsk(b, p[2], function(){ setModuleGrant(p[0], p[1], p[2], p[3]); }, function(){
+          var x = document.querySelector('[data-mac^="' + p[0] + "|" + p[1] + '|"]');
+          return x && x.closest("td");
+        });
       });
     });
     wirePillars();
     wireArrange();
+    /* ══ THE ORGANISATION TABLES' CELLS (§630) ═══════════════════════════
+       The register's block (§372) for Business units, Functions, Divisions
+       and Capabilities — and BEFORE `wireSetupFields`, for that block's own
+       reason: listeners on one element run in the order they were added, and
+       a field handler that paints must find the cell already let go, or the
+       paint draws it open with the answer already chosen. */
+    (function(){
+      document.querySelectorAll("tbody").forEach(function(tb){
+        if (!tb.querySelector("[data-ocell]")) return;
+        tb.addEventListener("dblclick", function(e){
+          var td = e.target && e.target.closest && e.target.closest("[data-ocell]");
+          if (!td || !tb.contains(td)) return;
+          var at = String(td.dataset.ocell).split("|");
+          try { window.getSelection().removeAllRanges(); } catch (err) {}
+          OCELL = { t: at[0], key: at[1], f: at.slice(2).join("|") };
+          /* A person cell opens its list in the same press (§372.14: a shut
+             box that has to be pressed again is a third act for nothing). */
+          PICKING = td.dataset.ocellpick || null; PICKQ = "";
+          paint();
+        });
+      });
+      if (!OCELL) return;
+      var cell = document.querySelector("td.ocellopen");
+      /* Nothing drawn open — the row went, the picker shut, the viewer may no
+         longer edit — so nothing is held open either (§61). */
+      if (!cell) { OCELL = null; return; }
+      /* A person cell is the picker's, wired by `wirePicker` like the dialog's. */
+      if (cell.querySelector(".ocellpop")) return;
+      cell.querySelectorAll(".fld").forEach(function(fld){
+        /* LEAVING IT IS WHAT COMMITS IT (§35): `change` lets the cell go and
+           the field's own handler, registered next, writes the value. A
+           handler that does not paint leaves the cell drawn open, so one
+           paint is queued — never inside the event (§30.1). */
+        fld.addEventListener("change", function(){
+          OCELL = null;
+          setTimeout(function(){ if (!OCELL && document.querySelector("td.ocellopen")) paint(); }, 0);
+        });
+        /* A repaint that removed the box is not somebody leaving it (§372.14),
+           and a cell holding two controls (how a function plans, and under
+           what) is left only when the focus leaves the CELL. */
+        fld.addEventListener("blur", function(){
+          setTimeout(function(){
+            if (!fld.isConnected || !document.querySelector("td.ocellopen")) return;
+            if (cell.contains(document.activeElement)) return;
+            OCELL = null; paint();
+          }, 0);
+        });
+        /* Escape puts the VALUE back before the node goes, so whatever the
+           removal fires writes what was already there (§372). */
+        var was = fld.value;
+        fld.addEventListener("keydown", function(e){
+          if (e.key === "Escape") {
+            e.preventDefault(); e.stopPropagation();
+            fld.value = was; OCELL = null; paint();
+          } else if (e.key === "Enter" && fld.tagName === "INPUT") {
+            e.preventDefault(); fld.blur();
+          }
+        });
+      });
+    })();
     wireSetupFields(document);
     /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
        save that will not happen has to say so where the save is (§42). */
@@ -6538,61 +6993,6 @@
         paint();
       });
     });
-    document.querySelectorAll("[data-tadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var k = b.dataset.tadd;
-        /* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Remove the
-           middle of KO1·KO2·KO3 and add: the count says 3 and KO3 is still on
-           screen, so two rows share an id. The authoriser compares plans BY ID
-           (§59) and a reporting snapshot is keyed by id and never by position
-           (§48), so a collision is not cosmetic. `koMint` is the one place
-           that answers it, shared with the Foundation's own editor. */
-        if (k === "ko")    GROUP.keyObjectives.push(
-                             Object.assign(koMint(GROUP.keyObjectives, "group"), { group:null }));
-        if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New " + labelWord("theme","group"), note:"" });
-        /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
-           `measures` and `tactics` — fields §15 removed — so the row had no
-           id, no function and neither list, and the Capabilities page threw on
-           the next paint. One function mints one now, and both places that add
-           a capability call it. */
-        if (k === "cap")   addCapability();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-trm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.trm.split("|"), i = +p[1];
-        /* Removal asks once when the row carries anything \u2014 a reported
-           objective is history, and units get a confirm for far less. A row
-           added a moment ago and still empty goes without ceremony. A
-           capability is its own question and takes its own dialog below. */
-        var what = null;
-        if (p[0] === "ko") {
-          var m = GROUP.keyObjectives[i];
-          if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
-            (m.actual ? " and its reported " + m.actual : "");
-        }
-        /* Read from the fields a capability ACTUALLY has. This asked for
-           `measures.length` on an object that has not carried `measures` since
-           §15, so it threw before it could confirm anything and the removal
-           never ran (§51.11). */
-        /* §325: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
-           second door onto it — the Temple's own table. Reaching only the
-           Setup page would leave a way to destroy three projects with a
-           browser dialog and no archive, which is §272.7's fault exactly:
-           the control is drawn twice and a fix that reaches one copy leaves
-           the other. Both doors open the same dialog now. */
-        if (p[0] === "cap") {
-          var cc = GROUP.capabilities[i];
-          if (cc) capRemoveOpen(cc.id);
-          return;
-        }
-        if (what && rmAsk(b, "trm", b.dataset.trm, "Remove " + esc(what) + "?")) return;
-        if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
-        if (p[0] === "theme") GROUP.themes.splice(i, 1);
-        paint();
-      });
-    });
     /* ── ADD AND REMOVE AN OBJECTIVE, ON A FOUNDATION (§96) ─────────
        These two buttons have existed on this page for as long as the page has,
        with nothing bound to them. The group's Temple edit has had working ones
@@ -6638,7 +7038,7 @@
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });
@@ -7001,16 +7401,19 @@
         }, 0);
       });
     });
+    /* §621: EVERY EDIT TO THE BANDS GOES TO THE DRAFT (bandsEdit) and waits
+       for Apply — the stored bands, which every figure reads, are untouched
+       until then. */
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
-        BANDS.bands[+inp.dataset.b].label = inp.value || "Unnamed"; paint();
+        bandsEdit()[+inp.dataset.b].label = inp.value || "Unnamed"; applyChanged("bands");
       });
     });
     document.querySelectorAll("input.bfloor").forEach(function(inp){
       inp.addEventListener("change", function(){
         var n = parseInt(inp.value, 10);
-        if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
-        paint();
+        if (!isNaN(n)) bandsEdit()[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
+        applyChanged("bands");
       });
     });
     /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§168). The colour
@@ -7019,15 +7422,15 @@
     document.querySelectorAll("[data-bcol]").forEach(function(el){
       el.addEventListener("click", function(){
         var p = el.dataset.bcol.split("|");
-        BANDS.bands[+p[0]].key = p[1];
-        paint();
+        bandsEdit()[+p[0]].key = p[1];
+        applyChanged("bands");
       });
     });
     document.querySelectorAll("[data-bdel]").forEach(function(el){
-      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel); paint(); });
+      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel, bandsEdit()); applyChanged("bands"); });
     });
     document.querySelectorAll("[data-badd]").forEach(function(el){
-      el.addEventListener("click", function(){ addBand(); paint(); });
+      el.addEventListener("click", function(){ addBand(bandsEdit()); applyChanged("bands"); });
     });
     /* A unit's company, and a company's two visibility flags. Both are
        configuration: they change who reaches what, never a figure. */
@@ -8172,6 +8575,14 @@
         e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
       });
     });
+    /* §629: the Forefront switch. Kept on this device, repainted in place;
+       a row being edited is somebody's, so it is committed by the repaint's
+       own leaving rule like any other (§35). */
+    document.querySelectorAll("[data-regff]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); setRegShowsFf(!regShowsFf()); paint();
+      });
+    });
     /* A tick repaints the table but MUST NOT close the menu — you come here to
        set several columns, and a chooser that shuts after each one is a chooser
        you reopen six times. */
@@ -8484,6 +8895,45 @@
         paint();
       });
     });
+    /* §630: the company's capability pillars — their menu, the way to the
+       plan, and Add. */
+    document.querySelectorAll("[data-cpmenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        CPMENU = CPMENU === b.dataset.cpmenu ? null : b.dataset.cpmenu;
+        paint();
+      });
+    });
+    /* OPEN IN THE PLAN: the company page, the tab that draws it (§542's
+       `pillarSecKey`, which knows a split box draws capabilities on their own
+       tab) and the rail on its row — the deep link the walk already makes. */
+    document.querySelectorAll("[data-cpopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var u = topAsUnit(), p = capPillarById(b.dataset.cpopen);
+        CPMENU = null;
+        if (!p) { paint(); return; }
+        RAIL[pillarRailKey(u, p)] = pillarRailId(p);
+        placeGo({ d: "group", s: "strategy", c: pillarSecKey(u, p, "plan") });
+        paint();
+      });
+    });
+    /* ADD MAKES THE NEXT ONE IN THE COMPANY'S PLAN, with the plan's own
+       minter (`addPillar`, §48: an id of its own, nothing renumbered), marked
+       a capability so it takes the next C code — and its name cell opens, so
+       the press that made it is followed by the word it is called. */
+    var addcp = document.getElementById("addcappillar");
+    if (addcp) addcp.addEventListener("click", function(){
+      if (!mayEditCapPillars()) return;
+      var it = addPillar(unitLikeWritable("group"));
+      if (!it) return;
+      it.kind = SMPRules.PILLAR_CAP;
+      /* The button lets go of the cursor first: a paint puts the cursor back
+         where it was (`putFocus`), which would take it out of the new name. */
+      addcp.blur();
+      OCELL = { t: "caps", key: it.id, f: "name" }; PICKING = null;
+      fieldSaved();
+      paint();
+    });
     /* ── ARRANGING A SETUP TABLE (§272) ────────────────────────────────
        THE FILTER AND THE SORT GO WITH THE PRESS, and that is not tidiness: a
        search HIDES its rows rather than removing them, so they keep their
@@ -8567,32 +9017,56 @@
        so it repaints on `change` — once, when the picker closes — and the hex
        field on `change` too. A repaint per frame of a drag would rebuild the
        control being dragged, which is §30.1 again. */
+    /* §621: A PICK IS HELD, NOT WRITTEN. It goes into BRAND_PEND and the
+       page keeps its colours until Apply (APPLY_AREAS.brand). Picking the
+       colour that is already stored is no change, so it waits for nothing. */
+    function brandPend(k, v){
+      v = v || null;
+      if (!("reset" in BRAND_PEND) && v === (branding()[k] || null)) delete BRAND_PEND[k];
+      else BRAND_PEND[k] = v;
+      applyChanged("brand");
+    }
     document.querySelectorAll("[data-brand]").forEach(function(inp){
       inp.addEventListener("change", function(){
-        branding()[inp.dataset.brand] = inp.value.toUpperCase();
-        applyBrand(); paint();
+        brandPend(inp.dataset.brand, inp.value.toUpperCase());
       });
     });
     document.querySelectorAll("[data-brandhex]").forEach(function(inp){
       inp.addEventListener("change", function(){
-        var v = inp.value.trim();
+        var v = inp.value.trim(), k = inp.dataset.brandhex;
         /* An unreadable value is refused rather than stored: a half-typed hex
            would blank the colour and look like the platform had lost it. */
-        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
-        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
-        applyBrand(); paint();
+        if (v && !hexRgb(v)) { inp.value = (k in BRAND_PEND ? BRAND_PEND[k] : branding()[k]) || ""; return; }
+        brandPend(k, v ? rgbHex(hexRgb(v)) : null);
       });
     });
     document.querySelectorAll("[data-brandclear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        branding()[b.dataset.brandclear] = null;
-        applyBrand(); paint();
-      });
+      b.addEventListener("click", function(){ brandPend(b.dataset.brandclear, null); });
     });
     document.querySelectorAll("[data-brandreset]").forEach(function(b){
       b.addEventListener("click", function(){
-        GROUP.branding = {};
-        applyBrand(); paint();
+        BRAND_PEND = { reset: true, accent: null, bar: null };
+        applyChanged("brand");
+      });
+    });
+    /* THE ROW UNDER EVERY COLOUR AREA (§621): one set of three buttons for
+       all of them, the area named on the button. */
+    document.querySelectorAll("[data-applygo]").forEach(function(b){
+      b.addEventListener("click", function(){ var a = APPLY_AREAS[b.dataset.applygo]; if (a) a.apply(b); });
+    });
+    document.querySelectorAll("[data-applydrop]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = APPLY_AREAS[b.dataset.applydrop];
+        if (!a) return;
+        a.at = null; a.discard(); leaveClose(); paint();
+      });
+    });
+    document.querySelectorAll("[data-applyundo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.applyundo, a = APPLY_AREAS[k];
+        if (!a) return;
+        a.undo(); paint();
+        askSaved(function(){ var r = document.querySelector('[data-applyrow="' + k + '"]'); return r; }, true);
       });
     });
 
@@ -9526,6 +10000,28 @@
           paint();
         });
       });
+      /* §630: a capability that is a pillar of the company's plan, written
+         where the plan writes it — the pillar itself, found by its id (§48),
+         and saved as the plan's pen saves (§71.2). An owner cleared is "",
+         as the plan's pen writes it; a custodian cleared loses its key
+         (§50.6), as the plan's pen does too. */
+      root.querySelectorAll("input[data-cpname]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var p = capPillarById(inp.dataset.cpname);
+          if (!p || !mayEditCapPillars()) return;
+          p.name = inp.value;
+          fieldSaved();
+        });
+      });
+      root.querySelectorAll("select[data-cpseat]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var a = sel.dataset.cpseat.split("|"), p = capPillarById(a[0]);
+          if (!p || !mayEditCapPillars()) return;
+          if (a[1] === "owner") p.owner = sel.value;
+          else if (sel.value) p.custodian = sel.value; else delete p.custodian;
+          fieldSaved();
+        });
+      });
       root.querySelectorAll("input[data-coname]").forEach(function(inp){
         inp.addEventListener("change", function(){
           var co = COMPANIES[inp.dataset.coname];
@@ -10393,11 +10889,56 @@
     /* §478: a unit's Core Values — add and remove, re-asked on the click
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
+       may, from the stored state at press time — never from the drawn one.
+       §603: PAST THE TOP LAYER AND A COMPANY (§611, below), THE LIST IS A
+       STORED UNIT'S, so that is the only other place either handler writes.
+       `unitLikeWritable()` would also hand back a capability's or a
+       function's view, rebuilt on every draw, where a value would be lost.
+       No page draws this box for either (they take the functions' Overview);
+       the type check found the door (§602) and this closes it. */
+    /* §611: and the top layer's and a company's, which draw the same list
+       (valuesEditList). Theirs is the group's own strategy, so the press is
+       re-asked exactly as a Who-we-are line's is, and there is no gap mark. */
+    var topValuesOf = function(t){
+      var tr = boxRef(t);
+      if (t !== "group" && tr.kind !== "mid") return null;
+      if (!mayAuthor(foundKeyFor(t), null)) return false;
+      var o = t === "group" ? GROUP : coFoundWritable(tr.key);
+      if (!Array.isArray(o.values)) o.values = [];
+      return o;
+    };
+    /* §611.1: the top layer's themes, on its Foundation. Re-asked on the press
+       as every Foundation write is (§48.2); a theme a pillar carries is never
+       removed, asked of the stored state at press time, never the drawn one.
+       A new theme's code is one no other theme holds, so two adds in a row
+       cannot leave two rows answering to one code. */
+    document.querySelectorAll("[data-themeadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayAuthor(foundKeyFor("group"), null)) return;
+        if (!Array.isArray(GROUP.themes)) GROUP.themes = [];
+        var held = GROUP.themes.map(function(t){ return t.ab; });
+        var ab = "NEW", n = 1;
+        while (held.indexOf(ab) >= 0) ab = "NEW" + (++n);
+        GROUP.themes.push({ ab:ab, name:"New " + labelWord("theme","group"), note:"" });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-themerm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayAuthor(foundKeyFor("group"), null)) return;
+        var i = +b.dataset.themerm, t = (GROUP.themes || [])[i];
+        if (!t || pillarsUsingTheme(t.ab)) return;
+        GROUP.themes.splice(i, 1);
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        var o = unitLikeWritable(t);
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) { top.values.push({ name: "", def: "" }); fieldSaved(); paint(); return; }
+        var o = UNITS[t];
         if (!o) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -10410,7 +10951,13 @@
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        var o = unitLikeWritable(t);
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) {
+          if (!top.values[i]) return;
+          top.values.splice(i, 1); fieldSaved(); paint(); return;
+        }
+        var o = UNITS[t];
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -12714,6 +13261,10 @@
     if (typeof COMENU !== "undefined" && COMENU !== null &&
         !(e.target.closest && e.target.closest(".kmenu, [data-comenu]"))) {
       COMENU = null; paint();
+    }
+    if (typeof CPMENU !== "undefined" && CPMENU !== null &&
+        !(e.target.closest && e.target.closest(".kmenu, [data-cpmenu]"))) {
+      CPMENU = null; paint();
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */

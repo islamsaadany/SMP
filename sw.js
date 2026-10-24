@@ -557,7 +557,104 @@
    score on the group and on a division. The built file's bytes changed,
    which is the whole trigger (§91). Proved held by no commit in any ref's
    history after fetching every ref (§94.16). */
-const SHELL = "smp-shell-v6.88-functions-row";
+/* v6.89-week-sweep — §588.2: the numbered saves are kept for a week, and a
+   tab older than the list takes the graph once. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+/* v6.92-brand-wired — §600: the colour controls on Client set-up's first
+   step stay wired when the client's record lands. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+/* v6.93-left-column — §601: the console's tabs in a column on the left.
+   The console page and its script changed (§584's precedent: a served
+   file's bytes are the trigger). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v6.95-slide-widths — §604: every slide table's columns as wide as what they
+   hold. The built file's bytes changed, which is the whole trigger (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v6.96-modules-look — §605 with §544.16: Insights, Meeting Notes and
+   Portfolio's projects in the Tracker's look, and the client set-up's
+   comment that said seven steps. The built file's bytes changed, which is
+   the whole trigger (§91). Proved held by no commit in any ref's history
+   after fetching every ref (§94.16). */
+/* v6.98-strip-stays — §609: on a squeezed window the strip of directions
+   stays and the title goes. v6.97 is held twice on other branches, so this
+   skips it. The built file's bytes changed, which is the whole trigger
+   (§91). Proved held by no commit in any ref's history after fetching every
+   ref (§94.16). */
+/* v6.99-score-cards-hero — §610: the pillar pane's score cards lead with the
+   score and the rail opens one gap under the chrome. Numbered v6.97 on the
+   branch; main took v6.98 while it waited. The built file's bytes changed
+   (§91). Proved held by no commit in any ref's history (§94.16). */
+/* v7.00-company-reading — §595, §606, §607 and §608: one seat rule for the
+   company's own plan, the functions' row without units, the company's
+   execution card beside its directions, and How we compete as a setting on
+   functions. The built file's bytes changed (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.01-foundation-themes — §611 and §611.1: the company's Core Values can
+   be added, its Capabilities section stands before the first one, its themes
+   are written on the Foundation and the Temple only shows. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.02-capability-parts — §602 and §603: the review and the plan described
+   for the page check; a capability offered only what its Structure card
+   offers; one answer for the quarter a cycle ends in. The built file's bytes
+   changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.03-theme-notes — §613: a theme's note runs to several lines. The built
+   file's bytes changed (§91). Proved held by no commit in any ref's history
+   (§94.16). */
+/* v7.05-cards-overview-slides — §616: the unit Overview's cards and the
+   direction slide's "where it stands" read like §610's cards. Numbered v7.01
+   on the branch; main took v7.01–v7.04 while it waited. The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history (§94.16). */
+/* v7.06-strip-card — §618: the squeezed strip is its own card, a navy
+   outline and the gutter kept under it. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v7.07-checks-cleared — §619: the checks already red on live cleared, the
+   Presentation button on white, the month/quarter switch held the platform's
+   way, and the Setup menu line "Planning & reporting". The built file's
+   bytes changed (§91). Proved held by no commit in any ref's history after
+   fetching every ref (§94.16). */
+/* v7.08-instant-moves — §620: every press shows something at once; the
+   files a page waits on carry their hash and are cached for good. The served
+   files' bytes changed, which is the whole trigger (§91). Proved held by no
+   commit in any ref's history after fetching every ref (§94.16). */
+/* v7.09-ask-and-apply — §621: a floating box asks first with the impact;
+   colours and scoring bands wait for Apply with an Undo; End in Mind has its
+   own tick; the Terminology page is gone. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v7.10-client-group — §624: the client's own pages are the rail's first
+   group (Profile in three tabs, The shape), the Official BU list joins The
+   organisation, Capabilities and the Caps column only where they list
+   something, and a client's old word shows in its box. The built file's
+   bytes changed, which is the whole trigger (§91). Proved held by no commit
+   in any ref's history after fetching every ref (§94.16). */
+/* v7.11-capability-owner — §625 and §626: the company's own data described
+   for the page check; the Copilot's Directions chat sets a capability's
+   Owner, a person, never a function. The built file's bytes changed (§91).
+   Proved held by no commit in any ref's history after fetching every ref
+   (§94.16). */
+/* v7.12-client-icon — §629: the register is the Client register and lists
+   the client's own people, Forefront's consultants one switch away; a client
+   may carry its own icon for Home's small squares. The built file's bytes
+   changed, which is the whole trigger (§91). Proved held by no commit in any
+   ref's history after fetching every ref (§94.16). */
+/* v7.13-org-cells — §630: Business units, Functions and Divisions open a
+   cell on a double-click, and Setup › Capabilities is the company plan's
+   own table where capabilities are pillars. The built file's bytes changed,
+   which is the whole trigger (§91). Proved held by no commit in any ref's
+   history after fetching every ref (§94.16). */
+/* v7.14-platform-80 — §631: the client platform is drawn at 80% on a
+   computer, as the console is, and Business units' Plans in never spills.
+   The built file's bytes changed, which is the whole trigger (§91). Proved
+   held by no commit in any ref's history after fetching every ref (§94.16). */
+/* §629–§631 were numbered v7.11–v7.13 on the branch; main took v7.11 for
+   §625–§626 while they waited, so they are v7.12–v7.14 here. */
+const SHELL = "smp-shell-v7.14-platform-80";
 const ASSETS = [
   "/",
   "/index.html",

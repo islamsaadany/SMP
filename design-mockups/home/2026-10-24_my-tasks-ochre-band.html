@@ -1,0 +1,125 @@
+<title>My Tasks Ochre Band</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* My tasks' top band in ochre instead of navy, three ways, beside today's.
+   Tokens are the console's (platform.html); the band's text is measured
+   against its fill (Forefront's amber carries #231500 at 9.04:1). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;--amber-line:#EBCF8F;
+  --ochre:#C98A1B;--ochre-deep:#9C5D08;
+  --bad:#B23025;--good:#1B6E4E;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--amber-line:#5A4718;--bad:#E8776B;--good:#63BE96;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--amber-line:#5A4718;--bad:#E8776B;--good:#63BE96;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+.doc{max-width:1200px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:86ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:0 0 20px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.opt{margin:0 0 30px}
+.lab{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.lab .rec{font-size:10px;letter-spacing:.08em;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 8px}
+.why{margin:8px 0 0;font-size:13px;color:var(--ink-2);max-width:90ch}
+.frame{border:1px solid var(--line);border-radius:12px;background:var(--ground);box-shadow:var(--frame-shadow);padding:16px 18px 10px;container-type:inline-size}
+
+/* the band, as live (navy) */
+.mast{border-radius:12px;padding:12px 18px 14px;margin:0 0 12px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px}
+.mast h1{margin:0;font-size:21px;font-weight:600;line-height:1.15}
+.strip{display:flex;gap:20px;font-variant-numeric:tabular-nums}
+.strip div{text-align:right}
+.strip b{display:block;font-size:19px;line-height:1}
+.strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-top:3px;white-space:nowrap}
+.navy{background:var(--ff);color:var(--ff-ink);box-shadow:inset 0 -3px 0 var(--amber)}
+.navy .wk{color:var(--amber)} .navy .strip span{color:var(--ff-quiet)} .navy .lt b{color:var(--ff-late)}
+/* A: ochre fill, dark ink */
+.ochre{background:var(--amber);color:var(--amber-ink);box-shadow:inset 0 -3px 0 rgba(35,21,0,.28)}
+.ochre .wk{color:#5A3500} .ochre .strip span{color:#5A3500}
+.ochre .lt b{color:var(--amber-ink)} .ochre .lt b::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#B23025;margin-left:5px;vertical-align:5px;box-shadow:0 0 0 2px rgba(255,255,255,.55)}
+/* B: deep ochre, white ink */
+.deep{background:linear-gradient(160deg,#B4730F,#8F5306);color:#FFFFFF;box-shadow:inset 0 -3px 0 var(--ff)}
+.deep .wk{color:#FFE2A8} .deep .strip span{color:#FBE3B5} .deep .lt b{color:#FFD0C9}
+/* C: ochre wash, ochre rule, the page's ink */
+.wash{background:var(--amber-wash);color:var(--ink);border:1px solid var(--amber-line);box-shadow:inset 4px 0 0 var(--amber)}
+.wash .wk{color:var(--amber-tx)} .wash .strip span{color:var(--ink-3)} .wash .lt b{color:var(--bad)}
+
+/* the rows under it, as live */
+.bar{display:flex;align-items:center;gap:6px;margin:0 0 10px;font-size:12px;color:var(--ink-3)}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sw span.on{background:var(--surface);color:var(--ink)}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 7px;border-bottom:2px solid var(--ink)}
+.sh .ix{font-size:12px;font-weight:600;color:var(--amber-tx)}
+.sh h2{margin:0;font-size:15.5px;font-weight:600}
+.sh .meta{font-size:13px;color:var(--ink-3)}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) 120px 90px 120px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.row.late .tick{border-color:var(--bad)}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.when{font-size:13px;color:var(--ink-2)} .row.late .when{color:var(--bad);font-weight:600}
+.st{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.st.p{color:var(--amber-tx)}
+@container (max-width:640px){ .row{grid-template-columns:20px minmax(0,1fr) auto} .row .pill,.row .st{display:none} .strip{gap:12px} }
+</style>
+
+<div class="doc">
+  <h1>My tasks: the top band in ochre</h1>
+  <p class="lede">Today's navy band first, then three ochre ones. Everything under the band stays as it is. I read "OKR" as <b>ochre</b>, the console's gold; if you meant something else, tell me and I will redraw it.</p>
+  <span class="flag">A drawing · nothing is built · the tasks are invented</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+
+  <div id="opts"></div>
+</div>
+
+<script>
+(function(){
+  var OPTS = [
+    {cls:"navy", lab:"Today · navy", why:"As live: the Tracker's navy band with the amber week line and an amber rule under it."},
+    {cls:"ochre", lab:"A · Ochre", rec:true, why:"Forefront's amber as the fill, the words in its dark brown (9:1, easy to read). The late count keeps its number in the band's ink with a red dot beside it, because red text on amber would be hard to read. Bright, and clearly not the Tracker's look."},
+    {cls:"deep", lab:"B · Deep ochre", why:"A darker, burnt ochre with white words and a navy rule under it. Calmer than A and closest to today's weight, at the cost of a colour the console does not use anywhere else."},
+    {cls:"wash", lab:"C · Ochre wash", why:"A pale ochre panel with an amber bar on its left, in the page's own ink; the late count in red. The quietest: the band reads as part of the page rather than a header."}
+  ];
+  var ROWS = [
+    {t:"Send the Q3 scorecard to the Head of Strategy", c:"Raya Trade", w:"Late 1 w", s:"In progress", late:1},
+    {t:"Chase the plant managers' Q3 figures", c:"ElAbd", w:"Late 2 d", s:"Not started", late:1},
+    {t:"Prepare the plant managers' scoring session", c:"ElAbd", w:"Thu 29 Oct", s:"Not started"}
+  ];
+  function band(cls){
+    return '<div class="mast ' + cls + '"><div><p class="wk">This week · 26 Oct – 30 Oct</p><h1>My tasks</h1></div>' +
+      '<div class="strip"><div><b>8</b><span>Open actions</span></div><div class="lt"><b>2</b><span>Late</span></div><div><b>4</b><span>Due this week</span></div><div><b>4</b><span>Clients</span></div></div></div>';
+  }
+  function body(){
+    return '<div class="bar">Sort by <span class="sw"><span class="on">Date</span><span>Client</span></span></div>' +
+      '<div class="sh"><span class="ix">01</span><h2>Late</h2><span class="meta">2 open</span></div>' +
+      ROWS.map(function(r){ return '<div class="row' + (r.late ? ' late' : '') + '"><span class="tick"></span><span>' + r.t + '</span><span class="pill">' + r.c + '</span><span class="when">' + r.w + '</span><span class="st' + (/progress/.test(r.s) ? ' p' : '') + '">— ' + r.s + '</span></div>'; }).join("");
+  }
+  document.getElementById("opts").innerHTML = OPTS.map(function(o){
+    return '<section class="opt"><p class="lab">' + o.lab + (o.rec ? ' <span class="rec">my pick</span>' : '') + '</p><div class="frame">' + band(o.cls) + body() + '</div><p class="why">' + o.why + '</p></section>';
+  }).join("");
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.getAttribute("data-v")); press(b.getAttribute("data-v")); }); });
+  press(document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+})();
+</script>

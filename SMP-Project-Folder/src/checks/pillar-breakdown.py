@@ -181,10 +181,14 @@ with sync_playwright() as pw:
          that scrolls contains everything by definition, so measuring against
          `bx.getBoundingClientRect().right` passes on the very build this
          section exists to catch (§113.8). */
-      const seen = bx.getBoundingClientRect().left + bx.clientWidth;
+      /* §631: the page is drawn at 80% on a computer — a box's place is in the
+         window's pixels and its clientWidth and --tw in the page's, so each
+         is put in one unit before they meet. */
+      const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      const seen = bx.getBoundingClientRect().left + bx.clientWidth * z;
       return { over: Math.round(bx.scrollWidth - bx.clientWidth),
                box: Math.round(bx.clientWidth),
-               sel: sel ? Math.round(sel.getBoundingClientRect().width) : 0,
+               sel: sel ? Math.round(sel.getBoundingClientRect().width / z) : 0,
                tw: Math.round(parseFloat(getComputedStyle(t)
                      .getPropertyValue('--tw')) || 0),
                xIn: !!(x && x.getBoundingClientRect().right <= seen + 1) };

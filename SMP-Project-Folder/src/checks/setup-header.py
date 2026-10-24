@@ -138,7 +138,13 @@ with sync_playwright() as p:
     flat = [c for v in chips.values() for c in v]
     ck("no `SMO` pill survives anywhere", not any(c.strip() in ("SMO", "SMO only", "Everyone")
                                                   for c in flat), flat)
-    ck("no chip is a bare count", not any(c[:1].isdigit() and "not on this list" not in c
+    # §135.1 kept TWO alarms, not one: the register's "N not on this list"
+    # and the capabilities page's "N with no owner" (drawn only while a
+    # capability has no owner — the demo's one capability has none since its
+    # holding function went, §544.13). An alarm names its condition; a bare
+    # count ("8 capabilities") names nothing, and is still refused.
+    ALARMS = ("not on this list", "with no owner")
+    ck("no chip is a bare count", not any(c[:1].isdigit() and not any(a in c for a in ALARMS)
                                           for c in flat), flat)
     # AND THE ALARM STILL WORKS. The demo has no stray name, so the state is
     # MADE — otherwise this ships unexercised (§94.2).
@@ -191,7 +197,11 @@ with sync_playwright() as p:
     # this section measured an unscrolled page three times and reported the
     # broken build clean. A short window is what gives it something to scroll,
     # and the scroll is asserted before anything is read off it.
-    pg.set_viewport_size({"width": 1400, "height": 560})
+    # §631: SHORTER, because the page is drawn at 80% on a computer and at 560
+    # the matrix nearly fits — 52px of room, too little to stand at 60 and
+    # 140. The state this measures has to exist (§255), so the window is
+    # made short enough for it.
+    pg.set_viewport_size({"width": 1400, "height": 460})
     go(pg, "access")
     # ── THE BOX IS WHAT SCROLLS NOW (§174.1) ─────────────────────────
     # This section scrolled the PAGE, which was the only thing that moved when
@@ -515,7 +525,9 @@ with sync_playwright() as p:
     for k in ("focusset", "units"):
         go(pg, k)
         m = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
-          return {h:Math.round(h.getBoundingClientRect().height),
+          /* §631: in the page's own pixels — the page is drawn at 80% */
+          return {h:Math.round(h.getBoundingClientRect().height /
+                    (parseFloat(getComputedStyle(document.documentElement).zoom)||1)),
                   v:getComputedStyle(document.documentElement)
                       .getPropertyValue('--sethead-h').trim(),
                   readers:[...document.styleSheets].reduce((n,ss)=>{

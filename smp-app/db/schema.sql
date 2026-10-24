@@ -24,6 +24,7 @@ CREATE TABLE tenants (
   kind        text NOT NULL DEFAULT 'client',
   status      text NOT NULL DEFAULT 'active',
   mark        text,                            -- PNG data URI only (§52)
+  icon        text,                            -- §629: the small square on Home; NULL = use the mark
   colors      jsonb NOT NULL DEFAULT '{}'::jsonb,
   industry    text NOT NULL DEFAULT '',       -- the standard GICS list (§322)
   size        text NOT NULL DEFAULT '',       -- a band, never a headcount (§322)
@@ -33,6 +34,11 @@ CREATE TABLE tenants (
   -- NULL on a live client, and cleared again when one is brought back.
   archived_at timestamptz,
   archived_by text,                            -- the account's email, printed
+  -- A PAST CLIENT (spec 067 §7): added only so its case studies can name it.
+  -- Created already retired, with no graph and no people, so its door is
+  -- closed and there is nothing behind it to bring back — which is why it
+  -- is a column and not a guess from an empty graph (§35).
+  past        boolean NOT NULL DEFAULT false,
   -- WHICH MODULES THIS CLIENT HAS (spec 046 §4.5). The whole list, in the
   -- client's own words, read back through lib/modules.ts modulesFor() —
   -- which drops a word the code no longer knows and always returns the
@@ -142,6 +148,58 @@ CREATE TABLE push_keys (
 );
 
 -- ── The consulting memory (spec 044) ───────────────────────────────────
+-- ── Case studies (spec 067) ─────────────────────────────────────────────
+-- One row per PIECE OF WORK for a client (decision 4), opened when the work
+-- starts so insights land in it as they are written (§10, answer 1), and
+-- written up at the end. Forefront's own and read across clients, for the
+-- memory's whole reason — so `about_tenant_id`, never `tenant_id`, and on
+-- the exclusion list below: the loop would otherwise give it a policy that
+-- hides every other client's case study from the consultant reading it.
+--
+-- THE STATE IS ONE WORD: running → writing → done. A writer and a due date
+-- are what `writing` means, and `done` is what puts it on the shelves; a
+-- draft is read by its writer and the admins only (decision 10), which the
+-- endpoint enforces and the row merely records.
+--
+-- THE LISTS ARE jsonb ON THE ROW, NOT TABLES OF THEIR OWN: the team, the
+-- stages, the deliverables and who to ask are read and written whole, with
+-- the case study, by one person at a time — four join tables would be
+-- machinery for a shape nobody queries across (rule 2b). A deliverable's
+-- file is {path, name, bytes}, the path built by the server and never sent.
+--
+-- RESTRICT on the client and on the people, like the memory: a case study
+-- outlives the engagement and stays attributed to whoever wrote it.
+CREATE TABLE case_studies (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  about_tenant_id uuid NOT NULL REFERENCES tenants (id) ON DELETE RESTRICT,
+  name            text NOT NULL,
+  started         text NOT NULL DEFAULT '',     -- 'YYYY-MM'; '' is unknown
+  ended           text NOT NULL DEFAULT '',     -- '' while the work runs
+  state           text NOT NULL DEFAULT 'running',
+  opened_by       uuid NOT NULL REFERENCES users (id) ON DELETE RESTRICT,
+  writer_id       uuid REFERENCES users (id) ON DELETE RESTRICT,
+  asked_by        uuid REFERENCES users (id) ON DELETE SET NULL,
+  due             date,
+  in_short        text NOT NULL DEFAULT '',
+  client_why      text NOT NULL DEFAULT '',
+  asked_to_do     text NOT NULL DEFAULT '',
+  came_of_it      text NOT NULL DEFAULT '',
+  our_team        jsonb NOT NULL DEFAULT '[]'::jsonb,   -- [{id, role}]
+  their_team      jsonb NOT NULL DEFAULT '[]'::jsonb,   -- [{name, role}]
+  stages          jsonb NOT NULL DEFAULT '[]'::jsonb,   -- [{when, what}]
+  deliverables    jsonb NOT NULL DEFAULT '[]'::jsonb,   -- [{id, name, what, month, file}]
+  who_to_ask      jsonb NOT NULL DEFAULT '[]'::jsonb,   -- [{name, about}]
+  done_at         timestamptz,
+  done_by         uuid REFERENCES users (id) ON DELETE SET NULL,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT case_state CHECK (state IN ('running','writing','done')),
+  CONSTRAINT case_name CHECK (btrim(name) <> ''),
+  CONSTRAINT case_writing_has_writer CHECK (state = 'running' OR writer_id IS NOT NULL)
+);
+CREATE INDEX case_about ON case_studies (about_tenant_id);
+CREATE INDEX case_writer ON case_studies (writer_id) WHERE state = 'writing';
+
 -- FOREFRONT'S, NOT A CLIENT'S, AND THAT IS THE WHOLE DESIGN. Specs 042 and
 -- 043 exist to stop one client's data reaching another; this is deliberately
 -- the opposite — an insight from Raya Trade is worth having BECAUSE it helps
@@ -186,6 +244,11 @@ CREATE TABLE memory_entries (
   -- the two are weeks apart. Free text, written by the debrief and typed by
   -- nobody; absent is '' and nothing derives it (§35).
   occurred        text NOT NULL DEFAULT '',
+  -- WHICH PIECE OF WORK IT CAME FROM (spec 067 §5). Optional: a title and a
+  -- client are still enough to save, and an insight with none waits under
+  -- its client until somebody places it. SET NULL, so a piece of work
+  -- removed never takes the insights with it.
+  case_id         uuid REFERENCES case_studies (id) ON DELETE SET NULL,
   created_at      timestamptz NOT NULL DEFAULT now(),
   updated_at      timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT memory_kind CHECK (kind IN ('practice','hiccup','lesson')),
@@ -193,6 +256,7 @@ CREATE TABLE memory_entries (
 );
 CREATE INDEX memory_about ON memory_entries (about_tenant_id, created_at DESC);
 CREATE INDEX memory_author ON memory_entries (author_id);
+CREATE INDEX memory_case ON memory_entries (case_id);
 
 -- ── The strategy frameworks library (spec 052) ──────────────────────────
 -- Forefront's own, and the one platform table that names no client at all:
@@ -1570,7 +1634,7 @@ BEGIN
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = current_schema() AND c.relkind = 'r'
       AND c.relname NOT IN ('tenants','users','tenant_users','sessions','login_attempts',
-                            'platform_access','tenant_log','push_keys','memory_entries',
+                            'platform_access','tenant_log','push_keys','memory_entries','case_studies',
                             'frameworks','copilot_assets','_migrations')
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);

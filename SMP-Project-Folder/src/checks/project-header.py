@@ -208,12 +208,18 @@ with sync_playwright() as pw:
                  point of the control (§130.1) — so the value is added if the
                  register does not carry it, exactly as a stored name outside
                  the list is (§96.2). */
-              if (el.tagName === "SELECT" &&
-                  ![...el.options].some(o => o.value === typed)) {
-                const o = document.createElement("option");
-                o.textContent = typed; el.appendChild(o);
-              }
-              el.value = typed;
+              /* §551.3: Stakeholders became a MULTIPLE select over the
+                 owners' list, so each name is one option, picked — never one
+                 option carrying the whole typed line. */
+              const names = el.multiple ? typed.split(/\s*,\s*/) : [typed];
+              if (el.tagName === "SELECT") names.forEach(n => {
+                if (![...el.options].some(o => o.value === n)) {
+                  const o = document.createElement("option");
+                  o.textContent = n; el.appendChild(o);
+                }
+              });
+              if (el.multiple) [...el.options].forEach(o => { o.selected = names.indexOf(o.value) >= 0; });
+              else el.value = typed;
               el.dispatchEvent(new Event('change', { bubbles: true }));
             }""", [label, typed])
             pg.wait_for_timeout(320)

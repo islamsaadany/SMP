@@ -18,7 +18,7 @@
           color:var(--ink); background:var(--surface); border:1px solid var(--line);
           border-radius:var(--r-sm, 6px); padding:4px 10px; cursor:pointer; }
 .copnew:hover, .copnew:focus-visible { border-color:var(--gold); outline:none; }
-.coplist { display:flex; flex-direction:column; max-height:42vh; overflow-y:auto; }
+.coplist { display:flex; flex-direction:column; max-height:calc(var(--winh) * 0.42); overflow-y:auto; }
 .copitem { display:flex; flex-direction:column; gap:2px; text-align:left; width:100%;
            background:transparent; border:0; border-bottom:1px solid var(--line);
            padding:9px 12px; cursor:pointer; font:inherit; color:var(--ink); }
@@ -48,7 +48,7 @@
 .copask { background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
           padding:10px 12px; margin-bottom:10px; font-size:var(--fs-note, 13.5px); color:var(--ink);
           display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;
+.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:calc(var(--winh) * 0.52); overflow-y:auto;
            padding:4px 2px 10px; }
 /* §470: the conversation's text size. CSS zoom on a wrapper INSIDE the
    scrolling box, so the box keeps its own height and only what is in it
@@ -152,7 +152,7 @@
      that already fitted — the window moved and the chat did not. A page sized
      to the window takes the small foot, as Setup's does (§167). */
   .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
-  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
+  .coppane { height:calc(var(--wind) - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
   .coprails { min-height:0; }
   .coprail { display:flex; flex-direction:column; min-height:0; }
   .coprail.copchats { flex:1 1 auto; }

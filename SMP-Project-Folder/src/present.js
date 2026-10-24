@@ -18,6 +18,32 @@ var DECK = { i:0, slides:[], root:null, flow:null, stops:null, title:"", from:"p
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
 
+/* ── A HIDDEN ROW STAYS ON THE SLIDE, AND SAYS SO (§597) ────────────────
+   Islam, 2026-10-23: *"we need to keep them on the slides showing that they
+   are removed so the presenter can validate the removal."* §233 left a
+   hidden row out of the deck; it is KEPT now, in its own seat with its own
+   number, greyed, wearing the plan page's chip — so the room sees what was
+   set aside and why (the note beside it), and the score above it is still
+   the average of the counted rows alone. Always on, every deck.
+
+   THE SCORE IS UNTOUCHED BY CONSTRUCTION: every reader that averages, asks
+   or counts still goes through `SMPRules.shown()`; only the three drawing
+   helpers below read the whole list. `deckRows` is the list a TABLE draws,
+   `deckTr` opens a row with the mark (and any class the caller already
+   had), and `deckStamp` puts the mark on a row a builder opened bare. The
+   chip is `hidChip()`, the plan page's own (§53.5 — one word for one
+   state). The overview slide's five-name preview keeps `shown()`: it is a
+   preview of what counts, not a table a presenter defends. */
+function deckRows(list){ return list || []; }
+function deckTr(row, cls){
+  var c = (cls || "") + (SMPRules.isHidden(row) ? " hiddenrow" : "");
+  c = c.trim();
+  return c ? '<tr class="' + c + '">' : '<tr>';
+}
+function deckStamp(row, html){
+  return SMPRules.isHidden(row) ? html.replace("<tr>", '<tr class="hiddenrow">') : html;
+}
+
 /* ── WHERE A PICTURE SLIDE CAN GO (§50.3) ─────────────────────────────────
    An anchor is a NAMED POINT IN THIS DECK, written on the slide it names and
    carrying its own label. The position picker is built by generating the deck
@@ -234,9 +260,9 @@ function unitAimSlides(u, bare){
      objectives are the group's Foundation, shown on its own tab, and its
      unit-shaped view holds neither (topAsUnit). */
   var aimAsp = !fnAim && !u.topLayer && compOn(u.ukey, "aspiration"), aimKo = !u.topLayer && compOn(u.ukey, "keyobj");
-  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var aimRows = !aimKo ? "" : deckRows(u.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       (aimNear
         ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
         : '') +
@@ -265,7 +291,7 @@ function unitAimSlides(u, bare){
     (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + (u.aspiration || !DECK_PLAN ? esc(u.aspiration) : PLAN_MISS) + '</p></div>' +
-      (u.endInMind
+      (u.endInMind && eimOn(u.ukey)
         ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
     (aimRows
@@ -407,8 +433,9 @@ function swotPart(target, name, slides){
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
    table with no rows is not a slide). The same table as the page. */
+/* §608: a function's too, once the office ticks the section on. */
 function competeSlides(u){
-  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  if (!u || !compOn(u.ukey, SMPRules.COMPETE)) return [];
   var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
     return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
   if (!c.discipline && !vals.length) return [];
@@ -472,24 +499,36 @@ function standDetail(rows, note){
     (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
     (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
 }
+/* §616: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
+   the slides"*, of §610). The headline was already the slide; what follows it
+   gets quieter: a line's figure keeps its band colour only when it is out of
+   the top band (`hdFig`), so colour under the number means something to look
+   at. And the measures that have not reported are SAID — the subtitle counts
+   six and the list showed four, with nothing on the slide saying where the
+   other two went. The execution side already said its own (§578). */
+function hdFig(v, txt){
+  return '<span class="hdf ' + dBand(v) + (v != null && band(v) === band(100) ? ' quiet' : '') + '">' + txt + '</span>';
+}
 function dirMeasureDetail(p){
-  var rows = scorableMeasures(p).map(function(m){
+  var scorable = scorableMeasures(p);
+  var rows = scorable.map(function(m){
     var v = measureScore(m);
-    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+    return { name:m.name, fig:hdFig(v, dPct(v)) };
   });
   if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
     var v = bdColScore(p, c);
     if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
-                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+                               fig:hdFig(v, dPct(v)) });
   });
-  return standDetail(rows, "");
+  var unrep = SMPRules.shown(p.measures || []).length - scorable.length;
+  return standDetail(rows, unrep > 0 ? unrep + " not reported yet" : "");
 }
 function dirExecDetail(p){
   var rep = reportedTactics(p), due = dueTactics(p);
   var rows = rep.map(function(t){
     var r = tacticProgress(t);
     return { name:t.name,
-             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+             fig:hdFig(r, dPct(Math.round(tacticReads(t)))) +
                  '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
   });
   var notDue = SMPRules.shown(p.tactics || []).length - due.length;
@@ -911,9 +950,9 @@ function deckSlides(u){
      the column, *"it's called annual target"* — which is Performance's own
      word since §239.2, so the projector and the page behind it stop using two
      names for one number. */
-  var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var oRows = deckRows(u.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : "&mdash;") + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
@@ -1251,10 +1290,10 @@ function pillarSlidesOf(u, p, pi, named){
       '</div></section>');
   }
 
-  var mRows = SMPRules.shown(p.measures).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
+  var mRows = deckRows(p.measures).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
       /* §572: the name bold and the Progress larger (Islam, on Option B). */
-      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="lead strong">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final dprog ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
@@ -1299,8 +1338,8 @@ function pillarSlidesOf(u, p, pi, named){
      (§564) keeps its one target column. */
   var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
   var bdRows = !bdShow ? "" :
-    SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
-      return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+    deckRows(SMPRules.bdRows(p)).map(function(r, ri){
+      return deckTr(r) + '<td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + hidChip(r) + '</td>' +
         bdCols.map(function(c){
           var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
           /* §564: the plan carries the target alone. */
@@ -1355,12 +1394,19 @@ function pillarSlidesOf(u, p, pi, named){
      A ROW THAT IS OWED A FIGURE SAYS SO. It printed the same em-dash as an
      unmeasurable row, so a review could not tell "nobody has entered this"
      from "there is nothing to enter" (§35). */
-  var tRows = SMPRules.shown(p.tactics).map(function(t, i){
+  var tRows = deckRows(p.tactics).map(function(t, i){
+    /* §597: a hidden tactic's first line opens with the mark; its outcome
+       lines already take it through outSubCls(). The builders below all
+       open their first line with a bare `<tr>`, so it is stamped once here
+       rather than at each of the six returns. */
+    return deckStamp(t, tacticRow(t, i));
+  }).join("");
+  function tacticRow(t, i){
     /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
        each outcome takes a line of its own, as on the page behind it. */
     var xs = scoredExtras(t), rs = outRowspan(xs.length);
     var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + '</td>' +
+      '<td class="lead strong"' + rs + '>' + esc(t.name) + planReqs(t) + hidChip(t) + '</td>' +
       '<td class="outc">' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
       (deckColOn("owner") ? '<td' + rs + '>' + (t.owner || !DECK_PLAN ? esc(t.owner) : PLAN_MISS) + '</td>' : '') +
       (deckColOn("collabs") ? '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' : '') +
@@ -1402,7 +1448,7 @@ function pillarSlidesOf(u, p, pi, named){
       '<td class="num"><b>' + figHtml(shown) + '</b>' + dueLine(pair ? figHtml(pair) : "") + '</td>' +
       '<td class="num final dprog ' + dBand(r) + '">' + dPct(r) + '</td>' +
       note + '</tr>';
-  }).join("");
+  }
   if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
     anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
     deckPillarHead(u, p, pi, L("tactic")) +
@@ -1482,11 +1528,11 @@ function companyReviewOn(){
 function companyFoundationSlides(){
   /* §557: what the company's structure switches on, and nothing it does not. */
   var aspOn = compOn("group", "aspiration");
-  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn ? String(GROUP.endInMind || "").trim() : "";
+  var asp = aspOn ? String(GROUP.aspiration || "").trim() : "", end = aspOn && eimOn("group") ? String(GROUP.endInMind || "").trim() : "";
   var kos = !compOn("group", "keyobj") ? [] : SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
   if (!asp && !end && !kos.length) return [];
-  var rows = kos.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+  var rows = (!compOn("group", "keyobj") ? [] : deckRows(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : [])).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
   }).join("");
@@ -1774,6 +1820,7 @@ function deckSlidesFn(subject){
     isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
   var analysis = [];
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (!isCap && !isUnit) analysis = analysis.concat(competeSlides({ ukey: "fn:" + fk }));
   if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
   var plan = projectsPlanPart(target, f, caps, objMode);
 
@@ -1823,9 +1870,9 @@ function deckSlidesFn(subject){
 }
 
 function capKOSlide(c){
-  var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + '</td>' +
+  var kRows = deckRows(c.keyObjectives).map(function(m, i){
+    return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + hidChip(m) + '</td>' +
       '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
       '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
@@ -1894,11 +1941,11 @@ function projectsPlanPart(target, f, caps, objMode){
     if (!c.own && holderHasKOs(c)) S.push(capKOSlide(c));
     if (!planOn(target)) return;
     if (objMode) {
-      var acts = SMPRules.shown(c.actions);
+      var acts = deckRows(c.actions);
       var aRows = acts.map(function(a3, i){
         var v = msReads(a3);
-        return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
-          '<b>' + esc(a3.name) + '</b>' +
+        return deckTr(a3) + '<td class="idx">' + (i+1) + '</td><td class="dirname">' +
+          '<b>' + esc(a3.name) + '</b>' + hidChip(a3) +
           (a3.owner ? '<span class="dsub">' + esc(a3.owner) + '</span>' : '') + '</td>' +
           '<td class="num">' + esc(a3.due || "\u2014") + '</td>' +
           '<td class="num">' + esc(msStatusWord(a3.status) || "\u2014") + '</td>' +
@@ -1999,8 +2046,8 @@ function projectsPlanPart(target, f, caps, objMode){
                        : esc(SMPRules.isYesNo(o.target) ? SMPRules.ynShown(o.actual)
                                                         : String(o.actual)));
         var notDue = !dueThisCycle(dxWhen(row));
-        return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(o.name) + '</td>' +
+        return deckTr(o, notDue ? "dim" : "") + '<td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(o.name) + hidChip(o) + '</td>' +
           '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
           '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
           '<td class="num">' + (d ? "Y/N" : figHtml(o.target || "\u2014")) + '</td>' +
@@ -2009,10 +2056,9 @@ function projectsPlanPart(target, f, caps, objMode){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      /* §233: filtered HERE, never inside dxRows() — the pane's pen
-         shares that builder and the pen shows everything. */
-      var dxRowsHtml = dxRows(p).filter(function(r){
-        return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
+      /* §233 filtered here; §597 keeps every row and marks the hidden ones
+         inside dxRow(), as every other table of the deck now does. */
+      var dxRowsHtml = dxRows(p).map(dxRow).join("");
       /* §236.2: the unit ruling's mirror — between a project's deliverables and
          its milestones is a valid place too, or the two sides drift (§53.5). */
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D"' +
@@ -2024,10 +2070,10 @@ function projectsPlanPart(target, f, caps, objMode){
         '<th class="fig">Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
-      var mRows = SMPRules.shown(p.milestones).map(function(m, i){
+      var mRows = deckRows(p.milestones).map(function(m, i){
         var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(m.name) +
+        return deckTr(m) + '<td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) + hidChip(m) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
           /* §227: the same cell the deck's tactic tables carry (§50). */
@@ -3172,6 +3218,225 @@ function closeDeck(){
   if (toEditor) slidesResume(reached);
 }
 
+/* ── EACH COLUMN AS WIDE AS WHAT IT HOLDS (§604) ──────────────────────
+   Islam, of the tactics slide: *"the outcome column is too narrow can we make
+   things more coherent to the content"*, and of the mockup, *"yes build it
+   and apply to all slides"*.
+
+   The tables were laid out by the browser, with the Note held at a quarter of
+   the slide whatever it said — so on a tactics slide with short notes the
+   Tactic and the Outcome wrapped to three and four lines, and two of six
+   tactics went to a second slide. Now, on every slide table:
+     · a column that cannot usefully wrap — #, quarters, a status pill, a
+       figure, a score — is exactly as wide as its widest entry;
+     · an Owner is as wide as the longest name, while that is short;
+     · the columns of words share the rest by what they are: the row's name
+       and its outcome a third each, the note a little less, collaborators
+       less again — each never narrower than its longest word nor wider than
+       its longest entry on one line; what is left when every one of them
+       fits on one line goes to them by the length of that longest entry.
+       A column nobody filled is as wide as its heading.
+
+   MEASURED, so the slide must be laid out (`.on`, at 1600x900): the widest
+   entry is the column at `width:max-content`, the longest word the column
+   at `width:1px`. The result is written on the header cells with
+   `table-layout:fixed`, and kept on them as `data-fw` for the PowerPoint
+   (`deckColWidths`). Nothing in a cell changes; only the widths. */
+var DECK_FIT_SHARE = { name:32, outcome:32, note:22, collabs:14, text:20 };
+/* Shares of `room` by weight, each between its floor and its cap. A column
+   that would fall under its floor or over its cap is held there and the rest
+   is shared again; what every cap leaves over goes back by the caps.
+   Null when the floors alone do not fit, and the table keeps its own layout. */
+function deckShare(room, cols){
+  var out = cols.map(function(){ return null; }), left = room;
+  var open = function(){ return cols.map(function(c, i){ return i; }).filter(function(i){ return out[i] === null; }); };
+  for (var o = open(); o.length; o = open()) {
+    var sum = o.reduce(function(n, i){ return n + cols[i].w; }, 0);
+    var part = function(i){ return left * cols[i].w / sum; };
+    var under = o.filter(function(i){ return part(i) < cols[i].lo; });
+    var over = under.length ? [] : o.filter(function(i){ return part(i) > cols[i].hi; });
+    if (!under.length && !over.length) {
+      o.forEach(function(i){ out[i] = part(i); });
+      left = 0;
+      break;
+    }
+    under.forEach(function(i){ out[i] = cols[i].lo; });
+    over.forEach(function(i){ out[i] = cols[i].hi; });
+    under.concat(over).forEach(function(i){ left -= out[i]; });
+  }
+  if (left < -0.5) return null;
+  if (left > 0.5) {
+    var all = cols.reduce(function(n, c){ return n + c.hi; }, 0);
+    out = out.map(function(w, i){ return w + left * cols[i].hi / all; });
+  }
+  return out;
+}
+/* What a column holds, read off the first row that has a cell in every
+   column — a tactic's outcome lines borrow cells from the row above. */
+function deckColRole(t, ths){
+  var row = [].filter.call(t.querySelectorAll("tbody tr"), function(tr){
+    return [].reduce.call(tr.children, function(n, td){ return n + (td.colSpan || 1); }, 0) === ths.length;
+  })[0];
+  return ths.map(function(th, i){
+    var td = row ? row.children[i] : null, cls = td ? td.classList : { contains:function(){ return false; } };
+    if (/^owner$/i.test(deckTxt(th))) return "who";
+    return cls.contains("lead") ? "name" : cls.contains("outc") ? "outcome"
+         : cls.contains("dnote") ? "note" : cls.contains("collabs") ? "collabs" : "text";
+  });
+}
+function deckColFit(sl){
+  [].forEach.call(sl.querySelectorAll("table.zebra"), function(t){
+    var ths = [].slice.call(t.querySelectorAll("thead th"));
+    t.style.tableLayout = ""; t.style.width = "";
+    ths.forEach(function(th){ th.style.width = ""; th.removeAttribute("data-fw"); });
+    if (ths.length < 3 || ths.some(function(th){ return th.colSpan > 1; })) return;
+    /* In the slide's own pixels: a presented deck is SCALED to the window, and
+       a box's on-screen size is not the width to write. */
+    var tw = t.offsetWidth;
+    if (!tw) return;
+    var scale = t.getBoundingClientRect().width / tw || 1;
+    var at = function(w){ t.style.width = w; return ths.map(function(th){ return th.offsetWidth; }); };
+    /* a pixel over, because the widths are written whole and a column a
+       fraction short of its widest entry wraps it */
+    var lo = at("1px").map(Math.ceil), hi = at("max-content").map(function(x){ return Math.ceil(x) + 1; });
+    t.style.width = "";
+    var role = deckColRole(t, ths), out = [], words = [], fixed = 0;
+    ths.forEach(function(th, i){
+      /* the `#` and a figure (`.num`, which never wraps) are fixed whatever
+         a squeeze would make of them */
+      var oneLine = th.classList.contains("idx") || th.classList.contains("num") ||
+        hi[i] - lo[i] < 12 || (role[i] === "who" && hi[i] <= tw * 0.16);
+      if (oneLine) { out[i] = hi[i]; fixed += hi[i]; }
+      else words.push({ i:i, w:DECK_FIT_SHARE[role[i] === "who" ? "collabs" : role[i]], lo:lo[i], hi:hi[i],
+                        tied: role[i] === "name" || role[i] === "outcome" });
+    });
+    if (!words.length) return;
+    var share = deckShare(tw - fixed, words);
+    if (!share) return;
+    words.forEach(function(c, k){ out[c.i] = share[k]; });
+    deckColBalance(t, words, out, scale);
+    t.style.tableLayout = "fixed";
+    ths.forEach(function(th, i){
+      th.style.width = Math.floor(out[i]) + "px";
+      th.setAttribute("data-fw", String(Math.round(out[i])));
+    });
+  });
+}
+/* ── AND THEN AS SHORT AS THE WORDS ALLOW ──────────────────────────────
+   The shares are where the columns START: the right answer for a slide whose
+   notes are short, and the wrong one for a slide whose notes are paragraphs —
+   squeezed to a share, a long note stands six lines tall beside a tactic on
+   two. So width is then moved between the columns of words, a step at a
+   time, wherever that makes the table shorter: each row as tall as its
+   tallest cell, a cell's lines counted by setting its words the way the
+   slide does. A move that saves nothing is not made, so a slide whose rows
+   are already as short as they can be keeps its shares. Each column stays
+   between its longest word and its longest entry. */
+function deckColBalance(t, words, out, scale){
+  var cv = deckColBalance.cv || (deckColBalance.cv = document.createElement("canvas").getContext("2d"));
+  var at = {}; words.forEach(function(c, k){ at[c.i] = k; });
+  /* Every body cell in its column, rowspans and colspans taken into account. */
+  var grid = [], rows = [].slice.call(t.querySelectorAll("tbody tr"));
+  var fix = [];
+  var cells = rows.map(function(tr, r){
+    var c = 0, mine = [];
+    fix[r] = 0;
+    grid[r] = grid[r] || [];
+    [].forEach.call(tr.children, function(td){
+      while (grid[r][c]) c++;
+      var rs = td.rowSpan || 1, cs = td.colSpan || 1;
+      for (var y = 0; y < rs; y++) for (var x = 0; x < cs; x++) {
+        grid[r + y] = grid[r + y] || []; grid[r + y][c + x] = 1;
+      }
+      if (cs === 1 && at[c] !== undefined) mine.push({ td:td, k:at[c] });
+      /* a cell that is not words (a pill, a figure, the quarters) is as tall
+         as it is whatever the widths, and the row is never shorter */
+      else if (rs === 1) {
+        var rg = document.createRange(); rg.selectNodeContents(td);
+        fix[r] = Math.max(fix[r], rg.getBoundingClientRect().height / (scale || 1));
+      }
+      c += cs;
+    });
+    return mine;
+  });
+  /* A cell's words at its own size, and how tall a line of them is. */
+  var info = cells.map(function(mine){
+    return mine.map(function(m){
+      var cs = getComputedStyle(m.td);
+      cv.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+      var txt = m.td.textContent.replace(/\s+/g, " ").trim();
+      var lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
+      var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      return { k:m.k, lh:lh, pad:pad, sp:cv.measureText(" ").width,
+               ws:txt ? txt.split(" ").map(function(w){ return cv.measureText(w).width; }) : [] };
+    });
+  });
+  var lines = function(x, w){
+    var room = w - x.pad, n = x.ws.length ? 1 : 0, run = 0;
+    x.ws.forEach(function(ww){
+      if (run && run + x.sp + ww > room) { n++; run = ww; }
+      else run += (run ? x.sp : 0) + ww;
+    });
+    return n;
+  };
+  var height = function(w){
+    return info.reduce(function(sum, row, r){
+      return sum + row.reduce(function(m, x){ return Math.max(m, lines(x, w[x.k]) * x.lh); }, fix[r]);
+    }, 0);
+  };
+  /* The row's name and its outcome move TOGETHER and stay equal, as the
+     mockup Islam approved has them; the note and the collaborators give or
+     take room beside them. */
+  var w = words.map(function(c){ return out[c.i]; });
+  var tied = words.map(function(c, k){ return c.tied ? k : -1; }).filter(function(k){ return k > -1; });
+  var units = words.map(function(c, k){ return c.tied ? null : [k]; }).filter(Boolean);
+  if (tied.length) units.push(tied);
+  var give = function(v, u, d){
+    u.forEach(function(k){ v[k] += d / u.length; });
+    return u.every(function(k){ return v[k] >= words[k].lo && v[k] <= Math.max(words[k].hi, w[k]); });
+  };
+  var best = height(w);
+  [64, 32, 16, 8].forEach(function(step){
+    for (var guard = 0; guard < 60; guard++) {
+      var move = null;
+      units.forEach(function(a){ units.forEach(function(b){
+        if (a === b) return;
+        var v = w.slice();
+        if (!give(v, a, step) || !give(v, b, -step)) return;
+        var h = height(v);
+        if (h < best - 0.5 && (!move || h < move.h)) move = { v:v, h:h };
+      }); });
+      if (!move) break;
+      w = move.v; best = move.h;
+    }
+  });
+  words.forEach(function(c, k){ out[c.i] = w[k]; });
+}
+
+/* The same widths on a deck that is not on the screen — the PowerPoint's, which
+   is built from `deckHtmlFor()` and never laid out. It is laid out here, off
+   screen at the slide's own size, for as long as the measuring takes. */
+function deckColFitBox(box){
+  var host = document.createElement("div");
+  host.className = "slmeasure";
+  host.setAttribute("aria-hidden", "true");
+  host.inert = true;
+  var home = box.parentNode, next = box.nextSibling, wasDeck = box.classList.contains("deck");
+  box.classList.add("deck");
+  host.appendChild(box);
+  document.body.appendChild(host);
+  try {
+    [].forEach.call(box.querySelectorAll(".dslide"), function(s){
+      s.classList.add("on"); deckColFit(s); s.classList.remove("on");
+    });
+  } finally {
+    host.remove();
+    if (!wasDeck) box.classList.remove("deck");
+    if (home) home.insertBefore(box, next);
+  }
+  return box;
+}
+
 /* Squeeze anything that overruns, then split what still does. Run once on
    open, so the deck never reflows while it is being presented.
 
@@ -3192,7 +3457,12 @@ function deckFitPass(deck){
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
-    if (s.scrollHeight > s.clientHeight) s.classList.add("tight");
+    /* §604: the columns are sized to what they hold FIRST, so a table that
+       now fits is not squeezed or split, and sized again at the smaller type
+       of a slide that still does not — before the split below, so a slide
+       and its continuation carry the same widths (the clone takes them). */
+    deckColFit(s);
+    if (s.scrollHeight > s.clientHeight) { s.classList.add("tight"); deckColFit(s); }
     s.classList.remove("on");
   });
   for (var pass = 0; pass < 20; pass++) {
@@ -3909,7 +4179,9 @@ function exampleDirection(){
   for (var k in top) u[k] = top[k];
   u.pillarPrefix = u.pillarCapPrefix = "EX";
   var share = elapsedShare();
-  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  /* §603: where the share cannot be read, the example stands at the quarter
+     the tactics fall back to -- one answer, not a Q2 of its own. */
+  if (share == null) share = cycleEndQuarter() / 4;
   var sales = Math.round(120 * share * 0.82 * 10) / 10;
   var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
     sub:"", owner:"Head of Restaurants", custodian:"",

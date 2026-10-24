@@ -584,6 +584,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      already announced by its heading; the line was doing the job twice. */
   .section { margin-top:26px; padding-top:0; border-top:0; }
   .section:first-of-type { margin-top:14px; }
+  /* §610: A RAIL OPENING THE PAGE SITS ONE GAP UNDER THE CHROME, NOT TWO.
+     The Directions page wrapped its rail in a headless section (§561.1 took
+     the heading away), so the section's 14px stacked on the view's 22px and
+     the rail stood 36px down where the Strategy page's stands 22px — Islam:
+     *"there is a space above the cards and the rail not needed"*. Only a
+     section with nothing before its rail; one with a heading keeps its air. */
+  .view > .section:first-child:has(> .split:first-child) { margin-top:0; }
   /* The single gap between the chrome and the page. The rail's sticky offset
      is calc(--chrome-h + this), so the rail's flow position and its pin
      position are the same number by construction and it cannot slide. */
@@ -639,7 +646,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      nowrap keeps column titles on one line, the tooltip inherited it too and
      ran off the edge as a single line. It sets its own wrapping. */
   .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
-                font-weight:400; width:min(320px,70vw); }
+                font-weight:400; width:min(320px,calc(var(--winw) * 0.7)); }
 
   /* A tooltip on the last column would open past the right edge, so tips near
      an edge anchor to it instead of centring on the icon. */
@@ -942,8 +949,20 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  .minirow .sub-n { font-size:9.5px; color:var(--ink-3); letter-spacing:.06em;
-                    text-transform:uppercase; font-weight:700; margin-top:2px; }
+  /* §610: the pillar pane's score pair, headline first (`scorePair`); §616:
+     and the unit Overview's cards above the rail. */
+  .scores.hero .card.tight { padding:18px 20px 16px; }
+  .scores.hero .card.tight .score-h { margin-bottom:10px; }
+  .scores.hero .headline { align-items:center; gap:14px; }
+  .scores.hero .headline .big { font-size:60px; letter-spacing:-.04em; }
+  .scores.hero .headline .big small { font-size:24px; margin-left:2px; }
+  .scores.hero .headline .ofplan { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .headline .drill { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .minirow { margin-top:14px; padding-top:11px; }
+  .scores.hero .minirow em { font-size:9px; }
+  .scores.hero .minirow b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
+  .scores.hero .unrep { font-size:var(--fs-small); color:var(--ink-2); background:var(--attn-bg);
+    border-radius:6px; padding:2px 8px; }
 
   .imp-checks { display:flex; flex-direction:column; gap:6px; margin:0 0 14px; }
   .chk { display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:baseline;
@@ -2162,7 +2181,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      would cover the navigation (§165's rule, at the other edge). */
   .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
     transform:none; bottom:auto; top:calc(100% + 8px);
-    width:max-content; max-width:min(300px, 60vw); }
+    width:max-content; max-width:min(300px, calc(var(--winw) * 0.6)); }
 
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
@@ -2412,6 +2431,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     align-items:center; gap:5px; list-style:none; }
   #subtabs .bandsmenu > summary:hover,
   .tabs .bandsmenu > summary:hover { color:var(--ink); border-color:var(--ink-3); }
+  /* §154's pairing, held in this row too. `.editbtn` is `background:none`,
+     and `--gold-deep` is right on white (4.99) but this row's ground is
+     `--surface-2`, where it measured 4.45 — under the line, found by
+     checks/state-contrast.py on Presentation's caret. So an outlined button
+     here stands on the surface, as the Bands pill beside it already does;
+     its hover keeps §154's wash and twin. */
+  #subtabs .tabacts .editbtn:not(.cta),
+  .tabs .tabacts .editbtn:not(.cta) { background:var(--surface); }
+  #subtabs .tabacts .editbtn:not(.cta):hover,
+  .tabs .tabacts .editbtn:not(.cta):hover { background:var(--attn-bg); color:var(--attn-tx); }
   .bandsmenu > summary::-webkit-details-marker { display:none; }
   /* The panel hangs BELOW the row, so the row may not clip it. The tab row has
      no reason to hide anything horizontally and this is the only thing that
@@ -2832,7 +2861,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
    segmented pair. */
 .mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
 .mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
-.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+.mpseg button:disabled, .mpseg button[aria-disabled="true"] { color:var(--ink-3); cursor:not-allowed; }
 /* A quarter carries its months in its label, so its box is wider than a
    month's — 112px, measured to sit four on one line down to 1100. */
 .mpm.mpq { width:112px; }
@@ -2905,7 +2934,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      is the one thing somebody opens this page to read. */
   .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
             margin:0 0 16px; }
-  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+  .drvtot-n { font:650 clamp(26px, calc(var(--winw) * 0.032), 34px)/1 var(--sans); color:var(--ink);
               letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
   /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection
@@ -3024,7 +3053,12 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
     color:var(--ink-2); font-weight:500; }
   .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
-  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+  /* The selected section's fill is the palette's second ink, the dark grey,
+     not `--stone` (§627): `--stone` is the house navy in the navy palette and
+     the Branding page never rewrites it, so under a tenant's own chrome the
+     switch kept saying navy. The squeezed strip of directions wears the same
+     fill (group-extra.css, §609/§627) and the two must agree. */
+  .tabs .secseg button[aria-selected="true"] { background:var(--ink-2); color:var(--surface);
     font-weight:600; }
   .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 

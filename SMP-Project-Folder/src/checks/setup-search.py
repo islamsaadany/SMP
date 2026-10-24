@@ -91,7 +91,11 @@ with sync_playwright() as p:
     # What this block is about survives whole: a word on no label finds its page.
     for word, want in [("weighting", "units"), ("password", "people"), ("upload", "import"),
                        ("threshold", "bands"), ("permissions", "access"),
-                       ("vocabulary", "labels"),
+                       # ("vocabulary", "labels") STOOD HERE (§621): Terminology
+                       # left Setup and its words are named on Getting started's
+                       # shape screen, which is the strip above this box until
+                       # set-up is done — so it is findable there by the same
+                       # words once it is a row, as the brand errand above is.
                        # §135.4: the Email page became Send an email's second
                        # section, so its keywords moved onto that def. The
                        # errand is unchanged — "where do I set the reply-to" —

@@ -453,8 +453,11 @@ try {
     page.includes("No file yet"));
   check("the download address is this client's, this report's, and ours — never the store's",
     page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
+  /* REWRITTEN, NEVER LOOSENED (§218): the count moved into the panel
+     (§605) and is said the Tracker's way, the number over its name — so the
+     two are asked for together, as the sentence was. */
   check("the count says what is there",
-    page.includes("2 reports"));
+    /<div class="tile"><b>2<\/b><span>Reports<\/span>/.test(page), (page.match(/<div class="tile">[\s\S]{0,60}/) || [""])[0]);
   /* §385, AND IT IS A REWRITE RATHER THAN A LOOSENING (§218, §214.3). This
      asked for `CATEGORIES.every(...)` — every category the MODULE offers, on
      every page — which was true only while the row was a fixed list, and went
@@ -480,7 +483,8 @@ try {
      shell's `script-src 'self'` admits — so what is asserted is still that
      nothing INLINE needs to run, and that the one script is the bar's. */
   check("no inline script, so the shell's script-src has nothing to admit but the bar's file",
-    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => t === '<script src="/topbar.js"></script>') &&
+    /* §620: the bar's file by its stamped address (rewritten, never loosened) */
+    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /^<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>$/.test(t)) &&
     (page.match(/<script/gi) || []).length === 1 && !/\son[a-z]+=/i.test(page));
   check("the module switcher is its way back out",
     page.includes('href="/client-a/strategy"'), "no way back to Strategy");
@@ -638,7 +642,7 @@ try {
     pgHoda.includes("FX Cost Exposure") && !pgKarim.includes("FX Cost Exposure"));
   /* A COUNT THAT DISAGREES WITH ITS OWN LIST IS A BUG REPORT WAITING TO
      HAPPEN (§108.1's shape), so it is asserted rather than assumed. */
-  const countOn = (p) => (p.match(/>(\d+) reports?</) || [])[1];
+  const countOn = (p) => (p.match(/<div class="tile"><b>(\d+)<\/b><span>Reports?</) || [])[1];
   const rowsOn = (p) => (p.match(/class="item"/g) || []).length;
   check("the count follows what that person can see, on both pages",
     Number(countOn(pgHoda)) === rowsOn(pgHoda) && Number(countOn(pgKarim)) === rowsOn(pgKarim) &&

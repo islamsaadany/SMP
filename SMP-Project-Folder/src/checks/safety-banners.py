@@ -171,6 +171,7 @@ class H(http.server.BaseHTTPRequestHandler):
                 SEEN.setdefault("afters", []).append({"after": after, "q": q})
                 page = [x for x in SAVES if x["seq"] > after]
                 self._s(200, json.dumps({"ok": True, "seq": page[-1]["seq"] if page else after,
+                                         "oldest": SAVES[0]["seq"] if SAVES else None,
                                          "more": False, "changes": page}).encode(), "application/json")
                 return
             if "since" in q:
@@ -459,6 +460,26 @@ with sync_playwright() as p:
     ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == n, (pg.evaluate("()=>SYNC.seq()"), n))
     ck("no caution is drawn", banner(pg) == "", banner(pg))
 
+    # ── 5f · A NUMBER OLDER THAN THE OLDEST ENTRY KEPT TAKES THE GRAPH (§588.2) ──
+    # The list is swept after a week. A tab holding a number from before the
+    # oldest entry kept cannot know what was swept between, so it fetches the
+    # graph once and carries on from the number that copy holds.
+    print("\n5f · a tab older than the oldest kept entry fetches the graph once")
+    del SAVES[:-1]                                   # the sweep: one entry left
+    STATE["group"]["org"] = "Theirs Six"             # a save that was swept
+    pg.evaluate("n=>SYNC.setSeq(n)", max(0, SAVES[0]["seq"] - 3))
+    states0 = states()
+    peek(pg); settle(1800)
+    ck("the graph was fetched once", states() == states0 + 1, states() - states0)
+    ck("...and the screen holds what the swept save wrote", pg.evaluate("()=>GROUP.org") == "Theirs Six", pg.evaluate("()=>GROUP.org"))
+    ck("...with the number the fetched copy carries", pg.evaluate("()=>SYNC.seq()") == SEQN[0], (pg.evaluate("()=>SYNC.seq()"), SEQN[0]))
+    states0 = states(); peek(pg); settle(600)
+    ck("the next ask is the light one again", states() == states0, states() - states0)
+    n = land({"rows": [{"at": "group", "path": [], "id": None, "set": {"org": "Theirs Seven"}, "del": []}]}, at="2026-09-02T10:25:00.000Z")
+    peek(pg); settle()
+    ck("...and a landing arrives as a change, as before", pg.evaluate("()=>GROUP.org") == "Theirs Seven" and states() == states0 and pg.evaluate("()=>SYNC.seq()") == n,
+       (pg.evaluate("()=>GROUP.org"), states() - states0))
+
     # ── 5e · THE CLOCK SLOWS WHEN NOBODY IS WORKING HERE (§588.1) ─────────
     print("\n5e · the ask comes every 20s while somebody works here, every 60s once nobody does")
     ck("working here: 20s", pg.evaluate("()=>SAFETY.every()") == 20000, pg.evaluate("()=>SAFETY.every()"))
@@ -484,17 +505,20 @@ with sync_playwright() as p:
     peek(pg)
     ck("an edit landing does not displace it", "newer version" in banner(pg).lower(), banner(pg))
     # ── 6b · RELOAD SAVES THE FIELD UNDER THE CURSOR FIRST (§258.2) ──────
-    # Setup › Terminology has plain bound inputs; the version caution is drawn
-    # on Setup too, since a stale build is stale everywhere.
+    # §621: Setup › Terminology STOOD HERE and left Setup. The shape screen's
+    # name boxes are the same kind of control — plain bound inputs that write
+    # on change — so the check types into one of those instead; the version
+    # caution is drawn on Setup too, since a stale build is stale everywhere.
     import time as _time
     press(pg, 'button[title="Setup"]'); pg.wait_for_timeout(500)
-    press(pg, "text=Terminology"); pg.wait_for_timeout(600)
+    pg.evaluate("()=>{const r=document.querySelector('[data-setupgo=start]'); if(r) r.click();}"); pg.wait_for_timeout(800)
+    pg.evaluate("()=>{const b=document.querySelector('[data-setupgo=shape]'); if(b) b.click();}"); pg.wait_for_timeout(900)
     mark = "TYPED-%d" % int(_time.time())
-    box = pg.locator("input.lbl").first
+    box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     ck("a field to type in", box.count() > 0)
     box.click(); box.fill(""); box.type(mark)
     ck("...and it still has the cursor (never blurred)",
-       pg.evaluate("()=>document.activeElement && document.activeElement.classList.contains('lbl')"))
+       pg.evaluate("()=>document.activeElement && document.activeElement.matches('input[data-stlw]')"))
     ck("the version caution is still up on Setup", "newer version" in banner(pg).lower(), banner(pg))
     SEEN["post_delay"] = 0.9; SEEN["post_answered"] = None
     loads0, posts0 = SEEN["loads"], SEEN["posts"]
@@ -516,7 +540,13 @@ with sync_playwright() as p:
     # a failed save keeps the page
     pg.evaluate("()=>typeof SAFETY!=='undefined'&&SAFETY.newVersion()")
     SEEN["post_status"] = 500; loads0 = SEEN["loads"]
-    box = pg.locator("input.lbl").first
+    # The reload above returns to Getting started (§173) with the flow on its
+    # first step — a step is the flow's own state, never the address — so the
+    # shape screen is opened again before its box is typed into.
+    pg.wait_for_timeout(800)
+    pg.evaluate("()=>{const b=document.querySelector('[data-setupgo=shape]'); if(b) b.click();}")
+    pg.wait_for_timeout(900)
+    box = pg.locator(".csetup .stpart input[data-stlw]:visible").first
     box.click(); box.fill(""); box.type(mark + "-b")
     press(pg, "#safety [data-safety-reload]")
     pg.wait_for_timeout(2000)

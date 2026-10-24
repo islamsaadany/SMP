@@ -394,7 +394,7 @@ export function PersonRow({
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                autoFocus={!person.linked} readOnly={person.linked} title={person.linked ? "From the client's People register — change it there" : undefined}
+                autoFocus={!person.linked} readOnly={person.linked} title={person.linked ? "From the Client register — change it there" : undefined}
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm read-only:bg-slate-100 read-only:text-slate-500"
               />
             </label>
@@ -403,7 +403,7 @@ export function PersonRow({
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)} readOnly={person.linked} title={person.linked ? "From the client's People register — change it there" : undefined}
+                onChange={(e) => setEmail(e.target.value)} readOnly={person.linked} title={person.linked ? "From the Client register — change it there" : undefined}
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm read-only:bg-slate-100 read-only:text-slate-500"
               />
             </label>

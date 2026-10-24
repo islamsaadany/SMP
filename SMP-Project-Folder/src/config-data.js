@@ -11,6 +11,34 @@
        at save time rather than discovered in a client demo.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ── THE PAGE IS DRAWN AT 80% ON A COMPUTER (§631) ───────────────────────
+   Islam, of a Setup table spilling across its columns: *"I believe the page
+   needs to be 80% smaller like what we did in the console page"* — and, of
+   the mockup that drew it, *"proceed"*. `html { zoom:.8 }` at 1000px and up
+   (`_shared.css`), the console's own rule (§601's 80%).
+
+   A ZOOMED PAGE HAS TWO KINDS OF PIXEL, measured in this Chromium rather than
+   assumed: what the browser REPORTS — a box's `getBoundingClientRect()`, the
+   window's `innerWidth`/`innerHeight`, the pointer, `scrollY` — is in the
+   window's pixels, 80% of the page's; what the page SETS — `left`, `top`,
+   `width`, a custom property, `offsetWidth` — is in the page's own. So
+   anything placed on screen from a measurement converts it once, here, and
+   never with a second copy of the 0.8 (§53.5). Scrolling needs nothing:
+   `scrollY` and a box's `top` are both the window's. */
+function pageZoom(){
+  var z = typeof document !== "undefined" ? parseFloat(getComputedStyle(document.documentElement).zoom) : 1;
+  return z > 0 ? z : 1;
+}
+/* A box's place and size in the page's own pixels. */
+function zRect(el){
+  var r = el.getBoundingClientRect(), z = pageZoom();
+  return { left: r.left / z, top: r.top / z, right: r.right / z, bottom: r.bottom / z,
+           width: r.width / z, height: r.height / z };
+}
+/* The window's width and height in the page's own pixels. */
+function winW(){ return window.innerWidth / pageZoom(); }
+function winH(){ return window.innerHeight / pageZoom(); }
+
 var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
@@ -158,6 +186,8 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §621: whether a layer shows its End in Mind — the shape screen's tick, inside the aspiration. */
+function eimOn(target){ return SMPRules.endInMindOn(GROUP, target); }
 /* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
    and Core Values are owed (Missing) only while Client set-up › Structure
    carries them for this unit; off, they are not drawn and not counted, and
@@ -351,6 +381,14 @@ var PROLEPICK = null;
    what commits it (§35) and Escape puts it back, which is the Tracker's shape
    one module over (spec 054). */
 var PCELL = null;
+/* ── AND THE SAME ON THE ORGANISATION TABLES (§630) ─────────────────────
+   Islam: *"why to edit row by row why the editing doesn't happen on the cell
+   level with a double click that opens the editable cells for editing?"*.
+   `{t, key, f}` — the table (`units`, `fns`, `companies`, `caps`), the row's
+   key and the column — or null. The register's rules exactly: one cell at a
+   time, leaving it or Enter keeps it, Escape puts it back. A person cell is
+   open while its picker is (`PICKING`), so choosing somebody shuts it. */
+var OCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -461,6 +499,8 @@ var FNMENU = null;
 var UMENU = null;
 /* AND FOR COMPANIES (§272). */
 var COMENU = null;
+/* AND FOR THE COMPANY'S CAPABILITIES, where they are pillars (§630). */
+var CPMENU = null;
 
 /* ── WHICH SETUP TABLE IS BEING ARRANGED (§272) ─────────────────────
    Islam: *"allow me in the setup to rearrange the business units table so they
@@ -899,6 +939,33 @@ function branding(){
     if (!(k in b)) b[k] = BRAND_DEFAULT[k];
   });
   return b;
+}
+
+/* ══ A COLOUR WAITS FOR APPLY (§621) ════════════════════════════════════
+   Islam: *"the color shouldn't change before apply; the undo is just a temp
+   button that appears shortly after the application so the user can get
+   back, and reset can revert it back to shipped palette"* — and then *"make
+   this a general rule of colors elements"*.
+
+   A picked colour is held HERE, never in the graph, so nothing on the page
+   and nothing in a save can carry it before Apply: the boxes show it, the
+   page does not. A key PRESENT means it changed — a value is the new
+   colour, null is cleared (the palette's own). Apply writes it into the
+   graph and keeps what it replaced for UNDO_MS; Undo puts that back.
+
+   EACH COLOUR AREA IS ONE ENTRY IN APPLY_AREAS, so the row under it, the
+   leave question and the Undo window are written once for every area that
+   sets a colour — the tenant's two today, the scoring bands beside them,
+   and whatever colour control comes next (the rule, not a list of pages). */
+var UNDO_MS = 10000;
+var BRAND_PEND = {};
+var BRAND_UNDO = null;
+var APPLY_AREAS = {};
+function brandPendKeys(){ return Object.keys(BRAND_PEND); }
+var BRAND_WORD = { accent: "the accent", bar: "the navigation bar" };
+function brandWaiting(){
+  if ("reset" in BRAND_PEND) return ["the shipped palette"];
+  return brandPendKeys().map(function(k){ return BRAND_WORD[k] || k; });
 }
 
 /* ══ COMMUNICATION (§72) ═══════════════════════════════════════════
@@ -4991,7 +5058,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 Client register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;
@@ -5249,15 +5316,10 @@ function canReport(unitKey){
     if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
-    return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer()) ||
-           /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer()) ||
-           /* §520.6: and a capability's owner or custodian enters their own
-              capability's figures here, exactly as a direction's owner does —
-              the capability's rows ask `cap:<id>` for themselves, so this
-              opens the page and nothing else. */
-           SMPRules.ownsTopCapability(world(), viewer());
+    /* §595: whoever reports all of it, or holds a seat on any part of it —
+       a direction, a capability, or (planning in projects) a project. The
+       one rule the server asks; which rows they type on is each part's. */
+    return SMPRules.mayReportTopOrPart(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -6919,6 +6981,11 @@ function strategyAc(acKey, target){
 }
 function mayAuthor(acKey, target){
   var t = target === undefined ? TARGET : target;
+  /* §598: while the Plan page shows the plan as it stood on a day, nothing
+     on it can be authored — the view is read only by construction, not by
+     hiding controls one at a time. The guard asks the TARGET, so a page on
+     another subject is untouched. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
@@ -6932,6 +6999,8 @@ function mayFill(acKey, target){
      half and leaving the other is how the two came to disagree in the first
      place (§53.5). */
   var t = target === undefined ? TARGET : target;
+  /* §598: the same guard the pen gets — an old plan takes no fill either. */
+  if (typeof TRAIL !== "undefined" && TRAIL.asofActive && TRAIL.asofActive(t)) return false;
   return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
@@ -7235,8 +7304,10 @@ var BAND_COLOURS = [
    starts at 0 by construction, so the new one goes immediately above it,
    halfway between 0 and the band above — which descends by arithmetic rather
    than by hoping somebody types a number in order. */
-function addBand(){
-  var b = BANDS.bands;
+/* §621: both act on the list they are handed — the bands being edited
+   (bandsEdit, below) on the Setup page, the stored ones by default. */
+function addBand(list){
+  var b = list || BANDS.bands;
   var above = b.length > 1 ? b[b.length - 2].floor : 100;
   var used = {};
   b.forEach(function(x){ used[x.key] = 1; });
@@ -7251,11 +7322,73 @@ function addBand(){
 /* AND REMOVING ONE PUTS THE FLOOR BACK. Every figure has to land somewhere, so
    whatever ends up last starts at 0 — take the bottom band away and the one
    above it inherits that, or a figure of 12 would belong to no band at all. */
-function removeBand(i){
-  var b = BANDS.bands;
+function removeBand(i, list){
+  var b = list || BANDS.bands;
   if (b.length <= 2) return;
   b.splice(i, 1);
   b[b.length - 1].floor = 0;
+}
+
+/* ══ THE BANDS ARE A COLOUR AREA (§621) ═══════════════════════════════════
+   Islam: *"for any colors adjustment like the bands as well let's use the
+   same concept of apply discard and undo"*. A band's key IS its colour
+   (§168), and its floor decides which colour every figure in the tenant
+   wears — so the whole table waits for Apply, not only the swatches: an
+   edit goes into BANDS_DRAFT, a copy, and BANDS is untouched until Apply.
+   Every pill, gauge and deck keeps today's bands meanwhile, because they
+   all read BANDS through bandOf(). */
+var BANDS_DRAFT = null;
+var BANDS_UNDO = null;
+function bandsEdit(){
+  if (!BANDS_DRAFT) BANDS_DRAFT = JSON.parse(JSON.stringify(BANDS.bands));
+  return BANDS_DRAFT;
+}
+/* What waits, in the page's words — one line per kind of change, named by
+   the level it is on as the table shows it. */
+function bandsWaiting(){
+  var d = BANDS_DRAFT, s = BANDS.bands, out = [];
+  if (!d) return out;
+  if (d.length > s.length) out.push(d.length - s.length === 1 ? "a level added" : (d.length - s.length) + " levels added");
+  if (d.length < s.length) out.push(s.length - d.length === 1 ? "a level removed" : (s.length - d.length) + " levels removed");
+  if (d.length === s.length) d.forEach(function(x, i){
+    var o = s[i], name = x.label || o.label;
+    if (x.key !== o.key) out.push("the colour for " + name);
+    if (x.floor !== o.floor) out.push("the floor for " + name);
+    if (x.label !== o.label) out.push("the name " + o.label);
+  });
+  return out;
+}
+function bandsOrdered(list){
+  for (var i = 1; i < list.length; i++) if (list[i].floor >= list[i-1].floor) return false;
+  return true;
+}
+/* WHAT A NEW SET OF BANDS WOULD MOVE: every scored measure on every unit and
+   function, read with the platform's own score (measureScore), and the band it
+   lands in now against the band it would land in. A count of things that
+   change colour with no figure having changed — the sentence the page used
+   to print in red, made exact and moved to the moment it is true. */
+function bandShift(next){
+  var of = 0, moved = 0;
+  var bandIn = function(v, list){
+    for (var i = 0; i < list.length; i++) if (v >= list[i].floor) return list[i].key + "|" + list[i].label;
+    var z = list[list.length - 1]; return z.key + "|" + z.label;
+  };
+  /* Only a measure WITH a score has a band to move; one with no data reads
+     "No data" under any floors, so it is not counted among the scored. */
+  var count = function(s){
+    ((s && s.items) || []).forEach(function(p){
+      scorableMeasures(p).forEach(function(m){
+        var v = measureScore(m);
+        if (v == null || isNaN(v)) return;
+        of++;
+        if (bandIn(v, BANDS.bands) !== bandIn(v, next)) moved++;
+      });
+    });
+  };
+  count(GROUP);
+  (UNIT_KEYS || []).forEach(function(k){ count(UNITS[k]); });
+  (FUNCTION_KEYS || []).forEach(function(k){ count(FUNCTIONS[k]); });
+  return { moved: moved, of: of };
 }
 
 function bandOf(v){
@@ -7331,9 +7464,20 @@ function reviewAsOf(){
      rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
+  return y * 12 + (cycleEndQuarter() * 3 - 1);   /* the LAST month of that quarter */
+}
+/* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
+   `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
+   Four readers used to ask the raw field each in their own way, and on a cycle
+   whose end cannot be read and which holds no quarter they split: the quarter
+   pips said all four quarters had passed while `tacticShare()` compared
+   against `undefined` and called every tactic 0% due, the failure its own
+   comment warns of. A cycle opened in the product cannot reach this -- the
+   form has asked for its end month since §307 -- so it is an older cycle
+   whose end was written in free text with no year anywhere. */
+function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+  return (q >= 1 && q <= 4) ? q : 4;
 }
 /* Did the month come from the cycle's own end, or from one of the fallbacks
    above? The strip says which, because a review point nobody set is a guess
@@ -7439,7 +7583,7 @@ function elapsedMonths(){
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
   var a = reviewAsOf(), y = reviewYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  if (a == null || y == null) return (i + 1) <= cycleEndQuarter();
   return y * 12 + i * 3 + 2 <= a;
 }
 /* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
@@ -8013,7 +8157,7 @@ function tacticShare(t){
     for (var j = 0; j < 4; j++) {
       if (!q[j]) continue;
       tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
+      if (j + 1 <= cycleEndQuarter()) el++;
     }
     return tot ? el / tot : null;
   }
@@ -8135,7 +8279,7 @@ function tacticFirstQuarterOver(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    if (y == null || a == null) return i + 1 <= cycleEndQuarter();
     return y * 12 + i * 3 + 2 <= a;
   }
   return false;
@@ -9416,7 +9560,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){

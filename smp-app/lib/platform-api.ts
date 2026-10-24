@@ -9,7 +9,7 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus } from "./my-work.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps } from "./my-work.ts";
 import { isOffice, type Who } from "./tracker.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
@@ -28,6 +28,7 @@ import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } fro
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
+import { markIsWide, squareFor } from "./client-icon.ts";
 import type { PlatformRules } from "./shared-types.ts";
 
 const require = createRequire(import.meta.url);
@@ -51,9 +52,9 @@ const NO_CLIENT = "That client is not available.";
 type Account = { id: string; email: string; name: string; is_admin: boolean; kind: string; status: string };
 type World = { mine: { client_key: string; person_key: string; seat: string; tenant_id: string }[]; access: Record<string, Record<string, string>> };
 type ClientRow = Tenant & { industry: string; notes: string; size: string;
-  archived_at: string | null; archived_by: string | null; modules?: unknown };
+  archived_at: string | null; archived_by: string | null; modules?: unknown; past?: boolean; icon?: string | null };
 
-const CLIENT_COLS = "id, key, name, kind, status, mark, industry, notes, size, made_here, archived_at, archived_by, modules";
+const CLIENT_COLS = "id, key, name, kind, status, mark, icon, industry, notes, size, made_here, archived_at, archived_by, modules, past";
 async function clientByKey(c: Q, key: unknown): Promise<ClientRow | null> {
   if (!key) return null;
   const r = await c.query("SELECT " + CLIENT_COLS + " FROM tenants WHERE key = $1", [String(key)]);
@@ -132,8 +133,15 @@ async function factsFor(t: ClientRow) {
     return await withTenant(t.id, async (c) => {
       const n = async (tbl: string) => Number((await c.query("SELECT count(*)::int AS n FROM " + tbl)).rows[0].n);
       const units = await n("units"), pillars = await n("pillars");
+      /* THE COMPANY'S OWN DIRECTIONS COUNT AS A PLAN (Islam: "why is elabd
+         showing no plan?"). `pillars` holds a unit's and a function's
+         directions only; the company's own (GROUP.items) travel in the org
+         row's extra, so a client planned at the company level read as having
+         no plan. SMP_BREAK=company-plan-unseen puts the old count back. */
+      const top = process.env.SMP_BREAK === "company-plan-unseen" ? 0 : Number((await c.query(
+        "SELECT CASE WHEN jsonb_typeof(extra->'items') = 'array' THEN jsonb_array_length(extra->'items') ELSE 0 END AS n FROM org")).rows[0]?.n || 0);
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
-      return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
+      return { units, planned: pillars + top > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
     }).then(async (f) => {
       /* the facts a module's MARK is made of (§368) — read through the ONE
          reader that also serves the Landing line page's preview, as somebody
@@ -182,7 +190,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const work = await myWork(shown, world.mine, account.email);
     for (const row of shown) {
       const facts = await factsFor(row);
-      cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
+      /* `square` is what Home's small square draws (§629): the client's own
+         icon, else its mark if the mark is not wide, else nothing — and
+         nothing means initials. Worked out here, by the same rule the Brand
+         tab warns with, so the two cannot disagree. */
+      cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, square: squareFor(row), mine: FF.isMine(world, row.key),
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
         /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
@@ -207,12 +219,26 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        because nothing on the card says anything about them and because
        reading every archived tenant's graph on every visit to this page is a
        cost nobody asked for. */
-    const archived = FF.archivedClients(world, account, all).map((row: ClientRow) => ({
+    /* …WITHOUT THE PAST CLIENTS (spec 067 §7): added only so their case
+       studies can name them, and kept off this page — Islam: "I don't want
+       it to be there as it will make things a bit crowded with no need". */
+    const archived = FF.archivedClients(world, account, all).filter((row: ClientRow) => !row.past).map((row: ClientRow) => ({
       key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark,
       at: row.archived_at, by: row.archived_by,
-      canConfig: FF.mayReadConfig(world, account, row)
+      canConfig: FF.mayReadConfig(world, account, row),
+      /* for the page's Mine (spec 067's Clients filter): a seat on it */
+      mine: world.mine.some((m) => m.client_key === row.key)
     }));
-    return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+    /* THE PAST CLIENTS, for the Clients page's Ended view and nowhere else
+       (Islam: "keep them out … but add a filter for active clients ended
+       clients and demo"). Every consultant reads their case studies, so
+       every consultant is shown them; nobody has a seat on one. */
+    const past = (await pool.query(
+      "SELECT t.key, t.name, t.industry, t.mark, t.archived_at, (SELECT count(*)::int FROM case_studies c WHERE c.about_tenant_id = t.id) AS cases " +
+      "FROM tenants t WHERE t.past ORDER BY t.name")).rows.map((r: any) => ({
+        key: r.key, name: r.name, industry: r.industry, mark: r.mark, at: r.archived_at, cases: r.cases }));
+    return ok({ cards, archived, past, canAddPast: account.is_admin,
+      canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 
   /* ── MY WORK (§400): the console's first tab ──────────────────────
@@ -245,8 +271,13 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const people = account.is_admin
       ? (await pool.query("SELECT email, name FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows
       : [];
+    /* AND THE CASE STUDIES THIS PERSON HAS BEEN ASKED TO WRITE UP (spec 067),
+       for whoever's list is being looked at — an admin looking at a
+       colleague's sees the colleague's, as with the actions. */
+    /* SMP_BREAK=no-writeups drops them — checks/case-page.mjs must go red */
+    const cases = process.env.SMP_BREAK === "no-writeups" ? [] : await writeUps(pool, whoAcc.id, w.today);
     return ok({ who: { email: whoAcc.email, name: whoAcc.name, self: whoAcc.id === account.id },
-      today: w.today, weekLine: w.weekLine, statuses: w.statuses, rows: w.rows, unanswered: w.unanswered, people });
+      today: w.today, weekLine: w.weekLine, statuses: w.statuses, rows: w.rows, cases, unanswered: w.unanswered, people });
   }
 
   /* ── A ROW TICKED, OR ITS STATUS CHANGED, ON MY WORK (§583) ──────────
@@ -506,7 +537,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        in this list the day it is built, and one that is not built is not
        offered at all, because a switch for a module with nothing behind it
        opens the Strategy platform wearing another name (§61). */
-    return ok({ client, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
+    return ok({ client: { ...client, markWide: markIsWide(row.mark) }, team: await teamOf(pool, row.id), seats: FF.SEATS, canEdit: FF.mayConfigureClient(world, account, row), register,
       shape, holds, goes,
       canArchive: FF.mayArchiveClient(world, account, row), canDelete: FF.mayDeleteClient(world, account, row),
       modules: modulesFor(row.modules),
@@ -529,6 +560,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.mark) && body.mark.length <= 400000) mark = body.mark;
       else return no(400, "The mark must be a PNG under 300 KB.");
     }
+    /* §629: the icon, the mark's rules exactly — a PNG data URI or "" to go
+       back to using the mark. Smaller, because it is drawn at 30px and the
+       Brand tab hands over a 256px square. */
+    let icon: string | null = null;
+    if (typeof body.icon === "string") {
+      if (body.icon === "") icon = "";
+      else if (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(body.icon) && body.icon.length <= 200000) icon = body.icon;
+      else return no(400, "The icon must be a PNG under 150 KB.");
+    }
+    if (icon !== null) await pool.query(
+      "UPDATE tenants SET icon = CASE WHEN $2 = '' THEN NULL ELSE $2 END WHERE id = $1", [row.id, icon]);
     await pool.query(
       "UPDATE tenants SET name = COALESCE($2,name), industry = COALESCE($3,industry), notes = COALESCE($4,notes), " +
       "size = COALESCE($6,size), " +
@@ -545,11 +587,15 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const moved: string[] = [];
     if (renamed) moved.push("renamed it " + String(body.name).trim());
     if (mark !== null) moved.push(mark === "" ? "took its mark off" : "changed its mark");
+    if (icon !== null) moved.push(icon === "" ? "went back to its mark as its icon" : "gave it an icon of its own");
     if (moved.length) {
       await logAct(pool, account, row, renamed ? "client.renamed" : "client.mark",
         moved.join(" and ").replace(/^./, (ch) => ch.toUpperCase()));
     }
-    return ok({});
+    /* §629: whether the mark AS IT NOW STANDS is wide, so a Brand tab that
+       has just uploaded one can say so without a rule of its own. */
+    const now = mark === null ? row.mark : mark === "" ? null : mark;
+    return ok({ markWide: markIsWide(now) });
   }
 
   /* ── SETTING A CLIENT UP, FROM THE OUTSIDE (§322) ────────────────────
@@ -663,6 +709,10 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         : "Archiving a client is the platform admin's.");
     }
     const on = body.on !== false;
+    /* A PAST CLIENT HAS NOTHING TO COME BACK TO (spec 067 §7): it was made
+       with no graph and no people, so bringing it back would open an empty
+       door. Refused by name. */
+    if (!on && row.past) return no(409, row.name + " is a past client, added for its case studies. There is no platform to bring back.");
     if (on) {
       await pool.query("UPDATE tenants SET status = 'retired', archived_at = now(), archived_by = $2 WHERE id = $1",
         [row.id, account.email]);

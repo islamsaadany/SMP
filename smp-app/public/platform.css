@@ -270,6 +270,29 @@
      reports a width of 0, so the check that finds this is the page HEIGHT
      crossing the viewport, not the shift itself. */
   html { scrollbar-gutter: stable; }
+  /* ── THE PAGE AT 80% ON A COMPUTER (§631) ───────────────────────────────
+     Islam, of a Setup table spilling across its columns: *"I believe the page
+     needs to be 80% smaller like what we did in the console page"*, then
+     *"proceed"*. The console's rule (§601): the whole page zoomed at 1000px
+     and up, so every size keeps its proportion; a phone keeps 100%, where 80%
+     would put the words under a readable size.
+
+     A DECK BEING SHOWN STAYS AT 100%: it fills the screen and scales its own
+     slides to it (present.js), and a projection drawn at 80% of the window
+     would be a smaller deck on the same wall.
+
+     AND THE WINDOW'S SIZE IS SAID IN THE PAGE'S PIXELS. Under a zoom, `100vh`
+     is 80% of the window (measured: a fixed 100vh box drew 720 of 900), so a
+     panel meant to reach the bottom stops short. Every length taken from the
+     window reads these three instead — `var(--winh)` for `100vh` — and they
+     carry the one correction. Lengths the script measures are converted the
+     same way, once (`pageZoom`, config-data.js). */
+  :root { --winw:100vw; --winh:100vh; --wind:100dvh; }
+  @media (min-width:1000px) {
+    html:not(:has(> body.presenting)) { zoom:.8; }
+    :root:not(:has(> body.presenting)) {
+      --winw:calc(100vw / .8); --winh:calc(100vh / .8); --wind:calc(100dvh / .8); }
+  }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
   /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
@@ -432,6 +455,64 @@
              padding:8px 13px; font-size:var(--fs-small); color:var(--ink-3);
              white-space:nowrap; letter-spacing:.01em;
              opacity:0; transition:opacity .22s ease; pointer-events:none; }
+  /* ── THE ASKING BOX (§621) ──────────────────────────────────────────
+     Floats beside what was pressed, SIZED TO WHAT IT SAYS (Islam: "make the
+     floating boxes fit the content, not too extended") — `max-content`,
+     capped so a long sentence wraps rather than running off the screen. The
+     gold edge is the platform's ask-first colour (.hist-confirm's); the
+     arrow is the box's own corner turned to point at the control. */
+  .askbox { position:absolute; z-index:70; box-sizing:border-box;
+            width:max-content; max-width:min(360px, calc(var(--winw) - 32px));
+            padding:12px 14px; border-radius:10px;
+            border:1px solid var(--attn); background:var(--surface); color:var(--ink);
+            box-shadow:0 12px 32px rgba(10,20,40,.18);
+            font-size:var(--fs-small); line-height:1.5; }
+  .askbox .askarrow { position:absolute; top:-8px; width:14px; height:14px; transform:rotate(45deg);
+                      background:var(--surface); border-left:1px solid var(--attn); border-top:1px solid var(--attn); }
+  .askbox.above .askarrow { top:auto; bottom:-8px; border:0;
+                            border-right:1px solid var(--attn); border-bottom:1px solid var(--attn); }
+  .askbox .asktitle { font-weight:700; color:var(--attn-tx); margin-bottom:2px; }
+  .askbox .askbody { margin-bottom:10px; }
+  .askbox .askacts { display:flex; flex-wrap:wrap; gap:8px; }
+  .askbox button { font:600 var(--fs-small)/1.3 var(--sans); padding:6px 14px; border-radius:7px; cursor:pointer; }
+  .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
+  .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  /* ── A COLOUR AREA'S ROW, AND THE QUESTION ON THE WAY OUT (§621) ─────
+     Apply is the platform's solid control (the panel's own fill and ink, so
+     it follows a tenant's bar); Discard and Undo are its quiet neighbours.
+     The line says in amber what waits, in green that it was applied. The
+     strip is the same three buttons' family, pinned over the pane. */
+  .applyrow { display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; margin-top:14px; }
+  .applyrow button { font:600 var(--fs-small)/1.3 var(--sans); padding:7px 16px; border-radius:7px; cursor:pointer; }
+  .applyrow .applybtn { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .applyrow .applybtn:disabled { opacity:.45; cursor:default; }
+  .applyrow .applyno { background:var(--surface); border:1px solid var(--line); color:var(--ink); padding:7px 14px; }
+  .applyrow button:focus-visible, .leavestrip button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
+  .applywait, .applydone { display:inline-flex; align-items:center; gap:7px; font-size:var(--fs-small); font-weight:600; }
+  .applywait { color:var(--attn-tx); }
+  .applydone { color:var(--good-tx); }
+  .applywait::before, .applydone::before { content:""; width:7px; height:7px; border-radius:50%; flex:none; }
+  .applywait::before { background:var(--attn); }
+  .applydone::before { background:var(--good); }
+  .leavestrip { position:fixed; z-index:65; left:max(16px, env(safe-area-inset-left, 0px)); right:96px;
+                bottom:max(18px, env(safe-area-inset-bottom, 0px));
+                display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px;
+                padding:12px 16px; border-radius:10px; border:1px solid var(--attn); background:var(--attn-bg);
+                color:var(--ink); box-shadow:0 6px 24px rgba(10,20,40,.14); font-size:var(--fs-small); line-height:1.45; }
+  @media (min-width: 900px) { .leavestrip { left:260px; } }
+  .leavestrip .lsay { flex:1 1 280px; min-width:0; }
+  .leavestrip .lsay b { color:var(--attn-tx); }
+  .leavestrip .lacts { display:flex; flex-wrap:wrap; gap:8px; }
+  .leavestrip button { font:600 var(--fs-small)/1.3 var(--sans); padding:7px 14px; border-radius:7px; cursor:pointer; }
+  .leavestrip .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .leavestrip .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
+  /* …and the answer, said on the control that was pressed. */
+  .asksaved { display:inline-flex; align-items:center; gap:5px; margin-left:6px; vertical-align:middle;
+              font-size:11px; font-weight:600; line-height:1; color:var(--good-tx); white-space:nowrap; }
+  .asksaved::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--good); }
+  .asksaved.bad { color:var(--bad-tx); }
+  .asksaved.bad::before { background:var(--bad); }
   .savetip[hidden] { display:none; }
   .savetip.show { opacity:1; pointer-events:auto; }
   body.presenting .savetip { display:none; }
@@ -494,6 +575,24 @@
   .pband-hist { font-size:var(--fs-micro); color:var(--ink-3); font-weight:400; white-space:nowrap; margin-right:12px; }
   .pband-hist b { font-weight:600; color:inherit; }
   .pband-hist .linkbtn { font:inherit; color:var(--gold-deep); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+  /* ── §598: THE PLAN AS IT STOOD ON A DAY ─────────────────────────────
+     The control sits in the band's own line, after See history; while a
+     day is shown it wears a field's edge so the page says which day it is
+     reading. The banner is the attention family — a decision about what is
+     shown, never a warning (§168) — and Back to today is its one act. The
+     pen is put away by mayAuthor() itself; the rule here only hides the
+     button that would open it. */
+  .pband-hist .linkbtn.asof-on { text-decoration:none; color:var(--ink); border:1px solid var(--gold-deep); border-radius:6px; padding:3px 8px; }
+  .pband-hist .linkbtn.asof-on b { font-weight:600; }
+  .asof-bar { display:flex; align-items:center; gap:14px; margin:0 0 14px; padding:10px 16px; border-radius:10px;
+              background:var(--attn-bg); color:var(--attn-tx); font-size:var(--fs-small); line-height:1.45; }
+  .asof-bar b { font-weight:700; color:inherit; }
+  .asof-bar .linkbtn { font:inherit; font-weight:600; color:inherit; background:none; border:0; padding:0; cursor:pointer;
+                       text-decoration:underline; text-underline-offset:2px; margin-left:auto; white-space:nowrap; }
+  .asof-pick { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .asof-pick .fld { width:auto; }
+  .asof-pick .hist-err { flex-basis:100%; }
+  body.asof .secpen { display:none; }
 
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
      A title is one line of prose however long it is, so this must read as a
@@ -641,7 +740,7 @@
      accent itself is chosen to work as a fill on the page, and on the panel it
      is 2.84:1 — the same pairing .banner strong already had to solve. */
   .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
-  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; white-space:pre-line; }
   .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
                border-top:3px solid var(--gold); background:var(--surface); }
   .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
@@ -1167,7 +1266,7 @@ html[data-client-settings] .viewer { display:none; }
     left:auto; right:0; transform:none; }
   /* The cell before it can overflow too once the pane is narrow, and that one
      has room on both sides — so it is capped rather than re-anchored. */
-  .hasnote::after { max-width:min(255px, 60vw); }
+  .hasnote::after { max-width:min(255px, calc(var(--winw) * 0.6)); }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
@@ -1206,6 +1305,16 @@ html[data-client-settings] .viewer { display:none; }
   details.valcard summary:hover { background:var(--surface-2); }
   details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
+
+  /* ── Themes box on the top layer's Foundation (§611.1) ─── */
+  .themeband { margin-top:20px; }
+  .themegrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  .themecard { display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:12px 15px; }
+  .themecard b { font-family:var(--serif); font-size:16px; font-weight:600; }
+  .themecard .themenote { font-size:13.5px; color:var(--ink-2); white-space:pre-line; }
+  .themeband input.themecode { width:5.5em; text-align:center; }
+  .themeband .why { display:inline; margin:0; }
 
   /* ── Temple entablature, fixed grid ───────────────────── */
   .entablature { grid-template-columns:repeat(3,1fr); gap:16px 26px; align-items:start; }
@@ -1316,7 +1425,7 @@ html[data-client-settings] .viewer { display:none; }
   .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
   .overlay.on { transition:opacity .12s ease, visibility 0s; }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
-           width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
+           width:min(940px,100%); max-height:calc(var(--winh) * 0.88); display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
   .modal-h { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
              border-bottom:1px solid var(--line); }
@@ -1368,7 +1477,7 @@ html[data-client-settings] .viewer { display:none; }
     .ks-k { text-align:left; }
     .ks-v { margin-bottom:7px; }
   }
-  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
+  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:var(--winh); border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
      The dialog carries the weight the quiet words in the head do not: what
@@ -2227,8 +2336,29 @@ html[data-client-settings] .viewer { display:none; }
      rather than assumed. */
   @media (max-width:1200px){
     .split:not(.setupsplit) { grid-template-columns:1fr; }
-    /* Stacked, the rail is not sticky and there is no gap above it to fill. */
-    .rail:not(.setuprail) { position:static; display:flex; overflow-x:auto; }
+    /* ── THE STRIP STAYS AND THE TITLE GOES (§609) ──────────────────────
+       Islam, of the Plan page on a squeezed window: *"the directions are not
+       freezed, they might be squeezed a bit but stay"*; then, of the title
+       pinned under them, *"is it a repetition?"* It is. Stacked, this rule
+       said `position:static`, so the strip scrolled away with the plan and
+       only the open direction's band stayed: switching meant scrolling back
+       up, and at 900 the fourth direction ran off the end as well.
+
+       NOW THE STRIP PINS, at the offset it already sits at — `.rail`'s own
+       `top`, no longer overridden here, so the flow position and the pin
+       are one number (§29.4) — and the band and the editing head that
+       replaces it scroll with the plan (below). The strip's open item names
+       the direction, and Done editing lives in the chrome's section row.
+       Measured at 1100x760: the rows start at y=254 under the strip against
+       263.7 under the pinned band, so pinning the strip costs nothing. Above
+       1200 the vertical rail and its pinned band are untouched.
+
+       `overflow` is the SORTABLE's now, not the rail's: a scroll box clips
+       its positioned descendants, and the rail's ground filler and corner
+       fill are exactly that. z-index 6 because the pane's corner acts sit at
+       5 and come later in the document, so at 5 the pen would paint over the
+       strip it slides under. */
+    .rail:not(.setuprail) { display:flex; overflow:visible; min-width:0; z-index:6; }
     /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
@@ -2241,13 +2371,155 @@ html[data-client-settings] .viewer { display:none; }
        `display:flex` on the wrapper rather than `display:contents`, which also
        works and would remove the wrapper's BOX — and `makeSortable` measures
        that box to decide where a dragged row lands. */
-    .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:0 0 auto; }
-    .split:not(.setupsplit) .rail::before { display:none; }
+    .rail:not(.setuprail) .sortable { display:flex; gap:2px; flex:1 1 auto; min-width:0;
+      overflow-x:auto; }
+    /* §53.7's ground above the pinned strip, across the full width now that
+       there is no gutter beside it to reach over — and ENDING ON THE BORDER'S
+       OUTER EDGE (§618). `bottom:100%` is measured from the padding box, so
+       the filler ran one pixel down over the strip's own top border and the
+       line was missing along the whole top: Islam, of the outlined strip, *"the
+       outer line is not around the whole thing is it broken?"* It was, and it
+       had been since §609 in the grey too. */
+    .split:not(.setupsplit) .rail::before { right:-1px; bottom:calc(100% + 1px); }
+    /* ── THE STRIP IS ITS OWN CARD (§618) ─────────────────────────────────
+       Islam: *"make the rail when it's in the top to be separate as if in a
+       separate card from the direction or capability data, just to be
+       appearing separately like the rail on the left"*; of five drawn
+       (design-mockups/strip-card/), *"go with D"*: an outer line in the open
+       item's own navy, and the gutter the side rail keeps kept UNDER the
+       strip while it is pinned, so the plan slides away into page ground
+       rather than up against the strip. The gutter is the corner layer below
+       reaching one `--split-gap` further down; at rest that band is the
+       split's own gap, already ground, so nothing at rest moves.
+
+       THE LINE IS THE OPEN ITEM'S OWN COLOUR — WHICH IS NOW THE DARK GREY
+       (§627), see the open item below. `--stone` was navy in the navy
+       palette and the Branding page never rewrites it, so under a tenant's
+       green chrome the strip stayed navy. */
+    .rail:not(.setuprail) { border-color:var(--ink-2); }
+    /* ITS FOUR ROUNDED CORNERS TAKE THE PAGE'S GROUND (§130.3's fill, on the
+       strip). Pinned, the plan's rows slide past behind them. At rest the
+       strip stands on that same ground — unlike the band, which sits in the
+       white card (§130.6) — so painting them always changes nothing at rest
+       and needs no observer. Each tile is the border box's own radius, so the
+       circle is the strip's own outer arc; and it is what rounds the open
+       item's fill at either end. */
+    .split:not(.setupsplit) .rail:not(.setuprail)::after {
+      content:""; position:absolute; inset:-1px; pointer-events:none;
+      bottom:calc(-1px - var(--split-gap, 16px));
+      background:
+        radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 100% 0, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) left 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
+        radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px),
+          var(--ground) var(--r)) right 0 bottom var(--split-gap, 16px) / var(--r) var(--r) no-repeat,
+        linear-gradient(var(--ground), var(--ground)) left bottom / 100% var(--split-gap, 16px) no-repeat; }
     .rail:not(.setuprail) .rhead, .rail:not(.setuprail) .rfoot, .rail:not(.setuprail) .rgroup { display:none; }
-    .rail:not(.setuprail) button.ritem { border-bottom:3px solid transparent; border-left:0; white-space:nowrap;
-      grid-template-columns:auto auto; }
-    .rail:not(.setuprail) button.ritem.on { border-left-color:transparent; border-bottom-color:var(--gold); }
+    /* ONE ROW, AND THE NAMES WRAP RATHER THAN RUN OFF THE END (§609). Islam:
+       *"the text needs to wrap"*. A flex row of the item's own parts in their
+       own order — handle, code, name, years, Missing, score — so every rail
+       that draws one (a unit's plan, its performance and its report, a
+       function's projects, the routes to market, the capabilities) lays out
+       the same way. The NAME is the only part that gives: it wraps, up to
+       three lines, and `overflow-wrap:anywhere` makes its smallest size a
+       letter rather than its longest word, so the strip shares the room in
+       proportion to the names and no direction leaves the strip. Measured on
+       Mobile's four: one line at 1100, two at 900 and 760; ten directions
+       still fit at 760. Past three lines a name ends in an ellipsis and the
+       whole of it is the name's `title`. */
+    .rail:not(.setuprail) button.ritem { display:flex; align-items:center; gap:8px;
+      flex:1 1 auto; width:auto; min-height:42px; padding:7px 14px 4px;
+      border-bottom:3px solid transparent; border-left:0; }
+    .rail:not(.setuprail) .ritem > * { flex:none; }
+    .rail:not(.setuprail) .ritem .rcode { margin:0; white-space:nowrap; }
+    .rail:not(.setuprail) .ritem b { flex:0 1 auto; min-width:0; line-height:1.3;
+      overflow-wrap:anywhere; display:-webkit-box; -webkit-box-orient:vertical;
+      -webkit-line-clamp:3; overflow:hidden; }
+    .rail:not(.setuprail) .ritem .rgap, .rail:not(.setuprail) .ritem .yrtag { margin-left:0; }
+    /* A STRIP THAT CARRIES NUMBERS GIVES THE NAME ITS OWN LINE. Performance's
+       scores, a report's tallies and a plan's Missing counts are 40–65px
+       each that do not shrink, and beside the code they left a name at 760px
+       about 40px — measured, words broken mid-way ("Portfoli / o &"). So in
+       such a strip the code and the numbers share the first line, the
+       numbers at its right, and the name takes the item's whole width
+       beneath them. Asked of the STRIP, not the item, so a strip never mixes
+       the two shapes; the plan strip, which has no numbers, keeps its one
+       line. */
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) button.ritem {
+      flex-wrap:wrap; column-gap:6px; row-gap:3px; align-content:center; }
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) .ritem .rcode { margin-right:auto; }
+    .rail:not(.setuprail):has(.ritem > .rnum, .ritem > .rgap) .ritem b { order:1; flex:1 1 100%; }
+    .rail:not(.setuprail) .railadd { flex:none; align-self:center; padding:0 14px;
+      white-space:nowrap; }
     .rail:not(.setuprail) .ritem .rsub { display:none; }
+    /* THE OPEN ONE WEARS THE SECTION SWITCH'S "SELECTED" (§609): the same
+       fill and `--surface` type as Plan in Foundation | SWOT | Plan, over the
+       gold edge it always had. The others step back to `--ink-3` and come up
+       to `--ink` under the pointer. Islam: *"the highlighting needs to be more
+       clear and the other directions titles to be dimmed"*.
+
+       AND THAT FILL IS THE DARK GREY, NOT THE PALETTE'S NAVY (§627). It was
+       `--stone`, which the navy palette sets to the house navy and which the
+       Branding page never rewrites — so a tenant whose bar is green got a
+       green chrome and a navy strip. Of the fills drawn (the tenant's bar
+       colour, a dark grey, a light grey, type only, the accent;
+       design-mockups/brand-strip/ and the live one beside it), Islam: *"the
+       actual color of the client might be too much"*, then *"dark grey with
+       the accent line beneath"*. `--ink-2` is the palette's second ink — body
+       text's own grey — so the fill is neutral under any tenant's colour and
+       the tenant shows where it already does: the chrome above and the accent
+       edge under the open item. In the dark palettes the second ink is light
+       and `--surface` dark, so the fill inverts with the theme as the switch's
+       does. The switch takes the same grey (arrange.css, `.secseg`).
+
+       §41 took a solid fill OFF this row once, so that a score keeps its
+       scoring colour — and it still does: on the filled item the score, the
+       Missing count and the years tag sit on a `--surface` ground of their
+       own, so their colours read exactly as they do on every other row. A
+       report's tally already is a chip and is left alone. The vertical rail
+       keeps §41's quiet ground; only the strip fills. */
+    .rail:not(.setuprail) button.ritem.on,
+    .rail:not(.setuprail) button.ritem.on:hover { background:var(--ink-2);
+      border-bottom-color:var(--gold); }
+    .rail:not(.setuprail) .ritem.on .rcode,
+    .rail:not(.setuprail) .ritem.on b { color:var(--surface); }
+    .rail:not(.setuprail) .ritem.on .grip i { background:var(--surface); }
+    .rail:not(.setuprail) .ritem.on .rnum:not(:has(.rtally)),
+    .rail:not(.setuprail) .ritem.on .rgap { background:var(--surface); border-radius:999px;
+      padding:2px 7px; }
+    .rail:not(.setuprail) .ritem.on .yrtag { background:var(--surface); }
+    .rail:not(.setuprail) .ritem:not(.on) .rcode,
+    .rail:not(.setuprail) .ritem:not(.on) b { color:var(--ink-3); }
+    .rail:not(.setuprail) .ritem:not(.on):hover .rcode,
+    .rail:not(.setuprail) .ritem:not(.on):hover b { color:var(--ink); }
+    /* WHERE ONE CLOSED DIRECTION ENDS AND THE NEXT BEGINS (§627). Islam:
+       *"an enhanced design to show somehow a separator between the
+       directions, maybe we have them in separate cards or a light grey
+       separator"*; of the four drawn (none, a full-height hairline, an inset
+       hairline, separate cards), *"separation hairline inset"*. A 1px hairline
+       in `--line`, stopped 9px short of the strip's top and bottom, before
+       every item but the first — drawn as the item's own ::before so the
+       items' 2px gap closes to nothing and the hairline is the only thing
+       between them. None beside the open item, on either side: its fill is
+       its edge. Separate cards were drawn and not taken: their gaps and
+       borders cost each name about 30px, so at 1100 every name wrapped and
+       the pinned strip grew from 46px to 80px. */
+    .rail:not(.setuprail) .sortable { gap:0; }
+    .rail:not(.setuprail) .sortable > button.ritem:not(:first-child)::before { content:"";
+      position:absolute; left:0; top:9px; bottom:9px; width:1px; background:var(--line); }
+    .rail:not(.setuprail) .sortable > button.ritem.on::before,
+    .rail:not(.setuprail) .sortable > button.ritem.on + button.ritem::before { display:none; }
+    /* AND THE TITLE UNDER IT SCROLLS WITH THE PLAN (§609), reading or
+       editing — the band §53.7 pinned and the head §194 pinned in its place.
+       Not sticky means it never leaves its flow position, so `pinWatch()`
+       never marks it and its corner fill (§130.6) never paints. */
+    .split:not(.setupsplit) > .pane > .pband,
+    .split:not(.setupsplit) > .pane > .ptitle.edhead { position:relative; top:auto; }
+    .split:not(.setupsplit) > .pane > .pband::before,
+    .split:not(.setupsplit) > .pane > .ptitle.edhead::before { display:none; }
   }
 
   /* The Report section in the third row. Gold while a cycle is asking for
@@ -2528,6 +2800,16 @@ html[data-client-settings] .viewer { display:none; }
      question — is this person active, and may I look through their eyes — and
      the column is wide enough for both once it is allowed not to wrap. */
   .unitcfg td.cc { white-space:nowrap; }
+  /* §631: A CELL NEVER SPILLS. "Plans in" keeps its word whole and lets the
+     count drop under it when the column has no room for both — a client with
+     a longer word for how it plans would otherwise run into Key Objectives
+     again, at any zoom. */
+  .unitcfg td.cc.plansin { white-space:normal; line-height:1.9; }
+  /* …and in a window too narrow even for the word, the word wraps inside its
+     own tag rather than past the cell's edge. Measured: at 1280 and wider it
+     never has to. */
+  .unitcfg td.cc.plansin .pill { display:inline-block; max-width:100%; line-height:1.35;
+    vertical-align:middle; white-space:normal; }
   .unitcfg td.cc .linkbu { margin-left:8px; }
 
   .rolechip { display:inline-flex; align-items:baseline; gap:5px; margin:0 5px 3px 0;
@@ -2870,7 +3152,7 @@ html[data-client-settings] .viewer { display:none; }
   /* Inside a settings table the field fills its column, the same as the
      select it replaced (`.cfg .fld { width:100% }`). */
   .cfg .ssbtn { width:100%; }
-  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(100vw - 16px));
+  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(var(--winw) - 16px));
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
@@ -3005,7 +3287,7 @@ html[data-client-settings] .viewer { display:none; }
      against the flow position instead would need JS and would waste 33px of
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
+               max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                       - var(--rail-gap, 22px)
                                       - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
@@ -3521,7 +3803,7 @@ html[data-client-settings] .viewer { display:none; }
      the top of the TABLE'S box rather than the window — which is what is
      wanted: the toolbar above it is not sticky, and a header that outran its
      own table would float over the note beneath it. */
-  .cfg.srctable { max-height:calc(100vh - 320px); overflow:auto; }
+  .cfg.srctable { max-height:calc(var(--winh) - 320px); overflow:auto; }
   .cfg.srctable table { min-width:820px; }
   .cfg.srctable thead th { position:sticky; top:0; z-index:2; }
   .cfg.srctable tbody td { padding-top:5px; padding-bottom:5px; }
@@ -3641,9 +3923,9 @@ html[data-client-settings] .viewer { display:none; }
 
      `overflow:auto` and a height are still what the sticky header pins to:
      without a scroll container `top:0` does nothing at all (§69.19). */
-  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  .cfg.peoplebox { overflow:auto; max-height:calc(var(--winh) - 300px); }
   .panefill { display:flex; flex-direction:column;
-              max-height:calc(100dvh - var(--chrome-h, 118px)
+              max-height:calc(var(--wind) - var(--chrome-h, 118px)
                                      - var(--rail-gap, 22px)
                                      - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
@@ -4312,6 +4594,42 @@ html[data-client-settings] .viewer { display:none; }
     display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
+  /* ── §630: AND THE ORGANISATION TABLES' OPEN CELL ───────────────────
+     The register's open cell, the same rules for the same reasons (§372,
+     §373): the control fills the cell's content box and stops at its edge.
+     A person cell keeps its name in a button ringed as a focused box is, and
+     its list floats over the rows below (`.ocellpop`, placed by the shell). */
+  .cfg td.ocellopen { overflow:visible; }
+  .cfg td.ocellopen .fld,
+  .cfg td.ocellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:100%;
+    box-sizing:border-box; }
+  .cfg td.ocellopen .ocellbtn { outline:2px solid var(--gold); outline-offset:1px;
+    border-color:var(--gold); }
+  /* A box takes the page's type unless it is a code (`.mono`): a plain
+     `.cfg` table inherits the typewriter face into its cells, and a name
+     typed in that face reads as a different kind of value. */
+  .cfg td.ocellopen input.fld:not(.mono) { font-family:var(--sans); }
+  /* AND THE BOX FILLS THE CELL. A text box's own width stops at about 170px,
+     which a 30% column leaves half empty. These four tables are all fixed
+     layout, where a percentage resolves against the content box — measured,
+     every box ends on its cell's content edge — so the register's warning
+     about `width:100%` (an AUTO table, §372) does not reach them. */
+  .cfg td.ocellopen input.fld { width:100%; }
+  .ocellpop { position:fixed; z-index:60; }
+  /* The capabilities' table, at the widths its mockup was approved at
+     (§630) — set on the heads, which `.cfg`'s own first-column rule would
+     otherwise win over a <col>. */
+  .cfg table.cappcfg { table-layout:fixed; width:100%; }
+  .cfg table.cappcfg th:nth-child(1) { width:5%; }
+  .cfg table.cappcfg th:nth-child(2) { width:8%; }
+  .cfg table.cappcfg th:nth-child(3) { width:30%; }
+  .cfg table.cappcfg th:nth-child(4) { width:17%; }
+  .cfg table.cappcfg th:nth-child(5) { width:16%; }
+  .cfg table.cappcfg th:nth-child(6) { width:10%; }
+  .cfg table.cappcfg th:nth-child(7) { width:9%; }
+  .cfg table.cappcfg th:nth-child(8) { width:44px; }
+  .ocellpop .picker { box-shadow:0 10px 28px rgba(15,23,42,.18); }
   /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
      Islam: "on opening something the arrow appears, no need for the arrow.
      and for the roles as well no need for the arrow showng the the box is a
@@ -4605,7 +4923,7 @@ html[data-client-settings] .viewer { display:none; }
                 font-size:11px; font-weight:700; }
   .ddbtn.has .ddlab { font-weight:600; color:var(--ink); }
   .ddcar { color:var(--ink-3); font-size:10px; }
-  .ddpop { position:fixed; z-index:60; width:280px; max-width:92vw;
+  .ddpop { position:fixed; z-index:60; width:280px; max-width:calc(var(--winw) * 0.92);
            background:var(--surface); border:1px solid var(--line);
            border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.18);
            padding:8px; display:flex; flex-direction:column; gap:6px; }
@@ -4730,7 +5048,7 @@ html[data-client-settings] .viewer { display:none; }
   .hmenu.open .hcount { background:var(--surface); }
   /* Wide enough for a table of headings and dates, and capped so a long list
      scrolls inside the panel instead of running off the window. */
-  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+  .hmenu-panel.wide { width:min(600px, calc(var(--winw) * 0.76)); max-height:calc(var(--winh) * 0.64); overflow:auto;
                       padding:4px 13px 13px; }
   .hmenu-panel.wide .section { margin:0; }
   /* §88's 150px cap exists so ONE long value cannot hold a whole table open.
@@ -5179,6 +5497,23 @@ html[data-client-settings] .viewer { display:none; }
   .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── THE FOREFRONT SWITCH (§629) ─────────────────────────────────
+     Its neighbours' shape (+ Add, Register file), because it sits among them
+     and is pressed like them; a box in front because pressing it changes
+     what the table holds and the box says which way it is. Never the accent
+     (§94.8): showing consultants is a look, not an alarm. Not scoped under
+     `.phead2` — the register's title row is `.setuphead` now, and a rule
+     scoped to the old row draws nothing (measured). */
+  .regff { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    font:600 12.5px/1 var(--sans); padding:8px 12px; border-radius:var(--r-pill);
+    white-space:nowrap; }
+  .regff:hover { border-color:var(--gold); color:var(--ink); }
+  .regff .box { width:13px; height:13px; border:1.5px solid var(--ink-3);
+    border-radius:3px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:10px; line-height:1; background:var(--surface); }
+  .regff.on { color:var(--ink); }
+  .regff.on .box { background:var(--ink); border-color:var(--ink); color:var(--surface); }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -6085,6 +6420,13 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      already announced by its heading; the line was doing the job twice. */
   .section { margin-top:26px; padding-top:0; border-top:0; }
   .section:first-of-type { margin-top:14px; }
+  /* §610: A RAIL OPENING THE PAGE SITS ONE GAP UNDER THE CHROME, NOT TWO.
+     The Directions page wrapped its rail in a headless section (§561.1 took
+     the heading away), so the section's 14px stacked on the view's 22px and
+     the rail stood 36px down where the Strategy page's stands 22px — Islam:
+     *"there is a space above the cards and the rail not needed"*. Only a
+     section with nothing before its rail; one with a heading keeps its air. */
+  .view > .section:first-child:has(> .split:first-child) { margin-top:0; }
   /* The single gap between the chrome and the page. The rail's sticky offset
      is calc(--chrome-h + this), so the rail's flow position and its pin
      position are the same number by construction and it cannot slide. */
@@ -6140,7 +6482,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      nowrap keeps column titles on one line, the tooltip inherited it too and
      ran off the edge as a single line. It sets its own wrapping. */
   .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
-                font-weight:400; width:min(320px,70vw); }
+                font-weight:400; width:min(320px,calc(var(--winw) * 0.7)); }
 
   /* A tooltip on the last column would open past the right edge, so tips near
      an edge anchor to it instead of centring on the icon. */
@@ -6443,8 +6785,20 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
-  .minirow .sub-n { font-size:9.5px; color:var(--ink-3); letter-spacing:.06em;
-                    text-transform:uppercase; font-weight:700; margin-top:2px; }
+  /* §610: the pillar pane's score pair, headline first (`scorePair`); §616:
+     and the unit Overview's cards above the rail. */
+  .scores.hero .card.tight { padding:18px 20px 16px; }
+  .scores.hero .card.tight .score-h { margin-bottom:10px; }
+  .scores.hero .headline { align-items:center; gap:14px; }
+  .scores.hero .headline .big { font-size:60px; letter-spacing:-.04em; }
+  .scores.hero .headline .big small { font-size:24px; margin-left:2px; }
+  .scores.hero .headline .ofplan { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .headline .drill { align-self:flex-end; margin-bottom:9px; }
+  .scores.hero .minirow { margin-top:14px; padding-top:11px; }
+  .scores.hero .minirow em { font-size:9px; }
+  .scores.hero .minirow b { font-size:12.5px; font-weight:600; color:var(--ink-2); }
+  .scores.hero .unrep { font-size:var(--fs-small); color:var(--ink-2); background:var(--attn-bg);
+    border-radius:6px; padding:2px 8px; }
 
   .imp-checks { display:flex; flex-direction:column; gap:6px; margin:0 0 14px; }
   .chk { display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:baseline;
@@ -7663,7 +8017,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      would cover the navigation (§165's rule, at the other edge). */
   .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
     transform:none; bottom:auto; top:calc(100% + 8px);
-    width:max-content; max-width:min(300px, 60vw); }
+    width:max-content; max-width:min(300px, calc(var(--winw) * 0.6)); }
 
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
@@ -7913,6 +8267,16 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     align-items:center; gap:5px; list-style:none; }
   #subtabs .bandsmenu > summary:hover,
   .tabs .bandsmenu > summary:hover { color:var(--ink); border-color:var(--ink-3); }
+  /* §154's pairing, held in this row too. `.editbtn` is `background:none`,
+     and `--gold-deep` is right on white (4.99) but this row's ground is
+     `--surface-2`, where it measured 4.45 — under the line, found by
+     checks/state-contrast.py on Presentation's caret. So an outlined button
+     here stands on the surface, as the Bands pill beside it already does;
+     its hover keeps §154's wash and twin. */
+  #subtabs .tabacts .editbtn:not(.cta),
+  .tabs .tabacts .editbtn:not(.cta) { background:var(--surface); }
+  #subtabs .tabacts .editbtn:not(.cta):hover,
+  .tabs .tabacts .editbtn:not(.cta):hover { background:var(--attn-bg); color:var(--attn-tx); }
   .bandsmenu > summary::-webkit-details-marker { display:none; }
   /* The panel hangs BELOW the row, so the row may not clip it. The tab row has
      no reason to hide anything horizontally and this is the only thing that
@@ -8333,7 +8697,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
    segmented pair. */
 .mphead { display:flex; align-items:center; flex-wrap:wrap; gap:6px 0; }
 .mpseg { text-transform:none; letter-spacing:0; font-weight:400; }
-.mpseg button:disabled { color:var(--ink-3); cursor:not-allowed; }
+.mpseg button:disabled, .mpseg button[aria-disabled="true"] { color:var(--ink-3); cursor:not-allowed; }
 /* A quarter carries its months in its label, so its box is wider than a
    month's — 112px, measured to sit four on one line down to 1100. */
 .mpm.mpq { width:112px; }
@@ -8406,7 +8770,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      is the one thing somebody opens this page to read. */
   .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
             margin:0 0 16px; }
-  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+  .drvtot-n { font:650 clamp(26px, calc(var(--winw) * 0.032), 34px)/1 var(--sans); color:var(--ink);
               letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
   .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
   /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection
@@ -8525,7 +8889,12 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
     color:var(--ink-2); font-weight:500; }
   .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
-  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+  /* The selected section's fill is the palette's second ink, the dark grey,
+     not `--stone` (§627): `--stone` is the house navy in the navy palette and
+     the Branding page never rewrites it, so under a tenant's own chrome the
+     switch kept saying navy. The squeezed strip of directions wears the same
+     fill (group-extra.css, §609/§627) and the two must agree. */
+  .tabs .secseg button[aria-selected="true"] { background:var(--ink-2); color:var(--surface);
     font-weight:600; }
   .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
@@ -8820,6 +9189,22 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
   .dslide td.idx { width:60px; color:var(--none); font-family:var(--mono); font-size:18px; text-align:right; }
   .dslide th.idx { width:60px; text-align:right; }
   .dslide tr.dim td { opacity:.5; }
+  /* ── §597: A HIDDEN ROW, KEPT ON THE SLIDE ───────────────────────────
+     The plan page's own two signs (§233), at the deck's size: every cell of
+     the row in the quiet ink at regular weight — a band colour, a bold
+     figure or a coloured pill would say the row still counts, and it does
+     not — and the chip after the name. Ink only, never display:none:
+     keeping the row on the slide is the whole of this feature. */
+  .dslide tr.hiddenrow td, .dslide tr.hiddenrow td.final, .dslide tr.hiddenrow td.lead,
+  .dslide tr.hiddenrow td.lead.strong, .dslide tr.hiddenrow td b,
+  .dslide tr.hiddenrow td.good, .dslide tr.hiddenrow td.attn, .dslide tr.hiddenrow td.warn,
+  .dslide tr.hiddenrow td.bad, .dslide tr.hiddenrow .good, .dslide tr.hiddenrow .attn,
+  .dslide tr.hiddenrow .warn, .dslide tr.hiddenrow .bad, .dslide tr.hiddenrow .missing,
+  .dslide tr.hiddenrow td.dstat .dlate { color:var(--ink-3); font-weight:400; }
+  .dslide tr.hiddenrow td.dstat .dpill { background:none; border:1.5px dashed var(--none); color:var(--ink-3); }
+  .dslide tr.hiddenrow td.dstat .dlate::before { background:var(--none); }
+  .dslide tr.hiddenrow .qs i.on { background:var(--surface-2); border-color:var(--none); color:var(--ink-3); }
+  .dslide .hidchip { font-size:13px; padding:6px 10px; margin-left:12px; vertical-align:middle; }
   .dslide .lead { font-weight:500; }
   /* §572: the key measures' and tactics' names bold, the outcome regular. */
   .dslide .lead.strong { font-weight:700; }
@@ -8838,7 +9223,9 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
      supporting fact, set below the row's own size (§50). */
   .dslide td.collabs { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:22ch; }
   .dslide td.collabs .nobody { color:var(--none); }
-  .dslide .withnote th:last-child { width:24%; }
+  /* §604: the Note no longer keeps a quarter of the slide (`width:24%`, here
+     until now) — every slide table's columns are sized to what they hold by
+     `deckColFit()`, the Note's among them. */
   .dirs td.dirname b { font:400 40px/1.2 var(--serif); display:block; }
   .dirs td.dirname .dsub { font-size:19px; margin-top:8px; }
   .dirs td { padding:30px 18px; }
@@ -10283,6 +10670,10 @@ textarea.fld.cmpbox { min-height: 84px; width: 100%; }
 .headdetail .hdf { font-weight:600; }
 .headdetail .hdv i { font-style:normal; color:var(--ink-3); font-size:.85em; }
 .headdetail .hdmore, .headdetail .hdnote { color:var(--ink-3); font-size:19px; }
+/* §616: the lines under the headline speak more quietly than it does —
+   smaller, and a figure in the top band in ink rather than in colour. */
+.headdetail { font-size:20px; }
+.dslide .headdetail .hdf.quiet { color:var(--ink-2); font-weight:500; }
 
 /* ── §579: LINE BY LINE ───────────────────────────────────────────────────
    A line waiting is transparent, never removed, so nothing moves as the
@@ -10420,7 +10811,7 @@ body.presenting .chatdock { display:none; }
                 font-variant-numeric:tabular-nums; }
 
 /* ── THE PANEL ─────────────────────────────────────────────────────────── */
-.chatpanel { width:376px; max-width:calc(100vw - 32px);
+.chatpanel { width:376px; max-width:calc(var(--winw) - 32px);
              background:var(--surface); border:1px solid var(--line); border-radius:12px;
              overflow:hidden; box-shadow:0 6px 26px rgba(0,0,0,.18);
              display:flex; flex-direction:column; }
@@ -10464,7 +10855,7 @@ body.presenting .chatdock { display:none; }
    CAPPED TO THE WINDOW for the reason `.chinbox` is: a fixed height on a
    short laptop puts the composer off the bottom of the screen, which is the
    one control somebody opened the panel to use. */
-.chatpanel { height:531px; max-height:calc(100dvh - 96px); }
+.chatpanel { height:531px; max-height:calc(var(--wind) - 96px); }
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
             background:var(--ground); flex:1 1 auto; min-height:0;
             overflow-y:auto; }
@@ -10589,7 +10980,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
+           height:calc(var(--wind) - var(--chin-top, 190px) - var(--pane-foot, 20px));
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -10715,7 +11106,7 @@ body.presenting .chatdock { display:none; }
    panel's padding and nothing else — asserted as the PROPERTY (no content
    above the heading, none below the fade) rather than as the number, so a
    later change to that padding goes red rather than silent (§94.8). */
-.hmenu-panel.chset { max-height:64vh; overflow-y:auto; overscroll-behavior:contain;
+.hmenu-panel.chset { max-height:calc(var(--winh) * 0.64); overflow-y:auto; overscroll-behavior:contain;
                      scrollbar-width:thin; scrollbar-color:var(--line) transparent; }
 .chset .chset-h { position:sticky; top:0; z-index:2;
                   box-shadow:0 -6px 0 var(--surface); }
@@ -11128,7 +11519,7 @@ body.presenting .tourdock { display:none; }
    in general"): where the card has no clear space and must dock over the
    page, what is under it stays readable through it. */
 .tourdock .tcard {
-  position:absolute; width:310px; max-width:calc(100vw - 24px);
+  position:absolute; width:310px; max-width:calc(var(--winw) - 24px);
   background:color-mix(in srgb, var(--surface) 92%, transparent);
   -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
   border:1px solid var(--line); border-radius:10px;
@@ -11518,21 +11909,19 @@ body.presenting #buildband { display:none; }
 .csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
 .csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
 
-/* the step rail */
-.csetup .wzrail { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 20px; }
-.csetup .wzstep { display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
-                  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface);
-                  color:var(--ink-2); font:600 12.5px/1.5 var(--sans); cursor:pointer; }
-.csetup .wzstep:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
-.csetup .wzstep .n { width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
-                     background:var(--surface-2); color:var(--ink-3); font:600 11px/1 var(--mono);
-                     flex:none; font-variant-numeric:tabular-nums; }
-.csetup .wzstep[aria-current="step"] { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
-.csetup .wzstep[aria-current="step"] .n { background:var(--cs-acc); color:var(--cs-acc-ink); }
-.csetup .wzstep.done { color:var(--ink-3); }
-.csetup .wzstep.done .n { background:var(--good-bg); color:var(--good-tx); }
+/* §624: the Profile's three tabs. The step pills went: each step is a page
+   on the rail now. Underlined, the platform's accent under the one that is
+   on, so a tab reads as where you are rather than as a button to press. */
+.csetup .wztabs { display:flex; gap:28px; border-bottom:1px solid var(--line); margin:4px 0 22px; max-width:760px; }
+.csetup .wztab { all:unset; cursor:pointer; font:600 14px/1 var(--sans); color:var(--ink-3);
+                 padding:10px 0 12px; border-bottom:3px solid transparent; margin-bottom:-1px; }
+.csetup .wztab:hover { color:var(--ink); }
+.csetup .wztab:focus-visible { outline:2px solid var(--cs-acc-tx); outline-offset:3px; border-radius:2px; }
+.csetup .wztab.on { color:var(--ink); border-bottom-color:var(--cs-acc); }
+.csetup .wztab .ct { font-weight:500; color:var(--ink-3); margin-left:6px; font-size:12.5px; }
 
 .csetup .wzcol { max-width:760px; }
+.csetup .wzpend { margin:14px 0 0; font-size:var(--fs-small); color:var(--attn-tx); }
 .csetup .wzq { font:600 20px/1.3 var(--sans); margin:4px 0 12px; text-wrap:balance; }
 .csetup .wzwhy { color:var(--ink-3); font-size:var(--fs-small); margin:14px 0 0; max-width:62ch; }
 .csetup .wzempty { color:var(--ink-3); font-size:var(--fs-small); font-style:italic; margin:0 0 10px; }
@@ -11542,6 +11931,10 @@ body.presenting #buildband { display:none; }
 .csetup .wzarched { border:1px solid var(--line); background:var(--surface-2); border-radius:var(--r-md);
                     padding:10px 13px; margin:0 0 16px; font-size:var(--fs-small); color:var(--ink-2); }
 .csetup .wzarched b { color:var(--ink); }
+/* §621: the shared-word warning that came over from Terminology — the
+   platform's own bad-note colours, because it asks for a change. */
+.csetup .wzarched.wzclash { border-color:var(--bad); background:var(--bad-bg); color:var(--bad-tx); }
+.csetup .wzarched.wzclash b { color:var(--bad-tx); }
 
 /* rows you add to */
 .csetup .wzrows { display:flex; flex-direction:column; gap:6px; }
@@ -11605,6 +11998,23 @@ body.presenting #buildband { display:none; }
 .csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
                        padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
 .csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* its icon (§629): the two choices on the left, what Home draws on the right */
+.csetup .wzicon { margin-top:22px; }
+.csetup .wzicon .iconrow { display:flex; align-items:flex-start; gap:28px; flex-wrap:wrap; margin-top:6px; }
+.csetup .wzicon .iconpick { display:flex; flex-direction:column; gap:8px; max-width:280px; }
+.csetup .wzicon .iconopt { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-body); color:var(--ink); cursor:pointer; }
+.csetup .wzicon .iconopt input:disabled + * { cursor:default; }
+.csetup .wzicon .iconown { display:flex; align-items:center; gap:12px; }
+.csetup .wzicon .iconsaid { margin:2px 0 0; font-size:var(--fs-small); line-height:1.5; color:var(--gold-deep); }
+.csetup .wzicon .iconprev { display:flex; gap:18px; padding:12px 16px; border:1px solid var(--line);
+                            border-radius:var(--r-md); background:var(--surface); }
+.csetup .wzicon .icontile { margin:0; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.csetup .wzicon .icontile img,
+.csetup .wzicon .icontile .iconinit { width:56px; height:56px; border-radius:12px; box-sizing:border-box; }
+.csetup .wzicon .icontile img { object-fit:contain; background:#fff; padding:3px; border:1px solid var(--line); }
+.csetup .wzicon .icontile .iconinit { display:flex; align-items:center; justify-content:center;
+                                      background:var(--panel); color:var(--gold); font:700 20px/1 var(--sans); }
+.csetup .wzicon .icontile figcaption { font-size:var(--fs-micro); color:var(--ink-3); }
 /* the branding, drawn by its own renderer inside the first step */
 .csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
 
@@ -11637,19 +12047,22 @@ body.presenting #buildband { display:none; }
                     color:var(--ink-3); margin-bottom:8px; }
 .csetup .wzendwhy { margin:0 0 12px; font-size:var(--fs-small); color:var(--ink-3); max-width:62ch; }
 .csetup .wzendrow { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.csetup .wzendq { color:var(--ink-3); font-size:var(--fs-small); margin-right:5px; }
 .csetup .wzask { border:1px solid var(--bad); background:var(--bad-bg); border-radius:var(--r-md); padding:13px 15px; }
 .csetup .wzask p { margin:0 0 11px; font-size:var(--fs-small); color:var(--ink); }
 .csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
 .csetup .wzask .row { margin-top:12px; }
 
-/* ── the rail's strip (§360): Getting started, under the head ─────────── */
-.setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
-                        padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
-                        background:var(--surface); color:var(--ink); font:inherit; }
-.setuprail .railstart:hover { background:var(--surface-2); }
-.setuprail .railstart.on { box-shadow:inset 3px 0 0 var(--gold); }
-.setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
-.setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
+/* ── §624: the client group's count and marks. The strip that was here
+   (Getting started under the head, §360) went: its two pages are rows of the
+   rail's first group. The count sits where a folded group's number does; a
+   tick is the platform's done green, the dot the accent of something still
+   to do — neither ever a pill, which on this rail means "waiting". */
+.setuprail .rgroup .rgprog { margin-left:auto; font:500 10.5px/1 var(--sans); letter-spacing:0;
+                             text-transform:none; color:var(--ink-3); }
+.setuprail .ritem .ridone { margin-left:auto; flex:none; color:var(--good-tx); font:700 12px/1 var(--sans); }
+.setuprail .ritem .ritodo { margin-left:auto; flex:none; width:7px; height:7px; border-radius:50%;
+                            background:var(--gold); }
 .setuprail .railback.railfwd { display:inline-block; }
 
 /* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════
@@ -11909,7 +12322,7 @@ body.presenting #buildband { display:none; }
           color:var(--ink); background:var(--surface); border:1px solid var(--line);
           border-radius:var(--r-sm, 6px); padding:4px 10px; cursor:pointer; }
 .copnew:hover, .copnew:focus-visible { border-color:var(--gold); outline:none; }
-.coplist { display:flex; flex-direction:column; max-height:42vh; overflow-y:auto; }
+.coplist { display:flex; flex-direction:column; max-height:calc(var(--winh) * 0.42); overflow-y:auto; }
 .copitem { display:flex; flex-direction:column; gap:2px; text-align:left; width:100%;
            background:transparent; border:0; border-bottom:1px solid var(--line);
            padding:9px 12px; cursor:pointer; font:inherit; color:var(--ink); }
@@ -11939,7 +12352,7 @@ body.presenting #buildband { display:none; }
 .copask { background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
           padding:10px 12px; margin-bottom:10px; font-size:var(--fs-note, 13.5px); color:var(--ink);
           display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;
+.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:calc(var(--winh) * 0.52); overflow-y:auto;
            padding:4px 2px 10px; }
 /* §470: the conversation's text size. CSS zoom on a wrapper INSIDE the
    scrolling box, so the box keeps its own height and only what is in it
@@ -12043,7 +12456,7 @@ body.presenting #buildband { display:none; }
      that already fitted — the window moved and the chat did not. A page sized
      to the window takes the small foot, as Setup's does (§167). */
   .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
-  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
+  .coppane { height:calc(var(--wind) - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
   .coprails { min-height:0; }
   .coprail { display:flex; flex-direction:column; min-height:0; }
   .coprail.copchats { flex:1 1 auto; }

@@ -1,0 +1,324 @@
+<title>Titles And One Look</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Two questions from Islam (2026-10-24): which font for Home's card titles,
+   since the serif looks off; and how My tasks and Clients take Home's look.
+   Tokens are the live console's (platform.html); sizes are the console's
+   own, drawn here at 100% (the console shows them at 80% on a computer). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-late:#FF9B8F;--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;--ff-rule:rgba(255,255,255,.12);
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--warn:#8A6410;--bad:#B23025;--bad-bg:#FBEDEB;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33211F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1400px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:90ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 14px;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:12px 0 0;font-size:13px}
+.toc a{color:var(--amber-tx);font-weight:600;text-decoration:none}
+section.part{margin-top:44px}
+.ph2{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px;flex-wrap:wrap}
+.ph2 .n{font:600 12px var(--mono);color:var(--amber-tx)}
+.ph2 h2{margin:0;font-size:19px;font-weight:600}
+.ph2 p{margin:0;color:var(--ink-3);font-size:13px}
+.lab{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.lab.after{color:var(--good)}
+.lab::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.rec{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 7px}
+.why{margin:10px 0 0;font-size:13px;color:var(--ink-2);max-width:92ch}
+.why b{color:var(--ink)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px;align-items:start}
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.pad{padding:16px}
+
+/* the column, as live */
+.app{display:flex}
+.side{width:224px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.sbhead{display:flex;align-items:center;gap:8px;min-height:58px;padding:12px 8px 12px 14px;border-bottom:1px solid var(--ff-rule)}
+.logo{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;background:var(--amber);color:#0F2C69}
+.logo svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.brand{display:flex;flex-direction:column;line-height:1.15}
+.brand b{font-size:12px;font-weight:700;color:var(--ff-ink);white-space:nowrap}
+.brand span{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+.nav{padding:10px;display:flex;flex-direction:column;gap:12px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:13.5px;padding:8px 10px;border-radius:8px;color:#C3CFE4;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink);font-weight:600}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.main{flex:1;min-width:0}
+.pg{padding:16px 20px 24px}
+
+/* the card, Home's own, with the title font as a choice */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;min-width:0;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.cic svg{width:17px;height:17px}
+.cic.late{background:var(--bad-bg);color:var(--bad)}
+.chd h2{margin:0;white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.cnt.late{background:var(--bad);color:#fff}
+.chd .sp{flex:1}
+.link{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--amber-tx);white-space:nowrap}
+.sort{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3)}
+.sort .sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.sort .sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2)}
+.sort .sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+/* the four title fonts */
+.fS h2{font-family:var(--serif);font-weight:500;font-size:18px}
+.fA h2{font-family:var(--font);font-weight:650;font-size:15.5px;letter-spacing:-.005em}
+.fB h2{font-family:var(--font);font-weight:700;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.fC h2{font-family:var(--font);font-weight:600;font-size:17px;letter-spacing:-.015em;color:var(--ff)}
+:root[data-theme="dark"] .fC h2{color:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fC h2{color:var(--ink)}}
+.fD h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:18px}
+/* round two (Islam: "can we make the serif bold? and maybe option A with a bigger font") */
+.fSB h2{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:-.005em}
+.fSB2 h2{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:19px}
+.fAL h2{font-family:var(--font);font-weight:700;font-size:19px;letter-spacing:-.015em}
+
+/* rows */
+.task{display:grid;grid-template-columns:17px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
+.task:last-child{border-bottom:0}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);margin-top:1px}
+.late .tick{border-color:var(--bad)}
+.task .t{font-size:13.5px;line-height:1.4}
+.task .m{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
+.task .m b{font-weight:600;color:var(--ink-2)}
+.wh{font-size:12px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.late .wh{color:var(--bad)}
+.cl{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line-soft)}
+.cl:last-child{border-bottom:0}
+.cm{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 10.5px/30px var(--mono);text-align:center}
+.cl b{display:block;font-size:14px;font-weight:600}
+.words{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--ink-2)}
+.words span{border-bottom:1px solid var(--line)}
+.words i{font-style:normal;font-size:11px;font-weight:600;color:var(--amber-tx);margin-left:6px}
+.words i.al{color:var(--bad)}
+
+/* the band, Home's greeting band made a page's band */
+.band{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:14px;padding:15px 22px 16px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);pointer-events:none}
+.band .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font-size:24px;font-weight:650;letter-spacing:-.01em;line-height:1.15}
+.band p{margin:3px 0 0;font-size:13px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.band .strip{display:flex;gap:20px;position:relative}
+.band .strip div{text-align:right}
+.band .strip b{display:block;font-size:19px;line-height:1}
+.band .strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}
+.band .strip .lt b{color:var(--ff-late)}
+.band .who{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ff-quiet);margin-left:10px;vertical-align:4px}
+.band .who b{color:var(--ff-ink);font-weight:600}
+.band .act{position:relative;border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:13px;font-weight:700;padding:8px 14px}
+.hello h1{font-family:var(--serif);font-weight:500;font-size:27px;letter-spacing:0}
+
+/* today's My tasks and Clients, for the before */
+.mast{background:var(--ff);color:var(--ff-ink);border-radius:12px;padding:12px 18px 14px;margin:0 0 12px;box-shadow:inset 0 -3px 0 var(--amber);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.mast .wk{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 6px}
+.mast h1{margin:0;font-size:21px;font-weight:600}
+.mast .strip{display:flex;gap:20px}.mast .strip div{text-align:right}.mast .strip b{display:block;font-size:19px;line-height:1}
+.mast .strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px}.mast .strip .lt b{color:var(--ff-late)}
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 7px;border-bottom:2px solid var(--ink);margin-top:12px}
+.sh .ix{font-size:12px;font-weight:600;color:var(--amber-tx)} .sh h2{margin:0;font-size:15.5px;font-weight:600} .sh .meta{font-size:13px;color:var(--ink-3)}
+.mrow{display:grid;grid-template-columns:20px minmax(0,1fr) 120px 86px 116px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.card .mrow{padding:8px 14px}
+.card .mrow:last-child{border-bottom:0}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.when{font-size:13px;color:var(--ink-2)} .mrow.late .when{color:var(--bad);font-weight:600}
+.st{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}.st.p{color:var(--amber-tx)}
+.mrow.byc{grid-template-columns:20px minmax(0,1fr) 86px 116px}
+.ptitle{display:flex;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.ptitle h1{margin:0;font-size:19px;font-weight:600}
+.search{margin-left:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:7px 11px;font-size:13px;color:var(--ink-3);min-width:200px}
+.which{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.which span{font-size:12.5px;font-weight:600;padding:6px 12px;border-right:1px solid var(--line);color:var(--ink-2)}
+.which span:last-child{border-right:0}.which span.on{background:var(--ff);color:var(--ff-ink)}
+.which i{font-style:normal;font-weight:500;opacity:.75;margin-left:5px}
+.mine{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.mine .t2{width:32px;height:18px;border-radius:999px;background:var(--line);position:relative}
+.mine .t2::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface)}
+.view{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.view span{width:32px;height:28px;display:grid;place-items:center;color:var(--ink-3);background:var(--surface)}
+.view span.on{background:var(--surface-2);color:var(--ink)}
+.view svg{width:15px;height:15px}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.card .cards{padding:14px}
+.cc{border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+.card .cc{box-shadow:none}
+.cc .top{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.cc .top .cm{width:30px;height:30px}
+.cc .top b{font-size:15px;font-weight:600}
+.tags{display:flex;gap:6px}
+.tag{font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:4px 6px;color:var(--ink-3)}
+.cc .mods{border-top:1px solid var(--line)}
+.cc .mods div{display:flex;justify-content:space-between;padding:7px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.cc .mods div:last-child{border-bottom:0}
+.cc .mods i{font-style:normal;font-size:11.5px;color:var(--amber-tx);font-weight:600}
+.cc .mods i.al{color:var(--warn)}
+.cc.add{border-style:dashed;display:grid;place-items:center;min-height:150px;color:var(--ink-3);font-weight:600;box-shadow:none}
+.cc .foot2{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.cc .foot2 a{color:var(--amber-tx);font-weight:600;text-decoration:none}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@container (max-width:900px){ .two{grid-template-columns:1fr} }
+@container (max-width:700px){ .side{display:none} .mrow,.mrow.byc{grid-template-columns:20px minmax(0,1fr) auto} .mrow .pill,.mrow .st{display:none} .band .strip{gap:12px} }
+</style>
+
+<div class="doc">
+  <h1>Card titles, and one look for My tasks and Clients</h1>
+  <p class="lede">Two answers. <b>First</b>, four fonts for the card titles beside today's serif, on the same Home cards. <b>Second</b>, My tasks and Clients drawn with Home's look: a navy band at the top in the greeting's style, and everything under it in cards with their header inside. "Before" is what is live.</p>
+  <span class="flag">A drawing · nothing is built · the clients and tasks are invented</span>
+  <div class="ctrl">Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+  <nav class="toc"><a href="#p1">1 · Card title fonts</a><a href="#p2">2 · My tasks</a><a href="#p3">3 · My tasks by client</a><a href="#p4">4 · Clients</a></nav>
+
+  <section class="part" id="p1">
+    <div class="ph2"><span class="n">01</span><h2>The card titles</h2><p>the same two cards in each font</p></div>
+    <div class="grid2" id="fonts"></div>
+    <p class="why"><b>Round two:</b> the serif in bold (19px), the same in Georgia bold (it looks alike on a Mac and on Windows), and A at 19px bold. The bold serif is my pick: it keeps Home's character and no longer reads like the rows under it.</p>
+    <p class="why"><b>Why the serif looks off:</b> it is the only serif on the platform, and on a Mac and on Windows it is a different typeface (Iowan Old Style or Palatino), so it never quite matches the system font around it. <b>A</b> uses the platform's own font, as every other title does, a touch heavier so the card still has a heading; I would also take the greeting's "Good morning" into it, so Home has one font. <b>B</b> makes the title a quiet label, like the column's headings. <b>C</b> is A in the navy, a little larger, for more presence. <b>D</b> keeps a serif but one that looks the same on every computer (Georgia). All four use fonts already on every computer, so nothing new is downloaded.</p>
+  </section>
+
+  <section class="part" id="p2">
+    <div class="ph2"><span class="n">02</span><h2>My tasks in Home's look</h2><p>drawn with title font A</p></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="mywork"></aside><div class="main"><div class="pg" id="mtBefore"></div></div></div></div>
+    <p class="lab after" style="margin-top:22px">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="mywork"></aside><div class="main"><div class="pg" id="mtAfter"></div></div></div></div>
+    <p class="why"><b>The band</b> becomes Home's greeting band: the week as its gold line, "My tasks" as the title, the counts on the right, and Show (whose tasks, for admins) beside the title. <b>Each group becomes a card</b> with its header inside: an icon (red for Late), the name and its count. Sort by stays on its own line under the band. The rows are today's rows, unchanged, with the tick and the status.</p>
+  </section>
+
+  <section class="part" id="p3">
+    <div class="ph2"><span class="n">03</span><h2>My tasks sorted by client</h2></div>
+    <div class="frame"><div class="pg" id="mtClient"></div></div>
+    <p class="why">Sorted by client, <b>each client is a card</b>: its name, open and late counts, and on the right a link straight into that client's Internal Tracker. Sort by sits on the band's line so it stays in one place whichever way the list is grouped.</p>
+  </section>
+
+  <section class="part" id="p4">
+    <div class="ph2"><span class="n">04</span><h2>Clients in Home's look</h2></div>
+    <p class="lab">Before · live</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="clients"></aside><div class="main"><div class="pg" id="clBefore"></div></div></div></div>
+    <p class="lab after" style="margin-top:22px">After</p>
+    <div class="frame"><div class="app"><aside class="side" data-on="clients"></aside><div class="main"><div class="pg" id="clAfter"></div></div></div></div>
+    <p class="why"><b>The band</b> says what is here (4 active · 1 ended · 1 demo) and carries <b>+ Add a client</b> as its one button, in amber. <b>One card holds the clients</b>, its header carrying everything that filters them: Active · Ended · Demo, Mine, the search, and cards or list. The client cards inside keep their modules and marks, lose the boxed SUPER USER and UNITS tags for one quiet line at the foot ("Super user · 10 units"), and Settings moves to that line as a word.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',
+    alert:'<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/>',
+    cal:'<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    later:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>'
+  };
+  var STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg>';
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  var G = [{h:"Work",items:[["home","Home"],["mywork","My tasks"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["memory","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll(".side").forEach(function(s){
+    var on = s.getAttribute("data-on");
+    s.innerHTML = '<div class="sbhead"><span class="logo">' + STAR + '</span><span class="brand"><b>Strategy Management</b><span>Platform</span></span></div><nav class="nav">' +
+      G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){ return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join("") + '</div>'; }).join("") + '</nav>';
+  });
+
+  /* 1 · fonts */
+  var F = [["fS","Today · the serif"],["fSB","New · The serif, bold",1],["fSB2","New · Georgia, bold"],["fAL","New · A, bigger and bolder"],["fA","A · The platform's own font, semibold"],["fB","B · A small label"],["fC","C · Semibold in navy"],["fD","D · Georgia, the same serif everywhere"]];
+  function sort(on){ return '<span class="sort">Sort by <span class="sw"><span' + (on === "date" ? ' class="on"' : '') + '>Date</span><span' + (on === "client" ? ' class="on"' : '') + '>Client</span></span></span>'; }
+  function head(icon, title, n, right, iccls, ncls){ return '<div class="chd"><span class="cic' + (iccls ? ' ' + iccls : '') + '">' + ic(icon) + '</span><h2>' + title + '</h2>' + (n != null ? '<span class="cnt' + (ncls ? ' ' + ncls : '') + '">' + n + '</span>' : '') + '<span class="sp"></span>' + (right || "") + '</div>'; }
+  var CL = '<div class="cl"><span class="cm">RT</span><span><b>Raya Trade</b><span class="words"><span>Strategy</span><i>13 of 19</i><span>Insights</span><span>Internal Tracker</span><i class="al">4 open · 1 late</i></span></span></div>' +
+           '<div class="cl"><span class="cm">EA</span><span><b>ElAbd</b><span class="words"><span>Strategy</span><span>Internal Tracker</span><i>2 open</i></span></span></div>';
+  var TK = '<div class="task late"><span class="tick"></span><span class="t">Send the Q3 scorecard to the Head of Strategy<span class="m"><b>Raya Trade</b> · In progress</span></span><span class="wh">Late 1 w</span></div>' +
+           '<div class="task"><span class="tick"></span><span class="t">Prepare the plant managers\' scoring session<span class="m"><b>ElAbd</b> · Not started</span></span><span class="wh">Thu 29 Oct</span></div>';
+  document.getElementById("fonts").innerHTML = F.map(function(f){
+    return '<div><p class="lab' + (f[0] === "fS" ? '' : ' after') + '">' + f[1] + (f[2] ? ' <span class="rec">my pick</span>' : '') + '</p><div class="frame pad ' + f[0] + '">' +
+      '<div class="card">' + head("clients", "Your clients", 2, '<span class="sort">Show <span class="sw"><span class="on">Mine</span><span>Demo</span></span></span><button class="link">All clients →</button>') + CL + '</div>' +
+      '<div class="card" style="margin:0">' + head("tasks", "Your tasks", 2, sort("date") + '<button class="link">All tasks →</button>') + TK + '</div></div></div>';
+  }).join("");
+
+  /* 2-3 · My tasks */
+  var C = { RT:"Raya Trade", EA:"ElAbd", WD:"Wander", RHI:"RHI" };
+  var R = [
+    {c:"RT",t:"Send the Q3 scorecard to the Head of Strategy",w:"Late 1 w",s:"In progress",late:1,b:"late"},
+    {c:"EA",t:"Chase the plant managers' Q3 figures",w:"Late 2 d",s:"Not started",late:1,b:"late"},
+    {c:"EA",t:"Prepare the plant managers' scoring session",w:"Thu 29 Oct",s:"Not started",b:"week"},
+    {c:"RT",t:"Review the unit heads' draft targets",w:"Fri 30 Oct",s:"In progress",b:"week"},
+    {c:"WD",t:"Agree the cycle dates with the CFO",w:"Fri 30 Oct",s:"Not started",b:"week"},
+    {c:"RHI",t:"Book the board offsite",w:"W2 Nov",s:"Not started",b:"later"}
+  ];
+  function mrow(r, byc){ return '<div class="mrow' + (r.late ? ' late' : '') + (byc ? ' byc' : '') + '"><span class="tick"></span><span>' + r.t + '</span>' + (byc ? '' : '<span class="pill">' + C[r.c] + '</span>') + '<span class="when">' + r.w + '</span><span class="st' + (/progress/.test(r.s) ? ' p' : '') + '">— ' + r.s + '</span></div>'; }
+  var strip = '<div class="strip"><div><b>6</b><span>Open</span></div><div class="lt"><b>2</b><span>Late</span></div><div><b>3</b><span>This week</span></div><div><b>4</b><span>Clients</span></div></div>';
+  var B = { late:["Late","alert"], week:["This week","cal"], later:["Next week and later","later"] };
+  document.getElementById("mtBefore").innerHTML = '<div class="mast"><div><p class="wk">This week · 26 Oct – 30 Oct</p><h1>My tasks</h1></div>' + strip + '</div>' +
+    '<div class="bar">' + sort("date") + '</div>' + ["late","week","later"].map(function(b, i){ var rows = R.filter(function(r){ return r.b === b; });
+      return '<div class="sh"><span class="ix">0' + (i + 1) + '</span><h2>' + B[b][0] + '</h2><span class="meta">' + rows.length + ' open</span></div>' + rows.map(function(r){ return mrow(r); }).join(""); }).join("");
+  function band(by){ return '<div class="band"><div><p class="eye">This week · 26 Oct – 30 Oct</p><h1>My tasks <span class="who">Show <b>Me ▾</b></span></h1><p>Your actions across every client\'s Internal Tracker.</p></div><span class="sp"></span>' + strip + '</div>' +
+    '<div class="bar">' + sort(by) + '</div>'; }
+  document.getElementById("mtAfter").innerHTML = band("date") + ["late","week","later"].map(function(b){ var rows = R.filter(function(r){ return r.b === b; });
+    return '<div class="card fA">' + head(B[b][1], B[b][0], rows.length, '', b === "late" ? "late" : "", b === "late" ? "late" : "") + rows.map(function(r){ return mrow(r); }).join("") + '</div>'; }).join("");
+  document.getElementById("mtClient").innerHTML = band("client") + ["RT","EA","WD","RHI"].map(function(k){ var rows = R.filter(function(r){ return r.c === k; }), late = rows.filter(function(r){ return r.late; }).length;
+    return '<div class="card fA">' + head("clients", C[k], rows.length + (late ? ' · ' + late + ' late' : ''), '<button class="link">Internal Tracker →</button>', "", late ? "late" : "") + rows.map(function(r){ return mrow(r, true); }).join("") + '</div>'; }).join("");
+
+  /* 4 · Clients */
+  var CC = [
+    {k:"RT",n:"Raya Trade",seat:"Super user",u:10,mods:[["Strategy","13 of 19"],["Insights",""],["Internal Tracker","4 open · 1 late",1]]},
+    {k:"EA",n:"ElAbd",seat:"Super user",u:6,mods:[["Strategy",""],["Internal Tracker","2 open"]]},
+    {k:"RHI",n:"RHI",seat:"SMO team",u:4,mods:[["Strategy",""],["Processes",""]]},
+    {k:"WD",n:"Wander",seat:"Super user",u:3,mods:[["Strategy","No plan",1],["Portfolio",""]]}
+  ];
+  function ccBefore(c){ return '<div class="cc"><div class="top"><span class="cm">' + c.k + '</span><b>' + c.n + '</b><span class="tags"><span class="tag">' + c.seat + '</span><span class="tag">' + c.u + ' units</span></span></div><div class="mods">' +
+    c.mods.map(function(m){ return '<div>' + m[0] + (m[1] ? '<i' + (m[2] ? ' class="al"' : '') + '>' + m[1] + '</i>' : '') + '</div>'; }).join("") + '</div></div>'; }
+  function ccAfter(c){ return '<div class="cc"><div class="top" style="flex-direction:row;align-items:center;gap:10px"><span class="cm">' + c.k + '</span><b>' + c.n + '</b></div><div class="mods">' +
+    c.mods.map(function(m){ return '<div>' + m[0] + (m[1] ? '<i' + (m[2] ? ' class="al"' : '') + '>' + m[1] + '</i>' : '') + '</div>'; }).join("") + '</div><div class="foot2"><span>' + c.seat + ' · ' + c.u + ' units</span><a href="#">Settings</a></div></div>'; }
+  var views = '<span class="view"><span class="on">' + ic("grid") + '</span><span>' + ic("list") + '</span></span>';
+  document.getElementById("clBefore").innerHTML = '<div class="ptitle"><h1>Clients</h1><span class="search">Search clients</span></div>' +
+    '<div class="bar"><span class="which"><span class="on">Active<i>4</i></span><span>Ended<i>1</i></span><span>Demo<i>1</i></span></span><span class="mine"><span class="t2"></span>Mine</span>' + views + '</div>' +
+    '<div class="cards">' + CC.map(ccBefore).join("") + '<div class="cc add">+ Add a client</div></div>';
+  document.getElementById("clAfter").innerHTML = '<div class="band"><div><p class="eye">4 active · 1 ended · 1 demo</p><h1>Clients</h1><p>Every client the office works with, and the way into each module.</p></div><span class="sp"></span><button class="act">+ Add a client</button></div>' +
+    '<div class="card fA">' + head("clients", "Active clients", 4, '<span class="which"><span class="on">Active<i>4</i></span><span>Ended<i>1</i></span><span>Demo<i>1</i></span></span><span class="mine"><span class="t2"></span>Mine</span><span class="search" style="margin-left:0;min-width:170px">Search clients</span>' + views.replace('margin-left:auto','')) +
+    '<div class="cards">' + CC.map(ccAfter).join("") + '</div></div>';
+
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); }); }
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.getAttribute("data-v")); press(b.getAttribute("data-v")); }); });
+  press(document.documentElement.getAttribute("data-theme") === "dark" || (!document.documentElement.hasAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+})();
+</script>

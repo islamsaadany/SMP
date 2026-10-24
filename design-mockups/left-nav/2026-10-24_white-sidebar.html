@@ -1,0 +1,487 @@
+<title>White Console Sidebar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a review page around live drawings of the console. One large
+   computer drawing you can click through, a strip of every tab, the phone
+   menu as a three-step flow, and today's navy beside the white for a direct
+   comparison. Tokens are the console's own (platform.html); the --sw-* set
+   is the white column, measured on white like the navy set was on navy. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-label:#8FA3C9;--ff-tx:#0F2C69;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-mark:#F5A623;
+  /* the white column: navy words 13.25:1, quiet words 7.9:1, headings 4.8:1,
+     and the on-tab icon in the darker amber (5.27:1) because #F5A623 is
+     2.03:1 on white */
+  --sw-bg:#FFFFFF;--sw-ink:#0F2C69;--sw-quiet:#465268;--sw-label:#5E6E85;
+  --sw-hover:#F1F4F9;--sw-on:#E8EEF8;--sw-rule:#D8DEE8;--sw-mark:#9C5D08;--sw-edge:#D8DEE8;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --scrim:rgba(20,28,43,.45);
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --side-w:232px;--rail-w:64px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;--ff-tx:#95A9CC;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-mark:#F5A623;
+  --sw-bg:#1A1F29;--sw-ink:#E7EBF2;--sw-quiet:#AAB4C6;--sw-label:#8590A3;
+  --sw-hover:#222834;--sw-on:#28303E;--sw-rule:#333B4A;--sw-mark:#F5A623;--sw-edge:#333B4A;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --scrim:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-label:#8197BE;--ff-tx:#95A9CC;
+  --ff-hover:rgba(255,255,255,.08);--ff-on:rgba(255,255,255,.13);--ff-rule:rgba(255,255,255,.12);--ff-mark:#F5A623;
+  --sw-bg:#1A1F29;--sw-ink:#E7EBF2;--sw-quiet:#AAB4C6;--sw-label:#8590A3;
+  --sw-hover:#222834;--sw-on:#28303E;--sw-rule:#333B4A;--sw-mark:#F5A623;--sw-edge:#333B4A;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;
+  --scrim:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the review page ── */
+.doc{max-width:1290px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.lede{max-width:76ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:34px 0 10px}
+.cap span{font-family:var(--font);letter-spacing:0;text-transform:none;font-weight:400}
+.ctrls{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:18px 0 0;padding:10px 14px;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;line-height:1;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.seg button:focus-visible{outline:2px solid var(--amber-tx);outline-offset:1px}
+
+.frame{position:relative;container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  background:var(--ground);box-shadow:var(--frame-shadow)}
+.frame.desk{height:740px}
+.frame.phone{width:340px;max-width:100%;height:640px;border-radius:28px;border-width:6px;border-color:var(--ink)}
+
+/* every tab: scaled-down computer drawings */
+.strip{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr))}
+.thumbfig{margin:0;min-width:0}
+.thumb{position:relative;width:100%;max-width:100%;aspect-ratio:1280/760;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:var(--ground);box-shadow:var(--shadow);cursor:pointer;padding:0;display:block}
+.thumb:focus-visible{outline:2px solid var(--amber-tx);outline-offset:2px}
+.thumb:hover{border-color:var(--ink-3)}
+.scaler{position:absolute;left:0;top:0;width:1280px;height:760px;transform-origin:0 0;container-type:inline-size;pointer-events:none}
+.thumbfig figcaption{display:flex;gap:8px;align-items:baseline;font-size:13px;color:var(--ink-2);margin-top:8px}
+.thumbfig figcaption b{color:var(--ink);font-weight:600}
+.thumbfig figcaption i{font-style:normal;margin-left:auto;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+.flow{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
+.flow figure{margin:0;max-width:100%}
+.flow figcaption{max-width:340px;font-size:13px;color:var(--ink-2);margin-top:10px;display:flex;gap:10px}
+.flow figcaption .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);
+  font:700 11px/20px var(--mono);text-align:center;color:var(--ink)}
+.arrow{align-self:center;color:var(--ink-3);font-size:22px}
+@media (max-width:760px){.arrow{display:none}}
+
+.vs{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-top:34px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.note h2{margin:0 0 8px;font:600 10.5px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--amber-tx)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink);font-weight:600}
+
+/* ═══ THE CONSOLE, REDRAWN ═══════════════════════════════════════════ */
+/* The column reads these --c-* names; the colour switch points them at the
+   navy set or the white set. */
+.app{--c-bg:var(--ff);--c-ink:var(--ff-ink);--c-quiet:var(--ff-quiet);--c-label:var(--ff-label);--c-hover:var(--ff-hover);
+  --c-on:var(--ff-on);--c-rule:var(--ff-rule);--c-mark:var(--ff-mark);--c-edge:transparent;
+  position:absolute;inset:0;display:flex;background:var(--ground);color:var(--ink);font-size:15px}
+.app[data-col="white"]{--c-bg:var(--sw-bg);--c-ink:var(--sw-ink);--c-quiet:var(--sw-quiet);--c-label:var(--sw-label);--c-hover:var(--sw-hover);
+  --c-on:var(--sw-on);--c-rule:var(--sw-rule);--c-mark:var(--sw-mark);--c-edge:var(--sw-edge)}
+
+.side{width:var(--side-w);flex:none;background:var(--c-bg);color:var(--c-quiet);display:flex;flex-direction:column;
+  border-right:1px solid var(--c-edge);transition:width .18s ease;z-index:3}
+.brand{display:flex;align-items:center;gap:8px;min-height:58px;padding:12px 12px 12px 18px;border-bottom:1px solid var(--c-rule)}
+.logo{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--amber);color:#0F2C69}
+.logo svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.bname{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.bname b{font-size:12px;font-weight:700;color:var(--c-ink);white-space:nowrap}
+.bname span{margin-top:2px;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--c-quiet)}
+.ibtn{margin-left:auto;width:30px;height:30px;border:0;border-radius:7px;background:transparent;color:var(--c-quiet);
+  display:grid;place-items:center;cursor:pointer;flex:none}
+.ibtn:hover{background:var(--c-hover);color:var(--c-ink)}
+.ibtn:focus-visible{outline:2px solid var(--amber-tx);outline-offset:1px}
+.ibtn svg.i{width:16px;height:16px}
+.ibtn.close{display:none}
+
+.snav{flex:1;overflow-y:auto;padding:10px 10px 12px;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--c-label);padding:6px 10px}
+.grp.foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--c-rule)}
+.item{position:relative;display:flex;align-items:center;gap:11px;width:100%;border:0;background:transparent;color:var(--c-quiet);
+  font-size:14px;font-weight:600;line-height:1;text-align:left;padding:10px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.item:hover{background:var(--c-hover);color:var(--c-ink)}
+.item:focus-visible{outline:2px solid var(--amber-tx);outline-offset:-2px}
+.item.on{background:var(--c-on);color:var(--c-ink)}
+.item.on svg.i{color:var(--c-mark)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.item .lb{overflow:hidden;text-overflow:ellipsis}
+
+.me{display:flex;align-items:center;gap:10px;padding:12px 12px 14px 14px;border-top:1px solid var(--c-rule)}
+.av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--c-on);color:var(--c-ink);font:700 11px/30px var(--mono);text-align:center}
+.who{min-width:0;display:flex;flex-direction:column;gap:3px}
+.who b{font-size:13px;font-weight:600;color:var(--c-ink);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who i{font-style:normal;font-size:11.5px;color:var(--c-quiet);line-height:1.1}
+.me .ibtn{margin-left:auto}
+
+/* the page */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtop{display:none}
+.page{flex:1;overflow-y:auto;padding:22px 22px 60px}
+.pin{max-width:1180px;margin:0 auto}
+.ptitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.ptitle h1{font-size:20px;margin:0;font-weight:600}
+.ptitle .right{margin-left:auto}
+.search{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:13.5px;width:240px;max-width:100%}
+.btn{border:0;border-radius:8px;background:var(--ff);color:#fff;font-weight:600;font-size:13px;padding:8px 13px}
+
+.tiles{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);margin-bottom:20px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.tile b{display:block;font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile span{font-size:13px;color:var(--ink-3)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel h3{margin:0;padding:11px 16px;font-size:13px;font-weight:600;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line-soft);font-size:14px}
+.row:last-child{border-bottom:0}
+.row .sub{color:var(--ink-3);font-size:12.5px}
+.row .end{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pill{font:600 10.5px/1.5 var(--mono);letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 7px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2)}
+.pill.late{color:var(--bad);background:var(--bad-bg);border-color:transparent}
+.pill.due{color:var(--warn);background:var(--warn-bg);border-color:transparent}
+.pill.ok{color:var(--good);background:var(--good-bg);border-color:transparent}
+.dot{width:28px;height:28px;border-radius:50%;flex:none;background:var(--surface-2);color:var(--ink-2);font:700 10.5px/28px var(--mono);text-align:center}
+.box{width:16px;height:16px;border:1.5px solid var(--ink-3);border-radius:4px;flex:none}
+.grid2{display:grid;gap:16px;grid-template-columns:2fr 1fr}
+
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.ccard{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.ctop{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);font:700 11px/30px var(--mono);text-align:center}
+.ccard h2{margin:0;font-size:16px;font-weight:600}
+.ind{margin:0;color:var(--ink-3);font-size:12.5px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.mods{margin-top:auto;border-top:1px solid var(--line)}
+.mrow{display:flex;align-items:baseline;gap:8px;padding:6px 14px;font-size:13px;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow i{font-style:normal;font-size:11.5px;color:var(--ink-3);margin-left:auto}
+.mrow i.alarm{color:var(--warn);font-weight:600}
+.ccard.add{min-height:150px;align-items:center;justify-content:center;border-style:dashed;font-weight:600;color:var(--ink-3);box-shadow:none}
+.matrix{width:100%;border-collapse:collapse;font-size:13.5px}
+.matrix th,.matrix td{padding:9px 12px;border-bottom:1px solid var(--line-soft);text-align:left}
+.matrix th{font-weight:600;color:var(--ink-3);font-size:12px;background:var(--surface-2)}
+.matrix td.c{text-align:center;color:var(--good);font-weight:700}
+.matrix td.x{text-align:center;color:var(--ink-3)}
+.fw{display:grid;gap:12px;grid-template-columns:repeat(4,1fr)}
+.fw div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;font-weight:600;font-size:14px}
+.fw div span{display:block;font-weight:400;color:var(--ink-3);font-size:12.5px;margin-top:4px}
+.field{display:flex;flex-direction:column;gap:5px;padding:12px 16px;border-bottom:1px solid var(--line-soft)}
+.field label{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.field .in{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px;color:var(--ink);background:var(--ground)}
+
+.scrim{display:none}
+
+@container (min-width:720px){
+  .app[data-rail="1"] .side{width:var(--rail-w)}
+  .app[data-rail="1"] .brand{flex-direction:column;padding:14px 0 10px;gap:10px}
+  .app[data-rail="1"] .bname{display:none}
+  .app[data-rail="1"] .brand .ibtn{margin:0}
+  .app[data-rail="1"] .brand .ibtn svg{transform:rotate(180deg)}
+  .app[data-rail="1"] .gl{font-size:0;padding:0;height:1px;margin:4px 6px;background:var(--c-rule)}
+  .app[data-rail="1"] .grp:first-child .gl{display:none}
+  .app[data-rail="1"] .item{justify-content:center;padding:11px 0}
+  .app[data-rail="1"] .item .lb{display:none}
+  .app[data-rail="1"] .me{flex-direction:column;padding:12px 0 14px;gap:8px}
+  .app[data-rail="1"] .who{display:none}
+  .app[data-rail="1"] .me .ibtn{margin:0}
+}
+@container (max-width:719px){
+  .side{position:absolute;top:0;bottom:0;left:0;width:min(84%,288px);transform:translateX(-102%);transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  .app[data-open="1"] .side{transform:none}
+  .brand .collapse{display:none}
+  .ibtn.close{display:grid}
+  .scrim{display:block;position:absolute;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:2}
+  .app[data-open="1"] .scrim{opacity:1;pointer-events:auto}
+  .mtop{display:flex;align-items:center;gap:10px;background:var(--c-bg);color:var(--c-ink);padding:8px 12px;min-height:50px;border-bottom:1px solid var(--c-edge)}
+  .mtop .ibtn{margin:0;color:var(--c-ink)}
+  .mtop .ibtn svg.i{width:20px;height:20px}
+  .mtop .bname b{font-size:12px}
+  .mtop .here{margin-left:auto;font-size:13px;font-weight:600;color:var(--c-quiet)}
+  .page{padding:16px 12px 40px}
+  .search{width:100%}
+  .ptitle .right{margin-left:0;width:100%}
+  .item{padding:12px 10px;font-size:15px}
+  .tiles{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .tile{padding:10px}
+  .tile b{font-size:20px}
+  .grid2{grid-template-columns:1fr}
+  .fw{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.side,.scrim{transition:none}}
+</style>
+
+<div class="doc">
+  <h1>The console with a white sidebar</h1>
+  <p class="lede">The same left column as today, painted <b>white</b> in place of navy. Nothing moves: same tabs, same order, same amber mark on the tab you are on.
+    Use the switch to flip between <b>White</b> and <b>Navy (today)</b>. Every drawing is live: press the tabs, the <b>«</b> button and the phone menu.</p>
+
+  <div class="ctrls" role="group" aria-label="Mockup options">
+    <div class="ctrl"><span>Sidebar colour</span>
+      <span class="seg" data-ctl="col"><button type="button" id="cw" data-v="white" aria-pressed="true">White</button><button type="button" id="cn" data-v="navy" aria-pressed="false">Navy (today)</button></span></div>
+    <div class="ctrl"><span>Column</span>
+      <span class="seg" data-ctl="rail"><button type="button" id="r0" data-v="0" aria-pressed="true">Full</button><button type="button" id="r1" data-v="1" aria-pressed="false">Icons only</button></span></div>
+    <div class="ctrl"><span>Theme</span>
+      <span class="seg" data-ctl="theme"><button type="button" id="tl" data-v="light">Light</button><button type="button" id="td" data-v="dark">Dark</button></span></div>
+  </div>
+
+  <p class="cap">Computer <span>— click any tab in the column</span></p>
+  <div class="frame desk" id="desk"></div>
+
+  <p class="cap">Every tab <span>— click one to open it in the drawing above</span></p>
+  <div class="strip" id="strip"></div>
+
+  <p class="cap">Phone flow <span>— opening the menu and moving to another tab</span></p>
+  <div class="flow">
+    <figure><div class="frame phone" id="ph1"></div><figcaption><span class="n">1</span><span>On Home. The top bar is white with a hairline under it; the menu button opens the column.</span></figcaption></figure>
+    <span class="arrow" aria-hidden="true">→</span>
+    <figure><div class="frame phone" id="ph2"></div><figcaption><span class="n">2</span><span>Menu open: the white column slides over a dimmed page. Home is marked in amber.</span></figcaption></figure>
+    <span class="arrow" aria-hidden="true">→</span>
+    <figure><div class="frame phone" id="ph3"></div><figcaption><span class="n">3</span><span>Tapped Clients: the menu closes and the bar names the page you are on.</span></figcaption></figure>
+  </div>
+
+  <p class="cap">Side by side <span>— Home, white against today's navy (ignores the colour switch)</span></p>
+  <div class="vs">
+    <figure class="thumbfig"><div class="thumb" id="vsw" role="img" aria-label="Home with a white sidebar"></div><figcaption><b>White</b><i>proposed</i></figcaption></figure>
+    <figure class="thumbfig"><div class="thumb" id="vsn" role="img" aria-label="Home with today's navy sidebar"></div><figcaption><b>Navy</b><i>today</i></figcaption></figure>
+  </div>
+
+  <div class="notes">
+    <div class="note"><h2>What changes</h2><ul>
+      <li><b>Column and phone bar</b> turn white. A 1px grey line on the column's right edge (and under the phone bar) separates it from the page, which is only a shade off white.</li>
+      <li><b>Words</b> become navy for the tab you are on and your name, and grey for the rest. The headings Work · Team · Knowledge stay small caps in a lighter grey.</li>
+      <li><b>The tab you are on</b> keeps its amber edge bar and gets a pale navy wash. Its icon uses the darker amber, because the bright amber is too faint on white.</li>
+    </ul></div>
+    <div class="note"><h2>Contrast on white</h2><ul>
+      <li><b>Tab you are on</b>, navy on pale wash: 12.1:1.</li>
+      <li><b>Other tabs</b>, grey #465268: 7.9:1. <b>Headings</b> #5E6E85: 4.8:1.</li>
+      <li><b>On-tab icon</b> in dark amber #9C5D08: 5.3:1. The bright amber #F5A623 would be 2.0:1.</li>
+      <li><b>Dark theme:</b> "white" becomes the dark card colour, so the column matches the cards and the page reads as one surface.</li>
+    </ul></div>
+    <div class="note"><h2>For you to decide</h2><ul>
+      <li><b>Brand weight:</b> with the navy gone, the only Forefront colour left in the frame is the amber logo and the navy buttons. Is that enough?</li>
+      <li><b>Edge:</b> a hairline (shown) or a soft shadow to lift the column off the page.</li>
+      <li><b>Phone bar:</b> white to match the column (shown), or keep it navy so the phone still opens on the brand colour.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    mywork:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    memory:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    fold:'<path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/>',
+    menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    close:'<path d="M6 6l12 12M18 6 6 18"/>',
+    out:'<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 16l-4-4 4-4M6 12h10"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  var LOGO = '<span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>';
+  var BNAME = '<span class="bname"><b>Strategy Management</b><span>Platform</span></span>';
+
+  /* today's tabs, in platform.html's order and groups */
+  var GROUPS = [
+    { h:"Work", items:[["home","Home"],["mywork","My tasks"],["clients","Clients"]] },
+    { h:"Team", items:[["consultants","Consultants"],["access","Who sees what"]] },
+    { h:"Knowledge", items:[["memory","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]] },
+    { h:null, items:[["history","History"]], foot:true }
+  ];
+  var ORDER = [], NAMES = {}, GRP = {};
+  GROUPS.forEach(function(g){ g.items.forEach(function(t){ ORDER.push(t[0]); NAMES[t[0]] = t[1]; GRP[t[0]] = g.h || "Record"; }); });
+
+  function title(t, right){ return '<div class="ptitle"><h1>' + t + '</h1>' + (right ? '<span class="right">' + right + '</span>' : '') + '</div>'; }
+  function rows(h, list){ return '<div class="panel">' + (h ? '<h3>' + h + '</h3>' : '') + list.join('') + '</div>'; }
+  function row(lead, main, sub, end){ return '<div class="row">' + (lead || '') + '<div><div>' + main + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div><span class="end">' + (end || '') + '</span></div>'; }
+  function pill(t, c){ return '<span class="pill ' + (c || '') + '">' + t + '</span>'; }
+  function dot(t){ return '<span class="dot">' + t + '</span>'; }
+
+  var PAGES = {
+    home: function(){ return title('Good morning, Islam') +
+      '<div class="tiles"><div class="tile"><b>7</b><span>Open tasks</span></div><div class="tile"><b>3</b><span>Due this week</span></div><div class="tile"><b>5</b><span>Clients</span></div></div>' +
+      '<div class="grid2">' + rows('Needs you', [
+        row(dot('EA'), 'El Abd Foods has no strategy plan', 'Strategy', pill('Overdue','late')),
+        row(dot('RT'), 'Approve Q4 insights for Raya Trade', 'Insights', pill('Due Thu','due')),
+        row(dot('RHI'), 'Process map review with Reliance', 'Processes', pill('Due Mon','due')),
+        row(dot('WD'), 'Wander KPIs updated', 'Strategy', pill('Done','ok'))]) +
+      rows('Recent', [row('', 'Raya Trade', 'Opened 2h ago'), row('', 'Frameworks: Balanced scorecard', 'Opened yesterday'), row('', 'Case study: Retail turnaround', 'Opened Tue')]) + '</div>'; },
+    mywork: function(){ return title('My tasks', '<button class="btn" type="button">+ New task</button>') + rows(null, [
+      row('<span class="box"></span>', 'Draft strategy plan for El Abd Foods', 'El Abd Foods · Strategy', pill('Overdue','late')),
+      row('<span class="box"></span>', 'Approve Q4 insights', 'Raya Trade · Insights', pill('Thu 29 Oct','due')),
+      row('<span class="box"></span>', 'Process map review', 'Reliance Heavy Industries · Processes', pill('Mon 2 Nov','due')),
+      row('<span class="box"></span>', 'Collect unit KPIs', 'Raya Trade · Internal Tracker', pill('Fri 6 Nov')),
+      row('<span class="box"></span>', 'Prepare kickoff deck', 'Wander · Strategy', pill('Tue 10 Nov')),
+      row('<span class="box"></span>', 'Update capability map', 'Forefront Consulting · Strategy', pill('No date'))]); },
+    clients: function(){
+      var C = [["EA","El Abd Foods","Food & Beverage",5,[["Strategy","No plan"],["Internal Tracker"]]],
+        ["RHI","Reliance Heavy Industries","Manufacturing",3,[["Strategy"],["Processes"]]],
+        ["RT","Raya Trade","Retail & E-commerce",10,[["Strategy"],["Insights"],["Internal Tracker","3 open"]]],
+        ["WD","Wander","Real Estate & Property",3,[["Strategy"]]],
+        ["FF","Forefront Consulting","Technology & Software",3,[["Strategy","No plan"]]]];
+      return title('Clients', '<input class="search" type="search" placeholder="Search clients" aria-label="Search clients">') + '<div class="cards">' +
+        C.map(function(c){ return '<div class="ccard"><div class="ctop"><span class="cmark">' + c[0] + '</span><h2>' + c[1] + '</h2><p class="ind">' + c[2] +
+          '</p><div class="tags">' + pill('Super user') + pill(c[3] + ' units') + '</div></div><div class="mods">' +
+          c[4].map(function(m){ return '<div class="mrow">' + m[0] + (m[1] ? '<i class="alarm">' + m[1] + '</i>' : '') + '</div>'; }).join('') + '</div></div>'; }).join('') +
+        '<div class="ccard add">+ Add a client</div></div>'; },
+    consultants: function(){ return title('Consultants', '<button class="btn" type="button">+ Invite</button>') + rows(null, [
+      row(dot('IS'), 'Islam Saadany', 'islam.saadany@forefront.consulting', pill('Super user')),
+      row(dot('NH'), 'Nour Hassan', '4 clients', pill('Consultant')),
+      row(dot('KM'), 'Karim Mansour', '3 clients', pill('Consultant')),
+      row(dot('SA'), 'Salma Adel', '2 clients', pill('Analyst')),
+      row(dot('OF'), 'Omar Fathy', 'Invited 2 days ago', pill('Pending','due'))]); },
+    access: function(){
+      var who = [["Nour Hassan",1,1,1,0,0],["Karim Mansour",0,1,1,1,0],["Salma Adel",1,0,0,0,1],["Omar Fathy",0,0,1,0,0]];
+      return title('Who sees what') + '<div class="panel"><table class="matrix"><thead><tr><th>Consultant</th><th>El Abd</th><th>Reliance</th><th>Raya</th><th>Wander</th><th>Forefront</th></tr></thead><tbody>' +
+        who.map(function(w){ return '<tr><td>' + w[0] + '</td>' + w.slice(1).map(function(v){ return v ? '<td class="c">✓</td>' : '<td class="x">–</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>'; },
+    memory: function(){ return title('Case studies', '<input class="search" type="search" placeholder="Search case studies" aria-label="Search case studies">') + rows(null, [
+      row('', 'Retail turnaround in 18 months', 'Retail & E-commerce · 2025', pill('Strategy')),
+      row('', 'Cutting plant downtime by a third', 'Manufacturing · 2024', pill('Processes')),
+      row('', 'From founder-led to unit-led', 'Food & Beverage · 2025', pill('Org design')),
+      row('', 'A KPI tree that the board reads', 'Real Estate · 2026', pill('Insights'))]); },
+    frameworks: function(){ return title('Frameworks') + '<div class="fw">' +
+      [["Balanced scorecard","4 perspectives"],["OKRs","Objectives and key results"],["SWOT","Strengths to threats"],["Value chain","Primary and support"],
+       ["PESTLE","Six outside forces"],["Porter's five forces","Industry pressure"],["Capability map","What the firm can do"],["RACI","Who does what"]]
+      .map(function(f){ return '<div>' + f[0] + '<span>' + f[1] + '</span></div>'; }).join('') + '</div>'; },
+    copilot: function(){ return title('Copilot') + '<div class="panel"><h3>Settings for every client</h3>' +
+      '<div class="field"><label>Tone</label><div class="in">Plain, direct, consultant-to-client</div></div>' +
+      '<div class="field"><label>Method</label><div class="in">Forefront strategy method v3</div></div>' +
+      '<div class="field"><label>Who can change these</label><div class="in">Forefront super users</div></div></div>'; },
+    history: function(){ return title('History') + rows('This week', [
+      row(dot('IS'), 'Islam added a unit to Raya Trade', 'Today, 10:42'),
+      row(dot('NH'), 'Nour approved El Abd Foods insights', 'Yesterday, 16:05'),
+      row(dot('KM'), 'Karim archived Wander Q2 plan', 'Wed, 11:20'),
+      row(dot('IS'), 'Islam invited Omar Fathy', 'Tue, 09:12')]); }
+  };
+
+  var apps = [];
+  function navHtml(){
+    return GROUPS.map(function(g){
+      return '<div class="grp' + (g.foot ? ' foot' : '') + '">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') +
+        g.items.map(function(t){ return '<button type="button" class="item" data-k="' + t[0] + '" title="' + t[1] + '">' + ic(t[0]) + '<span class="lb">' + t[1] + '</span></button>'; }).join('') + '</div>';
+    }).join('');
+  }
+  function build(host, o){
+    var a = document.createElement('div');
+    a.className = 'app';
+    a.setAttribute('data-col', o.col || 'white');
+    a.setAttribute('data-rail', '0');
+    a.setAttribute('data-open', o.open ? '1' : '0');
+    a.innerHTML =
+      '<aside class="side" aria-label="Main menu"><div class="brand">' + LOGO + BNAME +
+        '<button type="button" class="ibtn collapse" title="Icons only" aria-label="Show icons only">' + ic('fold') + '</button>' +
+        '<button type="button" class="ibtn close" aria-label="Close menu">' + ic('close') + '</button></div>' +
+        '<nav class="snav">' + navHtml() + '</nav>' +
+        '<div class="me"><span class="av" aria-hidden="true">IS</span><span class="who"><b>Islam Saadany</b><i>Super user</i></span>' +
+        '<button type="button" class="ibtn" title="Sign out" aria-label="Sign out">' + ic('out') + '</button></div></aside>' +
+      '<div class="main"><div class="mtop"><button type="button" class="ibtn open" aria-label="Open menu">' + ic('menu') + '</button>' + LOGO +
+        '<span class="here"></span></div><div class="page"><div class="pin"></div></div></div><div class="scrim"></div>';
+    host.appendChild(a);
+    var st = { el:a, fixed: !!o.fixed };
+    st.show = function(k){
+      a.querySelectorAll('.item').forEach(function(b){
+        var on = b.getAttribute('data-k') === k;
+        b.classList.toggle('on', on);
+        if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      });
+      a.querySelector('.here').textContent = NAMES[k];
+      a.querySelector('.pin').innerHTML = PAGES[k]();
+      a.querySelector('.page').scrollTop = 0;
+    };
+    a.querySelectorAll('.item').forEach(function(b){ b.addEventListener('click', function(){ st.show(b.getAttribute('data-k')); a.setAttribute('data-open', '0'); }); });
+    a.querySelector('.collapse').addEventListener('click', function(){ setRail(a.getAttribute('data-rail') === '1' ? '0' : '1'); });
+    a.querySelector('.open').addEventListener('click', function(){ a.setAttribute('data-open', '1'); });
+    a.querySelector('.close').addEventListener('click', function(){ a.setAttribute('data-open', '0'); });
+    a.querySelector('.scrim').addEventListener('click', function(){ a.setAttribute('data-open', '0'); });
+    st.show(o.tab || 'home');
+    apps.push(st);
+    return st;
+  }
+  function scaled(host){
+    var s = document.createElement('div'); s.className = 'scaler'; host.appendChild(s);
+    function fit(){ s.style.transform = 'scale(' + (host.clientWidth / 1280) + ')'; }
+    fit();
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(host); else window.addEventListener('resize', fit);
+    return s;
+  }
+
+  var desk = build(document.getElementById('desk'), { tab:'clients' });
+  var strip = document.getElementById('strip');
+  ORDER.forEach(function(k){
+    var f = document.createElement('figure'); f.className = 'thumbfig';
+    f.innerHTML = '<button type="button" class="thumb" aria-label="Open ' + NAMES[k] + ' in the large drawing"></button><figcaption><b>' + NAMES[k] + '</b><i>' + GRP[k] + '</i></figcaption>';
+    strip.appendChild(f);
+    var t = f.querySelector('.thumb');
+    build(scaled(t), { tab:k });
+    t.addEventListener('click', function(){ desk.show(k); document.getElementById('desk').scrollIntoView({ behavior:'smooth', block:'center' }); });
+  });
+  build(document.getElementById('ph1'), { tab:'home' });
+  build(document.getElementById('ph2'), { tab:'home', open:true });
+  build(document.getElementById('ph3'), { tab:'clients' });
+  build(scaled(document.getElementById('vsw')), { tab:'home', col:'white', fixed:true });
+  build(scaled(document.getElementById('vsn')), { tab:'home', col:'navy', fixed:true });
+
+  function press(ctl, v){
+    document.querySelectorAll('[data-ctl="' + ctl + '"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); });
+  }
+  function setRail(v){
+    apps.forEach(function(s){
+      s.el.setAttribute('data-rail', v);
+      var c = s.el.querySelector('.collapse');
+      c.title = v === '1' ? 'Show names' : 'Icons only';
+      c.setAttribute('aria-label', v === '1' ? 'Show names' : 'Show icons only');
+    });
+    press('rail', v);
+  }
+  document.querySelectorAll('[data-ctl] button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var ctl = b.parentNode.getAttribute('data-ctl'), v = b.getAttribute('data-v');
+      if (ctl === 'col'){ apps.forEach(function(s){ if (!s.fixed) s.el.setAttribute('data-col', v); }); press('col', v); }
+      if (ctl === 'rail') setRail(v);
+      if (ctl === 'theme'){ document.documentElement.setAttribute('data-theme', v); press('theme', v); }
+    });
+  });
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (!document.documentElement.hasAttribute('data-theme') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  press('theme', dark ? 'dark' : 'light');
+})();
+</script>

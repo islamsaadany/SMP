@@ -711,7 +711,43 @@ function collect(stored, incoming, w) {
 
 /* Append one row list to another, tolerating the null `splitRows` hands over
    when a plan change has no addressable row (§184). */
-function keep(into, rows) { (rows || []).forEach(function (r) { into.push(r); }); }
+/* §598: a structural row (field "row") is reported once per list, however
+   many field passes walk that list — the measures go through splitRows four
+   times, and a row that left would otherwise be logged four times. */
+function keep(into, rows) {
+  (rows || []).forEach(function (r) {
+    if (r && r.field === "row" && into.some(function (x) {
+      return x.field === "row" && String(x.id) === String(r.id) && x.had === r.had; })) return;
+    into.push(r);
+  });
+}
+
+/* ── §598: A ROW THAT LEFT, OR ARRIVED, IS LOGGED WITH ITS SEAT ────────
+   Islam: *"if I remove a line fully do I get history of the plans somehow?"*
+   Until this, a list whose ids differed reached `onPlan()` with NO rows, so
+   the log said "the unit's plan" and nothing about which row, and History
+   could put nothing back. The row's whole contents and its seat — which
+   holder, which list, which position — travel in the log entry instead:
+   a row that left as `from`, a row that arrived as `to`. The seat is what
+   lets Restore put it back where it was (his answer: *"old position"*),
+   and the contents are what let the Plan page be rebuilt as it stood on a
+   day. Reported only where the caller names the seat; a list with no seat
+   keeps the bare signal it always gave. */
+function structuralRows(sList, iList, seat) {
+  if (!seat) return null;
+  const sm = byId(sList), im = byId(iList), rows = [];
+  (sList || []).forEach(function (r, i) {
+    if (!r || im[String(r.id)]) return;
+    rows.push({ id: r.id, name: r.name || null, field: "row", had: true,
+                from: { in: seat.in == null ? null : seat.in, list: seat.list, at: i, of: (sList || []).length, row: r }, to: null });
+  });
+  (iList || []).forEach(function (r, i) {
+    if (!r || sm[String(r.id)]) return;
+    rows.push({ id: r.id, name: r.name || null, field: "row", had: false, from: null,
+                to: { in: seat.in == null ? null : seat.in, list: seat.list, at: i, of: (iList || []).length, row: r } });
+  });
+  return rows.length ? rows : null;
+}
 
 function uniq(a) {
   const seen = {}, out = [];
@@ -722,7 +758,7 @@ function uniq(a) {
 /* A list of rows with ids, split into what is reporting and what is plan.
    A change to WHICH rows exist is always plan: adding or removing a measure
    is authoring, not reporting. */
-function splitRows(sList, iList, fields, onReport, onPlan, onArrange) {
+function splitRows(sList, iList, fields, onReport, onPlan, onArrange, seat) {
   /* §191: FAIL CLOSED BEFORE ANYTHING ELSE IS ASKED. Without this the two
      maps below come back empty or collapsed and the loop finds nothing to
      classify, which reads as "no change" and is allowed. */
@@ -732,7 +768,9 @@ function splitRows(sList, iList, fields, onReport, onPlan, onArrange) {
   }
   if (!same(idsOf(sList), idsOf(iList))) {
     if (onArrange && reordered(sList, iList)) { onArrange(); return; }
-    onPlan(); return;
+    /* §598: the rows that left or arrived, with their seats, where the
+       caller named one. The GATE is unchanged — ids differing is plan. */
+    onPlan(structuralRows(sList, iList, seat)); return;
   }
   const sm = byId(sList), im = byId(iList);
   const moved = [];
@@ -1157,7 +1195,8 @@ function collectUnit(key, su, iu, add, w) {
   splitRows(su.keyObjectives, iu.keyObjectives, REPORT.unitKO.concat(SRC),
     function () {},
     function (rows) { add("unitPlan", key, "the unit's key objectives", rows); },
-    function () { add("arrange", key, "the order of the unit's key objectives"); });
+    function () { add("arrange", key, "the order of the unit's key objectives"); },
+    { in: null, list: "keyObjectives" });
 
   /* Pillars, and the measures and tactics under them. */
   /* §191: THE PILLAR LIST IS ASKED THE SAME QUESTION AS EVERY OTHER LIST.
@@ -1208,7 +1247,8 @@ function collectUnit(key, su, iu, add, w) {
           .concat(["note"]);
         splitRows(sb.rows, ib.rows, bdFields,
           function (rows) { rows.forEach(function (x) { moved.push(x); }); },
-          function (rows) { planMoved = true; keep(planRows, rows); });
+          function (rows) { planMoved = true; keep(planRows, rows); },
+          null, { in: a.id, list: "breakdown.rows" });
       })();
       splitRows(a.measures, b.measures, FIGURE,
         function (rows) { addFigures(w, key, su, rows, "reported figures", add); },
@@ -1221,10 +1261,12 @@ function collectUnit(key, su, iu, add, w) {
         function () {});
       splitRows(a.measures, b.measures, REPORT.measure.concat(SRC),
         function () {},
-        function (rows) { planMoved = true; keep(planRows, rows); });
+        function (rows) { planMoved = true; keep(planRows, rows); },
+        null, { in: a.id, list: "measures" });
       splitRows(a.tactics, b.tactics, REPORT.tactic,
         function (rows) { addOwnedTactics(w, key, a, rows, add, moved); },
-        function (rows) { planMoved = true; keep(planRows, rows); });
+        function (rows) { planMoved = true; keep(planRows, rows); },
+        null, { in: a.id, list: "tactics" });
     });
     if (moved.length) add("unitReporting", key, "reported figures", moved);
     if (planMoved) add("unitPlan", key, "the unit's plan", planRows.length ? planRows : null);
@@ -1245,7 +1287,8 @@ function collectUnit(key, su, iu, add, w) {
       splitRows(sac, iac, REPORT.action,
         function (rows) { add("capReporting", key, "action figures", rows); },
         function (rows) { add("capPlan", key, "the unit's actions", rows); },
-        function () { add("arrange", key, "the order of the unit's actions"); });
+        function () { add("arrange", key, "the order of the unit's actions"); },
+        { in: null, list: "actions" });
     }
   })();
 
@@ -1275,6 +1318,8 @@ const FN_SETUP = ["name", "navName", "codePrefix", "active", "head", "custodian"
    fall-through §42 exists for. */
 const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
   ["key", "items", "keyObjectives", "swot", "perf", "exec", "pend",
+   /* §608: How we compete, once the office offers it on a function. */
+   "compete",
    /* §326: a supporting function holds its own projects now. It is in the
       list so a change to them is not swept up as "a supporting function" —
       Setup, the office's — the way any unnamed field is; what they ARE is
@@ -1319,7 +1364,8 @@ function fnOwnWork(sf2, iff, target, add) {
     splitRows(sko, iko, REPORT.capKO,
       function (rows) { say("capReporting", target, "function key objective figures", rows); },
       function (rows) { say("capPlan", target, "a function's key objectives", rows); },
-      function () { say("arrange", target, "the order of a function's key objectives"); });
+      function () { say("arrange", target, "the order of a function's key objectives"); },
+      { in: null, list: "keyObjectives" });
   }
   if (!same(spr, ipr)) collectProjects(spr, ipr, target, say);
   /* §399: A FUNCTION'S S&W, whatever way it plans. The rule a unit's SWOT and
@@ -1331,6 +1377,10 @@ function fnOwnWork(sf2, iff, target, add) {
   if (!same(ssw, isw))
     say("unitAnalysis", target, "the function's strengths and weaknesses",
         fieldRows(target, sf2.name || target, ssw, isw, ["s", "w", "o", "t"], "swot."));
+  /* §608: AND HOW IT COMPETES, judged exactly as a unit's is — beside the
+     SWOT, by the rule the SWOT gets (`unitAnalysis`). */
+  if (!sameCanon(sf2.compete, iff.compete))
+    say("unitAnalysis", target, "how the function competes");
   /* §342: AND ITS ACTIONS, judged by the rules a milestone's row already gets
      — reported figures are the reporter's, the row itself is the plan, and
      the order is `arrange` (§278.3). Without this the whole list falls to the
@@ -1343,7 +1393,8 @@ function fnOwnWork(sf2, iff, target, add) {
     splitRows(sac, iac, REPORT.action,
       function (rows) { say("capReporting", target, "action figures", rows); },
       function (rows) { say("capPlan", target, "a function's actions", rows); },
-      function () { say("arrange", target, "the order of a function's actions"); });
+      function () { say("arrange", target, "the order of a function's actions"); },
+      { in: null, list: "actions" });
   }
   return spoke;
 }
@@ -1380,6 +1431,11 @@ function collectFunction(key, sf, iff, add, w) {
 
   if (String(sf.format) === "pillars") {
     collectUnit(target, asUnit(sf2, target), asUnit(iff, target), add, w);
+    /* §608: and its How we compete, classified HERE for §256's reason —
+       `asUnit()` names its fields and would drop this one, so the change
+       would reach the unit pass as nothing and be allowed to everybody. */
+    if (!sameCanon(sf.compete, iff.compete))
+      add("unitAnalysis", target, "how the function competes");
   } else if (fnOwnWork(sf2, iff, target, add)) {
     /* §326 classified the function's own plan; anything else FN_KNOWN speaks
        for is still the office's, below. */
@@ -1504,13 +1560,16 @@ function collectProjects(aP, bP, target, add) {
       }
       splitRows(pa.deliverables, pb.deliverables, REPORT.deliverable,
         function (rows) { add("capReporting", target, "project deliverables", rows); },
-        function (rows) { add("capPlan", target, "a project's deliverables", rows); });
+        function (rows) { add("capPlan", target, "a project's deliverables", rows); },
+        null, { in: pa.id, list: "deliverables" });
       splitRows(pa.outcomes, pb.outcomes, REPORT.outcome,
         function (rows) { add("capReporting", target, "project outcome figures", rows); },
-        function (rows) { add("capPlan", target, "a project's outcomes", rows); });
+        function (rows) { add("capPlan", target, "a project's outcomes", rows); },
+        null, { in: pa.id, list: "outcomes" });
       splitRows(pa.milestones, pb.milestones, REPORT.milestone,
         function (rows) { add("capReporting", target, "project milestones", rows); },
-        function (rows) { add("capPlan", target, "a project's milestones", rows); });
+        function (rows) { add("capPlan", target, "a project's milestones", rows); },
+        null, { in: pa.id, list: "milestones" });
     });
   }
 }
@@ -1585,7 +1644,8 @@ function collectCapabilities(sList, iList, add, w) {
     splitRows(a.keyObjectives, b.keyObjectives, REPORT.capKO,
       function (rows) { add("capReporting", target, "capability key objective figures", rows); },
       function (rows) { add("capPlan", target, "a capability's key objectives", rows); },
-      function () { add("arrange", target, "the order of a capability's key objectives"); });
+      function () { add("arrange", target, "the order of a capability's key objectives"); },
+      { in: a.id, list: "keyObjectives" });
 
     collectProjects(a.projects, b.projects, target, add);
     /* §394: A CAPABILITY THAT PLANS IN PILLARS IS JUDGED AS A PILLARS FUNCTION
@@ -1764,6 +1824,16 @@ function containerIndex(stored) {
   return out;
 }
 
+/* §595: THE ROWS OF THE COMPANY'S OWN PLAN THIS PERSON DOES NOT HOLD — the
+   one question every company branch below asks of a bounded reporter, through
+   the one seat rule (`holdsTopPart`). `seatOf` reads the part's seats off the
+   row's context; a row with no part is never theirs. */
+function topRowsNotMine(w, person, kind, ids, ctxs, seatOf) {
+  return ids.filter(function (id) {
+    const c = ctxs[id], seat = c ? seatOf(c) : null;
+    return !seat || !R.holdsTopPart(w, person, kind, seat);
+  });
+}
 function authorize(stored, incoming, person) {
   const w = R.worldOf(stored);              /* THE STORED WORLD. Never the incoming one. */
   const smo = R.isSMO(w, person);
@@ -2046,7 +2116,7 @@ function authorize(stored, incoming, person) {
           return;
         }
         if (R.mayReportTop(w, person)) return;
-        if (R.ownsTopPillar(w, person, p.owner || "", p.custodian || "")) return;
+        if (R.holdsTopPart(w, person, "pillar", { names: [p.owner || "", p.custodian || ""] })) return;
         no("Only the direction's owner and custodian, the SMO team and the CEO add its slides.");
         return;
       }
@@ -2084,14 +2154,13 @@ function authorize(stored, incoming, person) {
              the rows of their own direction and nothing else — never the
              company's submission, note or slides. Found through the STORED
              top plan (§42), never the incoming one. */
-          if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids || !R.ownsTopPillar(w, person)) {
+          if ((ch.kind !== "unitReporting" && ch.kind !== "lineNote") || !ch.ids || !R.holdsTopPart(w, person, "pillar")) {
             no("The top layer's own plan is reported by the SMO team and the CEO.");
             return;
           }
           const tctx = ctxOfUnit(topView(stored.group));
-          const notMineT = ch.ids.filter(function (id) {
-            const c = tctx[id];
-            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "", c.pillarCust || "");
+          const notMineT = topRowsNotMine(w, person, "pillar", ch.ids, tctx, function (c) {
+            return { names: [c.pillarOwner || "", c.pillarCust || ""] };
           });
           if (notMineT.length)
             no("Your role reports only your own direction — " + notMineT.length +
@@ -2201,7 +2270,7 @@ function authorize(stored, incoming, person) {
             return;
           }
           if (!R.mayReportTop(w, person) &&
-              !R.ownsTopPillar(w, person, c.owner || "", c.custodian || ""))
+              !R.holdsTopPart(w, person, "pillar", { names: [c.owner || "", c.custodian || ""] }))
             no("Saving " + (c.name ? "“" + c.name + "”" : "a direction") +
                " is its owner's or its custodian's.");
           return;
@@ -2424,14 +2493,13 @@ function authorize(stored, incoming, person) {
             return;
           }
           if (R.mayReportTop(w, person)) return;
-          if (!ch.ids || !R.ownsTopProject(w, person)) {
+          if (!ch.ids || !R.holdsTopPart(w, person, "project")) {
             no("The top layer's own plan is reported by the SMO team and the CEO.");
             return;
           }
           const gctx = ctxOfUnitOwn(topView(stored.group));
-          const notMineP = ch.ids.filter(function (id) {
-            const c = gctx[id];
-            return !c || !c.project || !R.ownsTopProject(w, person, c.project.owner || "");
+          const notMineP = topRowsNotMine(w, person, "project", ch.ids, gctx, function (c) {
+            return c.project ? { names: [c.project.owner || ""] } : null;
           });
           if (notMineP.length)
             no("Your role reports only your own project — " + notMineP.length +

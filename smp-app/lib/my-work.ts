@@ -41,6 +41,8 @@ export type WorkRow = {
   dueWeek: boolean;
   /* whether the person LOOKING may tick it or change its status (§583) */
   canChange: boolean;
+  /* the day it was finished, for My tasks' Show done (2026-10-24) */
+  doneDay: string | null;
 };
 export type ClientTally = { open: number; late: number };
 
@@ -80,10 +82,14 @@ function rowOf(t: Client, a: Action, today: string, who: Who | null): WorkRow {
     dueWeek: !done && !late && !!a.due && a.due <= weekOf(today).to,
     status: a.status, statusWord: STATUS_WORD[a.status],
     canChange: !!who && isOffice(who.seat) && mayChange(a, who),
+    doneDay: a.doneDay,
   };
 }
 
-/* One client's open actions for one person. A client that will not answer
+/* One client's open actions for one person, and those it finished in the
+   last 30 days (My tasks' Show done, Islam 2026-10-24: "done last week and
+   done in the last 30 days but last week is the important one"); the
+   callers that count or list what is open filter them out (tally, Home). A client that will not answer
    yields NOTHING and says so in the log — one client down must not take the
    whole list with it (§231.3's rule, one module over). */
 export async function openOn(t: Client, email: string, personKey: string | null, today: string, viewer: Who | null = null): Promise<WorkRow[] | null> {
@@ -97,8 +103,10 @@ export async function openOn(t: Client, email: string, personKey: string | null,
          §4b must go red under it. */
       const everyone = process.env.SMP_BREAK === "mywork-everyone";
       const r = await c.query(
-        "SELECT id, title, owner_key, due::text AS due, first_due::text AS first_due, status FROM tracker_actions " +
-        "WHERE " + (everyone ? "$1::text IS NOT NULL" : "owner_key = $1") + " AND status <> 'done' ORDER BY due ASC NULLS FIRST, created_at ASC", [key]);
+        "SELECT id, title, owner_key, due::text AS due, first_due::text AS first_due, status, " +
+        "to_char(done_at AT TIME ZONE 'Africa/Cairo', 'YYYY-MM-DD') AS done_day FROM tracker_actions " +
+        "WHERE " + (everyone ? "$1::text IS NOT NULL" : "owner_key = $1") +
+        " AND (status <> 'done' OR done_at >= now() - interval '30 days') ORDER BY due ASC NULLS FIRST, created_at ASC", [key]);
       return r.rows.map((row) => rowOf(t, shape(row), today, viewer));
     });
   } catch (e) {
@@ -122,7 +130,7 @@ export async function myWork(clients: Client[], seats: Seat[], email: string, op
     if (got === null) { unanswered.push(t.name); continue; }
     rows.push(...got);
     if (modulesFor(t.modules).includes("tracker" as never))
-      tally[t.key] = { open: got.length, late: got.filter((r) => r.late).length };
+      tally[t.key] = { open: got.filter((r) => r.status !== "done").length, late: got.filter((r) => r.late).length };
   }
   const order: Record<Bucket, number> = { late: 0, week: 1, later: 2 };
   rows.sort((a, b) => order[a.bucket] - order[b.bucket]
@@ -136,6 +144,29 @@ export async function myWork(clients: Client[], seats: Seat[], email: string, op
     statuses: STATUSES.map((s) => ({ key: s, word: STATUS_WORD[s] })),
     nextWeekFrom: addDays(week.from, 7),
   };
+}
+
+/* ── A CASE STUDY TO WRITE UP (spec 067, decision 7) ───────────────────
+   My work's SECOND source, said so (spec 067 §8): a write-up is not a
+   Tracker action and cannot be one — the backlog is on archived and past
+   clients, whose Trackers are behind a closed door. So it is read from the
+   case studies, shaped like a row with the Tracker's own week words and
+   buckets (whenOf, bucketOf), and drawn among the actions by its due date.
+   It carries NO status to change: a write-up is finished by marking it done
+   on the case study, never from a list (§61). */
+export type WriteUp = { kind: "case"; id: string; name: string; client: string; clientName: string;
+  due: string | null; when: string; bucket: Bucket; late: boolean; dueWeek: boolean };
+export async function writeUps(c: { query: PoolClient["query"] }, userId: string, today: string): Promise<WriteUp[]> {
+  const r = await c.query(
+    "SELECT cs.id, cs.name, cs.due::text AS due, t.key, t.name AS client_name FROM case_studies cs " +
+    "JOIN tenants t ON t.id = cs.about_tenant_id WHERE cs.state = 'writing' AND cs.writer_id = $1 " +
+    "ORDER BY cs.due NULLS LAST, cs.name", [userId]);
+  return r.rows.map((x: any) => {
+    const late = !!x.due && isLate(x.due, today);
+    return { kind: "case" as const, id: x.id, name: x.name, client: x.key, clientName: x.client_name, due: x.due,
+      when: whenOf({ due: x.due, firstDue: null, status: "open", doneDay: null } as any, today),
+      bucket: bucketOf(x.due, today), late, dueWeek: !late && !!x.due && x.due <= weekOf(today).to };
+  });
 }
 
 /* ── FINISHING A ROW FROM MY WORK (§583) ─────────────────────────────

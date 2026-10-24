@@ -180,7 +180,9 @@ export const OPTIONS_SCHEMA = { type: "OBJECT", properties: { reply: { type: "ST
 const CAP = { type: "OBJECT", properties: { title: { type: "STRING" }, kind: { type: "STRING" }, serves: { type: "ARRAY", items: { type: "STRING" } }, ownedBy: { type: "STRING" } }, required: ["title", "kind", "serves", "ownedBy"] };
 export const CAPS_SCHEMA = { type: "OBJECT", properties: { reply: { type: "STRING" }, capabilities: { type: "ARRAY", items: CAP } }, required: ["reply", "capabilities"] };
 
-export type Fn = { key: string; name: string };
+/* `head` is the function's head, a person key: a capability's owner is a
+   person (§626), so the function the model names arrives as its head. */
+export type Fn = { key: string; name: string; head?: string };
 const fnLines = (fns: Fn[]) => fns.length ? fns.map((f) => "- " + f.key + ": " + f.name).join("\n") : "(none — leave ownedBy empty)";
 const optionLines = (os: Option[]) => os.map((o, k) => (k + 1) + ". " + o.title).join("\n");
 
@@ -206,12 +208,15 @@ export function capsQuestion(dirs: string[], fns: Fn[], have: Cap[], own: string
     (ask ? "\n\nThe client asks: " + ask : "") +
     (first ? "\n\nSuggest 3 to 5 Capabilities the organisation must build to deliver these Directions, drawn from them and the SWOT." : "\n\nReturn ONLY the new rows" + (own.length || ask ? "" : " — add 2 that are not already on the table") + ".") +
     " Capabilities are never scored. For each give a kind: gap (" + CAP_KIND_SAYS.gap + "), transformation (" + CAP_KIND_SAYS.transformation + ") or enabler (" + CAP_KIND_SAYS.enabler + ");" +
-    " `serves` — the titles of the Directions above it supports, word for word; and ownedBy — a function key from the list.\n\nFUNCTIONS (for ownedBy):\n" + fnLines(fns) +
+    " `serves` — the titles of the Directions above it supports, word for word; and ownedBy — the key of the function from the list that should own it (its head becomes the owner).\n\nFUNCTIONS (for ownedBy):\n" + fnLines(fns) +
     "\n\nIn `reply`, say in one sentence what you suggested.";
 }
 
 /* The model's rows, cut to shape: an owner not on the list is dropped rather
-   than guessed at; a `serves` naming a Direction not on the table is dropped. */
+   than guessed at; a `serves` naming a Direction not on the table is dropped.
+   §626: a Capability's owner is a PERSON, so the function the model names
+   is kept as that function's head, and dropped where the function has none —
+   the row then says "owners to set" rather than claiming one. */
 export function modelOptions(raw: unknown, fns: Fn[], ownTitles: string[]): Option[] {
   const keys = new Set(fns.map((f) => f.key));
   const own = new Set(ownTitles.map((t) => t.toLowerCase()));
@@ -228,7 +233,8 @@ export function modelCaps(raw: unknown, fns: Fn[], dirs: string[], ownTitles: st
   const own = new Set(ownTitles.map((t) => t.toLowerCase()));
   return (Array.isArray(raw) ? raw : []).map((x: any) => {
     const c = cleanCap({ ...x, keep: first, mark: "" });
-    if (!keys.has(c.ownedBy)) c.ownedBy = "";
+    const fn = keys.has(c.ownedBy) ? fns.find((f) => f.key === c.ownedBy) : undefined;
+    c.ownedBy = (fn && fn.head) || "";
     c.serves = c.serves.map((t) => dl.get(t.toLowerCase()) || "").filter(Boolean);
     c.mark = own.has(c.title.toLowerCase()) ? "yours" : first ? "" : "new";
     if (c.mark === "yours") c.keep = true;
@@ -237,7 +243,7 @@ export function modelCaps(raw: unknown, fns: Fn[], dirs: string[], ownTitles: st
 }
 
 /* ── SAVING: WHAT WAS CHOSEN, AS A DELIVERABLE ───────────────────────── */
-export function dirsText(s: Dirs, fnName: (k: string) => string): string {
+export function dirsText(s: Dirs, fnName: (k: string) => string, ownerName: (k: string) => string = fnName): string {
   const out: string[] = [];
   if (s.mode === "directions") {
     out.push("DIRECTIONS:");
@@ -245,15 +251,15 @@ export function dirsText(s: Dirs, fnName: (k: string) => string): string {
   }
   if (s.mode === "capabilities" || s.withCaps) {
     out.push("CAPABILITIES:");
-    kept(s).forEach((c, k) => out.push((k + 1) + ". " + c.title + (c.kind ? " — " + CAP_KIND_WORD[c.kind] : "") + (c.serves.length ? " · serves " + c.serves.join(", ") : "") + (c.ownedBy ? " · " + fnName(c.ownedBy) : "")));
+    kept(s).forEach((c, k) => out.push((k + 1) + ". " + c.title + (c.kind ? " — " + CAP_KIND_WORD[c.kind] : "") + (c.serves.length ? " · serves " + c.serves.join(", ") : "") + (c.ownedBy ? " · " + ownerName(c.ownedBy) : "")));
   }
   return out.join("\n");
 }
 export const dirsTitle = (s: Dirs, placeWord: string) =>
   ((s.mode === "capabilities" ? "Capabilities — " : "Directions — ") + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
-export async function saveDirs(c: Q, chat: { id: string; place: string; section: Section; title: string }, s: Dirs, placeWord: string, fnName: (k: string) => string, by: string) {
+export async function saveDirs(c: Q, chat: { id: string; place: string; section: Section; title: string }, s: Dirs, placeWord: string, fnName: (k: string) => string, by: string, ownerName: (k: string) => string = fnName) {
   const title = dirsTitle(s, placeWord);
-  const body = { text: dirsText(s, fnName), directions: s.mode === "directions" ? goes(s) : [], capabilities: s.mode === "capabilities" || s.withCaps ? kept(s) : [] };
+  const body = { text: dirsText(s, fnName, ownerName), directions: s.mode === "directions" ? goes(s) : [], capabilities: s.mode === "capabilities" || s.withCaps ? kept(s) : [] };
   const note = "Built in “" + chat.title + "”";
   const hit = await c.query("SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",
     [chat.place, chat.section, title]);

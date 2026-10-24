@@ -256,6 +256,9 @@ with sync_playwright() as p:
     # way that copy sets it, from a real PNG.
     pg.evaluate("() => { closeDeck(); current='setup'; currentSub='start'; paint(); }")
     pg.wait_for_timeout(400)
+    # §624: the colours and the mark are on Profile's Brand tab.
+    pg.evaluate("() => { const t=document.querySelector('.csetup [data-cstab=brand]'); if (t) t.click(); }")
+    pg.wait_for_timeout(400)
     ok(pg.locator("[data-brand]").count() > 0, "the branding block is drawn (the control case)")
     ok(pg.locator("input[data-glogo]").count() == 0, "and carries NO separate group-mark upload")
     if MARK.exists():

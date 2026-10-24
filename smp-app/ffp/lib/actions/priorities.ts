@@ -245,10 +245,10 @@ export async function sendPlanForApproval(input: z.infer<typeof sendSchema>): Pr
   if (unscored.length) return refuse(`Score every chosen process first: ${unscored.map((r) => r.name).join(", ")}`);
 
   const approver = await registerPerson(d.workspaceId, d.approverPersonId);
-  if (!approver) return refuse("Pick the approver from the People register");
-  if (!approver.email) return refuse(`${approver.name} has no email on the People register, so they could not sign in to approve. Add one first`);
-  if (!approver.role) return refuse(`${approver.name} has no role on the People register. The sign-off records a name and a role, so give them one first`);
-  if (!approver.smpKey) return refuse(`${approver.name} is not on the client's People register`);
+  if (!approver) return refuse("Pick the approver from the Client register");
+  if (!approver.email) return refuse(`${approver.name} has no email on the Client register, so they could not sign in to approve. Add one first`);
+  if (!approver.role) return refuse(`${approver.name} has no role on the Client register. The sign-off records a name and a role, so give them one first`);
+  if (!approver.smpKey) return refuse(`${approver.name} is not on the Client register`);
 
   const me = (await auth())?.user;
   if (me && me.email.trim().toLowerCase() === approver.email.trim().toLowerCase()) return refuse("You cannot send the plan to yourself for approval. Pick somebody else");

@@ -529,7 +529,9 @@ function planDeckBox(target){
 function buildPlanPptx(target){
   var m = reviewPptxMark(target), kicker = placeLabel(target) || String(target || "");
   var out = [];
-  [].forEach.call(planDeckBox(target).querySelectorAll(".dslide"), function(sl){
+  /* §604: measured after the figures are stripped, so the plan's own columns
+     share the room. */
+  [].forEach.call(deckColFitBox(planDeckBox(target)).querySelectorAll(".dslide"), function(sl){
     out = out.concat(deckSlidePptx(sl, kicker, m && m.shape));
   });
   return pptxPackage(out, planPptxName(target).replace(/\.pptx$/, ""), m && m.media);
@@ -698,17 +700,31 @@ function deckBandColor(el){
    its own columns the same way and arrives here already right. */
 function deckCellSpec(td){
   var C = pptxColors();
+  /* §597: A HIDDEN ROW IS WRITTEN WHOLE AND QUIET. The deck keeps it on the
+     slide greyed (`tr.hiddenrow`), so the file does the same: every run in
+     the row takes the quiet ink at regular weight — no band, no red Missing,
+     no bold — and the name carries the words the chip says, as a smaller
+     run after it, so a reader of the .pptx is told what the room was told. */
+  var row = td.parentNode;
+  var hid = !!(row && row.classList && row.classList.contains("hiddenrow"));
   var qs = td.querySelector(".qs");
-  if (qs) return { t: deckQuarters(qs), align:"ctr" };
+  if (qs) return hid ? { t: deckQuarters(qs), align:"ctr", color:C.quiet }
+                     : { t: deckQuarters(qs), align:"ctr" };
   var isNum = td.classList.contains("num"), isIdx = td.classList.contains("idx");
   var align = (isNum || isIdx) ? "r" : null;
+  var chip = td.querySelector(".hidchip");
+  if (chip) {
+    var c0 = td.cloneNode(true); c0.querySelector(".hidchip").remove();
+    return { align:align, runs: [{ t: deckPieces(c0, true) || "—", color:C.quiet },
+                                 { t: " · " + deckTxt(chip), i:true, small:true, color:C.quiet }] };
+  }
   /* THE GAP MARK FOLLOWS ITS COLUMN, like every other value in it. Written
      right-aligned outright it sat hard right in the prose columns — a tactic
      with no outcome read as a figure (§119, found by looking at the page). */
-  if (td.querySelector(".missing")) return { miss:true, align:align };
+  if (td.querySelector(".missing") && !hid) return { miss:true, align:align };
 
-  var color = deckBandColor(td) || (isIdx ? C.quiet : null);
-  var bold  = td.classList.contains("final");
+  var color = hid ? C.quiet : (deckBandColor(td) || (isIdx ? C.quiet : null));
+  var bold  = !hid && td.classList.contains("final");
 
   var due = td.querySelector(".duehalf");
   if (due) {
@@ -728,7 +744,7 @@ function deckCellSpec(td){
     var c3 = td.cloneNode(true); c3.querySelector(".dsub").remove();
     return withUnits({ sub: deckTxt(sub), align:align,
              color: color, b: bold,
-             subColor: sub.classList.contains("dlate") ? C.band.bad : null }, deckPieces(c3, true) || "—");
+             subColor: (!hid && sub.classList.contains("dlate")) ? C.band.bad : null }, deckPieces(c3, true) || "—");
   }
 
   return withUnits({ align:align, color:color, b:bold }, deckPieces(td, true) || "—");
@@ -757,6 +773,20 @@ function deckColWidths(ths){
     var sh = th.classList.contains("num") ? 1 : 2;
     shares.push(sh); mins.push(m); total += sh; fixed += m;
   });
+  /* §604: THE SLIDE'S OWN WIDTHS, where the deck worked them out
+     (`deckColFit`, kept on the header as `data-fw`): each column takes the
+     same share of the file's table that it has on the slide, and still never
+     less than its heading needs. */
+  var fw = ths.map(function(th){ return Number(th.getAttribute("data-fw")) || 0; });
+  if (fw.every(function(x){ return x > 0; })) {
+    var sum = fw.reduce(function(n, x){ return n + x; }, 0);
+    var w = fw.map(function(x, i){ return Math.max(mins[i], Math.round(PPTX_CW * x / sum)); });
+    var over = w.reduce(function(n, x){ return n + x; }, 0) - PPTX_CW;
+    var give = w.reduce(function(n, x, i){ return n + (x - mins[i]); }, 0);
+    if (over > 0 && give > 0)
+      w = w.map(function(x, i){ return Math.round(x - over * (x - mins[i]) / give); });
+    if (over <= give) return w;
+  }
   var room = PPTX_CW - fixed;
   /* A table whose headings alone overflow the slide keeps its proportions
      rather than running off the edge — the minima are scaled to fit and the
@@ -1081,6 +1111,7 @@ function reviewPptxMark(target){
 function reviewPptxSlides(target, mark){
   var box = document.createElement("div");
   box.innerHTML = deckHtmlFor(target);
+  deckColFitBox(box);   /* §604: the slide's widths, for `deckColWidths` */
   var kicker = placeLabel(target) || String(target || "");
   var out = [];
   [].forEach.call(box.querySelectorAll(".dslide"), function(sl){

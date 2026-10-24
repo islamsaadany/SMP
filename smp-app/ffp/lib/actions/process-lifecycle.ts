@@ -78,15 +78,15 @@ export async function submitProcessForReview(input: z.infer<typeof submitSchema>
   if (!nextStatus(process.lifecycleStatus, "submit")) return refuse("Only a draft can be sent for review");
 
   const approver = await registerPerson(d.workspaceId, d.approverPersonId);
-  if (!approver) return refuse("Pick the approver from the People register");
-  if (!approver.email) return refuse(`${approver.name} has no email on the People register, so they could not sign in to approve. Add one first`);
-  if (!approver.role) return refuse(`${approver.name} has no role on the People register. The approval records a name and a role, so give them one first`);
+  if (!approver) return refuse("Pick the approver from the Client register");
+  if (!approver.email) return refuse(`${approver.name} has no email on the Client register, so they could not sign in to approve. Add one first`);
+  if (!approver.role) return refuse(`${approver.name} has no role on the Client register. The approval records a name and a role, so give them one first`);
 
   const reviewers: Reviewer[] = [];
   for (const id of new Set(d.reviewerPersonIds)) {
     if (id === d.approverPersonId) continue; // the approver is not also a reviewer
     const r = await registerPerson(d.workspaceId, id);
-    if (!r) return refuse("A reviewer is not on the People register");
+    if (!r) return refuse("A reviewer is not on the Client register");
     reviewers.push({ personId: r.id, name: r.name, role: r.role });
   }
 

@@ -27,9 +27,20 @@ def ck(name, ok, detail=""):
 def safe(pg, js, dflt=None):
     try: return pg.evaluate(js)
     except Exception: return dflt       # §215: degrade, never die
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
-        pg.click(sel, timeout=4000); pg.wait_for_timeout(250); return True
+        pg.click(sel, timeout=4000); pg.wait_for_timeout(250); answer(pg); return True
     except Exception:
         return False
 
@@ -76,7 +87,7 @@ with sync_playwright() as p:
 
     print("\n4 · the shape screen's level cards: the switch and the split, pressed (§544)")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]')
+        and press(pg, '[data-setupgo="shape"]')
     ck("the set-up flow's shape screen opens", ok)
     # §544: one card at a time, opened from the tree (§218: rewritten to
     # where the card is, never loosened about what it holds).

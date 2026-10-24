@@ -151,14 +151,15 @@ def serve():
 # Applied to the PAGE rather than to the sources, because platform.html is
 # hand-written and served as it is — there is no build step to make a broken
 # copy through (§276's rule needs one; this page has none).
-PUT_IT_BACK = """() => {
+PUT_IT_BACK = """async () => {
+  /* the demo's card dropped back into the clients grid, as before §317 */
+  document.querySelector('.clwhich button[data-which="demo"]').click();
+  await new Promise(r => setTimeout(r, 200));
+  const card = document.querySelector("[data-grid='demo'] .ccard").cloneNode(true);
+  document.querySelector('.clwhich button[data-which="active"]').click();
+  await new Promise(r => setTimeout(r, 200));
   const grid = document.querySelector("[data-grid='clients']");
-  const apart = document.querySelector('.apart');
-  if (!apart) return false;
-  const card = apart.querySelector('.ccard');
-  const add = grid.querySelector('.ccard.add');
-  grid.insertBefore(card, add || null);
-  apart.remove();
+  grid.insertBefore(card, grid.querySelector('.ccard.add') || null);
   return true;
 }"""
 
@@ -171,8 +172,14 @@ def run():
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
 
-        # ══ 1 · three clients and the demo ══════════════════════════════
-        print("\n1 · the clients, and the worked example beneath them")
+        # ══ 1 · three clients, and the demo under its own choice ═══════
+        # REWRITTEN TO THE NEW TRUTH (§218, spec 067's Clients filter). Islam:
+        # "add a filter for active clients ended clients and demo so it
+        # filters what we are seeing and default is active". §317's band below
+        # the grid is replaced by the Demo choice; every assertion the band
+        # carried is made of the Demo view instead — still never in the client
+        # grid, still its amber card, its tag, its door and the grid's width.
+        print("\n1 · the clients, and the worked example under Demo")
         SCENE["cards"] = CLIENTS + [DEMO]
         # §400: the console opens on My work now, and a same-page hash change is
         # not a navigation — leave the page first so the goto really reloads.
@@ -183,87 +190,82 @@ def run():
 
         shape = pg.evaluate("""() => {
           const grid = document.querySelector("[data-grid='clients']");
-          const apart = document.querySelector('.apart');
-          const names = e => Array.from(e ? e.querySelectorAll('.ccard[data-client] h2') : [])
-            .map(h => h.textContent);
-          const g = grid.getBoundingClientRect();
-          const a = apart ? apart.getBoundingClientRect() : null;
-          const dcard = apart ? apart.querySelector('.ccard') : null;
+          const names = e => Array.from(e ? e.querySelectorAll('.ccard[data-client] h2') : []).map(h => h.textContent);
           const ccard = grid.querySelector('.ccard[data-client]');
+          const pressed = document.querySelector('.clwhich button[aria-pressed="true"]');
+          const demoBtn = document.querySelector('.clwhich button[data-which="demo"]');
           return {
             grid: names(grid),
-            apart: names(apart),
-            hasApart: !!apart,
-            akey: apart ? (apart.querySelector('.akey') || {}).textContent : null,
             addInGrid: !!grid.querySelector('.ccard.add'),
-            addLast: grid.lastElementChild ? grid.lastElementChild.classList.contains('add') : false,
-            apartBelow: a ? a.top >= g.bottom - 1 : null,
-            demoGround: dcard ? getComputedStyle(dcard).backgroundColor : null,
+            // since 2026-10-24 + Add a client is the page band's button (Home's look)
+            addLast: !!document.querySelector('.pgband .pgadd'),
+            opensOn: pressed ? pressed.dataset.which : null,
+            demoOffer: demoBtn ? demoBtn.textContent : null,
             clientGround: ccard ? getComputedStyle(ccard).backgroundColor : null,
-            demoTag: dcard ? !!dcard.querySelector('.tag.demo') : null,
-            demoOpens: dcard ? dcard.dataset.client : null,
-            demoWidth: dcard ? Math.round(dcard.getBoundingClientRect().width) : null,
             clientWidth: ccard ? Math.round(ccard.getBoundingClientRect().width) : null,
             said: Array.from(document.querySelectorAll('#page .said, #page .err')).map(e => e.textContent)
           };
         }""")
-
         check("the client grid holds the clients and not the demo",
               shape["grid"] == ["Raya Trade", "RHI", "El Abd"], shape["grid"])
-        check("…and the way to add a client comes after the last real one",
-              shape["addInGrid"] and shape["addLast"], shape)
+        # REWRITTEN, NEVER LOOSENED (§218): the way to add a client moved from
+        # the grid's last card to the page band's button (2026-10-24, Home's
+        # look); it is still asserted to be there, and no longer among the clients
+        check("…and the way to add a client is the band's button, not a card among the clients",
+              (not shape["addInGrid"]) and shape["addLast"], shape)
+        check("the page opens on Active", shape["opensOn"] == "active", shape["opensOn"])
         # BOTH ENDS: a build that deleted the demo passes the assertion above.
-        check("the demo is still drawn, in a band of its own",
-              shape["hasApart"] and shape["apart"] == ["Demo"], shape["apart"])
-        check("…and that band is below the client grid",
-              shape["apartBelow"] is True, shape["apartBelow"])
-        check("…under a key naming what it is",
-              (shape["akey"] or "").strip().lower() == "the worked example", shape["akey"])
+        check("the demo is offered, under Demo, counted", shape["demoOffer"] == "Demo1", shape["demoOffer"])
+        pg.click('.clwhich button[data-which="demo"]'); pg.wait_for_timeout(250)
+        demo = pg.evaluate("""() => {
+          const g = document.querySelector("[data-grid='demo']");
+          const d = g ? g.querySelector('.ccard') : null;
+          return { names: Array.from(g ? g.querySelectorAll('.ccard[data-client] h2') : []).map(h => h.textContent),
+                   clients: !!document.querySelector("[data-grid='clients']"),
+                   ground: d ? getComputedStyle(d).backgroundColor : null,
+                   tag: d ? !!d.querySelector('.tag.demo') : null,
+                   opens: d ? d.dataset.client : null,
+                   width: d ? Math.round(d.getBoundingClientRect().width) : null };
+        }""")
+        check("pressing Demo draws the demo, and only the demo", demo["names"] == ["Demo"] and not demo["clients"], demo)
         # Nothing about the card itself moved (§94.2 from the other side).
         check("the demo card keeps the amber ground it already wore",
-              shape["demoGround"] not in (None, shape["clientGround"]),
-              (shape["demoGround"], shape["clientGround"]))
-        check("…keeps its Demo tag", shape["demoTag"] is True)
-        check("…and still opens its own client", shape["demoOpens"] == "demo", shape["demoOpens"])
-        # A card grown to the page would read as MORE important than the
-        # clients above it, which is the opposite of setting it apart.
+              demo["ground"] not in (None, shape["clientGround"]), (demo["ground"], shape["clientGround"]))
+        check("…keeps its Demo tag", demo["tag"] is True)
+        check("…and still opens its own client", demo["opens"] == "demo", demo["opens"])
         check("…at the grid's own track width, not the page's",
-              shape["demoWidth"] is not None and abs(shape["demoWidth"] - shape["clientWidth"]) <= 2,
-              (shape["demoWidth"], shape["clientWidth"]))
+              demo["width"] is not None and abs(demo["width"] - shape["clientWidth"]) <= 2,
+              (demo["width"], shape["clientWidth"]))
         check("nothing is said about there being no clients", shape["said"] == [], shape["said"])
+        pg.click('.clwhich button[data-which="active"]'); pg.wait_for_timeout(250)
 
         # ══ 2 · the search says "Search clients" and means it ═══════════
         print("\n2 · the search")
-        pg.fill(".ptitle .fld", "demo")
-        after = pg.evaluate("""() => {
-          const grid = document.querySelector("[data-grid='clients']");
-          const apart = document.querySelector('.apart');
-          const vis = e => Array.from(e ? e.querySelectorAll('.ccard[data-client]') : [])
-            .filter(c => !c.hidden).map(c => c.dataset.client);
-          return { grid: vis(grid), apart: vis(apart) };
-        }""")
-        check("a search for the demo turns up no client", after["grid"] == [], after["grid"])
-        check("…and does not reach into the band either", after["apart"] == ["demo"], after["apart"])
-        pg.fill(".ptitle .fld", "rhi")
+        pg.fill(".clcard .clbar .fld", "demo")
+        found = pg.eval_on_selector_all("[data-grid='clients'] .ccard[data-client]",
+                                        "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
+        check("a search for the demo turns up no client", found == [], found)
+        pg.click('.clwhich button[data-which="demo"]'); pg.wait_for_timeout(250)
+        found = pg.eval_on_selector_all("[data-grid='demo'] .ccard[data-client]",
+                                        "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
+        check("…and under Demo the same search still finds the worked example", found == ["demo"], found)
+        pg.click('.clwhich button[data-which="active"]'); pg.wait_for_timeout(250)
+        pg.fill(".clcard .clbar .fld", "rhi")
         one = pg.eval_on_selector_all(
             "[data-grid='clients'] .ccard[data-client]",
             "els => els.filter(c => !c.hidden).map(c => c.dataset.client)")
         check("…and a search for a client still finds it", one == ["rhi"], one)
-        pg.fill(".ptitle .fld", "")
+        pg.fill(".clcard .clbar .fld", "")
 
         # ══ 3 · the state a real deployment cannot show (§255) ══════════
         print("\n3 · the worked example seeded, and no clients yet")
         SCENE["cards"] = [DEMO]
-        # §400: the console opens on My work now, and a same-page hash change is
-        # not a navigation — leave the page first so the goto really reloads.
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
-        pg.wait_for_selector(".ccard", timeout=9000)
-        if BREAK == "in-grid":
-            pg.evaluate(PUT_IT_BACK)
+        pg.wait_for_selector(".clwhich", timeout=9000)
         empty = pg.evaluate("""() => ({
           said: Array.from(document.querySelectorAll('#page .said, #page .err')).map(e => e.textContent),
-          add: !!document.querySelector("[data-grid='clients'] .ccard.add"),
-          apart: !!document.querySelector('.apart .ccard[data-client="demo"]'),
+          add: !!document.querySelector(".pgband .pgadd"),
+          demoOffer: (document.querySelector('.clwhich button[data-which="demo"]') || {}).textContent || null,
           gridClients: document.querySelectorAll("[data-grid='clients'] .ccard[data-client]").length
         })""")
         # THE COUNT READ `j.cards.length`, WHICH INCLUDED THE DEMO — so this
@@ -272,15 +274,11 @@ def run():
         check("the page says there are no clients yet",
               any("No clients yet" in s for s in empty["said"]), empty["said"])
         check("…with the way in still drawn", empty["add"] is True)
-        check("…and the worked example still in its band",
-              empty["apart"] is True and empty["gridClients"] == 0, empty)
+        check("…and the worked example still offered, under Demo",
+              empty["demoOffer"] == "Demo1" and empty["gridClients"] == 0, empty)
 
-        # ══ 4 · the key is words, and words are measured (§38.5) ═══════
-        # --ink-3 is set against the quietest ground it sits on and this key
-        # sits on --ground in both themes — but a token cleared elsewhere is
-        # not thereby cleared here (§40), and this file has walked into that
-        # trap by number more than once. Measured, in both palettes.
-        print("\n4 · the band's key, read")
+        # ══ 4 · the choices are words, and words are measured (§38.5) ══
+        print("\n4 · the choices, read")
         RATIO = """(sel) => {
           const el = document.querySelector(sel);
           if (!el) return null;
@@ -300,12 +298,12 @@ def run():
         SCENE["cards"] = CLIENTS + [DEMO]
         for theme in ("light", "dark"):
             pg.emulate_media(color_scheme=theme)
-            # §400: the console opens on My work now, and a same-page hash change is
-            # not a navigation — leave the page first so the goto really reloads.
             pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
-            pg.wait_for_selector(".apart .akey", timeout=9000)
-            r = pg.evaluate(RATIO, ".apart .akey")
-            check("the key reads in " + theme + " (" + str(r) + ":1)", r is not None and r >= 4.5, r)
+            pg.wait_for_selector(".clwhich button", timeout=9000)
+            on = pg.evaluate(RATIO, '.clwhich button[aria-pressed="true"]')
+            off = pg.evaluate(RATIO, '.clwhich button[aria-pressed="false"]')
+            check("the chosen and the unchosen read in " + theme + " (" + str(on) + ", " + str(off) + ")",
+                  on is not None and off is not None and on >= 4.5 and off >= 4.5, (on, off))
         pg.emulate_media(color_scheme="light")
 
         # ══ 5 · a control is shaped like a control (§361) ═══════════════
@@ -332,6 +330,8 @@ def run():
         # §400: the console opens on My work now, and a same-page hash change is
         # not a navigation — leave the page first so the goto really reloads.
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
+        pg.wait_for_selector(".clwhich", timeout=9000)
+        pg.click('.clwhich button[data-which="ended"]')   # the archived card is under Ended now
         pg.wait_for_selector("[data-grid='archived'] .ccard", timeout=9000)
         if BREAK == "text-cursor":
             pg.add_style_tag(content=".ccfg{cursor:auto}")
@@ -391,12 +391,19 @@ def run():
         # two-sliders mark, the word on the hover and the accessible name.
         cog = pg.evaluate("""() => { const e = document.querySelector(".ccard[data-client='raya-trade'] .ccfg");
           if (!e) return null; const r = e.getBoundingClientRect();
+          // the console is shown at 80% on a computer (2026-10-24); the box is
+          // asked in the page's own pixels, which is what the style sets
+          const z = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
           return { text: e.textContent.trim(), svg: !!e.querySelector('svg circle'), title: e.title,
-                   label: e.getAttribute('aria-label'), w: Math.round(r.width), h: Math.round(r.height) } }""")
-        check("Settings on a card is the sliders mark with no word", bool(cog) and cog["text"] == "" and cog["svg"], cog)
+                   label: e.getAttribute('aria-label'), w: Math.round(r.width / z), h: Math.round(r.height / z) } }""")
+        # REWRITTEN, NEVER LOOSENED (§218): since 2026-10-24 (Home's look,
+        # "build both as drawn") Settings is the WORD at the card's foot, not
+        # the sliders mark in its corner; it is still asserted to be there,
+        # named for the hover and for a screen reader, and a target to press
+        check("Settings on a card is the word at its foot", bool(cog) and cog["text"] == "Settings" and not cog["svg"], cog)
         check("…named Settings on the hover and for a screen reader",
               bool(cog) and cog["title"] == "Settings" and cog["label"] == "Settings for Raya Trade", cog)
-        check("…and a square button", bool(cog) and cog["w"] == cog["h"] and cog["w"] >= 24, cog)
+        check("…and a target at least 24px tall", bool(cog) and cog["h"] >= 24, cog)
         SCENE["cards"] = CLIENTS + [DEMO]
 
         check("no page error anywhere", errs == [], errs)

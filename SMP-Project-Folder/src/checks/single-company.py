@@ -33,11 +33,22 @@ def safe(pg, js, dflt=None):
 def current_is(pg, k):
     try: return pg.evaluate("()=>current") == k
     except Exception: return False
+def answer(pg):
+    # §621: a press that changes who may do what, or would hide something
+    # written, asks first in the floating box. This file is about what the
+    # press DOES, so it answers the box; checks/ask-and-apply.py is about the
+    # box itself (that it opens, says the impact, and that Keep changes nothing).
+    try:
+        if pg.query_selector(".askbox .askyes"):
+            pg.click(".askbox .askyes"); pg.wait_for_timeout(250)
+    except Exception:
+        pass
+
 def press(pg, sel):
     try:
         el = pg.query_selector(sel)
         if not el: return False
-        el.click(); pg.wait_for_timeout(250); return True
+        el.click(); pg.wait_for_timeout(250); answer(pg); return True
     except Exception: return False
 
 with sync_playwright() as p:
@@ -60,8 +71,19 @@ with sync_playwright() as p:
     ck("before: the layer is on and units are active", before.get("exists") is True and before.get("units", 0) > 1, before)
     ck("…the navigation carries units", navUnits() > 0, navUnits())
     ck("…and the company page holds no plan of its own", before.get("top") == 0, before)
-    # §449, the other end: a group with no plan of its own is untouched
-    ck("§449 before: the group still opens on Performance", safe(pg, "()=>entrySub('group')") == "performance")
+    # §449, the other end: a group with no plan of its own is untouched.
+    # §520.11 / §544.13: the worked example now holds a CAPABILITY, which is
+    # part of the company's own plan, so it opens on Strategy › Capabilities —
+    # asserted as such. "No plan of its own" is then made true (the
+    # capability layer off, restored after) and must open on Performance.
+    # REWRITTEN, NEVER LOOSENED (§218): both ends, each asserted exactly.
+    ck("§449/§520.11 before: holding a capability, the group opens on Strategy › Capabilities",
+       safe(pg, "()=>[entrySub('group'), CURSEC.strategy]") == ["strategy", "caps"],
+       safe(pg, "()=>[entrySub('group'), CURSEC.strategy]"))
+    ck("§449 before: with no plan of its own at all, the group still opens on Performance",
+       safe(pg, """()=>{var had='structure' in GROUP, s=GROUP.structure;
+         GROUP.structure=Object.assign({},s||{},{cap:Object.assign({},(s||{}).cap||{},{exists:false})});
+         var r=entrySub('group'); if(!had) delete GROUP.structure; else GROUP.structure=s; return r}""") == "performance")
     secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
@@ -90,7 +112,7 @@ with sync_playwright() as p:
     # rewritten to the new rule, never loosened; and the new rule, that off
     # copies nothing, is asserted first).
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
+        and press(pg, '[data-setupgo="shape"]') and press(pg, '[data-shlvl="top"]')
     ck("Client set-up › the shape, on the top level, opens", ok)
     ck("the top card no longer asks where the strategy is planned (§544.4)",
        safe(pg, "()=>!document.querySelector('[data-stplan]')") is True)

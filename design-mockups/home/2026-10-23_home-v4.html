@@ -1,0 +1,370 @@
+<title>Home Dashboard Compact</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: Home, second drawing, after the two homes Islam liked — the people
+   portal (greeting band with the date, tiles that say what waits on you,
+   gold-eyebrow sections with a serif title and a "Go to … →", an "In
+   progress" list with rings and Continue) and ClientPlus (tiles beside a
+   tasks panel with Late / This week tabs and "View all tasks →").
+   Colours are the console's tokens; the serif is new to the console and used
+   only for the greeting and the section titles. */
+*{box-sizing:border-box}
+:root{
+  --ground:#F6F5F1;--surface:#FFFFFF;--surface-2:#EFEEE9;--line:#E2E0D8;--line-soft:#ECEAE3;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#122E6B;--ff-ink:#FFFFFF;--ff-quiet:#B4C3DE;--ff-rule:rgba(255,255,255,.14);--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C6A08;--amber-wash:#FDF6E6;--amber-line:#EBCF8F;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--bad:#B23025;--bad-bg:#FBECEA;
+  --shadow:0 1px 2px rgba(20,28,43,.05),0 6px 20px rgba(20,28,43,.05);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-rule:rgba(255,255,255,.14);--ff-on:rgba(255,255,255,.13);--ff-label:#8197BE;
+  --gold:#F5B94A;--amber-wash:#2B2210;--amber-line:#5A4718;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33201E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-rule:rgba(255,255,255,.14);--ff-on:rgba(255,255,255,.13);--ff-label:#8197BE;
+  --gold:#F5B94A;--amber-wash:#2B2210;--amber-line:#5A4718;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--bad:#E8776B;--bad-bg:#33201E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);
+  color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.doc{max-width:1480px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px}
+.lede{max-width:84ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink);font-weight:600}
+.flag{display:inline-block;margin:12px 0 18px;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctrl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:0 0 16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;margin-top:36px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.note h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note ul{margin:0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.note li+li{margin-top:6px}
+.note b{color:var(--ink)}
+
+/* the console around it */
+.frame{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ground);box-shadow:var(--frame-shadow)}
+.app{display:flex}
+.side{width:224px;flex:none;background:var(--ff);color:var(--ff-quiet);display:flex;flex-direction:column}
+.brand{display:flex;gap:8px;align-items:center;padding:16px 12px 14px 18px;min-height:58px;border-bottom:1px solid var(--ff-rule)}
+.brand .bmk{font:700 12px/1 var(--mono);letter-spacing:.16em;color:var(--ff-ink)}
+.brand .nm{font-weight:600;font-size:14px}
+.snav{padding:10px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:2px}
+.gl{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ff-label);padding:6px 10px}
+.item{position:relative;display:flex;align-items:center;gap:11px;font-size:14px;font-weight:600;padding:10px;border-radius:8px;white-space:nowrap}
+.item.on{background:var(--ff-on);color:var(--ff-ink)}
+.item.on svg.i{color:var(--amber)}
+.item.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid var(--ff-rule)}
+.av0{width:30px;height:30px;border-radius:50%;background:var(--ff-on);color:var(--ff-ink);font:700 11px/30px var(--mono);text-align:center}
+.swho b{display:block;font-size:13px;color:var(--ff-ink)}
+.swho i{font-style:normal;font-size:11.5px}
+.main{flex:1;min-width:0}
+.pg{padding:24px 28px 40px;max-width:1120px}
+
+/* 1 · the greeting band */
+.hello{position:relative;overflow:hidden;background:var(--ff);color:var(--ff-ink);border-radius:18px;padding:26px 32px 28px;margin:0 0 18px}
+.hello::before,.hello::after{content:"";position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.hello::before{width:420px;height:420px;right:-90px;top:-150px;background:rgba(255,255,255,.035)}
+.hello::after{width:300px;height:300px;right:-20px;top:-90px}
+.date{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+.hello h1{margin:0;font:500 36px/1.12 var(--serif);letter-spacing:-.005em}
+.hello p{margin:8px 0 0;color:var(--ff-quiet);font-size:15px}
+
+/* 2 · what waits on you, beside your tasks */
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin:0 0 40px;align-items:stretch}
+.top .crow{grid-template-columns:40px minmax(0,1fr)}
+.top .mods{grid-column:2;justify-content:flex-start}
+.top>section{display:flex;flex-direction:column}
+.top .list,.top .panel{flex:1}
+.none{margin:0;padding:22px 16px;text-align:center;font-size:14px;color:var(--ink-3)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);color:inherit;cursor:pointer;min-height:96px;position:relative}
+.tile .ti{width:36px;height:36px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;flex:none}
+.tile b{display:block;font-size:14.5px;font-weight:600;line-height:1.3}
+.tile span.s{display:block;font-size:13px;color:var(--ink-3);margin-top:2px;line-height:1.35}
+.tile .n{position:absolute;top:12px;right:12px;min-width:24px;height:24px;border-radius:999px;padding:0 7px;font:700 12px/24px var(--font);text-align:center;background:var(--surface-2);color:var(--ink-2)}
+.tile.ask{background:var(--amber-wash);border-color:var(--amber-line)}
+.tile.ask .ti{background:var(--surface);color:var(--gold)}
+.tile.ask .n{background:var(--amber);color:var(--amber-ink)}
+.tile.late .ti{background:var(--bad-bg);color:var(--bad)}
+.tile.late .n{background:var(--bad);color:#fff}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.ph{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line-soft)}
+.tabs{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px}
+.tabs button{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--ink-3);font-size:13px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.tabs button i{font-style:normal;font-size:11.5px;font-weight:700;border-radius:999px;padding:0 6px;background:var(--surface-2);color:var(--ink-2)}
+.tabs button[aria-selected="true"] i{background:var(--ink);color:var(--surface)}
+.tabs button.l[aria-selected="true"] i{background:var(--bad);color:#fff}
+.link{margin-left:auto;background:none;border:0;padding:0;font-size:13px;font-weight:600;color:var(--gold);cursor:pointer;white-space:nowrap}
+.task{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 16px;border-bottom:1px solid var(--line-soft)}
+.task:last-child{border-bottom:0}
+.tick{width:17px;height:17px;margin-top:2px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.task.late .tick{border-color:var(--bad)}
+.bk{color:var(--gold);margin-top:1px}
+.bk svg.i{width:17px;height:17px}
+.task .t{font-size:14.5px;line-height:1.4}
+.task .t b{font-weight:600}
+.task .m{display:block;font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.task .m .cl{font-weight:600;color:var(--ink-2)}
+.when{font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;padding-top:2px}
+.when.late{color:var(--bad)}
+.pane[hidden]{display:none}
+
+/* 3 · sections: gold eyebrow, serif title, a way to the whole */
+.sec{margin:0 0 40px}
+.sh{display:flex;align-items:flex-end;gap:16px;margin:0 0 14px}
+.eye{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 4px}
+.sh h2{margin:0;font:500 28px/1.15 var(--serif)}
+.sh .link{margin-bottom:5px}
+
+/* your clients: one row each, the modules as buttons */
+.list{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:4px 20px}
+.crow{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.crow:last-child{border-bottom:0}
+.cmark{width:40px;height:40px;border-radius:10px;background:var(--ff);color:var(--amber);font:700 12px/40px var(--mono);text-align:center}
+.crow b{display:block;font-size:15.5px;font-weight:600;line-height:1.3}
+.crow span.s{display:block;font-size:13px;color:var(--ink-3)}
+.mods{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.mod{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:9px;background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:600;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.mod:hover{background:var(--line-soft)}
+.mod i{font-style:normal;font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.mod i.alarm{color:var(--warn)}
+.mod i.due{color:var(--gold)}
+
+/* case studies: your write-ups (In progress, with rings) beside the new ones */
+.two{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:18px;align-items:start}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 20px 18px}
+.bxh{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 4px}
+.wu{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.wu:last-of-type{border-bottom:0}
+.ring{--p:0;width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--amber) calc(var(--p)*1%),var(--surface-2) 0);display:grid;place-items:center}
+.ring span{width:44px;height:44px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font:600 12.5px/1 var(--font);color:var(--ink)}
+.wu b{display:block;font-size:15px;font-weight:600;line-height:1.3}
+.wu span.s{display:block;font-size:13px;color:var(--ink-3);margin-top:2px}
+.wu span.s .late{color:var(--bad);font-weight:600}
+.cont{border:0;border-radius:9px;background:var(--surface-2);color:var(--ff);font-size:13.5px;font-weight:600;padding:8px 14px;cursor:pointer}
+:root[data-theme="dark"] .cont{color:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cont{color:var(--ink)}}
+.cont.go{background:var(--ff);color:var(--ff-ink)}
+.foot{display:inline-block;margin-top:10px;background:none;border:0;padding:0;font-size:13.5px;font-weight:600;color:var(--gold);cursor:pointer}
+.nw{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.nw:last-of-type{border-bottom:0}
+.spine{width:44px;height:58px;border-radius:3px 7px 7px 3px;background:linear-gradient(160deg,var(--ff),color-mix(in srgb,var(--ff) 75%,#000));box-shadow:inset 4px 0 0 rgba(0,0,0,.2),inset 0 -3px 0 var(--amber);color:var(--ff-ink);font:700 10.5px/58px var(--mono);text-align:center}
+.nw b{display:block;font-size:14.5px;font-weight:600;line-height:1.3}
+.nw span.s{display:block;font-size:12.5px;color:var(--ink-3)}
+.nw .new{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber);border-radius:999px;padding:1px 6px;vertical-align:2px}
+
+@container (max-width:860px){
+  .top,.two{grid-template-columns:1fr}
+}
+@container (max-width:719px){
+  .side{display:none}
+  .pg{padding:12px 12px 28px}
+  .hello{padding:20px 18px 22px;border-radius:14px}
+  .hello h1{font-size:28px}
+  .tile{min-height:0}
+  .crow{grid-template-columns:40px minmax(0,1fr)}
+  .mods{grid-column:1/-1;justify-content:flex-start}
+  .sh h2{font-size:24px}
+  .wu{grid-template-columns:48px minmax(0,1fr)}
+  .ring{width:48px;height:48px}.ring span{width:38px;height:38px}
+  .wu .cont{grid-column:2;justify-self:start}
+}
+
+/* Compact: ClientPlus's density, set on the frame so the two sizes can be
+   compared with the Size switch above the drawing. */
+.frame.compact{font-size:14px;line-height:1.5}
+.compact .side{width:212px}
+.compact .item{font-size:13.5px;padding:8px 10px}
+.compact .pg{padding:16px 20px 28px;max-width:none}
+.compact .hello{padding:16px 22px 17px;border-radius:14px;margin-bottom:16px}
+.compact .hello::before{width:300px;height:300px;top:-120px}
+.compact .hello::after{width:210px;height:210px;top:-70px}
+.compact .date{font-size:10.5px;margin-bottom:4px}
+.compact .hello h1{font-size:27px}
+.compact .hello p{font-size:13.5px;margin-top:4px}
+.compact .top{gap:16px;margin-bottom:24px}
+.compact .sec{margin-bottom:24px}
+.compact .sh{margin-bottom:8px}
+.compact .eye{font-size:10.5px;margin-bottom:2px}
+.compact .sh h2{font-size:20px}
+.compact .list{padding:2px 14px;border-radius:12px}
+.compact .top .crow,.compact .crow{grid-template-columns:30px minmax(0,1fr) auto;gap:10px;padding:9px 0}
+.compact .top .mods{grid-column:auto;justify-content:flex-end}
+.compact .cmark{width:30px;height:30px;border-radius:8px;font-size:10.5px;line-height:30px}
+.compact .crow b{font-size:14px}
+.compact .crow span.s{font-size:12px}
+.compact .mods{gap:6px}
+.compact .mod{font-size:12px;padding:5px 9px;border-radius:7px;gap:5px}
+.compact .mod i{font-size:11px}
+.compact .panel,.compact .box{border-radius:12px}
+.compact .ph{padding:9px 12px}
+.compact .tabs button{font-size:12.5px;padding:6px 10px;white-space:nowrap}
+.compact .task{padding:9px 14px;gap:10px}
+.compact .task .t{font-size:13.5px}
+.compact .task .m{font-size:12px;margin-top:1px}
+.compact .when{font-size:12px}
+.compact .none{padding:16px;font-size:13px}
+.compact .box{padding:12px 16px 14px}
+.compact .bxh{font-size:10.5px}
+.compact .wu{grid-template-columns:42px minmax(0,1fr) auto;gap:12px;padding:9px 0}
+.compact .ring{width:42px;height:42px}
+.compact .ring span{width:33px;height:33px;font-size:11px}
+.compact .wu b,.compact .nw b{font-size:14px}
+.compact .wu span.s,.compact .nw span.s{font-size:12px}
+.compact .cont{font-size:12.5px;padding:6px 12px}
+.compact .foot{font-size:12.5px;margin-top:6px}
+.compact .nw{grid-template-columns:32px minmax(0,1fr);gap:10px;padding:7px 0}
+.compact .spine{width:32px;height:42px;font-size:9.5px;line-height:42px}
+@container (max-width:719px){
+  .compact .crow,.compact .top .crow{grid-template-columns:30px minmax(0,1fr)}
+  .compact .mods,.compact .top .mods{grid-column:2;justify-content:flex-start}
+}
+</style>
+
+<div class="doc">
+  <h1>Home, compact</h1>
+  <p class="lede">The same Home at <b>ClientPlus's density</b>: 14px text, 20px section titles, a band half the height, client rows with their module buttons on the same line, tighter rows, and <b>the full width of the screen</b>. Use <b>Size</b> to switch back to today's size and compare. If you like it, the same sizes can go across the whole console.</p>
+  <span class="flag">Nothing here is built · the tasks, clients and case studies are invented for the drawing</span>
+  <div class="ctrl">Size <span class="seg" data-ctl="size"><button type="button" data-v="compact" aria-pressed="true">Compact</button><button type="button" data-v="today" aria-pressed="false">Today's size</button></span>&nbsp;&nbsp;Theme <span class="seg" data-ctl="theme"><button type="button" data-v="light">Light</button><button type="button" data-v="dark">Dark</button></span></div>
+
+  <div class="frame compact"><div class="app" data-on="home"><aside class="side"></aside><div class="main"><div class="pg">
+
+    <header class="hello">
+      <p class="date">Friday, 23 Oct 2026</p>
+      <h1>Good evening, Islam</h1>
+      <p>Your SMP Home.</p>
+    </header>
+
+    <div class="top">
+      <section>
+      <div class="sh"><div><p class="eye">Where you have a seat</p><h2>Your clients</h2></div></div>
+      <div class="list">
+        <div class="crow"><span class="cmark">RT</span><span><b>Raya Trade</b><span class="s">Retail &amp; E-commerce · Super user</span></span>
+          <span class="mods"><button type="button" class="mod">Strategy <i class="due">Cycle open</i></button><button type="button" class="mod">Insights</button><button type="button" class="mod">Tracker <i>3 open</i></button></span></div>
+        <div class="crow"><span class="cmark">EA</span><span><b>El Abd Foods</b><span class="s">Food &amp; Beverage · Super user</span></span>
+          <span class="mods"><button type="button" class="mod">Strategy <i class="alarm">No plan</i></button><button type="button" class="mod">Tracker <i>2 open</i></button></span></div>
+        <div class="crow"><span class="cmark">WD</span><span><b>Wander</b><span class="s">Real Estate &amp; Property · SMO team</span></span>
+          <span class="mods"><button type="button" class="mod">Strategy</button><button type="button" class="mod">Portfolio</button></span></div>
+        <div class="crow"><span class="cmark">RHI</span><span><b>Reliance Heavy Industries</b><span class="s">Manufacturing · SMO team</span></span>
+          <span class="mods"><button type="button" class="mod">Strategy</button><button type="button" class="mod">Processes</button></span></div>
+      </div>
+      </section>
+
+      <section>
+      <div class="sh"><div><p class="eye">Overdue and this week</p><h2>Your tasks</h2></div></div>
+      <div class="panel">
+        <div class="ph">
+          <div class="tabs" role="tablist">
+            <button type="button" class="l" role="tab" aria-selected="true" data-pane="late"><span data-i="alert"></span>Overdue <i>1</i></button>
+            <button type="button" role="tab" aria-selected="false" data-pane="week"><span data-i="cal"></span>This week <i>3</i></button>
+          </div>
+          <button type="button" class="link">All tasks →</button>
+        </div>
+        <div class="pane" data-pane="late">
+          <div class="task late"><span class="tick"></span><span class="t">Send the Q3 scorecard to the Head of Strategy<span class="m"><span class="cl">Raya Trade</span> · In progress</span></span><span class="when late">1 week late</span></div>
+          <p class="none">Nothing else overdue.</p>
+        </div>
+        <div class="pane" data-pane="week" hidden>
+          <div class="task"><span class="tick"></span><span class="t">Prepare the plant managers' scoring session<span class="m"><span class="cl">El Abd Foods</span> · Not started</span></span><span class="when">Thu 29 Oct</span></div>
+          <div class="task"><span class="bk" data-i="book"></span><span class="t">Write up the case study · <b>Operating model 2023</b><span class="m"><span class="cl">Nile Logistics</span> · Case study</span></span><span class="when">Fri 30 Oct</span></div>
+          <div class="task"><span class="tick"></span><span class="t">Review the unit heads' draft targets<span class="m"><span class="cl">Wander</span> · In progress</span></span><span class="when">Fri 30 Oct</span></div>
+        </div>
+      </div>
+      </section>
+    </div>
+
+    <section class="sec">
+      <div class="sh"><div><p class="eye">What we have learned</p><h2>Case studies</h2></div><button type="button" class="link">Go to Case studies →</button></div>
+      <div class="two">
+        <div class="box">
+          <p class="bxh">Your write-ups · in progress</p>
+          <div class="wu"><span class="ring" style="--p:38"><span>3/8</span></span><span><b>Operating model 2023</b><span class="s">Nile Logistics · 3 of 8 sections · due Fri 30 Oct</span></span><button type="button" class="cont go">Continue</button></div>
+          <div class="wu"><span class="ring" style="--p:0"><span>0/8</span></span><span><b>Cost review 2022</b><span class="s">Delta Mills · not started · due Fri 13 Nov</span></span><button type="button" class="cont">Start</button></div>
+          <button type="button" class="foot">2 insights of yours to place in a case study →</button>
+        </div>
+        <div class="box">
+          <p class="bxh">Newly finished</p>
+          <div class="nw"><span class="spine">RT</span><span><b>Reporting set-up 2025<span class="new">New</span></b><span class="s">Raya Trade · 5 deliverables · 6 insights</span></span></div>
+          <div class="nw"><span class="spine">WD</span><span><b>Strategy build 2025<span class="new">New</span></b><span class="s">Wander · 6 deliverables · 4 insights</span></span></div>
+          <div class="nw"><span class="spine">NL</span><span><b>Network redesign 2024</b><span class="s">Nile Logistics · 4 deliverables · 3 insights</span></span></div>
+        </div>
+      </div>
+    </section>
+
+  </div></div></div></div>
+
+  <div class="notes">
+    <div class="note"><h2>How it works</h2><ul>
+      <li><b>Home is a new tab</b> at the top of the column, and the console opens on it. My work is renamed My tasks and sits below Home.</li>
+      <li><b>The tasks panel</b> opens on Overdue when anything is overdue, otherwise on This week. With nothing to show, it says so ("No overdue tasks"). Write-ups asked of you appear here, marked with a book.</li>
+      <li><b>Your clients</b>: one row each, with a button into each module.</li>
+      <li><b>Case studies</b>: your write-ups with a ring for the sections done and Continue, and below them your insights still to place. Beside them, the case studies finished in the last 30 days.</li>
+    </ul></div>
+    <div class="note"><h2>Decided</h2><ul>
+      <li><b>"Newly finished"</b> tells the team something new is there to read. If it isn't useful, the write-ups card can take the full width.</li>
+      <li><b>Everyone, admins too,</b> sees only the clients they have a seat on. The whole list is under Clients in the column.</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var P = {
+    home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    clients:'<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+    consultants:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/>',
+    access:'<path d="M12 3 5 6v5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6z"/><circle cx="12" cy="10.5" r="2"/><path d="M12 12.5V15"/>',
+    cases:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    frameworks:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+    copilot:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
+    history:'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 4v4.5H8"/><path d="M12 8v4.5l3 2"/>',
+    book:'<path d="M5 5a1 1 0 0 1 1-1h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+    alert:'<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/>',
+    cal:'<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    spark:'<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>'
+  };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  document.querySelectorAll('[data-i]').forEach(function(e){ e.innerHTML = ic(e.getAttribute('data-i')); });
+  document.querySelectorAll('.tabs [data-i] svg').forEach(function(s){ s.style.width = '15px'; s.style.height = '15px'; });
+  P.work = '<path d="M9 5h10M9 12h10M9 19h10"/><path d="m4 5 1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/>';
+  var G = [{h:"Work",items:[["home","Home"],["work","My tasks"],["clients","Clients"]]},{h:"Team",items:[["consultants","Consultants"],["access","Who sees what"]]},
+    {h:"Knowledge",items:[["cases","Case studies"],["frameworks","Frameworks"],["copilot","Copilot"]]},{items:[["history","History"]]}];
+  document.querySelectorAll('.app').forEach(function(a){
+    var on = a.getAttribute('data-on');
+    a.querySelector('.side').innerHTML = '<div class="brand"><span class="bmk">FOREFRONT</span><span class="nm">Platform</span></div><nav class="snav">' +
+      G.map(function(g){ return '<div class="grp">' + (g.h ? '<span class="gl">' + g.h + '</span>' : '') + g.items.map(function(t){
+        return '<span class="item' + (t[0] === on ? ' on' : '') + '">' + ic(t[0]) + '<span>' + t[1] + '</span></span>'; }).join('') + '</div>'; }).join('') +
+      '</nav><div class="me"><span class="av0">IS</span><span class="swho"><b>Islam Saadany</b><i>Super user</i></span></div>';
+  });
+  document.querySelectorAll('.tabs button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = b.getAttribute('data-pane'), box = b.closest('.panel');
+      box.querySelectorAll('.tabs button').forEach(function(x){ x.setAttribute('aria-selected', String(x === b)); });
+      box.querySelectorAll('.pane').forEach(function(x){ x.hidden = x.getAttribute('data-pane') !== p; });
+    });
+  });
+  function press(v){ document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === v)); }); }
+  document.querySelectorAll('[data-ctl="size"] button').forEach(function(b){ b.addEventListener('click', function(){ var c = b.getAttribute('data-v') === 'compact'; document.querySelector('.frame').classList.toggle('compact', c); document.querySelectorAll('[data-ctl="size"] button').forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); }); });
+  document.querySelectorAll('[data-ctl="theme"] button').forEach(function(b){ b.addEventListener('click', function(){ document.documentElement.setAttribute('data-theme', b.getAttribute('data-v')); press(b.getAttribute('data-v')); }); });
+  press(document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+})();
+</script>

@@ -22,7 +22,7 @@ export async function acknowledgeProcess(input: z.infer<typeof schema>): Promise
   const seat = await readerSeat(workspaceId);
   if (!seat.ok) return unauthorized();
   if (!seat.personKey) {
-    return { ok: false, error: "VALIDATION_ERROR", message: "Only people on the People register can acknowledge. Ask the office to add you" };
+    return { ok: false, error: "VALIDATION_ERROR", message: "Only people on the Client register can acknowledge. Ask the office to add you" };
   }
 
   const process = await prisma.process.findUnique({ where: { id: processId }, select: { workspaceId: true, lifecycleStatus: true, archivedAt: true } });

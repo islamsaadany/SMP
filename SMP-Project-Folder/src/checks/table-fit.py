@@ -177,7 +177,7 @@ with sync_playwright() as p:
     g = pg.query_selector('[data-md="setup"]')
     if g and g.is_visible():
         g.click(); pg.wait_for_timeout(600)
-        it = pg.query_selector('.ritem:has-text("People register")')
+        it = pg.query_selector('.ritem:has-text("Client register")')
         if it and it.is_visible():
             it.click(); pg.wait_for_timeout(700)
     reg = pg.evaluate("""() => {

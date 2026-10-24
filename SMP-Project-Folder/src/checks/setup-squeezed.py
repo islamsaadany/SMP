@@ -167,12 +167,15 @@ def setup(pg):
 
 MEASURE = """() => {
   const q=s=>document.querySelector(s), d=document.documentElement;
+  /* §631: in the page's own pixels — the page is drawn at 80% on a computer,
+     and 196, 160 and 400 are sizes the page sets. */
+  const z=parseFloat(getComputedStyle(d).zoom)||1;
   const bx=e=>{const r=e.getBoundingClientRect();
-    return [Math.round(r.width), Math.round(r.height)];};
+    return [Math.round(r.width/z), Math.round(r.height/z)];};
   const box=q('#chinbox');
   return { rail:bx(q('.setuprail')), pane:bx(q('.setuppane')),
     chinbox: box ? bx(box) : [0,0],
-    titleTop: Math.round(q('.setupttl').getBoundingClientRect().top + scrollY),
+    titleTop: Math.round((q('.setupttl').getBoundingClientRect().top + scrollY)/z),
     scroll: d.scrollHeight - d.clientHeight };
 }"""
 
@@ -230,8 +233,13 @@ with sync_playwright() as pw:
           return { w:Math.round(rr.width), h:Math.round(rr.height),
                    disp:getComputedStyle(r).display, pos:getComputedStyle(r).position,
                    cols:getComputedStyle(document.querySelector('.split')).gridTemplateColumns };}""")
+        # REWRITTEN (§218), FOR §609: this asserted `position:static`, which
+        # was how the across strip was drawn, not what made it the strip —
+        # and §609 made it stick under the chrome on Islam's word. What this
+        # control case guards is unchanged: across, one short row, and now
+        # held while the plan scrolls.
         ck("%d: the unit's rail is still the across strip" % w,
-           m["disp"] == "flex" and m["pos"] == "static" and m["h"] < 120, m)
+           m["disp"] == "flex" and m["pos"] == "sticky" and m["h"] < 120, m)
         pg.close()
     b.close()
 

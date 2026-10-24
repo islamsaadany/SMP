@@ -131,8 +131,13 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             with open(os.path.join(REPO, "smp-app", "public", "platform-page.js"), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")
             return
-        if path == "/memory-split.js":
-            with open(os.path.join(REPO, "smp-app", "public", "memory-split.js"), encoding="utf-8") as f:
+        # the shapes drawn before the answers (§620) are served by the app itself
+        # (app/navskel.js), not from public/; a page here draws without them
+        if path == "/navskel.js":
+            self._send("", "application/javascript; charset=utf-8")
+            return
+        if path in ("/memory-split.js", "/case-split.js"):
+            with open(os.path.join(REPO, "smp-app", "public", path[1:]), encoding="utf-8") as f:
                 self._send(f.read(), "application/javascript; charset=utf-8")
             return
         if path == "/__admin0":
@@ -304,6 +309,14 @@ with sync_playwright() as p:
     def console():
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients"); pg.wait_for_timeout(600)
 
+    # THE ARCHIVED BAND AND THE WORKED EXAMPLE'S BAND ARE FILTERS NOW (spec
+    # 067's Clients filter; Islam: "a filter for active clients ended clients
+    # and demo … default is active"). Rewritten to that truth, never loosened
+    # (§218): every assertion below is the old one, made after pressing the
+    # choice that now holds what the band held.
+    def pick(which):
+        press(pg, '.clwhich button[data-which="%s"]' % which, 450)
+
     def archive(key):
         """§255: the act is inside the client now; the console is TOLD."""
         pg.evaluate("(k)=>fetch('/__archive/'+k)", key); pg.wait_for_timeout(250)
@@ -313,10 +326,9 @@ with sync_playwright() as p:
     # ── 1 · WITH NOTHING ARCHIVED THERE IS NO BAND ──────────────────────
     print("\n§1 · nothing archived")
     ck("the clients grid is drawn", bool(q(pg, '[data-grid="clients"]')))
-    ck("and no Archived band at all", q(pg, '[data-grid="archived"]') is None,
+    ck("and no archived grid at all", q(pg, '[data-grid="archived"]') is None,
        "a band with nothing in it is furniture (§61)")
-    heads = pg.eval_on_selector_all(".apart > .akey", "e => e.map(x => x.textContent)")
-    ck("…so nothing on the page says Archived", "Archived" not in heads, heads)
+    ck("…and no Ended choice to press, with nothing ended", q(pg, '.clwhich button[data-which="ended"]') is None)
 
     # ── 2 · A LIVE CLIENT'S SETTINGS IS A DOOR, AND NEITHER BLOCK IS HERE ─
     # REWRITTEN TO THE NEW TRUTH (§218, §360): the Archiving block moved into
@@ -335,12 +347,14 @@ with sync_playwright() as p:
     print("\n§3 · the Archived band")
     archive("elabd-foods")
     console()
-    band = q(pg, '[data-grid="archived"]')
-    ck("the Archived band is drawn", bool(band))
-    heads = pg.eval_on_selector_all(".apart > .akey", "e => e.map(x => x.textContent)")
-    ck("…under its own heading", "Archived" in heads, heads)
+    ck("the page still opens on Active, with no archived grid on it", q(pg, '[data-grid="archived"]') is None)
     ck("the client is no longer in the clients grid",
        q(pg, '[data-grid="clients"] .ccard[data-client="elabd-foods"]') is None)
+    ended_word = pg.evaluate('()=>{var b=document.querySelector(\'.clwhich button[data-which="ended"]\');return b?b.textContent:null}')
+    ck("…and Ended is offered, counting it", ended_word == "Ended1", ended_word)
+    pick("ended")
+    band = q(pg, '[data-grid="archived"]')
+    ck("pressing Ended draws the archived grid", bool(band))
     card = q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"]')
     ck("…and is in the archived one", bool(card))
     if card:
@@ -379,7 +393,8 @@ with sync_playwright() as p:
     print("\n§5 · a fresh visit")
     archive("elabd-foods")
     pg.goto("about:blank"); pg.goto(BASE + "/platform#clients"); pg.wait_for_timeout(550)
-    ck("the band is drawn on a page loaded from cold",
+    pick("ended")
+    ck("the archived client is under Ended on a page loaded from cold",
        bool(q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"]')))
 
     # ── 6 · THE WORKED EXAMPLE IS NEITHER ────────────────────────────────
@@ -389,9 +404,11 @@ with sync_playwright() as p:
     # The demo sits in its own band under the grid (§317), never in the
     # archived one: the server refuses to archive it, and the stub answers
     # as the rules module does.
-    ck("told to archive the demo, it is still drawn as the worked example and never in the Archived band",
-       bool(q(pg, '.ccard[data-client="demo"]')) and
-       q(pg, '[data-grid="archived"] .ccard[data-client="demo"]') is None,
+    pick("ended")
+    never_ended = q(pg, '[data-grid="archived"] .ccard[data-client="demo"]') is None
+    pick("demo")
+    ck("told to archive the demo, it is still drawn as the worked example, under Demo, and never under Ended",
+       bool(q(pg, '[data-grid="demo"] .ccard[data-client="demo"]')) and never_ended,
        "Islam: the demo client is not removable")
     ck("…and its Settings is the same door as any client's",
        open_settings(pg, "demo") and path() == "/demo/setup", path())
@@ -402,6 +419,7 @@ with sync_playwright() as p:
     # the one screen the console still draws for a client.
     print("\n§7 · deleting")
     console()
+    pick("ended")
     cfg = q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"] .ccfg')
     ck("an archived card carries Settings as well as Bring back", bool(cfg),
        "without it Delete is unreachable — §61, and this assertion found that")
@@ -509,6 +527,7 @@ with sync_playwright() as p:
     WORLD["elabd-foods"] = copy.deepcopy(LIVE)
     archive("elabd-foods")
     console()
+    pick("ended")
     ck("(fixture) a client is archived", bool(q(pg, '[data-grid="archived"]')))
     pg.evaluate("()=>fetch('/__admin0')"); pg.wait_for_timeout(200)
     console()

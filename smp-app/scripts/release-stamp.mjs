@@ -55,7 +55,7 @@ export function stampedFiles(root = APP){
    stale copy, and nobody asks again about one that did not change.
    Per file, not the release stamp: a release that changes only the console
    must not make every Strategy page download its 5 MB script again. */
-export const VERSIONED = ["platform.css", "theme.js", "shell.js", "platform-page.js", "client-setup.js", "memory-split.js"];
+export const VERSIONED = ["platform.css", "theme.js", "shell.js", "platform-page.js", "client-setup.js", "memory-split.js", "case-split.js"];
 export function assetStamps(root = APP){
   const out = {};
   for (const f of VERSIONED) out["/" + f] = createHash("sha256").update(readFileSync(join(root, "public", f))).digest("hex").slice(0, 12);

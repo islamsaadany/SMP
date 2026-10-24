@@ -424,9 +424,18 @@ with sync_playwright() as pw:
     CAP = pg.evaluate("()=>(GROUP.capabilities[0]||{}).id || ''")
     for key, what in (("fn:marketing", "the function's own work"),
                       ("cap:" + CAP, "the capability it holds")):
-        caps(pg) if key.startswith("cap:") else fns(pg)
-        if not dest(pg, key):
-            ck("%s is reachable" % what, False, key); continue
+        # §544.13 REWROTE WHERE A CAPABILITY IS REACHED, never loosened
+        # (§218): the row has no capabilities side any more, so the box is
+        # opened by its own address and must then BE that address.
+        if key.startswith("cap:"):
+            at = pg.evaluate("(k)=>{ current=k; currentSub='fnstrat'; paint(); return TARGET; }", key)
+            pg.wait_for_timeout(400)
+            if at != key:
+                ck("%s is reachable" % what, False, [key, at]); continue
+        else:
+            fns(pg)
+            if not dest(pg, key):
+                ck("%s is reachable" % what, False, key); continue
         tab(pg, "fnstrat"); sec(pg, "proj")
         d = pg.evaluate("""() => ({
           panes: document.querySelectorAll('#panel .pane').length,
@@ -514,9 +523,19 @@ with sync_playwright() as pw:
         ck("the group's Strategy tab carries its pen on the section line, as a unit's does",
            gl["line"] == 1, gl)
         ck("...and none is left in the Foundation card", gl["card"] == 0, gl)
+        # §611.1 REWROTE THIS PAIR (§218): the Temple only shows now — what it
+        # draws is written on the Foundation and in the Capabilities section —
+        # so it carries no pen at all, neither its own bar nor a section line.
+        # SAID RATHER THAN HIDDEN: the old claim ("keeps its Edit bar") was
+        # already red in this walk before §611.1 (§604 lists this check among
+        # those red identically on live) — the walk reaches the Temple in a
+        # state where the old build drew no bar either — so this line passes
+        # on both builds and proves nothing alone. The claim that goes red on
+        # the previous build is checks/themes-temple.py §3, on a fresh page.
         tab(pg, "temple")
-        ck("the group's Temple keeps its Edit bar",
-           pg.query_selector('#panel .pageact [data-page="temple"]') is not None)
+        ck("the group's Temple carries no Edit bar (it only shows)",
+           pg.query_selector('#panel .pageact [data-page="temple"]') is None and
+           pg.query_selector('#panel [data-page]') is None)
         ck("...and it is not on a section line (that tab has none)",
            pg.evaluate("()=>document.querySelectorAll('#secrow-in .secpen').length") == 0)
 

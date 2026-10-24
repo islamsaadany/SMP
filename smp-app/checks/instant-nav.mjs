@@ -128,7 +128,7 @@ try {
     return Array.from(h.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="(\/[a-z-]+\.(?:js|css)[^"]*)"/g)).map((m) => m[1]); };
   const con = await srcs("/platform"), str = await srcs("/raya-trade/strategy"), trk = await srcs("/raya-trade/tracker");
   const plain = (list, names) => names.filter((n) => !list.some((s) => s.startsWith(n + "?v=")));
-  const p1 = plain(con, ["/platform-page.js", "/client-setup.js", "/memory-split.js", "/navskel.js"]);
+  const p1 = plain(con, ["/platform-page.js", "/client-setup.js", "/memory-split.js", "/case-split.js", "/navskel.js"]);
   const p2 = plain(str, ["/platform.css", "/theme.js", "/shell.js", "/navskel.js"]);
   const p3 = plain(trk, ["/topbar.js"]);
   check("the console, Strategy and a module page load their files by stamped address", !p1.length && !p2.length && !p3.length, { console: p1, strategy: p2, tracker: p3 });

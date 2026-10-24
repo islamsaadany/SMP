@@ -5186,6 +5186,28 @@ console.log("\n46 · the client's structure (§404)");
   });
 })();
 
+/* ── §608: A FUNCTION'S HOW WE COMPETE ─────────────────────────────────────
+   The same rule as its S&W, both ends: the office writes it, the function's
+   own head and a unit's owner may not, and it is classified as the analysis
+   it is — never swept up as "a supporting function's settings". */
+(function () {
+  const fks = Object.keys(SEED.functions);
+  const proj = fks.filter(function (k) { return String(SEED.functions[k].format) !== "pillars" && SEED.functions[k].head; })[0];
+  const pil = fks.filter(function (k) { return String(SEED.functions[k].format) === "pillars"; })[0];
+  [proj, pil].forEach(function (fk) {
+    const put = function (inc) { inc.functions[fk].compete = { discipline: "bts", values: [{ title: "Answers in a day", how: [], measure: [] }] }; };
+    allows("smo", put, "§608: the office writes " + fk + "'s How we compete");
+    const head = SEED.functions[fk].head;
+    if (head && head !== "smo") refuses(head, put, "§608 REFUSED: " + fk + "'s own head may not (the Strategy half is the office's)");
+    refuses("own_mob", put, "§608 REFUSED: a business unit's owner may not write a function's How we compete");
+    const inc = clone(SEED); put(inc);
+    const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+    check("§608: " + fk + "'s How we compete is classified as its analysis",
+          kinds.indexOf("unitAnalysis") > -1 && kinds.indexOf("unknown") < 0 && kinds.indexOf("setup") < 0,
+          kinds.join(",") || "(nothing)");
+  });
+})();
+
 /* ── §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN ──────────────────
    Held by no function (company-wide), with `head` and `custodian` named on the
    capability itself. BOTH ENDS (§94.2): the two seats report, somebody else
@@ -5422,9 +5444,12 @@ console.log("\n§428 · the top layer's own plan");
    With the business units switched off, a direction's owner reports the rows
    of their own direction on the company page — and nothing else, never the
    submission. BOTH ENDS (§94.2): their own direction allowed, another's
-   refused, the submission refused, and with the units ON the same person is
-   refused outright (the rule only exists while the directions ARE the top
-   layer's pillars). */
+   refused, the submission refused.
+   §544.13 REVERSED THE LAST HALF: the units were taken out of the company's
+   own plan (*"if it belongs to the company, they should be irrelevant"*), so
+   with the units ON the same person still reports their own direction and
+   still may not touch another's. REWRITTEN, NEVER LOOSENED (§218): both ends
+   are still asserted, on the units-on world. */
 console.log("\n§447 · a direction's owner on the company page");
 (function () {
   const B = clone(SEED);
@@ -5452,7 +5477,9 @@ console.log("\n§447 · a direction's owner on the company page");
   check("§447: the office still reports every direction", v.ok, (v.refusals || []).join(" / "));
   const On = clone(B); delete On.group[R.STRUCTURE].bu;
   v = as("t439_dir", function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; }, On);
-  check("§447 REFUSED: with the units ON the rule does not exist", !v.ok, "was ALLOWED");
+  check("§447/§544.13: with the units ON they still report their own direction", v.ok, (v.refusals || []).join(" / "));
+  v = as("t439_dir", function (inc) { inc.group.items[1].measures[0].actual = "5%"; }, On);
+  check("§447/§544.13 REFUSED: …and still not another direction's figure", !v.ok, "was ALLOWED");
 })();
 
 /* ── §466: THE COMPANY PLANS IN PROJECTS ─────────────────────────────────
@@ -5667,7 +5694,13 @@ console.log("\n§505 · the direction owner row");
   check("§505: the role is bounded — it never speaks for the company", R.isOwnLinesRole("dirowner"), "not own-lines");
   const on = clone(B); on.group[R.STRUCTURE] = { bu: { exists: true } };
   const r2 = R.personRoles(R.worldOf(on), personOf(on, "t504_own")).map(function (r) { return r.role; });
-  check("§505: with the business units on, the same naming derives no Direction owner", r2.indexOf("dirowner") < 0, r2.join(","));
+  /* §544.13: the units no longer gate the company's own plan, so the role
+     derives whichever way they are switched — and it must, because the
+     reporting right it mirrors (`ownsTopPillar`) does (§42, §53.5). */
+  check("§505/§544.13: with the business units on, the same naming still derives a Direction owner",
+        r2.indexOf("dirowner") > -1, r2.join(",") || "(nothing)");
+  const r3 = R.personRoles(R.worldOf(on), personOf(on, "t504_none")).map(function (r) { return r.role; });
+  check("§505/§544.13: …and somebody named on no direction still holds nothing", r3.indexOf("dirowner") < 0, r3.join(","));
 })();
 
 /* ── §516: A PILLAR CAN NAME A CUSTODIAN ───────────────────────────────────
@@ -6223,8 +6256,12 @@ console.log("\n§520.6 · a capability's owner enters their own capability's fig
   check("§520.6: …and not the office by this road (theirs is the seat)",
         R.ownsTopCapability(w, personOf(B, "smo")) === false);
   const ON = clone(B); ON.group[R.STRUCTURE] = { bu: { exists: true } };
-  check("§520.6: with the business units on the rule answers nothing",
-        R.ownsTopCapability(R.worldOf(ON), personOf(ON, "t5206_own")) === false);
+  /* §544.13: a capability is the company's whatever the units say, so the
+     seat holds with them on — and still names only its own holders. */
+  check("§520.6/§544.13: with the business units on the head still holds the capability",
+        R.ownsTopCapability(R.worldOf(ON), personOf(ON, "t5206_own")) === true);
+  check("§520.6/§544.13: …and a direction's owner still does not",
+        R.ownsTopCapability(R.worldOf(ON), personOf(ON, "t5206_dir")) === false);
 
   function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
   function capOf(inc) { return inc.group.capabilities.filter(function (c) { return c.id === cap.id; })[0]; }

@@ -58,6 +58,12 @@ def side(pg, key):
 
 
 def go(pg, key, sub=None):
+    # §544.13: A CAPABILITY IS THE COMPANY'S and lives in its plan — the
+    # Capabilities section of the company's Strategy tab, one pane with the
+    # capabilities' rail — never a destination of its own any more.
+    if key == "CAPS":
+        pg.evaluate("()=>{ leaveModes && leaveModes(); current='group'; currentSub='strategy'; CURSEC.strategy='caps'; paint(); }")
+        pg.wait_for_timeout(350); return
     side(pg, key)
     pg.click('#units [data-u="%s"]' % key); pg.wait_for_timeout(350)
     if sub:
@@ -103,18 +109,22 @@ with sync_playwright() as p:
        bool(CAP) and not FNK.endswith("undefined"), {"cap": CAP, "fn": FNK})
     print("\n1 · a function's own work and a capability — one pane each, each railed")
     lefts = {}
+    # §544.13 / §483: the capability's two pages went with its destination —
+    # its plan is the company's Capabilities section (railed, compared here)
+    # and its reading is a card in the company's Performance, which draws no
+    # pane. The one-item rail is asserted where a capability now lives.
     for key, sub, label in ((FNK, "proj", "the function's own"),
-                            ("cap:" + CAP, "proj", "the capability's"),
-                            (FNK, None, "the function's own, Performance"),
-                            ("cap:" + CAP, None, "the capability's, Performance")):
+                            ("CAPS", "proj", "the company's capabilities"),
+                            (FNK, None, "the function's own, Performance")):
         go(pg, key, sub)
         if sub is None:
             ck("%s: Performance opens" % label, tab(pg, "performance"))
         got = panes(pg)
         ck("%s: one pane is drawn" % label, len(got) == 1, got)
         ck("%s: it has a rail" % label, bool(got) and got[0]["railed"], got)
-        ck("%s: the rail lists every project it holds" % label,
-           bool(got) and got[0]["rows"] >= 1, got)
+        ck("%s: the rail lists every item it holds" % label,
+           bool(got) and got[0]["rows"] == (pg.evaluate("()=>GROUP.capabilities.length") if key == "CAPS"
+                                            else pg.evaluate("(k)=>fnOwnProjects(k.slice(3)).length", key)), got)
         if got: lefts.setdefault(sub or "perf", []).append(got[0]["left"])
     # THE TWO SIDES AGREE, which is what this file has always asserted — and is
     # now a comparison between two PAGES rather than two panes (§53.5, A15).
@@ -172,7 +182,7 @@ with sync_playwright() as p:
     # §334: the one-item holder is the CAPABILITY's own page now, not a second
     # pane on the function's (§218 — the comparison is the point and it follows
     # the subject).
-    go(pg, "cap:" + CAP, "proj")
+    go(pg, "CAPS")
     ones = [g for g in panes(pg) if g["rows"] == 1]
     ck("the one-project holder has a rail to compare against", bool(ones), panes(pg))
     if ones:

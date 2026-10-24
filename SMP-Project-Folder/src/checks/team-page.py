@@ -73,7 +73,7 @@ TEAM = [
      "seat": "super", "person_key": "ff_islam"},
     {"email": "noran.essam@forefront.consulting", "name": "Noran Essam",
      "seat": "smoteam", "person_key": "smo"},
-    {"email": "omar.abdelhamid@forefront.consulting", "name": "Omar Abdel Hamid",
+    {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid",
      "seat": "smoteam", "person_key": None},
 ]
 REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade.example"},
@@ -81,7 +81,7 @@ REG = [{"key": "smo", "name": "Mohamed Essam", "email": "mohamed.essam@rayatrade
        {"key": "own_mob", "name": "Mennah Farouk", "email": "mennah.farouk@rayatrade.example"}]
 OFFICE = [{"email": "islam.saadany@forefront.consulting", "name": "Islam Saadany", "is_admin": True},
           {"email": "noran.essam@forefront.consulting", "name": "Noran Essam", "is_admin": False},
-          {"email": "omar.abdelhamid@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
+          {"email": "omar.abdelhamid.elsayed.office@forefront.consulting", "name": "Omar Abdel Hamid", "is_admin": False},
           {"email": "hana.zaki@forefront.consulting", "name": "Hana Zaki", "is_admin": False}]
 
 # The two client shapes, switched between runs — `made_here` is what decides
@@ -281,9 +281,17 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: errs.append(str(e)))
     open_team(pg)
     n = ev(pg, MEASURE)
-    ck("at 1100 every address clips, and every one is on its own hover",
-       hover_rule(n.get("mailTitles"))
-       and all(c["clipped"] for c in (n.get("mailTitles") or [])), n.get("mailTitles"))
+    # REWRITTEN TO THE RULE (§218, §94.8). "At 1100 every address clips" was a
+    # width fact about the column as it stood; the table now gives the address
+    # more room, so at 1100 only the long one clips. What §88 says is the
+    # agreement — a hover exactly where the value did not fit — and a narrower
+    # window can only clip MORE, never fewer. Both asserted, with the long
+    # address clipping here as it already did at 1600.
+    n_clip = sum(1 for c in (n.get("mailTitles") or []) if c["clipped"])
+    m_clip = sum(1 for c in (m.get("mailTitles") or []) if c["clipped"])
+    ck("at 1100 a hover exactly where an address clips, and no fewer clip than at 1600",
+       hover_rule(n.get("mailTitles")) and n_clip >= max(1, m_clip),
+       {"1100": n.get("mailTitles"), "clipped at 1600": m_clip})
     ck("...and a control cell still carries none",
        all(x == "" for x in (n.get("asTitles") or []) + (n.get("seatTitles") or [])),
        {"as": n.get("asTitles"), "seat": n.get("seatTitles")})
@@ -327,7 +335,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     rm = [p for p in STATE["posts"] if p.get("action") == "setTeam" and p.get("on") is False]
     ck("Remove posts that person off this client",
-       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid@forefront.consulting",
+       ok_rm is True and len(rm) == 1 and rm[0].get("email") == "omar.abdelhamid.elsayed.office@forefront.consulting",
        {"pressed": ok_rm, "posts": STATE["posts"]})
     pg.close()
 
@@ -396,13 +404,25 @@ with sync_playwright() as p:
     # and a table overflowing a box with `overflow:visible` is the reported
     # fault one size down. BOTH ENDS (§94.2): the box must be able to scroll
     # AND the whole table must be reachable inside it.
+    # REWRITTEN TO THE RULE (§218): the 1000px window no longer squeezes the
+    # table — its box is wider there now — so "at 1000 it is wider" stopped
+    # exercising anything. The width is FOUND rather than written: walk down
+    # until the table is wider than its box (it must happen above phone
+    # width, or the scroll path is never exercised), and assert the scroll
+    # there.
     print("\n7 · below the width it fits at, the box scrolls (§88)")
-    pg = b.new_page(viewport={"width": 1000, "height": 950})
-    pg.add_init_script(INIT)
-    pg.on("pageerror", lambda e: errs.append(str(e)))
-    open_team(pg)
-    sc = ev(pg, SCROLLBOX)
-    ck("at 1000 the table is wider than its box", sc.get("wider") is True, sc)
+    sc, at = {}, None
+    for w in (1000, 900, 800, 700, 600):
+        pg = b.new_page(viewport={"width": w, "height": 950})
+        pg.add_init_script(INIT)
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        open_team(pg)
+        sc = ev(pg, SCROLLBOX)
+        if sc.get("wider") is True:
+            at = w
+            break
+        pg.close()
+    ck("somewhere above phone width the table is wider than its box (%s)" % at, at is not None, sc)
     ck("...so the box scrolls, and the last column can be reached",
        sc.get("canScroll") is True and sc.get("reached", 0) >= sc.get("need", 1), sc)
     ck("...every row still one line, and the PAGE gains no sideways scroll",

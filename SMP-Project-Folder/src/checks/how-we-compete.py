@@ -1,7 +1,7 @@
 """How we compete, in the plan (spec 064 §3.1, §3.4; §492).
 
 A section after the SWOT, switched on per layer on Client set-up > Structure,
-offered on the top layer and the business units only. Off hides and keeps.
+offered on the top layer, the business units and (§608) the functions. Off hides and keeps.
 The table is the discipline across the top, then Value / How / Measure, one
 column per value.
 
@@ -45,8 +45,9 @@ with sync_playwright() as p:
 
     print("\n1 · the rule, both ends")
     ck("untouched, it is off for the unit and the top", safe(pg, "(u)=>[compOn(u,SMPRules.COMPETE), compOn('group',SMPRules.COMPETE)]", unit) == [False, False])
-    ck("offered on the top and a unit, never a function or a company",
-       safe(pg, "(a)=>['group',a.u,'fn:'+a.f,'co:x'].map(t=>SMPRules.compOffered(t,SMPRules.COMPETE))", {"u": unit, "f": fk}) == [True, True, False, False])
+    ck("offered on the top, a unit and (§608) a function, never a company",
+       safe(pg, "(a)=>['group',a.u,'fn:'+a.f,'co:x'].map(t=>SMPRules.compOffered(t,SMPRules.COMPETE))", {"u": unit, "f": fk}) == [True, True, True, False])
+    ck("…and untouched it is off on the function too (§608)", safe(pg, "(f)=>compOn('fn:'+f,SMPRules.COMPETE)", fk) is False)
     ck("untouched, the unit's Strategy tab has no such section", "compete" not in (safe(pg, SECS, unit) or []))
 
     print("\n2 · the Structure step: pressed")
@@ -58,8 +59,9 @@ with sync_playwright() as p:
         return press(pg, '[data-shlvl="%s"]' % k)
     ck("the top and the units carry a How we compete switch",
        all(lvl(k) and safe(pg, "(k)=>!!document.querySelector('[data-stsec=\"'+k+'|compete\"]')", k) for k in ("top", "bu")))
-    ck("…the functions do not",
-       lvl("fn") and safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|compete\"]')") is False)
+    ck("…and so do the functions (§608), the section reading off",
+       lvl("fn") and safe(pg, "()=>!!document.querySelector('[data-stsec=\"fn|compete\"]')") is True
+       and "Nothing entered is lost" in (safe(pg, "()=>{var s=document.querySelector('[data-stcompete=\"fn\"]');return s?s.textContent:''}") or ""))
     lvl("bu")
     ck("off, it says nothing is lost",
        "Nothing entered is lost" in (safe(pg, "()=>{var s=document.querySelector('[data-stcompete=\"bu\"]');return s?s.textContent:''}") or ""))

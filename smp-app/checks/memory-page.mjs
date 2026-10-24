@@ -104,14 +104,19 @@ await pg_.waitForSelector(".nav button", { timeout: 15000 });
 const api = (body) => pg_.evaluate((b) =>
   fetch("/api/memory", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }).then((r) => r.json()), body);
 const rows = async () => (await owner.query("SELECT count(*)::int n FROM memory_entries")).rows[0].n;
+/* THE MEMORY IS NOW THE INSIGHTS HALF OF CASE STUDIES (spec 067): the tab
+   opens on the library, and the list this check walks is one press further,
+   on the switch in the title. Rewritten for the rename, not loosened (§218). */
 const openMemory = async () => {
   await pg_.click('.nav button[data-tab="memory"]');
+  await pg_.waitForTimeout(600);
+  await pg_.click('.csseg button[data-view="list"]');
   await pg_.waitForTimeout(600);
 };
 
 await section("1 · the tab a consultant with no admin flag can reach", async () => {
   const tabs = await pg_.$$eval(".nav button", (bs) => bs.map((b) => b.textContent.trim()));
-  check(tabs.includes("Memory"), "Memory is in the navigation — decision 1: no gate", JSON.stringify(tabs));
+  check(tabs.includes("Case studies"), "the memory's tab, Case studies since spec 067, is in the navigation — decision 1: no gate", JSON.stringify(tabs));
   /* THE CONTROL IS THE TAB THAT IS ACTUALLY GATED. Written first as "neither
      Consultants nor Who sees what", which was the CHECK being wrong rather
      than the product: any office account may read the consultants list, so

@@ -272,8 +272,23 @@ def main():
             # pair of numbers, so a build reading them fails the two above.
             ck("...and not the stored raw ratio, which here says something else",
                (want["hi"], want["lo"]) != (want["storedHi"], want["storedLo"]), want)
-            ck("the count is the number of scored measures",
-               num(card["mini"].get("Measures")) is not None, card["mini"])
+            # §343 counts every measure and scored breakdown column under the
+            # client's own word for a measure (§418), and §610 says how many
+            # have NOT reported beside the headline, only while there are some.
+            # Rewritten to both, never loosened (§218): the old line asked for a
+            # "Measures" label that the client's word replaced.
+            cnt = ev(pg, """(a)=>{
+              var it = (UNITS[a[0]].items||[]).filter(function(x){ return x.id === a[1]; })[0];
+              var bd = bdColScores(it), sp = scoreSpread(scorableMeasures(it), bd);
+              var u = document.querySelector('.pane .scores .card.primary .unrep');
+              return {word: L("measure"), total: it.measures.length + bd.length, scored: sp.n,
+                      unrep: u ? u.textContent.trim() : null};
+            }""", [ukey, pcode])
+            ck("the count is every measure, under the client's word for one (§343, §418)",
+               not err(cnt) and num(card["mini"].get(cnt["word"])) == cnt["total"], (card["mini"], cnt))
+            gap = (cnt["total"] - cnt["scored"]) if not err(cnt) else None
+            ck("...and the ones not reported are said beside the headline, only while there are some (§610)",
+               not err(cnt) and (cnt["unrep"] == "%d not reported yet" % gap if gap and gap > 0 else cnt["unrep"] is None), cnt)
 
         # ── 4 · the Progress column beneath it agrees, row for row ─────
         print("\n── 4 · the table under the card says the same numbers ──")
@@ -426,15 +441,15 @@ def main():
             # §334: ITS OWN DESTINATION, not the function that holds it — a
             # capability is a page of its own now and its objectives are drawn
             # there rather than on the function's Performance page.
+            # §544.13: no capabilities side on the row any more — a capability
+            # is reached from the company's plan — but the `cap:<id>`
+            # destination stays, so it is opened by its address and asked to
+            # stand there (rewritten, never loosened: §218).
             ck("the capability opens as a destination of its own",
-               ev(pg, """(id)=>{
-                 var side = document.querySelector('#units [data-fold="caps"]');
-                 if (side) side.click();
-                 var b = document.querySelector('#units [data-u="cap:'+id+'"]');
-                 if (!b) return false; b.click(); return true; }""", cap["id"]),
+               ev(pg, """(id)=>{ current='cap:'+id; currentSub='fnperf'; paint();
+                 return TARGET === 'cap:'+id; }""", cap["id"]) is True,
                cap["id"])
             pg.wait_for_timeout(500)
-            open_sub(pg, "performance")
             # Every Score column drawn on the page, so the capability's own is
             # found without the check keeping a copy of the page's layout.
             cols = ev(pg, """()=>{

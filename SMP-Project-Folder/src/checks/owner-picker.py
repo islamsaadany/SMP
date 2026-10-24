@@ -299,6 +299,11 @@ with sync_playwright() as p:
 
     # ── 7 · a value already on the plan (§96.2)
     print("\n7 · a value already on the plan (§96.2)")
+    # §551 renamed the kept group: an owner is matched against the people
+    # register, so a stray one is "Not in the register" (ownerChoices), no
+    # longer "Already on this plan". Rewritten to the new name, never loosened
+    # (§218): it must still be that group, first, holding the stray value.
+    KEPT = "Not in the register"
     try:
         pg.evaluate("""()=>{UNITS.mobile.items[0].tactics[1].owner='Zzz Someone Long Gone'; paint();}""")
         pg.wait_for_timeout(400)
@@ -309,11 +314,11 @@ with sync_playwright() as p:
           const o=[...s.options].find(o=>o.selected);
           return {groups:g, chosen:o&&o.text,
                   inKept:!![...s.querySelectorAll('optgroup[label="Already on this plan"] option')]
-                    .find(x=>x.text==='Zzz Someone Long Gone')};}""")
+                    .find(x=>x.text==='Zzz Someone Long Gone')};}""".replace('Already on this plan', KEPT))
         ck("there is a second owner list to look at", kept is not None)
         kept = kept or {"groups": [], "chosen": None, "inKept": False}
         ck("it is kept, in a group that says what it is",
-           kept["inKept"] and kept["groups"][:1] == ["Already on this plan"], kept)
+           kept["inKept"] and kept["groups"][:1] == [KEPT], kept)
         ck("and it is what the cell shows", kept["chosen"] == "Zzz Someone Long Gone", kept)
 
     except Missing:

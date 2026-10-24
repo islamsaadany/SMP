@@ -433,7 +433,11 @@ check(/READS = \[[^\]]*"history"/.test(PAGE), "and a READ, so it keeps its last 
 check(/TAB === "history"\) return drawHistory\(\)/.test(PAGE), "redraw dispatches to it");
 /* LAST on the row — his own placement from the drawing: where you go to look
    back rather than to work. Asserted as the position, never as the list. */
-const tabs = [...PAGE.matchAll(/\["([a-z]+)", "[^"]+", (?:true|false|[A-Za-z.()!]+)\]/g)].map((m) => m[1]);
+/* read from the navigation's own list, so another list of three-item
+   arrays on the page (the Clients filter's Active · Ended · Demo) is not
+   taken for the tabs */
+const navList = PAGE.slice(PAGE.indexOf("var tabs = [["), PAGE.indexOf("]];", PAGE.indexOf("var tabs = [[")) + 3);
+const tabs = [...navList.matchAll(/\["([a-z]+)", "[^"]+", (?:true|false|[A-Za-z.()!]+)/g)].map((m) => m[1]);
 check(tabs.length > 1 && tabs[tabs.length - 1] === "history",
   "drawn last on the navigation row", JSON.stringify(tabs));
 

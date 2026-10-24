@@ -57,13 +57,13 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
-     address's hash, so a reload keeps it and a link can name one
-     ("Switch client…" from a client is /platform#clients). */
-  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks", "copilot", "history"];
+  /* THE CONSOLE OPENS ON HOME (spec 068; it opened on My work, §400), and
+     the tab you are on is the address's hash, so a reload keeps it and a link
+     can name one ("Switch client…" from a client is /platform#clients). */
+  var TABS_KNOWN = ["home", "mywork", "clients", "consultants", "access", "memory", "frameworks", "copilot", "history"];
   var TAB = (function () {
     var h = String(location.hash || "").replace(/^#/, "");
-    return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";
+    return TABS_KNOWN.indexOf(h) >= 0 ? h : "home";
   })();
   var ME = null;
   /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
@@ -120,11 +120,18 @@
        column, and History has none: it stands alone at the foot. Said on
        each tab rather than in a second list, so a tab added here cannot be
        left out of the column by forgetting the other. */
-    var tabs = [["mywork", "My work", true, "Work"],
+    /* HOME IS FIRST AND MY WORK IS MY TASKS (spec 068): Islam, "change the
+       name of my work to my Tasks". The key stays `mywork`, so every address
+       and kept copy that names it still works. */
+    var tabs = [["home", "Home", true, "Work"],
+                ["mywork", "My tasks", true, "Work"],
                 ["clients", "Clients", true, "Work"],
                 ["consultants", "Consultants", ME.canConsultants, "Team"],
                 ["access", "Who sees what", ME.canAccess, "Team"],
-                ["memory", "Memory", true, "Knowledge"],
+                /* CASE STUDIES IS THE MEMORY'S TAB (spec 067): the key stays
+                   `memory`, so every address and kept copy that names it still
+                   works; the word and what it opens on are the library's. */
+                ["memory", "Case studies", true, "Knowledge"],
                 /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 052,
                    decision 1): every consultant reads the whole library, and
                    only an admin adds to it — which is a gate on the ACT, asked
@@ -180,6 +187,7 @@
      menu button opens the column over the page. */
   var NAV_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">';
   var NAV_ICON = {
+    home: NAV_SVG + '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/></svg>',
     mywork: NAV_SVG + '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>',
     clients: NAV_SVG + '<path d="M4 20V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14"/><path d="M15 10h3a2 2 0 0 1 2 2v8"/><path d="M3 20h18"/><path d="M8 8h3M8 12h3M8 16h3"/></svg>',
     consultants: NAV_SVG + '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6"/><path d="M17 14.2a5 5 0 0 1 3.5 4.8"/></svg>',
@@ -270,7 +278,7 @@
   var KEPT = {};
   var ONLIST = null;
   var REVAL = null;
-  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client", "history", "read"];
+  var READS = ["me", "cards", "mywork", "home", "consultants", "access", "list", "one", "library", "client", "history", "read", "case", "options"];
   /* §620: what a tab's drawing is fed from its saved copy (REPLAY), and the
      record of what its latest reading was given, kept for next time
      (RECORD). Both are the request's own business: see send(). */
@@ -390,9 +398,20 @@
       access: function () {
         return head("150px") + b("70%", "q") + table(2, function () { return b("220px") + '<span class="grow"></span>' + n(4, function () { return b("90px", "p q hide-narrow"); }); });
       },
+      /* Home (spec 068): the greeting band, your clients and your tasks side
+         by side, and the two boxes under them */
+      home: function () {
+        var col = function (k) { return '<div class="box c grow">' + b("110px", "t") + n(k, function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 8) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; }) + "</div>"; };
+        return '<div class="box c" style="background:var(--surface-2);padding:20px 22px">' + b("120px", "q") + b("280px", "t") + b("140px", "q") + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(2) + col(2) + "</div>";
+      },
+      /* Case studies (spec 067), the memory's tab: the title and its count,
+         the big search line, the categories, the shelf of studies */
       memory: function () {
-        return head("100px", b("110px", "k q") + b("130px", "k")) + '<div class="box c"><div class="r">' + b("80%", "k q") + b("70px", "k") + '</div><div class="r">' +
-          n(4, function () { return b("110px", "p q"); }) + "</div></div>" + n(3, function (i) { return '<div class="box c">' + b((40 + i * 8) + "%") + b("85%", "q") + b("60%", "q") + "</div>"; });
+        return head("140px", b("90px", "q hide-narrow") + b("150px", "k q") + b("170px", "k")) + '<div class="r">' + b("100%", "k q") + b("150px", "k q hide-narrow") + "</div>" +
+          '<div class="r" style="flex-wrap:wrap">' + n(5, function (i) { return b((90 + (i % 3) * 24) + "px", "p q"); }) + "</div>" +
+          '<div class="r" style="align-items:stretch;gap:14px;flex-wrap:wrap">' + n(3, function (i) { return '<div class="box c grow" style="min-width:200px">' + b("70px", "p q") + b((70 - i * 8) + "%", "t") + b("90%", "q") + b("60%", "q") + "</div>"; }) + "</div>";
       },
       frameworks: function () {
         return head("130px", b("160px", "k")) + '<div class="box c">' + b("100%", "k q") + '<div class="r" style="flex-wrap:wrap">' + n(6, function (i) { return b((90 + (i % 3) * 30) + "px", "p q"); }) + "</div></div>" +
@@ -426,15 +445,18 @@
     revalStop();
     /* Only the tab's own list is kept, never a form or a reading view
        opened inside it — go() below puts the tab back on its list. */
-    if (real && ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "list" && FW.view === "list") {
+    if (real && ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "lib" && FW.view === "list") {
       var f = document.createDocumentFragment();
       while (SHOWN.firstChild) f.appendChild(SHOWN.firstChild);
       KEPT[TAB] = f;
     }
     ONLIST = null;
     TAB = tab;
-    try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
-    MEM.view = "list";
+    /* THE CLIENTS PAGE OPENS ON ACTIVE, every visit (Islam: "default is
+       active"); only a press inside the page moves it. */
+    if (tab === "clients" && how === "row") CL.which = "active";
+    try { history.replaceState(null, "", tab === "home" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
+    MEM.view = "lib";
     FW.view = "list";
     CP.editing = null;
     CP.flash = null;
@@ -478,6 +500,11 @@
      a working hand — applied to the one page that had no other way to update
      itself. */
   function redraw() {
+    /* THE TAB IS NAMED ON THE PAGE'S OWN BOX, so a page's own rules can be
+       scoped to it — case studies' are (spec 067), because a class name is
+       one global namespace here (§65.9) and theirs are common words. */
+    SHOWN.setAttribute("data-tab", TAB);
+    if (TAB === "home") return drawHome();
     if (TAB === "mywork") return drawMyWork();
     if (TAB === "clients") return drawClients();
     if (TAB === "consultants") return drawConsultants();
@@ -520,7 +547,7 @@
      THE PAGE DERIVES NO RULE. `mine` arrives on every row, computed by the
      server, exactly as `mine` on a client card already is: one answer, not
      two (§53.5), and the server asks again when the press lands (§48.2). */
-  var MEM = { view: "list", entry: null, filters: { q: "", client: "", industry: "", kind: "" },
+  var MEM = { view: "lib", entry: null, filters: { q: "", client: "", industry: "", kind: "", case: "" },
               draft: null, deb: null, drafts: null };
   var KINDS = [["practice", "Practice"], ["hiccup", "Hiccup"], ["lesson", "Lesson"]];
   /* The four questions, named ONCE — the form, the reading view and the
@@ -543,6 +570,13 @@
   }
 
   function drawMemory() {
+    /* A WRITE-UP PRESSED ON MY WORK lands here on its case study (spec 067). */
+    if (CS.jump) { MEM.view = CS.jump.view; MEM.caseId = CS.jump.id; CS.fresh = !!CS.jump.fresh; CS.pastFirst = !!CS.jump.past; CS.jump = null; }
+    if (MEM.view === "lib") return drawCases();
+    if (MEM.view === "case") return drawCase();
+    if (MEM.view === "open") return drawCaseOpen();
+    if (MEM.view === "write") return drawCaseWrite();
+    if (MEM.view === "draft") return drawCaseDraft();
     if (MEM.view === "entry") return drawMemEntry();
     if (MEM.view === "wiz") return drawMemForm();
     if (MEM.view === "deb") return drawDebrief();
@@ -554,13 +588,14 @@
   function drawMemList(quiet) {
     lead(quiet, "Reading…");
     var f = MEM.filters;
-    return mpost({ action: "list", q: f.q, client: f.client, industry: f.industry, kind: f.kind })
+    return mpost({ action: "list", q: f.q, client: f.client, industry: f.industry, kind: f.kind, case: f.case })
       .then(function (j) {
         if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the memory.", true); return; }
         MEM.clientNames = {};
         (j.clients || []).forEach(function (c) { MEM.clientNames[c.key] = c.name; });
         settle(function () {
           var right = el("span");
+          right.appendChild(csSwitch());
           var add = el("button", "btn", "Add one insight");
           add.type = "button";
           add.addEventListener("click", function () { memGo("wiz", { draft: null }); });
@@ -568,14 +603,14 @@
           deb.type = "button";
           deb.addEventListener("click", function () { memGo("deb", { deb: null }); });
           right.appendChild(add); right.appendChild(deb);
-          title("Memory", right);
+          title("Case studies", right);
 
           /* NOTHING YET — the one sentence on the page, and it is a fact the
              screen does not otherwise state rather than a description of
              itself (rule 1b-ii, §45.2). Drawn only when the memory is empty
              and nothing is being filtered, or "no insights match" would read
              as "there are none". */
-          var filtering = !!(f.q || f.client || f.industry || f.kind);
+          var filtering = !!(f.q || f.client || f.industry || f.kind || f.case);
           if (!j.entries.length && !filtering) {
             var box = el("div", "empty");
             box.appendChild(el("b", null, "Nothing here yet"));
@@ -666,6 +701,9 @@
       "Every client", f.client, function (v) { f.client = v; drawMemList(true); }));
     row.appendChild(memPick(j.industries.map(function (i) { return [i, i]; }),
       "Every industry", f.industry, function (v) { f.industry = v; drawMemList(true); }));
+    /* the insights still to be placed in a piece of work (spec 067 §5) */
+    row.appendChild(memPick([["none", "Not yet in a case study"]],
+      "In a case study or not", f.case, function (v) { f.case = v; drawMemList(true); }));
 
     var cell = el("span", "cell");
     cell.setAttribute("role", "group");
@@ -710,6 +748,9 @@
     facts.appendChild(el("b", null, e.clientName));
     facts.appendChild(document.createTextNode(
       (e.industry ? " · " + e.industry : "") + " · " + e.author + " · " + whenWord(e.when)));
+    /* WHICH PIECE OF WORK IT IS IN, or that it is in none yet (spec 067 §5) */
+    if (e.caseName) { facts.appendChild(document.createTextNode(" · in ")); facts.appendChild(el("b", null, e.caseName)); }
+    else facts.appendChild(el("span", "loose", " · not yet in a case study"));
     body.appendChild(facts);
     b.appendChild(body);
     b.addEventListener("click", function () { memGo("entry", { entry: e.id }); });
@@ -718,6 +759,9 @@
   /* The snippet is the first answer that has anything in it — a one-line
      insight has to look like a finished row, not a broken one (§245). */
   function memSnip(e) {
+    /* WHAT THE NEXT PERSON SHOULD KNOW LEADS, where there is one: it is the
+       line most worth reading on an index card (spec 067's drawing). */
+    if (String(e.next_person || "").trim()) return e.next_person;
     for (var i = 0; i < QS.length; i++) if (String(e[QS[i][0]] || "").trim()) return e[QS[i][0]];
     return "";
   }
@@ -729,10 +773,13 @@
       if (!j || !j.ok) { clear(); say((j && j.error) || "That insight is no longer here.", true); return; }
       var e = j.entry;
       settle(function () {
-        var back = el("button", "btn", "Back to the list");
+        /* BACK GOES WHERE IT CAME FROM: the case study it was opened in, or
+           the Insights list (spec 067). */
+        var fromCase = MEM.back === "case" && MEM.caseId;
+        var back = el("button", "btn", fromCase ? "Back to the case study" : "Back to the list");
         back.type = "button";
-        back.addEventListener("click", function () { memGo("list"); });
-        title("Memory", (function () { var r = el("span"); r.appendChild(back); return r; }()));
+        back.addEventListener("click", function () { var b = MEM.back; MEM.back = null; memGo(b === "case" && MEM.caseId ? "case" : "list"); });
+        title("Case studies", (function () { var r = el("span"); r.appendChild(back); return r; }()));
 
         var card = el("article", "ecard");
         var tags = el("div", "etags");
@@ -744,7 +791,11 @@
         var facts = el("p", "facts");
         facts.appendChild(el("b", null, whenWord(e.when)));
         if (e.occurred) facts.appendChild(document.createTextNode(" · " + e.occurred));
+        if (e.caseName) facts.appendChild(document.createTextNode(" · in " + e.caseName));
         card.appendChild(facts);
+        /* ITS AUTHOR OR AN ADMIN PLACES IT in a piece of work for the same
+           client (spec 067 §5); everybody else reads where it is. */
+        if (e.mine) memPlace(e, card);
 
         var qa = el("div", "qa");
         var any = false;
@@ -843,7 +894,7 @@
         var right = el("span");
         var cancel = el("button", "btn", "Cancel");
         cancel.type = "button";
-        cancel.addEventListener("click", function () { memGo(editing ? "entry" : "list"); });
+        cancel.addEventListener("click", function () { memGo(editing ? "entry" : e.caseId ? "case" : "list"); });
         var save = el("button", "btn amber", "Save");
         save.type = "button";
         right.appendChild(cancel); right.appendChild(save);
@@ -926,12 +977,13 @@
           var body = { action: "save", client: csel.value, kind: ksel.value,
                        title: tfld.value, occurred: wfld.value };
           if (editing) body.id = e.id;
+          else if (e.caseId) body.caseId = e.caseId;
           QS.forEach(function (q) { body[q[0]] = fields[q[0]].value; });
           save.disabled = true;
           mpost(body).then(function (r) {
             save.disabled = false;
             if (!r || !r.ok) { say((r && r.error) || "It could not be saved.", true); return; }
-            memGo(editing ? "entry" : "list", { entry: r.id });
+            memGo(editing ? "entry" : e.caseId ? "case" : "list", { entry: r.id });
           });
         });
       });
@@ -972,6 +1024,1156 @@
   function clientPhrase(c) {
     if (!c) return "this client";
     return c.name + (c.industry ? " (" + c.industry + ")" : "");
+  }
+
+  /* ════ Case studies (spec 067) ═══════════════════════════════════════
+     The memory's tab, now the library it opens on. Finished case studies
+     stand as covers on shelves, one per industry; work still running or
+     being written sits on the desk until it is done; a case study reads as a
+     report with its insights inside it. Drawn in the console's own tokens
+     from the signed-off drawing (design-mockups/case-studies/
+     2026-10-23_case-studies-library.html).
+
+     THE PAGE DERIVES NO RULE: `canOpen`, `canWrite`, `canAsk` and `hidden`
+     are the server's (lib/case-api.ts), and it asks again on every press. */
+  var CS = { q: "", cat: "", one: null, opts: null, draft: null, pending: null, read: null, missing: null, ask: false, asking: false, jump: null };
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function ym(v) { var m = /^(\d{4})-(\d{2})$/.exec(v || ""); return m ? { y: +m[1], m: +m[2] - 1 } : null; }
+  function monthWord(v, withYear) { var a = ym(v); return a ? MONTHS[a.m] + (withYear === false ? "" : " " + a.y) : ""; }
+  function spanWord(a, b) {
+    var x = ym(a), y = ym(b);
+    if (!x && !y) return "";
+    if (x && !y) return "since " + monthWord(a);
+    if (!x) return "until " + monthWord(b);
+    return (x.y === y.y ? monthWord(a, false) : monthWord(a)) + " – " + monthWord(b);
+  }
+  function spanLong(a, b) {
+    var x = ym(a), y = ym(b);
+    var w = function (p) { return MONTHS_LONG[p.m] + " " + p.y; };
+    if (x && y) return w(x) + " to " + w(y);
+    if (x) return "since " + w(x);
+    return y ? "until " + w(y) : "";
+  }
+  function dueWord(iso) {
+    var d = new Date(String(iso || "") + "T00:00:00");
+    return isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  }
+  function firstName(n) { return String(n || "").split(/\s+/)[0]; }
+  function cpostCases(body) { return send("/api/cases", body); }
+  var STATE_WORD = { running: "Running", writing: "Being written", done: "Done" };
+
+  /* The client's mark where it has one — a PNG data URI only (§52), so it is
+     safe as a src — and its initials where it does not (spec 067 §12). */
+  function csLogo(client) {
+    if (client && client.mark) {
+      var im = el("img", "logo");
+      im.src = client.mark; im.alt = client.name || "";
+      return im;
+    }
+    return el("span", "logo", initials(client ? client.name : "?"));
+  }
+
+  /* The switch between the two halves of the library, on every page of it. */
+  function csSwitch() {
+    var seg = el("span", "csseg");
+    seg.setAttribute("role", "group");
+    seg.setAttribute("aria-label", "Show");
+    [["lib", "Case studies"], ["list", "Insights"]].forEach(function (v) {
+      var on = MEM.view === v[0];
+      var b = el("button", on ? "on" : null, v[1]);
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(on));
+      b.setAttribute("data-view", v[0]);
+      b.addEventListener("click", function () { if (!on) memGo(v[0]); });
+      seg.appendChild(b);
+    });
+    return seg;
+  }
+
+  function csCover(c) {
+    var b = el("button", "cover");
+    b.type = "button";
+    b.setAttribute("data-case", c.id);
+    var cv = el("span", "cv");
+    cv.appendChild(csLogo(c.client));
+    /* New: finished in the last thirty days (the drawing's own rule). */
+    if (c.doneAt && Date.now() - new Date(c.doneAt).getTime() < 30 * 864e5) cv.appendChild(el("span", "newtag", "New"));
+    cv.appendChild(el("span", "cind", c.client.industry || "No industry set"));
+    cv.appendChild(el("span", "ctitle", c.name));
+    var when = spanWord(c.started, c.ended);
+    if (when) cv.appendChild(el("span", "cyr", when));
+    b.appendChild(cv);
+    var meta = el("span", "cmeta");
+    meta.appendChild(el("b", null, c.client.name));
+    meta.appendChild(el("span", null, nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
+    b.appendChild(meta);
+    b.addEventListener("click", function () { memGo("case", { caseId: c.id }); });
+    return b;
+  }
+
+  function csShelf(name, count, books, more) {
+    var sec = el("section", "shelf");
+    var h = el("div", "shh");
+    h.appendChild(el("h2", null, name));
+    h.appendChild(el("span", "n", String(count)));
+    if (more) {
+      var a = el("button", "textlink", "See the shelf ›");
+      a.type = "button";
+      a.addEventListener("click", more);
+      h.appendChild(a);
+    }
+    sec.appendChild(h);
+    var row = el("div", "books");
+    books.forEach(function (c) { row.appendChild(csCover(c)); });
+    sec.appendChild(row);
+    return sec;
+  }
+
+  /* ── The front of the library ──────────────────────────────────────── */
+  function drawCases(quiet) {
+    lead(quiet, "Reading…");
+    return cpostCases({ action: "library", q: CS.q }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the case studies.", true); return; }
+      settle(function () {
+        var right = el("span");
+        right.appendChild(csSwitch());
+        if (j.canOpen) {
+          var add = el("button", "btn amber", "Open a piece of work");
+          add.type = "button";
+          add.addEventListener("click", function () { memGo("open", { opened: null }); });
+          right.appendChild(add);
+        }
+        var head = title("Case studies", right);
+        var done = j.cases.filter(function (c) { return c.state === "done"; });
+        var desk = j.cases.filter(function (c) { return c.state !== "done"; });
+        head.insertBefore(el("span", "cscount", nOf(done.length, "case study", "case studies") + " on the shelves"), head.children[1] || null);
+
+        /* ONE SEARCH ACROSS EVERY CASE STUDY, and Ask beside it (the
+           memory's assistant, over the insights, until it reads case studies
+           too — spec 067 §9). Typing never repaints (§35): the search runs
+           when the box is left or Enter is pressed. */
+        var sb = el("div", "bigsearch");
+        sb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>';
+        var q = el("input");
+        q.type = "search"; q.id = "cs-q"; q.value = CS.q;
+        q.placeholder = "Search by client, industry, or what we did";
+        q.setAttribute("aria-label", "Search case studies");
+        q.addEventListener("change", function () { CS.q = q.value.trim(); CS.cat = ""; drawCases(true); });
+        sb.appendChild(q);
+        var askb = el("button", "ask", CS.ask ? "Search instead" : "Ask a question instead");
+        askb.type = "button";
+        askb.addEventListener("click", function () { CS.ask = !CS.ask; drawCases(true); });
+        sb.appendChild(askb);
+        page.appendChild(sb);
+        if (CS.ask) page.appendChild(memAskBox());
+
+        /* THE INDUSTRIES ARE THE SECOND ROW (spec 053's rule for a library),
+           drawn from what is on the shelves, never from every industry there
+           is: a tab that empties the page is not a choice (§61). */
+        var counts = {};
+        done.forEach(function (c) { var k = c.client.industry || "No industry set"; counts[k] = (counts[k] || 0) + 1; });
+        var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
+        if (CS.cat && !counts[CS.cat]) CS.cat = "";
+        if (cats.length) {
+          var row = el("nav", "catrow");
+          row.setAttribute("aria-label", "Industries");
+          [["", "All", done.length]].concat(cats.map(function (k) { return [k, k, counts[k]]; })).forEach(function (t) {
+            var a = el("button", CS.cat === t[0] ? "on" : null, t[1]);
+            a.type = "button";
+            a.setAttribute("data-cat", t[0]);
+            a.appendChild(el("i", null, String(t[2])));
+            a.addEventListener("click", function () { CS.cat = t[0]; drawCases(true); });
+            row.appendChild(a);
+          });
+          page.appendChild(row);
+        }
+
+        if (!done.length) {
+          var box = el("div", "empty");
+          box.appendChild(el("b", null, CS.q ? "Nothing on the shelves matches that" : "No case studies on the shelves yet"));
+          box.appendChild(document.createTextNode(CS.q
+            ? "Try a client's name, an industry, or a word from the story."
+            : "A case study goes on its industry's shelf when its writer marks it done."));
+          page.appendChild(box);
+        } else if (CS.cat) {
+          page.appendChild(csShelf(CS.cat, counts[CS.cat], done.filter(function (c) {
+            return (c.client.industry || "No industry set") === CS.cat; }), null));
+        } else {
+          page.appendChild(csShelf("Newest", Math.min(4, done.length), done.slice(0, 4), null));
+          cats.forEach(function (k) {
+            page.appendChild(csShelf(k, counts[k], done.filter(function (c) {
+              return (c.client.industry || "No industry set") === k; }), function () { CS.cat = k; drawCases(true); }));
+          });
+        }
+
+        /* THE DESK: not on the shelves yet. Its rows name the work and who is
+           writing it; the story inside a draft stays the writer's. */
+        if (desk.length) {
+          var d = el("section", "desk");
+          d.appendChild(el("h2", null, "On the desk"));
+          desk.forEach(function (c) {
+            var r = el("button", "drow");
+            r.type = "button";
+            r.setAttribute("data-case", c.id);
+            r.appendChild(el("span", "spine" + (c.state === "running" ? " run" : ""), initials(c.client.name)));
+            var tx = el("span", "tx");
+            tx.appendChild(el("b", null, c.name));
+            var bits = [c.client.name + (c.client.past ? " · past client" : c.client.archived ? " · archived" : "")];
+            if (c.state === "writing" && c.writer) bits.push((c.writer.id === j.me ? "you are" : c.writer.name + " is") + " writing it" + (c.due ? " · due " + dueWord(c.due) : ""));
+            if (c.state === "running") { var w = spanWord(c.started, ""); if (w) bits.push(w); bits.push(nOf(c.insights, "insight") + " so far"); }
+            tx.appendChild(el("span", null, bits.join(" · ")));
+            r.appendChild(tx);
+            r.appendChild(el("span", "state " + (c.state === "running" ? "run" : "write"), STATE_WORD[c.state]));
+            r.addEventListener("click", function () { memGo("case", { caseId: c.id }); });
+            d.appendChild(r);
+          });
+          page.appendChild(d);
+        }
+        var loose = (j.toPlace || []).reduce(function (n, t) { return n + t.n; }, 0);
+        if (loose) {
+          var tp = el("p", "toplace");
+          tp.appendChild(el("b", null, nOf(loose, "insight")));
+          tp.appendChild(document.createTextNode(" not in a case study yet · " +
+            j.toPlace.map(function (t) { return t.client + " " + t.n; }).join(" · ") + " "));
+          var go2 = el("button", "textlink", "Place them ›");
+          go2.type = "button";
+          go2.addEventListener("click", function () { MEM.filters.case = "none"; memGo("list"); });
+          tp.appendChild(go2);
+          page.appendChild(tp);
+        }
+      });
+    }).catch(function (e) { if (String(e.message) !== "sign in") { clear(); say("Could not reach the server.", true); } });
+  }
+
+  /* ── A case study, as a report ─────────────────────────────────────── */
+  function csHeader(c, acts) {
+    var crumb = el("div", "crumb");
+    var a = el("button", "textlink", "Case studies");
+    a.type = "button";
+    a.addEventListener("click", function () { memGo("lib"); });
+    crumb.appendChild(a);
+    crumb.appendChild(el("span", null, "›"));
+    if (c.state === "done" && c.client.industry) {
+      var b = el("button", "textlink", c.client.industry);
+      b.type = "button";
+      b.addEventListener("click", function () { CS.cat = c.client.industry; memGo("lib"); });
+      crumb.appendChild(b);
+    } else crumb.appendChild(el("span", null, c.state === "done" ? "No industry set" : "On the desk"));
+    crumb.appendChild(el("span", null, "›"));
+    crumb.appendChild(el("span", "here", c.name));
+    page.appendChild(crumb);
+
+    var h = el("header", "rhead");
+    h.appendChild(csLogo(c.client));
+    var mid = el("div");
+    var eb = [c.client.industry || "", spanWord(c.started, c.ended)].filter(Boolean).join(" · ");
+    if (eb) mid.appendChild(el("div", "eb", eb));
+    mid.appendChild(el("h1", null, c.name));
+    var cl = el("p", "cl");
+    cl.appendChild(el("b", null, c.client.name));
+    var who = c.client.past ? " · past client" : c.client.archived ? " · archived" : "";
+    if (c.state === "done") who += c.writer ? " · written by " + c.writer.name : "";
+    else if (c.state === "writing" && c.writer) who += " · " + c.writer.name + " is writing it" + (c.due ? " · due " + dueWord(c.due) : "");
+    else if (c.openedBy) who += " · opened by " + c.openedBy;
+    cl.appendChild(document.createTextNode(who));
+    mid.appendChild(cl);
+    h.appendChild(mid);
+    var right = el("div", "acts");
+    right.appendChild(el("span", "chip " + c.state, STATE_WORD[c.state]));
+    (acts || []).forEach(function (x) { right.appendChild(x); });
+    h.appendChild(right);
+    page.appendChild(h);
+  }
+
+  function csButton(text, cls, fn) {
+    var b = el("button", "btn" + (cls ? " " + cls : ""), text);
+    b.type = "button";
+    b.addEventListener("click", fn);
+    return b;
+  }
+
+  function csSection(art, n, name, count) {
+    var s = el("section", "rsec");
+    s.id = "cs-sec-" + n;
+    var h = el("h2");
+    h.appendChild(el("span", "no", (n < 10 ? "0" : "") + n));
+    h.appendChild(document.createTextNode(name));
+    if (count != null) h.appendChild(el("span", "ct", String(count)));
+    s.appendChild(h);
+    art.appendChild(s);
+    return s;
+  }
+
+  /* The timeline as a strip of months, each stage a bar under them — where
+     the stage's own words name months inside the work's span. A stage whose
+     words do not (or a span over two years) is drawn as a line instead:
+     nothing is placed by guessing (§35). */
+  function csTimeline(c) {
+    var box = el("div", "tl");
+    var a = ym(c.started), b = ym(c.ended);
+    var span = a && b ? (b.y - a.y) * 12 + (b.m - a.m) + 1 : 0;
+    var months = [];
+    if (span > 0 && span <= 24) for (var i = 0; i < span; i++) months.push({ y: a.y + Math.floor((a.m + i) / 12), m: (a.m + i) % 12 });
+    var find = function (word, year) {
+      var k = MONTHS.map(function (x) { return x.toLowerCase(); }).indexOf(String(word).slice(0, 3).toLowerCase());
+      if (k < 0) return -1;
+      for (var j = 0; j < months.length; j++) if (months[j].m === k && (!year || months[j].y === +year)) return j;
+      return -1;
+    };
+    if (months.length) {
+      box.style.setProperty("--m", String(months.length));
+      var head = el("div", "tlm");
+      months.forEach(function (p) { head.appendChild(el("span", null, MONTHS[p.m])); });
+      box.appendChild(head);
+    }
+    c.stages.forEach(function (s, idx) {
+      var row = el("div", "tls");
+      var lb = el("span", "lb", s.what);
+      if (s.when) lb.appendChild(el("small", null, s.when));
+      row.appendChild(lb);
+      var m = /([A-Za-z]{3,})\.?(?:\s+(\d{4}))?(?:\s*[–—-]\s*([A-Za-z]{3,})\.?(?:\s+(\d{4}))?)?/.exec(s.when || "");
+      var from = m ? find(m[1], m[2]) : -1, to = m && m[3] ? find(m[3], m[4]) : from;
+      if (months.length && from >= 0 && to >= from) {
+        var bar = el("div", "tlbar");
+        var i2 = el("i", idx === c.stages.length - 1 ? "end" : null);
+        i2.style.gridColumn = (from + 1) + " / " + (to + 2);
+        bar.appendChild(i2);
+        row.appendChild(bar);
+      }
+      box.appendChild(row);
+    });
+    return box;
+  }
+
+  function fileType(name) {
+    var x = (String(name || "").match(/\.([A-Za-z0-9]{2,5})$/) || [, ""])[1].toLowerCase();
+    return { pdf: ["PDF", "pdf"], ppt: ["PPT", "ppt"], pptx: ["PPTX", "ppt"], xls: ["XLS", "xls"], xlsx: ["XLSX", "xls"],
+             csv: ["CSV", "xls"], doc: ["DOC", ""], docx: ["DOCX", ""], zip: ["ZIP", ""] }[x] || [x ? x.toUpperCase() : "—", ""];
+  }
+
+  /* OPENING A FILE: the address is minted per press by the server, which
+     asks the rule again (§261.10). The tab is opened in the press itself, or
+     a browser would block it as a pop-up, and pointed at the file when the
+     address lands. */
+  function csOpenFile(c, d, said) {
+    var w = window.open("about:blank", "_blank");
+    cpostCases({ action: "fileOpen", id: c.id, deliverable: d.id }).then(function (r) {
+      if (r && r.ok && r.url) { if (w) w.location = r.url; else location.assign(r.url); return; }
+      if (w) w.close();
+      said.textContent = (r && r.error) || "The file could not be opened.";
+      said.hidden = false;
+    });
+  }
+
+  function csInsightCard(e) {
+    var a = el("button", "icard");
+    a.type = "button";
+    a.appendChild(el("span", "kind " + e.kind, kindWord(e.kind)));
+    a.appendChild(el("span", "ih", e.title));
+    if (e.next) a.appendChild(el("q", null, e.next));
+    a.appendChild(el("span", "by", (e.author || "") + (e.occurred ? " · " + e.occurred : "")));
+    a.addEventListener("click", function () { memGo("entry", { entry: e.id, back: "case" }); });
+    return a;
+  }
+
+  /* Writing one insight from inside the case study: its title, Enter, and it
+     is in — "a title and a client are enough" (045), the client being the
+     case study's own, taken by the server. */
+  function csAddLine(c, onSaved) {
+    var line = el("label", "addline");
+    line.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
+    var inp = el("input");
+    inp.type = "text"; inp.id = "cs-add-insight";
+    inp.placeholder = "Write an insight from this work and press Enter";
+    inp.addEventListener("keydown", function (ev) {
+      if (ev.key !== "Enter" || !inp.value.trim() || inp.disabled) return;
+      inp.disabled = true;
+      mpost({ action: "save", caseId: c.id, client: c.client.key, kind: "lesson", title: inp.value.trim() }).then(function (r) {
+        inp.disabled = false;
+        if (!r || !r.ok) { say((r && r.error) || "It could not be saved.", true); return; }
+        onSaved(r.id);
+      });
+    });
+    line.appendChild(inp);
+    return line;
+  }
+
+  function drawCase(quiet) {
+    lead(quiet, "Reading…");
+    return cpostCases({ action: "case", id: MEM.caseId }).then(function (j) {
+      if (!j || !j.ok) {
+        settle(function () {
+          title("Case studies", (function () { var r = el("span"); r.appendChild(csButton("Back to the library", "", function () { memGo("lib"); })); return r; }()));
+          say((j && j.error) || "That case study is no longer here.", true);
+        });
+        return;
+      }
+      var c = CS.one = j.case;
+      /* FROM MY WORK, A WRITE-UP NOT YET STARTED OPENS ON THE INTERVIEW (the
+         drawing's 8 → 9); one already started opens on its page, with the
+         interview and the draft one press away. */
+      var fresh = CS.fresh; CS.fresh = false;
+      if (fresh && c.canWrite && c.state === "writing" &&
+          !(c.inShort || c.clientWhy || c.askedToDo || c.cameOfIt || c.deliverables.length)) return memGo("write");
+      var needOpts = c.canAsk && c.state === "running" && !CS.opts;
+      (needOpts ? cpostCases({ action: "options" }).then(function (o) { CS.opts = o && o.ok ? o : null; }) : Promise.resolve()).then(function () {
+        settle(function () { csCasePage(c); });
+      });
+    }).catch(function (e) { if (String(e.message) !== "sign in") { clear(); say("Could not reach the server.", true); } });
+  }
+
+  function csCasePage(c) {
+    var said = el("p", "err");
+    said.hidden = true;
+    var acts = [];
+    var hasStory = !!(c.inShort || c.clientWhy || c.askedToDo || c.cameOfIt || c.deliverables.length);
+
+    if (c.canWrite && c.state === "writing") {
+      acts.push(csButton("The interview", "", function () { memGo("write"); }));
+      acts.push(csButton(hasStory ? "Edit the draft" : "Type it in", "amber", function () { CS.draft = null; memGo("draft"); }));
+    }
+    if (c.canWrite && c.state === "done") acts.push(csButton("Edit", "", function () { CS.draft = null; memGo("draft"); }));
+    if (c.canAsk && c.state === "running") acts.push(csButton("Ask for the write-up", "amber", function () { CS.asking = !CS.asking; drawCase(true); }));
+    csHeader(c, acts);
+    page.appendChild(said);
+
+    /* ASKING FOR THE WRITE-UP, in place: who, by when, and the month it
+       ended — what `writing` means (decision 7). */
+    if (CS.asking && c.canAsk && c.state === "running" && CS.opts) {
+      var ap = el("section", "askpanel");
+      ap.appendChild(el("h2", null, "Ask for the write-up"));
+      var pr = el("div", "fpair");
+      var wb = el("div"); wb.appendChild(labFor("cs-ask-who", "Who writes it"));
+      var ws = el("select", "fld"); ws.id = "cs-ask-who";
+      CS.opts.consultants.forEach(function (p) { var o = el("option", null, p.name || p.email); o.value = p.id; ws.appendChild(o); });
+      wb.appendChild(ws); pr.appendChild(wb);
+      var db = el("div"); db.appendChild(labFor("cs-ask-due", "Wanted by"));
+      var dd = el("input", "fld"); dd.id = "cs-ask-due"; dd.type = "date";
+      db.appendChild(dd); pr.appendChild(db);
+      var eb2 = el("div"); eb2.appendChild(labFor("cs-ask-end", "Ended"));
+      var ed2 = el("input", "fld"); ed2.id = "cs-ask-end"; ed2.type = "month"; ed2.value = c.ended || "";
+      eb2.appendChild(ed2); pr.appendChild(eb2);
+      ap.appendChild(pr);
+      var fa = el("div", "factions");
+      fa.appendChild(csButton("Cancel", "", function () { CS.asking = false; drawCase(true); }));
+      var go1 = csButton("Ask", "amber", function () {
+        go1.disabled = true;
+        cpostCases({ action: "ask", id: c.id, writer: ws.value, due: dd.value, ended: ed2.value }).then(function (r) {
+          go1.disabled = false;
+          if (!r || !r.ok) { said.textContent = (r && r.error) || "That did not save."; said.hidden = false; return; }
+          CS.asking = false; drawCase(true);
+        });
+      });
+      fa.appendChild(go1);
+      ap.appendChild(fa);
+      page.appendChild(ap);
+    }
+
+    if (c.hidden) page.appendChild(el("p", "stand later", (c.writer ? c.writer.name + " is writing it up." : "It is being written up.") + " It can be read once it is marked done."));
+    else if (c.state === "running") page.appendChild(el("p", "stand later", "The story is written when the work ends."));
+    else if (c.inShort) page.appendChild(el("p", "stand", c.inShort));
+    else page.appendChild(el("p", "stand later", "In short has not been written yet."));
+
+    var grid = el("div", c.hidden || c.state === "running" ? "rgrid solo" : "rgrid");
+    var art = el("article");
+    grid.appendChild(art);
+    var n = 0, toc = [["·", "In short", null]];
+    var add = function (name, count) { n++; toc.push([(n < 10 ? "0" : "") + n, name, "cs-sec-" + n]); return csSection(art, n, name, count); };
+    if (!c.hidden && c.state !== "running") {
+      if (c.clientWhy) add("The client and why they came to us").appendChild(el("p", null, c.clientWhy));
+      if (c.askedToDo) add("What we were asked to do").appendChild(el("p", null, c.askedToDo));
+      if (c.ourTeam.length || c.theirTeam.length) {
+        var ppl = el("div", "people");
+        [["Forefront", c.ourTeam, ""], [c.client.name, c.theirTeam, " them"]].forEach(function (g) {
+          if (!g[1].length) return;
+          var col = el("div");
+          col.appendChild(el("h4", null, g[0]));
+          var ul = el("ul", "plist");
+          g[1].forEach(function (p) {
+            var li = el("li");
+            li.appendChild(el("span", "av" + g[2], initials(p.name)));
+            var t = el("span");
+            t.appendChild(el("b", null, p.name));
+            if (p.role) t.appendChild(el("span", null, p.role));
+            li.appendChild(t);
+            ul.appendChild(li);
+          });
+          col.appendChild(ul);
+          ppl.appendChild(col);
+        });
+        add("The team").appendChild(ppl);
+      }
+      if (c.stages.length) add("Timeline", spanLong(c.started, c.ended)).appendChild(csTimeline(c));
+      if (c.deliverables.length) {
+        var nofile = c.deliverables.filter(function (d) { return !d.file; }).length;
+        var files = el("div", "files");
+        c.deliverables.forEach(function (d) {
+          var t = el("div", "ftile" + (d.file ? "" : " missing"));
+          var top = el("div", "ftop");
+          var ft = fileType(d.file && d.file.name);
+          top.appendChild(el("span", "ftype " + ft[1], d.file ? ft[0] : "—"));
+          if (d.month) top.appendChild(el("span", "fmon", d.month));
+          t.appendChild(top);
+          t.appendChild(el("b", null, d.name || "(no name)"));
+          if (d.what) t.appendChild(el("p", null, d.what));
+          if (d.file) {
+            var o = csButton("Open the file", "open", function () { csOpenFile(c, d, said); });
+            o.title = d.file.name + (d.file.size ? " · " + d.file.size : "");
+            t.appendChild(o);
+          } else t.appendChild(el("span", "open", "No file attached"));
+          files.appendChild(t);
+        });
+        add("Deliverables", c.deliverables.length + (nofile ? " · " + nofile + " with no file" : "")).appendChild(files);
+      }
+      if (c.cameOfIt) add("What came of it").appendChild(el("p", null, c.cameOfIt));
+      if (c.whoToAsk.length) {
+        var asks = el("div", "askers");
+        c.whoToAsk.forEach(function (p) {
+          var box = el("div", "asker");
+          box.appendChild(el("span", "av", initials(p.name)));
+          var t = el("div", "t");
+          t.appendChild(el("b", null, p.name));
+          if (p.about) t.appendChild(el("p", null, p.about));
+          /* the address is the consultant's own, where the name is one of
+             ours — a mailto is a convenience that may do nothing */
+          var mate = c.ourTeam.filter(function (q) { return q.name === p.name; })[0];
+          if (mate && mate.email) {
+            var m = el("a", "btn", "Ask " + firstName(p.name));
+            m.href = "mailto:" + mate.email + "?subject=" + encodeURIComponent(c.name);
+            t.appendChild(m);
+          }
+          box.appendChild(t);
+          asks.appendChild(box);
+        });
+        add("Who to ask").appendChild(asks);
+      }
+    }
+    var ins = add(c.state === "running" ? "Insights so far" : "Insights from this work", c.insightList.length);
+    ins.appendChild(csAddLine(c, function () { drawCase(true); }));
+    if (c.insightList.length) {
+      var cards = el("div", "icards");
+      c.insightList.forEach(function (e) { cards.appendChild(csInsightCard(e)); });
+      ins.appendChild(cards);
+    }
+
+    if (!c.hidden && c.state !== "running") {
+      var side2 = el("aside", "glance");
+      var g = el("div", "gbox");
+      g.appendChild(el("h3", null, "At a glance"));
+      var dl = el("dl");
+      [["Client", c.client.name], ["Industry", c.client.industry], ["Size", c.client.size], ["When", spanWord(c.started, c.ended)],
+       ["Deliverables", String(c.deliverables.length)], ["Insights", String(c.insightList.length)],
+       ["Written", c.doneAt ? whenWord(c.doneAt) : ""]].forEach(function (p) {
+        if (!p[1]) return;
+        dl.appendChild(el("dt", null, p[0])); dl.appendChild(el("dd", null, p[1]));
+      });
+      g.appendChild(dl);
+      side2.appendChild(g);
+      var g2 = el("div", "gbox");
+      g2.appendChild(el("h3", null, "Contents"));
+      var ol = el("ol", "toc");
+      toc.forEach(function (t) {
+        var li = el("li");
+        var b = el("button");
+        b.type = "button";
+        b.appendChild(el("i", null, t[0]));
+        b.appendChild(document.createTextNode(t[1]));
+        b.addEventListener("click", function () {
+          var tgt = t[2] ? document.getElementById(t[2]) : page.querySelector(".stand");
+          if (tgt) tgt.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        li.appendChild(b);
+        ol.appendChild(li);
+      });
+      g2.appendChild(ol);
+      side2.appendChild(g2);
+      grid.appendChild(side2);
+    }
+    page.appendChild(grid);
+
+    /* REMOVING ONE asks twice, the memory's way (memDrop): the button says
+       what the second press does. Its insights stay, under their client. */
+    if (c.canDrop) {
+      var foot = el("div", "csfoot");
+      var rm = csButton("Remove this piece of work", "", function () {
+        if (rm.dataset.armed !== "1") { rm.dataset.armed = "1"; rm.textContent = "Remove it — its insights stay, under " + c.client.name; rm.classList.add("amber"); return; }
+        rm.disabled = true;
+        cpostCases({ action: "drop", id: c.id }).then(function (r) {
+          if (!r || !r.ok) { rm.disabled = false; said.textContent = (r && r.error) || "It could not be removed."; said.hidden = false; return; }
+          memGo("lib");
+        });
+      });
+      foot.appendChild(rm);
+      page.appendChild(foot);
+    }
+  }
+
+  /* ── Opening a piece of work (admins) ──────────────────────────────── */
+  function drawCaseOpen() {
+    lead(false, "Reading…");
+    return cpostCases({ action: "options" }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the clients.", true); return; }
+      CS.opts = j;
+      settle(function () { csOpenForm(j); });
+    });
+  }
+
+  function csOpenForm(j) {
+    var crumb = el("div", "crumb");
+    var back = el("button", "textlink", "Case studies");
+    back.type = "button";
+    back.addEventListener("click", function () { memGo("lib"); });
+    crumb.appendChild(back); crumb.appendChild(el("span", null, "›")); crumb.appendChild(el("span", "here", "Open a piece of work"));
+    page.appendChild(crumb);
+    var said = el("p", "err"); said.hidden = true; page.appendChild(said);
+    var grid = el("div", "opengrid");
+    var f = el("section", "formcard");
+    f.appendChild(el("h2", null, "Open a piece of work"));
+    var team = [];
+    var pair = function () { var p = el("div", "fpair"); f.appendChild(p); return p; };
+    var field = function (host, id, label, node) { var b = el("div"); b.appendChild(labFor(id, label)); node.id = id; b.appendChild(node); host.appendChild(b); return node; };
+
+    var p1 = pair();
+    var cs = field(p1, "cs-o-client", "Client", el("select", "fld"));
+    var live = j.clients.filter(function (c) { return !c.archived; }), ended = j.clients.filter(function (c) { return c.archived; });
+    [["Clients", live], ["Archived and past clients", ended]].forEach(function (g) {
+      if (!g[1].length) return;
+      var og = el("optgroup"); og.label = g[0];
+      g[1].forEach(function (c) { var o = el("option", null, c.name + (c.past ? " (past client)" : c.archived ? " (archived)" : "")); o.value = c.key; og.appendChild(o); });
+      cs.appendChild(og);
+    });
+    var po = el("option", null, "A past client not on the platform…"); po.value = "__past"; cs.appendChild(po);
+    if (CS.pastFirst) { cs.value = "__past"; CS.pastFirst = false; }
+    var nm = field(p1, "cs-o-name", "Name of the work", el("input", "fld"));
+    nm.type = "text"; nm.placeholder = "Strategy build 2025";
+
+    /* A PAST CLIENT IN THREE FIELDS (decision 5): made archived, with nothing
+       behind its door, in the same press as the piece of work. The industry
+       and the size are the set-up flow's own lists (§322), not a copy. */
+    var pastBox = el("div", "pastbox");
+    pastBox.hidden = true;
+    var p2 = el("div", "fpair"); pastBox.appendChild(p2);
+    var pn = field(p2, "cs-o-pname", "Past client's name", el("input", "fld")); pn.type = "text";
+    var pi = field(p2, "cs-o-pind", "Industry", el("select", "fld"));
+    var pz = field(p2, "cs-o-psize", "Size", el("select", "fld"));
+    var setup = typeof CLIENTSETUP !== "undefined" ? CLIENTSETUP : { INDUSTRIES: [], SIZES: [] };
+    var blank = el("option", null, "Not set"); blank.value = ""; pi.appendChild(blank);
+    (setup.INDUSTRIES || []).forEach(function (grp) {
+      var og = el("optgroup"); og.label = grp[0] || "Other";
+      grp[1].forEach(function (x) { var o = el("option", null, x); o.value = x; og.appendChild(o); });
+      pi.appendChild(og);
+    });
+    var blank2 = el("option", null, "Not set"); blank2.value = ""; pz.appendChild(blank2);
+    (setup.SIZES || []).forEach(function (s) { var o = el("option", null, s[1] + " · " + s[2]); o.value = s[0]; pz.appendChild(o); });
+    f.appendChild(pastBox);
+
+    var p3 = pair();
+    var st = field(p3, "cs-o-from", "Started", el("input", "fld")); st.type = "month";
+    var en = field(p3, "cs-o-to", "Ended", el("input", "fld")); en.type = "month";
+
+    var tb = el("div", "fone");
+    tb.appendChild(el("span", "lab", "Our team"));
+    var pills = el("div", "pills");
+    tb.appendChild(pills);
+    f.appendChild(tb);
+    var addSel = el("select", "fld addsel");
+    addSel.id = "cs-o-team";
+    addSel.setAttribute("aria-label", "Add a consultant");
+    var drawTeam = function () {
+      pills.textContent = "";
+      team.forEach(function (p, i) {
+        var pill = el("span", "pill");
+        pill.appendChild(el("span", "av", initials(p.name)));
+        pill.appendChild(document.createTextNode(p.name));
+        var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Take " + p.name + " off the team");
+        x.addEventListener("click", function () { team.splice(i, 1); drawTeam(); });
+        pill.appendChild(x);
+        pills.appendChild(pill);
+      });
+      addSel.textContent = "";
+      var o0 = el("option", null, "+ Add a consultant"); o0.value = ""; addSel.appendChild(o0);
+      j.consultants.forEach(function (p) {
+        if (team.some(function (t) { return t.id === p.id; })) return;
+        var o = el("option", null, p.name || p.email); o.value = p.id; addSel.appendChild(o);
+      });
+      pills.appendChild(addSel);
+    };
+    addSel.addEventListener("change", function () {
+      var p = j.consultants.filter(function (x) { return x.id === addSel.value; })[0];
+      if (p) team.push({ id: p.id, name: p.name || p.email });
+      drawTeam();
+    });
+    drawTeam();
+
+    var sec = el("div", "fsec"); sec.appendChild(el("h3", null, "Ask for the write-up")); f.appendChild(sec);
+    var p4 = pair();
+    var ws = field(p4, "cs-o-writer", "Who writes it", el("select", "fld"));
+    var none = el("option", null, "Nobody yet: the work is still running"); none.value = ""; ws.appendChild(none);
+    j.consultants.forEach(function (p) { var o = el("option", null, p.name || p.email); o.value = p.id; ws.appendChild(o); });
+    var du = field(p4, "cs-o-due", "Wanted by", el("input", "fld")); du.type = "date";
+
+    var fa = el("div", "factions");
+    fa.appendChild(csButton("Cancel", "", function () { memGo("lib"); }));
+    var go1 = csButton("Open it", "amber", function () {
+      var body = { action: "open", name: nm.value, started: st.value, ended: en.value,
+                   team: team.map(function (t) { return { id: t.id }; }), writer: ws.value, due: du.value };
+      if (cs.value === "__past") body.past = { name: pn.value, industry: pi.value, size: pz.value };
+      else body.client = cs.value;
+      go1.disabled = true;
+      cpostCases(body).then(function (r) {
+        go1.disabled = false;
+        if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be opened."; said.hidden = false; window.scrollTo(0, 0); return; }
+        CS.opts = null;
+        memGo("case", { caseId: r.id });
+      });
+    });
+    fa.appendChild(go1);
+    f.appendChild(fa);
+    grid.appendChild(f);
+
+    /* THE COVER IT MAKES, filling in as it is typed, and where it will stand. */
+    var pv = el("aside", "preview");
+    pv.appendChild(el("span", "lab", "The cover it makes"));
+    var holder = el("div");
+    pv.appendChild(holder);
+    var where = el("p", "where");
+    pv.appendChild(where);
+    grid.appendChild(pv);
+    page.appendChild(grid);
+
+    var follow = function () {
+      var past = cs.value === "__past";
+      pastBox.hidden = !past;
+      var cl = past ? { name: pn.value || "Past client", industry: pi.value, mark: null }
+                    : (function () { var x = j.clients.filter(function (c) { return c.key === cs.value; })[0] || {}; return { name: x.name || "", industry: x.industry || "", mark: null }; }());
+      var writer = j.consultants.filter(function (p) { return p.id === ws.value; })[0];
+      holder.textContent = "";
+      var cov = csCover({ id: "", name: nm.value || "Name of the work", started: st.value, ended: en.value, client: cl,
+                          deliverables: 0, insights: 0, doneAt: null });
+      cov.disabled = true;
+      cov.querySelector(".cmeta span").textContent = writer ? "Being written by " + firstName(writer.name) : "Running";
+      holder.appendChild(cov);
+      where.textContent = "On the desk until it is marked done, then on the " + (cl.industry || "No industry set") + " shelf.";
+      du.disabled = !writer;
+      go1.textContent = writer ? "Open it and ask " + firstName(writer.name) : "Open it";
+    };
+    [cs, nm, pn, pi, st, en, ws].forEach(function (x) { x.addEventListener("input", follow); x.addEventListener("change", follow); });
+    follow();
+  }
+
+  /* ── The interview ─────────────────────────────────────────────────── */
+  function csPrompt(c) {
+    var team = c.ourTeam.map(function (p) { return p.name; }).join(", ");
+    return "I am writing up a case study for my consulting firm about a piece of work we finished. " +
+      "It will be read by consultants who have just joined and were not there.\n\n" +
+      "  Client:    " + c.client.name + (c.client.industry ? " (" + c.client.industry + ")" : "") + "\n" +
+      "  The work:  " + c.name + "\n" +
+      (spanLong(c.started, c.ended) ? "  When:      " + spanLong(c.started, c.ended) + "\n" : "") +
+      (team ? "  Our team:  " + team + "\n" : "") + "\n" +
+      "Interview me. Ask ONE question at a time and wait for my answer before asking the next one. " +
+      "Push back when my answer is vague, and do not move on until it would make sense to somebody who was not there.\n\n" +
+      "Ask me about, in this order:\n" +
+      "  · the client, and why they came to us\n" +
+      "  · what we were asked to do\n" +
+      "  · the client's people we worked with, and the role of each\n" +
+      "  · the main stages of the work, with the month of each\n" +
+      "  · every deliverable: its name, what it was, the month we handed it over\n" +
+      "  · what came of it\n" +
+      "  · for each of us on the team, what a new joiner should ask them about\n" +
+      "  · and last, one paragraph a new joiner should read first\n\n" +
+      "Then ask what went better than expected, what cost us time, what I know now that I did not at the start, " +
+      "and what I would warn the next consultant about. For each, ask what happened, what we did, what came of it, " +
+      "and what the next person should know.\n\n" +
+      "When I say I am done, write it back in exactly this shape and nothing else:\n\n" +
+      "=== IN SHORT\n=== THE CLIENT AND WHY THEY CAME TO US\n=== WHAT WE WERE ASKED TO DO\n" +
+      "=== THEIR TEAM            (one line each: name · role)\n=== TIMELINE              (one line each: month · stage)\n" +
+      "=== DELIVERABLES          (one line each: name · what it was · month)\n=== WHAT CAME OF IT\n" +
+      "=== WHO TO ASK            (one line each: name · what to ask them about)\n\n" +
+      "and then each insight as a block:\n\n===\nKIND: hiccup | practice | lesson\nTITLE: one line, the thing itself\n" +
+      "WHEN: the month\nWHAT HAPPENED: ...\nWHAT WE DID: ...\nWHAT CAME OF IT: ...\nWHAT THE NEXT PERSON SHOULD KNOW: ...\n===\n\n" +
+      "Use my words, not yours. If I only half answered something, leave that line out rather than filling it in.";
+  }
+
+  function csWithCase(draw) {
+    lead(false, "Reading…");
+    return cpostCases({ action: "case", id: MEM.caseId }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That case study is no longer here.", true); return; }
+      CS.one = j.case;
+      if (!j.case.canWrite) { memGo("case"); return; }
+      settle(function () { draw(j.case); });
+    });
+  }
+
+  function drawCaseWrite() {
+    return csWithCase(function (c) {
+      csHeader(c, [csButton("Type it in instead", "", function () { CS.draft = csDraftFrom(c); CS.pending = null; CS.read = null; memGo("draft"); })]);
+      var steps = el("div", "steps");
+      steps.setAttribute("aria-label", "Where you are");
+      [{ n: "1", w: "The interview", on: true }, { n: "2", w: "The draft", on: false }, { n: "3", w: "Marked done, on the shelf", on: false }].forEach(function (s, i) {
+        if (i) steps.appendChild(el("span", "bar"));
+        var x = el("span", "st" + (s.on ? " on" : ""));
+        x.appendChild(el("span", "dot", s.n));
+        x.appendChild(document.createTextNode(s.w));
+        steps.appendChild(x);
+      });
+      page.appendChild(steps);
+      var two = el("div", "twostep");
+      var a = el("section", "stepcard");
+      var h1 = el("h3"); h1.appendChild(el("span", "dot on", "1")); h1.appendChild(document.createTextNode("Copy the prompt, and talk it through with your assistant"));
+      a.appendChild(h1);
+      var pre = el("pre", "prompt", csPrompt(c));
+      a.appendChild(pre);
+      var aa = el("div", "wacts"); aa.appendChild(copyBtn(function () { return pre.textContent; })); a.appendChild(aa);
+      two.appendChild(a);
+      var b = el("section", "stepcard");
+      var h2 = el("h3"); h2.appendChild(el("span", "dot on", "2")); h2.appendChild(document.createTextNode("Paste the whole answer back"));
+      b.appendChild(h2);
+      var ta = el("textarea", "fld pastebox");
+      ta.id = "cs-paste";
+      ta.setAttribute("aria-label", "Paste the whole answer back");
+      b.appendChild(ta);
+      var ba = el("div", "wacts");
+      ba.appendChild(csButton("Read it into the draft", "amber", function () {
+        if (!ta.value.trim()) { ta.focus(); return; }
+        var s = window.CaseSplit.split(ta.value);
+        CS.draft = csMerge(csDraftFrom(c), s);
+        /* A BLOCK THAT COULD NOT BE READ IS KEPT, never dropped (§184): it
+           comes into the draft as an insight with its words and no title. */
+        CS.pending = s.insights.map(function (e) { return { kind: e.kind, title: e.title, happened: e.happened, did: e.did,
+          came_of_it: e.came_of_it, next_person: e.next_person, occurred: e.occurred, raw: false }; })
+          .concat(s.unread.map(function (u) { return { kind: "lesson", title: "", happened: String(u), did: "",
+            came_of_it: "", next_person: "", occurred: "", raw: true }; }));
+        CS.read = s.read; CS.missing = s.missing;
+        memGo("draft");
+      }));
+      b.appendChild(ba);
+      two.appendChild(b);
+      page.appendChild(two);
+    });
+  }
+
+  /* ── The draft: the report with every part open to change ──────────── */
+  function csDraftFrom(c) {
+    var copy = function (l) { return (l || []).map(function (x) { var o = {}; for (var k in x) if (Object.prototype.hasOwnProperty.call(x, k)) o[k] = x[k]; return o; }); };
+    return { id: c.id, name: c.name, started: c.started, ended: c.ended, inShort: c.inShort, clientWhy: c.clientWhy,
+             askedToDo: c.askedToDo, cameOfIt: c.cameOfIt, ourTeam: copy(c.ourTeam), theirTeam: copy(c.theirTeam),
+             stages: copy(c.stages), deliverables: copy(c.deliverables), whoToAsk: copy(c.whoToAsk) };
+  }
+  /* What the paste read REPLACES what was there; what it did not read is
+     left as it was. A deliverable the paste names again keeps its id, so a
+     file already attached to it stays (lib/case-api.ts deliverablesOf). */
+  function csMerge(d, s) {
+    if (s.in_short) d.inShort = s.in_short;
+    if (s.client_why) d.clientWhy = s.client_why;
+    if (s.asked_to_do) d.askedToDo = s.asked_to_do;
+    if (s.came_of_it) d.cameOfIt = s.came_of_it;
+    if (s.their_team.length) d.theirTeam = s.their_team.map(function (p) { return { name: p.name, role: p.role }; });
+    if (s.stages.length) d.stages = s.stages.map(function (x) { return { when: x.when, what: x.what }; });
+    if (s.who_to_ask.length) d.whoToAsk = s.who_to_ask.map(function (p) { return { name: p.name, about: p.about }; });
+    if (s.deliverables.length) {
+      var had = d.deliverables;
+      d.deliverables = s.deliverables.map(function (x) {
+        var same = had.filter(function (h) { return h.name && h.name.toLowerCase() === String(x.name).toLowerCase(); })[0];
+        return { id: same ? same.id : undefined, name: x.name, what: x.what, month: x.month, file: same ? same.file : null };
+      });
+    }
+    return d;
+  }
+
+  function drawCaseDraft() {
+    return csWithCase(function (c) {
+      if (!CS.draft || CS.draft.id !== c.id) { CS.draft = csDraftFrom(c); CS.pending = null; CS.read = null; }
+      csDraftPage(c, CS.draft);
+    });
+  }
+
+  function csDraftPage(c, d) {
+    var said = el("p", "err"); said.hidden = true;
+    var bar = el("div", "draftbar");
+    var filled = [d.inShort, d.clientWhy, d.askedToDo, d.ourTeam.length || d.theirTeam.length, d.stages.length,
+                  d.deliverables.length, d.cameOfIt, d.whoToAsk.length].filter(function (x) { return !!x; }).length;
+    var nofile = d.deliverables.filter(function (x) { return !x.file; }).length;
+    var b1 = el("span");
+    b1.appendChild(el("b", null, c.state === "done" ? "Editing" : "Draft"));
+    b1.appendChild(document.createTextNode((c.state === "done" ? " · everyone reads the saved version" : " · only you and the admins can see it") +
+      " · " + filled + " of 8 sections filled" + (nofile ? " · " + nOf(nofile, "file") + " missing" : "")));
+    bar.appendChild(b1);
+    var br = el("span", "right");
+    var saveB = csButton(c.state === "done" ? "Save" : "Save the draft", c.state === "done" ? "amber" : "", function () { csSave(c, said, null); });
+    br.appendChild(saveB);
+    if (c.state === "writing") br.appendChild(csButton("Mark it done", "amber", function (ev) {
+      var btn = ev.currentTarget;
+      btn.disabled = true;
+      csSave(c, said, function () {
+        cpostCases({ action: "done", id: c.id }).then(function (r) {
+          btn.disabled = false;
+          if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be marked done."; said.hidden = false; window.scrollTo(0, 0); return; }
+          CS.draft = null; memGo("case");
+        });
+      }, function () { btn.disabled = false; });
+    }));
+    br.appendChild(csButton("Back", "", function () { memGo("case"); }));
+    bar.appendChild(br);
+    page.appendChild(bar);
+    if (CS.read) {
+      var found = el("p", "found");
+      found.appendChild(el("b", null, "Read " + CS.read.length + " of 8 sections" + (CS.pending && CS.pending.length ? " and " + nOf(CS.pending.length, "insight") : "") + "."));
+      if (CS.missing && CS.missing.length) found.appendChild(document.createTextNode(" Nothing came back for " + CS.missing.join(", ") + "."));
+      page.appendChild(found);
+    }
+    page.appendChild(said);
+
+    var bind = function (node, key) { node.addEventListener("input", function () { d[key] = node.value; }); return node; };
+    var ed = function (key, label, rows, warn) {
+      var t = el("textarea", "ed" + (warn && !d[key] ? " lack" : ""));
+      t.rows = rows || 3; t.value = d[key] || ""; t.setAttribute("aria-label", label);
+      t.id = "cs-d-" + key;
+      if (warn) t.placeholder = "Nothing here yet. Type it in, or leave it empty and it will not be shown.";
+      return bind(t, key);
+    };
+    var head = el("div", "fpair");
+    var hb = el("div"); hb.appendChild(labFor("cs-d-name", "Name of the work"));
+    var nm = el("input", "fld"); nm.id = "cs-d-name"; nm.value = d.name; bind(nm, "name"); hb.appendChild(nm); head.appendChild(hb);
+    var sb = el("div"); sb.appendChild(labFor("cs-d-from", "Started"));
+    var sf = el("input", "fld"); sf.id = "cs-d-from"; sf.type = "month"; sf.value = d.started || ""; bind(sf, "started"); sb.appendChild(sf); head.appendChild(sb);
+    var eb = el("div"); eb.appendChild(labFor("cs-d-to", "Ended"));
+    var ef = el("input", "fld"); ef.id = "cs-d-to"; ef.type = "month"; ef.value = d.ended || ""; bind(ef, "ended"); eb.appendChild(ef); head.appendChild(eb);
+    page.appendChild(head);
+
+    page.appendChild(labFor("cs-d-inShort", "In short — the paragraph a new joiner reads first"));
+    var st = ed("inShort", "In short", 4);
+    st.classList.add("stand");
+    page.appendChild(st);
+
+    var art = el("div", "draftart");
+    var n = 0;
+    var sec = function (name) { n++; return csSection(art, n, name); };
+    sec("The client and why they came to us").appendChild(ed("clientWhy", "The client and why they came to us", 3));
+    sec("What we were asked to do").appendChild(ed("askedToDo", "What we were asked to do", 3));
+
+    /* A list of rows, each a few boxes and a remove — one drawer for the
+       team, the timeline and who to ask (§104.7). */
+    var rows = function (host, list, fields, addWord, redraw) {
+      var box = el("div", "edrows");
+      list.forEach(function (it, i) {
+        var r = el("div", "edrow");
+        fields.forEach(function (f) {
+          var inp = el("input", "fld");
+          inp.type = "text"; inp.value = it[f[0]] || ""; inp.placeholder = f[1];
+          inp.setAttribute("aria-label", f[1]);
+          inp.addEventListener("input", function () { it[f[0]] = inp.value; });
+          r.appendChild(inp);
+        });
+        var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Remove");
+        x.addEventListener("click", function () { list.splice(i, 1); redraw(); });
+        r.appendChild(x);
+        box.appendChild(r);
+      });
+      var a = csButton(addWord, "", function () { var o = {}; fields.forEach(function (f) { o[f[0]] = ""; }); list.push(o); redraw(); });
+      box.appendChild(a);
+      host.appendChild(box);
+    };
+    var again = function () { var y = window.scrollY; settle(function () { csDraftPage(c, d); }); window.scrollTo(0, y); };
+
+    var team = sec("The team");
+    var tw = el("div", "people");
+    var ours = el("div"); ours.appendChild(el("h4", null, "Forefront"));
+    var ourList = el("div", "edrows");
+    d.ourTeam.forEach(function (p, i) {
+      var r = el("div", "edrow");
+      r.appendChild(el("span", "who", p.name));
+      var role = el("input", "fld"); role.type = "text"; role.value = p.role || ""; role.placeholder = "Role";
+      role.setAttribute("aria-label", "Role of " + p.name);
+      role.addEventListener("input", function () { p.role = role.value; });
+      r.appendChild(role);
+      var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Take " + p.name + " off the team");
+      x.addEventListener("click", function () { d.ourTeam.splice(i, 1); again(); });
+      r.appendChild(x);
+      ourList.appendChild(r);
+    });
+    ours.appendChild(ourList);
+    var addOur = el("select", "fld addsel");
+    addOur.setAttribute("aria-label", "Add a consultant");
+    var o0 = el("option", null, "+ Add a consultant"); o0.value = ""; addOur.appendChild(o0);
+    var fillOur = function (people) {
+      people.forEach(function (p) {
+        if (d.ourTeam.some(function (t) { return t.id === p.id; })) return;
+        var o = el("option", null, p.name || p.email); o.value = p.id; addOur.appendChild(o);
+      });
+    };
+    if (CS.opts) fillOur(CS.opts.consultants);
+    else cpostCases({ action: "options" }).then(function (o) { if (o && o.ok) { CS.opts = o; fillOur(o.consultants); } });
+    addOur.addEventListener("change", function () {
+      var p = (CS.opts ? CS.opts.consultants : []).filter(function (x) { return x.id === addOur.value; })[0];
+      if (p) { d.ourTeam.push({ id: p.id, name: p.name || p.email, role: "" }); again(); }
+    });
+    ours.appendChild(addOur);
+    tw.appendChild(ours);
+    var theirs = el("div"); theirs.appendChild(el("h4", null, c.client.name));
+    rows(theirs, d.theirTeam, [["name", "Name"], ["role", "Role"]], "+ Add a person", again);
+    tw.appendChild(theirs);
+    team.appendChild(tw);
+
+    rows(sec("Timeline"), d.stages, [["when", "Month, or months"], ["what", "What happened then"]], "+ Add a stage", again);
+
+    var dv = sec("Deliverables");
+    var files = el("div", "files");
+    d.deliverables.forEach(function (x, i) {
+      var t = el("div", "ftile edit" + (x.file ? "" : " attach"));
+      [["name", "Name"], ["what", "What it was"], ["month", "Month handed over"]].forEach(function (f) {
+        var inp = el("input", "inl" + (f[0] === "name" ? " big" : ""));
+        inp.type = "text"; inp.value = x[f[0]] || ""; inp.placeholder = f[1];
+        inp.setAttribute("aria-label", f[1]);
+        inp.addEventListener("input", function () { x[f[0]] = inp.value; });
+        t.appendChild(inp);
+      });
+      var row = el("div", "frow");
+      if (x.file) row.appendChild(el("span", "fname", x.file.name));
+      var pick = el("input"); pick.type = "file"; pick.hidden = true;
+      var up = csButton(x.file ? "Replace the file" : "Attach the file", "open", function () { pick.click(); });
+      pick.addEventListener("change", function () { if (pick.files && pick.files[0]) csAttach(c, i, pick.files[0], up, said); });
+      row.appendChild(up); row.appendChild(pick);
+      var rm = el("button", "x", "×"); rm.type = "button"; rm.setAttribute("aria-label", "Remove this deliverable");
+      rm.addEventListener("click", function () { d.deliverables.splice(i, 1); again(); });
+      row.appendChild(rm);
+      t.appendChild(row);
+      files.appendChild(t);
+    });
+    dv.appendChild(files);
+    dv.appendChild(csButton("+ Add a deliverable", "", function () { d.deliverables.push({ name: "", what: "", month: "", file: null }); again(); }));
+
+    sec("What came of it").appendChild(ed("cameOfIt", "What came of it", 3, true));
+    rows(sec("Who to ask"), d.whoToAsk, [["name", "Name"], ["about", "What to ask them about"]], "+ Add a person", again);
+
+    /* THE INSIGHTS THE INTERVIEW DREW OUT, saved with the case study and
+       only then — the debrief's own rule: nothing lands until it is read. */
+    if (CS.pending && CS.pending.length) {
+      var is = sec("Insights from the interview");
+      CS.pending.forEach(function (e, i) {
+        var card = el("div", "dcard" + (e.raw ? " raw" : ""));
+        if (e.raw) card.appendChild(el("p", "rawnote", "This block could not be read. Its words are below — give it a title, or drop it."));
+        var hd = el("div", "dhead");
+        var ks = el("select", "fld"); ks.setAttribute("aria-label", "Kind");
+        KINDS.forEach(function (k) { var o = el("option", null, k[1]); o.value = k[0]; if (k[0] === e.kind) o.selected = true; ks.appendChild(o); });
+        ks.addEventListener("change", function () { e.kind = ks.value; });
+        hd.appendChild(ks);
+        var tt = el("input", "fld"); tt.type = "text"; tt.value = e.title || ""; tt.placeholder = "Title"; tt.setAttribute("aria-label", "Title");
+        tt.addEventListener("input", function () { e.title = tt.value; });
+        hd.appendChild(tt);
+        hd.appendChild(csButton("Drop", "drop", function () { CS.pending.splice(i, 1); again(); }));
+        card.appendChild(hd);
+        var q = e.happened || e.next_person;
+        if (q) card.appendChild(el("p", "dq", q));
+        is.appendChild(card);
+      });
+    }
+    page.appendChild(art);
+  }
+
+  /* SAVING: the case study, then the interview's insights, each all or
+     none. The draft is redrawn from the server's own answer. */
+  function csSave(c, said, then, failed) {
+    var d = CS.draft;
+    said.hidden = true;
+    var body = { action: "save", id: c.id, name: d.name, started: d.started, ended: d.ended,
+                 inShort: d.inShort, clientWhy: d.clientWhy, askedToDo: d.askedToDo, cameOfIt: d.cameOfIt,
+                 ourTeam: d.ourTeam.map(function (p) { return { id: p.id, role: p.role }; }),
+                 theirTeam: d.theirTeam, stages: d.stages, deliverables: d.deliverables, whoToAsk: d.whoToAsk };
+    var fail = function (msg) { said.textContent = msg; said.hidden = false; window.scrollTo(0, 0); if (failed) failed(); };
+    return cpostCases(body).then(function (r) {
+      if (!r || !r.ok) { fail((r && r.error) || "It could not be saved."); return; }
+      var pend = (CS.pending || []).filter(function (e) { return e.title && e.title.trim(); });
+      if ((CS.pending || []).length > pend.length) { fail("Give every insight from the interview a title, or drop it, before saving."); return; }
+      return (pend.length ? cpostCases({ action: "insights", id: c.id, entries: pend }) : Promise.resolve({ ok: true })).then(function (k) {
+        if (!k || !k.ok) { fail((k && k.error) || "The insights could not be saved."); return; }
+        CS.pending = null; CS.read = null;
+        CS.draft = csDraftFrom(r.case);
+        if (then) { then(); return; }
+        var y = window.scrollY;
+        settle(function () { csDraftPage(r.case, CS.draft); });
+        window.scrollTo(0, y);
+        var ok1 = page.querySelector(".draftbar b");
+        if (ok1) ok1.textContent = "Saved";
+      });
+    });
+  }
+
+  /* A DELIVERABLE'S FILE: saved first if the line is new, so it has an id
+     from the server; then the store's three steps, one piece at a time, the
+     client library's own loop (drawLibrary). */
+  function csAttach(c, i, f, btn, said) {
+    var d = CS.draft;
+    if (!d.deliverables[i] || !String(d.deliverables[i].name || "").trim()) { said.textContent = "Give the deliverable a name before attaching its file."; said.hidden = false; return; }
+    var was = btn.textContent;
+    btn.disabled = true; btn.textContent = "Saving…";
+    var fail = function (msg) { btn.disabled = false; btn.textContent = was; said.textContent = msg; said.hidden = false; };
+    var ready = d.deliverables[i].id ? Promise.resolve(true) : new Promise(function (res) { csSave(c, said, function () { res(true); }, function () { res(false); }); });
+    ready.then(function (ok1) {
+      if (!ok1) { fail("It could not be saved, so the file was not sent."); return; }
+      var del = CS.draft.deliverables[i];
+      if (!del || !del.id) { fail("Save the draft, then attach the file."); return; }
+      return cpostCases({ action: "fileBegin", id: c.id, deliverable: del.id, name: f.name, bytes: f.size }).then(function (b) {
+        if (!b || !b.ok) { fail((b && b.error) || "The upload could not be started."); return; }
+        var piece = b.piece || (3 * 1024 * 1024);
+        var total = Math.max(1, Math.ceil(f.size / piece));
+        var parts = [];
+        var q = "/api/cases/file?id=" + encodeURIComponent(c.id) + "&deliverable=" + encodeURIComponent(del.id) +
+                "&name=" + encodeURIComponent(f.name) + "&path=" + encodeURIComponent(b.path) +
+                "&storeKey=" + encodeURIComponent(b.storeKey) + "&uploadId=" + encodeURIComponent(b.uploadId);
+        var step = function (n) {
+          if (n > total) {
+            btn.textContent = "Finishing…";
+            return cpostCases({ action: "fileFinish", id: c.id, deliverable: del.id, name: f.name, bytes: f.size,
+                                path: b.path, parts: parts, uploadId: b.uploadId, storeKey: b.storeKey }).then(function (r) {
+              if (!r || !r.ok) { fail((r && r.error) || "The file could not be finished."); return; }
+              del.file = r.file;
+              var y = window.scrollY;
+              settle(function () { csDraftPage(c, CS.draft); });
+              window.scrollTo(0, y);
+            });
+          }
+          btn.textContent = total > 1 ? "Sending " + n + " of " + total + "…" : "Sending…";
+          return fetch(q + "&n=" + n, { method: "POST", cache: "no-store", headers: { "Content-Type": "application/octet-stream" },
+                                        body: f.slice((n - 1) * piece, Math.min(f.size, n * piece)) })
+            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              if (!r || !r.ok) { fail((r && r.error) || "That piece was refused."); return; }
+              parts.push({ partNumber: r.partNumber, etag: r.etag });
+              return step(n + 1);
+            });
+        };
+        return step(1);
+      });
+    }).catch(function () { fail("Could not reach the server. Nothing was changed — try again."); });
+  }
+
+  /* ── An insight's place (spec 067 §5) ──────────────────────────────── */
+  function memPlace(e, host) {
+    var box = el("div", "placebox");
+    box.appendChild(labFor("m-place", "Piece of work"));
+    var sel = el("select", "fld");
+    sel.id = "m-place";
+    var none = el("option", null, "Not in a case study yet"); none.value = ""; sel.appendChild(none);
+    box.appendChild(sel);
+    host.appendChild(box);
+    cpostCases({ action: "library" }).then(function (j) {
+      if (!j || !j.ok) return;
+      j.cases.filter(function (c) { return c.client.key === e.client; }).forEach(function (c) {
+        var o = el("option", null, c.name + (c.state === "done" ? "" : " · " + STATE_WORD[c.state].toLowerCase()));
+        o.value = c.id;
+        if (c.id === e.caseId) o.selected = true;
+        sel.appendChild(o);
+      });
+    });
+    sel.addEventListener("change", function () {
+      sel.disabled = true;
+      cpostCases({ action: "place", entry: e.id, case: sel.value || null }).then(function (r) {
+        sel.disabled = false;
+        if (!r || !r.ok) { say((r && r.error) || "It could not be placed.", true); return; }
+        drawMemEntry();
+      });
+    });
   }
 
   /* ── A period debrief, and what comes back ─────────────────────
@@ -1327,7 +2529,7 @@
     var top = el("div", "mwtop"), left = el("div");
     var wk = el("div", "mwwk");
     var name = el("div", "mwname");
-    name.appendChild(el("h1", null, "My work"));
+    name.appendChild(el("h1", null, "My tasks"));
     left.appendChild(wk);
     left.appendChild(name);
     var strip = el("div", "mwstrip");
@@ -1421,6 +2623,38 @@
     return row;
   }
 
+  /* A WRITE-UP ON MY WORK (spec 067 §8): the row's own look, a book where
+     the tick is and "Case study" where the status is. It carries NO control
+     to finish it — a case study is done when it is marked done on the case
+     study, never from a list (§61) — so the whole row opens it. */
+  function mwCaseRow(r) {
+    var row = el("div", "mwrow mwcase" + (r.late ? " late" : ""));
+    row.setAttribute("data-case", r.id);
+    var mk = el("span", "mwdoc");
+    mk.title = "A case study to write up";
+    mk.innerHTML = NAV_ICON.memory;
+    row.appendChild(mk);
+    var t = el("span", "t", "Write up the case study · ");
+    t.appendChild(el("b", null, r.name));
+    row.appendChild(t);
+    var cl = el("span", "mwcl");
+    cl.title = r.clientName;
+    cl.appendChild(el("i", null, r.clientName));
+    row.appendChild(cl);
+    row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
+    var st = el("span", "mwst prog");
+    st.appendChild(el("span", null, "Case study"));
+    row.appendChild(st);
+    var link = el("button", "mwgo");
+    link.type = "button";
+    link.title = "Open the case study";
+    link.setAttribute("aria-label", "Write up " + r.name);
+    link.innerHTML = MW_GO;
+    row.appendChild(link);
+    row.addEventListener("click", function () { CS.jump = { id: r.id, view: "case", fresh: true }; go("memory"); });
+    return row;
+  }
+
   function drawMyWork() {
     var m = mwMast();
     /* a refused or failed press is said here, under the panel, in words */
@@ -1451,12 +2685,16 @@
         m.name.appendChild(pick);
       }
       var rows = j.rows || [];
+      /* THE CASE STUDIES THIS PERSON IS WRITING UP (spec 067): My work's
+         second source, drawn among the actions by their due date and counted
+         with them (lib/my-work.ts writeUps). */
+      var cases = j.cases || [];
       var statuses = j.statuses || [];
-      mwCount(m.strip, rows);
+      mwCount(m.strip, rows.concat(cases));
       if (j.unanswered && j.unanswered.length) {
         body.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + " — nothing has been lost; try again shortly."));
       }
-      if (!rows.length) {
+      if (!rows.length && !cases.length) {
         body.appendChild(el("p", "muted", (j.who && !j.who.self ? j.who.name + " has" : "You have") +
           " no open actions in any client's Tracker."));
         return;
@@ -1505,7 +2743,8 @@
       var n = 0;
       ["late", "week", "later"].forEach(function (b) {
         var mine = rows.filter(function (r) { return r.bucket === b; });
-        if (!mine.length) return;
+        var ups = cases.filter(function (r) { return r.bucket === b; });
+        if (!mine.length && !ups.length) return;
         n++;
         var sec = el("section", "mwsec");
         sec.setAttribute("data-bucket", b);
@@ -1514,7 +2753,11 @@
         sh.appendChild(el("h2", null, MW_HEAD[b]));
         sh.appendChild(el("span", "meta"));
         sec.appendChild(sh);
-        mine.forEach(function (r) { sec.appendChild(mwRow(r, statuses, act)); });
+        /* in date order with the actions, a write-up with no date last */
+        var all = mine.map(function (r) { return [r.due || "9999", 0, r]; })
+          .concat(ups.map(function (r) { return [r.due || "9999", 1, r]; }))
+          .sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]; });
+        all.forEach(function (x) { sec.appendChild(x[1] ? mwCaseRow(x[2]) : mwRow(x[2], statuses, act)); });
         mwMeta(sec);
         list.appendChild(sec);
       });
@@ -1523,6 +2766,301 @@
       if (String(e.message) === "sign in") return;
       body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
     });
+  }
+
+  /* ── HOME (spec 068) ──────────────────────────────────────────────
+     Islam: "we need a user dashboard design when they open, maybe we adjust
+     my work to be the dashboard where it shows your tasks and it shows your
+     clients to open directly from there", then, of the drawings, "the
+     screen should split between the clients and the tasks, clients on the
+     left and tasks on the right … with overdue and this week in the same
+     place and all tasks takes the person to the tasks tab", "below 2 cards
+     the case studies", and "the admin also sees his clients".
+     NOTHING HERE IS ITS OWN ANSWER. The clients are the `cards` answer the
+     boot already holds, narrowed to a seat; the tasks are My tasks' own
+     `mywork` rows; the case studies are /api/cases `home`. So every word and
+     mark here is the one the page it opens says (§53.5). */
+  var HO_ALERT = NAV_SVG + '<path d="M12 4 3 19.5h18z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
+  var HO_CAL = NAV_SVG + '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg>';
+
+  function hoHello() {
+    var band = el("header", "hohello");
+    var now = new Date(), h = now.getHours();
+    var date = "";
+    try { date = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric" }); } catch (e) { date = ""; }
+    band.appendChild(el("p", "hodate", date));
+    var first = ME && ME.name ? String(ME.name).trim().split(/\s+/)[0] : "";
+    band.appendChild(el("h1", null, (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + (first ? ", " + first : "")));
+    band.appendChild(el("p", null, "Your SMP Home."));
+    page.appendChild(band);
+  }
+
+  function hoHead(host, eye, name, link, press) {
+    var h = el("div", "hosh");
+    var d = el("div");
+    d.appendChild(el("p", "hoeye", eye));
+    d.appendChild(el("h2", null, name));
+    h.appendChild(d);
+    if (link) {
+      var a = el("button", "holink", link);
+      a.type = "button";
+      a.addEventListener("click", press);
+      h.appendChild(a);
+    }
+    host.appendChild(h);
+  }
+
+  function hoClient(c) {
+    var row = el("div", "hocl");
+    row.setAttribute("data-client", c.key);
+    if (c.mark) { var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; row.appendChild(im); }
+    else row.appendChild(el("span", "cmark", initials(c.name)));
+    var who = el("span");
+    who.appendChild(el("b", null, c.name));
+    who.appendChild(el("span", "s", [c.industry, c.seat === "super" ? "Super user" : "SMO team"].filter(Boolean).join(" · ")));
+    row.appendChild(who);
+    var mods = el("span", "homods");
+    if (c.canOpen) (c.modules || []).forEach(function (m) {
+      var b = el("button", "homod");
+      b.type = "button";
+      b.setAttribute("data-module", m.key);
+      b.appendChild(document.createTextNode(m.label));
+      if (m.mark) {
+        var mk = el("i", m.alarm ? "alarm" : null, m.mark);
+        if (m.tip) mk.title = m.tip;
+        b.appendChild(mk);
+      }
+      b.addEventListener("click", function () { moduleGo(c, m); });
+      mods.appendChild(b);
+    });
+    row.appendChild(mods);
+    return row;
+  }
+
+  /* A TASK ON HOME OPENS WHAT ITS ROW ON MY TASKS OPENS — the client's
+     Tracker, or the case study to write — AND ITS TICK FINISHES IT (Islam:
+     "can you make the tasks check box clickable from the home?"). The tick is
+     My tasks' own: the same `workStatus` write through that client's door,
+     drawn only where the server says this person may (canChange), and the
+     row stays where the hand left it, green, until Home is read again (§583).
+     The status word stays on My tasks. A write-up has no tick: it is done on
+     the case study, never from a list (spec 067 §8). */
+  function hoTask(r, isCase, act) {
+    var done = !isCase && r.status === "done";
+    var b = el("div", "hotask" + (r.late && !done ? " late" : "") + (done ? " done" : ""));
+    b.tabIndex = 0;
+    b.setAttribute("role", "link");
+    if (isCase) {
+      b.setAttribute("data-case", r.id);
+      var bk = el("span", "bk");
+      bk.innerHTML = NAV_ICON.memory;
+      b.appendChild(bk);
+    } else {
+      b.setAttribute("data-client", r.client);
+      b.setAttribute("data-id", r.id);
+      var tick = el("button", "mwtick");
+      tick.type = "button";
+      tick.setAttribute("role", "checkbox");
+      tick.setAttribute("aria-checked", String(done));
+      tick.setAttribute("aria-label", (done ? "Mark not done: " : "Mark done: ") + (r.title || ""));
+      if (done) tick.innerHTML = MW_TICK;
+      if (r.canChange && act) tick.addEventListener("click", function (e) { e.stopPropagation(); act(r, b); });
+      else { tick.disabled = true; tick.title = "Only its owner or the client's Super user can finish this"; }
+      b.appendChild(tick);
+    }
+    var t = el("span", "t");
+    if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
+    else t.appendChild(document.createTextNode(r.title || "(untitled)"));
+    var m = el("span", "m");
+    m.appendChild(el("span", "c", r.clientName));
+    m.appendChild(document.createTextNode(" · " + (isCase ? "Case study" : r.statusWord || "")));
+    t.appendChild(m);
+    b.appendChild(t);
+    b.appendChild(el("span", "wh", r.when || ""));
+    var open = function () {
+      if (isCase) { CS.jump = { id: r.id, view: "case", fresh: true }; go("memory"); }
+      else location.assign("/" + r.client + "/tracker");
+    };
+    b.addEventListener("click", function (e) { if (!e.target.closest(".mwtick")) open(); });
+    b.addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target === b) open(); });
+    return b;
+  }
+
+  function hoTasks(box, j) {
+    box.textContent = "";
+    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read your tasks.")); return; }
+    var open = (j.rows || []).filter(function (r) { return r.status !== "done"; });
+    var cases = j.cases || [];
+    var pick = function (b) {
+      return open.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 0, r]; })
+        .concat(cases.filter(function (r) { return r.bucket === b; }).map(function (r) { return [r.due || "9999", 1, r]; }))
+        .sort(function (a, c) { return a[0] < c[0] ? -1 : a[0] > c[0] ? 1 : a[1] - c[1]; });
+    };
+    var panes = [["late", "Overdue", HO_ALERT, "l", "No overdue tasks."], ["week", "This week", HO_CAL, "w", "Nothing due this week."]];
+    var lists = { late: pick("late"), week: pick("week") };
+    /* It opens on Overdue when anything is, otherwise on This week. */
+    var on = lists.late.length ? "late" : "week";
+    var ph = el("div", "hoph");
+    var tabs = el("div", "hotabs");
+    tabs.setAttribute("role", "tablist");
+    ph.appendChild(tabs);
+    /* a refused or failed tick is said here, in words, and the row is left as it was */
+    var said = el("p", "err hosaid");
+    said.hidden = true;
+    var counts = {};
+    var recount = function () {
+      Object.keys(counts).forEach(function (k) {
+        counts[k].textContent = String(box.querySelectorAll('.hopane[data-pane="' + k + '"] .hotask:not(.done)').length);
+      });
+    };
+    var act = function (r, row) {
+      if (row.getAttribute("aria-busy") === "true") return;
+      var done = r.status === "done";
+      var hadFocus = document.activeElement === row.querySelector(".mwtick");
+      row.setAttribute("aria-busy", "true");
+      var undo = function (msg) { row.removeAttribute("aria-busy"); said.textContent = msg; said.hidden = false; };
+      post({ action: "workStatus", client: r.client, id: r.id, status: done ? (r.was || "not_started") : "done" }).then(function (a) {
+        if (!a.ok) { undo(a.error || "That did not save. Nothing was changed — try again."); return; }
+        var nr = a.row;
+        nr.was = done ? r.was : r.status;
+        var fresh = hoTask(nr, false, act);
+        row.parentNode.replaceChild(fresh, row);
+        said.hidden = true;
+        recount();
+        if (hadFocus) fresh.querySelector(".mwtick").focus();
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        undo("Could not reach the server. Nothing was changed — try again.");
+      });
+    };
+    var all = el("button", "holink", "All tasks →");
+    all.type = "button";
+    all.addEventListener("click", function () { go("mywork"); });
+    ph.appendChild(all);
+    box.appendChild(ph);
+    box.appendChild(said);
+    if (j.unanswered && j.unanswered.length) box.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + "."));
+    var bodies = {};
+    panes.forEach(function (p) {
+      var t = el("button", p[3]);
+      t.type = "button";
+      t.setAttribute("role", "tab");
+      t.setAttribute("data-pane", p[0]);
+      t.setAttribute("aria-selected", String(p[0] === on));
+      t.innerHTML = p[2];
+      t.appendChild(document.createTextNode(p[1]));
+      counts[p[0]] = el("i", null, String(lists[p[0]].length));
+      t.appendChild(counts[p[0]]);
+      tabs.appendChild(t);
+      var pane = el("div", "hopane");
+      pane.setAttribute("role", "tabpanel");
+      pane.setAttribute("data-pane", p[0]);
+      pane.hidden = p[0] !== on;
+      if (!lists[p[0]].length) pane.appendChild(el("p", "honone", p[4]));
+      lists[p[0]].forEach(function (x) { pane.appendChild(hoTask(x[2], !!x[1], act)); });
+      bodies[p[0]] = pane;
+      box.appendChild(pane);
+      t.addEventListener("click", function () {
+        tabs.querySelectorAll("button").forEach(function (o) { o.setAttribute("aria-selected", String(o === t)); });
+        Object.keys(bodies).forEach(function (k) { bodies[k].hidden = k !== p[0]; });
+      });
+    });
+  }
+
+  function hoCases(left, right, j) {
+    left.textContent = ""; right.textContent = "";
+    left.appendChild(el("p", "hobxh", "Your write-ups · in progress"));
+    right.appendChild(el("p", "hobxh", "Newly finished"));
+    if (!j || !j.ok) { left.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
+    if (!j.writing.length) left.appendChild(el("p", "honone", "No case study is waiting on you to write it."));
+    j.writing.forEach(function (c) {
+      var row = el("div", "hocase");
+      row.setAttribute("data-case", c.id);
+      var ring = el("span", "horing");
+      ring.style.setProperty("--p", String(Math.round(c.filled / 8 * 100)));
+      ring.appendChild(el("span", null, c.filled + "/8"));
+      row.appendChild(ring);
+      var t = el("span");
+      t.appendChild(el("b", null, c.name));
+      var s = el("span", "s", c.client.name + " · " + (c.filled ? c.filled + " of 8 sections" : "not started"));
+      if (c.due) {
+        var late = c.due < new Date().toISOString().slice(0, 10);
+        s.appendChild(document.createTextNode(" · "));
+        s.appendChild(el("span", late ? "late" : null, (late ? "was due " : "due ") + archDate(c.due + "T12:00:00")));
+      }
+      t.appendChild(s);
+      row.appendChild(t);
+      var b = el("button", c.filled ? "btn solid" : "btn", c.filled ? "Continue" : "Start");
+      b.type = "button";
+      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case", fresh: true }; go("memory"); });
+      row.appendChild(b);
+      left.appendChild(row);
+    });
+    if (j.loose) {
+      var f = el("button", "hofoot", nOf(j.loose, "insight") + " of yours to place in a case study →");
+      f.type = "button";
+      f.addEventListener("click", function () { MEM.filters.case = "none"; CS.jump = { view: "list" }; go("memory"); });
+      left.appendChild(f);
+    }
+    if (!j.fresh.length) right.appendChild(el("p", "honone", "Nothing finished in the last 30 days."));
+    j.fresh.forEach(function (c) {
+      var b = el("button", "hobook");
+      b.type = "button";
+      b.setAttribute("data-case", c.id);
+      b.appendChild(el("span", "hospine", initials(c.client.name)));
+      var t = el("span");
+      var nm = el("b", null, c.name);
+      nm.appendChild(el("span", "new", "New"));
+      t.appendChild(nm);
+      t.appendChild(el("span", "s", c.client.name + " · " + nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
+      b.appendChild(t);
+      b.addEventListener("click", function () { CS.jump = { id: c.id, view: "case" }; go("memory"); });
+      right.appendChild(b);
+    });
+  }
+
+  function drawHome() {
+    hoHello();
+    var top = el("div", "hotop");
+    var cs = el("section"), ts = el("section");
+    cs.setAttribute("data-home", "clients");
+    ts.setAttribute("data-home", "tasks");
+    hoHead(cs, "Where you have a seat", "Your clients");
+    hoHead(ts, "Overdue and this week", "Your tasks");
+    var cbox = el("div", "hobox hoclients"), tbox = el("div", "hobox");
+    cbox.appendChild(el("p", "honone", "Reading your clients…"));
+    tbox.appendChild(el("p", "honone", "Reading your tasks…"));
+    cs.appendChild(cbox); ts.appendChild(tbox);
+    top.appendChild(cs); top.appendChild(ts);
+    page.appendChild(top);
+    var sec = el("section", "hosec");
+    sec.setAttribute("data-home", "cases");
+    hoHead(sec, "What we have learned", "Case studies", "Go to Case studies →", function () { go("memory", true); });
+    var two = el("div", "hotwo"), left = el("div", "hobox"), right = el("div", "hobox");
+    left.setAttribute("data-home", "writing");
+    right.setAttribute("data-home", "fresh");
+    left.appendChild(el("p", "honone", "Reading…"));
+    two.appendChild(left); two.appendChild(right);
+    sec.appendChild(two);
+    page.appendChild(sec);
+
+    /* the boot's `cards`, once (§369), as the Clients tab takes it */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    var fail = function (box) { return function (e) {
+      if (String(e && e.message) === "sign in") return;
+      box.textContent = ""; box.appendChild(el("p", "honone", "Could not reach the server."));
+    }; };
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+      cbox.textContent = "";
+      if (!j || !j.ok) { cbox.appendChild(el("p", "honone", (j && j.error) || "Could not read your clients.")); return; }
+      /* A SEAT, FOR AN ADMIN TOO (Islam: "the admin also sees his clients"):
+         the whole list is one press away under Clients. */
+      var mine = j.cards.filter(function (c) { return !!c.seat; });
+      if (!mine.length) cbox.appendChild(el("p", "honone", "You have no seat on any client yet."));
+      mine.forEach(function (c) { cbox.appendChild(hoClient(c)); });
+    }).catch(fail(cbox));
+    post({ action: "mywork" }).then(function (j) { hoTasks(tbox, j); }).catch(fail(tbox));
+    cpostCases({ action: "home" }).then(function (j) { hoCases(left, right, j); }).catch(fail(left));
   }
 
   function drawClients() {
@@ -1561,7 +3099,7 @@
        "demo" finds it. */
     search.addEventListener("input", function () {
       var q = search.value.trim().toLowerCase();
-      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
+      Array.prototype.forEach.call(page.querySelectorAll("[data-grid] [data-name]"), function (c) {
         c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
       });
     });
@@ -1604,60 +3142,302 @@
          — same card, same amber, same Demo tag, same door. */
       var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
       var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
-
-      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
-      if (j.canAdd) grid.appendChild(addCard());
-      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
-         includes the demo — so on a platform seeded with the worked example
-         and no clients, the sentence below never drew and the one person who
-         could add one was shown a single amber card and no way in: §61's
-         trap the empty state was written to close, by a road it did not
-         cover. */
+      var archived = j.archived || [], past = j.past || [];
+      /* AND THE COUNT IS A COUNT OF CLIENTS (it read j.cards.length once,
+         which counted the demo — §61's trap by another road). */
       if (!clients.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-
-      /* Drawn only when there is one (§61): a heading over an empty band is
-         furniture, and a platform with no demo seeded has nothing to say. */
-      if (demos.length) {
-        var apart = el("div", "apart");
-        apart.appendChild(el("span", "akey", "The worked example"));
-        var dgrid = el("div", "cards");
-        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
-        apart.appendChild(dgrid);
-        page.appendChild(apart);
-      }
-
-      /* ── ARCHIVED CLIENTS (§323) ────────────────────────────────────
-         The page's OWN band — the one the worked example sits in — rather
-         than a second answer to "a row under the grid" (§53.5).
-
-         A CLIENT THAT SIMPLY VANISHED COULD NEVER COME BACK: the only route
-         would be through a card that is no longer drawn (§61). That is the
-         whole reason this band exists, and it is also where Delete becomes
-         reachable, so being archived is a real step rather than a hidden
-         state.
-
-         Drawn only when there is one, like the band above it: a heading over
-         an empty band is furniture, and a platform with nothing archived has
-         nothing to say. The server has already decided WHO sees this — it
-         sends the list only to somebody who can bring one back, so there is
-         no second answer here (§42). */
-      if (j.archived && j.archived.length) {
-        var arch = el("div", "apart");
-        arch.appendChild(el("span", "akey", "Archived"));
-        var agrid = el("div", "cards");
-        agrid.dataset.grid = "archived";
-        j.archived.forEach(function (c) { agrid.appendChild(archCardFor(c)); });
-        arch.appendChild(agrid);
-        page.appendChild(arch);
-      }
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
     });
+  }
+
+
+  /* ── WHICH CLIENTS, MINE, AND CARDS OR A LIST (spec 067's Clients filter) ──
+     Islam: "keep them out in the console but add a filter for active clients
+     ended clients and demo so it filters what we are seeing and default is
+     active … and maybe we have a filter for mine", and "give me the list view
+     option with card view". Drawn first and signed off by that answer
+     (design-mockups/clients-filter/2026-10-23_clients-filter-and-list.html).
+
+     ONE ROW ABOVE THE CLIENTS. Active is how the page opens, every visit;
+     the worked example moved from its band to Demo, and the archived band to
+     Ended, beside the past clients added for their case studies. Mine is the
+     clients this person has a SEAT on — membership, never the admin's reach.
+     Cards or list is remembered on this device, the column's own way (§601).
+     The counts follow Mine, so a number always says what pressing it shows.
+
+     THE GRIDS KEEP THEIR NAMES — `clients`, `archived`, `demo` — whichever
+     view draws them, because the checks and the search address them. */
+  var CL = { which: "active", mine: false, view: "cards" };
+  try { if (localStorage.getItem("smp.clients.view") === "list") CL.view = "list"; } catch (e) { /* this device only */ }
+
+  function moduleGo(c, m) {
+    /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's own
+       page (spec 053; the flag is the server's, lib/modules.ts). */
+    if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
+    location.assign("/" + c.key + "/" + m.key);
+  }
+
+  function clFill(host, d) {
+    var bar = el("div", "clbar");
+    host.parentNode.insertBefore(bar, host);
+    var body = el("div");
+    host.parentNode.insertBefore(body, host);
+    host.parentNode.removeChild(host);
+    var mineOf = function (list, f) { return CL.mine ? list.filter(f) : list; };
+    var seat = function (c) { return !!c.seat; };
+    var draw = function () {
+      var act = mineOf(d.clients, seat), dem = mineOf(d.demos, seat);
+      var end = CL.mine ? d.archived.filter(function (c) { return c.mine; }) : d.archived.concat(d.past);
+      bar.textContent = ""; body.textContent = "";
+      /* A CHOICE WITH NOTHING BEHIND IT IS NOT OFFERED, and one that has
+         just emptied (the last archived client deleted) falls back to
+         Active rather than leaving the page on a choice it no longer draws. */
+      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) CL.which = "active";
+      if (CL.which === "demo" && !d.demos.length) CL.which = "active";
+      var which = el("span", "clwhich");
+      which.setAttribute("role", "group");
+      which.setAttribute("aria-label", "Which clients");
+      [["active", "Active", act.length], ["ended", "Ended", end.length], ["demo", "Demo", dem.length]].forEach(function (w) {
+        if (w[0] === "demo" && !d.demos.length) return;
+        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) return;
+        var b = el("button", null, w[1]);
+        b.type = "button";
+        b.setAttribute("data-which", w[0]);
+        b.setAttribute("aria-pressed", String(CL.which === w[0]));
+        b.appendChild(el("i", null, String(w[2])));
+        b.addEventListener("click", function () { CL.which = w[0]; draw(); });
+        which.appendChild(b);
+      });
+      bar.appendChild(which);
+      var mine = el("button", "clmine" + (CL.mine ? " on" : ""));
+      mine.type = "button";
+      mine.setAttribute("role", "switch");
+      mine.setAttribute("aria-checked", String(CL.mine));
+      mine.appendChild(el("span", "sw"));
+      mine.appendChild(document.createTextNode("Mine"));
+      mine.title = "Only the clients you have a seat on";
+      mine.addEventListener("click", function () { CL.mine = !CL.mine; draw(); });
+      bar.appendChild(mine);
+      var view = el("span", "clview");
+      view.setAttribute("role", "group");
+      view.setAttribute("aria-label", "View");
+      [["cards", "Cards", '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'],
+       ["list", "List", '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>']].forEach(function (v) {
+        var b = el("button");
+        b.type = "button";
+        b.title = v[1];
+        b.setAttribute("aria-label", v[1]);
+        b.setAttribute("data-view", v[0]);
+        b.setAttribute("aria-pressed", String(CL.view === v[0]));
+        b.innerHTML = NAV_SVG + v[2] + "</svg>";
+        b.addEventListener("click", function () {
+          CL.view = v[0];
+          try { localStorage.setItem("smp.clients.view", v[0]); } catch (e) { /* this device only */ }
+          draw();
+        });
+        view.appendChild(b);
+      });
+      bar.appendChild(view);
+
+      if (CL.which === "ended") body.appendChild(clEnded(end, d.canAddPast));
+      else if (CL.which === "demo") body.appendChild(clActive(dem, false, "demo"));
+      else body.appendChild(clActive(act, d.canAdd, "clients"));
+      /* a search typed before the switch still applies to what is drawn */
+      var s = page.querySelector(".ptitle .right input");
+      if (s && s.value) s.dispatchEvent(new Event("input"));
+    };
+    draw();
+  }
+
+  function clEmpty(text) { return el("p", "muted clnone", text); }
+
+  /* The live clients (and the demo), as the cards they always were or as a
+     list: one line a client with the same facts — its industry, your seat,
+     its units, a button per module with that module's mark, Settings. */
+  function clActive(list, canAdd, gridName) {
+    var box = el("div");
+    if (CL.view === "cards") {
+      var g = el("div", "cards");
+      g.dataset.grid = gridName;
+      list.forEach(function (c) { g.appendChild(cardFor(c)); });
+      if (canAdd) g.appendChild(addCard());
+      box.appendChild(g);
+      if (!list.length && !canAdd) box.appendChild(clEmpty(CL.mine ? "You have no seat on any client here." : "Nothing here."));
+      return box;
+    }
+    var wrap = el("div", "cltable");
+    var t = el("table");
+    t.dataset.grid = gridName;
+    var hr = el("tr");
+    ["Client", "Industry", "Your seat", "Units", "Open", ""].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    var th = el("thead"); th.appendChild(hr); t.appendChild(th);
+    var tb = el("tbody");
+    list.forEach(function (c) {
+      var r = el("tr", "crow");
+      r.dataset.client = c.key;
+      r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+      var who = el("td");
+      var w = el("span", "clwho");
+      if (c.mark) { var im = el("img", "cmark solo"); im.src = c.mark; im.alt = ""; w.appendChild(im); }
+      else w.appendChild(el("span", "cmark", initials(c.name)));
+      w.appendChild(el("b", null, c.name));
+      if (c.kind === "demo") w.appendChild(el("span", "tag demo", "Demo"));
+      who.appendChild(w); r.appendChild(who);
+      r.appendChild(el("td", "muted", c.industry || ""));
+      r.appendChild(el("td", null, c.seat ? (c.seat === "super" ? "Super user" : "SMO team") : ""));
+      r.appendChild(el("td", "num", c.units ? String(c.units) : ""));
+      var mods = el("td");
+      var ml = el("span", "clmods");
+      if (c.canOpen && c.modules) c.modules.forEach(function (m) {
+        var b = el("button", "clmod", m.label);
+        b.type = "button";
+        b.dataset.module = m.key;
+        if (m.mark) { var mk = el("i", m.alarm ? "alarm" : "due", m.mark); if (m.tip) mk.title = m.tip; b.appendChild(mk); }
+        b.addEventListener("click", function () { moduleGo(c, m); });
+        ml.appendChild(b);
+      });
+      else if (!c.canOpen) ml.appendChild(el("span", "muted", "Listed only"));
+      mods.appendChild(ml); r.appendChild(mods);
+      var cog = el("td", "clgo");
+      if (c.canConfig) {
+        var chip = settingsChip(c.name);
+        chip.setAttribute("role", "button"); chip.tabIndex = 0;
+        var open = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+        chip.addEventListener("click", open);
+        chip.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+        cog.appendChild(chip);
+      }
+      r.appendChild(cog);
+      tb.appendChild(r);
+    });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    box.appendChild(wrap);
+    if (!list.length) box.appendChild(clEmpty(CL.mine ? "You have no seat on any client here." : "Nothing here."));
+    if (canAdd) {
+      var add = el("div", "cladd");
+      var b2 = el("button", "btn", "+ Add a client");
+      b2.type = "button";
+      b2.addEventListener("click", function () { drawNewClient(); });
+      add.appendChild(b2);
+      box.appendChild(add);
+    }
+    return box;
+  }
+
+  /* ENDED: the archived clients, with Bring back and Settings as on their
+     card (§323), and the past clients added for their case studies — no
+     Bring back (there is no platform to return to), and a way into their
+     case studies. "+ Add a past client" lives here and nowhere else; it is
+     Open a piece of work with a past client chosen, because a past client
+     exists only to carry one (spec 067 §7). */
+  function clEnded(list, canAddPast) {
+    var box = el("div");
+    var addPast = function () { CS.jump = { view: "open", past: true }; go("memory"); };
+    var casesOf = function (c) { CS.q = c.name; CS.cat = ""; CS.jump = { view: "lib" }; go("memory"); };
+    if (CL.view === "cards") {
+      var g = el("div", "cards");
+      g.dataset.grid = "archived";
+      list.forEach(function (c) {
+        var card = c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
+        card.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+        g.appendChild(card);
+      });
+      if (canAddPast) {
+        var b = el("button", "ccard add", "+ Add a past client");
+        b.type = "button";
+        b.dataset.addPast = "1";
+        b.addEventListener("click", addPast);
+        g.appendChild(b);
+      }
+      box.appendChild(g);
+      if (!list.length && !canAddPast) box.appendChild(clEmpty(CL.mine ? "You had a seat on none of the ended clients." : "No ended clients."));
+      return box;
+    }
+    var wrap = el("div", "cltable");
+    var t = el("table");
+    t.dataset.grid = "archived";
+    var hr = el("tr");
+    ["Client", "Industry", "Ended", ""].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    var th = el("thead"); th.appendChild(hr); t.appendChild(th);
+    var tb = el("tbody");
+    list.forEach(function (c) {
+      var r = el("tr", "crow");
+      r.dataset.client = c.key;
+      r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+      var who = el("td"), w = el("span", "clwho");
+      w.appendChild(el("span", "cmark arch", initials(c.name)));
+      w.appendChild(el("b", null, c.name));
+      who.appendChild(w); r.appendChild(who);
+      r.appendChild(el("td", "muted", c.industry || ""));
+      var when = archDate(c.at);
+      r.appendChild(el("td", null, c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
+      var acts = el("td", "clgo");
+      if (c.cases != null) {
+        var cb = el("button", "clmod", "Case studies");
+        cb.type = "button";
+        cb.appendChild(el("i", null, String(c.cases)));
+        cb.addEventListener("click", function () { casesOf(c); });
+        acts.appendChild(cb);
+      } else if (c.canConfig) {
+        var bb = el("button", "clmod", "Bring back");
+        bb.type = "button";
+        bb.addEventListener("click", function () { bringBack(c.key, c.name); });
+        acts.appendChild(bb);
+        var cog = settingsChip(c.name);
+        cog.setAttribute("role", "button"); cog.tabIndex = 0;
+        var open = function (e) { e.preventDefault(); drawArchived(c.key); };
+        cog.addEventListener("click", open);
+        cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+        acts.appendChild(cog);
+      }
+      r.appendChild(acts);
+      tb.appendChild(r);
+    });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    box.appendChild(wrap);
+    if (!list.length) box.appendChild(clEmpty(CL.mine ? "You had a seat on none of the ended clients." : "No ended clients."));
+    if (canAddPast) {
+      var add = el("div", "cladd");
+      var b2 = el("button", "btn", "+ Add a past client");
+      b2.type = "button";
+      b2.addEventListener("click", addPast);
+      add.appendChild(b2);
+      box.appendChild(add);
+    }
+    return box;
+  }
+
+  /* A PAST CLIENT'S CARD: the archived card's quiet look, "Past client"
+     where the archive date would be, and one row — its case studies. */
+  function pastCardFor(c, casesOf) {
+    var b = el("div", "ccard arch past");
+    b.dataset.client = c.key;
+    b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    var top = el("div", "ctop");
+    top.appendChild(el("div", "cmark", initials(c.name)));
+    top.appendChild(el("h2", null, c.name));
+    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    foot.appendChild(el("span", "tag arch", "Past client"));
+    top.appendChild(foot);
+    b.appendChild(top);
+    var mods = el("div", "mods");
+    var r = el("button", "mrow", "Case studies");
+    r.type = "button";
+    r.appendChild(el("i", c.cases ? "due" : null, String(c.cases)));
+    r.addEventListener("click", function () { casesOf(c); });
+    mods.appendChild(r);
+    b.appendChild(mods);
+    return b;
   }
 
   /* ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a). Islam, of two behaviours
@@ -1736,10 +3516,7 @@
            this is the one module whose work is on our side, and landing a
            consultant on the page where they can do nothing would be §61 with
            the sign reversed. */
-        r.addEventListener("click", function () {
-          if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
-          location.assign("/" + c.key + "/" + m.key);
-        });
+        r.addEventListener("click", function () { moduleGo(c, m); });
         mods.appendChild(r);
       });
       b.appendChild(mods);
@@ -1850,6 +3627,8 @@
   function bringBack(key, name) {
     setArchived(key, false).then(function (j) {
       if (!j.ok) { say(j.error || "Could not bring " + name + " back.", true); return; }
+      /* back where it now is: among the Active clients */
+      CL.which = "active";
       /* `go("clients")`, NEVER `drawClients()` — the first build called the
          renderer directly and `drawClients` does not CLEAR the page, so it
          appended a whole second copy underneath the first and the Archived
@@ -4045,8 +5824,8 @@
     av.setAttribute("data-tip", who.textContent);
   }
   var gated = function (me, tab) {
-    if (!me.canConsultants && tab === "consultants") return "mywork";
-    if (!me.canAccess && tab === "access") return "mywork";
+    if (!me.canConsultants && tab === "consultants") return "home";
+    if (!me.canAccess && tab === "access") return "home";
     return tab;
   };
 
@@ -4086,7 +5865,7 @@
     /* The boot's `cards` answer is for the Clients tab's FIRST draw only
        (§369); opening on another tab, it is let go rather than handed to a
        later visit as a stale list (§48.2). */
-    if (TAB !== "clients") BOOTCARDS = null;
+    if (TAB !== "clients" && TAB !== "home") BOOTCARDS = null;
     TAB = gated(ME, TAB);
     go(TAB, "boot");
   }).catch(function (e) {

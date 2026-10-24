@@ -756,9 +756,10 @@
 
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
        one rule that lets them report (`ownsTopPillar`), so the role and the
-       reporting right cannot disagree about who is named (§42, §53.5) — and
-       it is false whenever the business units are on, because then the top
-       layer's pillars are not directions anybody reports. */
+       reporting right cannot disagree about who is named (§42, §53.5).
+       §544.13: whichever way the business units are switched — the
+       company's own plan is the company's, and the units are irrelevant to
+       it. */
     if (ownsTopPillar(w, p)) once("dirowner", "group");
 
     /* §412: a capability's own seats, read off the capability exactly as a
@@ -4317,15 +4318,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     ctx = ctx || {};
     if (roleKey === "powner")
       return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
-    if (roleKey === "plowner")
-      return (ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
-              namedOn({ owner: ctx.pillarOwner }, person)) ||
-             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
-    /* §505: a direction's owner reaches the rows of a pillar naming them in
-       either seat — and only ever on the top layer, where they hold the role. */
-    if (roleKey === "dirowner")
-      return (!!ctx.pillarOwner && namedOn({ owner: ctx.pillarOwner }, person)) ||
-             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
+    /* §505, §595: a pillar's owner and a direction's owner reach the same
+       rows — those of the pillar naming them in either seat. One seat rule
+       (`holdsSeat`), where it was two copies of it; the direction's role is
+       only ever held on the top layer, so the target still tells them apart. */
+    if (roleKey === "plowner" || roleKey === "dirowner")
+      return holdsSeat(person, { names: [ctx.pillarOwner, ctx.pillarCust] });
     /* ── §384's `towner` BRANCH SAT HERE, AND THE CONTRADICTION WITH IT ──
        That section gave a tactic's Owner a role and a branch; §382's switch
        gave the same person a page. Both shipped, and the merge that brought
@@ -4759,18 +4757,43 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      a business unit only — a company page draws no SWOT either (§427), and
      a function or a capability supports the business rather than
      competing in a market. */
+  /* §608 — AND A FUNCTION MAY CARRY ONE, if the office ticks it. Islam, on
+     the fixed rules that should be settings: *"proceed with the settings"*.
+     The reasoning above stands as the DEFAULT — a function supports the
+     business, so the section is off on every function until somebody turns
+     it on — but it is no longer a rule written into the code. A
+     capability is still not offered it: it is part of the company's plan,
+     not a box facing anyone. */
   var COMPETE = "compete";
-  var COMPETE_LEVELS = ["top", "bu"];
+  var COMPETE_LEVELS = ["top", "bu", "fn"];
   /* The three value disciplines, in the order a tie breaks (§3.2). */
   var DISCIPLINES = [["btc", "Best Total Cost"], ["bts", "Best Total Solution"], ["bp", "Best Product"]];
   function disciplineName(k) {
     for (var i = 0; i < DISCIPLINES.length; i++) if (DISCIPLINES[i][0] === k) return DISCIPLINES[i][1];
     return "";
   }
+  /* §603 — A CAPABILITY IS OFFERED WHAT ITS CARD OFFERS (Islam, 2026-10-23:
+     *"isn't what holds what is a setting in the client setup?"*). The
+     Capabilities card on Client set-up › Structure gives a capability's first
+     section two parts, its brief and its North Star (§436's firstParts), and
+     its second section the S&W. The rule did not know that: a capability
+     whose card was never saved reads the functions' answers (§428), and the
+     functions' unsaid list carries Purpose, Aspiration and Core Values, which
+     STRUCT_NEVER_FN keeps off a function and nothing kept off a capability.
+     So the rule said a capability carried all three. No page draws them for
+     one today -- a capability opened takes the functions' Overview (the
+     shell's defsFor), which draws only the brief and the North Star -- but
+     the unit-style Foundation would have drawn them onto `capAsUnit()`'s
+     throwaway view, where a write is lost (§602's type check found that
+     door). The set-up now reads this list too, so the card, the rule and the
+     page cannot disagree (§53.5). Nothing stored is touched: off hides and
+     keeps (§404). */
+  var CAP_PARTS = ["brief", "keyobj", "swot"];
   function compOffered(target, comp) {
-    var isFn = boxRef(target).kind === "fn";
+    var kind = boxRef(target).kind, isFn = kind === "fn";
     if (comp === FN_DESC) return isFn;
     if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
+    if (kind === "cap") return STRUCT_COMPONENTS.indexOf(comp) < 0 || CAP_PARTS.indexOf(comp) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
   /* The part that draws a function's or a capability's "What it is" card:
@@ -5085,13 +5108,53 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      Under §2.2 a company plans whether or not it has units, so the units
      answer nothing here: what admits a direction's owner is a direction with
      their name on it, which is what the rest of this function asks. */
-  function ownsTopPillar(w, person, pillarOwner, pillarCust) {
+  /* ── ONE RULE FOR A SEAT ON A PART OF THE COMPANY'S OWN PLAN (§595) ────
+     Spec 066's final test: *"No role, address, formula or deck branch exists
+     for one kind of thing only"* — and Islam's *"do 2"*, to "who may report
+     on what" becoming one rule. A part of the company's plan is a direction
+     (or a capability planned as one), a capability RECORD, or a company
+     project; each was answered by a function of its own (§447/§469, §520,
+     §466) that asked the same question three ways: does this person hold a
+     seat on it? They ask it HERE now, once.
+
+     WHAT A SEAT IS, by where the plan stores it — and that difference is
+     data, not a second rule: a direction and a project name their seats by
+     the register NAME (`namedOn`, §130.1); a capability record by the person
+     KEY (§412). A project counts only while the company plans in projects
+     (§466), with or without the part named, exactly as before.
+
+     `ownsTopPillar`, `ownsTopProject` and `ownsTopCapability` stay as the
+     names their callers ask, each one line over this. Proved unchanged by the
+     whole census: every rule answer and every save the server judges, for
+     every person, on seven states — 91,084 decisions, before and after. */
+  var TOP_PART_KINDS = ["pillar", "cap", "project"];
+  function holdsSeat(person, seat) {
+    if (!person || !seat) return false;
+    return (seat.names || []).some(function (n) { return !!n && namedOn({ owner: n }, person); }) ||
+           (seat.keys || []).some(function (k) { return k === person.key; });
+  }
+  function topPartSeats(w, kind) {
+    if (kind === "pillar") return (w.topItems || []).map(function (p) {
+      return p ? { names: [p.owner, p.custodian] } : null; });
+    if (kind === "cap") return (w.capabilities || []).map(function (c) {
+      return c && c.id ? { keys: [c.head, c.custodian] } : null; });
+    return (w.topProjects || []).map(function (p) {
+      return p && p.owner ? { names: [p.owner] } : null; });
+  }
+  function holdsTopPart(w, person, kind, seat) {
     if (!person) return false;
-    var seat = function (name) { return !!name && namedOn({ owner: name }, person); };
-    if (pillarOwner != null || pillarCust != null) return seat(pillarOwner) || seat(pillarCust);
-    return (w.topItems || []).some(function (p) {
-      return p && (seat(p.owner) || seat(p.custodian));
+    if (kind === "project" && (!w || topWay(w.group) !== "projects")) return false;
+    if (seat) return holdsSeat(person, seat);
+    if (!w) return false;
+    return (kind ? [kind] : TOP_PART_KINDS).some(function (k) {
+      if (k === "project" && topWay(w.group) !== "projects") return false;
+      return topPartSeats(w, k).some(function (s) { return holdsSeat(person, s); });
     });
+  }
+  function ownsTopPillar(w, person, pillarOwner, pillarCust) {
+    return pillarOwner != null || pillarCust != null
+      ? holdsTopPart(w, person, "pillar", { names: [pillarOwner, pillarCust] })
+      : holdsTopPart(w, person, "pillar");
   }
   /* §517 — A DIRECTION'S OWNER SEES THEIR PART ONLY, IF THE OFFICE SAYS SO.
      Islam, of El Abd: direction owners "see the full plan and can't report",
@@ -5210,10 +5273,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      needs, units or no units; this used to refuse them the moment the client
      had a unit, which is the same mistake in a second place. */
   function ownsTopCapability(w, person) {
-    if (!person || !w) return false;
-    return (w.capabilities || []).some(function (c) {
-      return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
-    });
+    return !!w && holdsTopPart(w, person, "cap");
   }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
@@ -5297,11 +5357,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the function's own rule, §301) and never submits. A RULE beside
      mayReportTop, and only while the company plans in projects. */
   function ownsTopProject(w, person, projectOwner) {
-    if (!person || topWay(w.group) !== "projects") return false;
-    if (projectOwner != null) return projectOwner !== "" && namedOn({ owner: projectOwner }, person);
-    return (w.topProjects || []).some(function (p) {
-      return p && p.owner && namedOn({ owner: p.owner }, person);
-    });
+    return projectOwner != null
+      ? holdsTopPart(w, person, "project", { names: [projectOwner] })
+      : holdsTopPart(w, person, "project");
+  }
+  /* §595: WHO MAY OPEN THE COMPANY'S OWN REPORTING: whoever reports all of
+     it (the office and the group's CEO, §428), or whoever holds a seat on
+     any part of it. Which rows they then type on is each part's question. */
+  function mayReportTopOrPart(w, person) {
+    return mayReportTop(w, person) || holdsTopPart(w, person);
   }
   var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview", cap: "Overview" };
   function levelBlock(group, level, part) {
@@ -5922,6 +5986,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     NAV_ROWS: NAV_ROWS, navRowParts: navRowParts, navRowUnsaid: navRowUnsaid, navPicked: navPicked, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
     PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
     ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    holdsSeat: holdsSeat, holdsTopPart: holdsTopPart, mayReportTopOrPart: mayReportTopOrPart,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -13421,15 +13486,10 @@ function canReport(unitKey){
     if (CYCLE.locked && !inOffice()) return false;
     /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
-    return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer()) ||
-           /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer()) ||
-           /* §520.6: and a capability's owner or custodian enters their own
-              capability's figures here, exactly as a direction's owner does —
-              the capability's rows ask `cap:<id>` for themselves, so this
-              opens the page and nothing else. */
-           SMPRules.ownsTopCapability(world(), viewer());
+    /* §595: whoever reports all of it, or holds a seat on any part of it —
+       a direction, a capability, or (planning in projects) a project. The
+       one rule the server asks; which rows they type on is each part's. */
+    return SMPRules.mayReportTopOrPart(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -15510,9 +15570,20 @@ function reviewAsOf(){
      rather than deleted out from under a deployment that still holds one. */
   var y = cycleYear();
   if (y == null) return null;
+  return y * 12 + (cycleEndQuarter() * 3 - 1);   /* the LAST month of that quarter */
+}
+/* THE QUARTER THE CYCLE ENDS IN, where nothing better can be read: the stored
+   `endsQuarter` if it is a quarter, and Q4 if it is not. ONE ANSWER (§603).
+   Four readers used to ask the raw field each in their own way, and on a cycle
+   whose end cannot be read and which holds no quarter they split: the quarter
+   pips said all four quarters had passed while `tacticShare()` compared
+   against `undefined` and called every tactic 0% due, the failure its own
+   comment warns of. A cycle opened in the product cannot reach this -- the
+   form has asked for its end month since §307 -- so it is an older cycle
+   whose end was written in free text with no year anywhere. */
+function cycleEndQuarter(){
   var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+  return (q >= 1 && q <= 4) ? q : 4;
 }
 /* Did the month come from the cycle's own end, or from one of the fallbacks
    above? The strip says which, because a review point nobody set is a guess
@@ -15618,7 +15689,7 @@ function elapsedMonths(){
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
   var a = reviewAsOf(), y = reviewYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  if (a == null || y == null) return (i + 1) <= cycleEndQuarter();
   return y * 12 + i * 3 + 2 <= a;
 }
 /* §308: OVER THE PLAN'S OWN LENGTH, never a hard-coded twelve. On a tenant
@@ -16192,7 +16263,7 @@ function tacticShare(t){
     for (var j = 0; j < 4; j++) {
       if (!q[j]) continue;
       tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
+      if (j + 1 <= cycleEndQuarter()) el++;
     }
     return tot ? el / tot : null;
   }
@@ -16314,7 +16385,7 @@ function tacticFirstQuarterOver(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    if (y == null || a == null) return i + 1 <= REVIEW.endsQuarter;
+    if (y == null || a == null) return i + 1 <= cycleEndQuarter();
     return y * 12 + i * 3 + 2 <= a;
   }
   return false;
@@ -17595,7 +17666,9 @@ function competeHolder(target){
      rules says the same thing from the other end). §531: an EMPTY target
      shares the top layer's kind but has never answered GROUP here — the
      literal above is still the test — and falls through to UNITS[""]. */
-  if (k === "fn" || k === "cap" || k === "mid") return null;
+  /* §608: a function carries its own, once the office offers it. */
+  if (k === "fn") return FUNCTIONS[boxRef(t).key] || null;
+  if (k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){
@@ -20768,10 +20841,9 @@ var PAGE_INFO = {
       ["A view, not a scoreboard",
        "The roof is the aspiration, the band is the Key Objectives with their targets, the columns are the " +
        "themes, and the base is the capabilities that carry no theme because they support all three."],
-      ["Edited as tables, saved as the temple",
-       "A temple is a picture, and a picture is an awkward thing to type into. Editing opens tables for the " +
-       "aspiration, the objectives, the themes and the capabilities \u2014 they write to the same objects the " +
-       "view renders, so what is saved is the temple."],
+      ["Written where each part lives",
+       "The temple only shows. The aspiration, the Key Objectives with their headings, and the themes are " +
+       "written on the Foundation; the capabilities in Strategy's Capabilities section."],
       ["A theme's code is what pillars point at",
        "Renaming a theme carries its pillars with it. A theme still in use cannot be removed, because " +
        "deleting it would leave those pillars pointing at nothing and quietly absent from every theme."],
@@ -27572,7 +27644,7 @@ function drillCard(title, val, opts){
   var body = val == null
     ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
     : '<div class="big">' + val + '<small>%</small>' + vs + delta + '</div>' +
-      '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
+      '<div class="track"><div class="fill" style="width:' + Math.max(0, Math.min(100, val)) + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
     '<span class="pill ' + (opts.plain ? "kind" : b) + '">' +
@@ -28577,18 +28649,30 @@ function scoreSpread(rows, extra){
 /* Compact score pair. Three figures laid across rather than stacked, so the
    card is a band rather than a column. Both headline and status word come from
    the same band function, so they can never contradict each other. */
+/* §610: THE HEADLINE IS THE CARD (option A of the score-card mockup, Islam:
+   *"the main number should be bigger and the other go a bit smaller"*). The
+   `hero` class doubles the headline and quietens the three figures under it
+   (§616: the unit Overview's own three cards wear it too). "4 scored" is gone — Islam was *"not sure if it's useful
+   info"* — and the fact it carried is said the way a reader acts on it: how
+   many have NOT reported, beside the number they are missing from, and only
+   while there are some. Highest stays ink (it is never the worry); Lowest
+   keeps its band colour only when it is out of the top band, so colour on the
+   card means something to look at. */
+/* A Lowest in the top band says nothing to look at, so it stays ink. */
+function quietLow(lo){
+  return '<b' + (lo != null && band(lo) !== band(100) ? ' style="color:' + bandInk(lo) + '"' : '') + '>' + pct(lo) + '</b>';
+}
 function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   var r = pl ? Math.round(ex / pl * 100) : null;
-  return '<div class="scores">' +
+  var unreported = nMeasures - nScored;
+  return '<div class="scores hero">' +
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b>' +
-          (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
-        '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
-          pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b style="color:' + bandInk(lo) + '">' +
-          pct(lo) + '</b></div></div></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span>' +
+        (unreported > 0 ? '<span class="unrep">' + unreported + ' not reported yet</span>' : '') + '</div>' +
+      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b></div>' +
+        '<div><em>Highest</em><b>' + pct(hi) + '</b></div>' +
+        '<div><em>Lowest</em>' + quietLow(lo) + '</div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -30040,11 +30124,28 @@ function whereNext(keys){
         }).join("")) +
         '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
       var ptitle = L("project", "bu") + " &mdash; performance";
+      /* §607: and its execution beside it — the same `capExec` a function's
+         own projects are read by: the milestones due so far, completed. */
+      var pe = th ? capExec(th) : { pct: null };
+      var pedrill = miniTable(["#", L1("project"), "Milestones done", "Execution"],
+        prs.map(function(p, i){
+          var m = projMilestones(p), v = th ? capExec({ projects: [p] }).pct : null;
+          return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(projCode("u:group", p) + " " + (p.name || "")) + '</td>' +
+            '<td class="num">' + m.done + ' of ' + m.total + '</td>' +
+            '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">The milestones due so far, completed, across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pe.pct) + '</b>.</p>';
+      var etitle = L("project", "bu") + " &mdash; execution";
       return drillCard(buExists() ? labelWord("topword", "group") + " " + ptitle : ptitle, pv, {
         primary: !buExists(),
         sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", each counting equally.",
         drill: pdrill, modalTitle: L("project", "bu") + " — performance",
         modalSub: "Each project scored and averaged equally"
+      }) +
+      drillCard((buExists() ? labelWord("topword", "group") + " " + etitle : etitle) + tip(TIP_EXEC()), pe.pct, {
+        sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", on their milestones due so far.",
+        drill: pedrill, modalTitle: L("project", "bu") + " — execution",
+        modalSub: "Milestones due so far, completed"
       });
     }
     var tu = topAsUnit(), items = itemsNow(tu);
@@ -30056,18 +30157,38 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    /* §607: EXECUTION BESIDE IT. Islam: *"the directions needs to have
+       performance and execution"*. The same `unitRatio` a unit's own
+       execution card reads (delivered as a share of planned), over the top
+       layer's own view — nothing new computed. */
+    var ex = unitRatio(tu);
+    var exdrill = miniTable(["#", L1("pillar"), "Delivered", "Planned", "Of plan"],
+      items.map(function(p, i){
+        var pr = pillarRatio(p);
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(pillarCode(tu, i) + " " + (p.name || "")) + '</td>' +
+          '<td class="num">' + pct(pillarExec(p)) + '</td><td class="num">' + pct(pillarPlan(p)) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(pr) + '">' + pct(pr) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Delivered <b>' + pct(unitExec(tu)) + '</b> against <b>' + pct(unitPlan(tu)) + '</b> planned across ' +
+      L("pillar") + ' (' + items.length + ') &mdash; <b>' + pct(ex) + '</b> of plan.</p>';
+    var exCard = function(title, sub){
+      return drillCard(title + tip(TIP_EXEC()), ex, { sub: sub, drill: exdrill,
+        modalTitle: title.replace(/&mdash;/g, "—"), modalSub: L1("tactic") + " delivery, as a share of plan" });
+    };
     /* §447: with the units off these ARE the company's directions and this is
        its headline — the equal average Islam chose (*"yes equally"*). */
     if (!buExists()) return drillCard(L("pillar", "bu") + " &mdash; performance", unitPillars(tu), {
       primary: true, sub: "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", each counting equally.",
       drill: drill, modalTitle: L("pillar", "bu") + " — performance",
       modalSub: "Each direction scored and averaged equally"
-    });
+    }) + exCard(L("pillar", "bu") + " &mdash; execution",
+      "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", on their " + L("tactic") + " delivered against plan.");
     return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
       sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
       drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
       modalSub: "The top layer’s own plan, kept apart from the units"
-    });
+    }) + exCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; execution",
+      "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), on their " + L("tactic") + " delivered against plan.");
   }
 
   var SECS = [];
@@ -30083,6 +30204,10 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
+        /* §607: with the company's own two cards beside the objectives, the
+           units' two start a row of their own under them — three pairs
+           stacked, never five cards wrapping wherever the width breaks. */
+        (buExists() && topPlanCard() ? '</div><div class="scores"><div class="scores-gap" aria-hidden="true"></div>' : "") +
         (!buExists() ? "" :
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
@@ -30103,10 +30228,13 @@ function whereNext(keys){
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' +
-      /* §593: the functions' own row, under the units' two cards. Only where
-         the group HAS units — "in case of business units". */
-      (buExists() ? fnReadingCards(boardFunctionKeys(), "", 1 + (topPlanCard() ? 1 : 0)) : "") +
-      (buExists() ? whereNext(UNIT_KEYS) + whereNextFns(boardFunctionKeys()) : "")) });
+      /* §593: the functions' own row, under the units' two cards.
+         §606: and on a company WITHOUT units too (El Abd) — there the
+         functions are all it holds, so their row leads with no gap. */
+      /* §607: every pair sits under the objectives' column, so the
+         functions line up under the units' two, or the directions' two. */
+      fnReadingCards(boardFunctionKeys(), "", buExists() || topPlanCard() ? 1 : 0) +
+      (buExists() ? whereNext(UNIT_KEYS) : "") + whereNextFns(boardFunctionKeys())) });
 
   /* §464: the divisions left this page for the navigation — planned on the
      company, a division is a segment of the row and its page is its own
@@ -30249,95 +30377,17 @@ var GROUP_SECTIONS = [], GSEC = 0, GSEC_PICKED = false;
    A view, not a scoreboard: roof, aspiration, key objectives with targets
    only, themes as columns, capabilities as the base.
 
-   Editing happens in tables, because a temple is a picture and a picture is
-   an awkward thing to type into. What is saved is the temple \u2014 the tables
-   write to the same objects the view renders. */
-
-function templeTables(){
-  var editing = EDIT_PAGE.temple;
-
-  var stmt =
-    '<h4 class="mini">' + L1("aspiration") + '</h4>' +
-    '<div class="tcard">' +
-      '<div class="trow"><label>Statement</label>' +
-        fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
-      '<div class="trow"><label>' + L1("endinmind") + '</label>' +
-        fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>' +
-      '<div class="trow"><label>Horizon</label>' +
-        inputOr("temple", GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</div>' +
-    '</div>';
-
-  var koRows = GROUP.keyObjectives.map(function(m, i){
-    return '<tr class="' + rmMark("trm", "ko|" + i).replace(/^ /, "") + '">' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + fieldOr("temple", m.name, "", function(v){ m.name = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.group || "", "", function(v){ m.group = v || null; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.dir, "mono", function(v){ m.dir = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.target3y || "", "mono", function(v){ m.target3y = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.target || "", "mono", function(v){ m.target = v; }) + '</td>' +
-      '<td class="cc">' + inputOr("temple", m.compile, "", function(v){ m.compile = v; }) + '</td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>' +
-      rmStripRow("trm", "ko|" + i, RMASK ? RMASK.say : "", 8);
-  }).join("");
-
-  var themeRows = GROUP.themes.map(function(t, i){
-    var used = pillarsUsingTheme(t.ab);
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
-      '<td class="cc">' + inputOr("temple", t.ab, "mono", function(v){
-        var old = t.ab; t.ab = v.toUpperCase().slice(0, 4); renameTheme(old, t.ab); }) + '</td>' +
-      '<td>' + fieldOr("temple", t.name, "", function(v){ t.name = v; }) + '</td>' +
-      '<td>' + fieldOr("temple", t.note || "", "", function(v){ t.note = v; }) + '</td>' +
-      '<td class="cc"><span class="mono">' + used + '</span></td>' +
-      '<td class="cc">' + (editing
-        ? (used
-            ? '<span class="why" style="margin:0">in use</span>'
-            : '<button class="rmbtn" data-trm="theme|' + i + '">Remove</button>')
-        : '') + '</td></tr>';
-  }).join("");
-
-  var capRows = GROUP.capabilities.map(function(c, i){
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + fieldOr("temple", c.name, "", function(v){ c.name = v; }) + '</td>' +
-      '<td>' + fieldOr("temple", c.def, "", function(v){ c.def = v; }) + '</td>' +
-      '<td class="cc"><span class="mono">' + c.keyObjectives.length + '</span></td>' +
-      '<td class="cc"><span class="mono">' + c.projects.length + '</span></td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="cap|' + i + '">Remove</button>' : '') + '</td></tr>';
-  }).join("");
-
-  var add = function(kind, label){
-    return editing ? '<div class="addrow"><button class="editbtn" data-tadd="' + kind + '">+ ' + label + '</button></div>' : '';
-  };
-
-  return '<div class="templeedit">' + stmt +
-    '<h4 class="mini">' + L("keyobj","group") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Objective</th>' +
-      '<th class="cc">Group</th><th class="cc">Dir.</th><th class="cc">3-year</th>' +
-      '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + koRows + '</tbody></table></div>' + add("ko", "Add an objective") +
-
-    '<h4 class="mini">' + L("theme","group") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th class="cc" style="width:9%">Code</th>' +
-      '<th style="width:24%">Name</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a " + L1("theme")) +
-
-    '<h4 class="mini">' + L("capability") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">' + L1("capability") + '</th>' +
-      '<th>Definition</th><th class="cc">' + L("measure") + '</th><th class="cc">' + L("tactic") + '</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a " + L1("capability")) +
-
-    '<div class="note"><b>A ' + L1("theme") + ' in use cannot be removed.</b> Its code is what every ' + L1("pillar") + ' points at; ' +
-    'renaming one carries its ' + L("pillar") + ' with it, and deleting one would leave them pointing at nothing.</div>' +
-  '</div>';
-}
+   §611.1 — AND ONLY A VIEW. Islam: *"the temple should eventually read from
+   the other areas not built on it's own"*, then, of the drawing, *"I'm ok
+   with all"*. It had an Edit of its own over four tables (the aspiration,
+   the objectives, the themes, the capabilities) writing the same objects
+   this draws; every one of them is written where it lives now — the
+   aspiration, the objectives and their Heading and the themes on the
+   Foundation, the capabilities in Strategy's Capabilities section and Setup.
+   So the tables, the pen and the two handlers behind them (`[data-tadd]`,
+   `[data-trm]`) are gone rather than left as a second door (§53.5, §325). */
 
 function renderTemple(){
-  var can = grant("g_temple") === "edit";
-  var bar = can
-    ? '<div class="pageact"><button class="editbtn" data-page="temple">' +
-      (EDIT_PAGE.temple ? "Done" : "Edit") + '</button></div>' : '';
-
-  if (EDIT_PAGE.temple) return bar + templeTables();
-
   var groups = {};
   GROUP.keyObjectives.forEach(function(m){ (groups[m.group || ""] = groups[m.group || ""] || []).push(m); });
 
@@ -30356,7 +30406,7 @@ function renderTemple(){
       return k ? '<div class="ns-group"><span class="ns-group-h">' + esc(k) + '</span><div class="ns-group-in">' + inner + '</div></div>' : inner;
     }).join("");
 
-  return bar + '<div class="temple"><div class="roof"></div>' +
+  return '<div class="temple"><div class="roof"></div>' +
     '<div class="architrave">' + esc(GROUP.aspiration) + '</div>' +
     '<div class="entablature">' + ns + '</div>' +
     '<div class="pillars">' + GROUP.themes.map(function(p){
@@ -30481,15 +30531,66 @@ function foundationBody(o, tgt, gpg){
       '</div>' +
     '</div>' +
     koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
+    /* §611.1: the themes, on the top layer only — a company's page carries
+       none (§427) — and only while the Structure step has them on. */
+    (tgt === "group" && on("theme") ? themesBox(gpg) : '') +
 
+    /* §611: with the pen open the list is the unit's own (§478) — a name and
+       a definition per value, × to remove, "+ Add a value" — because the
+       old one could only rewrite the definition of a value already there, so
+       a company that had none could never have one. Read mode is unchanged. */
     (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (gpg ? valuesEditList(tgt, o.values || [], gpg, "", "", function(){}) :
     '<div class="valgrid">' +
       (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>');
+    '</div>') + '</div>');
+}
+
+/* §611.1 — THE THEMES ARE WRITTEN ON THE FOUNDATION. Islam: *"I added themes
+   but no themes appeared in the foundation"*, and of the Temple, *"it should
+   eventually read from the other areas not built on it's own"*; then, of the
+   drawing (design-mockups/top-themes-temple/), *"I'm ok with all"*. The rows
+   are the Temple's old table moved here, unchanged in what they write: the
+   code (renaming it carries every pillar tagged with it), the name, the note,
+   how many pillars use it, and Remove only while none does — a code is what
+   every pillar points at, so deleting one in use would leave them pointing
+   at nothing. Reading, they are cards: the code, the name, the note. */
+function themesBox(gpg){
+  var ts = GROUP.themes || [];
+  if (!gpg) return '<div class="card themeband"><h2 class="sec first">' + L("theme", "group") + '</h2>' +
+    (ts.length ? '<div class="themegrid">' + ts.map(function(t){
+      return '<div class="themecard"><span class="pill theme">' + esc(t.ab) + '</span><b>' + esc(t.name) + '</b>' +
+        (t.note ? '<span class="themenote">' + esc(t.note) + '</span>' : '') + '</div>';
+    }).join("") + '</div>' : '') + '</div>';
+  var rows = ts.map(function(t, i){
+    var used = pillarsUsingTheme(t.ab);
+    return '<tr>' + idxCell(i, false) +
+      '<td class="cc">' + inputOr(gpg, t.ab, "mono themecode", function(v){
+        /* An empty code, or one another theme holds, would strand the pillars
+           tagged with this one or merge them into that one: the code stays. */
+        var nv = String(v || "").trim().toUpperCase().slice(0, 4);
+        if (!nv || ts.some(function(x){ return x !== t && x.ab === nv; })) return;
+        var old = t.ab; t.ab = nv; renameTheme(old, nv); }) + '</td>' +
+      '<td>' + inputOr(gpg, t.name, "", function(v){ t.name = v; }) + '</td>' +
+      /* §613: a note runs to several lines (Islam: *"allow the theme notes to
+         have multiple lines"*) — the growing box the Core Values' definitions
+         use, and the cards and the Temple's columns keep its line breaks. */
+      '<td>' + fieldOr(gpg, t.note || "", "", function(v){ t.note = v; }) + '</td>' +
+      '<td class="cc"><span class="mono">' + used + '</span></td>' +
+      '<td class="cc acts1">' + (used
+        ? '<span class="why">In use</span> ' + tip("A " + L1("pillar").toLowerCase() + " carries this " +
+            L1("theme").toLowerCase() + ", so it cannot be removed. Changing its code carries the " +
+            L("pillar").toLowerCase() + " with it.")
+        : '<button class="rmbtn" data-themerm="' + i + '">Remove</button>') + '</td></tr>';
+  }).join("");
+  return '<div class="card themeband"><div class="boxhead"><span class="boxlab">' + L("theme", "group") + '</span></div>' +
+    '<div class="scroll"><table><thead><tr><th class="idx">#</th><th class="cc">Code</th><th>' + L1("theme") +
+    '</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="addrow"><button class="editbtn" data-themeadd="1">+ Add a ' + esc(L1("theme")) + '</button></div></div>';
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -30692,7 +30793,9 @@ function renderUnitPerformance(u){
      solid fill, and the page keeps the row. See `group-extra.css`. */
   return perfActs(presentMenu("unit", u.ukey)) +
 
-    '<div class="scores">' +
+    /* §616: and the Overview's own cards read the same way (Islam, of the
+       three above the rail: *"why not done the same in the cards above?"*). */
+    '<div class="scores hero">' +
       /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
          BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
          so the page leads with the same number or the two disagree about one
@@ -30705,10 +30808,8 @@ function renderUnitPerformance(u){
           deltaTag(u.ukey) +
           '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu") + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
-            pct(koHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
-            pct(koLo) + '</b></div></div></div>')) +
+          '<div><em>Highest</em><b>' + pct(koHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(koLo) + '</div></div></div>')) +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
@@ -30721,10 +30822,8 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + plId + '">See the ' +
             plWord + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
-            pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:' + bandInk(plLo) + '">' +
-            pct(plLo) + '</b></div></div></div>' +
+          '<div><em>Highest</em><b>' + pct(plHi) + '</b></div>' +
+          '<div><em>Lowest</em>' + quietLow(plLo) + '</div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
@@ -30895,7 +30994,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
-  compete: { unit: "analysis",                        ac: "u_anal"  },
+  compete: { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
@@ -32757,7 +32856,10 @@ function monthlySeg(row, fld, q, reg){
     var on = (mode === "q") === q;
     return '<button type="button" data-mpmode="' + mode + '" data-mpreg="' + reg +
       '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
-      (!on && stuck ? ' disabled title="Set a compile rule first, so the figures can be carried across"' : '') +
+      /* §538's house rule: HELD, not dead — `aria-disabled` keeps the
+         pointer and the focus, so the reason on it reaches somebody; the
+         handler declines the press. */
+      (!on && stuck ? ' aria-disabled="true" title="Set a compile rule first, so the figures can be carried across"' : '') +
       '>' + word + '</button>';
   };
   return '<span class="mpseg" role="group" aria-label="Plan this target">' +
@@ -33049,7 +33151,13 @@ function hidChip(row){
   return SMPRules.isHidden(row)
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
-function hidCls(row){ return (SMPRules.isHidden(row) || asofGone(row)) ? ' class="hiddenrow"' : ''; }
+/* `extra` is a class string from rmMark (" rmasking" or ""), so a row being
+   asked about is marked as well as hidden (§611.1: the objectives table took
+   the Temple's Remove, and the Temple's rows were marked). */
+function hidCls(row, extra){
+  var c = (((SMPRules.isHidden(row) || asofGone(row)) ? "hiddenrow" : "") + (extra || "")).trim();
+  return c ? ' class="' + c + '"' : '';
+}
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -33083,8 +33191,15 @@ function koEdit(list, page, acKey, owner){
                                 : arranging("group", null, page);
   var sortA = arr ? ' class="sortable" data-item="tr" data-kind="kos" data-kolist="' +
     li + '"' : '';
+  /* §611.1: THE HEADING THE TEMPLE GROUPS AN OBJECTIVE UNDER (`m.group`, the
+     demo's "Market share"), written here now that the Temple's own tables are
+     gone. Drawn on the top layer's table alone and only while its Temple is
+     on — exactly the reach the Temple's Edit had, so a client with no Temple
+     (El Abd: its themes are off) keeps the table it had. Called Heading, not
+     the Temple's "Group", because the top layer is called Group too. */
+  var head = owner === GROUP && templeOn("group"), cols = head ? 10 : 9;
   return '<div class="scroll"><table><thead><tr><th class="idx">#</th>' +
-    '<th>Objective</th><th class="cc">Dir.</th>' +
+    '<th>Objective</th>' + (head ? '<th>Heading</th>' : '') + '<th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th>' +
     '<th class="cc">Weight %</th><th></th></tr></thead><tbody' + sortA + '>' +
@@ -33100,9 +33215,10 @@ function koEdit(list, page, acKey, owner){
          mode says "Yes / No" where the target goes, which is the whole fact,
          and dimming something somebody is only reading says nothing. */
       var yn = isYesNoRow(m);
-      return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
+      return '<tr data-oi="' + i + '"' + hidCls(m, rmMark("korm", li + "|" + i)) + '>' + idxCell(i, arr, m.name) +
         '<td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
         (pg ? '' : hidChip(m)) + '</td>' +
+        (head ? '<td>' + inputOr(pg, m.group || "", "", function(v){ m.group = String(v || "").trim() || null; }) + '</td>' : '') +
         '<td class="cc">' + (pg && yn ? offSelect(m.dir || "\u2265")
           : gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] })) + '</td>' +
@@ -33148,8 +33264,8 @@ function koEdit(list, page, acKey, owner){
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>' +
-        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", 9) +
-        (pg && !yn ? monthlyRowFor(m, "monthly", "target", 9, m.name, pg) : "");
+        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", cols) +
+        (pg && !yn ? monthlyRowFor(m, "monthly", "target", cols, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
       '">+ Add an objective</button></div>' : '');
@@ -33442,15 +33558,7 @@ function unitValuesBox(u, upg){
   var walk = !vals.length ? " gapwalk" : "";
   return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
     (how
-      ? '<div class="uvlist">' + vals.map(function(v, i){
-          return '<div class="uvrow">' +
-            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
-            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
-            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
-            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
-        }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
-        '">+ Add a value</button></div>'
+      ? valuesEditList(u.ukey, vals, pg, pend, walk, function(){ unitValuesTouch(u, how); })
       : vals.length
         ? '<div class="valgrid">' + vals.map(function(v){
             return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
@@ -33458,6 +33566,21 @@ function unitValuesBox(u, upg){
           }).join("") + '</div>'
         : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
+}
+/* §611: THE CORE VALUES LIST WITH THE PEN OPEN — one builder for a unit's box
+   and the top layer's and a company's (§53.5), so the three cannot drift into
+   three looks. `key` is the target the two buttons carry; `touch` runs after
+   every write (a unit's stamps or lifts its gap mark, the top's has none). */
+function valuesEditList(key, vals, pg, pend, walk, touch){
+  return '<div class="uvlist">' + vals.map(function(v, i){
+      return '<div class="uvrow">' +
+        inputOr(pg, v.name || "", pend, function(x){ v.name = x; touch(); }) +
+        fieldOr(pg, v.def || "", pend, function(x){ v.def = x; touch(); }) +
+        '<button class="xbtn" data-uvalrm="' + esc(key) + '|' + i +
+        '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
+    }).join("") + '</div>' +
+    '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(key) +
+    '">+ Add a value</button></div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -33481,6 +33604,10 @@ function renderUnitAnalysis(u){
    pillars function already carries, so a pillars function's uploaded s/w
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
+function renderFnCompete(t){
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
+  return FUNCTIONS[fk] ? renderUnitCompete({ ukey: "fn:" + fk }) : "";
+}
 function renderFnSW(t){
   var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
@@ -33496,7 +33623,10 @@ function renderFnSW(t){
    rights move. In edit mode every cell is a box: a How or a Measure is one
    line per bullet. */
 function renderUnitCompete(u){
-  var t = u.ukey, page = "analysis", ac = "u_anal";
+  /* §608: a function's own sits on its Overview's page and grant, the pair
+     its S&W already uses (renderFnSW). */
+  var t = u.ukey, isFn = boxRef(t).kind === "fn";
+  var page = isFn ? "capfoundation" : "analysis", ac = isFn ? "k_found" : "u_anal";
   var c = competeOf(t), ed = authoring(page, ac);
   var vals = c.values;
   var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };
@@ -36437,7 +36567,8 @@ function fnObjPlan(fk){
 function fnObjCards(fk){
   var ko = fnObjScore(fk), ac = fnActionsTally(fk);
   var objs = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
-  return '<div class="scores">' +
+  /* §616: the same two cards as a unit's, so the same headline. */
+  return '<div class="scores hero">' +
     '<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Objectives performance <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
@@ -50144,8 +50275,9 @@ function swotPart(target, name, slides){
 /* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
    only when the layer carries the section AND it holds something (§253: a
    table with no rows is not a slide). The same table as the page. */
+/* §608: a function's too, once the office ticks the section on. */
 function competeSlides(u){
-  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  if (!u || !compOn(u.ukey, SMPRules.COMPETE)) return [];
   var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
     return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
   if (!c.discipline && !vals.length) return [];
@@ -50209,24 +50341,36 @@ function standDetail(rows, note){
     (rows.length > cut ? '<li class="hdmore">and ' + (rows.length - cut) + ' more</li>' : '') +
     (note ? '<li class="hdnote">' + note + '</li>' : '') + '</ul>';
 }
+/* §616: THE SLIDE READS THE WAY THE CARD DOES (Islam: *"do the same for
+   the slides"*, of §610). The headline was already the slide; what follows it
+   gets quieter: a line's figure keeps its band colour only when it is out of
+   the top band (`hdFig`), so colour under the number means something to look
+   at. And the measures that have not reported are SAID — the subtitle counts
+   six and the list showed four, with nothing on the slide saying where the
+   other two went. The execution side already said its own (§578). */
+function hdFig(v, txt){
+  return '<span class="hdf ' + dBand(v) + (v != null && band(v) === band(100) ? ' quiet' : '') + '">' + txt + '</span>';
+}
 function dirMeasureDetail(p){
-  var rows = scorableMeasures(p).map(function(m){
+  var scorable = scorableMeasures(p);
+  var rows = scorable.map(function(m){
     var v = measureScore(m);
-    return { name:m.name, fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' };
+    return { name:m.name, fig:hdFig(v, dPct(v)) };
   });
   if (SMPRules.bdHas(p)) SMPRules.bdCols(p).filter(SMPRules.bdScored).forEach(function(c){
     var v = bdColScore(p, c);
     if (v != null) rows.push({ name:SMPRules.bdName(p) + " \u00b7 " + bdColWord(p, c),
-                               fig:'<span class="hdf ' + dBand(v) + '">' + dPct(v) + '</span>' });
+                               fig:hdFig(v, dPct(v)) });
   });
-  return standDetail(rows, "");
+  var unrep = SMPRules.shown(p.measures || []).length - scorable.length;
+  return standDetail(rows, unrep > 0 ? unrep + " not reported yet" : "");
 }
 function dirExecDetail(p){
   var rep = reportedTactics(p), due = dueTactics(p);
   var rows = rep.map(function(t){
     var r = tacticProgress(t);
     return { name:t.name,
-             fig:'<span class="hdf ' + dBand(r) + '">' + dPct(Math.round(tacticReads(t))) + '</span>' +
+             fig:hdFig(r, dPct(Math.round(tacticReads(t)))) +
                  '<i> of ' + dPct(Math.round(tacticPlanShare(t))) + '</i>' };
   });
   var notDue = SMPRules.shown(p.tactics || []).length - due.length;
@@ -51518,6 +51662,7 @@ function deckSlidesFn(subject){
     isUnit ? unitAimSlides(f, true) : [], ownKs.map(capKOSlide));
   var analysis = [];
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) analysis = analysis.concat(swotPart("fn:" + fk, f.name, [fnSWSlide(f)]));
+  if (!isCap && !isUnit) analysis = analysis.concat(competeSlides({ ukey: "fn:" + fk }));
   if (isUnit) { analysis = analysis.concat(unitSwotSlides(f)); analysis = analysis.concat(competeSlides(f)); }
   var plan = projectsPlanPart(target, f, caps, objMode);
 
@@ -53876,7 +54021,9 @@ function exampleDirection(){
   for (var k in top) u[k] = top[k];
   u.pillarPrefix = u.pillarCapPrefix = "EX";
   var share = elapsedShare();
-  if (share == null) share = Math.max(0.25, Math.min(1, (REVIEW.endsQuarter || 2) / 4));
+  /* §603: where the share cannot be read, the example stands at the quarter
+     the tactics fall back to -- one answer, not a Q2 of its own. */
+  if (share == null) share = cycleEndQuarter() / 4;
   var sales = Math.round(120 * share * 0.82 * 10) / 10;
   var p = { id:"example-P1", name:"Growing the Restaurant Business", code:"", kind:"", theme:"",
     sub:"", owner:"Head of Restaurants", custodian:"",
@@ -69679,10 +69826,11 @@ var CLIENTSETUP = (function () {
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
-     every part but a function's own description. */
+     every part but a function's own description. §603: all of it is asked of
+     the shared rule, the capability's two included, so the page draws only
+     what this card can switch. */
   function firstParts(k){
-    if (k === "cap") return ["brief", "keyobj"];
-    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
+    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
       return SMPRules.compOffered(tgt, c); });
   }
@@ -71132,6 +71280,9 @@ var CLIENTSETUP = (function () {
 
   return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
+           /* the standard industry list and the size bands, ONE copy (§322):
+              the console's case studies add a past client with them (spec 067) */
+           INDUSTRIES:INDUSTRIES, SIZES:SIZES,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; } };
 })();
@@ -74094,7 +74245,27 @@ var SYNC = (function () {
      company's, so the company's plan is where it shows (`capAtTop`). What is
      left to ask is only whether this client has any and whether this viewer
      reaches them. */
-  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §611: AND WHILE THERE ARE NONE YET, THE SECTION IS STILL THERE (§61).
+     Islam: *"I added capabilities as well but nothing appeared to add the
+     capabilities."* Its "+ Add" lives inside it, so a client that switched
+     capabilities on and had none was offered no way to the first one here.
+     Empty, it is drawn for whoever sees the whole company — never for a part
+     owner, who reaches no capability that is not theirs (§517, §520) — and
+     never where the company's plan already holds its capabilities as pillars
+     (stage 3b): there `plancap` is the Capabilities tab, and two would stand.
+     AND ONLY ONCE THE OFFICE HAS SAID SO on the Structure step (the
+     capabilities card, or the top level's own ticks): unsaid, "capabilities
+     on" is §404's everything-on fallback rather than anybody's choice, and a
+     client set up before the step opens exactly as it did — the company
+     Foundation tab's own rule (§404). */
+  function topCapsOn(){
+    if (!SMPRules.capExists(GROUP)) return false;
+    if (capsReachable().length) return true;
+    var st = SMPRules.structureOf(GROUP);
+    var said = !!(st && ((st.cap && typeof st.cap.exists === "boolean") || (st.top && Array.isArray(st.top.on))));
+    return said && !GROUP.capabilities.length && !partOnly() &&
+      !(topAsUnit().items || []).some(function(p){ return SMPRules.pillarIsCap(p); });
+  }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? topStrategyWord() : SMPRules.foundTitle(GROUP, "group"); },
@@ -74293,6 +74464,9 @@ var SYNC = (function () {
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* §608: How we compete, once the office ticks it on. */
+                  { k:"compete", ac:"k_found", label:"Competitive Discipline", render:renderFnCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -74679,7 +74853,7 @@ var SYNC = (function () {
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting", title:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -77168,7 +77342,8 @@ var SYNC = (function () {
        plan", which is the rail pointing at one name and the page showing
        another all over again. The rail's own label is the page's name whether
        or not it has sections inside it. */
-    var pageName = def ? (def.label || "") : "";
+    /* §619: a page may keep a fuller title than its menu line has room for. */
+    var pageName = def ? (def.title || def.label || "") : "";
     var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
     var secrowHTML = "";
     /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
@@ -80248,61 +80423,6 @@ var SYNC = (function () {
         paint();
       });
     });
-    document.querySelectorAll("[data-tadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var k = b.dataset.tadd;
-        /* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Remove the
-           middle of KO1·KO2·KO3 and add: the count says 3 and KO3 is still on
-           screen, so two rows share an id. The authoriser compares plans BY ID
-           (§59) and a reporting snapshot is keyed by id and never by position
-           (§48), so a collision is not cosmetic. `koMint` is the one place
-           that answers it, shared with the Foundation's own editor. */
-        if (k === "ko")    GROUP.keyObjectives.push(
-                             Object.assign(koMint(GROUP.keyObjectives, "group"), { group:null }));
-        if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New " + labelWord("theme","group"), note:"" });
-        /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
-           `measures` and `tactics` — fields §15 removed — so the row had no
-           id, no function and neither list, and the Capabilities page threw on
-           the next paint. One function mints one now, and both places that add
-           a capability call it. */
-        if (k === "cap")   addCapability();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-trm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.trm.split("|"), i = +p[1];
-        /* Removal asks once when the row carries anything \u2014 a reported
-           objective is history, and units get a confirm for far less. A row
-           added a moment ago and still empty goes without ceremony. A
-           capability is its own question and takes its own dialog below. */
-        var what = null;
-        if (p[0] === "ko") {
-          var m = GROUP.keyObjectives[i];
-          if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
-            (m.actual ? " and its reported " + m.actual : "");
-        }
-        /* Read from the fields a capability ACTUALLY has. This asked for
-           `measures.length` on an object that has not carried `measures` since
-           §15, so it threw before it could confirm anything and the removal
-           never ran (§51.11). */
-        /* §325: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
-           second door onto it — the Temple's own table. Reaching only the
-           Setup page would leave a way to destroy three projects with a
-           browser dialog and no archive, which is §272.7's fault exactly:
-           the control is drawn twice and a fix that reaches one copy leaves
-           the other. Both doors open the same dialog now. */
-        if (p[0] === "cap") {
-          var cc = GROUP.capabilities[i];
-          if (cc) capRemoveOpen(cc.id);
-          return;
-        }
-        if (what && rmAsk(b, "trm", b.dataset.trm, "Remove " + esc(what) + "?")) return;
-        if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
-        if (p[0] === "theme") GROUP.themes.splice(i, 1);
-        paint();
-      });
-    });
     /* ── ADD AND REMOVE AN OBJECTIVE, ON A FOUNDATION (§96) ─────────
        These two buttons have existed on this page for as long as the page has,
        with nothing bound to them. The group's Temple edit has had working ones
@@ -80348,7 +80468,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-mpmode]").forEach(function(b){
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpreg];
-        if (!e || b.disabled) return;
+        if (!e || b.getAttribute("aria-disabled") === "true") return;  /* §538: held, declined here */
         if (monthlySwitch(e, b.dataset.mpmode)) { fieldSaved(); paint(); }
       });
     });
@@ -84103,11 +84223,56 @@ var SYNC = (function () {
     /* §478: a unit's Core Values — add and remove, re-asked on the click
        (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
+       may, from the stored state at press time — never from the drawn one.
+       §603: PAST THE TOP LAYER AND A COMPANY (§611, below), THE LIST IS A
+       STORED UNIT'S, so that is the only other place either handler writes.
+       `unitLikeWritable()` would also hand back a capability's or a
+       function's view, rebuilt on every draw, where a value would be lost.
+       No page draws this box for either (they take the functions' Overview);
+       the type check found the door (§602) and this closes it. */
+    /* §611: and the top layer's and a company's, which draw the same list
+       (valuesEditList). Theirs is the group's own strategy, so the press is
+       re-asked exactly as a Who-we-are line's is, and there is no gap mark. */
+    var topValuesOf = function(t){
+      var tr = boxRef(t);
+      if (t !== "group" && tr.kind !== "mid") return null;
+      if (!mayAuthor(foundKeyFor(t), null)) return false;
+      var o = t === "group" ? GROUP : coFoundWritable(tr.key);
+      if (!Array.isArray(o.values)) o.values = [];
+      return o;
+    };
+    /* §611.1: the top layer's themes, on its Foundation. Re-asked on the press
+       as every Foundation write is (§48.2); a theme a pillar carries is never
+       removed, asked of the stored state at press time, never the drawn one.
+       A new theme's code is one no other theme holds, so two adds in a row
+       cannot leave two rows answering to one code. */
+    document.querySelectorAll("[data-themeadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayAuthor(foundKeyFor("group"), null)) return;
+        if (!Array.isArray(GROUP.themes)) GROUP.themes = [];
+        var held = GROUP.themes.map(function(t){ return t.ab; });
+        var ab = "NEW", n = 1;
+        while (held.indexOf(ab) >= 0) ab = "NEW" + (++n);
+        GROUP.themes.push({ ab:ab, name:"New " + labelWord("theme","group"), note:"" });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-themerm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayAuthor(foundKeyFor("group"), null)) return;
+        var i = +b.dataset.themerm, t = (GROUP.themes || [])[i];
+        if (!t || pillarsUsingTheme(t.ab)) return;
+        GROUP.themes.splice(i, 1);
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        var o = unitLikeWritable(t);
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) { top.values.push({ name: "", def: "" }); fieldSaved(); paint(); return; }
+        var o = UNITS[t];
         if (!o) return;
         var how = unitValuesWrite(o);
         if (!how) return;
@@ -84120,7 +84285,13 @@ var SYNC = (function () {
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        var o = unitLikeWritable(t);
+        var top = topValuesOf(t);
+        if (top === false) return;
+        if (top) {
+          if (!top.values[i]) return;
+          top.values.splice(i, 1); fieldSaved(); paint(); return;
+        }
+        var o = UNITS[t];
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
         var how = unitValuesWrite(o);
         if (!how) return;

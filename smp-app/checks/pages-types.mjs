@@ -119,6 +119,7 @@ interface Screen { isExtended: boolean; }
    set-up flow — whose strategy-page names it does NOT have (§594). */
 const CONSOLE_GLOBALS = CLOSER + `type Closed<T> = { [K in keyof T]: T[K] };
 declare var MemorySplit: Closed<typeof import("./memory-split.js")>;
+declare var CaseSplit: Closed<typeof import("./case-split.js")>;
 ` + DOM;
 
 const STRATEGY_BREAKS = {
@@ -134,6 +135,9 @@ const STRATEGY_BREAKS = {
                       'var asp = aspOn ? String(GRUOP.aspiration || "").trim() : ""'],
   /* §599: a member of an object a page builds itself, misspelt */
   "own-object-member-misspelt": ["shell-inline.js", "if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;", "if (!SEARCHSEL.openOnn(rsel)) PROLEPICK = null;"],
+  /* §602: a field of the described data, misspelt — the review's, then the plan's */
+  "review-field-misspelt": ["config-data.js", 'return !!((REVIEW.parked || {})[String(target || "")]);', 'return !!((REVIEW.parkd || {})[String(target || "")]);'],
+  "plan-field-misspelt": ["config-data.js", "if (p.by === fk) carried.push(UNITS[k].name", "if (p.byy === fk) carried.push(UNITS[k].name"],
   /* §599: a plain object of behaviour — a `{ … }` holding functions — read wrongly */
   "plain-object-member-misspelt": ["shell-inline.js", ': null, def.k === MY_TAB.k) : null;', ': null, def.k === MY_TAB.kk) : null;'],
 };
@@ -194,6 +198,38 @@ function closeObjects(dir, files) {
   return closed;
 }
 
+/* THE PAGES' OWN DATA, LABELLED WITH ITS DESCRIPTION (§602). lib/state.d.ts
+   describes the data once; here, in the COPY the checker reads and nowhere
+   else, each page variable named below gets `/** @type {…} *\/` on its own
+   line, so a field the description does not name is a finding. Every name
+   must be found exactly once, or the label has silently missed. */
+const DESCRIBED = {
+  REVIEW: "SMP.Review",
+  UNITS: "{ [key: string]: SMP.Unit }",
+};
+function describeData(dir, files) {
+  copyFileSync(join(REPO, "lib", "state.d.ts"), join(dir, "state.d.ts"));
+  const found = {};
+  for (const f of files) {
+    if (!f.endsWith(".js")) continue;
+    const p = join(dir, f);
+    let src = readFileSync(p, "utf8");
+    const ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "script" });
+    const at = [];
+    for (const st of ast.body)
+      if (st.type === "VariableDeclaration" && st.declarations.length === 1 && DESCRIBED[st.declarations[0].id.name]) {
+        const name = st.declarations[0].id.name;
+        found[name] = (found[name] || 0) + 1;
+        at.push([st.start, "/** @type {" + DESCRIBED[name] + "} */ "]);
+      }
+    for (const [pos, text] of at.sort((x, y) => y[0] - x[0])) src = src.slice(0, pos) + text + src.slice(pos);
+    writeFileSync(p, src);
+  }
+  const missed = Object.keys(DESCRIBED).filter((n) => found[n] !== 1);
+  if (missed.length) throw new Error("pages-types: the description's labels did not each find one declaration: " + missed.join(", "));
+  return Object.keys(DESCRIBED);
+}
+
 /* The pages as the browser runs them, in a scratch directory. */
 function assembleStrategy() {
   const dir = mkdtempSync(join(tmpdir(), "pages-types-"));
@@ -211,8 +247,9 @@ function assembleStrategy() {
   if (!m) throw new Error("pages-types: the shell's inline script was not found");
   writeFileSync(join(dir, "shell-inline.js"), m[1]);
   writeFileSync(join(dir, "globals.d.ts"), STRATEGY_GLOBALS);
-  const files = ["globals.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"];
-  return { dir, files, closed: closeObjects(dir, files) };
+  const files = ["globals.d.ts", "state.d.ts", ...scripts, "theme.js", "shell-inline.js", "route.js"];
+  const described = describeData(dir, files);
+  return { dir, files, described, closed: closeObjects(dir, files) };
 }
 
 /* THE CONSOLE (platform.html, served unchanged by lib/shell.ts): its script
@@ -224,7 +261,8 @@ function assembleStrategy() {
    press drawing (lib/navskel.ts), one closed function that names nothing of
    the console's and that the console names nothing of — the same script
    every client page loads — so it is not part of the console's page. */
-const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
+const CONSOLE_SRC = { "/memory-split.js": join(APP, "lib", "memory-split.cjs"), "/case-split.js": join(APP, "lib", "case-split.cjs"),
+                      "/client-setup.js": join(SRC, "client-setup.js"), "/navskel.js": null };
 function assembleConsole() {
   const dir = mkdtempSync(join(tmpdir(), "console-types-"));
   const page = readFileSync(join(REPO, "platform.html"), "utf8");
@@ -234,7 +272,10 @@ function assembleConsole() {
     if (CONSOLE_SRC[m[1]] === null) continue;
     const name = basename(m[1]);
     copyFileSync(CONSOLE_SRC[m[1]], join(dir, name));
-    if (name !== "memory-split.js") files.push(name);
+    /* case-split requires the memory's splitter by its .cjs name in node */
+    if (name === "memory-split.js") copyFileSync(CONSOLE_SRC[m[1]], join(dir, "memory-split.cjs"));
+    /* the two splitters are UMD modules, read as the globals they define */
+    if (name !== "memory-split.js" && name !== "case-split.js") files.push(name);
   }
   const m = /<script>\n([\s\S]*)<\/script>\s*<\/body>/.exec(page);
   if (!m) throw new Error("pages-types: platform.html's own script was not found");
@@ -399,7 +440,7 @@ const CONSOLE_PATH_BREAKS = {
 };
 const SUBJECTS = {
   strategy: { title: "the strategy pages", known: join(here, "pages-types.known.json"),
-              note: "Read before recorded: none of these is a fault (§589). Rewrite with --write only after reading every new one.",
+              note: "Read before recorded: none of these is a fault (§589). The six `values` findings §602 recorded as a fault (the Core-values handlers' door to a capability's throwaway view; no page walked through it, §603) went when the door was closed (§603). The ones that name the group's object or a unit-like view are the description (lib/state.d.ts) not yet covering the group; they go when it does. Rewrite with --write only after reading every new one.",
               assemble: assembleStrategy, breaks: STRATEGY_BREAKS, minFiles: 30, own: "shell-inline.js" },
   console: { title: "the console page", known: join(here, "console-types.known.json"),
              note: "Read before recorded (§594). The console's own are noise. The rest are the set-up flow's STRATEGY-PAGE names, which the console page does not have: on its two entry points (Add a client, an archived client) each is behind a typeof guard or on a path the console never takes, and client-setup-outside.py drives both with no page error. A NEW one here is a name the console may reach and throw on (§467's fault): confirm it is guarded or unreachable from the console BEFORE recording it with --write.",
@@ -489,8 +530,9 @@ for (const sub of Object.values(SUBJECTS)) {
   try {
     const list = findings(asm), rec = known(sub.known), now = tally(list);
     const total = [...rec.values()].reduce((n, c) => n + c, 0);
-    check(sub.title + " read as one page: " + (asm.files.length - 1) + " scripts, its own among them",
-      asm.files.length - 1 >= sub.minFiles && asm.files.includes(sub.own));
+    const scripts = asm.files.filter((f) => !f.endsWith(".d.ts")).length;
+    check(sub.title + " read as one page: " + scripts + " scripts, its own among them",
+      scripts >= sub.minFiles && asm.files.includes(sub.own));
     check(asm.closed.length + " objects the page builds itself, closed for the checker (§599)", asm.closed.length > 0,
       "       none found — the closing step has stopped matching how the pages build their objects");
     const extra = beyond(list, rec);

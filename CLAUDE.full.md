@@ -92,7 +92,7 @@ A drift between specs and code is a documentation bug — report it before silen
 - Existing pages keep theirs until Islam asks for a sweep; this rule governs
   what is BUILT from now on.
 
-### 1b-v. HOW A SETUP CHANGE IS MADE: AS YOU GO, ASKED FIRST, OR APPLIED (2026-10-23, §608)
+### 1b-v. HOW A SETUP CHANGE IS MADE: AS YOU GO, ASKED FIRST, OR APPLIED (2026-10-23, §621)
 - **Islam: *"make this a general rule of colors elements"*, and of Setup:
   *"it should act as per the adjustment unless we are removing something that
   has data"*.** Three rules, for every Setup page built from now on:

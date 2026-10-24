@@ -34,7 +34,7 @@ def current_is(pg, k):
     try: return pg.evaluate("()=>current") == k
     except Exception: return False
 def answer(pg):
-    # §608: a press that changes who may do what, or would hide something
+    # §621: a press that changes who may do what, or would hide something
     # written, asks first in the floating box. This file is about what the
     # press DOES, so it answers the box; checks/ask-and-apply.py is about the
     # box itself (that it opens, says the impact, and that Keep changes nothing).

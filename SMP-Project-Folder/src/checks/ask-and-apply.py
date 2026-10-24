@@ -1,4 +1,4 @@
-"""SETUP: A CHANGE AS YOU GO, ASKED FIRST, OR APPLIED (§608).
+"""SETUP: A CHANGE AS YOU GO, ASKED FIRST, OR APPLIED (§621).
 
 qa-run: own-server — the asking box reports what the SERVER answered (Saved
 on the cell), the colours must reach the save only after Apply, and Client

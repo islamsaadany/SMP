@@ -218,12 +218,12 @@ with sync_playwright() as p:
         wrote = ev(pg, """()=>{const i=document.querySelector('.csetup [data-brand]'); if(!i) return 'no control';
           i.value='#123456'; i.dispatchEvent(new Event('change',{bubbles:true})); return 'set';}""", "probe")
         pg.wait_for_timeout(300)
-        # §608: a colour waits for Apply — held first, written by Apply, never before
+        # §621: a colour waits for Apply — held first, written by Apply, never before
         held = ev(pg, "()=>branding()[%r]" % key, None)
         ev(pg, "()=>{const a=document.querySelector('[data-applygo=brand]'); if(a) a.click();}")
         pg.wait_for_timeout(300)
         after = ev(pg, "()=>branding()[%r]" % key, None)
-    ck("…and a colour set there WRITES the tenant's branding on Apply, not before (§96, §608)",
+    ck("…and a colour set there WRITES the tenant's branding on Apply, not before (§96, §621)",
        wrote == "set" and held == before and after == "#123456" and after != before, (key, before, held, after, wrote))
     if key:
         ev(pg, "()=>{branding()[%r]=%s; applyBrand(); paint();}" % (key, json.dumps(before)))   # put back (§94.2)
@@ -327,7 +327,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     ck("with a plan line, no Add anywhere on the tree and no common name offered",
        q(pg, ".csetup .shadd") is None and q(pg, ".csetup .shchip") is None)
-    # REWRITTEN, never loosened (§218): §608 cut the notice to one line and put
+    # REWRITTEN, never loosened (§218): §621 cut the notice to one line and put
     # its reasons on the hover; it still says both halves, in one notice.
     ck("…the screen says the shape is set", ev(pg, "()=>/rows can\u2019t be added here/.test((document.querySelector('.csetup .wzarched')||{}).textContent||'')", False))
     ck("…and says in the same notice what is still changeable (§544: one notice, not two)",

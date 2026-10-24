@@ -213,7 +213,7 @@ with sync_playwright() as p:
     ck("the strategy cell offers the pen (Islam: the SMO can open it)", cell is not None)
     if cell:
         cell.click(); pg.wait_for_timeout(350)
-        # §608: Roles & access asks first; answered, because this file is about the grant
+        # §621: Roles & access asks first; answered, because this file is about the grant
         pg.click(".askbox .askyes"); pg.wait_for_timeout(350)
     after = asks(pg, who)
     ck("opened: the rule now allows the custodian the plan", after["rule"] is True, after)

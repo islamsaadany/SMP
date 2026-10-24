@@ -914,7 +914,7 @@
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
       { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
-      /* §608: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
+      /* §621: TERMINOLOGY LEFT SETUP (Islam: *"yes remove terminology"*).
          Client set-up › The shape names every word, layer by layer — End in
          Mind, the one it did not, included — and an empty box there shows
          the stored word as its fallback, which is all this page still did.
@@ -3022,7 +3022,7 @@
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
 
-  /* ══ THE ASKING BOX (§608) ═════════════════════════════════════════
+  /* ══ THE ASKING BOX (§621) ═════════════════════════════════════════
      Islam, of a Setup change that gives or takes access: *"giving more or
      less needs the confirmation … with the impact of the change, and I
      suggest it comes as a floating box not a bar"*; of the drawing, *"make
@@ -3094,7 +3094,7 @@
     /* The safe answer under the cursor: Enter keeps. */
     try { box.querySelector(".askno").focus({ preventScroll: true }); } catch (e) {}
   }
-  /* AND THE ANSWER IS SAID ON WHAT WAS PRESSED (§608): HR_ERP's rule for a
+  /* AND THE ANSWER IS SAID ON WHAT WAS PRESSED (§621): HR_ERP's rule for a
      row of switches (Admin › Notifications) — *"shows Saved on that row"*.
      The corner's word is a screen away from the cell. The save is asked for
      by name, so this says what the SERVER answered rather than what was
@@ -3119,7 +3119,7 @@
   }
 
   /* ══ A COLOUR WAITS FOR APPLY — THE AREAS, THE UNDO, THE LEAVE QUESTION ══
-     (§608). Each area in APPLY_AREAS answers four things — what waits, Apply,
+     (§621). Each area in APPLY_AREAS answers four things — what waits, Apply,
      Discard, Undo — and remembers WHERE its wait began (`at`). Everything
      else is written once here: the row's three buttons, the Undo window, and
      the question asked on the way out.
@@ -3196,7 +3196,7 @@
     e.preventDefault(); e.returnValue = "";
   });
 
-  /* THE TENANT'S TWO COLOURS (§39 → §608). Reset to the shipped palette is a
+  /* THE TENANT'S TWO COLOURS (§39 → §621). Reset to the shipped palette is a
      colour change like any other, so it waits for Apply too. */
   APPLY_AREAS.brand = {
     title: "The tenant’s colours", at: null,
@@ -3408,7 +3408,7 @@
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
-    /* §608: A PAINT SOMEWHERE ELSE WHILE A COLOUR WAITS IS A WAY OUT, and it
+    /* §621: A PAINT SOMEWHERE ELSE WHILE A COLOUR WAITS IS A WAY OUT, and it
        is held here — the one door every navigation passes. The old place is
        put back before anything is drawn, so the page under the question is
        the page with the colour on it, and the place asked for is kept for
@@ -3848,7 +3848,7 @@
          flow on a client with a plan, goes through the one switch Setup's own
          rows use — its warning, and hide-and-keep (§405). */
       switchWay: function(kind, key, value, sel){ switchPlanWay(kind, key, value, sel); },
-      /* §608: the platform's floating box, for a press that would hide or take
+      /* §621: the platform's floating box, for a press that would hide or take
          away something written. The console passes none, and a press there
          applies as it always did. */
       ask: function(anchor, o){ askFirst(anchor, o); },
@@ -5442,7 +5442,7 @@
       });
     });
 
-    /* §608: Terminology's two handlers went with its page. */
+    /* §621: Terminology's two handlers went with its page. */
     /* The "titles at this level" field went with LEVELS in 3.8. A title is
        information about a person, not a rung anyone is standing on. */
 
@@ -5454,7 +5454,7 @@
        already on that state keeps its absence (§50.6), so a tenant's stored
        map grows by exactly the answers somebody changed, and an untouched
        pair goes on following the shipped default. */
-    /* §608: EVERY PRESS HERE ASKS FIRST, giving or taking (Islam: *"giving
+    /* §621: EVERY PRESS HERE ASKS FIRST, giving or taking (Islam: *"giving
        more or less needs the confirmation … with the impact"*). The press
        only describes itself; the write below is unchanged and runs on Change
        it, after which the cell says whether the server took it. */
@@ -7253,7 +7253,7 @@
         }, 0);
       });
     });
-    /* §608: EVERY EDIT TO THE BANDS GOES TO THE DRAFT (bandsEdit) and waits
+    /* §621: EVERY EDIT TO THE BANDS GOES TO THE DRAFT (bandsEdit) and waits
        for Apply — the stored bands, which every figure reads, are untouched
        until then. */
     document.querySelectorAll("input.blabel").forEach(function(inp){
@@ -8822,7 +8822,7 @@
        so it repaints on `change` — once, when the picker closes — and the hex
        field on `change` too. A repaint per frame of a drag would rebuild the
        control being dragged, which is §30.1 again. */
-    /* §608: A PICK IS HELD, NOT WRITTEN. It goes into BRAND_PEND and the
+    /* §621: A PICK IS HELD, NOT WRITTEN. It goes into BRAND_PEND and the
        page keeps its colours until Apply (APPLY_AREAS.brand). Picking the
        colour that is already stored is no change, so it waits for nothing. */
     function brandPend(k, v){
@@ -8854,7 +8854,7 @@
         applyChanged("brand");
       });
     });
-    /* THE ROW UNDER EVERY COLOUR AREA (§608): one set of three buttons for
+    /* THE ROW UNDER EVERY COLOUR AREA (§621): one set of three buttons for
        all of them, the area named on the button. */
     document.querySelectorAll("[data-applygo]").forEach(function(b){
       b.addEventListener("click", function(){ var a = APPLY_AREAS[b.dataset.applygo]; if (a) a.apply(b); });

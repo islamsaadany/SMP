@@ -158,7 +158,7 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
-/* §608: whether a layer shows its End in Mind — the shape screen's tick, inside the aspiration. */
+/* §621: whether a layer shows its End in Mind — the shape screen's tick, inside the aspiration. */
 function eimOn(target){ return SMPRules.endInMindOn(GROUP, target); }
 /* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
    and Core Values are owed (Missing) only while Client set-up › Structure
@@ -903,7 +903,7 @@ function branding(){
   return b;
 }
 
-/* ══ A COLOUR WAITS FOR APPLY (§608) ════════════════════════════════════
+/* ══ A COLOUR WAITS FOR APPLY (§621) ════════════════════════════════════
    Islam: *"the color shouldn't change before apply; the undo is just a temp
    button that appears shortly after the application so the user can get
    back, and reset can revert it back to shipped palette"* — and then *"make
@@ -7271,7 +7271,7 @@ var BAND_COLOURS = [
    starts at 0 by construction, so the new one goes immediately above it,
    halfway between 0 and the band above — which descends by arithmetic rather
    than by hoping somebody types a number in order. */
-/* §608: both act on the list they are handed — the bands being edited
+/* §621: both act on the list they are handed — the bands being edited
    (bandsEdit, below) on the Setup page, the stored ones by default. */
 function addBand(list){
   var b = list || BANDS.bands;
@@ -7296,7 +7296,7 @@ function removeBand(i, list){
   b[b.length - 1].floor = 0;
 }
 
-/* ══ THE BANDS ARE A COLOUR AREA (§608) ═══════════════════════════════════
+/* ══ THE BANDS ARE A COLOUR AREA (§621) ═══════════════════════════════════
    Islam: *"for any colors adjustment like the bands as well let's use the
    same concept of apply discard and undo"*. A band's key IS its colour
    (§168), and its floor decides which colour every figure in the tenant

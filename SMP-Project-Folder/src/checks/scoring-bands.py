@@ -38,7 +38,7 @@ def ck(w, ok, x=""):
 
 
 def bands(pg):
-    # §608: THE PEN EDITS A DRAFT and Apply stores it (the bands are a colour
+    # §621: THE PEN EDITS A DRAFT and Apply stores it (the bands are a colour
     # area). This reads what the TABLE holds — the draft while there is one —
     # and §6b presses Apply and reads what was STORED (§96).
     return pg.evaluate("()=>JSON.parse(JSON.stringify(BANDS_DRAFT || BANDS.bands))")
@@ -179,7 +179,7 @@ with sync_playwright() as p:
     ck("...with the reason on the page",
        "at least two" in pg.eval_on_selector("#panel", "e=>e.innerHTML"))
 
-    # ── 6b · NOTHING WAS STORED UNTIL APPLY, AND APPLY STORES IT (§608) ──
+    # ── 6b · NOTHING WAS STORED UNTIL APPLY, AND APPLY STORES IT (§621) ──
     print("\n6b · Apply")
     ck("the stored scale is still the shipped one while the draft waits", stored(pg) == start, stored(pg))
     pg.evaluate("()=>document.querySelector('[data-applygo=\"bands\"]').click()")
@@ -202,7 +202,7 @@ with sync_playwright() as p:
        "scoring.ts" not in txt)
     ck("the note naming thresholds the product no longer ships is gone",
        "70 and 50 match" not in txt)
-    # REVERSED AT §608, NOT LOOSENED: the warning is said at Apply now, with
+    # REVERSED AT §621, NOT LOOSENED: the warning is said at Apply now, with
     # the number it moves (6b asserts the box), and the page no longer prints
     # it on every visit — the agreed paragraph table.
     ck("...and the history warning moved into Apply's box",

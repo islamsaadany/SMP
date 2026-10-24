@@ -109,7 +109,7 @@ with sync_playwright() as p:
        pg.evaluate("() => document.body.textContent.includes('may fill what’s empty')"))
 
     pg.click(PLAN_FILL); pg.wait_for_timeout(350)
-    # §608: Roles & access asks first; answered, because this file is about the grant
+    # §621: Roles & access asks first; answered, because this file is about the grant
     pg.click(".askbox .askyes"); pg.wait_for_timeout(350)
     lit = pg.evaluate("""() =>
       !!document.querySelector('.stbtn.on.st-fill[data-acm^="custodian:a_unit_own_strat,"]')""")

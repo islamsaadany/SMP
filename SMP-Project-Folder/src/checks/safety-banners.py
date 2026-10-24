@@ -505,7 +505,7 @@ with sync_playwright() as p:
     peek(pg)
     ck("an edit landing does not displace it", "newer version" in banner(pg).lower(), banner(pg))
     # ── 6b · RELOAD SAVES THE FIELD UNDER THE CURSOR FIRST (§258.2) ──────
-    # §608: Setup › Terminology STOOD HERE and left Setup. The shape screen's
+    # §621: Setup › Terminology STOOD HERE and left Setup. The shape screen's
     # name boxes are the same kind of control — plain bound inputs that write
     # on change — so the check types into one of those instead; the version
     # caution is drawn on Setup too, since a stale build is stale everywhere.

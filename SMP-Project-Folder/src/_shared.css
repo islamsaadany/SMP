@@ -429,7 +429,7 @@
              padding:8px 13px; font-size:var(--fs-small); color:var(--ink-3);
              white-space:nowrap; letter-spacing:.01em;
              opacity:0; transition:opacity .22s ease; pointer-events:none; }
-  /* ── THE ASKING BOX (§608) ──────────────────────────────────────────
+  /* ── THE ASKING BOX (§621) ──────────────────────────────────────────
      Floats beside what was pressed, SIZED TO WHAT IT SAYS (Islam: "make the
      floating boxes fit the content, not too extended") — `max-content`,
      capped so a long sentence wraps rather than running off the screen. The
@@ -452,7 +452,7 @@
   .askbox .askyes { background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
   .askbox .askno { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
   .askbox button:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
-  /* ── A COLOUR AREA'S ROW, AND THE QUESTION ON THE WAY OUT (§608) ─────
+  /* ── A COLOUR AREA'S ROW, AND THE QUESTION ON THE WAY OUT (§621) ─────
      Apply is the platform's solid control (the panel's own fill and ink, so
      it follows a tenant's bar); Discard and Undo are its quiet neighbours.
      The line says in amber what waits, in green that it was applied. The

@@ -1,4 +1,4 @@
-"""THE COLOURS ON CLIENT SET-UP WRITE ON A SERVED PLATFORM (§600), ON APPLY (§608).
+"""THE COLOURS ON CLIENT SET-UP WRITE ON A SERVED PLATFORM (§600), ON APPLY (§621).
 
 qa-run: own-server — the fault only exists where there is a server. The
 first step of Client set-up draws the two colour controls and the shell's
@@ -19,7 +19,7 @@ WHAT IS ASSERTED IS THE PROBLEM (§94.8):
     be gone. Without this a build that never redrew would pass every line
     below and prove nothing (§113.8).
   * THE PICKER, THE HEX FIELD AND CLEAR are wired: a pick is held and the
-    row under the colours says so (§608: nothing is written, worn or sent
+    row under the colours says so (§621: nothing is written, worn or sent
     before Apply); Apply writes `branding()` and the page wears it; Discard
     leaves it as it was.
   * THE SAVE CARRIES IT. What the stub RECEIVED on /api/state is read, never
@@ -143,7 +143,7 @@ with sync_playwright() as p:
        ev(pg, "()=>{const i=document.querySelector('.csetup [data-brand=accent]');"
               "return !!i && !i.__beforeRecord && !!document.querySelector('.csetup [data-doormark]');}", False))
 
-    print("\n2 · the controls the redraw left are wired — and a pick WAITS for Apply (§608)")
+    print("\n2 · the controls the redraw left are wired — and a pick WAITS for Apply (§621)")
     before = ev(pg, "()=>branding().accent")
     gold0 = (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "").strip().upper()
     picked = put(pg, ".csetup [data-brand=accent]", "#123456") == "set"
@@ -151,7 +151,7 @@ with sync_playwright() as p:
     ck("…a picked accent is HELD: the row under the colours says it waits (the wiring §600 restored)",
        picked and "not applied yet" in (ev(pg, "()=>(document.querySelector('[data-applyrow=brand]')||{}).textContent", "") or ""),
        ev(pg, "()=>(document.querySelector('[data-applyrow=brand]')||{}).textContent"))
-    ck("…and nothing is written before Apply (§608: the colour shouldn't change before apply)",
+    ck("…and nothing is written before Apply (§621: the colour shouldn't change before apply)",
        ev(pg, "()=>branding().accent") == before, ev(pg, "()=>branding().accent"))
     ck("…nor worn by the page",
        (ev(pg, "()=>getComputedStyle(document.documentElement).getPropertyValue('--gold')", "") or "").strip().upper() == gold0)

@@ -65,7 +65,7 @@ def ev(pg, js, d=None):
 
 
 def answer(pg):
-    # §608: a press that changes who may do what, or would hide something
+    # §621: a press that changes who may do what, or would hide something
     # written, asks first in the floating box. This file is about what the
     # press DOES, so it answers the box; checks/ask-and-apply.py is about the
     # box itself (that it opens, says the impact, and that Keep changes nothing).
@@ -200,7 +200,7 @@ with sync_playwright() as p:
     press(pg, ".csetup [data-shlvl=top]", 300)
     ck("…and one plan line shuts it", ev(pg, "()=>__smpHoldsNow().plans", -1) == 1,
        ev(pg, "()=>__smpHoldsNow().plans"))
-    # REWRITTEN, never loosened (§218): §608 cut the notice to one line — what
+    # REWRITTEN, never loosened (§218): §621 cut the notice to one line — what
     # stands and what is yours — and moved its reasons onto the hover.
     ck("the banner says rows can't be added here, and that names and switches still change",
        all(w in (ev(pg, "()=>{var b=document.querySelector('.csetup .wzarched');"

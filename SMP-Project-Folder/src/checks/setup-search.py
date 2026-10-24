@@ -91,7 +91,7 @@ with sync_playwright() as p:
     # What this block is about survives whole: a word on no label finds its page.
     for word, want in [("weighting", "units"), ("password", "people"), ("upload", "import"),
                        ("threshold", "bands"), ("permissions", "access"),
-                       # ("vocabulary", "labels") STOOD HERE (§608): Terminology
+                       # ("vocabulary", "labels") STOOD HERE (§621): Terminology
                        # left Setup and its words are named on Getting started's
                        # shape screen, which is the strip above this box until
                        # set-up is done — so it is findable there by the same

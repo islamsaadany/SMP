@@ -11,7 +11,7 @@ What is asserted, and why each end matters (§94.2):
   - THE THIRTEEN ROWS, in his order, with his descriptions and defaults,
     asserted against the shipped list (LABEL_DEFAULTS) rather than typed out
     a second time here, except the order and count, which are his decision.
-  - THE PAGE LEFT SETUP (§608, Islam: "yes remove terminology"): no def,
+  - THE PAGE LEFT SETUP (§621, Islam: "yes remove terminology"): no def,
     and End in Mind — the one word the shape screen did not name — has its
     row and its tick there. Its two boxes, Reset and the emptied-box rule
     went with the page; the words below are written straight into LABELS,
@@ -25,7 +25,7 @@ What is asserted, and why each end matters (§94.2):
     Functions page.
   - THE NAVIGATION: on the default words the switch keeps its short "Units";
     a client word replaces it.
-  - A SHARED WORD SHOUTS, and only then — on the shape screen now (§608).
+  - A SHARED WORD SHOUTS, and only then — on the shape screen now (§621).
 
 THE STATE IS MADE and nothing is left behind (§94.2). Every probe degrades
 (§215). SMP_BUILT points it at another build (§276).
@@ -57,7 +57,7 @@ ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "va
          "endinmind"]
 
 def shape_step(pg):
-    # §608: the words are named on Getting started's shape screen now
+    # §621: the words are named on Getting started's shape screen now
     js(pg, "current='setup'; currentSub='start'; paint()"); pg.wait_for_timeout(300)
     js(pg, "(function(){var b=document.querySelector('.csetup .wzstep[data-step=shape]'); if(b) b.click();})()")
     pg.wait_for_timeout(400)
@@ -84,7 +84,7 @@ with sync_playwright() as p:
     d = js(pg, "LABEL_DEFAULTS.filter(function(x){return x.key==='division'})[0]", {})
     ck("the division layer defaults to Division / Divisions", d == {"key": "division", "one": "Division", "many": "Divisions"}, d)
 
-    print("\n§2  the page left Setup; the words are named on the shape screen (§608)")
+    print("\n§2  the page left Setup; the words are named on the shape screen (§621)")
     ck("Terminology is not a Setup page any more (§24: deleted, not hidden)",
        js(pg, "!setupDefsAll().some(function(d){ return d.k === 'labels'; })", False))
     shape_step(pg)
@@ -132,7 +132,7 @@ with sync_playwright() as p:
     nav = js(pg, "[...document.querySelectorAll('[data-fold]')].map(function(b){return b.textContent.trim()})", [])
     ck("a client's word replaces it", any(t == "Brands" for t in nav) and not any(t == "Units" for t in nav), nav)
 
-    print("\n§6  a shared word is said where the words are named (§608)")
+    print("\n§6  a shared word is said where the words are named (§621)")
     shape_step(pg)
     k = ORDER.index("tactic")
     warn0 = js(pg, "!!document.querySelector('.csetup .wzclash')", True)

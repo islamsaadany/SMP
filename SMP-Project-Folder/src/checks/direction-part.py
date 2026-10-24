@@ -112,7 +112,7 @@ with sync_playwright() as p:
     ck("the legend explains it", "their part only" in leg, leg[:200])
 
     # ── 2. The press ─────────────────────────────────────────────────
-    # §608: every press on Roles & access asks first; this file is about what
+    # §621: every press on Roles & access asks first; this file is about what
     # the press does, so it answers Change it (ask-and-apply.py tests the box).
     try: pg.click(".acgrid [data-dirscope]"); pg.wait_for_timeout(300); pg.click(".askbox .askyes"); pg.wait_for_timeout(300)
     except Exception: pass

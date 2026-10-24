@@ -621,7 +621,7 @@ var CLIENTSETUP = (function () {
        still yours. */
     if (!canShape() && SHAPE_STEPS.indexOf(s.k) > -1) {
       var hb = el("div", "wzarched");
-      /* §608: ONE LINE (Islam: *"clean the setup pages from unnecessary
+      /* §621: ONE LINE (Islam: *"clean the setup pages from unnecessary
          paragraphs"*). The why — set-up rewrites a list, which would lose the
          work — is the hover; the line says what stands and what is yours. */
       hb.appendChild(document.createTextNode("This client has a plan, so "));
@@ -632,7 +632,7 @@ var CLIENTSETUP = (function () {
         "Switching a layer off only hides what is under it."));
       HOST.appendChild(hb);
     }
-    /* §608: TWO THINGS SHARING ONE WORD, said where the words are named now
+    /* §621: TWO THINGS SHARING ONE WORD, said where the words are named now
        that Terminology has left Setup. A status, drawn only while it is true
        (1b-ii); the answer is the page's (labelClashes), which the console's
        copy of this file does not carry. */
@@ -773,7 +773,7 @@ var CLIENTSETUP = (function () {
       say(""); if (then) then(); return true;
     }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
   }
-  /* §608: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
+  /* §621: A NOTE UNDER A FIELD IS A HOVER NOW (Islam: *"as we go we need to
      clean the setup pages from unnecessary paragraphs"*). The fact stays,
      on the platform's own "i" beside the label (`tip()`'s mark, 1b-ii). */
   function tipEl(text){
@@ -887,7 +887,7 @@ var CLIENTSETUP = (function () {
       rs.appendChild(nw);
     } else {
       field(rs, "The client's name", (GROUP && GROUP.org) || "", null, "", true);
-      /* §608: A STATUS, KEPT ON THE PAGE — it says why the box beside it cannot
+      /* §621: A STATUS, KEPT ON THE PAGE — it says why the box beside it cannot
          be changed here, which is not a description (1b-ii), so it did not
          become a hover with the notes that did. */
       if (!OPTS.live) rs.appendChild(el("p", "note",
@@ -1006,7 +1006,7 @@ var CLIENTSETUP = (function () {
           if (reg.canEdit) {
             var mb = el("button", "btn", on ? "Turn off" : "Turn on");
             mb.type = "button";
-            /* §608: TURNING ONE OFF ASKS FIRST, with what it takes away — the
+            /* §621: TURNING ONE OFF ASKS FIRST, with what it takes away — the
                note that used to sit under the list (Islam: *"unless we are
                removing something that has data"*). Turning one on never asks. */
             mb.addEventListener("click", function () {
@@ -1081,7 +1081,7 @@ var CLIENTSETUP = (function () {
       var row = el("div", "wzendrow");
       var go = el("button", "btn risk", "Archive this client");
       go.type = "button"; go.dataset.archive = "ask";
-      /* §608: the platform asks in its floating box, with what the paragraph
+      /* §621: the platform asks in its floating box, with what the paragraph
          under this button used to say; the console's copy asks in place. */
       go.addEventListener("click", function () {
         if (!OPTS.ask) { ask(a); return; }
@@ -1433,7 +1433,7 @@ var CLIENTSETUP = (function () {
     t.addEventListener("click", press);
     return t;
   }
-  /* §608 — END IN MIND, ITS OWN TICK, under the Winning Aspiration it lives
+  /* §621 — END IN MIND, ITS OWN TICK, under the Winning Aspiration it lives
      in (SMPRules.endInMindOn). Greyed and off while the aspiration is off —
      `disabled`, with the reason on the hover (§220, 1b-ii). Unticking asks
      first where somebody has written one. Stored as an absence. */
@@ -1461,7 +1461,7 @@ var CLIENTSETUP = (function () {
     h.appendChild(el("span")); h.appendChild(el("span", "lab", "One")); h.appendChild(el("span", "lab", "Many"));
     return h;
   }
-  /* ── WHAT A SWITCH WOULD HIDE (§608) ──────────────────────────────────
+  /* ── WHAT A SWITCH WOULD HIDE (§621) ──────────────────────────────────
      Islam, of Client set-up: *"it should act as per the adjustment unless we
      are removing something that has data — the same check box should come
      like the access"*. So a tick or a switch that would hide something
@@ -2052,7 +2052,7 @@ var CLIENTSETUP = (function () {
        card above, which is where they were already drawn whenever the office
        had said "in the company plan". */
 
-    /* §608: the note that closed this box is the hover on the step's own
+    /* §621: the note that closed this box is the hover on the step's own
        question now (render(), SHAPE_TIP) — and it no longer sends anybody to
        Terminology, which left Setup. */
     return box;
@@ -3036,7 +3036,7 @@ var CLIENTSETUP = (function () {
            progress:progress, isDone:isDone, STEPS:STEPS,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; },
-           /* §608: and for the shell's leave question, which puts the flow back
+           /* §621: and for the shell's leave question, which puts the flow back
               on the step a colour is waiting on — no commit, no redraw of its
               own: the shell's paint that follows draws it. */
            toStep: function (k) { if (S) S.at = stepIdx(k); } };

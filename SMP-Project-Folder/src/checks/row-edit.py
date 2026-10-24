@@ -182,7 +182,7 @@ with sync_playwright() as p:
              .querySelector('[data-tktable="'+k+'"]').querySelector('tr.tk-open')""", key))
         # leaving the page cancels
         open_row(pg, target)
-        # §608: Terminology left Setup; any other page is a page left
+        # §621: Terminology left Setup; any other page is a page left
         pg.click('.setuprail [data-setupgo="bands"]'); pg.wait_for_timeout(600)
         pg.click('.setuprail [data-setupgo="%s"]'%key); pg.wait_for_timeout(700)
         ck("leaving the page closes the open row",

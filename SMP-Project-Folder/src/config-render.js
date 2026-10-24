@@ -120,10 +120,10 @@ function sitsInWord(){
   });
 }
 
-/* ── TWO THINGS SHARING ONE WORD (§392 → §608) ──────────────────────────
+/* ── TWO THINGS SHARING ONE WORD (§392 → §621) ──────────────────────────
    Two different objects rendered under one name on the same screen. It was
    Terminology's warning, and it went to the shape screen with the words
-   (§608): `labelClashes()` answers, client-setup.js draws it while there is
+   (§621): `labelClashes()` answers, client-setup.js draws it while there is
    one. Asked of each form separately: "Project" as one thing's single word
    and another's plural is not a collision anybody reads. In Setup the word
    asked is the stored one — a layer's own name is not consulted there
@@ -248,7 +248,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      the whole plan, or their part. Pressing the eye or the pen turns it off
      (`data-dirclear`), so the three stay one choice to the person pressing. */
   var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
-  /* §608: what the asking box needs to say what this press would do — who
+  /* §621: what the asking box needs to say what this press would do — who
      the row is, what the column reaches, what the cell holds now. */
   var askAttr = opt.ask
     ? ' data-askwho="' + esc(opt.ask.who) + '" data-askwhat="' + esc(opt.ask.what) +
@@ -319,7 +319,7 @@ function accessRowName(r){
 }
 /* §516: a merged row counts everybody holding ANY of the roles under it,
    once each — a person who is both a BU owner and a function head is one
-   Owner, not two. §608: lifted out of the cell so the asking box names the
+   Owner, not two. §621: lifted out of the cell so the asking box names the
    same number the row does. */
 function matrixRoleHeads(r){
   var of = r.of || [r.key];
@@ -339,7 +339,7 @@ function matrixRoleCell(r){
   return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(accessRowName(r)) + '</b>' +
     '<span class="why">' + matrixRoleHeads(r) + '</span></td>';
 }
-/* ── WHAT A PRESS WOULD DO, IN WORDS (§608) ────────────────────────────
+/* ── WHAT A PRESS WOULD DO, IN WORDS (§621) ────────────────────────────
    Islam: *"giving more or less needs the confirmation … with the impact of
    the change"*. A cell carries who it is for (`who`), what it reaches
    (`what`) and what it holds now; the press carries what it would hold. The
@@ -758,7 +758,7 @@ function renderFactorEditor(){
    legend, the colours and the status words can never drift apart. ── */
 function renderBands(){
   var can = grant("c_bands") === "edit";
-  /* §608: an edit waiting for Apply keeps the table open, whatever cleared
+  /* §621: an edit waiting for Apply keeps the table open, whatever cleared
      the mode on the way past (leaveModes on a navigation the leave question
      then held back). */
   var editable = can && (EDITING.bands || !!BANDS_DRAFT);
@@ -794,7 +794,7 @@ function renderBands(){
         ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
         : '<span class="mono">' + x.floor + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
-      /* §608: HOW A FIGURE APPEARS TODAY, until Apply — the stored level in
+      /* §621: HOW A FIGURE APPEARS TODAY, until Apply — the stored level in
          this seat while the levels are the same ones. Once one is added or
          removed the seats no longer pair, and the pill shows the new table. */
       (function(a){ return '<td><span class="pill ' + a.key + '">' + esc(a.label) + '</span></td>'; })(
@@ -816,7 +816,7 @@ function renderBands(){
   return section("", "Scoring bands",
       null,
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
-        /* §608: while something waits, Apply and Discard below take Done's
+        /* §621: while something waits, Apply and Discard below take Done's
            place — two ways out of one edit would be two answers to it. */
         (can && !waiting.length
           ? '<button class="editbtn" data-edit="bands">' + (editable ? "Done" : "Edit") + '</button>'
@@ -834,7 +834,7 @@ function renderBands(){
                       ok ? null : "Floors must descend before this can be applied") : '') +
       /* A status, kept: it says why Apply will not take the table (1b-ii). */
       (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Apply is held until the order is fixed.</div>'));
-  /* §608: "Changing a threshold rewrites history" is not on the page any more.
+  /* §621: "Changing a threshold rewrites history" is not on the page any more.
      It was true only of some edits and said on every visit; the asking box
      says it at Apply, with the number of measures it moves (bandShift). */
 }
@@ -1775,7 +1775,7 @@ function brandingBody(){
   var set = !!(b.accent || b.bar || b.palette || b.font);
 
   function swatch(key, label, value, note){
-    /* §608: a picked colour waits in BRAND_PEND until Apply, so the boxes
+    /* §621: a picked colour waits in BRAND_PEND until Apply, so the boxes
        show it and nothing else on the page does. */
     var shown = (key in BRAND_PEND ? BRAND_PEND[key] : value) || "";
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
@@ -1841,7 +1841,7 @@ function brandingBody(){
      §313.36) and worn by the decks through groupLogo(). Deleted rather than
      hidden (§24); a stored GROUP.logo is left where it is and simply no
      longer read on a served page. */
-  /* §608: THE TWO NOTES UNDER THIS PAGE ARE GONE (Islam, of the Setup
+  /* §621: THE TWO NOTES UNDER THIS PAGE ARE GONE (Islam, of the Setup
      pages: *"as we go we need to clean the setup pages from unnecessary
      paragraphs"*). "Typeface" was a note to ourselves (§38.7) with nothing
      on it to set, so its section went with it; "Branding is the tenant's"
@@ -1863,7 +1863,7 @@ function brandingBody(){
       null,
       checkRows) : "");
 }
-/* ── THE ROW UNDER A COLOUR AREA (§608) ─────────────────────────────────
+/* ── THE ROW UNDER A COLOUR AREA (§621) ─────────────────────────────────
    One drawing for every area in APPLY_AREAS. Something waiting: Apply,
    Discard and an amber line naming what waits. Just applied: Apply greyed,
    a green Applied and Undo, for UNDO_MS. Otherwise nothing at all — a row
@@ -5440,7 +5440,7 @@ function renderBandsExtra(){
   var can = grant("c_bands") === "edit";
   var rows =
     '<div class="cfg"><table><tbody>' +
-      /* §608: the paragraph that sat under this table is this row's hover. */
+      /* §621: the paragraph that sat under this table is this row's hover. */
       '<tr><td style="width:46%">Reward begins at' + tip("At 100%, delivering the commitment earns. Set it " +
         "higher and a measure can meet its target without clearing the reward line: a fourth standing, met " +
         "but not earning, appears between short and earning. Either way the measure is scored against its own " +

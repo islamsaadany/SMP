@@ -246,7 +246,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const place = String(b.place || ""), section = String(b.section || "");
     if (!isPlace(place) || !isSection(section)) return refused(400, "Which place and which section?");
     const title = oneLine(b.title).slice(0, MAX_TITLE) || ("New " + SECTION_WORD[section].toLowerCase() + " chat");
-    const chat = await newChat(c, { place, section, title, by });
+    const chat = await newChat(c, { place, section, title, by, free: b.free === true });
     return out(200, { ok: true, chat });
   }
   if (kind === "newFlow") {

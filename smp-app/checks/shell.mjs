@@ -102,7 +102,7 @@ const model = http.createServer((req, res) => {
 });
 await new Promise((r) => model.listen(0, "127.0.0.1", r));
 const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk,
-  GEMINI_API_KEY: "stand-in-key", GEMINI_ENDPOINT: "http://127.0.0.1:" + model.address().port + "/models/" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
+  ANTHROPIC_API_KEY: "", GEMINI_API_KEY: "stand-in-key", GEMINI_ENDPOINT: "http://127.0.0.1:" + model.address().port + "/models/" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", (d) => process.stderr.write(d));
 let up = false;
 for (let i = 0; i < 60 && !up; i++) { await new Promise((r) => setTimeout(r, 500)); try { up = (await fetch(BASE + "/")).status === 200; } catch {} }
@@ -110,6 +110,9 @@ if (!up) { console.log("FAIL  the app did not start"); try { process.kill(-serve
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
 let ctx, page, errs = [];
+/* "+ New chat" is a choice since the free chat (§633): the workflow is its
+   first item, so every flow below opens the menu and presses it. */
+const newWorkflow = async () => { await page.click(".copnew[data-cop-newmenu]"); await page.click(".copnewmenu [data-cop-newchat]"); };
 /* THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§360), once a
    browser session, and it covers the viewport — so a context that presses a
    control under it waits thirty seconds on a click the overlay takes
@@ -1218,11 +1221,11 @@ await section("3h · the Copilot column on Roles & access, and View on the tab (
     await page.click("[data-cop-chats] [data-cop-chat]").catch(() => {});
     await page.waitForSelector("[data-cop-viewonly]", { timeout: 6000 }).catch(() => {});
     const v = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"),
-      text: !!document.querySelector("[data-cop-text]"), nw: !!document.querySelector(".coprh [data-cop-newchat]"), tab: !!document.querySelector('#subtabs button[data-s="copilot"]') }));
+      text: !!document.querySelector("[data-cop-text]"), nw: !!document.querySelector(".coprh [data-cop-newmenu]"), tab: !!document.querySelector('#subtabs button[data-s="copilot"]') }));
     check(v.tab && v.label && !v.text && !v.nw, "at View the tab is there, says View only, and has no box and no + New chat", JSON.stringify(v));
     await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'"));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
-    const e = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"), nw: !!document.querySelector(".coprh [data-cop-newchat]") }));
+    const e = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"), nw: !!document.querySelector(".coprh [data-cop-newmenu]") }));
     check(!e.label && e.nw, "with the row removed the office is back at edit — + New chat, no View only label", JSON.stringify(e));
   } finally {
     await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'; delete from copilot_chats")).catch(() => {});
@@ -1287,7 +1290,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        saved its units' Structure, so Purpose and Core Values are OFF — four
        cards. Ticked on through the stored graph, it is six, nothing optional. */
     ST0 = await page.evaluate(() => GROUP.structure ? JSON.parse(JSON.stringify(GROUP.structure)) : null);
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 5000 }).catch(() => {});
     const off4 = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()));
@@ -1296,7 +1299,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.evaluate(() => { GROUP.structure = { bu: { on: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"] } }; paint(); });
     const W = await readW();
     const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     /* the first chat's own Start buttons are still on screen, so wait for the
        NEW chat to be the current one before reading its id (§222). */
     await page.waitForFunction((w) => { const e = document.querySelector(".copitem[aria-current]"); return e && e.dataset.copChat !== w; }, was4, { timeout: 10000 });
@@ -1380,7 +1383,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await shot("0d-part");
 
     /* Start fresh: the roads, then the years on the guided road. */
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     const cid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
     await page.click('[data-cop-start="fresh"]');
@@ -1863,7 +1866,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.click('[data-cop-fold="sources"]');
     check(await page.evaluate(() => !document.querySelector("[data-cop-sources-rail]").classList.contains("copfolded")), "…and a fold button opens its section");
 
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-sw-start], .copsw-grid", { timeout: 10000 });
     await shot("1-start");
     const id = await chatId();
@@ -1890,7 +1893,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.waitForTimeout(300);
     const cols = await page.evaluate(() => {
       const r = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().width) : null; };
-      const nb = document.querySelector(".copnew[data-cop-newchat]");
+      const nb = document.querySelector(".copnew[data-cop-newmenu]");
       return { rails: r(".coprails"), side: r(".copsw-side"), newH: nb ? Math.round(nb.getBoundingClientRect().height) : null, lh: nb ? parseFloat(getComputedStyle(nb).lineHeight) || 15 : null };
     });
     check(cols.rails === 200 && cols.side === 200, "in a SWOT chat the chats rail and the to-do are both 200px, for symmetry (§490.2)", JSON.stringify(cols));
@@ -2001,6 +2004,44 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
   }
 });
 
+await section("3j2 · a free chat beside the workflow (§633)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup
+     (design-mockups/copilot-free-chat/2026-10-25_free-chat.html). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/analysis");
+    await page.click(".copnew[data-cop-newmenu]");
+    const m = await page.evaluate(() => Array.from(document.querySelectorAll(".copnewmenu button b")).map((b) => b.textContent));
+    check(JSON.stringify(m) === JSON.stringify(["SWOT workflow", "Free chat"]), "+ New chat offers the area's workflow, then a free chat", JSON.stringify(m));
+    await page.click("body", { position: { x: 5, y: 5 } });
+    check(!(await page.$(".copnewmenu")), "a press elsewhere shuts the choice");
+    await page.click(".copnew[data-cop-newmenu]");
+    await page.click(".copnewmenu [data-cop-newfree]");
+    await page.waitForSelector("[data-cop-text]", { timeout: 10000 });
+    const v = await page.evaluate(() => ({ sw: !!document.querySelector(".copsw-grid, [data-cop-sw-start]"),
+      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || "") }));
+    check(!v.sw && /Free chat/.test(v.tag), "a free chat opens as a plain conversation and the rail says Free chat", JSON.stringify(v));
+    const row = (await asTenant(tenantId, (c) => c.query("select section, extra from copilot_chats order by created_at desc limit 1"))).rows[0];
+    check(row && row.section === "analysis" && row.extra && row.extra.free === true, "it is kept in its area, marked free", JSON.stringify(row));
+    const n0 = MODEL_SEEN.length;
+    await page.fill("[data-cop-text]", "Which weakness hurts us most?");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => document.querySelectorAll(".copmsg, [data-cop-msgs] > *").length > 1, null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(500);
+    const sent = MODEL_SEEN.slice(n0).find(Boolean);
+    const sys = sent ? JSON.stringify(sent.systemInstruction || sent.system || "") : "";
+    check(/FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /WHAT THE PLATFORM SHOWS FOR THIS PLACE/.test(sys),
+      "the free chat is answered from the area's method and what the plan shows", sys.slice(0, 160));
+    check(!errs.length, "no page errors", errs.join(" | "));
+  } finally {
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
@@ -2021,7 +2062,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-cp-sc], [data-cop-cp-score]", { timeout: 15000 });
     if (!(await page.$("[data-cop-cp-sc]")) && (await page.$("[data-cop-cp-score]"))) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); }
     let r = await row();
@@ -2095,7 +2136,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await open("/raya-trade/strategy/mobile/copilot/directions");
     const before = await page.evaluate(() => { try { return UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name })); } catch (e) { return null; } });
     check(Array.isArray(before) && before.length > 0, "Mobile's plan already holds Directions to start from", JSON.stringify(before));
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-dv-start]", { timeout: 15000 });
     let r = await row();
     check(!!r && r.s && r.s.start === "" && !(r.s.options || []).length, "a new Directions chat asks plan-or-fresh first and suggests nothing", JSON.stringify(r && r.s && r.s.start));
@@ -2170,7 +2211,8 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       const tabs = await page.$$eval("[data-sub2]", (a) => a.map((x) => x.getAttribute("data-sub2")));
       check(tabs.includes("capabilities"), "with capabilities as their own layer, the Copilot carries a Capabilities section", JSON.stringify(tabs));
       await open("/raya-trade/strategy/mobile/copilot/capabilities");
-      await page.locator("[data-cop-newchat]:visible").first().click();
+      await page.locator("[data-cop-newmenu]:visible, .copslim [data-cop-newchat]:visible").first().click();
+      await page.click(".copnewmenu [data-cop-newchat]");
       await page.waitForSelector("[data-cop-dv-caps], [data-cop-dv-keep]", { timeout: 15000 });
       if (await page.$("[data-cop-dv-caps]")) await page.click("[data-cop-dv-caps]");
       await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
@@ -2210,7 +2252,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/execution");
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
     let r = await row();
     check(!!r && r.s && !r.s.period && (r.s.items || []).length > 0, "a new Execution chat asks the period first, with the plan's items listed", JSON.stringify(r && r.s && { p: r.s.period, n: (r.s.items || []).length }));
@@ -2273,7 +2315,7 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/advisory");
-    await page.click(".copnew[data-cop-newchat]");
+    await newWorkflow();
     await page.waitForSelector("[data-cop-ad-text]", { timeout: 15000 });
     check(!!(await page.$("[data-cop-ad-budget]")), "a new Advisory chat shows the question count in the right column");
     setAns({ kind: "question", lead: "Good question.", question: "How many stores do you run today?" });

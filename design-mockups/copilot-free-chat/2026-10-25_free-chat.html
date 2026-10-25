@@ -1,0 +1,122 @@
+<title>Copilot Free Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--warnbg:#FBF1DE;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);margin:0;padding:24px 16px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1{font-size:26px;margin:0}
+.lede{color:var(--ink-2);max-width:70ch;margin:6px 0 0}
+h2.step{font-size:19px;margin:0 0 4px}
+h2.step span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.k{color:var(--ink-3);font-size:13.5px;margin:0 0 12px;max-width:80ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-quiet);display:flex;gap:18px;padding:10px 16px;font-size:13.5px;flex-wrap:wrap}
+.bar b{color:var(--panel-ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.secs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap}
+.sec{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}
+.sec.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.body{display:grid;grid-template-columns:240px minmax(0,1fr)}
+@media (max-width:760px){.body{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line)}}
+.rail{border-right:1px solid var(--line);padding:12px;font-size:13px;background:var(--surface-2);position:relative}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.rh span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700}
+.new{font:600 12.5px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 10px}
+.new.open{border-color:var(--gold)}
+.menu{position:absolute;right:12px;top:44px;width:228px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.12);padding:4px;z-index:2}
+.mi{display:block;width:100%;text-align:left;border:0;background:none;border-radius:6px;padding:8px 10px;font:inherit;color:var(--ink)}
+.mi b{display:block;font-size:13.5px}
+.mi small{color:var(--ink-3);font-size:12.5px}
+.mi.hl{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+.ri{padding:6px 8px;border-radius:5px;color:var(--ink-2);display:flex;flex-direction:column}
+.ri small{color:var(--ink-3)}
+.ri.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 3px 0 0 var(--gold)}
+.ri.on small{font-weight:400}
+.dim{opacity:.35}
+.cop{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.m{max-width:64ch;padding:10px 13px;border-radius:10px;font-size:14.5px}
+.m.ai{background:var(--surface-2)}
+.m.me{background:var(--panel);color:var(--panel-ink);align-self:flex-end}
+.m p{margin:0 0 6px}.m p:last-child{margin:0}
+.m ul{margin:4px 0 6px;padding-left:18px}
+.src{font-size:12px;color:var(--ink-3)}
+.draft{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);max-width:64ch}
+.draft h4{margin:0 0 6px;font-size:13.5px}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-size:13px;background:var(--surface);color:var(--ink);font-weight:600}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.comp{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:14px}
+.note{border-left:3px solid var(--goldfill);background:var(--surface-2);padding:8px 12px;font-size:13.5px;color:var(--ink-2);border-radius:0 6px 6px 0;max-width:80ch}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Copilot: Free chat</h1>
+    <p class="lede">A second way to start a chat in every Copilot area. The area's guided workflow stays exactly as it is.</p>
+  </header>
+
+  <section>
+    <h2 class="step"><span>Step 1</span>Press “+ New chat”: pick the workflow or a free chat</h2>
+    <p class="k">The button now opens a small choice. The first choice is today's behaviour, named for the area you are in (for example: Analysis opens the SWOT workflow).</p>
+    <div class="frame">
+      <div class="bar"><span>Home</span><span>Strategy</span><b>Copilot</b></div>
+      <div class="secs"><span class="sec">Foundation</span><span class="sec on">Analysis</span><span class="sec">Competitive Discipline</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+      <div class="body">
+        <aside class="rail">
+          <div class="rh"><span>Chats</span><button class="new open">+ New chat</button></div>
+          <div class="menu">
+            <button class="mi"><b>SWOT workflow</b><small>Step by step, Forefront's method</small></button>
+            <button class="mi hl"><b>Free chat</b><small>Ask anything about the plan</small></button>
+          </div>
+          <div class="dim">
+            <div class="ri">SWOT — Group<small>Islam · 2 days ago · 3 of 6 done</small></div>
+            <div class="ri">Market scan notes<small>Islam · last week</small></div>
+          </div>
+        </aside>
+        <main class="cop">
+          <div class="note" style="margin:24px 0">Start a chat, or open a deliverable.</div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="step"><span>Step 2</span>The free chat: talk freely, answered from the method and the plan</h2>
+    <p class="k">An ordinary conversation. The Copilot follows Forefront's method and reads the plan as it is written now: foundation, SWOT, directions, measures with their targets and reported numbers, tactics and projects. A draft it writes can still be kept with Save.</p>
+    <div class="frame">
+      <div class="bar"><span>Home</span><span>Strategy</span><b>Copilot</b></div>
+      <div class="secs"><span class="sec">Foundation</span><span class="sec on">Analysis</span><span class="sec">Competitive Discipline</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+      <div class="body">
+        <aside class="rail">
+          <div class="rh"><span>Chats</span><button class="new">+ New chat</button></div>
+          <div class="ri on">Free chat — Group<small>Islam · just now · Free chat</small></div>
+          <div class="ri">SWOT — Group<small>Islam · 2 days ago · 3 of 6 done</small></div>
+          <div class="ri">Market scan notes<small>Islam · last week</small></div>
+        </aside>
+        <main class="cop">
+          <div class="m me"><p>Which of our weaknesses is hurting the Customer pillar most right now?</p></div>
+          <div class="m ai">
+            <p>Two measures under <b>P2 Customer</b> are off track: <b>Net promoter score</b> (reported 31, target 45) and <b>Repeat purchase rate</b> (reported 22%, target 30%).</p>
+            <p>The weakness that lines up with both is <b>“Slow after-sales response”</b> from your SWOT. Forefront's method says a weakness that touches a direction's key measure should be tackled through a tactic, not left in the analysis.</p>
+            <p>Do you want me to draft a tactic for it?</p>
+            <div class="src">From: the plan (platform)</div>
+          </div>
+          <div class="m me"><p>Yes, draft it.</p></div>
+          <div class="m ai">
+            <div class="draft">
+              <h4>Tactic for P2 Customer</h4>
+              <p><b>After-sales response in 24 hours.</b> Set a 24-hour first-response standard and report it monthly. Evidence: the two off-track measures above.</p>
+              <button class="btn pri">Save</button>
+            </div>
+          </div>
+          <div class="comp">Type a message…</div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <section class="note">
+    Nothing else changes: the guided workflows, deliverables, the Save button and who can use the Copilot stay as they are.
+  </section>
+</div>

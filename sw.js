@@ -654,7 +654,10 @@
    held by no commit in any ref's history after fetching every ref (§94.16). */
 /* §629–§631 were numbered v7.11–v7.13 on the branch; main took v7.11 for
    §625–§626 while they waited, so they are v7.12–v7.14 here. */
-const SHELL = "smp-shell-v7.14-platform-80";
+/* v7.15-copilot-free-chat — §633: "+ New chat" in the Copilot opens a
+   choice, the area's workflow or a free chat. The built file's bytes
+   changed, which is the whole trigger (§91). */
+const SHELL = "smp-shell-v7.15-copilot-free-chat";
 const ASSETS = [
   "/",
   "/index.html",

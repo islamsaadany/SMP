@@ -944,14 +944,14 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     /* §638: the LATEST draft stands in the panel beside the chat with the
        one Save; each bubble that wrote a draft says so in a line, and an
        earlier one can be put back in the panel from its own bubble. */
-    const lay = await page.evaluate(() => ({ lines: document.querySelectorAll("[data-cop-msgs] .copdraftline").length,
+    const lay = await page.evaluate(() => ({ boxes: (() => { const z = document.querySelector("[data-cop-split] .copzoom"), b = document.querySelector("[data-cop-split] .copbox"); return z && b ? Math.abs(z.getBoundingClientRect().width - b.getBoundingClientRect().width) : null; })(), lines: document.querySelectorAll("[data-cop-msgs] .copdraftline").length,
       inBubble: document.querySelectorAll("[data-cop-msgs] .copdraft, [data-cop-msgs] [data-cop-savedraft]").length,
       panel: [...document.querySelectorAll("[data-cop-out] [data-cop-savedraft]")].map((b) => b.textContent.trim()),
       side: (() => { const c = document.querySelector("[data-cop-split] > .copchat"), o = document.querySelector("[data-cop-out]");
         if (!c || !o) return null; const a = c.getBoundingClientRect(), b = o.getBoundingClientRect(); return b.left >= a.right - 1 && b.width > 300; })() }));
     if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/chat-draft-panel.png" });
-    check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true,
-      "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line", JSON.stringify(lay));
+    check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true && lay.boxes !== null && lay.boxes <= 2,
+      "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
@@ -1430,6 +1430,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        room, the width is kept on this browser; a double-click puts the
        default back and forgets it. Read before and after (§94.2). */
     {
+      await page.waitForSelector(".copflow > [data-cop-grip]", { state: "visible", timeout: 8000 });
+      await page.waitForTimeout(200);
       const g = await page.locator(".copflow > [data-cop-grip]").boundingBox();
       const w = () => page.evaluate(() => ({ chat: Math.round(document.querySelector(".copfchat").getBoundingClientRect().width), cards: Math.round(document.querySelector(".copleft").getBoundingClientRect().width),
         kept: localStorage.getItem("smp.copilot.chatw") }));

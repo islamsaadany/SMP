@@ -234,6 +234,20 @@ check("each section's guidance carries the house rules; the roads only where the
     /\[my draft "Mobile SWOT":/.test(memo) && /Brand partnerships — Samsung deals\. \(3 · Strong\)/.test(memo) && /\[options I offered: Move to the market · Add one\]/.test(memo), memo);
   check("...and a part that is not an answer adds nothing", partMemo({ kind: "files" }) === "" && partMemo(null) === "");
 }
+/* §634: a free chat is told the Free chat part in place of where the work
+   starts, and the section's method stays as its reference. */
+{
+  const M = "## Foundation\n\nThree to five key objectives.";
+  const FREE = DEFAULT_PARTS.find((p) => p.key === "part15");
+  const gf = guidanceFor("foundation", M, [], FREE ? FREE.text : "");
+  check("§634 the Free chat part ships in its own settings section, one for every area",
+    !!FREE && FREE.section === "free" && FREE.title === "Free chat" && /baseline/.test(FREE.text) && /One at a time/.test(FREE.text));
+  check("...a free chat is told it instead of where the work starts, the method kept as a reference, the limits still last",
+    /THIS IS A FREE CHAT/.test(gf) && !/WHERE THE WORK STARTS/.test(gf) && !/WAYS TO START/.test(gf) &&
+    /as your reference/.test(gf) && gf.indexOf("Three to five") < gf.indexOf("THIS IS A FREE CHAT") &&
+    gf.indexOf("THIS IS A FREE CHAT") < gf.indexOf("LIMITS FOR YOUR ANSWER") && /Never invent a figure/.test(gf), gf.slice(0, 300));
+  check("...and a workflow chat is not", !/THIS IS A FREE CHAT/.test(guidanceFor("foundation", M, [])) && /WHERE THE WORK STARTS/.test(guidanceFor("foundation", M, [])));
+}
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,
   history: [], assumptions: ["Margins flat"], files: [{ name: "notes.docx", kind: "docx", text: "Share fell" }, { name: "deck.pdf", kind: "pdf", text: "" }] });
 check("what the model is sent names the place, what the platform shows, the assumptions and each file by name",
@@ -455,7 +469,7 @@ try {
     const rd = await act(CONSULT, { action: "read" });
     check("a consultant reads every part and all five templates, told they may not change them",
       rd.code === 200 && rd.body.canEdit === false && (rd.body.parts || []).some((p) => p.section === "analysis" && /SWOT/.test(p.text)) &&
-      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 5, JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
+      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 6 && rd.body.sections[5].key === "free", JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
     const rdA = await act(ADMIN, { action: "read" });
     check("...and a Forefront super user is told they may", rdA.code === 200 && rdA.body.canEdit === true);
     const nope = await act(CONSULT, { action: "save", key: KEY, text: "Hijacked" });

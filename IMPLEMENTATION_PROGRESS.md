@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-25 — A free chat talks before it drafts (§634).** Its own part in Copilot settings › Free chat, for every area: confirm, ask one at a time or all at once, a baseline before any target, and a draft only when agreed.
+
 **2026-10-25 — A free chat beside every Copilot workflow (§633).** "+ New chat" now offers the area's workflow or a Free chat, answered from the area's method and this place's plan.
 
 **2026-10-25 — The Copilot and the assistant answer through Claude when `ANTHROPIC_API_KEY` is set (§632), merged to `main` on Islam's word.**

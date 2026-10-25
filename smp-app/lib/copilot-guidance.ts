@@ -94,7 +94,14 @@ export const GUIDE: Record<Section, Guide> = {
    the section produces, the METHOD (which leads), where the work starts
    (what exists, or the ways to start), and last the LIMITS — a short list of
    things that do not bend, never a script that decides what to say. */
-export function guidanceFor(section: Section, method = "", templates: string[] = []): string {
+/* A FREE CHAT (§634). Islam, of a free chat that answered "refine the key
+   objectives" with a critique, a Missing box and a whole revised set at
+   once: "it needs to bring something and verify what we are talking about
+   .. ask if we take them 1 by one or all at once .. ask about a baseline".
+   So a free chat is told the Free chat part of Copilot settings IN PLACE OF
+   where the work starts and the ways to start — those are what made it
+   draft on the first turn — and the section's method stays, as a reference. */
+export function guidanceFor(section: Section, method = "", templates: string[] = [], free: string | null = null): string {
   const g = GUIDE[section];
   const roads = g.roads.length
     ? "\nWAYS TO START: " + g.roads.join(" · ") + ". Offer them as `options` when the plan holds nothing yet and the person has not said how to begin; if you can already see enough to start, pick one yourself and say which." +
@@ -104,6 +111,12 @@ export function guidanceFor(section: Section, method = "", templates: string[] =
         : " There is no template for this section: if the Template way is chosen, say so and offer another way.")
     : "\nThis section has no set ways to start yet: when the plan holds nothing, work from what the person says.";
   const m = method.trim();
+  if (free != null && process.env.SMP_BREAK !== "free-as-workflow") {
+    const ref = m ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION, as your reference (the free chat rules below decide how the conversation goes):\n\n" + m : "";
+    return VOICE + "\n\nTHIS SECTION PRODUCES: " + g.produces + ref +
+      "\n\nTHIS IS A FREE CHAT. These rules decide how you talk and when you draft; in a free chat `missing` stays empty and a question goes in `reply`:\n\n" + (free.trim() || "Talk first; draft only when the person agrees or asks.") +
+      "\n\nLIMITS FOR YOUR ANSWER (these do not bend):\n" + HOUSE;
+  }
   /* The checks' breaks: the starting point taken out, and the method back
      after the limits, overruled (§460). */
   const start = process.env.SMP_BREAK === "no-refine" ? "" : "\n\n" + START;

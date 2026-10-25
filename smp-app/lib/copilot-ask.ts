@@ -149,6 +149,8 @@ export type AskInput = {
      Copilot settings hold them now (lib/copilot-settings.ts, §456). */
   method?: string;
   templates?: string[];
+  /* The Free chat part of Copilot settings, set only on a free chat (§634). */
+  free?: string | null;
 };
 
 export function corpusOf(a: AskInput): string {
@@ -196,7 +198,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
     maxTurns: process.env.SMP_BREAK === "short-memory" ? 8 : 20,
     schema: SCHEMA,
     needsCorpus: false,
-    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    instruction: guidanceFor(a.section, a.method || "", a.templates || [], a.free ?? null),
     corpusName: "THIS CHAT'S MATERIAL",
     corpusText: corpusOf(a),
     parts: pdfParts,
@@ -235,7 +237,7 @@ export async function askDraftOnly(a: AskInput): Promise<{ ok: true; draft: NonN
   if (!A.configured()) return { ok: false, why: "no key is set" };
   const call = (model?: string) => A.askJson({
     question: a.question, history: a.history, maxTurns: 20, schema: DRAFT_ONLY_SCHEMA, needsCorpus: false,
-    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    instruction: guidanceFor(a.section, a.method || "", a.templates || [], a.free ?? null),
     corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [],
     think: true, maxOutput: 8192, timeoutMs: 55_000, ...(model ? { model } : {}),
   });

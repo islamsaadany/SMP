@@ -1,6 +1,7 @@
 /* ══ THE COPILOT'S OWN SETTINGS (§456, spec 064) ═══════════════════════════
    Two things, the same for every client (Islam, 2026-10-01): the method the
-   Copilot is told, in fourteen parts filed under its five sections, and five
+   Copilot is told, in fourteen parts filed under its five sections (and since
+   §634 a fifteenth, Free chat, in a section of its own), and five
    blank templates. What ships is lib/copilot-defaults.generated.ts; a row in
    `copilot_assets` is an edit OVER the shipped text, by key. Saving the
    shipped text back DELETES the row rather than storing a copy of it
@@ -23,8 +24,11 @@ import { DEFAULT_PARTS, DEFAULT_TEMPLATES } from "./copilot-defaults.generated.t
 type Q = Pool | PoolClient;
 export const SECTION_TITLE: Record<string, string> = {
   foundation: "Foundation", analysis: "Analysis", directions: "Directions", execution: "Execution", advisory: "Advisory",
+  free: "Free chat",
 };
-export const SECTION_ORDER = ["foundation", "analysis", "directions", "execution", "advisory"] as const;
+/* "free" is not a Copilot section (§634): it holds the one part every free
+   chat is told, in every section, on top of that section's method. */
+export const SECTION_ORDER = ["foundation", "analysis", "directions", "execution", "advisory", "free"] as const;
 export const MAX_PART = 200_000;
 export const MAX_TEMPLATE = 3 * 1024 * 1024;
 

@@ -529,7 +529,10 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
      settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
-  const askIn = (q: string) => ({ method, templates: templateNamesFor(chat.section),
+  /* A free chat is also told the Free chat part (§634), read the same way.
+     A database that will not answer still gives it the free chat's shape. */
+  const free = chat.free ? (configured() ? await methodFor(doorPool(), "free").catch(() => "") : "") : null;
+  const askIn = (q: string) => ({ method, free, templates: templateNamesFor(chat.section),
     section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
     context: String(b.context ?? "").slice(0, MAX_CONTEXT), question: q, pasted,
     history: material.history, assumptions: material.assumptions, files: material.files,
@@ -558,6 +561,8 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
     if (r.ok) {
       const part: any = { ...r.part };
       if (askFirst) { delete part.draft; part.askFirst = true; }
+      /* §634: a free chat asks in its reply, so no Missing box repeats it. */
+      if (chat.free) part.missing = [];
       if (noDraft) part.noDraft = true;
       /* The offer to keep pasted material is attached by the PRODUCT, only
          under a message that really was pasted — never on the model's say. */

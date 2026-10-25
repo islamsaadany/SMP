@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SWOT Item Details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--panel-ink:#FFFFFF;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--bad:#A23B2A;--badbg:#FBE9E5;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--bad:#E8907E;--badbg:#3A221E;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--bad:#E8907E;--badbg:#3A221E;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:90ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+.say .pc{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:4px;font-size:13px}
+.say .pc span::before{content:"+ ";color:var(--good);font-weight:700}
+.say .pc span.m::before{content:"− ";color:var(--bad)}
+.stage{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.chatstub{flex:0 0 260px;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:14px;color:var(--ink-3);font-size:13px;min-height:200px}
+@media (max-width:900px){.chatstub{display:none}}
+/* the pane, at the width it has beside the chat */
+.pane{flex:1 1 640px;max-width:880px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px;flex-wrap:wrap}
+.ph b{font-size:14px}
+.ph .sp{margin-left:auto}
+.dens{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.dens button{border:0;background:var(--surface);padding:3px 10px;font-size:12px;border-right:1px solid var(--line)}
+.dens button:last-child{border-right:0}
+.dens button[aria-pressed="true"]{background:var(--surface-2);font-weight:700}
+.pb{padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.sec{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.g4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:620px){.g4{grid-template-columns:1fr}}
+.L{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.L h4{margin:0 0 6px;font-size:13.5px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.L h4 small{color:var(--ink-3);font-weight:600;font-size:11px}
+.L h4 button{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--ink);text-align:left}
+.L h4 button:hover{color:var(--gold)}
+ol{margin:0;padding-left:18px}
+li{margin:0 0 6px;color:var(--ink-2);font-size:13px}
+li:last-child{margin-bottom:0}
+.t{color:var(--ink);font-weight:600}
+.d{display:block;color:var(--ink-2)}
+.d.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev{display:block;font-size:11.5px;color:var(--ink-3)}
+.row{display:flex;align-items:baseline;gap:6px;width:100%;border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit}
+.row .chev{flex:none;width:12px;color:var(--ink-3);font-size:11px;transition:transform .15s}
+.row[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.row:hover .t{color:var(--gold)}
+.more{padding:4px 0 2px 18px}
+.focus{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.focus h4{margin:0 0 10px;font-size:15px;display:flex;gap:10px;align-items:baseline}
+.focus h4 button{border:0;background:none;padding:0;color:var(--gold);font:600 12.5px/1 var(--sans)}
+.focus .fi{display:grid;grid-template-columns:22px 1fr;gap:2px 8px;padding:8px 0;border-top:1px solid var(--line)}
+.focus .fi:first-of-type{border-top:0}
+.focus .n{color:var(--ink-3);font-weight:700}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mini .L{padding:8px 10px}
+.mini .L h4{margin:0}
+.chip{display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 7px;margin-left:4px;vertical-align:1px}
+.hi{background:var(--badbg);color:var(--bad)}.me{background:var(--warnbg);color:var(--gold)}.lo{background:var(--goodbg);color:var(--good)}
+.up{color:var(--good)}.down{color:var(--bad)}
+.f5{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.note{font-size:12.5px;color:var(--ink-3)}
+.reco{background:var(--goodbg);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Showing each item's description without cluttering the pane</h1>
+    <p class="lede">Islam: <i>"normally the items under swot, destep and porter has small descriptions under them how can we show this without a cluttered view?"</i> Every SWOT line has a title, a short description and its evidence; a force adds its impact, a DESTEP factor its trend and timeframe. Four ways to show them in the result pane — at the width the pane really has beside the chat. Try each, and press the items.</p>
+  </header>
+  <div class="ctl"><b>Way</b><span class="seg" id="ways">
+    <button data-w="A">A · Titles, press to open</button><button data-w="B">B · One line each</button><button data-w="C">C · A Titles / Details switch</button><button data-w="D">D · Open one letter</button></span>
+    <b>Show</b><span class="seg" id="what"><button data-s="swot">The SWOT</button><button data-s="porter">The five forces</button></span></div>
+  <div class="say" id="say"></div>
+  <div class="stage"><div class="chatstub">The conversation is here, to the left (about 560px). The pane on the right is what changes.</div>
+    <section class="pane"><div class="ph" id="ph"></div><div class="pb" id="pb"></div></section></div>
+  <div class="reco" id="reco"></div>
+</div>
+<script>
+(function(){
+  var SW = {
+    Strengths:[["Wide store network","Present in every governorate, with 140 stores — no competitor is in more than half.","The plan · store count"],["Trusted brand","Customers name Raya first for genuine devices and warranty.","Guided answer · question 1"],["Strong after-sales","Repairs in 48 hours in 90% of cities; repeat purchase follows it.","market-report.pdf"],["Supplier ties","Samsung and Xiaomi deals give first stock of new models.","Guided answer · question 2"],["Retail know-how","Thirty years of running stores; staff trained in-house.","The plan"]],
+    Weaknesses:[["Thin online presence","Online is 6% of sales against 20% for the market.","market-report.pdf"],["Slow pricing","Price changes take a week to reach every store.","Guided answer · question 3"],["Stock gaps","Popular models out of stock in smaller cities for weeks.","The plan"],["Legacy systems","Store systems from 2012 slow pricing and stock.","Guided answer · question 5"],["Few data skills","No analytics team; reports are built by hand.","Guided answer · question 7"]],
+    Opportunities:[["Young population","Half the market is under 25 and upgrades every two years.","Deep research · demographic"],["Financing demand","Instalment buying grew 40% last year.","Deep research · economic"],["Device upgrades","5G handsets reach the mid-range in 2026.","Deep research · technological"],["B2B tenders","Government and corporate device tenders are growing.","market-report.pdf"],["Rural reach","Rural smartphone ownership is still below 60%.","Deep research · demographic"]],
+    Threats:[["Price wars","Online-only sellers undercut mid-range prices by 8%.","market-report.pdf"],["FX swings","Import costs moved 30% in a year.","Deep research · economic"],["Grey imports","Unofficial devices are 15% of the market.","market-report.pdf"],["New entrants","Two regional chains opened in Cairo this year.","market-report.pdf"],["Rising rents","Mall rents up 25% in two years.","The plan"]]
+  };
+  var PO = [["Competitive Rivalry","hi",[["Price wars on mid-range phones","Online-only sellers cut mid-range prices by 8%."],["Grey imports","Unofficial devices sold below official price."]]],
+    ["Threat of New Entrants","me",[["Online-only sellers","Low setup cost; no stores to run."],["Regional chains","Two opened in Cairo this year."]]],
+    ["Threat of Substitutes","lo",[["Refurbished devices","Growing, but only 5% of sales."]]],
+    ["Supplier Power","hi",[["Two brands are 70% of sales","Samsung and Xiaomi set the terms."]]],
+    ["Buyer Power","me",[["B2B tenders squeeze margin","Tenders are decided on price."],["Price comparison apps","Shoppers compare before walking in."]]]];
+  var S = { w:"A", s:"swot", open:{}, dens:"titles", letter:"" };
+  var SAY = {
+    A:['<b>A · Titles, press to open.</b> Each item shows its title only; press it and its description and evidence open under it, press again to close. Several can be open.',['Calm by default: about 5 short lines a letter','Detail exactly where you look'],['To read everything you open each one']],
+    B:['<b>B · One line each.</b> The title, then the description cut to one line; the evidence and the rest show when the item is pressed.',['The gist of every item without pressing','Still one line per item, so the grid stays even'],['Cut sentences can read oddly','Twice the height of A']],
+    C:['<b>C · A Titles / Details switch</b> on the pane\'s header. Titles while working; Details to read it through before Save or Apply. Remembered per person.',['One switch, the whole pane','Details shows everything in full, nothing cut'],['Details is long — the clutter is back, by choice']],
+    D:['<b>D · Open one letter.</b> The grid shows titles; press a letter\'s name and it fills the pane, every item in full with its evidence, and the other three wait as small tiles to switch to.',['Reading in full, one letter at a time, with room','The overview never gets long'],['Comparing items across letters means switching']]
+  };
+  function esc(x){ return x; }
+  function itemA(L, i, it){ var k = L + i, o = !!S.open[k];
+    return '<li><button class="row" data-o="' + k + '" aria-expanded="' + o + '"><span class="chev">▸</span><span class="t">' + it[0] + '</span></button>' +
+      (o ? '<div class="more"><span class="d">' + it[1] + '</span><span class="ev">' + it[2] + '</span></div>' : '') + '</li>'; }
+  function itemB(L, i, it){ var k = L + i, o = !!S.open[k];
+    return '<li><button class="row" data-o="' + k + '" aria-expanded="' + o + '" style="display:block"><span class="t">' + it[0] + '</span>' +
+      '<span class="d' + (o ? '' : ' one') + '">' + it[1] + '</span>' + (o ? '<span class="ev">' + it[2] + '</span>' : '') + '</button></li>'; }
+  function itemC(it){ return '<li><span class="t">' + it[0] + '</span>' + (S.dens === "details" ? '<span class="d">' + it[1] + '</span><span class="ev">' + it[2] + '</span>' : '') + '</li>'; }
+  function swot(){
+    var keys = Object.keys(SW);
+    if (S.w === "D" && S.letter) {
+      var L = S.letter;
+      return '<div class="focus"><h4>' + L + ' <span class="note">' + SW[L].length + ' items</span><button data-l="">← All four</button></h4>' +
+        SW[L].map(function(it, i){ return '<div class="fi"><span class="n">' + (i + 1) + '</span><span class="t">' + it[0] + '</span><span></span><span class="d">' + it[1] + '</span><span></span><span class="ev">' + it[2] + '</span></div>'; }).join("") + '</div>' +
+        '<div class="mini">' + keys.filter(function(k){ return k !== L; }).map(function(k){ return '<div class="L"><h4><button data-l="' + k + '">' + k + '</button><small>' + SW[k].length + '</small></h4></div>'; }).join("") + '</div>';
+    }
+    return '<div class="g4">' + keys.map(function(L){
+      return '<div class="L"><h4>' + (S.w === "D" ? '<button data-l="' + L + '">' + L + ' ›</button>' : L) + '<small>' + SW[L].length + ' items</small></h4><ol>' +
+        SW[L].map(function(it, i){ return S.w === "A" ? itemA(L, i, it) : S.w === "B" ? itemB(L, i, it) : itemC(it); }).join("") + '</ol></div>'; }).join("") + '</div>';
+  }
+  function porter(){
+    var lab = { hi:"High", me:"Medium", lo:"Low" };
+    if (S.w === "D" && S.letter) {
+      var f = PO.filter(function(x){ return x[0] === S.letter; })[0];
+      return '<div class="focus"><h4>' + f[0] + ' <span class="chip ' + f[1] + '">' + lab[f[1]] + ' impact</span><button data-l="">← All five</button></h4>' +
+        f[2].map(function(it, i){ return '<div class="fi"><span class="n">' + (i + 1) + '</span><span class="t">' + it[0] + '</span><span></span><span class="d">' + it[1] + '</span></div>'; }).join("") + '</div>' +
+        '<div class="mini">' + PO.filter(function(x){ return x[0] !== S.letter; }).map(function(x){ return '<div class="L"><h4><button data-l="' + x[0] + '">' + x[0] + '</button><span class="chip ' + x[1] + '">' + lab[x[1]] + '</span></h4></div>'; }).join("") + '</div>';
+    }
+    return '<div class="f5">' + PO.map(function(x){
+      return '<div class="L"><h4>' + (S.w === "D" ? '<button data-l="' + x[0] + '">' + x[0] + ' ›</button>' : x[0]) + '<span class="chip ' + x[1] + '">' + lab[x[1]] + '</span></h4><ol>' +
+        x[2].map(function(it, i){ var w = [it[0], it[1], "Used: market-report.pdf"]; return S.w === "A" ? itemA(x[0], i, w) : S.w === "B" ? itemB(x[0], i, w) : itemC(w); }).join("") + '</ol></div>'; }).join("") + '</div>';
+  }
+  function draw(){
+    document.querySelectorAll("#ways button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.w === S.w)); });
+    document.querySelectorAll("#what button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.s === S.s)); });
+    var sy = SAY[S.w];
+    document.getElementById("say").innerHTML = sy[0] + '<div class="pc">' + sy[1].map(function(x){ return "<span>" + x + "</span>"; }).join("") + sy[2].map(function(x){ return '<span class="m">' + x + "</span>"; }).join("") + "</div>";
+    document.getElementById("ph").innerHTML = '<b>' + (S.s === "swot" ? "SWOT — Mobile v1" : "Micro analysis — the five forces") + '</b>' +
+      (S.w === "C" ? '<span class="sp dens"><button data-d="titles" aria-pressed="' + (S.dens === "titles") + '">Titles</button><button data-d="details" aria-pressed="' + (S.dens === "details") + '">Details</button></span>' : '<span class="sp note">' + (S.w === "D" ? "Press a name to open it" : "Press an item") + '</span>');
+    document.getElementById("pb").innerHTML = S.s === "swot" ? swot() : porter();
+    document.getElementById("reco").innerHTML = '<b>My recommendation: A, with C\'s switch.</b> Titles by default keep the grid calm while you work; pressing an item opens its description and evidence in place, so detail is one press away exactly where you look. And a <b>Titles / Details</b> switch on the pane\'s header opens every item at once for the read-through before Save or Apply. The same in the SWOT, the five forces and DESTEP.';
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-w],[data-s],[data-o],[data-d],[data-l]"); if (!t) return;
+    if (t.dataset.w) { S.w = t.dataset.w; S.open = {}; S.letter = ""; }
+    else if (t.dataset.s) { S.s = t.dataset.s; S.open = {}; S.letter = ""; }
+    else if (t.dataset.o) S.open[t.dataset.o] = !S.open[t.dataset.o];
+    else if (t.dataset.d) S.dens = t.dataset.d;
+    else if (t.dataset.l != null) S.letter = t.dataset.l;
+    draw();
+  });
+  draw();
+})();
+</script>
+</body>
+</html>

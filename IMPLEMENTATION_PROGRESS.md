@@ -4,11 +4,11 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-25 — The start box takes the material (§640).** Notes attached or work pasted there open a free chat that offers to structure it; Foundation's start cards are the guided questions and the template.
+**2026-10-25 — The start box takes the material (§640), merged to `main` on Islam's word.** Notes attached or work pasted there open a free chat that offers to structure it; Foundation's start cards are the guided questions and the template.
 
-**2026-10-25 — A new chat starts on one screen (§639).** A box to just ask — a free chat — and under it the area's ways to start; Foundation's four roads are taken at once. Replaces §633's menu.
+**2026-10-25 — A new chat starts on one screen (§639), merged to `main` on Islam's word.** A box to just ask — a free chat — and under it the area's ways to start; Foundation's four roads are taken at once. Replaces §633's menu.
 
-**2026-10-25 — The Copilot's layout concept, first release (§638).** A 740px reading column, the chats rail open by default, a reply's bold drawn bold; the guided Foundation is chat · cards · to-do with a handle between, and a free chat's draft stands to its right.
+**2026-10-25 — The Copilot's layout concept, first release (§638), merged to `main` on Islam's word.** A 740px reading column, the chats rail open by default, a reply's bold drawn bold; the guided Foundation is chat · cards · to-do with a handle between, and a free chat's draft stands to its right.
 
 **2026-10-25 — The Free chat part aligned with the method, and How we compete and Capabilities chats told their own method (§637), merged to `main` on Islam's word.**
 

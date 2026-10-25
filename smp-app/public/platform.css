@@ -13113,3 +13113,8 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
 .copor { display:flex; align-items:center; gap:10px; margin-top:8px; font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
 .copor::before, .copor::after { content:""; flex:1 1 auto; height:1px; background:var(--line); }
 .copstartcards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:0; }
+/* §640: the start box carries its own paperclip, labelled, under it. */
+.copstartunder { justify-content:flex-start; gap:8px; }
+.copstartclip { display:inline-flex; align-items:center; width:auto; height:26px; padding:0 9px; gap:5px; border:1px solid var(--line); border-radius:7px; font:600 var(--fs-small, 12.5px)/1 var(--sans); color:var(--ink-2); }
+.copstartclip:hover, .copstartclip:focus-visible { border-color:var(--gold); color:var(--ink); outline:none; }
+.copstartunder .cophint { margin-left:0; }

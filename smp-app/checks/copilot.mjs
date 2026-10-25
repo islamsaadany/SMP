@@ -254,6 +254,8 @@ check("each section's guidance carries the house rules; the roads only where the
   check("§637 the Free chat part asks each layer's own measure rule, and borrows the Consultant's questioning",
     /Key Objectives \(North Star\)/.test(FREE.text) && /Capabilities — key measures/.test(FREE.text) && /from Y to Z/.test(FREE.text) &&
     /Proceed with what you have/.test(FREE.text) && /which one wins/.test(FREE.text) && /what you draft is not/.test(FREE.text));
+  check("§640 …and when notes are attached or finished work pasted it says what it found and offers to structure it in one step, inventing nothing",
+    /attaches notes or pastes finished work/.test(FREE.text) && /"Structure it" and "Talk it through first"/.test(FREE.text) && /is not invented/.test(FREE.text));
   check("...and a workflow chat is not", !/THIS IS A FREE CHAT/.test(guidanceFor("foundation", M, [])) && /WHERE THE WORK STARTS/.test(guidanceFor("foundation", M, [])));
 }
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,

@@ -667,7 +667,9 @@
    handle, the rail open by default, a reply's bold drawn bold. */
 /* v7.19-copilot-start — §639: a new chat starts on one screen — a box to
    just ask (a free chat), then the area's ways to start. */
-const SHELL = "smp-shell-v7.19-copilot-start";
+/* v7.20-box-takes-material — §640: the start box takes notes and pasted
+   work; Foundation's start cards are the guided questions and the template. */
+const SHELL = "smp-shell-v7.20-box-takes-material";
 const ASSETS = [
   "/",
   "/index.html",

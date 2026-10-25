@@ -1419,10 +1419,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector(".copstart [data-cop-road]", { timeout: 10000 });
     const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".copstart .coppcard")).map((b) => ({ k: b.dataset.copRoad, rec: b.classList.contains("rec"),
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
-    const box0 = await page.evaluate(() => ({ box: !!document.querySelector(".copstart [data-cop-starttext]"), above: (() => { const b = document.querySelector(".copstart .copbox"), c = document.querySelector(".copstart .coppcard"); return b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false; })() }));
-    check(roads.length === 4 && roads[0].k === "guided" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
-      roads.every((r) => r.d.length > 20) && !roads.some((r) => /research/i.test(r.t + r.d)) && box0.box && box0.above,
-      "§639 the start screen: a box to just ask, and under it the four roads, each with a sentence, none marked Recommended (§475), no deep research", JSON.stringify({ roads, box0 }));
+    const box0 = await page.evaluate(() => ({ box: !!document.querySelector(".copstart [data-cop-starttext]"), clip: !!document.querySelector(".copstart [data-cop-startattach]"), above: (() => { const b = document.querySelector(".copstart .copbox"), c = document.querySelector(".copstart .coppcard"); return b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false; })() }));
+    check(roads.map((r) => r.k).join() === "guided,template" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
+      roads.every((r) => r.d.length > 20) && box0.box && box0.clip && box0.above,
+      "§640 the start screen: a box to ask, attach notes or paste, and under it only the roads that differ — guided questions and the template — none marked Recommended (§475)", JSON.stringify({ roads, box0 }));
     await shot("2-roads");
     await page.click('.copstart [data-cop-road="guided"]');
     await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
@@ -2110,6 +2110,22 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
       "…kept in its area, marked free, with what was typed as its first message, said once", JSON.stringify(row));
     await page.locator("[data-cop-home]:visible").first().click();
     check(!!(await page.$("[data-cop-startscreen]")), "§639 + New chat brings the start screen back");
+    /* §640 THE BOX TAKES THE MATERIAL: notes picked there open a free chat
+       with the file waiting above its box and what was typed kept, to go as
+       one message; a file the Copilot cannot read makes no chat at all. */
+    const chats0 = await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_chats")).then((r) => r.rows[0].n);
+    await page.setInputFiles("[data-cop-startfile]", { name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("x") });
+    await page.waitForTimeout(400);
+    const refused = { chats: await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_chats")).then((r) => r.rows[0].n), say: await page.evaluate(() => (document.querySelector(".copsay") || {}).textContent || "") };
+    check(refused.chats === chats0 && /Word \(\.docx\), PDF and Excel/.test(refused.say), "§640 a file the Copilot cannot read is refused in words on the start screen, and no chat is made", JSON.stringify(refused));
+    await page.fill("[data-cop-starttext]", "Here are my notes");
+    await page.setInputFiles("[data-cop-startfile]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx")) });
+    await page.waitForSelector(".coppend .copfile", { timeout: 10000 }).catch(() => {});
+    const att = await page.evaluate(() => ({ chip: ((document.querySelector(".coppend") || {}).textContent || ""), kept: (document.querySelector("[data-cop-text]") || {}).value || "",
+      tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || "") }));
+    const frow = (await asTenant(tenantId, (c) => c.query("select c.extra, (select count(*)::int from copilot_files f where f.chat_id = c.id) files from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
+    check(/notes\.docx/.test(att.chip) && att.kept === "Here are my notes" && /Free chat/.test(att.tag) && frow && frow.extra && frow.extra.free === true && frow.files === 1,
+      "§640 notes attached on the start screen open a free chat with the file waiting above its box and the typed words kept", JSON.stringify({ att, frow }));
     const sent = MODEL_SEEN.slice(n0).find(Boolean);
     const sys = sent ? JSON.stringify(sent.systemInstruction || sent.system || "") : "";
     check(/FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /WHAT THE PLATFORM SHOWS FOR THIS PLACE/.test(sys),

@@ -221,18 +221,31 @@ var COPILOT = (function(){
     advisory: ["Bring a decision", "A few questions, then a decision brief."]
   };
   var STARTTEXT = {};            /* place|section → what is half typed in the start box */
+  /* §640 THE BOX TAKES THE MATERIAL (Islam: "don't you think that uploading
+     raw notes or importing a finished foundation is a form of free chat?";
+     design-mockups/copilot-start/2026-10-25_box-takes-material.html, signed
+     off). Notes attached or finished work pasted go in the box and open a
+     free chat, which says what it found and offers to structure it (Copilot
+     settings › Free chat). So the cards keep only the roads that really
+     differ: in Foundation, the guided questions and the template. */
+  var STARTROADS = ["guided", "template"];
+  var BOXWORK = { foundation:"a finished Foundation", analysis:"an earlier SWOT or analysis", compete:"your value proposition",
+    directions:"your Directions", capabilities:"your Capabilities", execution:"your plan", advisory:"the papers behind your decision" };
   function startHtml(){
     var s = section(), area = placeWord() + "’s " + sectionWord();
     var cards = s === "foundation"
-      ? PATH_CARDS.map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
+      ? PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
       : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
           '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]);
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
-      '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything about ' + E(placeWord() + "’s " + sectionWord().toLowerCase()) + '…" aria-label="Ask the Copilot — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
+      '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
         '<button type="button" class="copsend" data-cop-startsend aria-label="Start a free chat" title="Send">' + SENDMARK + '</button></div>' +
-      '<p class="copstartk">Typing here starts a free chat. Enter sends · Shift + Enter for a new line.</p>' +
+      '<div class="copunder copstartunder"><button type="button" class="copclip copstartclip" data-cop-startattach aria-label="Attach notes — a Word, PDF or Excel file" title="Attach notes — a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '<span>Attach notes</span></button>' +
+        '<input type="file" hidden data-cop-startfile accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
+        '<span class="cophint">Word, PDF or Excel · or paste · Enter sends</span></div>' +
+      '<p class="copstartk">Typing, attaching or pasting here starts a free chat.</p>' +
       '<div class="copor">or start step by step</div>' +
       '<div class="coppaths copstartcards">' + cards + '</div></div>';
   }
@@ -1036,7 +1049,7 @@ var COPILOT = (function(){
         out.push(aiMsg("When the parts read as you want them, check them together and save the Foundation." +
           '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck' + (busyHere ? ' disabled' : '') + '>Check the whole Foundation</button></div>'));
     } else {
-      out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
+      out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){
         return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
       }).join("") + '</div>' : ''), true));
@@ -3187,15 +3200,19 @@ var COPILOT = (function(){
   }
   /* What is typed on the start screen opens a free chat and is its first
      message — said once, never lost: the box keeps it until the chat exists. */
-  function startFree(){
+  function startFree(file){
     var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
-    if (!text.trim() || THINKING || !canEdit()) { if (t) t.focus(); return; }
+    if ((!text.trim() && !file) || THINKING || !canEdit()) { if (t) t.focus(); return; }
     act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       delete STARTTEXT[k];
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       OPEN[key()] = { kind:"chat", id: j.chat.id };
-      draw(); send(text);
+      /* §640: a file picked on the start screen waits above the chat's box
+         with whatever was typed, to be sent as one message; typed words
+         alone are sent at once. */
+      if (file) { DRAFT[j.chat.id] = text; draw(); attach(file); }
+      else { draw(); send(text); }
     });
   }
   function send(forced){
@@ -3237,11 +3254,15 @@ var COPILOT = (function(){
 
   /* A FILE, read in the browser only as far as its size and name; the server
      decides whether it can be read at all and says so in words. */
+  function fileProblem(file){
+    if (!/\.(docx|pdf|xlsx)$/i.test(file.name)) return "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again.";
+    if (file.size > MAX_FILE) return "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters.";
+    return "";
+  }
   function attach(file){
     if (!file || !PANE || !PANE.chat) return;
-    var id = PANE.chat.id;
-    if (!/\.(docx|pdf|xlsx)$/i.test(file.name)) { SAY = "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again."; draw(); return; }
-    if (file.size > MAX_FILE) { SAY = "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters."; draw(); return; }
+    var id = PANE.chat.id, bad = fileProblem(file);
+    if (bad) { SAY = bad; draw(); return; }
     var r = new FileReader();
     r.onload = function(){
       var data = String(r.result || "").replace(/^data:[^,]*,/, "");
@@ -3254,6 +3275,10 @@ var COPILOT = (function(){
     r.readAsDataURL(file);
   }
   document.addEventListener("change", function(ev){
+    var sf = hit(ev, "[data-cop-startfile]");
+    if (sf) { var sfile = sf.files && sf.files[0]; sf.value = ""; if (!sfile) return;
+      var sbad = fileProblem(sfile); if (sbad) { SAY = sbad; draw(); return; }   /* refused before any chat is made */
+      startFree(sfile); return; }
     var f = hit(ev, "[data-cop-file]"); if (!f) return;
     var file = f.files && f.files[0]; f.value = ""; attach(file);
   });
@@ -3304,6 +3329,7 @@ var COPILOT = (function(){
       draw(); var st = document.querySelector("[data-cop-starttext]"); if (st) st.focus(); return;
     }
     if ((b = hit(ev, "[data-cop-startsend]"))) { startFree(); return; }
+    if ((b = hit(ev, "[data-cop-startattach]"))) { var sfi = document.querySelector("[data-cop-startfile]"); if (sfi) sfi.click(); return; }
     if ((b = hit(ev, "[data-cop-road]"))) { newFoundation(b.getAttribute("data-cop-road")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       MENU = null;

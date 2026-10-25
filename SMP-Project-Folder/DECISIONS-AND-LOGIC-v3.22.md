@@ -69614,6 +69614,17 @@ Islam: *"in the copilot choices in the different areas can we have a free chat o
 
 **CHECKED.** `checks/shell.mjs` presses through the menu wherever it opened a workflow, and a new section 3j2 presses Free chat and reads it back: the two choices in order, the choice shuts on a press elsewhere, a plain chat opens with the rail tag, the row is the area's and marked free, and what reached the model carries the area's method and what the plan shows. 441 ok; the 11 red are red identically on `main`'s own build (435 ok, the same 11), the 80%-zoom sizes of §631 and two not this change. `SHELL` **`smp-shell-v7.15-copilot-free-chat`**.
 
+## §634 — The Copilot reads Competitive Discipline and the capabilities too (2026-10-25)
+Islam, of a free chat in Foundation: *"does a chat in the Foundation reads the other areas in the plan"* — it did (foundation, SWOT, directions and measures, tactics, projects, actions; the chat's own area first, §457) except two — *"Add them"*.
+
+The plan text every Copilot message carries (`planText` in `copilot.js`) now holds **COMPETITIVE DISCIPLINE** — the discipline in words and each value with its how and measure, read through `competeOf` as the Competitive Discipline page reads it — and **CAPABILITIES**, the company's, each with its kind, the directions it serves and its owner. The area order is the plan's (foundation, analysis, compete, directions, capabilities, execution), the chat's own area still first. A whole unit's plan stays well inside the 24,000 characters the server takes (§457). Snapshot: `ui-versions/copilot.js/2026-10-25_before-plan-compete-caps.js`.
+
+**CHECKED.** `checks/shell.mjs` 3j2 sets a discipline, a value and a capability on the page's own objects and reads them back off what reached the model. 442 ok; the same 11 red as `main`'s own build. `SHELL` **`smp-shell-v7.16-plan-compete-caps`**.
+
+## §635 — The "+ New chat" choice opens on screen (2026-10-25)
+Islam's screenshot: the choice §633 added was cut off at the page's left edge — "…undation workflow", "…e chat". It was anchored to the rail's RIGHT and is wider than the rail (228px against a rail of 160–280), so it ran out past the rail's left side. It is now anchored at the rail's LEFT edge and opens rightward over the chat, which always has room. The look is otherwise unchanged. Snapshot: `ui-versions/copilot.css/2026-10-25_before-menu-left.css`; screenshot `design-mockups/copilot-free-chat/2026-10-25_menu-fixed.png`.
+
+**CHECKED.** `checks/shell.mjs` 3j2 now measures the open choice: it starts inside the rail and lies wholly within the window. 443 ok; the same 11 red as `main`'s own build. `SHELL` **`smp-shell-v7.17-new-menu-left`**.
 
 ## §636 — A free chat talks before it drafts, by its own part in Copilot settings (2026-10-25)
 Islam, of a free chat asked to "refine the key objectives with proper targets" that answered at once with a critique, a Missing box and a whole revised set: *"it needs to bring something and verify what we are talking about .. ask if we take them 1 by one or all at once .. ask about a baseline number now to reference to the targets and can accept if the user request a pure assumption"*; then *"keep the instructions in the ai settings … or shall we keep it for all as a separate section and widen the instructions as a baseline is not viable in the analysis or directions setting but makes sense in setting objectives"*.

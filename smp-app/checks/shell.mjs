@@ -2016,6 +2016,12 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.click(".copnew[data-cop-newmenu]");
     const m = await page.evaluate(() => Array.from(document.querySelectorAll(".copnewmenu button b")).map((b) => b.textContent));
     check(JSON.stringify(m) === JSON.stringify(["SWOT workflow", "Free chat"]), "+ New chat offers the area's workflow, then a free chat", JSON.stringify(m));
+    /* The whole choice is on screen and starts inside the rail — anchored
+       right it ran off the page's left edge (2026-10-25). */
+    const box = await page.evaluate(() => { const r = document.querySelector(".copnewmenu").getBoundingClientRect(), l = document.querySelector(".coprails").getBoundingClientRect();
+      return { left: Math.round(r.left), right: Math.round(r.right), rails: Math.round(l.left), win: innerWidth }; });
+    if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/free-chat-menu.png" });
+    check(box.left >= box.rails - 1 && box.left >= 0 && box.right <= box.win, "…and the whole choice is on screen, opening from the rail's left edge", JSON.stringify(box));
     await page.click("body", { position: { x: 5, y: 5 } });
     check(!(await page.$(".copnewmenu")), "a press elsewhere shuts the choice");
     await page.click(".copnew[data-cop-newmenu]");
@@ -2026,6 +2032,13 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     check(!v.sw && /Free chat/.test(v.tag), "a free chat opens as a plain conversation and the rail says Free chat", JSON.stringify(v));
     const row = (await asTenant(tenantId, (c) => c.query("select section, extra from copilot_chats order by created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true, "it is kept in its area, marked free", JSON.stringify(row));
+    /* §634: Competitive Discipline and the capabilities ride along too —
+       set on the page's own objects, as their pages would set them. */
+    await page.evaluate(() => {
+      const w = competeWritable("mobile"); w.discipline = "btc";
+      w.values = [{ title: "Lowest price", how: ["One price list"], measure: ["Price gap under 2%"] }];
+      GROUP.capabilities = (GROUP.capabilities || []).concat([{ id: "capx", name: "Store analytics", capKind: "enabler", serves: [] }]);
+    });
     const n0 = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Which weakness hurts us most?");
     await page.click("[data-cop-send]");
@@ -2035,6 +2048,8 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     const sys = sent ? JSON.stringify(sent.systemInstruction || sent.system || "") : "";
     check(/FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /WHAT THE PLATFORM SHOWS FOR THIS PLACE/.test(sys),
       "the free chat is answered from the area's method and what the plan shows", sys.slice(0, 160));
+    check(/COMPETITIVE DISCIPLINE[\s\S]*Best Total Cost[\s\S]*Lowest price/.test(sys) && /CAPABILITIES[\s\S]*Store analytics \(Enabler/.test(sys),
+      "…and it reads Competitive Discipline and the capabilities as well as the other areas (§634)", sys.length);
     check(!errs.length, "no page errors", errs.join(" | "));
   } finally {
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});

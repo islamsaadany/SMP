@@ -64837,7 +64837,7 @@ var COPILOT = (function(){
     var shut = railFolded();
     return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
-        (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
+        (canEdit() ? '<button type="button" class="coptog" data-cop-home aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails" data-cop-rails>' + railsInner() +
       '</aside>' +
       '<div class="copmain" data-cop-main>' + mainHtml() + '</div>' +
@@ -64862,20 +64862,42 @@ var COPILOT = (function(){
   function chatsHead(){
     var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railFolded() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
     return archView() ? tog + '<span class="coprhl">Archived chats</span>'
-      : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newmenu aria-haspopup="menu" aria-expanded="' + (MENU === "new") + '">+ New chat</button>' + newMenu() : '');
+      : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-home>+ New chat</button>' : '');
   }
-  /* A NEW CHAT IS A CHOICE (2026-10-25, Islam: "a free chat option" in every
-     area; design-mockups/copilot-free-chat/2026-10-25_free-chat.html). The
-     first is the area's own workflow, exactly what "+ New chat" did before;
-     the second is a plain conversation, answered from the area's method and
-     the plan as written for this place. */
+  /* §639 A NEW CHAT STARTS ON ONE SCREEN (Islam chose C of the signed-off
+     design-mockups/copilot-start/2026-10-25_free-chat-entry.html, asking
+     "why isn't free chat one of the options inside the creation options …
+     to be more consistent?"). It replaces §633's menu of two. The screen is
+     what an area opens on and what "+ New chat" brings back: a box to just
+     ask — typing in it IS a free chat — and, under it, the area's own ways
+     to start, step by step. Foundation's are its four roads, taken at once;
+     every other area's is its workflow, whose own ways (a SWOT's notes and
+     templates) live inside it. */
   var WORKFLOW_WORD = { foundation:"Foundation workflow", analysis:"SWOT workflow", compete:"Competitive Discipline workflow",
     directions:"Directions workflow", capabilities:"Capabilities workflow", execution:"Execution workflow", advisory:"Advisory workflow" };
-  function newMenu(){
-    if (MENU !== "new") return '';
-    return '<div class="copmenu copnewmenu" role="menu">' +
-      '<button type="button" role="menuitem" data-cop-newchat><b>' + E(WORKFLOW_WORD[section()] || "Workflow") + '</b><small>Step by step, Forefront\'s method</small></button>' +
-      '<button type="button" role="menuitem" data-cop-newfree><b>Free chat</b><small>Ask anything about the plan</small></button></div>';
+  var STARTS = {
+    analysis: ["SWOT, step by step", "The internal, micro and macro analyses, then the SWOT — from notes, a template or guided questions."],
+    compete: ["Score the value disciplines", "Market and internal factors, then the value proposition."],
+    directions: ["Suggest and score Directions", "From the SWOT and the discipline, scored Urgency × Importance × Ease."],
+    capabilities: ["Choose Capabilities", "What the chosen Directions need, each with an owner."],
+    execution: ["Plan the period", "Measures and tactics for each Direction, by quarter."],
+    advisory: ["Bring a decision", "A few questions, then a decision brief."]
+  };
+  var STARTTEXT = {};            /* place|section → what is half typed in the start box */
+  function startHtml(){
+    var s = section(), area = placeWord() + "’s " + sectionWord();
+    var cards = s === "foundation"
+      ? PATH_CARDS.map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
+          '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
+      : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
+          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]);
+    return '<div class="copstart" data-cop-startscreen>' +
+      '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
+      '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything about ' + E(placeWord() + "’s " + sectionWord().toLowerCase()) + '…" aria-label="Ask the Copilot — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
+        '<button type="button" class="copsend" data-cop-startsend aria-label="Start a free chat" title="Send">' + SENDMARK + '</button></div>' +
+      '<p class="copstartk">Typing here starts a free chat. Enter sends · Shift + Enter for a new line.</p>' +
+      '<div class="copor">or start step by step</div>' +
+      '<div class="coppaths copstartcards">' + cards + '</div></div>';
   }
   function chatsFoot(){
     var l = list();
@@ -64932,6 +64954,7 @@ var COPILOT = (function(){
   function mainHtml(){
     var o = OPEN[key()];
     var say = SAY ? '<div class="copsay" role="status">' + E(SAY) + '</div>' : '';
+    if (!o && canEdit()) return say + startHtml();
     if (!o) return say + '<div class="copempty">' +
       '<b>' + (canEdit() ? 'Start a chat, or open a deliverable.' : 'Open a chat or a deliverable.') + '</b>' +
       'A chat here is about ' + E(placeWord()) + '’s ' + E(sectionWord()) + '.</div>';
@@ -65434,6 +65457,22 @@ var COPILOT = (function(){
   /* The flow's own screen while it is the guided road or no road is chosen
      yet; the other three roads go on as an ordinary chat (§465). */
   function flowView(){ return flowOn() && (PANE.flow.path === "guided" || !PANE.flow.path); }
+  function pickPath(k){
+    var g2 = flowCopy(); g2.path = k;
+    if (g2.path === "guided") { g2.phase = g2.y0 && g2.y1 ? "ask" : "year"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
+    flowSave(g2, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); });
+  }
+  /* §639: a road chosen on the start screen is taken the moment the flow
+     reaches its roads — at once on a place with no Foundation, after "start
+     fresh" on one that has it. "Start from it" is the guided road already. */
+  var PENDROAD = {};             /* chat id → the road chosen on the start screen (this visit only) */
+  function applyRoad(){
+    if (!flowOn()) return;
+    var id = PANE.chat.id, r = PENDROAD[id], f = PANE.flow; if (!r) return;
+    if (f.path || f.start === "plan") { delete PENDROAD[id]; return; }
+    if (f.phase !== "path" || !canEdit()) return;
+    delete PENDROAD[id]; pickPath(r);
+  }
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
@@ -65981,11 +66020,7 @@ var COPILOT = (function(){
       var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "ask"; g.e = 0; g.qi = 0; SAY = "";
       flowSave(g, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
-    if ((b = hit(ev, "[data-cop-path]"))) {
-      var g2 = flowCopy(); g2.path = b.getAttribute("data-cop-path");
-      if (g2.path === "guided") { g2.phase = g2.y0 && g2.y1 ? "ask" : "year"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
-      flowSave(g2, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
-    }
+    if ((b = hit(ev, "[data-cop-path]"))) { pickPath(b.getAttribute("data-cop-path")); return true; }
     if ((b = hit(ev, "[data-cop-start]"))) {
       /* START FROM IT fills the cards from the plan, each part already
          agreed and marked as the plan's; START FRESH goes to the roads. */
@@ -66209,6 +66244,8 @@ var COPILOT = (function(){
   function keepDraft(){
     var t = document.querySelector("[data-cop-text]");
     if (t && PANE && PANE.chat) DRAFT[PANE.chat.id] = t.value;
+    var st = document.querySelector("[data-cop-starttext]");
+    if (st) STARTTEXT[key()] = st.value;
   }
   function draw(){
     keepDraft();
@@ -66221,6 +66258,7 @@ var COPILOT = (function(){
     if (penAt) { var pb = document.querySelector("[data-cop-pentext]"); if (pb) { pb.focus(); try { pb.setSelectionRange(penAt[0], penAt[1]); } catch (e) {} } }
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
+    applyRoad();
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
   /* THE PANE FILLS THE WINDOW (§453): it ends at the bottom of the screen,
@@ -66683,7 +66721,7 @@ var COPILOT = (function(){
     return s ? '<a class="copall" data-cop-all href="/' + E(s) + '/copilot">All chats on this client &rsaquo;</a>' : '';
   }
   function railsInner(){
-    return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + (MENU === "new" ? " copmenuopen" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
+    return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
         '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
         '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
       '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
@@ -67764,6 +67802,7 @@ var COPILOT = (function(){
   });
   document.addEventListener("keydown", function(ev){
     if (ev.key === "Enter" && !ev.shiftKey && hit(ev, "[data-cop-text]")) { ev.preventDefault(); send(); }
+    if (ev.key === "Enter" && !ev.shiftKey && hit(ev, "[data-cop-starttext]")) { ev.preventDefault(); startFree(); }
     if (hit(ev, "[data-cop-pentext]")) {
       if (ev.key === "Escape") { ev.preventDefault(); CARDPEN = null; draw(); return; }
       if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); penSave(); return; }
@@ -67800,6 +67839,28 @@ var COPILOT = (function(){
      Copilot is working, because a draft can take most of a minute and a box
      that sits still for that long reads as broken (§124). The server's own
      list replaces the page's guess when it lands. */
+  function newFoundation(road){
+    act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
+      var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+      if (road) PENDROAD[j.chat.id] = road;
+      PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
+      OPEN[key()] = { kind:"chat", id: j.chat.id };
+      openItem("chat", j.chat.id);
+    });
+  }
+  /* What is typed on the start screen opens a free chat and is its first
+     message — said once, never lost: the box keeps it until the chat exists. */
+  function startFree(){
+    var t = document.querySelector("[data-cop-starttext]"), text = t ? t.value : "", k = key();
+    if (!text.trim() || THINKING || !canEdit()) { if (t) t.focus(); return; }
+    act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
+      var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+      delete STARTTEXT[k];
+      PANE = { id: j.chat.id, chat: j.chat, messages: [] };
+      OPEN[key()] = { kind:"chat", id: j.chat.id };
+      draw(); send(text);
+    });
+  }
   function send(forced){
     if (!PANE || !PANE.chat || THINKING) return;
     var id = PANE.chat.id, t = document.querySelector("[data-cop-text]");
@@ -67877,7 +67938,7 @@ var COPILOT = (function(){
   });
   /* A press anywhere else shuts an open menu, on pointerdown (§100.4). */
   document.addEventListener("pointerdown", function(ev){
-    if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]") && !hit(ev, "[data-cop-newmenu]")) { MENU = null; draw(); }
+    if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]")) { MENU = null; draw(); }
   }, true);
   document.addEventListener("click", function(ev){
     var b;
@@ -67900,19 +67961,13 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
       applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
-    if ((b = hit(ev, "[data-cop-newmenu]"))) { MENU = MENU === "new" ? null : "new"; ASKDEL = null; draw(); return; }
-    /* The slim strip's "+" opens the rail with the choice showing. */
-    if ((b = hit(ev, ".copslim [data-cop-newchat]"))) { MENU = "new"; RAILKEPT = true; setRail(false); draw(); return; }
-    if ((b = hit(ev, "[data-cop-newfree]"))) {
-      MENU = null;
-      act({ act:"newChat", place: place(), section: section(), free: true, title: "Free chat — " + placeWord() }, function(j){
-        var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-        PANE = { id: j.chat.id, chat: j.chat, messages: [] };
-        OPEN[key()] = { kind:"chat", id: j.chat.id };
-        draw(); var t = document.querySelector("[data-cop-text]"); if (t) t.focus();
-      });
-      return;
+    if ((b = hit(ev, "[data-cop-home]"))) {
+      MENU = null; ASKDEL = null; SAY = ""; SHEET = ""; delete OPEN[key()]; PANE = null;
+      if (hit(ev, ".copslim")) { RAILKEPT = true; setRail(false); }
+      draw(); var st = document.querySelector("[data-cop-starttext]"); if (st) st.focus(); return;
     }
+    if ((b = hit(ev, "[data-cop-startsend]"))) { startFree(); return; }
+    if ((b = hit(ev, "[data-cop-road]"))) { newFoundation(b.getAttribute("data-cop-road")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       MENU = null;
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
@@ -67950,15 +68005,7 @@ var COPILOT = (function(){
         });
         return;
       }
-      if (section() === "foundation") {
-        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
-          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-          PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
-          OPEN[key()] = { kind:"chat", id: j.chat.id };
-          openItem("chat", j.chat.id);
-        });
-        return;
-      }
+      if (section() === "foundation") { newFoundation(""); return; }
       act({ act:"newChat", place: place(), section: section() }, function(j){
         var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
         PANE = { id: j.chat.id, chat: j.chat, messages: [] };

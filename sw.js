@@ -665,7 +665,9 @@
 /* v7.18-copilot-layout — §638: the Copilot's layout concept — a 740px
    reading column, the chat first and its work to the right behind a
    handle, the rail open by default, a reply's bold drawn bold. */
-const SHELL = "smp-shell-v7.18-copilot-layout";
+/* v7.19-copilot-start — §639: a new chat starts on one screen — a box to
+   just ask (a free chat), then the area's ways to start. */
+const SHELL = "smp-shell-v7.19-copilot-start";
 const ASSETS = [
   "/",
   "/index.html",

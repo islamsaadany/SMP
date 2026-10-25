@@ -12493,15 +12493,8 @@ body.presenting #buildband { display:none; }
                   color:var(--ink); padding:6px 10px; border-radius:5px; cursor:pointer; }
 .copmenu button:hover, .copmenu button:focus-visible { background:var(--surface-2); outline:none; }
 .copmenu .danger { color:var(--bad-tx); }
-/* "+ New chat" opens a choice (2026-10-25): workflow or free chat. */
+/* §639: "+ New chat" goes to the start screen; §633's menu of two is gone. */
 .coprh { position:relative; }
-.coprail.copmenuopen { overflow:visible; }
-/* Anchored at the rail's LEFT and opening rightward over the chat: the
-   rail is narrower than the choice, and anchored right it ran off the
-   page's left edge and was cut (Islam's screenshot, 2026-10-25). */
-.copnewmenu { left:8px; right:auto; top:calc(100% - 4px); min-width:228px; text-transform:none; letter-spacing:0; }
-.copnewmenu button b { display:block; font-weight:600; color:var(--ink); }
-.copnewmenu button small { display:block; font:var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-3); }
 .coprow .copren { flex:1 1 auto; min-width:0; margin:6px 10px; font-weight:600; }
 .coprow.ask { flex-wrap:wrap; gap:6px; padding:8px 12px; }
 .coprow.ask .copt { flex:1 1 100%; min-width:0; }
@@ -13109,3 +13102,14 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
   .copsplit.sheet > .copout { padding:0; overflow:hidden; }
   .copflow.sheet > .copshade, .copsplit.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
 }
+
+/* ── §639 THE START SCREEN (option C of the signed-off
+   design-mockups/copilot-start/2026-10-25_free-chat-entry.html): the box
+   to just ask at the reading width, then the area's ways to start. ── */
+.copstart { width:100%; max-width:var(--cop-read, 740px); margin:clamp(16px, 8vh, 72px) auto 24px; display:flex; flex-direction:column; gap:12px; }
+.copstarth { margin:0 0 4px; text-align:center; font:700 20px/1.3 var(--sans); color:var(--ink); }
+.copstartbox textarea { min-height:72px; }
+.copstartk { margin:-4px 0 0; text-align:center; font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copor { display:flex; align-items:center; gap:10px; margin-top:8px; font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+.copor::before, .copor::after { content:""; flex:1 1 auto; height:1px; background:var(--line); }
+.copstartcards { grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); margin-top:0; }

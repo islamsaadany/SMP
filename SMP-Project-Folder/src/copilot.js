@@ -1871,8 +1871,9 @@ var COPILOT = (function(){
     }
     if (ext.length) out.push(aiMsg((ext.length === 2 ? 'Both analyses are' : 'The analysis is') + ' agreed.'));
     if (!s.draft) return out.join("") + aiMsg('Ready to draft the SWOT.' + (ed ? swOpts([swOpt('data-cop-sw-draft', "Draft the SWOT", true, busyHere)]) : ''));
-    var again = s.phase === "draft" && ed ? [swOpt('data-cop-sw-draft', "Draft it again", false, busyHere), ext.length ? swOpt('data-cop-sw-go="analyses"', "Go back to the analyses") : ''] : [];
-    out.push(aiMsg('The SWOT is drafted — ' + swLines(s.draft) + ' lines, on the right.' + (s.check ? '' : swOpts(s.phase === "draft" && ed ? [swOpt('data-cop-sw-check', "Check it", true, busyHere)].concat(again) : []))));
+    var working = s.phase === "draft" || s.phase === "check";   /* the server's two phases of a draft not yet saved */
+    var again = working && ed ? [swOpt('data-cop-sw-draft', "Draft it again", false, busyHere), ext.length ? swOpt('data-cop-sw-go="analyses"', "Go back to the analyses") : ''] : [];
+    out.push(aiMsg('The SWOT is drafted — ' + swLines(s.draft) + ' lines, on the right.' + (s.check ? '' : swOpts(working && ed ? [swOpt('data-cop-sw-check', "Check it", true, busyHere)].concat(again) : []))));
     if (s.check) {
       out.push(meMsg("Check it"));
       out.push(aiMsg((s.check.agree.length ? s.check.agree.map(E).join(" ") : 'I checked it.') +
@@ -1969,7 +1970,7 @@ var COPILOT = (function(){
         '<button type="button" data-cop-sw-dens="1" aria-pressed="' + det + '">Details</button></span>' +
       '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button></div>';
     var body;
-    if (s.draft && (s.phase === "draft" || s.phase === "saved")) body = swGridHtml(s.draft) + swCheckHtml(s);
+    if (s.draft && (s.phase === "draft" || s.phase === "check" || s.phase === "saved")) body = swGridHtml(s.draft) + swCheckHtml(s);
     else if (s.phase === "analyses" && swExternal(s).length) body = swExternal(s).map(function(a){ return swAnalysisPage(s, a, ed, busyHere); }).join("");
     else body = swSoFarHtml(s);
     return '<div class="copleft copswpane" data-cop-swpane>' + head + '<div class="copswpb">' + body + '</div>' + swFootHtml(s, ed, busyHere) + '</div>';
@@ -1999,7 +2000,7 @@ var COPILOT = (function(){
     var state = saved ? '<span class="copsvst ' + (on ? 'ok' : 'warn') + '" data-cop-swstate>' + (on ? 'On the plan as v' + E(s.saved.n) : 'Saved as v' + E(s.saved.n) + ' · not on the plan yet') + '</span>'
       : '<span class="copm" data-cop-swstate>' + (s.draft ? 'Save keeps a version under Deliverables' : 'Drafted once the analyses are agreed') + '</span>';
     return '<div class="copoutf copswfoot" data-cop-swfoot>' + state + '<span class="copsw-sp"></span>' +
-      (ed ? '<button type="button" class="copbtn" data-cop-sw-finish' + (s.draft && s.phase === "draft" && !busyHere ? '' : ' disabled') + '>Save</button>' +
+      (ed ? '<button type="button" class="copbtn" data-cop-sw-finish' + (s.draft && (s.phase === "draft" || s.phase === "check") && !busyHere ? '' : ' disabled') + '>Save</button>' +
         '<button type="button" class="copbtn solid" data-cop-sw-apply' + (saved && !busyHere ? '' : ' disabled') + '>Apply to plan</button>' : '') + '</div>';
   }
   function swAnalysisPage(s, area, ed, busyHere){

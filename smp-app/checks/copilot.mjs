@@ -46,7 +46,7 @@ import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
-import { methodFor, templateFile } from "../lib/copilot-settings.ts";
+import { methodFor, templateFile, AREA_PARTS, areaPartKeys } from "../lib/copilot-settings.ts";
 import { copilotSettingsAction } from "../lib/copilot-settings-api.ts";
 import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { periodQuarters as exQs, periodWords as exWords, validPeriod as exValid, periodChoices as exChoices, withPeriod as exWith, cleanItem as exItem, newExec, todoOf as exTodo, finishBlocker as exBlock } from "../lib/copilot-execution.ts";
@@ -246,6 +246,14 @@ check("each section's guidance carries the house rules; the roads only where the
     /THIS IS A FREE CHAT/.test(gf) && !/WHERE THE WORK STARTS/.test(gf) && !/WAYS TO START/.test(gf) &&
     /as your reference/.test(gf) && gf.indexOf("Three to five") < gf.indexOf("THIS IS A FREE CHAT") &&
     gf.indexOf("THIS IS A FREE CHAT") < gf.indexOf("LIMITS FOR YOUR ANSWER") && /Never invent a figure/.test(gf), gf.slice(0, 300));
+  check("§635 every Copilot area is told a method: How we compete and Capabilities their own part, Directions only its own two",
+    SECTIONS.every((k) => areaPartKeys(k).length > 0) && areaPartKeys("compete").join() === "part6" &&
+    areaPartKeys("capabilities").join() === "part8" && areaPartKeys("directions").join() === "part7,part9" &&
+    areaPartKeys("foundation").join() === "part1" && areaPartKeys("advisory").join() === "part14" &&
+    Object.values(AREA_PARTS).flat().every((k) => DEFAULT_PARTS.some((p) => p.key === k)), SECTIONS.map((k) => k + ":" + areaPartKeys(k).join("+")).join(" "));
+  check("§635 the Free chat part asks each layer's own measure rule, and borrows the Consultant's questioning",
+    /Key Objectives \(North Star\)/.test(FREE.text) && /Capabilities — key measures/.test(FREE.text) && /from Y to Z/.test(FREE.text) &&
+    /Proceed with what you have/.test(FREE.text) && /which one wins/.test(FREE.text) && /what you draft is not/.test(FREE.text));
   check("...and a workflow chat is not", !/THIS IS A FREE CHAT/.test(guidanceFor("foundation", M, [])) && /WHERE THE WORK STARTS/.test(guidanceFor("foundation", M, [])));
 }
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,

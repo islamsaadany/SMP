@@ -37,7 +37,7 @@ import {
   saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
   withYear,
 } from "../../lib/copilot-flow.ts";
-import { methodFor, templateNamesFor } from "../../lib/copilot-settings.ts";
+import { methodFor, methodForArea, templateNamesFor } from "../../lib/copilot-settings.ts";
 import { shellHeaders } from "../../lib/shell.ts";
 import { listDocument, refusedCopilot, barOf, type Names, type ListAsk } from "./page.ts";
 import { doorPool } from "../../lib/auth.ts";
@@ -528,7 +528,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   /* What this section is told, read on every question so an edit in Copilot
      settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
-  const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
+  const method = configured() && brk() !== "no-method" ? await methodForArea(doorPool(), chat.section).catch(() => "") : "";
   /* A free chat is also told the Free chat part (§634), read the same way.
      A database that will not answer still gives it the free chat's shape. */
   const free = chat.free ? (configured() ? await methodFor(doorPool(), "free").catch(() => "") : "") : null;

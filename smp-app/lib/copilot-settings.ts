@@ -61,6 +61,28 @@ export async function methodFor(q: Q, section: string): Promise<string> {
   return ps.map((p) => "## " + p.title + "\n\n" + p.text.trim()).join("\n\n");
 }
 
+/* WHICH PARTS A CHAT IN EACH AREA IS TOLD (§635). The settings file parts
+   under five tabs, but the Copilot has seven areas: How we compete and
+   Capabilities have no tab, so a chat there was told no method at all, and
+   a Directions chat was told all four Directions parts — its neighbours'
+   included. Each area names its own parts, as the compete and directions
+   workflows already do by key; a part an edit adds later is still reached
+   through its tab (methodFor). */
+export const AREA_PARTS: Record<string, string[]> = {
+  compete: ["part6"], directions: ["part7", "part9"], capabilities: ["part8"],
+};
+/* The part keys an area is told: its own list, else every part on its tab. */
+export function areaPartKeys(area: string): string[] {
+  const own = process.env.SMP_BREAK === "area-by-tab" ? undefined : AREA_PARTS[area];
+  return own || DEFAULT_PARTS.filter((p) => p.section === area).map((p) => p.key);
+}
+export async function methodForArea(q: Q, area: string): Promise<string> {
+  if (!AREA_PARTS[area] || process.env.SMP_BREAK === "area-by-tab") return methodFor(q, area);
+  const keys = areaPartKeys(area);
+  const ps = (await partsOf(q)).filter((p) => keys.includes(p.key) && p.text.trim());
+  return ps.map((p) => "## " + p.title + "\n\n" + p.text.trim()).join("\n\n");
+}
+
 export async function templatesOf(q: Q): Promise<Template[]> {
   const got = await rows(q);
   return DEFAULT_TEMPLATES.map((t) => {

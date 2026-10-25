@@ -67935,7 +67935,7 @@ var COPILOT = (function(){
           PANE = { id: j.chat.id, chat: j.chat, messages: [] };
           adView(j);
           OPEN[key()] = { kind:"chat", id: j.chat.id };
-              draw(); var t = document.querySelector("[data-cop-ad-text]"); if (t) t.focus();
+          draw(); var t = document.querySelector("[data-cop-ad-text]"); if (t) t.focus();
         });
         return;
       }
@@ -67945,7 +67945,7 @@ var COPILOT = (function(){
           PANE = Object.assign({ id: j.chat.id, chat: j.chat, messages: [] }, {});
           cpView(j);
           OPEN[key()] = { kind:"chat", id: j.chat.id };
-              draw();
+          draw();
           cpAsk({ act:"competeScore" });
         });
         return;

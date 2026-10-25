@@ -234,24 +234,24 @@ check("each section's guidance carries the house rules; the roads only where the
     /\[my draft "Mobile SWOT":/.test(memo) && /Brand partnerships — Samsung deals\. \(3 · Strong\)/.test(memo) && /\[options I offered: Move to the market · Add one\]/.test(memo), memo);
   check("...and a part that is not an answer adds nothing", partMemo({ kind: "files" }) === "" && partMemo(null) === "");
 }
-/* §634: a free chat is told the Free chat part in place of where the work
+/* §636: a free chat is told the Free chat part in place of where the work
    starts, and the section's method stays as its reference. */
 {
   const M = "## Foundation\n\nThree to five key objectives.";
   const FREE = DEFAULT_PARTS.find((p) => p.key === "part15");
   const gf = guidanceFor("foundation", M, [], FREE ? FREE.text : "");
-  check("§634 the Free chat part ships in its own settings section, one for every area",
+  check("§636 the Free chat part ships in its own settings section, one for every area",
     !!FREE && FREE.section === "free" && FREE.title === "Free chat" && /baseline/.test(FREE.text) && /One at a time/.test(FREE.text));
   check("...a free chat is told it instead of where the work starts, the method kept as a reference, the limits still last",
     /THIS IS A FREE CHAT/.test(gf) && !/WHERE THE WORK STARTS/.test(gf) && !/WAYS TO START/.test(gf) &&
     /as your reference/.test(gf) && gf.indexOf("Three to five") < gf.indexOf("THIS IS A FREE CHAT") &&
     gf.indexOf("THIS IS A FREE CHAT") < gf.indexOf("LIMITS FOR YOUR ANSWER") && /Never invent a figure/.test(gf), gf.slice(0, 300));
-  check("§635 every Copilot area is told a method: How we compete and Capabilities their own part, Directions only its own two",
+  check("§637 every Copilot area is told a method: How we compete and Capabilities their own part, Directions only its own two",
     SECTIONS.every((k) => areaPartKeys(k).length > 0) && areaPartKeys("compete").join() === "part6" &&
     areaPartKeys("capabilities").join() === "part8" && areaPartKeys("directions").join() === "part7,part9" &&
     areaPartKeys("foundation").join() === "part1" && areaPartKeys("advisory").join() === "part14" &&
     Object.values(AREA_PARTS).flat().every((k) => DEFAULT_PARTS.some((p) => p.key === k)), SECTIONS.map((k) => k + ":" + areaPartKeys(k).join("+")).join(" "));
-  check("§635 the Free chat part asks each layer's own measure rule, and borrows the Consultant's questioning",
+  check("§637 the Free chat part asks each layer's own measure rule, and borrows the Consultant's questioning",
     /Key Objectives \(North Star\)/.test(FREE.text) && /Capabilities — key measures/.test(FREE.text) && /from Y to Z/.test(FREE.text) &&
     /Proceed with what you have/.test(FREE.text) && /which one wins/.test(FREE.text) && /what you draft is not/.test(FREE.text));
   check("...and a workflow chat is not", !/THIS IS A FREE CHAT/.test(guidanceFor("foundation", M, [])) && /WHERE THE WORK STARTS/.test(guidanceFor("foundation", M, [])));

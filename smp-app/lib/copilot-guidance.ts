@@ -94,7 +94,7 @@ export const GUIDE: Record<Section, Guide> = {
    the section produces, the METHOD (which leads), where the work starts
    (what exists, or the ways to start), and last the LIMITS — a short list of
    things that do not bend, never a script that decides what to say. */
-/* A FREE CHAT (§634). Islam, of a free chat that answered "refine the key
+/* A FREE CHAT (§636). Islam, of a free chat that answered "refine the key
    objectives" with a critique, a Missing box and a whole revised set at
    once: "it needs to bring something and verify what we are talking about
    .. ask if we take them 1 by one or all at once .. ask about a baseline".

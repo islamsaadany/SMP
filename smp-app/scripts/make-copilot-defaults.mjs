@@ -88,7 +88,7 @@ const parts = starts.map((s, k) => {
   return { key: "part" + s.n, n: s.n, title: s.title, section: SECTION_OF[s.n], text,
            rawWords: words(raw.join("\n")), words: words(text) };
 });
-/* §634: FREE CHAT is a fifteenth part in a sixth settings section of its
+/* §636: FREE CHAT is a fifteenth part in a sixth settings section of its
    own. It is ours, not the other product's export, so it is read as written
    (no tidying) from its own file, and it is told to every free chat in every
    section, after that section's method (lib/copilot-guidance.ts). */

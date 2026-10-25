@@ -1,7 +1,7 @@
 /* ══ THE COPILOT'S OWN SETTINGS (§456, spec 064) ═══════════════════════════
    Two things, the same for every client (Islam, 2026-10-01): the method the
    Copilot is told, in fourteen parts filed under its five sections (and since
-   §634 a fifteenth, Free chat, in a section of its own), and five
+   §636 a fifteenth, Free chat, in a section of its own), and five
    blank templates. What ships is lib/copilot-defaults.generated.ts; a row in
    `copilot_assets` is an edit OVER the shipped text, by key. Saving the
    shipped text back DELETES the row rather than storing a copy of it
@@ -26,7 +26,7 @@ export const SECTION_TITLE: Record<string, string> = {
   foundation: "Foundation", analysis: "Analysis", directions: "Directions", execution: "Execution", advisory: "Advisory",
   free: "Free chat",
 };
-/* "free" is not a Copilot section (§634): it holds the one part every free
+/* "free" is not a Copilot section (§636): it holds the one part every free
    chat is told, in every section, on top of that section's method. */
 export const SECTION_ORDER = ["foundation", "analysis", "directions", "execution", "advisory", "free"] as const;
 export const MAX_PART = 200_000;
@@ -61,7 +61,7 @@ export async function methodFor(q: Q, section: string): Promise<string> {
   return ps.map((p) => "## " + p.title + "\n\n" + p.text.trim()).join("\n\n");
 }
 
-/* WHICH PARTS A CHAT IN EACH AREA IS TOLD (§635). The settings file parts
+/* WHICH PARTS A CHAT IN EACH AREA IS TOLD (§637). The settings file parts
    under five tabs, but the Copilot has seven areas: How we compete and
    Capabilities have no tab, so a chat there was told no method at all, and
    a Directions chat was told all four Directions parts — its neighbours'

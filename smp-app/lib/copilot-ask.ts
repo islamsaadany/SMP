@@ -149,7 +149,7 @@ export type AskInput = {
      Copilot settings hold them now (lib/copilot-settings.ts, §456). */
   method?: string;
   templates?: string[];
-  /* The Free chat part of Copilot settings, set only on a free chat (§634). */
+  /* The Free chat part of Copilot settings, set only on a free chat (§636). */
   free?: string | null;
 };
 

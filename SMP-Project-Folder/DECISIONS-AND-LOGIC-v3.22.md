@@ -69615,7 +69615,7 @@ Islam: *"in the copilot choices in the different areas can we have a free chat o
 **CHECKED.** `checks/shell.mjs` presses through the menu wherever it opened a workflow, and a new section 3j2 presses Free chat and reads it back: the two choices in order, the choice shuts on a press elsewhere, a plain chat opens with the rail tag, the row is the area's and marked free, and what reached the model carries the area's method and what the plan shows. 441 ok; the 11 red are red identically on `main`'s own build (435 ok, the same 11), the 80%-zoom sizes of §631 and two not this change. `SHELL` **`smp-shell-v7.15-copilot-free-chat`**.
 
 
-## §634 — A free chat talks before it drafts, by its own part in Copilot settings (2026-10-25)
+## §636 — A free chat talks before it drafts, by its own part in Copilot settings (2026-10-25)
 Islam, of a free chat asked to "refine the key objectives with proper targets" that answered at once with a critique, a Missing box and a whole revised set: *"it needs to bring something and verify what we are talking about .. ask if we take them 1 by one or all at once .. ask about a baseline number now to reference to the targets and can accept if the user request a pure assumption"*; then *"keep the instructions in the ai settings … or shall we keep it for all as a separate section and widen the instructions as a baseline is not viable in the analysis or directions setting but makes sense in setting objectives"*.
 
 **WHY IT DRAFTED.** §633's free chat was marked `extra.free` but asked with the workflow's instruction: the method LEADS, and WHERE THE WORK STARTS says that when the person has said what to change, the whole revised text goes in `draft` in the same turn. So it did exactly what the workflow is told to do.
@@ -69624,7 +69624,7 @@ Islam, of a free chat asked to "refine the key objectives with proper targets" t
 
 **CHECKED.** `checks/copilot.mjs` §1: the part ships in the `free` section; a free chat's instruction carries it with no WHERE THE WORK STARTS and no WAYS TO START, the method before it and the limits after; a workflow chat is unchanged. Red under `free-as-workflow`. §3c's settings read now expects six sections (needs a database; not run in this container). `app-types` and `generated-in-step` clear.
 
-## §635 — The Free chat part aligned with the method; every Copilot area told its own parts (2026-10-25)
+## §637 — The Free chat part aligned with the method; every Copilot area told its own parts (2026-10-25)
 Islam: *"have a look on all the instructions across the different parts to have better understanding and align together on the right way to build the freechat instructions"*; on the review's three questions: *"north star is just another name for the key objectives, multiple numbers"*, *"ok"* (a soft round limit), *"ok"* (the per-area map).
 
 **WHAT THE REVIEW FOUND.** Thirteen of the fourteen parts are generator specs (counts, fields, scoring, examples) written for the other product's one-shot screens; only the Consultant (part 14) is written for conversation, and its questioning rules are the ones a free chat needs. Measures differ by layer in the method itself: the North Star is one target per line; Directions' Year 1 targets are SMART; Capabilities' key measures are "a mix of quantitative and qualitative"; Execution's objectives, KPIs and key results carry a baseline ("from Y to Z").

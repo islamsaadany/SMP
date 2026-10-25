@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-25 — The "+ New chat" choice opens on screen instead of being cut off at the left (§635).**
+
 **2026-10-25 — The Copilot reads Competitive Discipline and the capabilities as well as the rest of the plan (§634).**
 
 **2026-10-25 — A free chat beside every Copilot workflow (§633), merged to `main` on Islam's word.** "+ New chat" now offers the area's workflow or a Free chat, answered from the area's method and this place's plan.

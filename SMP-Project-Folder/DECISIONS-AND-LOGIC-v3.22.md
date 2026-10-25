@@ -69621,3 +69621,8 @@ The plan text every Copilot message carries (`planText` in `copilot.js`) now hol
 
 **CHECKED.** `checks/shell.mjs` 3j2 sets a discipline, a value and a capability on the page's own objects and reads them back off what reached the model. 442 ok; the same 11 red as `main`'s own build. `SHELL` **`smp-shell-v7.16-plan-compete-caps`**.
 
+## §635 — The "+ New chat" choice opens on screen (2026-10-25)
+Islam's screenshot: the choice §633 added was cut off at the page's left edge — "…undation workflow", "…e chat". It was anchored to the rail's RIGHT and is wider than the rail (228px against a rail of 160–280), so it ran out past the rail's left side. It is now anchored at the rail's LEFT edge and opens rightward over the chat, which always has room. The look is otherwise unchanged. Snapshot: `ui-versions/copilot.css/2026-10-25_before-menu-left.css`; screenshot `design-mockups/copilot-free-chat/2026-10-25_menu-fixed.png`.
+
+**CHECKED.** `checks/shell.mjs` 3j2 now measures the open choice: it starts inside the rail and lies wholly within the window. 443 ok; the same 11 red as `main`'s own build. `SHELL` **`smp-shell-v7.17-new-menu-left`**.
+

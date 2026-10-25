@@ -12506,7 +12506,10 @@ body.presenting #buildband { display:none; }
 /* "+ New chat" opens a choice (2026-10-25): workflow or free chat. */
 .coprh { position:relative; }
 .coprail.copmenuopen { overflow:visible; }
-.copnewmenu { right:12px; top:calc(100% - 4px); min-width:228px; text-transform:none; letter-spacing:0; }
+/* Anchored at the rail's LEFT and opening rightward over the chat: the
+   rail is narrower than the choice, and anchored right it ran off the
+   page's left edge and was cut (Islam's screenshot, 2026-10-25). */
+.copnewmenu { left:8px; right:auto; top:calc(100% - 4px); min-width:228px; text-transform:none; letter-spacing:0; }
 .copnewmenu button b { display:block; font-weight:600; color:var(--ink); }
 .copnewmenu button small { display:block; font:var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-3); }
 .coprow .copren { flex:1 1 auto; min-width:0; margin:6px 10px; font-weight:600; }

@@ -2016,6 +2016,12 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.click(".copnew[data-cop-newmenu]");
     const m = await page.evaluate(() => Array.from(document.querySelectorAll(".copnewmenu button b")).map((b) => b.textContent));
     check(JSON.stringify(m) === JSON.stringify(["SWOT workflow", "Free chat"]), "+ New chat offers the area's workflow, then a free chat", JSON.stringify(m));
+    /* The whole choice is on screen and starts inside the rail — anchored
+       right it ran off the page's left edge (2026-10-25). */
+    const box = await page.evaluate(() => { const r = document.querySelector(".copnewmenu").getBoundingClientRect(), l = document.querySelector(".coprails").getBoundingClientRect();
+      return { left: Math.round(r.left), right: Math.round(r.right), rails: Math.round(l.left), win: innerWidth }; });
+    if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/free-chat-menu.png" });
+    check(box.left >= box.rails - 1 && box.left >= 0 && box.right <= box.win, "…and the whole choice is on screen, opening from the rail's left edge", JSON.stringify(box));
     await page.click("body", { position: { x: 5, y: 5 } });
     check(!(await page.$(".copnewmenu")), "a press elsewhere shuts the choice");
     await page.click(".copnew[data-cop-newmenu]");

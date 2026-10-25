@@ -660,7 +660,9 @@
 /* v7.16-plan-compete-caps — §634: the Copilot's plan text carries
    Competitive Discipline and the capabilities. The built file's bytes
    changed (§91). */
-const SHELL = "smp-shell-v7.16-plan-compete-caps";
+/* v7.17-new-menu-left — §635: the "+ New chat" choice opens from the
+   rail's left edge, on screen. */
+const SHELL = "smp-shell-v7.17-new-menu-left";
 const ASSETS = [
   "/",
   "/index.html",

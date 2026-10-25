@@ -30,6 +30,7 @@ import { modulesFor } from "./modules.ts";
 import {
   shape, todayIn, weekOf, addDays, isLate, carriedWeeks, lateWord, weekWord, weekLabel, readableDay, STATUS_WORD, STATUSES,
   isStatus, isOffice, mayChange, oneAction, setStatus, ONLY_CHANGE, type Action, type Who,
+  addAction, officeRows, isOfficeRow, oneLine, calendarDay, thursdayOf,
 } from "./tracker.ts";
 
 export type Bucket = "late" | "week" | "later";
@@ -206,4 +207,53 @@ export function tallyMark(t: ClientTally | undefined): { mark: string; alarm: bo
   if (!t || !t.open) return null;
   return { mark: t.open + " open" + (t.late ? " · " + t.late + " late" : ""), alarm: t.late > 0,
     tip: "Your open actions on this client" + (t.late ? " — " + t.late + " past their week" : "") };
+}
+
+/* ── ADDING A TASK FROM MY TASKS (2026-10-25) ────────────────────────
+   Islam: "allow me in my tasks to add a task directly and to set the client
+   there", and of the owner, "me until I assign someone else". The add is
+   the Tracker's own (addAction — its title rule, its first due day, its
+   'created' history line) on the client chosen, asked of the person
+   LOOKING through that client's door, so it can add nothing the Tracker's
+   own add line would refuse: the client has a Tracker, the seat is the
+   office's, the owner is somebody on the office's seats there (isOfficeRow).
+   The clients offered are the ones that would accept it, each with the
+   people who may own it, so a pick is never drawn that the write refuses
+   (§61). */
+export type AddTarget = { client: string; clientName: string; me: string; people: { key: string; name: string }[] };
+export async function addTargets(clients: Client[], viewerOn: ViewerOn): Promise<AddTarget[]> {
+  const out: AddTarget[] = [];
+  for (const t of clients) {
+    if (!modulesFor(t.modules).includes("tracker" as never)) continue;
+    const who = viewerOn(t);
+    if (!who || !isOffice(who.seat) || !who.personKey) continue;
+    try {
+      const people = await withTenant(t.id, (c: PoolClient) => officeRows(c));
+      out.push({ client: t.key, clientName: t.name, me: who.personKey, people });
+    } catch (e) {
+      console.error("my tasks add on " + t.key + ":", (e as Error).message);
+    }
+  }
+  return out.sort((a, b) => a.clientName.localeCompare(b.clientName));
+}
+
+export async function addWork(t: Client, who: Who, b: { title?: unknown; ownerKey?: unknown; due?: unknown }, now: Date = new Date()): Promise<WorkWrite> {
+  if (!modulesFor(t.modules).includes("tracker" as never)) return { ok: false, status: 404, why: "This client has no Internal Tracker." };
+  if (!isOffice(who.seat)) return { ok: false, status: 403, why: "The Internal Tracker is the office's." };
+  const title = oneLine(b.title);
+  if (!title) return { ok: false, status: 400, why: "A task needs a few words." };
+  if (!who.personKey) return { ok: false, status: 400, why: "You are not on this client's register yet, so nothing can be added by you here." };
+  const ownerKey = String(b.ownerKey || who.personKey);
+  /* the Tracker's add line's own date rule: absent is this week's Thursday,
+     null or "" no date, and a day it cannot read is refused */
+  const today = todayIn(now);
+  let due: string | null;
+  if (b.due === undefined) due = thursdayOf(today);
+  else if (b.due === null || b.due === "") due = null;
+  else { due = calendarDay(b.due); if (!due) return { ok: false, status: 400, why: "That is not a date this list can read." }; }
+  return withTenant(t.id, async (c: PoolClient): Promise<WorkWrite> => {
+    if (!(await isOfficeRow(c, ownerKey))) return { ok: false, status: 400, why: "A task is owned by somebody on the office's seats." };
+    const a = await addAction(c, { title, ownerKey, by: who.personKey || "", due });
+    return { ok: true, row: rowOf(t, a, today, who) };
+  });
 }

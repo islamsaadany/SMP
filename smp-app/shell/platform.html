@@ -1625,6 +1625,14 @@
   .mwlist .mwrow:hover{ box-shadow:none }
   .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
   .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* THE ADD LINE (2026-10-25): the task's words, its client, its owner and
+     its date on one line under the card's header, the Tracker's own fields */
+  .mwadd{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 14px; border-bottom:1px solid var(--line) }
+  .mwadd .fld{ width:auto; padding:5px 9px; font-size:13px }
+  .mwadd .mwaddt{ flex:1 1 220px; min-width:0 }
+  .mwadd select.fld{ max-width:190px }
+  .mwadd .btn{ padding:5px 14px; font-size:13px }
+  .mwadd .mwaddsaid{ flex:1 0 100%; margin:0; font-size:12.5px }
   /* Show sits in a white header now, not on the navy */
   .mwcardhd .mwwho{ color:var(--ink-3); font-size:12px }
   .mwcardhd .mwwho select{ color:var(--ink); border:1px solid var(--line); background:var(--surface); padding:4px 24px 4px 9px; margin-left:6px; font-size:12.5px }

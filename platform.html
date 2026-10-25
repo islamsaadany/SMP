@@ -1624,6 +1624,14 @@
   .mwlist .mwrow:hover{ box-shadow:none }
   .mwlist .mwsec:last-child .mwrow:last-child{ border-bottom:0 }
   .mwsearch{ width:170px; padding:5px 10px; font-size:13px }
+  /* THE ADD LINE (2026-10-25): the task's words, its client, its owner and
+     its date on one line under the card's header, the Tracker's own fields */
+  .mwadd{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 14px; border-bottom:1px solid var(--line) }
+  .mwadd .fld{ width:auto; padding:5px 9px; font-size:13px }
+  .mwadd .mwaddt{ flex:1 1 220px; min-width:0 }
+  .mwadd select.fld{ max-width:190px }
+  .mwadd .btn{ padding:5px 14px; font-size:13px }
+  .mwadd .mwaddsaid{ flex:1 0 100%; margin:0; font-size:12.5px }
   /* Show sits in a white header now, not on the navy */
   .mwcardhd .mwwho{ color:var(--ink-3); font-size:12px }
   .mwcardhd .mwwho select{ color:var(--ink); border:1px solid var(--line); background:var(--surface); padding:4px 24px 4px 9px; margin-left:6px; font-size:12.5px }
@@ -4651,6 +4659,97 @@
     return row;
   }
 
+  /* ADD A TASK FROM MY TASKS (Islam, 2026-10-25: "allow me in my tasks to
+     add a task directly and to set the client there"; the owner is "me
+     until I assign someone else"). The clients offered, and who may own a
+     task on each, are the server's (j.adds), so nothing is offered that the
+     write would refuse (§61); the write is the Tracker's own add on that
+     client (workAdd). The date starts on this week's Thursday, the
+     Tracker's add line's own default; cleared, the task has no date. A task
+     added to this list is drawn among the others from the server's own row
+     (§53.5); one handed to somebody else is said in words, and is on their
+     list and in that client's Tracker. */
+  function mwAdd(j, landed) {
+    var self = !j.who || j.who.self;
+    var line = el("form", "mwadd");
+    line.setAttribute("data-workadd", "");
+    var title = el("input", "fld mwaddt");
+    title.type = "text";
+    title.placeholder = "Add a task…";
+    title.setAttribute("aria-label", "New task");
+    title.maxLength = 300;
+    var client = el("select", "fld");
+    client.setAttribute("aria-label", "Client");
+    j.adds.forEach(function (a) {
+      var o = el("option", null, a.clientName);
+      o.value = a.client;
+      client.appendChild(o);
+    });
+    var owner = el("select", "fld");
+    owner.setAttribute("aria-label", "Owner");
+    var target = function () {
+      for (var i = 0; i < j.adds.length; i++) if (j.adds[i].client === client.value) return j.adds[i];
+      return j.adds[0];
+    };
+    /* "Me" first, then the client's other office people; a new client
+       starts the owner on Me again */
+    var people = function () {
+      var t = target();
+      owner.textContent = "";
+      var me = el("option", null, "Me");
+      me.value = t.me;
+      owner.appendChild(me);
+      t.people.forEach(function (p) {
+        if (p.key === t.me) return;
+        var o = el("option", null, p.name);
+        o.value = p.key;
+        owner.appendChild(o);
+      });
+    };
+    client.addEventListener("change", people);
+    people();
+    var due = el("input", "fld");
+    due.type = "date";
+    due.value = j.addDue || "";
+    due.setAttribute("aria-label", "Due date");
+    due.title = "Due date — clear it for no date";
+    var go = el("button", "btn solid", "Add");
+    go.type = "submit";
+    var said = el("p", "muted mwaddsaid");
+    said.hidden = true;
+    [title, client, owner, due, go, said].forEach(function (x) { line.appendChild(x); });
+    line.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (line.getAttribute("aria-busy") === "true") return;
+      var words = title.value.trim();
+      if (!words) { title.focus(); return; }
+      var t = target(), who = owner.value;
+      line.setAttribute("aria-busy", "true");
+      go.disabled = true;
+      var done = function (msg, bad) {
+        line.removeAttribute("aria-busy");
+        go.disabled = false;
+        said.className = (bad ? "err" : "muted") + " mwaddsaid";
+        said.textContent = msg || "";
+        said.hidden = !msg;
+      };
+      post({ action: "workAdd", client: t.client, title: words, ownerKey: who, due: due.value || null }).then(function (a) {
+        if (!a.ok) { done(a.error || "That did not save. Nothing was added — try again.", true); return; }
+        title.value = "";
+        if (self && who === t.me) { done(""); landed(a.row); }
+        else {
+          var name = owner.options[owner.selectedIndex] ? owner.options[owner.selectedIndex].text : "";
+          done("Added to " + t.clientName + "’s Internal Tracker" + (who === t.me ? " for you." : " for " + name + "."));
+        }
+        title.focus();
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        done("Could not reach the server. Nothing was added — try again.", true);
+      });
+    });
+    return line;
+  }
+
   function drawMyWork() {
     var m = mwMast();
     /* a refused or failed press is said here, under the panel, in words */
@@ -4874,6 +4973,12 @@
         draw(); find();
       }));
       hd.appendChild(search);
+      if (j.adds && j.adds.length) card.appendChild(mwAdd(j, function (nr) {
+        rows.push(nr);
+        mwCount(m.strip, rows.concat(cases));
+        setCnt();
+        draw(); find();
+      }));
       card.appendChild(list);
       body.appendChild(card);
       draw();

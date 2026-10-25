@@ -9,8 +9,8 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
-import { myWork, tallyMark, setWorkStatus, writeUps } from "./my-work.ts";
-import { isOffice, type Who } from "./tracker.ts";
+import { myWork, tallyMark, setWorkStatus, writeUps, addTargets, addWork } from "./my-work.ts";
+import { isOffice, thursdayOf, type Who } from "./tracker.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -276,8 +276,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        colleague's sees the colleague's, as with the actions. */
     /* SMP_BREAK=no-writeups drops them — checks/case-page.mjs must go red */
     const cases = process.env.SMP_BREAK === "no-writeups" ? [] : await writeUps(pool, whoAcc.id, w.today);
+    /* THE ADD LINE'S CLIENTS (2026-10-25): those the person looking may add
+       to, each with who may own the task — the Tracker's own owner list */
+    const adds = await addTargets(shown, viewerOn);
     return ok({ who: { email: whoAcc.email, name: whoAcc.name, self: whoAcc.id === account.id },
-      today: w.today, weekLine: w.weekLine, statuses: w.statuses, rows: w.rows, cases, unanswered: w.unanswered, people });
+      today: w.today, weekLine: w.weekLine, statuses: w.statuses, rows: w.rows, cases, unanswered: w.unanswered, people, adds, addDue: thursdayOf(w.today) });
   }
 
   /* ── A ROW TICKED, OR ITS STATUS CHANGED, ON MY WORK (§583) ──────────
@@ -289,6 +292,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const door = await resolveTenant(pool, me, String((body && body.client) || ""));
     if (!door.ok) return no(404, "That client is not available.");
     const w = await setWorkStatus(door.tenant, { seat: door.seat, personKey: door.personKey }, String((body && body.id) || ""), body && body.status);
+    return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
+  }
+
+  /* ── A TASK ADDED ON MY TASKS (2026-10-25) ──────────────────────────
+     Through the chosen client's own door, as workStatus is, and then the
+     Tracker's own add (lib/my-work.ts addWork). */
+  if (action === "workAdd") {
+    const door = await resolveTenant(pool, me, String((body && body.client) || ""));
+    if (!door.ok) return no(404, "That client is not available.");
+    const w = await addWork(door.tenant, { seat: door.seat, personKey: door.personKey },
+      { title: body && body.title, ownerKey: body && body.ownerKey, due: body ? body.due : undefined });
     return w.ok ? ok({ row: w.row }) : no(w.status, w.why);
   }
 

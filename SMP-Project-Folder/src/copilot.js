@@ -463,7 +463,36 @@ var COPILOT = (function(){
     }).join("\n"));
     if (d.length) parts.directions = (items.length ? lw("pillar", true).toUpperCase() + " AND MEASURES" : "PROJECTS") + "\n" + d.join("\n");
     if (x.length) parts.execution = "TACTICS\n" + x.join("\n");
-    var order = ["foundation","analysis","directions","execution"], sec = section();
+    /* §634: the free chat reads EVERY area of the plan, so Competitive
+       Discipline and the capabilities come too — read off the same objects
+       their own pages render (competeOf, GROUP.capabilities). */
+    var cp = typeof competeOf === "function" ? competeOf(place()) : null;
+    if (cp && (cp.discipline || (cp.values || []).length)) {
+      var DW = { btc:"Best Total Cost", bts:"Best Total Solution", bp:"Best Product" };
+      parts.compete = "COMPETITIVE DISCIPLINE" + (cp.discipline ? "\nDiscipline: " + (DW[cp.discipline] || cp.discipline) : "") +
+        (cp.values || []).filter(function(v){ return v && clean(v.title); }).map(function(v){
+          return "\n- " + clean(v.title) +
+            ((v.how || []).length ? "\n  How: " + v.how.map(clean).filter(Boolean).join("; ") : "") +
+            ((v.measure || []).length ? "\n  Measure: " + v.measure.map(clean).filter(Boolean).join("; ") : "");
+        }).join("");
+    }
+    var caps = typeof GROUP !== "undefined" && GROUP && Array.isArray(GROUP.capabilities)
+      ? GROUP.capabilities.filter(function(c){ return c && !hid(c) && clean(c.name); }) : [];
+    if (caps.length) {
+      var KW = { gap:"Gap-closing", transformation:"Transformation", enabler:"Enabler" }, pn = {};
+      var gi = []; try { gi = typeof itemsNow === "function" ? itemsNow(GROUP) : (GROUP.items || []); } catch (e) { gi = GROUP.items || []; }
+      (gi || []).concat(items).forEach(function(p){ if (p && p.id) pn[p.id] = clean(p.name); });
+      parts.capabilities = "CAPABILITIES\n" + caps.map(function(c){
+        var b = [];
+        if (KW[c.capKind]) b.push(KW[c.capKind]);
+        var sv = (c.serves || []).map(function(id){ return pn[id]; }).filter(Boolean);
+        if (sv.length) b.push("serves " + sv.join(", "));
+        var who = c.head && typeof dvPersonName === "function" ? dvPersonName(c.head) : "";
+        if (who) b.push("owner " + who);
+        return "- " + clean(c.name) + (b.length ? " (" + b.join(", ") + ")" : "");
+      }).join("\n");
+    }
+    var order = ["foundation","analysis","compete","directions","capabilities","execution"], sec = section();
     if (order.indexOf(sec) > 0) order = [sec].concat(order.filter(function(k){ return k !== sec; }));
     return order.filter(function(k){ return parts[k]; }).map(function(k){ return parts[k]; }).join("\n\n");
   }

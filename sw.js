@@ -657,7 +657,10 @@
 /* v7.15-copilot-free-chat — §633: "+ New chat" in the Copilot opens a
    choice, the area's workflow or a free chat. The built file's bytes
    changed, which is the whole trigger (§91). */
-const SHELL = "smp-shell-v7.15-copilot-free-chat";
+/* v7.16-plan-compete-caps — §634: the Copilot's plan text carries
+   Competitive Discipline and the capabilities. The built file's bytes
+   changed (§91). */
+const SHELL = "smp-shell-v7.16-plan-compete-caps";
 const ASSETS = [
   "/",
   "/index.html",

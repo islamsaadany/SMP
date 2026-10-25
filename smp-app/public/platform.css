@@ -12893,7 +12893,9 @@ span.copsw-lb { cursor:default; }
    is flush with that corner it keeps clear of the button. */
 @media (min-width:821px) {
   :root[data-cop-page] .copcompose { margin-bottom:-8px; }
-  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)) .copcompose { padding-right:64px; }
+  /* §638: not beside a draft from 1280px — the corner is the draft's foot then (.copoutf). */
+  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)):not(:has(.copsplit)) .copcompose { padding-right:64px; }
+  @media (max-width:1279px) { :root[data-cop-page] .copmain:has(.copsplit) .copcompose { padding-right:64px; } }
 }
 /* ── §493 HOW WE COMPETE IN THE COPILOT (spec 064 §3.2–§3.5, from
    design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
@@ -13093,7 +13095,6 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
   .copflow.nocards > .copftodo { margin-left:0; }
   /* The office chat button floats over the window's corner (§490.2): with
      the draft beside the chat, the corner is the draft's foot, not the box. */
-  :root[data-cop-page] .copmain .copsplit .copcompose { padding-right:0; }
   :root[data-cop-page] .copoutf { padding-right:64px; }
 }
 @media (max-width:1279px){

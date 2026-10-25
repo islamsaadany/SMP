@@ -1947,7 +1947,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(sw.methods.internal.join() === "guided" && sw.methods.micro.join() === "report" && sw.methods.macro.join() === "research", "the ticks are stored", JSON.stringify(sw.methods));
     await page.click('[data-cop-sw-go="gather"]');
     await page.waitForSelector(".copsw-li", { timeout: 10000 });
-    const todo = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
+    const todo = await page.evaluate(() => (document.querySelector(".copsw-side .copsw-n") || {}).textContent || "");
     check(/^0\/5$/.test(todo.trim()), "the to-do list counts its lines — three to gather, the analyses, the SWOT — as done/n in its title (§490.2)", todo);
 
     /* §490.1 compact columns: a 200px chats rail, a 200px to-do (§490.2; 270 at §490.1), the work and
@@ -1965,7 +1965,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(cols.rails === 200 && cols.side === 200, "in a SWOT chat the chats rail and the to-do are both 200px, for symmetry (§490.2)", JSON.stringify(cols));
     check(cols.newH != null && cols.newH < cols.lh * 2, "…and + New chat stays on one line", JSON.stringify(cols));
     const scr = await page.evaluate(() => {
-      const side = document.querySelector(".copsw-side"), main = document.querySelector(".copsw-main"), cm = document.querySelector(".copmain");
+      const side = document.querySelector(".copsw-side"), main = document.querySelector(".copswpane"), cm = document.querySelector(".copmain");
       const hd = document.querySelector(".copsw-todoh"), li = document.querySelector(".copsw-li");
       const out = { over: side.scrollHeight - side.clientHeight, cmScroll: cm.scrollHeight - cm.clientHeight };
       const hd0 = hd.getBoundingClientRect().top, li0 = li.getBoundingClientRect().top, main0 = main.getBoundingClientRect().top;
@@ -1984,15 +1984,23 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
 
     /* the guided question is the original's, word for word */
     await page.click('[data-cop-sw-line="internal|guided"]');
-    await page.waitForSelector(".copsw-qt", { timeout: 10000 });
-    const qt = await page.evaluate(() => document.querySelector(".copsw-qt").textContent.trim());
-    check(qt === QUESTIONS.internal[0].question, "the guided question is asked word for word", qt);
-    await page.click("[data-cop-sw-answer]");
-    await page.waitForFunction(() => { const a = document.querySelector("[data-cop-sw-ans]"); return a && a.value.length > 5; }, null, { timeout: 10000 });
-    check(/Used:/.test(await page.evaluate(() => document.querySelector(".copsw-used") ? document.querySelector(".copsw-used").textContent : "")), "Answer for me fills the box and says what it used");
-    await page.waitForTimeout(500);
+    await page.waitForSelector(".copswchat .copsw-qt", { timeout: 10000 });
+    const qt = await page.evaluate(() => document.querySelector(".copswchat .copsw-qt").textContent.trim());
+    check(qt === QUESTIONS.internal[0].question, "§641 the guided question is asked in the chat, word for word", qt);
+    const box0 = await page.evaluate(() => { const t = document.querySelector("[data-cop-text]"); return { live: !!t && !t.disabled, ph: t ? t.placeholder : "" }; });
+    check(box0.live && /Type your answer/.test(box0.ph), "§641 …and the chat's own box takes the answer", JSON.stringify(box0));
+    await page.click(".copswchat [data-cop-sw-answer]");
+    await page.waitForFunction(() => { const a = document.querySelector("[data-cop-text]"); return a && a.value.length > 5; }, null, { timeout: 10000 });
+    const sug = await page.evaluate(() => (document.querySelector(".copswchat .copsw-used") || {}).textContent || "");
     sw = await swotRow(id);
-    check(/store network/.test(sw.ans.internal[0]), "…and the answer is saved", sw.ans.internal[0]);
+    check(/suggested answer is in the box/.test(sug) && !(sw.ans.internal || [])[0], "§641 Answer for me puts a suggestion in the box and says what it used, and nothing is stored until it is sent", JSON.stringify({ sug, stored: (sw.ans.internal || [])[0] }));
+    await page.press("[data-cop-text]", "Enter");
+    await page.waitForFunction((q) => { const e = document.querySelector(".copswchat .copsw-qt"); return e && e.textContent.trim() === q; }, QUESTIONS.internal[1].question, { timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    sw = await swotRow(id);
+    const asked = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll(".copswchat .copmsg.me .copbody")).map((x) => x.textContent).join("|"), box: (document.querySelector("[data-cop-text]") || {}).value }));
+    check(/store network/.test(sw.ans.internal[0]) && sw.q && sw.q.i === 1 && /store network/.test(asked.me) && !asked.box,
+      "§641 sent, the answer is saved and stands in the chat as said, and the next question is asked", JSON.stringify({ a: sw.ans.internal[0], q: sw.q, asked }));
     await shot("3-guided");
     /* the rest answered through the same save, then a reload */
     await page.evaluate(async ({ cid, n }) => { const r = await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -2016,38 +2024,72 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(!!d && /^DESTEP research prompt - Mobile\.txt$/.test(d.suggestedFilename()), "the research prompt downloads as a named .txt (a long dash made Chromium drop the name)", d && d.suggestedFilename());
     await page.fill("[data-cop-sw-paste]", "The economy is recovering; inflation is easing.");
     await page.click("[data-cop-sw-keep]");
-    await page.waitForFunction(() => /^3\/5$/.test((document.querySelector(".copsw-n") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
-    const t3 = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
+    await page.waitForFunction(() => /^3\/5$/.test((document.querySelector(".copsw-side .copsw-n") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    const t3 = await page.evaluate(() => (document.querySelector(".copsw-side .copsw-n") || {}).textContent || "");
     check(/^3\/5$/.test(t3.trim()), "with every gather line done the list says so", t3);
     await shot("4-gathered");
 
     /* the two analyses, each shown and agreed */
     await page.click('[data-cop-sw-go="analyses"]');
     for (const a of ["micro", "macro"]) {
-      await page.waitForSelector('[data-cop-sw-an="' + a + '"]', { timeout: 10000 });
-      await page.click('[data-cop-sw-an="' + a + '"]');
-      await page.waitForSelector('[data-cop-sw-agree="' + a + '"]', { timeout: 15000 });
+      await page.waitForSelector('.copswchat [data-cop-sw-an="' + a + '"]', { timeout: 10000 });
+      await page.click('.copswchat [data-cop-sw-an="' + a + '"]');
+      await page.waitForSelector('.copswchat [data-cop-sw-agree="' + a + '"]', { timeout: 15000 });
+      if (a === "micro") {
+        const an = await page.evaluate(() => ({ cards: document.querySelectorAll(".copswpane .copsw-an").length, rows: document.querySelectorAll(".copswpane .copsw-an [data-cop-sw-open]").length,
+          inChat: document.querySelectorAll(".copswchat .copsw-an").length }));
+        check(an.cards >= 1 && an.rows >= 2 && an.inChat === 0, "§641 the analysis stands in the pane, its factors as titles that open, and is agreed from the chat", JSON.stringify(an));
+      }
       await shot("5-" + a);
-      await page.click('[data-cop-sw-agree="' + a + '"]');
+      await page.click('.copswchat [data-cop-sw-agree="' + a + '"]');
       await page.waitForTimeout(500);
     }
     sw = await swotRow(id);
     check(sw.micro && sw.micro.agreed && sw.macro && sw.macro.agreed, "both the Micro and the Macro analysis are written and agreed", JSON.stringify([sw.micro && sw.micro.agreed, sw.macro && sw.macro.agreed]));
 
-    await page.waitForSelector("[data-cop-sw-draft]", { timeout: 10000 });
-    await page.click("[data-cop-sw-draft]");
-    await page.waitForSelector("[data-cop-sw-check]", { timeout: 15000 });
-    const letters = await page.evaluate(() => Array.from(document.querySelectorAll(".copsw-l")).map((l) => l.querySelectorAll("li").length));
-    check(letters.length === 4 && letters.every((n) => n === 5), "the SWOT draft shows five items per letter", JSON.stringify(letters));
-    await page.click("[data-cop-sw-check]");
-    await page.waitForSelector("[data-cop-sw-finish]", { timeout: 15000 });
+    await page.waitForSelector(".copswchat [data-cop-sw-draft]", { timeout: 10000 });
+    await page.click(".copswchat [data-cop-sw-draft]");
+    await page.waitForSelector(".copswchat [data-cop-sw-check]", { timeout: 15000 });
+    const letters = await page.evaluate(() => Array.from(document.querySelectorAll(".copswpane .copsw-l")).map((l) => l.querySelectorAll("li").length));
+    check(letters.length === 4 && letters.every((n) => n === 5), "the SWOT draft shows five items per letter, in the pane", JSON.stringify(letters));
+    /* §641 (Islam: "go with your recommendation"): titles first, an item
+       opens on a press, and the Titles / Details switch opens them all. */
+    const det = async () => page.evaluate(() => ({ open: document.querySelectorAll(".copswpane .copsw-l .copswdet").length, text: ((document.querySelector(".copswpane .copsw-l .copswdet") || {}).textContent || "") }));
+    const d0 = await det();
+    await page.click(".copswpane .copsw-l [data-cop-sw-open]");
+    const d1 = await det();
+    await page.click('[data-cop-sw-dens="1"]');
+    const d2 = await det();
+    await page.click('[data-cop-sw-dens="0"]');
+    const d3 = await det();
+    check(d0.open === 0 && d1.open === 1 && /Because of wide store network/.test(d1.text) && /The plan/.test(d1.text) && d2.open === 20 && d3.open === 1,
+      "§641 the items read as titles; one press opens an item's description and evidence, Details opens all twenty, Titles closes them again", JSON.stringify([d0.open, d1, d2.open, d3.open]));
+    await page.click(".copswchat [data-cop-sw-check]");
+    await page.waitForFunction(() => document.querySelector(".copswpane .copsw-check"), null, { timeout: 15000 }).catch(() => {});
+    const nochat = await page.evaluate(() => ({ chat: document.querySelectorAll(".copswchat [data-cop-sw-finish], .copswchat [data-cop-sw-apply]").length,
+      foot: Array.from(document.querySelectorAll("[data-cop-swfoot] button")).map((b) => b.textContent.trim() + (b.disabled ? "(off)" : "")).join("|"),
+      issue: /Two weaknesses overlap/.test((document.querySelector(".copswchat") || {}).textContent || "") }));
+    check(nochat.chat === 0 && nochat.foot === "Save|Apply to plan(off)" && nochat.issue,
+      "§641 Save and Apply to plan stand only at the pane's foot (Apply waits for a saved version); the check is said in the chat", JSON.stringify(nochat));
     await shot("6-check");
-    await page.click("[data-cop-sw-finish]");
-    await page.waitForTimeout(1500);
+    const plan0 = await page.evaluate(() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } });
+    await page.click("[data-cop-swfoot] [data-cop-sw-finish]");
+    await page.waitForFunction(() => /Saved as v1/.test((document.querySelector("[data-cop-swstate]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     const sv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title ilike 'SWOT%' order by d.created_at desc limit 1"))).rows[0];
-    check(!!sv && /SWOT/.test(sv.title), "Save writes a SWOT deliverable", JSON.stringify(sv));
-    const plan = await page.evaluate(() => { try { const u = UNITS.mobile; return u && u.swot ? u.swot.s : null; } catch (e) { return String(e); } });
-    check(Array.isArray(plan) && plan.includes("Wide store network"), "…and the titles are written into the plan's SWOT", JSON.stringify(plan));
+    const afterSave = await page.evaluate(() => ({ plan: (() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } })(),
+      state: (document.querySelector("[data-cop-swstate]") || {}).textContent || "" }));
+    check(!!sv && /SWOT/.test(sv.title) && afterSave.plan === plan0 && /not on the plan yet/.test(afterSave.state),
+      "§641 Save writes a SWOT deliverable and leaves the plan alone — the foot says it is not on the plan yet", JSON.stringify({ sv, state: afterSave.state, same: afterSave.plan === plan0 }));
+    const arch0 = await page.evaluate(() => ARCHIVES.length);
+    await page.click("[data-cop-swfoot] [data-cop-sw-apply]");
+    await page.waitForSelector("[data-cop-swapply-yes]", { timeout: 5000 });
+    const ask = await page.evaluate(() => (document.querySelector("#modal-b") || {}).textContent || "");
+    await page.click("[data-cop-swapply-yes]");
+    await page.waitForTimeout(1200);
+    const applied = await page.evaluate(() => ({ s: (UNITS.mobile.swot || {}).s, arch: ARCHIVES.length, kind: (ARCHIVES[0] || {}).kind, lines: ((ARCHIVES[0] || {}).counts || {}).lines,
+      state: (document.querySelector("[data-cop-swstate]") || {}).textContent || "" }));
+    check(/archived first/.test(ask) && Array.isArray(applied.s) && applied.s.includes("Wide store network") && applied.arch === arch0 + 1 && applied.kind === "swot" && applied.lines > 0 && /On the plan as v1/.test(applied.state),
+      "§641 Apply to plan asks first, archives the SWOT the plan held as its own kind, writes the titles in, and the foot says it is on the plan", JSON.stringify({ applied, arch0 }));
     await shot("7-saved");
     await page.waitForTimeout(800);
     const meta = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-chats] *")).map((e) => e.textContent).join(" "));

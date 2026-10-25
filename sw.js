@@ -669,7 +669,9 @@
    just ask (a free chat), then the area's ways to start. */
 /* v7.20-box-takes-material — §640: the start box takes notes and pasted
    work; Foundation's start cards are the guided questions and the template. */
-const SHELL = "smp-shell-v7.20-box-takes-material";
+/* v7.21-swot-split — §641: the SWOT as a conversation beside the SWOT it
+   builds; Save and Apply to plan at the pane's foot; a SWOT archive kind. */
+const SHELL = "smp-shell-v7.21-swot-split";
 const ASSETS = [
   "/",
   "/index.html",

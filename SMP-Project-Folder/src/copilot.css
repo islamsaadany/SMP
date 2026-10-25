@@ -814,3 +814,35 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
 .copstartclip { display:inline-flex; align-items:center; width:auto; height:26px; padding:0 9px; gap:5px; border:1px solid var(--line); border-radius:7px; font:600 var(--fs-small, 12.5px)/1 var(--sans); color:var(--ink-2); }
 .copstartclip:hover, .copstartclip:focus-visible { border-color:var(--gold); color:var(--ink); outline:none; }
 .copstartunder .cophint { margin-left:0; }
+
+/* ── §641 THE SWOT, SPLIT (design-mockups/copilot-swot-split/, signed
+   off): the conversation in the chat, the SWOT building in the pane, each
+   item a title that opens on a press (the Titles / Details switch opens
+   them all), Save and Apply to plan at the pane's foot. The frame is the
+   Foundation's (.copflow, §638). ── */
+.copswpane { overflow:hidden; gap:0; padding:0; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); }
+.copswph { padding:8px 10px; border-bottom:1px solid var(--line); background:var(--surface); flex-wrap:wrap; }
+.copswph .copvline { flex:1 1 auto; min-width:0; }
+.copswdens { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; flex:none; }
+.copswdens button { border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-2); padding:2px 9px; font:600 var(--fs-micro, 11px)/1.6 var(--sans); cursor:pointer; }
+.copswdens button:last-child { border-right:0; }
+.copswdens button[aria-pressed="true"] { background:var(--surface-2); color:var(--ink); }
+.copswdens button:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:-2px; }
+.copswpb { flex:1 1 auto; min-height:0; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
+.copswpb > .copsw-card { margin:0; }
+.copswfoot { flex:none; }
+ol.copswol, ul.copswol { list-style:none; padding-left:0; gap:2px; }
+.copswi { margin:0; }
+.copswrow { display:flex; align-items:baseline; gap:6px; width:100%; padding:2px 0; border:0; background:none; text-align:left; font:inherit; color:inherit; }
+button.copswrow { cursor:pointer; }
+.copswrow b { display:inline !important; color:var(--ink); }
+button.copswrow:hover b, button.copswrow:focus-visible b { color:var(--gold-deep, var(--gold)); }
+button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:1px; border-radius:3px; }
+.copswchev { flex:none; width:10px; font-size:10px; color:var(--ink-3); transition:transform .12s; }
+.copswrow[aria-expanded="true"] .copswchev { transform:rotate(90deg); }
+.copswdet { padding:2px 0 6px 16px; display:flex; flex-direction:column; gap:2px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copswi:not(:has(button.copswrow)) .copswdet { padding-left:0; }
+.copswiss { margin:6px 0 0; padding-left:18px; color:var(--bad-tx); }
+.copswchat .copsw-gridwrap { margin-top:8px; }
+.copswchat .copsw-qn, .copswchat .copsw-qt { display:block; }
+.copswchat .copsw-lh { margin:6px 0 0; }

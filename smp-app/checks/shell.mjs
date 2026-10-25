@@ -875,6 +875,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     /* §638 (Islam: "we don't collapse the side bar with default"): a chat
        with nothing yet beside it leaves the chats rail open, one centred
        column of at most 740px. */
+    if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/chat-rail-open.png" });
     const open0 = await page.evaluate(() => ({ shut: document.querySelector("[data-cop-pane]").classList.contains("copshut"), rails: getComputedStyle(document.querySelector(".coprails")).display,
       split: !!document.querySelector("[data-cop-split]"), box: Math.round(parseFloat(getComputedStyle(document.querySelector(".copcompose")).width)) }));
     check(!open0.shut && open0.rails !== "none" && !open0.split && open0.box <= 740, "§638 a chat with nothing beside it keeps the chats rail open and reads in one column of at most 740px", JSON.stringify(open0));
@@ -948,6 +949,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       panel: [...document.querySelectorAll("[data-cop-out] [data-cop-savedraft]")].map((b) => b.textContent.trim()),
       side: (() => { const c = document.querySelector("[data-cop-split] > .copchat"), o = document.querySelector("[data-cop-out]");
         if (!c || !o) return null; const a = c.getBoundingClientRect(), b = o.getBoundingClientRect(); return b.left >= a.right - 1 && b.width > 300; })() }));
+    if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/chat-draft-panel.png" });
     check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true,
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");

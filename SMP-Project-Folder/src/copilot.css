@@ -751,3 +751,56 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
    directions — column with the cards open, row with them shut. */
 .copsavebar .copfdone { margin:0; flex:0 0 100%; }
 @media (max-width:760px){ .copfcards { grid-template-columns:minmax(0, 1fr); } }
+
+/* ── §638 THE LAYOUT CONCEPT (Islam, 25 Oct 2026, from the signed-off
+   design-mockups/copilot-layout/2026-10-25_copilot-concept.html): a chat
+   reads at 740px however wide the screen; the chat comes first and what it
+   builds stands to its right behind a handle; a guided chat's to-do keeps
+   its 200px at the far right. From 1280px the three stand side by side —
+   the chat's default gives way first, so the work keeps 400px — and below
+   it the work and the to-do open over the chat from the head's buttons.
+   Later in the file on purpose: it settles the rules above. Tokens only. ── */
+.copchat > :not(.copmsgs), .copchat > .copmsgs > .copzoom { width:100%; max-width:var(--cop-read, 740px); margin-left:auto; margin-right:auto; box-sizing:border-box; }
+.copgrip { display:none; position:relative; cursor:col-resize; touch-action:none; min-height:0; }
+.copgrip::after { content:""; position:absolute; top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%); background:var(--line); }
+.copgrip:hover::after, .copgrip.on::after, .copgrip:focus-visible::after { width:3px; background:var(--gold); }
+.copgrip:focus-visible { outline:none; }
+.copshade, .copsheetb, .copsheetx { display:none; }
+.copdraftline { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:6px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copdraftline b { color:var(--ink); }
+.copsplit { display:flex; flex-direction:column; gap:8px; min-height:0; position:relative; }
+.copout { display:flex; flex-direction:column; min-width:0; min-height:0; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px); overflow:hidden; }
+.copouth { display:flex; align-items:baseline; gap:8px; padding:9px 12px; border-bottom:1px solid var(--line); background:var(--surface); }
+.copouth b { font-size:var(--fs-body, 14px); color:var(--ink); }
+.copouth .copsheetx { margin-left:auto; align-self:center; }
+.copoutb { flex:1 1 auto; min-height:0; overflow-y:auto; padding:10px 12px; }
+.copoutb .copdraft { margin-top:0; }
+.copoutf { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 12px; border-top:1px solid var(--line); background:var(--surface); }
+@media (min-width:821px){
+  .copmain > .copsplit { flex:1 1 auto; }
+  .copsplit > .copchat { flex:1 1 auto; display:flex; flex-direction:column; min-height:0; min-width:0; }
+}
+@media (min-width:1280px){
+  .copmain > .copsplit { display:grid; gap:0; grid-template-columns:min(var(--cop-chatw, 760px), calc(100% - 420px)) 12px minmax(0,1fr); }
+  .copsplit > .copgrip, .copflow > .copgrip { display:block; }
+  .copflow { gap:0; grid-template-columns:min(var(--cop-chatw, 760px), calc(100% - 640px)) 12px minmax(0,1fr) 208px; }
+  .copflow > .copftodo { margin-left:8px; }
+  .copflow.nocards { gap:8px; grid-template-columns:minmax(0,1fr) 200px; }
+  .copflow.nocards > .copftodo { margin-left:0; }
+  /* The office chat button floats over the window's corner (§490.2): with
+     the draft beside the chat, the corner is the draft's foot, not the box. */
+  :root[data-cop-page] .copmain .copsplit .copcompose { padding-right:0; }
+  :root[data-cop-page] .copoutf { padding-right:64px; }
+}
+@media (max-width:1279px){
+  .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); position:relative; }
+  .copflow > .copleft, .copflow > .copftodo, .copsplit > .copout { display:none; }
+  .copsheetb, .copsheetx { display:inline-flex; }
+  .copleft .copcardx { display:none; }
+  .copflow.sheet-cards > .copleft, .copflow.sheet-todo > .copftodo, .copsplit.sheet > .copout {
+    display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, 100%);
+    background:var(--surface); box-shadow:var(--shadow-md); padding:8px; overflow-y:auto; }
+  .copflow.sheet-todo > .copftodo { width:min(300px, 100%); }
+  .copsplit.sheet > .copout { padding:0; overflow:hidden; }
+  .copflow.sheet > .copshade, .copsplit.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
+}

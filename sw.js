@@ -662,7 +662,10 @@
    changed (§91). */
 /* v7.17-new-menu-left — §635: the "+ New chat" choice opens from the
    rail's left edge, on screen. */
-const SHELL = "smp-shell-v7.17-new-menu-left";
+/* v7.18-copilot-layout — §638: the Copilot's layout concept — a 740px
+   reading column, the chat first and its work to the right behind a
+   handle, the rail open by default, a reply's bold drawn bold. */
+const SHELL = "smp-shell-v7.18-copilot-layout";
 const ASSETS = [
   "/",
   "/index.html",

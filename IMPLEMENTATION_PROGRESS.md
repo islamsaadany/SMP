@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-25 — The Copilot's layout concept, first release (§638).** A 740px reading column, the chats rail open by default, a reply's bold drawn bold; the guided Foundation is chat · cards · to-do with a handle between, and a free chat's draft stands to its right.
+
 **2026-10-25 — The Free chat part aligned with the method, and How we compete and Capabilities chats told their own method (§637), merged to `main` on Islam's word.**
 
 **2026-10-25 — A free chat talks before it drafts (§636), merged to `main` on Islam's word.** Its own part in Copilot settings › Free chat, for every area: confirm, ask one at a time or all at once, a baseline before any target, and a draft only when agreed.

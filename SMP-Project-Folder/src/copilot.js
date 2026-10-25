@@ -171,7 +171,7 @@ var COPILOT = (function(){
   /* ── THE PANE ────────────────────────────────────────────────────────── */
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
-    var shut = railShut();
+    var shut = railFolded();
     return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
@@ -197,7 +197,7 @@ var COPILOT = (function(){
      start of the Chats header rather than on a row of its own above the
      rails, so an open rail spends no line on it. */
   function chatsHead(){
-    var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railShut() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
+    var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railFolded() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
     return archView() ? tog + '<span class="coprhl">Archived chats</span>'
       : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newmenu aria-haspopup="menu" aria-expanded="' + (MENU === "new") + '">+ New chat</button>' + newMenu() : '');
   }
@@ -547,13 +547,35 @@ var COPILOT = (function(){
     var w = document.querySelector("[data-cop-wword]"); if (w) w.textContent = workWord();
   }
   window.__copWork = { words: WORK_WORDS, slow: WORK_SLOW, word: workWord };
+  /* §638: a reply's **bold** is drawn bold. Only that, and read AFTER the
+     text is escaped, so nothing the model writes ever becomes markup. */
+  function rich(s){ return E(s).replace(/\*\*([^*\n]+?)\*\*/g, "<b>$1</b>"); }
+  /* §638 THE DRAFT STANDS BESIDE THE CHAT (design-mockups/copilot-layout/
+     2026-10-25_copilot-concept.html, signed off): a plain or free chat's
+     latest draft is drawn in its own panel to the right, with its Save;
+     the bubble that wrote it says so in a line. An earlier draft can be
+     put back in the panel from its own bubble. */
+  var PANELPICK = {};            /* chat id → the message whose draft the panel shows (this visit only) */
+  var SHEET = "";                /* "cards" | "todo" | "draft": the panel opened over the chat below 1280px */
+  function hasDraft(m){ var p = m && m.part; return !!(m && m.who === "ai" && p && p.kind === "answer" && p.draft && p.draft.groups && p.draft.groups.length); }
+  function draftMsg(){
+    if (!PANE || !PANE.chat || !PANE.messages) return null;
+    var pick = PANELPICK[PANE.chat.id], last = null;
+    for (var i = 0; i < PANE.messages.length; i++) { var m = PANE.messages[i]; if (hasDraft(m)) { last = m; if (pick && m.id === pick) return m; } }
+    return last;
+  }
   function answerHtml(m, last){
     var p = m.part || {};
-    var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
+    var h = m.body ? '<div class="copbody">' + rich(m.body) + '</div>' : '';
     /* §471: no "Understood / Working from" box. A stored answer from before
        may still carry one; it is not drawn — the reply says it in words. */
     if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
-    if (p.draft && p.draft.groups) {
+    if (hasDraft(m)) {
+      var shownHere = draftMsg() === m;
+      h += '<div class="copdraftline"><span>Draft' + (p.draft.title ? ' · <b>' + E(p.draft.title) + '</b>' : '') + '</span>' +
+        '<button type="button" class="copopt" data-cop-showdraft="' + E(m.id) + '">' + (shownHere ? 'View draft' : 'Show this draft') + '</button>' +
+        (p.saved && p.saved.deliverableId ? '<span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span>' : '') + '</div>';
+    } else if (p.draft && p.draft.groups) {
       h += '<div class="copdraft">' + (p.draft.title ? '<div class="copdt">' + E(p.draft.title) + '</div>' : '') +
         '<div class="copdg">' + p.draft.groups.map(function(g){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
@@ -627,6 +649,29 @@ var COPILOT = (function(){
   }
   window.__copSize = { steps: ZOOMS, index: function(){ return ZOOMS[zi()]; } };
 
+  function draftPanelHtml(m){
+    var p = m.part, latest = true;
+    for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
+    var foot = (p.saved && p.saved.deliverableId)
+      ? '<span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span><button type="button" class="copopt" data-cop-deliv="' + E(p.saved.deliverableId) + '">Open it</button>'
+      : (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button>' : '');
+    return '<section class="copout" data-cop-out aria-label="Draft">' +
+      '<div class="copouth"><b>' + E(p.draft.title || "Draft") + '</b><span class="copm">' + (latest ? 'Latest draft' : 'An earlier draft') + '</span>' +
+        '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close the draft" title="Close">×</button></div>' +
+      '<div class="copoutb"><div class="copdraft"><div class="copdg">' + p.draft.groups.map(function(g){
+          return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' + g.items.map(itemHtml).join("") + '</ul></div>';
+        }).join("") + '</div></div></div>' +
+      (foot ? '<div class="copoutf">' + foot + '</div>' : '') + '</section>';
+  }
+  /* THE HANDLE BETWEEN THE CHAT AND WHAT IT BUILDS (§638): drag to widen or
+     narrow the chat, double-click (or Home) for the default, arrows in 20px
+     steps. The width is this browser's own convenience, kept for the next
+     visit; the CSS caps it so the work beside it always keeps its room. */
+  var GRIPKEY = "smp.copilot.chatw";
+  function chatW(){ try { var v = Number(localStorage.getItem(GRIPKEY)); return v >= 420 && v <= 1400 ? v : 0; } catch (e) { return 0; } }
+  function splitStyle(){ var w = chatW(); return w ? ' style="--cop-chatw:' + w + 'px"' : ''; }
+  var GRIP = '<div class="copgrip" data-cop-grip role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize the chat" title="Drag to resize · double-click for the default width"></div>';
+  function sheetBtn(k, label){ return '<button type="button" class="copbtn quiet copsheetb" data-cop-sheet="' + k + '" aria-expanded="' + (SHEET === k) + '">' + label + '</button>'; }
   function chatHtml(){
     var c = PANE.chat;
     var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
@@ -641,9 +686,10 @@ var COPILOT = (function(){
     }).join("") + (THINKING === c.id ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '');
     var ctx = contextOf();
     var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
-    return '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
+    var dm = draftMsg();
+    var chat = '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
       '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
-      '<div class="copheadrow">' + head + sizeHtml() + '</div>' +
+      '<div class="copheadrow">' + head + (dm ? sheetBtn("draft", "View draft") : '') + sizeHtml() + '</div>' +
       (PANE.flow ? roadLine() : '') +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div></div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
@@ -653,6 +699,9 @@ var COPILOT = (function(){
             '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
         : composerHtml(c, !!pend)) +
       '</div>';
+    if (!dm) return chat;
+    return '<div class="copsplit' + (SHEET === "draft" ? ' sheet' : '') + '" data-cop-split' + splitStyle() + '>' + chat + GRIP + draftPanelHtml(dm) +
+      '<div class="copshade" data-cop-sheet=""></div></div>';
   }
   /* THE COMPOSER (§453, from the signed-off mockup): one box shaped like
      Claude's — one line to start, growing as you type to about ten lines and
@@ -921,7 +970,9 @@ var COPILOT = (function(){
       p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
     }
     var total = countedParts(f), agreed = agreedCount(f);
-    var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
+    var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>'
+      : sheetBtn("cards", "View " + sectionWord());
+    show += sheetBtn("todo", "To-do " + doneCount(PANE.flow) + "/" + S.filter(function(_, i){ return on(i); }).length);
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
       '<div class="copfbar"><span class="copfcount" data-cop-progress>' + agreed + ' of ' + total + ' parts agreed</span>' +
       '<div class="coptrack" role="progressbar" aria-label="Parts agreed" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + agreed + '"><i style="width:' + (total ? Math.round(agreed / total * 100) : 0) + '%"></i></div></div>';
@@ -1065,9 +1116,13 @@ var COPILOT = (function(){
     var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> · ' + (sNow ? "saved" : "in progress") +
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
-    return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
-      (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
-        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
+    /* §638: the chat first, the cards to its right behind the handle, the
+       to-do last at its 200px (the signed-off concept). Below 1280px the
+       cards and the to-do open over the chat from the head's two buttons. */
+    var cards = shut ? '' : GRIP + '<div class="copleft"><div class="copsh">' + vline +
+        '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button>' +
+        '<button type="button" class="copcx copcardx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>';
+    return '<div class="copflow' + (shut ? " nocards" : "") + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
         /* §525 — Save and Apply live in the card column, so closing the cards
@@ -1079,7 +1134,7 @@ var COPILOT = (function(){
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
               '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
           : composerHtml(c, false)) +
-      '</div>' + ftodoHtml(f) + '</div>';
+      '</div>' + cards + ftodoHtml(f) + '<div class="copshade" data-cop-sheet=""></div></div>';
   }
   /* §524 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
      it is APPLIED. Islam: "where do I press save for the foundation? in the
@@ -1404,13 +1459,31 @@ var COPILOT = (function(){
   }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
-  var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
+  /* §638 (Islam: "we don't collapse the side bar with default"): the rail
+     is OPEN unless the person shut it. It folds by itself only while a
+     result stands beside the chat — the Foundation's cards, a draft, a
+     workflow's work — the way Claude's list folds for an artifact, and that
+     fold is never stored as their choice (it was, under the old key, which
+     is why the rail had stayed shut for everybody; the new key starts every
+     browser open). Opening it by hand keeps it open for this visit. */
+  var RAILKEY = "smp.copilot.rail2", RAILKEPT = false;
   function railShut(){ try { return localStorage.getItem(RAILKEY) === "shut"; } catch (e) { return false; } }
-  function setRail(shut){
-    try { if (shut) localStorage.setItem(RAILKEY, "shut"); else localStorage.removeItem(RAILKEY); } catch (e) {}
+  function resultOpen(){
+    var o = OPEN[key()];
+    if (!o || o.kind !== "chat" || !PANE || PANE.id !== o.id || PANE.failed || !PANE.chat) return false;
+    if (swotOn() || competeOn() || advOn() || dirsOn() || execOn()) return true;
+    if (flowView()) return !CARDSHUT[PANE.chat.id];
+    return !!draftMsg();
+  }
+  function railFolded(){ return railShut() || (resultOpen() && !RAILKEPT); }
+  function syncRail(){
+    var shut = railFolded();
     var p = document.querySelector("[data-cop-pane]"); if (p) p.classList.toggle("copshut", shut);
     document.querySelectorAll("[data-cop-railtog]").forEach(function(t){ t.setAttribute("aria-expanded", String(!shut)); });
-    fitBox();
+  }
+  function setRail(shut){
+    try { if (shut) localStorage.setItem(RAILKEY, "shut"); else localStorage.removeItem(RAILKEY); } catch (e) {}
+    syncRail(); fitBox();
   }
 
   function delivHtml(){
@@ -1481,6 +1554,7 @@ var COPILOT = (function(){
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
+    syncRail();
     if (penAt) { var pb = document.querySelector("[data-cop-pentext]"); if (pb) { pb.focus(); try { pb.setSelectionRange(penAt[0], penAt[1]); } catch (e) {} } }
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
@@ -2710,7 +2784,6 @@ var COPILOT = (function(){
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       dvView(j);
       OPEN[key()] = { kind:"chat", id: j.chat.id };
-      if (!RAILKEPT && !railShut()) setRail(true);
       draw();
       if (PANE.dirs && PANE.dirs.start === "fresh") dvAsk({ act: mode === "capabilities" ? "capSuggest" : "dirSuggest" });
     });
@@ -2945,15 +3018,14 @@ var COPILOT = (function(){
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       exView(j);
       OPEN[key()] = { kind:"chat", id: j.chat.id };
-      if (!RAILKEPT && !railShut()) setRail(true);
       draw();
     });
   }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
-    /* A chat opening folds the chats rail to its strip (§490.2) — unless
-       the person has opened it again themselves this visit; then it stays. */
-    if (kind === "chat" && !RAILKEPT && !railShut()) setRail(true);
+    /* §638: the rail folds only while a result is open (resultOpen), which
+       draw() reads once the chat has come back. */
+    SHEET = "";
     if (!PANE || PANE.id !== id) PANE = null;
     draw();
     var k = key();
@@ -3036,7 +3108,31 @@ var COPILOT = (function(){
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
     if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
     if (ev.key === "Escape" && (MENU || ASKDEL)) { MENU = null; ASKDEL = null; draw(); }
+    if (ev.key === "Escape" && SHEET && !MENU) { SHEET = ""; draw(); }
+    var g = hit(ev, "[data-cop-grip]");
+    if (g && (ev.key === "ArrowLeft" || ev.key === "ArrowRight" || ev.key === "Home")) {
+      ev.preventDefault();
+      var ch = g.parentElement.querySelector("[data-cop-chatbox]");
+      if (ev.key === "Home") gripSet(g, 0); else gripSet(g, Math.round(ch.getBoundingClientRect().width / pageZoom()) + (ev.key === "ArrowLeft" ? -20 : 20));
+    }
   });
+  function gripSet(g, w){
+    var box = g.parentElement;
+    if (!w) { box.style.removeProperty("--cop-chatw"); try { localStorage.removeItem(GRIPKEY); } catch (e) {} return; }
+    w = Math.max(420, Math.min(1400, w));
+    box.style.setProperty("--cop-chatw", w + "px");
+    try { localStorage.setItem(GRIPKEY, String(w)); } catch (e) {}
+  }
+  document.addEventListener("pointerdown", function(ev){
+    var g = hit(ev, "[data-cop-grip]"); if (!g || ev.button !== 0) return;
+    ev.preventDefault();
+    var ch = g.parentElement.querySelector("[data-cop-chatbox]"), z = pageZoom(), x0 = ev.clientX, w0 = ch.getBoundingClientRect().width / z, w = 0;
+    g.classList.add("on");
+    function mv(e){ w = Math.round(w0 + (e.clientX - x0) / z); g.parentElement.style.setProperty("--cop-chatw", Math.max(420, Math.min(1400, w)) + "px"); }
+    function up(){ document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); g.classList.remove("on"); if (w) gripSet(g, w); }
+    document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up);
+  });
+  document.addEventListener("dblclick", function(ev){ var g = hit(ev, "[data-cop-grip]"); if (g) gripSet(g, 0); });
   /* SENDING. What was typed appears at once and the product says the
      Copilot is working, because a draft can take most of a minute and a box
      that sits still for that long reads as broken (§124). The server's own
@@ -3128,7 +3224,9 @@ var COPILOT = (function(){
     if (dvClick(ev)) return;
     if (exClick(ev)) return;
     if (swClick(ev)) return;
-    if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railShut(); RAILKEPT = !sh; setRail(sh); return; }
+    if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railFolded(); RAILKEPT = !sh; setRail(sh); return; }
+    if ((b = hit(ev, "[data-cop-sheet]"))) { var k = b.getAttribute("data-cop-sheet"); SHEET = SHEET === k ? "" : k; draw(); return; }
+    if ((b = hit(ev, "[data-cop-showdraft]"))) { if (PANE && PANE.chat) PANELPICK[PANE.chat.id] = b.getAttribute("data-cop-showdraft"); SHEET = "draft"; draw(); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
@@ -3174,7 +3272,6 @@ var COPILOT = (function(){
           PANE = { id: j.chat.id, chat: j.chat, messages: [] };
           adView(j);
           OPEN[key()] = { kind:"chat", id: j.chat.id };
-          if (!RAILKEPT && !railShut()) setRail(true);
           draw(); var t = document.querySelector("[data-cop-ad-text]"); if (t) t.focus();
         });
         return;
@@ -3185,7 +3282,6 @@ var COPILOT = (function(){
           PANE = Object.assign({ id: j.chat.id, chat: j.chat, messages: [] }, {});
           cpView(j);
           OPEN[key()] = { kind:"chat", id: j.chat.id };
-          if (!RAILKEPT && !railShut()) setRail(true);
           draw();
           cpAsk({ act:"competeScore" });
         });

@@ -76,7 +76,7 @@ const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_
    of an answer is measured, and what it SENT is read off the wire. */
 const MODEL_SEEN = [];
 const MODEL_ANSWER = {
-  reply: "Here is a first foundation from the plan.",
+  reply: "Here is a first **foundation** from the plan.",
   /* §471: a model still sending the old playback box. The SERVER drops the
      field (checks/copilot.mjs asserts that, red under the old shape), so the
      "no playback box" assertion below is the CONTROL and says so: it stays
@@ -872,6 +872,12 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
     const ctxLine = await page.evaluate(() => { const e = document.querySelector(".copctx"); return e ? e.textContent.trim() : ""; });
     check(/Mobile/.test(ctxLine) && /pillar/i.test(ctxLine), "the chat says in one line what the AI can see for the place", ctxLine);
+    /* §638 (Islam: "we don't collapse the side bar with default"): a chat
+       with nothing yet beside it leaves the chats rail open, one centred
+       column of at most 740px. */
+    const open0 = await page.evaluate(() => ({ shut: document.querySelector("[data-cop-pane]").classList.contains("copshut"), rails: getComputedStyle(document.querySelector(".coprails")).display,
+      split: !!document.querySelector("[data-cop-split]"), box: Math.round(parseFloat(getComputedStyle(document.querySelector(".copcompose")).width)) }));
+    check(!open0.shut && open0.rails !== "none" && !open0.split && open0.box <= 740, "§638 a chat with nothing beside it keeps the chats rail open and reads in one column of at most 740px", JSON.stringify(open0));
     /* A file, attached through the real control and read back (§96). */
     const docx = readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx"));
     await page.setInputFiles("[data-cop-file]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: docx });
@@ -902,12 +908,17 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(asp.length > 20 && /THE PLAN AS WRITTEN/.test(sys) && sys.includes(asp.slice(0, 60)) && /the plan's own text/.test(ctxLine),
       "…and Mobile's own Winning Aspiration went with it, the line saying the plan's text is included (§457)", asp.slice(0, 60));
     const ans = await page.evaluate(() => {
-      const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
-      return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
-        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: m.querySelectorAll("[data-cop-reply].rec, [data-cop-reply] .coprec").length, recWord: /recommended/i.test(Array.from(m.querySelectorAll("[data-cop-reply]")).map((x) => x.textContent).join("|")), firstOpt: (m.querySelector("[data-cop-reply]") || {}).textContent || "",
+      const m = document.querySelector("[data-cop-msgs] .copmsg.ai"), o = document.querySelector("[data-cop-out]"); if (!m || !o) return null;
+      return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: o.querySelectorAll(".copgrp li").length,
+        srcs: Array.from(o.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: m.querySelectorAll("[data-cop-reply].rec, [data-cop-reply] .coprec").length, recWord: /recommended/i.test(Array.from(m.querySelectorAll("[data-cop-reply]")).map((x) => x.textContent).join("|")), firstOpt: (m.querySelector("[data-cop-reply]") || {}).textContent || "",
         opts: m.querySelectorAll("[data-cop-reply]").length,
-        it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
+        it: (o.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "",
+        bold: Array.from(m.querySelectorAll(".copbody b")).map((x) => x.textContent).join("|"), stars: /\*\*/.test((m.querySelector(".copbody") || {}).textContent || ""),
+        read: (() => { const z = document.querySelector("[data-cop-split] .copzoom"), b = document.querySelector("[data-cop-split] .copbox"); return z && b ? [Math.round(z.getBoundingClientRect().width), Math.round(b.getBoundingClientRect().width)] : null; })(),
+        rail: (() => { const r = document.querySelector(".coprails"); return r ? getComputedStyle(r).display : "none"; })() };
     });
+    check(ans && ans.bold === "foundation" && !ans.stars, "§638 a reply's **bold** is drawn bold, and no stars are left in the text", JSON.stringify(ans && { bold: ans.bold, stars: ans.stars }));
+    check(ans && ans.read && ans.read[0] <= 741 && ans.read[1] <= 741 && ans.read[0] > 300, "§638 the conversation and the box read at 740px at most", JSON.stringify(ans && ans.read));
     check(ans && !ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.firstOpt) && ans.rec === 0 && !ans.recWord && ans.srcs.join("|") === "Assumed",
       "the answer draws no playback box (§471), and draws what is missing, the draft with sources, and two ways on — neither marked recommended (§474)", JSON.stringify(ans));
     /* §460: an item the method shapes draws its title, score and evidence, and
@@ -929,22 +940,35 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        "when I tried looks great save it it kept working … it should be saved
        to the deliverables rail on the left". Pressed, then read back from the
        database, never off the screen (§96). */
-    const saveBtns = await page.evaluate(() => [...document.querySelectorAll("[data-cop-msgs] [data-cop-savedraft]")].map((b) => b.textContent.trim()));
-    check(saveBtns.length === 2 && saveBtns.every((t) => t === "Save to Foundation deliverables"),
-      "every draft carries a Save button naming the section's deliverables (§472)", JSON.stringify(saveBtns));
+    /* §638: the LATEST draft stands in the panel beside the chat with the
+       one Save; each bubble that wrote a draft says so in a line, and an
+       earlier one can be put back in the panel from its own bubble. */
+    const lay = await page.evaluate(() => ({ lines: document.querySelectorAll("[data-cop-msgs] .copdraftline").length,
+      inBubble: document.querySelectorAll("[data-cop-msgs] .copdraft, [data-cop-msgs] [data-cop-savedraft]").length,
+      panel: [...document.querySelectorAll("[data-cop-out] [data-cop-savedraft]")].map((b) => b.textContent.trim()),
+      side: (() => { const c = document.querySelector("[data-cop-split] > .copchat"), o = document.querySelector("[data-cop-out]");
+        if (!c || !o) return null; const a = c.getBoundingClientRect(), b = o.getBoundingClientRect(); return b.left >= a.right - 1 && b.width > 300; })() }));
+    check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true,
+      "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
-    await page.locator("[data-cop-msgs] [data-cop-savedraft]").last().click();
-    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copsaved"), null, { timeout: 10000 }).catch(() => {});
+    await page.locator("[data-cop-out] [data-cop-savedraft]").click();
+    await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
-    const sv = await page.evaluate(() => ({ saved: [...document.querySelectorAll("[data-cop-msgs] .copsaved")].map((x) => x.textContent.trim()),
-      open: document.querySelectorAll("[data-cop-msgs] .copsaved ~ [data-cop-deliv]").length,
-      left: document.querySelectorAll("[data-cop-msgs] [data-cop-savedraft]").length,
+    const svA = await page.evaluate(() => ({ saved: [...document.querySelectorAll("[data-cop-out] .copsaved")].map((x) => x.textContent.trim()),
+      open: document.querySelectorAll("[data-cop-out] .copsaved ~ [data-cop-deliv]").length,
+      marks: document.querySelectorAll("[data-cop-msgs] .copdraftline .copsaved").length }));
+    await page.locator("[data-cop-msgs] [data-cop-showdraft]").first().click();
+    await page.waitForTimeout(150);
+    const sv = await page.evaluate(() => ({
+      left: document.querySelectorAll("[data-cop-out] [data-cop-savedraft]").length,
+      earlier: /earlier/i.test((document.querySelector("[data-cop-out] .copouth") || {}).textContent || ""),
       rail: [...document.querySelectorAll("[data-cop-delivs] [data-cop-deliv], .coprail [data-cop-deliv]")].map((x) => x.textContent.trim()).join("|") }));
+    Object.assign(sv, svA);
     const savedRow = (await asTenant(tenantId, (c) => c.query("select d.title, v.n, v.body->>'text' t from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id order by d.created_at desc, v.n desc limit 1"))).rows[0];
     check((await count("copilot_deliverables")) === d0 + 1 && savedRow && savedRow.title === "Mobile foundation" && savedRow.n === 1 && /PURPOSE\n- Connect every Egyptian/.test(savedRow.t),
       "pressing Save keeps the draft as a deliverable, v1, written out as text", JSON.stringify(savedRow));
-    check(sv.saved.length === 1 && /Saved as v1/.test(sv.saved[0]) && sv.open === 1 && sv.left === 1,
-      "…the pressed draft now says Saved as v1 with a way to open it, and the other draft keeps its button", JSON.stringify(sv));
+    check(sv.saved.length === 1 && /Saved as v1/.test(sv.saved[0]) && sv.open === 1 && sv.marks === 1 && sv.left === 1 && sv.earlier,
+      "…the panel now says Saved as v1 with a way to open it, its bubble is marked, and the earlier draft, shown again, keeps its button", JSON.stringify(sv));
     check(/Mobile foundation/.test(sv.rail), "…and it is on the left under Deliverables", sv.rail);
 
     /* §490: the word turns at 2s and the page re-reads it every 0.5s, so a look
@@ -1037,12 +1061,13 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(zb.stored === null && Math.abs(zb.h - z0.h) < 1, "back at normal the stored preference is removed (an absence, §50.6)", JSON.stringify(zb));
     await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
 
-    /* §490.2: opening a chat folds the chats rail to its strip, so the work
-       gets the room; pressed open again it stays open for the rest of the
+    /* §638 (was §490.2): with a draft standing beside the chat the rail
+       folds to its strip by itself, and that fold is NOT stored as the
+       person's choice; pressed open again it stays open for the rest of the
        visit. Asserted at both ends (§94.2), then the rail is used open. */
     const railNow = () => page.evaluate(() => { const r = document.querySelector(".coprails"); return r ? Math.round(r.getBoundingClientRect().width) : null; });
-    const shut0 = await page.evaluate(() => { try { return localStorage.getItem("smp.copilot.rail"); } catch (e) { return null; } });
-    check(shut0 === "shut" && !(await railNow()), "opening a chat folds the chats rail to its strip (§490.2)", String(shut0) + " " + (await railNow()));
+    const shut0 = await page.evaluate(() => { try { return [localStorage.getItem("smp.copilot.rail2"), localStorage.getItem("smp.copilot.rail")]; } catch (e) { return null; } });
+    check(shut0 && shut0[0] === null && shut0[1] === null && !(await railNow()), "§638 with a draft beside the chat the rail folds to its strip, and nothing is stored as the person's choice", JSON.stringify(shut0) + " " + (await railNow()));
     await page.click(".copslim [data-cop-railtog]"); await page.waitForTimeout(200);
     check((await railNow()) === 200, "…and pressed open it is the same 200px as in every other phase", String(await railNow()));
     const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
@@ -1254,7 +1279,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/foundation");
-    await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.rail"); } catch (e) {} });
+    await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.rail2"); } catch (e) {} });
     /* §514 — THE PART NAMES ARE THE CLIENT'S WORDS: two Terminology rows are
        renamed for the length of the section (state MADE, §113.8) and every
        name below is read back through the page's own labelWord — read at
@@ -1274,7 +1299,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click(".coprh [data-cop-railtog]");
     const shut = await page.evaluate(() => ({ cls: document.querySelector("[data-cop-pane]").classList.contains("copshut"),
       rails: getComputedStyle(document.querySelector(".coprails")).display, slim: document.querySelector(".copslim").getBoundingClientRect().width,
-      stored: localStorage.getItem("smp.copilot.rail") }));
+      stored: localStorage.getItem("smp.copilot.rail2") }));
     check(shut.cls && shut.rails === "none" && shut.slim >= 20 && shut.slim <= 28, "the rail button hides the rail to a 24px strip (§475 option A)", JSON.stringify(shut));
     await shot("0-shut");
     await open("/raya-trade/strategy/mobile/copilot/foundation");
@@ -1390,14 +1415,43 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector("[data-cop-path]", { timeout: 10000 });
     const cols = await page.evaluate(() => {
       const r = (q) => { const e = document.querySelector(q); return e ? e.getBoundingClientRect() : null; };
-      return { rail: r(".coprails"), left: r(".copleft"), chat: r(".copfchat"), cards: document.querySelectorAll(".copcard").length,
+      return { rail: r(".coprails"), left: r(".copleft"), chat: r(".copfchat"), todo: r(".copftodo"), todoCss: getComputedStyle(document.querySelector(".copftodo")).width, grip: r(".copflow > [data-cop-grip]"), cards: document.querySelectorAll(".copcard").length,
         empty: Array.from(document.querySelectorAll(".copcard p")).filter((p) => /Not started/.test(p.textContent)).length,
         pageW: document.documentElement.scrollWidth, winW: innerWidth };
     });
-    check(cols.rail && cols.left && cols.chat && cols.rail.right <= cols.left.left + 1 && cols.left.right <= cols.chat.left + 1,
-      "three columns: the rail, the six cards, the chat", JSON.stringify(cols));
+    check(cols.left && cols.chat && cols.todo && cols.grip && (!cols.rail || !cols.rail.width || cols.rail.right <= cols.chat.left + 1) &&
+      cols.chat.right <= cols.grip.left + 1 && cols.grip.right <= cols.left.left + 1 && cols.left.right <= cols.todo.left + 1 && cols.todoCss === "200px",
+      "§638 the chat first, then the handle, the six cards, and the to-do at 200px", JSON.stringify(cols));
     check(cols.cards === 6 && cols.empty === 6, "Start fresh shows six empty cards, Not started", cols.cards + " cards, " + cols.empty + " empty");
     check(cols.pageW <= cols.winW, "nothing pushes the page sideways", cols.pageW + " > " + cols.winW);
+    /* §638 THE HANDLE: dragged left the chat narrows and the cards take the
+       room, the width is kept on this browser; a double-click puts the
+       default back and forgets it. Read before and after (§94.2). */
+    {
+      const g = await page.locator(".copflow > [data-cop-grip]").boundingBox();
+      const w = () => page.evaluate(() => ({ chat: Math.round(document.querySelector(".copfchat").getBoundingClientRect().width), cards: Math.round(document.querySelector(".copleft").getBoundingClientRect().width),
+        kept: localStorage.getItem("smp.copilot.chatw") }));
+      const w0 = await w();
+      await page.mouse.move(g.x + g.width / 2, g.y + 200); await page.mouse.down();
+      await page.mouse.move(g.x + g.width / 2 - 120, g.y + 200, { steps: 6 }); await page.mouse.up();
+      const w1 = await w();
+      check(w0.kept === null && w1.chat < w0.chat - 60 && w1.cards > w0.cards + 60 && Number(w1.kept) > 400, "§638 dragging the handle narrows the chat, widens the cards, and the width is kept", JSON.stringify([w0, w1]));
+      await page.dblclick(".copflow > [data-cop-grip]");
+      const w2 = await w();
+      check(Math.abs(w2.chat - w0.chat) <= 2 && w2.kept === null, "…and a double-click puts the default back and forgets it", JSON.stringify(w2));
+      /* Below 1280px the cards and the to-do open over the chat. */
+      await page.setViewportSize({ width: 1100, height: 900 }); await page.waitForTimeout(250);
+      const n0 = await page.evaluate(() => ({ cards: getComputedStyle(document.querySelector(".copleft")).display, todo: getComputedStyle(document.querySelector(".copftodo")).display,
+        btns: Array.from(document.querySelectorAll(".copfhead [data-cop-sheet]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()) }));
+      await page.click('.copfhead [data-cop-sheet="cards"]'); await page.waitForTimeout(150);
+      const n1 = await page.evaluate(() => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"); const a = l.getBoundingClientRect(), b = c.getBoundingClientRect();
+        return { cards: getComputedStyle(l).display, over: a.left < b.right && a.right > b.left, shade: getComputedStyle(document.querySelector(".copflow > .copshade")).display }; });
+      await page.click(".copflow > .copshade", { position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
+      const n2 = await page.evaluate(() => getComputedStyle(document.querySelector(".copleft")).display);
+      check(n0.cards === "none" && n0.todo === "none" && n0.btns.length === 2 && /Foundation/.test(n0.btns[0]) && /To-do/.test(n0.btns[1]) && n1.cards === "flex" && n1.over && n1.shade === "block" && n2 === "none",
+        "§638 below 1280px the cards and the to-do wait behind two buttons in the chat's head, the cards open over the chat, and pressing beside them closes them", JSON.stringify([n0, n1, n2]));
+      await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+    }
     check(!(await page.$("[data-cop-setyears]")), "the years are not asked before the road is chosen");
     await shot("2-roads");
     const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".coppcard")).map((b) => ({ k: b.dataset.copPath, rec: b.classList.contains("rec"),
@@ -2753,8 +2807,8 @@ await section("4 · Forefront's own pages", async () => {
       const cp = await page.evaluate(() => { const st = document.querySelector(".cpstick"); const r = st ? st.getBoundingClientRect() : null;
         return { title: (document.querySelector(".cpcard .hochd h2") || {}).textContent, tabs: document.querySelectorAll(".cpstick [data-cpsec]").length, top: r ? Math.round(r.top) : null, scrolled: Math.round(scrollY),
           tiles: document.querySelectorAll(".cplim div").length }; });
-      check(cp.title === "The parts" && cp.tabs === 5 && cp.top === 0 && cp.scrolled > 500 && cp.tiles === 6,
-        "Copilot is one card, The parts, its header and five section tabs frozen at the top while the method scrolls, the limits as tiles", JSON.stringify(cp));
+      check(cp.title === "The parts" && cp.tabs === 6 && cp.top === 0 && cp.scrolled > 500 && cp.tiles === 6,
+        "Copilot is one card, The parts, its header and six section tabs (Free chat the sixth, §636) frozen at the top while the method scrolls, the limits as tiles", JSON.stringify(cp));
       await page.evaluate(() => window.scrollTo(0, 0));
       /* THE MARK AT THE TOP GOES HOME (Islam, 2026-10-24: "I want the icon
          on the top to take me home as well") — pressed from Copilot */

@@ -1,5 +1,15 @@
 import "server-only";
 import { GoogleGenAI, type Schema } from "@google/genai";
+import { createRequire } from "node:module";
+
+const need = createRequire(import.meta.url);
+const Assistant = need("../../../lib/assistant.cjs") as {
+  provider: () => "anthropic" | "gemini";
+  model: () => string;
+  askJson: (o: Record<string, unknown>) => Promise<{
+    ok: boolean; json?: unknown; why?: string; badKey?: boolean; status?: number;
+  }>;
+};
 
 /**
  * Shared Gemini access for the AI features (process review, template
@@ -25,6 +35,7 @@ export type StructuredOutcome<T> =
 const DEFAULT_MODEL = "gemini-3.5-flash";
 
 export function geminiModel(): string {
+  if (Assistant.provider() === "anthropic") return Assistant.model();
   return process.env["GEMINI_MODEL"] || DEFAULT_MODEL;
 }
 
@@ -37,6 +48,38 @@ export async function generateStructured<T>(params: {
   /** Shown when the model replies but not with usable JSON. */
   malformedMessage: string;
 }): Promise<StructuredOutcome<T>> {
+  /* With ANTHROPIC_API_KEY set, the call goes to Claude through the one
+     module that reads that key (lib/assistant.cjs), with the same schema. */
+  if (Assistant.provider() === "anthropic") {
+    const r = await Assistant.askJson({
+      instruction: params.systemPrompt,
+      question: params.promptText,
+      schema: params.schema,
+      needsCorpus: false,
+      noCorpus: true,
+      maxTurns: 1,
+      think: true,
+      maxOutput: 16384,
+      timeoutMs: 55_000,
+    });
+    if (r.ok && r.json && typeof r.json === "object") return { ok: true, data: r.json as T };
+    if (r.ok) return { ok: false, reason: "REQUEST_FAILED", message: params.malformedMessage };
+    if (r.badKey) {
+      return { ok: false, reason: "REQUEST_FAILED",
+               message: "This deployment's AI credentials were rejected. Contact an administrator." };
+    }
+    if (r.status === 529 || r.status === 503) {
+      return { ok: false, reason: "REQUEST_FAILED",
+               message: "The AI model is temporarily overloaded. Please try again in a moment." };
+    }
+    if (r.status === 429) {
+      return { ok: false, reason: "REQUEST_FAILED",
+               message: "The AI service has hit its rate limit. Please try again shortly." };
+    }
+    return { ok: false, reason: "REQUEST_FAILED",
+             message: r.why?.includes("answer could not be read") ? params.malformedMessage : (r.why || "AI request failed.") };
+  }
+
   const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) {
     return { ok: false, reason: "NOT_CONFIGURED", message: params.notConfiguredMessage };

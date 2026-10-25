@@ -2116,13 +2116,16 @@ var COPILOT = (function(){
       draw(); return true;
     }
     if ((b = hit(ev, "[data-cop-sw-q]"))) { var qi = b.getAttribute("data-cop-sw-q").split("|"); g = swCopy(); g.q = { area: qi[0], i: +qi[1] }; SWSUG = null;
-      DRAFT[id] = ""; swSave(g); return true; }
+      var tq = document.querySelector("[data-cop-text]"); if (tq) tq.value = ""; DRAFT[id] = ""; swSave(g); return true; }
     if ((b = hit(ev, "[data-cop-sw-help]"))) { var hk = b.getAttribute("data-cop-sw-help"); SWHELP[hk] = !SWHELP[hk]; draw(); return true; }
     if ((b = hit(ev, "[data-cop-sw-answer]"))) {
       var ai = b.getAttribute("data-cop-sw-answer").split("|");
       swAsk({ act:"swotAnswer", area: ai[0], i: +ai[1], swot: swCopy() }, function(j){
         SWSUG = { id: id, area: ai[0], i: +ai[1], used: j.used || [] };
-        DRAFT[id] = j.answer || ""; draw(); var tb = document.querySelector("[data-cop-text]"); if (tb) tb.focus();
+        /* draw() first keeps what the box shows (keepDraft), so the box
+           itself takes the suggestion, not only DRAFT. */
+        var tb = document.querySelector("[data-cop-text]"); if (tb) tb.value = j.answer || "";
+        DRAFT[id] = j.answer || ""; draw(); tb = document.querySelector("[data-cop-text]"); if (tb) tb.focus();
       });
       return true;
     }

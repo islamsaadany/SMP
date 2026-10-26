@@ -1064,7 +1064,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       const sm = document.querySelector('[data-cop-size="-1"]'), bg = document.querySelector('[data-cop-size="1"]');
       let stored = null; try { stored = localStorage.getItem("smp.copilot.textsize"); } catch (e) {}
       return { h: b ? b.getBoundingClientRect().height : 0, lh: t ? parseFloat(getComputedStyle(t).lineHeight) : 0,
-        val: t ? t.value : null, sm: sm ? sm.disabled : null, bg: bg ? bg.disabled : null, stored,
+        val: t ? t.value : null, sm: sm ? sm.getAttribute("aria-disabled") === "true" && /smallest/.test(sm.getAttribute("data-tip") || "") : null,
+        bg: bg ? bg.getAttribute("aria-disabled") === "true" && /largest/.test(bg.getAttribute("data-tip") || "") : null, dead: !!((sm && sm.disabled) || (bg && bg.disabled)), stored,
         inHead: !!document.querySelector(".copheadrow .copsize"), side: getComputedStyle(document.querySelector(".coprail .copt") || document.body).fontSize };
     });
     const z0 = await sz();

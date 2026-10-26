@@ -881,7 +881,7 @@ var COPILOT = (function(){
      button is stopped before any handler sees it (the capture guard below).
      `why` empty is a live button. */
   var BUSY = "The Copilot is still working on the last answer.";
-  var VIEWONLY = "You can read this chat but not change it.";
+  var VIEWWHY = "You can read this chat but not change it.";
   function held(why){ return why ? ' aria-disabled="true" data-tip="' + E(why) + '"' : ''; }
   function heldCls(why){ return why ? ' hasnote' : ''; }
   function setHeld(el, why){
@@ -2074,7 +2074,7 @@ var COPILOT = (function(){
         return '<tr><th scope="row">' + E(aw[a] || a) + '</th>' + cols.map(function(m){
           if ((off[a] || []).indexOf(m) < 0) return '<td class="na">—</td>';
           var on = (s.methods[a] || []).indexOf(m) >= 0;
-          return '<td><button type="button" class="copsw-tick' + (on ? " on" : "") + heldCls(!ed) + '" data-cop-sw-m="' + a + '|' + m + '" aria-pressed="' + on + '"' + held(ed ? "" : VIEWONLY) +
+          return '<td><button type="button" class="copsw-tick' + (on ? " on" : "") + heldCls(!ed) + '" data-cop-sw-m="' + a + '|' + m + '" aria-pressed="' + on + '"' + held(ed ? "" : VIEWWHY) +
             ' aria-label="' + E((aw[a] || a) + " — " + (mw[m] || m)) + '">' + (on ? '&#10003;' : '') + '</button></td>';
         }).join("") + '</tr>';
       }).join("") + '</tbody></table></div>' +

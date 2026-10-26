@@ -942,10 +942,15 @@ var COPILOT = (function(){
      a span, not a button, because a pressable card is itself a button; what
      is open is kept by the list's text so a redraw leaves it open. */
   var CARDMORE = {};
-  function cardBody(text){
+  /* §643.1 — Key Objectives always shows every objective (Islam: "for the
+     objectives remove the show more and show fewer and just show the
+     objectives created, all of them"): they are the numbers the plan is
+     measured by, read together. */
+  function cardBody(text, key){
     var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
     if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
-    var cut = lines.length > 4 ? 3 : lines.length, key = lines.join("\n"), open = !!CARDMORE[key];
+    var cut = lines.length > 4 && key !== "obj" ? 3 : lines.length;
+    key = lines.join("\n"); var open = !!CARDMORE[key];
     return '<ul' + (open ? ' class="open"' : '') + '>' + lines.map(function(l, k){ return '<li' + (k >= cut ? ' class="copmorel"' : '') + '>' + E(l) + '</li>'; }).join("") + '</ul>' +
       (lines.length > cut ? '<span class="copmore" role="button" tabindex="0" aria-expanded="' + open + '" data-cop-more="' + E(key) + '" data-n="' + (lines.length - cut) + '">' +
         (open ? 'Show fewer' : 'Show ' + (lines.length - cut) + ' more') + '</span>' : '');
@@ -1006,7 +1011,7 @@ var COPILOT = (function(){
          card a person comes back to and the one that told them nothing. */
       else if (a) { st = "In progress"; }
       else { empty = true; st = "Empty"; }
-      var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
+      var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f), el.key)
         : '<p>' + (now && f.phase === "draft" ? "Nothing agreed yet. The proposal is in the chat." : now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
       /* §643 — Your answers takes you to this part in the chat, opened. */
       if (a || ((f.talk && f.talk[i]) || []).length) body += '<span class="copanswers" role="button" tabindex="0" data-cop-answers="' + i + '">Your answers</span>';
@@ -1656,7 +1661,7 @@ var COPILOT = (function(){
     if (d.type === "foundation" && fp.length && !editing) {
       var words = partWords();
       body = '<div class="copfcards">' + fp.map(function(x){
-        return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
+        return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "", x.key) + '</div>'; }).join("") + '</div>' +
         /* §525.1 — the same green line the flow's bar carries, on the same
            test: the version shown is the version the plan holds. An older
            one applied is said by the row below, which names both numbers. */

@@ -872,7 +872,7 @@ var COPILOT = (function(){
   }
   function countedParts(f){ return steps().filter(function(_, i){ return on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
-  /* §646 — A BUTTON THAT CANNOT BE PRESSED SAYS WHY (Islam: "for any
+  /* §649 — A BUTTON THAT CANNOT BE PRESSED SAYS WHY (Islam: "for any
      disabled button we need to have a tooltip explaining why"). §538's way,
      now for every one: HELD, never `disabled` — `aria-disabled` and the reason
      in the platform's own bubble (`hasnote` + `data-tip`), which a pointer,
@@ -3667,7 +3667,7 @@ var COPILOT = (function(){
     var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more], [data-cop-answers]");
     if (b) { ev.preventDefault(); ev.stopPropagation(); if (b.hasAttribute("data-cop-more")) moreToggle(b); else answersGo(b); }
   }, true);
-  /* §646 — A HELD BUTTON IS NEVER PRESSED: stopped here, in the capture
+  /* §649 — A HELD BUTTON IS NEVER PRESSED: stopped here, in the capture
      phase, before any handler (every one of them used to test `disabled`).
      Its bubble has already said why. Only the Copilot's own controls. */
   document.addEventListener("click", function(ev){

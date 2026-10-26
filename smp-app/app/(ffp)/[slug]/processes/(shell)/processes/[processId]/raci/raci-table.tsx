@@ -496,7 +496,7 @@ export function RaciTable({
         </div>
       )}
 
-      <div className="max-h-[70vh] overflow-auto rounded-xl border border-slate-200 bg-white">
+      <div className="max-h-[calc(var(--winh)*0.7)] overflow-auto rounded-xl border border-slate-200 bg-white">
         {/* An editable grid for an Editor, a plain data table for a Viewer.
             role="grid" with roving-tabindex cells describes something you
             operate; for someone who can only read it that is both a lie and

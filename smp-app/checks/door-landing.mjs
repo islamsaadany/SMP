@@ -352,10 +352,13 @@ await section("5 · the office", async () => {
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const trailText = ((await page.locator("nav.trail").textContent().catch(() => "")) || "").replace(/\s+/g, " ");
-  check((await page.locator(".welcomeover .wexit").count()) === 0 && /^\s*Platform\b/.test(trailText) && /Raya Trade/.test(trailText),
+  const trailMark = await page.evaluate(() => { const a = document.querySelector("nav.trail > a.trff"); return !!a && a === document.querySelector("nav.trail").firstElementChild && a.getAttribute("href") === "/platform" && a.getAttribute("aria-label") === "Home" && !!a.querySelector("svg"); });
+  check((await page.locator(".welcomeover .wexit").count()) === 0 && trailMark && /^\s*Raya Trade/.test(trailText),
     /* REWRITTEN, NEVER LOOSENED (§218): §400.1 renamed the trail's first
-       word from Forefront to Platform (Islam: "let's change it to Platform"). */
-    "…with no Continue, and the office's trail naming the platform and the client above it (§400, §400.1)", trailText);
+       word from Forefront to Platform (Islam: "let's change it to Platform");
+       option D (2026-10-26) put the platform's mark in the word's place —
+       first in the trail, to /platform, named "Home" — with the client next. */
+    "…with no Continue, and the office's trail opening on the platform's mark and the client after it (§400, §400.1, option D)", (trailMark ? "mark ok · " : "no mark · ") + trailText);
   check(((await text(page, ".wpages a"))[0] || "").startsWith("Setup"), "…with Setup first among their pages");
   const r404 = await page.goto(BASE + "/no-such-client", { waitUntil: "networkidle" });
   const s1 = r404.status(), t1 = (await page.locator(".holder h1").textContent()).trim();

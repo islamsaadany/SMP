@@ -65565,7 +65565,7 @@ var COPILOT = (function(){
   }
   function countedParts(f){ return steps().filter(function(_, i){ return on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
-  /* §646 — A BUTTON THAT CANNOT BE PRESSED SAYS WHY (Islam: "for any
+  /* §649 — A BUTTON THAT CANNOT BE PRESSED SAYS WHY (Islam: "for any
      disabled button we need to have a tooltip explaining why"). §538's way,
      now for every one: HELD, never `disabled` — `aria-disabled` and the reason
      in the platform's own bubble (`hasnote` + `data-tip`), which a pointer,
@@ -68360,7 +68360,7 @@ var COPILOT = (function(){
     var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more], [data-cop-answers]");
     if (b) { ev.preventDefault(); ev.stopPropagation(); if (b.hasAttribute("data-cop-more")) moreToggle(b); else answersGo(b); }
   }, true);
-  /* §646 — A HELD BUTTON IS NEVER PRESSED: stopped here, in the capture
+  /* §649 — A HELD BUTTON IS NEVER PRESSED: stopped here, in the capture
      phase, before any handler (every one of them used to test `disabled`).
      Its bubble has already said why. Only the Copilot's own controls. */
   document.addEventListener("click", function(ev){
@@ -78848,9 +78848,14 @@ var SYNC = (function () {
       var staff = !on && location.protocol !== "file:" &&
                   !document.documentElement.hasAttribute("data-console") &&
                   document.documentElement.hasAttribute("data-module");
+      /* PRODUCT FIRST, ON EVERY BAR (2026-10-26, Islam's option 2 of two
+         drawn): the platform's mark and name lead and the company follows,
+         quiet after a hairline, which is the order the other modules' bar
+         (lib/topbar.ts) already had — so a client's own person reads one
+         line in every module. It reverses §400's company-first line here. */
       if (staff) {
-        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
-        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
+        if (h1) h1.textContent = "Strategy Management Platform";
+        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org || ""; }
       }
       if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
@@ -78871,6 +78876,13 @@ var SYNC = (function () {
            second request for this document, not an absent picture. */
         if (src) { mark.src = src; mark.hidden = false; }
         else { mark.removeAttribute("src"); mark.hidden = true; }
+        /* the company's mark goes with the company's name: after the
+           product for a client's own person (product first, 2026-10-26),
+           at the head of the line on the client's settings, where the name
+           is the heading. Moved, never copied. */
+        var brand = document.querySelector(".top .brand");
+        if (staff && org && brand) brand.insertBefore(mark, org);
+        else if (brand && mark.nextElementSibling !== brand) brand.parentNode.insertBefore(mark, brand);
       }
       /* The way back says where it goes AND what it does first, which is
          Islam's own wording: *"I save and close to go back to the console."*
@@ -88920,6 +88932,10 @@ var SYNC = (function () {
      every paint would shut a menu somebody has open. */
   var ICO_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
     'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  /* the platform's mark, the console column's own drawing (platform.html .sblogo) */
+  var ICO_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/>' +
+    '<circle cx="12" cy="12" r="1.3"/></svg>';
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -89121,8 +89137,16 @@ var SYNC = (function () {
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
+    /* OPTION D (2026-10-26, Islam: "remove the word platform and the icon
+       with a thin divider and who want to go back will press the icon"): the
+       platform's mark is the way back to the console, the console column's
+       own north star at the bar's scale, then a hairline, then the client.
+       Still `.trff` and still /platform, so every check that presses the way
+       back presses this; "Home" is its name, aloud and on a hover, as the
+       console's own mark is named. */
     nav.innerHTML =
-      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<a class="trff" href="/platform" aria-label="Home" title="Home">' + ICO_STAR + "</a>" +
+      '<span class="trbar" aria-hidden="true"></span>' +
       '<details class="dlmenu trstep trclient"><summary>' +
         "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
       sep + third;

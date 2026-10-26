@@ -899,7 +899,7 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 @keyframes copflash { 0% { box-shadow:0 0 0 3px var(--gold); } 100% { box-shadow:0 0 0 0 transparent; } }
 @media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .coppf.flash { animation:none; } }
 
-/* ── §646 A HELD BUTTON SAYS WHY (Islam, 26 Oct 2026: "for any disabled
+/* ── §649 A HELD BUTTON SAYS WHY (Islam, 26 Oct 2026: "for any disabled
    button we need to have a tooltip explaining why"). §538's held button for
    every Copilot control: dimmed like `disabled`, still reachable by a
    pointer, Tab and a tap, and its reason in the platform's dark bubble. The

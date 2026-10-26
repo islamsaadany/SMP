@@ -6,6 +6,18 @@
 @source "./lib";
 @import "@xyflow/react/dist/style.css";
 
+/* THE CANVASES AT 1:1 INSIDE A PAGE AT 80% (2026-10-26). Every module page is
+   zoomed to 0.8 from 1000px (lib/topbar.ts), and React Flow turns a pointer's
+   movement into a node's or the view's with no knowledge of a zoom outside
+   it: measured, a node dragged 120 by 60 moved 96 by 48 and fell behind the
+   cursor. Its own root takes the zoom back off (0.8 × 1.25 = 1), so the
+   canvas works in the screen's pixels; at width and height 100% it still
+   fills the box the page gives it, and fitView sizes the map to that box.
+   Tied to the 0.8 in lib/topbar.ts — change one, change both. */
+@media (min-width: 1000px) {
+  .react-flow { zoom: 1.25; }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

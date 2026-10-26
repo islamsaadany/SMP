@@ -1,5 +1,6 @@
 "use client";
 
+import { pageZoom } from "@/ffp/lib/client/page-zoom";
 import { documentControl } from "@/ffp/lib/domain/document-control";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -309,7 +310,7 @@ export function ExportPreview({
       const prevWidth = paper.style.width;
       paper.style.width = "297mm";
       paper.style.maxWidth = "none";
-      const heightMm = Math.ceil((paper.getBoundingClientRect().height * 25.4) / 96) + 3;
+      const heightMm = Math.ceil((paper.getBoundingClientRect().height / pageZoom() * 25.4) / 96) + 3;
       paper.dataset.prevWidth = prevWidth;
       if (heightMm > MAX_MM) {
         paper.style.width = prevWidth;
@@ -367,7 +368,7 @@ export function ExportPreview({
 
   return (
     <div
-      className="report-root min-h-screen"
+      className="report-root min-h-[var(--winh)]"
       style={
         {
           "--accent": accentPrimary,

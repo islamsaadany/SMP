@@ -1,0 +1,266 @@
+<title>Publish Insights In Place</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a review page around one stage. Four screens of the client's own
+   Insights page, chosen above the stage: the list as Forefront sees it, a new
+   report being written, a published report opened, and the list as the
+   client's people see it. Drawn in the shipped tokens of lib/card-look.ts
+   (§646) and the client's band colour; ElAbd's pink from Islam's screenshot. */
+*{box-sizing:border-box}
+:root{
+  --paper:#E8ECF2;--paper-2:#DCE2EA;
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --bar:#E6A9B4;--bar-ink:#141C2B;--bar-quiet:#4A3A40;--bar-accent:#5A3A10;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --tb-surface:#FFFFFF;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--title:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0C0F14;--paper-2:#161A22;
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;
+  --tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0C0F14;--paper-2:#161A22;
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1F2531;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;
+  --tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+.doc{max-width:1120px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;text-wrap:balance}
+.lede{max-width:88ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 0;font-size:12.5px;font-weight:600;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctl{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:22px 0 10px}
+.mods{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);flex:1 1 auto;min-width:0}
+.mods button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 12px 10px;font-size:14px;font-weight:600;color:var(--ink-3);cursor:pointer;white-space:nowrap}
+.mods button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.segs{display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--paper-2);border-radius:9px;padding:3px}
+.seg button{background:none;border:0;border-radius:7px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.mods button:focus-visible,.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper-2);box-shadow:var(--frame-shadow)}
+.stage.phone{display:flex;justify-content:center;padding:22px 12px}
+.stage.phone .dev{width:100%;max-width:390px;border:1px solid var(--line);border-radius:22px;overflow:hidden;max-height:860px;overflow-y:auto}
+.mnote{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:14px 0 0}
+.mnote section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 16px}
+.mnote h3{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.mnote section.ask h3{color:var(--gold)}
+.mnote ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px}
+.mnote li+li{margin-top:5px}
+.mnote b{color:var(--ink)}
+
+/* ── the drawn page ── */
+.dev{container:dev/inline-size;background:var(--ground);color:var(--ink);text-align:left;font-size:14px}
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink)}
+.tbin{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:44px;font-size:13.5px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;white-space:nowrap;overflow:hidden}
+.tbff{color:var(--tb-ink-2);font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbsep{color:var(--tb-ink-3)} .tbstep{font-weight:600}
+.tbva{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tb-ink-2)}
+.tbsel{border:1px solid var(--tb-line);border-radius:7px;padding:3px 9px;font-size:13px}
+.tbout{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);border:1px solid var(--tb-line);border-radius:99px;padding:4px 12px;flex:none}
+.pg{max-width:1000px;margin:0 auto;padding:18px 20px 28px}
+.band{position:relative;overflow:hidden;background:var(--bar);color:var(--bar-ink);border-radius:14px;padding:16px 22px 17px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;min-height:113px}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);pointer-events:none}
+.band>*{position:relative}
+.band .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--bar-accent)}
+.band h1{margin:0;font:400 27px/1.15 var(--title)}
+.band p{margin:4px 0 0;font-size:13.5px;color:var(--bar-quiet)}
+.band .sp{flex:1}
+.band .ends{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.strip{display:flex;gap:20px;font-variant-numeric:tabular-nums}
+.strip div{text-align:right}
+.strip b{display:block;font-size:19px;line-height:1}
+.strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.act{border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:13px;font-weight:700;padding:8px 14px;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--gold)}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.cx{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap;max-width:100%}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2);white-space:nowrap}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:170px}
+.item{display:flex;gap:16px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.item:last-child{border-bottom:0}
+.z>.item:nth-child(odd){background:var(--zebra)}
+.item .body{min-width:0;flex:1}
+.item h3{margin:0;font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.item p{margin:2px 0 0;font-size:13.5px;color:var(--ink-2)}
+.facts{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:13px;color:var(--ink-3)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-soft);border-radius:999px;padding:2px 10px}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.draft{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:1px 8px}
+.narrow{font-size:12.5px;color:var(--ink-3)}
+.dl{font-size:13px;font-weight:600;color:var(--gold);white-space:nowrap}
+.q{font-size:13px;color:var(--ink-3);white-space:nowrap}
+.edit{font-size:13px;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:3px 10px;background:var(--surface);white-space:nowrap}
+/* one report */
+.back{display:inline-block;font-size:12.5px;font-weight:600;color:var(--ink-3);margin:0 0 10px}
+.form{padding:16px 18px 6px;display:grid;gap:14px}
+.lab{display:block;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 5px}
+.fld{display:block;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font-size:14px;min-height:38px}
+.fld.ta{min-height:62px;color:var(--ink-2)}
+.fld.ph{color:var(--ink-3)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:5px 11px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--amber-wash);border-color:var(--gold);color:var(--gold)}
+.who{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 8px 7px 11px;font-size:14px}
+.who .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.btn.risk{color:var(--bad);border-color:var(--bad)}
+.btn[aria-disabled="true"]{opacity:.55}
+.file{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px dashed var(--line);border-radius:8px;padding:8px 8px 8px 11px;font-size:14px;color:var(--ink-3)}
+.file.has{border-style:solid;color:var(--ink)}
+.file .sp{flex:1}
+.note{font-size:12.5px;color:var(--ink-3);margin:5px 0 0}
+.foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 18px 14px;border-top:1px solid var(--line-soft);margin-top:10px}
+.foot .sp{flex:1}
+.foot .state{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.foot .state.pub{color:var(--good)}
+.apart{border-top:1px solid var(--line-soft);padding:6px 18px 12px}
+.apart .lab{margin:10px 0 2px}
+.arow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.arow:last-child{border-bottom:0}
+.arow .w{flex:1;min-width:0}
+.arow b{display:block;font-size:14px}
+.arow span{display:block;font-size:13px;color:var(--ink-3)}
+/* the pop-up over the list (Islam: "it can be a pop up modal") */
+.dev{position:relative}
+.scrim{position:absolute;inset:0;background:rgba(20,28,43,.45);display:flex;align-items:flex-start;justify-content:center;padding:44px 16px 24px;z-index:5}
+.modal{width:100%;max-width:680px;background:var(--surface);border-radius:14px;box-shadow:0 24px 64px rgba(20,28,43,.35);overflow:hidden}
+.modal .chd .x{width:30px;height:30px;border-radius:8px;border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1}
+.dev.held{min-height:980px}
+@container dev (max-width:560px){
+  .scrim{padding:0}
+  .modal{max-width:none;border-radius:0;min-height:100%}
+  .tbin{padding:0 12px} .tbff,.tbva,.tbsel{display:none}
+  .pg{padding:12px 12px 24px}
+  .band{padding:14px 16px 15px}
+  .search{min-width:0;flex:1 1 100%}
+  .item{flex-direction:column;align-items:flex-start;gap:6px}
+  .two{grid-template-columns:1fr}
+  .arow{flex-wrap:wrap}
+}
+</style>
+
+<div class="doc">
+  <h1>Publishing Insights from the client's own page</h1>
+  <p class="lede">A report opens as a pop-up over the list. Forefront writes and publishes a client's reports on the client's <b>Insights</b> page, the way Meeting Notes works, instead of on a separate page in the console. The client's people still see only what is published.</p>
+  <span class="flag">A drawing · nothing is built · ElAbd's colour, invented reports</span>
+
+  <div class="ctl">
+    <div class="mods" role="tablist" aria-label="Screen">
+      <button type="button" role="tab" data-m="list" aria-selected="true">1 · The list, as Forefront</button>
+      <button type="button" role="tab" data-m="new" aria-selected="false">2 · A new report</button>
+      <button type="button" role="tab" data-m="pub" aria-selected="false">3 · A published report</button>
+      <button type="button" role="tab" data-m="client" aria-selected="false">4 · The list, as the client</button>
+    </div>
+    <div class="segs">
+      <div class="seg" role="group" aria-label="Device"><button type="button" data-d="computer" aria-pressed="true">Computer</button><button type="button" data-d="phone" aria-pressed="false">Phone</button></div>
+      <div class="seg" role="group" aria-label="Theme"><button type="button" data-t="light">Light</button><button type="button" data-t="dark">Dark</button></div>
+    </div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div id="notes"></div>
+</div>
+
+<script>
+(function(){
+  var BULB = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
+  function tb(office){ return '<div class="tb"><div class="tbin"><nav class="tbtrail"><span class="tbff">Platform</span><span class="tbsep">›</span><span class="tbstep">ElAbd</span><span class="tbsep">›</span><span class="tbstep">Insights</span></nav>' +
+    (office ? '<span class="tbva">Viewing as</span><span class="tbsel">Islam Saadany ▾</span>' : '') + '<span class="tbout">Sign out</span></div></div>'; }
+  function band(n, office){ return '<div class="band"><div><p class="eye">ElAbd</p><h1>Insights</h1><p>Research, market reports and analysis written for ElAbd.</p></div><span class="sp"></span><div class="ends">' +
+    '<div class="strip"><div><b>' + n + '</b><span>Reports</span></div></div>' + (office ? '<button class="act" type="button">+ Publish a report</button>' : '') + '</div></div>'; }
+  var R = [
+    { t:"Plant managers' Q3 scoring: what moved", s:"Two of five plants lifted yield; the third lost a quarter to the line upgrade.", c:"Analysis", d:"22 Oct 2026", v:"v1", draft:1 },
+    { t:"Egypt FMCG outlook, H2", s:"Volume recovers slowly; price, not mix, carries the revenue line.", c:"Market", d:"14 Oct 2026", v:"v2", file:1, narrow:"Commercial, Finance" },
+    { t:"Snack-category share picture", s:"Private label took two points in the discount channel.", c:"Sector", d:"30 Sep 2026", v:"v1", file:1 }
+  ];
+  function row(r, office){
+    return '<div class="item"><div class="body"><h3>' + r.t + (office && r.draft ? '<span class="draft">Draft</span>' : '') + '</h3><p>' + r.s + '</p><div class="facts"><span class="pill">' + r.c + '</span><span>' + r.d + '</span><span>' + r.v + '</span>' +
+      (office && r.narrow ? '<span class="narrow">Seen by ' + r.narrow + '</span>' : '') + '</div></div>' +
+      (r.file ? '<span class="dl">Download</span>' : '<span class="q">No file yet</span>') + (office ? '<span class="edit">Open</span>' : '') + '</div>';
+  }
+  function list(office){
+    var rows = R.filter(function(r){ return office || !r.draft; });
+    var cats = office ? ["All","Analysis","Market","Sector"] : ["All","Market","Sector"];
+    return tb(office) + '<div class="pg">' + band(rows.filter(function(r){ return !r.draft; }).length, office) +
+      '<section class="card"><div class="chd"><span class="cic">' + BULB + '</span><h2>Reports</h2><span class="cnt">' + rows.length + '</span><span class="sp"></span>' +
+      '<span class="cx">Show <span class="sw">' + cats.map(function(c, i){ return '<span' + (i ? '' : ' class="on"') + '>' + c + '</span>'; }).join("") + '</span></span><span class="search">Search reports</span></div>' +
+      '<div class="z">' + rows.map(function(r){ return row(r, office); }).join("") + '</div></section></div>';
+  }
+  function chips(on){ return '<div class="chips">' + ["Analysis","Market","Sector","Macro","Governance"].map(function(c){ return '<span class="chip' + (on.indexOf(c) >= 0 ? ' on' : '') + '">' + c + '</span>'; }).join("") + '</div>'; }
+  function one(isNew){
+    var r = isNew ? null : R[1];
+    return list(true) + '<div class="scrim"><section class="modal" role="dialog" aria-modal="true"><div class="chd"><span class="cic">' + BULB + '</span><h2>' + (isNew ? 'A new report' : r.t) + '</h2>' + (isNew ? '<span class="draft">Draft</span>' : '<span class="cnt">' + r.v + '</span>') + '<span class="sp"></span><button class="x" type="button" aria-label="Close">×</button></div>' +
+      '<div class="form">' +
+        '<div><span class="lab">Title</span><div class="fld' + (isNew ? ' ph' : '') + '">' + (isNew ? 'Plant managers\' Q3 scoring: what moved' : r.t) + '</div></div>' +
+        '<div><span class="lab">Summary</span><div class="fld ta">' + (isNew ? 'Two of five plants lifted yield; the third lost a quarter to the line upgrade.' : r.s) + '</div></div>' +
+        '<div><span class="lab">Categories</span>' + chips(isNew ? ["Analysis"] : ["Market"]) + '</div>' +
+        '<div class="two"><div><span class="lab">Report date</span><div class="fld">' + (isNew ? '22 Oct 2026' : '14 Oct 2026') + '</div></div>' +
+        '<div><span class="lab">The file</span>' + (isNew
+          ? '<div class="file">No file yet<span class="sp"></span><button class="btn" type="button">Add the file</button></div>'
+          : '<div class="file has">FMCG-outlook-H2.pdf · 2.4 MB<span class="sp"></span><button class="btn" type="button">Replace</button></div><p class="note">Replacing keeps the same link and moves it to the next version.</p>') + '</div></div>' +
+        '<div><span class="lab">Who can see it</span><div class="who">' + (isNew ? 'Everyone at ElAbd' : 'Commercial · Finance') + '<span class="sp"></span><button class="btn" type="button">' + (isNew ? 'Narrow it…' : 'Change') + '</button></div>' +
+          (isNew ? '<p class="note">Save it first, then choose who can see it. New reports start open to everyone.</p>' : '') + '</div>' +
+      '</div>' +
+      '<div class="foot"><span class="state' + (isNew ? '' : ' pub') + '">' + (isNew ? 'Draft · only Forefront sees it' : 'Published · 14 Oct') + '</span><span class="sp"></span>' +
+        '<button class="btn" type="button">' + (isNew ? 'Save the draft' : 'Save') + '</button>' +
+        (isNew ? '<button class="btn amber" type="button" aria-disabled="true" title="Add the file first">Publish to ElAbd</button>' : '') + '</div>' +
+      (isNew ? '' : '<div class="apart"><span class="lab">Taking it back</span>' +
+        '<div class="arow"><div class="w"><b>Withdraw</b><span>Leaves ElAbd\'s Insights. Nothing is lost and it can go back out.</span></div><button class="btn" type="button">Withdraw</button></div>' +
+        '<div class="arow"><div class="w"><b>Delete</b><span>Withdraw first — nobody may delete a report the client is still reading.</span></div><button class="btn risk" type="button" aria-disabled="true">Delete…</button></div></div>') +
+      '</section></div>';
+  }
+  var S = {
+    list: { draw:function(){ return list(true); }, notes:[
+      "<b>+ Publish a report</b> sits in the band, as + New meeting does on Meeting Notes. Only Forefront's Super user and SMO team see it.",
+      "Drafts sit in the list with a gold <b>Draft</b> tag, and only Forefront sees them. The band counts what ElAbd can see.",
+      "A report narrowed to some departments says who in a quiet line. <b>Open</b> on each row opens it to edit."] },
+    new: { draw:function(){ return one(true); }, notes:[
+      "The console's form, field for field: title, summary, categories, report date, the file, who can see it.",
+      "<b>Save the draft</b> keeps it to Forefront. <b>Publish to ElAbd</b> waits for the file, as today.",
+      "It opens as a <b>pop-up over the list</b>; × or Escape closes it, and the list behind stays where it was. On a phone it fills the screen."] },
+    pub: { draw:function(){ return one(false); }, notes:[
+      "<b>Open</b> on a row brings up the same pop-up, with <b>Save</b> for corrections and Replace for a new version of the file.",
+      "<b>Withdraw</b> and <b>Delete</b> stay as they work today: Withdraw takes it off ElAbd's page; Delete only once it is withdrawn."] },
+    client: { draw:function(){ return list(false); }, notes:[
+      "ElAbd's own people see what they see today: the published reports they may open, with Download. No button, no drafts, no Open.",
+      "The console's publishing page goes. Insights on a client's card opens this page, like every other module."] }
+  };
+  var state = { m:"list", d:"computer" };
+  var stage = document.getElementById("stage"), notes = document.getElementById("notes");
+  function draw(){
+    stage.className = "stage" + (state.d === "phone" ? " phone" : "");
+    stage.innerHTML = '<div class="dev' + (state.m === "new" || state.m === "pub" ? ' held' : '') + '">' + S[state.m].draw() + '</div>';
+    notes.innerHTML = '<div class="mnote"><section><h3>What this shows</h3><ul><li>' + S[state.m].notes.join("</li><li>") + '</li></ul></section></div>';
+    document.querySelectorAll("[data-m]").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.m === state.m)); });
+    document.querySelectorAll("[data-d]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === state.d)); });
+  }
+  document.querySelectorAll("[data-m]").forEach(function(b){ b.addEventListener("click", function(){ state.m = b.dataset.m; draw(); }); });
+  document.querySelectorAll("[data-d]").forEach(function(b){ b.addEventListener("click", function(){ state.d = b.dataset.d; draw(); }); });
+  function press(v){ document.querySelectorAll("[data-t]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.t === v)); }); }
+  document.querySelectorAll("[data-t]").forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.dataset.t); press(b.dataset.t); }); });
+  press(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  draw();
+})();
+</script>

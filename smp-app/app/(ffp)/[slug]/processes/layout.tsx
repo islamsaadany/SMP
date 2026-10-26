@@ -80,7 +80,7 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
         data-ffp=""
         lang={locale}
         dir={dirFor(locale)}
-        className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} flex min-h-[calc(100vh-41px)] flex-col bg-slate-50 font-sans text-slate-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${plexArabic.variable} flex min-h-[calc(var(--winh)-41px)] flex-col bg-slate-50 font-sans text-slate-900 antialiased`}
       >
         <LocaleProvider locale={locale}>
           {props.children}

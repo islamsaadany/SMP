@@ -671,7 +671,13 @@
    work; Foundation's start cards are the guided questions and the template. */
 /* v7.21-swot-split — §641: the SWOT as a conversation beside the SWOT it
    builds; Save and Apply to plan at the pane's foot; a SWOT archive kind. */
-const SHELL = "smp-shell-v7.26-held-says-why";
+/* v7.26-one-mark — the north star is the platform's one mark: the tab
+   icon, the home-screen icons and the built file's own icon, on the
+   console and every client's platform alike; the module bars open on it
+   (option D), and the console's loading shape is the console as it is. */
+/* v7.27-held-says-why — §649: a Copilot button that cannot be pressed is
+   held, never disabled, and says why in the platform's bubble. */
+const SHELL = "smp-shell-v7.27-held-says-why";
 const ASSETS = [
   "/",
   "/index.html",

@@ -156,7 +156,7 @@ async function asTenant(id, fn) {
   } catch (e) { await c.query("ROLLBACK").catch(() => {}); throw e; }
   finally { c.release(); }
 }
-/* §646 — EVERY BUTTON THE COPILOT HOLDS SAYS WHY (Islam: "for any disabled
+/* §649 — EVERY BUTTON THE COPILOT HOLDS SAYS WHY (Islam: "for any disabled
    button we need to have a tooltip explaining why"). Swept at each step of
    each area, so a new button cannot arrive without its reason: no Copilot
    button is `disabled`, and every held one carries a reason in its bubble. */
@@ -171,7 +171,7 @@ async function heldSweep(page, where) {
       held: uniq.filter((b) => b.getAttribute("aria-disabled") === "true").length };
   });
   HELD_SEEN += r.held;
-  check(!r.dead.length && !r.mute.length, "§646 " + where + ": no Copilot button is disabled, and every held one says why", JSON.stringify(r));
+  check(!r.dead.length && !r.mute.length, "§649 " + where + ": no Copilot button is disabled, and every held one says why", JSON.stringify(r));
 }
 
 async function section(name, fn) {
@@ -1615,7 +1615,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await shot("6-draft");
     await heldSweep(page, "Foundation, a part drafted");
     const rc0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-savebar] [data-cop-fcheck]"); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "", dead: b.disabled } : null; });
-    check(!!rc0 && rc0.held === "true" && !rc0.dead && /^Agree every part first — 0 of \d+ are agreed\.$/.test(rc0.tip), "§646 Run the check is held, not dead, and says why: agree every part first, counted", JSON.stringify(rc0));
+    check(!!rc0 && rc0.held === "true" && !rc0.dead && /^Agree every part first — 0 of \d+ are agreed\.$/.test(rc0.tip), "§649 Run the check is held, not dead, and says why: agree every part first, counted", JSON.stringify(rc0));
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
     /* §643 — REWRITTEN, NOT LOOSENED (§218). Islam: "it changes it
        directly in the delivery box on the right … it should show me in the
@@ -3301,8 +3301,11 @@ await section("4 · Forefront's own pages", async () => {
     sub: ((document.getElementById("orgname") || {}).textContent || "").trim(),
     switcher: !!(document.querySelector(".topmark") && document.querySelector(".topmark").checkVisibility()),
   }));
-  check(!staff.trail && !staff.switcher && staff.h1 === "Raya Trade" && /Strategy Management Platform/.test(staff.sub),
-    "a client's own person gets no trail and no switcher; their bar names their company", JSON.stringify(staff));
+  /* PRODUCT FIRST (2026-10-26, Islam's option 2) REWRITTEN, NEVER LOOSENED
+     (§218): the product's name leads, as on every other module's bar, and
+     the company follows it — still named, still on the line. */
+  check(!staff.trail && !staff.switcher && staff.h1 === "Strategy Management Platform" && staff.sub === "Raya Trade",
+    "a client's own person gets no trail and no switcher; their bar names the product, then their company", JSON.stringify(staff));
   /* §401 — AND THE TRAIL'S CLIENT LIST IS REFUSED TO THEM ON THE SERVER, not
      only undrawn: the list names every client, which is the office's. */
   const staffList = await page.evaluate(async () => (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })).status);

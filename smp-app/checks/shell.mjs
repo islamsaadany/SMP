@@ -2414,10 +2414,26 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       r = await row();
       check(!!CAP_OWNER && r.s.caps[0].ownedBy === CAP_OWNER, "…and the person picked is stored on the row", JSON.stringify(r.s.caps[0]));
     }
+    /* §645 — REWRITTEN, NOT LOOSENED (§218). Islam: "we need to fix the
+       directions and execution skipping". Save keeps a version and leaves
+       the plan exactly as it was; Apply to plan asks first, archives what
+       the plan holds, then writes. Both ends (§94.2). */
+    const planBefore = await page.evaluate(() => JSON.stringify(UNITS.mobile.items));
+    const archBefore = await page.evaluate(() => ARCHIVES.length);
     await page.click("[data-cop-dv-finish]");
     await page.waitForTimeout(2000);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Directions%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Directions — Mobile" && dv.n === 1, "Save writes Directions — Mobile v1", JSON.stringify(dv));
+    const sv0 = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.items) === b, line: /not on the plan yet/.test((document.querySelector(".copsw-main") || {}).textContent || ""), apply: !!document.querySelector("[data-cop-dv-apply]") }), planBefore);
+    check(sv0.same && sv0.line && sv0.apply, "§645 Save keeps a version and leaves the plan exactly as it was — the chat says it is not on the plan yet and offers Apply to plan", JSON.stringify(sv0));
+    await page.click("[data-cop-dv-apply]");
+    await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
+    const askDv = await page.evaluate((b) => ({ t: (document.getElementById("modal-b") || {}).textContent || "", same: JSON.stringify(UNITS.mobile.items) === b }), planBefore);
+    check(/Directions — Mobile v1/.test(askDv.t) && /archived first/.test(askDv.t) && askDv.same, "§645 Apply to plan asks first, naming the version and that the plan's Directions are archived first — the plan untouched until Yes", JSON.stringify(askDv).slice(0, 300));
+    await page.click("[data-cop-planapply-yes]");
+    await page.waitForTimeout(1500);
+    const arDv = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), archBefore);
+    check(arDv.includes("unit:mobile"), "§645 …and Yes archives Mobile's plan before it writes", JSON.stringify(arDv));
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
     check(kept.length > 0 && kept.every((o) => after.some((p) => p.id === o.planId && p.name === o.title && p.u === o.urgency)), "a chosen Direction from the plan updates THAT pillar, by its key", JSON.stringify(after));
@@ -2444,6 +2460,11 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       check(!!cr && cr.s.caps.length === 1 && cr.s.caps[0].serves.join() === "Upper Egypt", "a Capabilities chat suggests from the saved Directions", JSON.stringify(cr && cr.s.caps));
       await page.click("[data-cop-dv-finish]");
       await page.waitForTimeout(2000);
+      const capSaved = await page.evaluate(() => GROUP.capabilities.filter((x) => x.name === "Data-led stock").length);
+      await page.click("[data-cop-dv-apply]");
+      await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
+      await page.click("[data-cop-planapply-yes]");
+      await page.waitForTimeout(1500);
       const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; const up = UNITS.mobile.items.filter((p) => p.name === "Upper Egypt")[0]; return c ? [c.capKind, (c.serves || []).length === 1 && !!up && c.serves[0] === up.id] : null; });
       check(JSON.stringify(cap) === JSON.stringify(["enabler", true]), "…and Save writes the Capability with its kind and the Direction it serves, by key", JSON.stringify(cap));
     }
@@ -2496,10 +2517,22 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
     const fin = await page.$("[data-cop-ex-finish]");
-    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true", "Save to plan is offered once everything is drafted");
+    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
+    const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
+    const exArch = await page.evaluate(() => ARCHIVES.length);
     if (fin) { await fin.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
+    const exSv = await page.evaluate((b) => ({ same: JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]) === b, apply: !!document.querySelector("[data-cop-ex-apply]") }), exBefore);
+    check(exSv.same && exSv.apply, "§645 Save leaves the plan — measures, tactics, capabilities and the period — exactly as it was, and offers Apply to plan", JSON.stringify(exSv));
+    await page.click("[data-cop-ex-apply]");
+    await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
+    const askEx = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    check(/Execution — Mobile v1/.test(askEx) && /archived first/.test(askEx), "§645 Apply to plan asks first, saying what is archived", askEx.slice(0, 200));
+    await page.click("[data-cop-planapply-yes]");
+    await page.waitForTimeout(1500);
+    const arEx = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), exArch);
+    check(arEx.includes("unit:mobile") && arEx.some((k) => k.indexOf("cap:") === 0), "§645 …and Yes archives Mobile's plan and the Capabilities it updates before it writes", JSON.stringify(arEx));
     const plan = await page.evaluate((ids) => {
       const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
       (UNITS.mobile.items || []).forEach((p) => { if (!ids.includes(p.id)) return;

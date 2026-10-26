@@ -2961,17 +2961,89 @@ var COPILOT = (function(){
     }
     if (ed && (s.mode === "capabilities" ? s.caps.length : s.chose)) {
       var label = s.mode === "capabilities" ? "Save " + k.length + (k.length === 1 ? " Capability" : " Capabilities")
-        : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "") + " to the plan";
+        : "Save " + g.length + (g.length === 1 ? " Direction" : " Directions") + (s.withCaps ? " and " + k.length + (k.length === 1 ? " Capability" : " Capabilities") : "");
       var why = PANE.dirsBlocker || "";
       main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-dv-finish' + (why ? ' aria-disabled="true" title="' + E(why) + '"' : '') + '>' + E(label) + '</button></div>';
     }
-    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan.");
+    if (s.saved) main += savedApplyHtml(s.saved, "dv");
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + dvSideHtml() + '</div>';
   }
   /* The plan is written after the press, the same order How we compete keeps
      (§35). A ticked Direction that came from the plan updates THAT pillar;
      a new one is a new pillar. A kept Capability is held by the function
      that owns it, and what it serves is stored as the pillars' ids. */
+  /* §645 — SAVED, THEN APPLIED, the Foundation's and the SWOT's way (§524,
+     §641): the saved line says it is not on the plan yet, and Apply to plan
+     asks first in the platform's own dialog, archives what the plan holds,
+     writes, and says whether the plan's save went through. */
+  var APPLIED = {};   /* chat id → the version applied in this visit */
+  function savedApplyHtml(sv, k){
+    var on = APPLIED[PANE.chat.id] === sv.n;
+    return cpMsg("product", "Saved as " + E(sv.title) + " v" + E(String(sv.n)) + " — under Deliverables. " +
+      (on ? "It is on the plan." : "It is not on the plan yet: Apply to plan puts it there, and archives what the plan holds first.")) +
+      (canEdit() ? '<div class="copbtns"><button type="button" class="copbtn' + (on ? '' : ' solid') + '" data-cop-' + k + '-apply>' + (on ? "Apply to plan again" : "Apply to plan") + '</button></div>' : '');
+  }
+  function planApplyAsk(what, replaces, go){
+    if (typeof openModalHtml !== "function") { go(); return; }
+    openModalHtml("Apply to the plan?", "",
+      '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
+      '<div class="kv"><span class="k">What</span><span>' + what + '</span></div>' +
+      '<div class="kv"><span class="k">What it replaces</span><span>' + replaces + '</span></div>' +
+      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="copgo" data-cop-planapply-yes="1">Apply to plan</button></div></div>');
+    var mb = document.getElementById("modal-b"); if (!mb) return;
+    mb.addEventListener("click", function(ev){
+      if (hit(ev, "[data-cop-apply-no]")) { closeModal(); return; }
+      if (hit(ev, "[data-cop-planapply-yes]")) { closeModal(); go(); }
+    });
+  }
+  /* What stands is archived before anything is written: the place's own plan
+     (its pillars, their measures and tactics) and each Capability the save
+     touches — the archives Import & storage › Archived plans restores. */
+  function planArchive(capIds, why){
+    var h = dvHolder(), n = 0;
+    if (h && typeof archiveUnitPlan === "function" && h.ukey && archiveUnitPlan(h, why)) n++;
+    if (typeof archiveCapPlan === "function" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
+      capIds.forEach(function(cid){ var c = GROUP.capabilities.filter(function(x){ return x && String(x.id) === String(cid); })[0]; if (c && archiveCapPlan(c, why)) n++; });
+    return n;
+  }
+  function planApplyGo(sv, capIds, can, write){
+    var id = PANE.chat.id, title = sv.title + " v" + sv.n;
+    /* Asked BEFORE anything is archived, so a place that cannot take it is
+       left exactly as it was. */
+    if (!can()) { SAY = "The plan could not be written from here — this place does not plan in Directions. Nothing was changed."; draw(); return; }
+    planArchive(capIds, "replaced from the Copilot — " + title);
+    var r = write();
+    if (!r.ok) { SAY = "The plan could not be written from here. What it held is archived under Import & storage › Archived plans."; draw(); return; }
+    APPLIED[id] = sv.n;
+    if (typeof paint === "function") paint(); else draw();
+    var saveNow = typeof SYNC !== "undefined" && SYNC.saveNow;
+    if (!saveNow) return;
+    SYNC.saveNow(function(how){
+      if (!(how === "saved" || how === "clean")) delete APPLIED[id];
+      SAY = how === "saved" || how === "clean"
+        ? title + " is on the plan now. What was there before is archived under Import & storage › Archived plans."
+        : "The plan did not save, so " + title + " is not on the plan yet. Try Apply to plan again once the save goes through.";
+      draw();
+    });
+  }
+  function dvApplyAsk(){
+    var s = PANE.dirs, g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
+    var dirs = s.mode !== "capabilities", have = dvExisting().length;
+    var caps = k.map(function(x){ return x.planId; }).filter(Boolean);
+    planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + [dirs ? g.length + (g.length === 1 ? " Direction" : " Directions") : "", (s.mode === "capabilities" || s.withCaps) ? k.length + (k.length === 1 ? " Capability" : " Capabilities") : ""].filter(Boolean).join(" and ") + " onto the plan.",
+      (dirs && have ? "The plan's " + have + (have === 1 ? " Direction is" : " Directions are") + " archived first" : "Nothing on the plan is replaced") + (caps.length ? ", and the " + caps.length + (caps.length === 1 ? " Capability" : " Capabilities") + " it updates" : "") +
+        ". A Direction with the same name is updated, a new one is added; nothing is removed. Archives are under Import &amp; storage › Archived plans.",
+      function(){ planApplyGo(s.saved, caps, function(){ var h = dvHolder(); return s.mode === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); },
+        function(){ return dvWritePlan(PANE.dirs); }); });
+  }
+  function exApplyAsk(){
+    var s = PANE.exec, caps = s.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
+    var nm = s.items.reduce(function(n, it){ return n + it.measures.length; }, 0), nt = s.items.reduce(function(n, it){ return n + it.tactics.length; }, 0);
+    planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + nm + " measures and " + nt + " tactics onto " + s.items.length + (s.items.length === 1 ? " item" : " items") + " of the plan, and the plan period.",
+      "The plan's Directions, with their measures and tactics, are archived first" + (caps.length ? ", and the " + caps.length + (caps.length === 1 ? " Capability" : " Capabilities") + " it updates" : "") +
+        ". A measure or tactic with the same name is updated, a new one is added; nothing is removed. Archives are under Import &amp; storage › Archived plans.",
+      function(){ planApplyGo(s.saved, caps, function(){ return !!(s.period && typeof GROUP !== "undefined"); }, function(){ return exWritePlan(PANE.exec); }); });
+  }
   function dvWritePlan(s){
     var h = dvHolder(), wroteD = 0, wroteC = 0, idOf = {};
     if (h && Array.isArray(h.items)) h.items.forEach(function(p){ if (p && p.name) idOf[String(p.name).trim().toLowerCase()] = p.id; });
@@ -3005,6 +3077,7 @@ var COPILOT = (function(){
   function dvClick(ev){
     if (!dirsOn()) return false;
     var b, s = PANE.dirs, id = PANE.chat.id;
+    if ((b = hit(ev, "[data-cop-dv-apply]"))) { if (canEdit() && s.saved) dvApplyAsk(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-dv-start]"))) {
       var st = b.getAttribute("data-cop-dv-start");
@@ -3073,10 +3146,12 @@ var COPILOT = (function(){
       act({ act:"dirFinish", id:id, placeWord:placeWord(), fns:dvFns(), owners:owners }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === id) dvView(j);
         dvProgress(id);
-        var r = dvWritePlan(PANE.dirs);
-        SAY = r.ok ? "" : "Saved as a deliverable. The plan could not be written from here — this place does not plan in Directions.";
+        /* §645 — SAVE IS A VERSION, NOT THE PLAN (Islam: "we need to fix the
+           directions and execution skipping"). It wrote the plan in the same
+           press; now the plan moves only on Apply to plan, which asks first. */
+        SAY = "";
         LISTS[key()] = null; loadList(true);
-        if (r.ok && typeof paint === "function") paint(); else draw();
+        draw();
       });
       return true;
     }
@@ -3230,9 +3305,9 @@ var COPILOT = (function(){
         '<div class="copcp-ask"><textarea class="fld" data-cop-ex-ask rows="2" placeholder="Ask for a change to these measures or tactics" aria-label="Ask the Copilot">' + E(EXASK[id] || "") + '</textarea>' +
         '<button type="button" class="copbtn" data-cop-ex-send>Send</button></div>';
       if (ed) { var why = PANE.execBlocker || "";
-        main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ex-finish' + (why ? ' aria-disabled="true" title="' + E(why) + '"' : '') + '>Save to plan</button></div>'; }
+        main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ex-finish' + (why ? ' aria-disabled="true" title="' + E(why) + '"' : '') + '>Save</button></div>'; }
     }
-    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan.");
+    if (s.saved) main += savedApplyHtml(s.saved, "ex");
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + exSideHtml() + '</div>';
   }
   /* The plan is written after the save press (§35): the plan period onto
@@ -3272,6 +3347,7 @@ var COPILOT = (function(){
   function exClick(ev){
     if (!execOn()) return false;
     var b, s = PANE.exec, id = PANE.chat.id;
+    if ((b = hit(ev, "[data-cop-ex-apply]"))) { if (canEdit() && s.saved) exApplyAsk(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-ex-period]"))) { EXPICK[id] = null; act({ act:"execPeriod", id:id, choice: b.getAttribute("data-cop-ex-period") }, function(j){ exView(j); exProgress(id); draw(); }); return true; }
     if ((b = hit(ev, "[data-cop-ex-pick]")) || (b = hit(ev, "[data-cop-ex-change]"))) {
@@ -3295,8 +3371,7 @@ var COPILOT = (function(){
       act({ act:"execFinish", id:id, placeWord: placeWord() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === id) exView(j);
         exProgress(id);
-        var r = exWritePlan(PANE.exec);
-        SAY = r.ok ? "" : "Saved as a deliverable. The plan could not be written from here.";
+        SAY = "";
         LISTS[key()] = null; loadList(true);
         if (r.ok && typeof paint === "function") paint(); else draw();
       });

@@ -10918,6 +10918,24 @@ function applyFoundationParts(target, parts){
   return true;
 }
 
+/* ── THE SWOT AS AN ARCHIVE OF ITS OWN (§641) ────────────────────────────
+   The Copilot's Apply to plan for a SWOT replaces the four letters and
+   nothing else, so — as the Foundation (§524) — what stood is archived as
+   its own kind, restorable whole from Import & storage › Archived plans,
+   and never by the plan's archive. Read and written through swotWritable,
+   the same view the SWOT page and the Copilot write. */
+function archiveSwot(target, why){
+  var w = swotWritable(target);
+  if (!w) return null;
+  var snap = { s:clone(w.s || []), w:clone(w.w || []), o:clone(w.o || []), t:clone(w.t || []) };
+  var lines = snap.s.length + snap.w.length + snap.o.length + snap.t.length;
+  if (!lines) return null;
+  var a = { id:archiveId(), kind:"swot", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ lines:lines }, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -10948,6 +10966,13 @@ function restoreArchive(id){
     renumberUnit(u);
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
+  }
+  else if (a.kind === "swot") {
+    /* §641: the four letters, put back whole; what stands is archived first. */
+    var sw = swotWritable(a.key);
+    if (!sw) return false;
+    archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
+    ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
   }
   else if (a.kind === "foundation") {
     /* §524: six parts, put back whole; what stands is archived first so the

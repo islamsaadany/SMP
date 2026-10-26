@@ -2,7 +2,7 @@
    Answers a question from the knowledge base, or says it cannot and hands the
    conversation to a person.
 
-   THE ONLY PLACE `GEMINI_API_KEY` IS READ, and nothing this module returns
+   THE ONLY PLACE `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` ARE READ, and nothing this module returns
    contains it — the rule `lib/mailer.js` follows for Resend (§72, §97.5). A
    credential read in two places is a credential logged in one of them.
 
@@ -73,10 +73,41 @@ const HANDOFF_LINE =
 
    Done HERE rather than asking somebody to check, because a value that only
    works when it is clean should be cleaned by whatever reads it. */
-function apiKey() {
-  return String(process.env[KEY_NAME] || "").trim().replace(/^["']|["']$/g, "");
+function cleanKey(v) {
+  return String(v || "").trim().replace(/^["']|["']$/g, "");
 }
-function model() { return String(process.env.GEMINI_MODEL || DEFAULT_MODEL).trim(); }
+
+/* ── CLAUDE, WHENEVER ITS KEY IS SET ──────────────────────────────────
+   `ANTHROPIC_API_KEY` present means every call goes to Claude; absent, the
+   Gemini path above is untouched, byte for byte — so a deployment switches
+   provider by setting one variable, and every check that stands a Gemini stub
+   up on GEMINI_ENDPOINT still measures what it always measured.
+
+   Same shape as Gemini's knobs: `ANTHROPIC_MODEL` overrides the default,
+   `ANTHROPIC_BASE_URL` is the seam for a stub or a proxy. */
+const CLAUDE_KEY_NAME = "ANTHROPIC_API_KEY";
+const CLAUDE_DEFAULT_MODEL = "claude-opus-5-5";
+const CLAUDE_ENDPOINT = "https://api.anthropic.com";
+const CLAUDE_VERSION = "2026-10-21";
+function claudeKey() { return cleanKey(process.env[CLAUDE_KEY_NAME]); }
+function provider() { return claudeKey() ? "anthropic" : "gemini"; }
+function claudeEndpoint() {
+  return String(process.env.ANTHROPIC_BASE_URL || CLAUDE_ENDPOINT).replace(/\/+$/, "") + "/v1/messages";
+}
+
+function apiKey() {
+  return provider() === "anthropic" ? claudeKey() : cleanKey(process.env[KEY_NAME]);
+}
+function model() {
+  return provider() === "anthropic"
+    ? String(process.env.ANTHROPIC_MODEL || CLAUDE_DEFAULT_MODEL).trim()
+    : String(process.env.GEMINI_MODEL || DEFAULT_MODEL).trim();
+}
+/* Which variable this deployment is reading — the one named in "no key"
+   messages. With neither set, the Claude one, because that is the one to add. */
+function keyName() {
+  return provider() === "anthropic" || !cleanKey(process.env[KEY_NAME]) ? CLAUDE_KEY_NAME : KEY_NAME;
+}
 /* PRESENT, NOT VALID. Everything this can see is that a value exists — whether
    the provider accepts it is a question only the provider answers, and §124
    was written because a row reading "working" off this was read as "the key is
@@ -105,9 +136,15 @@ const KEY_LEN = 39, KEY_HEAD = "AIza", KEY_HEAD2 = "AQ.";
 function keyShape() {
   const k = apiKey();
   if (!k) return null;
+  /* An Anthropic key starts `sk-ant-`; four characters of it say only `sk-a`,
+     so seven are shown — still a prefix every such key shares. */
+  if (provider() === "anthropic") {
+    return { provider: "anthropic", len: k.length, head: k.slice(0, 7),
+             looksRight: k.slice(0, 7) === "sk-ant-" };
+  }
   const classic = k.length === KEY_LEN && k.slice(0, 4) === KEY_HEAD;
   const newer = k.slice(0, 3) === KEY_HEAD2 && k.length >= 20;
-  return { len: k.length, head: k.slice(0, 4),
+  return { provider: "gemini", len: k.length, head: k.slice(0, 4),
            looksRight: classic || newer };
 }
 
@@ -280,10 +317,11 @@ const SCHEMA = {
                        §458). Optional, so every other caller is unchanged. */
 async function callModel(opts) {
   const kb = opts.kb || {};
-  if (!configured()) return { ok: false, why: "no " + KEY_NAME + " is set on this deployment" };
+  if (!configured()) return { ok: false, why: "no " + keyName() + " is set on this deployment" };
   if (opts.needsCorpus !== false && process.env.SMP_BREAK !== "loose-defaults" && !(kb.recipes || []).length && !(kb.sections || []).length) {
     return { ok: false, why: opts.emptyWhy || "the knowledge base is empty" };
   }
+  if (provider() === "anthropic") return callClaude(opts);
 
   /* How many earlier turns ride along: eight for the chat corner's short
      answers, more where a caller asks (the Copilot, §460 B — a strategy
@@ -429,6 +467,149 @@ async function callModel(opts) {
   return { ok: true, json: out };
 }
 
+/* GEMINI'S SCHEMA DIALECT INTO JSON SCHEMA. Every caller writes its schema
+   the way Gemini reads it (`"OBJECT"`, `nullable`, `propertyOrdering`), and
+   Claude's structured output wants plain JSON Schema with every object
+   closed (`additionalProperties: false`). Translated here, once, so no caller
+   carries two copies of its own schema. Keys Claude does not accept are
+   dropped rather than passed to be refused. */
+function toJsonSchema(s) {
+  if (!s || typeof s !== "object") return s;
+  if (Array.isArray(s)) return s.map(toJsonSchema);
+  /* `nullable` becomes "this, or null" — an enum or an object stays whole. */
+  if (s.nullable) {
+    const inner = toJsonSchema(Object.assign({}, s, { nullable: false, description: undefined }));
+    return Object.assign(s.description ? { description: s.description } : {},
+                         { anyOf: [inner, { type: "null" }] });
+  }
+  const out = {};
+  const type = typeof s.type === "string" ? s.type.toLowerCase() : s.type;
+  if (type) out.type = type;
+  if (s.description) out.description = s.description;
+  if (s.enum) out.enum = s.enum;
+  if (s.format) out.format = s.format;
+  if (s.items) out.items = toJsonSchema(s.items);
+  if (s.anyOf) out.anyOf = s.anyOf.map(toJsonSchema);
+  if (s.properties) {
+    out.properties = {};
+    Object.keys(s.properties).forEach(function (k) { out.properties[k] = toJsonSchema(s.properties[k]); });
+  }
+  if (s.required) out.required = s.required;
+  if (out.type === "object" || s.properties) {
+    out.additionalProperties = false;
+  }
+  return out;
+}
+
+/* Models that take the server-side refusal fallback (`fallbacks: "default"`):
+   a declined answer is re-run on the model the API picks, inside the same
+   call, rather than coming back as a refusal. Anything else is sent without. */
+const CLAUDE_FALLBACK_OK = /^claude-(opus-5-5|opus-5|fable-5-1|sonnet-5-5)$/;
+
+/* ONE CALL TO CLAUDE — the same contract as the Gemini call above: never
+   throws, every failure is `{ ok: false, why }`, a rejected key is `badKey`,
+   a busy provider keeps its status so the Copilot's retry ladder sees it. */
+async function callClaude(opts) {
+  const kb = opts.kb || {};
+  /* A model the caller names is used only if it is a Claude model — the
+     Copilot's lighter fallback is a Gemini name on a Gemini deployment. */
+  const useModel = opts.model && /^claude-/.test(opts.model) ? opts.model : model();
+
+  const keep = Math.max(1, Math.min(40, Number(opts.maxTurns) || 8));
+  const turns = (opts.history || []).slice(-keep)
+    .filter(function (m) { return String(m.body || "").trim(); })
+    .map(function (m) {
+      return { role: m.from_office ? "assistant" : "user", content: String(m.body) };
+    });
+  /* A conversation must start with the person, or the provider rejects it. */
+  while (turns.length && turns[0].role === "assistant") turns.shift();
+  /* PDFs go to Claude as documents, ahead of the question (spec 064 stage 2). */
+  const last = [];
+  (opts.parts || []).forEach(function (p) {
+    if (p && p.inlineData && p.inlineData.mimeType === "application/pdf") {
+      last.push({ type: "document",
+                  source: { type: "base64", media_type: "application/pdf", data: p.inlineData.data } });
+    } else if (p && p.text) {
+      last.push({ type: "text", text: String(p.text) });
+    }
+  });
+  last.push({ type: "text", text: String(opts.question || "") || "(no question)" });
+  turns.push({ role: "user", content: last });
+
+  /* The corpus is the large, stable part of every request, so it sits under
+     a cache breakpoint: a follow-up question reads it from cache. */
+  const system = [{ type: "text", text: opts.instruction || instruction(opts.who) }];
+  if (!opts.noCorpus) {
+    system.push({ type: "text", cache_control: { type: "ephemeral" },
+                  text: "=== " + (opts.corpusName || "KNOWLEDGE BASE") + " ===\n\n" +
+                        (opts.corpusText || corpusText(officeOnly(kb, !!opts.isOffice), opts.labels || {})) });
+  }
+
+  /* THINKING CANNOT BE SWITCHED OFF ON CLAUDE, so §134's "no thinking for a
+     lookup" becomes the lowest effort; a caller that asks to reason gets
+     medium. The output budget is a ceiling, not a spend — thinking is drawn
+     from it, so it is kept well clear of the answer (§133). */
+  const body = {
+    model: useModel,
+    max_tokens: Math.max(opts.maxOutput || 0, 16000),
+    system: system,
+    messages: turns,
+    output_config: {
+      effort: opts.think ? "medium" : "low",
+      format: { type: "json_schema", schema: toJsonSchema(opts.schema || SCHEMA) }
+    }
+  };
+  const headers = { "Content-Type": "application/json", "x-api-key": apiKey(),
+                    "anthropic-version": CLAUDE_VERSION };
+  if (CLAUDE_FALLBACK_OK.test(useModel)) {
+    body.fallbacks = "default";
+    headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+  }
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(function () { ctrl.abort(); }, opts.timeoutMs || TIMEOUT_MS);
+  let res, text;
+  try {
+    res = await fetch(claudeEndpoint(), {
+      method: "POST", headers: headers, body: JSON.stringify(body), signal: ctrl.signal
+    });
+    text = await res.text();
+  } catch (e) {
+    return { ok: false, why: e && e.name === "AbortError"
+      ? "the assistant did not answer in time" : "the assistant could not be reached" };
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!res.ok) {
+    let detail = "";
+    try { detail = (JSON.parse(text).error || {}).message || ""; } catch (e) { detail = ""; }
+    if (looksLikeBadKey(res.status, detail)) {
+      return { ok: false, status: res.status, badKey: true,
+               why: "the provider rejected the key" + (detail ? ": " + detail.slice(0, 160) : "") };
+    }
+    return { ok: false, status: res.status,
+             why: "the assistant refused the request (" + res.status +
+                  (res.status === 404 ? ", model \"" + useModel + "\"" : "") +
+                  (detail ? ": " + detail.slice(0, 200) : "") + ")" };
+  }
+
+  let out;
+  try {
+    const j = JSON.parse(text);
+    if (j.stop_reason === "refusal") return { ok: false, why: "the assistant declined to answer this one" };
+    if (j.stop_reason === "max_tokens") return { ok: false, why: "the assistant's answer was cut off" };
+    const raw = (j.content || []).filter(function (b) { return b.type === "text"; })
+      .map(function (b) { return b.text || ""; }).join("");
+    if (!raw) return { ok: false, why: "the assistant answered with nothing" };
+    out = JSON.parse(raw);
+  } catch (e) {
+    /* A MALFORMED ANSWER IS A FAILURE, NEVER A GUESS — as above. */
+    return { ok: false, why: "the assistant's answer could not be read" };
+  }
+  return { ok: true, json: out };
+}
+
 /* THE PARSED OBJECT, for a caller supplying its own schema. Nothing is shaped
    and nothing is second-guessed: what the model answered under the caller's
    own schema is what comes back (spec 052). */
@@ -453,7 +634,8 @@ async function ask(opts) {
            source: answered ? (String(out.source || "").replace(/[\[\]]/g, "").trim() || null) : null };
 }
 
-module.exports = { ask, askJson, configured, model, KEY_NAME, corpusText, instruction, SCHEMA,
+module.exports = { ask, askJson, configured, model, provider, toJsonSchema,
+                   get KEY_NAME() { return keyName(); }, corpusText, instruction, SCHEMA,
                    officeOnly, looksLikeBadKey, HANDOFF_LINE, keyShape, KEY_LEN, KEY_HEAD, KEY_HEAD2, withTenant,
                    /* test hook only: the cap's memory is per process, and a test
                       that cannot reset it can only measure the first case (§134). */

@@ -1461,7 +1461,18 @@ module.exports = async function handler(client, me, body, req, slug) {
          the shape an AI Studio key has. */
       const shape = assistant.keyShape();
       step("The API key", assistant.configured() ? "ok" : "fail",
-           shape
+           shape && shape.provider === "anthropic"
+             ? (shape.len + " characters, starting " + shape.head + ". " +
+                (shape.looksRight
+                  ? "That is the shape of an Anthropic key — whether Claude " +
+                    "accepts this one is the next step. If it is refused, check " +
+                    "it against console.anthropic.com: a deployment only has the " +
+                    "variables that existed when it was BUILT, so a key changed " +
+                    "since then needs a redeploy."
+                  : "An Anthropic key starts sk-ant- — this does not, so compare " +
+                    "it against console.anthropic.com. The next step is still " +
+                    "what decides."))
+           : shape
              ? (shape.len + " characters, starting " + shape.head + ". " +
                 (shape.looksRight
                   ? "That is the shape of an AI Studio key — whether the provider " +
@@ -1507,9 +1518,12 @@ module.exports = async function handler(client, me, body, req, slug) {
              refuses, and none of them is visible from here. */
           step("The key itself", "fail",
                out.why + " — most often the key was pasted with a stray space " +
-               "or newline, is restricted to a website or IP (a server key must " +
-               "not be), or belongs to a project where the Generative Language " +
-               "API is not switched on.");
+               (assistant.provider() === "anthropic"
+                 ? "or newline, was revoked, or belongs to a workspace with no " +
+                   "credit left."
+                 : "or newline, is restricted to a website or IP (a server key must " +
+                   "not be), or belongs to a project where the Generative Language " +
+                   "API is not switched on."));
         } else if (!out || !out.ok) {
           step("The model (" + assistant.model() + ")", "fail",
                (out && out.why) || "no answer");

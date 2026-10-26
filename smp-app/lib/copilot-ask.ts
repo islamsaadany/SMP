@@ -17,6 +17,7 @@ const need = createRequire(import.meta.url);
 const A = need("./assistant.cjs") as {
   askJson: (o: Record<string, unknown>) => Promise<{ ok: boolean; json?: unknown; why?: string; badKey?: boolean }>;
   configured: () => boolean;
+  provider: () => "anthropic" | "gemini";
 };
 export const configured = (): boolean => A.configured();
 
@@ -148,6 +149,8 @@ export type AskInput = {
      Copilot settings hold them now (lib/copilot-settings.ts, §456). */
   method?: string;
   templates?: string[];
+  /* The Free chat part of Copilot settings, set only on a free chat (§636). */
+  free?: string | null;
 };
 
 export function corpusOf(a: AskInput): string {
@@ -173,7 +176,7 @@ export type AskResult = { ok: true; reply: string; part: Answer } | { ok: false;
 /* The one call. A PDF rides as a document on the question; everything else
    is text in the corpus. The timeout is the drafting one — a draft is not a
    lookup (§134's own distinction) — and thinking is allowed. */
-const BUSY = new Set([429, 500, 502, 503, 504]);
+const BUSY = new Set([429, 500, 502, 503, 504, 529]);  /* 529: Claude's "overloaded" */
 /* The pauses before each further ask (§458). SMP_COPILOT_RETRY_MS, when set,
    replaces every one of them — the check sets it to 0 so a run takes no time. */
 const WAITS = [2000, 5000, 10000];
@@ -181,7 +184,9 @@ const waitFor = (i: number) => { const n = Number(process.env.SMP_COPILOT_RETRY_
 /* The lighter model asked once when the main one stays busy. An override
    for the day Google renames it; a fallback that is itself refused only
    means the person is told about the busy main model, as before. */
-const fallbackModel = () => String(process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest").trim();
+const fallbackModel = () => A.provider() === "anthropic"
+  ? String(process.env.ANTHROPIC_FALLBACK_MODEL || "claude-sonnet-5-5").trim()
+  : String(process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest").trim();
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
@@ -193,7 +198,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
     maxTurns: process.env.SMP_BREAK === "short-memory" ? 8 : 20,
     schema: SCHEMA,
     needsCorpus: false,
-    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    instruction: guidanceFor(a.section, a.method || "", a.templates || [], a.free ?? null),
     corpusName: "THIS CHAT'S MATERIAL",
     corpusText: corpusOf(a),
     parts: pdfParts,
@@ -232,7 +237,7 @@ export async function askDraftOnly(a: AskInput): Promise<{ ok: true; draft: NonN
   if (!A.configured()) return { ok: false, why: "no key is set" };
   const call = (model?: string) => A.askJson({
     question: a.question, history: a.history, maxTurns: 20, schema: DRAFT_ONLY_SCHEMA, needsCorpus: false,
-    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    instruction: guidanceFor(a.section, a.method || "", a.templates || [], a.free ?? null),
     corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [],
     think: true, maxOutput: 8192, timeoutMs: 55_000, ...(model ? { model } : {}),
   });

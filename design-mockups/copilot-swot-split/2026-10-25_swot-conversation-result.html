@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SWOT Conversation Split</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--top:#111417;--nav:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#A9B1BC;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--badtx:#A23B2A;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--badtx:#E8907E;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--badtx:#E8907E;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1500px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:90ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.top{background:var(--top);color:var(--panel-quiet);display:flex;gap:16px;padding:9px 16px;font-size:13px}
+.top b{color:var(--panel-ink)}
+.tabs{display:flex;gap:20px;padding:8px 16px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.tabs span{padding-bottom:7px}.tabs .on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.areas{display:flex;gap:4px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-2);overflow-x:auto}
+.areas span{padding:4px 10px;border-radius:5px;white-space:nowrap}.areas .on{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.body{display:flex;height:720px}
+.strip{flex:none;width:44px;border-right:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0}
+.ib{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;background:var(--surface);font-size:14px}
+.chat{flex:0 0 min(560px,40%);min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.ch{flex:none;display:flex;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px}
+.ch b{font-size:13.5px}
+.feed{flex:1 1 auto;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+.who{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.who.me{align-self:flex-end}
+.msg{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;line-height:1.55}
+.msg.ai{border-left:3px solid var(--goldfill)}
+.msg.me{align-self:flex-end;background:var(--surface-2);max-width:85%}
+.msg small{display:block;color:var(--ink-3);font-size:12px;margin-bottom:2px}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;background:var(--surface)}
+.opt.go{border-color:var(--gold);color:var(--gold);font-weight:600}
+.compose{flex:none;padding:8px 16px 14px}
+.box{border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:14px}
+.send{margin-left:auto;width:28px;height:28px;border-radius:8px;background:var(--nav);color:var(--panel-ink);display:grid;place-items:center;font-size:13px}
+.grip{flex:none;width:3px;background:var(--goldfill);opacity:.5}
+.out{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;background:var(--surface-2)}
+.oh{flex:none;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px;display:flex;gap:8px;align-items:baseline}
+.oh b{font-size:14px}
+.ob{flex:1 1 auto;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.of{flex:none;padding:10px 14px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.of .k{margin-right:auto;font-size:12px;color:var(--ink-3)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font:600 12.5px/1.2 var(--sans)}
+.btn.gold{background:var(--warnbg);border-color:var(--goldfill);color:var(--gold)}
+.btn.pri{background:var(--nav);color:var(--panel-ink);border-color:var(--nav)}
+.btn[disabled]{opacity:.45;cursor:default}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.L{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.L h4{margin:0 0 6px;font-size:13.5px;display:flex;justify-content:space-between}
+.L h4 small{color:var(--ink-3);font-weight:600;font-size:11px}
+.L ol{margin:0;padding-left:18px;color:var(--ink-2)}
+.L li{margin:2px 0}
+.L li b{color:var(--ink)}
+.L .e{color:var(--ink-3);font-style:italic}
+.L.now{border-left:3px solid var(--goldfill);background:var(--warnbg)}
+.new{display:inline-block;margin-left:4px;font-size:10.5px;font-weight:700;color:var(--good)}
+.forces{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.f b{font-size:12.5px}
+.f ul{margin:4px 0 0;padding-left:16px;color:var(--ink-2);font-size:12.5px}
+.sec{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.tag{font-size:10.5px;border:1px solid var(--line);border-radius:999px;padding:0 7px;text-transform:none;letter-spacing:0}
+.tag.ok{color:var(--good);border-color:var(--good)}
+.tag.wait{color:var(--gold);border-color:var(--goldfill)}
+.chk{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.chk ul{margin:4px 0 0;padding-left:18px}
+.chk .ok{color:var(--good)}.chk .bad{color:var(--badtx)}
+.todo{flex:none;width:200px;border-left:1px solid var(--line);padding:12px;font-size:12.5px;overflow:auto}
+.todo h5{margin:0 0 4px;font-size:13.5px}
+.todo h5 small{color:var(--ink-3);font-weight:600;font-size:11px}
+.bar2{height:3px;background:var(--line);border-radius:2px;margin:4px 0 10px}.bar2 i{display:block;height:100%;background:var(--goldfill)}
+.tg{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:10px 0 3px}
+.ti{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:4px}
+.ti .d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.ti.s-done .d{background:var(--good);border-color:var(--good)}
+.ti.s-now{background:var(--warnbg)}.ti.s-now .d{border-color:var(--goldfill)}
+.ti span{flex:1}
+.ti em{font-style:normal;font-size:10.5px;border:1px solid var(--line);border-radius:999px;padding:0 6px;color:var(--ink-3)}
+.ti.s-done em{color:var(--good);border-color:var(--good)}.ti.s-now em{color:var(--gold);border-color:var(--goldfill)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{color:var(--ink);display:block}
+@media (max-width:900px){.body{flex-direction:column;height:auto}.chat{flex:none;border-right:0}.todo{width:auto;border-left:0;border-top:1px solid var(--line)}.strip,.grip{display:none}.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The SWOT, split: a conversation on the left, the SWOT building on the right</h1>
+    <p class="lede">Today the SWOT is a form in one column — a big answer box per question, then the analyses, then the grid with its buttons. Split by the signed-off concept: the Copilot <b>asks in the chat</b> and you answer in the ordinary box; what you are building <b>grows in the pane</b>; <b>Save</b> and <b>Apply to plan</b> live only at the pane's foot; the to-do stays at 200px. Click through the three moments.</p>
+  </header>
+  <div class="ctl"><b>Moment</b><span class="seg" id="ph"><button data-p="0">1 · Gathering — a guided question</button><button data-p="1">2 · The analyses to agree</button><button data-p="2">3 · The SWOT drafted</button></span></div>
+  <div class="say" id="say"></div>
+  <div class="frame">
+    <div class="top"><span>⌂</span><b>Strategy</b><span>Functions</span><span>HR</span><span>Finance</span></div>
+    <div class="tabs"><span>Plan</span><span>Performance</span><span>Focus</span><span class="on">Copilot</span></div>
+    <div class="areas"><span>Foundation</span><span class="on">Analysis</span><span>Competitive Discipline</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
+    <div class="body" id="body"></div>
+  </div>
+  <div class="notes">
+    <div class="n"><b>What moves into the chat</b>Each guided question, asked by the Copilot; your answer typed in the ordinary box. "Help me understand" and "Answer for me" become quick replies. Agreeing an analysis ("Looks right", "Write it again") is said in the chat. Uploading a report for a line is the box's paperclip.</div>
+    <div class="n"><b>What moves into the pane</b>"What we have so far" (today squeezed under the to-do) becomes the pane itself while gathering: the four letters filling in, each new line marked. Then the five forces and DESTEP to agree, then the S·W·O·T grid and the check. Edit stays on the pane's own items.</div>
+    <div class="n"><b>Save and Apply to plan</b>Only at the pane's foot. <b>Save</b> keeps a version under Deliverables; <b>Apply to plan</b> writes the plan's SWOT, asking first and archiving what stood — today Save writes the plan by itself. Neither button is ever in the chat.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var P = 0;
+  var SAY = [
+    '<b>1 · Gathering.</b> The Copilot asks question 3 of 16 in the chat; the two before it are answered above. The pane is the SWOT so far — Strengths has two lines from your answers, marked new. The to-do shows Internal · Guided questions under way.',
+    '<b>2 · The analyses.</b> The ready report and the deep research are read; the Copilot says so in the chat and asks you to agree each analysis there. The pane shows the five forces (agreed) and DESTEP (waiting), each with Edit on its own card.',
+    '<b>3 · The SWOT drafted.</b> The chat says what the check found and asks what to do about it. The pane is the grid and the check; <b>Save</b> and <b>Apply to plan</b> are at its foot and nowhere else.'
+  ];
+  function T(rows){ return '<div class="todo"><h5>To-do <small>' + rows.n + '</small></h5><div class="bar2"><i style="width:' + rows.w + '%"></i></div>' +
+    rows.g.map(function(g){ return '<div class="tg">' + g[0] + '</div>' + g[1].map(function(i){ return '<div class="ti s-' + i[1] + '"><i class="d"></i><span>' + i[0] + '</span><em>' + ({done:"Done",now:"Now",todo:"To do"})[i[1]] + '</em></div>'; }).join(""); }).join("") + '</div>'; }
+  function draw(){
+    document.querySelectorAll("#ph button").forEach(function(b){ b.setAttribute("aria-pressed", String(+b.dataset.p === P)); });
+    document.getElementById("say").innerHTML = SAY[P];
+    var chat, out, foot, todo, head = "SWOT — Mobile v1";
+    if (P === 0) {
+      chat = '<div class="who">Copilot</div><div class="msg ai"><small>Internal · question 1 of 16 · customer-perceived strengths</small>What do customers consistently praise about your organisation? What keeps them coming back?</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">The store network and the after-sales care.</div>' +
+        '<div class="who">Copilot</div><div class="msg ai"><small>Question 2 of 16 · capabilities</small>What can you do that competitors find hard to copy?</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Our supplier ties with Samsung and Xiaomi.</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">Noted — both are in Strengths on the right.<br><small style="margin-top:6px">Question 3 of 16 · weaknesses</small>Where do customers or staff say you fall short?</div>' +
+        '<div class="opts"><span class="opt">Help me understand</span><span class="opt">Answer for me</span><span class="opt">Skip this one</span></div>';
+      out = '<div class="grid4">' +
+        '<div class="L"><h4>Strengths <small>2 lines</small></h4><ol><li><b>Wide store network</b> <span class="new">new</span></li><li><b>Supplier ties</b> <span class="new">new</span></li></ol></div>' +
+        '<div class="L now"><h4>Weaknesses <small>asking now</small></h4><p class="e">Question 3 is about these.</p></div>' +
+        '<div class="L"><h4>Opportunities <small>from the reports</small></h4><p class="e">Nothing yet — the micro and macro scans come next.</p></div>' +
+        '<div class="L"><h4>Threats <small>from the reports</small></h4><p class="e">Nothing yet.</p></div></div>';
+      foot = '<span class="k">The SWOT is drafted after the analyses</span><button class="btn" disabled>Save</button><button class="btn pri" disabled>Apply to plan</button>';
+      todo = T({ n:"0/5", w:6, g:[["Internal",[["Guided questions · 2/16","now"]]],["Micro · competition",[["Ready reports","todo"]]],["Macro · market",[["Deep research","todo"]]],["Then",[["Micro and macro analyses","todo"],["Draft the SWOT","todo"]]]] });
+      head = "SWOT — Mobile v1 · so far";
+    } else if (P === 1) {
+      chat = '<div class="who">Copilot</div><div class="msg ai">The guided questions are done — 16 of 16. I read <b>market-report.pdf</b> for the competition and the <b>deep research</b> for the market.</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">The <b>five forces</b> are on the right. Rivalry and buyer power come out strongest. Does it read right?</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Looks right</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">Agreed. Now <b>DESTEP</b> — I wrote it from the deep research; the economic factors lean on FX swings. Looks right?</div>' +
+        '<div class="opts"><span class="opt go">Looks right</span><span class="opt">Write it again</span><span class="opt">I\'ll edit it</span></div>';
+      out = '<div class="sec">Micro analysis — the five forces <span class="tag ok">Agreed</span></div><div class="forces">' +
+        ["Competitive Rivalry|Price wars on mid-range phones|Grey imports","New Entrants|Online-only sellers|Low setup cost","Substitutes|Refurbished devices","Supplier Power|Two brands are 70% of sales","Buyer Power|B2B tenders squeeze margin|Price comparison apps"].map(function(x){ var p = x.split("|"); return '<div class="f"><b>' + p[0] + '</b><ul>' + p.slice(1).map(function(y){ return "<li>" + y + "</li>"; }).join("") + "</ul></div>"; }).join("") + '</div>' +
+        '<div class="sec">Macro analysis — DESTEP <span class="tag wait">Waiting for you</span></div><div class="forces">' +
+        ["Demographic|Young population","Economic|FX swings|Financing demand","Social|Device upgrades every 2 years","Technological|5G rollout","Environmental|E-waste rules","Political|Import duties"].map(function(x){ var p = x.split("|"); return '<div class="f"><b>' + p[0] + '</b><ul>' + p.slice(1).map(function(y){ return "<li>" + y + "</li>"; }).join("") + "</ul></div>"; }).join("") + '</div>';
+      foot = '<span class="k">Agree DESTEP to draft the SWOT</span><button class="btn" disabled>Save</button><button class="btn pri" disabled>Apply to plan</button>';
+      todo = T({ n:"3/5", w:60, g:[["Internal",[["Guided questions","done"]]],["Micro · competition",[["Ready reports","done"]]],["Macro · market",[["Deep research","done"]]],["Then",[["Micro and macro analyses","now"],["Draft the SWOT","todo"]]]] });
+      head = "SWOT — Mobile v1 · the analyses";
+    } else {
+      chat = '<div class="who">Copilot</div><div class="msg ai">Both analyses are agreed, so I drafted the SWOT — five lines in each letter, on the right.</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Check it</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">The SWOT follows from both analyses. One thing: <b>two weaknesses overlap</b> — "Slow pricing" and "Legacy systems" describe the same cause. Merge them?</div>' +
+        '<div class="opts"><span class="opt go">Merge them</span><span class="opt">Keep both</span><span class="opt">Draft it again</span></div>';
+      var L = function(t, items){ return '<div class="L"><h4>' + t + ' <small>' + items.length + ' items</small></h4><ol>' + items.map(function(i){ return "<li><b>" + i + "</b></li>"; }).join("") + "</ol></div>"; };
+      out = '<div class="grid4">' + L("Strengths",["Wide store network","Trusted brand","Strong after-sales","Supplier ties","Retail know-how"]) + L("Weaknesses",["Thin online presence","Slow pricing","Stock gaps","Legacy systems","Few data skills"]) +
+        L("Opportunities",["Young population","Financing demand","Device upgrades","B2B tenders","Rural reach"]) + L("Threats",["Price wars","FX swings","Grey imports","New entrants","Rising rents"]) + '</div>' +
+        '<div class="chk"><b>The check</b><ul><li class="ok">The SWOT follows from both analyses.</li><li class="bad"><b>Weaknesses:</b> two weaknesses overlap.</li></ul></div>';
+      foot = '<span class="k">Save keeps a version · Apply writes the plan\'s SWOT</span><button class="btn">Save</button><button class="btn pri">Apply to plan</button>';
+      todo = T({ n:"4/5", w:80, g:[["Internal",[["Guided questions","done"]]],["Micro · competition",[["Ready reports","done"]]],["Macro · market",[["Deep research","done"]]],["Then",[["Micro and macro analyses","done"],["Draft the SWOT","now"]]]] });
+    }
+    document.getElementById("body").innerHTML = '<div class="strip"><span class="ib">»</span><span class="ib">+</span></div>' +
+      '<section class="chat"><div class="ch"><b>Copilot · SWOT</b></div><div class="feed">' + chat + '</div><div class="compose"><div class="box">📎<span style="flex:1">' + (P === 0 ? "Type your answer…" : "Reply, or say what to change…") + '</span><span class="send">↑</span></div></div></section>' +
+      '<div class="grip"></div><section class="out"><div class="oh"><b>' + head + '</b></div><div class="ob">' + out + '</div><div class="of">' + foot + '</div></section>' + todo;
+  }
+  document.getElementById("ph").addEventListener("click", function(e){ var b = e.target.closest("[data-p]"); if (b) { P = +b.dataset.p; draw(); } });
+  draw();
+})();
+</script>
+</body>
+</html>

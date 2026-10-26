@@ -4,6 +4,30 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-26 — The chat keeps everything (§643), merged to `main` on Islam's word.** A draft or change is a proposal in the chat; the card changes only on Save to the card; guided answers fold and reopen; typed lines are kept; the check is the pane's.
+
+**2026-10-26 — The Copilot at any zoom (§642), merged to `main` on Islam's word.** The layout follows the Copilot's own width, so a laptop at 125–150% keeps chat, cards and to-do side by side; long cards open with Show N more; one Go back per part; closing the cards moves nothing into the chat.
+
+**2026-10-25 — The SWOT, split (§641), merged to `main` on Islam's word.** A conversation beside the SWOT it builds; items open on a press; Save and Apply to plan only at the pane's foot, Apply archiving the plan's SWOT first.
+
+**2026-10-25 — The start box takes the material (§640), merged to `main` on Islam's word.** Notes attached or work pasted there open a free chat that offers to structure it; Foundation's start cards are the guided questions and the template.
+
+**2026-10-25 — A new chat starts on one screen (§639), merged to `main` on Islam's word.** A box to just ask — a free chat — and under it the area's ways to start; Foundation's four roads are taken at once. Replaces §633's menu.
+
+**2026-10-25 — The Copilot's layout concept, first release (§638), merged to `main` on Islam's word.** A 740px reading column, the chats rail open by default, a reply's bold drawn bold; the guided Foundation is chat · cards · to-do with a handle between, and a free chat's draft stands to its right.
+
+**2026-10-25 — The Free chat part aligned with the method, and How we compete and Capabilities chats told their own method (§637), merged to `main` on Islam's word.**
+
+**2026-10-25 — A free chat talks before it drafts (§636), merged to `main` on Islam's word.** Its own part in Copilot settings › Free chat, for every area: confirm, ask one at a time or all at once, a baseline before any target, and a draft only when agreed.
+
+**2026-10-25 — The "+ New chat" choice opens on screen instead of being cut off at the left (§635).**
+
+**2026-10-25 — The Copilot reads Competitive Discipline and the capabilities as well as the rest of the plan (§634).**
+
+**2026-10-25 — A free chat beside every Copilot workflow (§633), merged to `main` on Islam's word.** "+ New chat" now offers the area's workflow or a Free chat, answered from the area's method and this place's plan.
+
+**2026-10-25 — The Copilot and the assistant answer through Claude when `ANTHROPIC_API_KEY` is set (§632), merged to `main` on Islam's word.**
+
 **2026-10-24 — The mark at the top of the console's column opens Home (§622.7), merged to `main` 2026-10-24 on Islam's word.** On a computer and on a phone.
 
 **2026-10-24 — Consultants, Who sees what and Copilot in the console's look; the band never moves (§622.5, §622.6), merged to `main` 2026-10-24 on Islam's word.**

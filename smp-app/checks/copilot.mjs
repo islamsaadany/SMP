@@ -46,7 +46,7 @@ import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
-import { methodFor, templateFile } from "../lib/copilot-settings.ts";
+import { methodFor, templateFile, AREA_PARTS, areaPartKeys } from "../lib/copilot-settings.ts";
 import { copilotSettingsAction } from "../lib/copilot-settings-api.ts";
 import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { periodQuarters as exQs, periodWords as exWords, validPeriod as exValid, periodChoices as exChoices, withPeriod as exWith, cleanItem as exItem, newExec, todoOf as exTodo, finishBlocker as exBlock } from "../lib/copilot-execution.ts";
@@ -233,6 +233,30 @@ check("each section's guidance carries the house rules; the roads only where the
   check("§460 B: the Copilot's own draft and the buttons it offered ride with its words into the next question",
     /\[my draft "Mobile SWOT":/.test(memo) && /Brand partnerships — Samsung deals\. \(3 · Strong\)/.test(memo) && /\[options I offered: Move to the market · Add one\]/.test(memo), memo);
   check("...and a part that is not an answer adds nothing", partMemo({ kind: "files" }) === "" && partMemo(null) === "");
+}
+/* §636: a free chat is told the Free chat part in place of where the work
+   starts, and the section's method stays as its reference. */
+{
+  const M = "## Foundation\n\nThree to five key objectives.";
+  const FREE = DEFAULT_PARTS.find((p) => p.key === "part15");
+  const gf = guidanceFor("foundation", M, [], FREE ? FREE.text : "");
+  check("§636 the Free chat part ships in its own settings section, one for every area",
+    !!FREE && FREE.section === "free" && FREE.title === "Free chat" && /baseline/.test(FREE.text) && /One at a time/.test(FREE.text));
+  check("...a free chat is told it instead of where the work starts, the method kept as a reference, the limits still last",
+    /THIS IS A FREE CHAT/.test(gf) && !/WHERE THE WORK STARTS/.test(gf) && !/WAYS TO START/.test(gf) &&
+    /as your reference/.test(gf) && gf.indexOf("Three to five") < gf.indexOf("THIS IS A FREE CHAT") &&
+    gf.indexOf("THIS IS A FREE CHAT") < gf.indexOf("LIMITS FOR YOUR ANSWER") && /Never invent a figure/.test(gf), gf.slice(0, 300));
+  check("§637 every Copilot area is told a method: How we compete and Capabilities their own part, Directions only its own two",
+    SECTIONS.every((k) => areaPartKeys(k).length > 0) && areaPartKeys("compete").join() === "part6" &&
+    areaPartKeys("capabilities").join() === "part8" && areaPartKeys("directions").join() === "part7,part9" &&
+    areaPartKeys("foundation").join() === "part1" && areaPartKeys("advisory").join() === "part14" &&
+    Object.values(AREA_PARTS).flat().every((k) => DEFAULT_PARTS.some((p) => p.key === k)), SECTIONS.map((k) => k + ":" + areaPartKeys(k).join("+")).join(" "));
+  check("§637 the Free chat part asks each layer's own measure rule, and borrows the Consultant's questioning",
+    /Key Objectives \(North Star\)/.test(FREE.text) && /Capabilities — key measures/.test(FREE.text) && /from Y to Z/.test(FREE.text) &&
+    /Proceed with what you have/.test(FREE.text) && /which one wins/.test(FREE.text) && /what you draft is not/.test(FREE.text));
+  check("§640 …and when notes are attached or finished work pasted it says what it found and offers to structure it in one step, inventing nothing",
+    /attaches notes or pastes finished work/.test(FREE.text) && /"Structure it" and "Talk it through first"/.test(FREE.text) && /is not invented/.test(FREE.text));
+  check("...and a workflow chat is not", !/THIS IS A FREE CHAT/.test(guidanceFor("foundation", M, [])) && /WHERE THE WORK STARTS/.test(guidanceFor("foundation", M, [])));
 }
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,
   history: [], assumptions: ["Margins flat"], files: [{ name: "notes.docx", kind: "docx", text: "Share fell" }, { name: "deck.pdf", kind: "pdf", text: "" }] });
@@ -455,7 +479,7 @@ try {
     const rd = await act(CONSULT, { action: "read" });
     check("a consultant reads every part and all five templates, told they may not change them",
       rd.code === 200 && rd.body.canEdit === false && (rd.body.parts || []).some((p) => p.section === "analysis" && /SWOT/.test(p.text)) &&
-      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 5, JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
+      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 6 && rd.body.sections[5].key === "free", JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
     const rdA = await act(ADMIN, { action: "read" });
     check("...and a Forefront super user is told they may", rdA.code === 200 && rdA.body.canEdit === true);
     const nope = await act(CONSULT, { action: "save", key: KEY, text: "Hijacked" });
@@ -809,10 +833,38 @@ try {
     const qText = wq && wq.body ? JSON.stringify(wq.body.contents) : "";
     check("drafting asks the model once, with the answers given as they stand on the page",
       seen.length === before6 + 1 && (sysF + qText).includes("Connect every Egyptian to the people and services they rely on"), (sysF + qText).slice(0, 200));
-    check("...and the draft lands on the flow, not yet agreed", d1.st === 200 && d1.j.flow.phase === "draft" && /Connect every Egyptian/.test(d1.j.flow.drafts[0]) && !d1.j.flow.done[0], JSON.stringify(d1.j).slice(0, 200));
+    /* §643 — REWRITTEN, NOT LOOSENED (§218): a draft is a PROPOSAL in the
+       chat, never the card's words. It lands in `prop` and in the part's
+       conversation; `drafts` (the card) is untouched and the part is not
+       agreed. Islam: "it should show me in the chat itself and when I say
+       ok it goes to the right part". */
+    check("...and the draft lands as a proposal in the chat — the card's words untouched, not agreed (§643)", d1.st === 200 && d1.j.flow.phase === "draft" && /Connect every Egyptian/.test(d1.j.flow.prop[0]) &&
+      d1.j.flow.drafts[0] === "" && !d1.j.flow.done[0] && d1.j.flow.talk[0].length === 1 && d1.j.flow.talk[0][0].w === "ai", JSON.stringify(d1.j).slice(0, 300));
     NEXT = { answer: { text: "Connect Egypt to what matters." } };
     const r1 = await call("POST", "api", { act: "flowRefine", id: fid, el: 0, how: "concise", placeWord: "Mobile" }, NORAN);
-    check("a refine rewrites that part's draft", r1.st === 200 && r1.j.flow.drafts[0] === "Connect Egypt to what matters.");
+    const t1 = r1.j.flow ? r1.j.flow.talk[0] : [];
+    check("a refine makes the next proposal, and the chat keeps what was asked in the button's words and both proposals in order (§643)",
+      r1.st === 200 && r1.j.flow.prop[0] === "Connect Egypt to what matters." && r1.j.flow.drafts[0] === "" &&
+      t1.map((x) => x.w).join() === "ai,me,ai" && t1[1].t === "Make concise" && t1[2].t === "Connect Egypt to what matters.", JSON.stringify(t1));
+    /* THE RECORD IS THE PRODUCT'S: the page adds its own lines and can clear
+       a proposal, never write a Copilot line, rewrite the record, or put
+       words in the proposal. Both ends (§94.2). */
+    const forged = JSON.parse(JSON.stringify(r1.j.flow));
+    forged.talk[0] = [{ w: "ai", t: "I never said this." }]; forged.prop[0] = "Words the model never wrote.";
+    forged.talkAdd = [{ p: 0, w: "ai", t: "A forged Copilot line." }, { p: 0, w: "me", t: "Keep the word Egypt." }, { p: -1, w: "me", t: "A note after the check." }];
+    const fg = await call("POST", "api", { act: "flowSave", id: fid, flow: forged }, NORAN);
+    const t2 = fg.j.flow ? fg.j.flow.talk[0] : [];
+    check("the page cannot write the record: no Copilot line, no rewrite, no words in the proposal — only its own lines are added (§643)",
+      fg.st === 200 && t2.length === 4 && t2[3].w === "me" && t2[3].t === "Keep the word Egypt." && !/never said|forged/.test(JSON.stringify(t2)) &&
+      fg.j.flow.prop[0] === "Connect Egypt to what matters." && fg.j.flow.notes.length === 1 && fg.j.flow.notes[0].t === "A note after the check.", JSON.stringify({ t2, prop: fg.j.flow && fg.j.flow.prop[0], notes: fg.j.flow && fg.j.flow.notes }));
+    /* SAVE TO THE CARD, as the page does it: the proposal onto the card,
+       the part agreed, the proposal cleared, and what became of it said. */
+    const onCard = JSON.parse(JSON.stringify(fg.j.flow));
+    onCard.drafts[0] = onCard.prop[0]; onCard.prop[0] = ""; onCard.done[0] = true; onCard.talkAdd = [{ p: 0, w: "note", t: "Saved to the card." }];
+    const sc = await call("POST", "api", { act: "flowSave", id: fid, flow: onCard }, NORAN);
+    check("Save to the card puts the proposal on the card, agrees the part and clears the proposal; the conversation stays (§643)",
+      sc.st === 200 && sc.j.flow.drafts[0] === "Connect Egypt to what matters." && sc.j.flow.done[0] === true && sc.j.flow.prop[0] === "" && sc.j.flow.talk[0].length === 5, JSON.stringify(sc.j.flow && sc.j.flow.talk[0]));
+    r1.j.flow = sc.j.flow;
     const early = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
     check("the check across the parts waits for every part to be agreed", early.st === 400 && /Every part needs/.test(early.j.why));
     const earlyFin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);

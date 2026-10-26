@@ -6786,7 +6786,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -7161,6 +7161,8 @@ function archiveHeld(a){
        plural(c.units || 0, "submitted unit")].join(" &middot; ")
     : a.kind === "foundation"
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : a.kind === "swot"
+    ? plural(c.lines || 0, "SWOT line")
     : a.kind === "unit"
     ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
        plural(c.tactics, L1("tactic"), L("tactic")),
@@ -7183,6 +7185,8 @@ function renderArchives(){
       /* §524: the six parts of a Foundation, replaced from the Copilot. */
       (a.kind === "foundation"
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "swot"
+        ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
         : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
@@ -7190,6 +7194,7 @@ function renderArchives(){
        restore itself. */
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
+             : a.kind === "swot" ? !!swotWritable(a.key)
              : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"

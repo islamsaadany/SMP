@@ -65285,7 +65285,7 @@ var COPILOT = (function(){
      the bubble that wrote it says so in a line. An earlier draft can be
      put back in the panel from its own bubble. */
   var PANELPICK = {};            /* chat id → the message whose draft the panel shows (this visit only) */
-  var SHEET = "";                /* "cards" | "todo" | "draft": the panel opened over the chat below 1280px */
+  var SHEET = "";                /* "cards" | "todo" | "draft": the panel opened over the chat when there is no room beside it (§642) */
   function hasDraft(m){ var p = m && m.part; return !!(m && m.who === "ai" && p && p.kind === "answer" && p.draft && p.draft.groups && p.draft.groups.length); }
   function draftMsg(){
     if (!PANE || !PANE.chat || !PANE.messages) return null;
@@ -65629,13 +65629,26 @@ var COPILOT = (function(){
     return steps().filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
   }
   /* A part's text on its card: one line reads as a sentence, several as a
-     list, and a long list stops at four with how many more (the mockup). */
+     list, and a long list stops at three with Show N more.
+     §642 — THE REST OF A LONG CARD OPENS IN PLACE (Islam: Key Objectives
+     "all showing 2 more lines without a way of viewing them"). The link is
+     a span, not a button, because a pressable card is itself a button; what
+     is open is kept by the list's text so a redraw leaves it open. */
+  var CARDMORE = {};
   function cardBody(text){
     var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
     if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
-    var cut = lines.length > 4 ? 3 : lines.length;
-    return '<ul>' + lines.slice(0, cut).map(function(l){ return '<li>' + E(l) + '</li>'; }).join("") +
-      (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
+    var cut = lines.length > 4 ? 3 : lines.length, key = lines.join("\n"), open = !!CARDMORE[key];
+    return '<ul' + (open ? ' class="open"' : '') + '>' + lines.map(function(l, k){ return '<li' + (k >= cut ? ' class="copx"' : '') + '>' + E(l) + '</li>'; }).join("") + '</ul>' +
+      (lines.length > cut ? '<span class="copmore" role="button" tabindex="0" aria-expanded="' + open + '" data-cop-more="' + E(key) + '" data-n="' + (lines.length - cut) + '">' +
+        (open ? 'Show fewer' : 'Show ' + (lines.length - cut) + ' more') + '</span>' : '');
+  }
+  function moreToggle(b){
+    var key = b.getAttribute("data-cop-more"), ul = b.previousElementSibling, open = !CARDMORE[key];
+    if (open) CARDMORE[key] = true; else delete CARDMORE[key];
+    if (ul) ul.classList.toggle("open", open);
+    b.setAttribute("aria-expanded", String(open));
+    b.textContent = open ? "Show fewer" : "Show " + b.getAttribute("data-n") + " more";
   }
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   /* §513 — A PART'S TEXT IS EDITED ON ITS CARD (Islam: "edit the cards on
@@ -65804,7 +65817,7 @@ var COPILOT = (function(){
         /* §524 — the check is an extra move, never the door to saving
            (Islam: "a check is an extra move"), so Save is on the bar under
            the cards and only "Go back to" stays here, when there is one. */
-        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
+        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x, k){ return x.el in byKey && issues.findIndex(function(y){ return y.el === x.el; }) === k; }).map(function(x){
             return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") + '</div>' : ''), true));
     }
     /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
@@ -65863,7 +65876,7 @@ var COPILOT = (function(){
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     /* §638: the chat first, the cards to its right behind the handle, the
-       to-do last at its 200px (the signed-off concept). Below 1280px the
+       to-do last at its 200px (the signed-off concept). Without room beside it (§642) the
        cards and the to-do open over the chat from the head's two buttons. */
     var cards = shut ? '' : GRIP + '<div class="copleft"><div class="copsh">' + vline +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button>' +
@@ -65871,10 +65884,10 @@ var COPILOT = (function(){
     return '<div class="copflow' + (shut ? " nocards" : "") + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
-        /* §525 — Save and Apply live in the card column, so closing the cards
-           with × used to take them away too. With the cards shut the same bar
-           stands at the head of the chat. */
-        (shut ? savebarHtml(f) : '') +
+        /* §525 put the save bar at the head of the chat when the cards were
+           shut; §641's rule (Islam: "what is the need for the apply or save in
+           the chat?") takes it out again — the chat has Show cards, and Save
+           and Apply come back with the cards they belong to. */
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
         (!canEdit() ? VIEWONLY
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
@@ -68132,8 +68145,13 @@ var COPILOT = (function(){
   document.addEventListener("pointerdown", function(ev){
     if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]")) { MENU = null; draw(); }
   }, true);
+  document.addEventListener("keydown", function(ev){
+    var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more]");
+    if (b) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); }
+  }, true);
   document.addEventListener("click", function(ev){
     var b;
+    if ((b = hit(ev, "[data-cop-more]"))) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); return; }
     if (flowClick(ev)) return;
     if (cpClick(ev)) return;
     if (adClick(ev)) return;

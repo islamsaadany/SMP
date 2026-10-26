@@ -312,7 +312,9 @@ button.copcard.pick { font:inherit; text-align:left; cursor:pointer; width:100%;
 button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--surface-2); outline:none; border-color:var(--gold); }
 .copcard ul { margin:0; padding-left:16px; font-size:13px; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; }
 .copcard li { overflow-wrap:anywhere; }
-.copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
+ul:not(.open) > li.copx { display:none; }
+.copmore { display:inline-block; margin-top:2px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+.copmore:hover, .copmore:focus-visible { color:var(--ink); outline:none; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
 /* §513 — a card with text carries a pen and "Edit with AI", shown when the
    card is hovered or anything in it has the keyboard; on a touch screen,

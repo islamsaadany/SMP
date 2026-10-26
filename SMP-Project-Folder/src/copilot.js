@@ -936,13 +936,26 @@ var COPILOT = (function(){
     return steps().filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
   }
   /* A part's text on its card: one line reads as a sentence, several as a
-     list, and a long list stops at four with how many more (the mockup). */
+     list, and a long list stops at three with Show N more.
+     §642 — THE REST OF A LONG CARD OPENS IN PLACE (Islam: Key Objectives
+     "all showing 2 more lines without a way of viewing them"). The link is
+     a span, not a button, because a pressable card is itself a button; what
+     is open is kept by the list's text so a redraw leaves it open. */
+  var CARDMORE = {};
   function cardBody(text){
     var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
     if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
-    var cut = lines.length > 4 ? 3 : lines.length;
-    return '<ul>' + lines.slice(0, cut).map(function(l){ return '<li>' + E(l) + '</li>'; }).join("") +
-      (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
+    var cut = lines.length > 4 ? 3 : lines.length, key = lines.join("\n"), open = !!CARDMORE[key];
+    return '<ul' + (open ? ' class="open"' : '') + '>' + lines.map(function(l, k){ return '<li' + (k >= cut ? ' class="copx"' : '') + '>' + E(l) + '</li>'; }).join("") + '</ul>' +
+      (lines.length > cut ? '<span class="copmore" role="button" tabindex="0" aria-expanded="' + open + '" data-cop-more="' + E(key) + '" data-n="' + (lines.length - cut) + '">' +
+        (open ? 'Show fewer' : 'Show ' + (lines.length - cut) + ' more') + '</span>' : '');
+  }
+  function moreToggle(b){
+    var key = b.getAttribute("data-cop-more"), ul = b.previousElementSibling, open = !CARDMORE[key];
+    if (open) CARDMORE[key] = true; else delete CARDMORE[key];
+    if (ul) ul.classList.toggle("open", open);
+    b.setAttribute("aria-expanded", String(open));
+    b.textContent = open ? "Show fewer" : "Show " + b.getAttribute("data-n") + " more";
   }
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   /* §513 — A PART'S TEXT IS EDITED ON ITS CARD (Islam: "edit the cards on
@@ -3439,8 +3452,13 @@ var COPILOT = (function(){
   document.addEventListener("pointerdown", function(ev){
     if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]")) { MENU = null; draw(); }
   }, true);
+  document.addEventListener("keydown", function(ev){
+    var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more]");
+    if (b) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); }
+  }, true);
   document.addEventListener("click", function(ev){
     var b;
+    if ((b = hit(ev, "[data-cop-more]"))) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); return; }
     if (flowClick(ev)) return;
     if (cpClick(ev)) return;
     if (adClick(ev)) return;

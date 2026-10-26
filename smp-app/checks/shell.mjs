@@ -1404,6 +1404,24 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const st0 = await textOf('[data-cop-card="0"] .copst');
     check(P.drafts[0] === "We sell phones across Egypt, written by hand." && P.done[0] === true && P.from[0] === false && /Done/.test(st0) && !(await page.$("[data-cop-pentext]")),
       "Ctrl+Enter saves the words, the part reads Done and no longer From the plan", JSON.stringify({ d: P.drafts[0], done: P.done[0], from: P.from[0], st0 }));
+    /* §642 (Islam's screenshot: Key Objectives "all showing 2 more lines
+       without a way of viewing them"): a card of five lines shows three and
+       Show 2 more; pressed, all five open in place and it says Show fewer —
+       the part stays where it was, the press is not the card's. */
+    await page.hover('[data-cop-card="0"]'); await page.click('[data-cop-pen="0"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 });
+    await page.fill("[data-cop-pentext]", "One\nTwo\nThree\nFour\nFive");
+    await page.keyboard.press("Control+Enter");
+    await page.waitForSelector('[data-cop-card="0"] [data-cop-more]', { timeout: 5000 }).catch(() => {});
+    const seen = () => page.evaluate(() => { const c = document.querySelector('[data-cop-card="0"]'), m = c && c.querySelector("[data-cop-more]");
+      return { lines: c ? Array.from(c.querySelectorAll("li")).filter((l) => l.offsetHeight > 0).length : -1, more: m ? m.textContent : "", pen: !!document.querySelector("[data-cop-pentext]") }; });
+    const mo0 = await seen(), eBefore = (await flowRow(pid)).e;
+    await page.click('[data-cop-card="0"] [data-cop-more]'); await page.waitForTimeout(250);
+    const mo1 = await seen(), eAfter = (await flowRow(pid)).e;
+    await page.click('[data-cop-card="0"] [data-cop-more]'); await page.waitForTimeout(250);
+    const mo2 = await seen();
+    check(mo0.lines === 3 && mo0.more === "Show 2 more" && mo1.lines === 5 && mo1.more === "Show fewer" && mo2.lines === 3 && !mo1.pen && eBefore === eAfter,
+      "§642 a long card shows three lines and Show 2 more, which opens all five in place and closes again with Show fewer", JSON.stringify({ mo0, mo1, mo2, eBefore, eAfter }));
 
     /* EDIT WITH AI is what pressing the card did (§512): the part in the chat. */
     await page.hover('[data-cop-card="1"]'); await page.click('[data-cop-ai="1"]');

@@ -1,7 +1,7 @@
 # 069 · Track Record — what we did for each client, assignment by assignment
 
-**Status:** **BUILT 2026-10-26 on Islam's "Build it"** (decision record §648),
-on the branch, not merged. The drawing that was signed off is
+**Status:** **BUILT 2026-10-26 on Islam's "Build it", MERGED TO `main` the same day on "merge it and put it live"** (decision record §650).
+The drawing that was signed off is
 `design-mockups/track-record/2026-10-26_track-record-steps.html` (its second
 version, drawn in the console as it is today).
 

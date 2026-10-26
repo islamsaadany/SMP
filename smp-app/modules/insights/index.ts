@@ -22,7 +22,8 @@ import { libraryFile } from "../../lib/library-file.ts";
 import { viewerFor } from "../../lib/library-viewer.ts";
 import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
-import { insightsDocument, libraryFragment } from "./page.ts";
+import { insightsDocument, libraryFragment, publishData } from "./page.ts";
+import { APP_JS } from "./script.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { registerOf } from "../../lib/notes.ts";
 import { maySimulate, maySimulateSeat, type Seat } from "../../lib/view-as.ts";
@@ -73,13 +74,30 @@ async function viewerList(a: ServeArgs): Promise<TopViewer | null> {
    about the rule moved; what moved is how many places hold it. */
 const viewerOf = (a: ServeArgs): Promise<Viewer> => viewerFor(a.tenantId, a.seat, a.personKey);
 
+/* §648 — WHO MAY PUBLISH HERE is who could publish from the console's room:
+   the platform's admin, or this client's own Super user (platform-rules
+   mayConfigureClient), and a Forefront session either way. `admin` and
+   `seat` are already the narrowed ones while somebody is viewed as (§383),
+   so Viewing as a client's person shows exactly their page and no button.
+   This only decides what is DRAWN: every write goes to /api/platform, which
+   asks the rule again (§42). The break draws the controls for anybody. */
+const mayPublish = (a: ServeArgs): boolean =>
+  process.env.SMP_BREAK === "publish-anyone" || (!!a.consultant && (a.admin || a.seat === "super"));
+
 export async function serve(a: ServeArgs): Promise<Response> {
+  if (a.rest.length === 1 && a.rest[0] === "app.js")
+    return new Response(APP_JS, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+  if (a.rest.length === 1 && a.rest[0] === "data") {
+    const body = mayPublish(a) ? await publishData(a.slug, a.tenantId, a.tenantName) : { ok: false, error: "Not found." };
+    return new Response(JSON.stringify(body), { status: body.ok ? 200 : mayPublish(a) ? 503 : 404,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
+  }
   if (!a.rest.length) {
     const q = new URL(a.req.url).searchParams;
     return new Response(
       await insightsDocument(a.slug, a.tenantId, a.tenantName, a.have,
         { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a),
-        { consultant: !!a.consultant, viewer: a.consultant ? await viewerList(a) : null }),
+        { consultant: !!a.consultant, viewer: a.consultant ? await viewerList(a) : null, publish: mayPublish(a) }),
       { status: 200, headers: shellHeaders() });
   }
   /* ── THE ROWS, FOR THE TAB INSIDE THE PLATFORM (§376) ──────────────

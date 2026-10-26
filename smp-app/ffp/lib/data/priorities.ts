@@ -47,6 +47,8 @@ export type StepRow = {
   id: string;
   label: string;
   order: number;
+  /** The role the step is assigned to, when it has one. */
+  roleName: string | null;
   flagged: boolean;
   /** Nothing stands out on the map and it is not flagged; shown only when asked for. */
   quiet: boolean;
@@ -169,6 +171,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
         order: true,
         type: true,
         assignedRoleId: true,
+        assignedRole: { select: { name: true } },
         priorityFlagged: true,
         priorityImportance: true,
         priorityComplexity: true,
@@ -245,6 +248,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
       id: st.id,
       label: st.label,
       order: st.order,
+      roleName: st.assignedRole?.name ?? null,
       flagged: st.priorityFlagged,
       quiet,
       decision: st.deepDiveDecision as Decision | null,

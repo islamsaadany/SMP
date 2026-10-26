@@ -88,6 +88,9 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
             <a href={`/api/ffp/export/priorities/${workspaceId}`} download className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
               Download as Excel
             </a>
+            <a href={`/api/ffp/export/priorities/${workspaceId}/flagged-steps`} download className="ms-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
+              Download flagged steps (all processes)
+            </a>
           </div>
         )}
         {step === "score" && <ScoreTable workspaceId={workspaceId} rows={rows} weights={plan.weights} capacity={plan.capacity} editable={editable} lockedMessage={lockedMessage} />}

@@ -753,8 +753,12 @@ var COPILOT = (function(){
     if (swotOn()) return swGuidedNow() ? "Type your answer…" : "Use the choices above to carry on…";
     if (flowView()) {
       var ph = PANE.flow.phase;
-      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…"
-        : ph === "loaded" ? "Edit a part from its card, or name it and say what to change…" : "Use the buttons above to carry on…";
+      /* §650 — the grey line invites what the box can do NOW (Islam: "use
+         buttons above to carry on … this is wrong"): since §643 a line typed
+         at any step is kept, and one that names a part changes it. */
+      return ph === "ask" ? "Type your answer…" : ph === "review" ? "Change an answer above, or say anything…"
+        : ph === "draft" ? "Say what to change in this draft…"
+        : ph === "loaded" || ph === "check" || ph === "saved" ? "Name a part and say what to change, or ask anything…" : "Type a message…";
     }
     return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
@@ -764,8 +768,11 @@ var COPILOT = (function(){
     return '<div class="copcompose">' +
       '<div class="copbox">' +
         '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + (swotOn() && !swGuidedNow() ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
-        (function(){ var w = THINKING === c.id ? BUSY : !text.trim() && !pend ? "Type a message first." : "";
-        return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
+        /* §650 — Send appears only once there is something to send (Islam:
+           "the enter button should only appear when I write something, like
+           Claude"); while the Copilot works it stays, held, saying so. */
+        (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
+        return '<button type="button" class="copsend' + heldCls(w) + '" data-cop-send aria-label="Send"' + (none ? ' hidden' : '') + (w ? held(w) : ' title="Send"') + '>' + SENDMARK + '</button>'; })() +
       '</div>' +
       '<div class="copunder">' + (flowView() || swotOn() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
@@ -1130,13 +1137,24 @@ var COPILOT = (function(){
        happened; what follows is plain chat, each proposal naming its part.
        A part's block closes at its first note (saved or kept); a block still
        open is the part being drafted now, drawn open. */
-    var log = f.log || [], member = {}, opened = {}, closed = {}, aiCount = {}, lastAi = {};
+    /* §650 — A BLOCK IS OPEN ONLY FOR THE PART BEING DRAFTED NOW. It used to
+       close at the part's first note, and parts agreed before notes existed
+       (§643) never had one — so they read "Drafting" for good (Islam's
+       screenshot). A block ends at its part's first note, or where the next
+       part's questions begin; every block but the one in hand is closed. */
+    /* Every part with answers has its row: one answered before the record
+       marked "questions done" gets its row ahead of everything recorded. */
+    var log = S.map(function(el, i){ return on(i) && i !== (!all && f.phase !== "draft" ? f.e : -1) && ((f.ans && f.ans[i]) || []).some(function(a){ return String(a || "").trim(); }) &&
+        !(f.log || []).some(function(x){ return x.p === i && x.w === "qa"; }) ? { p:i, w:"qa", t:"-" } : null; }).filter(Boolean).concat(f.log || []);
+    var member = {}, opened = {}, ended = {}, closed = {}, aiCount = {}, lastAi = {};
+    var cur = !all && f.phase === "draft" ? f.e : -1, prop = cur >= 0 ? String((f.prop || [])[cur] || "") : "", liveDone = false, later = false, seenClosed = false;
+    var inHand = !all && (f.phase === "draft" || f.phase === "review" || f.phase === "ask") ? f.e : -1;
     log.forEach(function(x, k){
-      if (x.w === "qa") { if (!(x.p in closed)) opened[x.p] = k; return; }
-      if (x.p in opened && !(x.p in closed)) { member[k] = x.p; if (x.w === "note") closed[x.p] = k; }
+      if (x.w === "qa") { Object.keys(opened).forEach(function(q){ if (!(q in ended)) ended[q] = k; }); if (!(x.p in opened)) opened[x.p] = k; return; }
+      if (x.p in opened && !(x.p in ended)) { member[k] = x.p; if (x.w === "note") ended[x.p] = k; }
       if (x.w === "ai") lastAi[x.p] = k;
     });
-    var cur = !all && f.phase === "draft" ? f.e : -1, prop = cur >= 0 ? String((f.prop || [])[cur] || "") : "", liveDone = false, later = false, seenClosed = false;
+    Object.keys(opened).forEach(function(q){ if (+q !== inHand || q in ended) closed[q] = true; });
     var refBtns = '<div class="copbtns"><button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-refine="concise"' + held(busyHere && BUSY) + '>Make concise</button>' +
       '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-refine="professional"' + held(busyHere && BUSY) + '>More professional</button>' +
       '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-refine="simple"' + held(busyHere && BUSY) + '>Simplify</button></div>';
@@ -1153,14 +1171,15 @@ var COPILOT = (function(){
       if (x.w === "ai") aiCount[p] = (aiCount[p] || 0) + 1;
       if (x.w === "qa") {
         if (k !== opened[p]) return;
-        if (p in closed) { out.push(foldHtml(f, p, log, member)); seenClosed = true; }
+        if (closed[p]) { out.push(foldHtml(f, p, log, member)); seenClosed = true; }
         else out.push(foldHtml(f, p, log, member, true));
         return;
       }
-      if (member[k] !== undefined && member[k] in closed) return;
+      if (member[k] !== undefined && closed[member[k]]) return;
       if (member[k] === undefined && seenClosed && !later) { later = true; out.push('<div class="copsep" role="separator"><span>Later</span></div>'); }
       if (x.w === "me") { out.push(meMsg(x.t)); return; }
-      if (x.w === "note") { out.push('<div class="copfnote">' + E(x.t) + '</div>'); return; }
+      /* a note outside its part's row names the part it is about */
+      if (x.w === "note") { out.push('<div class="copfnote">' + (el && member[k] === undefined ? E(partName(el)) + ': ' : '') + E(x.t) + '</div>'); return; }
       if (p === cur && k === lastAi[p] && prop.trim() && x.t === prop) { liveDone = true; out.push(liveBox(p, aiCount[p], x.t)); return; }
       out.push('<div class="copmsg ai copwide copold"><span class="copwho">Copilot</span><div class="copbody"><span class="copeh">' + E(el ? partName(el) : "") + ' · Proposal ' + aiCount[p] +
         (k !== lastAi[p] ? ' · replaced' : '') + '</span><div class="copfdraft">' + E(withY(x.t, f)) + '</div></div></div>');
@@ -1232,7 +1251,7 @@ var COPILOT = (function(){
     var lines = current ? [] : log.filter(function(x, k){ return member[k] === i; });
     var d = lines.filter(function(x){ return x.w === "ai"; }).length;
     var open = !!FOLD[PANE.chat.id + ":" + i];
-    var st = current ? '<span class="copst now">Drafting</span>' : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">Kept as it was</span>';
+    var st = current ? '<span class="copst now">Drafting</span>' : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">Not agreed yet</span>';
     var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", d ? d + (d === 1 ? " draft" : " drafts") : ""].filter(Boolean).join(" · ");
     var body = '';
     if (open) {
@@ -1785,7 +1804,7 @@ var COPILOT = (function(){
     t.style.height = Math.max(BOX_MIN, Math.min(sh || BOX_MIN, BOX_MAX)) + "px";
     t.style.overflowY = sh > BOX_MAX ? "auto" : "hidden";
     var b = document.querySelector("[data-cop-send]");
-    if (b) { setHeld(b, THINKING ? BUSY : !t.value.trim() && !(PANE && PANE.pending && PANE.pending.length) ? "Type a message first." : ""); if (b.getAttribute("aria-disabled")) b.removeAttribute("title"); else b.setAttribute("title", "Send"); }
+    if (b) { b.hidden = !t.value.trim() && !(PANE && PANE.pending && PANE.pending.length); setHeld(b, THINKING ? BUSY : ""); if (b.getAttribute("aria-disabled")) b.removeAttribute("title"); else b.setAttribute("title", "Send"); }
   }
   window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 

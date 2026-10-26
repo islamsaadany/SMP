@@ -13232,3 +13232,4 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
   background:var(--ink); color:var(--ground); font:400 12px/1.4 var(--sans); letter-spacing:0; text-transform:none; text-align:left;
   padding:8px 11px; border-radius:3px; width:max-content; max-width:min(280px, calc(100vw - 16px)); white-space:normal; box-shadow:0 2px 8px rgba(0,0,0,.18); }
 :is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick)[aria-disabled="true"][data-tip]:is(:hover, :focus-visible) { opacity:.75; }
+.copsend[hidden] { display:none !important; }

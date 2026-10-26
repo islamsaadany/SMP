@@ -13123,7 +13123,7 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
   .copflow .copsheetb, .copflow .copsheetx { display:inline-flex; }
   .copleft .copcardx { display:none; }
   .copflow.sheet-cards > .copleft, .copflow.sheet-todo > .copftodo {
-    display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, 100%);
+    display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, calc(100% - 48px));
     background:var(--surface); box-shadow:var(--shadow-md); padding:8px; overflow-y:auto; }
   .copflow.sheet-todo > .copftodo { width:min(300px, 100%); }
   .copflow.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
@@ -13131,7 +13131,7 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
 @container copmain (max-width:799px){
   .copsplit > .copout { display:none; }
   .copsplit .copsheetb, .copsplit .copsheetx { display:inline-flex; }
-  .copsplit.sheet > .copout { display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, 100%);
+  .copsplit.sheet > .copout { display:flex; flex-direction:column; position:absolute; top:0; right:0; bottom:0; z-index:6; width:min(720px, calc(100% - 48px));
     background:var(--surface); box-shadow:var(--shadow-md); padding:0; overflow:hidden; }
   .copsplit.sheet > .copshade { display:block; position:absolute; inset:0; z-index:5; background:color-mix(in srgb, var(--ink) 22%, transparent); }
   :root[data-cop-page] .copmain .copsplit .copcompose { padding-right:64px; }

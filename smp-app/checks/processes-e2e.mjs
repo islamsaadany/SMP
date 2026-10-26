@@ -390,9 +390,7 @@ await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networ
 const orderRow = A.page.locator("tbody tr", { hasText: "Order to cash" }).first();
 await A.page.locator("button:has-text('Steps inside')").first().click();
 const stepRowTxt = await A.page.locator("tr", { hasText: "Step: Approve the credit limit" }).innerText();
-check(/Step: Raise the invoice/.test(await body(A.page)) === false, "steps with nothing noticed are folded away until asked for");
-await A.page.click("button:text-is('Show them, to flag one')");
-check(/Step: Raise the invoice/.test(await body(A.page)) && (await A.page.$$("button[aria-label='Flag step Raise the invoice']")).length === 1, "…and any of them can then be flagged");
+check(/Step: Raise the invoice/.test(await body(A.page)) && (await A.page.$$("button[aria-label='Flag step Raise the invoice']")).length === 1, "opening Steps inside lists every step, and any of them can be flagged");
 check(/High-risk control/i.test(stepRowTxt) && /Decision point/i.test(stepRowTxt) && /Not flagged/i.test(stepRowTxt), "a step with a high-risk control and a decision is noticed, and is not scored until flagged", stepRowTxt.replace(/\s+/g, " "));
 await A.page.click("button[aria-label='Flag step Approve the credit limit']");
 await A.page.waitForFunction(() => !!document.querySelector("button[aria-label='importance 5 of 5 for step Approve the credit limit']"), null, { timeout: 20000 });

@@ -10461,3 +10461,6 @@ So that fewer steps read as "quiet": a step is now also noticed when it says wha
 
 ## §605 — Priorities: left-aligned, no centred block (2026-10-26)
 Islam, again: the same empty space on the left. The cause was not the logo band but the page being a centred block of limited width: on a wide window the whole page sat in the middle with a gap beside the side menu. The page is now left-aligned and uses the full width of the window; only the top banner steps aside for the client logo. Checked in the real run (GREEN 115/0) at 1440 and 2200 pixels wide: the steps bar starts within 60 pixels of the side menu at both. Branch only; not merged.
+
+## §606 — Priorities: opening "Steps inside" lists every step (2026-10-26)
+Islam: RHI End2End showed one line and no steps. Its ~24 steps were all "quiet" (nothing noticed on the map), and opening the line only offered a second link to show them. Opening "Steps inside" now lists every step of the process in map order (flagged and noticed ones carry their signals and scores; the rest say "Nothing noticed on the map"), and any can be flagged. The summary line reads "N steps · N flagged · N noticed". Checked in the real run (GREEN 114/0). Branch only; not merged.

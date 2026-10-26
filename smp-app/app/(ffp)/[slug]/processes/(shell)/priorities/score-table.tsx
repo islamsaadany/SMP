@@ -63,7 +63,6 @@ export function ScoreTable({
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   const tree = useMemo(() => inTree(rows), [rows]);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
-  const [quietOpen, setQuietOpen] = useState<ReadonlySet<string>>(new Set());
   const [subsOpen, setSubsOpen] = useState<ReadonlySet<string>>(new Set());
   const mains = rows.filter((r) => tree.some((t) => t.sub && t.row.parentId === r.id)).map((r) => r.id);
 
@@ -317,12 +316,12 @@ export function ScoreTable({
                   <td />
                   <td colSpan={8} className={`px-3 py-1 text-xs ${sub ? "ps-8" : ""}`}>
                     <button type="button" aria-expanded={open.has(r.id)} onClick={() => setOpen(toggle(open, r.id, !open.has(r.id)))} className="font-semibold text-indigo-700 hover:underline">
-                      {open.has(r.id) ? "▾" : "▸"} Steps inside: {r.steps.filter((x) => x.flagged).length} flagged · {r.steps.filter((x) => !x.flagged && !x.quiet).length} noticed · {r.otherSteps} quiet
+                      {open.has(r.id) ? "▾" : "▸"} Steps inside: {r.steps.length} step{r.steps.length === 1 ? "" : "s"} · {r.steps.filter((x) => x.flagged).length} flagged · {r.steps.filter((x) => !x.flagged && !x.quiet).length} noticed
                     </button>
                   </td>
                 </tr>
               )}
-              {open.has(r.id) && r.steps.filter((x) => !x.quiet || quietOpen.has(r.id)).map((st) => (
+              {open.has(r.id) && r.steps.map((st) => (
                 <StepLine key={st.id} st={st} clearing={clearing} editable={editable} pending={pending} toneClass={toneClass}
                   onFlag={(on) => run(() => flagStep({ workspaceId, stepId: st.id, flagged: on }))}
                   onScore={(k, v) => stepScore(st.id, k, v)}
@@ -333,16 +332,6 @@ export function ScoreTable({
                   }}
                 />
               ))}
-              {open.has(r.id) && r.otherSteps > 0 && (
-                <tr className="border-t border-slate-100">
-                  <td colSpan={clearing ? 10 : 9} className="px-3 py-1 ps-12 text-xs text-slate-500">
-                    {r.otherSteps} step{r.otherSteps === 1 ? "" : "s"} with nothing noticed on the map.{" "}
-                    <button type="button" className="font-semibold text-indigo-700 hover:underline" onClick={() => setQuietOpen(toggle(quietOpen, r.id, !quietOpen.has(r.id)))}>
-                      {quietOpen.has(r.id) ? "Hide them" : "Show them, to flag one"}
-                    </button>
-                  </td>
-                </tr>
-              )}
               </Fragment>
             ))}
           </tbody>
@@ -404,6 +393,7 @@ function StepLine({
         ))}
       </td>
       <td className="px-3 py-2">
+        {st.quiet && <span className="text-xs text-slate-400">Nothing noticed on the map</span>}
         {st.signals.map((g) => <span key={g.key} className={`me-1 mb-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${toneClass[g.tone]}`}>{g.label}</span>)}
       </td>
       {st.flagged ? (

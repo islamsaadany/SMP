@@ -9,6 +9,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-10-26 — Directions and Execution: Save, then Apply to plan (§645), merged to `main` on Islam's word.** Save keeps a version under Deliverables; Apply to plan asks first, archives what stood, then writes.
 
+**2026-10-26 — View beside Download on Insights; the console's publishing page removed (§651), on the branch, not merged.** View opens the PDF in a pop-up over the list on a computer and in a new tab on a phone; a view is not a download; Forefront can view a draft's file.
+
 **2026-10-26 — Insights is published from the client's own Insights page (§648), merged to `main` on Islam's word.** + Publish a report in the band and Open on each row, for the platform's admin and the client's Super user; a pop-up with the console's form; drafts only they see. The console's publishing page is no longer the way in.
 
 **2026-10-26 — The Internal Tracker, Meeting Notes and Insights in My tasks' look (§646), merged to `main` on Islam's word.** Home's band in the client's colour (the Tracker too, now) with a sentence and the counts; one card with the filters in its header, frozen with the band on the Tracker; groups over a grey rule; striped rows; the main screens' typeface. Portfolio unchanged.

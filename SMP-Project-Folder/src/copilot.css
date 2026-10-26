@@ -902,21 +902,15 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 /* ── §649 A HELD BUTTON SAYS WHY (Islam, 26 Oct 2026: "for any disabled
    button we need to have a tooltip explaining why"). §538's held button for
    every Copilot control: dimmed like `disabled`, still reachable by a
-   pointer, Tab and a tap, and its reason in the platform's dark bubble. The
-   bubble is drawn here too, so it does not depend on where `.hasnote` is
-   scoped; the press itself is stopped in copilot.js before any handler. ── */
+   pointer, Tab and a tap, and its reason in the platform's dark bubble
+   (#coptip, below); the press itself is stopped in copilot.js before any
+   handler. ── */
 :is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"] { opacity:.55; cursor:not-allowed; filter:none; }
-:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"][data-tip] { position:relative; }
-:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"][data-tip]::after {
-  content:attr(data-tip); display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+/* §649.1 — the bubble is one element at page level (#coptip), placed from
+   the button and kept inside the window, so the pane and the chat box —
+   which clip what crosses their edges — never cut it (Islam's screenshots of
+   Run the check and Send, each note sliced at the left). */
+#coptip { display:none; position:fixed; z-index:2147483000; pointer-events:none;
   background:var(--ink); color:var(--ground); font:400 12px/1.4 var(--sans); letter-spacing:0; text-transform:none; text-align:left;
-  padding:8px 11px; border-radius:3px; width:max-content; max-width:min(255px, 60vw); white-space:normal; pointer-events:none; z-index:30; opacity:1; }
-:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"][data-tip]:is(:hover, :focus-visible)::after { display:block; }
-/* The size buttons sit at the head's right edge: the bubble opens below and
-   anchors to the right, so it is never cut by the top of the pane. The send
-   button sits at the box's right edge: anchored right, opening above. */
-.copsz[aria-disabled="true"][data-tip]::after { top:calc(100% + 8px); bottom:auto; left:auto; right:0; transform:none; }
-.copsend[aria-disabled="true"][data-tip]::after { left:auto; right:0; transform:none; }
-/* The held look reads through the bubble's own opacity: the button dims,
-   its note does not. */
+  padding:8px 11px; border-radius:3px; width:max-content; max-width:min(280px, calc(100vw - 16px)); white-space:normal; box-shadow:0 2px 8px rgba(0,0,0,.18); }
 :is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick)[aria-disabled="true"][data-tip]:is(:hover, :focus-visible) { opacity:.75; }

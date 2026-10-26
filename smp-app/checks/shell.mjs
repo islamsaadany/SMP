@@ -1616,6 +1616,26 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await heldSweep(page, "Foundation, a part drafted");
     const rc0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-savebar] [data-cop-fcheck]"); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "", dead: b.disabled } : null; });
     check(!!rc0 && rc0.held === "true" && !rc0.dead && /^Agree every part first — 0 of \d+ are agreed\.$/.test(rc0.tip), "§649 Run the check is held, not dead, and says why: agree every part first, counted", JSON.stringify(rc0));
+    /* §649.1 — THE BUBBLE IS WHOLE (Islam's screenshots: Run the check's and
+       Send's notes cut at the left by the pane and the chat box). Hovered at
+       a laptop's width and a narrower one; the bubble must sit entirely
+       inside the window, say exactly the button's reason, and go when the
+       pointer leaves. Measured as boxes (§94.8). */
+    const tipSeen = async (sel) => { await page.hover(sel).catch(() => {}); await page.waitForTimeout(120);
+      return page.evaluate((q) => { const b = document.querySelector(q), t = document.getElementById("coptip"); if (!b || !t || getComputedStyle(t).display === "none") return null;
+        const r = t.getBoundingClientRect(); return { text: t.textContent, want: b.getAttribute("data-tip"), inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight, w: Math.round(r.width) }; }, sel); };
+    const tips = {};
+    for (const w of [1440, 1100]) {
+      await page.setViewportSize({ width: w, height: 900 }); await page.waitForTimeout(250);
+      await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
+      tips["check" + w] = await tipSeen("[data-cop-savebar] [data-cop-fcheck]");
+      tips["send" + w] = await tipSeen("[data-cop-send]");
+    }
+    await page.mouse.move(2, 2); await page.waitForTimeout(120);
+    const gone = await page.evaluate(() => { const t = document.getElementById("coptip"); return !t || getComputedStyle(t).display === "none"; });
+    await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+    check(Object.values(tips).every((x) => x && x.inside && x.text === x.want && x.w > 60) && gone,
+      "§649.1 the bubble on Run the check and on Send is whole — inside the window, its exact reason — at 1440px and 1100px, and goes when the pointer leaves", JSON.stringify({ tips, gone }));
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
     /* §643 — REWRITTEN, NOT LOOSENED (§218). Islam: "it changes it
        directly in the delivery box on the right … it should show me in the

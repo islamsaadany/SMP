@@ -875,7 +875,7 @@ var COPILOT = (function(){
   /* §649 — A BUTTON THAT CANNOT BE PRESSED SAYS WHY (Islam: "for any
      disabled button we need to have a tooltip explaining why"). §538's way,
      now for every one: HELD, never `disabled` — `aria-disabled` and the reason
-     in the platform's own bubble (`hasnote` + `data-tip`), which a pointer,
+     in the platform's dark bubble (`data-tip`, drawn at page level by #coptip), which a pointer,
      Tab and a tap all reach; a `disabled` button takes no focus and, in some
      browsers, no hover, so it could never say anything. A press on a held
      button is stopped before any handler sees it (the capture guard below).
@@ -883,11 +883,16 @@ var COPILOT = (function(){
   var BUSY = "The Copilot is still working on the last answer.";
   var VIEWWHY = "You can read this chat but not change it.";
   function held(why){ return why ? ' aria-disabled="true" data-tip="' + E(why) + '"' : ''; }
-  function heldCls(why){ return why ? ' hasnote' : ''; }
+  /* The bubble is the page's own (#coptip below), never a `::after` inside
+     the button: the pane and the chat box clip what crosses their edges, and
+     a note centred on Run the check or Send was cut in half (Islam's
+     screenshots). So no `.hasnote` here. */
+  function heldCls(){ return ''; }
   function setHeld(el, why){
     if (!el) return;
-    if (why) { el.setAttribute("aria-disabled", "true"); el.setAttribute("data-tip", why); el.classList.add("hasnote"); }
-    else { el.removeAttribute("aria-disabled"); el.removeAttribute("data-tip"); el.classList.remove("hasnote"); }
+    if (why) { el.setAttribute("aria-disabled", "true"); el.setAttribute("data-tip", why); }
+    else { el.removeAttribute("aria-disabled"); el.removeAttribute("data-tip"); }
+    if (TIPFOR === el) tipHide();
   }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -1347,7 +1352,7 @@ var COPILOT = (function(){
       /* HELD, NOT DEAD (§538), and the reason is now the RIGHT one: the old
          line said "Save the Foundation first" even while the Copilot was
          working on a Foundation already saved. */
-      '<button type="button" class="copbtn' + (fwhy ? ' hasnote' : '') + '" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (fwhy ? ' aria-disabled="true" data-tip="' + E(fwhy) + '"' : '') + '>Apply to plan</button>' +
+      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (fwhy ? ' aria-disabled="true" data-tip="' + E(fwhy) + '"' : '') + '>Apply to plan</button>' +
       '</div></div>';
   }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
@@ -3670,10 +3675,36 @@ var COPILOT = (function(){
   /* §649 — A HELD BUTTON IS NEVER PRESSED: stopped here, in the capture
      phase, before any handler (every one of them used to test `disabled`).
      Its bubble has already said why. Only the Copilot's own controls. */
+  var COPSCOPE = ".copmain, .coppane, [data-cop-chatbox], .copsavebar, .copsw, .copcards, .copleft";
+  function heldAt(t){ var h = t && t.closest && t.closest('[aria-disabled="true"][data-tip]'); return h && h.closest(COPSCOPE) ? h : null; }
   document.addEventListener("click", function(ev){
     var h = ev.target && ev.target.closest && ev.target.closest('[aria-disabled="true"]');
-    if (h && h.closest(".copmain, .coppane, [data-cop-chatbox], .copsavebar, .copsw, .copcards, .copleft")) { ev.preventDefault(); ev.stopImmediatePropagation(); }
+    if (h && h.closest(COPSCOPE)) { ev.preventDefault(); ev.stopImmediatePropagation(); if (h.getAttribute("data-tip")) tipShow(h, true); }
   }, true);
+  /* §649.1 — THE BUBBLE IS THE PAGE'S, placed from the button and kept
+     inside the window: above it, or below when there is no room; never cut
+     by the pane or the chat box it sits in. Shown on hover, Tab and a tap
+     (a tap shows it for a few seconds); gone on leaving, scrolling or a key. */
+  var TIPEL = null, TIPFOR = null, TIPT = 0;
+  function tipShow(el, tap){
+    if (!TIPEL) { TIPEL = document.createElement("div"); TIPEL.id = "coptip"; TIPEL.setAttribute("role", "tooltip"); document.body.appendChild(TIPEL); }
+    TIPFOR = el; TIPEL.textContent = el.getAttribute("data-tip") || "";
+    if (!TIPEL.id || !el.getAttribute("aria-describedby")) el.setAttribute("aria-describedby", "coptip");
+    TIPEL.style.display = "block"; TIPEL.style.left = "0px"; TIPEL.style.top = "0px";
+    var z = typeof pageZoom === "function" ? pageZoom() : 1, r = el.getBoundingClientRect();
+    var L = r.left / z, T = r.top / z, W = r.width / z, B = r.bottom / z, vw = window.innerWidth / z, vh = window.innerHeight / z;
+    var w = TIPEL.offsetWidth, h = TIPEL.offsetHeight;
+    var x = Math.max(8, Math.min(L + W / 2 - w / 2, vw - w - 8)), y = T - h - 8;
+    if (y < 8) y = Math.min(B + 8, vh - h - 8);
+    TIPEL.style.left = Math.round(x) + "px"; TIPEL.style.top = Math.round(y) + "px";
+    clearTimeout(TIPT); if (tap) TIPT = setTimeout(tipHide, 3000);
+  }
+  function tipHide(){ clearTimeout(TIPT); if (TIPEL) TIPEL.style.display = "none"; if (TIPFOR) TIPFOR.removeAttribute("aria-describedby"); TIPFOR = null; }
+  document.addEventListener("mouseover", function(ev){ var h = heldAt(ev.target); if (h) { if (h !== TIPFOR) tipShow(h); } else if (TIPFOR && !TIPFOR.contains(ev.target)) tipHide(); });
+  document.addEventListener("focusin", function(ev){ var h = heldAt(ev.target); if (h) tipShow(h); else if (TIPFOR) tipHide(); });
+  document.addEventListener("focusout", function(ev){ if (TIPFOR && ev.target === TIPFOR) tipHide(); });
+  document.addEventListener("scroll", function(){ if (TIPFOR) tipHide(); }, true);
+  document.addEventListener("keydown", function(ev){ if (TIPFOR && ev.key === "Escape") tipHide(); });
   document.addEventListener("click", function(ev){
     var b;
     if ((b = hit(ev, "[data-cop-more]"))) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); return; }

@@ -70,6 +70,8 @@
     "check:insights": "node --experimental-strip-types checks/insights.mjs",
     "check:insights:red": "for b in all-categories client-sees-drafts leak-file-path version-always everyone-sees-everything; do SMP_BREAK=$b node --experimental-strip-types checks/insights.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:insights:tab": "node --experimental-strip-types checks/insights-tab.mjs",
+    "check:insights:publish": "node --experimental-strip-types checks/insights-publish.mjs",
+    "check:insights:publish:red": "for b in publish-anyone; do SMP_BREAK=$b node --experimental-strip-types checks/insights-publish.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:portfolio": "node --experimental-strip-types checks/portfolio.mjs",
     "check:drivers": "node checks/drivers.mjs",
     "check:drivers:red": "for b in no-season-cut count-prorated pct-raw increment-baseline no-interaction no-cascade season-id-from-count; do echo \"--- $b\"; SMP_BREAK=$b node checks/drivers.mjs > /dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; done; echo \"all seven red\"",

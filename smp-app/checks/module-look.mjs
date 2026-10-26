@@ -533,7 +533,9 @@ try {
       return { bg: mast ? getComputedStyle(mast).backgroundColor : null, want,
         title: mast && mast.querySelector("h2.pt") ? mast.querySelector("h2.pt").textContent.trim() : null,
         tile: mast && mast.querySelector(".tile b") ? mast.querySelector(".tile b").textContent.trim() : null,
-        rows: document.querySelectorAll(a.rows).length, off, th,
+        /* §647: whoever may publish also sees the drafts, which the band does
+           not count — it counts what the client can see */
+        rows: Array.from(document.querySelectorAll(a.rows)).filter((r) => !r.querySelector(".draft")).length, off, th,
         first: document.querySelector(a.rows) ? getComputedStyle(document.querySelector(a.rows)).backgroundColor : null,
         second: document.querySelectorAll(a.rows)[1] ? getComputedStyle(document.querySelectorAll(a.rows)[1]).backgroundColor : null,
         loaded: a.faces[0] !== "Source Sans 3" || Array.from(document.fonts).some((f) => f.family.replace(/["']/g, "") === "Source Sans 3" && f.status === "loaded") };

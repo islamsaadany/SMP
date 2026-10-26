@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-26 — Every held Copilot button says why (§649), on the branch, not merged.** No Copilot button is disabled: each that cannot be pressed is held, with its reason in the platform's bubble on hover, Tab and tap.
+**2026-10-26 — Every held Copilot button says why (§649), merged to `main` on Islam's word.** No Copilot button is disabled: each that cannot be pressed is held, with its reason in the platform's bubble on hover, Tab and tap.
 
 **2026-10-26 — Directions and Execution: Save, then Apply to plan (§645), merged to `main` on Islam's word.** Save keeps a version under Deliverables; Apply to plan asks first, archives what stood, then writes.
 

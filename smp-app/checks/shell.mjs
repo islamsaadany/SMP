@@ -156,6 +156,24 @@ async function asTenant(id, fn) {
   } catch (e) { await c.query("ROLLBACK").catch(() => {}); throw e; }
   finally { c.release(); }
 }
+/* §646 — EVERY BUTTON THE COPILOT HOLDS SAYS WHY (Islam: "for any disabled
+   button we need to have a tooltip explaining why"). Swept at each step of
+   each area, so a new button cannot arrive without its reason: no Copilot
+   button is `disabled`, and every held one carries a reason in its bubble. */
+let HELD_SEEN = 0;
+async function heldSweep(page, where) {
+  const r = await page.evaluate(() => {
+    const scope = Array.from(document.querySelectorAll(".copmain, .coppane, [data-cop-chatbox], .copleft"));
+    const btns = scope.flatMap((x) => Array.from(x.querySelectorAll("button")));
+    const uniq = Array.from(new Set(btns));
+    return { dead: uniq.filter((b) => b.disabled).map((b) => (b.textContent || b.getAttribute("aria-label") || "").trim().slice(0, 40)),
+      mute: uniq.filter((b) => b.getAttribute("aria-disabled") === "true" && !(b.getAttribute("data-tip") || "").trim()).map((b) => (b.textContent || b.getAttribute("aria-label") || "").trim().slice(0, 40)),
+      held: uniq.filter((b) => b.getAttribute("aria-disabled") === "true").length };
+  });
+  HELD_SEEN += r.held;
+  check(!r.dead.length && !r.mute.length, "§646 " + where + ": no Copilot button is disabled, and every held one says why", JSON.stringify(r));
+}
+
 async function section(name, fn) {
   /* SMP_ONLY runs the sections whose name starts with it, for looking at one
      screen while building it. The full run is the one that counts. */
@@ -1594,6 +1612,9 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-fdraft]");
     await page.waitForSelector(".copfdraft", { timeout: 15000 });
     await shot("6-draft");
+    await heldSweep(page, "Foundation, a part drafted");
+    const rc0 = await page.evaluate(() => { const b = document.querySelector("[data-cop-savebar] [data-cop-fcheck]"); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "", dead: b.disabled } : null; });
+    check(!!rc0 && rc0.held === "true" && !rc0.dead && /^Agree every part first — 0 of \d+ are agreed\.$/.test(rc0.tip), "§646 Run the check is held, not dead, and says why: agree every part first, counted", JSON.stringify(rc0));
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
     /* §643 — REWRITTEN, NOT LOOSENED (§218). Islam: "it changes it
        directly in the delivery box on the right … it should show me in the
@@ -1702,9 +1723,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        so the finally can put both back (§94.2). */
     FD0 = await page.evaluate(() => JSON.stringify({ f: foundationSnapshot(UNITS.mobile), a: ARCHIVES }));
     await shot("8-check");
+    await heldSweep(page, "Foundation, the check");
     const ck = await page.evaluate(() => ({ ok: document.querySelectorAll(".copchk.ok li").length, iss: document.querySelectorAll(".copchk.issue li").length,
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent),
-      fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent, finOn: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
+      fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent, finOn: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([aria-disabled=true])"),
       inMsgs: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), run: !!document.querySelector("[data-cop-savebar] [data-cop-fcheck]"),
       apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { held: a.getAttribute("aria-disabled"), dead: a.disabled, tip: a.getAttribute("data-tip") || "" } : null; })() }));
     check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0,
@@ -1768,7 +1790,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F.phase === "check" && F.check === null && F.drafts[0] === "We connect Egypt. Every town, every store, every day." && MODEL_SEEN.length === seenS + 1,
       "a draft changed during the check drops the check's results on the server (§514)", JSON.stringify({ phase: F.phase, check: F.check, d: F.drafts[0], seen: MODEL_SEEN.length - seenS }));
     const st = await page.evaluate(() => ({ line: /Run the check from the pane/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
-      fin: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), bar: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"), chk: document.querySelectorAll(".copchk").length }));
+      fin: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), bar: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([aria-disabled=true])"), chk: document.querySelectorAll(".copchk").length }));
     check(st.line && st.run && !st.fin && st.bar && st.chk === 0 && !(await page.$("[data-cop-msgs] [data-cop-fcheck]")),
       "…and the chat says to run the check from the pane — Run the check is the pane's, never the chat's (§643) — draws no results, and the bar's Save stays live, because the check is not the door (§524)", JSON.stringify(st));
     /* The 503 the browser logs here is the refusal this block ASKS for (the
@@ -1807,7 +1829,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => /Kept in the chat/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
     for (let i = 0; i < 20 && !((F = await flowRow(cid)).log || []).some((x) => x.p === -1); i++) await page.waitForTimeout(250);
-    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
+    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([aria-disabled=true])"),
       line: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me .copbody")).some((x) => x.textContent === "Make it shorter please") }));
     check(MODEL_SEEN.length === seenC && /Kept in the chat/.test(nn.say) && /name it/.test(nn.say) && nn.fin && nn.line && F.log.some((x) => x.p === -1 && x.w === "me" && x.t === "Make it shorter please"),
       "a line naming no part asks nothing and leaves the check where it was — and stays in the chat, stored (§643: \"my text disappears\")", JSON.stringify({ nn, log: F.log.slice(-3) }));
@@ -1831,6 +1853,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-savebar] [data-cop-ffinish]");
     await page.waitForFunction(() => /Saved as Foundation — Mobile v1/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
     await shot("9-saved");
+    await heldSweep(page, "Foundation, saved");
     const sv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n, v.body->>'text' t from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title = 'Foundation — Mobile'"))).rows;
     check(sv.length === 1 && sv[0].n === 1 && /We connect Egypt\./.test(sv[0].t) && /for 2028/.test(sv[0].t), "the Foundation is saved as version 1, the end year written in", JSON.stringify(sv).slice(0, 200));
     check(await page.waitForFunction(() => Array.from(document.querySelectorAll("[data-cop-deliv]")).some((b) => /Foundation — Mobile/.test(b.textContent)), null, { timeout: 5000 }).then(() => true, () => false),
@@ -1840,7 +1863,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        (§538): since Apply is held by `aria-disabled`, `:not([disabled])` alone
        was true of a held button too, so this line could not fail. */
     const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
-      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector('[data-cop-savebar] [data-cop-fapply]:not([disabled]):not([aria-disabled="true"])'),
+      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][aria-disabled=true]") && /Nothing has changed since v1/.test((document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || { getAttribute: () => "" }).getAttribute("data-tip") || ""), apply: !!document.querySelector('[data-cop-savebar] [data-cop-fapply]:not([disabled]):not([aria-disabled="true"])'),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
     check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§524)", JSON.stringify(sb));
     /* §525.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there
@@ -2088,6 +2111,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(/store network/.test(sw.ans.internal[0]) && sw.q && sw.q.i === 1 && /store network/.test(asked.me) && !asked.box,
       "§641 sent, the answer is saved and stands in the chat as said, and the next question is asked", JSON.stringify({ a: sw.ans.internal[0], q: sw.q, asked }));
     await shot("3-guided");
+    await heldSweep(page, "SWOT, a guided question");
     /* the rest answered through the same save, then a reload */
     await page.evaluate(async ({ cid, n }) => { const r = await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ act: "swotSave", id: cid, placeWord: "Mobile", swot: { ans: { internal: Array.from({ length: n }, (_, k) => "Answer " + k) } } }) }); return r.status; }, { cid: id, n: QUESTIONS.internal.length });
@@ -2153,11 +2177,12 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.click(".copswchat [data-cop-sw-check]");
     await page.waitForFunction(() => document.querySelector(".copswpane .copsw-check"), null, { timeout: 15000 }).catch(() => {});
     const nochat = await page.evaluate(() => ({ chat: document.querySelectorAll(".copswchat [data-cop-sw-finish], .copswchat [data-cop-sw-apply]").length,
-      foot: Array.from(document.querySelectorAll("[data-cop-swfoot] button")).map((b) => b.textContent.trim() + (b.disabled ? "(off)" : "")).join("|"),
+      foot: Array.from(document.querySelectorAll("[data-cop-swfoot] button")).map((b) => b.textContent.trim() + (b.getAttribute("aria-disabled") === "true" ? "(off)" : "")).join("|"),
       issue: /Two weaknesses overlap/.test((document.querySelector(".copswchat") || {}).textContent || "") }));
     check(nochat.chat === 0 && nochat.foot === "Save|Apply to plan(off)" && nochat.issue,
       "§641 Save and Apply to plan stand only at the pane's foot (Apply waits for a saved version); the check is said in the chat", JSON.stringify(nochat));
     await shot("6-check");
+    await heldSweep(page, "SWOT, the check");
     const plan0 = await page.evaluate(() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } });
     await page.click("[data-cop-swfoot] [data-cop-sw-finish]");
     await page.waitForFunction(() => /Saved as v1/.test((document.querySelector("[data-cop-swstate]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
@@ -2177,6 +2202,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(/archived first/.test(ask) && Array.isArray(applied.s) && applied.s.includes("Wide store network") && applied.arch === arch0 + 1 && applied.kind === "swot" && applied.lines > 0 && /On the plan as v1/.test(applied.state),
       "§641 Apply to plan asks first, archives the SWOT the plan held as its own kind, writes the titles in, and the foot says it is on the plan", JSON.stringify({ applied, arch0 }));
     await shot("7-saved");
+    await heldSweep(page, "SWOT, saved");
     await page.waitForTimeout(800);
     const meta = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-chats] *")).map((e) => e.textContent).join(" "));
     check(/of \d+ done/.test(meta), "the chat row in the rail reads N of M done", meta.slice(0, 160));
@@ -2321,6 +2347,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
     const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
+    await heldSweep(page, "Competitive Discipline, before the save");
     await page.click("[data-cop-cp-finish]");
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
@@ -2418,6 +2445,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
        directions and execution skipping". Save keeps a version and leaves
        the plan exactly as it was; Apply to plan asks first, archives what
        the plan holds, then writes. Both ends (§94.2). */
+    await heldSweep(page, "Directions, before the save");
     const planBefore = await page.evaluate(() => JSON.stringify(UNITS.mobile.items));
     const archBefore = await page.evaluate(() => ARCHIVES.length);
     await page.click("[data-cop-dv-finish]");
@@ -2516,6 +2544,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     r = await row();
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
+    await heldSweep(page, "Execution, before the save");
     const fin = await page.$("[data-cop-ex-finish]");
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
@@ -2599,6 +2628,7 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     check(recs === 1, "the brief shows exactly one recommended option", recs);
     const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
     check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
+    await heldSweep(page, "Advisory, before the save");
     await page.click("[data-cop-ad-finish]");
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];

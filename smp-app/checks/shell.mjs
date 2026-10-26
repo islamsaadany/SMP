@@ -3270,8 +3270,11 @@ await section("4 · Forefront's own pages", async () => {
     sub: ((document.getElementById("orgname") || {}).textContent || "").trim(),
     switcher: !!(document.querySelector(".topmark") && document.querySelector(".topmark").checkVisibility()),
   }));
-  check(!staff.trail && !staff.switcher && staff.h1 === "Raya Trade" && /Strategy Management Platform/.test(staff.sub),
-    "a client's own person gets no trail and no switcher; their bar names their company", JSON.stringify(staff));
+  /* PRODUCT FIRST (2026-10-26, Islam's option 2) REWRITTEN, NEVER LOOSENED
+     (§218): the product's name leads, as on every other module's bar, and
+     the company follows it — still named, still on the line. */
+  check(!staff.trail && !staff.switcher && staff.h1 === "Strategy Management Platform" && staff.sub === "Raya Trade",
+    "a client's own person gets no trail and no switcher; their bar names the product, then their company", JSON.stringify(staff));
   /* §401 — AND THE TRAIL'S CLIENT LIST IS REFUSED TO THEM ON THE SERVER, not
      only undrawn: the list names every client, which is the office's. */
   const staffList = await page.evaluate(async () => (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })).status);

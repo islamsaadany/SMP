@@ -6591,11 +6591,9 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .top .brandmark { flex:none; display:grid; place-items:center; width:24px; height:24px; border-radius:7px;
                     background:#F5A623; color:#0F2C69; }
   .top .brandmark svg { width:17px; height:17px; display:block; }
-  /* beside the product's name after the company's, the hairline moves from
-     the name to before the mark, so mark and name read as one */
-  .top .brand h1 + .brandmark { position:relative; }
-  .top .brand h1 + .brandmark::before { content:""; position:absolute; left:-7px; top:3px; bottom:3px; width:1px; background:var(--line); }
-  .top .brand .brandmark + .orgname { border-left:0; padding-left:0; margin-left:-3px; }
+  /* the company's logo beside its name, after the hairline (product first) */
+  .top .brand .clientlogo + .orgname { border-left:0; padding-left:0; }
+  .top .brand .clientlogo { border-left:1px solid var(--line); padding-left:12px; box-sizing:content-box; }
   nav.trail .trbar { flex:none; width:1px; height:18px; background:var(--line); margin:0 6px 0 4px; }
   nav.trail .trsep { color:var(--ink-3); font-size:15px; line-height:1; }
   nav.trail details.trstep > summary { cursor:pointer; gap:6px; padding:3px 7px; border-radius:7px;

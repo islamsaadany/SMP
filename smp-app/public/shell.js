@@ -78815,17 +78815,15 @@ var SYNC = (function () {
       var staff = !on && location.protocol !== "file:" &&
                   !document.documentElement.hasAttribute("data-console") &&
                   document.documentElement.hasAttribute("data-module");
+      /* PRODUCT FIRST, ON EVERY BAR (2026-10-26, Islam's option 2 of two
+         drawn): the platform's mark and name lead and the company follows,
+         quiet after a hairline, which is the order the other modules' bar
+         (lib/topbar.ts) already had — so a client's own person reads one
+         line in every module. It reverses §400's company-first line here. */
       if (staff) {
-        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
-        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
+        if (h1) h1.textContent = "Strategy Management Platform";
+        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org || ""; }
       }
-      /* The platform's mark goes with the PRODUCT's name (option D,
-         2026-10-26): before the heading where that is the product, before
-         the small line where a client's own person reads their company
-         first. Moved, never copied, so there is one on the line. */
-      var bm = document.querySelector(".brand .brandmark");
-      var withOrg = staff && org && !org.hidden;
-      if (bm && h1) h1.parentNode.insertBefore(bm, withOrg ? org : h1);
       if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
         /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
@@ -78845,6 +78843,13 @@ var SYNC = (function () {
            second request for this document, not an absent picture. */
         if (src) { mark.src = src; mark.hidden = false; }
         else { mark.removeAttribute("src"); mark.hidden = true; }
+        /* the company's mark goes with the company's name: after the
+           product for a client's own person (product first, 2026-10-26),
+           at the head of the line on the client's settings, where the name
+           is the heading. Moved, never copied. */
+        var brand = document.querySelector(".top .brand");
+        if (staff && org && brand) brand.insertBefore(mark, org);
+        else if (brand && mark.nextElementSibling !== brand) brand.parentNode.insertBefore(mark, brand);
       }
       /* The way back says where it goes AND what it does first, which is
          Islam's own wording: *"I save and close to go back to the console."*

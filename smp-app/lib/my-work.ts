@@ -27,6 +27,7 @@ import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
 import { registerKeyFor } from "./state-api.ts";
 import { modulesFor } from "./modules.ts";
+import { writeUpsWhere } from "./case-api.ts";
 import {
   shape, todayIn, weekOf, addDays, isLate, carriedWeeks, lateWord, weekWord, weekLabel, readableDay, STATUS_WORD, STATUSES,
   isStatus, isOffice, mayChange, oneAction, setStatus, ONLY_CHANGE, type Action, type Who,
@@ -146,24 +147,27 @@ export async function myWork(clients: Client[], seats: Seat[], email: string, op
   };
 }
 
-/* ── A CASE STUDY TO WRITE UP (spec 067, decision 7) ───────────────────
-   My work's SECOND source, said so (spec 067 §8): a write-up is not a
-   Tracker action and cannot be one — the backlog is on archived and past
-   clients, whose Trackers are behind a closed door. So it is read from the
-   case studies, shaped like a row with the Tracker's own week words and
-   buckets (whenOf, bucketOf), and drawn among the actions by its due date.
-   It carries NO status to change: a write-up is finished by marking it done
-   on the case study, never from a list (§61). */
+/* ── A WRITE-UP TO DO (spec 069, which reworks spec 067 decision 7) ───
+   My tasks' SECOND source, said so (spec 067 §8): a write-up is not a
+   Tracker action and cannot be one — most are about ended and past clients,
+   whose Trackers are behind a closed door. So it is read from the Track
+   Record, shaped like a row with the Tracker's own week words and buckets
+   (whenOf, bucketOf), and drawn among the actions by when it is wanted: the
+   first day after the assignment's end month. Nobody asks for it; its lead
+   is waited on once that month comes, and whoever starts it after that.
+   It carries NO status to change: a write-up is finished by publishing it,
+   never from a list (§61). */
 export type WriteUp = { kind: "case"; id: string; name: string; client: string; clientName: string;
-  due: string | null; when: string; bucket: Bucket; late: boolean; dueWeek: boolean };
+  type: string; due: string | null; when: string; bucket: Bucket; late: boolean; dueWeek: boolean };
 export async function writeUps(c: { query: PoolClient["query"] }, userId: string, today: string): Promise<WriteUp[]> {
   const r = await c.query(
-    "SELECT cs.id, cs.name, cs.due::text AS due, t.key, t.name AS client_name FROM case_studies cs " +
-    "JOIN tenants t ON t.id = cs.about_tenant_id WHERE cs.state = 'writing' AND cs.writer_id = $1 " +
-    "ORDER BY cs.due NULLS LAST, cs.name", [userId]);
+    "SELECT cs.id, cs.name, cs.kind, t.key, t.name AS client_name, " +
+    "CASE WHEN cs.ended ~ '^\\d{4}-\\d{2}$' THEN (to_date(cs.ended, 'YYYY-MM') + interval '1 month')::date::text END AS due " +
+    "FROM case_studies cs JOIN tenants t ON t.id = cs.about_tenant_id WHERE " + writeUpsWhere("$1", "$2") +
+    " ORDER BY cs.ended, cs.name", [userId, today.slice(0, 7)]);
   return r.rows.map((x: any) => {
     const late = !!x.due && isLate(x.due, today);
-    return { kind: "case" as const, id: x.id, name: x.name, client: x.key, clientName: x.client_name, due: x.due,
+    return { kind: "case" as const, id: x.id, name: x.name, client: x.key, clientName: x.client_name, type: x.kind, due: x.due,
       when: whenOf({ due: x.due, firstDue: null, status: "open", doneDay: null } as any, today),
       bucket: bucketOf(x.due, today), late, dueWeek: !late && !!x.due && x.due <= weekOf(today).to };
   });

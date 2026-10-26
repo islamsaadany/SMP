@@ -675,7 +675,9 @@
    icon, the home-screen icons and the built file's own icon, on the
    console and every client's platform alike; the module bars open on it
    (option D), and the console's loading shape is the console as it is. */
-const SHELL = "smp-shell-v7.26-one-mark";
+/* v7.27-held-says-why — §649: a Copilot button that cannot be pressed is
+   held, never disabled, and says why in the platform's bubble. */
+const SHELL = "smp-shell-v7.27-held-says-why";
 const ASSETS = [
   "/",
   "/index.html",

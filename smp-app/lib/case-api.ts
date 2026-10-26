@@ -1,4 +1,10 @@
-/* Case studies (spec 067) — Forefront's own, never a client's.
+/* The Track Record (spec 069, which reworks spec 067's case studies) —
+ * Forefront's own, never a client's.
+ *
+ * A ROW IS AN ASSIGNMENT on the client registry: a client, Planning or
+ * Retainer, its months, its lead and team — added by the super user on the
+ * Clients page — and, when the work ends, its write-up. Any consultant may
+ * write one up; its lead is asked to when the end month comes (my-work.ts).
  *
  * A ROUTE OF ITS OWN, /api/cases, beside the memory's and for the memory's
  * reason (lib/memory-api.ts's header): one action per request, one `Answer`
@@ -30,9 +36,13 @@ const brk = () => process.env.SMP_BREAK || "";
 
 /* The memory's own refusal sentence, for the memory's reason (§53.5). */
 const NOT_YOURS = "That is not something this account opens.";
-const GONE = "That case study is no longer here.";
+const GONE = "That assignment is no longer here.";
 
 export const STATES = ["running", "writing", "done"] as const;
+/* The two kinds of assignment, named ONCE (Islam, 2026-10-26: "Planning &
+   Retainer for now"). A third is one word here and one in the CHECK. */
+export const ASSIGNMENT_KINDS = ["planning", "retainer"] as const;
+
 /* The four prose sections, named ONCE — the reader, the save and the
    splitter's field names all walk this list (§104.7). */
 export const PROSE = ["in_short", "client_why", "asked_to_do", "came_of_it"] as const;
@@ -44,36 +54,51 @@ const month = (v: unknown): string => /^\d{4}-(0[1-9]|1[0-2])$/.test(str(v).trim
 const day = (v: unknown): string | null => /^\d{4}-\d{2}-\d{2}$/.test(str(v).trim()) ? str(v).trim() : null;
 const isUuid = (v: unknown): boolean => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str(v));
 const list = (v: unknown, max = 50): any[] => (Array.isArray(v) ? v.slice(0, max) : []);
+const kindOf = (v: unknown): string => (ASSIGNMENT_KINDS as readonly string[]).includes(str(v)) ? str(v) : "";
 
 /* ── THE RULES, each with the switch that puts back what it forbids ── */
 type Row = Record<string, any>;
+/* THE REGISTRY IS THE SUPER USER'S (Islam, 2026-10-26: "registry is from
+   the super user"): adding, changing and removing an assignment, and adding
+   a past client. */
 export function mayOpen(me: SessionUser): boolean {
-  return brk() === "anyone-opens" ? true : me.isAdmin;          /* RED: anybody opens a piece of work */
+  return brk() === "anyone-opens" ? true : me.isAdmin;          /* RED: anybody adds an assignment */
 }
+/* A DRAFT is read by whoever is writing it, the assignment's lead and the
+   super users; a published write-up by every consultant (spec 067 decision 2). */
 export function maySeeDraft(me: SessionUser, r: Row): boolean {
-  if (r.state === "done") return true;
-  return brk() === "drafts-open" ? true : me.isAdmin || r.writer_id === me.id;   /* RED: a draft read by all */
+  /* nothing is written while it runs, so there is no draft to keep back */
+  if (r.state === "done" || r.state === "running") return true;
+  return brk() === "drafts-open" ? true : me.isAdmin || r.writer_id === me.id || r.lead_id === me.id;   /* RED: a draft read by all */
 }
+/* ANY CONSULTANT MAY WRITE ONE UP (Islam, 2026-10-26: "consultants can
+   start"), while nobody else has started it; once somebody has, it is theirs
+   and the lead's. A published one is corrected by its writer, its lead or a
+   super user (spec 045's rule for an entry). */
 export function mayWrite(me: SessionUser, r: Row): boolean {
-  if (brk() === "anyone-writes") return true;                   /* RED: anybody rewrites a case study */
+  if (brk() === "anyone-writes") return true;                   /* RED: anybody rewrites a write-up */
   if (me.isAdmin) return true;
-  return r.state !== "running" && r.writer_id === me.id;
+  if (me.kind !== "office") return false;
+  if (r.state === "running") return true;
+  return r.writer_id === me.id || r.lead_id === me.id;
 }
 
 /* ── READING ───────────────────────────────────────────────────────── */
 const HEAD =
   "cs.id, cs.name, cs.started, cs.ended, cs.state, cs.due::text AS due, cs.done_at, cs.created_at, cs.updated_at, " +
-  "cs.writer_id, cs.opened_by, t.key AS client_key, t.name AS client_name, t.industry, t.size, t.mark, t.past, " +
+  "cs.writer_id, cs.opened_by, cs.kind, cs.lead_id, ld.name AS lead_name, ld.email AS lead_email, t.key AS client_key, t.name AS client_name, t.industry, t.size, t.mark, t.past, " +
   "t.status AS client_status, w.name AS writer_name, w.email AS writer_email, o.name AS opener_name, a.name AS asker_name, " +
   "jsonb_array_length(cs.deliverables) AS n_deliverables, " +
   "(SELECT count(*)::int FROM memory_entries m WHERE m.case_id = cs.id) AS n_insights";
 const FROM =
   "FROM case_studies cs JOIN tenants t ON t.id = cs.about_tenant_id " +
-  "LEFT JOIN users w ON w.id = cs.writer_id LEFT JOIN users o ON o.id = cs.opened_by LEFT JOIN users a ON a.id = cs.asked_by";
+  "LEFT JOIN users w ON w.id = cs.writer_id LEFT JOIN users o ON o.id = cs.opened_by LEFT JOIN users a ON a.id = cs.asked_by " +
+  "LEFT JOIN users ld ON ld.id = cs.lead_id";
 
 function head(r: Row) {
   return {
-    id: r.id, name: r.name, started: r.started, ended: r.ended, state: r.state, due: r.due,
+    id: r.id, name: r.name, started: r.started, ended: r.ended, state: r.state, due: r.due, kind: r.kind,
+    lead: r.lead_id ? { id: r.lead_id, name: r.lead_name, email: r.lead_email } : null,
     doneAt: r.done_at, createdAt: r.created_at,
     client: { key: r.client_key, name: r.client_name, industry: r.industry, size: r.size, mark: r.mark || null,
               past: !!r.past, archived: r.client_status === "retired" },
@@ -112,10 +137,11 @@ async function full(c: Q, r: Row, me: SessionUser) {
   return {
     ...head(r),
     hidden: !see,
-    canWrite: mayWrite(me, r), canAsk: mayOpen(me), canDrop: mayOpen(me),
+    canWrite: mayWrite(me, r), canRegister: mayOpen(me), canDrop: mayOpen(me),
     inShort: see ? r.in_short : "", clientWhy: see ? r.client_why : "",
     askedToDo: see ? r.asked_to_do : "", cameOfIt: see ? r.came_of_it : "",
-    ourTeam: see ? team.filter((p) => names.has(str(p.id))).map((p) => ({ id: p.id, role: str(p.role), ...names.get(str(p.id))! })) : [],
+    /* THE TEAM IS THE REGISTRY'S, not the story's, so a draft shows it too */
+    ourTeam: team.filter((p) => names.has(str(p.id))).map((p) => ({ id: p.id, role: str(p.role), ...names.get(str(p.id))! })),
     theirTeam: see ? list(r.their_team) : [],
     stages: see ? list(r.stages) : [],
     /* THE FILE'S PATH NEVER LEAVES THE SERVER — its name and size do, and
@@ -182,14 +208,26 @@ export function casePath(caseId: string, deliverableId: string, name: string): s
   return "cases/" + seg(caseId, 40) + "/" + seg(deliverableId, 40) + "." + seg(ext, 5);
 }
 
+/* WHO IS WAITED ON FOR A WRITE-UP, one WHERE for My tasks and Home: the
+   person writing one that is not published yet, and the lead of one nobody
+   has started whose end month has come (Islam, 2026-10-26: the write-up
+   "lands on the lead" when the assignment ends). `me` and `month` are the
+   placeholders the caller binds; months compare as 'YYYY-MM' text. */
+export function writeUpsWhere(me: string, month: string): string {
+  return "((cs.state = 'writing' AND cs.writer_id = " + me + ") OR " +
+    "(cs.state = 'running' AND cs.lead_id = " + me + " AND cs.ended <> '' AND cs.ended <= " + month + "))";
+}
+export function thisMonth(now: Date = new Date()): string { return now.toISOString().slice(0, 7); }
+
 /* ── THE ENDPOINT ───────────────────────────────────────────────────── */
 export async function caseAction(pool: Pool, me: SessionUser, body: any): Promise<Answer> {
   if (me.kind === "client" && brk() !== "client-reads") return no(403, NOT_YOURS);
   const action = str(body?.action);
 
-  /* THE LIBRARY: every piece of work, newest first. The page arranges it
-     into shelves and the desk; the search looks into a story only where this
-     person may read it, so a draft's words cannot be found by searching. */
+  /* THE FRONT (spec 069): every assignment, newest first, which the page
+     groups into one card per client; and how many learnings each client
+     holds. The search looks into a write-up only where this person may read
+     it, so a draft's words cannot be found by searching. */
   if (action === "library") {
     const args: unknown[] = [];
     let where = "";
@@ -198,22 +236,45 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
       args.push(me.id, me.isAdmin, "%" + q + "%");
       const p = "$" + args.length;
       where = " WHERE (cs.name ILIKE " + p + " OR t.name ILIKE " + p + " OR t.industry ILIKE " + p +
-        " OR ((cs.state = 'done' OR $2 OR cs.writer_id = $1) AND (cs.in_short ILIKE " + p + " OR cs.client_why ILIKE " + p +
+        " OR ((cs.state = 'done' OR $2 OR cs.writer_id = $1 OR cs.lead_id = $1) AND (cs.in_short ILIKE " + p + " OR cs.client_why ILIKE " + p +
         " OR cs.asked_to_do ILIKE " + p + " OR cs.came_of_it ILIKE " + p + " OR cs.deliverables::text ILIKE " + p + ")))";
     }
     const rows = (await pool.query(
-      "SELECT " + HEAD + " " + FROM + where + " ORDER BY coalesce(cs.done_at, cs.created_at) DESC LIMIT 500", args)).rows;
-    const toPlace = (await pool.query(
-      "SELECT t.name AS client, count(*)::int AS n FROM memory_entries m JOIN tenants t ON t.id = m.about_tenant_id " +
-      "WHERE m.case_id IS NULL GROUP BY t.name ORDER BY count(*) DESC, t.name")).rows;
-    return ok({ cases: rows.map(head), toPlace, canOpen: mayOpen(me), me: me.id });
+      "SELECT " + HEAD + " " + FROM + where + " ORDER BY coalesce(nullif(cs.started, ''), to_char(cs.created_at, 'YYYY-MM')) DESC, cs.name LIMIT 500", args)).rows;
+    const learnings = (await pool.query(
+      "SELECT t.key AS client, t.name, t.industry, t.size, t.mark, count(*)::int AS n, count(*) FILTER (WHERE m.case_id IS NULL)::int AS loose " +
+      "FROM memory_entries m JOIN tenants t ON t.id = m.about_tenant_id WHERE t.kind <> 'demo' GROUP BY t.id")).rows;
+    return ok({ cases: rows.map(head), learnings, canOpen: mayOpen(me), me: me.id });
   }
 
-  /* HOME'S TWO CARDS (spec 068): the write-ups this person is asked for, each
-     with how many of the eight sections hold something; the case studies
-     marked done in the last 30 days; and how many of their own insights are
-     in no case study yet. Done ones are read by everyone, so `fresh` needs no
-     rule; `writing` is the person's own by its WHERE. */
+  /* ONE CLIENT'S PAGE: the client, its assignments oldest first (the
+     timeline's order), and the learnings tied to none of them yet — every
+     one written before spec 069, until somebody picks its assignment. */
+  if (action === "client") {
+    const t = await pool.query(
+      "SELECT id, key, name, industry, size, mark, past, status FROM tenants WHERE key = $1 AND kind <> 'demo'", [str(body.client)]);
+    if (!t.rowCount) return no(404, "That client is not here.");
+    const c = t.rows[0];
+    const rows = (await pool.query(
+      "SELECT " + HEAD + " " + FROM + " WHERE cs.about_tenant_id = $1 ORDER BY coalesce(nullif(cs.started, ''), '9999'), cs.created_at", [c.id])).rows;
+    const loose = (await pool.query(
+      "SELECT e.id, e.kind, e.title, e.next_person, e.occurred, e.created_at, e.author_id, u.name AS author_name " +
+      "FROM memory_entries e JOIN users u ON u.id = e.author_id WHERE e.about_tenant_id = $1 AND e.case_id IS NULL " +
+      "ORDER BY e.created_at DESC", [c.id])).rows;
+    return ok({
+      client: { key: c.key, name: c.name, industry: c.industry, size: c.size, mark: c.mark || null, past: !!c.past, archived: c.status === "retired" },
+      assignments: rows.map(head),
+      loose: loose.map((e) => ({ id: e.id, kind: e.kind, title: e.title, next: e.next_person, occurred: e.occurred,
+        when: e.created_at, author: e.author_name, mine: me.isAdmin || e.author_id === me.id })),
+      canOpen: mayOpen(me),
+    });
+  }
+
+  /* HOME'S CARD (spec 068): the write-ups waiting on this person — the
+     ones they are writing, and the ones they lead whose end month has come
+     (writeUpsWhere, the same WHERE My tasks reads) — each with how many of
+     the eight sections hold something; and the write-ups published in the
+     last 30 days, which everyone reads. */
   if (action === "home") {
     const writing = (await pool.query(
       "SELECT " + HEAD + ", (" +
@@ -221,15 +282,12 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
       "(jsonb_array_length(cs.our_team) + jsonb_array_length(cs.their_team) > 0)::int + " +
       "(jsonb_array_length(cs.stages) > 0)::int + (jsonb_array_length(cs.deliverables) > 0)::int + " +
       "(cs.came_of_it <> '')::int + (jsonb_array_length(cs.who_to_ask) > 0)::int) AS filled " +
-      FROM + " WHERE cs.state = 'writing' AND " +
-      (brk() === "home-all" ? "$1::uuid IS NOT NULL" : "cs.writer_id = $1") +      /* RED: everybody's write-ups on my Home */
-      " ORDER BY cs.due NULLS LAST, cs.name", [me.id])).rows;
+      FROM + " WHERE " + (brk() === "home-all" ? "cs.state <> 'done' AND $1::uuid IS NOT NULL AND $2::text IS NOT NULL" : writeUpsWhere("$1", "$2")) +   /* RED: everybody's write-ups on my Home */
+      " ORDER BY cs.ended, cs.name", [me.id, thisMonth()])).rows;
     const fresh = (await pool.query(
       "SELECT " + HEAD + " " + FROM + " WHERE cs.state = 'done' AND cs.done_at > now() - interval '30 days' " +
       "ORDER BY cs.done_at DESC LIMIT 3")).rows;
-    const loose = (await pool.query(
-      "SELECT count(*)::int AS n FROM memory_entries WHERE case_id IS NULL AND author_id = $1", [me.id])).rows[0].n;
-    return ok({ writing: writing.map((r) => ({ ...head(r), filled: Number(r.filled) || 0 })), fresh: fresh.map(head), loose });
+    return ok({ writing: writing.map((r) => ({ ...head(r), filled: Number(r.filled) || 0 })), fresh: fresh.map(head) });
   }
 
   if (action === "case") {
@@ -238,9 +296,9 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     return ok({ case: await full(pool, r, me) });
   }
 
-  /* What the opening form needs: every client but the worked example —
-     archived and past ones included, since a case study is written after the
-     work (decision 5) — and every consultant. */
+  /* What the pickers need: every client but the worked example — ended and
+     past ones included, since most write-ups are about finished work — and
+     every consultant. */
   if (action === "options") {
     const clients = (await pool.query(
       "SELECT key, name, industry, status, past FROM tenants WHERE kind <> 'demo' ORDER BY status = 'retired', name")).rows
@@ -250,99 +308,112 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     return ok({ clients, consultants, canOpen: mayOpen(me) });
   }
 
-  if (action === "open") {
-    if (!mayOpen(me)) return no(403, "Opening a piece of work is for the platform's admins.");
+  /* THE REGISTRY, for the Clients page: every assignment with its team's
+     names, grouped there under its client. Read by every consultant — the
+     Clients page is — and changed only by the super user. */
+  if (action === "registry") {
+    const rows = (await pool.query("SELECT cs.our_team, " + HEAD + " " + FROM +
+      " ORDER BY t.name, coalesce(nullif(cs.started, ''), '9999'), cs.created_at")).rows;
+    const names = await people(pool, rows.flatMap((r) => list(r.our_team).map((p) => str(p.id))));
+    return ok({
+      assignments: rows.map((r) => ({ ...head(r),
+        team: list(r.our_team).filter((p) => names.has(str(p.id))).map((p) => ({ id: str(p.id), name: names.get(str(p.id))!.name })) })),
+      canOpen: mayOpen(me),
+    });
+  }
+
+  /* ADDING OR CHANGING AN ASSIGNMENT (the super user, on Clients). Its name,
+     type, months, lead and team; a lead is one of the team by being named
+     the lead, and is put on the team if left off it. */
+  if (action === "assign") {
+    if (!mayOpen(me)) return no(403, "Adding an assignment is for the super user.");
     const name = oneLine(body.name, 160);
-    if (!name) return no(400, "Give the piece of work a name.");
-    const writer = isUuid(body.writer) ? str(body.writer) : "";
-    const due = day(body.due);
-    if (writer && !due) return no(400, "Say when the write-up is wanted.");
-    const c = await pool.connect();
-    try {
-      await c.query("BEGIN");
-      let tenantId = "";
-      if (body.past) {
-        const made = await pastClient(c, me, body.past);
-        if ("code" in made) { await c.query("ROLLBACK"); return made; }
-        tenantId = made.id;
-      } else {
-        const t = await c.query("SELECT id FROM tenants WHERE key = $1 AND kind <> 'demo'", [str(body.client)]);
-        if (!t.rowCount) { await c.query("ROLLBACK"); return no(400, "Say which client it was for."); }
-        tenantId = t.rows[0].id;
-      }
-      const office = await officeIds(c, [writer, ...list(body.team).map((p: any) => p?.id ?? p)]);
-      if (writer && !office.has(writer)) { await c.query("ROLLBACK"); return no(400, "The writer has to be one of the consultants."); }
-      const team = list(body.team).map((p: any) => ({ id: str(p?.id ?? p), role: oneLine(p?.role, 80) })).filter((p) => office.has(p.id));
-      const r = await c.query(
-        "INSERT INTO case_studies (about_tenant_id, name, started, ended, state, opened_by, writer_id, asked_by, due, our_team) " +
-        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb) RETURNING id",
-        [tenantId, name, month(body.started), month(body.ended), writer ? "writing" : "running", me.id,
-         writer || null, writer ? me.id : null, writer ? due : null, JSON.stringify(team)]);
-      await c.query("COMMIT");
-      return ok({ id: r.rows[0].id });
-    } catch (e) { await c.query("ROLLBACK").catch(() => {}); throw e; }
-    finally { c.release(); }
+    if (!name) return no(400, "Give the assignment a name.");
+    const kind = kindOf(body.kind);
+    if (!kind) return no(400, "Say whether it is Planning or Retainer.");
+    const started = month(body.started), ended = month(body.ended);
+    if (!started) return no(400, "Say the month it started.");
+    if (ended && ended < started) return no(400, "It cannot end before it started.");
+    const lead = isUuid(body.lead) ? str(body.lead) : "";
+    const office = await officeIds(pool, [lead, ...list(body.team).map((p: any) => p?.id ?? p)]);
+    if (!lead || !office.has(lead)) return no(400, "Pick the lead from the consultants.");
+    const team = [lead, ...list(body.team).map((p: any) => str(p?.id ?? p))]
+      .filter((id, i, all) => office.has(id) && all.indexOf(id) === i).map((id) => ({ id, role: "" }));
+    if (body.id) {
+      const r = await rowFor(pool, body.id);
+      if (!r) return no(404, GONE);
+      /* the roles typed on the write-up survive a change of team */
+      const roles = new Map(list(r.our_team).map((p) => [str(p.id), str(p.role)]));
+      const kept = team.map((p) => ({ id: p.id, role: roles.get(p.id) || "" }));
+      await pool.query("UPDATE case_studies SET name=$2, kind=$3, started=$4, ended=$5, lead_id=$6, our_team=$7::jsonb, updated_at=now() WHERE id=$1",
+        [r.id, name, kind, started, ended, lead, JSON.stringify(kept)]);
+      return ok({ id: r.id });
+    }
+    const t = await pool.query("SELECT id FROM tenants WHERE key = $1 AND kind <> 'demo'", [str(body.client)]);
+    if (!t.rowCount) return no(400, "Say which client it is for.");
+    const r = await pool.query(
+      "INSERT INTO case_studies (about_tenant_id, name, kind, started, ended, state, opened_by, lead_id, our_team) " +
+      "VALUES ($1,$2,$3,$4,$5,'running',$6,$7,$8::jsonb) RETURNING id",
+      [t.rows[0].id, name, kind, started, ended, me.id, lead, JSON.stringify(team)]);
+    return ok({ id: r.rows[0].id });
   }
 
-  if (action === "ask") {
-    if (!mayOpen(me)) return no(403, "Asking for a write-up is for the platform's admins.");
-    const r = await rowFor(pool, body.id);
-    if (!r) return no(404, GONE);
-    if (r.state === "done") return no(409, "It is already written up.");
-    const writer = str(body.writer), due = day(body.due);
-    if (!(await officeIds(pool, [writer])).has(writer)) return no(400, "The writer has to be one of the consultants.");
-    if (!due) return no(400, "Say when the write-up is wanted.");
-    await pool.query(
-      "UPDATE case_studies SET state='writing', writer_id=$2, asked_by=$3, due=$4, ended=coalesce(nullif($5,''), ended), updated_at=now() WHERE id=$1",
-      [r.id, writer, me.id, due, month(body.ended)]);
-    return ok({ id: r.id });
+  /* A PAST CLIENT (spec 067 §7): name, industry and size, made ended with
+     nothing behind its door. Added on Clients › Ended by the super user, so
+     its assignments can be added and written up. */
+  if (action === "past") {
+    if (!mayOpen(me)) return no(403, "Adding a past client is for the super user.");
+    const made = await pastClient(pool, me, body);
+    if ("code" in made) return made;
+    const k = await pool.query("SELECT key FROM tenants WHERE id = $1", [made.id]);
+    return ok({ key: k.rows[0].key });
   }
 
+  /* SAVING THE WRITE-UP. The first save by somebody on an assignment nobody
+     is writing makes them its writer. The name, months and team are the
+     registry's and are not taken from here; the roles on the team are. */
   if (action === "save") {
     const r = await rowFor(pool, body.id);
     if (!r) return no(404, GONE);
-    if (!mayWrite(me, r)) return no(403, r.state === "running"
-      ? "Nobody has been asked to write this up yet." : "Only its writer or an admin can change it.");
-    const name = oneLine(body.name ?? r.name, 160);
-    if (!name) return no(400, "Give the piece of work a name.");
-    const office = await officeIds(pool, list(body.ourTeam).map((p: any) => p?.id));
-    const ourTeam = list(body.ourTeam).map((p: any) => ({ id: str(p?.id), role: oneLine(p?.role, 80) })).filter((p) => office.has(p.id));
+    if (!mayWrite(me, r)) return no(403, "Somebody else is writing this one up. Its writer, its lead or a super user can change it.");
+    const roles = new Map(list(body.ourTeam).map((p: any) => [str(p?.id), oneLine(p?.role, 80)]));
+    const ourTeam = list(r.our_team).map((p) => ({ id: str(p.id), role: roles.has(str(p.id)) ? roles.get(str(p.id))! : str(p.role) }));
     const theirTeam = list(body.theirTeam).map((p: any) => ({ name: oneLine(p?.name, 120), role: oneLine(p?.role, 160) })).filter((p) => p.name);
     const stages = list(body.stages).map((s: any) => ({ when: oneLine(s?.when, 40), what: oneLine(s?.what, 300) })).filter((s) => s.what);
     const who = list(body.whoToAsk).map((p: any) => ({ name: oneLine(p?.name, 120), about: oneLine(p?.about, 400) })).filter((p) => p.name);
+    const start = r.state === "running";
     await pool.query(
-      "UPDATE case_studies SET name=$2, started=$3, ended=$4, in_short=$5, client_why=$6, asked_to_do=$7, came_of_it=$8, " +
-      "our_team=$9::jsonb, their_team=$10::jsonb, stages=$11::jsonb, deliverables=$12::jsonb, who_to_ask=$13::jsonb, updated_at=now() WHERE id=$1",
-      [r.id, name, body.started === undefined ? r.started : month(body.started), body.ended === undefined ? r.ended : month(body.ended),
-       prose(body.inShort), prose(body.clientWhy), prose(body.askedToDo), prose(body.cameOfIt),
+      "UPDATE case_studies SET in_short=$2, client_why=$3, asked_to_do=$4, came_of_it=$5, " +
+      "our_team=$6::jsonb, their_team=$7::jsonb, stages=$8::jsonb, deliverables=$9::jsonb, who_to_ask=$10::jsonb, " +
+      (start ? "state='writing', writer_id=$11, " : "") + "updated_at=now() WHERE id=$1",
+      [r.id, prose(body.inShort), prose(body.clientWhy), prose(body.askedToDo), prose(body.cameOfIt),
        JSON.stringify(ourTeam), JSON.stringify(theirTeam), JSON.stringify(stages),
-       JSON.stringify(deliverablesOf(body.deliverables, r.deliverables)), JSON.stringify(who)]);
+       JSON.stringify(deliverablesOf(body.deliverables, r.deliverables)), JSON.stringify(who), ...(start ? [me.id] : [])]);
     return ok({ case: await full(pool, (await rowFor(pool, r.id))!, me) });
   }
 
-  /* MARKED DONE IS WHAT PUTS IT ON THE SHELVES (decision 10). In short has
-     to be there, because it is the first thing a new joiner reads and the
-     cover's own words. */
+  /* PUBLISHED is what every consultant reads (spec 067 decision 10). In short
+     has to be there: it is the first thing a new joiner reads. */
   if (action === "done") {
     const r = await rowFor(pool, body.id);
     if (!r) return no(404, GONE);
-    if (!mayWrite(me, r)) return no(403, "Only its writer or an admin can mark it done.");
+    if (!mayWrite(me, r)) return no(403, "Only its writer, its lead or a super user can publish it.");
     if (r.state === "done") return ok({ id: r.id });
-    if (!str(r.in_short).trim() && brk() !== "done-empty") return no(400, "Write In short first — it is the first thing a new joiner reads.");
-    await pool.query("UPDATE case_studies SET state='done', done_at=now(), done_by=$2, updated_at=now() WHERE id=$1", [r.id, me.id]);
+    if (!str(r.in_short).trim() && brk() !== "done-empty") return no(400, "Write In short first. It is the first thing a new joiner reads.");
+    await pool.query("UPDATE case_studies SET state='done', writer_id=coalesce(writer_id, $2), done_at=now(), done_by=$2, updated_at=now() WHERE id=$1", [r.id, me.id]);
     return ok({ id: r.id });
   }
 
-  /* THE INSIGHTS FROM THE INTERVIEW, saved into this piece of work — all or
-     none, for the debrief's reason (lib/memory-api.ts saveMany). */
+  /* THE LEARNINGS FROM THE WRITE-UP'S PROMPT, saved into this assignment —
+     all or none, for the debrief's reason (lib/memory-api.ts saveMany). */
   if (action === "insights") {
     const r = await rowFor(pool, body.id);
     if (!r) return no(404, GONE);
-    if (!mayWrite(me, r)) return no(403, "Only its writer or an admin can add to it.");
+    if (!mayWrite(me, r)) return no(403, "Only its writer, its lead or a super user can add to it.");
     const drafts = list(body.entries, 40).map(draftOf);
     if (!drafts.length) return ok({ saved: 0 });
     const missing = drafts.findIndex((d) => !d.title);
-    if (missing >= 0) return no(400, "Give insight " + (missing + 1) + " a title before saving.");
+    if (missing >= 0) return no(400, "Give learning " + (missing + 1) + " a title before saving.");
     const c = await pool.connect();
     try {
       await c.query("BEGIN");
@@ -353,9 +424,8 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     finally { c.release(); }
   }
 
-  /* PLACING AN INSIGHT (spec 067 §5): into a piece of work for the SAME
-     client, or back to "not yet in a case study". By its author or an admin,
-     the memory's own rule for changing an entry. */
+  /* TYING A LEARNING TO AN ASSIGNMENT of the SAME client, or untying it.
+     By its author or a super user, the memory's own rule for an entry. */
   if (action === "place") {
     if (!isUuid(body.entry)) return no(404, "That insight is no longer here.");
     const e = await pool.query("SELECT author_id, about_tenant_id FROM memory_entries WHERE id = $1", [str(body.entry)]);
@@ -365,7 +435,7 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
     if (body.case) {
       const r = await rowFor(pool, body.case);
       if (!r) return no(404, GONE);
-      if (r.about_tenant_id !== e.rows[0].about_tenant_id && brk() !== "cross-client") return no(400, "That piece of work is for a different client.");
+      if (r.about_tenant_id !== e.rows[0].about_tenant_id && brk() !== "cross-client") return no(400, "That assignment is for a different client.");
       caseId = r.id;
     }
     await pool.query("UPDATE memory_entries SET case_id = $2, updated_at = now() WHERE id = $1", [str(body.entry), caseId]);
@@ -373,10 +443,10 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
   }
 
   if (action === "drop") {
-    if (!mayOpen(me)) return no(403, "Removing a piece of work is for the platform's admins.");
+    if (!mayOpen(me)) return no(403, "Removing an assignment is for the super user.");
     const r = await rowFor(pool, body.id);
     if (!r) return ok({ gone: true });
-    /* Its insights stay, back under their client (SET NULL); its files go. */
+    /* Its learnings stay, back under their client (SET NULL); its files go. */
     for (const d of list(r.deliverables, 200)) if (d.file && d.file.path) await dropBlob(str(d.file.path));
     await pool.query("DELETE FROM case_studies WHERE id = $1", [r.id]);
     return ok({ gone: true });
@@ -386,8 +456,8 @@ export async function caseAction(pool: Pool, me: SessionUser, body: any): Promis
   if (action === "fileBegin" || action === "fileFinish") {
     const r = await rowFor(pool, body.id);
     if (!r) return no(404, GONE);
-    if (!mayWrite(me, r)) return no(403, "Only its writer or an admin can attach a file.");
-    if (!storeReady()) return no(503, "There is no file store set up yet, so a file cannot be attached. Everything else about the case study works.");
+    if (!mayWrite(me, r)) return no(403, "Only its writer, its lead or a super user can attach a file.");
+    if (!storeReady()) return no(503, "There is no file store set up yet, so a file cannot be attached. Everything else about the write-up works.");
     const d = list(r.deliverables, 200).find((x) => str(x.id) === str(body.deliverable));
     if (!d) return no(404, "That deliverable is not there any more. Save the draft, then attach the file.");
     const name = safeFileName(body.name);
@@ -429,7 +499,7 @@ export async function casePart(pool: Pool, me: SessionUser, q: URLSearchParams, 
   if (me.kind === "client") return no(403, NOT_YOURS);
   const r = await rowFor(pool, q.get("id"));
   if (!r) return no(404, GONE);
-  if (!mayWrite(me, r)) return no(403, "Only its writer or an admin can attach a file.");
+  if (!mayWrite(me, r)) return no(403, "Only its writer, its lead or a super user can attach a file.");
   if (!storeReady()) return no(503, "There is no file store set up yet.");
   const d = list(r.deliverables, 200).find((x) => str(x.id) === str(q.get("deliverable")));
   if (!d) return no(404, "That deliverable is not there any more.");

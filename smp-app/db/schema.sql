@@ -193,12 +193,19 @@ CREATE TABLE case_studies (
   done_by         uuid REFERENCES users (id) ON DELETE SET NULL,
   created_at      timestamptz NOT NULL DEFAULT now(),
   updated_at      timestamptz NOT NULL DEFAULT now(),
+  -- TRACK RECORD (spec 069): the row is now an ASSIGNMENT on the client
+  -- registry, added by the super user with its type and its lead; its lead
+  -- is asked for the write-up when the end month comes (migration 034).
+  kind            text NOT NULL DEFAULT 'planning',
+  lead_id         uuid REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT case_kind CHECK (kind IN ('planning','retainer')),
   CONSTRAINT case_state CHECK (state IN ('running','writing','done')),
   CONSTRAINT case_name CHECK (btrim(name) <> ''),
   CONSTRAINT case_writing_has_writer CHECK (state = 'running' OR writer_id IS NOT NULL)
 );
 CREATE INDEX case_about ON case_studies (about_tenant_id);
 CREATE INDEX case_writer ON case_studies (writer_id) WHERE state = 'writing';
+CREATE INDEX case_lead ON case_studies (lead_id) WHERE state <> 'done';
 
 -- FOREFRONT'S, NOT A CLIENT'S, AND THAT IS THE WHOLE DESIGN. Specs 042 and
 -- 043 exist to stop one client's data reaching another; this is deliberately

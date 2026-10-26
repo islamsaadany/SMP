@@ -150,10 +150,12 @@
                 ["clients", "Clients", true, "Work"],
                 ["consultants", "Consultants", ME.canConsultants, "Team"],
                 ["access", "Who sees what", ME.canAccess, "Team"],
-                /* CASE STUDIES IS THE MEMORY'S TAB (spec 067): the key stays
-                   `memory`, so every address and kept copy that names it still
-                   works; the word and what it opens on are the library's. */
-                ["memory", "Case studies", true, "Knowledge"],
+                /* TRACK RECORD IS THE MEMORY'S TAB (spec 069, which renamed
+                   spec 067's Case studies: Islam, "case studies mean that
+                   there is something new while it's just documentation of
+                   our previous work"). The key stays `memory`, so every
+                   address and kept copy that names it still works. */
+                ["memory", "Track Record", true, "Knowledge"],
                 /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 052,
                    decision 1): every consultant reads the whole library, and
                    only an admin adds to it — which is a gate on the ACT, asked
@@ -414,7 +416,7 @@
     clients: ["Clients", "Every client the office works with, and the way into each module."],
     consultants: ["Consultants", "The office's people, their seats and what each may open."],
     access: ["Who sees what", "Which pages each seat may open, and who may change them."],
-    memory: ["Case studies", "What we did for each client, and what we learned doing it."],
+    memory: ["Track Record", "What we did for each client, and what we learned doing it."],
     frameworks: ["Frameworks", "The strategy frameworks the office works with, to read or to ask."],
     copilot: ["Copilot settings", "How the Copilot thinks and what it may do, the same for every client."],
     history: ["History", "What was done to the clients you can open, and by whom."]
@@ -632,83 +634,19 @@
   }
 
   function drawMemory() {
-    /* A WRITE-UP PRESSED ON MY WORK lands here on its case study (spec 067). */
-    if (CS.jump) { MEM.view = CS.jump.view; MEM.caseId = CS.jump.id; CS.fresh = !!CS.jump.fresh; CS.pastFirst = !!CS.jump.past; CS.jump = null; }
+    /* A WRITE-UP PRESSED ON MY TASKS OR HOME lands here on its assignment. */
+    if (CS.jump) { MEM.view = CS.jump.view; MEM.caseId = CS.jump.id; CS.fresh = !!CS.jump.fresh; if (CS.jump.client) MEM.clientKey = CS.jump.client; CS.jump = null; }
     if (MEM.view === "lib") return drawCases();
+    if (MEM.view === "client") return drawClientPage();
     if (MEM.view === "case") return drawCase();
-    if (MEM.view === "open") return drawCaseOpen();
+    if (MEM.view === "pick") return drawPick();
     if (MEM.view === "write") return drawCaseWrite();
     if (MEM.view === "draft") return drawCaseDraft();
     if (MEM.view === "entry") return drawMemEntry();
     if (MEM.view === "wiz") return drawMemForm();
-    if (MEM.view === "deb") return drawDebrief();
+    if (MEM.view === "learn") return drawDebrief();
     if (MEM.view === "drafts") return drawDrafts();
-    return drawMemList();
-  }
-
-  /* ── The list ──────────────────────────────────────────────────── */
-  function drawMemList(quiet) {
-    lead(quiet, "Reading…");
-    var f = MEM.filters;
-    return mpost({ action: "list", q: f.q, client: f.client, industry: f.industry, kind: f.kind, case: f.case })
-      .then(function (j) {
-        if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the memory.", true); return; }
-        MEM.clientNames = {};
-        (j.clients || []).forEach(function (c) { MEM.clientNames[c.key] = c.name; });
-        settle(function () {
-          var right = el("span");
-          var add = el("button", "btn", "Add one insight");
-          add.type = "button";
-          add.addEventListener("click", function () { memGo("wiz", { draft: null }); });
-          var deb = el("button", "btn amber", "Write up a period");
-          deb.type = "button";
-          deb.addEventListener("click", function () { memGo("deb", { deb: null }); });
-          right.appendChild(add); right.appendChild(deb);
-          pageBand("Case studies", right, nOf((j.entries || []).length, "insight"), "What we did for each client, and what we learned doing it.");
-
-          /* NOTHING YET — the one sentence on the page, and it is a fact the
-             screen does not otherwise state rather than a description of
-             itself (rule 1b-ii, §45.2). Drawn only when the memory is empty
-             and nothing is being filtered, or "no insights match" would read
-             as "there are none". */
-          var filtering = !!(f.q || f.client || f.industry || f.kind || f.case);
-          if (!j.entries.length && !filtering) {
-            var box = el("div", "empty");
-            box.appendChild(el("b", null, "Nothing here yet"));
-            box.appendChild(document.createTextNode(
-              "Every insight names the client it came from and the person who wrote it."));
-            var first = el("button", "btn amber", "Write up a period");
-            first.type = "button";
-            first.addEventListener("click", function () { memGo("deb", { deb: null }); });
-            box.appendChild(first);
-            page.appendChild(box);
-            return;
-          }
-
-          page.appendChild(memAskBox());
-          /* THE SAME CARD AS THE LIBRARY (round three): Case studies ·
-             Insights in its header, the filters in a row under it, the
-             insights as striped rows. */
-          var card = el("section", "hocard cslib");
-          var hd = el("div", "hochd");
-          var hic = el("span", "hocic");
-          hic.innerHTML = NAV_ICON.memory;
-          hd.appendChild(hic);
-          hd.appendChild(el("h2", null, "Insights"));
-          hd.appendChild(el("span", "hocnt", String(j.entries.length)));
-          hd.appendChild(el("span", "sp"));
-          hd.appendChild(csSwitch());
-          card.appendChild(hd);
-          card.appendChild(memFilters(j));
-          if (!j.entries.length) card.appendChild(el("p", "muted mwnone", "Nothing matches that."));
-          else {
-            var list = el("div", "elist");
-            j.entries.forEach(function (e) { list.appendChild(memRow(e)); });
-            card.appendChild(list);
-          }
-          page.appendChild(card);
-        });
-      });
+    return drawCases();
   }
 
   /* ASK IT — on the page the insights are on, never a corner of its own
@@ -764,75 +702,6 @@
     return box;
   }
 
-  function memFilters(j) {
-    var f = MEM.filters, row = el("div", "filters");
-    var q = el("input", "fld search");
-    q.type = "search"; q.value = f.q;
-    q.placeholder = "Search insights — title, body, client";
-    /* TYPING NEVER REPAINTS (§35). The search runs when the box is left or
-       Enter is pressed, so the field being typed into is never replaced. */
-    q.addEventListener("change", function () { f.q = q.value.trim(); drawMemList(true); });
-    row.appendChild(q);
-
-    row.appendChild(memPick(j.clients.map(function (c) { return [c.key, c.name]; }),
-      "Every client", f.client, function (v) { f.client = v; drawMemList(true); }));
-    row.appendChild(memPick(j.industries.map(function (i) { return [i, i]; }),
-      "Every industry", f.industry, function (v) { f.industry = v; drawMemList(true); }));
-    /* the insights still to be placed in a piece of work (spec 067 §5) */
-    row.appendChild(memPick([["none", "Not yet in a case study"]],
-      "In a case study or not", f.case, function (v) { f.case = v; drawMemList(true); }));
-
-    var cell = el("span", "cell");
-    cell.setAttribute("role", "group");
-    cell.setAttribute("aria-label", "Kind");
-    [["", "All"]].concat(KINDS).forEach(function (k) {
-      var b = el("button", f.kind === k[0] ? "on" : null, k[1]);
-      b.type = "button";
-      b.addEventListener("click", function () { f.kind = k[0]; drawMemList(true); });
-      cell.appendChild(b);
-    });
-    row.appendChild(cell);
-    row.appendChild(el("span", "count", j.entries.length + (j.entries.length === 1 ? " insight" : " insights")));
-    return row;
-  }
-
-  /* The filters offer what the MEMORY holds, never every client on the
-     platform: a picker whose every option empties the page is not a choice
-     (§61). */
-  function memPick(pairs, all, value, onPick) {
-    var sel = el("select", "fld");
-    sel.setAttribute("aria-label", all);
-    var opts = [["", all]].concat(pairs);
-    opts.forEach(function (o) {
-      var op = el("option", null, o[1]);
-      op.value = o[0];
-      if (o[0] === value) op.selected = true;
-      sel.appendChild(op);
-    });
-    sel.addEventListener("change", function () { onPick(sel.value); });
-    return sel;
-  }
-
-  function memRow(e) {
-    var b = el("button", "erow");
-    b.type = "button";
-    b.appendChild(el("span", "tag " + e.kind, kindWord(e.kind)));
-    var body = el("span", "body");
-    body.appendChild(el("h3", null, e.title));
-    var snip = memSnip(e);
-    if (snip) body.appendChild(el("p", "snip", snip));
-    var facts = el("span", "facts");
-    facts.appendChild(el("b", null, e.clientName));
-    facts.appendChild(document.createTextNode(
-      (e.industry ? " · " + e.industry : "") + " · " + e.author + " · " + whenWord(e.when)));
-    /* WHICH PIECE OF WORK IT IS IN, or that it is in none yet (spec 067 §5) */
-    if (e.caseName) { facts.appendChild(document.createTextNode(" · in ")); facts.appendChild(el("b", null, e.caseName)); }
-    else facts.appendChild(el("span", "loose", " · not yet in a case study"));
-    body.appendChild(facts);
-    b.appendChild(body);
-    b.addEventListener("click", function () { memGo("entry", { entry: e.id }); });
-    return b;
-  }
   /* The snippet is the first answer that has anything in it — a one-line
      insight has to look like a finished row, not a broken one (§245). */
   function memSnip(e) {
@@ -847,16 +716,16 @@
   function drawMemEntry() {
     lead(false, "Reading…");
     return mpost({ action: "one", id: MEM.entry }).then(function (j) {
-      if (!j || !j.ok) { clear(); say((j && j.error) || "That insight is no longer here.", true); return; }
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That learning is no longer here.", true); return; }
       var e = j.entry;
       settle(function () {
-        /* BACK GOES WHERE IT CAME FROM: the case study it was opened in, or
-           the Insights list (spec 067). */
-        var fromCase = MEM.back === "case" && MEM.caseId;
-        var back = el("button", "btn", fromCase ? "Back to the case study" : "Back to the list");
+        /* BACK GOES WHERE IT CAME FROM: the client's page it was opened on,
+           or the front's list of learnings (spec 069). */
+        var fromClient = MEM.back !== "lib";
+        var back = el("button", "btn", fromClient ? "Back to " + e.clientName : "Back to Track Record");
         back.type = "button";
-        back.addEventListener("click", function () { var b = MEM.back; MEM.back = null; memGo(b === "case" && MEM.caseId ? "case" : "list"); });
-        title("Case studies", (function () { var r = el("span"); r.appendChild(back); return r; }()));
+        back.addEventListener("click", function () { MEM.back = null; if (fromClient) memGo("client", { clientKey: e.client, caseId: e.caseId || MEM.caseId }); else memGo("lib"); });
+        title("Track Record", (function () { var r = el("span"); r.appendChild(back); return r; }()));
 
         var card = el("article", "ecard");
         var tags = el("div", "etags");
@@ -868,10 +737,10 @@
         var facts = el("p", "facts");
         facts.appendChild(el("b", null, whenWord(e.when)));
         if (e.occurred) facts.appendChild(document.createTextNode(" · " + e.occurred));
-        if (e.caseName) facts.appendChild(document.createTextNode(" · in " + e.caseName));
+        if (e.caseName) facts.appendChild(document.createTextNode(" · " + (TYPE_WORD[e.caseKind] || "") + " · " + e.caseName));
         card.appendChild(facts);
-        /* ITS AUTHOR OR AN ADMIN PLACES IT in a piece of work for the same
-           client (spec 067 §5); everybody else reads where it is. */
+        /* ITS AUTHOR OR A SUPER USER TIES IT to one of the same client's
+           assignments (spec 069); everybody else reads where it is. */
         if (e.mine) memPlace(e, card);
 
         var qa = el("div", "qa");
@@ -932,7 +801,7 @@
     btn.disabled = true;
     mpost({ action: "drop", id: e.id }).then(function (j) {
       if (!j || !j.ok) { btn.disabled = false; say((j && j.error) || "It could not be removed.", true); return; }
-      memGo("list");
+      memGo("client", { clientKey: e.client, caseId: e.caseId });
     });
   }
 
@@ -942,7 +811,7 @@
      new (§98). */
   function onePrompt(csel, clients) {
     var c = clientPhrase(clientNamed(clients, csel.value));
-    return "I am writing up one consulting insight for my firm's memory, about\n" +
+    return "I am writing up one thing my consulting firm learned, about\n" +
       c + ".\n\n" +
       "Ask me these four questions, one at a time, and wait for my answer\n" +
       "before asking the next:\n\n" +
@@ -959,23 +828,28 @@
     var e = MEM.draft || {};
     var editing = !!e.id;
     lead(false, "Reading…");
-    /* THE CLIENT LIST IS THE CARDS' OWN, not the memory's: this is the one
-       picker that must offer a client nothing has been written about yet, so
-       it cannot come from the list endpoint like the filters do. `cards` has
-       already dropped the retired ones (visibleClients); the worked example is
-       dropped here, because it is not an engagement anybody learned anything
-       on (§317). */
-    return post({ action: "cards" }).then(function (j) {
-      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
+    /* THE CLIENT AND THE ASSIGNMENT ARE ALREADY CHOSEN (spec 069): a new
+       learning arrives from Add learnings with both picked, and one being
+       corrected keeps its own; where it belongs is changed on its page. */
+    return Promise.resolve().then(function () {
+      var clients = [{ key: e.client, name: e.clientName || e.client }];
       settle(function () {
         var right = el("span");
         var cancel = el("button", "btn", "Cancel");
         cancel.type = "button";
-        cancel.addEventListener("click", function () { memGo(editing ? "entry" : e.caseId ? "case" : "list"); });
-        var save = el("button", "btn amber", "Save");
+        cancel.addEventListener("click", function () { if (editing) memGo("entry"); else memGo("learn", { pickClient: e.client, pickCase: e.caseId }); });
+        var save = el("button", "btn amber", "Save the learning");
         save.type = "button";
         right.appendChild(cancel); right.appendChild(save);
-        title(editing ? "Edit an insight" : "Add an insight", right);
+        title(editing ? "Edit a learning" : "Add a learning", right);
+        if (e.caseName) {
+          var ctx = el("p", "trctx");
+          ctx.appendChild(el("b", null, e.clientName || ""));
+          ctx.appendChild(document.createTextNode(" · "));
+          ctx.appendChild(typeTag(e.caseKind));
+          ctx.appendChild(document.createTextNode(" " + e.caseName));
+          page.appendChild(ctx);
+        }
 
         var wiz = el("div", "wiz");
         var fields = {};
@@ -985,7 +859,7 @@
         cbox.appendChild(labFor("m-client", "Client"));
         var csel = el("select", "fld");
         csel.id = "m-client";
-        if (editing) { csel.disabled = true; }
+        csel.disabled = true;
         clients.forEach(function (c) {
           var op = el("option", null, c.name);
           op.value = c.key;
@@ -1030,7 +904,7 @@
           wiz.appendChild(box);
         });
 
-        wiz.appendChild(el("p", "note", "A title and a client are enough to save. The rest can wait."));
+        wiz.appendChild(el("p", "note", "A title is enough to save. The rest can wait."));
 
         /* The other way to finish it — under a rule, because it is not the
            next step of the form but an alternative to filling it in (§317's
@@ -1060,7 +934,8 @@
           mpost(body).then(function (r) {
             save.disabled = false;
             if (!r || !r.ok) { say((r && r.error) || "It could not be saved.", true); return; }
-            memGo(editing ? "entry" : e.caseId ? "case" : "list", { entry: r.id });
+            if (editing) memGo("entry", { entry: r.id });
+            else memGo("client", { clientKey: e.client, caseId: e.caseId });
           });
         });
       });
@@ -1103,17 +978,16 @@
     return c.name + (c.industry ? " (" + c.industry + ")" : "");
   }
 
-  /* ════ Case studies (spec 067) ═══════════════════════════════════════
-     The memory's tab, now the library it opens on. Finished case studies
-     stand as covers on shelves, one per industry; work still running or
-     being written sits on the desk until it is done; a case study reads as a
-     report with its insights inside it. Drawn in the console's own tokens
-     from the signed-off drawing (design-mockups/case-studies/
-     2026-10-23_case-studies-library.html).
+  /* ════ The Track Record (spec 069, which reworks spec 067's case studies) ═
+     The memory's tab. The front is one card per client; a client's page has
+     a tab per assignment — Planning or Retainer, added by the super user on
+     Clients — with its write-up and its learnings. Drawn in the console's own
+     tokens from the signed-off drawing (design-mockups/track-record/
+     2026-10-26_track-record-steps.html).
 
-     THE PAGE DERIVES NO RULE: `canOpen`, `canWrite`, `canAsk` and `hidden`
+     THE PAGE DERIVES NO RULE: `canOpen`, `canWrite`, `canRegister` and `hidden`
      are the server's (lib/case-api.ts), and it asks again on every press. */
-  var CS = { q: "", cat: "", one: null, opts: null, draft: null, pending: null, read: null, missing: null, ask: false, asking: false, jump: null };
+  var CS = { f: { q: "", industry: "", type: "", kind: "" }, one: null, opts: null, draft: null, pending: null, read: null, missing: null, ask: false, asking: false, jump: null };
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   var MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function ym(v) { var m = /^(\d{4})-(\d{2})$/.exec(v || ""); return m ? { y: +m[1], m: +m[2] - 1 } : null; }
@@ -1132,13 +1006,9 @@
     if (x) return "since " + w(x);
     return y ? "until " + w(y) : "";
   }
-  function dueWord(iso) {
-    var d = new Date(String(iso || "") + "T00:00:00");
-    return isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
-  }
+
   function firstName(n) { return String(n || "").split(/\s+/)[0]; }
   function cpostCases(body) { return send("/api/cases", body); }
-  var STATE_WORD = { running: "Running", writing: "Being written", done: "Done" };
 
   /* The client's mark where it has one — a PNG data URI only (§52), so it is
      safe as a src — and its initials where it does not (spec 067 §12). */
@@ -1151,232 +1021,550 @@
     return el("span", "logo", initials(client ? client.name : "?"));
   }
 
-  /* The switch between the two halves of the library, on every page of it. */
-  function csSwitch() {
-    var seg = el("span", "csseg");
-    seg.setAttribute("role", "group");
-    seg.setAttribute("aria-label", "Show");
-    [["lib", "Case studies"], ["list", "Insights"]].forEach(function (v) {
-      var on = MEM.view === v[0];
-      var b = el("button", on ? "on" : null, v[1]);
-      b.type = "button";
-      b.setAttribute("aria-pressed", String(on));
-      b.setAttribute("data-view", v[0]);
-      b.addEventListener("click", function () { if (!on) memGo(v[0]); });
-      seg.appendChild(b);
+  /* ── THE TRACK RECORD'S WORDS (spec 069) ───────────────────────────────
+     An assignment is Planning or Retainer; where its write-up stands is one
+     of four words, the fourth being the lead's own reminder: the work has
+     ended and nothing is written yet. */
+  var TYPE_WORD = { planning: "Planning", retainer: "Retainer" };
+  function thisMonth() { return new Date().toISOString().slice(0, 7); }
+  function asgEnded(c) { return !!c.ended && c.ended <= thisMonth(); }
+  function asgState(c) {
+    if (c.state === "done") return ["Written up", "pub"];
+    if (c.state === "writing") return ["Draft", "dr"];
+    return asgEnded(c) ? ["Not written", "late"] : ["Running", "run"];
+  }
+  function typeTag(kind) { return el("span", "ttag " + (kind || "planning"), TYPE_WORD[kind] || "Planning"); }
+  function kindTag(kind) { return el("span", "ktag " + kind, kindWord(kind)); }
+
+  /* + ADD TO TRACK RECORD, one button with its two choices (Islam: "add
+     learning or add a track record for a client as well?"). There is no
+     "add a client" here: clients and assignments come from Clients. */
+  function trAdd(client) {
+    var wrap = el("span", "tradd");
+    /* THE MENU IS PLACED ON THE SCREEN, not inside the band: the band
+       clips what overflows it (its drawn circle), so a menu inside it would
+       be cut off at its edge. It closes on the next press anywhere. */
+    var shut = function () { menu.hidden = true; document.removeEventListener("click", shut); window.removeEventListener("scroll", shut); };
+    var b = csButton("+ Add to Track Record", "amber", function (e) {
+      e.stopPropagation();
+      if (!menu.hidden) { shut(); return; }
+      var r = b.getBoundingClientRect();
+      menu.style.top = Math.round(r.bottom + 6) + "px";
+      menu.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + "px";
+      menu.hidden = false;
+      document.addEventListener("click", shut);
+      window.addEventListener("scroll", shut, { passive: true });
     });
-    return seg;
+    b.setAttribute("aria-haspopup", "true");
+    var menu = el("div", "tramenu");
+    menu.hidden = true;
+    [["pick", "Write up an assignment", "Pick a client and one of its assignments"],
+     ["learn", "Add learnings", "A hiccup, a practice or a lesson, with the prompt or by hand"]].forEach(function (o) {
+      var x = el("button");
+      x.type = "button";
+      x.setAttribute("data-add", o[0]);
+      x.appendChild(el("b", null, o[1]));
+      x.appendChild(el("small", null, o[2]));
+      x.addEventListener("click", function () { memGo(o[0], { pickClient: client || "", pickCase: o[0] === "learn" && client ? MEM.caseId : "" }); });
+      menu.appendChild(x);
+    });
+    wrap.appendChild(b); wrap.appendChild(menu);
+    return wrap;
   }
 
-  function csCover(c) {
-    var b = el("button", "cover");
-    b.type = "button";
-    b.setAttribute("data-case", c.id);
-    var cv = el("span", "cv");
-    cv.appendChild(csLogo(c.client));
-    /* New: finished in the last thirty days (the drawing's own rule). */
-    if (c.doneAt && Date.now() - new Date(c.doneAt).getTime() < 30 * 864e5) cv.appendChild(el("span", "newtag", "New"));
-    cv.appendChild(el("span", "cind", c.client.industry || "No industry set"));
-    cv.appendChild(el("span", "ctitle", c.name));
-    var when = spanWord(c.started, c.ended);
-    if (when) cv.appendChild(el("span", "cyr", when));
-    b.appendChild(cv);
-    var meta = el("span", "cmeta");
-    meta.appendChild(el("b", null, c.client.name));
-    meta.appendChild(el("span", null, nOf(c.deliverables, "deliverable") + " · " + nOf(c.insights, "insight")));
-    b.appendChild(meta);
-    b.addEventListener("click", function () { memGo("case", { caseId: c.id }); });
-    return b;
-  }
-
-  function csShelf(name, count, books, more) {
-    var sec = el("section", "shelf");
-    var h = el("div", "shh");
-    h.appendChild(el("h2", null, name));
-    h.appendChild(el("span", "n", String(count)));
-    if (more) {
-      var a = el("button", "textlink", "See the shelf ›");
-      a.type = "button";
-      a.addEventListener("click", more);
-      h.appendChild(a);
-    }
-    sec.appendChild(h);
-    var row = el("div", "books");
-    books.forEach(function (c) { row.appendChild(csCover(c)); });
-    sec.appendChild(row);
-    return sec;
-  }
-
-  /* ── The front of the library ──────────────────────────────────────── */
+  /* ── The front ─────────────────────────────────────────────────────────
+     One card per client with its assignments and where each write-up
+     stands (Islam: learnings "are part of the clients work", so there is no
+     second view). Picking a kind of learning, or searching, lists the
+     learnings that match across every client under the cards — the one
+     question the old Insights view answered ("every hiccup on a Retainer"). */
   function drawCases(quiet) {
     lead(quiet, "Reading…");
-    return cpostCases({ action: "library", q: CS.q }).then(function (j) {
-      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the case studies.", true); return; }
+    var f = CS.f;
+    var wantLearn = !!(f.kind || f.q);
+    return Promise.all([cpostCases({ action: "library", q: f.q }),
+                        wantLearn ? mpost({ action: "list", q: f.q, industry: f.industry, kind: f.kind, type: f.type }) : Promise.resolve(null)])
+    .then(function (both) {
+      var j = both[0], lj = both[1];
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the Track Record.", true); return; }
       settle(function () {
         var right = el("span");
-        /* THE BAND CARRIES THE TWO ACTS (round three): Ask a question, and
-           Open a piece of work for those who may; Case studies · Insights and
-           the search go to the library card's header. */
-        var askb = el("button", "btn ask", CS.ask ? "Search instead" : "Ask a question");
-        askb.type = "button";
-        askb.addEventListener("click", function () { CS.ask = !CS.ask; drawCases(true); });
+        var askb = csButton(CS.ask ? "Search instead" : "Ask a question", "ask", function () { CS.ask = !CS.ask; drawCases(true); });
         right.appendChild(askb);
-        if (j.canOpen) {
-          var add = el("button", "btn amber", "Open a piece of work");
-          add.type = "button";
-          add.addEventListener("click", function () { memGo("open", { opened: null }); });
-          right.appendChild(add);
-        }
-        var head = pageBand("Case studies", right, "", "What we did for each client, and what we learned doing it.");
-        var done = j.cases.filter(function (c) { return c.state === "done"; });
-        var desk = j.cases.filter(function (c) { return c.state !== "done"; });
-        head.eye.textContent = done.length + " on the shelves" + (desk.length ? " · " + desk.length + " on the desk" : "");
+        right.appendChild(trAdd(""));
+        var head = pageBand("Track Record", right, "", "What we did for each client, and what we learned doing it.");
 
-        /* THE LIBRARY IS ONE CARD (Islam, 2026-10-24, round three of
-           design-mockups/home/2026-10-24_one-band-everywhere.html): its header
-           holds Case studies · Insights and the search; the industries sit in
-           a row under it; each shelf is labelled over a grey rule, as My
-           tasks' groups are. One search across every case study; typing never
-           repaints (§35): it runs when the box is left or Enter is pressed. */
+        /* one card per client, in the order its newest assignment started */
+        var byClient = {}, order = [];
+        j.cases.forEach(function (c) {
+          var k = c.client.key;
+          if (!byClient[k]) { byClient[k] = { client: c.client, list: [], learn: 0 }; order.push(k); }
+          byClient[k].list.push(c);
+        });
+        (j.learnings || []).forEach(function (l) {
+          if (!byClient[l.client]) {
+            if (f.q) return;     /* a search names what matched, not every client with a note */
+            byClient[l.client] = { client: { key: l.client, name: l.name, industry: l.industry, size: l.size, mark: l.mark || null }, list: [], learn: 0 };
+            order.push(l.client);
+          }
+          byClient[l.client].learn = l.n;
+        });
+        var groups = order.map(function (k) { return byClient[k]; });
+        var written = j.cases.filter(function (c) { return c.state === "done"; }).length;
+        var nLearn = (j.learnings || []).reduce(function (n, l) { return n + l.n; }, 0);
+        head.eye.textContent = nOf(groups.length, "client") + " · " + nOf(j.cases.length, "assignment") + " · " + written + " written up · " + nOf(nLearn, "learning");
+
         var card = el("section", "hocard cslib");
         var hd = el("div", "hochd");
         var hic = el("span", "hocic");
         hic.innerHTML = NAV_ICON.memory;
         hd.appendChild(hic);
-        hd.appendChild(el("h2", null, "The library"));
-        hd.appendChild(el("span", "hocnt", String(done.length)));
+        var hname = el("h2", null, f.kind ? "Learnings" : "Clients");
+        hd.appendChild(hname);
+        var hcnt = el("span", "hocnt");
+        hd.appendChild(hcnt);
         hd.appendChild(el("span", "sp"));
-        hd.appendChild(csSwitch());
+        /* TYPING NEVER REPAINTS (§35): it runs when the box is left or Enter */
         var q = el("input", "fld");
-        q.type = "search"; q.id = "cs-q"; q.value = CS.q;
-        q.placeholder = "Search by client, industry, or what we did";
-        q.setAttribute("aria-label", "Search case studies");
-        q.addEventListener("change", function () { CS.q = q.value.trim(); CS.cat = ""; drawCases(true); });
+        q.type = "search"; q.id = "cs-q"; q.value = f.q;
+        q.placeholder = "Search write-ups and learnings";
+        q.setAttribute("aria-label", "Search the Track Record");
+        q.addEventListener("change", function () { f.q = q.value.trim(); drawCases(true); });
         hd.appendChild(q);
         card.appendChild(hd);
         if (CS.ask) { var ab = memAskBox(); ab.classList.add("inlib"); card.appendChild(ab); }
-        /* THE INDUSTRIES ARE TABS, drawn from what is on the shelves, never
-           from every industry there is: a tab that empties the page is not a
-           choice (§61). */
-        var counts = {};
-        done.forEach(function (c) { var k = c.client.industry || "No industry set"; counts[k] = (counts[k] || 0) + 1; });
-        var cats = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
-        if (CS.cat && !counts[CS.cat]) CS.cat = "";
-        if (cats.length) {
-          var row = el("nav", "catrow");
-          row.setAttribute("aria-label", "Industries");
-          [["", "All", done.length]].concat(cats.map(function (k) { return [k, k, counts[k]]; })).forEach(function (t) {
-            var a = el("button", CS.cat === t[0] ? "on" : null, t[1]);
-            a.type = "button";
-            a.setAttribute("data-cat", t[0]);
-            a.appendChild(el("i", null, String(t[2])));
-            a.addEventListener("click", function () { CS.cat = t[0]; drawCases(true); });
-            row.appendChild(a);
+
+        /* THE FILTERS ARE CHIPS, drawn from what is here (§61): industries
+           the cards carry; the two types; the three kinds of learning. */
+        var inds = {};
+        groups.forEach(function (g) { if (g.client.industry) inds[g.client.industry] = true; });
+        var chips = el("div", "trchips");
+        var chipRow = function (label, key, opts) {
+          if (!opts.length) return;
+          chips.appendChild(el("span", "lbl", label));
+          opts.forEach(function (o) {
+            var on = f[key] === o[0];
+            var b = el("button", on ? "on" : null, o[1]);
+            b.type = "button";
+            b.setAttribute("data-" + key, o[0]);
+            b.setAttribute("aria-pressed", String(on));
+            b.addEventListener("click", function () { f[key] = on ? "" : o[0]; drawCases(true); });
+            chips.appendChild(b);
           });
-          card.appendChild(row);
+          chips.appendChild(el("span", "div"));
+        };
+        chipRow("Industry", "industry", Object.keys(inds).sort().map(function (k) { return [k, k]; }));
+        chipRow("Type", "type", [["planning", "Planning"], ["retainer", "Retainer"]]);
+        chipRow("Learnings", "kind", KINDS.map(function (k) { return [k[0], k[1]]; }));
+        if (f.industry || f.type || f.kind || f.q) {
+          chips.appendChild(csButton("Clear", "sm", function () { CS.f = { q: "", industry: "", type: "", kind: "" }; drawCases(true); }));
         }
-        if (!done.length) {
-          var box = el("div", "empty");
-          box.appendChild(el("b", null, CS.q ? "Nothing on the shelves matches that" : "No case studies on the shelves yet"));
-          box.appendChild(document.createTextNode(CS.q
-            ? "Try a client's name, an industry, or a word from the story."
-            : "A case study goes on its industry's shelf when its writer marks it done."));
-          card.appendChild(box);
-        } else if (CS.cat) {
-          card.appendChild(csShelf(CS.cat, counts[CS.cat], done.filter(function (c) {
-            return (c.client.industry || "No industry set") === CS.cat; }), null));
-        } else {
-          card.appendChild(csShelf("Newest", Math.min(4, done.length), done.slice(0, 4), null));
-          cats.forEach(function (k) {
-            card.appendChild(csShelf(k, counts[k], done.filter(function (c) {
-              return (c.client.industry || "No industry set") === k; }), function () { CS.cat = k; drawCases(true); }));
-          });
+        card.appendChild(chips);
+
+        var shown = groups.filter(function (g) { return !f.industry || g.client.industry === f.industry; })
+          .map(function (g) { return { client: g.client, learn: g.learn, list: g.list.filter(function (c) { return !f.type || c.kind === f.type; }) }; })
+          .filter(function (g) { return !f.type || g.list.length; });
+
+        if (!f.kind) {
+          hcnt.textContent = String(shown.length);
+          if (!shown.length) {
+            var box = el("div", "empty");
+            box.appendChild(el("b", null, f.q || f.industry || f.type ? "Nothing matches that" : "Nothing in the Track Record yet"));
+            box.appendChild(document.createTextNode(f.q || f.industry || f.type
+              ? "Try a client's name, an industry, or a word from a write-up."
+              : "Assignments are added on the Clients page, and each one is written up when it ends."));
+            card.appendChild(box);
+          } else {
+            var grid = el("div", "trcards");
+            shown.forEach(function (g) { grid.appendChild(trClientCard(g)); });
+            card.appendChild(grid);
+          }
+        }
+        if (lj && lj.ok) {
+          if (f.kind) hcnt.textContent = String(lj.entries.length);
+          else card.appendChild(el("h3", "trsub", nOf(lj.entries.length, "learning") + " matching"));
+          if (!lj.entries.length && f.kind) card.appendChild(el("p", "muted mwnone", "No learnings match that."));
+          var res = el("div", "trres");
+          lj.entries.forEach(function (e) { res.appendChild(trLearnRow(e)); });
+          card.appendChild(res);
         }
         page.appendChild(card);
-
-        /* ON THE DESK IS ITS OWN CARD, its rows striped: work running or being
-           written; the story inside a draft stays the writer's. */
-        if (desk.length) {
-          var d = el("section", "hocard desk");
-          var dh = el("div", "hochd");
-          var dic = el("span", "hocic");
-          dic.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 10v9M19 10v9"/><path d="M8 10V6h8v4"/></svg>';
-          dh.appendChild(dic);
-          dh.appendChild(el("h2", null, "On the desk"));
-          dh.appendChild(el("span", "hocnt", String(desk.length)));
-          d.appendChild(dh);
-          desk.forEach(function (c) {
-            var r = el("button", "drow");
-            r.type = "button";
-            r.setAttribute("data-case", c.id);
-            r.appendChild(el("span", "spine" + (c.state === "running" ? " run" : ""), initials(c.client.name)));
-            var tx = el("span", "tx");
-            tx.appendChild(el("b", null, c.name));
-            var bits = [c.client.name + (c.client.past ? " · past client" : c.client.archived ? " · archived" : "")];
-            if (c.state === "writing" && c.writer) bits.push((c.writer.id === j.me ? "you are" : c.writer.name + " is") + " writing it" + (c.due ? " · due " + dueWord(c.due) : ""));
-            if (c.state === "running") { var w = spanWord(c.started, ""); if (w) bits.push(w); bits.push(nOf(c.insights, "insight") + " so far"); }
-            tx.appendChild(el("span", null, bits.join(" · ")));
-            r.appendChild(tx);
-            r.appendChild(el("span", "state " + (c.state === "running" ? "run" : "write"), STATE_WORD[c.state]));
-            r.addEventListener("click", function () { memGo("case", { caseId: c.id }); });
-            d.appendChild(r);
-          });
-          page.appendChild(d);
-        }
-        var loose = (j.toPlace || []).reduce(function (n, t) { return n + t.n; }, 0);
-        if (loose) {
-          var tp = el("p", "toplace");
-          tp.appendChild(el("b", null, nOf(loose, "insight")));
-          tp.appendChild(document.createTextNode(" not in a case study yet · " +
-            j.toPlace.map(function (t) { return t.client + " " + t.n; }).join(" · ") + " "));
-          var go2 = el("button", "textlink", "Place them ›");
-          go2.type = "button";
-          go2.addEventListener("click", function () { MEM.filters.case = "none"; memGo("list"); });
-          tp.appendChild(go2);
-          page.appendChild(tp);
-        }
       });
     }).catch(function (e) { if (String(e.message) !== "sign in") { clear(); say("Could not reach the server.", true); } });
   }
 
-  /* ── A case study, as a report ─────────────────────────────────────── */
-  function csHeader(c, acts) {
-    var crumb = el("div", "crumb");
-    var a = el("button", "textlink", "Case studies");
-    a.type = "button";
-    a.addEventListener("click", function () { memGo("lib"); });
-    crumb.appendChild(a);
-    crumb.appendChild(el("span", null, "›"));
-    if (c.state === "done" && c.client.industry) {
-      var b = el("button", "textlink", c.client.industry);
-      b.type = "button";
-      b.addEventListener("click", function () { CS.cat = c.client.industry; memGo("lib"); });
-      crumb.appendChild(b);
-    } else crumb.appendChild(el("span", null, c.state === "done" ? "No industry set" : "On the desk"));
-    crumb.appendChild(el("span", null, "›"));
-    crumb.appendChild(el("span", "here", c.name));
-    page.appendChild(crumb);
+  function trClientCard(g) {
+    var b = el("div", "trcard");
+    b.setAttribute("data-client", g.client.key);
+    var hd = el("button", "trhd");
+    hd.type = "button";
+    hd.appendChild(csLogo(g.client));
+    var t = el("span");
+    t.appendChild(el("b", null, g.client.name));
+    t.appendChild(el("small", null, [g.client.industry, g.client.past ? "Past client" : g.client.archived ? "Ended" : ""].filter(Boolean).join(" · ")));
+    hd.appendChild(t);
+    hd.addEventListener("click", function () { memGo("client", { clientKey: g.client.key, caseId: null }); });
+    b.appendChild(hd);
+    var list = el("div", "trasg");
+    g.list.slice().reverse().forEach(function (c) {
+      var r = el("button");
+      r.type = "button";
+      r.setAttribute("data-case", c.id);
+      r.appendChild(typeTag(c.kind));
+      r.appendChild(el("span", "nm", c.name));
+      var st = asgState(c);
+      r.appendChild(el("span", "st " + st[1], st[0]));
+      r.addEventListener("click", function () { memGo("client", { clientKey: g.client.key, caseId: c.id }); });
+      list.appendChild(r);
+    });
+    if (g.list.length) b.appendChild(list);
+    b.appendChild(el("p", "trft", g.learn ? nOf(g.learn, "learning") : "No learnings yet"));
+    return b;
+  }
 
-    var h = el("header", "rhead");
-    h.appendChild(csLogo(c.client));
-    var mid = el("div");
-    var eb = [c.client.industry || "", spanWord(c.started, c.ended)].filter(Boolean).join(" · ");
-    if (eb) mid.appendChild(el("div", "eb", eb));
-    mid.appendChild(el("h1", null, c.name));
-    var cl = el("p", "cl");
-    cl.appendChild(el("b", null, c.client.name));
-    var who = c.client.past ? " · past client" : c.client.archived ? " · archived" : "";
-    if (c.state === "done") who += c.writer ? " · written by " + c.writer.name : "";
-    else if (c.state === "writing" && c.writer) who += " · " + c.writer.name + " is writing it" + (c.due ? " · due " + dueWord(c.due) : "");
-    else if (c.openedBy) who += " · opened by " + c.openedBy;
-    cl.appendChild(document.createTextNode(who));
-    mid.appendChild(cl);
-    h.appendChild(mid);
-    var right = el("div", "acts");
-    right.appendChild(el("span", "chip " + c.state, STATE_WORD[c.state]));
-    (acts || []).forEach(function (x) { right.appendChild(x); });
-    h.appendChild(right);
-    page.appendChild(h);
+  function trLearnRow(e) {
+    var b = el("button", "trlr");
+    b.type = "button";
+    b.appendChild(kindTag(e.kind));
+    var t = el("span", "tx");
+    t.appendChild(el("b", null, e.title));
+    var snip = memSnip(e);
+    if (snip) t.appendChild(el("small", null, snip));
+    b.appendChild(t);
+    var w = el("span", "wh");
+    w.appendChild(el("b", null, e.clientName));
+    w.appendChild(el("span", "by", e.author));   /* the author is what a reader acts on (spec 045 decision 3) */
+    if (e.caseName) { var a = el("span"); if (e.caseKind) a.appendChild(typeTag(e.caseKind)); a.appendChild(document.createTextNode(" " + e.caseName)); w.appendChild(a); }
+    else w.appendChild(el("span", "loose", "Not tied to an assignment yet"));
+    b.appendChild(w);
+    b.addEventListener("click", function () { memGo("entry", { entry: e.id, back: "lib" }); });
+    return b;
+  }
+
+  /* ── A client's page ───────────────────────────────────────────────────
+     The client on top, its assignments on a strip of months, one tab each;
+     inside a tab the write-up and that assignment's learnings. A learning
+     tied to none sits under the tabs until somebody picks its assignment. */
+  function drawCase(quiet) {
+    /* A write-up pressed on My tasks or Home names its assignment, not its
+       client: read it once for the client, then draw the client's page on it. */
+    lead(quiet, "Reading…");
+    return cpostCases({ action: "case", id: MEM.caseId }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That assignment is no longer here.", true); return; }
+      var c = j.case;
+      var fresh = CS.fresh; CS.fresh = false;
+      MEM.clientKey = c.client.key;
+      if (fresh && c.canWrite && c.state !== "done" && !(c.inShort || c.clientWhy || c.askedToDo || c.cameOfIt || c.deliverables.length)) return memGo("write");
+      return memGo("client");
+    });
+  }
+
+  function drawClientPage(quiet) {
+    lead(quiet, "Reading…");
+    return cpostCases({ action: "client", client: MEM.clientKey }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That client is not here.", true); return; }
+      var list = j.assignments;
+      var pick = list.filter(function (c) { return c.id === MEM.caseId; })[0] || list[list.length - 1] || null;
+      MEM.caseId = pick ? pick.id : null;
+      return (pick ? cpostCases({ action: "case", id: pick.id }) : Promise.resolve(null)).then(function (k) {
+        settle(function () { trClientPage(j, k && k.ok ? k.case : null); });
+      });
+    }).catch(function (e) { if (String(e.message) !== "sign in") { clear(); say("Could not reach the server.", true); } });
+  }
+
+  function trCrumb(parts) {
+    var crumb = el("div", "crumb");
+    parts.forEach(function (p, i) {
+      if (i) crumb.appendChild(el("span", null, "›"));
+      if (p[1]) { var a = el("button", "textlink", p[0]); a.type = "button"; a.addEventListener("click", p[1]); crumb.appendChild(a); }
+      else crumb.appendChild(el("span", "here", p[0]));
+    });
+    page.appendChild(crumb);
+  }
+
+  function trClientPage(j, c) {
+    var cl = j.client;
+    trCrumb([["Track Record", function () { memGo("lib"); }], [cl.name]]);
+    var head = pageBand(cl.name, trAdd(cl.key), [cl.industry, cl.size, cl.past ? "Past client" : cl.archived ? "Ended" : ""].filter(Boolean).join(" · "), null);
+    head.classList.add("trband");
+    head.insertBefore(csLogo(cl), head.firstChild);
+    var said = el("p", "err"); said.hidden = true;
+    page.appendChild(said);
+
+    if (!j.assignments.length) {
+      var none = el("div", "empty");
+      none.appendChild(el("b", null, "No assignments yet"));
+      none.appendChild(document.createTextNode(j.canOpen ? "Add this client's assignments on the Clients page, in the list view." : "The super user adds this client's assignments on the Clients page."));
+      page.appendChild(none);
+    } else {
+      page.appendChild(trTimeline(j.assignments));
+      var tabs = el("div", "trtabs");
+      tabs.setAttribute("role", "tablist");
+      j.assignments.slice().reverse().forEach(function (a) {
+        var on = c && a.id === c.id;
+        var b = el("button", on ? "on" : null);
+        b.type = "button";
+        b.setAttribute("role", "tab");
+        b.setAttribute("aria-selected", String(on));
+        b.setAttribute("data-case", a.id);
+        b.appendChild(typeTag(a.kind));
+        b.appendChild(document.createTextNode(a.name));
+        b.addEventListener("click", function () { if (!on) { MEM.caseId = a.id; drawClientPage(true); } });
+        tabs.appendChild(b);
+      });
+      page.appendChild(tabs);
+      if (c) trAssignment(c, said);
+    }
+
+    if (j.loose.length) {
+      var sec = el("section", "trloose");
+      var h = el("div", "trlh");
+      h.appendChild(el("h2", null, "Not tied to an assignment yet"));
+      h.appendChild(el("span", "hocnt", String(j.loose.length)));
+      sec.appendChild(h);
+      var cards = el("div", "icards");
+      j.loose.forEach(function (e) { cards.appendChild(csInsightCard(e)); });
+      sec.appendChild(cards);
+      page.appendChild(sec);
+    }
+  }
+
+  /* The assignments as bars on one strip of months, from the first start to
+     the last end (or this month, for one still running). Months are the
+     registry's own 'YYYY-MM', so nothing here is placed by guessing. */
+  function trTimeline(list) {
+    var box = el("div", "trtl");
+    var now = ym(thisMonth()), idx = function (p) { return p.y * 12 + p.m; };
+    var starts = list.map(function (c) { return ym(c.started); }).filter(Boolean);
+    if (!starts.length) return box;
+    var lo = Math.min.apply(null, starts.map(idx));
+    var hi = Math.max.apply(null, list.map(function (c) { var e = ym(c.ended); return e ? idx(e) : idx(now); }).concat([lo]));
+    var span = hi - lo + 1;
+    var bars = el("div", "trbars");
+    list.forEach(function (c) {
+      var a = ym(c.started); if (!a) return;
+      var e = ym(c.ended), end = e ? idx(e) : idx(now);
+      var bar = el("button", "trbar " + (c.kind || "planning") + (e ? "" : " open"));
+      bar.type = "button";
+      bar.style.left = ((idx(a) - lo) / span * 100) + "%";
+      bar.style.width = (Math.max(1, end - idx(a) + 1) / span * 100) + "%";
+      bar.textContent = (TYPE_WORD[c.kind] || "Planning") + " · " + c.name + (e ? "" : " (running)");
+      bar.title = bar.textContent + " · " + spanWord(c.started, c.ended);
+      bar.addEventListener("click", function () { MEM.caseId = c.id; drawClientPage(true); });
+      bars.appendChild(bar);
+    });
+    box.appendChild(bars);
+    var ticks = el("div", "trticks");
+    var mid = Math.floor((lo + hi) / 2);
+    [lo, mid, hi].filter(function (v, i, all) { return all.indexOf(v) === i; }).forEach(function (v) {
+      ticks.appendChild(el("span", null, MONTHS[v % 12] + " " + Math.floor(v / 12)));
+    });
+    box.appendChild(ticks);
+    return box;
+  }
+
+  /* ONE ASSIGNMENT, inside its tab: the write-up as a report on the left,
+     At a glance on the right with the one button that moves it on. */
+  function trAssignment(c, said) {
+    var grid = el("div", "rgrid trgrid");
+    var art = el("article");
+    grid.appendChild(art);
+    var host = page;
+    page = art;
+    try {
+      var st = asgState(c);
+      if (c.hidden) art.appendChild(el("p", "stand later", (c.writer ? c.writer.name + " is writing it up." : "It is being written up.") + " Everyone can read it once it is published."));
+      else if (c.state === "running") art.appendChild(el("p", "stand later", asgEnded(c)
+        ? "This assignment ended " + monthWord(c.ended) + " and is not written up yet."
+        : "Running " + spanWord(c.started, "") + ". The write-up comes when it ends; learnings can be added now."));
+      else if (c.inShort) art.appendChild(el("p", "stand", c.inShort));
+      else art.appendChild(el("p", "stand later", "In short has not been written yet."));
+      if (!c.hidden && c.state !== "running") csReportBody(c, art, said);
+      var ins = el("section", "rsec trlearn");
+      var h = el("div", "trlh");
+      h.appendChild(el("h2", null, c.state === "running" && !asgEnded(c) ? "Learnings so far" : "Learnings from this assignment"));
+      h.appendChild(el("span", "hocnt", String(c.insightList.length)));
+      h.appendChild(el("span", "sp"));
+      h.appendChild(csButton("+ Add learnings", "sm", function () { memGo("learn", { pickClient: c.client.key, pickCase: c.id }); }));
+      ins.appendChild(h);
+      ins.appendChild(csAddLine(c, function () { drawClientPage(true); }));
+      if (c.insightList.length) {
+        var cards = el("div", "icards");
+        c.insightList.forEach(function (e) { cards.appendChild(csInsightCard(e)); });
+        ins.appendChild(cards);
+      }
+      art.appendChild(ins);
+
+      var side = el("aside", "glance");
+      var g = el("div", "gbox");
+      g.appendChild(el("h3", null, "At a glance"));
+      var dl = el("dl");
+      var row = function (k, v) { if (!v) return; dl.appendChild(el("dt", null, k)); var dd = el("dd"); if (typeof v === "string") dd.textContent = v; else dd.appendChild(v); dl.appendChild(dd); };
+      row("Type", typeTag(c.kind));
+      row("When", spanWord(c.started, c.ended));
+      row("Lead", c.lead ? c.lead.name : "");
+      row("Team", c.ourTeam.map(function (p) { return p.name; }).join(", "));
+      if (!c.hidden && c.state !== "running") row("Deliverables", String(c.deliverables.length));
+      row("Learnings", String(c.insightList.length));
+      g.appendChild(dl);
+      g.appendChild(el("p", "src", "Type, months, lead and team come from the Clients page."));
+      var stl = el("p", "trst");
+      stl.appendChild(el("span", "st " + st[1], st[0] + (c.state === "done" && c.doneAt ? " · " + whenWord(c.doneAt) : "")));
+      if (c.writer && c.state !== "running") stl.appendChild(el("span", "muted", (c.state === "done" ? "by " : "writing: ") + c.writer.name));
+      g.appendChild(stl);
+      var acts = el("div", "gacts");
+      /* the write-up comes when the work ends; a super user may start one early */
+      if (c.canWrite && c.state === "running" && (asgEnded(c) || c.canRegister)) acts.appendChild(csButton("Write it up", "amber", function () { memGo("write"); }));
+      if (c.canWrite && c.state === "writing") {
+        acts.appendChild(csButton("Continue the draft", "amber", function () { CS.draft = null; memGo("draft"); }));
+        acts.appendChild(csButton("The prompt", "", function () { memGo("write"); }));
+      }
+      if (c.canWrite && c.state === "done") acts.appendChild(csButton("Edit", "", function () { CS.draft = null; memGo("draft"); }));
+      if (acts.firstChild) g.appendChild(acts);
+      side.appendChild(g);
+      grid.appendChild(side);
+    } finally { page = host; }
+    page.appendChild(grid);
+  }
+
+  /* THE WRITE-UP'S SECTIONS, numbered, each only where it holds something. */
+  function csReportBody(c, art, said) {
+    var n = 0;
+    var add = function (name, count) { n++; return csSection(art, n, name, count); };
+    if (c.clientWhy) add("The client and why they came to us").appendChild(el("p", null, c.clientWhy));
+    if (c.askedToDo) add("What we were asked to do").appendChild(el("p", null, c.askedToDo));
+    if (c.ourTeam.length || c.theirTeam.length) {
+      var ppl = el("div", "people");
+      [["Forefront", c.ourTeam, ""], [c.client.name, c.theirTeam, " them"]].forEach(function (g) {
+        if (!g[1].length) return;
+        var col = el("div");
+        col.appendChild(el("h4", null, g[0]));
+        var ul = el("ul", "plist");
+        g[1].forEach(function (p) {
+          var li = el("li");
+          li.appendChild(el("span", "av" + g[2], initials(p.name)));
+          var t = el("span");
+          t.appendChild(el("b", null, p.name));
+          if (p.role) t.appendChild(el("span", null, p.role));
+          li.appendChild(t);
+          ul.appendChild(li);
+        });
+        col.appendChild(ul);
+        ppl.appendChild(col);
+      });
+      add("The team").appendChild(ppl);
+    }
+    if (c.stages.length) add("Timeline", spanLong(c.started, c.ended)).appendChild(csTimeline(c));
+    if (c.deliverables.length) {
+      var nofile = c.deliverables.filter(function (d) { return !d.file; }).length;
+      var files = el("div", "files");
+      c.deliverables.forEach(function (d) {
+        var t = el("div", "ftile" + (d.file ? "" : " missing"));
+        var top = el("div", "ftop");
+        var ft = fileType(d.file && d.file.name);
+        top.appendChild(el("span", "ftype " + ft[1], d.file ? ft[0] : "—"));
+        if (d.month) top.appendChild(el("span", "fmon", d.month));
+        t.appendChild(top);
+        t.appendChild(el("b", null, d.name || "(no name)"));
+        if (d.what) t.appendChild(el("p", null, d.what));
+        if (d.file) {
+          var o = csButton("Open the file", "open", function () { csOpenFile(c, d, said); });
+          o.title = d.file.name + (d.file.size ? " · " + d.file.size : "");
+          t.appendChild(o);
+        } else t.appendChild(el("span", "open", "No file attached"));
+        files.appendChild(t);
+      });
+      add("Deliverables", c.deliverables.length + (nofile ? " · " + nofile + " with no file" : "")).appendChild(files);
+    }
+    if (c.cameOfIt) add("What came of it").appendChild(el("p", null, c.cameOfIt));
+    if (c.whoToAsk.length) {
+      var asks = el("div", "askers");
+      c.whoToAsk.forEach(function (p) {
+        var box = el("div", "asker");
+        box.appendChild(el("span", "av", initials(p.name)));
+        var t = el("div", "t");
+        t.appendChild(el("b", null, p.name));
+        if (p.about) t.appendChild(el("p", null, p.about));
+        /* the address is the consultant's own, where the name is one of
+           ours — a mailto is a convenience that may do nothing */
+        var mate = c.ourTeam.filter(function (q) { return q.name === p.name; })[0];
+        if (mate && mate.email) {
+          var m = el("a", "btn", "Ask " + firstName(p.name));
+          m.href = "mailto:" + mate.email + "?subject=" + encodeURIComponent(c.name);
+          t.appendChild(m);
+        }
+        box.appendChild(t);
+        asks.appendChild(box);
+      });
+      add("Who to ask").appendChild(asks);
+    }
+  }
+
+  /* ── Picking an assignment: to write it up, or to add learnings to it ──
+     Every client with an assignment, then its assignments, newest first.
+     The client and assignment a page was opened from arrive chosen. */
+  function trPickers(j, onChange) {
+    var pair = el("div", "fpair trpick");
+    var withAsg = {};
+    j.cases.forEach(function (c) { (withAsg[c.client.key] = withAsg[c.client.key] || { client: c.client, list: [] }).list.push(c); });
+    var keys = Object.keys(withAsg).sort(function (a, b) { return withAsg[a].client.name.localeCompare(withAsg[b].client.name); });
+    var cb = el("div"); cb.appendChild(labFor("tr-p-client", "Client"));
+    var cs = el("select", "fld"); cs.id = "tr-p-client";
+    keys.forEach(function (k) { var o = el("option", null, withAsg[k].client.name); o.value = k; cs.appendChild(o); });
+    if (MEM.pickClient && withAsg[MEM.pickClient]) cs.value = MEM.pickClient;
+    cb.appendChild(cs); pair.appendChild(cb);
+    var ab = el("div"); ab.appendChild(labFor("tr-p-asg", "Assignment"));
+    var as = el("select", "fld"); as.id = "tr-p-asg";
+    ab.appendChild(as); pair.appendChild(ab);
+    var fill = function () {
+      as.textContent = "";
+      var g = withAsg[cs.value];
+      (g ? g.list : []).forEach(function (c) {
+        var o = el("option", null, (TYPE_WORD[c.kind] || "Planning") + " · " + c.name + " (" + spanWord(c.started, c.ended) + (c.ended ? "" : ", running") + ")");
+        o.value = c.id;
+        as.appendChild(o);
+      });
+      if (MEM.pickCase && g && g.list.some(function (c) { return c.id === MEM.pickCase; })) as.value = MEM.pickCase;
+    };
+    fill();
+    cs.addEventListener("change", function () { MEM.pickClient = cs.value; MEM.pickCase = ""; fill(); onChange(); });
+    as.addEventListener("change", function () { MEM.pickCase = as.value; onChange(); });
+    var pickedCase = function () { var g = withAsg[cs.value]; return g ? g.list.filter(function (c) { return c.id === as.value; })[0] || null : null; };
+    return { node: pair, empty: !keys.length, picked: pickedCase };
+  }
+
+  function drawPick() {
+    lead(false, "Reading…");
+    return cpostCases({ action: "library" }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the Track Record.", true); return; }
+      settle(function () {
+        trCrumb([["Track Record", function () { memGo("lib"); }], ["Write up an assignment"]]);
+        var card = el("section", "formcard trpickcard");
+        card.appendChild(el("h2", null, "Write up an assignment"));
+        var p = trPickers(j, function () { draw(); });
+        if (p.empty) { card.appendChild(el("p", "muted", "There are no assignments yet. They are added on the Clients page.")); page.appendChild(card); return; }
+        card.appendChild(p.node);
+        var note = el("p", "muted");
+        card.appendChild(note);
+        var fa = el("div", "factions");
+        fa.appendChild(csButton("Cancel", "", function () { memGo("lib"); }));
+        var go1 = csButton("Write it up", "amber", function () {
+          var c = p.picked(); if (!c) return;
+          MEM.caseId = c.id; MEM.clientKey = c.client.key;
+          if (c.state === "done") { CS.draft = null; memGo("draft"); } else memGo("write");
+        });
+        fa.appendChild(go1);
+        card.appendChild(fa);
+        var draw = function () {
+          var c = p.picked();
+          note.textContent = !c ? "" : c.state === "done" ? "It is written up already. Pressing on opens it to edit."
+            : c.state === "writing" ? (c.writer ? c.writer.name + " has started it." : "It has been started.") : "";
+          go1.textContent = c && c.state === "done" ? "Edit it" : c && c.state === "writing" ? "Continue it" : "Write it up";
+        };
+        draw();
+        page.appendChild(card);
+      });
+    });
   }
 
   function csButton(text, cls, fn) {
@@ -1478,7 +1666,7 @@
     line.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
     var inp = el("input");
     inp.type = "text"; inp.id = "cs-add-insight";
-    inp.placeholder = "Write an insight from this work and press Enter";
+    inp.placeholder = "Write a learning from this assignment and press Enter";
     inp.addEventListener("keydown", function (ev) {
       if (ev.key !== "Enter" || !inp.value.trim() || inp.disabled) return;
       inp.disabled = true;
@@ -1492,377 +1680,15 @@
     return line;
   }
 
-  function drawCase(quiet) {
-    lead(quiet, "Reading…");
-    return cpostCases({ action: "case", id: MEM.caseId }).then(function (j) {
-      if (!j || !j.ok) {
-        settle(function () {
-          title("Case studies", (function () { var r = el("span"); r.appendChild(csButton("Back to the library", "", function () { memGo("lib"); })); return r; }()));
-          say((j && j.error) || "That case study is no longer here.", true);
-        });
-        return;
-      }
-      var c = CS.one = j.case;
-      /* FROM MY WORK, A WRITE-UP NOT YET STARTED OPENS ON THE INTERVIEW (the
-         drawing's 8 → 9); one already started opens on its page, with the
-         interview and the draft one press away. */
-      var fresh = CS.fresh; CS.fresh = false;
-      if (fresh && c.canWrite && c.state === "writing" &&
-          !(c.inShort || c.clientWhy || c.askedToDo || c.cameOfIt || c.deliverables.length)) return memGo("write");
-      var needOpts = c.canAsk && c.state === "running" && !CS.opts;
-      (needOpts ? cpostCases({ action: "options" }).then(function (o) { CS.opts = o && o.ok ? o : null; }) : Promise.resolve()).then(function () {
-        settle(function () { csCasePage(c); });
-      });
-    }).catch(function (e) { if (String(e.message) !== "sign in") { clear(); say("Could not reach the server.", true); } });
-  }
-
-  function csCasePage(c) {
-    var said = el("p", "err");
-    said.hidden = true;
-    var acts = [];
-    var hasStory = !!(c.inShort || c.clientWhy || c.askedToDo || c.cameOfIt || c.deliverables.length);
-
-    if (c.canWrite && c.state === "writing") {
-      acts.push(csButton("The interview", "", function () { memGo("write"); }));
-      acts.push(csButton(hasStory ? "Edit the draft" : "Type it in", "amber", function () { CS.draft = null; memGo("draft"); }));
-    }
-    if (c.canWrite && c.state === "done") acts.push(csButton("Edit", "", function () { CS.draft = null; memGo("draft"); }));
-    if (c.canAsk && c.state === "running") acts.push(csButton("Ask for the write-up", "amber", function () { CS.asking = !CS.asking; drawCase(true); }));
-    csHeader(c, acts);
-    page.appendChild(said);
-
-    /* ASKING FOR THE WRITE-UP, in place: who, by when, and the month it
-       ended — what `writing` means (decision 7). */
-    if (CS.asking && c.canAsk && c.state === "running" && CS.opts) {
-      var ap = el("section", "askpanel");
-      ap.appendChild(el("h2", null, "Ask for the write-up"));
-      var pr = el("div", "fpair");
-      var wb = el("div"); wb.appendChild(labFor("cs-ask-who", "Who writes it"));
-      var ws = el("select", "fld"); ws.id = "cs-ask-who";
-      CS.opts.consultants.forEach(function (p) { var o = el("option", null, p.name || p.email); o.value = p.id; ws.appendChild(o); });
-      wb.appendChild(ws); pr.appendChild(wb);
-      var db = el("div"); db.appendChild(labFor("cs-ask-due", "Wanted by"));
-      var dd = el("input", "fld"); dd.id = "cs-ask-due"; dd.type = "date";
-      db.appendChild(dd); pr.appendChild(db);
-      var eb2 = el("div"); eb2.appendChild(labFor("cs-ask-end", "Ended"));
-      var ed2 = el("input", "fld"); ed2.id = "cs-ask-end"; ed2.type = "month"; ed2.value = c.ended || "";
-      eb2.appendChild(ed2); pr.appendChild(eb2);
-      ap.appendChild(pr);
-      var fa = el("div", "factions");
-      fa.appendChild(csButton("Cancel", "", function () { CS.asking = false; drawCase(true); }));
-      var go1 = csButton("Ask", "amber", function () {
-        go1.disabled = true;
-        cpostCases({ action: "ask", id: c.id, writer: ws.value, due: dd.value, ended: ed2.value }).then(function (r) {
-          go1.disabled = false;
-          if (!r || !r.ok) { said.textContent = (r && r.error) || "That did not save."; said.hidden = false; return; }
-          CS.asking = false; drawCase(true);
-        });
-      });
-      fa.appendChild(go1);
-      ap.appendChild(fa);
-      page.appendChild(ap);
-    }
-
-    if (c.hidden) page.appendChild(el("p", "stand later", (c.writer ? c.writer.name + " is writing it up." : "It is being written up.") + " It can be read once it is marked done."));
-    else if (c.state === "running") page.appendChild(el("p", "stand later", "The story is written when the work ends."));
-    else if (c.inShort) page.appendChild(el("p", "stand", c.inShort));
-    else page.appendChild(el("p", "stand later", "In short has not been written yet."));
-
-    var grid = el("div", c.hidden || c.state === "running" ? "rgrid solo" : "rgrid");
-    var art = el("article");
-    grid.appendChild(art);
-    var n = 0, toc = [["·", "In short", null]];
-    var add = function (name, count) { n++; toc.push([(n < 10 ? "0" : "") + n, name, "cs-sec-" + n]); return csSection(art, n, name, count); };
-    if (!c.hidden && c.state !== "running") {
-      if (c.clientWhy) add("The client and why they came to us").appendChild(el("p", null, c.clientWhy));
-      if (c.askedToDo) add("What we were asked to do").appendChild(el("p", null, c.askedToDo));
-      if (c.ourTeam.length || c.theirTeam.length) {
-        var ppl = el("div", "people");
-        [["Forefront", c.ourTeam, ""], [c.client.name, c.theirTeam, " them"]].forEach(function (g) {
-          if (!g[1].length) return;
-          var col = el("div");
-          col.appendChild(el("h4", null, g[0]));
-          var ul = el("ul", "plist");
-          g[1].forEach(function (p) {
-            var li = el("li");
-            li.appendChild(el("span", "av" + g[2], initials(p.name)));
-            var t = el("span");
-            t.appendChild(el("b", null, p.name));
-            if (p.role) t.appendChild(el("span", null, p.role));
-            li.appendChild(t);
-            ul.appendChild(li);
-          });
-          col.appendChild(ul);
-          ppl.appendChild(col);
-        });
-        add("The team").appendChild(ppl);
-      }
-      if (c.stages.length) add("Timeline", spanLong(c.started, c.ended)).appendChild(csTimeline(c));
-      if (c.deliverables.length) {
-        var nofile = c.deliverables.filter(function (d) { return !d.file; }).length;
-        var files = el("div", "files");
-        c.deliverables.forEach(function (d) {
-          var t = el("div", "ftile" + (d.file ? "" : " missing"));
-          var top = el("div", "ftop");
-          var ft = fileType(d.file && d.file.name);
-          top.appendChild(el("span", "ftype " + ft[1], d.file ? ft[0] : "—"));
-          if (d.month) top.appendChild(el("span", "fmon", d.month));
-          t.appendChild(top);
-          t.appendChild(el("b", null, d.name || "(no name)"));
-          if (d.what) t.appendChild(el("p", null, d.what));
-          if (d.file) {
-            var o = csButton("Open the file", "open", function () { csOpenFile(c, d, said); });
-            o.title = d.file.name + (d.file.size ? " · " + d.file.size : "");
-            t.appendChild(o);
-          } else t.appendChild(el("span", "open", "No file attached"));
-          files.appendChild(t);
-        });
-        add("Deliverables", c.deliverables.length + (nofile ? " · " + nofile + " with no file" : "")).appendChild(files);
-      }
-      if (c.cameOfIt) add("What came of it").appendChild(el("p", null, c.cameOfIt));
-      if (c.whoToAsk.length) {
-        var asks = el("div", "askers");
-        c.whoToAsk.forEach(function (p) {
-          var box = el("div", "asker");
-          box.appendChild(el("span", "av", initials(p.name)));
-          var t = el("div", "t");
-          t.appendChild(el("b", null, p.name));
-          if (p.about) t.appendChild(el("p", null, p.about));
-          /* the address is the consultant's own, where the name is one of
-             ours — a mailto is a convenience that may do nothing */
-          var mate = c.ourTeam.filter(function (q) { return q.name === p.name; })[0];
-          if (mate && mate.email) {
-            var m = el("a", "btn", "Ask " + firstName(p.name));
-            m.href = "mailto:" + mate.email + "?subject=" + encodeURIComponent(c.name);
-            t.appendChild(m);
-          }
-          box.appendChild(t);
-          asks.appendChild(box);
-        });
-        add("Who to ask").appendChild(asks);
-      }
-    }
-    var ins = add(c.state === "running" ? "Insights so far" : "Insights from this work", c.insightList.length);
-    ins.appendChild(csAddLine(c, function () { drawCase(true); }));
-    if (c.insightList.length) {
-      var cards = el("div", "icards");
-      c.insightList.forEach(function (e) { cards.appendChild(csInsightCard(e)); });
-      ins.appendChild(cards);
-    }
-
-    if (!c.hidden && c.state !== "running") {
-      var side2 = el("aside", "glance");
-      var g = el("div", "gbox");
-      g.appendChild(el("h3", null, "At a glance"));
-      var dl = el("dl");
-      [["Client", c.client.name], ["Industry", c.client.industry], ["Size", c.client.size], ["When", spanWord(c.started, c.ended)],
-       ["Deliverables", String(c.deliverables.length)], ["Insights", String(c.insightList.length)],
-       ["Written", c.doneAt ? whenWord(c.doneAt) : ""]].forEach(function (p) {
-        if (!p[1]) return;
-        dl.appendChild(el("dt", null, p[0])); dl.appendChild(el("dd", null, p[1]));
-      });
-      g.appendChild(dl);
-      side2.appendChild(g);
-      var g2 = el("div", "gbox");
-      g2.appendChild(el("h3", null, "Contents"));
-      var ol = el("ol", "toc");
-      toc.forEach(function (t) {
-        var li = el("li");
-        var b = el("button");
-        b.type = "button";
-        b.appendChild(el("i", null, t[0]));
-        b.appendChild(document.createTextNode(t[1]));
-        b.addEventListener("click", function () {
-          var tgt = t[2] ? document.getElementById(t[2]) : page.querySelector(".stand");
-          if (tgt) tgt.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-        li.appendChild(b);
-        ol.appendChild(li);
-      });
-      g2.appendChild(ol);
-      side2.appendChild(g2);
-      grid.appendChild(side2);
-    }
-    page.appendChild(grid);
-
-    /* REMOVING ONE asks twice, the memory's way (memDrop): the button says
-       what the second press does. Its insights stay, under their client. */
-    if (c.canDrop) {
-      var foot = el("div", "csfoot");
-      var rm = csButton("Remove this piece of work", "", function () {
-        if (rm.dataset.armed !== "1") { rm.dataset.armed = "1"; rm.textContent = "Remove it — its insights stay, under " + c.client.name; rm.classList.add("amber"); return; }
-        rm.disabled = true;
-        cpostCases({ action: "drop", id: c.id }).then(function (r) {
-          if (!r || !r.ok) { rm.disabled = false; said.textContent = (r && r.error) || "It could not be removed."; said.hidden = false; return; }
-          memGo("lib");
-        });
-      });
-      foot.appendChild(rm);
-      page.appendChild(foot);
-    }
-  }
-
-  /* ── Opening a piece of work (admins) ──────────────────────────────── */
-  function drawCaseOpen() {
-    lead(false, "Reading…");
-    return cpostCases({ action: "options" }).then(function (j) {
-      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the clients.", true); return; }
-      CS.opts = j;
-      settle(function () { csOpenForm(j); });
-    });
-  }
-
-  function csOpenForm(j) {
-    var crumb = el("div", "crumb");
-    var back = el("button", "textlink", "Case studies");
-    back.type = "button";
-    back.addEventListener("click", function () { memGo("lib"); });
-    crumb.appendChild(back); crumb.appendChild(el("span", null, "›")); crumb.appendChild(el("span", "here", "Open a piece of work"));
-    page.appendChild(crumb);
-    var said = el("p", "err"); said.hidden = true; page.appendChild(said);
-    var grid = el("div", "opengrid");
-    var f = el("section", "formcard");
-    f.appendChild(el("h2", null, "Open a piece of work"));
-    var team = [];
-    var pair = function () { var p = el("div", "fpair"); f.appendChild(p); return p; };
-    var field = function (host, id, label, node) { var b = el("div"); b.appendChild(labFor(id, label)); node.id = id; b.appendChild(node); host.appendChild(b); return node; };
-
-    var p1 = pair();
-    var cs = field(p1, "cs-o-client", "Client", el("select", "fld"));
-    var live = j.clients.filter(function (c) { return !c.archived; }), ended = j.clients.filter(function (c) { return c.archived; });
-    [["Clients", live], ["Archived and past clients", ended]].forEach(function (g) {
-      if (!g[1].length) return;
-      var og = el("optgroup"); og.label = g[0];
-      g[1].forEach(function (c) { var o = el("option", null, c.name + (c.past ? " (past client)" : c.archived ? " (archived)" : "")); o.value = c.key; og.appendChild(o); });
-      cs.appendChild(og);
-    });
-    var po = el("option", null, "A past client not on the platform…"); po.value = "__past"; cs.appendChild(po);
-    if (CS.pastFirst) { cs.value = "__past"; CS.pastFirst = false; }
-    var nm = field(p1, "cs-o-name", "Name of the work", el("input", "fld"));
-    nm.type = "text"; nm.placeholder = "Strategy build 2025";
-
-    /* A PAST CLIENT IN THREE FIELDS (decision 5): made archived, with nothing
-       behind its door, in the same press as the piece of work. The industry
-       and the size are the set-up flow's own lists (§322), not a copy. */
-    var pastBox = el("div", "pastbox");
-    pastBox.hidden = true;
-    var p2 = el("div", "fpair"); pastBox.appendChild(p2);
-    var pn = field(p2, "cs-o-pname", "Past client's name", el("input", "fld")); pn.type = "text";
-    var pi = field(p2, "cs-o-pind", "Industry", el("select", "fld"));
-    var pz = field(p2, "cs-o-psize", "Size", el("select", "fld"));
-    var setup = typeof CLIENTSETUP !== "undefined" ? CLIENTSETUP : { INDUSTRIES: [], SIZES: [] };
-    var blank = el("option", null, "Not set"); blank.value = ""; pi.appendChild(blank);
-    (setup.INDUSTRIES || []).forEach(function (grp) {
-      var og = el("optgroup"); og.label = grp[0] || "Other";
-      grp[1].forEach(function (x) { var o = el("option", null, x); o.value = x; og.appendChild(o); });
-      pi.appendChild(og);
-    });
-    var blank2 = el("option", null, "Not set"); blank2.value = ""; pz.appendChild(blank2);
-    (setup.SIZES || []).forEach(function (s) { var o = el("option", null, s[1] + " · " + s[2]); o.value = s[0]; pz.appendChild(o); });
-    f.appendChild(pastBox);
-
-    var p3 = pair();
-    var st = field(p3, "cs-o-from", "Started", el("input", "fld")); st.type = "month";
-    var en = field(p3, "cs-o-to", "Ended", el("input", "fld")); en.type = "month";
-
-    var tb = el("div", "fone");
-    tb.appendChild(el("span", "lab", "Our team"));
-    var pills = el("div", "pills");
-    tb.appendChild(pills);
-    f.appendChild(tb);
-    var addSel = el("select", "fld addsel");
-    addSel.id = "cs-o-team";
-    addSel.setAttribute("aria-label", "Add a consultant");
-    var drawTeam = function () {
-      pills.textContent = "";
-      team.forEach(function (p, i) {
-        var pill = el("span", "pill");
-        pill.appendChild(el("span", "av", initials(p.name)));
-        pill.appendChild(document.createTextNode(p.name));
-        var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Take " + p.name + " off the team");
-        x.addEventListener("click", function () { team.splice(i, 1); drawTeam(); });
-        pill.appendChild(x);
-        pills.appendChild(pill);
-      });
-      addSel.textContent = "";
-      var o0 = el("option", null, "+ Add a consultant"); o0.value = ""; addSel.appendChild(o0);
-      j.consultants.forEach(function (p) {
-        if (team.some(function (t) { return t.id === p.id; })) return;
-        var o = el("option", null, p.name || p.email); o.value = p.id; addSel.appendChild(o);
-      });
-      pills.appendChild(addSel);
-    };
-    addSel.addEventListener("change", function () {
-      var p = j.consultants.filter(function (x) { return x.id === addSel.value; })[0];
-      if (p) team.push({ id: p.id, name: p.name || p.email });
-      drawTeam();
-    });
-    drawTeam();
-
-    var sec = el("div", "fsec"); sec.appendChild(el("h3", null, "Ask for the write-up")); f.appendChild(sec);
-    var p4 = pair();
-    var ws = field(p4, "cs-o-writer", "Who writes it", el("select", "fld"));
-    var none = el("option", null, "Nobody yet: the work is still running"); none.value = ""; ws.appendChild(none);
-    j.consultants.forEach(function (p) { var o = el("option", null, p.name || p.email); o.value = p.id; ws.appendChild(o); });
-    var du = field(p4, "cs-o-due", "Wanted by", el("input", "fld")); du.type = "date";
-
-    var fa = el("div", "factions");
-    fa.appendChild(csButton("Cancel", "", function () { memGo("lib"); }));
-    var go1 = csButton("Open it", "amber", function () {
-      var body = { action: "open", name: nm.value, started: st.value, ended: en.value,
-                   team: team.map(function (t) { return { id: t.id }; }), writer: ws.value, due: du.value };
-      if (cs.value === "__past") body.past = { name: pn.value, industry: pi.value, size: pz.value };
-      else body.client = cs.value;
-      go1.disabled = true;
-      cpostCases(body).then(function (r) {
-        go1.disabled = false;
-        if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be opened."; said.hidden = false; window.scrollTo(0, 0); return; }
-        CS.opts = null;
-        memGo("case", { caseId: r.id });
-      });
-    });
-    fa.appendChild(go1);
-    f.appendChild(fa);
-    grid.appendChild(f);
-
-    /* THE COVER IT MAKES, filling in as it is typed, and where it will stand. */
-    var pv = el("aside", "preview");
-    pv.appendChild(el("span", "lab", "The cover it makes"));
-    var holder = el("div");
-    pv.appendChild(holder);
-    var where = el("p", "where");
-    pv.appendChild(where);
-    grid.appendChild(pv);
-    page.appendChild(grid);
-
-    var follow = function () {
-      var past = cs.value === "__past";
-      pastBox.hidden = !past;
-      var cl = past ? { name: pn.value || "Past client", industry: pi.value, mark: null }
-                    : (function () { var x = j.clients.filter(function (c) { return c.key === cs.value; })[0] || {}; return { name: x.name || "", industry: x.industry || "", mark: null }; }());
-      var writer = j.consultants.filter(function (p) { return p.id === ws.value; })[0];
-      holder.textContent = "";
-      var cov = csCover({ id: "", name: nm.value || "Name of the work", started: st.value, ended: en.value, client: cl,
-                          deliverables: 0, insights: 0, doneAt: null });
-      cov.disabled = true;
-      cov.querySelector(".cmeta span").textContent = writer ? "Being written by " + firstName(writer.name) : "Running";
-      holder.appendChild(cov);
-      where.textContent = "On the desk until it is marked done, then on the " + (cl.industry || "No industry set") + " shelf.";
-      du.disabled = !writer;
-      go1.textContent = writer ? "Open it and ask " + firstName(writer.name) : "Open it";
-    };
-    [cs, nm, pn, pi, st, en, ws].forEach(function (x) { x.addEventListener("input", follow); x.addEventListener("change", follow); });
-    follow();
-  }
-
   /* ── The interview ─────────────────────────────────────────────────── */
   function csPrompt(c) {
     var team = c.ourTeam.map(function (p) { return p.name; }).join(", ");
-    return "I am writing up a case study for my consulting firm about a piece of work we finished. " +
+    return "I am writing up a " + (TYPE_WORD[c.kind] || "Planning") + " assignment my consulting firm finished, for its Track Record. " +
       "It will be read by consultants who have just joined and were not there.\n\n" +
       "  Client:    " + c.client.name + (c.client.industry ? " (" + c.client.industry + ")" : "") + "\n" +
-      "  The work:  " + c.name + "\n" +
+      "  The work:  " + c.name + " (" + (TYPE_WORD[c.kind] || "Planning") + ")\n" +
       (spanLong(c.started, c.ended) ? "  When:      " + spanLong(c.started, c.ended) + "\n" : "") +
+      (c.lead ? "  Lead:      " + c.lead.name + "\n" : "") +
       (team ? "  Our team:  " + team + "\n" : "") + "\n" +
       "Interview me. Ask ONE question at a time and wait for my answer before asking the next one. " +
       "Push back when my answer is vague, and do not move on until it would make sense to somebody who was not there.\n\n" +
@@ -1883,7 +1709,7 @@
       "=== THEIR TEAM            (one line each: name · role)\n=== TIMELINE              (one line each: month · stage)\n" +
       "=== DELIVERABLES          (one line each: name · what it was · month)\n=== WHAT CAME OF IT\n" +
       "=== WHO TO ASK            (one line each: name · what to ask them about)\n\n" +
-      "and then each insight as a block:\n\n===\nKIND: hiccup | practice | lesson\nTITLE: one line, the thing itself\n" +
+      "and then each learning as a block:\n\n===\nKIND: hiccup | practice | lesson\nTITLE: one line, the thing itself\n" +
       "WHEN: the month\nWHAT HAPPENED: ...\nWHAT WE DID: ...\nWHAT CAME OF IT: ...\nWHAT THE NEXT PERSON SHOULD KNOW: ...\n===\n\n" +
       "Use my words, not yours. If I only half answered something, leave that line out rather than filling it in.";
   }
@@ -1891,48 +1717,72 @@
   function csWithCase(draw) {
     lead(false, "Reading…");
     return cpostCases({ action: "case", id: MEM.caseId }).then(function (j) {
-      if (!j || !j.ok) { clear(); say((j && j.error) || "That case study is no longer here.", true); return; }
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That assignment is no longer here.", true); return; }
       CS.one = j.case;
-      if (!j.case.canWrite) { memGo("case"); return; }
+      MEM.clientKey = j.case.client.key;
+      if (!j.case.canWrite) { memGo("client"); return; }
       settle(function () { draw(j.case); });
     });
   }
 
+  /* THE HEAD OF THE WRITE-UP'S TWO PAGES: where you are, the assignment's
+     name and type, and what the registry says about it — which is what the
+     prompt carries, so a reader sees what the assistant will be told. */
+  function trWriteHead(c, step, right) {
+    trCrumb([["Track Record", function () { memGo("lib"); }], [c.client.name, function () { memGo("client"); }], ["Write up: " + c.name]]);
+    var row = el("div", "trwh");
+    row.appendChild(el("h1", null, "Write up: " + c.name));
+    row.appendChild(typeTag(c.kind));
+    row.appendChild(el("span", "sp"));
+    (right || []).forEach(function (x) { row.appendChild(x); });
+    page.appendChild(row);
+    var ctx = el("div", "trctxs");
+    [["Client", c.client.name], ["Industry", c.client.industry], ["When", spanWord(c.started, c.ended)],
+     ["Lead", c.lead ? c.lead.name : ""], ["Team", c.ourTeam.map(function (p) { return p.name; }).join(", ")]].forEach(function (p) {
+      if (!p[1]) return;
+      var d = el("span"); d.appendChild(el("i", null, p[0] + " ")); d.appendChild(el("b", null, p[1])); ctx.appendChild(d);
+    });
+    page.appendChild(ctx);
+    var steps = el("div", "steps");
+    steps.setAttribute("aria-label", "Where you are");
+    ["Talk it through", "Check", c.state === "done" ? "Saved" : "Publish"].forEach(function (w, i) {
+      if (i) steps.appendChild(el("span", "bar"));
+      var x = el("span", "st" + (i === step ? " on" : i < step ? " done" : ""));
+      x.appendChild(el("span", "dot", i < step ? "✓" : String(i + 1)));
+      x.appendChild(document.createTextNode(w));
+      steps.appendChild(x);
+    });
+    page.appendChild(steps);
+  }
+
   function drawCaseWrite() {
     return csWithCase(function (c) {
-      csHeader(c, [csButton("Type it in instead", "", function () { CS.draft = csDraftFrom(c); CS.pending = null; CS.read = null; memGo("draft"); })]);
-      var steps = el("div", "steps");
-      steps.setAttribute("aria-label", "Where you are");
-      [{ n: "1", w: "The interview", on: true }, { n: "2", w: "The draft", on: false }, { n: "3", w: "Marked done, on the shelf", on: false }].forEach(function (s, i) {
-        if (i) steps.appendChild(el("span", "bar"));
-        var x = el("span", "st" + (s.on ? " on" : ""));
-        x.appendChild(el("span", "dot", s.n));
-        x.appendChild(document.createTextNode(s.w));
-        steps.appendChild(x);
-      });
-      page.appendChild(steps);
+      trWriteHead(c, 0, [csButton("Type it in by hand instead", "", function () { CS.draft = csDraftFrom(c); CS.pending = null; CS.read = null; memGo("draft"); })]);
       var two = el("div", "twostep");
       var a = el("section", "stepcard");
-      var h1 = el("h3"); h1.appendChild(el("span", "dot on", "1")); h1.appendChild(document.createTextNode("Copy the prompt, and talk it through with your assistant"));
+      var h1 = el("h3"); h1.appendChild(el("span", "dot on", "A")); h1.appendChild(document.createTextNode("Take this prompt to your assistant"));
       a.appendChild(h1);
       var pre = el("pre", "prompt", csPrompt(c));
       a.appendChild(pre);
-      var aa = el("div", "wacts"); aa.appendChild(copyBtn(function () { return pre.textContent; })); a.appendChild(aa);
+      var aa = el("div", "wacts");
+      aa.appendChild(claudeLink(function () { return pre.textContent; }));
+      aa.appendChild(copyBtn(function () { return pre.textContent; }));
+      a.appendChild(aa);
       two.appendChild(a);
       var b = el("section", "stepcard");
-      var h2 = el("h3"); h2.appendChild(el("span", "dot on", "2")); h2.appendChild(document.createTextNode("Paste the whole answer back"));
+      var h2 = el("h3"); h2.appendChild(el("span", "dot on", "B")); h2.appendChild(document.createTextNode("Paste the whole answer back"));
       b.appendChild(h2);
       var ta = el("textarea", "fld pastebox");
       ta.id = "cs-paste";
       ta.setAttribute("aria-label", "Paste the whole answer back");
       b.appendChild(ta);
       var ba = el("div", "wacts");
-      ba.appendChild(csButton("Read it into the draft", "amber", function () {
+      ba.appendChild(csButton("Fill the write-up", "amber", function () {
         if (!ta.value.trim()) { ta.focus(); return; }
         var s = window.CaseSplit.split(ta.value);
         CS.draft = csMerge(csDraftFrom(c), s);
         /* A BLOCK THAT COULD NOT BE READ IS KEPT, never dropped (§184): it
-           comes into the draft as an insight with its words and no title. */
+           comes into the draft as a learning with its words and no title. */
         CS.pending = s.insights.map(function (e) { return { kind: e.kind, title: e.title, happened: e.happened, did: e.did,
           came_of_it: e.came_of_it, next_person: e.next_person, occurred: e.occurred, raw: false }; })
           .concat(s.unread.map(function (u) { return { kind: "lesson", title: "", happened: String(u), did: "",
@@ -1940,6 +1790,7 @@
         CS.read = s.read; CS.missing = s.missing;
         memGo("draft");
       }));
+      ba.appendChild(el("span", "muted", "Nothing is saved until you check it."));
       b.appendChild(ba);
       two.appendChild(b);
       page.appendChild(two);
@@ -1983,35 +1834,38 @@
 
   function csDraftPage(c, d) {
     var said = el("p", "err"); said.hidden = true;
+    trWriteHead(c, c.state === "done" ? 1 : 1, []);
     var bar = el("div", "draftbar");
     var filled = [d.inShort, d.clientWhy, d.askedToDo, d.ourTeam.length || d.theirTeam.length, d.stages.length,
                   d.deliverables.length, d.cameOfIt, d.whoToAsk.length].filter(function (x) { return !!x; }).length;
     var nofile = d.deliverables.filter(function (x) { return !x.file; }).length;
     var b1 = el("span");
     b1.appendChild(el("b", null, c.state === "done" ? "Editing" : "Draft"));
-    b1.appendChild(document.createTextNode((c.state === "done" ? " · everyone reads the saved version" : " · only you and the admins can see it") +
+    b1.appendChild(document.createTextNode((c.state === "done" ? " · everyone reads the saved version" : " · only you, the lead and the super users can see it") +
       " · " + filled + " of 8 sections filled" + (nofile ? " · " + nOf(nofile, "file") + " missing" : "")));
     bar.appendChild(b1);
     var br = el("span", "right");
-    var saveB = csButton(c.state === "done" ? "Save" : "Save the draft", c.state === "done" ? "amber" : "", function () { csSave(c, said, null); });
-    br.appendChild(saveB);
-    if (c.state === "writing") br.appendChild(csButton("Mark it done", "amber", function (ev) {
+    var acts = el("div", "pubbar");
+    var saveB = csButton(c.state === "done" ? "Save" : "Save as draft", c.state === "done" ? "amber" : "", function () { csSave(c, said, null); });
+    acts.appendChild(csButton("Back", "", function () { memGo("client"); }));
+    acts.appendChild(el("span", "sp"));
+    acts.appendChild(saveB);
+    if (c.state !== "done") acts.appendChild(csButton("Publish", "amber", function (ev) {
       var btn = ev.currentTarget;
       btn.disabled = true;
       csSave(c, said, function () {
         cpostCases({ action: "done", id: c.id }).then(function (r) {
           btn.disabled = false;
-          if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be marked done."; said.hidden = false; window.scrollTo(0, 0); return; }
-          CS.draft = null; memGo("case");
+          if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be published."; said.hidden = false; window.scrollTo(0, 0); return; }
+          CS.draft = null; memGo("client");
         });
       }, function () { btn.disabled = false; });
     }));
-    br.appendChild(csButton("Back", "", function () { memGo("case"); }));
     bar.appendChild(br);
     page.appendChild(bar);
     if (CS.read) {
       var found = el("p", "found");
-      found.appendChild(el("b", null, "Read " + CS.read.length + " of 8 sections" + (CS.pending && CS.pending.length ? " and " + nOf(CS.pending.length, "insight") : "") + "."));
+      found.appendChild(el("b", null, "Read " + CS.read.length + " of 8 sections" + (CS.pending && CS.pending.length ? " and " + nOf(CS.pending.length, "learning") : "") + "."));
       if (CS.missing && CS.missing.length) found.appendChild(document.createTextNode(" Nothing came back for " + CS.missing.join(", ") + "."));
       page.appendChild(found);
     }
@@ -2025,15 +1879,6 @@
       if (warn) t.placeholder = "Nothing here yet. Type it in, or leave it empty and it will not be shown.";
       return bind(t, key);
     };
-    var head = el("div", "fpair");
-    var hb = el("div"); hb.appendChild(labFor("cs-d-name", "Name of the work"));
-    var nm = el("input", "fld"); nm.id = "cs-d-name"; nm.value = d.name; bind(nm, "name"); hb.appendChild(nm); head.appendChild(hb);
-    var sb = el("div"); sb.appendChild(labFor("cs-d-from", "Started"));
-    var sf = el("input", "fld"); sf.id = "cs-d-from"; sf.type = "month"; sf.value = d.started || ""; bind(sf, "started"); sb.appendChild(sf); head.appendChild(sb);
-    var eb = el("div"); eb.appendChild(labFor("cs-d-to", "Ended"));
-    var ef = el("input", "fld"); ef.id = "cs-d-to"; ef.type = "month"; ef.value = d.ended || ""; bind(ef, "ended"); eb.appendChild(ef); head.appendChild(eb);
-    page.appendChild(head);
-
     page.appendChild(labFor("cs-d-inShort", "In short — the paragraph a new joiner reads first"));
     var st = ed("inShort", "In short", 4);
     st.classList.add("stand");
@@ -2080,28 +1925,9 @@
       role.setAttribute("aria-label", "Role of " + p.name);
       role.addEventListener("input", function () { p.role = role.value; });
       r.appendChild(role);
-      var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Take " + p.name + " off the team");
-      x.addEventListener("click", function () { d.ourTeam.splice(i, 1); again(); });
-      r.appendChild(x);
       ourList.appendChild(r);
     });
     ours.appendChild(ourList);
-    var addOur = el("select", "fld addsel");
-    addOur.setAttribute("aria-label", "Add a consultant");
-    var o0 = el("option", null, "+ Add a consultant"); o0.value = ""; addOur.appendChild(o0);
-    var fillOur = function (people) {
-      people.forEach(function (p) {
-        if (d.ourTeam.some(function (t) { return t.id === p.id; })) return;
-        var o = el("option", null, p.name || p.email); o.value = p.id; addOur.appendChild(o);
-      });
-    };
-    if (CS.opts) fillOur(CS.opts.consultants);
-    else cpostCases({ action: "options" }).then(function (o) { if (o && o.ok) { CS.opts = o; fillOur(o.consultants); } });
-    addOur.addEventListener("change", function () {
-      var p = (CS.opts ? CS.opts.consultants : []).filter(function (x) { return x.id === addOur.value; })[0];
-      if (p) { d.ourTeam.push({ id: p.id, name: p.name || p.email, role: "" }); again(); }
-    });
-    ours.appendChild(addOur);
     tw.appendChild(ours);
     var theirs = el("div"); theirs.appendChild(el("h4", null, c.client.name));
     rows(theirs, d.theirTeam, [["name", "Name"], ["role", "Role"]], "+ Add a person", again);
@@ -2142,10 +1968,10 @@
     /* THE INSIGHTS THE INTERVIEW DREW OUT, saved with the case study and
        only then — the debrief's own rule: nothing lands until it is read. */
     if (CS.pending && CS.pending.length) {
-      var is = sec("Insights from the interview");
+      var is = sec("Learnings found in the answer");
       CS.pending.forEach(function (e, i) {
         var card = el("div", "dcard" + (e.raw ? " raw" : ""));
-        if (e.raw) card.appendChild(el("p", "rawnote", "This block could not be read. Its words are below — give it a title, or drop it."));
+        if (e.raw) card.appendChild(el("p", "rawnote", "This block could not be read. Its words are below. Give it a title, or drop it."));
         var hd = el("div", "dhead");
         var ks = el("select", "fld"); ks.setAttribute("aria-label", "Kind");
         KINDS.forEach(function (k) { var o = el("option", null, k[1]); o.value = k[0]; if (k[0] === e.kind) o.selected = true; ks.appendChild(o); });
@@ -2162,6 +1988,7 @@
       });
     }
     page.appendChild(art);
+    page.appendChild(acts);
   }
 
   /* SAVING: the case study, then the interview's insights, each all or
@@ -2169,7 +1996,7 @@
   function csSave(c, said, then, failed) {
     var d = CS.draft;
     said.hidden = true;
-    var body = { action: "save", id: c.id, name: d.name, started: d.started, ended: d.ended,
+    var body = { action: "save", id: c.id,
                  inShort: d.inShort, clientWhy: d.clientWhy, askedToDo: d.askedToDo, cameOfIt: d.cameOfIt,
                  ourTeam: d.ourTeam.map(function (p) { return { id: p.id, role: p.role }; }),
                  theirTeam: d.theirTeam, stages: d.stages, deliverables: d.deliverables, whoToAsk: d.whoToAsk };
@@ -2177,9 +2004,9 @@
     return cpostCases(body).then(function (r) {
       if (!r || !r.ok) { fail((r && r.error) || "It could not be saved."); return; }
       var pend = (CS.pending || []).filter(function (e) { return e.title && e.title.trim(); });
-      if ((CS.pending || []).length > pend.length) { fail("Give every insight from the interview a title, or drop it, before saving."); return; }
+      if ((CS.pending || []).length > pend.length) { fail("Give every learning a title, or drop it, before saving."); return; }
       return (pend.length ? cpostCases({ action: "insights", id: c.id, entries: pend }) : Promise.resolve({ ok: true })).then(function (k) {
-        if (!k || !k.ok) { fail((k && k.error) || "The insights could not be saved."); return; }
+        if (!k || !k.ok) { fail((k && k.error) || "The learnings could not be saved."); return; }
         CS.pending = null; CS.read = null;
         CS.draft = csDraftFrom(r.case);
         if (then) { then(); return; }
@@ -2241,19 +2068,19 @@
     }).catch(function () { fail("Could not reach the server. Nothing was changed — try again."); });
   }
 
-  /* ── An insight's place (spec 067 §5) ──────────────────────────────── */
+  /* ── A learning's assignment (spec 069) ───────────────────────────── */
   function memPlace(e, host) {
     var box = el("div", "placebox");
-    box.appendChild(labFor("m-place", "Piece of work"));
+    box.appendChild(labFor("m-place", "Assignment"));
     var sel = el("select", "fld");
     sel.id = "m-place";
-    var none = el("option", null, "Not in a case study yet"); none.value = ""; sel.appendChild(none);
+    var none = el("option", null, "Not tied to an assignment yet"); none.value = ""; sel.appendChild(none);
     box.appendChild(sel);
     host.appendChild(box);
-    cpostCases({ action: "library" }).then(function (j) {
+    cpostCases({ action: "client", client: e.client }).then(function (j) {
       if (!j || !j.ok) return;
-      j.cases.filter(function (c) { return c.client.key === e.client; }).forEach(function (c) {
-        var o = el("option", null, c.name + (c.state === "done" ? "" : " · " + STATE_WORD[c.state].toLowerCase()));
+      j.assignments.forEach(function (c) {
+        var o = el("option", null, (TYPE_WORD[c.kind] || "Planning") + " · " + c.name);
         o.value = c.id;
         if (c.id === e.caseId) o.selected = true;
         sel.appendChild(o);
@@ -2263,18 +2090,19 @@
       sel.disabled = true;
       cpostCases({ action: "place", entry: e.id, case: sel.value || null }).then(function (r) {
         sel.disabled = false;
-        if (!r || !r.ok) { say((r && r.error) || "It could not be placed.", true); return; }
+        if (!r || !r.ok) { say((r && r.error) || "It could not be tied to that assignment.", true); return; }
         drawMemEntry();
       });
     });
   }
 
-  /* ── A period debrief, and what comes back ─────────────────────
-     THE MAIN DOOR (Islam: "it will not be case by case usually it would be a
-     period of time to share"). One conversation, several insights: the page
-     writes a prompt carrying the client and the period, the consultant talks
-     it through with whatever assistant they use, and pastes the whole answer
-     back in one box.
+  /* ── Adding learnings (spec 069) ────────────────────────────────────────
+     THE MAIN DOOR stays the period debrief (Islam, of the memory: "it will
+     not be case by case usually it would be a period of time to share"):
+     one conversation, several learnings. What changed is the context: a
+     client AND one of its assignments are picked first, so every learning
+     says which piece of work it came from, and the prompt carries both.
+     Typing one in by hand is the other way, one press over.
 
      NOTHING IS STORED UNTIL SOMEBODY HAS READ IT. The prompt forbids
      invention — "use my words, not yours; if I only half answered, leave that
@@ -2283,91 +2111,108 @@
      only place that judgement can happen. */
   function drawDebrief() {
     lead(false, "Reading…");
-    return post({ action: "cards" }).then(function (j) {
-      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
-      var d = MEM.deb || { client: (clients[0] || {}).key || "", from: "", to: "", paste: "" };
+    return cpostCases({ action: "library" }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the Track Record.", true); return; }
+      var d = MEM.deb || { from: "", to: "", paste: "" };
       settle(function () {
-        var right = el("span");
-        var cancel = el("button", "btn", "Cancel");
-        cancel.type = "button";
-        cancel.addEventListener("click", function () { memGo("list", { deb: null }); });
-        right.appendChild(cancel);
-        title("Write up a period", right);
-
+        trCrumb([["Track Record", function () { memGo("lib"); }], ["Add learnings"]]);
         var wiz = el("div", "wiz");
-        var pair = el("div", "wpair");
-        var csel = el("select", "fld");
-        csel.id = "d-client";
-        clients.forEach(function (c) {
-          var op = el("option", null, c.name);
-          op.value = c.key;
-          if (c.key === d.client) op.selected = true;
-          csel.appendChild(op);
+        var p = trPickers(j, function () { follow(); });
+        if (p.empty) { wiz.appendChild(el("p", "muted", "There are no assignments yet. They are added on the Clients page, and every learning belongs to one.")); page.appendChild(wiz); return; }
+        wiz.appendChild(p.node);
+        var seg = el("span", "csseg trhow");
+        seg.setAttribute("role", "group");
+        seg.setAttribute("aria-label", "How");
+        [["talk", "Talk it through"], ["type", "Type one in"]].forEach(function (v) {
+          var b = el("button", v[0] === "talk" ? "on" : null, v[1]);
+          b.type = "button";
+          b.setAttribute("aria-pressed", String(v[0] === "talk"));
+          b.setAttribute("data-how", v[0]);
+          if (v[0] === "type") b.addEventListener("click", function () {
+            var c = p.picked(); if (!c) return;
+            memGo("wiz", { draft: { caseId: c.id, client: c.client.key, clientName: c.client.name, caseName: c.name, caseKind: c.kind } });
+          });
+          seg.appendChild(b);
         });
-        pair.appendChild(boxed("d-client", "Client", csel));
+        wiz.appendChild(seg);
+
+        var pair = el("div", "wpair");
         var from = el("input", "fld"); from.id = "d-from"; from.type = "text"; from.value = d.from;
         from.placeholder = "1 August 2026";
-        pair.appendChild(boxed("d-from", "From", from));
+        pair.appendChild(boxed("d-from", "From (optional)", from));
         var to = el("input", "fld"); to.id = "d-to"; to.type = "text"; to.value = d.to;
         to.placeholder = "11 September 2026";
-        pair.appendChild(boxed("d-to", "To", to));
+        pair.appendChild(boxed("d-to", "To (optional)", to));
         wiz.appendChild(pair);
 
-        wiz.appendChild(el("span", "lab", "Take this to your assistant and talk it through"));
-        var pre = el("pre", "prompt", debPrompt(csel, clients, from, to));
-        wiz.appendChild(pre);
+        var two = el("div", "twostep");
+        var a = el("section", "stepcard");
+        var h1 = el("h3"); h1.appendChild(el("span", "dot on", "A")); h1.appendChild(document.createTextNode("Take this prompt to your assistant"));
+        a.appendChild(h1);
+        var pre = el("pre", "prompt", "");
+        a.appendChild(pre);
         var acts = el("div", "wacts");
+        var openC = claudeLink(function () { return pre.textContent; });
+        acts.appendChild(openC);
         acts.appendChild(copyBtn(function () { return pre.textContent; }));
-        wiz.appendChild(acts);
+        a.appendChild(acts);
+        two.appendChild(a);
         /* THE PROMPT FOLLOWS AS YOU TYPE, and `input` is right here where it
            would be wrong almost anywhere else in this product: §35's rule is
            that typing must not REPAINT, and this repaints nothing — it writes
-           into one <pre> that nobody is typing into, which is the
-           write-into-the-node pattern §63 and §193 already use.
+           into one <pre> that nobody is typing into (§63, §193). On `change`
+           it went stale: `change` fires on BLUR, so somebody who filled in the
+           end date and reached straight for Copy the prompt copied a prompt
+           without it. */
+        var follow = function () { pre.textContent = debPrompt(p.picked(), from, to); openC.href = claudeHref(pre.textContent); };
+        [from, to].forEach(function (f) { f.addEventListener("input", follow); f.addEventListener("change", follow); });
+        follow();
 
-           On `change` it went stale in the one way that matters: `change`
-           fires on BLUR, so somebody who filled in the end date and reached
-           straight for Copy the prompt would have copied a prompt with no end
-           date in it. Measured — the period read "covering 1 August 2026"
-           with 11 September plainly in the box beside it. */
-        [csel, from, to].forEach(function (f) {
-          var follow = function () { pre.textContent = debPrompt(csel, clients, from, to); };
-          f.addEventListener("input", follow);
-          f.addEventListener("change", follow);
-        });
-
-        var apart = el("div", "apart");
-        apart.appendChild(el("span", "akey", "Then paste what came back"));
+        var b = el("section", "stepcard");
+        var h2 = el("h3"); h2.appendChild(el("span", "dot on", "B")); h2.appendChild(document.createTextNode("Paste the whole answer back"));
+        b.appendChild(h2);
         var paste = el("textarea", "fld pastebox");
         paste.id = "d-paste";
         paste.value = d.paste;
-        paste.placeholder = "Paste the whole answer here — every block at once.";
-        apart.appendChild(paste);
+        paste.setAttribute("aria-label", "Paste the whole answer back");
+        paste.placeholder = "Paste the whole answer here, every block at once.";
+        b.appendChild(paste);
         var pacts = el("div", "wacts");
-        var read = el("button", "btn amber", "Read what came back");
+        var read = el("button", "btn amber", "Read the learnings");
         read.type = "button";
         read.addEventListener("click", function () {
           var text = paste.value;
           if (!text.trim()) { say("There is nothing pasted in yet.", true); return; }
           var out = window.MemorySplit.split(text);
           if (!out.entries.length && !out.unread.length) { say("There is nothing pasted in yet.", true); return; }
+          var c = p.picked(); if (!c) return;
           memGo("drafts", {
-            /* the NAME is carried with the key: on a first debrief the list
-               endpoint has never heard of this client, so MEM.clientNames is
-               empty and the strip would read a slug (§124) */
-            deb: { client: csel.value, clientName: csel.options[csel.selectedIndex].textContent,
+            deb: { client: c.client.key, clientName: c.client.name, caseId: c.id, caseName: c.name, caseKind: c.kind,
                    from: from.value, to: to.value, paste: text },
             drafts: out.entries.map(function (e) { return e; })
               .concat(out.unread.map(function (t) { return rawDraft(t); }))
           });
         });
         pacts.appendChild(read);
-        pacts.appendChild(el("span", "muted", "Nothing is saved until you have read them."));
-        apart.appendChild(pacts);
-        wiz.appendChild(apart);
+        pacts.appendChild(el("span", "muted", "You check each one before it is saved."));
+        b.appendChild(pacts);
+        two.appendChild(b);
+        wiz.appendChild(two);
         page.appendChild(wiz);
       });
     });
+  }
+
+  /* OPEN IN CLAUDE: a new chat with the prompt already in its box. A link,
+     not a script: it opens in a new tab wherever links do, and where it
+     does nothing Copy the prompt is beside it. */
+  function claudeHref(text) { return "https://claude.ai/new?q=" + encodeURIComponent(text); }
+  function claudeLink(text) {
+    var a = el("a", "btn amber", "Open in Claude");
+    a.href = claudeHref(text());
+    a.target = "_blank";
+    a.rel = "noopener";
+    return a;
   }
 
   function boxed(id, label, control) {
@@ -2388,11 +2233,14 @@
     if (f && t) return f + " to " + t;
     return f || t || "";
   }
-  function debPrompt(csel, clients, from, to) {
-    var c = clientPhrase(clientNamed(clients, csel.value));
+  function debPrompt(c, from, to) {
     var p = periodWord(from, to);
-    return "I have just finished a period of work at " + c + (p ? ",\ncovering " + p : "") + ". Help me write up what we learned\n" +
-      "from it, for my firm's consulting memory.\n\n" +
+    var who = c ? c.client.name + (c.client.industry ? " (" + c.client.industry + ")" : "") : "this client";
+    var work = c ? c.name + " (" + (TYPE_WORD[c.kind] || "Planning") + (spanLong(c.started, c.ended) ? ", " + spanLong(c.started, c.ended) : "") + ")" : "";
+    return "I want to record what my consulting firm learned on a piece of work, for the next consultant.\n\n" +
+      "  Client:   " + who + "\n" +
+      (work ? "  Work:     " + work + "\n" : "") +
+      (p ? "  Period:   " + p + "\n" : "") + "\n" +
       "Interview me. Ask ONE question at a time and wait for my answer before\n" +
       "asking the next one.\n\n" +
       "Start by asking me to walk you through the period — what we worked on and\n" +
@@ -2427,11 +2275,11 @@
       var right = el("span");
       var back = el("button", "btn", "Back");
       back.type = "button";
-      back.addEventListener("click", function () { memGo("deb"); });
+      back.addEventListener("click", function () { memGo("learn", { pickClient: d.client, pickCase: d.caseId }); });
       var save = el("button", "btn amber", "Save all " + drafts.length);
       save.type = "button";
       right.appendChild(back); right.appendChild(save);
-      title("What came back", right);
+      title("Check the learnings", right);
 
       if (!drafts.length) {
         page.appendChild(el("p", "muted", "Nothing left to save — go back and paste it again."));
@@ -2444,11 +2292,11 @@
       var read = drafts.filter(function (x) { return !x.raw; }).length;
       var raw = drafts.length - read;
       var found = el("p", "found");
-      var b = el("b", null, read + (read === 1 ? " insight read" : " insights read"));
+      var b = el("b", null, read + (read === 1 ? " learning read" : " learnings read"));
       found.appendChild(b);
       found.appendChild(document.createTextNode(
         (raw ? ", and " + raw + (raw === 1 ? " block it could not" : " blocks it could not") : "") +
-        " · " + (clientNameOf(d.client) || d.client) + (periodOf(d) ? " · " + periodOf(d) : "")));
+        " · " + (clientNameOf(d.client) || d.client) + (d.caseName ? " · " + (TYPE_WORD[d.caseKind] || "") + " · " + d.caseName : "") + (periodOf(d) ? " · " + periodOf(d) : "")));
       var sp = el("span", "sp");
       KINDS.forEach(function (k) {
         var n = drafts.filter(function (x) { return !x.raw && x.kind === k[0]; }).length;
@@ -2466,10 +2314,10 @@
         for (var i = 0; i < drafts.length; i++) if (!String(drafts[i].title || "").trim()) { missing = i; break; }
         if (missing >= 0) { say("Give number " + (missing + 1) + " a title before saving.", true); return; }
         save.disabled = true;
-        mpost({ action: "saveMany", client: d.client, entries: drafts }).then(function (r) {
+        mpost({ action: "saveMany", client: d.client, caseId: d.caseId, entries: drafts }).then(function (r) {
           save.disabled = false;
           if (!r || !r.ok) { say((r && r.error) || "They could not be saved.", true); return; }
-          memGo("list", { deb: null, drafts: null });
+          memGo("client", { deb: null, drafts: null, clientKey: d.client, caseId: d.caseId });
         });
       });
     });
@@ -2725,10 +2573,10 @@
     var row = el("div", "mwrow mwcase" + (r.late ? " late" : ""));
     row.setAttribute("data-case", r.id);
     var mk = el("span", "mwdoc");
-    mk.title = "A case study to write up";
+    mk.title = "An assignment to write up";
     mk.innerHTML = NAV_ICON.memory;
     row.appendChild(mk);
-    var t = el("span", "t", "Write up the case study · ");
+    var t = el("span", "t", "Write up the assignment · ");
     t.appendChild(el("b", null, r.name));
     row.appendChild(t);
     var cl = el("span", "mwcl");
@@ -2737,11 +2585,11 @@
     row.appendChild(cl);
     row.appendChild(el("span", "mwwhen" + (r.late ? " late" : ""), r.when));
     var st = el("span", "mwst prog");
-    st.appendChild(el("span", null, "Case study"));
+    st.appendChild(el("span", null, "Track Record"));
     row.appendChild(st);
     var link = el("button", "mwgo");
     link.type = "button";
-    link.title = "Open the case study";
+    link.title = "Open the write-up";
     link.setAttribute("aria-label", "Write up " + r.name);
     link.innerHTML = MW_GO;
     row.appendChild(link);
@@ -3171,11 +3019,11 @@
       b.appendChild(tick);
     }
     var t = el("span", "t");
-    if (isCase) { t.appendChild(document.createTextNode("Write up the case study · ")); t.appendChild(el("b", null, r.name)); }
+    if (isCase) { t.appendChild(document.createTextNode("Write up the assignment · ")); t.appendChild(el("b", null, r.name)); }
     else t.appendChild(document.createTextNode(r.title || "(untitled)"));
     var m = el("span", "m");
     if (!noClient) { m.appendChild(el("span", "c", r.clientName)); m.appendChild(document.createTextNode(" · ")); }
-    m.appendChild(document.createTextNode(isCase ? "Case study" : r.statusWord || ""));
+    m.appendChild(document.createTextNode(isCase ? "Track Record" : r.statusWord || ""));
     t.appendChild(m);
     b.appendChild(t);
     b.appendChild(el("span", "wh", r.when || ""));
@@ -3255,7 +3103,7 @@
   function hoCases(c, j) {
     var box = c.body;
     box.textContent = "";
-    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read the case studies.")); return; }
+    if (!j || !j.ok) { box.appendChild(el("p", "honone", (j && j.error) || "Could not read the Track Record.")); return; }
     var two = el("div", "hotwo"), left = el("div"), right = el("div");
     left.setAttribute("data-home", "writing");
     right.setAttribute("data-home", "fresh");
@@ -3263,7 +3111,7 @@
     box.appendChild(two);
     left.appendChild(el("p", "hobxh", "Your write-ups · in progress"));
     right.appendChild(el("p", "hobxh", "Newly finished"));
-    if (!j.writing.length) left.appendChild(el("p", "honone", "No case study is waiting on you to write it."));
+    if (!j.writing.length) left.appendChild(el("p", "honone", "No write-up is waiting on you."));
     j.writing.forEach(function (w) {
       var row = el("div", "hocase");
       row.setAttribute("data-case", w.id);
@@ -3287,12 +3135,6 @@
       row.appendChild(b);
       left.appendChild(row);
     });
-    if (j.loose) {
-      var f = el("button", "hofoot", nOf(j.loose, "insight") + " of yours to place in a case study →");
-      f.type = "button";
-      f.addEventListener("click", function () { MEM.filters.case = "none"; CS.jump = { view: "list" }; go("memory"); });
-      left.appendChild(f);
-    }
     if (!j.fresh.length) right.appendChild(el("p", "honone", "Nothing finished in the last 30 days."));
     j.fresh.forEach(function (k) {
       var b = el("button", "hobook");
@@ -3303,7 +3145,7 @@
       var nm = el("b", null, k.name);
       nm.appendChild(el("span", "new", "New"));
       t.appendChild(nm);
-      t.appendChild(el("span", "s", k.client.name + " · " + nOf(k.deliverables, "deliverable") + " · " + nOf(k.insights, "insight")));
+      t.appendChild(el("span", "s", k.client.name + " · " + (TYPE_WORD[k.kind] || "Planning") + " · " + nOf(k.deliverables, "deliverable") + " · " + nOf(k.insights, "learning")));
       b.appendChild(t);
       b.addEventListener("click", function () { CS.jump = { id: k.id, view: "case" }; go("memory"); });
       right.appendChild(b);
@@ -3317,9 +3159,9 @@
     var cc = hoCard(top, "Your clients", NAV_ICON.clients, "clients");
     cc.head.appendChild(hoLink("All clients →", function () { go("clients", "row"); }));
     var tc = hoCard(top, "Your tasks", HO_TASKS, "tasks");
-    var sc = hoCard(page, "Case studies", NAV_ICON.memory, "cases");
+    var sc = hoCard(page, "Track Record", NAV_ICON.memory, "cases");
     sc.card.classList.add("hosec");
-    sc.head.appendChild(hoLink("The library →", function () { go("memory", "row"); }));
+    sc.head.appendChild(hoLink("Track Record →", function () { go("memory", "row"); }));
 
     /* the boot's `cards`, once (§369), as the Clients tab takes it */
     var handed = BOOTCARDS; BOOTCARDS = null;
@@ -3519,6 +3361,7 @@
     var mineOf = function (list, f) { return CL.mine ? list.filter(f) : list; };
     var seat = function (c) { return !!c.seat; };
     var draw = function () {
+      CLREG.redraw = draw;
       var act = mineOf(d.clients, seat), dem = mineOf(d.demos, seat);
       var end = CL.mine ? d.archived.filter(function (c) { return c.mine; }) : d.archived.concat(d.past);
       bar.textContent = ""; body.textContent = "";
@@ -3583,6 +3426,191 @@
       if (d.search && d.search.value) d.search.dispatchEvent(new Event("input"));
     };
     draw();
+    /* THE REGISTRY'S ASSIGNMENTS are read once the clients are on screen and
+       drawn under each in the list view (spec 069); the cards are unchanged. */
+    clRegRead();
+  }
+
+  /* ── THE CLIENT REGISTRY (spec 069) ────────────────────────────────────
+     Islam: "I can have a registry of all the clients so nobody needs to
+     create a client and always pick from a list … with start date and end
+     date and lead consultant and the team and the assignment type", and
+     "registry is from the super user". The Clients page already IS the one
+     list of clients, so the registry is drawn on it rather than as a second
+     page: in the list view, each client's assignments under it, and for the
+     super user + Add an assignment and Edit. Track Record reads from here. */
+  var CLREG = { data: null, opts: null, redraw: null, open: "" };
+  function clRegRead() {
+    return cpostCases({ action: "registry" }).then(function (r) {
+      CLREG.data = r && r.ok ? r : null;
+      if (CLREG.redraw && CL.view === "list") CLREG.redraw();
+    }).catch(function () { /* the clients stand without their assignments */ });
+  }
+  function clAsgRows(tb, c, cols) {
+    var reg = CLREG.data;
+    if (!reg) return;
+    reg.assignments.filter(function (a) { return a.client.key === c.key; }).forEach(function (a) {
+      tb.appendChild(CLREG.open === a.id ? clAsgForm(c, a, cols) : clAsgRow(c, a, cols, reg.canOpen));
+    });
+    if (!reg.canOpen) return;
+    if (CLREG.open === "new:" + c.key) { tb.appendChild(clAsgForm(c, null, cols)); return; }
+    var tr = el("tr", "asgadd");
+    var td = el("td"); td.colSpan = cols;
+    var b = csButton("+ Add an assignment", "sm", function () { clAsgOpen("new:" + c.key); });
+    b.setAttribute("data-add-assignment", c.key);
+    td.appendChild(b);
+    tr.appendChild(td);
+    tb.appendChild(tr);
+  }
+  function clAsgOpen(which) {
+    CLREG.open = which;
+    (CLREG.opts ? Promise.resolve(CLREG.opts) : cpostCases({ action: "options" })).then(function (o) {
+      if (!o || !o.ok) { say((o && o.error) || "Could not read the consultants.", true); return; }
+      CLREG.opts = o;
+      if (CLREG.redraw) CLREG.redraw();
+    });
+  }
+  function clAsgRow(c, a, cols, canEdit) {
+    var tr = el("tr", "asgrow");
+    tr.setAttribute("data-case", a.id);
+    tr.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();   /* it goes with its client */
+    var td = el("td"); td.colSpan = cols;
+    var line = el("div", "asgline");
+    line.appendChild(typeTag(a.kind));
+    var nm = el("button", "textlink", a.name);
+    nm.type = "button";
+    nm.title = "Open in Track Record";
+    nm.addEventListener("click", function () { CS.jump = { view: "client", client: c.key, id: a.id }; go("memory"); });
+    line.appendChild(nm);
+    line.appendChild(el("span", "mo", spanWord(a.started, a.ended) + (a.ended ? "" : " · running")));
+    if (a.lead) line.appendChild(el("span", "ld", "Lead " + a.lead.name));
+    var team = (a.team || []).filter(function (p) { return !a.lead || p.id !== a.lead.id; }).map(function (p) { return p.name; });
+    if (team.length) line.appendChild(el("span", "tm", "Team " + team.join(", ")));
+    line.appendChild(el("span", "sp"));
+    var st = asgState(a);
+    line.appendChild(el("span", "st " + st[1], st[0]));
+    if (canEdit) line.appendChild(csButton("Edit", "sm", function () { clAsgOpen(a.id); }));
+    td.appendChild(line);
+    tr.appendChild(td);
+    return tr;
+  }
+  /* ADDING OR CHANGING ONE, in place under its client: name, type, the two
+     months, the lead and the team, each picked from the consultants. */
+  function clAsgForm(c, a, cols) {
+    var o = CLREG.opts || { consultants: [] };
+    var tr = el("tr", "asgform");
+    var td = el("td"); td.colSpan = cols;
+    var f = el("div", "asgf");
+    var said = el("p", "err"); said.hidden = true;
+    var box = function (id, label, node) { var b = el("div"); b.appendChild(labFor(id, label)); node.id = id; b.appendChild(node); f.appendChild(b); return node; };
+    var nm = box("asg-name", "Assignment", el("input", "fld")); nm.type = "text"; nm.value = a ? a.name : ""; nm.placeholder = "Strategy build 2026";
+    var ty = box("asg-type", "Type", el("select", "fld"));
+    [["planning", "Planning"], ["retainer", "Retainer"]].forEach(function (t) { var op = el("option", null, t[1]); op.value = t[0]; ty.appendChild(op); });
+    ty.value = a ? a.kind : "planning";
+    var st = box("asg-start", "Start", el("input", "fld")); st.type = "month"; st.value = a ? a.started : "";
+    var en = box("asg-end", "End (empty while running)", el("input", "fld")); en.type = "month"; en.value = a ? a.ended : "";
+    var ld = box("asg-lead", "Lead", el("select", "fld"));
+    var pick0 = el("option", null, "Pick the lead"); pick0.value = ""; ld.appendChild(pick0);
+    o.consultants.forEach(function (p) { var op = el("option", null, p.name || p.email); op.value = p.id; ld.appendChild(op); });
+    ld.value = a && a.lead ? a.lead.id : "";
+    var team = (a ? a.team || [] : []).filter(function (p) { return !a.lead || p.id !== a.lead.id; }).map(function (p) { return { id: p.id, name: p.name }; });
+    var tb = el("div", "asgteam");
+    tb.appendChild(el("span", "lab", "Team"));
+    var pills = el("div", "pills");
+    tb.appendChild(pills);
+    f.appendChild(tb);
+    var drawTeam = function () {
+      pills.textContent = "";
+      team.forEach(function (p, i) {
+        var pill = el("span", "pill", p.name);
+        var x = el("button", "x", "×"); x.type = "button"; x.setAttribute("aria-label", "Take " + p.name + " off the team");
+        x.addEventListener("click", function () { team.splice(i, 1); drawTeam(); });
+        pill.appendChild(x);
+        pills.appendChild(pill);
+      });
+      var add = el("select", "fld addsel");
+      add.setAttribute("aria-label", "Add a consultant to the team");
+      var z = el("option", null, "+ Add"); z.value = ""; add.appendChild(z);
+      o.consultants.forEach(function (p) {
+        if (p.id === ld.value || team.some(function (t) { return t.id === p.id; })) return;
+        var op = el("option", null, p.name || p.email); op.value = p.id; add.appendChild(op);
+      });
+      add.addEventListener("change", function () {
+        var p = o.consultants.filter(function (x) { return x.id === add.value; })[0];
+        if (p) team.push({ id: p.id, name: p.name || p.email });
+        drawTeam();
+      });
+      pills.appendChild(add);
+    };
+    ld.addEventListener("change", function () { team = team.filter(function (t) { return t.id !== ld.value; }); drawTeam(); });
+    drawTeam();
+    var acts = el("div", "asgacts");
+    acts.appendChild(csButton("Cancel", "sm", function () { CLREG.open = ""; CLREG.redraw(); }));
+    if (a) {
+      /* REMOVING ONE asks twice, the memory's way: its learnings stay, under
+         the client, and its write-up and files go. */
+      var rm = csButton("Remove", "sm", function () {
+        if (rm.dataset.armed !== "1") { rm.dataset.armed = "1"; rm.textContent = "Remove it and its write-up. Its learnings stay"; return; }
+        rm.disabled = true;
+        cpostCases({ action: "drop", id: a.id }).then(function (r) {
+          if (!r || !r.ok) { rm.disabled = false; said.textContent = (r && r.error) || "It could not be removed."; said.hidden = false; return; }
+          CLREG.open = ""; clRegRead();
+        });
+      });
+      acts.appendChild(rm);
+    }
+    acts.appendChild(el("span", "sp"));
+    var save = csButton(a ? "Save" : "Add", "amber sm", function () {
+      save.disabled = true;
+      cpostCases({ action: "assign", id: a ? a.id : undefined, client: c.key, name: nm.value, kind: ty.value, started: st.value, ended: en.value,
+                   lead: ld.value, team: team.map(function (t) { return t.id; }) }).then(function (r) {
+        save.disabled = false;
+        if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be saved."; said.hidden = false; return; }
+        CLREG.open = ""; clRegRead();
+      });
+    });
+    acts.appendChild(save);
+    td.appendChild(f);
+    td.appendChild(acts);
+    td.appendChild(said);
+    tr.appendChild(td);
+    return tr;
+  }
+
+  /* + ADD A PAST CLIENT, on Ended (spec 067 §7, kept): its name, industry and
+     size, created ended with nothing behind its door, so its assignments can
+     be added under it and written up. */
+  function clPastForm(onDone) {
+    var f = el("div", "pastform");
+    var said = el("p", "err"); said.hidden = true;
+    var box = function (id, label, node) { var b = el("div"); b.appendChild(labFor(id, label)); node.id = id; b.appendChild(node); f.appendChild(b); return node; };
+    var pn = box("past-name", "Past client's name", el("input", "fld")); pn.type = "text";
+    var pi = box("past-ind", "Industry", el("select", "fld"));
+    var pz = box("past-size", "Size", el("select", "fld"));
+    var setup = typeof CLIENTSETUP !== "undefined" ? CLIENTSETUP : { INDUSTRIES: [], SIZES: [] };
+    var blank = el("option", null, "Not set"); blank.value = ""; pi.appendChild(blank);
+    (setup.INDUSTRIES || []).forEach(function (grp) {
+      var og = el("optgroup"); og.label = grp[0] || "Other";
+      grp[1].forEach(function (x) { var op = el("option", null, x); op.value = x; og.appendChild(op); });
+      pi.appendChild(og);
+    });
+    var blank2 = el("option", null, "Not set"); blank2.value = ""; pz.appendChild(blank2);
+    (setup.SIZES || []).forEach(function (z) { var op = el("option", null, z[1] + " · " + z[2]); op.value = z[0]; pz.appendChild(op); });
+    var acts = el("div", "asgacts");
+    acts.appendChild(csButton("Cancel", "sm", function () { onDone(false); }));
+    acts.appendChild(el("span", "sp"));
+    var go1 = csButton("Add the past client", "amber sm", function () {
+      go1.disabled = true;
+      cpostCases({ action: "past", name: pn.value, industry: pi.value, size: pz.value }).then(function (r) {
+        go1.disabled = false;
+        if (!r || !r.ok) { said.textContent = (r && r.error) || "It could not be added."; said.hidden = false; return; }
+        onDone(true);
+      });
+    });
+    acts.appendChild(go1);
+    var wrap = el("div", "pastwrap");
+    wrap.appendChild(f); wrap.appendChild(acts); wrap.appendChild(said);
+    return wrap;
   }
 
   function clEmpty(text) { return el("p", "muted clnone", text); }
@@ -3645,6 +3673,7 @@
       }
       r.appendChild(cog);
       tb.appendChild(r);
+      if (gridName !== "demo") clAsgRows(tb, c, 6);
     });
     t.appendChild(tb);
     wrap.appendChild(t);
@@ -3669,8 +3698,12 @@
      exists only to carry one (spec 067 §7). */
   function clEnded(list, canAddPast) {
     var box = el("div");
-    var addPast = function () { CS.jump = { view: "open", past: true }; go("memory"); };
-    var casesOf = function (c) { CS.q = c.name; CS.cat = ""; CS.jump = { view: "lib" }; go("memory"); };
+    var addPast = function () {
+      if (box.querySelector(".pastwrap")) return;
+      var form = clPastForm(function (added) { if (added) { CL.view = "list"; go("clients"); } else form.remove(); });
+      box.insertBefore(form, box.firstChild);
+    };
+    var casesOf = function (c) { CS.jump = { view: "client", client: c.key }; go("memory"); };
     if (CL.view === "cards") {
       var g = el("div", "cards");
       g.dataset.grid = "archived";
@@ -3710,7 +3743,7 @@
       r.appendChild(el("td", null, c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
       var acts = el("td", "clgo");
       if (c.cases != null) {
-        var cb = el("button", "clmod", "Case studies");
+        var cb = el("button", "clmod", "Track Record");
         cb.type = "button";
         cb.appendChild(el("i", null, String(c.cases)));
         cb.addEventListener("click", function () { casesOf(c); });
@@ -3729,6 +3762,7 @@
       }
       r.appendChild(acts);
       tb.appendChild(r);
+      clAsgRows(tb, c, 4);
     });
     t.appendChild(tb);
     wrap.appendChild(t);
@@ -3760,7 +3794,7 @@
     top.appendChild(foot);
     b.appendChild(top);
     var mods = el("div", "mods");
-    var r = el("button", "mrow", "Case studies");
+    var r = el("button", "mrow", "Track Record");
     r.type = "button";
     r.appendChild(el("i", c.cases ? "due" : null, String(c.cases)));
     r.addEventListener("click", function () { casesOf(c); });

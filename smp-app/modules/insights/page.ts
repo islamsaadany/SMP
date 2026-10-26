@@ -25,7 +25,8 @@ import { categoriesFor } from "../../lib/library-viewer.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopViewer } from "../../lib/topbar.ts";
 import { barFor } from "../../lib/branding.ts";
-import { ledgerCss, mastHtml, LENS } from "../../lib/ledger.ts";
+import { ledgerCss, LENS } from "../../lib/ledger.ts";
+import { CARD_LOOK_CSS, bandHtml, cardHead } from "../../lib/card-look.ts";
 import type { Rules } from "../../lib/shared-types.ts";
 
 /* THE MONTH IS THE PRODUCT'S OWN WORD, not the browser's (§53.5). The first
@@ -77,25 +78,31 @@ export function factLine(it: Item): string {
 }
 
 
-/* THE LEDGER LOOK (§605), from design-mockups/modules-look/2026-10-23_one-look.html:
-   the panel, the search line and the shared rules are lib/ledger.ts; what is
-   here is the report's own row. The row's markup is the one the platform's
-   tab draws too (libraryRows, §376), so only how it is laid out is this
-   page's: the category is a tag, the separators make way for space, and the
-   list opens under the Tracker's heavy rule. */
+/* MY TASKS' LOOK (§646), from design-mockups/modules-look/
+   2026-10-26_modules-in-my-tasks-look.html: the band, the card and its
+   header are lib/card-look.ts; what is here is the report's own row inside
+   the card, striped grey and white, grey first. The row's markup is the one
+   the platform's tab draws too (libraryRows, §376), so only how it is laid
+   out is this page's: the category is My tasks' pill, the separators make
+   way for space, and Download is a word in the gold, as a link is in the
+   console. */
 const CSS = `
-.list{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
-.item{display:flex;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line-2)}
+.card .list{display:flex;flex-direction:column}
+.item{display:flex;gap:16px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.item:last-child{border-bottom:0}
+.list .item:nth-child(odd of .item){background:var(--zebra)}
 .item .body{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:3px}
-.item h3{margin:0;font:600 15px/1.35 var(--font)}
+.item h3{margin:0;font:600 14.5px/1.35 var(--font)}
 .item p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
 .item .facts{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-top:3px;font:400 13px/1.4 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .item .facts .sep{display:none}
-.item .facts b{font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:5px 10px}
-.dl{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font:600 13px/1.5 var(--font);text-decoration:none}
-.dl:hover,.dl:focus-visible{border-color:var(--gold);outline:none}
+.item .facts b{display:inline-flex;align-items:center;gap:6px;font:400 12px/1.4 var(--font);color:var(--ink-2);background:var(--surface);border:1px solid var(--line-soft);border-radius:999px;padding:2px 10px}
+.item .facts b::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex:none}
+.dl{flex:none;color:var(--gold);font:600 13px/1.5 var(--font);text-decoration:none;white-space:nowrap}
+.dl:hover{text-decoration:underline}
+.dl:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 .nofile{flex:none;font-size:13px;color:var(--ink-3)}
-@media (max-width:560px){.item{flex-direction:column;align-items:flex-start;gap:8px}}
+@media (max-width:560px){.item{flex-direction:column;align-items:flex-start;gap:6px}}
 `;
 
 /* ── THE ROWS, AND THE ROWS ALONE (§376) ──────────────────────────────
@@ -245,11 +252,11 @@ export async function insightsDocument(
   const present = await categoriesFor(tenantId, viewer);
   const anyShelf = present.length > 0 || !!q || !!category;
   const cats = !anyShelf ? "" :
-    '<nav class="cats" aria-label="Categories">' +
+    '<span class="cx">Show <nav class="cats" aria-label="Categories">' +
     ['<a href="' + esc(catHref("")) + '"' + (category ? "" : ' aria-current="true"') + ">All</a>"]
       .concat(present.map((c) =>
         '<a href="' + esc(catHref(c)) + '"' + (category === c ? ' aria-current="true"' : "") + ">" + esc(c) + "</a>"))
-      .join("") + "</nav>";
+      .join("") + "</nav></span>";
 
   /* THE SEARCH BOX KEEPS ITS OWN QUESTION, which is not the row's: it is
      drawn where there is something to search, and the categories where there
@@ -258,25 +265,30 @@ export async function insightsDocument(
   const anyReports = items.length > 0 || !!q || !!category;
   /* THE COUNT IS THE PANEL'S NOW (§605), the number it always was — the
      reports listed — said the way the Tracker says its own. */
-  const tools = !anyReports ? "" :
-    '<div class="tools">' +
+  const find = !anyReports ? "" :
     '<form class="find" method="get" action="' + esc(here) + '" role="search">' + LENS +
     (category ? '<input type="hidden" name="category" value="' + esc(category) + '">' : "") +
     '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search reports" aria-label="Search reports">' +
     '<button class="go" type="submit">Search</button>' +
-    "</form></div>";
-  const mast = mastHtml({ esc, eyebrow: named, title: MODULE_DEF.insights.label, views: cats,
+    "</form>";
+  /* THE BAND AND ONE CARD (§646): the count in the band as the Tracker says
+     its own, and in the card's header beside its title; the categories and
+     the search are the card's filters, as My tasks' Show and search are. */
+  const mast = bandHtml({ esc, eyebrow: named, title: MODULE_DEF.insights.label,
+    sentence: "Research, market reports and analysis written for " + named + ".",
     tiles: anyReports ? [{ n: items.length, label: items.length === 1 ? "Report" : "Reports" }] : [] });
 
-  const list = libraryRows(slug, items, read, q, category, tenantName);
+  const list = '<section class="card">' +
+    cardHead({ esc, icon: "bulb", title: "Reports", count: read && anyReports ? items.length : null, right: cats + find }) +
+    libraryRows(slug, items, read, q, category, tenantName) + "</section>";
 
   return "<!doctype html>\n<html lang='en' data-module='insights'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(named) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CSS) + "</style>\n</head>\n<body>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CARD_LOOK_CSS + CSS) + "</style>\n</head>\n<body>\n" +
     topBarHtml({ slug, tenantName: named, module: "insights", have, consultant: !!top.consultant, viewer: top.viewer }) + "\n" +
-    '<main class="pg">\n' + mast + "\n" + tools + list +
+    '<main class="pg">\n' + mast + "\n" + list +
     "\n</main>\n</body>\n</html>\n";
 }

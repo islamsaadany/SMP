@@ -25,6 +25,7 @@ import {
 } from "@/ffp/lib/actions/value-chain";
 import { deleteProcessStep } from "@/ffp/lib/actions/process";
 import { STEP_GAP_DESCRIPTIONS, STEP_GAP_LABELS } from "@/ffp/lib/domain/step-readiness";
+import { pageZoom } from "@/ffp/lib/client/page-zoom";
 
 type ProcessRef = { id: string; code: string; name: string };
 type RoleRef = { id: string; name: string };
@@ -250,7 +251,7 @@ export function ValueChainBoard({
       {drag.ghost && (
         <div
           className="pointer-events-none fixed z-50 w-[240px] rounded-lg border border-[var(--accent)] bg-white p-2.5 text-[13px] font-semibold text-slate-900 shadow-lg"
-          style={{ left: drag.ghost.x + 12, top: drag.ghost.y + 12 }}
+          style={{ left: drag.ghost.x / pageZoom() + 12, top: drag.ghost.y / pageZoom() + 12 }}
           aria-hidden="true"
         >
           {drag.ghost.label}
@@ -546,7 +547,7 @@ function Column({
       {/* The column scrolls inside itself rather than stretching the page: one
           phase holding everything unplaced would otherwise leave every other
           column stranded at the top of a very long scroll. */}
-      <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto pe-0.5">{children}</div>
+      <div className="flex max-h-[calc(var(--winh)*0.6)] flex-col gap-2 overflow-y-auto pe-0.5">{children}</div>
     </section>
   );
 }

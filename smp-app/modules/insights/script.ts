@@ -1,4 +1,4 @@
-/* ── INSIGHTS: PUBLISHING FROM THE CLIENT'S OWN PAGE (§647) ───────────────
+/* ── INSIGHTS: PUBLISHING FROM THE CLIENT'S OWN PAGE (§648) ───────────────
    Islam: *"this needs to be doable from the module inside the client like
    the meeting notes as the insights are client relevant"*, then of the
    mockup (design-mockups/insights/2026-10-26_publish-from-the-module.html):

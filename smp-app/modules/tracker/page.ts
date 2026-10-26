@@ -151,7 +151,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 /* THE TOPICS PANEL (§533): every topic on this client, open and closed, and
    the ones with no actions on them — which the page could not reach at all
    before, because a heading is only drawn over rows that are in view. */
-.tpanel{position:absolute;top:32px;right:0;z-index:9;width:380px;max-width:min(380px,calc(100vw - 48px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,43,.2);text-align:left}
+.tpanel{position:absolute;top:32px;right:0;z-index:9;width:380px;max-width:min(380px,calc(var(--winw) - 48px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,43,.2);text-align:left}
 .tpanel .ph{display:flex;align-items:center;gap:8px;padding:9px 12px 8px;border-bottom:1px solid var(--line)}
 .tpanel .ph .lab{font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .tpanel .ph .hint{margin-left:auto;font:400 12px/1.4 var(--font);color:var(--ink-3)}
@@ -402,7 +402,7 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
   .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
   .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
   .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
-  .tpanel{width:min(380px,calc(100vw - 32px))}
+  .tpanel{width:min(380px,calc(var(--winw) - 32px))}
   .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
   .row{grid-template-columns:20px minmax(0,1fr) auto auto 26px;grid-template-areas:"tick t t st more" ". when tcol who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .tcol{grid-area:tcol;justify-self:start}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
   .team,.weeks,.topics{right:auto;left:0}}

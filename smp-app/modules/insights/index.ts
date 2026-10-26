@@ -74,7 +74,7 @@ async function viewerList(a: ServeArgs): Promise<TopViewer | null> {
    about the rule moved; what moved is how many places hold it. */
 const viewerOf = (a: ServeArgs): Promise<Viewer> => viewerFor(a.tenantId, a.seat, a.personKey);
 
-/* §647 — WHO MAY PUBLISH HERE is who could publish from the console's room:
+/* §648 — WHO MAY PUBLISH HERE is who could publish from the console's room:
    the platform's admin, or this client's own Super user (platform-rules
    mayConfigureClient), and a Forefront session either way. `admin` and
    `seat` are already the narrowed ones while somebody is viewed as (§383),

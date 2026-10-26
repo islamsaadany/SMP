@@ -892,10 +892,16 @@ if (browser) {
   check("it is the first thing in the row",
     (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("trail"));
   const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
-      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
+      const ffa = n.querySelector('a.trff');
+      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: ffa ? ffa.getAttribute('href') : '', first: n.firstElementChild === ffa,
+               mark: !!(ffa && ffa.querySelector('svg')), name: ffa ? ffa.getAttribute('aria-label') : '',
                where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
-  check("it reads Platform › the client › the module you are in",
-    tr.ff === "/platform" && /^platform\b/i.test(tr.text) && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  /* OPTION D (2026-10-26) REWRITTEN, NEVER LOOSENED (§218): the word
+     Platform gave way to the platform's mark, which is still the first thing
+     in the trail and still the way to /platform — named "Home", with no word
+     before the client. */
+  check("it reads the platform's mark (Home, to the console) | the client › the module you are in",
+    tr.ff === "/platform" && tr.first && tr.mark && tr.name === "Home" && /^Raya Trade\b/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
   check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
   /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
      clients", the module step "the other modules and then the separator and

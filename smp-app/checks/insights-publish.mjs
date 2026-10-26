@@ -1,4 +1,4 @@
-/* PUBLISHING INSIGHTS FROM THE CLIENT'S OWN PAGE (§647).
+/* PUBLISHING INSIGHTS FROM THE CLIENT'S OWN PAGE (§648).
 
    Islam: "this needs to be doable from the module inside the client like the
    meeting notes as the insights are client relevant", then "it can be a pop

@@ -106,7 +106,7 @@ const CSS = `
 @media (max-width:560px){.item{flex-direction:column;align-items:flex-start;gap:6px}}
 `;
 
-/* ── PUBLISHING IN PLACE (§647), sent ONLY to whoever may publish: a
+/* ── PUBLISHING IN PLACE (§648), sent ONLY to whoever may publish: a
    draft's tag, who a narrowed report reaches, Open on each row, and the
    pop-up. A client's page carries none of it, so it says nothing about
    writing (checks/insights.mjs §11). ── */
@@ -235,7 +235,7 @@ export async function libraryFragment(
 
 export function libraryRows(
   slug: string, items: Item[], read: boolean, q: string, category: string, tenantName: string,
-  /* §647: drawn for whoever may publish, on the module's own page only — the
+  /* §648: drawn for whoever may publish, on the module's own page only — the
      platform's tab never passes it. A draft says so, a narrowed report says
      how far it reaches, and each row has Open; a draft's file is not offered
      for download, because the file's address answers only for what is out. */
@@ -275,7 +275,7 @@ export function libraryRows(
 
 export type Ask = { q?: string; category?: string };
 
-/* §647 — WHAT THE POP-UP WORKS FROM, served at /<client>/insights/data and
+/* §648 — WHAT THE POP-UP WORKS FROM, served at /<client>/insights/data and
    only to whoever may publish (index.ts): every report as the office reads
    it (drafts, who each reaches), the one list of categories, and this
    client's places to narrow a report to. A failed read is said, never an
@@ -313,7 +313,7 @@ export async function insightsDocument(
   /* A LIBRARY THAT COULD NOT BE READ IS NOT AN EMPTY ONE (§35, §93: counting
      an error as absence reports everybody as having none). The two states say
      different things, and neither of them says "nothing has been published". */
-  /* §647: WHOEVER MAY PUBLISH READS THE OFFICE'S LIST — drafts and all, as
+  /* §648: WHOEVER MAY PUBLISH READS THE OFFICE'S LIST — drafts and all, as
      the console's room read it (forClient false) — and the places a report
      can be narrowed to. Everybody else reads exactly what they read before. */
   const pub = !!top.publish;
@@ -386,7 +386,7 @@ export async function insightsDocument(
      the search are the card's filters, as My tasks' Show and search are. */
   /* THE BAND COUNTS WHAT THE CLIENT CAN SEE, for everybody; whoever may
      publish has + Publish a report beside it, as Meeting Notes has + New
-     meeting (§647). */
+     meeting (§648). */
   const mast = bandHtml({ esc, eyebrow: named, title: MODULE_DEF.insights.label,
     sentence: "Research, market reports and analysis written for " + named + ".",
     tiles: anyReports ? [{ n: outCount, label: outCount === 1 ? "Report" : "Reports" }] : [],

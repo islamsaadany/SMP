@@ -533,7 +533,7 @@ try {
       return { bg: mast ? getComputedStyle(mast).backgroundColor : null, want,
         title: mast && mast.querySelector("h2.pt") ? mast.querySelector("h2.pt").textContent.trim() : null,
         tile: mast && mast.querySelector(".tile b") ? mast.querySelector(".tile b").textContent.trim() : null,
-        /* §647: whoever may publish also sees the drafts, which the band does
+        /* §648: whoever may publish also sees the drafts, which the band does
            not count — it counts what the client can see */
         rows: Array.from(document.querySelectorAll(a.rows)).filter((r) => !r.querySelector(".draft")).length, off, th,
         first: document.querySelector(a.rows) ? getComputedStyle(document.querySelector(a.rows)).backgroundColor : null,

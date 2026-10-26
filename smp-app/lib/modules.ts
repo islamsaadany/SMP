@@ -373,7 +373,7 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    NAMED HERE for the reason every other module fact is: the card, the address
    and Setup ask one place what a module is (§53.5). The card reads the flag
    off the row the server sent it and decides nothing itself. */
-/* §647: NONE ANY MORE. Islam: *"this needs to be doable from the module
+/* §648: NONE ANY MORE. Islam: *"this needs to be doable from the module
    inside the client like the meeting notes as the insights are client
    relevant"*, and of the console's room: *"no need for the console page"*.
    Insights is published from the client's own Insights page now, so its row

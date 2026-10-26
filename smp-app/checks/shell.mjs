@@ -2665,8 +2665,8 @@ await section("4 · Forefront's own pages", async () => {
   const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
   check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
     "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
-  /* the memory's tab is called Case studies since spec 067 — renamed, not loosened (§218) */
-  check(ffTabs.includes("Case studies"), "…and the consulting memory, now Case studies, which every consultant reaches (spec 045, 067)", ffTabs.join("|"));
+  /* the memory's tab is called Track Record since spec 069 (Case studies in 067) — renamed, not loosened (§218) */
+  check(ffTabs.includes("Track Record"), "…and the consulting memory, now the Track Record, which every consultant reaches (spec 045, 067, 069)", ffTabs.join("|"));
   /* \u00a7400: THE CONSOLE OPENS ON *MY WORK*, which is the first tab \u2014 so the
      cards are one press away rather than the landing. REWRITTEN, NEVER
      LOOSENED (\u00a7218): the landing is asserted as the new decision, and the
@@ -2880,8 +2880,8 @@ await section("4 · Forefront's own pages", async () => {
         zoom: getComputedStyle(document.documentElement).zoom };
     });
     const h1 = await home();
-    check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Case studies"]),
-      "Home draws your clients, your tasks and case studies, each a card with its header inside it (spec 068, 2026-10-24)", JSON.stringify(h1.heads));
+    check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
+      "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
     check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,

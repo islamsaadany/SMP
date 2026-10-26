@@ -1,5 +1,11 @@
 # 067 · Case studies — what we did for a client, written for the next person
 
+> **Reworked by spec 069 (Track Record), 2026-10-26.** The tab is now Track
+> Record; a row is an assignment on the client registry kept by the super user
+> on the Clients page; any consultant may write one up and its lead is asked
+> when it ends. What follows is the record of 067 as built; read 069 for how
+> it works now.
+
 **Status:** **LIVE — built 2026-10-23 on Islam's "yes build it", merged to
 `main` the same day on "merge it and put it live" (decision record §615).** The library drawing (`design-mockups/case-studies/2026-10-23_case-studies-library.html`)
 was signed off by that answer; what was built and what was not is §14.

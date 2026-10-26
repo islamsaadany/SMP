@@ -1,13 +1,17 @@
-/* Case studies, driven in a real browser against the built app (spec 067).
-   The whole way a past case study gets written — an admin opens it for a
-   past client, the writer finds it on My work, does the interview, reads the
-   draft, marks it done — and then what a new joiner sees: the library, the
-   report, the insights. Every step asserted on the screen AND in the rows.
+/* The Track Record, driven in a real browser against the built app (spec 069,
+   which reworks spec 067's case studies). The whole way an assignment gets
+   written up — the super user adds it on Clients (and a past client on
+   Ended), its lead finds the write-up on My tasks when the end month has
+   come, talks it through with the prompt, checks the draft and publishes —
+   and then what a new joiner sees: the front with its client cards and
+   filters, a client's page with a tab per assignment, and learnings added
+   to an assignment with the learnings prompt or typed in. Every step
+   asserted on the screen AND in the rows.
 
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node --experimental-strip-types checks/case-page.mjs
      … --break=no-split      (RED: the page loads no interview splitter)
      … --break=drafts-open   (RED: a new joiner reads somebody's draft)
-     … --break=no-writeups   (RED: My work does not show the write-up)
+     … --break=no-writeups   (RED: My tasks does not show the write-up)
      … --shots=DIR           (a screenshot of each page, for looking at)
 
    Needs `next build` first. Re-runnable: the dev tenant is remade at the start. */
@@ -118,219 +122,205 @@ KIND: lesson
 TITLE: Five measures is the most they will look at
 ===`;
 
-let boss, writer, reader, caseId;
+let boss, writer, reader, pastId, planId, retId;
+const rowOf = async (id) => (await owner.query("SELECT * FROM case_studies WHERE id = $1", [id])).rows[0];
+const goTab = async (p, tab) => { await p.click('.nav button[data-tab="' + tab + '"]'); await settle(p); await p.waitForTimeout(500); };
+const listView = async (p) => { await p.click('.clview button[data-view="list"]'); await p.waitForTimeout(900); };
+/* fills the open assignment form in the Clients list and presses Add */
+async function addAssignment(p, client, a) {
+  await p.click('[data-add-assignment="' + client + '"]'); await p.waitForTimeout(900);
+  await p.fill("#asg-name", a.name);
+  await p.selectOption("#asg-type", a.kind);
+  await p.fill("#asg-start", a.start);
+  if (a.end) await p.fill("#asg-end", a.end);
+  if (a.lead) await p.selectOption("#asg-lead", { label: a.lead });
+  await p.click('tr.asgform button:has-text("Add")'); await p.waitForTimeout(1200);
+}
 
-await section("1 · the tab, and the front of the library", async () => {
+await section("1 · the tab, and the front", async () => {
   reader = await as("reader@forefront.example");
   const tabs = await reader.$$eval(".nav button", (bs) => bs.map((b) => b.textContent.trim()));
-  check(tabs.includes("Case studies") && !tabs.includes("Memory"), "the tab is called Case studies, in Memory's place (Islam: \"call it case studies\")", JSON.stringify(tabs));
+  check(tabs.includes("Track Record") && !tabs.includes("Case studies"), "the tab is called Track Record (Islam: case studies \"mean that there is something new\")", JSON.stringify(tabs));
   await openTab(reader);
-  const view = await reader.$eval('.csseg button[aria-pressed="true"]', (b) => b.textContent.trim()).catch(() => "");
-  check(view === "Case studies", "it opens on the library, with Insights one press away", view);
-  check(await reader.$(".cslib .hochd #cs-q") !== null, "the front has one search, in the library card's header (round three)", "");
-  check((await reader.$$(".cslib .hochd .csseg")).length === 1, "…and Case studies · Insights beside it", "");
-  check(!!(await reader.$('.pgband button:has-text("Ask a question")')), "…and Ask a question on the band", "");
-  check(/No case studies on the shelves yet/.test(await reader.textContent("#page")), "with nothing finished, the shelves say so rather than standing empty (§61)", "");
-  check(!(await reader.$('.ptitle button:has-text("Open a piece of work")')), "a consultant is not offered Open a piece of work (decision 11)", "");
-  boss = await as("boss@forefront.example");
-  await openTab(boss);
-  check(!!(await boss.$('.ptitle button:has-text("Open a piece of work")')), "…an admin is", "");
+  check(await reader.$(".cslib .hochd #cs-q") !== null, "the front has one search, in the card's header", "");
+  check(!(await reader.$(".cslib .csseg")), "…and no Clients / Learnings switch (Islam: learnings \"are part of the clients work\")", "");
+  check(!!(await reader.$('.pgband button:has-text("+ Add to Track Record")')), "…and one + Add to Track Record on the band", "");
+  await reader.click('.pgband button:has-text("+ Add to Track Record")');
+  const choices = await reader.$$eval(".tramenu button b", (bs) => bs.map((b) => b.textContent.trim()));
+  check(JSON.stringify(choices) === JSON.stringify(["Write up an assignment", "Add learnings"]), "…offering its two choices, and no way to add a client here", JSON.stringify(choices));
+  check(/Nothing in the Track Record yet/.test(await reader.textContent("#page")), "with nothing added, the front says so and where assignments come from", "");
   await shot(reader, "1-front-empty");
 });
 
-await section("2 · an admin opens a past piece of work, past client and all", async () => {
-  await boss.click('.ptitle button:has-text("Open a piece of work")');
-  await settle(boss);
-  await boss.selectOption("#cs-o-client", "__past");
-  check(await boss.isVisible("#cs-o-pname"), "choosing a past client shows its three fields", "");
-  await boss.fill("#cs-o-pname", "Nile Logistics");
-  await boss.selectOption("#cs-o-pind", "Transportation & Logistics");
-  await boss.fill("#cs-o-name", "Operating model 2023");
-  await boss.fill("#cs-o-from", "2023-03");
-  await boss.fill("#cs-o-to", "2023-11");
-  await boss.selectOption("#cs-o-team", writerId);
-  await boss.selectOption("#cs-o-writer", writerId);
-  await boss.fill("#cs-o-due", "2026-11-13");
-  await settle(boss);
-  const cover = await boss.textContent(".preview .cover");
-  check(/Operating model 2023/.test(cover) && /Nile Logistics/.test(cover) && /Mar – Nov 2023/.test(cover), "the cover it makes fills in as it is typed", cover);
-  check(/Transportation & Logistics shelf/.test(await boss.textContent(".preview .where")), "…and says which shelf it will stand on", await boss.textContent(".preview .where"));
-  const label = await boss.textContent(".factions .btn.amber");
-  check(/Open it and ask Islam/.test(label), "the button says who it will ask", label);
-  await shot(boss, "2-open");
-  await boss.click(".factions .btn.amber");
-  await settle(boss);
-  check(/Being written/.test(await boss.textContent(".rhead .chip")), "it opens on its own page, being written", await boss.textContent(".rhead").catch(() => ""));
-  const t = (await owner.query("SELECT status, past FROM tenants WHERE key = 'nile-logistics'")).rows[0];
-  check(t && t.status === "retired" && t.past, "the past client is made, archived and marked past", JSON.stringify(t));
-  caseId = (await owner.query("SELECT id FROM case_studies WHERE name = 'Operating model 2023'")).rows[0].id;
-  await boss.click('.nav button[data-tab="clients"]');
-  await boss.waitForTimeout(1200);
-  check(!/Nile Logistics/.test(await boss.textContent("#page")), "…and NOT on the Clients page, archived band included (Islam: \"I don't want it to be there\")", "");
+await section("2 · the registry is the Clients page (the super user's)", async () => {
+  boss = await as("boss@forefront.example");
+  await goTab(boss, "clients"); await listView(boss);
+  check(!!(await boss.$('[data-add-assignment="raya-trade"]')), "in the list view, the super user is offered + Add an assignment under a client", "");
+  await goTab(reader, "clients"); await listView(reader);
+  check(!(await reader.$('[data-add-assignment="raya-trade"]')), "…a consultant is not (Islam: \"registry is from the super user\")", "");
+  /* refused on the server, not only hidden */
+  const refused = await reader.evaluate(() => fetch("/api/cases", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "assign", client: "raya-trade", name: "Sneaky", kind: "planning", started: "2025-01" }) }).then((r) => r.status));
+  check(refused === 403, "…and a consultant's own request to add one is refused by the server", refused);
+  await addAssignment(boss, "raya-trade", { name: "Strategy build", kind: "planning", start: "2025-01", end: "2025-06" });
+  check(/Pick the lead/.test(await boss.textContent("tr.asgform")), "an assignment with no lead is refused, in words, and the form stays open", await boss.textContent("tr.asgform").catch(() => ""));
+  await boss.selectOption("#asg-lead", { label: "Islam Writer" });
+  await boss.click('tr.asgform button:has-text("Add")'); await boss.waitForTimeout(1200);
+  await addAssignment(boss, "raya-trade", { name: "Strategy follow-up", kind: "retainer", start: "2025-07", lead: "Islam Writer" });
+  const rows = await boss.$$eval("tr.asgrow", (rs) => rs.map((r) => r.textContent));
+  check(rows.length === 2 && rows.some((t) => /Planning.*Strategy build.*Jan – Jun 2025.*Lead Islam Writer/.test(t)) && rows.some((t) => /Retainer.*Strategy follow-up.*running/.test(t)),
+    "both assignments stand under Raya Trade with their type, months and lead", JSON.stringify(rows));
+  const db = (await owner.query("SELECT id, kind, lead_id, started, ended, state FROM case_studies ORDER BY started")).rows;
+  planId = db[0] && db[0].id; retId = db[1] && db[1].id;
+  check(db.length === 2 && db[0].kind === "planning" && db[1].kind === "retainer" && db[0].lead_id === writerId && db.every((r) => r.state === "running"),
+    "…and in the rows: two assignments, typed, led by the writer, nothing written yet", JSON.stringify(db));
+  await shot(boss, "2-registry");
 });
 
-await section("3 · the writer finds it on My work, and does the interview", async () => {
+await section("3 · a past client, added on Ended, with its assignment", async () => {
+  await boss.click('.clwhich button[data-which="ended"]'); await boss.waitForTimeout(500);
+  await boss.click('button:has-text("+ Add a past client")'); await boss.waitForTimeout(500);
+  await boss.fill("#past-name", "Nile Logistics");
+  await boss.click('button:has-text("Add the past client")'); await boss.waitForTimeout(2500);
+  const t = (await owner.query("SELECT key, past, status FROM tenants WHERE name = 'Nile Logistics'")).rows[0];
+  check(!!t && t.past && t.status === "retired", "it is made ended, with nothing behind its door", JSON.stringify(t));
+  await boss.click('.clwhich button[data-which="ended"]').catch(() => {}); await boss.waitForTimeout(500);
+  await addAssignment(boss, t.key, { name: "Operating model 2023", kind: "planning", start: "2023-03", end: "2023-11", lead: "Islam Writer" });
+  pastId = (await owner.query("SELECT id FROM case_studies WHERE name = 'Operating model 2023'")).rows[0]?.id;
+  check(!!pastId, "…and its assignment is added under it the same way", "");
+});
+
+await section("4 · the write-up lands on the lead's My tasks", async () => {
   writer = await as("writer@forefront.example");
-  await writer.click('.nav button[data-tab="mywork"]');
-  await writer.waitForTimeout(1200);
-  const row = await writer.$(".mwrow.mwcase");
-  check(!!row, "the write-up is on the writer's My work (decision 7)", "");
-  if (!row) return;
-  check(/Write up the case study · Operating model 2023/.test(await row.textContent()) && /Case study/.test(await row.textContent()), "…named as a write-up, with Case study where a status would be", await row.textContent());
-  check(!(await row.$(".mwtick")), "…and NO tick: it is finished on the case study, never from a list (§61)", "");
-  await shot(writer, "3-mywork");
-  await row.click();
-  await settle(writer);
-  check(!!(await writer.$(".twostep")), "pressing it opens the interview, since nothing is written yet", "");
-  const prompt = await writer.textContent(".stepcard .prompt");
-  check(/Client:\s+Nile Logistics \(Transportation & Logistics\)/.test(prompt) && /March 2023 to November 2023/.test(prompt) && /Islam Writer/.test(prompt),
-    "the prompt already holds the client, its industry, the months and the team", prompt.slice(0, 300));
-  await shot(writer, "4-interview");
+  await goTab(writer, "mywork");
+  const rows = await writer.$$eval(".mwcase", (rs) => rs.map((r) => r.textContent));
+  check(rows.some((t) => /Write up the assignment · Operating model 2023/.test(t)) && rows.some((t) => /Strategy build/.test(t)),
+    "the two ended assignments are on their lead's My tasks, with nobody asking", JSON.stringify(rows));
+  check(!rows.some((t) => /Strategy follow-up/.test(t)), "…the running Retainer is not", JSON.stringify(rows));
+  const late = await writer.$eval('.mwcase[data-case="' + pastId + '"]', (r) => r.classList.contains("late")).catch(() => null);
+  check(late === true, "…and the one that ended in 2023 is late", late);
+  await goTab(reader, "mywork");
+  check((await reader.$$(".mwcase")).length === 0, "CONTROL — somebody who leads none has none", "");
+  await goTab(writer, "mywork");
+  await writer.click('.mwcase[data-case="' + pastId + '"]'); await writer.waitForTimeout(2000);
+  const prompt = await writer.textContent("pre.prompt").catch(() => "");
+  check(/Nile Logistics/.test(prompt) && /Operating model 2023 \(Planning\)/.test(prompt) && /Lead:\s+Islam Writer/.test(prompt),
+    "pressing it opens the prompt straight away, filled from the registry", prompt.slice(0, 300));
+  const href = await writer.getAttribute('a:has-text("Open in Claude")', "href").catch(() => "");
+  check(/^https:\/\/claude\.ai\/new\?q=/.test(href) && decodeURIComponent(href.split("q=")[1] || "").includes("Operating model 2023"),
+    "…with Open in Claude beside Copy the prompt, carrying the same prompt", href.slice(0, 120));
+  await shot(writer, "4-write");
+});
+
+await section("5 · paste, check, publish", async () => {
   await writer.fill("#cs-paste", PASTE);
-  await writer.click('.stepcard button:has-text("Read it into the draft")');
-  await settle(writer);
+  await writer.click('button:has-text("Fill the write-up")'); await writer.waitForTimeout(1200);
   const found = await writer.textContent(".found").catch(() => "");
-  check(/Read 7 of 8 sections and 2 insights/.test(found) && /What came of it/.test(found), "the draft says what was read, and names the section that came back empty", found);
-  check((await writer.inputValue("#cs-d-inShort")).startsWith("Nile Logistics asked us"), "In short is in its box, ready to change", "");
-  check((await writer.$$(".dcard")).length === 2, "the two insights wait in the draft, unsaved", "");
-  const before = (await owner.query("SELECT in_short FROM case_studies WHERE id = $1", [caseId])).rows[0].in_short;
-  check(before === "", "NOTHING IS SAVED UNTIL IT IS SAVED — the row is still empty after reading the paste (§94.2)", before);
-  await shot(writer, "5-draft");
-  await writer.click('.draftbar button:has-text("Save the draft")');
-  await writer.waitForTimeout(1200);
-  const row2 = (await owner.query("SELECT in_short, stages, deliverables, their_team FROM case_studies WHERE id = $1", [caseId])).rows[0];
-  check(row2.in_short.startsWith("Nile Logistics") && row2.stages.length === 2 && row2.deliverables.length === 1 && row2.their_team.length === 1,
-    "Save the draft stores the sections, the timeline, the deliverables and the team", JSON.stringify(row2).slice(0, 200));
-  const ins = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id = $1", [caseId])).rows[0].n;
-  check(ins === 2, "…and the interview's insights, IN this piece of work", ins);
-  await writer.click('.draftbar button:has-text("Mark it done")');
-  await writer.waitForTimeout(1500);
-  check(/Done/.test(await writer.textContent(".rhead .chip").catch(() => "")), "Mark it done puts it on the shelves", await writer.textContent(".rhead").catch(() => ""));
+  check(brk === "no-split" ? true : /Read 7 of 8 sections and 2 learnings/.test(found), "the paste is read into seven sections and two learnings", found);
+  check(/Learnings found in the answer/.test(await writer.textContent("#page")), "…the learnings are listed under the draft, tied to this assignment", "");
+  check(!(await writer.$("#cs-d-name")), "…and the name and months are not typed again: they are the registry's", "");
+  await shot(writer, "5-check");
+  await writer.click('.pubbar button:has-text("Publish")'); await writer.waitForTimeout(2500);
+  const r = await rowOf(pastId);
+  check(r.state === "done" && r.writer_id === writerId && /three regional depots/.test(r.in_short), "Publish saves it and marks it published, the writer named", JSON.stringify({ state: r.state, w: r.writer_id === writerId }));
+  const n = (await owner.query("SELECT count(*)::int AS n FROM memory_entries WHERE case_id = $1", [pastId])).rows[0].n;
+  check(n === 2, "…its two learnings saved into this assignment", n);
+  check(/three regional depots/.test(await writer.textContent("#page")) && !!(await writer.$('.trtabs button[aria-selected="true"]')),
+    "…and it lands on the client's page, on its tab", "");
 });
 
-await section("4 · a new joiner reads it", async () => {
-  await reader.click('.nav button[data-tab="clients"]'); await reader.waitForTimeout(500);
+await section("6 · what a new joiner sees", async () => {
   await openTab(reader);
-  const shelves = await reader.$$eval(".shelf .shh h2", (h) => h.map((x) => x.textContent.trim()));
-  check(shelves.includes("Newest") && shelves.includes("Transportation & Logistics"), "the library has a Newest shelf and one for its industry", JSON.stringify(shelves));
-  const cats = await reader.$$eval(".catrow button", (b) => b.map((x) => x.textContent.trim()));
-  check(cats.length === 2 && /^All/.test(cats[0]), "the industries row offers only what is on the shelves (§61)", JSON.stringify(cats));
-  check(/New/.test(await reader.textContent(".shelf .cover")), "a case study finished in the last thirty days is marked New", "");
-  await shot(reader, "6-front");
-  await reader.click(".shelf .cover");
-  await settle(reader);
-  const head = await reader.textContent(".rhead");
-  check(/Operating model 2023/.test(head) && /written by Islam Writer/.test(head) && /past client/.test(head), "the report's header: the work, the client, who wrote it", head);
-  check((await reader.textContent(".stand")).startsWith("Nile Logistics asked"), "In short is the opening paragraph", "");
-  const secs = await reader.$$eval(".rsec h2", (h) => h.map((x) => x.textContent.replace(/\s+/g, " ").trim()));
-  check(secs.some((s) => /Timeline/.test(s)) && secs.some((s) => /Deliverables/.test(s)) && !secs.some((s) => /What came of it/.test(s)),
-    "the sections are numbered, and one with nothing in it is left out", JSON.stringify(secs));
-  check(!!(await reader.$(".tlbar i")), "the timeline is drawn as a strip of months where the stages name them", "");
-  check(/No file attached/.test(await reader.textContent(".files")), "a deliverable with no file says so", "");
-  check((await reader.$$(".icards .icard")).length === 2, "the insights from this work are inside it, as cards", "");
-  check(/Tell the managers before head office/.test(await reader.textContent(".icards")), "…each leading with what the next person should know", "");
-  check(!(await reader.$('.rhead button:has-text("Edit")')), "a new joiner gets no Edit", "");
-  await shot(reader, "7-report");
+  const cards = await reader.$$eval(".trcard", (cs) => cs.map((c) => c.dataset.client));
+  check(cards.length === 2, "the front draws one card per client", JSON.stringify(cards));
+  const nile = await reader.textContent('.trcard:has-text("Nile Logistics")').catch(() => "");
+  check(/Operating model 2023/.test(nile) && /Written up/i.test(nile) && /2 learnings/.test(nile), "…each with its assignments, where each stands, and its learnings", nile);
+  const raya = await reader.textContent('.trcard[data-client="raya-trade"]').catch(() => "");
+  check(/Strategy build/.test(raya) && /Not written/i.test(raya) && /Strategy follow-up/.test(raya) && /Running/i.test(raya), "…an ended one not yet written says so, a running one says Running", raya);
+  await reader.click('.trchips button[data-kind="hiccup"]'); await reader.waitForTimeout(1200);
+  const res = await reader.$$eval(".trlr", (rs) => rs.map((r) => r.textContent));
+  check(res.length === 1 && /drivers first/.test(res[0]) && /Nile Logistics/.test(res[0]) && /Operating model 2023/.test(res[0]),
+    "picking Hiccup lists the hiccups across clients, each naming its client and assignment", JSON.stringify(res));
+  check(!(await reader.$(".trcards")), "…in place of the cards", "");
+  await reader.click('.trchips button:has-text("Clear")'); await reader.waitForTimeout(1000);
+  await reader.click('.trcard:has-text("Nile Logistics") .trhd'); await reader.waitForTimeout(1500);
+  check(/three regional depots/.test(await reader.textContent("#page")) && /The depot managers heard about it/.test(await reader.textContent("#page")),
+    "a client's page opens on its write-up, with the assignment's learnings under it", "");
+  await shot(reader, "6-client");
 });
 
-await section("5 · somebody else's draft stays theirs", async () => {
-  const id = (await owner.query(
-    "INSERT INTO case_studies (about_tenant_id, name, state, opened_by, writer_id, due, in_short) " +
-    "SELECT t.id, 'Reporting cycle 2026', 'writing', $1, $1, '2026-12-01', 'A secret draft sentence' FROM tenants t WHERE t.key = 'raya-trade' RETURNING id",
-    [writerId])).rows[0].id;
+await section("7 · a draft is its writer's, the lead's and the super users'", async () => {
+  /* the writer starts the Raya Planning write-up and saves a draft */
+  await writer.evaluate((id) => fetch("/api/cases", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "save", id, inShort: "A DRAFT SENTENCE NOBODY ELSE READS" }) }), planId);
+  const r = await rowOf(planId);
+  check(r.state === "writing" && r.writer_id === writerId, "the first save makes its saver the writer", JSON.stringify({ s: r.state }));
   await openTab(reader);
-  check(/Reporting cycle 2026/.test(await reader.textContent(".desk")), "a draft is on the desk, by name, for everybody", "");
-  await reader.click('.desk .drow:has-text("Reporting cycle 2026")');
-  await settle(reader);
+  await reader.click('.trcard[data-client="raya-trade"] .trasg button[data-case="' + planId + '"]'); await reader.waitForTimeout(1500);
   const txt = await reader.textContent("#page");
-  check(!/A secret draft sentence/.test(txt) && /is writing it up/.test(txt), "…but opening it shows who is writing it, not what they wrote (decision 10)", txt.slice(0, 200));
-  await owner.query("DELETE FROM case_studies WHERE id = $1", [id]);
+  check(brk === "drafts-open" ? /A DRAFT SENTENCE/.test(txt) === false : !/A DRAFT SENTENCE/.test(txt) && /is writing it up/.test(txt),
+    "a new joiner sees that it is being written, not the draft", txt.slice(0, 200));
+  const asked = await reader.evaluate((id) => fetch("/api/cases", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "case", id }) }).then((x) => x.json()), planId);
+  check(asked.case && asked.case.inShort === "", "…and the server does not send it to them either", JSON.stringify(asked.case && asked.case.inShort));
 });
 
-await section("6 · insights: the other half of the library", async () => {
+await section("8 · adding learnings to an assignment, with the prompt", async () => {
   await openTab(reader);
-  await reader.click('.csseg button[data-view="list"]');
-  await settle(reader);
-  check(!!(await reader.$('.ptitle .right button:has-text("Add one insight")')), "Insights keeps today's ways in: Add one insight", "");
-  const facts = await reader.$$eval(".erow .facts", (f) => f.map((x) => x.textContent));
-  check(facts.some((f) => /in Operating model 2023/.test(f)), "each insight names the case study it is in", JSON.stringify(facts));
-  await reader.click('.csseg button[data-view="lib"]');
-  await settle(reader);
-  await reader.click(".shelf .cover");
-  await settle(reader);
-  await reader.fill("#cs-add-insight", "Ask the drivers what they heard");
-  await reader.press("#cs-add-insight", "Enter");
-  await reader.waitForTimeout(1200);
-  check(/Ask the drivers what they heard/.test(await reader.textContent(".icards")), "an insight written inside a case study lands in it at once", "");
-  const e = (await owner.query("SELECT case_id FROM memory_entries WHERE title = 'Ask the drivers what they heard'")).rows[0];
-  check(e && e.case_id === caseId, "…stored in this piece of work", JSON.stringify(e));
+  await reader.click('.pgband button:has-text("+ Add to Track Record")');
+  await reader.click('.tramenu button[data-add="learn"]'); await reader.waitForTimeout(1500);
+  await reader.selectOption("#tr-p-client", "raya-trade"); await reader.waitForTimeout(200);
+  await reader.selectOption("#tr-p-asg", retId); await reader.waitForTimeout(200);
+  const prompt = await reader.textContent("pre.prompt");
+  check(/Raya Trade/.test(prompt) && /Strategy follow-up \(Retainer/.test(prompt), "the learnings prompt carries the client and the assignment picked", prompt.slice(0, 260));
+  await reader.fill("#d-paste", "===\nKIND: hiccup\nTITLE: Monthly review slipped when the CEO travelled\nWHAT THE NEXT PERSON SHOULD KNOW: Agree a second chair.\n===");
+  await reader.click('button:has-text("Read the learnings")'); await reader.waitForTimeout(800);
+  await reader.click('button:has-text("Save all 1")'); await reader.waitForTimeout(2000);
+  const e = (await owner.query("SELECT case_id FROM memory_entries WHERE title LIKE 'Monthly review%'")).rows[0];
+  check(!!e && e.case_id === retId, "it is saved into the Retainer, never under the client alone", JSON.stringify(e));
+  check(/Monthly review slipped/.test(await reader.textContent("#page")) && !!(await reader.$('.trtabs button[aria-selected="true"][data-case="' + retId + '"]')),
+    "…and the page lands on that assignment's tab, showing it", "");
+  const tabTxt = await reader.textContent(".trgrid");
+  check(/Running since Jul 2025/.test(tabTxt) && !/being written up/.test(tabTxt) && !(await reader.$('.gacts button:has-text("Write it up")')),
+    "…a running Retainer reads as running, with no write-up offered until it ends", tabTxt.slice(0, 160));
+  await shot(reader, "8-learnings");
 });
 
-await section("7 · a phone", async () => {
-  const p = await as("reader@forefront.example", 400);
-  /* the tab named in the address, read when the page loads — a reload,
-     since changing only the hash of the page already open loads nothing */
-  await p.goto(BASE + "/platform#memory"); await p.reload(); await p.waitForTimeout(1500);
-  let w = await p.evaluate(() => document.documentElement.scrollWidth);
-  check(w <= 400, "the library is no wider than a 400px screen", w);
-  await shot(p, "8-phone-front");
-  const n = await p.$$eval(".shelf .cover", (c) => c.length);
-  check(n > 0, "the covers are on the phone's shelves", n);
-  await p.locator(".shelf .cover").first().click({ timeout: 8000 }); await settle(p);
-  w = await p.evaluate(() => document.documentElement.scrollWidth);
-  check(w <= 400, "…nor is the report", w);
-  await shot(p, "8-phone-report");
+await section("9 · or typed in by hand", async () => {
+  await reader.click('.trlearn button:has-text("+ Add learnings")'); await reader.waitForTimeout(1500);
+  await reader.click('.trhow button[data-how="type"]'); await reader.waitForTimeout(800);
+  check(/Raya Trade/.test(await reader.textContent(".trctx").catch(() => "")), "Type one in names the client and assignment it goes to", "");
+  await reader.fill("#m-title", "Agree who chairs the review");
+  await reader.selectOption("#m-kind", "practice");
+  await reader.click('button:has-text("Save the learning")'); await reader.waitForTimeout(2000);
+  const e = (await owner.query("SELECT case_id, kind FROM memory_entries WHERE title = 'Agree who chairs the review'")).rows[0];
+  check(!!e && e.case_id === retId && e.kind === "practice", "…and it is saved into that assignment", JSON.stringify(e));
 });
 
-await section("8 · the Clients page: Active, Ended, Demo, Mine, cards or list", async () => {
-  const p = boss;
-  const goClients = async () => { await p.click('.nav button[data-tab="clients"]'); await p.waitForTimeout(1200); };
-  await goClients();
-  const on = await p.$eval('.clwhich button[aria-pressed="true"]', (b) => b.dataset.which).catch(() => null);
-  check(on === "active", "the Clients page opens on Active (Islam: \"default is active\")", on);
-  check(!/Nile Logistics/.test(await p.textContent("#page")), "a past client is not among the Active ones", "");
-  await p.click('.clwhich button[data-which="ended"]'); await p.waitForTimeout(400);
-  const past = await p.$('[data-grid="archived"] .ccard[data-client="nile-logistics"]');
-  check(!!past && /Past client/i.test(await past.textContent()), "under Ended, the past client, marked Past client", past ? await past.textContent() : "");
-  check(past && !(await past.$(".cback")), "…with no Bring back: there is no platform to return to", "");
-  check(!!(await p.$('[data-grid="archived"] [data-add-past]')), "…and + Add a past client lives here", "");
-  if (past) {
-    await (await past.$(".mrow")).click(); await p.waitForTimeout(1200);
-    check((await p.inputValue("#cs-q").catch(() => "")) === "Nile Logistics" && !!(await p.$(".shelf .cover")),
-      "its Case studies row opens the library on its case studies", await p.inputValue("#cs-q").catch(() => ""));
-  }
-  await goClients();
-  await p.click('.clwhich button[data-which="ended"]'); await p.waitForTimeout(400);
-  await p.click('[data-grid="archived"] [data-add-past]'); await p.waitForTimeout(1200);
-  check((await p.inputValue("#cs-o-client").catch(() => "")) === "__past" && await p.isVisible("#cs-o-pname"),
-    "+ Add a past client opens Open a piece of work with a past client chosen", await p.inputValue("#cs-o-client").catch(() => ""));
-  /* MINE, BOTH ENDS: the admin has no seat here, the office's SMO has one */
-  await goClients();
-  const back = await p.$eval('.clwhich button[aria-pressed="true"]', (b) => b.dataset.which).catch(() => null);
-  check(back === "active", "coming back to Clients after Ended opens on Active again, every visit", back);
-  await p.click(".clmine"); await p.waitForTimeout(300);
-  check(/Active0/.test(await p.textContent(".clwhich")) && !(await p.$('[data-grid="clients"] .ccard[data-client="raya-trade"]')),
-    "Mine, for somebody with no seat anywhere, shows none — and its count says so first", await p.textContent(".clwhich"));
-  const smo = await as("office@forefront.example");
-  await smo.click('.nav button[data-tab="clients"]'); await smo.waitForTimeout(1200);
-  await smo.click(".clmine"); await smo.waitForTimeout(300);
-  check(!!(await smo.$('[data-grid="clients"] .ccard[data-client="raya-trade"]')), "CONTROL — Mine, for somebody with a seat, shows their client", await smo.textContent(".clwhich"));
-  /* CARDS OR LIST, remembered on this device */
-  await p.click(".clmine"); await p.waitForTimeout(200);
-  await p.click('.clview button[data-view="list"]'); await p.waitForTimeout(300);
-
-  const rowsNow = await p.$$eval('table[data-grid="clients"] tr.crow', (r) => r.map((x) => x.dataset.client));
-  check(rowsNow.includes("raya-trade"), "the list draws one line a client", JSON.stringify(rowsNow) + " " + (await p.textContent(".clwhich")));
-  check(!!(await p.$('tr.crow[data-client="raya-trade"] .clmod')), "…with a button per module", "");
-  await p.reload(); await p.waitForTimeout(1500);
-  await goClients();
-  check(!!(await p.$('table[data-grid="clients"]')), "…and the list is still the view after a reload", "");
-  await p.click('.clview button[data-view="cards"]'); await p.waitForTimeout(300);
-  check(!!(await p.$('.cards[data-grid="clients"]')), "CONTROL — and back to cards", "");
-  await shot(p, "9-clients");
+await section("10 · Write up an assignment, from the front", async () => {
+  await openTab(boss);
+  await boss.click('.pgband button:has-text("+ Add to Track Record")');
+  await boss.click('.tramenu button[data-add="pick"]'); await boss.waitForTimeout(1500);
+  await boss.selectOption("#tr-p-client", "raya-trade"); await boss.waitForTimeout(200);
+  await boss.selectOption("#tr-p-asg", retId); await boss.waitForTimeout(200);
+  await boss.click('.trpickcard button:has-text("Write it up")'); await boss.waitForTimeout(1500);
+  check(/Strategy follow-up \(Retainer\)/.test(await boss.textContent("pre.prompt").catch(() => "")), "picking a client and assignment opens its prompt", "");
 });
 
-await section("9 · nothing threw", async () => {
+await section("11 · on a phone", async () => {
+  const p = await as("reader@forefront.example", 390);
+  await p.click("#sbopen").catch(() => {});
+  await p.click('.nav button[data-tab="memory"]').catch(() => {}); await p.waitForTimeout(1500);
+  const wide = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  check(wide <= 1, "the front does not scroll sideways at 390px", wide);
+  await shot(p, "11-phone-front");
+  await p.click('.trcard[data-client="raya-trade"] .trhd').catch(() => {}); await p.waitForTimeout(1500);
+  const wide2 = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  check(wide2 <= 1, "…nor does a client's page", wide2);
+  await shot(p, "11-phone-client");
+});
+
+await section("12 · nothing threw", async () => {
   check(errors.length === 0, "no page error anywhere in the walk (§118)", errors.join(" | "));
 });
 

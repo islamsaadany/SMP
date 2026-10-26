@@ -65823,7 +65823,7 @@ var COPILOT = (function(){
         out.push(foldHtml(f, i, true));
         talk.forEach(function(x, k){
           if (x.w === "me") out.push(meMsg(x.t));
-          else if (x.w === "note") out.push('<div class="copnote">' + E(x.t) + '</div>');
+          else if (x.w === "note") out.push('<div class="copfnote">' + E(x.t) + '</div>');
           else if (k === live) out.push(liveBox(x.t));
           else { pn++; out.push('<div class="copmsg ai copwide copold"><span class="copwho">Copilot</span><div class="copbody"><span class="copeh">Proposal ' + pn + ' · ' + E(partName(el)) + ' · replaced</span><div class="copfdraft">' + E(withY(x.t, f)) + '</div></div></div>'); }
         });
@@ -65853,7 +65853,7 @@ var COPILOT = (function(){
     if (f.phase === "check" && !f.check && !busyHere) {
       out.push(aiMsg("Every part is agreed. Run the check from the pane when you're ready — it reads the parts together.", true));
     }
-    (f.notes || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : '<div class="copnote">' + E(x.t) + '</div>'); });
+    (f.notes || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : '<div class="copfnote">' + E(x.t) + '</div>'); });
     if (f.phase === "saved" && f.saved) {
       out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
@@ -65878,14 +65878,14 @@ var COPILOT = (function(){
     var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", !current && ch ? ch + (ch === 1 ? " change" : " changes") : ""].filter(Boolean).join(" · ");
     var body = '';
     if (open) {
-      body = '<div class="copfoldb">' + el.questions.map(function(q, k){
+      body = '<div class="coppfb">' + el.questions.map(function(q, k){
           var v = String(a[k] || "").trim();
           return v ? '<div class="copqa"><span class="copq">' + E(withY(q, f)) + '</span><span class="copa">' + E(v) + '</span></div>' : ''; }).join("") +
         talk.map(function(x){ return x.w === "me" ? '<div class="copqa"><span class="copa">' + E(x.t) + '</span></div>' :
-          x.w === "note" ? '<div class="copnote">' + E(x.t) + '</div>' : '<div class="copqa"><span class="copq">Copilot proposed</span><span class="copqp">' + E(withY(x.t, f)) + '</span></div>'; }).join("") +
+          x.w === "note" ? '<div class="copfnote">' + E(x.t) + '</div>' : '<div class="copqa"><span class="copq">Copilot proposed</span><span class="copqp">' + E(withY(x.t, f)) + '</span></div>'; }).join("") +
         (!current && txt ? '<div class="copqa"><span class="copq">Agreed wording</span><span class="copqp agreed">' + E(withY(txt, f)) + '</span></div>' : '') + '</div>';
     }
-    return '<div class="copfold' + (open ? ' open' : '') + '" data-cop-foldbox="' + i + '"><button type="button" class="copfoldh" data-cop-fold="' + i + '" aria-expanded="' + open + '">' +
+    return '<div class="coppf' + (open ? ' open' : '') + '" data-cop-foldbox="' + i + '"><button type="button" class="coppfh" data-cop-pfold="' + i + '" aria-expanded="' + open + '">' +
       '<span class="copchev" aria-hidden="true">▸</span><b>' + E(current ? "Your answers on " + partName(el) : partName(el)) + '</b><small>' + E(bits) + '</small>' + st + '</button>' + body + '</div>';
   }
   /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
@@ -66115,10 +66115,10 @@ var COPILOT = (function(){
       }
       /* §643: a line that names no part is still kept in the chat. */
       var gn = flowCopy(); DRAFT[id] = ""; sayIn(gn, -1, "me", text.trim());
-      SAY = "Kept in the chat. To change a part, name it, or press Go back to."; flowSave(gn); return;
+      flowSave(gn, function(){ SAY = "Kept in the chat. To change a part, name it, or press Go back to."; draw(); }); return;
     }
     var gm = flowCopy(); DRAFT[id] = ""; sayIn(gm, -1, "me", text.trim());
-    SAY = "Kept in the chat. Use the buttons above to carry on."; flowSave(gm);
+    flowSave(gm, function(){ SAY = "Kept in the chat. Use the buttons above to carry on."; draw(); });
   }
   /* SAVING A CARD'S OWN WORDS (§513). The text is the part's, agreed as it
      stands — so a part that was still a draft reads Done once saved, and a
@@ -66209,8 +66209,8 @@ var COPILOT = (function(){
       if (had) sayIn(g5, e5, "note", "Kept as it was.");
       partDone(g5); flowSave(g5); return true;
     }
-    if ((b = hit(ev, "[data-cop-fold]"))) {
-      var fk = PANE.chat.id + ":" + b.getAttribute("data-cop-fold");
+    if ((b = hit(ev, "[data-cop-pfold]"))) {
+      var fk = PANE.chat.id + ":" + b.getAttribute("data-cop-pfold");
       if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true;
       draw(); return true;
     }

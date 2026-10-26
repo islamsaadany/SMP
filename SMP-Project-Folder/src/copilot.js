@@ -946,7 +946,7 @@ var COPILOT = (function(){
     var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
     if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
     var cut = lines.length > 4 ? 3 : lines.length, key = lines.join("\n"), open = !!CARDMORE[key];
-    return '<ul' + (open ? ' class="open"' : '') + '>' + lines.map(function(l, k){ return '<li' + (k >= cut ? ' class="copx"' : '') + '>' + E(l) + '</li>'; }).join("") + '</ul>' +
+    return '<ul' + (open ? ' class="open"' : '') + '>' + lines.map(function(l, k){ return '<li' + (k >= cut ? ' class="copmorel"' : '') + '>' + E(l) + '</li>'; }).join("") + '</ul>' +
       (lines.length > cut ? '<span class="copmore" role="button" tabindex="0" aria-expanded="' + open + '" data-cop-more="' + E(key) + '" data-n="' + (lines.length - cut) + '">' +
         (open ? 'Show fewer' : 'Show ' + (lines.length - cut) + ' more') + '</span>' : '');
   }

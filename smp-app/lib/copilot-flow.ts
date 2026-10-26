@@ -269,6 +269,8 @@ export function storedFlow(raw: unknown): Flow | null {
   }
   const f = sanitizeFlow(raw, null);
   f.talk = base.talk; f.notes = base.notes; f.prop = base.prop;
+  /* …and its card holds no words: a card holds only what was agreed. */
+  FLOW_ELEMENTS.forEach((_, i) => { if (base.prop[i] && !Array.isArray(j.prop) && !f.done[i]) f.drafts[i] = ""; });
   if (j.check && typeof j.check === "object") f.check = {
     agree: (Array.isArray(j.check.agree) ? j.check.agree : []).map((x: unknown) => oneLine(x).slice(0, 400)).filter(Boolean).slice(0, 8),
     issues: (Array.isArray(j.check.issues) ? j.check.issues : []).map((x: any) => ({ el: str(x && x.el), text: oneLine(x && x.text).slice(0, 400) })).filter((x: any) => x.text).slice(0, 8),

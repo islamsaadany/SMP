@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-26 — The chat in the order it happened (§644), on the branch, not merged.** Each part's guided pass folds where it happened, then plain chat; Your answers is a hover icon; Key Objectives shows every objective.
+**2026-10-26 — The chat in the order it happened (§644), merged to `main` on Islam's word.** Each part's guided pass folds where it happened, then plain chat; Your answers is a hover icon; Key Objectives shows every objective.
 
 **2026-10-26 — The chat keeps everything (§643), merged to `main` on Islam's word.** A draft or change is a proposal in the chat; the card changes only on Save to the card; guided answers fold and reopen; typed lines are kept; the check is the pane's.
 

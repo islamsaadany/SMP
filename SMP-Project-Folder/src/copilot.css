@@ -756,6 +756,8 @@ span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
    it the work and the to-do open over the chat from the head's buttons.
    Later in the file on purpose: it settles the rules above. Tokens only. ── */
 .copchat > :not(.copmsgs), .copchat > .copmsgs > .copzoom { width:100%; max-width:var(--cop-read, 740px); margin-left:auto; margin-right:auto; box-sizing:border-box; }
+/* §642: the parts-agreed line reads over the chat's column, not the whole pane (Islam, 26 Oct 2026) */
+.copfchat > .copfbar { width:100%; max-width:var(--cop-read, 740px); margin-left:auto; margin-right:auto; box-sizing:border-box; }
 .copgrip { display:none; position:relative; cursor:col-resize; touch-action:none; min-height:0; }
 .copgrip::after { content:""; position:absolute; top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%); background:var(--line); }
 .copgrip:hover::after, .copgrip.on::after, .copgrip:focus-visible::after { width:3px; background:var(--gold); }

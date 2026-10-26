@@ -10455,3 +10455,6 @@ Islam: why the empty space? The page reserved a fixed band on the left for the c
 
 ## §603 — Priorities: a + to fold sub-processes, and every step can be reached (2026-10-26)
 Islam: "RHI End2End" has about 24 steps but nothing shows, and the page is long; wanted a + that opens the sub-processes. (1) Steps with nothing noticed on the map were counted but never listed, so a process whose steps carry no risk controls, decisions or hand-overs showed nothing to flag. Now "Steps inside" opens to the flagged and noticed steps, with "Show them, to flag one" listing the quiet ones; any step can be flagged. (2) Sub-processes start folded under their main process, with a +/− (and the number of subs) on the main, and Open all · Close all above the table. Checked in the real run (GREEN 113/0): subs folded then opened, quiet steps folded then listed and flaggable. Branch only; not merged.
+
+## §604 — Priorities: the map notices more on a step (2026-10-26)
+So that fewer steps read as "quiet": a step is now also noticed when it says what goes wrong if it is missed ("Risk noted on the step") and when its written procedure runs to five lines or more ("Long procedure"). These are signals only; they do not change the suggested scores. Checked: rules 42/0 and the real run.

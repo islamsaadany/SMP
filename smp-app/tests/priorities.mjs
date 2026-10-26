@@ -51,12 +51,14 @@ check("the named approver, by register key, may approve", P.mayApprovePlan({ act
 
 
 // Steps inside a process
-const sf = (o) => ({ decision: false, controlsHigh: 0, controlsMedium: 0, controlsLow: 0, handoverTo: [], roles: 0, subtasks: 0, ...o });
+const sf = (o) => ({ decision: false, controlsHigh: 0, controlsMedium: 0, controlsLow: 0, handoverTo: [], roles: 0, subtasks: 0, riskNoted: false, instructions: 0, ...o });
 check("a step with nothing on it has no signals", P.stepSignals(sf({})).length === 0);
 check("a high-risk control is the first signal", P.stepSignals(sf({ controlsHigh: 1, decision: true }))[0].key === "high-risk");
 check("a hand-over names where it goes", P.stepSignals(sf({ handoverTo: ["IT-Onboarding"] }))[0].label === "Hands over to IT-Onboarding");
 check("three roles is noticed, two is not", P.stepSignals(sf({ roles: 3 })).length === 1 && P.stepSignals(sf({ roles: 2 })).length === 0);
 check("six sub-tasks is noticed, five is not", P.stepSignals(sf({ subtasks: 6 })).length === 1 && P.stepSignals(sf({ subtasks: 5 })).length === 0);
+check("a risk written on the step is noticed", P.stepSignals(sf({ riskNoted: true }))[0].key === "risk-noted");
+check("a five-line procedure is noticed, four is not", P.stepSignals(sf({ instructions: 5 })).length === 1 && P.stepSignals(sf({ instructions: 4 })).length === 0);
 check("no complexity suggestion with nothing to go on", P.suggestStepComplexity(sf({})) === null);
 check("a decision with a hand-over and 3 roles is 4", P.suggestStepComplexity(sf({ decision: true, handoverTo: ["X"], roles: 3 })).score === 4);
 check("no risk suggestion when nothing is logged against the step", P.suggestStepRisk(sf({ decision: true })) === null);

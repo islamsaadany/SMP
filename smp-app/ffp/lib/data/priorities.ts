@@ -171,6 +171,8 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
         priorityComplexity: true,
         priorityRisk: true,
         priorityWhy: true,
+        exceptionHandling: true,
+        detailedAction: true,
         _count: { select: { links: true, handoffsOut: true, handoffsIn: true, supportingRoles: true, activities: true } },
         links: { select: { targetProcess: { select: { name: true, archivedAt: true } } } },
         handoffsOut: { select: { toStep: { select: { process: { select: { name: true } } } } } },
@@ -229,6 +231,8 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
       handoverTo: [...others],
       roles: (st.assignedRoleId ? 1 : 0) + st._count.supportingRoles,
       subtasks: st._count.activities,
+      riskNoted: !!(st.exceptionHandling && st.exceptionHandling.trim()),
+      instructions: st.detailedAction.filter((l) => l.trim()).length,
     };
     const signals = stepSignals(sf);
     const quiet = !st.priorityFlagged && signals.length === 0 && st.branchedProcesses.length === 0;

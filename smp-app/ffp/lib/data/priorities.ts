@@ -6,9 +6,15 @@ import {
   rankProcesses,
   suggestComplexity,
   suggestRisk,
+  stepSignals,
+  suggestStepComplexity,
+  suggestStepRisk,
+  weightedScore,
   type Decision,
   type PlanStatus,
   type ScoreFacts,
+  type StepFacts,
+  type StepSignal,
   type Weights,
 } from "@/ffp/lib/domain/priorities";
 
@@ -35,6 +41,24 @@ export type PlanView = {
   snapshot: PlanSnapshot | null;
 };
 
+/** A step inside a process that the office flagged, or that the map says is worth a look. */
+export type StepRow = {
+  id: string;
+  label: string;
+  order: number;
+  flagged: boolean;
+  importance: number | null;
+  complexity: number | null;
+  risk: number | null;
+  why: string | null;
+  score: number | null;
+  signals: StepSignal[];
+  suggestedComplexity: { score: number; reason: string } | null;
+  suggestedRisk: { score: number; reason: string } | null;
+  /** Processes already branching from this step: it has been made into its own process. */
+  nowProcesses: { id: string; code: string; name: string }[];
+};
+
 export type PriorityRow = {
   id: string;
   code: string;
@@ -53,6 +77,10 @@ export type PriorityRow = {
   suggestedRisk: { score: number; reason: string } | null;
   progress: { done: number; total: number; aspects: { label: string; help: string; done: boolean }[] };
   lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
+  /** Flagged steps and steps with something noticed, in map order. */
+  steps: StepRow[];
+  /** Steps with nothing noticed and not flagged. */
+  otherSteps: number;
 };
 
 const DEFAULT_PLAN: PlanView = {
@@ -128,9 +156,27 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
     }),
     prisma.processStep.findMany({
       where: { process: where },
-      select: { processId: true, type: true, assignedRoleId: true, _count: { select: { links: true, handoffsOut: true, handoffsIn: true } } },
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        processId: true,
+        label: true,
+        order: true,
+        type: true,
+        assignedRoleId: true,
+        priorityFlagged: true,
+        priorityImportance: true,
+        priorityComplexity: true,
+        priorityRisk: true,
+        priorityWhy: true,
+        _count: { select: { links: true, handoffsOut: true, handoffsIn: true, supportingRoles: true, activities: true } },
+        links: { select: { targetProcess: { select: { name: true, archivedAt: true } } } },
+        handoffsOut: { select: { toStep: { select: { process: { select: { name: true } } } } } },
+        handoffsIn: { select: { fromStep: { select: { process: { select: { name: true } } } } } },
+        branchedProcesses: { where: { archivedAt: null }, select: { id: true, code: true, name: true } },
+      },
     }),
-    prisma.processControl.findMany({ where: { process: where }, select: { processId: true, riskLevel: true, control: true } }),
+    prisma.processControl.findMany({ where: { process: where }, select: { processId: true, stepId: true, riskLevel: true, control: true } }),
     prisma.authorityAssignment.groupBy({ by: ["processId"], where: { process: where }, _count: { _all: true } }),
   ]);
 
@@ -155,6 +201,53 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
     else if (c.riskLevel === "medium") f.risksMedium++;
     else f.risksLow++;
     if (c.control && c.control.trim()) f.controlsLogged++;
+  }
+  const controlsByStep = new Map<string, { high: number; medium: number; low: number }>();
+  for (const c of controls) {
+    if (!c.stepId) continue;
+    const x = controlsByStep.get(c.stepId) ?? controlsByStep.set(c.stepId, { high: 0, medium: 0, low: 0 }).get(c.stepId)!;
+    if (c.riskLevel === "high") x.high++;
+    else if (c.riskLevel === "medium") x.medium++;
+    else x.low++;
+  }
+  const stepRowsBy = new Map<string, StepRow[]>();
+  const otherStepsBy = new Map<string, number>();
+  for (const st of steps) {
+    const cs = controlsByStep.get(st.id) ?? { high: 0, medium: 0, low: 0 };
+    const others = new Set<string>([
+      ...st.links.filter((l) => !l.targetProcess.archivedAt).map((l) => l.targetProcess.name),
+      ...st.handoffsOut.map((h) => h.toStep.process.name),
+      ...st.handoffsIn.map((h) => h.fromStep.process.name),
+    ]);
+    const sf: StepFacts = {
+      decision: st.type === "DECISION",
+      controlsHigh: cs.high,
+      controlsMedium: cs.medium,
+      controlsLow: cs.low,
+      handoverTo: [...others],
+      roles: (st.assignedRoleId ? 1 : 0) + st._count.supportingRoles,
+      subtasks: st._count.activities,
+    };
+    const signals = stepSignals(sf);
+    if (!st.priorityFlagged && signals.length === 0 && st.branchedProcesses.length === 0) {
+      otherStepsBy.set(st.processId, (otherStepsBy.get(st.processId) ?? 0) + 1);
+      continue;
+    }
+    (stepRowsBy.get(st.processId) ?? stepRowsBy.set(st.processId, []).get(st.processId)!).push({
+      id: st.id,
+      label: st.label,
+      order: st.order,
+      flagged: st.priorityFlagged,
+      importance: st.priorityImportance,
+      complexity: st.priorityComplexity,
+      risk: st.priorityRisk,
+      why: st.priorityWhy,
+      score: st.priorityFlagged ? weightedScore(weights, { importance: st.priorityImportance, complexity: st.priorityComplexity, risk: st.priorityRisk }) : null,
+      signals,
+      suggestedComplexity: suggestStepComplexity(sf),
+      suggestedRisk: suggestStepRisk(sf),
+      nowProcesses: st.branchedProcesses,
+    });
   }
   const authorityBy = new Map(authority.map((a) => [a.processId, a._count._all]));
 
@@ -182,6 +275,8 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
         lifecycleStatus: p.lifecycleStatus,
       }),
       lifecycleStatus: p.lifecycleStatus,
+      steps: stepRowsBy.get(p.id) ?? [],
+      otherSteps: otherStepsBy.get(p.id) ?? 0,
     };
   });
   return rankProcesses(base, weights).map(({ item, score, rank }) => ({ ...item, score, rank }));

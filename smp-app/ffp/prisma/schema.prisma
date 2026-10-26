@@ -549,6 +549,15 @@ model ProcessStep {
   authorityAssignment AuthorityAssignment?
   branchedProcesses   Process[]            @relation("ProcessBranchOrigin")
 
+  /// Priorities inside a process: a step the office flagged as worth a closer look, and its own three
+  /// 1–5 scores (importance, complexity, risk). Only a flagged step is scored; a step's score never
+  /// touches the process's own.
+  priorityFlagged    Boolean @default(false)
+  priorityImportance Int?
+  priorityComplexity Int?
+  priorityRisk       Int?
+  priorityWhy        String?
+
   createdAt DateTime @default(now())
 
   @@index([processId])

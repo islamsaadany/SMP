@@ -37,6 +37,12 @@ export function PlanBoard({ workspaceId, plan, rows, editable }: { workspaceId: 
                   <div className="my-1.5 flex gap-[3px]" role="img" aria-label={`Deep dive ${r.progress.done} of ${r.progress.total}: ${r.progress.aspects.map((a) => `${a.label} ${a.done ? "done" : "not yet"}`).join(", ")}`}>
                     {r.progress.aspects.map((a) => <i key={a.label} title={`${a.label}${a.done ? " ✓ done" : " — not yet"}: ${a.help}`} className={`h-[7px] flex-1 rounded ${a.done ? "bg-emerald-600" : "bg-slate-200"}`} />)}
                   </div>
+                  {r.steps.some((x) => x.flagged) && (
+                    <div className="mb-1 text-xs text-slate-600">
+                      <b>Steps to watch:</b>{" "}
+                      {r.steps.filter((x) => x.flagged).map((x) => `${x.label}${x.score != null ? ` (${x.score})` : ""}`).join(" · ")}
+                    </div>
+                  )}
                   <div className="text-xs text-slate-500">
                     Deep dive {r.progress.done} of {r.progress.total} <AspectInfo aspects={r.progress.aspects} /> · <Link href={`/${workspaceId}/processes/processes/${r.id}`} className="font-semibold text-indigo-700 hover:underline">Open process →</Link>
                   </div>

@@ -241,7 +241,7 @@ check(anon.status() >= 300 && anon.status() < 400 && /sign-in/.test(anon.headers
 const extra = [["P3.1", "Inventory & Stock Count"], ["P4.1", "Credit & Collections"], ["P5.1", "Hire to Retire"]];
 for (const [c, n] of extra) await proc(c, n);
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
-check(await A.page.isVisible("nav[aria-label='Steps']") && (await A.page.$$("tbody tr")).length === 5, "Priorities lists every high-level process");
+check(await A.page.isVisible("nav[aria-label='Steps']") && (await A.page.$$("tbody tr:has(.font-mono)")).length === 5, "Priorities lists every high-level process");
 const dot = (name, k, n) => A.page.click(`button[aria-label='${k} ${n} of 5 for ${name}']`);
 const scoreOf = async (name) => A.page.$$eval("tbody tr", (rows, nm) => { const r = rows.find((x) => x.textContent.includes(nm)); return r ? (r.querySelector("td.tabular-nums")?.textContent ?? "") : "?"; }, name);
 const waitScore = (name, v) => A.page.waitForFunction(([nm, val]) => { const r = [...document.querySelectorAll("tbody tr")].find((x) => x.textContent.includes(nm)); return r && r.querySelector("td.tabular-nums")?.textContent === val; }, [name, v], { timeout: 20000 });
@@ -291,7 +291,7 @@ check(JSON.stringify(before) === JSON.stringify(afterOrder) && before.join() ===
 await q(ffp, 'update processes set "parentProcessId"=(select id from processes where code=$2 and "workspaceId"=$1) where code=$3 and "workspaceId"=$1', [S, "P2.4", "P3.1"]);
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 const tree = await order();
-check(tree.indexOf("P3.1") === tree.indexOf("P2.4") + 1 && /main/i.test(await body(A.page)) && (await A.page.$$("tbody td.ps-8")).length === 1, "a sub-process sits directly under its main process, indented", tree.join());
+check(tree.indexOf("P3.1") === tree.indexOf("P2.4") + 1 && /main/i.test(await body(A.page)) && (await A.page.$$("tbody td.ps-8:has(.font-mono)")).length === 1, "a sub-process sits directly under its main process, indented", tree.join());
 await q(ffp, 'update processes set "parentProcessId"=null where code=$2 and "workspaceId"=$1', [S, "P3.1"]);
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 await A.page.click("button:text-is('Clear entries…')");
@@ -368,6 +368,33 @@ await A.page.click("button:text-is('Reopen')");
 await A.page.waitForFunction(() => document.querySelector("button")?.textContent !== undefined && !/Changing it from here needs a reason/.test(document.body.innerText), null, { timeout: 20000 });
 const ro = (await q(ffp, 'select status, history from priority_plans where "workspaceId"=$1', [S]))[0];
 check(ro.status === "DRAFT" && ro.history.some((h) => /Reopened/.test(h.what) && /Credit & Collections/.test(h.reason || "")), "reopening takes a reason and keeps it on record", JSON.stringify(ro.history.slice(-1)));
+
+/* ── steps inside a process: noticed, flagged, scored, made into a process ── */
+const decStep = (await q(ffp, 'insert into process_steps (id,"processId",type,label,"order","assignedRoleId") values (gen_random_uuid()::text,$1,\'DECISION\',$2,9,$3) returning id', [P1, "Approve the credit limit", rCc]))[0].id;
+await q(ffp, 'insert into process_controls (id,"processId","stepId",risk,"riskLevel",control) values (gen_random_uuid()::text,$1,$2,$3,\'high\',$4)', [P1, decStep, "Limit set too high", "Two people sign"]);
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+const orderRow = A.page.locator("tbody tr", { hasText: "Order to cash" }).first();
+await A.page.locator("button:has-text('Steps inside')").first().click();
+const stepRowTxt = await A.page.locator("tr", { hasText: "Step: Approve the credit limit" }).innerText();
+check(/High-risk control/i.test(stepRowTxt) && /Decision point/i.test(stepRowTxt) && /Not flagged/i.test(stepRowTxt), "a step with a high-risk control and a decision is noticed, and is not scored until flagged", stepRowTxt.replace(/\s+/g, " "));
+await A.page.click("button[aria-label='Flag step Approve the credit limit']");
+await A.page.waitForFunction(() => !!document.querySelector("button[aria-label='importance 5 of 5 for step Approve the credit limit']"), null, { timeout: 20000 });
+const fl = (await q(ffp, 'select "priorityFlagged" f, "priorityComplexity" c, "priorityRisk" r, "priorityImportance" i from process_steps where id=$1', [decStep]))[0];
+check(fl.f === true && fl.r === 4 && fl.c === 2 && fl.i == null, "flagging starts the scores from the map (risk 4 from one high control) and leaves importance to the office", JSON.stringify(fl));
+await A.page.click("button[aria-label='importance 5 of 5 for step Approve the credit limit']");
+await A.page.waitForFunction(() => /\b77\b/.test([...document.querySelectorAll("tr")].find((r) => r.textContent.includes("Step: Approve the credit limit"))?.querySelector("td.tabular-nums")?.textContent ?? ""), null, { timeout: 20000 }).catch(() => {});
+const stScore = await A.page.locator("tr", { hasText: "Step: Approve the credit limit" }).locator("td.tabular-nums").innerText();
+check(stScore.trim() === "77", "the step gets its own score (77)", stScore);
+check((await scoreOf("Order to cash")) === "95", "…and the process's own score is untouched");
+A.page.once("dialog", (d) => d.accept("Approve the credit limit"));
+await A.page.click("button:text-is('Make it a process')");
+await A.page.waitForSelector("[role=status]:has-text('Made')", { timeout: 20000 });
+const np = (await q(ffp, 'select p.code, p."priorityImportance" i, p."priorityRisk" r, p."parentProcessId" pp, p."branchFromStepId" b, s."priorityFlagged" f from processes p join process_steps s on s.id=p."branchFromStepId" where p."workspaceId"=$1 and p."branchFromStepId"=$2', [S, decStep]))[0];
+check(!!np && np.pp === P1 && np.b === decStep && np.i === 5 && np.r === 4 && np.f === false, "making it a process creates a sub-process branching from the step, carries the scores, and keeps the step as the link", JSON.stringify(np));
+await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });
+const ex2 = await A.get("/api/ffp/export/priorities/" + S);
+const wb2 = new (await import("exceljs")).default.Workbook(); await wb2.xlsx.load(await ex2.body());
+check(!!wb2.getWorksheet("Flagged steps"), "the Excel file has a Flagged steps sheet");
 
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");

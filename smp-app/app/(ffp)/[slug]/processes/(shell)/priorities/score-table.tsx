@@ -1,17 +1,20 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { Fragment, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   acceptSuggestedScores,
   clearPriorityEntries,
   fillDecisionsFromRanking,
+  flagStep,
+  promoteStepToProcess,
+  setStepPriority,
   setDeepDiveDecision,
   setPlanSettings,
   setProcessPriority,
 } from "@/ffp/lib/actions/priorities";
 import { DECISIONS, DECISION_LABEL, inTree, type Decision, type Weights } from "@/ffp/lib/domain/priorities";
-import type { PriorityRow } from "@/ffp/lib/data/priorities";
+import type { PriorityRow, StepRow } from "@/ffp/lib/data/priorities";
 
 const WEIGHTS: { key: keyof Weights; setting: "weightImportance" | "weightRisk" | "weightComplexity"; label: string }[] = [
   { key: "importance", setting: "weightImportance", label: "Importance to the business" },
@@ -59,6 +62,7 @@ export function ScoreTable({
   const [kinds, setKinds] = useState<ReadonlySet<string>>(new Set());
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   const tree = useMemo(() => inTree(rows), [rows]);
+  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   function openClear() {
     setKinds(new Set());
@@ -85,6 +89,10 @@ export function ScoreTable({
       router.refresh();
     });
   }
+
+  const stepScore = (id: string, key: "importance" | "complexity" | "risk", value: number | null) =>
+    run(() => setStepPriority({ workspaceId, stepId: id, [key]: value }));
+  const toneClass = { bad: "bg-rose-100 text-rose-800", warn: "bg-amber-100 text-amber-800", info: "bg-sky-100 text-sky-800", plain: "bg-slate-100 text-slate-700" } as const;
 
   const score = (id: string, key: "importance" | "complexity" | "risk", value: number | null) =>
     run(() => setProcessPriority({ workspaceId, processId: id, [key]: value }));
@@ -215,7 +223,8 @@ export function ScoreTable({
               <tr><td colSpan={clearing ? 10 : 9} className="px-3 py-6 text-center text-slate-400">No processes yet. Map the high-level processes first.</td></tr>
             )}
             {tree.map(({ row: r, sub, hasSubs }) => (
-              <tr key={r.id} className={`border-t border-slate-100 align-top ${sub ? "" : "bg-slate-50/40"}`}>
+              <Fragment key={r.id}>
+              <tr className={`border-t border-slate-100 align-top ${sub ? "" : "bg-slate-50/40"}`}>
                 {clearing && (
                   <td className="px-3 py-2">
                     <input type="checkbox" aria-label={`Clear ${r.name}`} checked={picked.has(r.id)} onChange={(e) => setPicked(toggle(picked, r.id, e.target.checked))} />
@@ -280,6 +289,32 @@ export function ScoreTable({
                   </select>
                 </td>
               </tr>
+              {r.steps.length + r.otherSteps > 0 && (
+                <tr className="border-t border-slate-100 bg-white">
+                  {clearing && <td />}
+                  <td />
+                  <td colSpan={8} className={`px-3 py-1 text-xs ${sub ? "ps-8" : ""}`}>
+                    <button type="button" aria-expanded={open.has(r.id)} onClick={() => setOpen(toggle(open, r.id, !open.has(r.id)))} className="font-semibold text-indigo-700 hover:underline">
+                      {open.has(r.id) ? "▾" : "▸"} Steps inside: {r.steps.filter((x) => x.flagged).length} flagged · {r.steps.filter((x) => !x.flagged).length} noticed · {r.otherSteps} quiet
+                    </button>
+                  </td>
+                </tr>
+              )}
+              {open.has(r.id) && r.steps.map((st) => (
+                <StepLine key={st.id} st={st} clearing={clearing} editable={editable} pending={pending} toneClass={toneClass}
+                  onFlag={(on) => run(() => flagStep({ workspaceId, stepId: st.id, flagged: on }))}
+                  onScore={(k, v) => stepScore(st.id, k, v)}
+                  onWhy={(v) => run(() => setStepPriority({ workspaceId, stepId: st.id, why: v || null }))}
+                  onPromote={() => {
+                    const name = window.prompt("Name for the new process (it becomes a sub-process of this one, branching from the step):", st.label);
+                    if (name && name.trim()) run(() => promoteStepToProcess({ workspaceId, stepId: st.id, name: name.trim() }), () => setNote(`Made "${name.trim()}" a process of its own. The step stays in the main process as the link.`));
+                  }}
+                />
+              ))}
+              {open.has(r.id) && r.otherSteps > 0 && (
+                <tr className="border-t border-slate-100"><td colSpan={clearing ? 10 : 9} className="px-3 py-1 ps-12 text-xs text-slate-500">{r.otherSteps} other step{r.otherSteps === 1 ? "" : "s"} with nothing noticed.</td></tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
         </table>
@@ -288,5 +323,103 @@ export function ScoreTable({
         Office-only working view. The suggestions come from the process map and the risks already logged. You accept or change them, and none of this is printed in anything the client receives except the sign-off page.
       </p>
     </div>
+  );
+}
+
+function StepLine({
+  st,
+  clearing,
+  editable,
+  pending,
+  toneClass,
+  onFlag,
+  onScore,
+  onWhy,
+  onPromote,
+}: {
+  st: StepRow;
+  clearing: boolean;
+  editable: boolean;
+  pending: boolean;
+  toneClass: Record<"bad" | "warn" | "info" | "plain", string>;
+  onFlag: (on: boolean) => void;
+  onScore: (k: "importance" | "complexity" | "risk", v: number | null) => void;
+  onWhy: (v: string) => void;
+  onPromote: () => void;
+}) {
+  const sugg = { importance: null, complexity: st.suggestedComplexity, risk: st.suggestedRisk } as const;
+  return (
+    <tr className="border-t border-slate-100 bg-amber-50/30 align-top text-[13px]">
+      {clearing && <td />}
+      <td className="px-3 py-2">
+        <button
+          type="button"
+          disabled={!editable || pending}
+          aria-pressed={st.flagged}
+          aria-label={`${st.flagged ? "Unflag" : "Flag"} step ${st.label}`}
+          title={st.flagged ? "Flagged. Click to clear it and its scores." : "Flag this step to score it"}
+          onClick={() => {
+            if (st.flagged && !window.confirm("Clear the flag? This removes the step's scores.")) return;
+            onFlag(!st.flagged);
+          }}
+          className={`text-base ${st.flagged ? "" : "opacity-35"} disabled:cursor-default`}
+        >
+          ⚑
+        </button>
+      </td>
+      <td className="px-3 py-2 ps-10">
+        <span aria-hidden className="me-1 text-slate-400">↳</span>
+        <span className="font-medium text-slate-800">Step: {st.label}</span>
+        {st.nowProcesses.map((p) => (
+          <div key={p.id} className="mt-0.5 text-xs text-emerald-700">Now its own process: {p.name} <span className="font-mono">{p.code}</span></div>
+        ))}
+      </td>
+      <td className="px-3 py-2">
+        {st.signals.map((g) => <span key={g.key} className={`me-1 mb-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${toneClass[g.tone]}`}>{g.label}</span>)}
+      </td>
+      {st.flagged ? (
+        (["importance", "complexity", "risk"] as const).map((k) => (
+          <td key={k} className="px-3 py-2">
+            <div className="flex gap-1" role="group" aria-label={`Step ${st.label}: ${k}`}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  disabled={!editable || pending}
+                  aria-label={`${k} ${n} of 5 for step ${st.label}`}
+                  aria-pressed={(st[k] ?? 0) >= n}
+                  onClick={() => onScore(k, st[k] === n ? null : n)}
+                  className={`h-3 w-3 rounded-full border ${(st[k] ?? 0) >= n ? DOT_ON[k] : "border-slate-300 bg-slate-100"} disabled:cursor-default`}
+                />
+              ))}
+            </div>
+            {sugg[k] && <div className="mt-1 text-[11px] text-slate-500">suggested {sugg[k]!.score}: {sugg[k]!.reason}</div>}
+          </td>
+        ))
+      ) : (
+        <td colSpan={3} className="px-3 py-2 text-xs text-slate-500">Not flagged, so not scored. Flag it to score it.</td>
+      )}
+      <td className="px-3 py-2 font-bold tabular-nums">{st.score ?? "—"}</td>
+      <td className="px-3 py-2">
+        {st.flagged && (
+          <input
+            defaultValue={st.why ?? ""}
+            key={st.why ?? ""}
+            disabled={!editable}
+            maxLength={200}
+            aria-label={`Why: step ${st.label}`}
+            onBlur={(e) => e.currentTarget.value.trim() !== (st.why ?? "") && onWhy(e.currentTarget.value.trim())}
+            className="w-full min-w-40 rounded-md border border-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-slate-400"
+          />
+        )}
+      </td>
+      <td className="px-3 py-2">
+        {st.flagged && st.nowProcesses.length === 0 && (
+          <button type="button" disabled={!editable || pending} onClick={onPromote} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-40">
+            Make it a process
+          </button>
+        )}
+      </td>
+    </tr>
   );
 }

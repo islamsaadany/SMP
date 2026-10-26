@@ -1178,10 +1178,10 @@ var COPILOT = (function(){
     return '<div class="copflow' + (shut ? " nocards" : "") + (SHEET === "cards" || SHEET === "todo" ? " sheet sheet-" + SHEET : "") + '" data-cop-split' + splitStyle() + '>' +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
-        /* §525 — Save and Apply live in the card column, so closing the cards
-           with × used to take them away too. With the cards shut the same bar
-           stands at the head of the chat. */
-        (shut ? savebarHtml(f) : '') +
+        /* §525 put the save bar at the head of the chat when the cards were
+           shut; §641's rule (Islam: "what is the need for the apply or save in
+           the chat?") takes it out again — the chat has Show cards, and Save
+           and Apply come back with the cards they belong to. */
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
         (!canEdit() ? VIEWONLY
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +

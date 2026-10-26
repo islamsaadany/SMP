@@ -1772,14 +1772,17 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        is nothing on the plan to say so about. Without this, a build drawing
        the green line always passes the assertion after Apply (§113.8). */
     check(!(await page.$("[data-cop-fdone]")), "…and the green done line is NOT there yet, because saved is not on the plan (§525.1)");
-    /* §525 — closing the cards with × used to take Save and Apply with them;
-       the bar now stands at the head of the chat, and Show cards puts it back. */
+    /* §642 (Islam's screenshot: "a strange bar stayed on top of the chat"):
+       §525 moved the save bar into the chat's head when the cards were shut;
+       by §641's rule there is no Save or Apply in the chat, so closing the
+       cards leaves only Show cards there, and the bar comes back with them. */
     await page.click('[data-cop-cards="hide"]');
     await page.waitForSelector(".copflow.nocards", { timeout: 5000 }).catch(() => {});
-    const sbShut = await page.evaluate(() => ({ inChat: !!document.querySelector(".copfchat > [data-cop-savebar]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]"), cards: !!document.querySelector(".copleft") }));
-    check(sbShut.inChat && sbShut.apply && !sbShut.cards, "with the cards closed, Save and Apply to plan stay on screen at the head of the chat (§525)", JSON.stringify(sbShut));
+    const sbShut = await page.evaluate(() => ({ inChat: !!document.querySelector(".copfchat [data-cop-savebar], .copfchat [data-cop-fapply]"), show: !!document.querySelector('.copfchat [data-cop-cards="show"]'), cards: !!document.querySelector(".copleft") }));
     await page.click('[data-cop-cards="show"]');
     await page.waitForSelector(".copleft [data-cop-savebar]", { timeout: 5000 }).catch(() => {});
+    const sbBack = await page.evaluate(() => !!document.querySelector(".copleft [data-cop-savebar] [data-cop-fapply]"));
+    check(!sbShut.inChat && sbShut.show && !sbShut.cards && sbBack, "§642 with the cards closed the chat holds only Show cards — no Save or Apply in it — and the bar comes back with the cards", JSON.stringify({ sbShut, sbBack }));
     /* APPLY TO PLAN asks first, in the platform's own dialog, then REPLACES
        the unit's Foundation and ARCHIVES what stood (§49.2) — read off the
        graph and the archive, never the chat. The old Foundation is MADE

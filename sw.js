@@ -671,7 +671,7 @@
    work; Foundation's start cards are the guided questions and the template. */
 /* v7.21-swot-split — §641: the SWOT as a conversation beside the SWOT it
    builds; Save and Apply to plan at the pane's foot; a SWOT archive kind. */
-const SHELL = "smp-shell-v7.25-apply-asks";
+const SHELL = "smp-shell-v7.26-held-says-why";
 const ASSETS = [
   "/",
   "/index.html",

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Chat In Time</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--accent:#D9773A;--nav:#16325C;--panel-ink:#FFFFFF;--warn:#8A5A12;--good:#2E6B45;--me:#E9EEF5;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warn:#E3B868;--good:#8FCBA4;--me:#26303D;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warn:#E3B868;--good:#8FCBA4;--me:#26303D;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1380px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:96ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 12px minmax(0,480px);grid-template-rows:minmax(0,1fr);border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px;height:780px}
+.grip{position:relative}.grip::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+.chat{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0 12px 12px}
+.fh{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}.fh b{flex:1}
+.bar{max-width:720px;width:100%;margin:0 auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);padding:6px 0}
+.bar i{flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p),var(--line) var(--p))}
+.msgs{flex:1 1 auto;min-height:0;overflow:auto;padding:4px 0 8px;scroll-behavior:smooth}
+.col{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.who{font-size:11.5px;color:var(--ink-3);margin-bottom:-4px}.who.r{text-align:right}
+.ai{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px;max-width:92%}
+.me{align-self:flex-end;background:var(--me);border:1px solid var(--line);border-radius:10px;padding:7px 12px;max-width:80%}
+.sep{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:12px;margin:6px 0}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+.prop{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px}
+.prop h6{margin:0 0 4px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.prop .txt{background:var(--surface-2);border-radius:6px;padding:8px 10px}
+.prop.old{opacity:.62}.prop.old .txt{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink-3) 60%,transparent)}
+.note{text-align:center;font-size:12px;color:var(--ink-3)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font:600 12.5px/1.2 var(--sans)}
+.btn.go{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn:focus-visible,.fold:focus-visible,.ic:focus-visible,.ttl:focus-visible,.yl:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.part{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.fold{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:8px 12px;font-size:14px;border-radius:8px}
+.fold:hover{background:var(--surface-2)}
+.chev{width:14px;color:var(--ink-3);transition:transform .15s}
+.part.open .chev{transform:rotate(90deg)}
+.fold small{color:var(--ink-3);font-size:12.5px;flex:1}
+.ok{font-size:12px;font-weight:600;color:var(--good)}
+.inner{display:none;border-top:1px solid var(--line);padding:10px 12px;flex-direction:column;gap:8px}
+.part.open .inner{display:flex}
+.qa{display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+.qa .q{color:var(--ink-3)}
+.qa .a{align-self:flex-end;background:var(--me);border-radius:8px;padding:4px 10px;max-width:85%}
+.flash{animation:fl 1.4s ease}
+@keyframes fl{0%{box-shadow:0 0 0 3px var(--goldfill)}100%{box-shadow:0 0 0 0 transparent}}
+.box{max-width:720px;width:100%;margin:8px auto 0;display:flex;gap:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px}
+.box input{flex:1;border:0;background:none;font:inherit;color:var(--ink);outline:none}
+.pane{min-width:0;display:flex;flex-direction:column;gap:8px;overflow:auto;padding:4px 2px}
+.ph{font-size:12.5px;color:var(--ink-3)}.ph b{color:var(--ink)}
+.card{position:relative;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.card.busy{border-style:dashed}
+.card h4{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h4 small{font-size:11.5px;color:var(--good);white-space:nowrap}
+.card.busy h4 small{color:var(--warn)}
+.card p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.card ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+/* A · the answers join the card's hover icons */
+.icons{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .12s}
+.mA .card:hover .icons,.mA .card:focus-within .icons{opacity:1}
+.mA .card:hover h4 small,.mA .card:focus-within h4 small{visibility:hidden}
+.ic{width:28px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--surface);display:grid;place-items:center;color:var(--ink-2)}
+.ic svg{width:15px;height:15px}
+.ic:hover{border-color:var(--gold);color:var(--ink)}
+.tip{position:absolute;top:36px;right:8px;background:var(--ink);color:var(--surface);font-size:11.5px;padding:2px 8px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none}
+.mA .ic[data-goto]:hover ~ .tip{opacity:1}
+/* B · the title is the way back */
+.ttl{border:0;background:none;padding:0;font:700 14px/1.4 var(--sans);color:var(--ink);text-align:left}
+.mB .ttl{cursor:pointer}
+.mB .ttl:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+.mB .ttl::after{content:" ↗";font-weight:400;color:var(--ink-3);font-size:12px;opacity:0}
+.mB .ttl:hover::after{opacity:1}
+/* C · today: a link on every card */
+.yl{display:none;border:0;background:none;padding:4px 0 0;color:var(--gold);font:600 12.5px/1.4 var(--sans);text-decoration:underline;text-underline-offset:2px}
+.mC .yl{display:inline-block}
+.foot{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;font-size:12.5px;color:var(--ink-3)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{display:block;color:var(--ink)}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr);height:auto}.grip{display:none}.msgs{max-height:620px}}
+@media (prefers-reduced-motion:reduce){.chev,.icons{transition:none}.flash{animation:none}.msgs{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The chat in the order it happened</h1>
+    <p class="lede">Your Foundation — Online: the four parts answered and agreed through the guided questions, then Winning Aspiration refined in plain chat. Each part's questions fold in the place you answered them; nothing for a part appears before you reach it; after the guided pass it's an ordinary chat at the bottom.</p>
+  </header>
+  <div class="ctl"><b>Back to the answers from a card</b><span class="seg" id="mode"><button data-m="A">A · An icon on hover (recommended)</button><button data-m="B">B · Press the card's title</button><button data-m="C">C · A link on every card (today)</button></span></div>
+  <div class="say" id="say"></div>
+  <div class="app" id="app">
+    <section class="chat">
+      <div class="fh"><b>Copilot · Foundation — Online</b><span class="btn">A− A+</span></div>
+      <div class="bar" id="bar"></div>
+      <div class="msgs" id="msgs"><div class="col" id="col"></div></div>
+      <form class="box" id="box"><input id="in" placeholder="Ask for a change, or say anything…" autocomplete="off"><button class="btn go" type="submit">Send</button></form>
+    </section>
+    <div class="grip"></div>
+    <aside class="pane" id="pane"></aside>
+  </div>
+  <div class="notes">
+    <div class="n"><b>1 · Time, not part order</b>The chat reads top to bottom as it happened, like any chat. Each part's guided questions, its draft and the moment it was agreed fold into one row at that point. Nothing is drawn for a part you haven't reached.</div>
+    <div class="n"><b>2 · Then it's a chat</b>After the guided pass, what you ask, each proposal and Save or Keep follow at the bottom in order. Each proposal names its part, because you may move between them.</div>
+    <div class="n"><b>3 · Back from a card, without clutter</b><b style="display:inline">A</b> puts a speech-bubble icon beside the pen and Edit with AI, shown on hover like them: the card stays clean. <b style="display:inline">B</b> makes the title the way back. Both scroll the chat to that part's row and open it.</div>
+    <div class="n"><b>4 · Why A</b>The card already has a hover row for "do something with this part". Going back to its conversation is one more of those, so it needs no new pattern, and the card reads as clean text at rest. B is invisible until you know it.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var PARTS = {
+    who:{ t:"Who we are", agreed:"We are Raya Shop, Raya Trade's B2C e-commerce platform (website and app) in Egypt, selling mobiles, IT, TVs and home appliances first-party, plus a third-party marketplace. Our edge: genuine products from authorised brands, Takseety instalments at checkout, and one digital front door to the Raya Group.",
+      qa:[["What does Raya Shop sell, and to whom?","Mobiles, IT, TVs and home appliances to online shoppers in Egypt, plus a marketplace."],["Through which channels?","Website and app, Raya stores, the call centre and our Jumia store."],["How do you fulfil orders?","From stock and stores, with 3PL partners in Cairo and Giza."],["How do customers pay?","Cash on delivery, cards and wallets, and Takseety instalments."],["What makes you different?","Genuine products, backed by Egypt's largest electronics distributor."],["What else do you offer?","Web and app assets rented to brands; refurbished mobile and IT."],["Anything else?","Online orders can be picked up or returned in store."]], props:1 },
+    asp:{ t:"Winning Aspiration", agreed:"To be one of Egypt's top-choice online destinations for electronics and home appliances, recognised for genuine products, easy instalments, and in-store pick-up and returns, while running a profitable business as the Raya Group's single digital front door.",
+      qa:[["Where will Raya Shop play?","Electronics and home appliances online, nationwide."],["How will customers choose you?","Genuine products, instalments, pick-up and returns in store."],["What does winning look like by 2027?","Top-choice destination, profitable."],["What role for the Group?","The single digital front door."]], props:2 },
+    eim:{ t:"End in Mind", agreed:"To be the online home Egyptian households turn to for the technology and appliances they rely on, where every product is genuine, payment fits their budget, and a Raya store or delivery is never far away.",
+      qa:[["Picture the end of 2027. What do customers say?","That it's the one place they trust for electronics online."],["What has changed for the Group?","Online and stores work as one."],["What would make you proud?","Households choosing us first."]], props:1 },
+    obj:{ t:"Key Objectives", agreed:"Total GMV EGP 1 billion a year\nDelivery SLA in Cairo and Giza: 48 hours or less\nSame-day PFS & HDFS: 100% of eligible orders\nOrder cancellation ratio: 30% or less\nCustomer satisfaction: 85% or higher",
+      qa:[["The one number that says you're winning?","Total GMV, EGP 1 billion a year."],["Your delivery promise?","48 hours inside Cairo and Giza."],["Store pick-up?","Same day, every eligible order."],["Cancellations?","30% or less."],["Customer satisfaction?","85% or higher."]], props:1 }
+  };
+  var ORDER = ["who","asp","eim","obj"];
+  var CONCISE = "Egypt's top online choice for electronics and appliances: genuine products, easy instalments, pick-up and returns in store — and a profitable single front door for the Raya Group.";
+  var S = { m:"A", open:{}, later:[{w:"me",t:"Make Winning Aspiration more concise"},{w:"ai",p:"asp",t:CONCISE}], decided:null, aspCard:PARTS.asp.agreed };
+  var E = function(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+  var IC = { pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 5.2l3.6 3.6M16.7 3.7a2.5 2.5 0 113.6 3.6L6.5 21H3v-3.6z"/></svg>',
+    ai:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 3.5l1.6 4.4 4.4 1.6-4.4 1.6L10 15.5l-1.6-4.4L4 9.5l4.4-1.6z"/><path d="M17.5 13.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>',
+    chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>' };
+  function foldHtml(k){
+    var p = PARTS[k], open = !!S.open[k];
+    return '<div class="part' + (open ? " open" : "") + '" id="part-' + k + '"><button type="button" class="fold" data-fold="' + k + '" aria-expanded="' + open + '"><span class="chev">▸</span><b>' + E(p.t) + '</b><small>' + p.qa.length + ' answers · ' + p.props + (p.props === 1 ? " draft" : " drafts") + '</small><span class="ok">Agreed</span></button>' +
+      '<div class="inner">' + p.qa.map(function(x){ return '<div class="qa"><span class="q">' + E(x[0]) + '</span><span class="a">' + E(x[1]) + '</span></div>'; }).join("") +
+      '<div class="prop"><h6>Agreed and saved to the card</h6><div class="txt">' + E(p.agreed).replace(/\n/g, "<br>") + '</div></div></div></div>';
+  }
+  function chat(){
+    var h = '<div class="who">Copilot</div><div class="ai">How would you like to build it?</div><div class="who r">Mohamed Essam</div><div class="me">Answer guided questions</div>' +
+      '<div class="who">Copilot</div><div class="ai">How long does this strategy run? Everything we build for Online will use that year.</div><div class="who r">Mohamed Essam</div><div class="me">2026 to the end of 2027 (2 years)</div>' +
+      '<div class="who">Copilot</div><div class="ai">Good. We\'ll build the parts in order, starting with <b>Who we are</b> (7 short questions).</div>';
+    h += ORDER.map(foldHtml).join("");
+    h += '<div class="who">Copilot</div><div class="ai">All four parts are agreed. Run the check from the pane when you\'re ready, or tell me what to change.</div>';
+    h += '<div class="sep">Later</div>';
+    var n = 0, last = -1;
+    S.later.forEach(function(x, i){ if (x.w === "ai") last = i; });
+    S.later.forEach(function(x, i){
+      if (x.w === "me") { h += '<div class="who r">Mohamed Essam</div><div class="me">' + E(x.t) + '</div>'; return; }
+      if (x.w === "note") { h += '<div class="note">' + E(x.t) + '</div>'; return; }
+      n++; var live = i === last && !S.decided;
+      h += '<div class="who">Copilot</div><div class="prop' + (live || i === last ? "" : " old") + '"><h6>' + E(PARTS[x.p].t) + ' · Proposal ' + n + (i < last ? " · replaced" : "") + '</h6><div class="txt">' + E(x.t) + '</div>' +
+        (live ? '<div class="btns"><button class="btn" data-refine>Make concise</button><button class="btn" data-refine>More professional</button><button class="btn" data-refine>Simplify</button></div><div class="btns"><button class="btn go" data-save>Save to the card</button><button class="btn" data-keep>Keep as it was</button></div>' : '') + '</div>';
+    });
+    document.getElementById("col").innerHTML = h;
+    document.getElementById("bar").innerHTML = '4 of 4 parts agreed <i style="--p:100%"></i>';
+  }
+  function body(k){
+    var t = k === "asp" ? S.aspCard : PARTS[k].agreed;
+    return t.indexOf("\n") >= 0 ? '<ul>' + t.split("\n").map(function(l){ return '<li>' + E(l) + '</li>'; }).join("") + '</ul>' : '<p>' + E(t) + '</p>';
+  }
+  function pane(){
+    var busy = !S.decided && S.later.some(function(x){ return x.w === "ai"; });
+    document.getElementById("pane").innerHTML = '<div class="ph"><b>Foundation — Online v2</b> · in progress · 2026 to the end of 2027</div>' + ORDER.map(function(k){
+      var b = k === "asp" && busy;
+      return '<div class="card' + (b ? " busy" : "") + '" tabindex="-1"><h4><button type="button" class="ttl" data-title="' + k + '">' + E(PARTS[k].t) + '</button><small>' + (b ? "Being changed in the chat" : "Agreed") + '</small></h4>' +
+        '<div class="icons"><button type="button" class="ic" aria-label="Write it yourself">' + IC.pen + '</button><button type="button" class="ic" aria-label="Edit with AI">' + IC.ai + '</button><button type="button" class="ic" data-goto="' + k + '" aria-label="Your answers in the chat">' + IC.chat + '</button><span class="tip">Your answers in the chat</span></div>' +
+        body(k) + '<button type="button" class="yl" data-goto="' + k + '">Your answers</button></div>';
+    }).join("") + '<div class="foot">' + (busy ? "Winning Aspiration is being changed in the chat" : "4 of 4 parts agreed") + '<div class="btns"><button class="btn" type="button">Run the check</button><button class="btn" type="button">Save as Foundation — Online v2</button><button class="btn" type="button">Apply to plan</button></div></div>';
+  }
+  var SAY = { A:"<b>A</b> — hover a card: beside the pen and Edit with AI, a speech-bubble takes you to that part's answers in the chat. At rest the card is only its words.",
+    B:"<b>B</b> — press a card's title to go to its answers in the chat. Nothing extra on the card, but nothing says it until you hover the title.",
+    C:"<b>C</b> — today's link under every card. Always there, and it repeats four times down the pane." };
+  function draw(){
+    document.getElementById("app").className = "app m" + S.m;
+    document.querySelectorAll("#mode button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.m === S.m)); });
+    document.getElementById("say").innerHTML = SAY[S.m];
+    chat(); pane();
+  }
+  function go(k){
+    S.open[k] = true; draw();
+    var el = document.getElementById("part-" + k), m = document.getElementById("msgs");
+    m.scrollTop = el.offsetTop - m.offsetTop - 8; el.classList.add("flash");
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-m],[data-fold],[data-goto],[data-title],[data-refine],[data-save],[data-keep]"); if (!b) return;
+    if (b.dataset.m) { S.m = b.dataset.m; draw(); return; }
+    if (b.dataset.fold) { S.open[b.dataset.fold] = !S.open[b.dataset.fold]; draw(); return; }
+    if (b.dataset.goto) { go(b.dataset.goto); return; }
+    if (b.dataset.title) { if (S.m === "B") go(b.dataset.title); return; }
+    if (b.hasAttribute("data-refine")) { S.later.push({ w:"me", t:b.textContent }); S.later.push({ w:"ai", p:"asp", t:CONCISE.replace("top online choice", "first online choice") }); draw(); scrollEnd(); return; }
+    if (b.hasAttribute("data-save")) { var l = S.later.filter(function(x){ return x.w === "ai"; }).pop(); S.aspCard = l.t; S.later.push({ w:"note", t:"Winning Aspiration saved to the card." }); S.decided = 1; draw(); scrollEnd(); return; }
+    if (b.hasAttribute("data-keep")) { S.later.push({ w:"note", t:"Winning Aspiration kept as it was." }); S.decided = 1; draw(); scrollEnd(); }
+  });
+  function scrollEnd(){ var m = document.getElementById("msgs"); m.scrollTop = m.scrollHeight; }
+  document.getElementById("box").addEventListener("submit", function(e){
+    e.preventDefault(); var v = document.getElementById("in").value.trim(); if (!v) return;
+    document.getElementById("in").value = ""; S.decided = null;
+    S.later.push({ w:"me", t:v }); S.later.push({ w:"ai", p:"asp", t:CONCISE.replace("— and", "— while staying") }); draw(); scrollEnd();
+  });
+  draw(); scrollEnd();
+})();
+</script>
+</body>
+</html>

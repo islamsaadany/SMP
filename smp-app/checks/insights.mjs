@@ -482,10 +482,14 @@ try {
      while the page carried none; the shared top bar loads ONE FILE, which the
      shell's `script-src 'self'` admits — so what is asserted is still that
      nothing INLINE needs to run, and that the one script is the bar's. */
-  check("no inline script, so the shell's script-src has nothing to admit but the bar's file",
+  /* §651 (rewritten, never loosened, §218): View's viewer is the module's
+     own file, so the page loads exactly TWO, each by address and with no
+     body — the bar's and the viewer's — and still nothing inline */
+  check("no inline script, so the shell's script-src has nothing to admit but the bar's file and the viewer's",
     /* §620: the bar's file by its stamped address (rewritten, never loosened) */
-    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /^<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>$/.test(t)) &&
-    (page.match(/<script/gi) || []).length === 1 && !/\son[a-z]+=/i.test(page));
+    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) =>
+      /^<script src="\/topbar\.js\?v=[0-9a-f]{12}"><\/script>$/.test(t) || t === '<script src="/client-a/insights/view.js"></script>') &&
+    (page.match(/<script/gi) || []).length === 2 && !/\son[a-z]+=/i.test(page));
   check("the module switcher is its way back out",
     page.includes('href="/client-a/strategy"'), "no way back to Strategy");
   check("a date is written the way the rest of the product writes one",

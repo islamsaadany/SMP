@@ -224,7 +224,7 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      office's alone, by seat (ffp/lib/auth/workspace.ts) — so NO AREA, the
      tracker's reason. No longer a library: Forefront works IN it rather
      than publishing to it, so the card's row walks into the client's
-     platform (LIBRARY_MODULES below). */
+     platform, as every module's row does since §651. */
   processes: { label: "Processes", note: "Process maps, RACI and authority matrices",        built: true,  areas: [], lines: [NOTHING], appRoute: true },
   /* THE OFFICE'S OWN LIST ABOUT THIS CLIENT (spec 054). Built, and NO AREA:
      it is opened by the seat and by nothing a client could be granted
@@ -363,26 +363,6 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    Strategy's is what the card already reads; a module with nothing to say
    draws its name alone, which is `""` and never a placeholder. `have` is the
    client's own list, so the card cannot offer a door the address refuses. */
-/* ── WHICH MODULES FOREFRONT WORKS ON RATHER THAN WALKS INTO (spec 053) ──
-   A library is published BY US and read by the client (spec 046 §4.9), so a
-   consultant pressing its row on a client's card belongs in the publishing
-   room in this console — not in the client's own read-only page, which is the
-   one place they can do nothing at all. Strategy's row goes the other way,
-   into the client's platform, because that IS where the work is.
-
-   NAMED HERE for the reason every other module fact is: the card, the address
-   and Setup ask one place what a module is (§53.5). The card reads the flag
-   off the row the server sent it and decides nothing itself. */
-/* §648: NONE ANY MORE. Islam: *"this needs to be doable from the module
-   inside the client like the meeting notes as the insights are client
-   relevant"*, and of the console's room: *"no need for the console page"*.
-   Insights is published from the client's own Insights page now, so its row
-   on a card opens that page like every other module. The flag and the
-   console's room code stay until the console's next release removes them. */
-export const LIBRARY_MODULES: readonly ModuleKey[] = [];
-export function isLibrary(k: unknown): boolean {
-  return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
-}
 
 /* THE LINE A MODULE SAYS, from its declaration, the client's pick and the
    facts — ONE reader for the console's card and the client's landing
@@ -399,7 +379,7 @@ export function landingLine(k: ModuleKey, pick: string | null | undefined, facts
   return lineDef(k, pick).read(facts || NO_FACTS);
 }
 
-export type ModuleRow = { key: ModuleKey; label: string; mark: string; alarm: boolean; tip: string; room: boolean };
+export type ModuleRow = { key: ModuleKey; label: string; mark: string; alarm: boolean; tip: string };
 /* ONE MARK PER ROW, AND NOTHING WHEN THERE IS NOTHING (§368).
    REVERSING the pair this returned before — a `line` (the client's chosen
    sentence) and a `state` (the card's own health word) — which is recorded
@@ -432,7 +412,7 @@ export function moduleRows(have: ModuleKey[], facts: CardFacts): ModuleRow[] {
     let m = (d || (() => null))(facts);
     if (!m && brk === "mark-always") m = { mark: d ? "Nothing to do" : "—" };
     const got = m || { mark: "", alarm: false, tip: "" };
-    return { key: k, label: MODULE_DEF[k].label, room: isLibrary(k),
+    return { key: k, label: MODULE_DEF[k].label,
              mark: got.mark, alarm: !!got.alarm, tip: got.tip || "" };
   });
 }

@@ -6,8 +6,10 @@ import { prisma } from "@/ffp/lib/db/client";
 import { auth } from "@/ffp/lib/auth/config";
 import { readerSeat, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { ok, notFound, unauthorized, validationError, type ActionResult } from "@/ffp/lib/actions/errors";
+import { createProcess } from "@/ffp/lib/actions/process";
 import { registerPerson } from "@/ffp/lib/data/register-person";
 import { buildSnapshot, loadPlan, loadPriorityRows } from "@/ffp/lib/data/priorities";
+import { planUnits } from "@/ffp/lib/domain/priority-units";
 import {
   DECISIONS,
   goesDeep,
@@ -237,7 +239,7 @@ export async function sendPlanForApproval(input: z.infer<typeof sendSchema>): Pr
     risk: plan.weightRisk,
     complexity: plan.weightComplexity,
   });
-  const shortlisted = rows.filter((r) => goesDeep(r.decision));
+  const shortlisted = planUnits(rows).filter((r) => goesDeep(r.decision));
   if (!planCanSend(plan.status, shortlisted.length)) {
     return refuse(plan.status !== "DRAFT" ? "This plan has already been sent" : "Choose at least one process for Wave 1 or Wave 2 first");
   }
@@ -344,3 +346,123 @@ export async function reopenPriorityPlan(input: z.infer<typeof returnSchema>): P
   return ok(null);
 }
 
+
+
+/* ── steps inside a process ── */
+
+async function ownedStep(workspaceId: string, stepId: string) {
+  return prisma.processStep.findFirst({
+    where: { id: stepId, process: { workspaceId, archivedAt: null } },
+    select: { id: true, label: true, processId: true, priorityFlagged: true, priorityImportance: true, priorityComplexity: true, priorityRisk: true, priorityWhy: true },
+  });
+}
+
+const flagSchema = ws.extend({ stepId: z.string().min(1), flagged: z.boolean() });
+
+/** Flags a step as worth a closer look (and offers a starting complexity and risk from the map), or clears the flag and its scores. */
+export async function flagStep(input: z.infer<typeof flagSchema>): Promise<ActionResult<null>> {
+  const parsed = flagSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, stepId, flagged } = parsed.data;
+  const denied = await editor(workspaceId);
+  if (denied) return denied;
+  if (!(await ownedStep(workspaceId, stepId))) return notFound();
+  const locked = await mustBeDraft(workspaceId);
+  if (locked) return locked;
+  if (!flagged) {
+    await prisma.processStep.update({ where: { id: stepId }, data: { priorityFlagged: false, priorityImportance: null, priorityComplexity: null, priorityRisk: null, priorityWhy: null, deepDiveDecision: null } });
+  } else {
+    // Start from what the map says; importance is always the office's to give.
+    const plan = await loadPlan(workspaceId);
+    const row = (await loadPriorityRows(workspaceId, plan.weights)).flatMap((r) => r.steps).find((x) => x.id === stepId);
+    await prisma.processStep.update({
+      where: { id: stepId },
+      data: { priorityFlagged: true, priorityComplexity: row?.suggestedComplexity?.score ?? null, priorityRisk: row?.suggestedRisk?.score ?? null },
+    });
+  }
+  refresh(workspaceId);
+  return ok(null);
+}
+
+const stepScoreSchema = ws.extend({
+  stepId: z.string().min(1),
+  importance: score.nullable().optional(),
+  complexity: score.nullable().optional(),
+  risk: score.nullable().optional(),
+  why: z.string().trim().max(200).nullable().optional(),
+});
+
+/** Scores a flagged step. A step's score is its own and never touches its process's. */
+export async function setStepPriority(input: z.infer<typeof stepScoreSchema>): Promise<ActionResult<null>> {
+  const parsed = stepScoreSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const d = parsed.data;
+  const denied = await editor(d.workspaceId);
+  if (denied) return denied;
+  const step = await ownedStep(d.workspaceId, d.stepId);
+  if (!step) return notFound();
+  if (!step.priorityFlagged) return refuse("Flag the step first, then score it");
+  const locked = await mustBeDraft(d.workspaceId);
+  if (locked) return locked;
+  await prisma.processStep.update({
+    where: { id: d.stepId },
+    data: {
+      ...(d.importance !== undefined ? { priorityImportance: d.importance } : {}),
+      ...(d.complexity !== undefined ? { priorityComplexity: d.complexity } : {}),
+      ...(d.risk !== undefined ? { priorityRisk: d.risk } : {}),
+      ...(d.why !== undefined ? { priorityWhy: d.why || null } : {}),
+    },
+  });
+  refresh(d.workspaceId);
+  return ok(null);
+}
+
+const promoteSchema = ws.extend({ stepId: z.string().min(1), name: z.string().trim().min(1).max(120) });
+
+/**
+ * Makes a flagged step into a sub-process of its own: a new draft process under the same main process, branching from the
+ * step (the link sub-processes already have), carrying the step's scores. The step stays in the main process as the link;
+ * nothing is deleted or moved.
+ */
+export async function promoteStepToProcess(input: z.infer<typeof promoteSchema>): Promise<ActionResult<{ id: string; code: string }>> {
+  const parsed = promoteSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const { workspaceId, stepId, name } = parsed.data;
+  const denied = await editor(workspaceId);
+  if (denied) return denied;
+  const step = await ownedStep(workspaceId, stepId);
+  if (!step) return notFound();
+  const locked = await mustBeDraft(workspaceId);
+  if (locked) return locked;
+  if (await prisma.process.findFirst({ where: { branchFromStepId: stepId, archivedAt: null }, select: { id: true } })) return refuse("This step is already its own process");
+  const home = await prisma.process.findUniqueOrThrow({ where: { id: step.processId }, select: { categoryId: true } });
+  const made = await createProcess({ workspaceId, name, parentProcessId: step.processId, categoryId: home.categoryId ?? undefined, branchFromStepId: stepId });
+  if (!made.ok) return made;
+  await prisma.process.update({
+    where: { id: made.data.id },
+    data: { priorityImportance: step.priorityImportance, priorityComplexity: step.priorityComplexity, priorityRisk: step.priorityRisk, priorityWhy: step.priorityWhy },
+  });
+  // The scores now live on the new process; the step keeps only the link.
+  await prisma.processStep.update({ where: { id: stepId }, data: { priorityFlagged: false, priorityImportance: null, priorityComplexity: null, priorityRisk: null, priorityWhy: null, deepDiveDecision: null } });
+  refresh(workspaceId);
+  return ok(made.data);
+}
+
+const stepDecisionSchema = ws.extend({ stepId: z.string().min(1), decision: z.enum(DECISIONS as [Decision, ...Decision[]]).nullable() });
+
+/** The wave for one flagged step. Empty means it goes with its process. */
+export async function setStepDecision(input: z.infer<typeof stepDecisionSchema>): Promise<ActionResult<null>> {
+  const parsed = stepDecisionSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+  const d = parsed.data;
+  const denied = await editor(d.workspaceId);
+  if (denied) return denied;
+  const step = await ownedStep(d.workspaceId, d.stepId);
+  if (!step) return notFound();
+  if (!step.priorityFlagged) return refuse("Flag the step first");
+  const locked = await mustBeDraft(d.workspaceId);
+  if (locked) return locked;
+  await prisma.processStep.update({ where: { id: d.stepId }, data: { deepDiveDecision: d.decision } });
+  refresh(d.workspaceId);
+  return ok(null);
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { buildSnapshot, type PlanView, type PriorityRow } from "@/ffp/lib/data/priorities";
 import { goesDeep } from "@/ffp/lib/domain/priorities";
+import { planUnits } from "@/ffp/lib/domain/priority-units";
 import { PrioritiesDocument } from "../../priorities-document";
 import { PlanActions, type ApproverOption } from "./plan-actions";
 
@@ -36,7 +37,7 @@ export function SignOff({
         people={people}
         canWithdraw={isSender}
         approverLabel={plan.approverName ? `${plan.approverName}${plan.approverRole ? ` (${plan.approverRole})` : ""}` : null}
-        shortlisted={rows.filter((r) => goesDeep(r.decision)).length}
+        shortlisted={planUnits(rows).filter((r) => goesDeep(r.decision)).length}
       />
       <div className="mt-3 flex flex-wrap items-center gap-3 print:hidden">
         <Link href={`/${workspaceId}/processes/reports/priorities`} target="_blank" className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 hover:bg-slate-50">

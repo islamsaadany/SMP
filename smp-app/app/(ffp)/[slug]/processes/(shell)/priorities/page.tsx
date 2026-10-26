@@ -63,9 +63,12 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
   const base = `/${workspaceId}/processes/priorities`;
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] px-6 py-8">
-      <div className="mx-auto w-full max-w-6xl xl:mx-0 xl:ms-[max(17rem,calc((100%-72rem)/2))]">
+    <main className="w-full px-6 py-8">
+      <div className="w-full">
+        {/* The client logo sits in the left margin at the top, so only the banner steps aside for it; the working table below uses the full width. */}
+        <div className="xl:ms-[17rem]">
         <WorkspacePageHeader title="Deep-dive priorities" subtitle={`${rows.length} high-level process${rows.length === 1 ? "" : "es"}. Which ones do we take deep next: full steps, RACI, controls and an SOP?`} />
+        </div>
         <nav aria-label="Steps" className="mb-4 grid overflow-hidden rounded-xl border border-slate-200 bg-white sm:grid-cols-4">
           {STEPS.map((s) => (
             <Link
@@ -84,6 +87,9 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
           <div className="mb-3 flex justify-end">
             <a href={`/api/ffp/export/priorities/${workspaceId}`} download className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
               Download as Excel
+            </a>
+            <a href={`/api/ffp/export/priorities/${workspaceId}/flagged-steps`} download className="ms-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
+              Download all steps (flagged marked)
             </a>
           </div>
         )}

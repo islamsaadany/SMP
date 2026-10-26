@@ -61,6 +61,30 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
     });
   }
 
+  const st = wb.addWorksheet("Flagged steps", { views: [{ state: "frozen", ySplit: 1 }] });
+  st.columns = [
+    { header: "In process", key: "proc", width: 36 },
+    { header: "Process code", key: "code", width: 12 },
+    { header: "Step", key: "step", width: 40 },
+    { header: "Importance (1-5)", key: "imp", width: 12 },
+    { header: "Complexity (1-5)", key: "cx", width: 12 },
+    { header: "Risk (1-5)", key: "risk", width: 10 },
+    { header: "Score (0-100)", key: "score", width: 10 },
+    { header: "Why", key: "why", width: 40 },
+    { header: "Wave", key: "wave", width: 16 },
+    { header: "What the map noticed", key: "sig", width: 50 },
+    { header: "Now its own process", key: "now", width: 30 },
+  ];
+  st.getRow(1).font = { bold: true };
+  for (const { row: r } of rows) {
+    for (const x of r.steps.filter((y) => y.flagged || y.nowProcesses.length)) {
+      st.addRow({
+        proc: r.name, code: r.code, step: x.label, imp: x.importance ?? "", cx: x.complexity ?? "", risk: x.risk ?? "",
+        score: x.score ?? "", why: x.why ?? "", wave: x.flagged ? (x.decision ? DECISION_LABEL[x.decision] : r.decision ? `${DECISION_LABEL[r.decision]} (with its process)` : "Not decided") : "", sig: x.signals.map((g) => g.label).join("; "), now: x.nowProcesses.map((p) => `${p.name} (${p.code})`).join("; "),
+      });
+    }
+  }
+
   const s = wb.addWorksheet("Settings");
   s.columns = [{ header: "Setting", key: "k", width: 36 }, { header: "Value", key: "v", width: 40 }];
   s.getRow(1).font = { bold: true };

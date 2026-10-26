@@ -171,3 +171,54 @@ export function inTree<T extends { id: string; code: string; parentId: string | 
   }
   return out;
 }
+
+/* ── steps inside a process: what makes a step worth a look, and a starting score from it ── */
+
+export type StepFacts = {
+  decision: boolean;
+  controlsHigh: number;
+  controlsMedium: number;
+  controlsLow: number;
+  /** Names of the other processes this step hands over to or links to. */
+  handoverTo: string[];
+  roles: number;
+  subtasks: number;
+  /** The step says what goes wrong if it is missed or done badly ("Risk if mishandled"). */
+  riskNoted: boolean;
+  /** Lines in the step's written procedure. */
+  instructions: number;
+};
+
+export type StepSignal = { key: string; label: string; tone: "bad" | "warn" | "info" | "plain" };
+
+const MANY_ROLES = 3;
+const MANY_SUBTASKS = 6;
+const LONG_PROCEDURE = 5;
+
+/** What the map already says about a step. Empty when nothing stands out; the office decides what to flag. */
+export function stepSignals(f: StepFacts): StepSignal[] {
+  const out: StepSignal[] = [];
+  if (f.controlsHigh > 0) out.push({ key: "high-risk", label: "High-risk control", tone: "bad" });
+  else if (f.controlsMedium > 0) out.push({ key: "medium-risk", label: "Medium-risk control", tone: "warn" });
+  if (f.riskNoted) out.push({ key: "risk-noted", label: "Risk noted on the step", tone: "warn" });
+  if (f.decision) out.push({ key: "decision", label: "Decision point", tone: "info" });
+  if (f.handoverTo.length) out.push({ key: "handover", label: `Hands over to ${f.handoverTo.slice(0, 2).join(", ")}${f.handoverTo.length > 2 ? "…" : ""}`, tone: "info" });
+  if (f.roles >= MANY_ROLES) out.push({ key: "roles", label: `${f.roles} roles`, tone: "plain" });
+  if (f.subtasks >= MANY_SUBTASKS) out.push({ key: "subtasks", label: `${f.subtasks} sub-tasks`, tone: "plain" });
+  if (f.instructions >= LONG_PROCEDURE) out.push({ key: "procedure", label: `Long procedure (${f.instructions} lines)`, tone: "plain" });
+  return out;
+}
+
+/** Complexity of one step from its decision, hand-overs, roles and sub-tasks. Null when none of those is there to go on. */
+export function suggestStepComplexity(f: StepFacts): { score: number; reason: string } | null {
+  const points = (f.decision ? 2 : 0) + 2 * f.handoverTo.length + f.roles + Math.floor(f.subtasks / 3);
+  if (points === 0) return null;
+  const score = points < 3 ? 1 : points < 5 ? 2 : points < 7 ? 3 : points < 10 ? 4 : 5;
+  const bits = [f.decision ? "decision" : "", f.handoverTo.length ? `${f.handoverTo.length} hand-over${f.handoverTo.length === 1 ? "" : "s"}` : "", f.roles ? `${f.roles} role${f.roles === 1 ? "" : "s"}` : "", f.subtasks ? `${f.subtasks} sub-task${f.subtasks === 1 ? "" : "s"}` : ""].filter(Boolean);
+  return { score, reason: bits.join(", ") };
+}
+
+/** Risk of one step from the risks logged against it; null when none is logged. */
+export function suggestStepRisk(f: StepFacts): { score: number; reason: string } | null {
+  return suggestRisk({ steps: 1, decisions: 0, crossProcess: 0, roles: 0, risksHigh: f.controlsHigh, risksMedium: f.controlsMedium, risksLow: f.controlsLow });
+}

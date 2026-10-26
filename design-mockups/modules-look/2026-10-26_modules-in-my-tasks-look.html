@@ -287,7 +287,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
         "Each owner (or topic) is a group label over a grey rule, as in My tasks, with its late count in red and <b>N done ›</b> at the right. The heavy black rule and the 01, 02 numbers go.",
         "Rows are striped grey and white. Every control on a row stays as it is: tick, topic, week, owner, status, the arrow.",
         "The band keeps the <b>client's own colour</b>, as today (agreed 26 Oct)."],
-      ask:["The band stays frozen at the top while the list scrolls, as it does today. With the views now in the card, should the card's header freeze with it?"] },
+      ask:["The band stays frozen at the top while the list scrolls, as today, and the card's header with the filters freezes with it."] },
     notes: { name:"Meeting notes", n:notesNew, o:notesOld,
       changes:["Home's band with the meeting count, and <b>+ New meeting</b> as the amber button in the band (as Clients has + Add a client).",
         "One <b>Meetings</b> card with the search in its header.",
@@ -301,8 +301,9 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
         "The band keeps the <b>client's own colour</b>, as today (agreed 26 Oct)."],
       ask:[] }
   };
-  var shared = ["The bands carry a one-line sentence under the title, as My tasks' does. Keep it, or leave the title alone?",
-    "The typeface becomes the console's, as on My tasks, in place of the one these modules use today."];
+  var shared = ["The band keeps the <b>client's own colour</b>.",
+    "The one-line sentence under the title stays, as on My tasks.",
+    "The typeface becomes the main screens', as on My tasks."];
 
   var state = { m:"tracker", v:"new", d:"computer" };
   try { var s = JSON.parse(localStorage.getItem("mods-mytasks") || "null"); if (s) { state.v = s.v || state.v; state.d = s.d || state.d; } } catch (e) {}
@@ -313,7 +314,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
     stage.className = "stage" + (state.d === "phone" ? " phone" : "");
     stage.innerHTML = '<div class="dev">' + tb(mo.name) + '<div class="pg ' + (isNew ? "N" : "L") + '">' + (isNew ? mo.n : mo.o) + '</div></div>';
     var ask = mo.ask.concat(shared);
-    notes.innerHTML = '<div class="mnote"><section><h3>What changes</h3><ul><li>' + mo.changes.join("</li><li>") + '</li></ul></section><section class="ask"><h3>To agree</h3><ul><li>' + ask.join("</li><li>") + '</li></ul></section></div>';
+    notes.innerHTML = '<div class="mnote"><section><h3>What changes</h3><ul><li>' + mo.changes.join("</li><li>") + '</li></ul></section><section class="ask"><h3>Agreed · 26 Oct</h3><ul><li>' + ask.join("</li><li>") + '</li></ul></section></div>';
     document.querySelectorAll("[data-m]").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.m === state.m)); });
     document.querySelectorAll("[data-v]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.v === state.v)); });
     document.querySelectorAll("[data-d]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === state.d)); });

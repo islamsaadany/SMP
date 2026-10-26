@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot At Any Zoom</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--accent:#D9773A;--nav:#16325C;--panel-ink:#FFFFFF;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--bad:#A23B2A;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--bad:#E8907E;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;--bad:#E8907E;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1400px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:92ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+.vp{overflow:hidden}
+.scaler{transform-origin:top left}
+
+/* ═ the Copilot, at the room it has (the real build's rules) ═ */
+.room{container:room / inline-size;background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:8px;height:640px;display:flex;gap:8px;font-size:13.5px}
+.strip{flex:none;width:24px;display:flex;flex-direction:column;gap:6px}
+.ib{width:24px;height:26px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;background:var(--surface);font-size:12px}
+.main{flex:1 1 auto;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px;display:flex;container:copmain / inline-size}
+.flow{flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);position:relative}
+.chat{min-width:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:0 10px 12px}
+.fh{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.fh b{flex:1 1 auto;font-size:13.5px}
+.mini{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:3px 9px;font:600 12px/1.2 var(--sans)}
+.az{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.az span{padding:3px 7px;font-size:12px;background:var(--surface);border-right:1px solid var(--line)}.az span:last-child{border-right:0}
+.bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);padding:6px 0}
+.bar i{flex:1;height:3px;background:var(--accent);border-radius:2px}
+.msgs{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.col{width:100%;max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.who{font-size:11.5px;color:var(--ink-3)}
+.msg{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:8px 12px;font-size:13.5px}
+.msg h6{margin:0 0 4px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.msg ul{margin:0;padding-left:18px}
+.msg li.ok::marker{color:var(--good)}.msg li.no::marker{color:var(--bad)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font:600 12.5px/1.2 var(--sans)}
+.btn.sv{background:#F2C4A2;border-color:#F2C4A2;color:#8A4B22}
+.box{max-width:740px;width:100%;margin:8px auto 0;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px;color:var(--ink-3);display:flex;justify-content:space-between}
+.grip{display:none;position:relative;cursor:col-resize}
+.grip::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+.cards{min-width:0;display:none;flex-direction:column;gap:8px;overflow:hidden;container:cards / inline-size}
+.ch{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3)}
+.ch b{color:var(--ink)}
+.ch .x{margin-left:auto;width:26px;height:24px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;background:var(--surface)}
+.cg{flex:1 1 auto;min-height:0;overflow:auto;display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+@container cards (min-width:560px){ .cg{grid-template-columns:1fr 1fr} .cg .wide{grid-column:1/-1} }
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.card h4{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between}
+.card h4 small{color:var(--good);font-size:11.5px}
+.card p{margin:0;font-size:13px;color:var(--ink-2)}
+.card ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+.more{border:0;background:none;padding:2px 0 0;color:var(--gold);font:600 12.5px/1.4 var(--sans);text-decoration:underline;text-underline-offset:2px}
+.foot{border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.foot .st{font-size:12.5px;color:var(--good)}
+.todo{display:none;min-width:0;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12.5px;overflow:auto}
+.todo h5{margin:0;font-size:13.5px}
+.todo .t{height:3px;background:var(--accent);border-radius:2px;margin:6px 0 8px}
+.tg{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:8px 0 2px}
+.ti{display:flex;align-items:center;gap:6px;padding:2px 0}
+.ti i{width:9px;height:9px;border-radius:50%;background:var(--good);flex:none}
+.ti span{flex:1}
+.ti em{font-style:normal;font-size:10.5px;border:1px solid var(--good);color:var(--good);border-radius:999px;padding:0 6px}
+.shade{display:none;position:absolute;inset:0;background:color-mix(in srgb, var(--ink) 22%, transparent);z-index:5}
+.sheetb{display:none}
+/* room for a 420 chat + 360 of cards + the 200 to-do: side by side */
+@container copmain (min-width:1000px){
+  .flow{grid-template-columns:min(760px, max(420px, calc(100% - 580px))) 12px minmax(0,1fr) 208px}
+  .flow > .grip{display:block}
+  .flow > .cards{display:flex}
+  .flow > .todo{display:block;margin-left:8px}
+  .flow.shut{grid-template-columns:minmax(0,1fr) 200px;gap:8px}
+  .flow.shut > .todo{margin-left:0}
+}
+/* not enough room: the cards and the to-do wait behind two buttons */
+@container copmain (max-width:999px){
+  .sheetb{display:inline-flex}
+  .flow.sheet-cards > .cards{display:flex;position:absolute;top:0;right:0;bottom:0;width:min(720px,100%);z-index:6;background:var(--surface);box-shadow:0 4px 18px rgba(0,0,0,.18);padding:8px}
+  .flow.sheet-cards > .shade{display:block}
+}
+.flow.shut > .cards,.flow.shut > .grip{display:none !important}
+
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{color:var(--ink);display:block}
+.n s{color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Foundation after the fix — at any zoom</h1>
+    <p class="lede">Your screen from this morning, with the four fixes in. Choose the zoom of a 1440px laptop and see what the Copilot does with the room it gets; close and reopen the cards; press <b>Show 2 more</b> on Key Objectives. The layout below is drawn by the same width rules the build uses.</p>
+  </header>
+  <div class="ctl"><b>Zoom · 1440px laptop</b><span class="seg" id="zoom"><button data-z="100">100%</button><button data-z="125">125%</button><button data-z="150">150%</button><button data-z="175">175%</button></span>
+    <b>Cards</b><span class="seg" id="cardsw"><button data-c="open">Open</button><button data-c="shut">Closed with ×</button></span></div>
+  <div class="say" id="say"></div>
+  <div class="vp" id="vp"><div class="scaler" id="scaler"><div class="room" id="room"></div></div></div>
+  <div class="notes">
+    <div class="n"><b>1 · The Copilot's room, not the window</b>Side by side while there is room for a 420px chat, 360px of cards and the 200px to-do — at 100%, 125% and 150%. Only at 175% do the cards and the to-do wait behind <i>View Foundation</i> and <i>To-do 7/7</i>. <s>Before: covered from 125%.</s></div>
+    <div class="n"><b>2 · Show 2 more</b>A long card shows three lines and <i>Show 2 more</i>; pressed, the whole list opens in place and the link says <i>Show fewer</i>. <s>Before: "…2 more lines", which did nothing.</s></div>
+    <div class="n"><b>3 · One "Go back to" per part</b>Two issues in Key Objectives give one button, not two.</div>
+    <div class="n"><b>4 · Nothing moves into the chat</b>Closing the cards leaves only <i>Show cards</i> in the chat's head; Save, Apply and the check come back with the cards. <s>Before: the save bar sat on top of the chat.</s></div>
+  </div>
+</div>
+<script>
+(function(){
+  var S = { z:125, c:"open", sheet:false, more:false };
+  var KO = ["Total GMV (our single headline number): EGP 1 billion a year","Delivery SLA inside Cairo and Giza: 48 hours or less","Same-day delivery for store pick-up and home delivery from store (PFS & HDFS): 100% of eligible orders","Customer satisfaction (CSAT) on online orders: 90% or more","Instalment orders through Takseety: 25% of online sales"];
+  function room(z){ return Math.round(1440 / (z / 100) / 0.8) - 48; }   /* the page at 80%, less the platform's margins */
+  function draw(){
+    document.querySelectorAll("#zoom button").forEach(function(b){ b.setAttribute("aria-pressed", String(+b.dataset.z === S.z)); });
+    document.querySelectorAll("#cardsw button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.c === S.c)); });
+    var W = room(S.z), shut = S.c === "shut", side = W - 48 >= 1000;
+    document.getElementById("say").innerHTML = '<b>' + S.z + '%</b> — the Copilot has about <b>' + W + 'px</b>. ' +
+      (shut ? 'Cards closed: the chat takes the room, its head has <b>Show cards</b> and no save bar; ' + (side ? 'the to-do stays at the right.' : 'the to-do waits behind <b>To-do 7/7</b>.') :
+       side ? 'Room for all three: chat, cards' + (W < 1500 ? ' (one column, they are narrow)' : ' (two columns)') + ' and the to-do at 200px.' :
+       'Not enough room for three: the cards and the to-do wait behind <b>View Foundation</b> and <b>To-do 7/7</b> in the chat\'s head.');
+    var shown = S.more ? KO : KO.slice(0, 3);
+    var cards = '<div class="cards"><div class="ch"><span><b>Foundation — Online v1</b> · saved · 4 of 4 done · 2026 to the end of 2027</span><span class="x">×</span></div>' +
+      '<div class="cg">' +
+        '<div class="card wide"><h4>Who we are <small>Done</small></h4><p>We are Raya Shop, Raya Trade\'s B2C e-commerce platform (website and app) in Egypt, selling mobiles, IT, TVs and home appliances first-party, plus a third-party marketplace…</p></div>' +
+        '<div class="card wide"><h4>Winning Aspiration <small>Done</small></h4><p>To be Egypt\'s most trusted, first-choice online destination for electronics and home appliances, ahead of both specialist retailers and marketplaces…</p></div>' +
+        '<div class="card"><h4>End in Mind <small>Done</small></h4><p>To be the online home Egyptian households turn to for the technology and appliances they rely on…</p></div>' +
+        '<div class="card"><h4>Key Objectives <small>Done</small></h4><ul>' + shown.map(function(x){ return '<li>' + x + '</li>'; }).join("") + '</ul>' +
+          '<button class="more" id="more">' + (S.more ? 'Show fewer' : 'Show 2 more') + '</button></div>' +
+      '</div><div class="foot"><span class="st">Saved as Foundation — Online v1</span><div class="btns" style="margin:0"><span class="btn">Run the check</span><span class="btn sv">Save as Foundation — Online v1</span><span class="btn">Apply to plan</span></div></div></div>';
+    var chat = '<div class="chat"><div class="fh"><b>Copilot · Foundation · check</b>' +
+        (shut ? '<button class="mini" data-act="show">Show cards</button><button class="mini sheetb">To-do 7/7</button>' : '<button class="mini sheetb" data-act="sheet">View Foundation</button><button class="mini sheetb">To-do 7/7</button>') +
+        '<span class="az"><span>A−</span><span>A+</span></span></div>' +
+      '<div class="bar">4 of 4 parts agreed <i></i></div>' +
+      '<div class="msgs"><div class="col">' +
+        '<div class="who">Copilot</div><div class="msg" style="max-width:600px">Key Objectives agreed for Foundation — Online.</div>' +
+        '<div class="who">Copilot</div><div class="msg"><h6>Consistency check across the parts</h6><ul>' +
+          '<li class="ok">Who We Are, Winning Aspiration and End in Mind all name Raya Shop as the single digital front door to the Raya Group.</li>' +
+          '<li class="no">The aspiration promises a profitable platform, but no objective measures it. Add one target, such as Raya BUs live on the platform (≥5).</li>' +
+          '<li class="no">The aspiration claims same-day delivery, but objective 2 accepts 48 hours in Cairo and Giza.</li></ul>' +
+          '<div class="btns"><span class="btn">Go back to Key Objectives</span><span class="btn">Go back to Winning Aspiration</span></div></div>' +
+        '<div class="who">Copilot</div><div class="msg" style="max-width:600px">Saved as Foundation — Online v1. Press <b>Apply to plan</b> under the cards to put it on the plan.</div>' +
+      '</div></div><div class="box"><span>Use the buttons above to carry on…</span><span>↵</span></div></div>';
+    var todo = '<aside class="todo"><h5>To-do <small style="color:var(--ink-3);font-weight:600">7/7</small></h5><div class="t"></div>' +
+      '<div class="tg">Start</div><div class="ti"><i></i><span>Starting point</span><em>Done</em></div><div class="ti"><i></i><span>Plan years 2026–2027</span><em>Done</em></div>' +
+      '<div class="tg">The parts</div>' + ["Who we are","Winning Aspiration","End in Mind","Key Objectives"].map(function(t){ return '<div class="ti"><i></i><span>' + t + '</span><em>Agreed</em></div>'; }).join("") +
+      '<div class="tg">Then</div><div class="ti"><i></i><span>Consistency check</span><em>Done</em></div><div class="ti"><i></i><span>Save as Foundation</span><em>Done</em></div></aside>';
+    var r = document.getElementById("room");
+    r.style.width = W + "px";
+    r.innerHTML = '<div class="strip"><span class="ib">▮</span><span class="ib">+</span></div><div class="main"><div class="flow' + (shut ? " shut" : "") + (S.sheet && !shut ? " sheet-cards" : "") + '">' +
+      chat + (shut ? '' : '<div class="grip"></div>' + cards) + todo + '<div class="shade" data-act="close"></div></div></div>';
+    fit();
+  }
+  function fit(){
+    var r = document.getElementById("room"), sc = document.getElementById("scaler"), vp = document.getElementById("vp");
+    var avail = vp.clientWidth, w = r.offsetWidth, s = Math.min(1, avail / w);
+    sc.style.transform = "scale(" + s + ")"; vp.style.height = (r.offsetHeight * s) + "px";
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest("[data-z],[data-c],[data-act],#more"); if (!t) return;
+    if (t.dataset.z) { S.z = +t.dataset.z; S.sheet = false; }
+    else if (t.dataset.c) { S.c = t.dataset.c; S.sheet = false; }
+    else if (t.id === "more") S.more = !S.more;
+    else if (t.dataset.act === "show") S.c = "open";
+    else if (t.dataset.act === "sheet") S.sheet = true;
+    else if (t.dataset.act === "close") S.sheet = false;
+    draw();
+  });
+  window.addEventListener("resize", fit);
+  draw();
+})();
+</script>
+</body>
+</html>

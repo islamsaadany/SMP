@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-26 — The Copilot at any zoom (§642), merged to `main` on Islam's word.** The layout follows the Copilot's own width, so a laptop at 125–150% keeps chat, cards and to-do side by side; long cards open with Show N more; one Go back per part; closing the cards moves nothing into the chat.
+
 **2026-10-25 — The SWOT, split (§641), merged to `main` on Islam's word.** A conversation beside the SWOT it builds; items open on a press; Save and Apply to plan only at the pane's foot, Apply archiving the plan's SWOT first.
 
 **2026-10-25 — The start box takes the material (§640), merged to `main` on Islam's word.** Notes attached or work pasted there open a free chat that offers to structure it; Foundation's start cards are the guided questions and the template.

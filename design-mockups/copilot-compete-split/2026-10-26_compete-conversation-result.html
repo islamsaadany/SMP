@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitive Discipline Split</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--top:#111417;--nav:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#A9B1BC;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--top:#0B0D10;--nav:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1500px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:24px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:92ch}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.ctl b{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.say{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--goldfill);border-radius:8px;padding:9px 14px;font-size:14px;color:var(--ink-2)}
+.say b{color:var(--ink)}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.top{background:var(--top);color:var(--panel-quiet);display:flex;gap:16px;padding:9px 16px;font-size:13px}
+.top b{color:var(--panel-ink)}
+.tabs{display:flex;gap:20px;padding:8px 16px 0;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.tabs span{padding-bottom:7px}.tabs .on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--goldfill)}
+.areas{display:flex;gap:4px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-2);overflow-x:auto}
+.areas span{padding:4px 10px;border-radius:5px;white-space:nowrap}.areas .on{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.body{display:flex;height:740px}
+.strip{flex:none;width:44px;border-right:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0}
+.ib{width:28px;height:28px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;background:var(--surface);font-size:14px}
+.chat{flex:0 0 min(540px,38%);min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.ch{flex:none;display:flex;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px}
+.ch b{font-size:13.5px}
+.feed{flex:1 1 auto;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+.who{font-size:11.5px;color:var(--ink-3);font-weight:600}
+.who.me{align-self:flex-end}
+.msg{border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:14px;line-height:1.55}
+.msg.ai{border-left:3px solid var(--goldfill)}
+.msg.me{align-self:flex-end;background:var(--surface-2);max-width:85%}
+.cl{font-size:11px;font-weight:700;border-radius:999px;padding:0 7px;background:var(--goodbg);color:var(--good)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:12.5px;background:var(--surface)}
+.opt.go{background:var(--nav);color:var(--panel-ink);border-color:var(--nav)}
+.compose{flex:none;padding:8px 16px 14px}
+.box{border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:14px}
+.box.off{background:var(--surface-2)}
+.send{margin-left:auto;width:28px;height:28px;border-radius:8px;background:var(--nav);color:var(--panel-ink);display:grid;place-items:center;font-size:13px}
+.grip{flex:none;width:3px;background:var(--goldfill);opacity:.5}
+.out{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;background:var(--surface-2)}
+.oh{flex:none;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--surface);font-size:13px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.oh b{font-size:14px}
+.oh .sp{margin-left:auto}
+.dens,.sides{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.dens span,.sides span{padding:2px 9px;font-size:11px;font-weight:600;color:var(--ink-2);border-right:1px solid var(--line);background:var(--surface)}
+.dens span:last-child,.sides span:last-child{border-right:0}
+.dens .on,.sides .on{background:var(--surface-2);color:var(--ink)}
+.ob{flex:1 1 auto;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.of{flex:none;padding:10px 14px;border-top:1px solid var(--line);background:var(--surface);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.of .k{margin-right:auto;font-size:12px;color:var(--ink-3)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font:600 12.5px/1.2 var(--sans)}
+.btn.pri{background:var(--nav);color:var(--panel-ink);border-color:var(--nav)}
+.btn[disabled]{opacity:.45;cursor:default}
+table.sc{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sc th,.sc td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;font-size:12.5px}
+.sc th:first-child,.sc td:first-child{text-align:left}
+.sc thead th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);background:var(--surface-2)}
+.sc thead th.lead{color:var(--good)}
+.fr{border:0;background:none;padding:0;font:inherit;color:var(--ink);font-weight:600;text-align:left;display:flex;gap:6px;align-items:baseline}
+.fr i{font-style:normal;font-size:10px;color:var(--ink-3)}
+.fd{display:block;font-size:12px;color:var(--ink-2);font-weight:400;padding:2px 0 0 16px}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;border:1px solid var(--line);border-radius:11px;font-weight:600;background:var(--surface)}
+.pill.ed{border-color:var(--goldfill);color:var(--gold)}
+.tot td{font-weight:700;background:var(--surface-2)}
+.tot td.lead{color:var(--good)}
+.more{font-size:12.5px;color:var(--gold);font-weight:600;padding:6px 8px;text-align:left !important}
+.vc{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.v{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 40px;position:relative}
+.v.on{border-color:var(--nav);box-shadow:inset 3px 0 0 var(--nav)}
+.v .tk{position:absolute;left:10px;top:10px;width:20px;height:20px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;font-size:12px;color:transparent}
+.v.on .tk{background:var(--nav);border-color:var(--nav);color:var(--panel-ink)}
+.v b{font-size:13.5px}
+.v .lh{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:700;margin-top:4px}
+.v ul{margin:2px 0 0;padding-left:16px;color:var(--ink-2)}
+.v .x{font-size:12px;color:var(--ink-3)}
+table.vp{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;table-layout:fixed}
+.vp th,.vp td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;font-size:12.5px;text-align:left}
+.vp th{width:92px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);background:var(--surface-2)}
+.vp td b{font-size:13px}
+.vp ul{margin:0;padding-left:16px;color:var(--ink-2)}
+.vp td.ed{box-shadow:inset 0 0 0 2px var(--goldfill);background:var(--warnbg)}
+.todo{flex:none;width:200px;border-left:1px solid var(--line);padding:12px;font-size:12.5px;overflow:auto}
+.todo h5{margin:0 0 4px;font-size:13.5px}
+.todo h5 small{color:var(--ink-3);font-weight:600;font-size:11px}
+.bar2{height:3px;background:var(--line);border-radius:2px;margin:4px 0 10px}.bar2 i{display:block;height:100%;background:var(--goldfill)}
+.ti{display:flex;align-items:flex-start;gap:6px;padding:4px;border-radius:4px}
+.ti .d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);flex:none;margin-top:4px}
+.ti.s-done .d{background:var(--good);border-color:var(--good)}
+.ti.s-now{background:var(--warnbg)}.ti.s-now .d{border-color:var(--goldfill)}
+.ti span{flex:1}
+.ti small{display:block;color:var(--ink-3);font-size:11px}
+.ti em{font-style:normal;font-size:10.5px;border:1px solid var(--line);border-radius:999px;padding:0 6px;color:var(--ink-3);white-space:nowrap}
+.ti.s-done em{color:var(--good);border-color:var(--good)}.ti.s-now em{color:var(--gold);border-color:var(--goldfill)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.n{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.n b{color:var(--ink);display:block}
+@media (max-width:900px){.body{flex-direction:column;height:auto}.chat{flex:none;border-right:0}.todo{width:auto;border-left:0;border-top:1px solid var(--line)}.strip,.grip{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Competitive Discipline, split: the choice talked through on the left, the evidence and the table on the right</h1>
+    <p class="lede">Today the whole thing runs in one column: the score tables, the recommendation, the value cards, the table with its ask box and its Save button, all under each other. Split by the signed-off concept, as the SWOT is: the Copilot <b>recommends and asks in the chat</b>; the <b>scores, the values and the table stand in the pane</b> and are changed there; <b>Save</b> and <b>Apply to plan</b> live only at the pane's foot; the to-do stays at 200px. Click through the three moments.</p>
+  </header>
+  <div class="ctl"><b>Moment</b><span class="seg" id="ph"><button data-p="0">1 · Scored — which discipline?</button><button data-p="1">2 · Pick the values</button><button data-p="2">3 · The table</button></span></div>
+  <div class="say" id="say"></div>
+  <div class="frame">
+    <div class="top"><span>⌂</span><b>Strategy</b><span>Functions</span><span>HR</span><span>Finance</span></div>
+    <div class="tabs"><span>Plan</span><span>Performance</span><span>Focus</span><span class="on">Copilot</span></div>
+    <div class="areas"><span>Foundation</span><span>Analysis</span><span class="on">Competitive Discipline</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
+    <div class="body" id="body"></div>
+  </div>
+  <div class="notes">
+    <div class="n"><b>What moves into the chat</b>"I'll score the three disciplines…", the recommendation (who leads, by how much, how clear, and whether your internal scores agree) with <i>Yes, Best Total Solution · Choose another · Let me change scores</i>; "Here are six values — tick 3 or 4" with <i>Use the 3 I ticked · Suggest other values</i>; and the table's changes asked for in the chat's ordinary box instead of the separate "Ask for a change" box.</div>
+    <div class="n"><b>What moves into the pane</b>The score tables (Market and Internal as two tabs, each factor a title that opens to its question, the scores still pressed to change, yours marked in gold); then the value cards, ticked in place; then the value-proposition table, its cells edited in place. The <i>Titles / Details</i> switch opens every factor and every card's How and Measure.</div>
+    <div class="n"><b>Save and Apply to plan</b>Only at the pane's foot. <b>Save</b> keeps a version under Deliverables; <b>Apply to plan</b> writes the plan's Competitive Discipline — the discipline and the table — asking first and archiving what stood, as the SWOT's does. Today "Save to Competitive Discipline" writes the plan at once. "Keep chatting" goes: the chat is always there.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var P = 0;
+  var MF = [["Market Growth Rate","How fast is the market growing and what drives growth?",[1,2,1]],["Competition Dynamics / Customer Selection","How intense is competition and on what basis do firms compete?",[1,2,0]],["Customer Behavior","How do customers make decisions and what influences them?",[0,2,1]],
+    ["Technological Change","How rapidly is technology evolving in this market?",[0,1,2]],["Regulatory Environment","What regulatory factors impact the market?",[1,1,0]],["Supply Chain Complexity","How complex are supply chain requirements?",[2,1,0]],
+    ["Industry Products Life Cycle","Where is the industry in its lifecycle?",[1,2,1]],["Customer Need","What are the primary needs customers seek to fulfill?",[0,2,1]],["Market Product Mix Requirement","What product/service mix does the market demand?",[1,2,1]],["Switching Costs / Customer Lock-in","How easy is it for customers to switch providers?",[1,2,0]]];
+  var VALS = [["One partner for every device","Bundles of devices, financing and after-sales","Bundle share of B2B sales ≥ 40%",true],["Financing that says yes","Instalments approved in-store in 10 minutes","Approval time under 10 minutes",true],
+    ["Repairs that come back fast","48-hour repair promise in every city","Repairs back in 48h ≥ 90%",true],["Advice before the sale","Trained device advisors in every store","Advisor-led sales share ≥ 30%",false],["Business accounts that stay","Account managers for SMEs and tenders","SME retention ≥ 85%",false],["Lowest price, every day","Price-match on the top 50 models","Price gap under 2%",false]];
+  var SAY = [
+    '<b>1 · Scored.</b> The Copilot scored the twenty factors and says in the chat who leads, by how much and how clearly, and asks whether to go with it. The pane is the market table — factor names as titles (pressed, the question opens), the totals at the foot, the leader in green. One score you changed is marked in gold. Internal is the second tab.',
+    '<b>2 · Pick the values.</b> Best Total Solution is chosen. The chat offers six values and asks you to tick three or four; the cards stand in the pane and are ticked there. Titles first — Details shows each card\'s How and Measure.',
+    '<b>3 · The table.</b> The three ticked values make the value-proposition table in the pane, each cell edited in place (one is being edited). A change can also be asked for in the chat\'s ordinary box. <b>Save</b> and <b>Apply to plan</b> stand at the pane\'s foot and nowhere else.'
+  ];
+  function todo(st){ var T = [["Score the disciplines","Best Total Solution leads"],["Choose the discipline","Best Total Solution"],["Pick the values","3 ticked"],["Refine and check the table","On the table now"],["Save","Into Competitive Discipline"]];
+    var done = st.filter(function(x){ return x === "done"; }).length;
+    return '<div class="todo"><h5>To-do <small>' + done + '/5</small></h5><div class="bar2"><i style="width:' + done * 20 + '%"></i></div>' +
+      T.map(function(t, i){ return '<div class="ti s-' + st[i] + '"><i class="d"></i><span>' + t[0] + '<small>' + (st[i] === "todo" ? "Not yet" : t[1]) + '</small></span><em>' + ({done:"Done",now:"Now",todo:"To do"})[st[i]] + '</em></div>'; }).join("") + '</div>'; }
+  function draw(){
+    document.querySelectorAll("#ph button").forEach(function(b){ b.setAttribute("aria-pressed", String(+b.dataset.p === P)); });
+    document.getElementById("say").innerHTML = SAY[P];
+    var chat, out, foot, head, tools, st, boxOff = false, boxPh;
+    if (P === 0) {
+      chat = '<div class="who">Copilot</div><div class="msg ai">I\'ll score the three value disciplines — Best Total Cost, Best Total Solution and Best Product — against 10 market factors and 10 internal ones, from what the plan says about Mobile. You can change any score in the table.</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">Done. <b>Best Total Solution</b> leads the market by 30 points <span class="cl">Clear</span>. Your internal scores lean to Best Product — the gap to close. Go with Best Total Solution?</div>' +
+        '<div class="opts"><span class="opt go">Yes, Best Total Solution</span><span class="opt">Choose Best Total Cost</span><span class="opt">Choose Best Product</span><span class="opt">Let me change scores</span></div>';
+      var tot = [0,0,0];
+      MF.forEach(function(f){ f[2].forEach(function(v, k){ tot[k] += v; }); });
+      out = '<table class="sc"><thead><tr><th>Market factor</th><th>Best Total Cost</th><th class="lead">Best Total Solution</th><th>Best Product</th></tr></thead><tbody>' +
+        MF.slice(0, 5).map(function(f, i){ return '<tr><td><button class="fr"><i>' + (i === 1 ? "▾" : "▸") + '</i>' + f[0] + '</button>' + (i === 1 ? '<span class="fd">' + f[1] + '</span>' : '') + '</td>' +
+          f[2].map(function(v, k){ return '<td><span class="pill' + (i === 3 && k === 2 ? " ed" : "") + '">' + v + '</span></td>'; }).join("") + '</tr>'; }).join("") +
+        '<tr><td colspan="4" class="more">+ 5 more market factors</td></tr>' +
+        '<tr class="tot"><td>Total</td><td>' + tot[0] + ' · 45%</td><td class="lead">' + tot[1] + ' · 85%</td><td>' + tot[2] + ' · 35%</td></tr></tbody></table>' +
+        '<p style="margin:0;font-size:12px;color:var(--ink-3)">Each score 0, 1 or 2 — press one to change it. A score you changed is marked in gold.</p>';
+      head = "Competitive Discipline — Mobile v1"; tools = '<span class="sides"><span class="on">Market</span><span>Internal</span></span>';
+      foot = '<span class="k">Saved once the table is agreed</span><button class="btn" disabled>Save</button><button class="btn pri" disabled>Apply to plan</button>';
+      st = ["done","now","todo","todo","todo"]; boxPh = "Ask why, or tell me a score to change…";
+    } else if (P === 1) {
+      chat = '<div class="who">Copilot</div><div class="msg ai">Best Total Solution leads the market by 30 points <span class="cl">Clear</span>. Go with it?</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Yes, Best Total Solution</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">Here are six values for <b>Best Total Solution</b>, on the right. Tick the ones closest to how you want to win — usually three or four.</div>' +
+        '<div class="opts"><span class="opt go">Use the 3 I ticked</span><span class="opt">Suggest other values</span></div>';
+      out = '<div class="vc">' + VALS.map(function(v, i){ return '<div class="v' + (v[3] ? " on" : "") + '"><span class="tk">✓</span><b>' + v[0] + '</b>' +
+        (i === 0 ? '<div class="lh">How</div><ul><li>' + v[1] + '</li></ul><div class="lh">Measure</div><ul><li>' + v[2] + '</li></ul>' : '<div class="x">▸ How and Measure</div>') + '</div>'; }).join("") + '</div>';
+      head = "Competitive Discipline — Mobile v1 · values"; tools = '<span class="dens"><span class="on">Titles</span><span>Details</span></span>';
+      foot = '<span class="k">Saved once the table is agreed</span><button class="btn" disabled>Save</button><button class="btn pri" disabled>Apply to plan</button>';
+      st = ["done","done","now","todo","todo"]; boxPh = "Ask for other values, or say what you want…";
+    } else {
+      chat = '<div class="who">Copilot</div><div class="msg ai">Here are six values for Best Total Solution, on the right.</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Use these 3.</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">The table is on the right — three values, each with how you deliver it and how you measure it. Change any cell there, or tell me here.</div>' +
+        '<div class="who me">Islam Saadany</div><div class="msg me">Make the financing measure about approvals per week, not time</div>' +
+        '<div class="who">Copilot</div><div class="msg ai">Changed: <b>Financing that says yes</b> now measures <b>approvals per week ≥ 1,200</b>. Anything else?</div>';
+      out = '<table class="vp"><thead><tr><th>Discipline</th><th colspan="3" style="background:var(--nav);color:var(--panel-ink);text-transform:none;letter-spacing:0;font-size:13px">Best Total Solution</th></tr></thead><tbody>' +
+        '<tr><th>Value</th>' + VALS.slice(0, 3).map(function(v){ return '<td><b>' + v[0] + '</b></td>'; }).join("") + '</tr>' +
+        '<tr><th>How</th>' + VALS.slice(0, 3).map(function(v){ return '<td><ul><li>' + v[1] + '</li></ul></td>'; }).join("") + '</tr>' +
+        '<tr><th>Measure</th><td><ul><li>' + VALS[0][2] + '</li></ul></td><td class="ed"><ul><li>Approvals per week ≥ 1,200</li></ul></td><td><ul><li>' + VALS[2][2] + '</li></ul></td></tr></tbody></table>' +
+        '<p style="margin:0;font-size:12px;color:var(--ink-3)">Press a cell to edit it; it is kept when you leave it.</p>';
+      head = "Competitive Discipline — Mobile v1 · the table"; tools = '';
+      foot = '<span class="k">Save keeps a version · Apply writes the plan\'s Competitive Discipline</span><button class="btn">Save</button><button class="btn pri" disabled>Apply to plan</button>';
+      st = ["done","done","done","now","todo"]; boxPh = "Ask for a change — a title, a How to drop, a Measure to add…";
+    }
+    document.getElementById("body").innerHTML = '<div class="strip"><span class="ib">»</span><span class="ib">+</span></div>' +
+      '<section class="chat"><div class="ch"><b>Copilot · Competitive Discipline</b></div><div class="feed">' + chat + '</div><div class="compose"><div class="box' + (boxOff ? " off" : "") + '"><span style="flex:1">' + boxPh + '</span><span class="send">↑</span></div></div></section>' +
+      '<div class="grip"></div><section class="out"><div class="oh"><b>' + head + '</b><span class="sp"></span>' + tools + '</div><div class="ob">' + out + '</div><div class="of">' + foot + '</div></section>' + todo(st);
+  }
+  document.getElementById("ph").addEventListener("click", function(e){ var b = e.target.closest("[data-p]"); if (b) { P = +b.dataset.p; draw(); } });
+  draw();
+})();
+</script>
+</body>
+</html>

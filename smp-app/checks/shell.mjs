@@ -1595,18 +1595,38 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector(".copfdraft", { timeout: 15000 });
     await shot("6-draft");
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
-    const dr = await page.evaluate(() => ({ t: document.querySelector(".copfdraft").textContent, card: document.querySelector('[data-cop-card="0"] p').textContent,
-      refines: document.querySelectorAll("[data-cop-refine]").length, save: (document.querySelector("[data-cop-fsave]") || {}).textContent }));
-    check(/connect every Egyptian/.test(dr.t) && /connect every Egyptian/.test(dr.card) && dr.refines === 3 && dr.save.indexOf("Save and continue to " + W.asp) >= 0,
-      "the draft shows in the chat and on its card, with three refines and Save and continue to the next part", JSON.stringify(dr));
+    /* §643 — REWRITTEN, NOT LOOSENED (§218). Islam: "it changes it
+       directly in the delivery box on the right … it should show me in the
+       chat itself and when I say ok it goes to the right part". The draft is
+       a proposal IN THE CHAT; the card says it is being written there and
+       holds no words until Save to the card. */
+    const LIVE = ".copmsg:not(.copold) .copfdraft";
+    const dr = await page.evaluate((L) => ({ t: (document.querySelector(L) || {}).textContent || "", card: document.querySelector('[data-cop-card="0"] p').textContent, st: (document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || "",
+      refines: document.querySelectorAll("[data-cop-refine]").length, save: (document.querySelector("[data-cop-fsave]") || {}).textContent, keep: !!document.querySelector("[data-cop-fkeep]") }), LIVE);
+    check(/connect every Egyptian/.test(dr.t) && !/connect every Egyptian/.test(dr.card) && /Being written in the chat/.test(dr.st) && dr.refines === 3 && dr.save === "Save to the card" && !dr.keep,
+      "§643 the draft is a proposal in the chat with three refines and Save to the card; the card says it is being written there and holds none of it", JSON.stringify(dr));
     Object.assign(MODEL_ANSWER, { text: "We connect Egypt." });
     await page.click('[data-cop-refine="concise"]');
-    await page.waitForFunction(() => /We connect Egypt\.$/.test((document.querySelector(".copfdraft") || {}).textContent || ""), null, { timeout: 15000 });
-    check(true, "a refine rewrites the draft");
+    await page.waitForFunction((L) => /We connect Egypt\.$/.test((document.querySelector(L) || {}).textContent || ""), LIVE, { timeout: 15000 });
+    const rf = await page.evaluate(() => ({ old: Array.from(document.querySelectorAll(".copold .copfdraft")).map((x) => x.textContent), me: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me .copbody")).map((x) => x.textContent),
+      card: document.querySelector('[data-cop-card="0"] p').textContent }));
+    check(rf.old.length === 1 && /connect every Egyptian/.test(rf.old[0]) && rf.me.includes("Make concise") && !/We connect Egypt/.test(rf.card),
+      "§643 a refine is the next proposal: what was asked stays in the chat, the one it replaced stays faded above it, and the card has still not changed", JSON.stringify(rf));
     await page.click("[data-cop-fsave]");
     await page.waitForFunction(() => /Done/.test((document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || ""), null, { timeout: 10000 });
     for (let i = 0; i < 20 && !(F = await flowRow(cid)).done[0]; i++) await page.waitForTimeout(250);
-    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt.", "Save and continue agrees the part and moves to the next", JSON.stringify({ done: F.done, e: F.e, phase: F.phase }));
+    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt." && F.prop[0] === "" && F.talk[0].map((x) => x.w).join() === "ai,me,ai,note",
+      "Save to the card puts the proposal on the card, agrees the part and moves to the next; the part's conversation is kept (§643)", JSON.stringify({ done: F.done, e: F.e, phase: F.phase, talk: F.talk[0] }));
+    /* §643 — THE AGREED PART FOLDS, AND OPENS AGAIN (Islam: "the guided
+       answers collapse after finishing but I can open them again to see my
+       answers"): one row, then every question with its answer and the
+       wording agreed on a press. */
+    const fo0 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? { row: r.querySelector(".copfoldh").textContent, body: !!r.querySelector(".copfoldb") } : null; });
+    await page.click('[data-cop-fold="0"]');
+    const fo1 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? r.textContent : ""; });
+    await page.click('[data-cop-fold="0"]');
+    check(fo0 && /answer/.test(fo0.row) && /1 change/.test(fo0.row) && /Agreed/.test(fo0.row) && !fo0.body && /plans and connectivity/.test(fo1) && /Make concise/.test(fo1) && /Agreed wording/.test(fo1) && /We connect Egypt\./.test(fo1),
+      "§643 the agreed part folds to one row and opens to its answers, the change asked for and the wording agreed", JSON.stringify({ fo0, fo1: fo1.slice(0, 300) }));
     /* THE COUNT MOVES WHEN A PART IS AGREED, which is the number's whole
        claim: the two readings before this one are both 0 of 6, so without
        this a bar frozen at nought passes every assertion above it (§113.8). */
@@ -1634,16 +1654,26 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(!fr.now && fr.empty && fr.done, "on the fresh road the Done card carries the icons, an empty one stays a button, the one in the chat has neither (§513)", JSON.stringify(fr));
     if (await pressIf('[data-cop-ai="0"]')) for (let i = 0; i < 20 && (F = await flowRow(cid)).e !== 0; i++) await page.waitForTimeout(250);
     await page.waitForSelector(".copfdraft", { timeout: 10000 }).catch(() => {});
-    check(F.e === 0 && F.phase === "draft" && F.done[0] === false && /We connect Egypt\./.test(await textOf(".copfdraft")),
-      "pressing it opens its draft to change, before the check", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0] }));
-    check((await textOf("[data-cop-fsave]")).indexOf("Save and continue to " + W.asp) >= 0, "…and its Save names the part you were on, in the client's word (§514)");
+    /* §643 — opening an agreed part to change it leaves it agreed, and its
+       card keeps its words, saying it is being changed in the chat. */
+    await page.waitForSelector("[data-cop-fkeep]", { timeout: 10000 }).catch(() => {});
+    const opn = await page.evaluate(() => ({ card: (document.querySelector('[data-cop-card="0"] p') || {}).textContent || "", st: (document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || "",
+      ask: /What would you like to change in/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), keep: (document.querySelector("[data-cop-fkeep]") || {}).textContent || "", save: !!document.querySelector("[data-cop-fsave]") }));
+    check(F.e === 0 && F.phase === "draft" && F.done[0] === true && /We connect Egypt\./.test(opn.card) && /Being changed in the chat/.test(opn.st) && opn.ask && opn.keep === "Leave it as it is" && !opn.save,
+      "§643 pressing it opens it to change in the chat; it stays agreed and its card keeps its words, saying it is being changed", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0], opn }));
     /* §513 — the part left half answered says so: In progress, N of M. */
     const half = { st: await textOf('[data-cop-card="1"] .copst'), p: await textOf('[data-cop-card="1"] p') };
     check(/In progress/.test(half.st) && /^1 of \d+ answered\.$/.test(half.p.trim()), "a part left half answered reads In progress, 1 of N answered (§513)", JSON.stringify(half));
-    await pressIf("[data-cop-fsave]");
+    await pressIf("[data-cop-fkeep]");
     for (let i = 0; i < 20 && ((F = await flowRow(cid)).e !== 1 || F.phase !== "ask"); i++) await page.waitForTimeout(250);
-    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.qi === 1,
-      "saving it puts you back on question 2 of the part you were on", JSON.stringify({ done0: F.done[0], e: F.e, phase: F.phase, qi: F.qi }));
+    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.qi === 1 && F.drafts[0] === "We connect Egypt.",
+      "leaving it as it is puts you back on question 2 of the part you were on, its words as they were", JSON.stringify({ done0: F.done[0], e: F.e, phase: F.phase, qi: F.qi }));
+    /* §643 — Your answers on a card takes you to that part in the chat, opened;
+       the press is the link's, not the card's. */
+    if (await pressIf('[data-cop-card="0"] [data-cop-answers]')) await page.waitForTimeout(200);
+    const ya = await page.evaluate(() => ({ open: !!document.querySelector('[data-cop-foldbox="0"].open .copfoldb'), pen: !!document.querySelector("[data-cop-pentext]") }));
+    const yaF = await flowRow(cid);
+    check(ya.open && !ya.pen && yaF.e === 1 && yaF.phase === "ask", "§643 Your answers on a card opens that part's answers in the chat and leaves the work where it was", JSON.stringify({ ya, e: yaF.e, phase: yaF.phase }));
 
     /* The other four, agreed through the server so the check can be pressed. */
     F.drafts = F.drafts.map((d, i) => d || "Part " + (i + 1) + " for {Y}"); F.done = F.done.map(() => true); F.phase = "check";
@@ -1721,13 +1751,14 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.fill("[data-cop-pentext]", "We connect Egypt. Every town, every store, every day.").catch(() => {});
     await pressIf("[data-cop-pensave]");
     for (let i = 0; i < 40 && MODEL_SEEN.length === seenS; i++) await page.waitForTimeout(250);
-    await page.waitForFunction(() => /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    await page.waitForFunction(() => /Run the check from the pane/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     for (let i = 0; i < 20 && (F = await flowRow(cid)).drafts[0] !== "We connect Egypt. Every town, every store, every day."; i++) await page.waitForTimeout(250);
     check(F.phase === "check" && F.check === null && F.drafts[0] === "We connect Egypt. Every town, every store, every day." && MODEL_SEEN.length === seenS + 1,
       "a draft changed during the check drops the check's results on the server (§514)", JSON.stringify({ phase: F.phase, check: F.check, d: F.drafts[0], seen: MODEL_SEEN.length - seenS }));
-    const st = await page.evaluate(() => ({ line: /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
+    const st = await page.evaluate(() => ({ line: /Run the check from the pane/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
       fin: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), bar: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"), chk: document.querySelectorAll(".copchk").length }));
-    check(st.line && st.run && !st.fin && st.bar && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, draws no results — and the bar's Save stays live, because the check is not the door (§524)", JSON.stringify(st));
+    check(st.line && st.run && !st.fin && st.bar && st.chk === 0 && !(await page.$("[data-cop-msgs] [data-cop-fcheck]")),
+      "…and the chat says to run the check from the pane — Run the check is the pane's, never the chat's (§643) — draws no results, and the bar's Save stays live, because the check is not the door (§524)", JSON.stringify(st));
     /* The 503 the browser logs here is the refusal this block ASKS for (the
        model answered nothing); it is asserted present and taken off the
        page-error list, so the section's own closing "no page errors" still
@@ -1747,30 +1778,40 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     Object.assign(MODEL_ANSWER, { text: "Integrity and speed." });
     await page.fill("[data-cop-text]", "Make our values shorter");
     await page.click("[data-cop-send]");
-    await page.waitForFunction(() => /Integrity and speed\./.test((document.querySelector(".copfdraft") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction((L) => /Integrity and speed\./.test((document.querySelector(L) || {}).textContent || ""), LIVE, { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "draft"; i++) await page.waitForTimeout(250);
     check(MODEL_SEEN.length === seenW + 1 && F.e === 5 && F.phase === "draft", "a line naming the part by the CLIENT's word (Our Values) opens it (§514)", JSON.stringify({ e: F.e, phase: F.phase, seen: MODEL_SEEN.length - seenW }));
+    /* §643 — Save to the card does not run the check: the check is the
+       pane's, pressed there (Islam: "the chat just saves things to the
+       cards"). */
     await pressIf("[data-cop-fsave]");
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "check"; i++) await page.waitForTimeout(250);
+    check(MODEL_SEEN.length === seenW + 1 && F.phase === "check" && F.check === null && F.drafts[5] === "Integrity and speed.", "§643 saving to the card asks no check of its own", JSON.stringify({ seen: MODEL_SEEN.length - seenW, phase: F.phase }));
+    await pressIf("[data-cop-savebar] [data-cop-fcheck]");
     await page.waitForSelector(".copchk", { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && !((F = await flowRow(cid)).check); i++) await page.waitForTimeout(250);
     const seenC = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Make it shorter please");
     await page.click("[data-cop-send]");
-    await page.waitForFunction(() => /or name it, then say what to change/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
-    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])") }));
-    check(MODEL_SEEN.length === seenC && /Edit the part from its card on the left, or name it/.test(nn.say) && nn.fin,
-      "a line naming no part asks nothing, says how, and leaves the check where it was", JSON.stringify(nn));
+    await page.waitForFunction(() => /Kept in the chat/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
+    for (let i = 0; i < 20 && !((F = await flowRow(cid)).notes || []).length; i++) await page.waitForTimeout(250);
+    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
+      line: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me .copbody")).some((x) => x.textContent === "Make it shorter please") }));
+    check(MODEL_SEEN.length === seenC && /Kept in the chat/.test(nn.say) && /name it/.test(nn.say) && nn.fin && nn.line && F.notes.some((x) => x.t === "Make it shorter please"),
+      "a line naming no part asks nothing and leaves the check where it was — and stays in the chat, stored (§643: \"my text disappears\")", JSON.stringify({ nn, notes: F.notes }));
     Object.assign(MODEL_ANSWER, { text: "Integrity, speed and care." });
     await page.fill("[data-cop-text]", "Make the core values shorter");
     await page.click("[data-cop-send]");
-    await page.waitForFunction(() => /Integrity, speed and care\./.test((document.querySelector(".copfdraft") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction((L) => /Integrity, speed and care\./.test((document.querySelector(L) || {}).textContent || ""), LIVE, { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "draft"; i++) await page.waitForTimeout(250);
-    check(MODEL_SEEN.length === seenC + 1 && /core values shorter/.test(JSON.stringify(MODEL_SEEN[seenC])) && F.e === 5 && F.phase === "draft" && F.done[5] === false,
-      "a line naming Core Values opens that part with the change applied", JSON.stringify({ seen: MODEL_SEEN.length - seenC, e: F.e, phase: F.phase }));
-    check(/Save and check the whole foundation/.test(await textOf("[data-cop-fsave]")), "…and its Save goes back to the check");
+    check(MODEL_SEEN.length === seenC + 1 && /core values shorter/.test(JSON.stringify(MODEL_SEEN[seenC])) && F.e === 5 && F.phase === "draft" && F.done[5] === true && F.drafts[5] === "Integrity and speed." && F.prop[5] === "Integrity, speed and care.",
+      "a line naming Core Values opens that part with the change proposed in the chat — the card keeps its agreed words (§643)", JSON.stringify({ seen: MODEL_SEEN.length - seenC, e: F.e, phase: F.phase, d: F.drafts[5], p: F.prop[5] }));
+    check((await textOf("[data-cop-fsave]")) === "Save to the card" && (await textOf("[data-cop-fkeep]")) === "Keep as it was", "…with Save to the card and Keep as it was (§643)");
     await pressIf("[data-cop-fsave]");
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "check"; i++) await page.waitForTimeout(250);
+    await pressIf("[data-cop-savebar] [data-cop-fcheck]");
     await page.waitForSelector(".copchk", { timeout: 15000 });
-    check(MODEL_SEEN.length === seenC + 2, "saving it runs the check again", MODEL_SEEN.length - seenC);
+    check(MODEL_SEEN.length === seenC + 2, "saved to the card, Run the check in the pane runs it again", MODEL_SEEN.length - seenC);
     await page.click("[data-cop-savebar] [data-cop-ffinish]");
     await page.waitForFunction(() => /Saved as Foundation — Mobile v1/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
     await shot("9-saved");

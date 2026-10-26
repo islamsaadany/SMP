@@ -950,6 +950,13 @@ var COPILOT = (function(){
       (lines.length > cut ? '<span class="copmore" role="button" tabindex="0" aria-expanded="' + open + '" data-cop-more="' + E(key) + '" data-n="' + (lines.length - cut) + '">' +
         (open ? 'Show fewer' : 'Show ' + (lines.length - cut) + ' more') + '</span>' : '');
   }
+  function answersGo(b){
+    if (!PANE || !PANE.chat) return;
+    var i = b.getAttribute("data-cop-answers");
+    FOLD[PANE.chat.id + ":" + i] = true; draw();
+    var box = document.querySelector('[data-cop-foldbox="' + i + '"]');
+    if (box) { box.scrollIntoView({ block:"start" }); box.classList.add("flash"); setTimeout(function(){ box.classList.remove("flash"); }, 1200); }
+  }
   function moreToggle(b){
     var key = b.getAttribute("data-cop-more"), ul = b.previousElementSibling, open = !CARDMORE[key];
     if (open) CARDMORE[key] = true; else delete CARDMORE[key];
@@ -991,7 +998,7 @@ var COPILOT = (function(){
          counting something else. */
       if (now && f.phase === "ask") { st = "Question " + (f.qi + 1) + " of " + n; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
-      else if (now) { st = "Drafting"; cls += " now"; }
+      else if (now) { st = f.done[i] && txt ? "Being changed in the chat" : "Being written in the chat"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
       else if (txt) { st = "In progress"; }
       /* §513 — A PART HALF ANSWERED IS IN PROGRESS, NOT EMPTY. It said
@@ -1000,7 +1007,9 @@ var COPILOT = (function(){
       else if (a) { st = "In progress"; }
       else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
-        : '<p>' + (now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+        : '<p>' + (now && f.phase === "draft" ? "Nothing agreed yet. The proposal is in the chat." : now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+      /* §643 — Your answers takes you to this part in the chat, opened. */
+      if (a || ((f.talk && f.talk[i]) || []).length) body += '<span class="copanswers" role="button" tabindex="0" data-cop-answers="' + i + '">Your answers</span>';
       var wide = el.key === "who" || el.key === "asp";
       var head = '<h3><span>' + E(partName(el)) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
       var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
@@ -1060,8 +1069,7 @@ var COPILOT = (function(){
     if (plan) {
       out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Edit a part from its card — the pen to write it yourself, or Edit with AI — or tell me what you want to change."));
       if (f.phase === "loaded" && ed && agreedAll(f))
-        out.push(aiMsg("When the parts read as you want them, check them together and save the Foundation." +
-          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck' + (busyHere ? ' disabled' : '') + '>Check the whole Foundation</button></div>'));
+        out.push(aiMsg("When the parts read as you want them, run the check and save the Foundation from the pane."));
     } else {
       out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){
         return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
@@ -1083,10 +1091,7 @@ var COPILOT = (function(){
     S.forEach(function(el, i){
       if (!on(i)) return;
       var current = !all && i === f.e;
-      if (!current) {
-        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(partName(el)) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
-        return;
-      }
+      if (!current) { out.push(foldHtml(f, i, false)); return; }
       if (f.phase === "loaded") return;
       if (plan) out.push(aiMsg("Let's work on <b>" + E(partName(el)) + "</b>" + "."));
       if (f.phase === "ask") {
@@ -1105,14 +1110,33 @@ var COPILOT = (function(){
           }).join("") + '</div>' +
           (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(partName(el)) + '</button></div>' : ''), true));
       } else if (f.phase === "draft") {
-        var nx = nextUndone(f, i);
-        out.push(aiMsg('<span class="copeh">Draft · ' + E(partName(el)) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
-          (ed ? 'Refine it, or type what to change in the box below.' +
-            '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
-            '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
-            '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
-            '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(partName(S[nx]))) + '</button></div>' : ''), true));
+        /* §643 — THE PART'S CONVERSATION, WHOLE: the answers (folded), then
+           every proposal and every change asked for, in order; the newest
+           proposal live, the ones it replaced faded. The card keeps the
+           agreed wording until Save to the card. */
+        var prop = String((f.prop || [])[i] || ""), talk = (f.talk && f.talk[i]) || [], live = -1, pn = 0;
+        if (prop.trim()) for (var tk = talk.length - 1; tk >= 0; tk--) if (talk[tk].w === "ai") { if (talk[tk].t === prop) live = tk; break; }
+        var refBtns = '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
+          '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
+          '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>';
+        var agreedNow = !!String(f.drafts[i] || "").trim();
+        var liveBox = function(t){
+          pn++;
+          return aiMsg('<span class="copeh">Proposal ' + pn + ' · ' + E(partName(el)) + '</span><div class="copfdraft">' + E(withY(t, f)) + '</div>' +
+            (ed ? 'Refine it, or type what to change in the box below.' + refBtns +
+              '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>Save to the card</button>' +
+              (agreedNow ? '<button type="button" class="copbtn" data-cop-fkeep' + (busyHere ? ' disabled' : '') + '>Keep as it was</button>' : '') + '</div>' : ''), true);
+        };
+        out.push(foldHtml(f, i, true));
+        talk.forEach(function(x, k){
+          if (x.w === "me") out.push(meMsg(x.t));
+          else if (x.w === "note") out.push('<div class="copnote">' + E(x.t) + '</div>');
+          else if (k === live) out.push(liveBox(x.t));
+          else { pn++; out.push('<div class="copmsg ai copwide copold"><span class="copwho">Copilot</span><div class="copbody"><span class="copeh">Proposal ' + pn + ' · ' + E(partName(el)) + ' · replaced</span><div class="copfdraft">' + E(withY(x.t, f)) + '</div></div></div>'); }
+        });
+        if (prop.trim() && live < 0) out.push(liveBox(prop));
+        if (!prop.trim() && ed) out.push(aiMsg("What would you like to change in <b>" + E(partName(el)) + "</b>? Type it below, or use a button. The card keeps its wording until you save a new one." + refBtns +
+          '<div class="copbtns"><button type="button" class="copbtn" data-cop-fkeep' + (busyHere ? ' disabled' : '') + '>Leave it as it is</button></div>', true));
       }
     });
     if (all && f.check) {
@@ -1134,14 +1158,42 @@ var COPILOT = (function(){
        drops the results the moment a draft changes (copilot-flow.ts); this
        is what stands in their place, with the one way to get them back. */
     if (f.phase === "check" && !f.check && !busyHere) {
-      out.push(aiMsg("The check has not run on the text as it stands now." +
-        (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
+      out.push(aiMsg("Every part is agreed. Run the check from the pane when you're ready — it reads the parts together.", true));
     }
+    (f.notes || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : '<div class="copnote">' + E(x.t) + '</div>'); });
     if (f.phase === "saved" && f.saved) {
       out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
+  }
+  /* §643 — A PART'S ANSWERS AND CONVERSATION, FOLDED (Islam: "the guided
+     answers collapse after finishing but I can open them again to see my
+     answers"). One row — the part, how many answers and changes, agreed —
+     that opens in place on a press to every question with its answer, every
+     change asked for, and the wording agreed. Folded is this visit's memory;
+     nothing in it is ever dropped. The part being worked on folds only its
+     answers: its conversation is drawn open below. */
+  var FOLD = {};
+  function foldHtml(f, i, current){
+    var el = steps()[i], a = (f.ans && f.ans[i]) || [], talk = current ? [] : ((f.talk && f.talk[i]) || []);
+    var n = a.filter(function(x){ return String(x || "").trim(); }).length;
+    var ch = ((f.talk && f.talk[i]) || []).filter(function(x){ return x.w === "me"; }).length, txt = String(f.drafts[i] || "").trim();
+    if (!n && !talk.length && (current || !txt || f.from[i])) return current || !f.done[i] || f.from[i] ? "" : aiMsg(E(partName(el)) + " left empty for " + E(fname()) + ".");
+    var open = !!FOLD[PANE.chat.id + ":" + i];
+    var st = current ? "" : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">In progress</span>';
+    var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", !current && ch ? ch + (ch === 1 ? " change" : " changes") : ""].filter(Boolean).join(" · ");
+    var body = '';
+    if (open) {
+      body = '<div class="copfoldb">' + el.questions.map(function(q, k){
+          var v = String(a[k] || "").trim();
+          return v ? '<div class="copqa"><span class="copq">' + E(withY(q, f)) + '</span><span class="copa">' + E(v) + '</span></div>' : ''; }).join("") +
+        talk.map(function(x){ return x.w === "me" ? '<div class="copqa"><span class="copa">' + E(x.t) + '</span></div>' :
+          x.w === "note" ? '<div class="copnote">' + E(x.t) + '</div>' : '<div class="copqa"><span class="copq">Copilot proposed</span><span class="copqp">' + E(withY(x.t, f)) + '</span></div>'; }).join("") +
+        (!current && txt ? '<div class="copqa"><span class="copq">Agreed wording</span><span class="copqp agreed">' + E(withY(txt, f)) + '</span></div>' : '') + '</div>';
+    }
+    return '<div class="copfold' + (open ? ' open' : '') + '" data-cop-foldbox="' + i + '"><button type="button" class="copfoldh" data-cop-fold="' + i + '" aria-expanded="' + open + '">' +
+      '<span class="copchev" aria-hidden="true">▸</span><b>' + E(current ? "Your answers on " + partName(el) : partName(el)) + '</b><small>' + E(bits) + '</small>' + st + '</button>' + body + '</div>';
   }
   /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
      opens on its draft, a part with every question answered opens on the
@@ -1151,9 +1203,11 @@ var COPILOT = (function(){
   var PICK_PHASES = ["loaded", "ask", "review", "draft", "check", "saved"];
   function openPart(g, i){
     var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
-    g.e = i; g.done[i] = false; NUDGE = null;
+    /* §643: opening a part to change it leaves it agreed — the card keeps
+       its wording until a proposal is saved to it. */
+    g.e = i; NUDGE = null;
     if (CARDPEN && CARDPEN.i === i) CARDPEN = null;   /* §513: the part is in the chat now */
-    if (String(g.drafts[i] || "").trim()) { g.phase = "draft"; g.qi = 0; return; }
+    if (String(g.drafts[i] || "").trim() || String((g.prop || [])[i] || "").trim()) { g.phase = "draft"; g.qi = 0; return; }
     while (k < n && String(a[k] || "").trim()) k++;
     if (n && k >= n) { g.phase = "review"; g.qi = 0; } else { g.phase = "ask"; g.qi = Math.min(k, Math.max(n - 1, 0)); }
   }
@@ -1303,7 +1357,23 @@ var COPILOT = (function(){
       draw(); if (then) then();
     });
   }
-  function flowCopy(){ var f = JSON.parse(JSON.stringify(PANE.flow)); f.skip = skipNow(); return f; }
+  function flowCopy(){ var f = JSON.parse(JSON.stringify(PANE.flow)); f.skip = skipNow(); delete f.talkAdd; return f; }
+  /* §643 — A LINE FOR THE CHAT'S RECORD: drawn at once, and sent as the
+     page's own addition (the server keeps the record; the page only adds). */
+  function sayIn(g, p, w, t){
+    g.talkAdd = (g.talkAdd || []).concat([{ p:p, w:w, t:t }]);
+    if (p < 0) g.notes = (g.notes || []).concat([{ w:w, t:t }]);
+    else { g.talk = g.talk || []; g.talk[p] = (g.talk[p] || []).concat([{ w:w, t:t }]); }
+  }
+  /* After a part is saved to its card or kept as it was: the plan road goes
+     back to the cards, the guided road to the next part still owed, and with
+     every part agreed to the check — which is the pane's to run, not the
+     chat's (Islam: "the chat just saves things to the cards"). */
+  function partDone(g){
+    if (g.start === "plan") { g.phase = "loaded"; return; }
+    var nx = nextUndone(g, g.e);
+    if (nx < 0) g.phase = "check"; else openPart(g, nx);
+  }
   function flowAsk(body){
     if (!PANE || !PANE.chat || THINKING) return;
     var id = PANE.chat.id, ctx = contextOf();
@@ -1350,9 +1420,12 @@ var COPILOT = (function(){
         if (String(gp.drafts[pi] || "").trim()) { gp.e = pi; flowAsk({ act:"flowRefine", el:pi, how:text.trim(), flow:gp }); return; }
         openPart(gp, pi); flowSave(gp, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return;
       }
-      SAY = "Edit the part from its card on the left, or name it, then say what to change."; draw(); return;
+      /* §643: a line that names no part is still kept in the chat. */
+      var gn = flowCopy(); DRAFT[id] = ""; sayIn(gn, -1, "me", text.trim());
+      SAY = "Kept in the chat. To change a part, name it, or press Go back to."; flowSave(gn); return;
     }
-    SAY = "Noted. Use the buttons above to carry on."; draw();
+    var gm = flowCopy(); DRAFT[id] = ""; sayIn(gm, -1, "me", text.trim());
+    SAY = "Kept in the chat. Use the buttons above to carry on."; flowSave(gm);
   }
   /* SAVING A CARD'S OWN WORDS (§513). The text is the part's, agreed as it
      stands — so a part that was still a draft reads Done once saved, and a
@@ -1430,12 +1503,23 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-refine]"))) { if (!b.disabled) flowAsk({ act:"flowRefine", el:f.e, how:b.getAttribute("data-cop-refine"), flow:flowCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-fsave]"))) {
       if (b.disabled) return true;
-      var g3 = flowCopy(); g3.done[g3.e] = true;
-      if (g3.start === "plan") { g3.phase = "loaded"; flowSave(g3); return true; }
-      var nx = nextUndone(g3, g3.e);
-      if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
-      openPart(g3, nx);
-      flowSave(g3); return true;
+      var g3 = flowCopy(), e3 = g3.e, p3 = String((g3.prop || [])[e3] || "");
+      if (!p3.trim()) return true;
+      g3.drafts[e3] = p3; g3.from[e3] = false; g3.done[e3] = true; g3.prop[e3] = "";
+      sayIn(g3, e3, "note", "Saved to the card.");
+      partDone(g3); flowSave(g3); return true;
+    }
+    if ((b = hit(ev, "[data-cop-fkeep]"))) {
+      if (b.disabled) return true;
+      var g5 = flowCopy(), e5 = g5.e, had = String((g5.prop || [])[e5] || "").trim();
+      if (g5.prop) g5.prop[e5] = "";
+      if (had) sayIn(g5, e5, "note", "Kept as it was.");
+      partDone(g5); flowSave(g5); return true;
+    }
+    if ((b = hit(ev, "[data-cop-fold]"))) {
+      var fk = PANE.chat.id + ":" + b.getAttribute("data-cop-fold");
+      if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true;
+      draw(); return true;
     }
     if ((b = hit(ev, "[data-cop-goback]"))) {
       var g4 = flowCopy(), x = Number(b.getAttribute("data-cop-goback"));
@@ -3453,12 +3537,13 @@ var COPILOT = (function(){
     if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]")) { MENU = null; draw(); }
   }, true);
   document.addEventListener("keydown", function(ev){
-    var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more]");
-    if (b) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); }
+    var b = (ev.key === "Enter" || ev.key === " ") && hit(ev, "[data-cop-more], [data-cop-answers]");
+    if (b) { ev.preventDefault(); ev.stopPropagation(); if (b.hasAttribute("data-cop-more")) moreToggle(b); else answersGo(b); }
   }, true);
   document.addEventListener("click", function(ev){
     var b;
     if ((b = hit(ev, "[data-cop-more]"))) { ev.preventDefault(); ev.stopPropagation(); moreToggle(b); return; }
+    if ((b = hit(ev, "[data-cop-answers]"))) { ev.preventDefault(); ev.stopPropagation(); answersGo(b); return; }
     if (flowClick(ev)) return;
     if (cpClick(ev)) return;
     if (adClick(ev)) return;

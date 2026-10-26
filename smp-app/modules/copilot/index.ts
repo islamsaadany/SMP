@@ -32,7 +32,7 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
-  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
+  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
   saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
   withYear,
@@ -585,6 +585,8 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
    same shape as `sayFlow`: read in one transaction, the model asked with no
    transaction open (§289), the answer written in another, against the flow
    as it stands THEN, so a page that saved meanwhile is not overwritten. */
+/* §643 — a refine button is said in the chat in the button's own words. */
+const REFINE_WORDS: Record<string, string> = { concise: "Make concise", professional: "More professional", simple: "Simplify" };
 async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -607,7 +609,7 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
        checked as any save is, so a correction made a second ago is drafted. */
     const f = b.flow ? sanitizeFlow(b.flow, stored) : stored;
     if (kind === "flowDraft" && !f.ans[el].some((x) => x.trim())) return refused(400, "Answer at least one question first.");
-    if (kind === "flowRefine" && !f.drafts[el].trim()) return refused(400, "There is no draft of this part to change yet.");
+    if (kind === "flowRefine" && !(f.prop[el].trim() || f.drafts[el].trim())) return refused(400, "There is no draft of this part to change yet.");
     if (kind === "flowCheck" && !allAgreed(f)) return refused(400, "Every part needs a draft you have agreed before they can be checked together.");
     if (b.flow) await writeFlow(c, id, f);
     return { chat, f };
@@ -643,10 +645,23 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
   return withTenant(tenantId, async (c) => {
     const now = await flowOf(c, id);
     if (!now) return refused(400, "This is not a guided Foundation chat.");
-    const drafts = now.drafts.slice(); drafts[el] = text;
-    const done = now.done.slice(); done[el] = false;
-    const from = now.from.slice(); from[el] = false;
-    const g: Flow = { ...now, phase: "draft", e: el, drafts, done, from, check: null };
+    /* §643 — A DRAFT OR A REFINE IS A PROPOSAL, IN THE CHAT. The card keeps
+       the agreed wording (and the part stays agreed if it was) until Save to
+       the card; what the person asked for and what came back are kept in the
+       part's conversation, in order. The break writes it onto the card, as
+       before §643. */
+    if (brk() === "draft-onto-card") {
+      const drafts = now.drafts.slice(); drafts[el] = text;
+      const done = now.done.slice(); done[el] = false;
+      const g0: Flow = { ...now, phase: "draft", e: el, drafts, done, check: null };
+      await writeFlow(c, id, g0);
+      return out(200, { ok: true, flow: g0 });
+    }
+    const prop = now.prop.slice(); prop[el] = text;
+    const talk = now.talk.map((t) => t.slice());
+    if (kind === "flowRefine") talk[el] = addTalk(talk[el], "me", (REFINE_WORDS[how] || how).slice(0, MAX_ANSWER));
+    talk[el] = addTalk(talk[el], "ai", text);
+    const g: Flow = { ...now, phase: "draft", e: el, prop, talk };
     await writeFlow(c, id, g);
     return out(200, { ok: true, flow: g });
   });

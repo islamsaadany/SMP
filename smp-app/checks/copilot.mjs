@@ -833,10 +833,38 @@ try {
     const qText = wq && wq.body ? JSON.stringify(wq.body.contents) : "";
     check("drafting asks the model once, with the answers given as they stand on the page",
       seen.length === before6 + 1 && (sysF + qText).includes("Connect every Egyptian to the people and services they rely on"), (sysF + qText).slice(0, 200));
-    check("...and the draft lands on the flow, not yet agreed", d1.st === 200 && d1.j.flow.phase === "draft" && /Connect every Egyptian/.test(d1.j.flow.drafts[0]) && !d1.j.flow.done[0], JSON.stringify(d1.j).slice(0, 200));
+    /* §643 — REWRITTEN, NOT LOOSENED (§218): a draft is a PROPOSAL in the
+       chat, never the card's words. It lands in `prop` and in the part's
+       conversation; `drafts` (the card) is untouched and the part is not
+       agreed. Islam: "it should show me in the chat itself and when I say
+       ok it goes to the right part". */
+    check("...and the draft lands as a proposal in the chat — the card's words untouched, not agreed (§643)", d1.st === 200 && d1.j.flow.phase === "draft" && /Connect every Egyptian/.test(d1.j.flow.prop[0]) &&
+      d1.j.flow.drafts[0] === "" && !d1.j.flow.done[0] && d1.j.flow.talk[0].length === 1 && d1.j.flow.talk[0][0].w === "ai", JSON.stringify(d1.j).slice(0, 300));
     NEXT = { answer: { text: "Connect Egypt to what matters." } };
     const r1 = await call("POST", "api", { act: "flowRefine", id: fid, el: 0, how: "concise", placeWord: "Mobile" }, NORAN);
-    check("a refine rewrites that part's draft", r1.st === 200 && r1.j.flow.drafts[0] === "Connect Egypt to what matters.");
+    const t1 = r1.j.flow ? r1.j.flow.talk[0] : [];
+    check("a refine makes the next proposal, and the chat keeps what was asked in the button's words and both proposals in order (§643)",
+      r1.st === 200 && r1.j.flow.prop[0] === "Connect Egypt to what matters." && r1.j.flow.drafts[0] === "" &&
+      t1.map((x) => x.w).join() === "ai,me,ai" && t1[1].t === "Make concise" && t1[2].t === "Connect Egypt to what matters.", JSON.stringify(t1));
+    /* THE RECORD IS THE PRODUCT'S: the page adds its own lines and can clear
+       a proposal, never write a Copilot line, rewrite the record, or put
+       words in the proposal. Both ends (§94.2). */
+    const forged = JSON.parse(JSON.stringify(r1.j.flow));
+    forged.talk[0] = [{ w: "ai", t: "I never said this." }]; forged.prop[0] = "Words the model never wrote.";
+    forged.talkAdd = [{ p: 0, w: "ai", t: "A forged Copilot line." }, { p: 0, w: "me", t: "Keep the word Egypt." }, { p: -1, w: "me", t: "A note after the check." }];
+    const fg = await call("POST", "api", { act: "flowSave", id: fid, flow: forged }, NORAN);
+    const t2 = fg.j.flow ? fg.j.flow.talk[0] : [];
+    check("the page cannot write the record: no Copilot line, no rewrite, no words in the proposal — only its own lines are added (§643)",
+      fg.st === 200 && t2.length === 4 && t2[3].w === "me" && t2[3].t === "Keep the word Egypt." && !/never said|forged/.test(JSON.stringify(t2)) &&
+      fg.j.flow.prop[0] === "Connect Egypt to what matters." && fg.j.flow.notes.length === 1 && fg.j.flow.notes[0].t === "A note after the check.", JSON.stringify({ t2, prop: fg.j.flow && fg.j.flow.prop[0], notes: fg.j.flow && fg.j.flow.notes }));
+    /* SAVE TO THE CARD, as the page does it: the proposal onto the card,
+       the part agreed, the proposal cleared, and what became of it said. */
+    const onCard = JSON.parse(JSON.stringify(fg.j.flow));
+    onCard.drafts[0] = onCard.prop[0]; onCard.prop[0] = ""; onCard.done[0] = true; onCard.talkAdd = [{ p: 0, w: "note", t: "Saved to the card." }];
+    const sc = await call("POST", "api", { act: "flowSave", id: fid, flow: onCard }, NORAN);
+    check("Save to the card puts the proposal on the card, agrees the part and clears the proposal; the conversation stays (§643)",
+      sc.st === 200 && sc.j.flow.drafts[0] === "Connect Egypt to what matters." && sc.j.flow.done[0] === true && sc.j.flow.prop[0] === "" && sc.j.flow.talk[0].length === 5, JSON.stringify(sc.j.flow && sc.j.flow.talk[0]));
+    r1.j.flow = sc.j.flow;
     const early = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
     check("the check across the parts waits for every part to be agreed", early.st === 400 && /Every part needs/.test(early.j.why));
     const earlyFin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitive Discipline Scoring Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--nav:#16325C;--panel-ink:#FFFFFF;--warnbg:#FBF1DE;--goodbg:#E6F2EA;--good:#2E6B45;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--nav:#0E2A4F;--panel-ink:#EAF0FA;--warnbg:#2E2717;--goodbg:#1C2E23;--good:#8FCBA4;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px;display:flex;flex-direction:column;gap:16px}
+h1{font-size:26px;margin:0}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:85ch}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--ink-2)}
+.rule b{display:block;color:var(--ink);font-size:15px}
+.lv{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);font-weight:700;font-size:12.5px;margin-right:6px;background:var(--surface)}
+.lv.l2{border-color:var(--good);color:var(--good)}
+.lv.l1{border-color:var(--goldfill);color:var(--gold)}
+.ctl{position:sticky;top:0;z-index:3;background:var(--ground);padding:8px 0;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--nav);color:var(--panel-ink);font-weight:600}
+.ctl input{flex:1 1 220px;max-width:320px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:14px var(--sans);background:var(--surface);color:var(--ink)}
+h2{font-size:19px;margin:12px 0 0}
+h2 small{display:block;font-size:13.5px;font-weight:400;color:var(--ink-3)}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.fh{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.fh b{font-size:15.5px}
+.fh span{color:var(--ink-3);font-size:13.5px}
+.fh .n{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-weight:700}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+col.k{width:56px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;font-size:13.5px;text-align:left}
+th:last-child,td:last-child{border-right:0}
+tr:last-child td{border-bottom:0}
+thead th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);background:var(--surface-2)}
+td.k{text-align:center;background:var(--surface-2)}
+td{color:var(--ink-2)}
+tr.r2 td:not(.k){color:var(--ink)}
+@media (max-width:760px){
+  table,thead,tbody,tr,th,td{display:block}
+  thead{display:none}
+  tr{border-bottom:1px solid var(--line);padding:6px 0}
+  td{border:0;padding:3px 12px}
+  td.k{background:none;text-align:left;padding-top:8px}
+  td[data-d]::before{content:attr(data-d) " · ";font-weight:700;color:var(--ink-3);font-size:12px}
+}
+.foot{font-size:13.5px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Competitive Discipline — the scoring guide (draft for review)</h1>
+    <p class="lede">What 0, 1 and 2 mean for each discipline on each of the twenty factors. It would live in Copilot settings › Competitive Strategy, owned by Forefront and editable there; the Copilot scores against it and shows the matching line beside every score, with its reason and evidence. Drafted from Treacy and Wiersema's three disciplines — every line is for you to change.</p>
+  </header>
+  <div class="rules">
+    <div class="rule"><b>The three levels</b><span class="lv">0</span>does not point to it · <span class="lv l1">1</span>partly · <span class="lv l2">2</span>strongly</div>
+    <div class="rule"><b>Each discipline on its own</b>A factor can give 2 to two disciplines, or 0 to all three. The three scores on a row do not compete.</div>
+    <div class="rule"><b>The choice is the totals</b>Each side totals out of 20 as a per-cent. A lead over 25 points is Clear, 10 to 25 Leaning, under 10 Unclear. The market decides; the internal side shows the gap to close.</div>
+  </div>
+  <div class="ctl"><span class="seg" id="side"><button data-s="all" aria-pressed="true">All 20</button><button data-s="m">Market (10)</button><button data-s="i">Internal (10)</button></span>
+    <input id="q" type="search" placeholder="Find a factor or a word…" aria-label="Find"></div>
+  <div id="list"></div>
+  <div class="foot"><b>How the two sides read.</b> A <b>market</b> factor asks what the market rewards — how strongly this factor, in this market, favours each way of winning. An <b>internal</b> factor asks how the organisation is built today — how strongly it is set up for each way of winning. The Copilot reads both from the plan (the SWOT, the Foundation, the analyses), never from nothing, and names its evidence.</div>
+</div>
+<script>
+(function(){
+  var D = ["Best Total Cost","Best Total Solution","Best Product"];
+  /* [id, name, question, side, [[btc0,btc1,btc2],[bts0,bts1,bts2],[bp0,bp1,bp2]]] */
+  var F = [
+    ["market_growth","Market Growth Rate","How fast is the market growing and what drives growth?","m",[
+      ["Fast growth from new buyers; price is not what holds them","Growth is slowing and price starts to matter","Mature or slow; growth only by winning share on price"],
+      ["Growth comes from one-off buyers","Some growth from customers buying more","Growth comes from deepening existing relationships — a bigger share of each customer"],
+      ["Flat; nothing new drives it","Some growth from new products","Growth is driven by new categories and new generations of product"]]],
+    ["competition","Competition Dynamics / Customer Selection","How intense is competition and on what basis do firms compete?","m",[
+      ["Firms rarely compete on price","Price is one basis among several","Firms win mainly on price and efficiency"],
+      ["Sales are transactional; nobody wins on the relationship","Service and advice win some deals","Firms win by knowing customers and solving their problems"],
+      ["Products are much alike","Features sometimes decide","Firms win with the best or newest product"]]],
+    ["customer_behavior","Customer Behavior","How do customers make decisions and what influences them?","m",[
+      ["Price does not decide how they buy","Price matters, alongside other things","They compare and buy on lowest price"],
+      ["They buy single items, with no help needed","Some want a bundle or advice","They want it solved for them, bundled, and stay with whoever helps"],
+      ["Features do not decide it","Some chase the newest model","They buy the newest and the best, early"]]],
+    ["tech_change","Technological Change","How rapidly is technology evolving in this market?","m",[
+      ["Technology changes so fast that efficiency gains do not last","Moderate change; some efficiency holds","Stable technology; gains come from process and scale"],
+      ["Simple technology; customers need no help","Some customers need help using it","Complex or changing technology; customers need someone to set it up and support it"],
+      ["Slow change","Steady improvements","Rapid change; the first with the new wins"]]],
+    ["regulatory","Regulatory Environment","What regulatory factors impact the market?","m",[
+      ["Rules make low prices hard (price controls, heavy compliance)","Compliance adds some cost","Standard rules; compliance at scale is an advantage"],
+      ["Rules are simple for customers","Customers need some help with rules","Customers need guiding through rules (financing, warranties, permits)"],
+      ["Rules slow every launch","Some approvals for new products","Rules allow fast launches or protect what is new"]]],
+    ["supply_chain","Supply Chain Complexity","How complex are supply chain requirements?","m",[
+      ["The chain is too complex to run cheaply","Moderate complexity","The market rewards whoever runs the chain cheapest and most reliably"],
+      ["Customers do not care how it arrives","Some value delivery and setup","Customers value someone managing it end to end — delivery, setup, after-sales"],
+      ["The chain does not shape the product","Access to new stock helps sometimes","First access to the newest models or parts decides who wins"]]],
+    ["product_lifecycle","Industry Products Life Cycle","Where is the industry in its lifecycle?","m",[
+      ["Introduction or early growth","Late growth","Mature; products are commodities"],
+      ["Early; products sell on their own","Maturing; bundling starts","Mature; value moves to service and solutions"],
+      ["Mature; little renewal","Regular refresh cycles","Early or fast cycles; new generations often"]]],
+    ["customer_need","Customer Need","What are the primary needs customers seek to fulfill?","m",[
+      ["The need is not price-sensitive","Value for money matters","The core need is low cost and convenience"],
+      ["The need is simple and the same for all","Needs vary somewhat","Needs are specific; customers want an answer made for them"],
+      ["Any product meets the need","Performance matters to some","The need is the best performance or the newest capability"]]],
+    ["product_mix","Market Product Mix Requirement","What product/service mix does the market demand?","m",[
+      ["The market wants a wide, custom range","A mix of standard and custom","A narrow standard range at a low price"],
+      ["Single products are enough","Some want bundles","Complete bundles of products and services"],
+      ["The range is generic","Some premium lines","The latest, flagship products"]]],
+    ["switching_costs","Switching Costs / Customer Lock-in","How easy is it for customers to switch providers?","m",[
+      ["Lock-in is high; price does not move them","Some move for price","Switching is easy; they move for a better price"],
+      ["There is no relationship to lose","Some ties keep them","Relationships and joined-up service make switching costly"],
+      ["Product does not move them","A better product moves some","They switch to whoever has the better product"]]],
+    ["operations","Operational Efficiency","How efficient are internal operations and processes?","i",[
+      ["Costly, slow processes","Average efficiency","Lean, low-cost and reliable at scale"],
+      ["Processes ignore the individual customer","Some flexibility for customers","Processes flex to each customer's need"],
+      ["Processes slow every launch","Launches take effort","Processes built for fast launches"]]],
+    ["innovation","Innovation Capacity","How strong is the ability to innovate and develop new offerings?","i",[
+      ["No process improvement","Some improvement","Innovation aimed at cutting cost and steps"],
+      ["No new services","Some new services","New services and solutions built with customers"],
+      ["Little that is new","Some new products","A strong pipeline; first to market"]]],
+    ["offerings","Product/Service Offerings","How competitive are current products/services?","i",[
+      ["Priced above the market","Competitively priced","Lowest price for acceptable quality"],
+      ["Stand-alone items","Some bundles or services","Complete, tailored solutions"],
+      ["Me-too products","Some distinctive products","The best or newest in the market"]]],
+    ["workforce","Workforce Skill Area","What are the core skills and capabilities of the workforce?","i",[
+      ["Few operations and cost skills","Some","Strong operations, logistics and cost skills"],
+      ["Little customer-facing skill","Some advisory skill","Strong advisory, account and service skills"],
+      ["Little product or technical talent","Some","Strong product, design and technical talent"]]],
+    ["brand","Brand Positioning","How is the brand perceived in the market?","i",[
+      ["Seen as expensive","Seen as fairly priced","Known for low prices and value"],
+      ["Seen as transactional","Seen as helpful","Known as the partner who solves problems"],
+      ["Seen as ordinary","Seen as good","Known for the newest and best"]]],
+    ["risk","Approach to Risk","How does the organization approach risk-taking?","i",[
+      ["Big bets that raise cost","Mixed","Avoids risk; values predictability"],
+      ["Will not carry risk for a customer","Sometimes","Carries risk to keep a customer (guarantees, financing)"],
+      ["Avoids new bets","Some bets","Bold bets on new products"]]],
+    ["culture","Culture Driver","What drives organizational culture and behavior?","i",[
+      ["Little discipline on cost","Some","Discipline, efficiency and standards"],
+      ["Inward-looking","Some customer focus","Customer first; relationships"],
+      ["Cautious; follows others","Some experiment","Creativity, experiment and speed"]]],
+    ["processes","Core Processes","What are the most important operational processes?","i",[
+      ["Supply chain and cost are weak","Average","Supply chain, operations and cost control lead"],
+      ["Account and service processes are weak","Average","Account management, solution design and service lead"],
+      ["Product development is weak","Average","Research, product development and launch lead"]]],
+    ["structure","Organization Structure","How is the organization structured to deliver value?","i",[
+      ["Layered and costly","Mixed","Central, standardised, few layers"],
+      ["Organised around products or functions","Some customer teams","Organised around customers; an empowered front line"],
+      ["Rigid","Some project teams","Flexible teams around products and projects"]]],
+    ["systems","Management Systems","What management systems guide decision-making?","i",[
+      ["Cost and reliability are not measured","Some cost measures","Measures cost, reliability and efficiency"],
+      ["Customers are not measured","Some satisfaction measures","Measures retention, share of wallet and satisfaction"],
+      ["Innovation is not measured","Some","Measures innovation, time to market and new-product revenue"]]]
+  ];
+  var S = { side:"all", q:"" };
+  function esc(x){ return String(x).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+  function draw(){
+    document.querySelectorAll("#side button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.s === S.side)); });
+    var q = S.q.trim().toLowerCase(), out = [], n = 0;
+    [["m","Market factors","What the market rewards — how strongly this factor favours each way of winning."],["i","Internal factors","How the organisation is built today — how strongly it is set up for each way of winning."]].forEach(function(g){
+      if (S.side !== "all" && S.side !== g[0]) return;
+      var rows = F.filter(function(f){ return f[3] === g[0] && (!q || JSON.stringify(f).toLowerCase().indexOf(q) >= 0); });
+      if (!rows.length) return;
+      out.push('<h2>' + g[1] + '<small>' + g[2] + '</small></h2>');
+      rows.forEach(function(f){
+        n++;
+        out.push('<section class="f"><div class="fh"><b>' + esc(f[1]) + '</b><span>' + esc(f[2]) + '</span><span class="n">' + (g[0] === "m" ? "Market" : "Internal") + '</span></div>' +
+          '<table><colgroup><col class="k"><col><col><col></colgroup><thead><tr><th></th>' + D.map(function(d){ return '<th>' + d + '</th>'; }).join("") + '</tr></thead><tbody>' +
+          [0,1,2].map(function(l){ return '<tr class="r' + l + '"><td class="k"><span class="lv' + (l ? " l" + l : "") + '">' + l + '</span></td>' +
+            f[4].map(function(d, k){ return '<td data-d="' + D[k] + '">' + esc(d[l]) + '</td>'; }).join("") + '</tr>'; }).join("") +
+          '</tbody></table></section>');
+      });
+    });
+    document.getElementById("list").innerHTML = out.join("") || '<p class="lede">Nothing matches.</p>';
+  }
+  document.getElementById("side").addEventListener("click", function(e){ var b = e.target.closest("[data-s]"); if (b) { S.side = b.dataset.s; draw(); } });
+  document.getElementById("q").addEventListener("input", function(e){ S.q = e.target.value; draw(); });
+  draw();
+})();
+</script>
+</body>
+</html>

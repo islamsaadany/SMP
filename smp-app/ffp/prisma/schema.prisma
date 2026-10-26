@@ -557,6 +557,8 @@ model ProcessStep {
   priorityComplexity Int?
   priorityRisk       Int?
   priorityWhy        String?
+  /// Which wave this flagged step goes in. Empty means it goes with its process.
+  deepDiveDecision   DeepDiveDecision?
 
   createdAt DateTime @default(now())
 

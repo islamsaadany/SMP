@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/ffp/lib/db/client";
+import { planUnits } from "@/ffp/lib/domain/priority-units";
 import {
   DEFAULT_WEIGHTS,
   deepDiveProgress,
@@ -49,6 +50,8 @@ export type StepRow = {
   flagged: boolean;
   /** Nothing stands out on the map and it is not flagged; shown only when asked for. */
   quiet: boolean;
+  /** The step's own wave; empty means it goes with its process. */
+  decision: Decision | null;
   importance: number | null;
   complexity: number | null;
   risk: number | null;
@@ -171,6 +174,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
         priorityComplexity: true,
         priorityRisk: true,
         priorityWhy: true,
+        deepDiveDecision: true,
         exceptionHandling: true,
         detailedAction: true,
         _count: { select: { links: true, handoffsOut: true, handoffsIn: true, supportingRoles: true, activities: true } },
@@ -243,6 +247,7 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
       order: st.order,
       flagged: st.priorityFlagged,
       quiet,
+      decision: st.deepDiveDecision as Decision | null,
       importance: st.priorityImportance,
       complexity: st.priorityComplexity,
       risk: st.priorityRisk,
@@ -296,6 +301,8 @@ export type PlanSnapshot = {
     id: string;
     code: string;
     name: string;
+    /** For a flagged step taken deep on its own: the process it is a step of. */
+    inProcess?: string | null;
     department: string | null;
     importance: number | null;
     complexity: number | null;
@@ -314,8 +321,8 @@ export function buildSnapshot(plan: PlanView, rows: PriorityRow[]): PlanSnapshot
     capacity: plan.capacity,
     labels: { WAVE_1: plan.wave1Label, WAVE_2: plan.wave2Label, LATER: plan.laterLabel },
     total: rows.length,
-    rows: rows
-      .filter((r) => r.rank != null || r.decision != null)
-      .map((r) => ({ id: r.id, code: r.code, name: r.name, department: r.department, importance: r.importance, complexity: r.complexity, risk: r.risk, score: r.score, rank: r.rank, why: r.why, decision: r.decision })),
+    rows: planUnits(rows)
+      .filter((u) => u.rank != null || u.decision != null || u.kind === "step")
+      .map((u) => ({ id: u.id, code: u.code, name: u.name, inProcess: u.inProcess, department: u.department, importance: u.importance, complexity: u.complexity, risk: u.risk, score: u.score, rank: u.rank, why: u.why, decision: u.decision })),
   };
 }

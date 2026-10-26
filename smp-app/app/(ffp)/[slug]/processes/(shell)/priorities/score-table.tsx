@@ -8,6 +8,7 @@ import {
   fillDecisionsFromRanking,
   flagStep,
   promoteStepToProcess,
+  setStepDecision,
   setStepPriority,
   setDeepDiveDecision,
   setPlanSettings,
@@ -325,6 +326,8 @@ export function ScoreTable({
                 <StepLine key={st.id} st={st} clearing={clearing} editable={editable} pending={pending} toneClass={toneClass}
                   onFlag={(on) => run(() => flagStep({ workspaceId, stepId: st.id, flagged: on }))}
                   onScore={(k, v) => stepScore(st.id, k, v)}
+                  processDecision={r.decision}
+                  onDecision={(d) => run(() => setStepDecision({ workspaceId, stepId: st.id, decision: d }))}
                   onWhy={(v) => run(() => setStepPriority({ workspaceId, stepId: st.id, why: v || null }))}
                   onPromote={() => {
                     const name = window.prompt("Name for the new process (it becomes a sub-process of this one, branching from the step):", st.label);
@@ -350,6 +353,8 @@ function StepLine({
   editable,
   pending,
   toneClass,
+  processDecision,
+  onDecision,
   onFlag,
   onScore,
   onWhy,
@@ -360,6 +365,8 @@ function StepLine({
   editable: boolean;
   pending: boolean;
   toneClass: Record<"bad" | "warn" | "info" | "plain", string>;
+  processDecision: Decision | null;
+  onDecision: (d: Decision | null) => void;
   onFlag: (on: boolean) => void;
   onScore: (k: "importance" | "complexity" | "risk", v: number | null) => void;
   onWhy: (v: string) => void;
@@ -433,6 +440,20 @@ function StepLine({
         )}
       </td>
       <td className="px-3 py-2">
+        {st.flagged && (
+          <select
+            value={st.decision ?? ""}
+            disabled={!editable || pending}
+            aria-label={`Wave for step ${st.label}`}
+            onChange={(e) => onDecision((e.target.value || null) as Decision | null)}
+            className="mb-1 block rounded-md border border-slate-300 bg-white px-1.5 py-1 text-xs"
+          >
+            <option value="">{`With its process${processDecision ? ` (${DECISION_LABEL[processDecision]})` : ""}`}</option>
+            {DECISIONS.map((d) => (
+              <option key={d} value={d}>{DECISION_LABEL[d]}</option>
+            ))}
+          </select>
+        )}
         {st.flagged && st.nowProcesses.length === 0 && (
           <button type="button" disabled={!editable || pending} onClick={onPromote} className="rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-amber-700 disabled:opacity-40">
             Make it a process

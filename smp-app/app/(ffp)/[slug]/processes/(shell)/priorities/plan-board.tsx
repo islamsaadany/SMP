@@ -3,6 +3,7 @@ import { DECISION_LABEL, wave1OverCapacity, type Decision } from "@/ffp/lib/doma
 import type { PlanView, PriorityRow } from "@/ffp/lib/data/priorities";
 import { WaveLabel } from "./wave-label";
 import { AspectInfo } from "./aspect-info";
+import { byScoreDesc, planUnits } from "@/ffp/lib/domain/priority-units";
 
 const COLS: { d: Decision; sub: (p: PlanView) => string; edit?: "wave1Label" | "wave2Label" | "laterLabel" }[] = [
   { d: "WAVE_1", sub: (p) => p.wave1Label, edit: "wave1Label" },
@@ -12,10 +13,13 @@ const COLS: { d: Decision; sub: (p: PlanView) => string; edit?: "wave1Label" | "
 ];
 
 export function PlanBoard({ workspaceId, plan, rows, editable }: { workspaceId: string; plan: PlanView; rows: PriorityRow[]; editable: boolean }) {
-  const by = (d: Decision) => rows.filter((r) => r.decision === d).sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99));
+  // A process with flagged steps is represented by those steps; a process without, by itself.
+  const units = planUnits(rows);
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const by = (d: Decision) => units.filter((u) => u.decision === d).sort(byScoreDesc);
   const w1 = by("WAVE_1").length;
   const over = wave1OverCapacity(w1, plan.capacity);
-  const undecided = rows.filter((r) => r.decision == null);
+  const undecided = units.filter((u) => u.decision == null);
   return (
     <div>
       <p role="status" className={`mb-3 rounded-lg px-3 py-2 text-sm ${over ? "bg-rose-50 text-rose-800" : "bg-emerald-50 text-emerald-800"}`}>
@@ -30,29 +34,36 @@ export function PlanBoard({ workspaceId, plan, rows, editable }: { workspaceId: 
               <div className="text-xs text-slate-500">
                 {c.edit ? <WaveLabel workspaceId={workspaceId} field={c.edit} value={c.sub(plan)} disabled={!editable} /> : c.sub(plan)}
               </div>
-              {list.map((r) => (
+              {list.map((u) => {
+                if (u.kind === "step") {
+                  return (
+                    <article key={u.id} className="mt-2 rounded-lg border border-amber-200 bg-white p-2.5">
+                      <div className="font-semibold text-slate-900"><span aria-hidden className="me-1">⚑</span>{u.name}</div>
+                      <div className="text-xs text-slate-500">Step of {u.inProcess} · {u.code}</div>
+                      <div className="mt-1 text-xs text-slate-600">Score <b className="text-slate-900">{u.score ?? "—"}</b>{u.why ? ` · ${u.why}` : ""}</div>
+                      <div className="mt-1 text-xs"><Link href={`/${workspaceId}/processes/processes/${u.processId}`} className="font-semibold text-indigo-700 hover:underline">Open process →</Link></div>
+                    </article>
+                  );
+                }
+                const r = byId.get(u.id)!;
+                return (
                 <article key={r.id} className="mt-2 rounded-lg border border-slate-200 bg-white p-2.5">
                   <div className="font-semibold text-slate-900">{r.name}</div>
                   <div className="text-xs text-slate-500">{r.code} · {r.department ?? "No department"}</div>
                   <div className="my-1.5 flex gap-[3px]" role="img" aria-label={`Deep dive ${r.progress.done} of ${r.progress.total}: ${r.progress.aspects.map((a) => `${a.label} ${a.done ? "done" : "not yet"}`).join(", ")}`}>
                     {r.progress.aspects.map((a) => <i key={a.label} title={`${a.label}${a.done ? " ✓ done" : " — not yet"}: ${a.help}`} className={`h-[7px] flex-1 rounded ${a.done ? "bg-emerald-600" : "bg-slate-200"}`} />)}
                   </div>
-                  {r.steps.some((x) => x.flagged) && (
-                    <div className="mb-1 text-xs text-slate-600">
-                      <b>Steps to watch:</b>{" "}
-                      {r.steps.filter((x) => x.flagged).map((x) => `${x.label}${x.score != null ? ` (${x.score})` : ""}`).join(" · ")}
-                    </div>
-                  )}
                   <div className="text-xs text-slate-500">
                     Deep dive {r.progress.done} of {r.progress.total} <AspectInfo aspects={r.progress.aspects} /> · <Link href={`/${workspaceId}/processes/processes/${r.id}`} className="font-semibold text-indigo-700 hover:underline">Open process →</Link>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </section>
           );
         })}
       </div>
-      {undecided.length > 0 && <p className="mt-3 text-xs text-slate-500">Not decided yet: {undecided.map((r) => r.name).join(", ")}. Decide them on the Score step.</p>}
+      {undecided.length > 0 && <p className="mt-3 text-xs text-slate-500">Not decided yet: {undecided.map((u) => (u.kind === "step" ? `${u.name} (step of ${u.inProcess})` : u.name)).join(", ")}. Decide them on the Score step.</p>}
       <p className="mt-3 text-xs text-slate-500">Each card has one bar per aspect: Map · RACI · Authority · Controls · SOP · Approved. A green bar means that aspect is done; they fill in by themselves as the work is done on the process. Press the ! on a card to see what each one needs.</p>
     </div>
   );

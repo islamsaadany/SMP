@@ -1457,8 +1457,16 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       await page.dblclick(".copflow > [data-cop-grip]");
       const w2 = await w();
       check(Math.abs(w2.chat - w0.chat) <= 2 && w2.kept === null, "…and a double-click puts the default back and forgets it", JSON.stringify(w2));
-      /* Below 1280px the cards and the to-do open over the chat. */
+      /* §642 (Islam's screenshot: the cards over the chat on a laptop): the
+         switch reads the Copilot's own width, not the window's, so at a
+         1100px window the cards and the to-do stay beside the chat … */
       await page.setViewportSize({ width: 1100, height: 900 }); await page.waitForTimeout(250);
+      const lap = await page.evaluate(() => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"), t = document.querySelector(".copftodo");
+        return { cards: getComputedStyle(l).display, todo: getComputedStyle(t).display, beside: l.getBoundingClientRect().left >= c.getBoundingClientRect().right - 1,
+          main: Math.round(parseFloat(getComputedStyle(document.querySelector(".copmain")).width)) }; });
+      check(lap.cards !== "none" && lap.todo !== "none" && lap.beside, "§642 at a 1100px window the cards and the to-do stay beside the chat, as on a laptop", JSON.stringify(lap));
+      /* … and only when the Copilot itself has no room do they open over it. */
+      await page.setViewportSize({ width: 760, height: 900 }); await page.waitForTimeout(250);
       const n0 = await page.evaluate(() => ({ cards: getComputedStyle(document.querySelector(".copleft")).display, todo: getComputedStyle(document.querySelector(".copftodo")).display,
         btns: Array.from(document.querySelectorAll(".copfhead [data-cop-sheet]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()) }));
       await page.click('.copfhead [data-cop-sheet="cards"]'); await page.waitForTimeout(150);
@@ -1467,7 +1475,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       await page.click(".copflow > .copshade", { position: { x: 20, y: 20 } }); await page.waitForTimeout(150);
       const n2 = await page.evaluate(() => getComputedStyle(document.querySelector(".copleft")).display);
       check(n0.cards === "none" && n0.todo === "none" && n0.btns.length === 2 && /Foundation/.test(n0.btns[0]) && /To-do/.test(n0.btns[1]) && n1.cards === "flex" && n1.over && n1.shade === "block" && n2 === "none",
-        "§638 below 1280px the cards and the to-do wait behind two buttons in the chat's head, the cards open over the chat, and pressing beside them closes them", JSON.stringify([n0, n1, n2]));
+        "§638, §642 with no room beside the chat, the cards and the to-do wait behind two buttons in the chat's head, the cards open over the chat, and pressing beside them closes them", JSON.stringify([n0, n1, n2]));
       await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
     }
     const rd = await flowRow(cid);

@@ -592,7 +592,7 @@ var COPILOT = (function(){
      the bubble that wrote it says so in a line. An earlier draft can be
      put back in the panel from its own bubble. */
   var PANELPICK = {};            /* chat id → the message whose draft the panel shows (this visit only) */
-  var SHEET = "";                /* "cards" | "todo" | "draft": the panel opened over the chat below 1280px */
+  var SHEET = "";                /* "cards" | "todo" | "draft": the panel opened over the chat when there is no room beside it (§642) */
   function hasDraft(m){ var p = m && m.part; return !!(m && m.who === "ai" && p && p.kind === "answer" && p.draft && p.draft.groups && p.draft.groups.length); }
   function draftMsg(){
     if (!PANE || !PANE.chat || !PANE.messages) return null;
@@ -1111,7 +1111,7 @@ var COPILOT = (function(){
         /* §524 — the check is an extra move, never the door to saving
            (Islam: "a check is an extra move"), so Save is on the bar under
            the cards and only "Go back to" stays here, when there is one. */
-        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
+        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x, k){ return x.el in byKey && issues.findIndex(function(y){ return y.el === x.el; }) === k; }).map(function(x){
             return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") + '</div>' : ''), true));
     }
     /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
@@ -1170,7 +1170,7 @@ var COPILOT = (function(){
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     /* §638: the chat first, the cards to its right behind the handle, the
-       to-do last at its 200px (the signed-off concept). Below 1280px the
+       to-do last at its 200px (the signed-off concept). Without room beside it (§642) the
        cards and the to-do open over the chat from the head's two buttons. */
     var cards = shut ? '' : GRIP + '<div class="copleft"><div class="copsh">' + vline +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close" title="Close">×</button>' +

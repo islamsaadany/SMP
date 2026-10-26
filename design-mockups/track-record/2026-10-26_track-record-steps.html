@@ -1,0 +1,471 @@
+<title>Track Record Steps</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: seven stacked drawings of the console (navy column left, page
+   right), one per step, in the order the work happens: the registry, the
+   task on My work, the Track Record front, a client's page, writing up an
+   assignment, checking and publishing, adding a learning. Tokens are the
+   console's own (smp-app/shell/platform.html). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-deep:#0A1F4D;--ff-ink:#FFFFFF;--ff-quiet:#A9BAD8;--ff-on:rgba(255,255,255,.13);--ff-label:#8FA3C9;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEAE8;
+  --plan:#2F57A8;--plan-bg:#E8EEFA;--ret:#6B3FA0;--ret-bg:#F1EAF9;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33201E;
+  --plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;
+  --ff:#0D2350;--ff-deep:#091A40;--ff-ink:#F0F4FB;--ff-quiet:#95A9CC;--ff-on:rgba(255,255,255,.13);--ff-label:#8197BE;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33201E;
+  --plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+.doc{max-width:1180px;margin:0 auto;padding-block:26px 72px}
+.doc>h1{font-size:24px;font-weight:650;margin:0 0 6px;letter-spacing:-.01em}
+.lede{max-width:72ch;color:var(--ink-2);margin:0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 0;padding:0;list-style:none}
+.flow li{font-size:12.5px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.flow li b{color:var(--gold);margin-right:4px}
+
+.cap{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:46px 0 10px}
+.cap .n{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.cap h2{margin:0;font-size:18px;font-weight:650}
+.who{font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
+.why{margin:0 0 12px;max-width:80ch;color:var(--ink-2);font-size:14px}
+
+/* the console frame */
+.frame{display:grid;grid-template-columns:190px minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+.nav{background:var(--ff);color:var(--ff-ink);padding:16px 10px;font-size:13.5px;display:flex;flex-direction:column;gap:2px}
+.nav .brand{font-weight:700;padding:2px 10px 14px;letter-spacing:.02em}
+.nav .grp{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ff-label);padding:12px 10px 4px}
+.nav span{padding:6px 10px;border-radius:6px;color:var(--ff-quiet)}
+.nav span.on{background:var(--ff-on);color:var(--ff-ink);font-weight:600;box-shadow:inset 3px 0 0 var(--amber)}
+.page{padding:22px 24px 26px;min-width:0}
+@media (max-width:760px){.frame{grid-template-columns:1fr}.nav{display:none}.page{padding:16px}}
+
+.band{background:var(--ff);color:var(--ff-ink);border-radius:8px;padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.band h3{margin:0;font-size:20px;font-weight:650}
+.band .eye{font-size:12px;color:var(--ff-quiet);margin-top:2px}
+.crumb{font-size:13px;color:var(--ink-3);margin-bottom:10px}
+.crumb b{color:var(--ink);font-weight:600}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:7px 13px;font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.btn.navy{background:var(--ff);border-color:var(--ff);color:var(--ff-ink)}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font-size:13px;font-weight:600;padding:6px 12px;border-radius:6px}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.band .seg{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+.band .seg button{color:var(--ff-quiet)}
+.band .seg button.on{background:var(--surface);color:var(--ink)}
+
+.tag{display:inline-block;font-size:11.5px;font-weight:650;border-radius:5px;padding:1px 7px;white-space:nowrap}
+.t-plan{background:var(--plan-bg);color:var(--plan)}
+.t-ret{background:var(--ret-bg);color:var(--ret)}
+.t-hic{background:var(--bad-bg);color:var(--bad)}
+.t-pra{background:var(--good-bg);color:var(--good)}
+.t-les{background:var(--warn-bg);color:var(--warn)}
+.st{font-size:12px;font-weight:600;white-space:nowrap}
+.st.pub{color:var(--good)}.st.dr{color:var(--gold)}.st.run{color:var(--ink-3)}.st.late{color:var(--bad)}
+
+/* tables */
+.tw{overflow-x:auto;margin-top:14px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+th{text-align:left;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:650;padding:8px 10px;border-bottom:2px solid var(--ink)}
+td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.client td{background:var(--surface-2);font-weight:650;border-bottom:1px solid var(--line)}
+tr.client td .ind{font-weight:400;color:var(--ink-3);font-size:12.5px;margin-left:6px}
+tr.adding td{background:var(--amber-wash)}
+.fld{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:6px 8px;font-size:13px}
+.fld.ro{background:var(--surface-2);color:var(--ink-2)}
+td .fld{min-width:90px}
+.muted{color:var(--ink-3)}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+
+/* my work */
+.mw h4{margin:16px 0 6px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.mwrow{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line-soft);border-radius:7px;margin-bottom:6px}
+.mwrow.hl{border-color:var(--amber);background:var(--amber-wash)}
+.mwrow .t{min-width:0}
+.mwrow .t small{display:block;color:var(--ink-3);font-size:12.5px}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px}
+.book{width:18px;height:18px;color:var(--gold)}
+@media (max-width:560px){.mwrow{grid-template-columns:24px minmax(0,1fr)}.mwrow>:nth-child(n+3){grid-column:2}}
+
+/* front */
+.search{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.search .fld{flex:1;min-width:200px;padding:9px 12px;font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--ink-2);background:var(--surface)}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.ccard{border:1px solid var(--line);border-radius:9px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.ccard .hd{display:flex;gap:10px;align-items:center}
+.mark{width:34px;height:34px;border-radius:7px;background:var(--ff);color:var(--ff-ink);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.ccard .hd b{display:block}
+.ccard .hd small{color:var(--ink-3);font-size:12.5px}
+.asg{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-soft);padding-top:10px}
+.asg div{display:flex;gap:8px;align-items:center;font-size:13px}
+.asg .m{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ccard .ft{font-size:12.5px;color:var(--ink-3)}
+
+/* client page */
+.chead{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.chead .mark{width:46px;height:46px;font-size:16px}
+.chead h3{margin:0;font-size:21px}
+.chead small{color:var(--ink-3)}
+.tline{position:relative;margin:18px 0 6px;height:46px;border-bottom:1px solid var(--line)}
+.tline .bar{position:absolute;top:6px;height:26px;border-radius:5px;font-size:12px;font-weight:650;display:flex;align-items:center;padding:0 9px;white-space:nowrap;overflow:hidden}
+.tline .bar.p{background:var(--plan-bg);color:var(--plan);border:1px solid var(--plan)}
+.tline .bar.r{background:var(--ret-bg);color:var(--ret);border:1px dashed var(--ret)}
+.tmonths{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.atabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.atabs button{border:0;background:none;padding:9px 12px;font-weight:600;color:var(--ink-2);border-bottom:3px solid transparent;margin-bottom:-1px;display:flex;gap:8px;align-items:center}
+.atabs button.on{color:var(--ink);border-bottom-color:var(--amber)}
+.agrid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:22px;margin-top:16px}
+@media (max-width:900px){.agrid{grid-template-columns:1fr}}
+.sec h5{margin:16px 0 4px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.sec h5:first-child{margin-top:0}
+.sec p{margin:0;max-width:66ch}
+.sec .lead{font-size:16.5px;line-height:1.5}
+.files{display:flex;flex-direction:column;gap:6px}
+.file{display:flex;gap:10px;align-items:center;border:1px solid var(--line-soft);border-radius:7px;padding:8px 10px;font-size:13.5px;flex-wrap:wrap}
+.file .ext{font-family:var(--mono);font-size:11px;background:var(--surface-2);border-radius:4px;padding:2px 6px;color:var(--ink-2)}
+.file.miss{border-style:dashed;border-color:var(--amber);background:var(--amber-wash)}
+.side{border:1px solid var(--line);border-radius:9px;padding:14px;align-self:start;display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.side dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px}
+.side dt{color:var(--ink-3)}
+.side dd{margin:0}
+.side .src{font-size:11.5px;color:var(--ink-3);border-top:1px solid var(--line-soft);padding-top:8px}
+.lcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.lc{border:1px solid var(--line);border-radius:8px;padding:11px 12px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.lc b{font-weight:650}
+.lc .nx{color:var(--ink-2);font-size:13px}
+.lc small{color:var(--ink-3);font-size:12px}
+.lhead{display:flex;align-items:center;gap:10px;margin:22px 0 8px;flex-wrap:wrap}
+.lhead h4{margin:0;font-size:15px}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:14px;color:var(--ink-2);font-size:13.5px}
+
+/* write-up */
+.ctx{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:13px;background:var(--surface-2);border-radius:8px;padding:10px 14px;margin-top:12px}
+.ctx span{color:var(--ink-3)}
+.ctx b{font-weight:600;color:var(--ink)}
+.steps{display:flex;gap:8px;align-items:center;margin:16px 0;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--ink-3)}
+.steps .s{display:flex;gap:6px;align-items:center}
+.steps .d{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px}
+.steps .s.on{color:var(--ink)}
+.steps .s.on .d{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.steps .s.done .d{background:var(--good);border-color:var(--good);color:var(--surface)}
+.steps .ln{width:28px;height:1.5px;background:var(--line)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:9px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h4{margin:0;font-size:15px;display:flex;gap:8px;align-items:center}
+.card h4 .d{width:22px;height:22px;border-radius:50%;background:var(--amber);color:var(--amber-ink);display:grid;place-items:center;font-size:12px;flex:none}
+pre.prompt{margin:0;font-family:var(--mono);font-size:12px;line-height:1.5;background:var(--surface-2);border-radius:7px;padding:12px;white-space:pre-wrap;max-height:260px;overflow:auto;color:var(--ink-2)}
+textarea.paste{min-height:260px;resize:vertical;font-family:var(--mono);font-size:12px;line-height:1.5}
+
+/* check */
+.ed{border:1px dashed var(--line);border-radius:7px;padding:8px 10px;background:var(--surface)}
+.ed.empty-sec{color:var(--ink-3);font-style:italic}
+.pubbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.ok{font-size:13px;color:var(--good);font-weight:600}
+.warnline{font-size:13px;color:var(--warn)}
+
+/* learning form */
+.lform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+@media (max-width:640px){.lform{grid-template-columns:1fr}}
+.lform .full{grid-column:1/-1}
+.lab{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+.kinds{display:flex;gap:8px;flex-wrap:wrap}
+.kind{border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface);color:var(--ink);text-align:left;min-width:150px}
+.kind b{display:block}
+.kind small{color:var(--ink-3)}
+.kind.on{border-color:var(--amber);background:var(--amber-wash)}
+.lform textarea.fld{min-height:64px;resize:vertical}
+
+.diff{margin-top:56px;border-top:2px solid var(--ink);padding-top:16px}
+.diff h2{font-size:18px;margin:0 0 10px}
+.diff ul{margin:0;padding-left:20px;max-width:80ch;color:var(--ink-2);display:flex;flex-direction:column;gap:6px}
+.diff b{color:var(--ink)}
+</style>
+
+<div class="doc">
+  <h1>Track Record: how it works, step by step</h1>
+  <p class="lede">The client is the page. Each client has its assignments (Planning, Retainer). The write-up and every learning belong to one assignment, so a reader always knows which piece of work it came from.</p>
+  <ol class="flow">
+    <li><b>1</b>Super user fills the registry</li>
+    <li><b>2</b>Task lands on My work</li>
+    <li><b>3</b>Track Record front</li>
+    <li><b>4</b>A client's page</li>
+    <li><b>5</b>Write up: prompt and paste</li>
+    <li><b>6</b>Check and publish</li>
+    <li><b>7</b>Add a learning</li>
+  </ol>
+
+  <!-- 1 · Registry -->
+  <div class="cap"><span class="n">Step 1</span><h2>The client registry</h2><span class="who">Super user only</span></div>
+  <p class="why">One list of every client and its assignments. Nobody else creates a client or types dates and teams. Everything later reads from here. The list you send gets loaded once; after that, a row is added here.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span>Track Record</span><div class="grp">Settings</div><span class="on">Client registry</span><span>Consultants</span></div>
+    <div class="page">
+      <div class="row"><h3 style="margin:0;font-size:20px">Client registry</h3><span class="sp"></span><button class="btn">+ Add client</button><button class="btn amber">+ Add assignment</button></div>
+      <div class="tw"><table>
+        <thead><tr><th>Assignment</th><th>Type</th><th>Start</th><th>End</th><th>Lead</th><th>Team</th></tr></thead>
+        <tbody>
+          <tr class="client"><td colspan="6">Raya Trade <span class="ind">Distribution · Large</span></td></tr>
+          <tr><td>Strategy build</td><td><span class="tag t-plan">Planning</span></td><td class="num">Jan 2025</td><td class="num">Jun 2025</td><td>Islam S.</td><td>Sara M., Omar K.</td></tr>
+          <tr><td>Strategy follow-up</td><td><span class="tag t-ret">Retainer</span></td><td class="num">Jul 2025</td><td class="num muted">Running</td><td>Sara M.</td><td>Omar K.</td></tr>
+          <tr class="client"><td colspan="6">Nile Foods <span class="ind">Food &amp; beverage · Medium</span></td></tr>
+          <tr><td>Five-year plan</td><td><span class="tag t-plan">Planning</span></td><td class="num">Mar 2026</td><td class="num">Sep 2026</td><td>Omar K.</td><td>Hana A.</td></tr>
+          <tr class="adding"><td><input class="fld" id="r-name" value="Annual review 2026" aria-label="Assignment name"></td>
+            <td><select class="fld" id="r-type" aria-label="Type"><option>Planning</option><option selected>Retainer</option></select></td>
+            <td><input class="fld" id="r-start" value="Oct 2026" aria-label="Start"></td>
+            <td><input class="fld" id="r-end" placeholder="Leave empty while running" aria-label="End"></td>
+            <td><select class="fld" id="r-lead" aria-label="Lead"><option>Omar K.</option></select></td>
+            <td><input class="fld" id="r-team" value="Hana A." aria-label="Team"></td></tr>
+          <tr class="client"><td colspan="6">Delta Logistics <span class="ind">Transport · Large · ended client</span></td></tr>
+          <tr><td>Strategy build</td><td><span class="tag t-plan">Planning</span></td><td class="num">Feb 2023</td><td class="num">Aug 2023</td><td>Islam S.</td><td>Sara M.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Lead and team are picked from the Consultants list, never typed. Types for now: Planning, Retainer. More can be added later.</p>
+    </div>
+  </div>
+
+  <!-- 2 · My work -->
+  <div class="cap"><span class="n">Step 2</span><h2>The write-up lands on the lead's My work</h2><span class="who">Automatic</span></div>
+  <p class="why">When an assignment's end date passes, its lead gets a task. Nobody has to ask. For old assignments loaded from your list, every one without a write-up shows here at once, so the backlog is visible.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span class="on">My work</span><div class="grp">Knowledge</div><span>Track Record</span></div>
+    <div class="page mw">
+      <h3 style="margin:0;font-size:20px">My work</h3>
+      <h4>Late</h4>
+      <div class="mwrow hl">
+        <svg class="book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg>
+        <div class="t"><b>Write up: Delta Logistics · Strategy build</b><small>Planning · Feb–Aug 2023 · ended 3 years ago</small></div>
+        <span class="st late">Track Record</span><button class="btn sm amber">Write it up</button>
+      </div>
+      <h4>This week</h4>
+      <div class="mwrow hl">
+        <svg class="book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5V21h16"/></svg>
+        <div class="t"><b>Write up: Raya Trade · Strategy build</b><small>Planning · Jan–Jun 2025</small></div>
+        <span class="st dr">Track Record</span><button class="btn sm amber">Write it up</button>
+      </div>
+      <div class="mwrow">
+        <span class="tick"></span>
+        <div class="t"><b>Send the Q3 scorecard</b><small>Nile Foods · Tracker</small></div>
+        <span class="st run">In progress</span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 · Front -->
+  <div class="cap"><span class="n">Step 3</span><h2>Track Record: the front</h2><span class="who">Every consultant</span></div>
+  <p class="why">Two views. <b>Clients</b>: one card per client with its assignments and where each write-up stands. <b>Learnings</b>: every note across all clients, filtered by kind, type or industry.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span class="on">Track Record</span></div>
+    <div class="page">
+      <div class="band"><div><h3>Track Record</h3><div class="eye">3 clients · 4 assignments · 2 published · 7 learnings</div></div>
+        <div class="row"><div class="seg"><button class="on">Clients</button><button>Learnings</button></div><button class="btn amber">+ Add a learning</button></div></div>
+      <div class="search"><input class="fld" id="f-q" placeholder="Search clients, write-ups and learnings" aria-label="Search"></div>
+      <div class="chips"><span class="chip on">All industries</span><span class="chip">Distribution</span><span class="chip">Food &amp; beverage</span><span class="chip">Transport</span><span class="chip">·</span><span class="chip">Planning</span><span class="chip">Retainer</span></div>
+      <div class="cards">
+        <div class="ccard"><div class="hd"><span class="mark">RT</span><div><b>Raya Trade</b><small>Distribution · Large</small></div></div>
+          <div class="asg"><div><span class="tag t-plan">Planning</span>Strategy build<span class="sp"></span><span class="st pub">Published</span></div>
+            <div><span class="tag t-ret">Retainer</span>Strategy follow-up<span class="sp"></span><span class="st run">Running</span></div></div>
+          <div class="ft">5 learnings</div></div>
+        <div class="ccard"><div class="hd"><span class="mark">NF</span><div><b>Nile Foods</b><small>Food &amp; beverage · Medium</small></div></div>
+          <div class="asg"><div><span class="tag t-plan">Planning</span>Five-year plan<span class="sp"></span><span class="st dr">Being written</span></div>
+            <div><span class="tag t-ret">Retainer</span>Annual review 2026<span class="sp"></span><span class="st run">Running</span></div></div>
+          <div class="ft">2 learnings</div></div>
+        <div class="ccard"><div class="hd"><span class="mark">DL</span><div><b>Delta Logistics</b><small>Transport · Large · ended</small></div></div>
+          <div class="asg"><div><span class="tag t-plan">Planning</span>Strategy build<span class="sp"></span><span class="st late">Not written</span></div></div>
+          <div class="ft">No learnings yet</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 · Client page -->
+  <div class="cap"><span class="n">Step 4</span><h2>A client's page</h2><span class="who">Every consultant</span></div>
+  <p class="why">The client on top with its assignments on a timeline. Each assignment is a tab. Inside it: the write-up, then the learnings from that assignment. A Retainer that is still running already collects learnings; its write-up comes when it ends.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span class="on">Track Record</span></div>
+    <div class="page">
+      <div class="crumb">Track Record › <b>Raya Trade</b></div>
+      <div class="chead"><span class="mark">RT</span><div><h3>Raya Trade</h3><small>Distribution · Large · client since Jan 2025</small></div></div>
+      <div class="tline">
+        <div class="bar p" style="left:0;width:27%">Planning · Strategy build</div>
+        <div class="bar r" style="left:27.5%;width:72.5%">Retainer · Strategy follow-up (running)</div>
+      </div>
+      <div class="tmonths"><span>Jan 2025</span><span>Jul 2025</span><span>Jan 2026</span><span>Jul 2026</span><span>Now</span></div>
+      <div class="atabs"><button class="on"><span class="tag t-plan">Planning</span>Strategy build</button><button><span class="tag t-ret">Retainer</span>Strategy follow-up</button></div>
+      <div class="agrid">
+        <div class="sec">
+          <h5>In short</h5>
+          <p class="lead">Raya came to us with three strategies in five years and none followed through. We built one plan with the leadership team in six months, cut 40 objectives to 9, and set up a monthly review that is still running.</p>
+          <h5>The client and why they came to us</h5>
+          <p>A family-owned distributor moving into retail. The new CEO wanted one direction the board would back.</p>
+          <h5>What we were asked to do</h5>
+          <p>Build the strategy and the scorecard, and get the top 30 managers behind it.</p>
+          <h5>Deliverables</h5>
+          <div class="files">
+            <div class="file"><span class="ext">PDF</span><b>Strategy house</b><span class="muted">The one-page strategy · Mar 2025</span></div>
+            <div class="file"><span class="ext">XLSX</span><b>Balanced scorecard</b><span class="muted">9 objectives, 24 measures · May 2025</span></div>
+            <div class="file"><span class="ext">PPTX</span><b>Board deck</b><span class="muted">Final presentation · Jun 2025</span></div>
+          </div>
+          <h5>What came of it</h5>
+          <p>The board approved it in June and asked us to stay on as a Retainer to run the reviews.</p>
+          <div class="lhead"><h4>Learnings from this assignment</h4><span class="muted" style="font-size:13px">3</span><span class="sp"></span><button class="btn sm">+ Add a learning</button></div>
+          <div class="lcards">
+            <div class="lc"><span><span class="tag t-hic">Hiccup</span></span><b>The board saw the scorecard too late</b><span class="nx">Show the board a draft by month two, not at the end.</span><small>Sara M. · Apr 2025</small></div>
+            <div class="lc"><span><span class="tag t-pra">Practice</span></span><b>Objectives voted down in one workshop</b><span class="nx">Dot voting with the top 30 cut the list in an afternoon.</span><small>Islam S. · Feb 2025</small></div>
+            <div class="lc"><span><span class="tag t-les">Lesson</span></span><b>Retail and wholesale need separate measures</b><span class="nx">Ask early which side of the business owns each number.</span><small>Omar K. · May 2025</small></div>
+          </div>
+        </div>
+        <aside class="side">
+          <dl><dt>Type</dt><dd><span class="tag t-plan">Planning</span></dd><dt>When</dt><dd>Jan – Jun 2025</dd><dt>Lead</dt><dd>Islam S.</dd><dt>Team</dt><dd>Sara M., Omar K.</dd><dt>Their side</dt><dd>CEO, Strategy manager</dd></dl>
+          <div><b style="font-size:12.5px">Who to ask</b><div class="muted" style="font-size:13px">Islam S. on the board · Sara M. on the scorecard</div></div>
+          <div class="src">Type, dates, lead and team come from the registry.</div>
+          <span class="st pub">Published · Jul 2025 by Islam S.</span>
+          <button class="btn sm">Edit</button>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 · Write up -->
+  <div class="cap"><span class="n">Step 5</span><h2>Writing it up: the prompt and the paste on one page</h2><span class="who">The lead, or anyone on the team</span></div>
+  <p class="why">Pressing <b>Write it up</b> opens this. The details at the top come from the registry and go into the prompt. Copy it or open it straight in Claude, talk it through, and paste the answer back on the right.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span class="on">Track Record</span></div>
+    <div class="page">
+      <div class="crumb">Track Record › Raya Trade › <b>Write up: Strategy build</b></div>
+      <div class="row"><h3 style="margin:0;font-size:20px">Write up: Strategy build</h3><span class="tag t-plan">Planning</span><span class="sp"></span><button class="btn sm">Type it in by hand instead</button></div>
+      <div class="ctx"><div><span>Client </span><b>Raya Trade</b></div><div><span>Industry </span><b>Distribution</b></div><div><span>When </span><b>Jan – Jun 2025</b></div><div><span>Lead </span><b>Islam S.</b></div><div><span>Team </span><b>Sara M., Omar K.</b></div></div>
+      <div class="steps"><span class="s on"><span class="d">1</span>Talk it through</span><span class="ln"></span><span class="s"><span class="d">2</span>Check</span><span class="ln"></span><span class="s"><span class="d">3</span>Publish</span></div>
+      <div class="two">
+        <section class="card">
+          <h4><span class="d">A</span>Take this prompt to your assistant</h4>
+<pre class="prompt">I am writing up a Planning assignment my consulting firm finished, for consultants who were not there.
+
+  Client:   Raya Trade (Distribution, Large)
+  Work:     Strategy build (Planning)
+  When:     January to June 2025
+  Our team: Islam S. (lead), Sara M., Omar K.
+
+Interview me. One question at a time. Push back if my answer is vague.
+
+Ask about: why the client came to us, what we were asked to do, their people and roles, the main stages by month, each deliverable, what came of it, who on our team to ask about what.
+
+Then ask for learnings: what went wrong (hiccup), what worked (practice), what I know now (lesson).
+
+When I say done, write it back in the fixed shape below. Use my words. Leave out anything I only half answered.
+…</pre>
+          <div class="row"><button class="btn amber">Open in Claude</button><button class="btn">Copy the prompt</button></div>
+        </section>
+        <section class="card">
+          <h4><span class="d">B</span>Paste the whole answer back</h4>
+          <textarea class="fld paste" id="w-paste" aria-label="Paste the answer">=== IN SHORT
+Raya came to us with three strategies in five years and none followed through…
+
+=== THE CLIENT AND WHY THEY CAME TO US
+A family-owned distributor moving into retail…
+
+=== DELIVERABLES
+Strategy house · the one-page strategy · Mar 2025
+…</textarea>
+          <div class="row"><button class="btn navy">Fill the write-up</button><span class="muted" style="font-size:12.5px">Nothing is saved until you check it.</span></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 · Check and publish -->
+  <div class="cap"><span class="n">Step 6</span><h2>Check it, attach the files, publish</h2><span class="who">The writer</span></div>
+  <p class="why">The paste fills the write-up in place. Every section with a dashed edge can be changed. A section the answer left out says so. The learnings it found are listed at the bottom, already tied to this assignment. Attach each file, then Publish.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span class="on">Track Record</span></div>
+    <div class="page">
+      <div class="crumb">Track Record › Raya Trade › <b>Write up: Strategy build</b></div>
+      <div class="steps"><span class="s done"><span class="d">✓</span>Talk it through</span><span class="ln"></span><span class="s on"><span class="d">2</span>Check</span><span class="ln"></span><span class="s"><span class="d">3</span>Publish</span></div>
+      <p class="ok" style="margin:0 0 12px">7 of 8 sections filled · 3 learnings found</p>
+      <div class="sec">
+        <h5>In short</h5><div class="ed">Raya came to us with three strategies in five years and none followed through. We built one plan with the leadership team in six months…</div>
+        <h5>What we were asked to do</h5><div class="ed">Build the strategy and the scorecard, and get the top 30 managers behind it.</div>
+        <h5>Their team</h5><div class="ed empty-sec">Not in the answer. Type it here or leave it empty.</div>
+        <h5>Deliverables</h5>
+        <div class="files">
+          <div class="file"><span class="ext">PDF</span><b>Strategy house</b><span class="muted">Mar 2025</span><span class="sp"></span><span class="ok">Attached</span></div>
+          <div class="file miss"><span class="ext">—</span><b>Balanced scorecard</b><span class="muted">May 2025</span><span class="sp"></span><button class="btn sm amber">Attach file</button></div>
+          <div class="file miss"><span class="ext">—</span><b>Board deck</b><span class="muted">Jun 2025</span><span class="sp"></span><button class="btn sm amber">Attach file</button></div>
+        </div>
+        <div class="lhead"><h4>Learnings found in the answer</h4><span class="muted" style="font-size:13px">saved with the write-up, under Planning · Strategy build</span></div>
+        <div class="lcards">
+          <div class="lc"><span><span class="tag t-hic">Hiccup</span></span><b>The board saw the scorecard too late</b><span class="nx">Show the board a draft by month two.</span><button class="btn sm">Edit · Remove</button></div>
+          <div class="lc"><span><span class="tag t-pra">Practice</span></span><b>Objectives voted down in one workshop</b><span class="nx">Dot voting with the top 30.</span><button class="btn sm">Edit · Remove</button></div>
+          <div class="lc"><span><span class="tag t-les">Lesson</span></span><b>Retail and wholesale need separate measures</b><span class="nx">Ask early who owns each number.</span><button class="btn sm">Edit · Remove</button></div>
+        </div>
+      </div>
+      <div class="pubbar"><button class="btn">Save as draft</button><span class="warnline">2 files not attached. You can publish and add them later.</span><span class="sp"></span><button class="btn amber">Publish</button></div>
+    </div>
+  </div>
+
+  <!-- 7 · Add a learning -->
+  <div class="cap"><span class="n">Step 7</span><h2>Adding a learning at any time</h2><span class="who">Every consultant</span></div>
+  <p class="why">For something that happened during the work, without waiting for the write-up. Pick the client, then its assignment. That gives the learning its context. Pick what kind it is. Four short questions, and it appears on the client's page under that assignment.</p>
+  <div class="frame">
+    <div class="nav"><div class="brand">Forefront</div><span>Home</span><span>Clients</span><span>My work</span><div class="grp">Knowledge</div><span class="on">Track Record</span></div>
+    <div class="page">
+      <div class="crumb">Track Record › <b>Add a learning</b></div>
+      <div class="lform">
+        <div><label class="lab" for="l-client">Client</label><select class="fld" id="l-client"><option>Raya Trade</option><option>Nile Foods</option><option>Delta Logistics</option></select></div>
+        <div><label class="lab" for="l-asg">Assignment</label><select class="fld" id="l-asg"><option>Retainer · Strategy follow-up (running)</option><option>Planning · Strategy build (Jan–Jun 2025)</option></select></div>
+        <div class="full"><span class="lab">What kind</span>
+          <div class="kinds">
+            <button class="kind on"><b><span class="tag t-hic">Hiccup</span></b><small>Something went wrong or cost us time</small></button>
+            <button class="kind"><b><span class="tag t-pra">Practice</span></b><small>Something that worked, worth repeating</small></button>
+            <button class="kind"><b><span class="tag t-les">Lesson</span></b><small>Something we know now and didn't before</small></button>
+          </div></div>
+        <div class="full"><label class="lab" for="l-title">In one line</label><input class="fld" id="l-title" value="Monthly review slipped when the CEO travelled"></div>
+        <div><label class="lab" for="l-a">What happened</label><textarea class="fld" id="l-a">Two reviews in a row were cancelled at a day's notice.</textarea></div>
+        <div><label class="lab" for="l-b">What we did</label><textarea class="fld" id="l-b">Moved the review to the COO, with the CEO reading a one-page summary.</textarea></div>
+        <div><label class="lab" for="l-c">What came of it</label><textarea class="fld" id="l-c">No review missed since.</textarea></div>
+        <div><label class="lab" for="l-d">What the next person should know</label><textarea class="fld" id="l-d">On a Retainer, agree a second chair for the review from day one.</textarea></div>
+      </div>
+      <div class="pubbar"><button class="btn">Cancel</button><span class="sp"></span><button class="btn amber">Save the learning</button></div>
+    </div>
+  </div>
+
+  <section class="diff">
+    <h2>What changes from today</h2>
+    <ul>
+      <li><b>The name</b> becomes Track Record, and each entry is an assignment's write-up.</li>
+      <li><b>Clients and assignments come from one registry</b>, kept by the super user. Nobody types a client, dates or a team anywhere else.</li>
+      <li><b>No admin has to ask</b> for a write-up. The task appears on the lead's My work when the assignment ends.</li>
+      <li><b>The prompt is the first thing you see</b> when you write one up, already filled from the registry, with Open in Claude beside it.</li>
+      <li><b>Check and publish happen on the same page</b> as the paste. Two states only: Draft and Published.</li>
+      <li><b>Every learning is tied to an assignment</b>, so a Planning hiccup is never mixed up with a Retainer one. "Write up a period" goes away; the write-up's prompt asks for learnings too.</li>
+      <li><b>Gone:</b> "Open a piece of work", "Ask for the write-up", the desk and shelves, and "Not yet in a case study".</li>
+    </ul>
+  </section>
+</div>

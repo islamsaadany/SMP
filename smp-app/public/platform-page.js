@@ -132,6 +132,7 @@
      built after `me` answers rather than written into the markup. */
   function drawNav() {
     nav.textContent = "";
+    nav.removeAttribute("aria-busy");
     /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
        spec 045 rather than an oversight: every consultant reads every
        insight, which is what makes it a memory rather than a filing cabinet.
@@ -455,10 +456,17 @@
       },
       /* Home (spec 068): the greeting band, your clients and your tasks side
          by side, and the two boxes under them */
+      /* THE CARDS HOME DRAWS, in their own boxes (.hotop, .hocard, .hochd,
+         .hotwo), so they land where the page will: Your clients and Your
+         tasks side by side, Case studies wide under them with its two
+         halves. Only what is inside each waits. */
       home: function () {
-        var col = function (k) { return '<div class="box c grow">' + b("110px", "t") + n(k, function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 8) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; }) + "</div>"; };
-        return '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
-          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(2) + col(2) + "</div>";
+        var line = function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 10) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; };
+        var card = function (cls, body) { return '<section class="hocard' + cls + '"><div class="hochd"><span class="hocic"></span>' + b("120px", "t") +
+          '<span class="sp"></span>' + b("80px", "q") + '</div><div class="hobody">' + body + "</div></section>"; };
+        var half = function (k) { return "<div>" + b("140px", "q") + n(k, line) + "</div>"; };
+        return '<div class="hotop">' + card("", '<div style="padding:4px 14px 8px">' + n(1, line) + "</div>") + card("", '<div style="padding:4px 14px 8px">' + n(1, line) + "</div>") + "</div>" +
+          card(" hosec", '<div class="hotwo">' + half(1) + half(1) + "</div>");
       },
       /* Case studies (spec 067), the memory's tab: the title and its count,
          the big search line, the categories, the shelf of studies */
@@ -479,7 +487,7 @@
         return head("100px", b("200px", "k q") + b("60px", "p q")) + table(8, function (i) { return b("44px", "q") + b("120px") + b("90px", "q") + b((260 - (i % 3) * 50) + "px", "q hide-narrow"); });
       }
     };
-    var d = el("div", "tsk");
+    var d = el("div", "tsk" + (tab === "home" ? " tskhome" : ""));
     d.setAttribute("aria-hidden", "true");
     d.innerHTML = (S[tab] || S.history)();
     return d;

@@ -111,6 +111,13 @@
      that paints a page and then corrects it has shown somebody a screen that
      was not theirs. */
   body:not(.ready) .wrap{ visibility:hidden }
+  .bootwait{ display:none }
+  body:not(.ready) .bootwait{ display:block; padding:16px 22px 0 }
+  .bwband{ height:113px; border-radius:14px; background:var(--ff); padding:21px 22px 17px; display:flex; flex-direction:column; justify-content:flex-end; gap:10px }
+  .bwband span{ display:block; height:13px; width:320px; max-width:70%; border-radius:6px; background:rgba(255,255,255,.18); animation:tskpulse 1.5s ease-in-out infinite }
+  .bwband .a{ height:10px; width:150px; background:rgba(245,166,35,.55) } .bwband .t{ height:20px; width:260px }
+  @media (max-width:999px){ body:not(.ready) .bootwait{ padding:14px 14px 0 } }
+  @media (prefers-reduced-motion:reduce){ .bwband span{ animation:none; opacity:.75 } }
 
   /* ── THE CHROME IS A COLUMN ON THE LEFT (§601) ─────────────────────────
      Islam, of design-mockups/left-nav/2026-10-23_left-sidebar.html: "yes
@@ -532,6 +539,17 @@
   .tsk .head{ padding-bottom:12px; border-bottom:1px solid var(--line) }
   .tsk .th{ height:34px; border-radius:8px 8px 0 0; background:var(--surface-2); border:1px solid var(--line) }
   .tsk .tr{ display:flex; align-items:center; gap:18px; padding:12px 14px; border:1px solid var(--line); border-top:0; background:var(--surface) }
+  /* Home's waiting cards are Home's own boxes (tabSkelBody), so the gap the
+     shape puts between its parts is the page's own margins instead */
+  .tsk.tskhome{ gap:0 }
+  .tsk .hotwo > div{ display:flex; flex-direction:column; gap:4px }
+  /* the column's tabs, waiting (drawWaiting): a tab's height, the label's */
+  .sbskrow{ display:flex; align-items:center; gap:11px; height:34px; padding:0 10px }
+  .sbskgl{ display:flex; align-items:center; height:22px; padding:0 10px }
+  .sbsk{ display:block; flex:none; height:12px; border-radius:6px; background:var(--sb-on); animation:tskpulse 1.5s ease-in-out infinite }
+  .sbskrow .sbsk:first-child{ height:18px; border-radius:5px }
+  html[data-rail="1"] .sbskrow{ justify-content:center; padding:0 } html[data-rail="1"] .sbskrow .sbsk + .sbsk, html[data-rail="1"] .sbskgl{ display:none }
+  @media (prefers-reduced-motion:reduce){ .sbsk{ animation:none; opacity:.75 } }
   .tsk .ln{ padding:11px 0; border-bottom:1px solid var(--line-soft) }
   @keyframes tskpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
   @media (prefers-reduced-motion:reduce){ .tsk .b{ animation:none; opacity:.75 } }
@@ -1877,7 +1895,11 @@
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
-  <nav class="nav" id="nav" aria-label="Pages"></nav>
+  <!-- THE COLUMN WAITS IN ITS OWN SHAPE (2026-10-26): the tabs are drawn
+       once `me` answers and drawNav() empties this first, so until then
+       the column shows its three runs and History in grey — in the page
+       itself, so it is there at the first paint, before any script. -->
+  <nav class="nav" id="nav" aria-label="Pages" aria-busy="true"><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:50px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:70px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:56px"></span></div></div><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:86px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:96px"></span></div></div><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:90px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:80px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:62px"></span></div></div><div class="sbgrp foot"><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:58px"></span></div></div></nav>
   <div class="sbfoot">
     <span class="sbav" id="sbav" aria-hidden="true"></span>
     <span id="who"></span>
@@ -1890,6 +1912,12 @@
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <button class="sblogo" type="button" data-home-logo aria-label="Home" data-tip="Home"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></button><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
+  <!-- AND THE BAND WAITS IN THE PAGE TOO (2026-10-26): every tab opens on
+       a band of one size in one place (2026-10-24), so it is drawn here,
+       before any script, and stands until the page is ready — the first
+       visit after a release, when the page's script is still on its way,
+       shows the band and the column's tabs rather than an empty page. -->
+  <div class="bootwait" aria-hidden="true"><div class="bwband"><span class="a"></span><span class="t"></span><span></span></div></div>
   <div class="wrap" id="page"></div>
 </div>
 </div>
@@ -2042,6 +2070,7 @@
      built after `me` answers rather than written into the markup. */
   function drawNav() {
     nav.textContent = "";
+    nav.removeAttribute("aria-busy");
     /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
        spec 045 rather than an oversight: every consultant reads every
        insight, which is what makes it a memory rather than a filing cabinet.
@@ -2365,10 +2394,17 @@
       },
       /* Home (spec 068): the greeting band, your clients and your tasks side
          by side, and the two boxes under them */
+      /* THE CARDS HOME DRAWS, in their own boxes (.hotop, .hocard, .hochd,
+         .hotwo), so they land where the page will: Your clients and Your
+         tasks side by side, Case studies wide under them with its two
+         halves. Only what is inside each waits. */
       home: function () {
-        var col = function (k) { return '<div class="box c grow">' + b("110px", "t") + n(k, function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 8) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; }) + "</div>"; };
-        return '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(3) + col(3) + "</div>" +
-          '<div class="r" style="align-items:stretch;gap:16px;flex-wrap:wrap">' + col(2) + col(2) + "</div>";
+        var line = function (i) { return '<div class="r ln">' + b("30px", "q") + b((62 - i * 10) + "%") + '<span class="grow"></span>' + b("70px", "q hide-narrow") + "</div>"; };
+        var card = function (cls, body) { return '<section class="hocard' + cls + '"><div class="hochd"><span class="hocic"></span>' + b("120px", "t") +
+          '<span class="sp"></span>' + b("80px", "q") + '</div><div class="hobody">' + body + "</div></section>"; };
+        var half = function (k) { return "<div>" + b("140px", "q") + n(k, line) + "</div>"; };
+        return '<div class="hotop">' + card("", '<div style="padding:4px 14px 8px">' + n(1, line) + "</div>") + card("", '<div style="padding:4px 14px 8px">' + n(1, line) + "</div>") + "</div>" +
+          card(" hosec", '<div class="hotwo">' + half(1) + half(1) + "</div>");
       },
       /* Case studies (spec 067), the memory's tab: the title and its count,
          the big search line, the categories, the shelf of studies */
@@ -2389,7 +2425,7 @@
         return head("100px", b("200px", "k q") + b("60px", "p q")) + table(8, function (i) { return b("44px", "q") + b("120px") + b("90px", "q") + b((260 - (i % 3) * 50) + "px", "q hide-narrow"); });
       }
     };
-    var d = el("div", "tsk");
+    var d = el("div", "tsk" + (tab === "home" ? " tskhome" : ""));
     d.setAttribute("aria-hidden", "true");
     d.innerHTML = (S[tab] || S.history)();
     return d;

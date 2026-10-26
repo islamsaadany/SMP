@@ -78744,6 +78744,13 @@ var SYNC = (function () {
         if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
         if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
       }
+      /* The platform's mark goes with the PRODUCT's name (option D,
+         2026-10-26): before the heading where that is the product, before
+         the small line where a client's own person reads their company
+         first. Moved, never copied, so there is one on the line. */
+      var bm = document.querySelector(".brand .brandmark");
+      var withOrg = staff && org && !org.hidden;
+      if (bm && h1) h1.parentNode.insertBefore(bm, withOrg ? org : h1);
       if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
         /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
@@ -88812,6 +88819,10 @@ var SYNC = (function () {
      every paint would shut a menu somebody has open. */
   var ICO_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
     'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  /* the platform's mark, the console column's own drawing (platform.html .sblogo) */
+  var ICO_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/>' +
+    '<circle cx="12" cy="12" r="1.3"/></svg>';
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -89013,8 +89024,16 @@ var SYNC = (function () {
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
+    /* OPTION D (2026-10-26, Islam: "remove the word platform and the icon
+       with a thin divider and who want to go back will press the icon"): the
+       platform's mark is the way back to the console, the console column's
+       own north star at the bar's scale, then a hairline, then the client.
+       Still `.trff` and still /platform, so every check that presses the way
+       back presses this; "Home" is its name, aloud and on a hover, as the
+       console's own mark is named. */
     nav.innerHTML =
-      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<a class="trff" href="/platform" aria-label="Home" title="Home">' + ICO_STAR + "</a>" +
+      '<span class="trbar" aria-hidden="true"></span>' +
       '<details class="dlmenu trstep trclient"><summary>' +
         "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
       sep + third;

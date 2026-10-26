@@ -743,10 +743,24 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      steps above it the quieter ink, which is how a trail reads everywhere. */
   nav.trail { display:flex; align-items:center; gap:6px; min-width:0; margin-right:auto;
               font-size:13.5px; white-space:nowrap; }
-  nav.trail .trff { color:var(--ink-2); text-decoration:none; font-weight:600;
-                    letter-spacing:.04em; font-size:12px; text-transform:uppercase; }
-  nav.trail .trff:hover { color:var(--ink); text-decoration:underline; }
-  nav.trail .trff:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:3px; }
+  /* OPTION D (2026-10-26): the trail opens on the platform's MARK, not the
+     word — the console column's north star (.sblogo), navy on amber, at the
+     bar's scale — and a hairline before the client. It is the way back to the
+     console; a hover rings it and says "Home", as the console's own mark does. */
+  nav.trail .trff { flex:none; display:grid; place-items:center; width:24px; height:24px; border-radius:7px;
+                    background:#F5A623; color:#0F2C69; text-decoration:none; }
+  nav.trail .trff svg { width:17px; height:17px; display:block; }
+  nav.trail .trff:hover { box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--gold); filter:brightness(1.04); }
+  nav.trail .trff:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:7px; }
+  .top .brandmark { flex:none; display:grid; place-items:center; width:24px; height:24px; border-radius:7px;
+                    background:#F5A623; color:#0F2C69; }
+  .top .brandmark svg { width:17px; height:17px; display:block; }
+  /* beside the product's name after the company's, the hairline moves from
+     the name to before the mark, so mark and name read as one */
+  .top .brand h1 + .brandmark { position:relative; }
+  .top .brand h1 + .brandmark::before { content:""; position:absolute; left:-7px; top:3px; bottom:3px; width:1px; background:var(--line); }
+  .top .brand .brandmark + .orgname { border-left:0; padding-left:0; margin-left:-3px; }
+  nav.trail .trbar { flex:none; width:1px; height:18px; background:var(--line); margin:0 6px 0 4px; }
   nav.trail .trsep { color:var(--ink-3); font-size:15px; line-height:1; }
   nav.trail details.trstep > summary { cursor:pointer; gap:6px; padding:3px 7px; border-radius:7px;
                                        color:var(--ink); font-weight:600; min-width:0; }
@@ -802,6 +816,8 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   html[data-viewing-as] nav.trail details.trclient > summary,
   html[data-viewing-as] nav.trail details.trstep > summary:hover,
   html[data-viewing-as] nav.trail details.trstep[open] > summary { color:var(--ink-3); }
+  /* the mark greys with the words: its amber is the bar's loudest colour */
+  html[data-viewing-as] nav.trail .trff { background:var(--surface-2); }
   /* THE CARET KEEPS A WEIGHT A WORD KEEPS, AND THE SEPARATOR DOES NOT —
      one stated departure from the drawing, in the direction of Islam's own
      decision. Measured, `--line` on the bar's surface is **1.38:1 light and

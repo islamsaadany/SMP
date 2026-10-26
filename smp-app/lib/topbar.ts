@@ -65,6 +65,14 @@ const esc = (v: unknown): string =>
   String(v == null ? "" : v).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as Record<string, string>)[c]!);
 
+/* THE PLATFORM'S MARK (option D, 2026-10-26): the console column's own
+   north star (platform.html .sblogo), drawn at the bar's scale. It opens
+   both bars and is the way back — to the console for Forefront's people, to
+   the client's own platform for a client's. */
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+  'stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/>' +
+  '<circle cx="12" cy="12" r="1.3"/></svg>';
+
 const DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
   'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -92,7 +100,7 @@ export function topBarHtml(t: TopBar): string {
         esc(link.label) + (link.count ? '<span class="tbn">' + esc(link.count) + "</span>" : "") + "</a>"
       : "";
     return '<header class="tb"><div class="tbin">' +
-      '<a class="tbbrand" href="' + esc(clientHref(t.slug, DEFAULT_MODULE, "")) + '">Strategy Management Platform</a>' +
+      '<a class="tbbrand" href="' + esc(clientHref(t.slug, DEFAULT_MODULE, "")) + '"><span class="tbmark">' + STAR + "</span>Strategy Management Platform</a>" +
       '<span class="tborg">' + esc(t.tenantName) + "</span>" + reading + right + "</div></header>";
   }
   const mods = moduleMenu(t.have);
@@ -131,7 +139,8 @@ export function topBarHtml(t: TopBar): string {
     : !!(t.viewer && t.viewer.current && t.viewer.current !== t.viewer.self);
   return '<header class="tb' + (viewing ? " tbviewing" : "") + '"><div class="tbin">' +
     '<nav class="tbtrail" aria-label="Where you are">' +
-      '<a class="tbff" href="/platform">Platform</a>' + sep +
+      '<a class="tbff tbmark" href="/platform" aria-label="Home" title="Home">' + STAR + "</a>" +
+      '<span class="tbbar" aria-hidden="true"></span>' +
       '<details class="tbstep tbclient"><summary><span>' + esc(t.tenantName) + "</span>" + DOWN + "</summary>" +
         '<div class="tbmenu" role="menu" data-clients="' + esc(t.slug) + '">' +
           '<div class="tbquiet">Reading your clients…</div><div class="tbrule" role="separator"></div>' +
@@ -161,8 +170,11 @@ const TOPBAR_CSS_RAW = `
 .tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;position:relative;z-index:30}
 .tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
 .tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
-.tbff{color:var(--tb-ink-2);text-decoration:none;font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
-.tbff:hover{color:var(--tb-ink);text-decoration:underline}
+.tbmark{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:#F5A623;color:#0F2C69;text-decoration:none}
+.tbmark svg{width:17px;height:17px;display:block}
+a.tbmark:hover{box-shadow:0 0 0 2px var(--tb-surface),0 0 0 4px var(--tb-gold);filter:brightness(1.04)}
+a.tbmark:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+.tbbar{flex:none;width:1px;height:18px;background:var(--tb-line);margin:0 6px 0 4px}
 .tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
 .tbstep{position:relative}
 .tbstep>summary{list-style:none;display:inline-flex;align-items:center;cursor:pointer;gap:6px;padding:3px 7px;border-radius:7px;color:var(--tb-ink);font-weight:600}
@@ -175,7 +187,8 @@ const TOPBAR_CSS_RAW = `
    the viewed person's own access, so the ground still answers the pointer
    (the control plainly works) and only the ink stands down. Islam's A of two
    drawn; B, which also held the menus, is refused in arrange.css's own note. */
-.tbviewing .tbff,.tbviewing .tbstep>summary,.tbviewing .tbclient>summary,.tbviewing .tbstep>summary:hover,.tbviewing .tbstep[open]>summary{color:var(--tb-ink-3)}
+.tbviewing .tbff{background:var(--tb-surface-2);color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary,.tbviewing .tbclient>summary,.tbviewing .tbstep>summary:hover,.tbviewing .tbstep[open]>summary{color:var(--tb-ink-3)}
 .tbviewing .tbstep>summary>svg{color:var(--tb-ink-3)}
 .tbviewing .tbsep{color:var(--tb-line)}
 .tbmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:290px;background:var(--tb-surface);border:1px solid var(--tb-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:4px 0;white-space:normal}
@@ -185,7 +198,7 @@ const TOPBAR_CSS_RAW = `
 .tbsub{display:block;font-size:11.5px;color:var(--tb-ink-2);margin-top:2px;font-weight:400}
 .tbquiet{padding:9px 14px;font-size:13.5px;color:var(--tb-ink-2);font-style:italic}
 .tbrule{height:1px;background:var(--tb-line);margin:4px 0}
-.tbbrand{font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
+.tbbrand{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
 .tbbrand:hover{text-decoration:underline}
 .tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
 .tbread{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--tb-ink);text-decoration:none;padding:3px 8px;border-radius:7px}

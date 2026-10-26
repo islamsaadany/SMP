@@ -167,6 +167,15 @@ const TOPBAR_CSS_RAW = `
 :root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}}
 :root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}
+/* THE MODULE PAGES AT 80% ON A COMPUTER (2026-10-26, Islam's option 1 of
+   two): the console (§601) and Strategy (§631) already are, so a bar and the
+   page under it were 80% in two places and 100% in the rest. Every module
+   page loads this stylesheet, so the rule is said once, here, in their
+   words: zoomed from 1000px, a phone kept at 100%. The window's size is said
+   in the page's own pixels (--winw, --winh), as _shared.css does for
+   Strategy, because under a zoom 100vh is 80% of the window. */
+:root{--winw:100vw;--winh:100vh}
+@media (min-width:1000px){html{zoom:.8}:root{--winw:calc(100vw / .8);--winh:calc(100vh / .8)}}
 .tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;position:relative;z-index:30}
 .tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
 .tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}

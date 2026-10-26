@@ -951,7 +951,9 @@ try {
        The words cost its first column 54 → 86px and the popup 200 → 232, and
        it hangs off the right edge of a cell near the right edge of the page,
        so what is asserted is the BOX against the window at both ends. */
-    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right),Math.round(r.width),document.documentElement.clientWidth].join(' ')})()");
+    /* the edges against the window in the screen's pixels, the width in the
+       page's own: the page is zoomed to 0.8 on a computer (lib/topbar.ts) */
+    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
     check("...and the wider picker is inside the window, both edges", !!pbox && (() => { const [l, r, w, vw] = pbox.split(" ").map(Number); return l >= 0 && r <= vw && w === 232; })(), pbox);
     /* THE BOLD STAYS IN THE PICKER and only there — the other end of the
        assertion above, which is that no ROW carries one (§94.2). */
@@ -1180,14 +1182,21 @@ try {
     const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .team');if(!t)return null;var c=getComputedStyle(t);"
       + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
       + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"
-      + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width),need:Math.round(w+slack),"
-      + "row:Math.round(t.querySelector('button').getBoundingClientRect().height),pad:bc.paddingTop};})()");
+      /* boxes the browser reports are in the screen's pixels and the page is
+         zoomed to 0.8 on a computer (lib/topbar.ts), so they are read back in
+         the page's own pixels, the ones the stylesheet and scrollWidth use */
+      + "var z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;"
+      + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width/z),need:Math.round(w+slack),"
+      + "row:Math.round(t.querySelector('button').getBoundingClientRect().height/z),pad:bc.paddingTop};})()");
     check("pressing my name opens the team, first names only and no heading", await team.isVisible() &&
       (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
       (await team.locator("button").allInnerTexts()).join("|"));
     const fit = await teamFit();
     check("...and the list is no wider than its longest name needs — the floor in the stylesheet is gone", !!fit &&
-      (fit.floor === "0px" || fit.floor === "auto") && fit.box === fit.need, JSON.stringify(fit));
+      /* within a pixel, the console's own allowance (§622): a zoomed box
+         snaps to the screen's pixels, so read back in the page's it can land
+         one short of the whole number its content asks for */
+      (fit.floor === "0px" || fit.floor === "auto") && Math.abs(fit.box - fit.need) <= 1, JSON.stringify(fit));
     check("...with rows short enough to be compact and tall enough to press", !!fit && fit.row <= 30 && fit.row >= 24, fit && fit.row);
     await pg.locator("h2.pt").click();
     check("a click elsewhere closes it and changes nothing", !(await team.isVisible()) && (await asTenant(A, (c) => oneAction(c, born.id))).ownerKey === "noran");

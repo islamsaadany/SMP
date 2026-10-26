@@ -150,7 +150,7 @@ input.date{cursor:auto}
 .rm{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--bad);cursor:pointer;text-decoration:underline}
 @media (max-width:760px){.two{grid-template-columns:1fr}
   .nrow{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"d n s" "t t t";row-gap:4px;column-gap:10px}.nrow .t{grid-area:t}.nrow .word{grid-area:s}.nrow .d{grid-area:d}.nrow .n{grid-area:n}
-  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(100vw - 60px))}}
+  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(var(--winw) - 60px))}}
 `;
 
 

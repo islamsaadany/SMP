@@ -1615,8 +1615,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-fsave]");
     await page.waitForFunction(() => /Done/.test((document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || ""), null, { timeout: 10000 });
     for (let i = 0; i < 20 && !(F = await flowRow(cid)).done[0]; i++) await page.waitForTimeout(250);
-    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt." && F.prop[0] === "" && F.talk[0].map((x) => x.w).join() === "ai,me,ai,note",
-      "Save to the card puts the proposal on the card, agrees the part and moves to the next; the part's conversation is kept (§643)", JSON.stringify({ done: F.done, e: F.e, phase: F.phase, talk: F.talk[0] }));
+    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt." && F.prop[0] === "" && F.log.map((x) => x.p + x.w).join() === "0qa,0ai,0me,0ai,0note",
+      "Save to the card puts the proposal on the card, agrees the part and moves to the next; the conversation is kept in the order it happened (§643, §644)", JSON.stringify({ done: F.done, e: F.e, phase: F.phase, log: F.log }));
     /* §643 — THE AGREED PART FOLDS, AND OPENS AGAIN (Islam: "the guided
        answers collapse after finishing but I can open them again to see my
        answers"): one row, then every question with its answer and the
@@ -1625,8 +1625,15 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click('[data-cop-pfold="0"]');
     const fo1 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? r.textContent : ""; });
     await page.click('[data-cop-pfold="0"]');
-    check(fo0 && /answer/.test(fo0.row) && /1 change/.test(fo0.row) && /Agreed/.test(fo0.row) && !fo0.body && /plans and connectivity/.test(fo1) && /Make concise/.test(fo1) && /Agreed wording/.test(fo1) && /We connect Egypt\./.test(fo1),
-      "§643 the agreed part folds to one row and opens to its answers, the change asked for and the wording agreed", JSON.stringify({ fo0, fo1: fo1.slice(0, 300) }));
+    /* §644 — IN THE ORDER IT HAPPENED: the folded row stands where the part
+       was answered, before the next part's question; nothing is drawn for a
+       part not reached; no "Later" yet, because nothing has followed the
+       guided pass. */
+    const tm = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'), qs = Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.ai")), q = qs[qs.length - 1];
+      return { rows: document.querySelectorAll("[data-cop-foldbox]").length, before: !!(r && q && (r.compareDocumentPosition(q) & Node.DOCUMENT_POSITION_FOLLOWING)), sep: !!document.querySelector(".copsep") }; });
+    check(fo0 && /answer/.test(fo0.row) && /2 drafts/.test(fo0.row) && /Agreed/.test(fo0.row) && !fo0.body && /plans and connectivity/.test(fo1) && /Make concise/.test(fo1) && /On the card now/.test(fo1) && /We connect Egypt\./.test(fo1) &&
+      tm.rows === 1 && tm.before && !tm.sep,
+      "§643, §644 the agreed part folds to one row where it was answered — before the next part's question, no row for parts not reached — and opens to its answers, its drafts, the change asked for and what is on the card", JSON.stringify({ fo0, tm, fo1: fo1.slice(0, 300) }));
     /* THE COUNT MOVES WHEN A PART IS AGREED, which is the number's whole
        claim: the two readings before this one are both 0 of 6, so without
        this a bar frozen at nought passes every assertion above it (§113.8). */
@@ -1670,7 +1677,12 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "leaving it as it is puts you back on question 2 of the part you were on, its words as they were", JSON.stringify({ done0: F.done[0], e: F.e, phase: F.phase, qi: F.qi }));
     /* §643 — Your answers on a card takes you to that part in the chat, opened;
        the press is the link's, not the card's. */
+    /* §644 — it is a hover icon beside the pen and Edit with AI, not a link
+       at rest (Islam: "always visible is not really neat"; option A). */
+    const yaRest = await page.evaluate(() => { const b = document.querySelector('[data-cop-card="0"] .copcact [data-cop-answers]'); return b ? getComputedStyle(b.closest(".copcact")).opacity : "none"; });
+    await page.hover('[data-cop-card="0"]');
     if (await pressIf('[data-cop-card="0"] [data-cop-answers]')) await page.waitForTimeout(200);
+    check(yaRest === "0" && !(await page.$('[data-cop-card="0"] .copanswers')), "§644 Your answers is an icon among the card's hover icons, hidden at rest", yaRest);
     const ya = await page.evaluate(() => ({ open: !!document.querySelector('[data-cop-foldbox="0"].open .coppfb'), pen: !!document.querySelector("[data-cop-pentext]") }));
     const yaF = await flowRow(cid);
     check(ya.open && !ya.pen && yaF.e === 1 && yaF.phase === "ask", "§643 Your answers on a card opens that part's answers in the chat and leaves the work where it was", JSON.stringify({ ya, e: yaF.e, phase: yaF.phase }));
@@ -1794,11 +1806,11 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.fill("[data-cop-text]", "Make it shorter please");
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => /Kept in the chat/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
-    for (let i = 0; i < 20 && !((F = await flowRow(cid)).notes || []).length; i++) await page.waitForTimeout(250);
+    for (let i = 0; i < 20 && !((F = await flowRow(cid)).log || []).some((x) => x.p === -1); i++) await page.waitForTimeout(250);
     const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
       line: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me .copbody")).some((x) => x.textContent === "Make it shorter please") }));
-    check(MODEL_SEEN.length === seenC && /Kept in the chat/.test(nn.say) && /name it/.test(nn.say) && nn.fin && nn.line && F.notes.some((x) => x.t === "Make it shorter please"),
-      "a line naming no part asks nothing and leaves the check where it was — and stays in the chat, stored (§643: \"my text disappears\")", JSON.stringify({ nn, notes: F.notes }));
+    check(MODEL_SEEN.length === seenC && /Kept in the chat/.test(nn.say) && /name it/.test(nn.say) && nn.fin && nn.line && F.log.some((x) => x.p === -1 && x.w === "me" && x.t === "Make it shorter please"),
+      "a line naming no part asks nothing and leaves the check where it was — and stays in the chat, stored (§643: \"my text disappears\")", JSON.stringify({ nn, log: F.log.slice(-3) }));
     Object.assign(MODEL_ANSWER, { text: "Integrity, speed and care." });
     await page.fill("[data-cop-text]", "Make the core values shorter");
     await page.click("[data-cop-send]");
@@ -1807,6 +1819,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(MODEL_SEEN.length === seenC + 1 && /core values shorter/.test(JSON.stringify(MODEL_SEEN[seenC])) && F.e === 5 && F.phase === "draft" && F.done[5] === true && F.drafts[5] === "Integrity and speed." && F.prop[5] === "Integrity, speed and care.",
       "a line naming Core Values opens that part with the change proposed in the chat — the card keeps its agreed words (§643)", JSON.stringify({ seen: MODEL_SEEN.length - seenC, e: F.e, phase: F.phase, d: F.drafts[5], p: F.prop[5] }));
     check((await textOf("[data-cop-fsave]")) === "Save to the card" && (await textOf("[data-cop-fkeep]")) === "Keep as it was", "…with Save to the card and Keep as it was (§643)");
+    /* §644 — after the guided pass it is plain chat, marked Later once, and a
+       proposal names its part, since the chat moves between parts. */
+    const lt = await page.evaluate(() => ({ seps: document.querySelectorAll(".copsep").length, head: (Array.from(document.querySelectorAll(".copmsg:not(.copold) .copeh")).pop() || {}).textContent || "" }));
+    check(lt.seps === 1 && lt.head.indexOf(Wc.val + " · Proposal") === 0, "§644 what follows the guided pass is plain chat, marked Later once, each proposal naming its part", JSON.stringify(lt));
     await pressIf("[data-cop-fsave]");
     for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "check"; i++) await page.waitForTimeout(250);
     await pressIf("[data-cop-savebar] [data-cop-fcheck]");

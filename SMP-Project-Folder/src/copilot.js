@@ -978,6 +978,7 @@ var COPILOT = (function(){
      redraw puts back what is half-typed rather than the stored draft. */
   var CARDPEN = null;
   var PENMARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 5.2l3.6 3.6M16.7 3.7a2.5 2.5 0 113.6 3.6L6.5 21H3v-3.6z"/></svg>';
+  var CHATMARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>';
   var AIMARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 3.5l1.6 4.4 4.4 1.6-4.4 1.6L10 15.5l-1.6-4.4L4 9.5l4.4-1.6z"/><path d="M17.5 13.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>';
   function penHere(){ return !!(CARDPEN && PANE && PANE.chat && CARDPEN.id === PANE.chat.id); }
   function cardsHtml(f){
@@ -1013,8 +1014,7 @@ var COPILOT = (function(){
       else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f), el.key)
         : '<p>' + (now && f.phase === "draft" ? "Nothing agreed yet. The proposal is in the chat." : now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
-      /* §643 — Your answers takes you to this part in the chat, opened. */
-      if (a || ((f.talk && f.talk[i]) || []).length) body += '<span class="copanswers" role="button" tabindex="0" data-cop-answers="' + i + '">Your answers</span>';
+
       var wide = el.key === "who" || el.key === "asp";
       var head = '<h3><span>' + E(partName(el)) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
       var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
@@ -1032,7 +1032,12 @@ var COPILOT = (function(){
       if (pick && !pen && txt && !now)
         return '<div class="' + c + ' acts" data-cop-card="' + i + '">' + head + body +
           '<span class="copcact"><button type="button" data-cop-pen="' + i + '" title="Edit the text" aria-label="Edit the text of ' + E(partName(el)) + '">' + PENMARK + '</button>' +
-          '<button type="button" data-cop-ai="' + i + '" title="Edit with AI" aria-label="Edit ' + E(partName(el)) + ' with AI">' + AIMARK + '</button></span></div>';
+          '<button type="button" data-cop-ai="' + i + '" title="Edit with AI" aria-label="Edit ' + E(partName(el)) + ' with AI">' + AIMARK + '</button>' +
+          /* §644 — BACK TO ITS ANSWERS IS ONE MORE HOVER ICON (Islam: "show
+             answers on the card always visible is not really neat"; option A
+             of design-mockups/copilot-layout/2026-10-26_chat-in-time.html):
+             the card at rest is only its words. */
+          ((f.log || []).some(function(x){ return x.p === i && x.w === "qa"; }) ? '<button type="button" data-cop-answers="' + i + '" title="Your answers in the chat" aria-label="Your answers on ' + E(partName(el)) + ' in the chat">' + CHATMARK + '</button>' : '') + '</span></div>';
       return pick && !pen && !now
         ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '" aria-label="Work on ' + E(partName(el)) + '">' + head + body + '</button>'
         : '<div class="' + c + '" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') + '>' + head + body + '</div>';
@@ -1093,11 +1098,53 @@ var COPILOT = (function(){
       out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(partName(S[0])) + "</b> (" + S[0].questions.length + " short questions)."));
     }
     var all = f.phase === "check" || f.phase === "saved";
-    S.forEach(function(el, i){
-      if (!on(i)) return;
-      var current = !all && i === f.e;
-      if (!current) { out.push(foldHtml(f, i, false)); return; }
-      if (f.phase === "loaded") return;
+    /* §644 — THE CHAT IN THE ORDER IT HAPPENED (Islam: "I thought they will
+       be collapsed in their place of creation in the chat"; signed off from
+       design-mockups/copilot-layout/2026-10-26_chat-in-time.html). Drawn from
+       the one record, `log`: a part's guided pass — its questions, the
+       drafts made from them, and its first save — is ONE folded row where it
+       happened; what follows is plain chat, each proposal naming its part.
+       A part's block closes at its first note (saved or kept); a block still
+       open is the part being drafted now, drawn open. */
+    var log = f.log || [], member = {}, opened = {}, closed = {}, aiCount = {}, lastAi = {};
+    log.forEach(function(x, k){
+      if (x.w === "qa") { if (!(x.p in closed)) opened[x.p] = k; return; }
+      if (x.p in opened && !(x.p in closed)) { member[k] = x.p; if (x.w === "note") closed[x.p] = k; }
+      if (x.w === "ai") lastAi[x.p] = k;
+    });
+    var cur = !all && f.phase === "draft" ? f.e : -1, prop = cur >= 0 ? String((f.prop || [])[cur] || "") : "", liveDone = false, later = false, seenClosed = false;
+    var refBtns = '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
+      '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
+      '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>';
+    var liveBox = function(p, n, t){
+      var agreedNow = !!String(f.drafts[p] || "").trim();
+      return aiMsg('<span class="copeh">' + E(partName(S[p])) + ' · Proposal ' + n + '</span><div class="copfdraft">' + E(withY(t, f)) + '</div>' +
+        (ed ? 'Refine it, or type what to change in the box below.' + refBtns +
+          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>Save to the card</button>' +
+          (agreedNow ? '<button type="button" class="copbtn" data-cop-fkeep' + (busyHere ? ' disabled' : '') + '>Keep as it was</button>' : '') + '</div>' : ''), true);
+    };
+    log.forEach(function(x, k){
+      var p = x.p, el = p >= 0 ? S[p] : null;
+      if (p >= 0 && !on(p)) return;
+      if (x.w === "ai") aiCount[p] = (aiCount[p] || 0) + 1;
+      if (x.w === "qa") {
+        if (k !== opened[p]) return;
+        if (p in closed) { out.push(foldHtml(f, p, log, member)); seenClosed = true; }
+        else out.push(foldHtml(f, p, log, member, true));
+        return;
+      }
+      if (member[k] !== undefined && member[k] in closed) return;
+      if (member[k] === undefined && seenClosed && !later) { later = true; out.push('<div class="copsep" role="separator"><span>Later</span></div>'); }
+      if (x.w === "me") { out.push(meMsg(x.t)); return; }
+      if (x.w === "note") { out.push('<div class="copfnote">' + E(x.t) + '</div>'); return; }
+      if (p === cur && k === lastAi[p] && prop.trim() && x.t === prop) { liveDone = true; out.push(liveBox(p, aiCount[p], x.t)); return; }
+      out.push('<div class="copmsg ai copwide copold"><span class="copwho">Copilot</span><div class="copbody"><span class="copeh">' + E(el ? partName(el) : "") + ' · Proposal ' + aiCount[p] +
+        (k !== lastAi[p] ? ' · replaced' : '') + '</span><div class="copfdraft">' + E(withY(x.t, f)) + '</div></div></div>');
+    });
+    /* What is being done NOW, at the foot: the part's questions, its answers
+       to review, or — with no proposal yet — what to change. */
+    var el = S[f.e], i = f.e;
+    if (!all && on(i) && f.phase !== "loaded") {
       if (plan) out.push(aiMsg("Let's work on <b>" + E(partName(el)) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
@@ -1115,35 +1162,11 @@ var COPILOT = (function(){
           }).join("") + '</div>' +
           (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(partName(el)) + '</button></div>' : ''), true));
       } else if (f.phase === "draft") {
-        /* §643 — THE PART'S CONVERSATION, WHOLE: the answers (folded), then
-           every proposal and every change asked for, in order; the newest
-           proposal live, the ones it replaced faded. The card keeps the
-           agreed wording until Save to the card. */
-        var prop = String((f.prop || [])[i] || ""), talk = (f.talk && f.talk[i]) || [], live = -1, pn = 0;
-        if (prop.trim()) for (var tk = talk.length - 1; tk >= 0; tk--) if (talk[tk].w === "ai") { if (talk[tk].t === prop) live = tk; break; }
-        var refBtns = '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
-          '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
-          '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>';
-        var agreedNow = !!String(f.drafts[i] || "").trim();
-        var liveBox = function(t){
-          pn++;
-          return aiMsg('<span class="copeh">Proposal ' + pn + ' · ' + E(partName(el)) + '</span><div class="copfdraft">' + E(withY(t, f)) + '</div>' +
-            (ed ? 'Refine it, or type what to change in the box below.' + refBtns +
-              '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>Save to the card</button>' +
-              (agreedNow ? '<button type="button" class="copbtn" data-cop-fkeep' + (busyHere ? ' disabled' : '') + '>Keep as it was</button>' : '') + '</div>' : ''), true);
-        };
-        out.push(foldHtml(f, i, true));
-        talk.forEach(function(x, k){
-          if (x.w === "me") out.push(meMsg(x.t));
-          else if (x.w === "note") out.push('<div class="copfnote">' + E(x.t) + '</div>');
-          else if (k === live) out.push(liveBox(x.t));
-          else { pn++; out.push('<div class="copmsg ai copwide copold"><span class="copwho">Copilot</span><div class="copbody"><span class="copeh">Proposal ' + pn + ' · ' + E(partName(el)) + ' · replaced</span><div class="copfdraft">' + E(withY(x.t, f)) + '</div></div></div>'); }
-        });
-        if (prop.trim() && live < 0) out.push(liveBox(prop));
+        if (prop.trim() && !liveDone) out.push(liveBox(i, (aiCount[i] || 0) + 1, prop));
         if (!prop.trim() && ed) out.push(aiMsg("What would you like to change in <b>" + E(partName(el)) + "</b>? Type it below, or use a button. The card keeps its wording until you save a new one." + refBtns +
           '<div class="copbtns"><button type="button" class="copbtn" data-cop-fkeep' + (busyHere ? ' disabled' : '') + '>Leave it as it is</button></div>', true));
       }
-    });
+    }
     if (all && f.check) {
       var byKey = {}; S.forEach(function(el, i){ byKey[el.key] = i; });
       var issues = f.check.issues || [], agree = f.check.agree || [];
@@ -1165,7 +1188,6 @@ var COPILOT = (function(){
     if (f.phase === "check" && !f.check && !busyHere) {
       out.push(aiMsg("Every part is agreed. Run the check from the pane when you're ready — it reads the parts together.", true));
     }
-    (f.notes || []).forEach(function(x){ out.push(x.w === "me" ? meMsg(x.t) : '<div class="copfnote">' + E(x.t) + '</div>'); });
     if (f.phase === "saved" && f.saved) {
       out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
@@ -1180,25 +1202,25 @@ var COPILOT = (function(){
      nothing in it is ever dropped. The part being worked on folds only its
      answers: its conversation is drawn open below. */
   var FOLD = {};
-  function foldHtml(f, i, current){
-    var el = steps()[i], a = (f.ans && f.ans[i]) || [], talk = current ? [] : ((f.talk && f.talk[i]) || []);
+  function foldHtml(f, i, log, member, current){
+    var el = steps()[i], a = (f.ans && f.ans[i]) || [], txt = String(f.drafts[i] || "").trim();
     var n = a.filter(function(x){ return String(x || "").trim(); }).length;
-    var ch = ((f.talk && f.talk[i]) || []).filter(function(x){ return x.w === "me"; }).length, txt = String(f.drafts[i] || "").trim();
-    if (!n && !talk.length && (current || !txt || f.from[i])) return current || !f.done[i] || f.from[i] ? "" : aiMsg(E(partName(el)) + " left empty for " + E(fname()) + ".");
+    var lines = current ? [] : log.filter(function(x, k){ return member[k] === i; });
+    var d = lines.filter(function(x){ return x.w === "ai"; }).length;
     var open = !!FOLD[PANE.chat.id + ":" + i];
-    var st = current ? "" : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">In progress</span>';
-    var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", !current && ch ? ch + (ch === 1 ? " change" : " changes") : ""].filter(Boolean).join(" · ");
+    var st = current ? '<span class="copst now">Drafting</span>' : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">Kept as it was</span>';
+    var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", d ? d + (d === 1 ? " draft" : " drafts") : ""].filter(Boolean).join(" · ");
     var body = '';
     if (open) {
       body = '<div class="coppfb">' + el.questions.map(function(q, k){
           var v = String(a[k] || "").trim();
           return v ? '<div class="copqa"><span class="copq">' + E(withY(q, f)) + '</span><span class="copa">' + E(v) + '</span></div>' : ''; }).join("") +
-        talk.map(function(x){ return x.w === "me" ? '<div class="copqa"><span class="copa">' + E(x.t) + '</span></div>' :
+        lines.map(function(x){ return x.w === "me" ? '<div class="copqa"><span class="copa">' + E(x.t) + '</span></div>' :
           x.w === "note" ? '<div class="copfnote">' + E(x.t) + '</div>' : '<div class="copqa"><span class="copq">Copilot proposed</span><span class="copqp">' + E(withY(x.t, f)) + '</span></div>'; }).join("") +
-        (!current && txt ? '<div class="copqa"><span class="copq">Agreed wording</span><span class="copqp agreed">' + E(withY(txt, f)) + '</span></div>' : '') + '</div>';
+        (!current && txt ? '<div class="copqa"><span class="copq">On the card now</span><span class="copqp agreed">' + E(withY(txt, f)) + '</span></div>' : '') + '</div>';
     }
     return '<div class="coppf' + (open ? ' open' : '') + '" data-cop-foldbox="' + i + '"><button type="button" class="coppfh" data-cop-pfold="' + i + '" aria-expanded="' + open + '">' +
-      '<span class="copchev" aria-hidden="true">▸</span><b>' + E(current ? "Your answers on " + partName(el) : partName(el)) + '</b><small>' + E(bits) + '</small>' + st + '</button>' + body + '</div>';
+      '<span class="copchev" aria-hidden="true">▸</span><b>' + E(partName(el)) + '</b><small>' + E(bits) + '</small>' + st + '</button>' + body + '</div>';
   }
   /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
      opens on its draft, a part with every question answered opens on the
@@ -1367,8 +1389,7 @@ var COPILOT = (function(){
      page's own addition (the server keeps the record; the page only adds). */
   function sayIn(g, p, w, t){
     g.talkAdd = (g.talkAdd || []).concat([{ p:p, w:w, t:t }]);
-    if (p < 0) g.notes = (g.notes || []).concat([{ w:w, t:t }]);
-    else { g.talk = g.talk || []; g.talk[p] = (g.talk[p] || []).concat([{ w:w, t:t }]); }
+    g.log = (g.log || []).concat([{ p:p, w:w, t:t }]);
   }
   /* After a part is saved to its card or kept as it was: the plan road goes
      back to the cards, the guided road to the next part still owed, and with

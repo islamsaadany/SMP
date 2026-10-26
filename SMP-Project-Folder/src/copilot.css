@@ -892,8 +892,9 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copfnote { font-size:var(--fs-small, 12.5px); color:var(--ink-3); text-align:center; }
 .copmsg.copold { opacity:.62; }
 .copmsg.copold .copfdraft { text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--ink-3) 60%, transparent); }
-.copanswers { display:inline-block; margin-top:4px; margin-right:10px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
-.copanswers:hover, .copanswers:focus-visible { color:var(--ink); outline:none; }
+/* §644 — after the guided pass the chat goes on as plain chat, marked once. */
+.copsep { display:flex; align-items:center; gap:10px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); margin:4px 0; }
+.copsep::before, .copsep::after { content:""; flex:1; height:1px; background:var(--line); }
 .coppf.flash { animation:copflash 1.2s ease; }
 @keyframes copflash { 0% { box-shadow:0 0 0 3px var(--gold); } 100% { box-shadow:0 0 0 0 transparent; } }
 @media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .coppf.flash { animation:none; } }

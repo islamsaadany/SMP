@@ -32,7 +32,7 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
-  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, sanitizeFlow, flowOf, writeFlow,
+  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, withQa, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
   saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
   withYear,
@@ -658,10 +658,10 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
       return out(200, { ok: true, flow: g0 });
     }
     const prop = now.prop.slice(); prop[el] = text;
-    const talk = now.talk.map((t) => t.slice());
-    if (kind === "flowRefine") talk[el] = addTalk(talk[el], "me", (REFINE_WORDS[how] || how).slice(0, MAX_ANSWER));
-    talk[el] = addTalk(talk[el], "ai", text);
-    const g: Flow = { ...now, phase: "draft", e: el, prop, talk };
+    let log = kind === "flowDraft" ? withQa(now.log, el) : now.log;
+    if (kind === "flowRefine") log = addTalk(log, el, "me", (REFINE_WORDS[how] || how).slice(0, MAX_ANSWER));
+    log = addTalk(log, el, "ai", text);
+    const g: Flow = { ...now, phase: "draft", e: el, prop, log };
     await writeFlow(c, id, g);
     return out(200, { ok: true, flow: g });
   });

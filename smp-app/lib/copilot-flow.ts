@@ -129,18 +129,21 @@ export type Flow = {
      disappears. we need to maintain my answers and discussions"). `drafts`
      is now only ever the AGREED wording, the card's; a draft or a refine is
      a PROPOSAL in `prop`, shown in the chat until Save to the card moves it
-     onto the card or Keep as it was drops it. `talk` is each part's
-     conversation in order — what the person asked for in their own words
-     (`me`), each proposal (`ai`), and what became of it (`note`); `notes`
-     is what was said outside any one part (after the check). Both are the
-     product's record: the page can ADD only its own lines (`talkAdd`), never
-     write an `ai` line or take one away, and can only CLEAR a proposal. */
+     onto the card or Keep as it was drops it.
+     §644 — THE CONVERSATION IS ONE RECORD, IN THE ORDER IT HAPPENED (Islam:
+     "I thought they will be collapsed in their place of creation in the
+     chat … the chat stays in the chat"). `log` holds, in time order: the
+     moment a part's guided questions were done (`qa`, where its folded row
+     sits), what the person asked for in their own words (`me`), each
+     proposal (`ai`), and what became of it (`note`); `p` names the part, or
+     -1 for a line about none. It is the product's record: the page can ADD
+     only its own `me` and `note` lines (`talkAdd`), never write an `ai` or
+     `qa` line or take one away, and can only CLEAR a proposal. */
   prop: string[];
-  talk: Talk[][];
-  notes: Talk[];
+  log: Talk[];
 };
-export type Talk = { w: "me" | "ai" | "note"; t: string };
-export const MAX_TALK = 80;
+export type Talk = { p: number; w: "qa" | "me" | "ai" | "note"; t: string };
+export const MAX_LOG = 400;
 export const MAX_ANSWER = 2000;
 export const MAX_DRAFT = 6000;
 export const SHORT_ANSWER = 15;
@@ -166,7 +169,7 @@ export function newFlow(hasPlan = false, skip: string[] = []): Flow {
   return { phase: hasPlan ? "start" : "path", start: "", y0: null, y1: null, path: "", e: 0, qi: 0,
     ans: FLOW_ELEMENTS.map((el) => el.questions.map(() => "")), drafts: FLOW_ELEMENTS.map(() => ""),
     done: FLOW_ELEMENTS.map(() => false), from: FLOW_ELEMENTS.map(() => false), skip: cleanSkip(skip), check: null, saved: null,
-    prop: FLOW_ELEMENTS.map(() => ""), talk: FLOW_ELEMENTS.map(() => []), notes: [] };
+    prop: FLOW_ELEMENTS.map(() => ""), log: [] };
 }
 /* Every part the Structure asks for agreed WITH a draft (§479); a part
    switched off is not asked, so it waits for nothing. */
@@ -212,13 +215,10 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
   /* §643 — the conversation is the stored one plus the page's own new lines;
      a proposal is the stored one, or cleared by the page (saved or kept). */
-  f.talk = base.talk.map((t) => t.slice());
-  f.notes = base.notes.slice();
+  f.log = base.log.slice();
   if (Array.isArray(j.talkAdd)) for (const a of j.talkAdd.slice(0, 4)) {
     const w = a && (a.w === "me" || a.w === "note") ? a.w : "", t = str(a && a.t).trim().slice(0, MAX_ANSWER), p = Number(a && a.p);
-    if (!w || !t) continue;
-    if (p === -1) f.notes = addTalk(f.notes, w, t);
-    else if (Number.isInteger(p) && p >= 0 && p < N) f.talk[p] = addTalk(f.talk[p], w, t);
+    if (w && t && Number.isInteger(p) && p >= -1 && p < N) f.log = addTalk(f.log, p, w, t);
   }
   f.prop = FLOW_ELEMENTS.map((_, i) => Array.isArray(j.prop) && str(j.prop[i]) === "" ? "" : base.prop[i]);
   if (process.env.SMP_BREAK === "flow-trust-prop" && Array.isArray(j.prop)) f.prop = FLOW_ELEMENTS.map((_, i) => str(j.prop[i]));
@@ -249,17 +249,36 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   if (f.phase === "check" && !f.check && savedCurrent(f)) f.phase = "saved";
   return f;
 }
-export function addTalk(list: Talk[], w: Talk["w"], t: string): Talk[] {
-  return list.concat([{ w, t }]).slice(-MAX_TALK);
+export function addTalk(list: Talk[], p: number, w: Talk["w"], t: string): Talk[] {
+  return list.concat([{ p, w, t }]).slice(-MAX_LOG);
 }
-const readTalk = (v: unknown): Talk[] => (Array.isArray(v) ? v : []).map((x: any) => ({ w: x && (x.w === "me" || x.w === "ai" || x.w === "note") ? x.w : "", t: str(x && x.t).slice(0, MAX_DRAFT) }))
-  .filter((x: any) => x.w && x.t).slice(-MAX_TALK) as Talk[];
+/* The moment a part's guided questions were done, once per part. */
+export function withQa(list: Talk[], p: number): Talk[] {
+  return list.some((x) => x.p === p && x.w === "qa") ? list : addTalk(list, p, "qa", "-");
+}
+const W = ["qa", "me", "ai", "note"];
+const readLog = (v: unknown, p0?: number): Talk[] => (Array.isArray(v) ? v : []).map((x: any) => {
+  const p = p0 ?? Number(x && x.p);
+  return { p: Number.isInteger(p) && p >= -1 && p < N ? p : -1, w: x && W.includes(x.w) ? x.w : "", t: str(x && x.t).slice(0, MAX_DRAFT) };
+}).filter((x: any) => x.w && x.t) as Talk[];
 export function storedFlow(raw: unknown): Flow | null {
   if (!raw || typeof raw !== "object") return null;
   const j: any = raw;
   const base = newFlow();
-  base.talk = FLOW_ELEMENTS.map((_, i) => readTalk(Array.isArray(j.talk) ? j.talk[i] : null));
-  base.notes = readTalk(j.notes);
+  if (Array.isArray(j.log)) base.log = readLog(j.log).slice(-MAX_LOG);
+  else {
+    /* A flow written under §643 kept a list per part: put them in the
+       nearest order the record allows — each part where its questions were
+       answered, its lines after it, then what was said about none. */
+    FLOW_ELEMENTS.forEach((_, i) => {
+      const ans = Array.isArray(j.ans) && Array.isArray(j.ans[i]) && j.ans[i].some((a: unknown) => str(a).trim());
+      const t = readLog(Array.isArray(j.talk) ? j.talk[i] : null, i);
+      if (ans && (t.length || (Array.isArray(j.done) && j.done[i]))) base.log.push({ p: i, w: "qa", t: "-" });
+      base.log.push(...t);
+    });
+    base.log.push(...readLog(j.notes, -1));
+    base.log = base.log.slice(-MAX_LOG);
+  }
   base.prop = FLOW_ELEMENTS.map((_, i) => str(Array.isArray(j.prop) ? j.prop[i] : "").slice(0, MAX_DRAFT));
   /* A flow written before §643 drafted straight onto the card: the part
      being drafted then (not yet agreed) holds its draft as the proposal. */
@@ -268,7 +287,7 @@ export function storedFlow(raw: unknown): Flow | null {
     if (Number.isInteger(e) && e >= 0 && e < N && d.trim() && !(Array.isArray(j.done) && j.done[e])) base.prop[e] = d.slice(0, MAX_DRAFT);
   }
   const f = sanitizeFlow(raw, null);
-  f.talk = base.talk; f.notes = base.notes; f.prop = base.prop;
+  f.log = base.log; f.prop = base.prop;
   /* …and its card holds no words: a card holds only what was agreed. */
   FLOW_ELEMENTS.forEach((_, i) => { if (base.prop[i] && !Array.isArray(j.prop) && !f.done[i]) f.drafts[i] = ""; });
   if (j.check && typeof j.check === "object") f.check = {

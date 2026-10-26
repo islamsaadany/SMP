@@ -137,7 +137,12 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620
       (name ? "<b>" + esc(name) + "</b>" : b("90px")) + '<span class="sp">\\u203a</span><b>' + esc(label) + "</b></div>";
   }
   function rows(k, cols) { return n(k, function (i) { return '<div class="r" style="padding:10px 0;border-bottom:1px solid var(--ns-line)">' + b("16px") + b((60 - i * 7) + "%") + '<span class="grow"></span>' + cols + "</div>"; }); }
-  var LEDGER = { insights: 1, notes: 1, portfolio: 1 };
+  var LEDGER = { portfolio: 1 };
+  /* The Internal Tracker, Meeting Notes and Insights wear My tasks' look
+     since §646 (lib/card-look.ts): Home's band with the counts, then one card
+     whose header holds the title and the filters, a group's label over a
+     grey rule, and rows striped grey first. */
+  var CARD = { tracker: 1, notes: 1, insights: 1 };
   var SHAPE = {
     strategy: function () {
       return '<div class="r" style="height:44px;flex:none;padding:0 18px;background:var(--ns-q);border-bottom:1px solid var(--ns-line)">' + b("26px", "k") +
@@ -148,12 +153,15 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620
         n(7, function (i) { return b((90 + (i % 3) * 20) + "px", "q"); }) + '</div></div><div class="body">' + b("160px", "t") + '<div class="r">' + n(3, function () { return b("90px", "p q"); }) + "</div>" +
         n(3, function () { return '<div class="c" style="gap:8px;max-width:520px">' + b("100px", "q") + b("100%", "k q") + "</div>"; }) + "</div></div>";
     },
-    tracker: function () {
-      return '<div class="body"><div class="mid c"><div class="box" style="background:var(--ns-q)"><div class="r" style="align-items:flex-end"><div class="c">' + b("150px", "q") + b("150px", "t") + '</div><span class="grow"></span>' +
-        n(4, function () { return '<div class="c" style="align-items:flex-end;gap:6px">' + b("22px", "t") + b("40px", "q") + "</div>"; }) + '</div></div>' + b("100%", "k q") + rows(5, b("70px", "q") + b("80px")) + "</div></div>";
+    card: function () {
+      return '<div class="body"><div class="mid c" style="max-width:1000px;gap:16px"><div class="box" style="background:var(--ns-q);border:0;border-radius:14px;min-height:113px;padding:16px 22px;display:flex;align-items:flex-end"><div class="r grow" style="align-items:flex-end"><div class="c" style="gap:8px">' +
+        b("150px", "q") + b("190px", "t") + b("260px", "q") + '</div><span class="grow"></span>' + n(3, function () { return '<div class="c" style="align-items:flex-end;gap:6px">' + b("22px", "t") + b("48px", "q") + "</div>"; }) +
+        '</div></div><div class="box" style="padding:0;overflow:hidden"><div class="r" style="padding:10px 14px;border-bottom:1px solid var(--ns-line)">' + b("30px", "k q") + b("90px", "t") + '<span class="grow"></span>' + b("280px", "k q") + b("170px", "k q") + "</div>" +
+        '<div class="r" style="padding:14px 14px 7px;border-bottom:2px solid var(--ns-line)">' + b("120px", "q") + "</div>" +
+        n(5, function (i) { return '<div class="r" style="padding:10px 14px;background:' + (i % 2 ? "var(--ns-surface)" : "var(--ns-ground)") + '">' + b("16px") + b((58 - i * 7) + "%") + '<span class="grow"></span>' + b("90px", "q") + b("80px") + "</div>"; }) +
+        "</div></div></div>";
     },
-    /* Insights, Meeting Notes and Portfolio wear the Tracker's furniture
-       since §605 (lib/ledger.ts): the panel with the counts and the views,
+    /* Portfolio wears the Tracker's old furniture since §605 (lib/ledger.ts): the panel with the counts and the views,
        the underlined search line, numbered sections under a heavy rule */
     ledger: function () {
       return '<div class="body"><div class="mid c" style="max-width:1000px;gap:18px"><div class="box" style="background:var(--ns-q);padding:16px 20px"><div class="r" style="align-items:flex-end"><div class="c">' +
@@ -207,7 +215,7 @@ export const NAVSKEL_SCRIPT = process.env.SMP_BREAK === "no-navskel" ? "/* §620
     up.id = "navskel";
     up.setAttribute("aria-busy", "true");
     up.setAttribute("aria-label", "Opening " + (to.kind === "console" ? "the platform" : to.label));
-    var shape = SHAPE[to.kind] || SHAPE[LEDGER[to.kind] ? "ledger" : ""] || SHAPE.ledger;
+    var shape = SHAPE[to.kind] || SHAPE[CARD[to.kind] ? "card" : LEDGER[to.kind] ? "ledger" : ""] || SHAPE.ledger;
     up.innerHTML = to.kind === "console" ? consoleShape(to.tab) : topLine(clientName(to.slug), to.label) + shape();
     var con = up.querySelector(".con");
     if (con) {

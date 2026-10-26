@@ -1,0 +1,331 @@
+<title>Modules in My Tasks' Look</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: a review page around one stage. Pick a module, then Today or
+   Proposed, Computer or Phone. Today is the ledger look as shipped (§605,
+   from design-mockups/modules-look/2026-10-23_one-look.html); Proposed is
+   My tasks' look as shipped (§622.3–§622.5, from design-mockups/home/
+   2026-10-24_one-band-everywhere.html): Home's band, one card with its
+   filters in the header, groups over a grey rule, striped rows grey first,
+   Georgia bold titles. Demo client: Meridian Group. */
+*{box-sizing:border-box}
+:root{
+  --paper:#E8ECF2;--paper-2:#DCE2EA;
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--zebra:#F4F6F9;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --bar:#16325C;--bar-ink:#FFFFFF;--bar-quiet:#B9C1CE;--bar-accent:#E8A33A;--bar-late:#FF9B8F;
+  --ff-quiet:#A9BAD8;
+  --amber:#F5A623;--amber-ink:#231500;--amber-tx:#9C5D08;--amber-wash:#FEF4E2;
+  --good:#1B6E4E;--bad:#B23025;--bad-bg:#FBEDEB;
+  --tb-surface:#FFFFFF;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --frame-shadow:0 1px 2px rgba(20,28,43,.08),0 18px 48px rgba(20,28,43,.12);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--title:Georgia,"Times New Roman",serif;
+  --ledger:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0C0F14;--paper-2:#161A22;
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff-quiet:#95A9CC;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;
+  --tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0C0F14;--paper-2:#161A22;
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--zebra:#1E2430;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff-quiet:#95A9CC;
+  --amber-tx:#F5A623;--amber-wash:#2B2210;--good:#63BE96;--bad:#E8776B;--bad-bg:#33211F;
+  --tb-surface:#1C2027;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--frame-shadow:0 1px 2px rgba(0,0,0,.5),0 18px 48px rgba(0,0,0,.45);color-scheme:dark}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── the review page ── */
+.doc{max-width:1120px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;text-wrap:balance}
+.lede{max-width:88ch;color:var(--ink-2);margin:0}
+.lede b{color:var(--ink)}
+.flag{display:inline-block;margin:12px 0 0;font-size:12.5px;font-weight:600;color:var(--amber-tx);border:1px solid var(--amber-tx);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.ctl{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:22px 0 10px}
+.mods{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);flex:1 1 auto;min-width:0}
+.mods button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 12px 10px;font-size:14.5px;font-weight:600;color:var(--ink-3);cursor:pointer;white-space:nowrap}
+.mods button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+.segs{display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--paper-2);border-radius:9px;padding:3px}
+.seg button{background:none;border:0;border-radius:7px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.12)}
+.mods button:focus-visible,.seg button:focus-visible{outline:2px solid var(--amber-tx);outline-offset:2px}
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper-2);box-shadow:var(--frame-shadow)}
+.stage.phone{display:flex;justify-content:center;padding:22px 12px}
+.stage.phone .dev{width:100%;max-width:390px;border:1px solid var(--line);border-radius:22px;overflow:hidden;max-height:820px;overflow-y:auto}
+.mnote{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:14px 0 0}
+.mnote section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 16px}
+.mnote h3{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.mnote section.ask h3{color:var(--amber-tx)}
+.mnote ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px}
+.mnote li+li{margin-top:5px}
+.mnote b{color:var(--ink)}
+
+/* ── the drawn module page ── */
+.dev{container:dev/inline-size;background:var(--ground);color:var(--ink);text-align:left}
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink)}
+.tbin{display:flex;align-items:center;gap:12px;padding:0 24px;min-height:40px;font-size:13.5px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;white-space:nowrap;overflow:hidden}
+.tbff{color:var(--tb-ink-2);font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbsep{color:var(--tb-ink-3)}
+.tbstep{font-weight:600;color:var(--tb-ink)} .tbstep.cl{color:var(--tb-ink-2)}
+.tbout{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);border:1px solid var(--tb-line);border-radius:99px;padding:4px 12px;flex:none}
+.pg{max-width:1000px;margin:0 auto;padding:16px 20px 28px}
+
+/* TODAY: the ledger look (lib/ledger.ts, modules/tracker/page.ts) */
+.L{font-family:var(--ledger);font-size:15px;line-height:1.55}
+.L .mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.L .mast.flat{padding-bottom:19px}
+.L .mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.L .wkof{font-size:11px;font-weight:600;line-height:1;letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+.L .pt{margin:0;font-size:24px;font-weight:600;line-height:1.15;color:var(--bar-ink)}
+.L .strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.L .tile{text-align:right;min-height:48px}
+.L .tile b{display:block;font-size:22px;font-weight:600;line-height:1}
+.L .tile span{display:block;font-size:10.5px;font-weight:600;line-height:1.6;letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.L .tile.late b{color:var(--bar-late)}
+.L .cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;overflow-x:auto;scrollbar-width:none}
+.L .cats a{font-size:13.5px;font-weight:600;line-height:1;color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;white-space:nowrap}
+.L .cats a.on{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.L .cats .sp{flex:1}
+.L .cats .end{align-self:center;margin-bottom:9px;font-size:13px;color:var(--bar-quiet);padding:6px 8px;white-space:nowrap}
+.L .cats .end b{color:var(--bar-ink)}
+.L .tools{display:flex;gap:18px;align-items:center;margin:0 0 22px;flex-wrap:wrap}
+.L .tools .sp{flex:1}
+.L .write{flex:1 1 360px;font-size:15px;color:var(--ink-3);border-bottom:1.5px solid var(--amber-tx);padding:6px 2px 8px}
+.L .write b{color:var(--amber-tx);margin-right:10px}
+.L .find{flex:0 1 240px;display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-3);border-bottom:1.5px solid var(--line);padding:6px 2px}
+.L .btn{border:1px solid var(--amber);background:var(--amber);color:var(--amber-ink);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.L .sec{margin:0 0 26px}
+.L .sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.L .sh .ix{font-size:12px;font-weight:600;color:var(--amber-tx)}
+.L .sh h3{margin:0;font-size:17px;font-weight:600}
+.L .sh .meta{font-size:13px;color:var(--ink-3)} .L .sh .meta .bad{color:var(--bad);font-weight:600}
+.L .ledger{border-top:2px solid var(--ink)}
+.L .row{display:grid;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft)}
+.L .foot{padding:9px 0 0 32px;font-size:13px;color:var(--ink-3)} .L .foot b{color:var(--amber-tx)}
+
+/* PROPOSED: My tasks' look (platform.html, §622.3–§622.5) */
+.N{font-family:var(--font);font-size:14px;line-height:1.5}
+.band{position:relative;overflow:hidden;background:var(--bar);color:var(--bar-ink);border-radius:14px;padding:16px 22px 17px;margin:0 0 16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;min-height:104px}
+.band::before{content:"";position:absolute;width:300px;height:300px;right:-90px;top:-120px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);pointer-events:none}
+.band::after{content:"";position:absolute;width:210px;height:210px;right:-20px;top:-70px;border-radius:50%;border:1.5px solid rgba(255,255,255,.07);pointer-events:none}
+.band>*{position:relative}
+.band .eye{margin:0 0 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.band h1{margin:0;font:400 27px/1.15 var(--title)}
+.band p{margin:4px 0 0;font-size:13.5px;color:var(--ff-quiet)}
+.band .sp{flex:1}
+.band .strip{display:flex;gap:20px;font-variant-numeric:tabular-nums}
+.band .strip div{text-align:right}
+.band .strip b{display:block;font-size:19px;line-height:1}
+.band .strip span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ff-quiet);margin-top:3px;white-space:nowrap}
+.band .strip .lt b{color:var(--bar-late)}
+.band .act{border:0;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:13px;font-weight:700;padding:8px 14px;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin:0 0 16px}
+.chd{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.cic{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--amber-wash);color:var(--amber-tx)}
+.chd h2{margin:0;font:700 19px/1.15 var(--title);white-space:nowrap}
+.cnt{font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2)}
+.chd .sp{flex:1}
+.cx{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-3);white-space:nowrap}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface-2);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.sw span{font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;color:var(--ink-2);white-space:nowrap}
+.sw span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,28,43,.08)}
+.pick{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--ink)}
+.pick::after{content:"";border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--ink-3)}
+.search{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-3);min-width:170px}
+.addl{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1.5px solid var(--amber-tx);font-size:14px;color:var(--ink-3)}
+.addl b{width:20px;text-align:center;color:var(--amber-tx);font-size:16px}
+.grpl{display:flex;align-items:baseline;gap:8px;padding:14px 14px 7px;border-bottom:2px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.grpl i{font-style:normal;font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.grpl i .bad{color:var(--bad)}
+.grpl a{margin-left:auto;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--amber-tx)}
+.z>.row:nth-child(odd){background:var(--zebra)}
+.N .row{display:grid;gap:12px;align-items:center;padding:8px 14px;font-size:14px}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.late .tick{border-color:var(--bad)}
+.pill{justify-self:end;font-size:12px;color:var(--ink-2);background:var(--surface);border:1px solid var(--line-soft);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:6px;vertical-align:1px}
+.pill.add{border-style:dashed;color:var(--ink-3)} .pill.add::before{display:none}
+.when{font-size:13px;color:var(--ink-2);white-space:nowrap} .late .when{color:var(--bad);font-weight:600}
+.own{font-size:13px;color:var(--ink-2)}
+.st{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.st.p{color:var(--amber-tx)} .st.d{color:var(--good)}
+.chev{color:var(--ink-3);display:grid;place-items:center}
+.chev svg{width:14px;height:14px}
+.sub{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.t b{font-weight:600}
+.ppl{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ppl svg{width:13px;height:13px}
+.q{font-size:13px;color:var(--ink-3);white-space:nowrap}
+.dl{font-size:13px;font-weight:600;color:var(--amber-tx);white-space:nowrap}
+
+/* the rows' columns, both looks */
+.tr{grid-template-columns:20px minmax(0,1fr) 120px 84px 64px 120px 22px}
+.nr{grid-template-columns:92px minmax(0,1fr) 54px 100px}
+.ir{grid-template-columns:minmax(0,1fr) 110px 96px 34px 90px}
+.L .ir{grid-template-columns:minmax(0,1fr) auto}
+.L .tags{display:flex;gap:10px;align-items:center;margin-top:6px;font-size:13px;color:var(--ink-3)}
+.L .tag{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:999px;padding:4px 10px}
+
+@container dev (max-width:560px){
+  .tbin{padding:0 12px} .tbff,.tbsep:first-of-type{display:none}
+  .pg{padding:12px 12px 24px}
+  .band{padding:14px 16px 15px}
+  .band .strip{gap:12px}
+  .search{min-width:0;flex:1 1 100%}
+  .tr{grid-template-columns:20px minmax(0,1fr) auto}
+  .tr .pill,.tr .own,.tr .st,.tr .chev{display:none}
+  .nr{grid-template-columns:auto minmax(0,1fr) auto}
+  .nr .ppl{display:none}
+  .ir{grid-template-columns:minmax(0,1fr) auto}
+  .ir .pill,.ir .q.v,.ir .q.dt{display:none}
+  .L .strip{gap:12px}
+  .L .tile{text-align:left;min-height:0}
+  .L .write{flex-basis:100%}
+}
+</style>
+
+<div class="doc">
+  <h1>Internal Tracker, Meeting notes and Insights in My tasks' look</h1>
+  <p class="lede">The three modules drawn the way <b>My tasks</b> now looks: Home's band with the counts, <b>one card</b> with its filters in the header, groups over a grey rule, rows striped grey and white, titles in Georgia. Same words, same controls, same behaviour; only the look changes.</p>
+  <span class="flag">A drawing · nothing is built · the demo client's content</span>
+
+  <div class="ctl">
+    <div class="mods" role="tablist" aria-label="Module">
+      <button type="button" role="tab" id="m-tracker" data-m="tracker" aria-selected="true">Internal Tracker</button>
+      <button type="button" role="tab" id="m-notes" data-m="notes" aria-selected="false">Meeting notes</button>
+      <button type="button" role="tab" id="m-insights" data-m="insights" aria-selected="false">Insights</button>
+    </div>
+    <div class="segs">
+      <div class="seg" role="group" aria-label="Version"><button type="button" id="v-new" data-v="new" aria-pressed="true">Proposed</button><button type="button" id="v-today" data-v="today" aria-pressed="false">Today</button></div>
+      <div class="seg" role="group" aria-label="Screen"><button type="button" id="d-computer" data-d="computer" aria-pressed="true">Computer</button><button type="button" id="d-phone" data-d="phone" aria-pressed="false">Phone</button></div>
+      <div class="seg" role="group" aria-label="Theme"><button type="button" id="t-light" data-t="light">Light</button><button type="button" id="t-dark" data-t="dark">Dark</button></div>
+    </div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <div id="notes"></div>
+</div>
+
+<script>
+(function(){
+  var P = { tasks:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',
+    cal:'<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>' };
+  function ic(k){ return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + P[k] + '</svg>'; }
+  var CHEV = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  var PERSON = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  var SRCH = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+  function tb(mod){ return '<div class="tb"><div class="tbin"><nav class="tbtrail"><span class="tbff">Platform</span><span class="tbsep">›</span><span class="tbstep cl">Meridian Group</span><span class="tbsep">›</span><span class="tbstep">' + mod + '</span></nav><span class="tbout">Sign out</span></div></div>'; }
+  function band(eye, title, sub, right){ return '<div class="band"><div><p class="eye">' + eye + '</p><h1>' + title + '</h1><p>' + sub + '</p></div><span class="sp"></span>' + (right || "") + '</div>'; }
+  function strip(items){ return '<div class="strip">' + items.map(function(x){ return '<div' + (x[2] ? ' class="lt"' : '') + '><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("") + '</div>'; }
+  function head(icon, title, n, right){ return '<div class="chd"><span class="cic">' + ic(icon) + '</span><h2>' + title + '</h2><span class="cnt">' + n + '</span><span class="sp"></span>' + right + '</div>'; }
+  function sw(word, opts, on){ return '<span class="cx">' + word + ' <span class="sw">' + opts.map(function(o){ return '<span' + (o === on ? ' class="on"' : '') + '>' + o + '</span>'; }).join("") + '</span></span>'; }
+  function lmast(eye, title, tiles, cats, flat){ return '<header class="mast' + (flat ? ' flat' : '') + '"><div class="mrow"><div><div class="wkof">' + eye + '</div><h2 class="pt">' + title + '</h2></div><div class="strip">' +
+    tiles.map(function(t){ return '<div class="tile' + (t[2] ? ' late' : '') + '"><b>' + t[0] + '</b><span>' + t[1] + '</span></div>'; }).join("") + '</div></div>' + (cats ? '<nav class="cats">' + cats + '</nav>' : '') + '</header>'; }
+
+  /* ── Internal Tracker ── */
+  var TG = [
+    ["Farida Anwar", "4 open", "2 late", 3, [
+      ["Collect the half-year notes from B2B Online and Nigeria", "H1 review", "Late 2 w", "Farida", "In progress", 1],
+      ["Recovery plan for Home Electronics' dealer churn", "", "Late 1 w", "Farida", "Not started", 1],
+      ["Agree Nigeria's credit limits with the Group CFO", "Credit", "W44", "Farida", "Not started"],
+      ["Prepare the H1 review deck for the Group CEO", "H1 review", "W44", "Farida", "In progress"]]],
+    ["Sami Haddad", "3 open", "1 late", 1, [
+      ["Close out the Q2 focus-board actions", "Focus board", "Late 1 w", "Sami", "In progress", 1],
+      ["Check Finance's forecast accuracy definition against Treasury's", "", "W44", "Sami", "Not started"],
+      ["Draft the B2C scorecard targets for review", "Scorecard", "W45", "Sami", "Not started"]]]
+  ];
+  function trowN(r){ return '<div class="row tr' + (r[5] ? ' late' : '') + '"><span class="tick"></span><span class="t">' + r[0] + '</span><span class="pill' + (r[1] ? '' : ' add') + '">' + (r[1] || "+ Add a topic") + '</span><span class="when">' + r[2] + '</span><span class="own">' + r[3] + '</span><span class="st' + (/progress/.test(r[4]) ? ' p' : '') + '">— ' + r[4] + '</span><span class="chev">' + CHEV + '</span></div>'; }
+  function trowL(r){ return '<div class="row tr' + (r[5] ? ' late' : '') + '"><span class="tick"></span><span class="t">' + r[0] + '</span><span class="pill' + (r[1] ? '' : ' add') + '" style="border:0;background:' + (r[1] ? 'var(--surface-2)' : 'transparent') + '">' + (r[1] || "+ Add a topic") + '</span><span class="when">' + r[2] + '</span><span class="own">' + r[3] + '</span><span class="st' + (/progress/.test(r[4]) ? ' p' : '') + '">— ' + r[4] + '</span><span class="chev">' + CHEV + '</span></div>'; }
+  var trackerNew = band("This week · 26 Oct – 30 Oct", "Internal Tracker", "Meridian Group's actions, read by the week.", strip([[12,"Open"],[3,"Late",1],[3,"Due"],[0,"Done this week"]])) +
+    '<div class="card">' + head("tasks", "Actions", 7,
+      sw("Show", ["This week","All","Mine","Undated","Weekly check"], "This week") + '<span class="cx">Group by <span class="pick">Owner</span></span><span class="search">Search actions</span>') +
+    '<div class="addl"><b>+</b>Write the next action and press Enter</div>' +
+    TG.map(function(g){ return '<div class="grpl">' + g[0] + ' <i>· ' + g[1] + ' · <span class="bad">' + g[2] + '</span></i><a>' + g[3] + ' done ›</a></div><div class="z">' + g[4].map(trowN).join("") + '</div>'; }).join("") + '</div>';
+  var trackerOld = lmast("This week · 26 Oct – 30 Oct", "Internal Tracker", [[12,"Open"],[3,"Late",1],[3,"Due"],[0,"Done this week"]],
+      '<a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><a>Weekly check</a><span class="sp"></span><span class="end">Group by <b>Owner</b> ▾ ···</span>') +
+    '<div class="tools"><span class="write"><b>+</b>Write the next action and press Enter</span><span class="find">' + SRCH + 'Search</span></div>' +
+    TG.map(function(g, i){ return '<section class="sec"><div class="sh"><span class="ix">0' + (i + 1) + '</span><h3>' + g[0] + '</h3><span class="meta">' + g[1] + ' · <span class="bad">' + g[2] + '</span></span></div>' + g[4].map(trowL).join("") + '<div class="foot"><b>' + g[3] + ' done ›</b></div></section>'; }).join("");
+
+  /* ── Meeting notes ── */
+  var NG = [
+    ["October 2026", [["Tue 20 Oct","Monthly focus board","Group CEO, Farida, Group CFO",3,"Not sent"],["Tue 13 Oct","H1 review — B2C company","Company CEO, Sami, Nabil, Ghassan, Farida",5,"Sent"],["Fri 9 Oct","H1 review — Distribution company","Company CEO, Bassem, Fadi, Ziad, Farida",5,"Updated"]]],
+    ["September 2026", [["Tue 22 Sep","Monthly focus board","Group CEO, Farida, Group CFO",3,"Sent"],["Wed 9 Sep","Credit policy working session","Group CFO, Treasury, Farida",3,"Sent"]]]
+  ];
+  function stw(s){ return '<span class="st' + (s === "Sent" ? ' d' : s === "Updated" ? ' p' : '') + '">— ' + s + '</span>'; }
+  function nrow(r){ return '<div class="row nr"><span class="when">' + r[0] + '</span><span class="t"><b>' + r[1] + '</b><span class="sub">' + r[2] + '</span></span><span class="ppl">' + PERSON + r[3] + '</span>' + stw(r[4]) + '</div>'; }
+  var notesNew = band("Meridian Group", "Meetings", "Every meeting with this client, and its minutes.", strip([[5,"Meetings"]]) + '<button class="act">+ New meeting</button>') +
+    '<div class="card">' + head("cal", "Meetings", 5, '<span class="search">Search meetings</span>') +
+    NG.map(function(g){ return '<div class="grpl">' + g[0] + ' <i>· ' + g[1].length + ' meetings</i></div><div class="z">' + g[1].map(nrow).join("") + '</div>'; }).join("") + '</div>';
+  var notesOld = lmast("Meridian Group", "Meetings", [[5,"Meetings"]], "", true) +
+    '<div class="tools"><span class="find">' + SRCH + 'Search meetings</span><span class="sp"></span><span class="btn">+ New meeting</span></div>' +
+    NG.map(function(g, i){ return '<section class="sec"><div class="sh"><span class="ix">0' + (i + 1) + '</span><h3>' + g[0] + '</h3><span class="meta">' + g[1].length + ' meetings</span></div>' + g[1].map(nrow).join("") + '</section>'; }).join("");
+
+  /* ── Insights ── */
+  var IR = [["Customer survey: store experience","Analysis","15 Oct 2026","v2",1],["Competitor moves: e-commerce entrants","Analysis","2 Oct 2026","v1",0],
+    ["Consumer electronics price index","Market","18 Sep 2026","v1",1],["Egypt retail outlook, Q3","Sector","4 Sep 2026","v1",0]];
+  var insightsNew = band("Meridian Group", "Insights", "The reports written for this client.", strip([[4,"Reports"]])) +
+    '<div class="card">' + head("bulb", "Reports", 4, sw("Show", ["All","Analysis","Market","Sector"], "All") + '<span class="search">Search reports</span>') +
+    '<div class="z">' + IR.map(function(r){ return '<div class="row ir"><span class="t"><b>' + r[0] + '</b></span><span class="pill">' + r[1] + '</span><span class="q dt">' + r[2] + '</span><span class="q v">' + r[3] + '</span>' + (r[4] ? '<span class="dl">Download</span>' : '<span class="q">No file yet</span>') + '</div>'; }).join("") + '</div></div>';
+  var insightsOld = lmast("Meridian Group", "Insights", [[4,"Reports"]], '<a class="on">All</a><a>Analysis</a><a>Market</a><a>Sector</a>') +
+    '<div class="tools"><span class="find">' + SRCH + 'Search reports</span></div><div class="ledger">' +
+    IR.map(function(r){ return '<div class="row ir"><span class="t"><b>' + r[0] + '</b><span class="tags"><span class="tag">' + r[1] + '</span><span>' + r[2] + '</span><span>' + r[3] + '</span></span></span>' + (r[4] ? '<span class="dl">Download</span>' : '<span class="q">No file yet</span>') + '</div>'; }).join("") + '</div>';
+
+  var MOD = {
+    tracker: { name:"Internal Tracker", n:trackerNew, o:trackerOld,
+      changes:["The navy panel becomes <b>Home's band</b>: the week, the title in Georgia, the four counts on the right.",
+        "The views (This week, All, Mine, Undated, Weekly check), <b>Group by</b> and the search move into the header of one <b>Actions</b> card, the way My tasks has Show, Sort by and its search.",
+        "The <b>write line</b> stays at the top of the list, now the card's first line.",
+        "Each owner (or topic) is a group label over a grey rule, as in My tasks, with its late count in red and <b>N done ›</b> at the right. The heavy black rule and the 01, 02 numbers go.",
+        "Rows are striped grey and white. Every control on a row stays as it is: tick, topic, week, owner, status, the arrow.",
+        "The band keeps the <b>client's own colour</b>, as today (agreed 26 Oct)."],
+      ask:["The band stays frozen at the top while the list scrolls, as today, and the card's header with the filters freezes with it."] },
+    notes: { name:"Meeting notes", n:notesNew, o:notesOld,
+      changes:["Home's band with the meeting count, and <b>+ New meeting</b> as the amber button in the band (as Clients has + Add a client).",
+        "One <b>Meetings</b> card with the search in its header.",
+        "Each month is a group label over a grey rule; meetings are striped rows with the date, title, who came, how many and whether the minutes went out.",
+        "The band keeps the <b>client's own colour</b>, as today (agreed 26 Oct)."],
+      ask:[] },
+    insights: { name:"Insights", n:insightsNew, o:insightsOld,
+      changes:["Home's band with the report count.",
+        "One <b>Reports</b> card; the category tabs become a <b>Show</b> switch in its header beside the search.",
+        "Each report is one striped row: title, category, date, version, and Download or No file yet.",
+        "The band keeps the <b>client's own colour</b>, as today (agreed 26 Oct)."],
+      ask:[] }
+  };
+  var shared = ["The band keeps the <b>client's own colour</b>.",
+    "The one-line sentence under the title stays, as on My tasks.",
+    "The typeface becomes the main screens', as on My tasks."];
+
+  var state = { m:"tracker", v:"new", d:"computer" };
+  try { var s = JSON.parse(localStorage.getItem("mods-mytasks") || "null"); if (s) { state.v = s.v || state.v; state.d = s.d || state.d; } } catch (e) {}
+  if (MOD[(location.hash || "").slice(1)]) state.m = location.hash.slice(1);
+  var stage = document.getElementById("stage"), notes = document.getElementById("notes");
+  function draw(){
+    var mo = MOD[state.m], isNew = state.v === "new";
+    stage.className = "stage" + (state.d === "phone" ? " phone" : "");
+    stage.innerHTML = '<div class="dev">' + tb(mo.name) + '<div class="pg ' + (isNew ? "N" : "L") + '">' + (isNew ? mo.n : mo.o) + '</div></div>';
+    var ask = mo.ask.concat(shared);
+    notes.innerHTML = '<div class="mnote"><section><h3>What changes</h3><ul><li>' + mo.changes.join("</li><li>") + '</li></ul></section><section class="ask"><h3>Agreed · 26 Oct</h3><ul><li>' + ask.join("</li><li>") + '</li></ul></section></div>';
+    document.querySelectorAll("[data-m]").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.m === state.m)); });
+    document.querySelectorAll("[data-v]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.v === state.v)); });
+    document.querySelectorAll("[data-d]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === state.d)); });
+    try { localStorage.setItem("mods-mytasks", JSON.stringify({ v:state.v, d:state.d })); } catch (e) {}
+  }
+  document.querySelectorAll("[data-m]").forEach(function(b){ b.addEventListener("click", function(){ state.m = b.dataset.m; try { history.replaceState(null, "", "#" + state.m); } catch (x) {} draw(); }); });
+  document.querySelectorAll("[data-v]").forEach(function(b){ b.addEventListener("click", function(){ state.v = b.dataset.v; draw(); }); });
+  document.querySelectorAll("[data-d]").forEach(function(b){ b.addEventListener("click", function(){ state.d = b.dataset.d; draw(); }); });
+  function press(v){ document.querySelectorAll("[data-t]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.t === v)); }); }
+  document.querySelectorAll("[data-t]").forEach(function(b){ b.addEventListener("click", function(){ document.documentElement.setAttribute("data-theme", b.dataset.t); press(b.dataset.t); }); });
+  press(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  draw();
+})();
+</script>

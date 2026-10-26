@@ -30,6 +30,7 @@
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { BAR_DEFAULT, barFor, barVars } from "../../lib/branding.ts";
+import { CARD_LOOK_CSS, bandHtml, cardHead } from "../../lib/card-look.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
@@ -408,19 +409,57 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 `;
 
 
+/* MY TASKS' LOOK, THE TRACKER'S OWN PART (§646). The band and the card are
+   lib/card-look.ts; what is here is how the Tracker's furniture sits in the
+   card. The card is two boxes that read as one: its top (the header and the
+   add line) rides in the pinned wrapper with the band, so the filters freeze
+   with it (Islam: "yes headers filter stay fixed"), and its body is the
+   list. Neither clips what overflows it, because the week, the owner, the
+   topic and the settings open their lists over the rows below. */
+const LOOK = `
+.card.ctop{margin:0;border-radius:12px 12px 0 0;box-shadow:none;overflow:visible}
+.card.ctop.solo{border-radius:12px;margin:0 0 16px}
+.card.cbot{border-top:0;border-radius:0 0 12px 12px;overflow:visible;padding-bottom:6px;margin:0 0 16px}
+.ctop .chd .dots{margin:0;align-self:center}
+.ctop .chd .dots>button{color:var(--ink-3);font:400 12px/1 var(--font);padding:4px 8px;border:1px solid var(--line);background:var(--surface)}
+.ctop .chd .dots>button b{color:var(--ink);font-weight:600}
+.ctop .chd .dots>button:hover,.ctop .chd .dots>button.on,.ctop .chd .dots>button:focus-visible{background:var(--surface-2);color:var(--ink)}
+.ctop .tools{margin:0;padding:4px 14px;border-top:0;gap:0}
+.ctop .write{border-bottom:0}
+.ctop .tools+.counted,.ctop .counted.ck{margin:0;padding:8px 14px 4px;text-align:left}
+.ctop .unread{margin:0;border:0;border-radius:0}
+.pin .card.ctop{border-bottom:1.5px solid var(--gold)}
+.pin .card.ctop.solo{border-bottom:1px solid var(--line)}
+.cbot .list .row{padding:8px 14px;border-bottom-color:var(--line-soft)}
+.cbot .sec .row:nth-child(odd of .row:not(.done)),.cbot .sec.showdone .row:nth-child(odd of .row){background:var(--zebra)}
+.cbot .sec .row.on{background:var(--surface)}
+.cbot .open{padding-left:46px;padding-right:14px}
+.cbot .foot{padding:8px 14px 10px 46px}
+.cbot .sh .end{font:600 11.5px/1.4 var(--font)}
+.cbot .sh h3 input{font:600 14px/1.2 var(--font);letter-spacing:0;text-transform:none}
+.cbot .sh.quiet h3{font-style:italic}
+.cbot .meter{margin:0 14px -2px}
+.cbot .asleep{padding:10px 14px 0}
+.cbot .blk{margin:10px 14px 0}
+.cbot .sec:has(.blk){padding-bottom:12px}
+.cbot .blk .row.chk{padding:9px 14px}
+.cbot .none{padding:16px 14px 12px}
+@media (max-width:760px){.cbot .open{padding-left:14px}.cbot .foot{padding-left:14px}}
+`;
+
 /* What the script needs to know rides on <body>: the two addresses it talks
    to, and the view, the search and the grouping the page was drawn with, so
    a press asks the server for the same list it is looking at. */
 const topOf = (p: PageArgs): TopBar => ({ slug: p.slug, tenantName: p.tenantName, module: "tracker", have: p.have, consultant: !!p.consultant });
 
-/* §499 — THE TRACKER WEARS FOREFRONT'S COLOURS, NEVER THE CLIENT'S. Islam:
-   "not the banner only the whole module". It is the office's own weekly list
-   (§356), so it is Forefront's page about a client rather than the client's
-   page, and the signed-off ledger mockup drew it navy and gold. §498's
-   barVars stays the one reader of how words sit on a band; it is simply
-   handed Forefront's navy here and nothing the client set. The break puts
-   the client's colour back so the check can prove it is not read. */
-async function trackerBar(tenantId: string): Promise<string> { return brk() === "client-bar" ? barFor(tenantId) : BAR_DEFAULT; }
+/* §646 REVERSES §499 — THE TRACKER'S BAND FOLLOWS THE CLIENT'S COLOUR, as
+   Meeting Notes' and Insights' do. Islam, asked whether the Tracker should
+   stay Forefront's navy as §499 had it: *"Tracker follows client"*. §499's
+   reasoning (the office's own list, Forefront's page about a client) is kept
+   in the record; the answer changed. barVars stays the one reader of how
+   words sit on a band. The break puts §499's fixed navy back so the check
+   can prove the client's colour is read. */
+async function trackerBar(tenantId: string): Promise<string> { return brk() === "fixed-bar" ? BAR_DEFAULT : barFor(tenantId); }
 
 type BodyAttrs = { api: string; list: string; view: string; q: string; group: string; dates: string };
 function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, attrs: BodyAttrs | null, body: string): string {
@@ -432,7 +471,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
     "<title>" + esc(tenantName) + " &mdash; " + esc(MODULE_DEF.tracker.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BARVARS%", barVars(bar))) + brkCss() + "</style>\n</head>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BARVARS%", barVars(bar)) + CARD_LOOK_CSS + LOOK) + brkCss() + "</style>\n</head>\n" +
     "<body" + a + ">\n" +
     topBarHtml(top) + "\n" +
     body +
@@ -778,27 +817,33 @@ function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { 
 
 export type ListOut = { body: string; count: string; open: string | null };
 
-/* THE MASTHEAD (§497): the week, the name, the four counts and the views on
-   the client's own colour. It is part of what a press redraws, so the counts
-   follow a tick without a reload. */
-function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number; late: number; dueWeek: number; doneWeek: number } | null, L: Loaded | null = null): string {
+/* THE BAND AND THE CARD'S HEAD (§646, from §497): the week, the name, a
+   sentence and the four counts on the client's own colour; under it the top
+   of the Actions card, whose header holds the views as My tasks' switch,
+   Group by and the search, and under that header `inner` — the add line, or
+   the check's count. Both ride in the pinned wrapper, and both are part of
+   what a press redraws, so the counts follow a tick without a reload.
+   `solo` closes the card when no list follows it (the unread page). */
+function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number; late: number; dueWeek: number; doneWeek: number } | null, L: Loaded | null = null,
+  o: { find?: string; inner?: string; shown?: number | null; solo?: boolean } = {}): string {
   const here = clientHref(p.slug, "tracker", "");
   const q = String(p.ask.q || "").trim().slice(0, 120);
   const view: View = p.ask.view;
   const viewHref = (v: View) => here + "?view=" + v + (q ? "&q=" + encodeURIComponent(q) : "");
   const thu = thursdayOf(today);
-  const strip = !sum ? "" : '<div class="strip">' +
-    '<div class="tile"><b>' + sum.open + "</b><span>Open</span></div>" +
-    '<div class="tile' + (sum.late ? " late" : "") + '"><b>' + sum.late + "</b><span>Late</span></div>" +
+  const tiles = !sum ? [] : [
+    { n: sum.open, label: "Open" },
+    { n: sum.late, label: "Late", late: !!sum.late },
     /* NO COUNT ON THE CARD (§356.16); the break puts back the tail it
        removed, counted the way the summary counted it (§94.5, §276). */
-    '<div class="tile"><b>' + sum.dueWeek + "</b><span>Due" + (() => {
+    { n: sum.dueWeek, label: "Due" + (() => {
       if (brk() !== "card-count") return "";
       const w = weekOf(today);
       const n = all.filter((a) => a.status === "not_started" && !!a.due && a.due >= w.from && a.due <= w.to).length;
-      return n ? " &middot; " + n + " not started" : "";
-    })() + "</span></div>" +
-    '<div class="tile"><b>' + sum.doneWeek + "</b><span>Done this week</span></div></div>";
+      return n ? " \u00b7 " + n + " not started" : "";
+    })() },
+    { n: sum.doneWeek, label: "Done this week" },
+  ];
   /* the two settings behind "Group by" on the far right (§356.14, §497):
      each choice names its value, the one in force marked; the script writes
      a cookie and reads the list again */
@@ -819,12 +864,14 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
     "</span>" +
     '<span class="sep"><button type="button" role="menuitem" data-act="topics">' + LINES + "Topics" + '<span class="arr">' + RIGHT + "</span></button></span>" +
     "</span>" + topicsPanel(L) + "</span>";
-  return '<header class="mast"><div class="mrow"><div class="mt">' +
-    '<div class="wkof">' + esc(weekWord(thu, today)) + " &middot; " + esc(weekLabel(weekOf(today), today)) + "</div>" +
-    '<h2 class="pt">' + esc(MODULE_DEF.tracker.label) + "</h2></div>" + strip + "</div>" +
-    '<nav class="cats" aria-label="Views">' +
+  const band = bandHtml({ esc, eyebrow: weekWord(thu, today) + " \u00b7 " + weekLabel(weekOf(today), today), title: MODULE_DEF.tracker.label,
+    sentence: p.tenantName + "\u2019s actions, read by the week.", tiles });
+  const views = '<span class="cx">Show <nav class="cats" aria-label="Views">' +
     VIEWS.map((v) => '<a href="' + esc(viewHref(v)) + '"' + (v === view ? ' aria-current="true"' : "") + ">" + esc(VIEW_WORD[v]) + "</a>").join("") +
-    '<span class="sp"></span>' + settings + "</nav></header>";
+    "</nav></span>";
+  return band + '<div class="card ctop' + (o.solo ? " solo" : "") + '">' +
+    cardHead({ esc, icon: "tasks", title: "Actions", count: o.shown == null ? null : o.shown, right: views + settings + (o.find || "") }) +
+    (o.inner || "") + "</div>";
 }
 
 /* ══ THE TOPICS PANEL (§533) ═══════════════════════════════════════════
@@ -922,8 +969,8 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
       : '<div class="none"><b>No topics yet for ' + esc(p.tenantName) + ".</b>" +
         "The check is read one topic at a time, so it needs a topic first. Make one on any action's topic tag, or behind the &middot;&middot;&middot; above.</div>";
     return {
-      body: pinned(masthead(p, today, all, sum, L) + '<div class="counted ck">' + ck.countHtml + "</div>") +
-        '<div class="list">' + ck.html + "</div>" + nothing,
+      body: pinned(masthead(p, today, all, sum, L, { inner: '<div class="counted ck">' + ck.countHtml + "</div>" })) +
+        '<div class="card cbot"><div class="list">' + ck.html + "</div>" + nothing + "</div>",
       count: ck.count, open: L.open,
     };
   }
@@ -983,7 +1030,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search" aria-label="Search actions">' +
     '<button class="go" type="submit">Search</button>' +
     '<span class="cnt" id="count">' + esc(count) + "</span></form>";
-  const tools = '<div class="tools' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div>" + (all.length ? find : "") + "</div>";
+  const tools = '<div class="tools' + (all.length ? "" : " solo") + '"><div class="write">' + addrow + "</div></div>";
   /* NO COUNT LINE UNDER THE ADD LINE (§566). Islam: *"remove the small 14
      action line under the add action as it's already existing in the navy
      large panel"*. It went with its search figure too, said and agreed. The
@@ -994,7 +1041,8 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: pinned(masthead(p, today, all, sum, L) + tools + counted) + '<div class="list">' + secs + "</div>" + none, count, open: L.open };
+  return { body: pinned(masthead(p, today, all, sum, L, { find: all.length ? find : "", inner: tools + counted, shown: shown.length })) +
+    '<div class="card cbot"><div class="list">' + secs + "</div>" + none + "</div>", count, open: L.open };
 }
 
 /* What stays at the top while the list scrolls (§565): one wrapper, so the
@@ -1027,8 +1075,8 @@ export async function trackerDocument(p: PageArgs): Promise<string> {
     console.error("tracker: reading " + p.slug + "'s list:", (e as Error).message);
   }
   if (!L) {
-    const body = '<main class="pg">' + masthead(p, today, [], null) +
-      '<p class="unread">The list could not be read just now. Nothing has been lost &mdash; try again in a moment.</p></main>\n';
+    const body = '<main class="pg">' + masthead(p, today, [], null, null, { solo: true,
+      inner: '<p class="unread">The list could not be read just now. Nothing has been lost &mdash; try again in a moment.</p>' }) + "</main>\n";
     return skeleton(p.slug, p.tenantName, topOf(p), bar, null, body);
   }
   const out = listBody(L, p, today);

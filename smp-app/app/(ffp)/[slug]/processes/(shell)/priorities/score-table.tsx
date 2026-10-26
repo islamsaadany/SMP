@@ -63,6 +63,9 @@ export function ScoreTable({
   const [picked, setPicked] = useState<ReadonlySet<string>>(new Set());
   const tree = useMemo(() => inTree(rows), [rows]);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
+  const [quietOpen, setQuietOpen] = useState<ReadonlySet<string>>(new Set());
+  const [subsOpen, setSubsOpen] = useState<ReadonlySet<string>>(new Set());
+  const mains = rows.filter((r) => tree.some((t) => t.sub && t.row.parentId === r.id)).map((r) => r.id);
 
   function openClear() {
     setKinds(new Set());
@@ -202,6 +205,13 @@ export function ScoreTable({
         {note && <p role="status" className="mt-2 text-xs text-emerald-700">{note}</p>}
       </section>
 
+      {mains.length > 0 && (
+        <p className="-mb-2 text-end text-xs font-semibold text-slate-600">
+          <button type="button" className="hover:underline" onClick={() => setSubsOpen(new Set(mains))}>Open all</button>
+          <span aria-hidden> · </span>
+          <button type="button" className="hover:underline" onClick={() => setSubsOpen(new Set())}>Close all</button>
+        </p>
+      )}
       <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full min-w-[900px] text-sm">
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
@@ -222,7 +232,7 @@ export function ScoreTable({
             {rows.length === 0 && (
               <tr><td colSpan={clearing ? 10 : 9} className="px-3 py-6 text-center text-slate-400">No processes yet. Map the high-level processes first.</td></tr>
             )}
-            {tree.map(({ row: r, sub, hasSubs }) => (
+            {tree.filter(({ row: r, sub }) => !sub || subsOpen.has(r.parentId!)).map(({ row: r, sub, hasSubs }) => (
               <Fragment key={r.id}>
               <tr className={`border-t border-slate-100 align-top ${sub ? "" : "bg-slate-50/40"}`}>
                 {clearing && (
@@ -236,6 +246,18 @@ export function ScoreTable({
                     {sub && <span aria-hidden className="me-1 text-slate-400">↳</span>}
                     {r.name}
                     {hasSubs && <span className="ms-2 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-600">Main</span>}
+                    {hasSubs && (
+                      <button
+                        type="button"
+                        aria-expanded={subsOpen.has(r.id)}
+                        aria-label={`${subsOpen.has(r.id) ? "Hide" : "Show"} the sub-processes of ${r.name}`}
+                        onClick={() => setSubsOpen(toggle(subsOpen, r.id, !subsOpen.has(r.id)))}
+                        className="ms-2 inline-flex h-5 min-w-5 items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                      >
+                        {subsOpen.has(r.id) ? "−" : "+"}
+                        <span className="font-semibold text-slate-500">{tree.filter((t) => t.sub && t.row.parentId === r.id).length}</span>
+                      </button>
+                    )}
                   </div>
                   <div className="font-mono text-xs text-slate-500">{r.code}</div>
                 </td>
@@ -289,18 +311,18 @@ export function ScoreTable({
                   </select>
                 </td>
               </tr>
-              {r.steps.length + r.otherSteps > 0 && (
+              {r.steps.length > 0 && (
                 <tr className="border-t border-slate-100 bg-white">
                   {clearing && <td />}
                   <td />
                   <td colSpan={8} className={`px-3 py-1 text-xs ${sub ? "ps-8" : ""}`}>
                     <button type="button" aria-expanded={open.has(r.id)} onClick={() => setOpen(toggle(open, r.id, !open.has(r.id)))} className="font-semibold text-indigo-700 hover:underline">
-                      {open.has(r.id) ? "▾" : "▸"} Steps inside: {r.steps.filter((x) => x.flagged).length} flagged · {r.steps.filter((x) => !x.flagged).length} noticed · {r.otherSteps} quiet
+                      {open.has(r.id) ? "▾" : "▸"} Steps inside: {r.steps.filter((x) => x.flagged).length} flagged · {r.steps.filter((x) => !x.flagged && !x.quiet).length} noticed · {r.otherSteps} quiet
                     </button>
                   </td>
                 </tr>
               )}
-              {open.has(r.id) && r.steps.map((st) => (
+              {open.has(r.id) && r.steps.filter((x) => !x.quiet || quietOpen.has(r.id)).map((st) => (
                 <StepLine key={st.id} st={st} clearing={clearing} editable={editable} pending={pending} toneClass={toneClass}
                   onFlag={(on) => run(() => flagStep({ workspaceId, stepId: st.id, flagged: on }))}
                   onScore={(k, v) => stepScore(st.id, k, v)}
@@ -312,7 +334,14 @@ export function ScoreTable({
                 />
               ))}
               {open.has(r.id) && r.otherSteps > 0 && (
-                <tr className="border-t border-slate-100"><td colSpan={clearing ? 10 : 9} className="px-3 py-1 ps-12 text-xs text-slate-500">{r.otherSteps} other step{r.otherSteps === 1 ? "" : "s"} with nothing noticed.</td></tr>
+                <tr className="border-t border-slate-100">
+                  <td colSpan={clearing ? 10 : 9} className="px-3 py-1 ps-12 text-xs text-slate-500">
+                    {r.otherSteps} step{r.otherSteps === 1 ? "" : "s"} with nothing noticed on the map.{" "}
+                    <button type="button" className="font-semibold text-indigo-700 hover:underline" onClick={() => setQuietOpen(toggle(quietOpen, r.id, !quietOpen.has(r.id)))}>
+                      {quietOpen.has(r.id) ? "Hide them" : "Show them, to flag one"}
+                    </button>
+                  </td>
+                </tr>
               )}
               </Fragment>
             ))}

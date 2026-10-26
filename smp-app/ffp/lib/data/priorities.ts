@@ -47,6 +47,8 @@ export type StepRow = {
   label: string;
   order: number;
   flagged: boolean;
+  /** Nothing stands out on the map and it is not flagged; shown only when asked for. */
+  quiet: boolean;
   importance: number | null;
   complexity: number | null;
   risk: number | null;
@@ -77,9 +79,9 @@ export type PriorityRow = {
   suggestedRisk: { score: number; reason: string } | null;
   progress: { done: number; total: number; aspects: { label: string; help: string; done: boolean }[] };
   lifecycleStatus: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "RETIRED";
-  /** Flagged steps and steps with something noticed, in map order. */
+  /** Every step in map order; the quiet ones are marked. */
   steps: StepRow[];
-  /** Steps with nothing noticed and not flagged. */
+  /** How many of them are quiet. */
   otherSteps: number;
 };
 
@@ -229,15 +231,14 @@ export async function loadPriorityRows(workspaceId: string, weights: Weights): P
       subtasks: st._count.activities,
     };
     const signals = stepSignals(sf);
-    if (!st.priorityFlagged && signals.length === 0 && st.branchedProcesses.length === 0) {
-      otherStepsBy.set(st.processId, (otherStepsBy.get(st.processId) ?? 0) + 1);
-      continue;
-    }
+    const quiet = !st.priorityFlagged && signals.length === 0 && st.branchedProcesses.length === 0;
+    if (quiet) otherStepsBy.set(st.processId, (otherStepsBy.get(st.processId) ?? 0) + 1);
     (stepRowsBy.get(st.processId) ?? stepRowsBy.set(st.processId, []).get(st.processId)!).push({
       id: st.id,
       label: st.label,
       order: st.order,
       flagged: st.priorityFlagged,
+      quiet,
       importance: st.priorityImportance,
       complexity: st.priorityComplexity,
       risk: st.priorityRisk,

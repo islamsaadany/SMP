@@ -89,7 +89,7 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
               Download as Excel
             </a>
             <a href={`/api/ffp/export/priorities/${workspaceId}/flagged-steps`} download className="ms-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50">
-              Download flagged steps (all processes)
+              Download all steps (flagged marked)
             </a>
           </div>
         )}

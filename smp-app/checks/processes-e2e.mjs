@@ -414,8 +414,12 @@ const w2s = await A.page.$$eval("section[aria-label='Wave 2'] article", (x) => x
 check(w2s.some((t) => /Approve the credit limit/.test(t)), "a flagged step can go in its own wave", JSON.stringify(w2s));
 const fs_ = await A.get("/api/ffp/export/priorities/" + S + "/flagged-steps");
 const wb3 = new (await import("exceljs")).default.Workbook(); await wb3.xlsx.load(await fs_.body());
-const fsr = []; wb3.getWorksheet("Flagged steps").eachRow((r, n) => { if (n > 1) fsr.push(r.values.slice(1)); });
-check(fs_.status() === 200 && fsr.length === 1 && fsr[0][5] === "Approve the credit limit" && fsr[0][6] === "Credit Controller" && fsr[0][11] === "Wave 2", "the flagged-steps download lists every flagged step with its process, role, score and wave", JSON.stringify(fsr[0]));
+const hs = wb3.getWorksheet("Steps").getRow(1).values.slice(1);
+const fsr = []; wb3.getWorksheet("Steps").eachRow((r, n) => { if (n > 1) fsr.push(r.values.slice(1)); });
+const ci = (h) => hs.indexOf(h);
+const flaggedRows = fsr.filter((r) => r[ci("Flagged")] === "Yes");
+check(fs_.status() === 200 && fsr.length >= 11 && flaggedRows.length === 1 && flaggedRows[0][ci("Step")] === "Approve the credit limit" && flaggedRows[0][ci("Role")] === "Credit Controller" && flaggedRows[0][ci("Wave")] === "Wave 2", "the steps download lists every step of every process, with a Flagged column, and the flagged one carries its scores and wave", JSON.stringify([fsr.length, flaggedRows[0]]));
+check(fsr.some((r) => r[ci("Step")] === "Raise the invoice" && r[ci("Flagged")] === "No") && new Set(fsr.map((r) => r[ci("Level")])).has("Main"), "…an unflagged step is in it too, marked No");
 check((await T.get("/api/ffp/export/priorities/" + S + "/flagged-steps")).status() === 403, "…and a client's own person cannot download it");
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 await A.page.locator("button:has-text('Steps inside')").first().click();

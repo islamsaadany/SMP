@@ -6,9 +6,10 @@ import { loadPlan, loadPriorityRows } from "@/ffp/lib/data/priorities";
 import { DECISION_LABEL, inTree } from "@/ffp/lib/domain/priorities";
 
 /**
- * Every flagged step in every process as one flat sheet, for reporting. Office only: it carries the
- * working notes and scores. One row per flagged step, with where it sits (process, main process,
- * step number), who does it, its scores, its wave and why.
+ * Every step of every process, main and sub, as one flat sheet for reporting, with a column saying
+ * whether it is flagged. Office only: it carries the working notes and scores. One row per step,
+ * with where it sits (process, main process, step number), who does it, whether it is flagged, its
+ * scores, its wave and why. Processes in the screen's order, steps in map order.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ workspaceId: string }> }) {
   const { workspaceId } = await params;
@@ -24,8 +25,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
   const byId = new Map(rows.map((r) => [r.row.id, r.row]));
 
   const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet("Flagged steps", { views: [{ state: "frozen", ySplit: 1 }] });
+  const ws = wb.addWorksheet("Steps", { views: [{ state: "frozen", ySplit: 1 }] });
   ws.columns = [
+    { header: "Level", key: "level", width: 8 },
     { header: "Main process", key: "main", width: 30 },
     { header: "Process code", key: "code", width: 12 },
     { header: "Process", key: "proc", width: 36 },
@@ -33,6 +35,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
     { header: "Step no.", key: "no", width: 9 },
     { header: "Step", key: "step", width: 44 },
     { header: "Role", key: "role", width: 24 },
+    { header: "Flagged", key: "flag", width: 9 },
     { header: "Importance (1-5)", key: "imp", width: 12 },
     { header: "Complexity (1-5)", key: "cx", width: 12 },
     { header: "Risk (1-5)", key: "risk", width: 10 },
@@ -43,9 +46,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
     { header: "Now its own process", key: "now", width: 30 },
   ];
   ws.getRow(1).font = { bold: true };
-  for (const { row: r } of rows) {
-    for (const x of r.steps.filter((y) => y.flagged)) {
+  for (const { row: r, sub } of rows) {
+    for (const x of r.steps) {
       ws.addRow({
+        level: sub ? "Sub" : "Main",
         main: r.parentId ? (byId.get(r.parentId)?.name ?? "") : r.name,
         code: r.code,
         proc: r.name,
@@ -53,11 +57,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
         no: x.order + 1,
         step: x.label,
         role: x.roleName ?? "",
+        flag: x.flagged ? "Yes" : "No",
         imp: x.importance ?? "",
         cx: x.complexity ?? "",
         risk: x.risk ?? "",
         score: x.score ?? "",
-        wave: x.decision ? DECISION_LABEL[x.decision] : r.decision ? `${DECISION_LABEL[r.decision]} (with its process)` : "Not decided",
+        wave: x.flagged ? (x.decision ? DECISION_LABEL[x.decision] : r.decision ? `${DECISION_LABEL[r.decision]} (with its process)` : "Not decided") : "",
         why: x.why ?? "",
         sig: x.signals.map((g) => g.label).join("; "),
         now: x.nowProcesses.map((p) => `${p.name} (${p.code})`).join("; "),
@@ -69,7 +74,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ wor
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="${workspace.name.replace(/[^a-z0-9]+/gi, "-")}-flagged-steps.xlsx"`,
+      "Content-Disposition": `attachment; filename="${workspace.name.replace(/[^a-z0-9]+/gi, "-")}-all-steps.xlsx"`,
     },
   });
 }

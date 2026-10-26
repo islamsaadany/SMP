@@ -10458,3 +10458,6 @@ Islam: "RHI End2End" has about 24 steps but nothing shows, and the page is long;
 
 ## §604 — Priorities: the map notices more on a step (2026-10-26)
 So that fewer steps read as "quiet": a step is now also noticed when it says what goes wrong if it is missed ("Risk noted on the step") and when its written procedure runs to five lines or more ("Long procedure"). These are signals only; they do not change the suggested scores. Checked: rules 42/0 and the real run.
+
+## §605 — Priorities: left-aligned, no centred block (2026-10-26)
+Islam, again: the same empty space on the left. The cause was not the logo band but the page being a centred block of limited width: on a wide window the whole page sat in the middle with a gap beside the side menu. The page is now left-aligned and uses the full width of the window; only the top banner steps aside for the client logo. Checked in the real run (GREEN 115/0) at 1440 and 2200 pixels wide: the steps bar starts within 60 pixels of the side menu at both. Branch only; not merged.

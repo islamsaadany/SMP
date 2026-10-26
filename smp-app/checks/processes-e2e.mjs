@@ -279,6 +279,14 @@ check(await A.page.evaluate(() => document.documentElement.scrollWidth <= docume
 const navBox = await A.page.locator("nav[aria-label='Steps']").boundingBox();
 const banner = await A.page.locator("h1").first().boundingBox();
 check(!!navBox && !!banner && navBox.x < banner.x - 100, "the banner steps aside for the logo but the working area below uses the full width", JSON.stringify([navBox?.x, banner?.x]));
+for (const w of [1440, 2200]) {
+  await A.page.setViewportSize({ width: w, height: 900 });
+  await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+  const nb = await A.page.locator("nav[aria-label='Steps']").boundingBox();
+  const sb = await A.page.locator("nav:has(a[href$='/processes/priorities'])").first().boundingBox();
+  check(!!nb && !!sb && nb.x - (sb.x + sb.width) < 60, `at ${w} pixels wide the working area starts right beside the side menu, with no empty band`, JSON.stringify([nb?.x, sb && sb.x + sb.width]));
+}
+await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
 check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));

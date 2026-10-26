@@ -143,7 +143,15 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .arow .w{flex:1;min-width:0}
 .arow b{display:block;font-size:14px}
 .arow span{display:block;font-size:13px;color:var(--ink-3)}
+/* the pop-up over the list (Islam: "it can be a pop up modal") */
+.dev{position:relative}
+.scrim{position:absolute;inset:0;background:rgba(20,28,43,.45);display:flex;align-items:flex-start;justify-content:center;padding:44px 16px 24px;z-index:5}
+.modal{width:100%;max-width:680px;background:var(--surface);border-radius:14px;box-shadow:0 24px 64px rgba(20,28,43,.35);overflow:hidden}
+.modal .chd .x{width:30px;height:30px;border-radius:8px;border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1}
+.dev.held{min-height:980px}
 @container dev (max-width:560px){
+  .scrim{padding:0}
+  .modal{max-width:none;border-radius:0;min-height:100%}
   .tbin{padding:0 12px} .tbff,.tbva,.tbsel{display:none}
   .pg{padding:12px 12px 24px}
   .band{padding:14px 16px 15px}
@@ -156,7 +164,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
 
 <div class="doc">
   <h1>Publishing Insights from the client's own page</h1>
-  <p class="lede">Forefront writes and publishes a client's reports on the client's <b>Insights</b> page, the way Meeting Notes works, instead of on a separate page in the console. The client's people still see only what is published.</p>
+  <p class="lede">A report opens as a pop-up over the list. Forefront writes and publishes a client's reports on the client's <b>Insights</b> page, the way Meeting Notes works, instead of on a separate page in the console. The client's people still see only what is published.</p>
   <span class="flag">A drawing · nothing is built · ElAbd's colour, invented reports</span>
 
   <div class="ctl">
@@ -203,8 +211,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function chips(on){ return '<div class="chips">' + ["Analysis","Market","Sector","Macro","Governance"].map(function(c){ return '<span class="chip' + (on.indexOf(c) >= 0 ? ' on' : '') + '">' + c + '</span>'; }).join("") + '</div>'; }
   function one(isNew){
     var r = isNew ? null : R[1];
-    return tb(true) + '<div class="pg"><span class="back">← All reports</span>' +
-      '<section class="card"><div class="chd"><span class="cic">' + BULB + '</span><h2>' + (isNew ? 'A new report' : r.t) + '</h2>' + (isNew ? '<span class="draft">Draft</span>' : '<span class="cnt">' + r.v + '</span>') + '</div>' +
+    return list(true) + '<div class="scrim"><section class="modal" role="dialog" aria-modal="true"><div class="chd"><span class="cic">' + BULB + '</span><h2>' + (isNew ? 'A new report' : r.t) + '</h2>' + (isNew ? '<span class="draft">Draft</span>' : '<span class="cnt">' + r.v + '</span>') + '<span class="sp"></span><button class="x" type="button" aria-label="Close">×</button></div>' +
       '<div class="form">' +
         '<div><span class="lab">Title</span><div class="fld' + (isNew ? ' ph' : '') + '">' + (isNew ? 'Plant managers\' Q3 scoring: what moved' : r.t) + '</div></div>' +
         '<div><span class="lab">Summary</span><div class="fld ta">' + (isNew ? 'Two of five plants lifted yield; the third lost a quarter to the line upgrade.' : r.s) + '</div></div>' +
@@ -232,9 +239,9 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
     new: { draw:function(){ return one(true); }, notes:[
       "The console's form, field for field: title, summary, categories, report date, the file, who can see it.",
       "<b>Save the draft</b> keeps it to Forefront. <b>Publish to ElAbd</b> waits for the file, as today.",
-      "<b>← All reports</b> goes back to the list, as on a meeting."] },
+      "It opens as a <b>pop-up over the list</b>; × or Escape closes it, and the list behind stays where it was. On a phone it fills the screen."] },
     pub: { draw:function(){ return one(false); }, notes:[
-      "A published report opens to the same form, with <b>Save</b> for corrections and Replace for a new version of the file.",
+      "<b>Open</b> on a row brings up the same pop-up, with <b>Save</b> for corrections and Replace for a new version of the file.",
       "<b>Withdraw</b> and <b>Delete</b> stay as they work today: Withdraw takes it off ElAbd's page; Delete only once it is withdrawn."] },
     client: { draw:function(){ return list(false); }, notes:[
       "ElAbd's own people see what they see today: the published reports they may open, with Download. No button, no drafts, no Open.",
@@ -244,7 +251,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
   var stage = document.getElementById("stage"), notes = document.getElementById("notes");
   function draw(){
     stage.className = "stage" + (state.d === "phone" ? " phone" : "");
-    stage.innerHTML = '<div class="dev">' + S[state.m].draw() + '</div>';
+    stage.innerHTML = '<div class="dev' + (state.m === "new" || state.m === "pub" ? ' held' : '') + '">' + S[state.m].draw() + '</div>';
     notes.innerHTML = '<div class="mnote"><section><h3>What this shows</h3><ul><li>' + S[state.m].notes.join("</li><li>") + '</li></ul></section></div>';
     document.querySelectorAll("[data-m]").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.m === state.m)); });
     document.querySelectorAll("[data-d]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === state.d)); });

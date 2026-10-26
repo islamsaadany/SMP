@@ -276,6 +276,9 @@ check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored proc
 await A.page.setViewportSize({ width: 1440, height: 900 });
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
 check(await A.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "the Priorities page does not run off the right edge");
+const navBox = await A.page.locator("nav[aria-label='Steps']").boundingBox();
+const banner = await A.page.locator("h1").first().boundingBox();
+check(!!navBox && !!banner && navBox.x < banner.x - 100, "the banner steps aside for the logo but the working area below uses the full width", JSON.stringify([navBox?.x, banner?.x]));
 await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
 const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
 check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));

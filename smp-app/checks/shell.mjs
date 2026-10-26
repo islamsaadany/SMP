@@ -1487,6 +1487,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       await page.setViewportSize({ width: 760, height: 900 }); await page.waitForTimeout(250);
       const n0 = await page.evaluate(() => ({ cards: getComputedStyle(document.querySelector(".copleft")).display, todo: getComputedStyle(document.querySelector(".copftodo")).display,
         btns: Array.from(document.querySelectorAll(".copfhead [data-cop-sheet]")).filter((b) => b.offsetParent).map((b) => b.textContent.trim()) }));
+      if (process.env.SMP_SHOTS) { console.log("DBG760", JSON.stringify(n0), await page.evaluate(() => { const m = document.querySelector(".copmain"), b = document.querySelector('.copfhead [data-cop-sheet="cards"]'); return JSON.stringify({ main: m && m.getBoundingClientRect().width, btn: b && { d: getComputedStyle(b).display, r: b.getBoundingClientRect().toJSON() }, vw: innerWidth }); })); await page.screenshot({ path: process.env.SMP_SHOTS + "/dbg760.png" }); }
       await page.click('.copfhead [data-cop-sheet="cards"]'); await page.waitForTimeout(150);
       const n1 = await page.evaluate(() => { const l = document.querySelector(".copleft"), c = document.querySelector(".copfchat"); const a = l.getBoundingClientRect(), b = c.getBoundingClientRect();
         return { cards: getComputedStyle(l).display, over: a.left < b.right && a.right > b.left, shade: getComputedStyle(document.querySelector(".copflow > .copshade")).display }; });

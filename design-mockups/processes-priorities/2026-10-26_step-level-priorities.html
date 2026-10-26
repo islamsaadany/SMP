@@ -33,16 +33,32 @@ tr.step td{padding-left:28px;font-size:13.5px}
 </style>
 <body><div class="app">
 <h1>Priorities inside a process: steps that deserve to be a process of their own</h1>
-<p class="sub">Three ways to do it, drawn on the same example (Hire to Retire). Click the tabs. All names and numbers are made up.</p>
+<p class="sub">Three ways to do it, plus the combined one you asked for (first tab), drawn on the same example (Hire to Retire). Click the tabs. All names and numbers are made up.</p>
 <div class="nav" id="nav">
-<button class="on" data-v="a">A · Score the steps</button>
+<button class="on" data-v="m">A + B · Hotspots, then score the flagged</button>
+<button data-v="a">A · Score the steps</button>
 <button data-v="b">B · Flag hotspots</button>
 <button data-v="c">C · A Steps view</button>
 <button data-v="p">What "make it a process" does</button>
 <button data-v="r">Compare and recommend</button>
 </div>
 
-<div class="view on" id="a">
+<div class="view on" id="m">
+<div class="idea"><b>Idea:</b> B's hotspot signals decide which steps are worth looking at, and A's scoring applies only to the steps you flag. Flag a step and it opens the same three dots, pre-filled from the signals as suggestions (office-only, you accept or change them). Unflagged steps stay folded away, so there is nothing to score by hand.</div>
+<div class="card tw"><table>
+<thead><tr><th>Process / step</th><th>Why the system noticed it</th><th>Flag</th><th>Importance</th><th>Complexity</th><th>Risk</th><th>Score</th><th></th></tr></thead>
+<tbody>
+<tr class="main"><td>▾ Hire to Retire <span class="chip plain">MAIN</span> <span class="chip warn">2 flagged</span></td><td class="note">10 steps · 3 decisions · 6 roles</td><td></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td>78</td><td></td></tr>
+<tr class="step"><td>4 · Approve the offer and salary</td><td><span class="chip bad">High-risk control</span><span class="chip info">Decision</span><span class="chip plain">3 roles</span></td><td><span class="flag on">⚑</span></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><div class="note">suggested 3: decision, 3 roles</div></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><div class="note">suggested 5: 1 high-risk control</div></td><td><b>82</b></td><td><button class="btn gold">Make it a process</button></td></tr>
+<tr class="step"><td>7 · Set up IT access and equipment</td><td><span class="chip info">Hands over to IT-Onboarding</span><span class="chip plain">4 roles</span></td><td><span class="flag on">⚑</span></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><div class="note">suggested 4: hand-over, 4 roles</div></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></td><td><b>58</b></td><td><button class="btn">Link to IT-Onboarding</button></td></tr>
+<tr class="step"><td>2 · Screen the CVs</td><td><span class="chip info">Decision</span></td><td><span class="flag">⚑</span></td><td colspan="5" class="note">Not flagged, so not scored. Flag it to score it.</td><td></td></tr>
+<tr class="step"><td colspan="8" class="note">▸ 7 other steps with nothing noticed (folded)</td></tr>
+</tbody></table></div>
+<div class="cols"><div class="card"><h3>What you get</h3><ul class="pros"><li>Scoring only where it matters: a handful of steps, not hundreds.</li><li>Flagged steps get a real score, so they rank against each other and against whole processes.</li><li>Flagged steps show on the process card in the plan, with their score.</li><li>A step already covered by another process is linked, not duplicated.</li></ul></div>
+<div class="card"><h3>Rules I would use</h3><ul><li>A step's score is its own; it never changes the main process's score.</li><li>Un-flagging a step clears its score, after a confirmation.</li><li>"Make it a process" carries the step's score over to the new process.</li><li>Suggestions stay office-only and are never printed for the client.</li></ul></div></div>
+</div>
+
+<div class="view" id="a">
 <div class="idea"><b>Idea:</b> open a process in the Score list and every step gets the same three dots (importance, complexity, risk). A step that scores high gets a "Make it a process" button.</div>
 <div class="card tw"><table>
 <thead><tr><th>Process / step</th><th>Importance</th><th>Complexity</th><th>Risk</th><th>Score</th><th></th></tr></thead>
@@ -101,7 +117,7 @@ tr.step td{padding-left:28px;font-size:13.5px}
 <tr><td><b>Ranked against processes</b></td><td>Yes</td><td>After it becomes one</td><td>After it becomes one</td></tr>
 <tr><td><b>Catches "already a process elsewhere"</b></td><td>No</td><td>Yes</td><td>Yes</td></tr>
 </tbody></table></div>
-<div class="card rec"><h3>My recommendation: B first, then C if the lists get long</h3><p style="margin:0">B keeps you in the process, needs almost no scoring, and turns a step into a proper process that is then scored with everything else. C is the same signals shown across the whole company, and it is cheap to add on top of B later. A is the heaviest, and most steps will never be candidates.</p></div>
+<div class="card rec"><h3>Recommendation: the combined A + B (first tab), then C if the lists get long</h3><p style="margin:0">The combined version is B with scoring only on flagged steps, so flagged steps rank properly and nothing else needs scoring. Plain B keeps you in the process, needs almost no scoring, and turns a step into a proper process that is then scored with everything else. C is the same signals shown across the whole company, and it is cheap to add on top of B later. A is the heaviest, and most steps will never be candidates.</p></div>
 </div>
 </div>
 <script>

@@ -1621,10 +1621,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        answers collapse after finishing but I can open them again to see my
        answers"): one row, then every question with its answer and the
        wording agreed on a press. */
-    const fo0 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? { row: r.querySelector(".copfoldh").textContent, body: !!r.querySelector(".copfoldb") } : null; });
-    await page.click('[data-cop-fold="0"]');
+    const fo0 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? { row: r.querySelector(".coppfh").textContent, body: !!r.querySelector(".coppfb") } : null; });
+    await page.click('[data-cop-pfold="0"]');
     const fo1 = await page.evaluate(() => { const r = document.querySelector('[data-cop-foldbox="0"]'); return r ? r.textContent : ""; });
-    await page.click('[data-cop-fold="0"]');
+    await page.click('[data-cop-pfold="0"]');
     check(fo0 && /answer/.test(fo0.row) && /1 change/.test(fo0.row) && /Agreed/.test(fo0.row) && !fo0.body && /plans and connectivity/.test(fo1) && /Make concise/.test(fo1) && /Agreed wording/.test(fo1) && /We connect Egypt\./.test(fo1),
       "§643 the agreed part folds to one row and opens to its answers, the change asked for and the wording agreed", JSON.stringify({ fo0, fo1: fo1.slice(0, 300) }));
     /* THE COUNT MOVES WHEN A PART IS AGREED, which is the number's whole
@@ -1671,7 +1671,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     /* §643 — Your answers on a card takes you to that part in the chat, opened;
        the press is the link's, not the card's. */
     if (await pressIf('[data-cop-card="0"] [data-cop-answers]')) await page.waitForTimeout(200);
-    const ya = await page.evaluate(() => ({ open: !!document.querySelector('[data-cop-foldbox="0"].open .copfoldb'), pen: !!document.querySelector("[data-cop-pentext]") }));
+    const ya = await page.evaluate(() => ({ open: !!document.querySelector('[data-cop-foldbox="0"].open .coppfb'), pen: !!document.querySelector("[data-cop-pentext]") }));
     const yaF = await flowRow(cid);
     check(ya.open && !ya.pen && yaF.e === 1 && yaF.phase === "ask", "§643 Your answers on a card opens that part's answers in the chat and leaves the work where it was", JSON.stringify({ ya, e: yaF.e, phase: yaF.phase }));
 

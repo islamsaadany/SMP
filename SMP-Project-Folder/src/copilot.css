@@ -875,25 +875,25 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
    26 Oct 2026, from design-mockups/copilot-layout/2026-10-26_chat-keeps-everything.html):
    a finished part folds to one row and opens in place; the proposals a part
    went through stay, the replaced ones faded; Your answers on a card. ── */
-.copfold { border:1px solid var(--line); border-radius:8px; background:var(--surface); }
-.copfoldh { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; font-size:var(--fs-note, 13.5px); color:var(--ink); cursor:pointer; border-radius:8px; }
-.copfoldh:hover { background:var(--surface-2); }
-.copfoldh:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-.copfoldh b { font-weight:700; }
-.copfoldh small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
+.coppf { border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.coppfh { display:flex; align-items:center; gap:8px; width:100%; border:0; background:none; text-align:left; padding:8px 12px; font:inherit; font-size:var(--fs-note, 13.5px); color:var(--ink); cursor:pointer; border-radius:8px; }
+.coppfh:hover { background:var(--surface-2); }
+.coppfh:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+.coppfh b { font-weight:700; }
+.coppfh small { flex:1 1 auto; min-width:0; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
 .copchev { width:14px; color:var(--ink-3); transition:transform .15s; }
-.copfold.open .copchev { transform:rotate(90deg); }
-.copfoldb { border-top:1px solid var(--line); padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+.coppf.open .copchev { transform:rotate(90deg); }
+.coppfb { border-top:1px solid var(--line); padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
 .copqa { display:flex; flex-direction:column; gap:2px; font-size:var(--fs-note, 13.5px); }
 .copq { color:var(--ink-3); }
 .copa { align-self:flex-end; max-width:85%; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:4px 10px; color:var(--ink); white-space:pre-wrap; }
 .copqp { background:var(--surface-2); border-radius:6px; padding:6px 10px; color:var(--ink-2); white-space:pre-wrap; }
 .copqp.agreed { border-left:3px solid var(--good, #2E6B45); color:var(--ink); }
-.copnote { font-size:var(--fs-small, 12.5px); color:var(--ink-3); text-align:center; }
+.copfnote { font-size:var(--fs-small, 12.5px); color:var(--ink-3); text-align:center; }
 .copmsg.copold { opacity:.62; }
 .copmsg.copold .copfdraft { text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--ink-3) 60%, transparent); }
 .copanswers { display:inline-block; margin-top:4px; margin-right:10px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
 .copanswers:hover, .copanswers:focus-visible { color:var(--ink); outline:none; }
-.copfold.flash { animation:copflash 1.2s ease; }
+.coppf.flash { animation:copflash 1.2s ease; }
 @keyframes copflash { 0% { box-shadow:0 0 0 3px var(--gold); } 100% { box-shadow:0 0 0 0 transparent; } }
-@media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .copfold.flash { animation:none; } }
+@media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .coppf.flash { animation:none; } }

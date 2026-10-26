@@ -4,6 +4,10 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-26 — Directions and Execution: Save, then Apply to plan (§645), merged to `main` on Islam's word.** Save keeps a version under Deliverables; Apply to plan asks first, archives what stood, then writes.
+
+**2026-10-26 — The Internal Tracker, Meeting Notes and Insights in My tasks' look (§646), merged to `main` on Islam's word.** Home's band in the client's colour (the Tracker too, now) with a sentence and the counts; one card with the filters in its header, frozen with the band on the Tracker; groups over a grey rule; striped rows; the main screens' typeface. Portfolio unchanged.
+
 **2026-10-26 — The chat in the order it happened (§644), merged to `main` on Islam's word.** Each part's guided pass folds where it happened, then plain chat; Your answers is a hover icon; Key Objectives shows every objective.
 
 **2026-10-26 — The chat keeps everything (§643), merged to `main` on Islam's word.** A draft or change is a proposal in the chat; the card changes only on Save to the card; guided answers fold and reopen; typed lines are kept; the check is the pane's.
@@ -10473,3 +10477,6 @@ Checked: real run GREEN 116/0 (the plan shows the step and not the whole process
 
 ## §608 — Priorities: download every step, with a Flagged column, for reporting (2026-10-27)
 Islam asked for an extraction of all steps, main and sub processes, not only flagged ones, with a column saying whether a step is flagged. The **Download all steps (flagged marked)** button next to "Download as Excel" on the Priorities page gives one flat sheet, one row per step of every process in the screen's order (steps in map order): level (main or sub), main process, process code and name, department, step number, step, role, **Flagged (Yes/No)**, importance, complexity, risk, score, wave (for a flagged step: its own, or "with its process"), why, what the map noticed, and whether it is now its own process. Office only (a client's own person is refused). Checked in the real run (GREEN 119/0): every step is there, the flagged one is marked Yes and carries its scores and wave, an unflagged one is marked No. Branch only; not merged.
+
+## §647 — One mark everywhere; the bar opens on it; the console's loading shape as it is; product first for a client's people; every module at 80% (2026-10-26)
+The north star is the platform's one mark (tab, home-screen icons, built file). Every module's bar opens on it, a hairline, then the client and module (option D). Going back to the console draws the console as it is, and its column and band are there at the first paint. A client's own people read product first on every bar. Every module page is at 80% on a computer, like the console and Strategy, with window lengths, measured lengths and React Flow mended for the zoom. Checked on the merged tree (see DECISIONS §647); merged to `main` on Islam's word.

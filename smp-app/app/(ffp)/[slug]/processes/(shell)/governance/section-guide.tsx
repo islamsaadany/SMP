@@ -3,6 +3,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { sectionGuideFor, type SectionGuideId } from "@/ffp/lib/domain/section-guides";
 import { useLocale, useMessages } from "@/ffp/lib/i18n/client";
+import { pageZoom } from "@/ffp/lib/client/page-zoom";
 
 const TABS = ["why", "how", "eval"] as const;
 type TabKey = (typeof TABS)[number];
@@ -80,11 +81,11 @@ export function SectionGuide({ id }: { id: SectionGuideId }) {
     if (getComputedStyle(dialog).direction === "rtl") {
       dialog.style.right = "0px";
       const overflow = 12 - dialog.getBoundingClientRect().left;
-      if (overflow > 0) dialog.style.right = `${-overflow}px`;
+      if (overflow > 0) dialog.style.right = `${-overflow / pageZoom()}px`;
     } else {
       dialog.style.left = "0px";
       const overflow = dialog.getBoundingClientRect().right - (window.innerWidth - 12);
-      if (overflow > 0) dialog.style.left = `${-overflow}px`;
+      if (overflow > 0) dialog.style.left = `${-overflow / pageZoom()}px`;
     }
     headingRef.current?.focus();
   }, [open]);
@@ -126,7 +127,7 @@ export function SectionGuide({ id }: { id: SectionGuideId }) {
           id={dialogId}
           role="dialog"
           aria-labelledby={`${uid}-title`}
-          className="absolute top-full z-40 mt-2 flex max-h-[min(70vh,34rem)] w-[min(28rem,calc(100vw-2rem))] flex-col rounded-xl border border-slate-200 bg-white text-start text-xs font-normal normal-case tracking-normal text-slate-700 shadow-xl"
+          className="absolute top-full z-40 mt-2 flex max-h-[min(calc(var(--winh)*0.7),34rem)] w-[min(28rem,calc(var(--winw)-2rem))] flex-col rounded-xl border border-slate-200 bg-white text-start text-xs font-normal normal-case tracking-normal text-slate-700 shadow-xl"
         >
           <div className="flex items-start gap-2 px-4 pt-3.5">
             <div className="min-w-0 flex-1">

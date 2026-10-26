@@ -93,6 +93,10 @@
          a client that has not uploaded one gets no empty box (§15.1). -->
     <img class="clientlogo" id="clientlogo" alt="" hidden>
     <div class="brand">
+      <!-- The platform's mark before its name (option D, 2026-10-26): the
+           console column's north star, so a client's own people see the one
+           logo Forefront's do. A picture of the name beside it, so hidden. -->
+      <span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></span>
       <h1>Strategy Management Platform</h1>
       <!-- Whose strategy this is. The product name alone never said it, and a
            consulting product shown to a client should. Set in paint() from
@@ -3617,9 +3621,14 @@
       var staff = !on && location.protocol !== "file:" &&
                   !document.documentElement.hasAttribute("data-console") &&
                   document.documentElement.hasAttribute("data-module");
+      /* PRODUCT FIRST, ON EVERY BAR (2026-10-26, Islam's option 2 of two
+         drawn): the platform's mark and name lead and the company follows,
+         quiet after a hairline, which is the order the other modules' bar
+         (lib/topbar.ts) already had — so a client's own person reads one
+         line in every module. It reverses §400's company-first line here. */
       if (staff) {
-        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
-        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
+        if (h1) h1.textContent = "Strategy Management Platform";
+        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org || ""; }
       }
       if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
@@ -3640,6 +3649,13 @@
            second request for this document, not an absent picture. */
         if (src) { mark.src = src; mark.hidden = false; }
         else { mark.removeAttribute("src"); mark.hidden = true; }
+        /* the company's mark goes with the company's name: after the
+           product for a client's own person (product first, 2026-10-26),
+           at the head of the line on the client's settings, where the name
+           is the heading. Moved, never copied. */
+        var brand = document.querySelector(".top .brand");
+        if (staff && org && brand) brand.insertBefore(mark, org);
+        else if (brand && mark.nextElementSibling !== brand) brand.parentNode.insertBefore(mark, brand);
       }
       /* The way back says where it goes AND what it does first, which is
          Islam's own wording: *"I save and close to go back to the console."*

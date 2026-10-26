@@ -25,7 +25,8 @@
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { barFor } from "../../lib/branding.ts";
-import { ledgerCss, mastHtml, sectionHead, LENS } from "../../lib/ledger.ts";
+import { ledgerCss, sectionHead, LENS } from "../../lib/ledger.ts";
+import { CARD_LOOK_CSS, bandHtml, cardHead } from "../../lib/card-look.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Note, type Who, type Minutes, type Named, type SendRow, type Register, type Person,
@@ -59,10 +60,14 @@ const CSS = `
 .unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
 /* ── the list: a month is a numbered section, a meeting a row. The row is
    .nrow, never .mrow, which is the panel's own row in lib/ledger.ts. ── */
-.nrow{display:grid;grid-template-columns:92px minmax(0,1fr) 54px 150px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2);text-decoration:none;color:inherit}
-.nrow:hover,.nrow:focus-visible{background:var(--surface-2);box-shadow:-8px 0 0 var(--surface-2),8px 0 0 var(--surface-2);outline:none}
+/* IN MY TASKS' LOOK (§646): inside the card, striped grey and white, grey
+   first, restarting under each month's grey rule. */
+.nrow{display:grid;grid-template-columns:92px minmax(0,1fr) 54px 150px;gap:12px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line-2);text-decoration:none;color:inherit}
+.sec .nrow:nth-child(odd of .nrow){background:var(--zebra)}
+.sec .nrow:last-child{border-bottom:0}
+.nrow:hover,.nrow:focus-visible,.sec .nrow:hover{background:var(--surface-2);outline:none}
 .nrow .d{font:500 13.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
-.nrow .t{min-width:0;font:600 15px/1.35 var(--font)}
+.nrow .t{min-width:0;font:600 14.5px/1.35 var(--font)}
 .nrow .t small{display:block;font:400 13px/1.4 var(--font);color:var(--ink-3);margin-top:2px}
 .nrow .n{display:inline-flex;align-items:center;gap:5px;font:400 13px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
 .nrow .n svg{width:13px;height:13px;flex:none}
@@ -150,7 +155,7 @@ input.date{cursor:auto}
 .rm{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--bad);cursor:pointer;text-decoration:underline}
 @media (max-width:760px){.two{grid-template-columns:1fr}
   .nrow{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"d n s" "t t t";row-gap:4px;column-gap:10px}.nrow .t{grid-area:t}.nrow .word{grid-area:s}.nrow .d{grid-area:d}.nrow .n{grid-area:n}
-  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(100vw - 60px))}}
+  .head{grid-template-columns:1fr}.pick{width:min(300px,calc(var(--winw) - 60px))}}
 `;
 
 
@@ -167,7 +172,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
     /* `title-as-heading` puts the reported look back — borderless, transparent,
        no key — which must turn checks/notes.mjs red (§94.5). Never set on a
        deployment (constitution XVI). */
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CSS) +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(ledgerCss(bar) + CARD_LOOK_CSS + CSS) +
       (BRK() === "title-as-heading" ? ".ttl{border:0!important;border-radius:0!important;background:transparent!important}.head .lab{display:none}" : "") +
       "</style>\n</head>\n" +
     "<body" + a + ">\n" +
@@ -250,18 +255,21 @@ export function listBody(L: Loaded, p: PageArgs, today: string): string {
   const rows = months.map((g, i) =>
     '<section class="sec">' + sectionHead(esc, i + 1, g.m, plural(g.notes.length, "meeting", "meetings")) +
     g.notes.map(row).join("") + "</section>").join("");
-  const mast = mastHtml({ esc, eyebrow: p.tenantName, title: "Meetings",
-    tiles: [{ n: shown.length, label: shown.length === 1 ? "Meeting" : "Meetings" }] });
-  const tools = '<div class="tools"><form class="find" method="get" action="' + esc(here) + '" role="search">' + LENS +
+  /* THE BAND AND ONE CARD (§646): + New meeting is the band's amber button,
+     as Clients carries + Add a client; the search is the card's filter. */
+  const mast = bandHtml({ esc, eyebrow: p.tenantName, title: "Meetings", sentence: "Every meeting with " + p.tenantName + ", and its minutes.",
+    tiles: [{ n: shown.length, label: shown.length === 1 ? "Meeting" : "Meetings" }],
+    act: '<button class="act" type="button" data-act="new">+ New meeting</button>' });
+  const find = '<form class="find" method="get" action="' + esc(here) + '" role="search">' + LENS +
     '<input class="srch" type="search" name="q" value="' + esc(q) + '" placeholder="Search meetings" aria-label="Search meetings">' +
-    '<button class="go" type="submit">Search</button></form><span class="sp"></span>' +
-    '<button class="btn amber" type="button" data-act="new">+ New meeting</button></div>';
+    '<button class="go" type="submit">Search</button></form>';
   const none = !L.notes.length
     ? '<div class="none"><b>No meetings noted for ' + esc(p.tenantName) + " yet.</b>Start one and type as it runs; the assistant turns the notes into minutes, and the minutes go to the attendees.</div>"
     : !shown.length
       ? '<div class="none"><b>Nothing matches.</b>Try another word, or <a href="' + esc(here) + '">see them all</a>.</div>'
       : "";
-  return mast + tools + (rows ? '<div class="list">' + rows + "</div>" : "") + none;
+  return mast + '<section class="card">' + cardHead({ esc, icon: "cal", title: "Meetings", count: shown.length, right: find }) +
+    (rows ? '<div class="list">' + rows + "</div>" : "") + none + "</section>";
 }
 
 /* THE ATTENDEES: a chip each, the register behind + Add attendee. A keyed
@@ -429,7 +437,7 @@ export async function notesDocument(p: PageArgs): Promise<string> {
   catch (e) { console.error("notes: reading " + p.slug + ":", (e as Error).message); }
   if (!L) {
     return skeleton(p.slug, p.tenantName, topOf(p), bar, null,
-      '<main class="pg">' + mastHtml({ esc, eyebrow: p.tenantName, title: "Meetings" }) +
+      '<main class="pg">' + bandHtml({ esc, eyebrow: p.tenantName, title: "Meetings", sentence: "Every meeting with " + p.tenantName + ", and its minutes." }) +
       '<p class="unread">The meetings could not be read just now. Nothing has been lost &mdash; try again in a moment.</p></main>\n');
   }
   /* A note asked for and not found: said, with the way back (§35, §61). */

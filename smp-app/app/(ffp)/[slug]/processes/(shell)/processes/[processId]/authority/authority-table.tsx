@@ -160,7 +160,7 @@ export function AuthorityTable({
         </div>
       )}
 
-      <div className="max-h-[70vh] overflow-auto rounded-xl border border-slate-200 bg-white">
+      <div className="max-h-[calc(var(--winh)*0.7)] overflow-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm" aria-label="Authority rules by task">
           <caption className="sr-only">
             Each task carries a list of rules. A rule turns on either an amount of money or an elapsed time, and says

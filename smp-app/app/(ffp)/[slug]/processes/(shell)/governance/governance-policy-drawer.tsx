@@ -221,7 +221,7 @@ export function GovernancePolicyDrawer({
           </div>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto px-5 py-4">
+        <div className="max-h-[calc(var(--winh)*0.6)] overflow-y-auto px-5 py-4">
           {editing ? (
             <textarea
               value={body}

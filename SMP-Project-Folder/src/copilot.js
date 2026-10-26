@@ -3373,7 +3373,7 @@ var COPILOT = (function(){
         exProgress(id);
         SAY = "";
         LISTS[key()] = null; loadList(true);
-        if (r.ok && typeof paint === "function") paint(); else draw();
+        draw();
       });
       return true;
     }

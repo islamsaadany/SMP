@@ -2520,6 +2520,10 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
+    /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
+       keeps nothing empty), so the ones expected are those that hold something. */
+    const exCapsHeld = await page.evaluate((ids) => (GROUP.capabilities || []).filter((c) => ids.includes(String(c.id)) && !planIsEmpty(capSnapshotCounts(capPlanSnapshot(c)))).map((c) => "cap:" + c.id),
+      r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId)));
     if (fin) { await fin.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
@@ -2532,7 +2536,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await page.click("[data-cop-planapply-yes]");
     await page.waitForTimeout(1500);
     const arEx = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), exArch);
-    check(arEx.includes("unit:mobile") && arEx.some((k) => k.indexOf("cap:") === 0), "§645 …and Yes archives Mobile's plan and the Capabilities it updates before it writes", JSON.stringify(arEx));
+    check(arEx.includes("unit:mobile") && exCapsHeld.every((k) => arEx.includes(k)), "§645 …and Yes archives Mobile's plan and each Capability it updates that holds anything, before it writes", JSON.stringify({ arEx, exCapsHeld }));
     const plan = await page.evaluate((ids) => {
       const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
       (UNITS.mobile.items || []).forEach((p) => { if (!ids.includes(p.id)) return;

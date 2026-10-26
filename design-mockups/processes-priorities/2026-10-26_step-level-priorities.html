@@ -1,0 +1,110 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Step-level priorities</title>
+<style>
+:root{--bg:#F3F5F9;--surf:#fff;--surf2:#EFF2F6;--ink:#1B2430;--ink2:#414A58;--ink3:#5F6B7C;--line:#D6DCE5;--navy:#16325C;--navy-ink:#fff;--gold:#B7791F;--gold-bg:#FDF3DC;--good:#17623A;--good-bg:#DDF3E5;--warn:#8A5A00;--warn-bg:#FFF0CC;--bad:#9B1C2E;--bad-bg:#FBE1E5;--info:#1F4FA3;--info-bg:#E1EAF9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--gold:#E0A83F;--gold-bg:#3A2F14;--good:#7FD9A0;--good-bg:#173626;--warn:#F0C66B;--warn-bg:#3A2F14;--bad:#F29AA7;--bad-bg:#401A22;--info:#8FB4F0;--info-bg:#1B2A44}}
+:root[data-theme="dark"]{--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--gold:#E0A83F;--gold-bg:#3A2F14;--good:#7FD9A0;--good-bg:#173626;--warn:#F0C66B;--warn-bg:#3A2F14;--bad:#F29AA7;--bad-bg:#401A22;--info:#8FB4F0;--info-bg:#1B2A44}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Segoe UI",sans-serif;font-size:14.5px;line-height:1.45;padding:16px}
+.app{max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:17px;margin:0 0 8px}h3{font-size:14px;margin:0 0 6px}
+.sub{color:var(--ink3);margin:0 0 14px}
+.nav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:14px}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);font:inherit;font-weight:600;padding:8px 14px;cursor:pointer}
+.nav button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.view{display:none}.view.on{display:block}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.idea{background:var(--info-bg);color:var(--ink);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:760px}
+th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.main td{background:var(--surf2);font-weight:600}
+tr.step td{padding-left:28px;font-size:13.5px}
+.dots{display:inline-flex;gap:3px}.dots i{width:11px;height:11px;border-radius:50%;border:1px solid var(--line);background:var(--surf2)}
+.dots.i i.on{background:#2D3A8C;border-color:#2D3A8C}.dots.c i.on{background:#E08A00;border-color:#E08A00}.dots.r i.on{background:#D6264A;border-color:#D6264A}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;margin:1px 3px 1px 0;white-space:nowrap}
+.good{background:var(--good-bg);color:var(--good)}.warn{background:var(--warn-bg);color:var(--warn)}.bad{background:var(--bad-bg);color:var(--bad)}.info{background:var(--info-bg);color:var(--info)}.plain{background:var(--surf2);color:var(--ink2)}
+.btn{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:3px 10px;border-radius:6px;cursor:pointer}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#16120A}
+.flag{font-size:16px;cursor:pointer;opacity:.35}.flag.on{opacity:1}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.pros li,.cons li{margin:2px 0}.pros{color:var(--ink)}
+.rec{border:2px solid var(--gold);background:var(--gold-bg)}
+.note{color:var(--ink3);font-size:12.5px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.flow .b{background:var(--surf2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}.flow .a{color:var(--ink3)}
+</style>
+<body><div class="app">
+<h1>Priorities inside a process: steps that deserve to be a process of their own</h1>
+<p class="sub">Three ways to do it, drawn on the same example (Hire to Retire). Click the tabs. All names and numbers are made up.</p>
+<div class="nav" id="nav">
+<button class="on" data-v="a">A · Score the steps</button>
+<button data-v="b">B · Flag hotspots</button>
+<button data-v="c">C · A Steps view</button>
+<button data-v="p">What "make it a process" does</button>
+<button data-v="r">Compare and recommend</button>
+</div>
+
+<div class="view on" id="a">
+<div class="idea"><b>Idea:</b> open a process in the Score list and every step gets the same three dots (importance, complexity, risk). A step that scores high gets a "Make it a process" button.</div>
+<div class="card tw"><table>
+<thead><tr><th>Process / step</th><th>Importance</th><th>Complexity</th><th>Risk</th><th>Score</th><th></th></tr></thead>
+<tbody>
+<tr class="main"><td>▾ Hire to Retire <span class="chip plain">MAIN</span></td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td>78</td><td></td></tr>
+<tr class="step"><td>1 · Raise a vacancy request</td><td><span class="dots i"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td>24</td><td></td></tr>
+<tr class="step"><td>4 · Approve the offer and salary</td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td>82</td><td><button class="btn gold">Make it a process</button></td></tr>
+<tr class="step"><td>7 · Set up IT access and equipment</td><td><span class="dots i"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="dots r"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td>66</td><td><button class="btn gold">Make it a process</button></td></tr>
+<tr class="step"><td>9 · Send the welcome pack</td><td><span class="dots i"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td><span class="dots c"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td><span class="dots r"><i></i><i></i><i></i><i></i><i></i></span></td><td>8</td><td></td></tr>
+</tbody></table></div>
+<div class="cols"><div class="card"><h3>Good</h3><ul class="pros"><li>Same scoring everywhere, one idea to learn.</li><li>Steps and processes can be ranked on one scale.</li></ul></div>
+<div class="card"><h3>Not so good</h3><ul class="cons"><li>Heavy: 24 processes with 10 to 30 steps each is hundreds of rows to score.</li><li>Most steps are plainly not candidates, so most of the effort is wasted.</li></ul></div></div>
+</div>
+
+<div class="view" id="b">
+<div class="idea"><b>Idea:</b> steps are not scored. The system points at steps that look like hotspots, using what is already on the map. You flag the ones that matter with one click and say why. Flagged steps show under their process as "steps to watch", and can be made into a process.</div>
+<div class="card tw"><table>
+<thead><tr><th>Process / step</th><th>Why the system noticed it</th><th>Flag</th><th>Your note</th><th></th></tr></thead>
+<tbody>
+<tr class="main"><td>▾ Hire to Retire <span class="chip plain">MAIN</span> <span class="chip warn">2 steps to watch</span></td><td class="note">10 steps · 3 decisions · 6 roles</td><td></td><td></td><td></td></tr>
+<tr class="step"><td>4 · Approve the offer and salary</td><td><span class="chip bad">High-risk control logged</span><span class="chip info">Decision point</span><span class="chip plain">3 roles</span></td><td><span class="flag on" title="Flagged">⚑</span></td><td>Salary approvals are not consistent across departments</td><td><button class="btn gold">Make it a process</button></td></tr>
+<tr class="step"><td>7 · Set up IT access and equipment</td><td><span class="chip info">Hands over to IT-Onboarding</span><span class="chip plain">4 roles</span><span class="chip plain">9 sub-tasks</span></td><td><span class="flag on" title="Flagged">⚑</span></td><td>Already has its own process in IT; link instead</td><td><button class="btn">Link to IT-Onboarding</button></td></tr>
+<tr class="step"><td>2 · Screen the CVs</td><td><span class="chip info">Decision point</span></td><td><span class="flag">⚑</span></td><td></td><td></td></tr>
+<tr class="step"><td>9 · Send the welcome pack</td><td class="note">Nothing noticed</td><td><span class="flag">⚑</span></td><td></td><td></td></tr>
+</tbody></table></div>
+<div class="card"><h3>What the system looks at (all already on the map)</h3><p class="note">A decision point, a hand-over to another process, the number of roles involved, a high or medium risk logged against the step, and the number of sub-tasks. Suggestions are for the office only, like the existing suggested scores.</p></div>
+<div class="cols"><div class="card"><h3>Good</h3><ul class="pros"><li>Light: you look at a few steps, not hundreds.</li><li>Catches a step that is already a process elsewhere, so you link rather than duplicate.</li><li>Flagged steps show on the process card in the plan.</li></ul></div>
+<div class="card"><h3>Not so good</h3><ul class="cons"><li>A step has no score, so it is not ranked against processes until it becomes one.</li></ul></div></div>
+</div>
+
+<div class="view" id="c">
+<div class="idea"><b>Idea:</b> a fifth step on the Priorities page, "Steps". It lists the steps that look like hotspots across all processes, ranked by how many signals they carry. For each you choose: Stays a step, Watch, or Make it a process.</div>
+<div class="card tw"><table>
+<thead><tr><th>#</th><th>Step</th><th>In process</th><th>Signals</th><th>Your call</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Approve the offer and salary</td><td>Hire to Retire</td><td><span class="chip bad">High-risk control</span><span class="chip info">Decision</span><span class="chip plain">3 roles</span></td><td><select><option>Make it a process</option><option>Watch</option><option>Stays a step</option></select></td></tr>
+<tr><td>2</td><td>Three-way match before payment</td><td>Procure to Pay</td><td><span class="chip bad">High-risk control</span><span class="chip info">Hands over to Finance</span></td><td><select><option>Watch</option><option>Make it a process</option><option>Stays a step</option></select></td></tr>
+<tr><td>3</td><td>Set up IT access and equipment</td><td>Hire to Retire</td><td><span class="chip info">Hands over to IT-Onboarding</span><span class="chip plain">4 roles</span></td><td><select><option>Not decided</option><option>Make it a process</option><option>Watch</option><option>Stays a step</option></select></td></tr>
+<tr><td>4</td><td>Month-end accruals</td><td>Record to Report</td><td><span class="chip warn">Medium-risk control</span><span class="chip plain">5 roles</span></td><td><select><option>Not decided</option></select></td></tr>
+</tbody></table></div>
+<div class="cols"><div class="card"><h3>Good</h3><ul class="pros"><li>One place to see the hotspots across the whole company.</li><li>Does not clutter the process Score list.</li></ul></div>
+<div class="card"><h3>Not so good</h3><ul class="cons"><li>Separate from the process, so you lose the "here, in this process" view.</li><li>One more step to learn on the page.</li></ul></div></div>
+</div>
+
+<div class="view" id="p">
+<div class="idea"><b>What "Make it a process" does, in all three options.</b> It uses the "branch from a step" link that sub-processes already have, so nothing new in the map.</div>
+<div class="flow"><div class="b">Step 4 · Approve the offer and salary<br><span class="note">inside Hire to Retire</span></div><span class="a">→</span><div class="b"><b>New sub-process</b> "Approve the offer and salary"<br><span class="note">code HRX110, branches from step 4, takes that step's controls and notes as its start</span></div><span class="a">→</span><div class="b">It appears in the Score list under Hire to Retire, scored like any other process</div></div>
+<div class="card"><h3>You choose before it happens</h3><ul><li>The name and code (suggested from the step).</li><li>Whether the step stays in the main process as a link to the new one (recommended), or is removed from it.</li><li>The new process starts as a Draft and is not part of any wave until you decide.</li></ul></div>
+<p class="note">Nothing is deleted or moved without a confirmation, and the original step is never lost.</p>
+</div>
+
+<div class="view" id="r">
+<div class="card tw"><table style="min-width:560px"><thead><tr><th></th><th>A · Score the steps</th><th>B · Flag hotspots</th><th>C · Steps view</th></tr></thead><tbody>
+<tr><td><b>Effort for you</b></td><td>High</td><td>Low</td><td>Low</td></tr>
+<tr><td><b>Seen in the process</b></td><td>Yes</td><td>Yes</td><td>No, separate page</td></tr>
+<tr><td><b>Ranked against processes</b></td><td>Yes</td><td>After it becomes one</td><td>After it becomes one</td></tr>
+<tr><td><b>Catches "already a process elsewhere"</b></td><td>No</td><td>Yes</td><td>Yes</td></tr>
+</tbody></table></div>
+<div class="card rec"><h3>My recommendation: B first, then C if the lists get long</h3><p style="margin:0">B keeps you in the process, needs almost no scoring, and turns a step into a proper process that is then scored with everything else. C is the same signals shown across the whole company, and it is cheap to add on top of B later. A is the heaviest, and most steps will never be candidates.</p></div>
+</div>
+</div>
+<script>
+const v=document.querySelectorAll('.view');document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));v.forEach(s=>s.classList.toggle('on',s.id===b.dataset.v))});
+document.querySelectorAll('.flag').forEach(f=>f.onclick=()=>f.classList.toggle('on'));
+</script></body></html>

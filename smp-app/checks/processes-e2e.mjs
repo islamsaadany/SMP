@@ -272,6 +272,14 @@ const dec2 = Object.fromEntries((await q(ffp, 'select code, "deepDiveDecision" d
 check(dec2["P1.1"] === "WAVE_1" && dec2["P2.4"] === "WAVE_2", "suggesting waves never changes a decision somebody made");
 check(dec2["P4.1"] == null && dec2["P5.1"] == null, "…and leaves unscored processes undecided", JSON.stringify(dec2));
 
+/* Layout: nothing pushed off the right edge, and every row's "Open" is reachable. */
+await A.page.setViewportSize({ width: 1440, height: 900 });
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+check(await A.page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1), "the Priorities page does not run off the right edge");
+await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "networkidle" });
+const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
+check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));
+await A.page.setViewportSize({ width: 1280, height: 720 });
 /* The list keeps its order while scoring; sub-processes sit under their main; "Clear entries" clears only what was picked. */
 const order = () => A.page.$$eval("tbody tr td:nth-child(2) .font-mono", (e) => e.map((x) => x.textContent.trim()));
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });

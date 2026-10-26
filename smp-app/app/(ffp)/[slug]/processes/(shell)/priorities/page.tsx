@@ -64,7 +64,7 @@ export default async function PrioritiesPage(props: PageProps<"/[slug]/processes
 
   return (
     <main className="mx-auto w-full max-w-[1600px] px-6 py-8">
-      <div className="mx-auto w-full max-w-6xl xl:mx-0 xl:ms-[max(17rem,calc((100%-72rem)/2))]">
+      <div className="mx-auto w-full max-w-6xl xl:mx-0 xl:ms-[17rem] xl:w-auto">
         <WorkspacePageHeader title="Deep-dive priorities" subtitle={`${rows.length} high-level process${rows.length === 1 ? "" : "es"}. Which ones do we take deep next: full steps, RACI, controls and an SOP?`} />
         <nav aria-label="Steps" className="mb-4 grid overflow-hidden rounded-xl border border-slate-200 bg-white sm:grid-cols-4">
           {STEPS.map((s) => (

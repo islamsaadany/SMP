@@ -129,7 +129,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
           ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place), applied: await appliedFoundation(c, chat, pw || chat.place) } : {}),
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
-          ...(chat.section === "compete" ? await competeView(c, chat) : {}),
+          ...(chat.section === "compete" ? await competeView(c, chat, pw) : {}),
           ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
           ...(chat.section === "execution" ? await execView(c, chat) : {}),
           ...(chat.section === "advisory" ? await advisoryView(c, chat) : {}) };

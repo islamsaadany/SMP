@@ -949,3 +949,13 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copdswot { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
 @media (max-width:760px){ .copdswot { grid-template-columns:1fr; } }
 .copdstay { display:block; width:100%; margin-top:6px; }
+
+/* §654 C1 — Competitive Discipline split three ways: the pane holds the
+   scores, then the table above them; the folded value cards are small. */
+.copcppane .copcp-wrap { margin:0; }
+.copcppane .copsw-card h3 { display:flex; align-items:baseline; gap:8px; }
+.copcppane .copsw-card h3 .linkbu { margin-left:auto; }
+.copcp-cards.small { display:flex; flex-wrap:wrap; gap:6px; }
+.copcp-cards.small .copcp-card { display:flex; align-items:center; gap:6px; padding:4px 8px; margin:0; }
+.copcp-cards.small .copcp-card h4 { margin:0; font-size:var(--fs-small, 12.5px); }
+.copcp-cards.small .copcp-card:not(.on) { opacity:.6; }

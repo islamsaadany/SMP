@@ -2355,7 +2355,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
   }
 });
 
-await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
+await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493; split three ways §654 C1)", async () => {
   const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/cd-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
@@ -2385,6 +2385,16 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(rec === "btc", "the page recommends the discipline the scores lead with", rec);
     const few = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
     check(few === 9, "the market table opens on three factors, a pill per discipline", few);
+    /* §654 C1 — the split: the scores sit in the pane on the right, the
+       conversation on the left in the order it happened, the to-do beside;
+       the chat's own box is held until there is a table to change. */
+    const sp = await page.evaluate(() => ({
+      pane: !!document.querySelector("[data-cop-cppane] [data-cop-cp-sc]"), inChat: !!document.querySelector("[data-cop-chatbox] [data-cop-cp-sc]"),
+      todo: !!document.querySelector(".copftodo [data-cop-cp-todo]"), step: (document.querySelector(".copfhead small") || {}).textContent || "",
+      me: (document.querySelector("[data-cop-msgs] .copmsg.me") || {}).textContent || "", box: (document.querySelector("[data-cop-text]") || {}).disabled,
+      foot: (document.querySelector("[data-cop-cpfoot]") || {}).textContent || "", save: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("data-tip") : null }));
+    check(sp.pane && !sp.inChat && sp.todo && /The discipline/.test(sp.step) && /Score them/.test(sp.me) && sp.box === true && /v1/.test(sp.foot) && /in progress/.test(sp.foot) && /Pick the values first/.test(String(sp.save)),
+      "§654 C1 the scores are on the right, the to-do beside, the chat reads 'Score them' as what happened, its box held until there is a table, and Save held saying to pick the values first", JSON.stringify(sp));
     await page.click(".copcp-more [data-cop-cp-more]"); await page.waitForTimeout(300);
     const all = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
     check(all === CP_M.length * 3, "…and + more shows every market factor", all);
@@ -2405,11 +2415,24 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(r.s.table && r.s.table.discipline === "btc" && r.s.table.values.map((v) => v.title).join() === "Hassle-free,Wide reach", "the two ticked values become the table, stored", JSON.stringify(r.s.table && r.s.table.values.map((v) => v.title)));
     const cells = await page.$$eval("[data-cop-cp-cell]", (a) => a.length);
     check(cells === 6, "every cell of the table is editable before saving", cells);
-    await page.fill("[data-cop-cp-ask]", "Rename the first value");
-    await page.click("[data-cop-cp-refine]");
+    const tb = await page.evaluate(() => ({ pane: !!document.querySelector("[data-cop-cppane] table.cmptab"), fold: (document.querySelector('[data-cop-pfold="cpvals"]') || {}).textContent || "",
+      cards: document.querySelectorAll("[data-cop-cp-pick]").length, box: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(tb.pane && /The values/.test(tb.fold) && /5 offered · 2 ticked/.test(tb.fold) && tb.cards === 0 && tb.box === false && /Ask for a change/.test(tb.ph),
+      "§654 C1 the table is on the right; the cards fold where they happened as 'The values · 5 offered · 2 ticked'; the chat's box opens, asking for a change", JSON.stringify(tb));
+    await page.click('[data-cop-pfold="cpvals"]'); await page.waitForTimeout(200);
+    const fo = await page.$$eval(".coppf.open .copcp-cards.small .copcp-card", (a) => a.length);
+    check(fo === 5, "§654 C1 …and opens again on a press, showing the five cards as they were ticked", fo);
+    /* the ask goes through the chat's own box, and stays in the chat in order */
+    await page.fill("[data-cop-text]", "Rename the first value");
+    await page.keyboard.press("Enter");
     await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
     const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
+    const lg = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me, [data-cop-msgs] .copmsg.ai")).slice(-2).map((m) => m.className.replace(/.*\b(me|ai)\b.*/, "$1") + ":" + m.textContent.trim().slice(0, 40)));
+    check(lg.length === 2 && /^me:.*Rename the first value/.test(lg[0]) && /^ai:.*Done — the first value is renamed/.test(lg[1]), "§654 C1 the ask and its answer stay in the chat, in order", JSON.stringify(lg));
+    await page.reload(); await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
+    const lg2 = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent.trim()).filter((t) => /Rename the first value/.test(t)).length);
+    check(lg2 === 1, "§654 C1 …and after a reload, still there — stored, not this visit's memory", lg2);
     await heldSweep(page, "Competitive Discipline, before the save");
     await shot("1-before-save");
     /* §654 B1 — REWRITTEN, NOT LOOSENED (§218): Save keeps the version and
@@ -2422,8 +2445,10 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Competitive Discipline — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
-    const cpSv = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.compete || null) === b, line: /not on the plan yet/.test((document.querySelector(".copsw-main") || {}).textContent || ""), apply: !!document.querySelector("[data-cop-cp-apply]") }), cpBefore);
-    check(cpSv.same && cpSv.line && cpSv.apply, "§654 Save leaves the plan's Competitive Discipline exactly as it was — the chat says it is not on the plan yet and offers Apply to plan", JSON.stringify(cpSv));
+    const cpSv = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.compete || null) === b, line: /v1 saved.*not on the plan yet/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""),
+      apply: (document.querySelector("[data-cop-cp-apply]") || {}).getAttribute ? document.querySelector("[data-cop-cp-apply]").getAttribute("aria-disabled") : "none", saveHeld: (document.querySelector("[data-cop-cp-finish]") || {}).getAttribute ? document.querySelector("[data-cop-cp-finish]").getAttribute("data-tip") : null,
+      said: /Saved as .*v1.*under Deliverables/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || "") }), cpBefore);
+    check(cpSv.same && cpSv.line && cpSv.apply !== "true" && /Nothing has changed/.test(String(cpSv.saveHeld)) && cpSv.said, "§654 Save leaves the plan's Competitive Discipline exactly as it was — the pane's foot says v1 saved · not on the plan yet with Apply to plan live, Save held, and the chat says where the version is", JSON.stringify(cpSv));
     await page.click("[data-cop-cp-apply]");
     await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
     const cpAsk = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
@@ -2435,10 +2460,10 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and Yes writes the table into the plan's Competitive Discipline", JSON.stringify(plan));
     const cpAr = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), cpArch.n);
     check(cpArch.had ? cpAr.includes("compete:mobile") && !cpAr.includes("unit:mobile") : cpAr.length === 0, "§654 …having archived the plan's Competitive Discipline as its own kind (or nothing, where the plan held none)", JSON.stringify({ cpAr, had: cpArch.had }));
-    const cpOn = await page.evaluate(() => ({ line: /It is on the plan\./.test((document.querySelector(".copsw-main") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
-    check(cpOn.line && cpOn.again, "§654 …and the chat says it is on the plan, offering Apply again", JSON.stringify(cpOn));
+    const cpOn = await page.evaluate(() => ({ line: /v1 on the plan/.test((document.querySelector("[data-cop-cpfoot]") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
+    check(cpOn.line && cpOn.again, "§654 …and the pane's foot says v1 on the plan, offering Apply again", JSON.stringify(cpOn));
     await shot("2-saved");
-    check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
+    check(await page.evaluate(() => { const b = document.querySelector("[data-cop-cp-finish]"); return !!b && b.getAttribute("aria-disabled") === "true" && /Nothing has changed/.test(b.getAttribute("data-tip") || ""); }), "a saved chat holds Save, saying nothing has changed (§649)");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];

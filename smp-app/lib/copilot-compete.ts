@@ -102,13 +102,15 @@ export type Compete = {
   table: { discipline: Disc; values: Value[] } | null;
   alts: string[];                   // alternative titles the last refine offered, as quick replies
   reply: string;                    // what the last refine said
+  log: { w: "me" | "ai"; t: string }[]; // §654 C1 — every ask for a change and its answer, in order (the chat in time)
   saved: { deliverableId: string; n: number; title: string } | null;
 };
+export const MAX_CP_LOG = 200;
 export const MAX_VALUES = 5;
 export const MAX_BULLETS = 5;
 export const MAX_TEXT = 300;
 
-export const newCompete = (): Compete => ({ phase: "score", market: null, internal: null, edited: [], chosen: "", suggested: [], picked: [], table: null, alts: [], reply: "", saved: null });
+export const newCompete = (): Compete => ({ phase: "score", market: null, internal: null, edited: [], chosen: "", suggested: [], picked: [], table: null, alts: [], reply: "", log: [], saved: null });
 
 const cleanScore = (raw: any): Score | null => {
   if (!raw || typeof raw !== "object") return null;
@@ -162,6 +164,7 @@ export function storedCompete(raw: unknown): Compete | null {
   if (j.saved && typeof j.saved === "object" && j.saved.deliverableId) base.saved = { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title) };
   base.alts = (Array.isArray(j.alts) ? j.alts : []).map((x: unknown) => oneLine(x).slice(0, 160)).filter(Boolean).slice(0, 4);
   base.reply = String(j.reply ?? "").slice(0, 1200);
+  base.log = (Array.isArray(j.log) ? j.log : []).map((x: any) => ({ w: x && x.w === "ai" ? "ai" : "me", t: String((x && x.t) ?? "").slice(0, 1200) })).filter((x: any) => x.t).slice(-MAX_CP_LOG) as Compete["log"];
   const s = sanitizeCompete(j, base);
   if (base.saved && j.phase === "saved") s.phase = "saved";
   return s;
@@ -228,6 +231,13 @@ export function refineQuestion(t: Compete["table"], ask: string): string {
 
 /* ── SAVING: THE TABLE AS A DELIVERABLE ──────────────────────────────── */
 export const competeTitle = (placeWord: string) => ("Competitive Discipline — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
+/* §654 C1 — the version the pane's head names before the save (the SWOT's shape). */
+export async function nextCompeteVersion(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<number> {
+  const r = await c.query(
+    "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +
+    "WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3)", [chat.place, chat.section, competeTitle(placeWord)]);
+  return Number(r.rows[0]?.n) || 1;
+}
 export async function saveCompete(c: Q, chat: { id: string; place: string; section: Section; title: string }, s: Compete, placeWord: string, by: string) {
   const title = competeTitle(placeWord);
   const body = { text: tableText(s.table), compete: s.table, scores: { market: s.market, internal: s.internal } };

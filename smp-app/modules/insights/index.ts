@@ -24,6 +24,7 @@ import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
 import { insightsDocument, libraryFragment, publishData } from "./page.ts";
 import { APP_JS } from "./script.ts";
+import { VIEW_JS } from "./view.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { registerOf } from "../../lib/notes.ts";
 import { maySimulate, maySimulateSeat, type Seat } from "../../lib/view-as.ts";
@@ -85,6 +86,8 @@ const mayPublish = (a: ServeArgs): boolean =>
   process.env.SMP_BREAK === "publish-anyone" || (!!a.consultant && (a.admin || a.seat === "super"));
 
 export async function serve(a: ServeArgs): Promise<Response> {
+  if (a.rest.length === 1 && a.rest[0] === "view.js")
+    return new Response(VIEW_JS, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
   if (a.rest.length === 1 && a.rest[0] === "app.js")
     return new Response(APP_JS, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
   if (a.rest.length === 1 && a.rest[0] === "data") {
@@ -122,5 +125,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
   }
   if (a.rest.length === 2 && a.rest[1] === "file")
     return libraryFile(a.tenantId, "insights", a.rest[0]!, a.req.url, await viewerOf(a));
+  /* §651: View — the same viewer, no download counted; a draft's file for
+     whoever may publish; ?as=json answers the address for the page's own
+     viewer rather than following it */
+  if (a.rest.length === 2 && a.rest[1] === "view")
+    return libraryFile(a.tenantId, "insights", a.rest[0]!, a.req.url, await viewerOf(a),
+      { view: true, office: mayPublish(a), json: new URL(a.req.url).searchParams.get("as") === "json" });
   return Response.redirect(new URL(clientHref(a.slug, "insights", ""), a.req.url), 302);
 }

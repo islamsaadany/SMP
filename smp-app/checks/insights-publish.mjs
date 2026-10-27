@@ -3,7 +3,7 @@
    Islam: "this needs to be doable from the module inside the client like the
    meeting notes as the insights are client relevant", then "it can be a pop
    up modal", then "yes build it". The console's room is no longer the way in
-   (lib/modules.ts LIBRARY_MODULES is empty), so this is the only place a
+   (§651 removed it from the console altogether), so this is the only place a
    report is written — and the claims worth proving are the ones that would
    hurt:
      · whoever may publish (the platform's admin, or this client's Super
@@ -70,7 +70,7 @@ try {
   /* the module's own serve(), as the route hands it a request */
   const page = async (who, path = "") => {
     const a = { req: new Request("http://x/" + KEY + "/insights" + path), slug: KEY, module: "insights", tenantId: t.id, tenantName: "Publish Client",
-      have: ["strategy", "insights"], rest: path ? path.split("/").filter(Boolean) : [], personKey: who.personKey || null, seat: who.seat ?? null,
+      have: ["strategy", "insights"], rest: path ? path.split("?")[0].split("/").filter(Boolean) : [], personKey: who.personKey || null, seat: who.seat ?? null,
       admin: !!who.admin, consultant: !!who.consultant, me: { personKey: who.personKey || null, seat: who.seat ?? null } };
     const r = await serve(a);
     return { status: r.status, text: await r.text(), type: r.headers.get("Content-Type") || "" };
@@ -118,7 +118,10 @@ try {
         rs.writeHead(a.code, { "Content-Type": "application/json" }); rs.end(JSON.stringify(a.body)); return;
       }
       if (path === "/" + KEY + "/insights/data") { const r = await page({ consultant: true, admin: true }, "/data"); rs.writeHead(r.status, { "Content-Type": "application/json" }); rs.end(r.text); return; }
-      if (path === "/" + KEY + "/insights/app.js") { const r = await page({ consultant: true, admin: true }, "/app.js"); rs.writeHead(200, { "Content-Type": r.type }); rs.end(r.text); return; }
+      if (path.startsWith("/" + KEY + "/insights/")) {
+        const r = await page({ consultant: true, admin: true }, path.slice(("/" + KEY + "/insights").length) + (String(rq.url).includes("?") ? "?" + String(rq.url).split("?")[1] : ""));
+        rs.writeHead(r.status, { "Content-Type": r.type || "text/plain" }); rs.end(r.text); return;
+      }
       if (path === "/" + KEY + "/insights") { const r = await page({ consultant: true, admin: true }); rs.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }); rs.end(r.text); return; }
       rs.writeHead(404); rs.end("");
     } catch (e) { rs.writeHead(500); rs.end(String(e && e.stack)); }
@@ -162,6 +165,14 @@ try {
      the pieces route is the console's, unchanged, and is not this check's. */
   await withTenant(t.id, (c) => setFile(c, mine.id, filePath("insights", t.id, mine.id, "fmcg.pdf"), "fmcg.pdf", 2400000));
   await pg_.reload({ waitUntil: "load" });
+  /* §651 — VIEW. A draft with a file: Forefront has View (to check it) and
+     no Download; the client cannot reach a draft by its view address. */
+  const draftRow = pg_.locator(".item", { hasText: "Egypt FMCG outlook, H2" });
+  check("a draft with a file has View for Forefront, and no Download", (await draftRow.locator("a.vw").count()) === 1 && (await draftRow.locator("a.dl").count()) === 0);
+  const clientView = await page({ consultant: false, admin: false, seat: "none", personKey: "p1" }, "/" + mine.id + "/view?as=json");
+  const officeView = await page({ consultant: true, admin: true }, "/" + mine.id + "/view?as=json");
+  check("...a client's person cannot view the draft by its address (Not found), whoever may publish reaches it",
+    clientView.status === 404 && officeView.status !== 404, clientView.status + " / " + officeView.status);
   await pg_.locator('[data-act="open-report"][data-id="' + mine.id + '"]').click();
   check("Open brings up the same pop-up, filled in, the file named", (await pg_.locator("#m-title").inputValue()) === "Egypt FMCG outlook, H2" &&
     /fmcg\.pdf/.test(await pg_.locator(".file .fname").textContent()) && (await pg_.locator(".mfoot .btn.amber").getAttribute("aria-disabled")) === null);
@@ -173,8 +184,28 @@ try {
   await pg_.waitForSelector('.tile b', { timeout: 5000 }).catch(() => {});
   check("...the band now counts it, and its row offers Download", (await pg_.locator(".mast .tile b").first().textContent()) === "1" &&
     (await pg_.locator(".item", { hasText: "Egypt FMCG outlook, H2" }).locator("a.dl").count()) === 1);
+  const pubRow = pg_.locator(".item", { hasText: "Egypt FMCG outlook, H2" });
+  check("View sits before Download on the published row, a link that opens a new tab without the script",
+    await pubRow.evaluate((r) => { const v = r.querySelector("a.vw"), d = r.querySelector("a.dl"); return !!v && !!d && !!(v.compareDocumentPosition(d) & 4) && v.target === "_blank" && /\/view$/.test(v.getAttribute("href")); }));
+  const dl0 = (await q("SELECT downloads FROM library_items WHERE id = $1", [mine.id]))[0].downloads;
+  await pubRow.locator("a.vw").click();
+  check("pressed on a computer, View opens the viewer over the list — the report's title, Download and a way to a new tab",
+    await pg_.locator(".vscrim .viewer[role=dialog]").isVisible() && (await pg_.locator(".viewer h2").textContent()) === "Egypt FMCG outlook, H2" &&
+    (await pg_.locator(".viewer a.dl").count()) === 1 && (await pg_.locator(".viewer a.vtab").count()) === 1 && pg_.url().endsWith("/insights"));
+  await pg_.waitForFunction(() => /cannot be shown|Opening/.test((document.querySelector(".vwait") || {}).textContent || "") || !!document.querySelector(".vframe"), null, { timeout: 5000 }).catch(() => {});
+  /* no file store on a check database, so the viewer SAYS it cannot show the
+     report rather than standing empty (§61); a store would give a frame */
+  check("...with no file store it says so rather than standing empty", /cannot be shown just now/.test((await pg_.locator(".vbody").textContent()) || ""), await pg_.locator(".vbody").textContent());
+  await pg_.keyboard.press("Escape");
+  check("...Escape closes it", (await pg_.locator(".vscrim").count()) === 0);
+  await page({ consultant: true, admin: true }, "/" + mine.id + "/view");
+  const dl1 = (await q("SELECT downloads FROM library_items WHERE id = $1", [mine.id]))[0].downloads;
+  await page({ consultant: true, admin: true }, "/" + mine.id + "/file");
+  const dl2 = (await q("SELECT downloads FROM library_items WHERE id = $1", [mine.id]))[0].downloads;
+  check("a view is not counted as a download; a download still is", dl1 === dl0 && dl2 === dl0 + 1, dl0 + " → " + dl1 + " → " + dl2);
   const asClient = (await page({ consultant: false, admin: false, seat: "none", personKey: "p1" })).text;
   check("...and the client's own page lists it, still without the draft", asClient.includes("Egypt FMCG outlook, H2") && !asClient.includes("A draft nobody outside sees"));
+  check("...with View for the client too, and the viewer's script", /class="vw"[^>]*data-act="view-report"/.test(asClient) && asClient.includes('src="/' + KEY + '/insights/view.js"'));
 
   await pg_.locator('[data-act="open-report"][data-id="' + mine.id + '"]').click();
   check("a published report's Delete is held: withdraw first", await pg_.locator(".arow .btn.risk").isDisabled());

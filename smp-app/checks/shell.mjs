@@ -1630,7 +1630,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
       tips["check" + w] = await tipSeen("[data-cop-savebar] [data-cop-fcheck]");
     }
-    /* §651 — Send is not there until something is typed (Islam: "like
+    /* §652 — Send is not there until something is typed (Islam: "like
        Claude"), and is there the moment it is. */
     const sendVis = async () => page.evaluate(() => { const b = document.querySelector("[data-cop-send]"); return !!b && getComputedStyle(b).display !== "none" && b.getBoundingClientRect().width > 0; });
     const sendEmpty = await sendVis();
@@ -1639,7 +1639,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
     const sendAgain = await sendVis();
     const ph = await page.evaluate(() => (document.querySelector("[data-cop-text]") || {}).placeholder || "");
-    check(!sendEmpty && sendTyped && !sendAgain && !/buttons above/i.test(ph), "§651 Send shows only once something is typed, and the grey line invites what the box can do now", JSON.stringify({ sendEmpty, sendTyped, sendAgain, ph }));
+    check(!sendEmpty && sendTyped && !sendAgain && !/buttons above/i.test(ph), "§652 Send shows only once something is typed, and the grey line invites what the box can do now", JSON.stringify({ sendEmpty, sendTyped, sendAgain, ph }));
     await page.mouse.move(2, 2); await page.waitForTimeout(120);
     const gone = await page.evaluate(() => { const t = document.getElementById("coptip"); return !t || getComputedStyle(t).display === "none"; });
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
@@ -1753,10 +1753,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        so the finally can put both back (§94.2). */
     FD0 = await page.evaluate(() => JSON.stringify({ f: foundationSnapshot(UNITS.mobile), a: ARCHIVES }));
     await shot("8-check");
-    /* §651 — with every part agreed no row reads Drafting, and the grey line
+    /* §652 — with every part agreed no row reads Drafting, and the grey line
        is not "Use the buttons above" (Islam's screenshot). */
     const rows8 = await page.evaluate(() => ({ st: Array.from(document.querySelectorAll("[data-cop-foldbox] .copst")).map((x) => x.textContent), ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
-    check(!rows8.st.some((t) => /Drafting/.test(t)) && !/buttons above/i.test(rows8.ph), "§651 at the check no folded part reads Drafting, and the box invites a change or a question", JSON.stringify(rows8));
+    check(!rows8.st.some((t) => /Drafting/.test(t)) && !/buttons above/i.test(rows8.ph), "§652 at the check no folded part reads Drafting, and the box invites a change or a question", JSON.stringify(rows8));
     await heldSweep(page, "Foundation, the check");
     const ck = await page.evaluate(() => ({ ok: document.querySelectorAll(".copchk.ok li").length, iss: document.querySelectorAll(".copchk.issue li").length,
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent),
@@ -2729,8 +2729,8 @@ await section("4 · Forefront's own pages", async () => {
   const ffTabs = await page.locator("#nav button, #nav a").allTextContents();
   check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
     "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
-  /* the memory's tab is called Case studies since spec 067 — renamed, not loosened (§218) */
-  check(ffTabs.includes("Case studies"), "…and the consulting memory, now Case studies, which every consultant reaches (spec 045, 067)", ffTabs.join("|"));
+  /* the memory's tab is called Track Record since spec 069 (Case studies in 067) — renamed, not loosened (§218) */
+  check(ffTabs.includes("Track Record"), "…and the consulting memory, now the Track Record, which every consultant reaches (spec 045, 067, 069)", ffTabs.join("|"));
   /* \u00a7400: THE CONSOLE OPENS ON *MY WORK*, which is the first tab \u2014 so the
      cards are one press away rather than the landing. REWRITTEN, NEVER
      LOOSENED (\u00a7218): the landing is asserted as the new decision, and the
@@ -2944,8 +2944,8 @@ await section("4 · Forefront's own pages", async () => {
         zoom: getComputedStyle(document.documentElement).zoom };
     });
     const h1 = await home();
-    check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Case studies"]),
-      "Home draws your clients, your tasks and case studies, each a card with its header inside it (spec 068, 2026-10-24)", JSON.stringify(h1.heads));
+    check(JSON.stringify(h1.heads) === JSON.stringify(["Your clients", "Your tasks", "Track Record"]),
+      "Home draws your clients, your tasks and the Track Record, each a card with its header inside it (spec 068, 069)", JSON.stringify(h1.heads));
     check(h1.tabs === 0 && h1.sort === "Date" && JSON.stringify(h1.rows) === JSON.stringify(["MW late one", "MW this week"]) && h1.late === 1 && h1.count === "2",
       "\u2026its tasks are one list by date, the late one first in the alarm, then the one due now; the far one is left to My tasks", JSON.stringify(h1));
     check(h1.clients.some((c) => /^raya-trade:.*tracker/.test(c)) && !h1.industry,

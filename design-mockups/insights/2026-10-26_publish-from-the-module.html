@@ -110,6 +110,22 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .narrow{font-size:12.5px;color:var(--ink-3)}
 .dl{font-size:13px;font-weight:600;color:var(--gold);white-space:nowrap}
 .q{font-size:13px;color:var(--ink-3);white-space:nowrap}
+.view{font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+/* the viewer: a large pop-up holding the PDF */
+.viewer{width:100%;max-width:920px;background:var(--surface);border-radius:14px;box-shadow:0 24px 64px rgba(20,28,43,.35);overflow:hidden;display:flex;flex-direction:column}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.viewer .vh h2{margin:0;font:700 17px/1.2 var(--title);min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer .vh .meta{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.viewer .vh .x{width:30px;height:30px;border-radius:8px;border:0;background:none;color:var(--ink-3);font-size:20px;line-height:1}
+.pdf{background:#525659;padding:18px 0;display:grid;justify-items:center;gap:14px;height:640px;overflow:hidden}
+.pdfbar{background:#323639;color:#E8EAED;font-size:12px;display:flex;gap:14px;align-items:center;padding:7px 14px}
+.pdfbar .sp{flex:1}
+.sheet{width:min(560px,88%);aspect-ratio:1/1.32;background:#FFF;box-shadow:0 2px 8px rgba(0,0,0,.4);padding:36px 40px;color:#141C2B;display:flex;flex-direction:column;gap:10px}
+.sheet .k{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9C5D08}
+.sheet h3{margin:0;font:700 22px/1.2 Georgia,serif}
+.sheet .ln{height:8px;border-radius:4px;background:#E6EAF1}
+.sheet .chart{height:120px;border-radius:6px;background:linear-gradient(180deg,#F4F6F9,#EDF0F5);margin:8px 0;display:flex;align-items:flex-end;gap:10px;padding:12px}
+.sheet .chart i{flex:1;background:#0F2C69;border-radius:3px 3px 0 0}
 .edit{font-size:13px;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:3px 10px;background:var(--surface);white-space:nowrap}
 /* one report */
 .back{display:inline-block;font-size:12.5px;font-weight:600;color:var(--ink-3);margin:0 0 10px}
@@ -173,6 +189,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
       <button type="button" role="tab" data-m="new" aria-selected="false">2 · A new report</button>
       <button type="button" role="tab" data-m="pub" aria-selected="false">3 · A published report</button>
       <button type="button" role="tab" data-m="client" aria-selected="false">4 · The list, as the client</button>
+      <button type="button" role="tab" data-m="view" aria-selected="false">5 · View a report</button>
     </div>
     <div class="segs">
       <div class="seg" role="group" aria-label="Device"><button type="button" data-d="computer" aria-pressed="true">Computer</button><button type="button" data-d="phone" aria-pressed="false">Phone</button></div>
@@ -198,7 +215,7 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
   function row(r, office){
     return '<div class="item"><div class="body"><h3>' + r.t + (office && r.draft ? '<span class="draft">Draft</span>' : '') + '</h3><p>' + r.s + '</p><div class="facts"><span class="pill">' + r.c + '</span><span>' + r.d + '</span><span>' + r.v + '</span>' +
       (office && r.narrow ? '<span class="narrow">Seen by ' + r.narrow + '</span>' : '') + '</div></div>' +
-      (r.file ? '<span class="dl">Download</span>' : '<span class="q">No file yet</span>') + (office ? '<span class="edit">Open</span>' : '') + '</div>';
+      (r.file ? '<span class="view">View</span><span class="dl">Download</span>' : '<span class="q">No file yet</span>') + (office ? '<span class="edit">Open</span>' : '') + '</div>';
   }
   function list(office){
     var rows = R.filter(function(r){ return office || !r.draft; });
@@ -247,11 +264,24 @@ svg.i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-widt
       "ElAbd's own people see what they see today: the published reports they may open, with Download. No button, no drafts, no Open.",
       "The console's publishing page goes. Insights on a client's card opens this page, like every other module."] }
   };
+  S.view = { draw:function(){
+      var ph = state.d === "phone";
+      return list(false) + '<div class="scrim"' + (ph ? '' : ' style="padding-top:28px"') + '><section class="viewer" role="dialog" aria-modal="true">' +
+        '<div class="vh"><h2>Egypt FMCG outlook, H2</h2><span class="meta">v2 · 14 Oct 2026</span><span class="dl">Download</span><button class="x" type="button" aria-label="Close">×</button></div>' +
+        '<div class="pdfbar"><span>FMCG-outlook-H2.pdf</span><span class="sp"></span><span>1 / 14</span><span>− 100% +</span></div>' +
+        '<div class="pdf"><div class="sheet"><span class="k">ElAbd · Market</span><h3>Egypt FMCG outlook, H2</h3>' +
+        '<span class="ln" style="width:92%"></span><span class="ln" style="width:86%"></span><span class="ln" style="width:70%"></span>' +
+        '<div class="chart"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:82%"></i></div>' +
+        '<span class="ln" style="width:90%"></span><span class="ln" style="width:78%"></span></div></div></section></div>';
+    }, notes:[
+      "<b>View</b> sits before Download on every report with a file. It opens the PDF in a large pop-up over the list, the browser's own reader inside it: scroll the pages, zoom, and Download in the corner. × or Escape closes it.",
+      "On a phone, View opens the PDF in the phone's own reader instead, since most phones cannot show a PDF inside a page.",
+      "Viewing does not count as a download. Forefront also sees View on drafts, to check the file before publishing; the client never sees a draft."] };
   var state = { m:"list", d:"computer" };
   var stage = document.getElementById("stage"), notes = document.getElementById("notes");
   function draw(){
     stage.className = "stage" + (state.d === "phone" ? " phone" : "");
-    stage.innerHTML = '<div class="dev' + (state.m === "new" || state.m === "pub" ? ' held' : '') + '">' + S[state.m].draw() + '</div>';
+    stage.innerHTML = '<div class="dev' + (state.m === "new" || state.m === "pub" || state.m === "view" ? ' held' : '') + '">' + S[state.m].draw() + '</div>';
     notes.innerHTML = '<div class="mnote"><section><h3>What this shows</h3><ul><li>' + S[state.m].notes.join("</li><li>") + '</li></ul></section></div>';
     document.querySelectorAll("[data-m]").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.m === state.m)); });
     document.querySelectorAll("[data-d]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.d === state.d)); });

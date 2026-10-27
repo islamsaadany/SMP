@@ -753,7 +753,7 @@ var COPILOT = (function(){
     if (swotOn()) return swGuidedNow() ? "Type your answer…" : "Use the choices above to carry on…";
     if (flowView()) {
       var ph = PANE.flow.phase;
-      /* §651 — the grey line invites what the box can do NOW (Islam: "use
+      /* §652 — the grey line invites what the box can do NOW (Islam: "use
          buttons above to carry on … this is wrong"): since §643 a line typed
          at any step is kept, and one that names a part changes it. */
       return ph === "ask" ? "Type your answer…" : ph === "review" ? "Change an answer above, or say anything…"
@@ -768,7 +768,7 @@ var COPILOT = (function(){
     return '<div class="copcompose">' +
       '<div class="copbox">' +
         '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + (swotOn() && !swGuidedNow() ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
-        /* §651 — Send appears only once there is something to send (Islam:
+        /* §652 — Send appears only once there is something to send (Islam:
            "the enter button should only appear when I write something, like
            Claude"); while the Copilot works it stays, held, saying so. */
         (function(){ var w = THINKING === c.id ? BUSY : "", none = !text.trim() && !pend;
@@ -1137,7 +1137,7 @@ var COPILOT = (function(){
        happened; what follows is plain chat, each proposal naming its part.
        A part's block closes at its first note (saved or kept); a block still
        open is the part being drafted now, drawn open. */
-    /* §651 — A BLOCK IS OPEN ONLY FOR THE PART BEING DRAFTED NOW. It used to
+    /* §652 — A BLOCK IS OPEN ONLY FOR THE PART BEING DRAFTED NOW. It used to
        close at the part's first note, and parts agreed before notes existed
        (§643) never had one — so they read "Drafting" for good (Islam's
        screenshot). A block ends at its part's first note, or where the next

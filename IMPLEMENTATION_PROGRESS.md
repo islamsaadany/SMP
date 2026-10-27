@@ -4,11 +4,14 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-26 — Send only when typed; the bubble never cut; no agreed part reads Drafting (§649.1, §651), on the branch, not merged.**
+**2026-10-26 — Send only when typed; the bubble never cut; no agreed part reads Drafting (§649.1, §652), on the branch, not merged.**
 
+**2026-10-26 — Case studies become the Track Record (§650, spec 069), merged to `main` on Islam's word.** The tab is Track Record. The super user adds each client's assignments on Clients (list view): Planning or Retainer, start and end month, lead and team; a past client is added on Ended. When an assignment ends, its lead gets "Write up the assignment" on My tasks and Home, with nobody asking, and any consultant can start one. Writing it up is one page: what Clients says about it, the prompt filled from that with Open in Claude beside Copy, and the paste box; the paste fills the write-up on the next page to check, attach files and Publish. The front is one card per client; picking Hiccup, Practice or Lesson lists those learnings across clients. A client's page has a tab per assignment with its write-up and its learnings. Learnings are added to an assignment with the learnings prompt or typed in. Gone: Open a piece of work, Ask for the write-up, the desk and shelves, the separate Insights view. Waiting on Islam: the client list to load.
 **2026-10-26 — Every held Copilot button says why (§649), merged to `main` on Islam's word.** No Copilot button is disabled: each that cannot be pressed is held, with its reason in the platform's bubble on hover, Tab and tap.
 
 **2026-10-26 — Directions and Execution: Save, then Apply to plan (§645), merged to `main` on Islam's word.** Save keeps a version under Deliverables; Apply to plan asks first, archives what stood, then writes.
+
+**2026-10-26 — View beside Download on Insights; the console's publishing page removed (§651), merged to `main` on Islam's word.** View opens the PDF in a pop-up over the list on a computer and in a new tab on a phone; a view is not a download; Forefront can view a draft's file.
 
 **2026-10-26 — Insights is published from the client's own Insights page (§648), merged to `main` on Islam's word.** + Publish a report in the band and Open on each row, for the platform's admin and the client's Super user; a pop-up with the console's form; drafts only they see. The console's publishing page is no longer the way in.
 

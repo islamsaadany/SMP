@@ -1,16 +1,19 @@
-/* Case studies' endpoint, driven over HTTP against the built app (spec 067).
-   Every rule BOTH WAYS (§94.2): who may open a piece of work, who may write
-   it, who may read a draft, what a save may and may not carry, and the
-   boundary every Forefront-only surface keeps — a client's own staff.
+/* The Track Record's endpoint, driven over HTTP against the built app (spec
+   069, which reworks spec 067's case studies). Every rule BOTH WAYS (§94.2):
+   who may add an assignment to the registry, who may write one up, who may
+   read a draft, what a save may and may not carry, whose My tasks and Home a
+   write-up lands on, and the boundary every Forefront-only surface keeps — a
+   client's own staff.
 
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node --experimental-strip-types checks/case-api.mjs
-     … --break=anyone-opens   (RED: a consultant opens a piece of work)
+     … --break=anyone-opens   (RED: a consultant adds an assignment)
      … --break=drafts-open    (RED: a draft is read by everybody)
-     … --break=anyone-writes  (RED: anybody rewrites a case study)
+     … --break=anyone-writes  (RED: anybody rewrites somebody's write-up)
      … --break=take-file      (RED: a save names a file the server never stored)
-     … --break=client-reads   (RED: a client's own staff read case studies)
-     … --break=cross-client   (RED: an insight placed in another client's work)
-     … --break=done-empty     (RED: marked done with nothing to read first)
+     … --break=client-reads   (RED: a client's own staff read the Track Record)
+     … --break=cross-client   (RED: a learning tied to another client's assignment)
+     … --break=done-empty     (RED: published with nothing to read first)
+     … --break=home-all       (RED: everybody's write-ups on my Home)
 
    Needs `next build` first. Re-runnable: the dev tenant is remade at the start. */
 import { spawn } from "node:child_process";
@@ -89,174 +92,180 @@ const reader = await signIn("reader@forefront.example");
 const client = await signIn("mobhead@raya.example");
 
 let caseId = null, pastId = null;
+const month = (d) => d.toISOString().slice(0, 7);
+const LAST_MONTH = month(new Date(Date.now() - 40 * 864e5)), NEXT_YEAR = month(new Date(Date.now() + 365 * 864e5));
 
 await section("0 · the door, and the boundary", async () => {
   let r = await cs("", { action: "library" });
   check(r.status === 401 && r.j && r.j.auth === true, "no session: 401, and the page is told it is the session", r.status);
   r = await cs(client, { action: "library" });
-  check(r.status === 403, "a CLIENT's own account is refused — case studies are Forefront's", r.status + " " + JSON.stringify(r.j));
+  check(r.status === 403, "a CLIENT's own account is refused — the Track Record is Forefront's", r.status + " " + JSON.stringify(r.j));
   const m = await mem(client, { action: "list" });
   check(r.j && m.j && r.j.error === m.j.error, "…in the memory's own words, so the two surfaces cannot be told apart (§53.5)", JSON.stringify([r.j, m.j]));
   r = await cs(reader, { action: "library" });
-  check(r.status === 200 && Array.isArray(r.j.cases), "CONTROL — a consultant with no admin flag reads the library (decision 2)", r.status);
-  check(r.j.canOpen === false, "…and is told they may not open a piece of work", JSON.stringify(r.j.canOpen));
+  check(r.status === 200 && Array.isArray(r.j.cases), "CONTROL — a consultant with no admin flag reads the Track Record", r.status);
+  check(r.j.canOpen === false, "…and is told they may not change the registry", JSON.stringify(r.j.canOpen));
   r = await cs(boss, { action: "library" });
-  check(r.j.canOpen === true, "…while an admin is told they may (decision 11)", JSON.stringify(r.j.canOpen));
+  check(r.j.canOpen === true, "…while the super user is told they may", JSON.stringify(r.j.canOpen));
 });
 
-await section("1 · opening a piece of work is an admin's (decision 11)", async () => {
-  let r = await cs(reader, { action: "open", client: "raya-trade", name: "Not mine to open" });
-  check(r.status === 403, "a consultant cannot open one, refused by the server and not only by a hidden button", r.status + " " + JSON.stringify(r.j));
-  r = await cs(boss, { action: "open", client: "raya-trade", name: "  " });
+await section("1 · the registry is the super user's (Islam: \"registry is from the super user\")", async () => {
+  let r = await cs(reader, { action: "assign", client: "raya-trade", name: "Not mine to add", kind: "planning", started: "2025-01", lead: writerId });
+  check(r.status === 403, "a consultant cannot add an assignment, refused by the server and not only by a hidden button", r.status + " " + JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "raya-trade", name: "  ", kind: "planning", started: "2025-01", lead: writerId });
   check(r.status === 400 && /name/i.test(r.j.error || ""), "a blank name is refused in words", JSON.stringify(r.j));
-  r = await cs(boss, { action: "open", client: "nobody-at-all", name: "Ghost" });
-  check(r.status === 400 && /client/i.test(r.j.error || ""), "…and so is a client that does not exist", JSON.stringify(r.j));
-  r = await cs(boss, { action: "open", client: "raya-trade", name: "Strategy build 2025", started: "2025-01", team: [{ id: writerId, role: "Engagement lead" }] });
-  check(r.status === 200 && r.j.id, "an admin opens one for a client, with a team", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "raya-trade", name: "X", kind: "advisory", started: "2025-01", lead: writerId });
+  check(r.status === 400 && /Planning or Retainer/.test(r.j.error || ""), "…and so is a type other than Planning or Retainer", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "raya-trade", name: "X", kind: "planning", started: "2025-01" });
+  check(r.status === 400 && /lead/i.test(r.j.error || ""), "…and an assignment with no lead", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "raya-trade", name: "X", kind: "planning", started: "2025-06", ended: "2025-01", lead: writerId });
+  check(r.status === 400 && /before/i.test(r.j.error || ""), "…and one that ends before it starts", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "nobody-at-all", name: "Ghost", kind: "planning", started: "2025-01", lead: writerId });
+  check(r.status === 400 && /client/i.test(r.j.error || ""), "…and a client that does not exist", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "raya-trade", name: "Strategy build 2025", kind: "planning", started: "2025-01", ended: LAST_MONTH,
+    lead: writerId, team: [readerId, "00000000-0000-0000-0000-000000000000"] });
+  check(r.status === 200 && r.j.id, "the super user adds one: name, type, months, lead and team", JSON.stringify(r.j));
   caseId = r.j.id;
-  const row = (await owner.query("SELECT state, writer_id, our_team FROM case_studies WHERE id = $1", [caseId])).rows[0];
-  check(row && row.state === "running" && !row.writer_id, "…and with no writer it is RUNNING: opened when the work starts (answer 1)", JSON.stringify(row));
-  check(row && row.our_team.length === 1 && row.our_team[0].role === "Engagement lead", "…with its team stored", JSON.stringify(row && row.our_team));
+  const row = (await owner.query("SELECT state, writer_id, lead_id, kind, our_team FROM case_studies WHERE id = $1", [caseId])).rows[0];
+  check(row && row.state === "running" && !row.writer_id && row.lead_id === writerId && row.kind === "planning", "…stored with its type and lead, nothing written yet", JSON.stringify(row));
+  check(row && row.our_team.map((p) => p.id).join() === [writerId, readerId].join(), "…the lead on the team first, a made-up consultant dropped", JSON.stringify(row && row.our_team));
+  r = await cs(reader, { action: "registry" });
+  const mine = (r.j.assignments || []).find((a) => a.id === caseId);
+  check(r.status === 200 && mine && mine.lead.name === "Islam Writer" && mine.team.length === 2 && r.j.canOpen === false,
+    "every consultant reads the registry for the Clients page, the lead and team named", JSON.stringify(mine).slice(0, 200));
+  r = await cs(boss, { action: "assign", id: caseId, client: "raya-trade", name: "Strategy build 2025", kind: "planning", started: "2025-01", ended: LAST_MONTH, lead: writerId, team: [] });
+  const t2 = (await owner.query("SELECT our_team FROM case_studies WHERE id = $1", [caseId])).rows[0].our_team;
+  check(r.status === 200 && t2.length === 1, "the super user changes one in place", JSON.stringify(t2));
 });
 
-await section("2 · a past client, made in the same press (decision 5)", async () => {
-  let r = await cs(boss, { action: "open", past: { name: "Nile Logistics", industry: "Transportation", size: "Mid-size" },
-    name: "Operating model 2023", started: "2023-03", ended: "2023-11", writer: writerId });
-  check(r.status === 400 && /wanted/i.test(r.j.error || ""), "asking for a write-up with no date is refused — the date is what orders it on My work", JSON.stringify(r.j));
-  const before = (await owner.query("SELECT count(*)::int n FROM tenants WHERE key = 'nile-logistics'")).rows[0].n;
-  check(before === 0, "…and the refusal made NO past client: it is one transaction (§171)", before);
-  r = await cs(boss, { action: "open", past: { name: "Nile Logistics", industry: "Transportation", size: "Mid-size" },
-    name: "Operating model 2023", started: "2023-03", ended: "2023-11", writer: writerId, due: "2026-11-13" });
-  check(r.status === 200 && r.j.id, "an admin opens a past piece of work for a client that was never on the platform", JSON.stringify(r.j));
-  pastId = r.j.id;
+await section("2 · a past client, then its assignment", async () => {
+  let r = await cs(writer, { action: "past", name: "Nile Logistics" });
+  check(r.status === 403, "a consultant cannot add a past client", r.status);
+  r = await cs(boss, { action: "past", name: "Nile Logistics", industry: "Transportation", size: "Mid-size" });
+  check(r.status === 200 && r.j.key === "nile-logistics", "the super user adds a past client by name, industry and size", JSON.stringify(r.j));
   const t = (await owner.query("SELECT status, past, archived_at IS NOT NULL AS dated, modules FROM tenants WHERE key = 'nile-logistics'")).rows[0];
   check(t && t.status === "retired" && t.past === true && t.dated, "the past client is made RETIRED and marked past — its door closed from the start", JSON.stringify(t));
   check(t && Array.isArray(t.modules) && t.modules.length === 0, "…with no modules: there is nothing behind the door", JSON.stringify(t && t.modules));
-  const row = (await owner.query("SELECT state, writer_id, due::text AS due FROM case_studies WHERE id = $1", [pastId])).rows[0];
-  check(row.state === "writing" && row.writer_id === writerId && row.due === "2026-11-13", "…and with a writer the piece of work is WRITING, due on the day asked", JSON.stringify(row));
-  r = await cs(boss, { action: "open", past: { name: "Nile Logistics" }, name: "Again" });
+  r = await cs(boss, { action: "past", name: "Nile Logistics" });
   check(r.status === 400 && /already/i.test(r.j.error || ""), "the same past client twice is refused by name, not made twice (§53.5)", JSON.stringify(r.j));
+  r = await cs(boss, { action: "assign", client: "nile-logistics", name: "Operating model 2023", kind: "planning", started: "2023-03", ended: "2023-11", lead: writerId });
+  check(r.status === 200, "…and its assignment is added like any other", JSON.stringify(r.j));
+  pastId = r.j.id;
   const opts = await cs(writer, { action: "options" });
   const nile = (opts.j.clients || []).find((c) => c.key === "nile-logistics");
-  check(nile && nile.past && nile.archived, "the opening form offers past and archived clients too", JSON.stringify(nile));
+  check(nile && nile.past && nile.archived, "the pickers offer past and ended clients too", JSON.stringify(nile));
   check(!(opts.j.clients || []).some((c) => c.key === "demo"), "…and never the worked example", JSON.stringify((opts.j.clients || []).map((c) => c.key)));
 });
 
-await section("3 · writing it: the writer or an admin, nobody else (decision 10)", async () => {
-  let r = await cs(writer, { action: "save", id: caseId, inShort: "x" });
-  check(r.status === 403 && /nobody has been asked/i.test(r.j.error || ""), "a RUNNING piece of work cannot be written by a consultant — nobody has been asked yet", JSON.stringify(r.j));
-  r = await cs(reader, { action: "save", id: pastId, inShort: "Not my story" });
-  check(r.status === 403, "a consultant who is not the writer cannot change a write-up", r.status + " " + JSON.stringify(r.j));
+await section("3 · writing one up: any consultant may start it, then it is theirs", async () => {
   const deliverables = [
     { name: "Depot diagnostic", what: "Visits and figures from all three depots", month: "Apr 2023" },
     { name: "Operating model design", what: "Central planning", month: "Jul 2023", file: { path: "cases/someone-else/secret.pdf", name: "secret.pdf", bytes: 9 } },
   ];
-  r = await cs(writer, { action: "save", id: pastId, name: "Operating model 2023",
+  let r = await cs(writer, { action: "save", id: pastId, name: "Renamed by a writer", started: "1999-01",
     inShort: "Nile Logistics asked us to redesign its depots.", clientWhy: "Two years of missed targets.",
     askedToDo: "Redesign how the depots are run.", cameOfIt: "",
     ourTeam: [{ id: writerId, role: "Lead" }, { id: "00000000-0000-0000-0000-000000000000", role: "Ghost" }],
     theirTeam: [{ name: "Hany M.", role: "COO" }, { name: "", role: "nobody" }],
     stages: [{ when: "Mar", what: "Diagnostic" }, { when: "Apr", what: "" }],
     deliverables, whoToAsk: [{ name: "Islam Writer", about: "the depot managers" }] });
-  check(r.status === 200 && r.j.case, "the writer saves the eight sections", JSON.stringify(r.j).slice(0, 200));
+  check(r.status === 200 && r.j.case, "a consultant starts the write-up (Islam: \"consultants can start\")", JSON.stringify(r.j).slice(0, 200));
   const c = r.j.case || {};
-  check(c.inShort === "Nile Logistics asked us to redesign its depots." && c.askedToDo, "…and reads them back", JSON.stringify([c.inShort, c.askedToDo]));
-  check(c.ourTeam && c.ourTeam.length === 1 && c.ourTeam[0].name === "Islam Writer", "our team keeps only real consultants, and names them from the account", JSON.stringify(c.ourTeam));
+  check(c.state === "writing" && c.writer && c.writer.id === writerId, "…the first save makes them its writer", JSON.stringify([c.state, c.writer]));
+  check(c.name === "Operating model 2023" && c.started === "2023-03", "…and the name and months stay the registry's, whatever the save carried", JSON.stringify([c.name, c.started]));
+  check(c.ourTeam && c.ourTeam.length === 1 && c.ourTeam[0].role === "Lead", "the team is the registry's; only its roles are written here", JSON.stringify(c.ourTeam));
   check(c.theirTeam && c.theirTeam.length === 1 && c.stages && c.stages.length === 1, "an empty person or stage is dropped rather than drawn as a blank line", JSON.stringify([c.theirTeam, c.stages]));
   const stored = (await owner.query("SELECT deliverables FROM case_studies WHERE id = $1", [pastId])).rows[0].deliverables;
   check(stored.length === 2 && stored.every((d) => d.file === null), "A FILE IS NEVER TAKEN FROM THE BODY: a save naming somebody else's path stores no file (the path is the permission)", JSON.stringify(stored));
   check(stored.every((d) => /^[0-9a-f-]{36}$/.test(d.id)), "…and every deliverable gets an id from the server", JSON.stringify(stored.map((d) => d.id)));
-  const again = await cs(writer, { action: "save", id: pastId, name: "Operating model 2023", inShort: c.inShort,
+  const again = await cs(writer, { action: "save", id: pastId, inShort: c.inShort,
     deliverables: [{ id: stored[0].id, name: "Depot diagnostic", what: "renamed what", month: "Apr 2023" }] });
   const stored2 = (await owner.query("SELECT deliverables FROM case_studies WHERE id = $1", [pastId])).rows[0].deliverables;
   check(again.status === 200 && stored2.length === 1 && stored2[0].id === stored[0].id, "a deliverable keeps its id across saves, so its file stays with it", JSON.stringify(stored2));
-  r = await cs(boss, { action: "save", id: pastId, name: "Operating model 2023", inShort: c.inShort, deliverables: stored2 });
-  check(r.status === 200, "CONTROL — an admin may correct it too", r.status);
+  r = await cs(reader, { action: "save", id: pastId, inShort: "Not my story" });
+  check(r.status === 403, "once started, somebody else cannot rewrite it", r.status + " " + JSON.stringify(r.j));
+  r = await cs(boss, { action: "save", id: pastId, inShort: c.inShort, deliverables: stored2 });
+  check(r.status === 200, "CONTROL — a super user may correct it", r.status);
 });
 
-await section("4 · a draft is the writer's and the admins' (decision 10)", async () => {
+await section("4 · a draft is its writer's, its lead's and the super users'", async () => {
   let r = await cs(reader, { action: "case", id: pastId });
   check(r.status === 200 && r.j.case.hidden === true, "a consultant opening someone else's draft is told it is hidden…", JSON.stringify(r.j && r.j.case && r.j.case.hidden));
-  check(r.j.case.inShort === "" && r.j.case.deliverables.length === 0 && r.j.case.ourTeam.length === 0, "…and gets NONE of its story, only its head", JSON.stringify([r.j.case.inShort, r.j.case.deliverables.length]));
+  check(r.j.case.inShort === "" && r.j.case.deliverables.length === 0, "…and gets NONE of its story, only its head and the registry's team", JSON.stringify([r.j.case.inShort, r.j.case.deliverables.length]));
   r = await cs(reader, { action: "library", q: "redesign its depots" });
   check(r.status === 200 && !r.j.cases.some((x) => x.id === pastId), "a draft's words cannot be found by searching for them", JSON.stringify(r.j.cases.map((x) => x.name)));
   r = await cs(writer, { action: "library", q: "redesign its depots" });
   check(r.j.cases.some((x) => x.id === pastId), "CONTROL — its writer finds it by those words", JSON.stringify(r.j.cases.map((x) => x.name)));
-  r = await cs(writer, { action: "case", id: pastId });
-  check(r.j.case.hidden === false && r.j.case.inShort, "CONTROL — the writer reads the whole draft", JSON.stringify(r.j.case.hidden));
+  r = await cs(reader, { action: "case", id: caseId });
+  check(r.j.case.hidden === false, "an assignment nobody has started hides nothing: there is no draft", JSON.stringify(r.j.case.hidden));
 });
 
-await section("5 · marking it done puts it on the shelves", async () => {
+await section("5 · publishing puts it in front of everyone", async () => {
   await owner.query("UPDATE case_studies SET in_short = '' WHERE id = $1", [pastId]);
   let r = await cs(writer, { action: "done", id: pastId });
-  check(r.status === 400 && /in short/i.test(r.j.error || ""), "it cannot be marked done with nothing to read first", JSON.stringify(r.j));
+  check(r.status === 400 && /in short/i.test(r.j.error || ""), "it cannot be published with nothing to read first", JSON.stringify(r.j));
   await owner.query("UPDATE case_studies SET in_short = 'Nile Logistics asked us to redesign its depots.' WHERE id = $1", [pastId]);
   r = await cs(reader, { action: "done", id: pastId });
-  check(r.status === 403, "somebody who is not its writer cannot mark it done", r.status);
+  check(r.status === 403, "somebody who is not its writer or lead cannot publish it", r.status);
   r = await cs(writer, { action: "done", id: pastId });
-  check(r.status === 200, "its writer marks it done", JSON.stringify(r.j));
+  check(r.status === 200, "its writer publishes it", JSON.stringify(r.j));
   r = await cs(reader, { action: "case", id: pastId });
-  check(r.j.case.state === "done" && r.j.case.hidden === false && r.j.case.inShort, "…and now every consultant reads the whole of it (decision 2)", JSON.stringify([r.j.case.state, r.j.case.hidden]));
+  check(r.j.case.state === "done" && r.j.case.hidden === false && r.j.case.inShort, "…and now every consultant reads the whole of it", JSON.stringify([r.j.case.state, r.j.case.hidden]));
   r = await cs(reader, { action: "library", q: "redesign its depots" });
   check(r.j.cases.some((x) => x.id === pastId), "…and finds it by its words", JSON.stringify(r.j.cases.map((x) => x.name)));
 });
 
-await section("6 · asking for a write-up when the work ends", async () => {
-  let r = await cs(writer, { action: "ask", id: caseId, writer: writerId, due: "2026-12-01" });
-  check(r.status === 403, "a consultant cannot ask for one", r.status);
-  r = await cs(boss, { action: "ask", id: caseId, writer: readerId });
-  check(r.status === 400 && /wanted/i.test(r.j.error || ""), "an ask with no date is refused", JSON.stringify(r.j));
-  r = await cs(boss, { action: "ask", id: caseId, writer: writerId, due: "2026-12-01", ended: "2025-06" });
-  check(r.status === 200, "an admin asks the writer, with a date", JSON.stringify(r.j));
-  const row = (await owner.query("SELECT state, writer_id, ended FROM case_studies WHERE id = $1", [caseId])).rows[0];
-  check(row.state === "writing" && row.writer_id === writerId && row.ended === "2025-06", "…and the piece of work is now WRITING, with its end month", JSON.stringify(row));
+await section("6 · the write-up lands on the lead when the end month comes", async () => {
+  const running = (await cs(boss, { action: "assign", client: "raya-trade", name: "Strategy follow-up", kind: "retainer", started: "2025-07", lead: writerId })).j.id;
+  const later = (await cs(boss, { action: "assign", client: "raya-trade", name: "Ends next year", kind: "retainer", started: "2025-07", ended: NEXT_YEAR, lead: writerId })).j.id;
+  let r = await cs(writer, { action: "home" });
+  const ids = (r.j.writing || []).map((x) => x.id);
+  check(ids.includes(caseId), "an ended assignment nobody has started is on its lead's Home", JSON.stringify((r.j.writing || []).map((x) => x.name)));
+  check(!ids.includes(running) && !ids.includes(later), "…one still running, or ending later, is not", JSON.stringify((r.j.writing || []).map((x) => x.name)));
+  check(!ids.includes(pastId), "…nor one already published", JSON.stringify(ids));
+  check((r.j.fresh || []).some((x) => x.id === pastId) && !(r.j.fresh || []).some((x) => x.state !== "done"), "…and the published one is among the newly published, with no draft among them", JSON.stringify((r.j.fresh || []).map((x) => x.name)));
+  r = await cs(reader, { action: "home" });
+  check(r.status === 200 && !(r.j.writing || []).some((x) => x.id === caseId), "somebody who leads none of it has none on their Home", JSON.stringify(r.j.writing));
+  const w = await call("/api/platform", writer, { action: "mywork" });
+  const rows = (w.j && w.j.cases) || [];
+  const row = rows.find((x) => x.id === caseId);
+  check(row && row.type === "planning" && row.late === true, "…and it is on the lead's My tasks, late since its end month has passed", JSON.stringify(row || w.j).slice(0, 240));
+  await owner.query("DELETE FROM case_studies WHERE id IN ($1, $2)", [running, later]);
 });
 
-await section("7 · insights inside a piece of work (spec 067 §5)", async () => {
+await section("7 · learnings inside an assignment", async () => {
   let r = await mem(reader, { action: "save", caseId, title: "Interview the CFO first", kind: "practice", client: "case-other" });
-  check(r.status === 200, "an insight added from inside a case study saves", JSON.stringify(r.j));
+  check(r.status === 200, "a learning added to an assignment saves", JSON.stringify(r.j));
   const e = (await owner.query("SELECT e.case_id, t.key FROM memory_entries e JOIN tenants t ON t.id = e.about_tenant_id WHERE e.id = $1", [r.j.id])).rows[0];
-  check(e.case_id === caseId && e.key === "raya-trade", "…lands IN it, under the case study's own client — never the client the body named", JSON.stringify(e));
+  check(e.case_id === caseId && e.key === "raya-trade", "…lands IN it, under the assignment's own client — never the client the body named", JSON.stringify(e));
+  r = await mem(reader, { action: "saveMany", caseId, client: "case-other", entries: [{ kind: "hiccup", title: "Review slipped" }, { kind: "lesson", title: "Agree a second chair" }] });
+  const two = (await owner.query("SELECT count(*)::int n FROM memory_entries e JOIN tenants t ON t.id = e.about_tenant_id WHERE e.case_id = $1 AND t.key = 'raya-trade' AND e.title IN ('Review slipped','Agree a second chair')", [caseId])).rows[0].n;
+  check(r.status === 200 && two === 2, "the learnings prompt's paste saves all of them into the assignment, under its client", JSON.stringify([r.j, two]));
+  r = await mem(reader, { action: "list", kind: "hiccup", type: "planning" });
+  check(r.j.entries.some((x) => x.title === "Review slipped" && x.caseKind === "planning"), "the front's filters find it: every hiccup on a Planning assignment", JSON.stringify(r.j.entries.map((x) => x.title)));
+  r = await mem(reader, { action: "list", kind: "hiccup", type: "retainer" });
+  check(!r.j.entries.some((x) => x.title === "Review slipped"), "CONTROL — and not under Retainer", JSON.stringify(r.j.entries.map((x) => x.title)));
   r = await cs(reader, { action: "case", id: caseId });
-  check(r.j.case.insightList.some((x) => x.title === "Interview the CFO first"), "…and is listed inside the case study", JSON.stringify(r.j.case.insightList.map((x) => x.title)));
-  r = await mem(reader, { action: "save", client: "raya-trade", title: "Written before case studies" });
+  check(r.j.case.insightList.some((x) => x.title === "Interview the CFO first"), "…and they are listed inside the assignment", JSON.stringify(r.j.case.insightList.map((x) => x.title)));
+  r = await mem(reader, { action: "save", client: "raya-trade", title: "Written before the Track Record" });
   const loose = r.j.id;
-  r = await mem(reader, { action: "list", case: "none" });
-  check(r.j.entries.some((x) => x.id === loose) && !r.j.entries.some((x) => x.caseId), "an insight with no piece of work is listed as not yet placed", JSON.stringify(r.j.entries.map((x) => x.caseName)));
+  r = await cs(reader, { action: "client", client: "raya-trade" });
+  check(r.j.loose.some((x) => x.id === loose) && r.j.assignments.some((a) => a.id === caseId), "a client's page lists its assignments and the learnings tied to none yet", JSON.stringify(r.j.loose.map((x) => x.title)));
   r = await cs(writer, { action: "place", entry: loose, case: caseId });
-  check(r.status === 403, "somebody else cannot place my insight", r.status);
-  const other = (await cs(boss, { action: "open", client: "case-other", name: "Other work" })).j.id;
+  check(r.status === 403, "somebody else cannot tie my learning to an assignment", r.status);
+  const other = (await cs(boss, { action: "assign", client: "case-other", name: "Other work", kind: "planning", started: "2025-01", lead: writerId })).j.id;
   r = await cs(reader, { action: "place", entry: loose, case: other });
-  check(r.status === 400 && /different client/i.test(r.j.error || ""), "an insight cannot be placed in another client's work", JSON.stringify(r.j));
+  check(r.status === 400 && /different client/i.test(r.j.error || ""), "a learning cannot be tied to another client's assignment", JSON.stringify(r.j));
   r = await cs(reader, { action: "place", entry: loose, case: caseId });
-  check(r.status === 200 && r.j.placed, "its author places it in a piece of work for the same client", JSON.stringify(r.j));
+  check(r.status === 200 && r.j.placed, "its author ties it to an assignment of the same client", JSON.stringify(r.j));
   r = await mem(reader, { action: "one", id: loose });
-  check(r.j.entry.caseName === "Strategy build 2025", "…and the insight now names its case study", JSON.stringify(r.j.entry.caseName));
+  check(r.j.entry.caseName === "Strategy build 2025", "…and the learning now names its assignment", JSON.stringify(r.j.entry.caseName));
   r = await cs(writer, { action: "insights", id: pastId, entries: [{ kind: "hiccup", title: "Drivers knew first", happened: "x" }, { title: "" }] });
-  check(r.status === 400, "the interview's insights are all or none: one without a title stops the lot", JSON.stringify(r.j));
+  check(r.status === 400, "the write-up's learnings are all or none: one without a title stops the lot", JSON.stringify(r.j));
   const n0 = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id = $1", [pastId])).rows[0].n;
   r = await cs(writer, { action: "insights", id: pastId, entries: [{ kind: "hiccup", title: "Drivers knew first" }, { kind: "lesson", title: "Five measures is the most" }] });
   const n1 = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id = $1", [pastId])).rows[0].n;
-  check(r.status === 200 && n0 === 0 && n1 === 2, "…and with titles both land, in the piece of work", JSON.stringify([n0, n1, r.j]));
-});
-
-await section("7b · Home's two cards (spec 068)", async () => {
-  let r = await cs(writer, { action: "home" });
-  const w = (r.j.writing || []).find((x) => x.id === caseId);
-  const f0 = w ? w.filled : -1;
-  check(r.status === 200 && w && f0 >= 0 && f0 < 8 && w.client.key === "raya-trade", "the writer's Home lists the write-up asked of them, with how many of its eight sections hold something", r.status + " " + JSON.stringify(w || r.j).slice(0, 300));
-  check((r.j.fresh || []).some((x) => x.id === pastId) && !(r.j.fresh || []).some((x) => x.state !== "done"), "…and the case study marked done is among the newly finished, with no draft among them", JSON.stringify((r.j.fresh || []).map((x) => x.name)));
-  await owner.query("UPDATE case_studies SET in_short = 'a', stages = '[{\"when\":\"Mar\",\"what\":\"x\"}]' WHERE id = $1", [caseId]);
-  r = await cs(writer, { action: "home" });
-  check(((r.j.writing || []).find((x) => x.id === caseId) || {}).filled === f0 + 2, "…and the count follows what is written: two sections more, two more", JSON.stringify([f0, ((r.j.writing || []).find((x) => x.id === caseId) || {}).filled]));
-  await owner.query("UPDATE case_studies SET in_short = '', stages = '[]' WHERE id = $1", [caseId]);
-  r = await cs(reader, { action: "home" });
-  check(r.status === 200 && !(r.j.writing || []).some((x) => x.id === caseId), "somebody else's write-up is not on my Home", JSON.stringify(r.j.writing));
-  const n0 = r.j.loose;
-  const extra = (await mem(reader, { action: "save", client: "raya-trade", title: "Loose for Home" })).j.id;
-  r = await cs(reader, { action: "home" });
-  check(r.j.loose === n0 + 1, "…and an insight of mine in no case study is counted for placing", JSON.stringify([n0, r.j.loose]));
-  await owner.query("DELETE FROM memory_entries WHERE id = $1", [extra]);
+  check(r.status === 200 && n0 === 0 && n1 === 2, "…and with titles both land, in the assignment", JSON.stringify([n0, n1, r.j]));
 });
 
 await section("8 · files: the store's absence answers in words", async () => {
@@ -270,21 +279,21 @@ await section("8 · files: the store's absence answers in words", async () => {
   check(r.status === 404, "a deliverable with no file answers that there is none", r.status);
 });
 
-await section("9 · deleting a client that has case studies is refused by name", async () => {
+await section("9 · deleting a client that has a Track Record is refused by name", async () => {
   const { deleteTenant } = await import("../lib/tenant-delete.ts");
   const t = (await owner.query("SELECT id FROM tenants WHERE key = 'nile-logistics'")).rows[0];
   let msg = "";
   try { await deleteTenant(owner, t.id); } catch (e) { msg = String(e.message); }
-  check(/case stud|insight/i.test(msg), "the memory and the case studies outlive the engagement, and the refusal says why", msg);
+  check(/case stud|insight|track record|learning/i.test(msg), "the memory and the Track Record outlive the engagement, and the refusal says why", msg);
 });
 
-await section("10 · removing a piece of work keeps its insights", async () => {
+await section("10 · removing an assignment keeps its learnings", async () => {
   let r = await cs(writer, { action: "drop", id: caseId });
-  check(r.status === 403, "a consultant cannot remove a piece of work", r.status);
+  check(r.status === 403, "a consultant cannot remove an assignment", r.status);
   const before = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id = $1", [caseId])).rows[0].n;
   r = await cs(boss, { action: "drop", id: caseId });
-  const loose = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id IS NULL AND title IN ('Interview the CFO first','Written before case studies')")).rows[0].n;
-  check(r.status === 200 && before === 2 && loose === 2, "an admin removes it, and its insights go back under their client rather than with it", JSON.stringify([before, loose]));
+  const loose = (await owner.query("SELECT count(*)::int n FROM memory_entries WHERE case_id IS NULL AND title IN ('Interview the CFO first','Written before the Track Record')")).rows[0].n;
+  check(r.status === 200 && before === 4 && loose === 2, "the super user removes it, and its learnings go back under their client rather than with it", JSON.stringify([before, loose]));
 });
 
 /* AND IT LEAVES NO CLIENT BEHIND: a second client named "Other Client"

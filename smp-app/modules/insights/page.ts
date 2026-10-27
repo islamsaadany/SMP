@@ -103,6 +103,23 @@ const CSS = `
 .dl:hover{text-decoration:underline}
 .dl:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 .nofile{flex:none;font-size:13px;color:var(--ink-3)}
+/* §651: View, and the viewer it opens over the list */
+.vw{flex:none;color:var(--ink-2);font:600 13px/1.5 var(--font);text-decoration:none;white-space:nowrap}
+.vw:hover{color:var(--ink);text-decoration:underline}
+.vw:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+html.held{overflow:hidden}
+.vscrim{position:fixed;inset:0;z-index:50;background:rgba(20,28,43,.45);display:flex;align-items:center;justify-content:center;padding:3vh 16px}
+.viewer{width:100%;max-width:980px;height:94vh;background:var(--surface);color:var(--ink);border-radius:14px;box-shadow:0 24px 64px rgba(20,28,43,.35);display:flex;flex-direction:column;overflow:hidden}
+.viewer .vh{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.viewer .vh h2{margin:0;flex:1;min-width:0;font:700 17px/1.25 var(--title);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer .vmeta{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.viewer .vtab{font:600 12.5px/1.5 var(--font);color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.viewer .vtab:hover{color:var(--ink);text-decoration:underline}
+.viewer .x{width:32px;height:32px;border-radius:8px;border:0;background:none;color:var(--ink-3);font:400 22px/1 var(--font);cursor:pointer}
+.viewer .x:hover,.viewer .x:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.vbody{flex:1;min-height:0;background:var(--surface-2);display:flex}
+.vframe{flex:1;border:0;width:100%;height:100%;background:var(--surface-2)}
+.vwait{margin:auto;color:var(--ink-3);font-size:14px;padding:20px;text-align:center}
 @media (max-width:560px){.item{flex-direction:column;align-items:flex-start;gap:6px}}
 `;
 
@@ -250,11 +267,18 @@ export function libraryRows(
       (it.summary ? "<p>" + esc(it.summary) + "</p>" : "") +
       '<span class="facts">' + factLine(it) + (o && o.seenLabel ? '<span class="reach">Seen by ' + esc(o.seenLabel) + "</span>" : "") + "</span>" +
       "</span>" +
+      /* §651: VIEW BEFORE DOWNLOAD, a real link that view.js turns into the
+         pop-up on a computer; a draft has View alone (the office's check
+         before it goes out) and never Download */
+      (it.hasFile
+        ? '<a class="vw" href="' + esc(clientHref(slug, "insights", it.id + "/view")) + '" target="_blank" rel="noopener" data-act="view-report"' +
+          ' data-title="' + esc(it.title) + '" data-meta="' + esc(["v" + it.version, readableDay(it.reportDate)].filter(Boolean).join(" \u00b7 ")) + '"' +
+          (draft ? "" : ' data-file="' + esc(clientHref(slug, "insights", it.id + "/file")) + '"') + ">View</a>" : "") +
       (it.hasFile && !draft
         ? '<a class="dl" href="' + esc(clientHref(slug, "insights", it.id + "/file")) + '">Download</a>'
         /* A report with nothing attached says so rather than drawing a
            button that would answer "not found" (§61). */
-        : it.hasFile ? '<span class="nofile">File attached</span>' : '<span class="nofile">No file yet</span>') +
+        : it.hasFile ? "" : '<span class="nofile">No file yet</span>') +
       (o ? '<button class="openr" type="button" data-act="open-report" data-id="' + esc(it.id) + '">Open</button>' : "") +
       "</div>";
     }).join("") + "</div>";
@@ -398,7 +422,8 @@ export async function insightsDocument(
   /* THE POP-UP'S SCRIPT, for whoever may publish; it asks the module's own
      /data for the reports as the office reads them (publishData), so the
      page carries nothing inline for the shell's script-src to refuse. */
-  const data = !pub ? "" : '<script src="' + esc(clientHref(slug, "insights", "app.js")) + '"></script>\n';
+  const data = '<script src="' + esc(clientHref(slug, "insights", "view.js")) + '"></script>\n' +
+    (!pub ? "" : '<script src="' + esc(clientHref(slug, "insights", "app.js")) + '"></script>\n');
 
   return "<!doctype html>\n<html lang='en' data-module='insights'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +

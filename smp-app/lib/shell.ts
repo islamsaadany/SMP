@@ -209,7 +209,9 @@ export function versioned(path: string): string {
 export const SHELL_CSP =
   "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; " +
   "connect-src 'self'; worker-src 'self'; manifest-src 'self'; media-src 'self' blob: https://*.blob.vercel-storage.com; " +
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://*.sharepoint.com; " +
+  /* §651: the file store too, so Insights' View can show a report's PDF in
+     its own pop-up (the short-lived address the module answers) */
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://drive.google.com https://*.sharepoint.com https://*.blob.vercel-storage.com; " +
   "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 
 export function shellHeaders(): Record<string, string> {

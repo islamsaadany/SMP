@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-27 — The Copilot, oriented (§653), merged to `main` on Islam's word.** The rail stays open with room; one job per header; one counter; four status words; a lighter chat; the path in one line; Start from the existing plan on the Foundation, SWOT and Directions start screens.
+
 **2026-10-26 — Send only when typed; the bubble never cut; no agreed part reads Drafting (§649.1, §652), merged to `main` on Islam's word.**
 
 **2026-10-26 — Case studies become the Track Record (§650, spec 069), merged to `main` on Islam's word.** The tab is Track Record. The super user adds each client's assignments on Clients (list view): Planning or Retainer, start and end month, lead and team; a past client is added on Ended. When an assignment ends, its lead gets "Write up the assignment" on My tasks and Home, with nobody asking, and any consultant can start one. Writing it up is one page: what Clients says about it, the prompt filled from that with Open in Claude beside Copy, and the paste box; the paste fills the write-up on the next page to check, attach files and Publish. The front is one card per client; picking Hiccup, Practice or Lesson lists those learnings across clients. A client's page has a tab per assignment with its write-up and its learnings. Learnings are added to an assignment with the learnings prompt or typed in. Gone: Open a piece of work, Ask for the write-up, the desk and shelves, the separate Insights view. Waiting on Islam: the client list to load.

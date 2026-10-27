@@ -19196,6 +19196,50 @@ function archiveSwot(target, why){
   return a;
 }
 
+/* ── DIRECTIONS AND EXECUTION AS ARCHIVES OF THEIR OWN (§654 A2) ───────
+   The Copilot's Apply to plan for Directions (§645) took a `unit` archive —
+   the Foundation, the SWOT and the pillars together — so restoring it would
+   have put back far more than the apply changed. Each apply now archives
+   the part it touches: `directions` holds the pillars and the Capabilities
+   it updates (name, kind, what they serve, owner); `execution` holds the
+   pillars' measures and tactics, the Capabilities' objectives and projects,
+   and the plan period. Restoring puts that part back and nothing else. */
+function planPeriodNow(){
+  var R = typeof SMPRules !== "undefined" ? SMPRules : null, g = typeof GROUP !== "undefined" ? GROUP : {};
+  return { from: g[(R && R.PLAN_FROM) || "planFrom"] || "", to: g[(R && R.PLAN_TO) || "planTo"] || "" };
+}
+function capsById(ids){
+  var all = typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  return (ids || []).map(function(id){ return all.filter(function(c){ return c && String(c.id) === String(id); })[0]; }).filter(Boolean);
+}
+function archiveDirections(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, name:c.name || "", capKind:c.capKind || "", serves:clone(c.serves || []), head:c.head || "" }; });
+  var pillars = items.filter(function(p){ return p && String(p.name || "").trim(); }).length;
+  if (!pillars && !caps.length) return null;
+  var a = { id:archiveId(), kind:"directions", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ pillars:pillars, capabilities:caps.length }, plan:{ items:items, caps:caps } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+function archiveExecution(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, keyObjectives:clone(c.keyObjectives || []), projects:clone(c.projects || []) }; });
+  var measures = 0, tactics = 0;
+  items.forEach(function(p){ if (!p) return; measures += (p.measures || []).length; tactics += (p.tactics || []).length; });
+  caps.forEach(function(c){ measures += c.keyObjectives.length; tactics += c.projects.length; });
+  var period = planPeriodNow();
+  if (!measures && !tactics && !period.from && !period.to) return null;
+  var a = { id:archiveId(), kind:"execution", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ measures:measures, tactics:tactics, capabilities:caps.length }, plan:{ items:items, caps:caps, period:period } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -19233,6 +19277,32 @@ function restoreArchive(id){
     if (!sw) return false;
     archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
     ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
+  }
+  else if (a.kind === "directions" || a.kind === "execution") {
+    /* §654 A2: the part applied, put back; what stands is archived first as
+       the same kind, so the restore can itself be undone. */
+    var ud = unitLikeWritable(a.key);
+    if (!ud) return false;
+    var ids = (a.plan.caps || []).map(function(c){ return c.id; });
+    if (a.kind === "directions") archiveDirections(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    else archiveExecution(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    ud.items = clone(a.plan.items || []);
+    capsById(ids).forEach(function(c){
+      var sc = (a.plan.caps || []).filter(function(x){ return String(x.id) === String(c.id); })[0]; if (!sc) return;
+      if (a.kind === "directions") {
+        c.name = sc.name;
+        if (sc.capKind) c.capKind = sc.capKind; else delete c.capKind;
+        if (sc.serves && sc.serves.length) c.serves = clone(sc.serves); else delete c.serves;
+        if (sc.head) c.head = sc.head; else delete c.head;
+      } else { c.keyObjectives = clone(sc.keyObjectives || []); c.projects = clone(sc.projects || []); }
+    });
+    if (a.kind === "execution" && a.plan.period && typeof GROUP !== "undefined") {
+      var Rp = typeof SMPRules !== "undefined" ? SMPRules : null;
+      GROUP[(Rp && Rp.PLAN_FROM) || "planFrom"] = a.plan.period.from; GROUP[(Rp && Rp.PLAN_TO) || "planTo"] = a.plan.period.to;
+    }
+    if (ud.ukey && a.key !== "group") renumberUnit(ud);
+    var dFk = fnKeyOfTarget(a.key);
+    if (dFk) fnWriteBack(dFk, ud);
   }
   else if (a.kind === "foundation") {
     /* §524: six parts, put back whole; what stands is archived first so the
@@ -45792,7 +45862,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -46169,6 +46239,10 @@ function archiveHeld(a){
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
     : a.kind === "swot"
     ? plural(c.lines || 0, "SWOT line")
+    : a.kind === "directions"
+    ? [plural(c.pillars || 0, L1("pillar"), L("pillar")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
+    : a.kind === "execution"
+    ? [plural(c.measures || 0, L1("measure"), L("measure")), plural(c.tactics || 0, L1("tactic"), L("tactic")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
     : a.kind === "unit"
     ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
        plural(c.tactics, L1("tactic"), L("tactic")),
@@ -46193,6 +46267,10 @@ function renderArchives(){
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "swot"
         ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "directions"
+        ? '<span class="why">' + L("pillar") + ' and the capabilities they touch &mdash; the Foundation and the SWOT are untouched</span>'
+        : a.kind === "execution"
+        ? '<span class="why">Measures, tactics and the plan period &mdash; the rest of the plan is untouched</span>'
         : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
@@ -46201,7 +46279,7 @@ function renderArchives(){
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
              : a.kind === "swot" ? !!swotWritable(a.key)
-             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+             : a.kind === "unit" || a.kind === "directions" || a.kind === "execution" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -65008,7 +65086,8 @@ var COPILOT = (function(){
         '<span class="copm">' + kindWord(d.kind) + ' · v' + E(d.latest) + ' · ' + E(when(d.latestAt)) + '</span></button>';
     }).join("");
   }
-  function kindWord(k){ return k === "promotable" ? "Promotable" : "Copilot-only"; }
+  /* §654 B4 — the rail's chip in the Copilot's own words. */
+  function kindWord(k){ return k === "promotable" ? "Can go on the plan" : "Stays in the Copilot"; }
 
   function mainHtml(){
     var o = OPEN[key()];
@@ -66487,7 +66566,10 @@ var COPILOT = (function(){
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : d.type === "foundation"
+        /* §654 A1 — every structured type is edited in the chat that built
+           it (the Foundation's rule, §525): a plain-text version would hold
+           none of its parts. */
+        (editing || !canEdit() ? '' : ["foundation", "swot", "compete", "directions", "capabilities", "execution"].indexOf(d.type) >= 0
           ? (fchat ? '<button type="button" class="copbtn quiet" data-cop-edit-chat="' + E(fchat) + '">Edit' + (cur ? ' as v' + (cur.n + 1) : '') + '</button>' : '')
           : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
@@ -67445,7 +67527,7 @@ var COPILOT = (function(){
     var pips = ""; for (var k = 0; k < c.of; k++) pips += '<i class="' + (k < c.asked ? "u" : "") + '"></i>';
     h += '<div class="copsw-box adbudget" data-cop-ad-budget><div class="copsw-bh"><b>Round ' + c.round + ' of ' + c.rounds + '</b> <span class="copsw-n">' + c.asked + ' of ' + c.of + ' asked</span></div>' +
       '<div class="adpips" aria-hidden="true">' + pips + '</div>' +
-      '<p class="adwhy">' + (s.brief ? "The questions are done." : c.stopped ? "You asked it to proceed with what it has." :
+      '<p class="adwhy">' + (s.brief ? (c.stopped && c.asked < c.of ? "Proceeded after " + c.asked + " of " + c.of + "." : "The questions are done.") : c.stopped ? "You asked it to proceed with what it has." :
         c.owed ? "The questions are used up; the brief comes next." : "At most " + c.of + " questions a round and " + c.rounds + " rounds, then the brief.") + '</p></div>';
     if (s.assumed && s.assumed.length) h += '<div class="copsw-box"><div class="copsw-bh"><b>Assumed so far</b></div><ul class="adlist">' +
       s.assumed.map(function(a){ return '<li>' + adTag("assumed") + ' ' + E(a) + '</li>'; }).join("") + '</ul></div>';
@@ -67570,7 +67652,7 @@ var COPILOT = (function(){
      it. */
   var DVASK = {}, DVOWN = {}, DVADD = {}, DVPEND = null;
   function dirsOn(){ return !!(PANE && PANE.chat && PANE.dirs); }
-  function dvView(j){ ["dirs","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
+  function dvView(j){ ["dirs","dirsApplied","dirsTodo","dirsDone","dirsScores","dirsWords","dirsBlocker"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function dvCopy(){ return JSON.parse(JSON.stringify(PANE.dirs)); }
   function dvProgress(id){
@@ -67771,7 +67853,11 @@ var COPILOT = (function(){
      writes, and says whether the plan's save went through. */
   var APPLIED = {};   /* chat id → the version applied in this visit */
   function savedApplyHtml(sv, k){
-    var on = APPLIED[PANE.chat.id] === sv.n;
+    /* §654 A3 — "on the plan" is the deliverable's own note (planApplied),
+       so it survives a reload; this visit's memory covers the moment between
+       the plan's save and the note. */
+    var note = k === "dv" ? PANE.dirsApplied : PANE.execApplied;
+    var on = (note && note.n === sv.n) || APPLIED[PANE.chat.id] === sv.n;
     return cpMsg("product", "Saved as " + E(sv.title) + " v" + E(String(sv.n)) + " — under Deliverables. " +
       (on ? "It is on the plan." : "It is not on the plan yet: Apply to plan puts it there, and archives what the plan holds first.")) +
       (canEdit() ? '<div class="copbtns"><button type="button" class="copbtn' + (on ? '' : ' solid') + '" data-cop-' + k + '-apply>' + (on ? "Apply to plan again" : "Apply to plan") + '</button></div>' : '');
@@ -67792,19 +67878,22 @@ var COPILOT = (function(){
   /* What stands is archived before anything is written: the place's own plan
      (its pillars, their measures and tactics) and each Capability the save
      touches — the archives Import & storage › Archived plans restores. */
-  function planArchive(capIds, why){
-    var h = dvHolder(), n = 0;
-    if (h && typeof archiveUnitPlan === "function" && h.ukey && archiveUnitPlan(h, why)) n++;
-    if (typeof archiveCapPlan === "function" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
-      capIds.forEach(function(cid){ var c = GROUP.capabilities.filter(function(x){ return x && String(x.id) === String(cid); })[0]; if (c && archiveCapPlan(c, why)) n++; });
-    return n;
+  /* §654 A2 — AN ARCHIVE OF THE PART APPLIED, never the whole plan: §645
+     took a `unit` archive (Foundation, SWOT and pillars together), so
+     restoring it would have rolled the Foundation and the SWOT back too.
+     Now a `directions` archive holds the pillars and the Capabilities the
+     apply touches; an `execution` archive the pillars' measures and tactics,
+     the Capabilities' objectives and projects, and the plan period. */
+  function planArchive(kind, capIds, why){
+    var f = kind === "execution" ? (typeof archiveExecution === "function" ? archiveExecution : null) : (typeof archiveDirections === "function" ? archiveDirections : null);
+    return f && f(place(), capIds, why) ? 1 : 0;
   }
-  function planApplyGo(sv, capIds, can, write){
+  function planApplyGo(sv, kind, capIds, can, write){
     var id = PANE.chat.id, title = sv.title + " v" + sv.n;
     /* Asked BEFORE anything is archived, so a place that cannot take it is
        left exactly as it was. */
     if (!can()) { SAY = "The plan could not be written from here — this place does not plan in Directions. Nothing was changed."; draw(); return; }
-    planArchive(capIds, "replaced from the Copilot — " + title);
+    planArchive(kind, capIds, "replaced from the Copilot — " + title);
     var r = write();
     if (!r.ok) { SAY = "The plan could not be written from here. What it held is archived under Import & storage › Archived plans."; draw(); return; }
     APPLIED[id] = sv.n;
@@ -67817,6 +67906,11 @@ var COPILOT = (function(){
         ? title + " is on the plan now. What was there before is archived under Import & storage › Archived plans."
         : "The plan did not save, so " + title + " is not on the plan yet. Try Apply to plan again once the save goes through.";
       draw();
+      /* §654 A3 — the note follows the fact (§524.1): written only once the
+         plan's save has landed, and only on the chat that applied it. */
+      if (how === "saved" || how === "clean") act({ act:"planApplied", id: sv.deliverableId, n: sv.n }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) { if (kind === "execution") PANE.execApplied = j.applied; else PANE.dirsApplied = j.applied; draw(); }
+      });
     });
   }
   function dvApplyAsk(){
@@ -67826,7 +67920,7 @@ var COPILOT = (function(){
     planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + [dirs ? g.length + (g.length === 1 ? " Direction" : " Directions") : "", (s.mode === "capabilities" || s.withCaps) ? k.length + (k.length === 1 ? " Capability" : " Capabilities") : ""].filter(Boolean).join(" and ") + " onto the plan.",
       (dirs && have ? "The plan's " + have + (have === 1 ? " Direction is" : " Directions are") + " archived first" : "Nothing on the plan is replaced") + (caps.length ? ", and the " + caps.length + (caps.length === 1 ? " Capability" : " Capabilities") + " it updates" : "") +
         ". A Direction with the same name is updated, a new one is added; nothing is removed. Archives are under Import &amp; storage › Archived plans.",
-      function(){ planApplyGo(s.saved, caps, function(){ var h = dvHolder(); return s.mode === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); },
+      function(){ planApplyGo(s.saved, "directions", caps, function(){ var h = dvHolder(); return s.mode === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); },
         function(){ return dvWritePlan(PANE.dirs); }); });
   }
   function exApplyAsk(){
@@ -67835,7 +67929,7 @@ var COPILOT = (function(){
     planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + nm + " measures and " + nt + " tactics onto " + s.items.length + (s.items.length === 1 ? " item" : " items") + " of the plan, and the plan period.",
       "The plan's Directions, with their measures and tactics, are archived first" + (caps.length ? ", and the " + caps.length + (caps.length === 1 ? " Capability" : " Capabilities") + " it updates" : "") +
         ". A measure or tactic with the same name is updated, a new one is added; nothing is removed. Archives are under Import &amp; storage › Archived plans.",
-      function(){ planApplyGo(s.saved, caps, function(){ return !!(s.period && typeof GROUP !== "undefined"); }, function(){ return exWritePlan(PANE.exec); }); });
+      function(){ planApplyGo(s.saved, "execution", caps, function(){ return !!(s.period && typeof GROUP !== "undefined"); }, function(){ return exWritePlan(PANE.exec); }); });
   }
   function dvWritePlan(s){
     var h = dvHolder(), wroteD = 0, wroteC = 0, idOf = {};
@@ -67991,7 +68085,7 @@ var COPILOT = (function(){
      act, the model asked by one, the plan written after the save press. */
   var EXPEND = null, EXASK = {}, EXPICK = {};
   function execOn(){ return !!(PANE && PANE.chat && PANE.exec); }
-  function exView(j){ ["exec","execTodo","execDone","execBlocker","execWords"].forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function exView(j){ ["exec","execApplied","execTodo","execDone","execBlocker","execWords"].forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function exCopy(){ return JSON.parse(JSON.stringify(PANE.exec)); }
   function exProgress(id){ var l = list(); if (l && l.swotProgress && PANE && PANE.execTodo) l.swotProgress[id] = { done: PANE.execDone, of: PANE.execTodo.length }; }
   /* The plan's Directions and the capabilities this place holds, as the
@@ -68097,7 +68191,7 @@ var COPILOT = (function(){
     if (!s.items.length) main = cpMsg("product", "This place's plan has no Directions or Capabilities yet. Choose them first, in the Directions section.");
     else if (!s.period) main = exPeriodAsk(ed);
     else {
-      main = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? ' · <button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
+      main = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? '<button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
         (EXPICK[id] ? exPeriodAsk(ed) : '');
       var it = s.items[s.cursor];
       if (s.reply) main += cpMsg("ai", E(s.reply));

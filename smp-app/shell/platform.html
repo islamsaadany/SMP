@@ -1083,13 +1083,25 @@
   /* the registry, on the Clients page's list view */
   .cltable tr.asgrow td{ padding-top:7px; padding-bottom:7px; background:var(--surface) }
   .cltable tr.asgadd td{ padding-top:4px; padding-bottom:10px }
-  .asgline{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; padding-left:38px; font-size:13px }
+  .asgline{ display:grid; grid-template-columns:22px auto minmax(0,1fr) auto auto; gap:6px 14px; align-items:center; padding-left:24px; font-size:13px }
+  .asgline .nm{ display:flex; gap:10px; align-items:center; white-space:nowrap }
+  .asgline .facts{ display:flex; flex-wrap:wrap; gap:4px 18px; min-width:0; color:var(--ink-2) }
+  .asgline .facts b{ color:var(--ink); font-weight:650 }
+  .asgplus{ width:22px; height:22px; padding:0; display:grid; place-items:center; border:1px solid var(--line); border-radius:6px;
+    background:var(--surface); color:var(--ink-3); cursor:pointer }
+  .asgplus svg{ width:11px; height:11px; display:block }
+  .asgplus:hover{ color:var(--ink); border-color:var(--ink-3) }
+  .asgplus:focus-visible{ outline:2px solid var(--amber-tx); outline-offset:2px }
+  /* where it stands: a dot and the word in its colour, no box */
+  .asgst{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; white-space:nowrap; justify-self:end }
+  .asgst::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor }
+  .asgst.run{ color:var(--good) } .asgst.late{ color:var(--bad) } .asgst.dr{ color:var(--warn) } .asgst.pub{ color:var(--plan) }
+  .asgfirst{ display:flex; gap:10px; align-items:center; padding-left:24px; font-size:13px; color:var(--ink-3) }
+  @media (max-width:760px){ .asgline{ grid-template-columns:22px minmax(0,1fr); padding-left:0 } .asgline .facts, .asgline .asgst{ grid-column:2; justify-self:start } }
   .asgline .textlink{ border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer }
   .asgline .textlink:hover{ color:var(--amber-tx) }
   .asgline .mo{ color:var(--ink-2); font-variant-numeric:tabular-nums }
-  .asgline .ld, .asgline .tm{ color:var(--ink-3) }
-  .asgline .sp, .asgacts .sp{ flex:1 }
-  .cltable tr.asgadd td{ padding-left:48px }
+  .asgacts .sp{ flex:1 }
   .cltable tr.asgform td{ background:var(--amber-wash) }
   .asgf, .pastform{ display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px 14px; padding:6px 0 0 38px }
   .pastform{ padding-left:0 }

@@ -181,13 +181,42 @@ await section("2 · the registry is the Clients page (the super user's)", async 
   await boss.click('tr.asgform button:has-text("Add")'); await boss.waitForTimeout(1200);
   await addAssignment(boss, "raya-trade", { name: "Strategy follow-up", kind: "retainer", start: "2025-07", lead: "Islam Writer" });
   const rows = await boss.$$eval("tr.asgrow", (rs) => rs.map((r) => r.textContent));
-  check(rows.length === 2 && rows.some((t) => /Planning.*Strategy build.*Jan – Jun 2025.*Lead Islam Writer/.test(t)) && rows.some((t) => /Retainer.*Strategy follow-up.*running/.test(t)),
+  check(rows.length === 2 && rows.some((t) => /Planning.*Strategy build.*Jan – Jun 2025.*Lead: Islam Writer/.test(t)) && rows.some((t) => /Retainer.*Strategy follow-up.*since Jul 2025.*Running/.test(t)),
     "both assignments stand under Raya Trade with their type, months and lead", JSON.stringify(rows));
   const db = (await owner.query("SELECT id, kind, lead_id, started, ended, state FROM case_studies ORDER BY started")).rows;
   planId = db[0] && db[0].id; retId = db[1] && db[1].id;
   check(db.length === 2 && db[0].kind === "planning" && db[1].kind === "retainer" && db[0].lead_id === writerId && db.every((r) => r.state === "running"),
     "…and in the rows: two assignments, typed, led by the writer, nothing written yet", JSON.stringify(db));
+  /* THE LINE AS AGREED (2026-10-27): the label bold, the name plain; one +,
+     beside the last line and drawn in the middle of its square; status a word */
+  const look = await boss.evaluate(() => {
+    const lead = Array.from(document.querySelectorAll("tr.asgrow .facts b")).find((b) => b.textContent === "Lead:");
+    const plus = document.querySelectorAll('tr.asgrow .asgplus[data-add-assignment="raya-trade"]');
+    const box = plus[0] && plus[0].getBoundingClientRect(), ic = plus[0] && plus[0].querySelector("svg").getBoundingClientRect();
+    const last = Array.from(document.querySelectorAll("tr.asgrow")).filter((r) => r.querySelector(".asgplus")).pop();
+    return { labelBold: lead && +getComputedStyle(lead).fontWeight >= 600, nameBold: lead && +getComputedStyle(lead.parentNode).fontWeight >= 600,
+      plusN: plus.length, onLast: !!last && !last.nextElementSibling?.classList.contains("asgrow"),
+      off: box ? [Math.abs((ic.left + ic.width / 2) - (box.left + box.width / 2)), Math.abs((ic.top + ic.height / 2) - (box.top + box.height / 2))] : null,
+      ownLine: !!document.querySelector('tr.asgadd [data-add-assignment="raya-trade"]') };
+  });
+  check(look.labelBold && !look.nameBold, "Lead: is bold and the name after it is not", JSON.stringify(look));
+  check(look.plusN === 1 && look.onLast && !look.ownLine, "one + beside the last assignment, and no line of its own", JSON.stringify(look));
+  check(look.off && look.off[0] < 0.75 && look.off[1] < 0.75, "…drawn in the middle of its square", JSON.stringify(look.off));
   await shot(boss, "2-registry");
+});
+
+await section("2c · a client whose assignments have all ended is under Ended", async () => {
+  await owner.query("UPDATE case_studies SET ended = '2025-12' WHERE name = 'Strategy follow-up'");
+  await goTab(boss, "clients");
+  check(!(await boss.$('table[data-grid="clients"] tr.crow[data-client="raya-trade"]')), "with both assignments over, Raya Trade leaves Active", "");
+  await boss.click('.clwhich button[data-which="ended"]'); await boss.waitForTimeout(500);
+  const row = await boss.textContent('table[data-grid="archived"] tr.crow[data-client="raya-trade"]').catch(() => "");
+  check(/Assignments ended/.test(row) && /Strategy/.test(row), "…and stands under Ended, still with its modules: its platform stays open", row);
+  const t = (await owner.query("SELECT status FROM tenants WHERE key = 'raya-trade'")).rows[0];
+  check(t.status !== "retired", "…and nothing about the client itself changed", JSON.stringify(t));
+  await owner.query("UPDATE case_studies SET ended = '' WHERE name = 'Strategy follow-up'");
+  await goTab(boss, "clients");
+  check(!!(await boss.$('table[data-grid="clients"] tr.crow[data-client="raya-trade"]')), "CONTROL — a running assignment puts it back under Active", "");
 });
 
 await section("2b · the month picker", async () => {

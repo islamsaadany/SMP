@@ -3294,14 +3294,21 @@
       var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
       var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
       var archived = j.archived || [], past = j.past || [];
+      /* A CLIENT WHOSE ASSIGNMENTS HAVE ALL ENDED is drawn under Ended
+         (spec 069, choice (a)); it is still a live client with its door open */
+      var over = {};
+      (j.workEnded || []).forEach(function (k) { over[k] = true; });
+      var finished = clients.filter(function (c) { return over[c.key]; });
+      finished.forEach(function (c) { c.workEnded = true; });
+      clients = clients.filter(function (c) { return !over[c.key]; });
       /* AND THE COUNT IS A COUNT OF CLIENTS (it read j.cards.length once,
          which counted the demo — §61's trap by another road). */
-      if (!clients.length) {
+      if (!clients.length && !finished.length) {
         say(j.canAdd
           ? "No clients yet. Add the first one — it is created with its own name and nothing else."
           : "No client has been given to this account yet. Ask the platform's super user.");
       }
-      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length ? (archived.length + past.length) + " ended" : "",
+      eye.textContent = [nOf(clients.length, "active client"), archived.length + past.length + finished.length ? (archived.length + past.length + finished.length) + " ended" : "",
         demos.length ? nOf(demos.length, "demo") : ""].filter(Boolean).join(" · ");
       if (j.canAdd) {
         var add = el("button", "btn amber pgadd", "+ Add a client");
@@ -3309,7 +3316,7 @@
         add.addEventListener("click", function () { drawNewClient(); });
         band.appendChild(add);
       }
-      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
+      clFill(grid, { clients: clients, demos: demos, archived: archived, past: past, finished: finished, canAdd: j.canAdd, canAddPast: j.canAddPast, search: search });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);
@@ -3364,19 +3371,19 @@
     var draw = function () {
       CLREG.redraw = draw;
       var act = mineOf(d.clients, seat), dem = mineOf(d.demos, seat);
-      var end = CL.mine ? d.archived.filter(function (c) { return c.mine; }) : d.archived.concat(d.past);
+      var end = CL.mine ? d.finished.filter(seat).concat(d.archived.filter(function (c) { return c.mine; })) : d.finished.concat(d.archived, d.past);
       bar.textContent = ""; body.textContent = "";
       /* A CHOICE WITH NOTHING BEHIND IT IS NOT OFFERED, and one that has
          just emptied (the last archived client deleted) falls back to
          Active rather than leaving the page on a choice it no longer draws. */
-      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) CL.which = "active";
+      if (CL.which === "ended" && !d.archived.length && !d.past.length && !d.finished.length && !d.canAddPast) CL.which = "active";
       if (CL.which === "demo" && !d.demos.length) CL.which = "active";
       var which = el("span", "clwhich");
       which.setAttribute("role", "group");
       which.setAttribute("aria-label", "Which clients");
       [["active", "Active", act.length], ["ended", "Ended", end.length], ["demo", "Demo", dem.length]].forEach(function (w) {
         if (w[0] === "demo" && !d.demos.length) return;
-        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.canAddPast) return;
+        if (w[0] === "ended" && !d.archived.length && !d.past.length && !d.finished.length && !d.canAddPast) return;
         var b = el("button", null, w[1]);
         b.type = "button";
         b.setAttribute("data-which", w[0]);
@@ -3447,19 +3454,30 @@
       if (CLREG.redraw && CL.view === "list") CLREG.redraw();
     }).catch(function () { /* the clients stand without their assignments */ });
   }
+  /* THE CLIENT'S ASSIGNMENTS, one clean line each (Islam, 2026-10-27, on
+     design-mockups/track-record/2026-10-27_assignment-rows.html): the + sits
+     beside the last one instead of taking a line of its own; a client with
+     none keeps one line, + Add an assignment. */
   function clAsgRows(tb, c, cols) {
     var reg = CLREG.data;
     if (!reg) return;
-    reg.assignments.filter(function (a) { return a.client.key === c.key; }).forEach(function (a) {
-      tb.appendChild(CLREG.open === a.id ? clAsgForm(c, a, cols) : clAsgRow(c, a, cols, reg.canOpen));
+    var mine = reg.assignments.filter(function (a) { return a.client.key === c.key; });
+    var adding = CLREG.open === "new:" + c.key;
+    mine.forEach(function (a, i) {
+      tb.appendChild(CLREG.open === a.id ? clAsgForm(c, a, cols)
+        : clAsgRow(c, a, cols, reg.canOpen, reg.canOpen && !adding && i === mine.length - 1));
     });
     if (!reg.canOpen) return;
-    if (CLREG.open === "new:" + c.key) { tb.appendChild(clAsgForm(c, null, cols)); return; }
+    if (adding) { tb.appendChild(clAsgForm(c, null, cols)); return; }
+    if (mine.length) return;
     var tr = el("tr", "asgadd");
     var td = el("td"); td.colSpan = cols;
+    var line = el("div", "asgfirst");
     var b = csButton("+ Add an assignment", "sm", function () { clAsgOpen("new:" + c.key); });
     b.setAttribute("data-add-assignment", c.key);
-    td.appendChild(b);
+    line.appendChild(b);
+    line.appendChild(el("span", null, "No assignments yet"));
+    td.appendChild(line);
     tr.appendChild(td);
     tb.appendChild(tr);
   }
@@ -3471,26 +3489,46 @@
       if (CLREG.redraw) CLREG.redraw();
     });
   }
-  function clAsgRow(c, a, cols, canEdit) {
+  /* The + is drawn, not typed, so it sits in the middle of its square:
+     a "+" in a font rides above the centre by the font's own metrics. */
+  var ASG_PLUS = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function clAsgRow(c, a, cols, canEdit, plus) {
     var tr = el("tr", "asgrow");
     tr.setAttribute("data-case", a.id);
     tr.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();   /* it goes with its client */
     var td = el("td"); td.colSpan = cols;
     var line = el("div", "asgline");
-    line.appendChild(typeTag(a.kind));
+    if (plus) {
+      var p = el("button", "asgplus");
+      p.type = "button";
+      p.innerHTML = ASG_PLUS;
+      p.title = "Add an assignment to " + c.name;
+      p.setAttribute("aria-label", "Add an assignment to " + c.name);
+      p.setAttribute("data-add-assignment", c.key);
+      p.addEventListener("click", function () { clAsgOpen("new:" + c.key); });
+      line.appendChild(p);
+    } else line.appendChild(el("span"));
+    var nmw = el("span", "nm");
+    nmw.appendChild(typeTag(a.kind));
     var nm = el("button", "textlink", a.name);
     nm.type = "button";
     nm.title = "Open in Track Record";
     nm.addEventListener("click", function () { CS.jump = { view: "client", client: c.key, id: a.id }; go("memory"); });
-    line.appendChild(nm);
-    line.appendChild(el("span", "mo", spanWord(a.started, a.ended) + (a.ended ? "" : " · running")));
-    if (a.lead) line.appendChild(el("span", "ld", "Lead " + a.lead.name));
-    var team = (a.team || []).filter(function (p) { return !a.lead || p.id !== a.lead.id; }).map(function (p) { return p.name; });
-    if (team.length) line.appendChild(el("span", "tm", "Team " + team.join(", ")));
-    line.appendChild(el("span", "sp"));
+    nmw.appendChild(nm);
+    line.appendChild(nmw);
+    /* the labels are bold and the names plain (Islam: "make the Lead and the
+       Team words bold but the names itself to stay not bold") */
+    var facts = el("span", "facts");
+    facts.appendChild(el("span", "mo", spanWord(a.started, a.ended)));
+    var fact = function (label, value) { var x = el("span"); x.appendChild(el("b", null, label)); x.appendChild(document.createTextNode(" " + value)); facts.appendChild(x); };
+    if (a.lead) fact("Lead:", a.lead.name);
+    var team = (a.team || []).filter(function (p2) { return !a.lead || p2.id !== a.lead.id; }).map(function (p2) { return p2.name; });
+    if (team.length) fact("Team:", team.join(", "));
+    line.appendChild(facts);
     var st = asgState(a);
-    line.appendChild(el("span", "st " + st[1], st[0]));
+    line.appendChild(el("span", "asgst " + st[1], st[0]));
     if (canEdit) line.appendChild(csButton("Edit", "sm", function () { clAsgOpen(a.id); }));
+    else line.appendChild(el("span"));
     td.appendChild(line);
     tr.appendChild(td);
     return tr;
@@ -3792,7 +3830,7 @@
       var g = el("div", "cards");
       g.dataset.grid = "archived";
       list.forEach(function (c) {
-        var card = c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
+        var card = c.workEnded ? cardFor(c) : c.cases != null ? pastCardFor(c, casesOf) : archCardFor(c);
         card.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
         g.appendChild(card);
       });
@@ -3819,14 +3857,32 @@
       r.dataset.client = c.key;
       r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
       var who = el("td"), w = el("span", "clwho");
-      w.appendChild(el("span", "cmark arch", initials(c.name)));
+      if (c.workEnded && c.mark) { var im = el("img", "cmark solo"); im.src = c.mark; im.alt = ""; w.appendChild(im); }
+      else w.appendChild(el("span", "cmark" + (c.workEnded ? "" : " arch"), initials(c.name)));
       w.appendChild(el("b", null, c.name));
       who.appendChild(w); r.appendChild(who);
       r.appendChild(el("td", "muted", c.industry || ""));
       var when = archDate(c.at);
-      r.appendChild(el("td", null, c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
+      r.appendChild(el("td", null, c.workEnded ? "Assignments ended" : c.cases != null ? "Past client" : (when ? "Archived " + when : "Archived") + (c.by ? " · " + c.by : "")));
       var acts = el("td", "clgo");
-      if (c.cases != null) {
+      if (c.workEnded) {
+        /* still a live client: its modules and its settings, as on Active */
+        if (c.canOpen && c.modules) c.modules.forEach(function (m) {
+          var mb = el("button", "clmod", m.label);
+          mb.type = "button";
+          mb.dataset.module = m.key;
+          mb.addEventListener("click", function () { moduleGo(c, m); });
+          acts.appendChild(mb);
+        });
+        if (c.canConfig) {
+          var chip = settingsChip(c.name);
+          chip.setAttribute("role", "button"); chip.tabIndex = 0;
+          var go2 = function (e) { e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+          chip.addEventListener("click", go2);
+          chip.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go2(e); });
+          acts.appendChild(chip);
+        }
+      } else if (c.cases != null) {
         var cb = el("button", "clmod", "Track Record");
         cb.type = "button";
         cb.appendChild(el("i", null, String(c.cases)));

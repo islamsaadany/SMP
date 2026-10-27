@@ -11247,7 +11247,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
 var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
-                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+                        "Mobile", "Official BU", "Unit", "Reports to", "Role", "Status"];
+/* ── REPORTS TO IN THE FILE (§655.1) ───────────────────────────────────
+   Written as the manager's NAME — the register's own short name, which
+   `displayNames()` has already made unique across the register (§81.1), so
+   the download is a picture of the page and the picture reads back to one
+   row. Read as any of: an employee number, an address, the short name or
+   the full name — matched against the register first, then against the
+   other rows of the same file, so a manager who arrives in the same upload
+   as their report still resolves. Two rows answering to one spelling is
+   REFUSED with both named (§61's rule for capabilities: never pick the
+   first), and a name nobody carries is a problem that says what to write. */
+function reportsToByText(text, dnames){
+  var want = fileTxt(text);
+  if (!want) return { person:null };
+  var low = want.toLowerCase();
+  var byId = personByEmpId(want);
+  if (byId) return { person:byId };
+  var byMail = peopleByEmail(want);
+  if (byMail.length === 1) return { person:byMail[0] };
+  if (byMail.length > 1) return { ambiguous:byMail.map(function(p){ return p.name; }) };
+  var hits = PEOPLE.filter(function(p){
+    return fileTxt(knownName(p, dnames)).toLowerCase() === low || fileTxt(p.name).toLowerCase() === low;
+  });
+  if (hits.length > 1) return { ambiguous:hits.map(function(p){ return p.name; }) };
+  if (hits.length === 1) return { person:hits[0] };
+  return { unknown:true };
+}
 /* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
    Every file downloaded before today has a "Name" column holding the FULL
    name, so the new pair cannot simply take those headers: read blindly, an old
@@ -11794,6 +11820,22 @@ function planPeopleFile(rows){
       } };
     });
   })();
+  /* ── WHAT THE FILE'S OWN ROWS ANSWER TO (§655.1) ───────────────────
+     A Reports to cell may name somebody who is in this very file and not
+     yet on the register, so each row's identifiers are indexed once: its
+     employee number, address, full name and short name, each lowercased,
+     pointing at the row's position. Two rows under one spelling leave the
+     spelling ambiguous, which the reader says rather than resolves. */
+  var fileIds = {};
+  (rows || []).forEach(function(r, i){
+    [fileTxt(r["Emp ID"]), addrOf(r), fileTxt(fileFullName(r)), fileTxt(fileKnownName(r))]
+      .forEach(function(v){
+        var k = String(v || "").toLowerCase();
+        if (!k) return;
+        (fileIds[k] = fileIds[k] || []).push(i);
+      });
+  });
+  var byFileIndex = {};   /* file position → the plan row it became, for the loop walk */
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -11807,6 +11849,7 @@ function planPeopleFile(rows){
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
+    var mgrCell = fileTxt(r["Reports to"]);
     var label  = name || id || email || "this row";
 
     /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
@@ -12098,12 +12141,93 @@ function planPeopleFile(rows){
                 conflict:conflict, choice:null, picks:[] };
 
     row.action = conflict ? "conflict" : (existing ? "match" : "add");
+    /* ── WHO THIS ROW REPORTS TO (§655.1) ─────────────────────────────
+       The register answers first; failing that, another row of this file.
+       `row.reportsTo` is { key } for somebody on the register, { row:i } for
+       somebody arriving in this file, and `row.reportsToLabel` is the word
+       the review shows. A blank cell says nothing, as every cell does (§54).
+       Naming the row itself is refused here, where the sentence can say
+       which row — the setter would refuse it too, silently (§42). */
+    if (mgrCell) {
+      var mg = reportsToByText(mgrCell, dnames);
+      if (mg.ambiguous) {
+        plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" could be ' +
+          mg.ambiguous.join(" or ") + '. Write their Emp ID or email, so the row says which.' });
+        return;
+      }
+      if (mg.person) {
+        if (existing && mg.person.key === existing.key) {
+          plan.problems.push({ at:at, msg:'"' + label + '" is written as reporting to themselves.' });
+          return;
+        }
+        row.reportsTo = { key:mg.person.key };
+        row.reportsToLabel = knownName(mg.person, dnames);
+      } else {
+        var inFile = (fileIds[mgrCell.toLowerCase()] || []).filter(function(j){ return j !== i; });
+        if (inFile.length > 1) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is on ' +
+            inFile.map(function(j){ return "Row " + (j + 2); }).join(" and ") +
+            ' of this file. Write their Emp ID or email, so the row says which.' });
+          return;
+        }
+        if (!inFile.length) {
+          plan.problems.push({ at:at, msg:'Reports to "' + mgrCell + '" is nobody on the register and ' +
+            'nobody in this file. Write the name as the download does, or their Emp ID or email, ' +
+            'or leave it blank to keep who they report to now.' });
+          return;
+        }
+        row.reportsTo = { row:inFile[0] };
+        row.reportsToLabel = fileTxt(fileKnownName(rows[inFile[0]])) || fileTxt(fileFullName(rows[inFile[0]])) || mgrCell;
+      }
+    }
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
     peopleRowPicks(row, conflict ? null : existing, dnames);
+    byFileIndex[i] = row;
     plan.rows.push(row);
   });
+  /* ── NO LOOPS, SAID BEFORE ANYTHING LANDS (§655.1) ─────────────────
+     The chain as this file would leave it: the register's own pointers,
+     overwritten by the rows that say something, a row still arriving
+     standing in for the person it will be. Walked from every row that
+     names a manager; a walk that comes back to the row is a problem on
+     that row, naming the ring — the setter refuses a loop too, but at
+     apply time, where nothing can be said (§42, §96). A conflict row is
+     nobody until it is answered, so a ring through one is caught by the
+     setter and not here; that row's own Reports to is then left as it was. */
+  (function(){
+    var node = function(row){ return row.key || ("row:" + row.at); };
+    var next = {}, nameOf = {};
+    PEOPLE.forEach(function(p){ if (p.reportsTo) next[p.key] = p.reportsTo; nameOf[p.key] = knownName(p, dnames); });
+    var target = function(row){
+      if (!row.reportsTo) return null;
+      if (row.reportsTo.key) return row.reportsTo.key;
+      var other = byFileIndex[row.reportsTo.row];
+      return other ? node(other) : null;
+    };
+    plan.rows.forEach(function(row){
+      if (row.action === "conflict") return;
+      var t = target(row);
+      if (t) next[node(row)] = t;
+      nameOf[node(row)] = row.name || row.at;
+    });
+    plan.rows.forEach(function(row){
+      if (!row.reportsTo || row.action === "conflict") return;
+      var start = node(row), k = next[start], path = [nameOf[start]], seen = {};
+      while (k && !seen[k]) {
+        seen[k] = true; path.push(nameOf[k] || k);
+        if (k === start) {
+          plan.problems.push({ at:row.at, msg:'Reports to would make a loop: ' +
+            path.join(" \u2192 ") + '. Somebody in that ring must report to somebody outside it.' });
+          delete row.reportsTo; delete row.reportsToLabel;
+          row.picks = row.picks.filter(function(f){ return f.k !== "reportsTo"; });
+          return;
+        }
+        k = next[k];
+      }
+    });
+  })();
   return plan;
 }
 
@@ -12156,6 +12280,21 @@ function peopleRowPicks(row, existing, dnames){
        lose, so it is filled and not asked about. */
     row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
   });
+  /* §655.1: Reports to is a key dressed as a name, so it is compared as a
+     key and shown as a name. A cell naming the manager already recorded is
+     not a difference; a manager arriving in this file is always one. */
+  if (row.reportsTo) {
+    /* A manager still arriving in this file has no key yet, so they can never
+       be the one recorded — found by the check: compared as "no key" against
+       "no manager" they read as the same, and the pick was never offered. */
+    var same = !!row.reportsTo.key && row.reportsTo.key === (existing.reportsTo || null);
+    if (!same) {
+      var mgrWas = reportsToOf(existing);
+      row.picks.push({ k:"reportsTo", label:"Reports to",
+        was: mgrWas ? fileTxt(knownName(mgrWas, dnames)) : "",
+        now: row.reportsToLabel, take: !mgrWas });
+    }
+  }
   return row;
 }
 /* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
@@ -12257,6 +12396,7 @@ function applyPeopleFile(plan){
          equal the guess stores nothing rather than freezing it (§93.8). */
       row.picks.forEach(function(f){
         if (!f.take) return;
+        if (f.k === "reportsTo") return;   /* §655.1: below, once every row has a key */
         if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
       });
       if (row.id) p.empId = row.id;
@@ -12277,6 +12417,23 @@ function applyPeopleFile(plan){
     if (row.wantActive === true && !personActive(p)) restorePerson(p.key, false);
     if (row.role) grantPersonRole(p.key, row.role, row.where);
     if (row.wantActive === false && personActive(p)) retirePerson(p.key);
+    row.made = p.key;
+  });
+  /* ── REPORTS TO, LAST (§655.1) ─────────────────────────────────────
+     After every row has become a person, because a manager may be a row
+     that was only just added. A new person takes it outright; a matched
+     one only where the review ticked it (§87.6). Through the setter, which
+     still refuses a loop a conflict row's answer closed — the one ring the
+     planner could not see — and leaves that person as they were. */
+  plan.rows.forEach(function(row){
+    if (!row.reportsTo || !row.made) return;
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "match" && !row.picks.some(function(f){ return f.k === "reportsTo" && f.take; })) return;
+    var mgr = row.reportsTo.key || (function(){
+      var other = plan.rows.filter(function(x){ return x.at === "Row " + (row.reportsTo.row + 2); })[0];
+      return other && other.made;
+    })();
+    if (mgr) setReportsTo(personBy(row.made), mgr);
   });
 }
 
@@ -24366,6 +24523,7 @@ var PILLAR_RANGE = "Pillars!$A$2:$A$400";
    rows in it puts blank entries in the dropdown. */
 function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
+function LISTS_PEOPLE_RANGE(n){ return "Lists!$C$2:$C$" + (n + 1); }   /* §655.1 */
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
 /* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
@@ -25954,6 +26112,7 @@ function peopleReadme(){
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
     ["Unit", "Where they actually sit here — the business unit, supporting function or company that decides what they can open. Choose it from the dropdown. Fill it and it is used; leave it blank and their Official BU decides, where that name points at exactly one place; leave both and they are left where they are. This is the column to fill if you already know: nobody then has to be asked at sign-in."],
+    ["Reports to", "Who they answer to, written as the person's Name exactly as this file writes it — pick it from the dropdown. Their Emp ID or email is read too, and so is somebody added further down this same file. It decides nothing about what anybody can open. Blank keeps who they report to now; a name on two rows, a name nobody carries, or a chain that would loop back on itself stops the row and says so."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
@@ -26027,6 +26186,17 @@ function peopleWorkbook(){
      carry the same value the register shows, or a download-edit-upload round
      trip would report the two people it separated as a change. */
   var dnames = displayNames();
+  /* §655.1: the register's names, for the Reports to dropdown — the short
+     names the column is written in, active people only, in the register's
+     order. From the Lists sheet, for §67.5's reason (an inline list over
+     255 characters is silently empty). Soft, like Official BU's: a manager
+     who is in the same file and not yet on the register is typed, and the
+     reader resolves them. */
+  var mgrNames = PEOPLE.filter(function(p){ return personActive(p) && !SMPRules.isMintedRow(p); })
+                       .map(function(p){ return knownName(p, dnames); });
+  if (mgrNames.length) {
+    vals.push({ range:range("Reports to"), from:LISTS_PEOPLE_RANGE(mgrNames.length), soft:true });
+  }
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
@@ -26041,6 +26211,9 @@ function peopleWorkbook(){
          which is a real state, and writing a guess into it would be the file
          answering a question only the SMO can. */
       roleWhereLabel2(personAt(p)),
+      /* §655.1: the manager's short name, as the register shows it — unique
+         across the register (§81.1), so it reads back to one row. */
+      (function(){ var m = reportsToOf(p); return m ? knownName(m, dnames) : ""; })(),
       held.length ? roleName(held[0].role) : "",
       personActive(p) ? "Active" : "Retired",
       /* Everything after the first, WITH where it is held — the one column
@@ -26057,16 +26230,19 @@ function peopleWorkbook(){
      deletes, and a validation whose range has gone is a dropdown that is empty
      again, which is the bug this exists to fix. */
   var listRows = [];
-  for (var i = 0; i < Math.max(places.length, names.length); i++) {
-    listRows.push([places[i] || "", names[i] || ""]);
+  for (var i = 0; i < Math.max(places.length, names.length, mgrNames.length); i++) {
+    listRows.push([places[i] || "", names[i] || "", mgrNames[i] || ""]);
   }
 
   return [
     peopleReadme(),
-    { name:"Lists", widths:[38, 30],
-      head:["Unit, function or company", "Official BU"],
+    { name:"Lists", widths:[38, 30, 30],
+      head:["Unit, function or company", "Official BU", "People"],
       rows:listRows },
-    { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
+    /* §655.1: ONE WIDTH PER HEADING, "Also holds" included — the list had
+       been one short since the Name split (§93.8), so every column from
+       Name on wore its neighbour's width and the last one wore Excel's. */
+    { name:"People", widths:[12, 30, 22, 32, 30, 16, 22, 26, 24, 20, 11, 34],
       /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
          never on PEOPLE_FILE_COLS: the validation ranges above look a column
          up by its bare name, and the reader matches headings ignoring
@@ -26077,7 +26253,12 @@ function peopleWorkbook(){
       }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
-      lockedCols:[9],
+      /* §655.1: DERIVED, like the validation ranges above. Written as a
+         position it had drifted — [9] since §65 — and the two columns added
+         since (§93.8, §655.1) each moved "Also holds" a place along, so the
+         grey style was sitting on Status. The platform's own column is the
+         one after the last of PEOPLE_FILE_COLS, by construction. */
+      lockedCols:[PEOPLE_FILE_COLS.length],
       validations:vals,
       rows:rows }
   ];
@@ -26104,7 +26285,9 @@ var PEOPLE_HEAD_ALIASES = {
   mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
   employeename:"Name", employee:"Name",
   employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
-  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile",
+  manager:"Reports to", linemanager:"Reports to", managername:"Reports to",
+  supervisor:"Reports to", reportingto:"Reports to", reportingmanager:"Reports to"
 };
 var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
 /* What the downloaded template marks with an asterisk: the same three, with

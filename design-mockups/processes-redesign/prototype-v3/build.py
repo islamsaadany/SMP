@@ -2,15 +2,15 @@
 """Assembles the rethought Processes prototype (spec 067) into one self-contained HTML file.
 
 Two outputs, same content:
-  ../2026-10-24_processes-prototype-v2.html     a full document: the file to download and open offline
-  <scratch>/processes-prototype-v2.artifact.html the same page without the document skeleton,
+  ../2026-10-27_processes-prototype-v3.html     a full document: the file to download and open offline
+  <scratch>/processes-prototype-v3.artifact.html the same page without the document skeleton,
                                                  which the artifact host adds itself
 Run: python3 build.py [scratch_dir]
 """
 import base64, pathlib, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-OUT = HERE.parent / "2026-10-24_processes-prototype-v2.html"
+OUT = HERE.parent / "2026-10-27_processes-prototype-v3.html"
 FONT = HERE.parents[2] / "smp-app" / "public" / "fonts" / "Source_Sans_3.woff2"
 
 font64 = base64.b64encode(FONT.read_bytes()).decode()
@@ -33,6 +33,6 @@ doc = (
 OUT.write_text(doc)
 print("wrote", OUT, len(doc) // 1024, "KB")
 if len(sys.argv) > 1:
-    art = pathlib.Path(sys.argv[1]) / "processes-prototype-v2.artifact.html"
+    art = pathlib.Path(sys.argv[1]) / "processes-prototype-v3.artifact.html"
     art.write_text(body)
     print("wrote", art)

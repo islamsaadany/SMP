@@ -50,9 +50,10 @@ function nextAct(p, cls) {
 const CTL_IDEAS = [[/proof of delivery/i, 'The invoice is raised only from a signed proof photo'], [/price/i, 'Price list signed off before use'], [/credit note/i, 'The ERP blocks a second credit note on one invoice'], [/split/i, 'Weekly report of orders just under a threshold'], [/shrinkage|stock/i, 'A second count, signed by the supervisor']];
 const ctlIdea = (risk) => (CTL_IDEAS.find(([re]) => re.test(risk)) || [0, 'A second person checks it before the work moves on'])[1];
 const STEP_IDEAS = { ORD100: ['o5', 'Handle a refused delivery', 'r4', 'refused', 'A delivery the customer refuses has no step'], STO100: ['t3', 'Record the difference', 'r7', 'no', ''], INV100: ['i3', 'Recount before adjusting', 'r13', 'yes', ''] };
-function insertStep(c, anchor, type, label, role, edgeLabel, p) {
+function insertStep(c, anchor, type, label, role, edgeLabel, p, why) {
   let n = c.steps.length + 1, id; do { id = 'x' + n++; } while (stepById(c, id));
   const s = st(id, type, label, role); if (p.live) s.changed = true;
+  if (why) { s.proposed = true; s.why = why; } /* from Check with AI: proposed until confirmed */
   const ai = anchor ? c.steps.findIndex((x) => x.id === anchor) : -1;
   if (ai < 0) { const e = c.steps.findIndex((x) => x.type === 'END'); c.steps.splice(e < 0 ? c.steps.length : e, 0, s); }
   else {
@@ -77,9 +78,9 @@ function aiFindings(p, c) {
   tasks(c).filter((s) => s.type === 'DECISION' && c.conn.filter((e) => e[0] === s.id).length < 2).forEach((s) => {
     const mine = idea && idea[0] === s.id, label = mine ? idea[1] : 'Handle the other answer';
     if (c.steps.some((x) => x.label === label)) return;
-    out.push({ step: s.id, text: 'A decision with only one way out', why: 'Say what happens on the other answer, or each person decides it for themselves.', btn: 'Add as a step: ' + label, fn: (cc) => { UI.sel = insertStep(cc, s.id, 'TASK', label, mine ? idea[2] : s.role, mine ? idea[3] : 'no', p); } });
+    out.push({ step: s.id, text: 'A decision with only one way out', why: 'Say what happens on the other answer, or each person decides it for themselves.', btn: 'Add as a step: ' + label, add: true, fn: (cc) => { UI.sel = insertStep(cc, s.id, 'TASK', label, mine ? idea[2] : s.role, mine ? idea[3] : 'no', p, 'Say what happens on the other answer of step ' + stepNo(c, s.id) + '.'); } });
   });
-  if (idea && idea[4] && stepById(c, idea[0]) && !c.steps.some((x) => x.label === idea[1])) out.push({ step: idea[0], text: 'A missing step: ' + idea[4].charAt(0).toLowerCase() + idea[4].slice(1), why: 'Similar processes name who takes the goods back and what happens to the order.', btn: 'Add as a step: ' + idea[1], fn: (cc) => { UI.sel = insertStep(cc, idea[0], 'TASK', idea[1], idea[2], idea[3], p); } });
+  if (idea && idea[4] && stepById(c, idea[0]) && !c.steps.some((x) => x.label === idea[1])) out.push({ step: idea[0], text: 'A missing step: ' + idea[4].charAt(0).toLowerCase() + idea[4].slice(1), why: 'Similar processes name who takes the goods back and what happens to the order.', btn: 'Add as a step: ' + idea[1], add: true, fn: (cc) => { UI.sel = insertStep(cc, idea[0], 'TASK', idea[1], idea[2], idea[3], p, idea[4] + '.'); } });
   if (tasks(c).length && !c.kpis.length) out.push({ step: null, text: 'No measure says whether it works', why: 'One measure is enough to start: how long it takes from start to finish.', btn: 'Add a measure: time from start to finish', fn: (cc) => { cc.kpis.push(['Time from start to finish', 'Set a target', 'Monthly']); } });
   return out;
 }
@@ -98,7 +99,7 @@ function secDot(k, p, c) {
 }
 
 R.b = (args) => {
-  if (!isOffice()) return R.mine();
+  if (!isOffice()) return R.list();
   const p = byCode(args[0]); if (!p) return R.all();
   const sec = BSECS.some((x) => x[0] === args[1]) ? args[1] : 'map';
   UI.bsec = sec;
@@ -142,7 +143,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.
 
 /* ── Map ── */
 function bMap(p, c, ed) {
-  const s0 = UI.sel && tasks(c).some((s) => s.id === UI.sel) ? UI.sel : (tasks(c)[0] || {}).id;
+  const s0 = UI.sel && (tasks(c).some((s) => s.id === UI.sel) || (stepById(c, UI.sel) || {}).proposed) ? UI.sel : (tasks(c)[0] || {}).id;
   const froms = p.draft ? S.suggestions.filter((s) => s.code === p.code && s.draftV === p.draft.v) : [];
   const from = froms.map((s) => { const at = s.step && stepById(c, s.step); return '<div class="from">From <b>' + esc(person(s.by).name) + '</b>’s suggestion' + (at ? ' on step ' + stepNo(c, s.step) + ', <button class="lnk" type="button" data-act="pickStep" data-step="' + s.step + '">' + esc(at.label) + '</button>' : '') + ' · ' + fmt(s.at) + '<br>“' + esc(s.text) + '”' + (s.answer ? '<br><span class="note">The office asked: ' + esc(s.answer.text) + '</span>' : '') + (s.reply ? '<br>' + esc(person(s.by).name.split(' ')[0]) + ' replied: “' + esc(s.reply.text) + '”' : s.state === 'answered' ? '<br><span class="note">No reply yet.</span>' : '') + '</div>'; }).join('');
   const hasUndo = UI.undo.some((u) => u.code === p.code);
@@ -151,6 +152,7 @@ function bMap(p, c, ed) {
 }
 function stepForm(p, c, sid) {
   const s = stepById(c, sid); if (!s) return '<p class="note">Add a step with + Step, then pick it to fill it in.</p>';
+  if (s.proposed) return '<span class="note" style="font-family:var(--mono);font-weight:700;color:var(--gold-deep)">PROPOSED · FROM AI REVIEW</span><h3>' + esc(s.label) + '</h3><p class="note">' + esc(s.why || 'Check with AI proposed it.') + ' Done by: ' + esc(roleName(s.role)) + '.</p><p style="font-size:13px">It is not a step until you confirm it: readers, the RACI and the gaps ignore it until then.</p><div class="row3"><button class="btn gold" type="button" data-act="propOk" data-step="' + s.id + '">Confirm</button><button class="btn" type="button" data-act="propDel" data-step="' + s.id + '">Delete</button></div>';
   const r = raciOf(c, sid), gp = gapsOf(c).filter((x) => x.step === sid);
   const ks = c.controls.map((k, i) => [k, i]).filter(([k]) => k.step === sid), rules = c.auth.map((x, i) => [x, i]).filter(([x]) => x.step === sid);
   const ds = ' data-step="' + sid + '"';
@@ -278,7 +280,13 @@ function bAi(p, c, ed) {
   return '<div class="box" style="padding:4px 16px">' + (f.length ? f.map((x, i) => '<div class="aif"><b>' + (x.step ? 'Step ' + stepNo(c, x.step) + ' · ' + esc(stepById(c, x.step).label) : 'The whole process') + '</b><span>' + esc(x.text) + '</span><span class="note">' + esc(x.why) + '</span><div class="row3" style="margin-top:2px"><button class="btn" type="button" data-act="aiApply" data-i="' + i + '"' + (ed ? '' : ' disabled') + '>' + esc(x.btn) + '</button>' + (x.step ? '<button class="lnk" type="button" data-act="aiShow" data-step="' + x.step + '">Show it on the map</button>' : '') + '</div></div>').join('') : '<div class="aif"><b>Nothing found</b><span>Every step has a role and one accountable, every risk has a control, and every decision has two ways out.</span></div>') + '</div>' +
     '<p class="note" style="margin-top:8px">' + (why ? esc(why) + ' ' : '') + 'Reads ' + (p.draft ? 'draft v' + p.draft.v : 'v' + p.inForce) + ' as it stands now. A sample: in the product the suggestions come from AI and say where they come from.</p>';
 }
-ACT.aiApply = (el) => { const p = bp(), f = aiFindings(p, bContent(p))[Number(el.dataset.i)]; if (!f) return; edit((c) => { f.fn(c); if (f.step) touch(p, stepById(c, f.step)); }, 'Done: ' + f.btn.charAt(0).toLowerCase() + f.btn.slice(1) + '. Undo on Map takes it back.'); };
+ACT.aiApply = (el) => {
+  const p = bp(), f = aiFindings(p, bContent(p))[Number(el.dataset.i)]; if (!f) return;
+  if (f.add) { edit((c) => f.fn(c)); go('mona.b.' + p.code + '.map'); toast('Proposed on the map, in gold. Confirm makes it a step; Delete takes it away.'); return; }
+  edit((c) => { f.fn(c); if (f.step) touch(p, stepById(c, f.step)); }, 'Done: ' + f.btn.charAt(0).toLowerCase() + f.btn.slice(1) + '. Undo on Map takes it back.');
+};
+ACT.propOk = (el) => edit((c) => { const s = stepById(c, el.dataset.step); delete s.proposed; delete s.why; }, 'Confirmed. It is a step now; fill it in.');
+ACT.propDel = (el) => edit((c) => { c.steps = c.steps.filter((s) => s.id !== el.dataset.step); c.conn = c.conn.filter((e) => e[0] !== el.dataset.step && e[1] !== el.dataset.step); UI.sel = null; }, 'Deleted. Nothing was changed.');
 ACT.aiShow = (el) => { UI.sel = el.dataset.step; go('mona.b.' + UI.args[0] + '.map'); };
 
 /* ── the band's actions ── */
@@ -286,6 +294,7 @@ ACT.bStart = () => { const p = bp(), d = startDraft(p); render(); toast('Draft v
 ACT.sendAppr = () => {
   const p = bp(), d = p.draft, g = gapsOf(d.c), who = person(p.approver).name;
   if (!tasks(d.c).length) { toast('Draw at least one step first.'); return; }
+  const prop = d.c.steps.find((s) => s.proposed); if (prop) { UI.sel = prop.id; go('mona.b.' + p.code + '.map'); toast('Confirm or delete the proposed step first.'); return; }
   dialog({ title: 'Send v' + d.v + ' for approval', sub: 'It goes to ' + esc(who) + ', who approves ' + esc(p.name) + ', and lands in their To do.', body: (g.length ? '<p class="ctl bad">' + plural(g.length, 'gap is', 'gaps are') + ' still open. You can send it anyway: ' + esc(who) + ' sees them in the Summary.</p>' : '<p class="ctl">No gaps.</p>') + fld('A note for ' + esc(who), '<textarea id="sa-note">' + esc(d.note || '') + '</textarea>'), foot: foot2('sendApprGo', 'Send to ' + esc(who)) });
 };
 ACT.sendApprGo = () => {

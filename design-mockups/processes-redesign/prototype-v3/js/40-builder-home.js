@@ -11,9 +11,7 @@ const SECS = {
   landscape: ['Landscape', 'How Raya Trade’s processes fit together: today’s Value chain and Helicopter views in one place.', [['chain', 'Value chain'], ['cards', 'Hand-overs'], ['milestones', 'Milestones']]],
   priorities: ['Priorities', 'Which processes the office takes deep next: full steps, RACI, controls and an SOP.', [['score', '1 · Score'], ['rank', '2 · Rank'], ['plan', '3 · Plan'], ['signoff', '4 · Sign-off']]],
   governance: ['Governance', 'The assessment, risks, policies, and the controls that come from each process.', [['attention', 'Needs attention'], ['assessment', 'Assessment'], ['risks', 'Risks'], ['policies', 'Policies'], ['controls', 'Controls'], ['activity', 'Activity']]],
-  org: ['Org & roles', 'The roles and people every map, RACI and authority rule uses. People come from the client’s People register.', [['people', 'People'], ['roles', 'Roles'], ['chart', 'Chart']]],
   export: ['Export', 'Pick processes and build the SOP pack: the company, a summary, the org structure, then each process.'],
-  settings: ['Settings', 'The workspace profile and branding, the governance profile and the categories. Admins only.'],
 };
 function officeBand(sec) {
   const h = handleFor(), sug = h.filter((x) => x.kind === 'Suggestion' || x.kind === 'Reply').length, ret = procs().filter((p) => p.draft && p.draft.state === 'returned').length, open = procs().filter((p) => p.draft).length, gaps = totalGaps();
@@ -23,16 +21,16 @@ function officeBand(sec) {
 }
 function officeTabs(sec, sub) {
   const n = handleFor().length;
-  return tabBar([['all', 'All processes', procs().length], ['handle', 'To handle', n || '', true], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['org', 'Org & roles'], ['export', 'Export'], ['settings', 'Settings']].map(([k, l, c, hot]) => [k, l, c || '', hot, 'mona.' + k]), sec, sub);
+  return tabBar([['all', 'All processes', procs().length], ['handle', 'To handle', n || '', true], ['landscape', 'Landscape'], ['priorities', 'Priorities'], ['governance', 'Governance'], ['export', 'Export']].map(([k, l, c, hot]) => [k, l, c || '', hot, 'mona.' + k]), sec, sub);
 }
 function officePage(sec, body, kpis) {
-  if (!isOffice()) return R.mine();
+  if (!isOffice()) return R.list();
   const views = SECS[sec][2], v = views ? (views.some((x) => x[0] === UI.args[0]) ? UI.args[0] : views[0][0]) : null;
   const sv = views ? '<div class="sv" role="tablist" aria-label="' + SECS[sec][0] + ' views">' + views.map(([k, l]) => '<button type="button" role="tab" class="' + (k === v ? 'on' : '') + '" aria-selected="' + (k === v) + '" data-go="mona.' + sec + '.' + k + '">' + l + '</button>').join('') + '</div>' : '';
   const held = views && !PHONE.matches;
   return page(officeBand(sec) + officeTabs(sec, held ? sv : '') + (kpis ? kp(kpis) : '') + (views && !held ? '<div class="svrow">' + sv + '</div>' : '') + body(v));
 }
-ACT.lookStaff = () => { go('dalia.mine'); toast('Now looking as Dalia Sabry, a sales coordinator: what client staff see.'); };
+ACT.lookStaff = () => { go('dalia.list'); toast('Now looking as Dalia Sabry, a sales coordinator: what client staff see.'); };
 
 /* ── All processes ── */
 R.all = () => officePage('all', () => {
@@ -130,17 +128,102 @@ R.landscape = () => officePage('landscape', (v) => {
 /* ── Priorities ── */
 const DEC = { W1: 'Wave 1', W2: 'Wave 2', LATER: 'Later', HIGH: 'Stays high-level' };
 const prioScore = (r) => { const W = S.plan.weights; return Math.round((r[1] * W.imp + r[3] * W.risk + r[2] * W.cx) / 5); };
+/* steps inside a process: what the map notices on a step, the office's flag and the step's own score (main §601–§610) */
+const stepKey = (code, sid) => code + ':' + sid;
+function noticed(c, s) {
+  const n = [];
+  if (s.type === 'DECISION') n.push('Decision point');
+  controlsOf(c, s.id).filter((k) => k.level === 'High' || k.level === 'Medium').forEach((k) => n.push('Risk: ' + k.level.toLowerCase()));
+  if (Object.keys(raciOf(c, s.id)).length >= 3) n.push(Object.keys(raciOf(c, s.id)).length + ' roles');
+  if (s.acts.length >= 5) n.push('Long procedure');
+  return n;
+}
+const stepScore = (x) => { const W = S.plan.weights; return Math.round((x.imp * W.imp + x.risk * W.risk + x.cx * W.cx) / 5); };
+function stepsInside(code) {
+  const c = anyC(byCode(code)); if (!c) return { flagged: [], noticed: [], quiet: [] };
+  const all = tasks(c).map((s) => ({ s, f: S.steps[stepKey(code, s.id)], n: noticed(c, s) }));
+  return { c, flagged: all.filter((x) => x.f), noticed: all.filter((x) => !x.f && x.n.length), quiet: all.filter((x) => !x.f && !x.n.length) };
+}
+/* what goes into the plan: a process with flagged steps is there as those steps, each in its own wave */
+function planUnits() {
+  const out = [];
+  S.prio.forEach((r) => {
+    const st = stepsInside(r[0]).flagged;
+    if (!st.length) out.push({ kind: 'p', code: r[0], wave: r[5], score: prioScore(r), why: r[4] });
+    else st.forEach((x) => out.push({ kind: 's', code: r[0], s: x.s, wave: x.f.wave === 'proc' ? r[5] : x.f.wave, score: stepScore(x.f), why: x.f.why }));
+  });
+  return out.sort((a, b) => b.score - a.score);
+}
+const dotsEd = (key, f, v) => '<span class="dots ed" role="group" aria-label="' + f + ': ' + v + ' of 5">' + [1, 2, 3, 4, 5].map((n) => '<button type="button" class="' + (n <= v ? 'on' : '') + '" data-act="stepDot" data-key="' + key + '" data-f="' + f + '" data-n="' + n + '" aria-label="' + n + '">●</button>').join('') + '</span>';
 R.priorities = () => {
-  const ranked = S.prio.slice().sort((a, b) => prioScore(b) - prioScore(a));
+  const mains = S.prio.filter((r) => !byCode(r[0]).parent || !S.prio.some((m) => m[0] === byCode(r[0]).parent));
+  const subsOf = (code) => S.prio.filter((r) => byCode(r[0]).parent === code);
+  const ranked = mains.slice().sort((a, b) => prioScore(b) - prioScore(a));
+  const chosen = UI.chosen || S.prio.map((r) => r[0]);
+  const flaggedAll = Object.keys(S.steps).length, units = planUnits();
   const stateWord = { draft: 'Draft', sent: 'With Yara', approved: 'Signed off', returned: 'Sent back' }[S.plan.state];
   return officePage('priorities', (v) => {
-    if (v === 'score') return '<div class="blk" style="margin-bottom:12px"><span class="lbl">What counts, and how much</span><p style="font-size:13px">Importance <b>' + S.plan.weights.imp + '%</b> · Risk if it goes wrong <b>' + S.plan.weights.risk + '%</b> · Complexity <b>' + S.plan.weights.cx + '%</b> · the team runs <b>' + S.plan.capacity + '</b> deep dives at once</p></div>' +
-      '<div class="box tw"><table class="t"><thead><tr><th><span>Rank</span></th><th><span>Process</span></th><th><span>Importance</span></th><th><span>Complexity</span></th><th><span>Risk</span></th><th><span>Score</span></th><th><span>Why</span></th><th><span>Decision</span></th></tr></thead><tbody>' + ranked.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + pn(r[0]) + '</td><td>' + dots(r[1]) + '</td><td>' + dots(r[2]) + '</td><td>' + dots(r[3]) + '</td><td><b>' + prioScore(r) + '</b></td><td>' + esc(r[4]) + '</td><td>' + DEC[r[5]] + '</td></tr>').join('') + '</tbody></table></div>';
+    if (v === 'score') {
+      const rows = []; let rank = 0;
+      ranked.forEach((r) => { const subs = subsOf(r[0]); if (chosen.includes(r[0])) rows.push([r, ++rank, false, subs.length]); if (subs.length && (UI.openSubs || {})[r[0]]) subs.filter((x) => chosen.includes(x[0])).forEach((x) => rows.push([x, ++rank, true, 0])); });
+      const w1 = units.filter((u) => u.wave === 'W1').length;
+      const picker = '<div class="cpick"><button class="btn" type="button" data-act="cpick" aria-expanded="' + !!UI.cpick + '">Choose processes · ' + chosen.length + ' of ' + S.prio.length + ' ▾</button>' + (UI.cpick ? '<div class="cmenu box"><div class="row3" style="margin:0 0 6px">' + [['all', 'Select all'], ['none', 'None'], ['unscored', 'Only unscored'], ['flagged', 'Has flagged steps']].map(([k, l]) => '<button class="btn sm" type="button" data-act="cquick" data-k="' + k + '">' + l + '</button>').join('') + '</div>' + mains.map((r) => '<label class="chk"><input type="checkbox" data-chg="cpickOne" data-code="' + r[0] + '"' + (chosen.includes(r[0]) ? ' checked' : '') + '> <span>' + pn(r[0]) + (subsOf(r[0]).length ? ' <small>' + plural(subsOf(r[0]).length, 'sub') + '</small>' : '') + '</span></label>' + subsOf(r[0]).map((x) => '<label class="chk" style="padding-left:22px"><input type="checkbox" data-chg="cpickOne" data-code="' + x[0] + '"' + (chosen.includes(x[0]) ? ' checked' : '') + '> <span>↳ ' + esc(nameOf(x[0])) + '</span></label>').join('')).join('') + '</div>' : '') + '</div>';
+      const strip = '<div class="pstrip"><span><b>' + chosen.length + ' / ' + S.prio.length + '</b> shown</span><span><b>' + S.prio.length + '</b> scored</span><span><b>' + flaggedAll + '</b> steps flagged</span><span class="' + (w1 > S.plan.capacity ? 'over' : '') + '">Wave 1: <b>' + w1 + ' / ' + S.plan.capacity + '</b></span></div>';
+      const stepRows = (r) => {
+        const si = stepsInside(r[0]); if (!si.c) return '';
+        const open = (UI.openSteps || {})[r[0]], quiet = (UI.openQuiet || {})[r[0]];
+        const line = '<tr class="srow"><td></td><td colspan="7"><button class="lnk" type="button" data-act="openSteps" data-code="' + r[0] + '">' + (open ? '▾' : '▸') + ' Steps inside: ' + si.flagged.length + ' flagged · ' + si.noticed.length + ' noticed · ' + si.quiet.length + ' quiet</button></td></tr>';
+        if (!open) return line;
+        const one = (x) => { const k = stepKey(r[0], x.s.id), f = x.f, own = f && f.own;
+          return '<tr class="srow in"><td></td><td><span class="flag' + (f ? ' on' : '') + '">⚑</span> ' + stepNo(si.c, x.s.id) + ' · ' + esc(x.s.label) + (x.n.length ? '<span class="sub">' + esc(x.n.join(' · ')) + '</span>' : '') + (own ? '<span class="sub"><span class="chip gold">Now its own process</span> ' + pn(own) + '</span>' : '') + '</td>' +
+            (f ? '<td>' + dotsEd(k, 'imp', f.imp) + '</td><td>' + dotsEd(k, 'cx', f.cx) + '</td><td>' + dotsEd(k, 'risk', f.risk) + '</td><td><b>' + stepScore(f) + '</b></td><td>' + esc(f.why) + '</td><td>' + selD('data-chg="stepWave" data-key="' + k + '" aria-label="Wave"', [['proc', 'With its process'], ['W1', 'Wave 1'], ['W2', 'Wave 2'], ['LATER', 'Later'], ['HIGH', 'Stays high-level']], f.wave) + '<div class="row3" style="margin-top:6px">' + (own ? '' : '<button class="btn sm" type="button" data-act="stepOwn" data-key="' + k + '">Make it a process</button>') + '<button class="btn sm" type="button" data-act="stepFlag" data-key="' + k + '">Unflag</button></div></td>'
+              : '<td colspan="5" class="note">Not scored until it is flagged</td><td><button class="btn sm" type="button" data-act="stepFlag" data-key="' + k + '">⚑ Flag</button></td>') + '</tr>'; };
+        return line + si.flagged.concat(si.noticed).map(one).join('') + (si.quiet.length ? (quiet ? si.quiet.map(one).join('') : '<tr class="srow in"><td></td><td colspan="7"><button class="lnk" type="button" data-act="openQuiet" data-code="' + r[0] + '">Show the ' + plural(si.quiet.length, 'quiet step') + ', to flag one</button></td></tr>') : '');
+      };
+      return '<div class="blk" style="margin-bottom:12px"><span class="lbl">What counts, and how much</span><p style="font-size:13px">Importance <b>' + S.plan.weights.imp + '%</b> · Risk if it goes wrong <b>' + S.plan.weights.risk + '%</b> · Complexity <b>' + S.plan.weights.cx + '%</b> · the team runs <b>' + S.plan.capacity + '</b> deep dives at once</p></div>' +
+        '<div class="tbar">' + picker + strip + '<span class="sp"></span><button class="btn" type="button" data-act="toast" data-msg="Downloads the scores as Excel, every process, whatever is chosen.">Download as Excel</button><button class="btn" type="button" data-act="toast" data-msg="Downloads one row per flagged step across every process: process, step, role, scores, wave, why, what the map noticed.">Download flagged steps (all processes)</button></div>' +
+        '<div class="box tw"><table class="t prio"><thead><tr><th><span>Rank</span></th><th><span>Process</span></th><th><span>Importance</span></th><th><span>Complexity</span></th><th><span>Risk</span></th><th><span>Score</span></th><th><span>Why</span></th><th><span>Decision</span></th></tr></thead><tbody>' +
+        rows.map(([r, n, sub, ns]) => '<tr><td>' + n + '</td><td>' + (sub ? '↳ ' : '') + pn(r[0]) + (ns ? ' <button class="lnk" type="button" data-act="openSubs" data-code="' + r[0] + '">' + ((UI.openSubs || {})[r[0]] ? '−' : '+') + ' ' + plural(ns, 'sub') + '</button>' : '') + '</td><td>' + dots(r[1]) + '</td><td>' + dots(r[2]) + '</td><td>' + dots(r[3]) + '</td><td><b>' + prioScore(r) + '</b></td><td>' + esc(r[4]) + '</td><td>' + DEC[r[5]] + '</td></tr>' + stepRows(r)).join('') +
+        '</tbody></table>' + (rows.length ? '' : '<p class="empty">No process chosen. Use Choose processes, or Select all.</p>') + '</div><p class="note" style="margin-top:8px">A step’s score never changes its process’s score. Only a flagged step is scored; flagging starts its complexity and risk from the map, and importance is the office’s.</p>';
+    }
     if (v === 'rank') return '<div class="box" style="padding:12px 16px">' + ranked.map((r, i) => '<div class="rk"><b>' + (i + 1) + '</b><span>' + pn(r[0]) + '</span><span class="bar"><i style="width:' + prioScore(r) + '%;background:' + (r[5] === 'W1' ? 'var(--gold)' : 'var(--stone)') + '"></i></span><b>' + prioScore(r) + '</b></div>').join('') + '<p class="note" style="margin-top:6px">Gold: Wave 1. Score out of 100, from the weights on Score.</p></div>';
-    if (v === 'plan') return '<div class="cols">' + ['W1', 'W2', 'LATER', 'HIGH'].map((k) => { const rs = ranked.filter((r) => r[5] === k); return '<div class="col"><h4>' + DEC[k] + '<span class="note">' + rs.length + (k === 'W1' ? ' of ' + S.plan.capacity : '') + '</span></h4>' + rs.map((r) => '<div class="card">' + pn(r[0]) + '<small>Score ' + prioScore(r) + ' · ' + esc(byCode(r[0]).cat) + '</small></div>').join('') + '</div>'; }).join('') + '</div>';
+    if (v === 'plan') return '<div class="cols">' + ['W1', 'W2', 'LATER', 'HIGH'].map((k) => { const us = units.filter((u) => u.wave === k); return '<div class="col"><h4>' + DEC[k] + '<span class="note">' + us.length + (k === 'W1' ? ' of ' + S.plan.capacity : '') + '</span></h4>' + us.map((u) => u.kind === 'p' ? '<div class="card">' + pn(u.code) + '<small>Score ' + u.score + ' · ' + esc(byCode(u.code).cat) + '</small></div>' : '<div class="card step"><b>' + esc(u.s.label) + '</b><small>Step of ' + esc(nameOf(u.code)) + ' · score ' + u.score + '</small><small>' + esc(u.why) + '</small></div>').join('') + '</div>'; }).join('') + '</div><p class="note" style="margin-top:8px">A process with flagged steps is in the plan as those steps, each in its own wave.</p>';
     const act = S.plan.state === 'draft' || S.plan.state === 'returned' ? '<button class="btn gold" type="button" data-act="planSend">Send to Yara Kamal for sign-off</button>' : S.plan.state === 'sent' ? '<span class="note">With Yara Kamal. Look as Yara to sign it off.</span>' : '<span class="note">Signed off by Yara Kamal. Wave 1 can start.</span>';
-    return '<div class="two2"><div class="blk"><span class="lbl">The page the client signs</span><p style="font-size:14px;margin-bottom:6px"><b>Deep-dive plan for Raya Trade</b></p><p class="note">Wave 1 starts now: ' + esc(ranked.filter((r) => r[5] === 'W1').map((r) => nameOf(r[0])).join(', ')) + '. Wave 2 follows: ' + esc(ranked.filter((r) => r[5] === 'W2').map((r) => nameOf(r[0])).join(', ')) + '.</p></div><div class="blk"><span class="lbl">Where it is</span><p>' + pill(S.plan.state === 'approved' ? 'good' : S.plan.state === 'returned' ? 'bad' : S.plan.state === 'sent' ? 'attn' : 'q', stateWord) + '</p><div class="row3">' + act + '</div></div></div>';
-  }, [[S.prio.length + '/' + S.prio.length, 'Scored'], [S.prio.filter((r) => r[5] === 'W1').length, 'Wave 1'], [S.prio.filter((r) => r[5] === 'W2').length, 'Wave 2'], [stateWord, 'The plan']]);
+    const unitName = (u) => u.kind === 'p' ? nameOf(u.code) : u.s.label + ' (step of ' + nameOf(u.code) + ')';
+    return '<div class="two2"><div class="blk"><span class="lbl">The page the client signs</span><p style="font-size:14px;margin-bottom:6px"><b>Deep-dive plan for Raya Trade</b></p><p class="note">Wave 1 starts now: ' + esc(units.filter((u) => u.wave === 'W1').map(unitName).join(', ')) + '. Wave 2 follows: ' + esc(units.filter((u) => u.wave === 'W2').map(unitName).join(', ')) + '.</p></div><div class="blk"><span class="lbl">Where it is</span><p>' + pill(S.plan.state === 'approved' ? 'good' : S.plan.state === 'returned' ? 'bad' : S.plan.state === 'sent' ? 'attn' : 'q', stateWord) + '</p><div class="row3">' + act + '</div></div></div>';
+  }, [[S.prio.length + '/' + S.prio.length, 'Scored'], [flaggedAll, 'Steps flagged'], [units.filter((u) => u.wave === 'W1').length + '/' + S.plan.capacity, 'Wave 1'], [units.filter((u) => u.wave === 'W2').length, 'Wave 2'], [stateWord, 'The plan']]);
+};
+const toggle = (k, code) => { UI[k] = UI[k] || {}; UI[k][code] = !UI[k][code]; render(); };
+ACT.openSteps = (el) => toggle('openSteps', el.dataset.code);
+ACT.openQuiet = (el) => toggle('openQuiet', el.dataset.code);
+ACT.openSubs = (el) => toggle('openSubs', el.dataset.code);
+ACT.cpick = () => { UI.cpick = !UI.cpick; render(); };
+ACT.cquick = (el) => { const k = el.dataset.k; UI.chosen = k === 'all' ? null : k === 'none' ? [] : k === 'unscored' ? [] : S.prio.filter((r) => stepsInside(r[0]).flagged.length).map((r) => r[0]); render(); if (k === 'unscored') toast('Every process here is scored, so none is shown.'); };
+CHG.cpickOne = (el) => { const all = S.prio.map((r) => r[0]), cur = UI.chosen || all.slice(), code = el.dataset.code, subs = S.prio.filter((r) => byCode(r[0]).parent === code).map((r) => r[0]); let next = el.checked ? cur.concat(code, subs) : cur.filter((x) => x !== code && !subs.includes(x)); next = all.filter((x) => next.includes(x)); UI.chosen = next.length === all.length ? null : next; render(); };
+ACT.stepDot = (el) => { S.steps[el.dataset.key][el.dataset.f] = Number(el.dataset.n); render(); };
+CHG.stepWave = (el) => { S.steps[el.dataset.key].wave = el.value; render(); toast(el.value === 'proc' ? 'It goes with its process’s wave.' : 'In the plan this step sits in ' + DEC[el.value] + ', on its own.'); };
+ACT.stepFlag = (el) => {
+  const k = el.dataset.key, [code, sid] = k.split(':'), c = anyC(byCode(code)), s = stepById(c, sid);
+  if (S.steps[k]) { dialog({ title: 'Unflag step ' + stepNo(c, sid) + '?', sub: esc(s.label) + ' · ' + esc(nameOf(code)), body: '<p>Its scores and wave are cleared, and the plan shows ' + esc(nameOf(code)) + ' as a whole again if no other step is flagged.</p>', foot: foot2('stepUnflagGo', 'Unflag', ' data-key="' + k + '"') }); return; }
+  const lv = { High: 5, Medium: 3, Low: 2 }, risk = Math.max(2, ...controlsOf(c, sid).map((x) => lv[x.level] || 2)), cx = Math.min(5, 2 + (s.type === 'DECISION' ? 1 : 0) + (Object.keys(raciOf(c, sid)).length >= 3 ? 1 : 0) + (s.acts.length >= 5 ? 1 : 0));
+  S.steps[k] = { imp: 3, cx, risk, why: noticed(c, s).join(', ') || 'Flagged by the office', wave: 'proc' };
+  UI.openSteps = UI.openSteps || {}; UI.openSteps[code] = true; render(); toast('Flagged. Complexity and risk start from the map; set importance, it is the office’s.');
+};
+ACT.stepUnflagGo = (el) => { delete S.steps[el.dataset.key]; closeLayer(); render(); toast('Unflagged; its scores are cleared.'); };
+ACT.stepOwn = (el) => {
+  const k = el.dataset.key, [code, sid] = k.split(':'), s = stepById(anyC(byCode(code)), sid);
+  dialog({ title: 'Make it a process', sub: 'A draft sub-process under ' + esc(nameOf(code)) + ', branching from step ' + stepNo(anyC(byCode(code)), sid) + '. The step stays where it is, as the link; nothing is deleted or moved.', body: fld('Its name', '<input id="so-name" value="' + esc(s.label) + '">'), foot: foot2('stepOwnGo', 'Create the draft', ' data-key="' + k + '"') });
+};
+ACT.stepOwnGo = (el) => {
+  const n = val('so-name'); if (!n) { toast('Give it a name first.'); return; }
+  const k = el.dataset.key, [code, sid] = k.split(':'), parent = byCode(code), s = stepById(anyC(parent), sid), f = S.steps[k];
+  const base = (n.replace(/[^A-Za-z]/g, '').slice(0, 3) || 'NEW').toUpperCase(); let num = 100; while (byCode(base + num)) num += 100;
+  const ids = s.acts.map((_, i) => 'y' + (i + 1));
+  const c = content({ purpose: '', steps: s.acts.map((a, i) => st(ids[i], 'TASK', a, s.role)), conn: chain(ids) });
+  const np = { code: base + num, name: n, cat: parent.cat, area: parent.area, owner: parent.owner, approver: parent.approver, parent: code, acks: [], nextReview: null, high: false, sop: false, live: null, inForce: null, publishedAt: null, versions: [], ncs: [], draft: { v: 1, state: 'draft', started: TODAY, note: 'Made from step ' + stepNo(anyC(parent), sid) + ' of ' + parent.name, c } };
+  S.processes.push(np); S.prio.push([np.code, f.imp, f.cx, f.risk, f.why, f.wave === 'proc' ? (S.prio.find((r) => r[0] === code) || [])[5] || 'LATER' : f.wave]);
+  f.own = np.code; log('Mona Farag made step ' + stepNo(anyC(parent), sid) + ' of ' + parent.name + ' its own process: ' + np.code);
+  closeLayer(); render(); toast(np.code + ' ' + n + ' is a draft under ' + parent.name + ', carrying the step’s scores.');
 };
 ACT.planSend = () => { S.plan.state = 'sent'; log('Mona Farag sent the deep-dive plan to Yara Kamal'); render(); toast('Sent. It lands in Yara Kamal’s To do: look as Yara to sign it off.'); };
 
@@ -168,18 +251,6 @@ R.governance = () => {
 };
 CHG.ck = (el) => { S.checklist[Number(el.dataset.i)][4] = el.checked; render(); };
 
-/* ── Org & roles ── */
-R.org = () => {
-  const ppl = S.people.filter((x) => !x.office);
-  const used = (r) => procs().filter((p) => tasks(anyC(p)).some((s) => s.role === r) || Object.values((anyC(p) || { raci: {} }).raci).some((o) => o[r])).length;
-  const tree = (mgr) => { const kids = ppl.filter((x) => x.mgr === mgr); return kids.length ? '<ul>' + kids.map((x) => '<li><b>' + esc(x.name) + '</b> <span>' + esc(roleName(x.roles[0])) + '</span>' + tree(x.id) + '</li>').join('') + '</ul>' : ''; };
-  return officePage('org', (v) => {
-    if (v === 'people') return '<div class="box tw"><table class="t cards"><thead><tr><th><span>Name</span></th><th><span>Email</span></th><th><span>Role</span></th><th><span>Reports to</span></th></tr></thead><tbody>' + ppl.map((x) => '<tr><td><b>' + esc(x.name) + '</b>' + (x.reg ? '' : ' <span class="chip">Added here</span>') + '</td><td>' + (x.reg ? esc(x.name.toLowerCase().replace(/[^a-z]+/g, '.') + '@rayatrade.example') : '<span class="note">—</span>') + '</td><td>' + esc(roleName(x.roles[0])) + '</td><td>' + esc(x.mgr ? person(x.mgr).name : '—') + '</td></tr>').join('') + '</tbody></table></div>';
-    if (v === 'roles') return '<div class="box tw"><table class="t cards"><thead><tr><th><span>Role</span></th><th><span>People</span></th><th><span>Used in</span></th></tr></thead><tbody>' + S.roles.map((r) => '<tr><td><b>' + esc(r.name) + '</b></td><td>' + esc(ppl.filter((x) => x.roles.includes(r.id)).map((x) => x.name).join(', ') || '—') + '</td><td>' + plural(used(r.id), 'process', 'processes') + '</td></tr>').join('') + '</tbody></table></div>';
-    return '<div class="box tree" style="padding:12px 16px">' + tree(null) + '</div>';
-  }, [[ppl.length, 'People'], [S.roles.length, 'Roles'], [ppl.filter((x) => x.reg).length, 'From the register']]);
-};
-
 /* ── Export ── */
 R.export = () => {
   const n = S.exp.length, over = n > 12;
@@ -191,11 +262,3 @@ R.export = () => {
 CHG.expPick = (el) => { const c = el.dataset.code; S.exp = el.checked ? S.exp.concat(c) : S.exp.filter((x) => x !== c); render(); };
 CHG.expAll = (el) => { S.exp = el.checked ? procs().map((p) => p.code) : []; render(); };
 ACT.expPreview = () => dialog({ title: 'Raya Trade · Process pack', sub: 'A preview of the report the client receives.', wide: true, body: '<p><b>1. Cover and contents</b></p><p><b>2. Executive summary</b> · ' + plural(S.exp.length, 'process', 'processes') + ' documented</p><p><b>3. Org structure</b> · ' + S.people.filter((x) => !x.office).length + ' people in ' + S.roles.length + ' roles</p>' + S.exp.map((c, i) => { const p = byCode(c), cc = anyC(p); return '<p><b>' + (4 + i) + '. ' + pn(c) + '</b> · ' + (cc ? plural(tasks(cc).length, 'step') + ', ' + plural(cc.controls.length, 'control') : 'not drawn yet, shown as not recorded') + ' · ' + esc(stateOf(p).label) + '</p>'; }).join('') });
-
-/* ── Settings ── */
-R.settings = () => officePage('settings', () => '<div class="two2"><div class="blk"><span class="lbl">Client logo and colours</span><div style="display:flex;gap:10px;align-items:center"><div class="logo">No logo</div><button class="btn" type="button" data-act="toast" data-msg="Uploads a logo, under 300 KB.">Upload logo</button></div><div class="sw">' + [['#0F6B63', 'Primary'], ['#3E7F8F', 'Secondary'], ['#C9A24D', 'Tertiary']].map(([c, l]) => '<span><i style="background:' + c + '"></i>' + l + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Used on the report and the SOP.</p></div>' +
-  '<div class="blk"><span class="lbl">Client profile</span><dl class="dl"><dt>Industry</dt><dd>Retail & distribution</dd><dt>About</dt><dd>Distribution and retail group with stores and a business-to-business arm.</dd></dl><p class="note" style="margin-top:6px">Helps Check with AI and the drafts suit this client.</p></div>' +
-  '<div class="blk"><span class="lbl">Governance profile</span><dl class="dl"><dt>Size</dt><dd>Mid-market</dd><dt>Jurisdiction</dt><dd>Egypt</dd></dl><p class="note" style="margin-top:6px">Grounds every governance assessment.</p></div>' +
-  '<div class="blk"><span class="lbl">Categories</span><div style="display:flex;flex-wrap:wrap;gap:5px">' + ['Finance', 'Supply Chain', 'Retail', 'Commercial', 'Care', 'HR'].map((x) => '<span class="chip">' + x + '</span>').join('') + '</div><p class="note" style="margin-top:6px">Shown as Department on Priorities and the list.</p></div>' +
-  '<div class="blk"><span class="lbl">Language</span><p style="font-size:13px">English · العربية</p><p class="note" style="margin-top:6px">Each person’s own choice.</p></div>' +
-  '<div class="blk"><span class="lbl">Who opens Processes</span><p style="font-size:13px">The Strategy Office builds. A client’s own people see only what is in force, and what waits for them.</p></div></div>');

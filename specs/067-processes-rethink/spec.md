@@ -32,6 +32,14 @@ mockup it was given against is named after it.
 16. The way out of the builder: *"can we have it somewhere more visible maybe an x on the top right below the navy bar or exit builder writing or save and exit something like this"*.
 17. Its style: *"C"*, **Save and exit**.
 
+**Round 2, 27 Oct**, after reading what main changed (agreed on `2026-10-27_round2-before-after.html`):
+
+18. *"for all: the first tab shall be All processes with simple filters to show mine or what I own or what I have a step in etc. no need for multiple pages or tables"*, then, correcting my reading: *"what I need is that the tables for the processes should be with filters and the default one is the all processes as is and then people see the other tables they should see as filters not other subtabs."*
+19. *"remove the map panel from all users and keep the to do"*. The office's tabs stay: *"yes office items stays"*.
+20. *"for the office remove the org roles & settings as it will be set at the client settings on smp"*. Job roles and departments: *"already in the smp client registry"*.
+21. The tab's name, since it held a filter of the same name: *"A"*, the tab is **Processes** and its first filter **All**.
+22. *"I will add a column for the manager so we can identify who reports to whome and neglect the juridjecsion part for now"*.
+
 ## 1. The shape
 
 Processes has two sides, and **who you are decides which one opens**. There is no
@@ -40,8 +48,8 @@ switch to remember.
 | | Reading side | Builder |
 |---|---|---|
 | Who | A client's own people: managers, process owners, approvers, staff | The Strategy Office (Super user and SMO team seats) |
-| Opens on | **My processes** | **All processes** |
-| What they do | Read, approve, review, acknowledge, suggest a change | Draw, write, check and publish processes; run priorities, governance, the org directory, the export |
+| Opens on | **Processes**, on its All filter | **All processes** |
+| What they do | Read, approve, review, acknowledge, suggest a change | Draw, write, check and publish processes; run priorities, governance, the export |
 | What they see of a process | Only the version in force | Every version, including drafts |
 
 This keeps how SMP works today, where the office lands in the office area and a
@@ -64,26 +72,23 @@ looks like.
 
 ## 3. The reading side
 
-### 3.1 Opening the module: My processes  *(Q6)*
+### 3.1 Opening the module: Processes  *(Q6, round 2: 18, 19, 21)*
 
-The band reads **My processes**, with the person's role and what they own,
+The band reads **Processes**, with the person's role and what they own,
 approve and have a step in. Its tiles show what they own, what they approve,
 what is waiting on them, and risks with no control.
 
-The tabs are **My processes · To do · Map · All processes**. To do is second and
-carries a gold count.
+The tabs are **Processes · To do**. To do is second and carries a gold count.
+My processes and Map are gone (round 2).
 
-- **My processes** has two tables.
-  - **Yours** lists the processes they own or approve. Each row shows their part, where the process is, and what needs attention, such as a risk with no control, how many have read it, or the review date.
+- **Processes** is one page with **filters**, not tabs: **All · Yours · You have a step in**. A filter shows only when it has rows, so a staff member with nothing of their own sees All and You have a step in.
+  - **All**, the default, is the All processes table as it was: what is in force, searchable and sortable, with each person's part.
+  - **Yours** lists the processes they own or approve, in any state. Each row shows their part, where the process is, and what needs attention, such as a risk with no control, how many have read it, or the review date.
   - **You have a step in** lists the processes someone else owns where their role does part of the work. Each row names their step.
 
-  Each row carries **its own action button**: Open and approve, Review by 12 Nov, Read the change, Reply to the office.
+  In Yours and You have a step in, each row carries **its own action button**: Open and approve, Review by 12 Nov, Read it, Reply.
 - A **"Waiting on you"** line in the band opens To do, so the to-do never hides.
 - **To do** groups the waiting items: to approve, to review, to read, and answers to their suggestions. Each item has its button. A short "done lately" list sits beside it, and when the tab is empty it says they are up to date.
-- **Map** shows every process grouped by area, with the selling flow drawn left to right.
-  - Their own processes are gold, and the ones where they have a step are dashed.
-  - An **Only mine** filter narrows the map, and clicking a process opens a side panel.
-- **All processes** is the full list, as today. It is not drawn yet.
 
 Acting on an item in a row or on the To do tab clears it in both places.
 
@@ -136,8 +141,9 @@ The band reads **Process builder**, with the office's own counts: a suggestion,
 drafts sent back, open drafts, and gaps. Its actions are **Open the staff view** and
 **New process**.
 
-The eight tabs sit in one row, with All processes first: **All processes · To handle ·
-Landscape · Priorities · Governance · Org & roles · Export · Settings**.
+The six tabs sit in one row, with All processes first: **All processes · To handle ·
+Landscape · Priorities · Governance · Export**. Org & roles and Settings are gone: what they
+held is set in SMP's client settings (round 2, §4.4).
 
 - **All processes** is a table of every process: name, owner, where it is, how ready it is, gaps, and Open in builder.
   - **Ready** shows the six marks (Map, RACI, Authority, Controls, SOP, Approved) on every process, high-level ones included. *(Q15.)*
@@ -145,18 +151,16 @@ Landscape · Priorities · Governance · Org & roles · Export · Settings**.
   - Every column heading sorts. "Where it is" sorts by what needs the office first: sent back, review late, waiting for approval, then being drawn.
 - **To handle** lists suggestions from owners, drafts the approver sent back, and processes with gaps. It carries a gold count.
 - **Landscape** has three views: Value chain, Hand-overs and Milestones. It replaces today's separate Value chain and Helicopter pages.
-- **Priorities** has four steps: 1 Score, 2 Rank, 3 Plan, 4 Sign-off.
+- **Priorities** has four steps: 1 Score, 2 Rank, 3 Plan, 4 Sign-off. As main built it (its §601–§610): on Score, **Choose processes** picks which show, a strip says where things stand, sub-processes fold under a +, and each process opens its **steps inside**. A step can be flagged, scored, given its own wave, or made a process of its own. The Plan holds a process with flagged steps as those steps. Download flagged steps gives one row per flagged step.
 - **Governance** has six views: Needs attention, Assessment, Risks, Policies, Controls and Activity.
-- **Org & roles** has three views: People, Roles and Chart.
 - **Export** builds the pack. Tick processes and pack sections, then Preview report, SOP, or Check end to end. The check reads at most 12 processes and says how many to untick (§599).
-- **Settings** holds the logo and colours, the client profile, the governance profile, the categories and the language. It is for Admins.
 
 **Today's Dashboard goes**, because All processes and the band's tiles do its job.
 
 On a section's page:
 - There is no title; its description sits in the band.
 - **Its numbers sit in boxes under the tabs**, while the band keeps the office's counts. *(Q12, Q1 A.)*
-- **Its own views sit in a second, lighter row of switches that stays under the tab bar as you scroll.** *(Q12, Q2 B.)* On a phone the eight tabs already take three rows, so there only the tabs stay and the views scroll with the page. *(Q13.)*
+- **Its own views sit in a second, lighter row of switches that stays under the tab bar as you scroll.** *(Q12, Q2 B.)* On a phone the tabs already take several rows, so there only the tabs stay and the views scroll with the page. *(Q13.)*
 
 ### 4.3 Building one process  *(Q7)*
 
@@ -179,6 +183,25 @@ Connections · Check with AI**.
 - **Authority, Risks & controls, Quality and Lifecycle** keep the designs of the 2026-10-23 prototype. They are not redrawn here.
 - **People, Compliance and Connections** stay, as signed off on 14 Oct. Until each has something to hold, it says "Nothing recorded yet" on every process. *(Q15.)*
 - **Check with AI** is its own section. It lists suggestions, such as a risk with no control, a step with no one accountable, or a missing step. Each has its own button (Add a control, Make the Finance manager accountable, Add as a step), and nothing changes until one is pressed. *(Q15.)*
+
+### 4.4 What SMP's client settings hold for Processes  *(round 2: 20, 22)*
+
+| What | Where |
+|---|---|
+| People | Client register |
+| Job roles and departments | Client register |
+| Who reports to whom | Client register: Islam adds a manager column. Processes draws its org chart from it. |
+| Logo and colours | Profile › Brand (two colours there; Processes used three) |
+| Industry, about the client, size | Profile › Details |
+| Who opens Processes | Forefront team seats, as today |
+| Jurisdiction | Left for now. The governance assessment asks for it. |
+
+### 4.5 Check with AI: Add as a step  *(as main built it, its §609)*
+
+*Add as a step* proposes the step on the map, drawn in gold with "Proposed · AI review".
+It is not a step until the office presses **Confirm**; **Delete** takes it away. Readers,
+the RACI and the gaps ignore it until then, and a draft with a proposed step cannot be
+sent for approval.
 
 ## 5. Still open
 
@@ -224,7 +247,9 @@ in `design-mockups/processes-redesign/`.
 | Opening the module (reading side) | https://claude.ai/artifact/Ca4iexcoLs3XUoaLcVi3BB | `2026-10-24_module-landing-options.html` |
 | Where the office builds (options compared) | https://claude.ai/artifact/6SGfFu8mK9svrLzZeVUagb | `2026-10-24_builder-options.html` |
 | The builder: ways in and out, the builder home, every section | https://claude.ai/artifact/BT6QKStYrnyVhtfxjd6yJA | `2026-10-24_builder-entry.html` |
-| **The whole design, working, for the team:** both sides, four people to look as, one suggestion followed from owner to staff | https://claude.ai/artifact/5t9hhW9VtctGqprNH64yyb | `2026-10-24_processes-prototype-v2.html` (source in `prototype-v2/`) |
+| **The whole design, working, for the team:** both sides, four people to look as, one suggestion followed from owner to staff | https://claude.ai/artifact/5t9hhW9VtctGqprNH64yyb | `2026-10-24_processes-prototype-v2.html` (source in git; now `prototype-v3/`) |
+| Round 2: my understanding, before and after, as agreed | https://claude.ai/artifact/E4nkubEnKQXhCUXG1cPyk6 | `2026-10-27_round2-before-after.html` |
+| **Round 2, working:** the Processes tab with filters, no Map, the office's six tabs, main's Priorities and Check with AI | https://claude.ai/artifact/PKpghveZAppgHgEzGaLNRL | `2026-10-27_processes-prototype-v3.html` (source in `prototype-v3/`) |
 
 Earlier versions of each page, holding the options that were not chosen, are in the
 page's history and in git.

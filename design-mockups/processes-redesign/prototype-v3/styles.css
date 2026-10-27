@@ -467,3 +467,27 @@ svg.edges text{font:600 11px var(--sans);fill:var(--ink-2)}
 .t input,.t select,.dl select{border:1px solid var(--field-line);border-radius:6px;background:var(--surface);padding:4px 7px;font-size:13px;width:100%;color:var(--ink);min-width:110px}
 .pmenu .pl small{font-size:11.5px}
 .aif .btn{white-space:normal;text-align:left}
+/* round 2: the Processes tab's filters */
+.chips{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.chips button:hover{border-color:var(--gold)}
+.chips button span{font-weight:700;color:var(--ink-3);margin-left:3px}
+.chips button.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.chips button.on span{color:var(--bar-quiet)}
+/* Priorities, from main: the process picker, the strip, steps inside a process */
+.tbar .sp{flex:1}
+.cpick{position:relative}
+.cmenu{position:absolute;left:0;top:calc(100% + 4px);z-index:25;width:min(360px,calc(100vw - 32px));max-height:360px;overflow:auto;padding:10px 12px;box-shadow:var(--shadow)}
+.cmenu .chk{display:flex;gap:6px;align-items:center;padding:3px 0;font-size:13px}
+.pstrip{display:inline-flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-2);border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px}
+.pstrip b{color:var(--ink)}.pstrip .over b{color:var(--bad-tx)}
+.t.prio tr.srow td{background:var(--surface)!important;border-top:1px dashed var(--line-soft);padding:5px 12px;font-size:12.5px}
+.t.prio tr.srow.in td{background:var(--over-bg)!important}
+.flag{color:var(--line);font-size:14px}.flag.on{color:var(--gold-deep)}
+.dots.ed button{border:0;background:none;padding:0 1px;font-size:13px;line-height:1;color:var(--line)}
+.dots.ed button.on{color:var(--ink-2)}
+.card.step{border-left-color:var(--gold)}
+.card.step b{font-size:13px}
+/* Check with AI, from main: the proposed step */
+.st.prop{border:2px dashed var(--gold)!important;background:var(--over-bg)!important}
+.st.prop .n{color:var(--gold-deep)}

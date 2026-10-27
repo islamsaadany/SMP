@@ -22,7 +22,8 @@ const nameOf = (c) => (byCode(c) || { name: c }).name;
 const live = (p) => p.live;
 const draftC = (p) => (p.draft ? p.draft.c : null);
 const anyC = (p) => p.live || draftC(p);
-const tasks = (c) => (c ? c.steps.filter((s) => s.type === 'TASK' || s.type === 'DECISION') : []);
+/* a step the AI review proposed is drawn on the map but is not a step until the office confirms it (main §609) */
+const tasks = (c) => (c ? c.steps.filter((s) => (s.type === 'TASK' || s.type === 'DECISION') && !s.proposed) : []);
 const stepById = (c, id) => (c ? c.steps.find((s) => s.id === id) : null);
 const stepNo = (c, id) => tasks(c).findIndex((s) => s.id === id) + 1;
 const raciOf = (c, sid) => (c.raci[sid] || {});

@@ -39,10 +39,10 @@ function flowHtml(c, p, opts) {
   const sel = o.sel;
   let n = 0;
   const boxes = c.steps.map((s, i) => {
-    const isT = s.type === 'TASK' || s.type === 'DECISION';
+    const isT = (s.type === 'TASK' || s.type === 'DECISION') && !s.proposed;
     if (isT) n += 1;
     const gp = g.filter((x) => x.step === s.id);
-    return '<button type="button" class="st' + (s.type === 'DECISION' ? ' dec' : '') + (isT ? '' : ' ends') + (s.id === sel ? ' on' : '') + '" id="fs-' + s.id + '" ' + (isT ? 'data-act="pickStep" data-step="' + s.id + '"' : '') + ' style="grid-row:' + (lanes.indexOf(s.role) + 1) + ';grid-column:' + (i + 2) + '"><span class="n">' + (isT ? 'STEP ' + n : s.type === 'START' ? 'START' : 'END') + '</span><b>' + esc(s.label) + '</b>' + (gp.length ? '<span class="gap" title="' + esc(gp.map((x) => x.text).join('; ')) + '">!</span>' : '') + (o.changes && s.changed ? '<span class="chg">CHANGED</span>' : '') + '</button>';
+    return '<button type="button" class="st' + (s.type === 'DECISION' ? ' dec' : '') + (s.proposed ? ' prop' : isT ? '' : ' ends') + (s.id === sel ? ' on' : '') + '" id="fs-' + s.id + '" ' + (isT || s.proposed ? 'data-act="pickStep" data-step="' + s.id + '"' : '') + ' style="grid-row:' + (lanes.indexOf(s.role) + 1) + ';grid-column:' + (i + 2) + '"><span class="n">' + (isT ? 'STEP ' + n : s.proposed ? 'PROPOSED · AI REVIEW' : s.type === 'START' ? 'START' : 'END') + '</span><b>' + esc(s.label) + '</b>' + (gp.length ? '<span class="gap" title="' + esc(gp.map((x) => x.text).join('; ')) + '">!</span>' : '') + (o.changes && s.changed ? '<span class="chg">CHANGED</span>' : '') + '</button>';
   }).join('');
   const cols = c.steps.length;
   return '<div class="lanes-wrap"><div class="lanes" data-flow="' + esc(JSON.stringify(c.conn)) + '" style="grid-template-columns:104px repeat(' + cols + ',minmax(116px,1fr));grid-template-rows:repeat(' + lanes.length + ',96px);min-width:' + (104 + cols * 116) + 'px">' +

@@ -10,11 +10,11 @@ const TODAY = '2026-10-24';
 const ACT = {}, CHG = {}, INP = {};
 const R = {};
 let S = null;
-const UI = { as: 'hend', scr: 'mine', args: [], sel: null, q: '', sort: ['name', 1], rq: '', rsort: ['name', 1], pick: false, undo: [], mapOnly: false, exp: null };
+const UI = { as: 'hend', scr: 'list', args: [], sel: null, q: '', sort: ['name', 1], rq: '', rsort: ['name', 1], filt: null, pick: false, undo: [], exp: null };
 
 /* who you can look as: the person each stands for */
 const AS = { hend: 'p3', yara: 'p1', dalia: 'p13', mona: 'office' };
-const home = (as) => (as === 'mona' ? 'all' : 'mine');
+const home = (as) => (as === 'mona' ? 'all' : 'list');
 
 /* addresses are plain tokens (#hend.mine, #mona.b.ORD100.map): the artifact host passes only those through */
 function go(token) { if (location.hash === '#' + token) render(); else location.hash = token; }
@@ -29,8 +29,9 @@ function parse() {
 let lastKey = '';
 const AFTER = [];
 function render() {
-  const prev = lastKey;
+  const prev = lastKey, prevAs = UI.as;
   parse();
+  if (UI.as !== prevAs) UI.filt = null;
   /* Save and exit goes back to wherever the builder was entered from */
   if (UI.scr === 'b' && prev && !/^#mona\.(b|preview)\./.test(prev)) UI.from = prev.slice(1);
   const key = location.hash;

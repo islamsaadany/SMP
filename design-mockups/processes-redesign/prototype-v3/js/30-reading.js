@@ -1,27 +1,29 @@
 /* ══ THE READING SIDE ══════════════════════════════════════════════════
-   What a client's own people see: My processes, To do, Map, All processes,
-   and a process page that opens on its flow with Steps and Summary as tabs.
-   They see the version in force; an approver also reads the draft sent to them. */
+   What a client's own people see: two tabs, Processes and To do. Processes is
+   one page with filters: All (what is in force, as before), Yours (what you own
+   or approve) and You have a step in. A filter shows only when it has rows.
+   A process page opens on its flow with Steps and Summary as tabs. They see the
+   version in force; an approver also reads the draft sent to them. */
 function myParts(pid) {
   const yours = procs().filter((p) => p.owner === pid || p.approver === pid);
   const step = procs().filter((p) => yours.indexOf(p) < 0 && readersOf(p).includes(pid));
   return { yours, step };
 }
-function readingBand(title, sub) {
+function readingBand() {
   const pid = meId(), t = todoFor(pid), parts = myParts(pid);
   const own = parts.yours.filter((p) => p.owner === pid).length, appr = parts.yours.filter((p) => p.approver === pid).length;
   const noCtl = parts.yours.reduce((n, p) => n + (anyC(p) ? anyC(p).controls.filter((k) => !k.control).length : 0), 0);
   return mast({
-    eyebrow: 'Raya Trade · Processes', title,
-    sub: sub || esc(me().name) + ' · ' + esc(roleName(me().roles[0])) + ' · <b>' + own + '</b> you own · <b>' + appr + '</b> you approve · <b>' + parts.step.length + '</b> you have a step in',
+    eyebrow: 'Raya Trade · Processes', title: 'Processes',
+    sub: esc(me().name) + ' · ' + esc(roleName(me().roles[0])) + ' · <b>' + own + '</b> you own · <b>' + appr + '</b> you approve · <b>' + parts.step.length + '</b> you have a step in',
     wait: t.length && UI.scr !== 'todo' ? '<span>' + plural(t.length, 'thing') + ' waiting</span><button type="button" data-go="' + addr('todo') + '">See them</button>' : '',
-    acts: '<button class="bq" type="button" data-go="' + addr('list') + '">Search</button><button class="bgold" type="button" data-act="askNew">Ask for a new process</button>',
+    acts: '<button class="bgold" type="button" data-act="askNew">Ask for a new process</button>',
     tiles: tiles([[own, 'You own'], [appr, 'You approve'], [t.length, 'Waiting on you', t.length ? 'hot' : ''], [noCtl, 'Risk, no control', noCtl ? 'late' : '']]),
   });
 }
 function readingTabs(cur) {
   const t = todoFor(meId()).length, n = procs().filter((p) => p.live).length;
-  return tabBar([['mine', 'My processes', '', '', addr('mine')], ['todo', 'To do', t || '', true, addr('todo')], ['map', 'Map', '', '', addr('map')], ['list', 'All processes', n, '', addr('list')]], cur);
+  return tabBar([['list', 'Processes', n, '', addr('list')], ['todo', 'To do', t || '', true, addr('todo')]], cur);
 }
 /* the buttons a row carries: whatever waits on this person for this process */
 function rowActs(code) {
@@ -38,54 +40,50 @@ function yourFlags(p) {
   return f;
 }
 
-R.mine = () => {
+/* ── Processes: one page, three filters ── */
+const FILTERS = [['all', 'All'], ['yours', 'Yours'], ['step', 'You have a step in']];
+R.list = () => {
   const pid = meId(), { yours, step } = myParts(pid);
-  const rowY = (p) => { const a = rowActs(p.code); return '<tr><td><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + addr('p', p.code) + '">' + esc(p.name) + '</button><span class="sub">' + esc(p.cat) + '</span></td><td><span class="chip ' + (p.owner === pid ? 'gold' : 'navy') + '">' + (p.owner === pid ? 'Owner' : 'Approver') + '</span></td><td>' + stPill(p) + '</td><td>' + flags(yourFlags(p)) + (a ? '<div class="inl">' + a + '</div>' : '') + '</td></tr>'; };
-  const rowS = (p) => { const a = rowActs(p.code), mine = myStepsIn(p.live, pid); return '<tr><td><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + addr('p', p.code) + '">' + esc(p.name) + '</button><span class="sub">Owner ' + esc(person(p.owner).name) + '</span></td><td>' + esc(mine.map((s) => s.label).join(', ')) + '</td><td>' + stPill(p) + '</td><td>' + flags([p.acks.includes(pid) ? ['good', 'Read · v' + p.inForce] : ['warn', changedSteps(p.live).some((s) => me().roles.includes(s.role)) ? 'Your step changed: read it' : 'Not read yet']]) + (a ? '<div class="inl">' + a + '</div>' : '') + '</td></tr>'; };
-  return page(readingBand('My processes') + readingTabs('mine') +
-    (yours.length ? '<div class="sect"><span class="lbl">Yours</span><span class="note">you own or approve these</span></div><div class="box tw"><table class="t cards"><thead><tr><th><span>Process</span></th><th><span>Your part</span></th><th><span>Where it is</span></th><th><span>Needs attention</span></th></tr></thead><tbody>' + yours.map(rowY).join('') + '</tbody></table></div>' : '') +
-    (step.length ? '<div class="sect"><span class="lbl">You have a step in</span><span class="note">someone else owns these; your role does part of the work</span></div><div class="box tw"><table class="t cards"><thead><tr><th><span>Process</span></th><th><span>Your step</span></th><th><span>Where it is</span></th><th><span>For you</span></th></tr></thead><tbody>' + step.map(rowS).join('') + '</tbody></table></div>' : '') +
-    (!yours.length && !step.length ? '<div class="ph"><b>No processes yet</b>When you own, approve or have a step in a process, it shows here.</div>' : ''));
+  const n = { all: procs().filter((p) => p.live).length, yours: yours.length, step: step.length };
+  const f = UI.filt && n[UI.filt] ? UI.filt : 'all';
+  const chips = '<div class="chips" role="group" aria-label="Show">' + FILTERS.filter(([k]) => k === 'all' || n[k]).map(([k, l]) => '<button type="button" class="' + (k === f ? 'on' : '') + '" aria-pressed="' + (k === f) + '" data-act="filt" data-f="' + k + '">' + l + ' <span>' + n[k] + '</span></button>').join('') + '</div>';
+  let body;
+  if (f === 'yours') {
+    /* the Yours table, as My processes had it */
+    const rowY = (p) => { const a = rowActs(p.code); return '<tr><td><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + addr('p', p.code) + '">' + esc(p.name) + '</button><span class="sub">' + esc(p.cat) + '</span></td><td><span class="chip ' + (p.owner === pid ? 'gold' : 'navy') + '">' + (p.owner === pid ? 'Owner' : 'Approver') + '</span></td><td>' + stPill(p) + '</td><td>' + flags(yourFlags(p)) + (a ? '<div class="inl">' + a + '</div>' : '') + '</td></tr>'; };
+    body = '<div class="box tw"><table class="t cards"><thead><tr><th><span>Process</span></th><th><span>Your part</span></th><th><span>Where it is</span></th><th><span>Needs attention</span></th></tr></thead><tbody>' + yours.map(rowY).join('') + '</tbody></table></div><p class="note" style="margin-top:8px">You own or approve these, in any state.</p>';
+  } else if (f === 'step') {
+    /* the You have a step in table, as My processes had it */
+    const rowS = (p) => { const a = rowActs(p.code), mine = myStepsIn(p.live, pid); return '<tr><td><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + addr('p', p.code) + '">' + esc(p.name) + '</button><span class="sub">Owner ' + esc(person(p.owner).name) + '</span></td><td>' + esc(mine.map((s) => s.label).join(', ')) + '</td><td>' + stPill(p) + '</td><td>' + flags([p.acks.includes(pid) ? ['good', 'Read · v' + p.inForce] : ['warn', changedSteps(p.live).some((s) => me().roles.includes(s.role)) ? 'Your step changed: read it' : 'Not read yet']]) + (a ? '<div class="inl">' + a + '</div>' : '') + '</td></tr>'; };
+    body = '<div class="box tw"><table class="t cards"><thead><tr><th><span>Process</span></th><th><span>Your step</span></th><th><span>Where it is</span></th><th><span>For you</span></th></tr></thead><tbody>' + step.map(rowS).join('') + '</tbody></table></div><p class="note" style="margin-top:8px">Someone else owns these; your role does part of the work.</p>';
+  } else body = allTable();
+  return page(readingBand() + readingTabs('list') + chips + body);
 };
+R.mine = R.list; R.map = R.list;
+ACT.filt = (el) => { UI.filt = el.dataset.f; render(); };
 
 R.todo = () => {
   const pid = meId(), t = todoFor(pid);
   const group = (k, title) => { const items = t.filter((x) => x.kind === k); return items.length ? '<div class="tgroup"><div class="sect" style="margin:0 0 2px"><span class="lbl">' + title + '</span><span class="note">' + items.length + '</span></div>' + items.map((x) => '<div class="tcard"><div><h3>' + (x.code === 'PLAN' ? '' : '<span class="code">' + x.code + '</span> ') + esc(x.name || nameOf(x.code)) + '</h3><p>' + esc(x.what) + '</p><p class="note">' + esc(x.meta) + ' · ' + esc(x.why) + '</p>' + (x.quote ? '<blockquote>' + esc(x.quote) + '</blockquote>' : '') + '</div><div class="acts">' + (x.actName ? '<button class="btn gold" type="button" data-act="' + x.actName + '" data-id="' + (x.id || '') + '">' + esc(x.act) + '</button>' : '<button class="btn gold" type="button" data-go="' + x.go + '">' + esc(x.act) + '</button>') + '</div></div>').join('') + '</div>' : ''; };
   const done = (S.done[pid] || []);
-  return page(readingBand('My processes') + readingTabs('todo') + '<div class="cgrid"><div>' +
+  return page(readingBand() + readingTabs('todo') + '<div class="cgrid"><div>' +
     (t.length ? group('Approve', 'To approve') + group('Review', 'To review') + group('Read', 'To read') + group('Answer', 'Answers to your suggestions') : '<div class="ph"><b>You are up to date</b>Nothing is waiting on you. New approvals, reviews and versions to read show up here.</div>') +
     '</div><div><div class="box done" style="padding:12px 14px"><span class="lbl">Done lately</span>' + (done.length ? '<ul>' + done.slice(0, 6).map((d) => '<li>' + esc(d) + '</li>').join('') + '</ul>' : '<p class="note" style="margin-top:6px">Nothing yet.</p>') + '</div></div></div>');
 };
 
-const AREAS = [['sell', 'How we sell and deliver', true, ['PRI100', 'ORD100', 'LOG100', 'CUS100']], ['buy', 'Buying and stock', false, ['PRO100', 'INV100']], ['stores', 'Stores', false, ['NEW100', 'STO100']], ['fin', 'Finance and people', false, ['ORD101', 'ORD102', 'CRE100', 'REC100', 'HIR100']]];
-function mapBody(pid, opener) {
-  const sel = UI.mapSel && byCode(UI.mapSel) ? byCode(UI.mapSel) : byCode('ORD100');
-  const kind = (p) => (pid && (p.owner === pid || p.approver === pid) ? 'y' : pid && readersOf(p).includes(pid) ? 's' : '');
-  const extra = procs().filter((p) => !AREAS.some((a) => a[3].includes(p.code)));
-  const areas = AREAS.map((a) => [a[0], a[1], a[2], a[3].concat(a[0] === 'fin' ? extra.map((p) => p.code) : [])]);
-  const card = (p) => { const k = kind(p); return '<button type="button" class="pc ' + k + (p === sel ? ' on' : '') + '" data-act="mapPick" data-code="' + p.code + '">' + (k === 'y' ? '<span class="chip gold tag">Yours</span>' : k === 's' ? '<span class="chip navy tag">Your step</span>' : '') + '<span class="code">' + p.code + '</span><b>' + esc(p.name) + '</b><span class="st">' + esc(stateOf(p).label) + '</span></button>'; };
-  const k = kind(sel);
-  return (pid ? '<div class="legend"><span><i class="y"></i>Yours: you own or approve it</span><span><i class="s"></i>You have a step in it</span><span><i></i>Others</span><label style="margin-left:auto;display:inline-flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" data-chg="mapOnly"' + (UI.mapOnly ? ' checked' : '') + '> Only mine</label></div>' : '') +
-    '<div class="bgrid"><div class="' + (UI.mapOnly ? 'dim' : '') + '">' + areas.map(([key, label, chev, codes]) => '<div class="area"><div class="area-h"><b>' + label + '</b>' + (chev ? '<span class="note">left to right, as the work flows</span>' : '') + '</div><div class="lane' + (chev ? ' chev' : '') + '">' + codes.map(byCode).filter(Boolean).map(card).join('') + '</div></div>').join('') + '</div>' +
-    '<aside class="box side"><span class="code">' + sel.code + '</span><h3>' + esc(sel.name) + '</h3><dl class="dl"><dt>Owner</dt><dd>' + esc(person(sel.owner).name) + '</dd><dt>Where it is</dt><dd>' + esc(stateOf(sel).label) + '</dd>' + (pid ? '<dt>You</dt><dd>' + (k === 'y' ? (sel.owner === pid ? 'Own it' : 'Approve it') : k === 's' ? 'Have a step in it' : 'No part in it') + '</dd>' : '') + '</dl><p style="font-size:13px;color:var(--ink-2)">' + esc((anyC(sel) && anyC(sel).purpose) || 'Not drawn in detail yet.') + '</p><div>' + opener(sel) + '</div></aside></div>';
-}
-ACT.mapPick = (el) => { UI.mapSel = el.dataset.code; render(); };
-CHG.mapOnly = (el) => { UI.mapOnly = el.checked; render(); };
-R.map = () => page(readingBand('My processes') + readingTabs('map') + mapBody(meId(), (p) => (p.live || p.owner === meId() || p.approver === meId()) ? '<button class="btn gold" type="button" data-go="' + addr('p', p.code) + '">Open</button>' : '<span class="note">Not in force yet, so there is nothing to read.</span>'));
-
-R.list = () => {
+/* the All filter: the All processes table, as it was */
+function allTable() {
   const pid = meId(), q = UI.rq.toLowerCase();
   const part = (p) => (p.owner === pid ? 'Owner' : p.approver === pid ? 'Approver' : readersOf(p).includes(pid) ? 'Your step' : '');
   const KEY = { name: (p) => p.name, owner: (p) => person(p.owner).name, since: (p) => p.publishedAt || '', part: (p) => part(p) || 'zz' };
   const [k, dir] = UI.rsort;
   const rows = procs().filter((p) => p.live && (!q || (p.code + ' ' + p.name + ' ' + person(p.owner).name).toLowerCase().indexOf(q) >= 0)).sort((a, b) => KEY[k](a).localeCompare(KEY[k](b)) * dir || a.name.localeCompare(b.name));
   const th = (key, label) => '<th' + (k === key ? ' aria-sort="' + (dir > 0 ? 'ascending' : 'descending') + '"' : '') + '><button type="button" data-act="rsort" data-k="' + key + '">' + label + ' <i>' + (k === key ? (dir > 0 ? '↑' : '↓') : '↕') + '</i></button></th>';
-  return page(readingBand('My processes') + readingTabs('list') +
-    '<div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="rq" value="' + esc(UI.rq) + '" placeholder="Search by code, name or owner" data-inp="rq" autocomplete="off"></label><span class="note">' + rows.length + ' in force · processes still being drawn show once they are published</span></div>' +
+  return '<div class="tbar"><label class="srch"><span class="sr">Search processes</span><input type="search" id="rq" value="' + esc(UI.rq) + '" placeholder="Search by code, name or owner" data-inp="rq" autocomplete="off"></label><span class="note">' + rows.length + ' in force · processes still being drawn show once they are published</span></div>' +
     '<div class="box tw"><table class="t cards"><thead><tr>' + th('name', 'Process') + th('owner', 'Owner') + th('since', 'In force since') + th('part', 'Your part') + '<th><span><span class="sr">Open</span></span></th></tr></thead><tbody>' +
     rows.map((p) => '<tr><td><span class="code">' + p.code + '</span> <button class="pn" type="button" data-go="' + addr('p', p.code) + '">' + esc(p.name) + '</button></td><td>' + esc(person(p.owner).name) + '</td><td>v' + p.inForce + ' · ' + fmt(p.publishedAt) + '</td><td>' + (part(p) ? '<span class="chip ' + (part(p) === 'Your step' ? 'navy' : 'gold') + '">' + part(p) + '</span>' : '<span class="note">—</span>') + '</td><td><button class="btn" type="button" data-go="' + addr('p', p.code) + '">Open</button></td></tr>').join('') +
-    '</tbody></table>' + (rows.length ? '' : '<p class="empty">No process in force matches “' + esc(UI.rq) + '”.</p>') + '</div>');
-};
+    '</tbody></table>' + (rows.length ? '' : '<p class="empty">No process in force matches “' + esc(UI.rq) + '”.</p>') + '</div>';
+}
 INP.rq = (el) => { UI.rq = el.value; const pos = el.selectionStart; render(); const n = $('#rq'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } };
 ACT.rsort = (el) => { const k = el.dataset.k; UI.rsort = UI.rsort[0] === k ? [k, -UI.rsort[1]] : [k, 1]; render(); };
 

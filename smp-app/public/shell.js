@@ -19240,6 +19240,21 @@ function archiveExecution(target, capIds, why){
   return a;
 }
 
+/* ── COMPETITIVE DISCIPLINE AS AN ARCHIVE OF ITS OWN (§654 B1) ──────────
+   The Copilot's Apply to plan for Competitive Discipline archives the
+   discipline and the value table the plan holds, and restoring puts them
+   back and nothing else. */
+function archiveCompete(target, why){
+  var w = competeWritable(target);
+  if (!w) return null;
+  var snap = { discipline: w.discipline || "", values: clone(w.values || []) };
+  if (!snap.discipline && !snap.values.length) return null;
+  var a = { id:archiveId(), kind:"compete", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ values:snap.values.length }, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -19277,6 +19292,16 @@ function restoreArchive(id){
     if (!sw) return false;
     archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
     ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
+  }
+  else if (a.kind === "compete") {
+    /* §654 B1: the discipline and the value table, put back; what stands is
+       archived first so the restore can itself be undone. */
+    var cw = competeWritable(a.key);
+    if (!cw) return false;
+    archiveCompete(a.key, "replaced by restoring the " + a.at + " archive");
+    cw.discipline = a.plan.discipline || "";
+    cw.values = clone(a.plan.values || []);
+    if (typeof competeTidy === "function") competeTidy(a.key);
   }
   else if (a.kind === "directions" || a.kind === "execution") {
     /* §654 A2: the part applied, put back; what stands is archived first as
@@ -45862,7 +45887,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" || a.kind === "compete" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -46239,6 +46264,8 @@ function archiveHeld(a){
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
     : a.kind === "swot"
     ? plural(c.lines || 0, "SWOT line")
+    : a.kind === "compete"
+    ? plural(c.values || 0, "value")
     : a.kind === "directions"
     ? [plural(c.pillars || 0, L1("pillar"), L("pillar")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
     : a.kind === "execution"
@@ -46267,6 +46294,8 @@ function renderArchives(){
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "swot"
         ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "compete"
+        ? '<span class="why">Competitive Discipline only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "directions"
         ? '<span class="why">' + L("pillar") + ' and the capabilities they touch &mdash; the Foundation and the SWOT are untouched</span>'
         : a.kind === "execution"
@@ -46279,6 +46308,7 @@ function renderArchives(){
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
              : a.kind === "swot" ? !!swotWritable(a.key)
+             : a.kind === "compete" ? !!competeHolder(a.key)
              : a.kind === "unit" || a.kind === "directions" || a.kind === "execution" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
@@ -65476,9 +65506,13 @@ var COPILOT = (function(){
   function draftPanelHtml(m){
     var p = m.part, latest = true;
     for (var i = PANE.messages.length - 1; i >= 0; i--) if (hasDraft(PANE.messages[i])) { latest = PANE.messages[i] === m; break; }
-    var foot = (p.saved && p.saved.deliverableId)
+    var foot = ((p.saved && p.saved.deliverableId)
       ? '<span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span><button type="button" class="copopt" data-cop-deliv="' + E(p.saved.deliverableId) + '">Open it</button>'
-      : (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button>' : '');
+      : (canEdit() && !PANE.chat.archived ? '<button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button>' : '')) +
+      /* §654 B3 — said where it stands: a free chat's draft stays in the
+         Copilot; what goes on the plan is built step by step. */
+      '<span class="copm copdstay" data-cop-draftstay>Stays in the Copilot. To put it on the plan, build it step by step.</span>' +
+      (canEdit() ? '<button type="button" class="copopt" data-cop-home>Start step by step</button>' : '');
     return '<section class="copout" data-cop-out aria-label="Draft">' +
       '<div class="copouth"><b>' + E(p.draft.title || "Draft") + '</b><span class="copm">' + (latest ? 'Latest draft' : 'An earlier draft') + '</span>' +
         '<button type="button" class="copcx copsheetx" data-cop-sheet="" aria-label="Close the draft" title="Close">×</button></div>' +
@@ -66543,6 +66577,18 @@ var COPILOT = (function(){
        pen and Edit with AI already work, and a change there starts vN+1. */
     var fchat = "";
     vs.forEach(function(v){ if (!fchat && v.chatId) fchat = v.chatId; });
+    /* §654 B2 — EVERY SAVED VERSION IS DRAWN AS ITS TYPE, with whether it is
+       on the plan and the same Apply to plan its chat carries (the
+       Foundation's page, §524, as the pattern): the rail is a library only
+       if what it holds can be read and applied from here. */
+    var typed = !editing && cur && cur.body && typeof cur.body === "object" ? typedBodyHtml(d, cur.body) : "";
+    if (typed) {
+      var onN = d.applied ? d.applied.n : 0;
+      body = typed + '<div class="copplanrow" data-cop-planrow>' + (onN
+          ? '<span class="copsvst ok">On the plan as v' + E(onN) + (onN < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
+          : '<span class="copsvst warn">Not on the plan yet</span>') +
+        (canEdit() && d.type !== "advisory" ? '<button type="button" class="copbtn' + (onN === cur.n ? '' : ' solid') + '" data-cop-dapply="' + E(d.id) + '">' + (onN === cur.n ? "Apply to plan again" : "Apply to plan") + '</button>' : '') + '</div>';
+    }
     if (d.type === "foundation" && fp.length && !editing) {
       var words = partWords();
       body = '<div class="copfcards">' + fp.map(function(x){
@@ -66578,6 +66624,75 @@ var COPILOT = (function(){
     '</div>';
   }
 
+  /* §654 B2 — a version's body, drawn as its type (read only; the chat edits). */
+  function typedBodyHtml(d, b){
+    var li = function(a, f){ return (a || []).length ? '<ul class="copdul">' + a.map(function(x){ return '<li>' + f(x) + '</li>'; }).join("") + '</ul>' : '<p class="copnone">Nothing here.</p>'; };
+    if (d.type === "compete" && b.compete && Array.isArray(b.compete.values)) {
+      var t = b.compete;
+      return '<div class="copdtyped"><p class="copdline"><b>Discipline</b> ' + E(cpWord(t.discipline)) + '</p><div class="tblscroll"><table class="cmptab"><thead><tr><th>Value</th><th>How</th><th>Measure</th></tr></thead><tbody>' +
+        t.values.map(function(v){ return '<tr><td><b>' + E(v.title) + '</b></td><td>' + E((v.how || []).join(" · ")) + '</td><td>' + E((v.measure || []).join(" · ")) + '</td></tr>'; }).join("") + '</tbody></table></div></div>';
+    }
+    if ((d.type === "directions" || d.type === "capabilities") && (Array.isArray(b.directions) || Array.isArray(b.capabilities))) {
+      var sc = function(o){ return o.urgency && o.importance && o.ease ? o.urgency * o.importance * o.ease : null; };
+      return '<div class="copdtyped">' + ((b.directions || []).length ? '<h5>Directions</h5>' + li(b.directions, function(o){ var n = sc(o); return '<b>' + E(o.title) + '</b>' + (n != null ? ' <span class="copm">· ' + n + ' of 64</span>' : '') + (o.ownedBy ? ' <span class="copm">· ' + E(dvPersonName(o.ownedBy) || o.ownedBy) + '</span>' : ''); }) : '') +
+        ((b.capabilities || []).length ? '<h5>Capabilities</h5>' + li(b.capabilities, function(x){ return '<b>' + E(x.title) + '</b>' + (x.kind ? ' <span class="copm">· ' + E(x.kind) + '</span>' : '') + ((x.serves || []).length ? ' <span class="copm">· serves ' + E(x.serves.join(", ")) + '</span>' : '') + (x.ownedBy ? ' <span class="copm">· ' + E(dvPersonName(x.ownedBy) || x.ownedBy) + '</span>' : ''); }) : '') + '</div>';
+    }
+    if (d.type === "execution" && Array.isArray(b.items)) {
+      var per = b.period ? '<p class="copdline"><b>Period</b> ' + E(b.period.y + " · Q" + Math.ceil(b.period.m1 / 3) + (b.period.m2 !== b.period.m1 ? "–Q" + Math.ceil(b.period.m2 / 3) : "")) + '</p>' : '';
+      return '<div class="copdtyped">' + per + b.items.map(function(it){
+        return '<h5>' + E(it.title || it.name || "") + '</h5>' + li(it.measures, function(m){ return '<b>' + E(m.name) + '</b> <span class="copm">· ' + E(m.target || "—") + '</span>'; }) +
+          li(it.tactics, function(x){ return E(x.name) + ' <span class="copm">· ' + E(x.owner || "—") + (x.quarters && x.quarters.length ? ' · Q' + x.quarters.join(", Q") : '') + '</span>'; }); }).join("") + '</div>';
+    }
+    if (d.type === "swot" && b.swot && typeof b.swot === "object") {
+      return '<div class="copdtyped copdswot">' + LETTERS.map(function(L){ return '<section><h5>' + E(LETTER_WORD[L]) + '</h5>' + li(b.swot[L], function(x){ return '<b>' + E(x.title) + '</b>' + (x.description ? ' <span class="copm">· ' + E(x.description) + '</span>' : ''); }) + '</section>'; }).join("") + '</div>';
+    }
+    if (d.type === "advisory" && b.brief && typeof b.brief === "object") return '<div class="copdtyped">' + adBriefHtml(b.brief) + '</div>';
+    return "";
+  }
+  /* §654 B2 — APPLY FROM THE VERSION'S PAGE: the same ask, the same archive
+     of the part, the same write its chat makes; the note written once the
+     plan's save lands, then the page read again. */
+  function delivApplyAsk(){
+    var d = PANE.deliverable, cur = PANE.versions && PANE.versions[0], b = cur && cur.body; if (!d || !b) return;
+    var kind = d.type === "capabilities" ? "directions" : d.type, capIds = [], write, can, what, replaces;
+    var vword = E(d.title) + " v" + E(cur.n), arch = "What the plan holds is archived first, under Import &amp; storage › Archived plans, and can be put back from there.";
+    if (d.type === "compete") {
+      what = vword + " — " + E(cpWord((b.compete || {}).discipline)) + " and " + ((b.compete || {}).values || []).length + " values onto the plan’s Competitive Discipline."; replaces = arch;
+      can = function(){ try { return !!(typeof competeWritable === "function" && competeWritable(place())); } catch (e) { return false; } };
+      write = function(){ return { ok: cpWritePlan(b.compete) }; };
+    } else if (d.type === "directions" || d.type === "capabilities") {
+      var st = { mode: d.type, withCaps: (b.capabilities || []).length > 0, options: (b.directions || []).map(function(o){ var x = JSON.parse(JSON.stringify(o)); x.go = true; return x; }), caps: (b.capabilities || []).map(function(x){ var y = JSON.parse(JSON.stringify(x)); y.keep = true; return y; }) };
+      capIds = st.caps.map(function(x){ return x.planId; }).filter(Boolean);
+      what = vword + " — " + st.options.length + " Directions and " + st.caps.length + " Capabilities onto the plan."; replaces = "A Direction with the same name is updated, a new one is added; nothing is removed. " + arch;
+      can = function(){ var h = dvHolder(); return d.type === "capabilities" ? typeof addCapability === "function" : !!(h && Array.isArray(h.items) && typeof addPillar === "function"); };
+      write = function(){ return dvWritePlan(st); };
+    } else if (d.type === "execution") {
+      var ex = { period: b.period, items: b.items || [] };
+      capIds = ex.items.filter(function(it){ return it.kind !== "direction"; }).map(function(it){ return it.planId; }).filter(Boolean);
+      what = vword + " — the measures and tactics of " + ex.items.length + " items, and the plan period, onto the plan."; replaces = "A measure or tactic with the same name is updated, a new one is added; nothing is removed. " + arch;
+      can = function(){ return !!ex.period; };
+      write = function(){ return exWritePlan(ex); };
+    } else if (d.type === "swot") {
+      var n = LETTERS.reduce(function(k, L){ return k + ((b.swot || {})[L] || []).length; }, 0);
+      what = vword + " — its " + n + " lines onto the plan’s SWOT."; replaces = arch;
+      can = function(){ try { return !!(typeof swotWritable === "function" && swotWritable(place())); } catch (e) { return false; } };
+      write = function(){ swWritePlan(b.swot); return { ok: true }; };
+    } else return;
+    planApplyAsk(what, replaces, function(){
+      var title = d.title + " v" + cur.n, did = d.id;
+      if (!can()) { SAY = "The plan could not be written from here. Nothing was changed."; draw(); return; }
+      planArchive(kind, capIds, "replaced from the Copilot — " + title);
+      var r = write();
+      if (!r || !r.ok) { SAY = "The plan could not be written from here. What it held is archived under Import & storage › Archived plans."; draw(); return; }
+      if (typeof paint === "function") paint(); else draw();
+      if (!(typeof SYNC !== "undefined" && SYNC.saveNow)) return;
+      SYNC.saveNow(function(how){
+        if (!(how === "saved" || how === "clean")) { SAY = "The plan did not save, so " + title + " is not on the plan yet. Try Apply to plan again once the save goes through."; draw(); return; }
+        SAY = title + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+        act({ act:"planApplied", id: did, n: cur.n }, function(){ if (PANE && PANE.deliverable && PANE.deliverable.id === did) openItem("deliv", did); loadList(true); });
+      });
+    });
+  }
   /* ── WRITING INTO OUR OWN NODES ─────────────────────────────────────────
      The rails and the main pane are rewritten; the composer's text is read
      into DRAFT first, so an answer landing while somebody types keeps what
@@ -67244,7 +67359,7 @@ var COPILOT = (function(){
   var CPMORE = {}, CPINT = {}, CPASKTXT = {}, CPPEND = null;
   function competeOn(){ return !!(PANE && PANE.chat && PANE.compete); }
   function cpCopy(){ return JSON.parse(JSON.stringify(PANE.compete)); }
-  function cpView(j){ ["compete","competeTodo","competeDone","competeFactors","competeResult","competeWords"]
+  function cpView(j){ ["compete","competeApplied","competeTodo","competeDone","competeFactors","competeResult","competeWords"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
@@ -67388,9 +67503,9 @@ var COPILOT = (function(){
         if (ed) main += '<p class="copnote">Every cell is editable here before saving.</p>' +
           '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
           '<button type="button" class="copbtn' + heldCls(busyHere && BUSY) + '" data-cop-cp-refine' + held(busyHere && BUSY) + '>Send</button></div>' +
-          '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
+          '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Ask for a change</button>' +
           '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
-        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under Competitive Discipline.");
+        if (s.saved) main += savedApplyHtml(s.saved, "cp");
       }
     }
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
@@ -67415,6 +67530,7 @@ var COPILOT = (function(){
   function cpClick(ev){
     if (!competeOn()) return false;
     var b, s = PANE.compete, id = PANE.chat.id;
+    if ((b = hit(ev, "[data-cop-cp-apply]"))) { if (canEdit() && s.saved) cpApplyAsk(); return true; }
     if ((b = hit(ev, "[data-cop-cp-int]"))) { CPINT[id] = !CPINT[id]; draw(); return true; }
     if ((b = hit(ev, "[data-cop-cp-more]"))) { CPMORE[id] = b.getAttribute("data-cop-cp-more") === "1" ? true : !CPMORE[id]; draw(); return true; }
     if (!canEdit() || s.saved) return false;
@@ -67459,12 +67575,12 @@ var COPILOT = (function(){
       act({ act:"competeFinish", id:id, placeWord:placeWord() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === id) cpView(j);
         cpProgress(id);
-        var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
-        var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
-        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the Competitive Discipline page."
-          : on ? "" : "Saved. Competitive Discipline is switched off for this layer on Setup › The shape, so the plan keeps it hidden until it is turned on.";
+        /* §654 B1 — SAVE IS A VERSION, NOT THE PLAN (the §645 rule, which
+           Competitive Discipline had skipped): the plan moves only on Apply
+           to plan, which asks first and archives what stood. */
+        SAY = "";
         LISTS[key()] = null; loadList(true);
-        if (wrote && typeof paint === "function") paint(); else draw();
+        draw();
       });
       return true;
     }
@@ -67694,7 +67810,8 @@ var COPILOT = (function(){
      what a Capabilities chat says it serves. */
   function dvExisting(){
     var h = dvHolder(), items = (h && Array.isArray(h.items)) ? h.items : [];
-    return items.filter(function(p){ return p && String(p.name || "").trim(); }).map(function(p){ return { id: String(p.id || ""), title: String(p.name).trim() }; });
+    /* §654 B5 — a row from the plan carries the scores the plan holds. */
+    return items.filter(function(p){ return p && String(p.name || "").trim(); }).map(function(p){ return { id: String(p.id || ""), title: String(p.name).trim(), urgency: p.urgency, importance: p.importance, ease: p.ease, ownedBy: p.ownedBy || "" }; });
   }
   function dvSave(patch, quiet){
     if (!dirsOn()) return;
@@ -67752,8 +67869,8 @@ var COPILOT = (function(){
     return '<select class="fld copdv-own" data-cop-dv-own="' + kind + '|' + i + '" aria-label="Owned by"><option value="">—</option>' +
       dvFns().map(function(f){ return '<option value="' + E(f.key) + '"' + (f.key === k ? ' selected' : '') + '>' + E(f.name) + '</option>'; }).join("") + '</select>';
   }
-  function dvTick(attr, on, label, ed){
-    return ed ? '<button type="button" class="copsw-tick' + (on ? " on" : "") + '" ' + attr + ' aria-pressed="' + on + '" aria-label="' + E(label) + '">&#10003;</button>'
+  function dvTick(attr, on, label, ed, why){
+    return ed ? '<button type="button" class="copsw-tick' + (on ? " on" : "") + '" ' + attr + held(why || "") + ' aria-pressed="' + on + '" aria-label="' + E(label) + '">&#10003;</button>'
       : '<span class="copsw-tick' + (on ? " on" : "") + '">&#10003;</span>';
   }
   function dvOptionsHtml(ed){
@@ -67771,7 +67888,7 @@ var COPILOT = (function(){
           }).join("") +
           '<td class="copdv-score">' + (sc[i] == null ? "–" : E(String(sc[i]))) + '</td>' +
           '<td>' + dvOwnerCell("o", i, o.ownedBy, ed) + '</td>' +
-          '<td>' + dvTick('data-cop-dv-go="' + i + '"', !!o.go, "Go ahead with " + o.title, ed) + '</td></tr>';
+          '<td>' + dvTick('data-cop-dv-go="' + i + '"', !!o.go, "Go ahead with " + o.title, ed, sc[i] == null && !o.go ? "Score it first — Urgency, Importance and Ease." : "") + '</td></tr>';
       }).join("") + '</tbody></table></div>';
   }
   function dvCapsHtml(ed){
@@ -67856,7 +67973,7 @@ var COPILOT = (function(){
     /* §654 A3 — "on the plan" is the deliverable's own note (planApplied),
        so it survives a reload; this visit's memory covers the moment between
        the plan's save and the note. */
-    var note = k === "dv" ? PANE.dirsApplied : PANE.execApplied;
+    var note = k === "dv" ? PANE.dirsApplied : k === "cp" ? PANE.competeApplied : PANE.execApplied;
     var on = (note && note.n === sv.n) || APPLIED[PANE.chat.id] === sv.n;
     return cpMsg("product", "Saved as " + E(sv.title) + " v" + E(String(sv.n)) + " — under Deliverables. " +
       (on ? "It is on the plan." : "It is not on the plan yet: Apply to plan puts it there, and archives what the plan holds first.")) +
@@ -67885,6 +68002,8 @@ var COPILOT = (function(){
      apply touches; an `execution` archive the pillars' measures and tactics,
      the Capabilities' objectives and projects, and the plan period. */
   function planArchive(kind, capIds, why){
+    if (kind === "compete") return typeof archiveCompete === "function" && archiveCompete(place(), why) ? 1 : 0;
+    if (kind === "swot") return typeof archiveSwot === "function" && archiveSwot(place(), why) ? 1 : 0;
     var f = kind === "execution" ? (typeof archiveExecution === "function" ? archiveExecution : null) : (typeof archiveDirections === "function" ? archiveDirections : null);
     return f && f(place(), capIds, why) ? 1 : 0;
   }
@@ -67909,9 +68028,18 @@ var COPILOT = (function(){
       /* §654 A3 — the note follows the fact (§524.1): written only once the
          plan's save has landed, and only on the chat that applied it. */
       if (how === "saved" || how === "clean") act({ act:"planApplied", id: sv.deliverableId, n: sv.n }, function(j){
-        if (PANE && PANE.chat && PANE.chat.id === id) { if (kind === "execution") PANE.execApplied = j.applied; else PANE.dirsApplied = j.applied; draw(); }
+        if (PANE && PANE.chat && PANE.chat.id === id) { if (kind === "execution") PANE.execApplied = j.applied; else if (kind === "compete") PANE.competeApplied = j.applied; else PANE.dirsApplied = j.applied; draw(); }
       });
     });
+  }
+  function cpApplyAsk(){
+    var s = PANE.compete, t = s.table || { values: [] }, on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
+    var w = null; try { w = typeof competeWritable === "function" ? competeWritable(place()) : null; } catch (e) { w = null; }
+    var had = w ? (w.values || []).length : 0;
+    planApplyAsk(E(s.saved.title) + " v" + E(String(s.saved.n)) + " — " + E(cpWord(t.discipline)) + " and " + t.values.length + (t.values.length === 1 ? " value" : " values") + " onto the plan’s Competitive Discipline.",
+      (had ? "The " + had + (had === 1 ? " value" : " values") + " the plan holds today are archived first, under Import &amp; storage › Archived plans, and can be put back from there." : "The plan holds no Competitive Discipline yet, so nothing is replaced.") +
+        (on ? "" : " <b>Competitive Discipline is switched off for this layer</b> on Setup › The shape: the plan takes it and keeps it hidden until it is turned on."),
+      function(){ planApplyGo(s.saved, "compete", [], function(){ try { return !!(typeof competeWritable === "function" && competeWritable(place())); } catch (e) { return false; } }, function(){ return { ok: cpWritePlan(PANE.compete && PANE.compete.table) }; }); });
   }
   function dvApplyAsk(){
     var s = PANE.dirs, g = s.options.filter(function(o){ return o.go; }), k = s.caps.filter(function(x){ return x.keep; });
@@ -68594,6 +68722,7 @@ var COPILOT = (function(){
     /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
        could be read, and `b.disabled` goes false the moment it does — a guard
        left reading that property would let the held button act. */
+    if ((b = hit(ev, "[data-cop-dapply]"))) { if (b.getAttribute("aria-disabled") !== "true") delivApplyAsk(); return; }
     if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
       applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }

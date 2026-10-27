@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-27 — The Copilot swept; batch 2, the plan's doors (§654).** Competitive Discipline saves a version and applies on an ask that archives the plan's own and warns where the layer has it switched off; every saved version's page is drawn as its type with On the plan and Apply to plan; a free chat's draft says it stays in the Copilot; a Direction from the plan keeps its scores and an unscored one cannot go ahead. Shell `smp-shell-v7.31-sweep-2`.
+
 **2026-10-27 — The Copilot swept; batch 1, safety first (§654), merged to `main` on Islam's word.** No plain-text edit of a structured version; Directions and Execution archive only the part they apply; on-the-plan survives a reload; three small lines.
 
 **2026-10-27 — The Copilot, oriented (§653), merged to `main` on Islam's word.** The rail stays open with room; one job per header; one counter; four status words; a lighter chat; the path in one line; Start from the existing plan on the Foundation, SWOT and Directions start screens.

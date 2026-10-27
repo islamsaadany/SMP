@@ -2281,6 +2281,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
 });
 
 await section("3j2 · a free chat beside the workflow (§633)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/free-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-free-chat/2026-10-25_free-chat.html). */
   const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
@@ -2316,6 +2317,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
     await page.waitForTimeout(300);
     const v = await page.evaluate(() => ({ sw: !!document.querySelector(".copsw-grid, [data-cop-sw-start]"),
       tag: ((document.querySelector(".copitem[aria-current] .copm") || {}).textContent || ""), start: !!document.querySelector("[data-cop-startscreen]") }));
+    await shot("1-open");
     check(!v.sw && !v.start && /Free chat/.test(v.tag), "§639 typing there and pressing Enter opens a free chat, a plain conversation the rail calls Free chat", JSON.stringify(v));
     const row = (await asTenant(tenantId, (c) => c.query("select c.section, c.extra, (select string_agg(m.body, '|' order by m.id) from copilot_messages m where m.chat_id = c.id and m.who = 'person') said from copilot_chats c order by c.created_at desc limit 1"))).rows[0];
     check(row && row.section === "analysis" && row.extra && row.extra.free === true && row.said === "Which weakness hurts us most?",
@@ -2352,6 +2354,7 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
 });
 
 await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/cd-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
      One stand-in answer holds every key the three asks need. */
@@ -2406,12 +2409,14 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
     await heldSweep(page, "Competitive Discipline, before the save");
+    await shot("1-before-save");
     await page.click("[data-cop-cp-finish]");
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Competitive Discipline — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
     const plan = await page.evaluate(() => { try { const w = UNITS.mobile.compete; return w ? [w.discipline, w.values.length] : null; } catch (e) { return String(e); } });
     check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and the table is written into the plan's How we compete", JSON.stringify(plan));
+    await shot("2-saved");
     check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
@@ -2423,6 +2428,7 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
 });
 
 await section("3l · the Directions chat: plan or fresh, scored, ticked, capabilities, the save writes the plan (§494)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/dirs-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup. One stand-in
      answer holds both keys, `options` for the Directions ask and
      `capabilities` for the Capabilities one. */
@@ -2504,6 +2510,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
        the plan exactly as it was; Apply to plan asks first, archives what
        the plan holds, then writes. Both ends (§94.2). */
     await heldSweep(page, "Directions, before the save");
+    await shot("1-before-save");
     const planBefore = await page.evaluate(() => JSON.stringify(UNITS.mobile.items));
     const archBefore = await page.evaluate(() => ARCHIVES.length);
     await page.click("[data-cop-dv-finish]");
@@ -2520,6 +2527,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.waitForTimeout(1500);
     const arDv = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), archBefore);
     check(arDv.includes("unit:mobile"), "§645 …and Yes archives Mobile's plan before it writes", JSON.stringify(arDv));
+    await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
     check(kept.length > 0 && kept.every((o) => after.some((p) => p.id === o.planId && p.name === o.title && p.u === o.urgency)), "a chosen Direction from the plan updates THAT pillar, by its key", JSON.stringify(after));
@@ -2564,6 +2572,7 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
 });
 
 await section("3m · the Execution chat: the period once, each item drafted, the save writes the plan (§495)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/exec-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off panels F and G. The
      stand-in answers every draft with one measure and one tactic that asks
      for Q1 AND Q4: the period chosen is "this quarter to year end", so only
@@ -2603,6 +2612,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
     await heldSweep(page, "Execution, before the save");
+    await shot("1-before-save");
     const fin = await page.$("[data-cop-ex-finish]");
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
@@ -2623,6 +2633,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await page.click("[data-cop-planapply-yes]");
     await page.waitForTimeout(1500);
     const arEx = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), exArch);
+    await shot("2-applied");
     check(arEx.includes("unit:mobile") && exCapsHeld.every((k) => arEx.includes(k)), "§645 …and Yes archives Mobile's plan and each Capability it updates that holds anything, before it writes", JSON.stringify({ arEx, exCapsHeld }));
     const plan = await page.evaluate((ids) => {
       const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
@@ -2652,6 +2663,7 @@ await section("3m · the Execution chat: the period once, each item drafted, the
 });
 
 await section("3n · the Advisory chat: one question at a time, counted, proceed, the brief, the save (§496)", async () => {
+  const shot = async (n) => { if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/adv-" + n + ".png" }); };
   /* PRESSED AND READ BACK (§96), from the signed-off mockup
      (design-mockups/copilot-advisory/2026-10-06_advisory.html). */
   const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
@@ -2687,10 +2699,12 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
     const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
     check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
     await heldSweep(page, "Advisory, before the save");
+    await shot("1-before-save");
     await page.click("[data-cop-ad-finish]");
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Upper Egypt stores" && dv.kind === "copilot-only" && dv.n === 1, "Save writes the brief as an Advisory deliverable, v1, kept in the Copilot", JSON.stringify(dv));
+    await shot("2-saved");
     check(!(await page.$("[data-cop-ad-finish]")), "a saved chat offers no Save again");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {

@@ -2148,6 +2148,16 @@ var PEOPLE_COLS = [
      and it earns its place only when somebody is looking for the people who
      belong to a company and no unit. */
   { k:"company",  label:"Company", off:true },
+  /* ── WHO THEY ANSWER TO (§655) ──────────────────────────────────
+     Islam: "add a column to identify the manager of the person". "Reports
+     to", and not "Manager": the Org Directory already says it in those words,
+     Portfolio reads "Project Manager" as the Lead (spec 060 §5.1a), and
+     "Senior Manager" is a job title on this very register — a column headed
+     Manager would collide with both. It holds a register KEY and never a
+     typed name (§48), so a rename reaches it, and it GRANTS NOTHING (§56):
+     who somebody answers to is a fact about them, not a right. Shown by
+     default, because it was asked for as a column of the register. */
+  { k:"reportsto", label:"Reports to" },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -2740,6 +2750,22 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
+    /* ── REPORTS TO (§655): A PICK FROM THE REGISTER, NEVER A TYPED NAME ──
+       The list is reportsToChoices(): everybody active, minus this person and
+       minus anybody who already answers to them, however far down — so a
+       loop cannot be chosen and no refusal has to be drawn. Somebody they
+       already point at stays in the list whatever their status, or opening
+       the dialog would silently read a retired manager as nobody (§54.4).
+       WIDE, like Job title above it: a fourth narrow field would put the
+       three places on a row of three and a row of one, §122's empty cell. */
+    var mgr = reportsToOf(p);
+    F("Reports to", '<select class="fld" data-preports="' + esc(p.key) + '">' +
+        '<option value="">&mdash; nobody &mdash;</option>' +
+        reportsToChoices(p).map(function(m){
+          return '<option value="' + esc(m.key) + '"' +
+            (mgr && mgr.key === m.key ? " selected" : "") + '>' +
+            esc(knownName(m, DNAMES)) + (personActive(m) ? "" : " (retired)") + '</option>';
+        }).join("") + '</select>', true);
     /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
@@ -3442,6 +3468,17 @@ function renderPeople(){
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
         })()) : '') +
+      /* ── REPORTS TO (§655): THE REGISTER'S NAME, READ AT DRAW TIME ────
+         The row holds a key; what it prints is whatever the register calls
+         that person today (§48, §130.9). A manager who has retired is still
+         named — the fact did not stop being true — and the hover says so,
+         the way every other mark in this table speaks (§116.4). */
+      (showCol("reportsto") ? pcell(p, "Reports to", (function(){
+          var m = reportsToOf(p);
+          if (!m) return '<span class="why" style="margin:0">&mdash;</span>';
+          return '<span class="val" title="' + esc(m.name) +
+            (personActive(m) ? '' : ' \u00b7 retired') + '">' + esc(knownName(m, DNAMES)) + '</span>';
+        })()) : '') +
       /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
          Islam: "can you make a right click on the email to highlight the
          whole email to copy on right click .. as it happens on the phone
@@ -3986,6 +4023,8 @@ function renderPeople(){
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
+        /* A select when the cell is open, so it takes §93.10's floor too. */
+        (showCol("reportsto") ? th("Reports to", "wcol") : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -5256,6 +5295,12 @@ function renderKB(){
            'already attributed to them stays true. Deleting takes the row, the password and ' +
            'the open sessions, and is <b>refused while anything still points at the ' +
            'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
+      { h: "Reports to says who somebody answers to, and decides nothing",
+        p: '<b>Reports to</b> names the person\u2019s manager, picked from the register ' +
+           'rather than typed, so renaming the manager renames them here too. It grants ' +
+           'nothing \u2014 what somebody may open is their roles, not who they answer to. ' +
+           'Nobody can be made to report to themselves or to somebody under them, and a ' +
+           'row cannot be deleted while anybody still reports to it.' },
       { h: "Two rows that are one person are merged, never guessed",
         p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
            'name, because two people really can share one. A row with neither is marked, ' +

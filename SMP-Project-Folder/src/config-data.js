@@ -1273,6 +1273,59 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* ── REPORTS TO (§655) ─────────────────────────────────────────────
+   `p.reportsTo` is the manager's register KEY (§48) and rides in `extra`
+   like `phone` and `active` above, for the same reason: no relational
+   meaning the server reads, so no column and no migration. Read through
+   here, so a key pointing at a row that has gone reads as nobody rather
+   than as a name the register no longer holds. */
+function reportsToOf(p){
+  var k = p && p.reportsTo;
+  return k ? (personBy(k) || null) : null;
+}
+/* Everybody who answers to this person, directly. */
+function reportsOf(key){
+  return PEOPLE.filter(function(p){ return p.reportsTo === key; });
+}
+/* Everybody under them, however far down — the set that may NOT become
+   their manager, or the chain would loop. Walked with a seen-set so a loop
+   that arrived by some other road (an old file, a merge) ends the walk
+   rather than the page. */
+function reportsUnder(key){
+  var out = {}, queue = [key];
+  while (queue.length) {
+    var k = queue.shift();
+    reportsOf(k).forEach(function(p){
+      if (out[p.key] || p.key === key) return;
+      out[p.key] = true; queue.push(p.key);
+    });
+  }
+  return out;
+}
+/* Who the picker offers: active people in the register's order, never the
+   person themselves, never anybody under them, never a row the Forefront
+   platform MINTED for a consultant (§629 — they are not the client's people).
+   The one they already point at is kept whatever its status, so opening the
+   field cannot silently read a retired manager as nobody (§54.4). */
+function reportsToChoices(p){
+  var under = reportsUnder(p.key);
+  return PEOPLE.filter(function(m){
+    if (m.key === p.key || under[m.key]) return false;
+    if (p.reportsTo === m.key) return true;
+    return personActive(m) && !SMPRules.isMintedRow(m);
+  });
+}
+/* The one door that writes it. Deleted when cleared rather than kept as "",
+   so absent and blank stay one word (the rule the file fields keep above).
+   Refuses the person themselves and anybody under them — the picker never
+   offers either, and this is the save answering alike (§42). */
+function setReportsTo(p, key){
+  if (!p) return false;
+  if (!key) { delete p.reportsTo; return true; }
+  if (key === p.key || !personBy(key) || reportsUnder(p.key)[key]) return false;
+  p.reportsTo = key;
+  return true;
+}
 /* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
@@ -2338,6 +2391,17 @@ function personDeleteBlockers(key){
     plural(claims.length, "open request") + " for a figure — answer them on the " +
     "cycle page first, so the request is not left pointing at nobody"));
 
+  /* §655: `p.reportsTo` is a KEY, so it is on this list by the list's own
+     rule. Retiring is not blocked — a retired manager is still who somebody
+     answered to — but a row that is deleted would leave them answering to
+     nobody at all. */
+  var reps = reportsOf(key);
+  if (reps.length) out.push(personBlock(
+    plural(reps.length, "person").replace("persons", "people") + " reporting to them",
+    plural(reps.length, "person").replace("persons", "people") + " still report to them (" +
+    reps.map(function(r){ return r.name; }).join(", ") +
+    ") — change their Reports to first"));
+
   return out;
 }
 
@@ -2479,6 +2543,18 @@ function personMergePlan(keepKey, dropKey){
     if (c.by === drop.key && c.state === "open")
       plan.owns.push({ kind:"claim", name:"an open request for a figure" });
   });
+  /* §655: the people who answer to the other row come across, named so the
+     panel can say it. The survivor is left out — a merge must not make
+     somebody report to themselves. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key !== keep.key) plan.owns.push({ kind:"reports", name:r.name + " reporting to them" });
+  });
+  /* And who the other row answered to, when the survivor answers to nobody —
+     a fill like the text fields' (§87.5: what is recorded wins), never a
+     move of a manager the survivor already has, and never the survivor. */
+  var dropMgr = reportsToOf(drop);
+  if (dropMgr && !reportsToOf(keep) && dropMgr.key !== keep.key)
+    plan.fills.push({ k:"reportsTo", label:"Reports to", value:dropMgr.name, key:dropMgr.key });
 
   /* Where the other row sat, offered only when the survivor sits nowhere —
      moving somebody who already has a unit is a real act and a merge must not
@@ -2496,7 +2572,11 @@ function mergePeople(keepKey, dropKey, picks){
   if (!plan) return { ok:false, why:"There is nothing to merge." };
   var keep = plan.keep, drop = plan.drop, took = picks || {};
 
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.fills.forEach(function(f){
+    /* §655: the Reports to fill is a key dressed as a name for the panel. */
+    if (f.k === "reportsTo") { setReportsTo(keep, f.key); return; }
+    keep[f.k] = f.value;
+  });
   plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
 
   /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
@@ -2523,6 +2603,13 @@ function mergePeople(keepKey, dropKey, picks){
     });
   });
   claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+  /* §655: everybody who answered to the other row answers to the survivor
+     now — through the setter, so the survivor is never made to report to
+     themselves; a row it refuses is left pointing at the other row, and the
+     delete below names it rather than losing it. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key === keep.key) delete r.reportsTo; else setReportsTo(r, keep.key);
+  });
 
   /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
      still pointing at the row, so the delete refuses and the merge reports it

@@ -9533,6 +9533,59 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* ── REPORTS TO (§655) ─────────────────────────────────────────────
+   `p.reportsTo` is the manager's register KEY (§48) and rides in `extra`
+   like `phone` and `active` above, for the same reason: no relational
+   meaning the server reads, so no column and no migration. Read through
+   here, so a key pointing at a row that has gone reads as nobody rather
+   than as a name the register no longer holds. */
+function reportsToOf(p){
+  var k = p && p.reportsTo;
+  return k ? (personBy(k) || null) : null;
+}
+/* Everybody who answers to this person, directly. */
+function reportsOf(key){
+  return PEOPLE.filter(function(p){ return p.reportsTo === key; });
+}
+/* Everybody under them, however far down — the set that may NOT become
+   their manager, or the chain would loop. Walked with a seen-set so a loop
+   that arrived by some other road (an old file, a merge) ends the walk
+   rather than the page. */
+function reportsUnder(key){
+  var out = {}, queue = [key];
+  while (queue.length) {
+    var k = queue.shift();
+    reportsOf(k).forEach(function(p){
+      if (out[p.key] || p.key === key) return;
+      out[p.key] = true; queue.push(p.key);
+    });
+  }
+  return out;
+}
+/* Who the picker offers: active people in the register's order, never the
+   person themselves, never anybody under them, never a row the Forefront
+   platform MINTED for a consultant (§629 — they are not the client's people).
+   The one they already point at is kept whatever its status, so opening the
+   field cannot silently read a retired manager as nobody (§54.4). */
+function reportsToChoices(p){
+  var under = reportsUnder(p.key);
+  return PEOPLE.filter(function(m){
+    if (m.key === p.key || under[m.key]) return false;
+    if (p.reportsTo === m.key) return true;
+    return personActive(m) && !SMPRules.isMintedRow(m);
+  });
+}
+/* The one door that writes it. Deleted when cleared rather than kept as "",
+   so absent and blank stay one word (the rule the file fields keep above).
+   Refuses the person themselves and anybody under them — the picker never
+   offers either, and this is the save answering alike (§42). */
+function setReportsTo(p, key){
+  if (!p) return false;
+  if (!key) { delete p.reportsTo; return true; }
+  if (key === p.key || !personBy(key) || reportsUnder(p.key)[key]) return false;
+  p.reportsTo = key;
+  return true;
+}
 /* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
@@ -10598,6 +10651,17 @@ function personDeleteBlockers(key){
     plural(claims.length, "open request") + " for a figure — answer them on the " +
     "cycle page first, so the request is not left pointing at nobody"));
 
+  /* §655: `p.reportsTo` is a KEY, so it is on this list by the list's own
+     rule. Retiring is not blocked — a retired manager is still who somebody
+     answered to — but a row that is deleted would leave them answering to
+     nobody at all. */
+  var reps = reportsOf(key);
+  if (reps.length) out.push(personBlock(
+    plural(reps.length, "person").replace("persons", "people") + " reporting to them",
+    plural(reps.length, "person").replace("persons", "people") + " still report to them (" +
+    reps.map(function(r){ return r.name; }).join(", ") +
+    ") — change their Reports to first"));
+
   return out;
 }
 
@@ -10739,6 +10803,18 @@ function personMergePlan(keepKey, dropKey){
     if (c.by === drop.key && c.state === "open")
       plan.owns.push({ kind:"claim", name:"an open request for a figure" });
   });
+  /* §655: the people who answer to the other row come across, named so the
+     panel can say it. The survivor is left out — a merge must not make
+     somebody report to themselves. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key !== keep.key) plan.owns.push({ kind:"reports", name:r.name + " reporting to them" });
+  });
+  /* And who the other row answered to, when the survivor answers to nobody —
+     a fill like the text fields' (§87.5: what is recorded wins), never a
+     move of a manager the survivor already has, and never the survivor. */
+  var dropMgr = reportsToOf(drop);
+  if (dropMgr && !reportsToOf(keep) && dropMgr.key !== keep.key)
+    plan.fills.push({ k:"reportsTo", label:"Reports to", value:dropMgr.name, key:dropMgr.key });
 
   /* Where the other row sat, offered only when the survivor sits nowhere —
      moving somebody who already has a unit is a real act and a merge must not
@@ -10756,7 +10832,11 @@ function mergePeople(keepKey, dropKey, picks){
   if (!plan) return { ok:false, why:"There is nothing to merge." };
   var keep = plan.keep, drop = plan.drop, took = picks || {};
 
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.fills.forEach(function(f){
+    /* §655: the Reports to fill is a key dressed as a name for the panel. */
+    if (f.k === "reportsTo") { setReportsTo(keep, f.key); return; }
+    keep[f.k] = f.value;
+  });
   plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
 
   /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
@@ -10783,6 +10863,13 @@ function mergePeople(keepKey, dropKey, picks){
     });
   });
   claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+  /* §655: everybody who answered to the other row answers to the survivor
+     now — through the setter, so the survivor is never made to report to
+     themselves; a row it refuses is left pointing at the other row, and the
+     delete below names it rather than losing it. */
+  reportsOf(drop.key).forEach(function(r){
+    if (r.key === keep.key) delete r.reportsTo; else setReportsTo(r, keep.key);
+  });
 
   /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
      still pointing at the row, so the delete refuses and the merge reports it
@@ -41249,6 +41336,16 @@ var PEOPLE_COLS = [
      and it earns its place only when somebody is looking for the people who
      belong to a company and no unit. */
   { k:"company",  label:"Company", off:true },
+  /* ── WHO THEY ANSWER TO (§655) ──────────────────────────────────
+     Islam: "add a column to identify the manager of the person". "Reports
+     to", and not "Manager": the Org Directory already says it in those words,
+     Portfolio reads "Project Manager" as the Lead (spec 060 §5.1a), and
+     "Senior Manager" is a job title on this very register — a column headed
+     Manager would collide with both. It holds a register KEY and never a
+     typed name (§48), so a rename reaches it, and it GRANTS NOTHING (§56):
+     who somebody answers to is a fact about them, not a right. Shown by
+     default, because it was asked for as a column of the register. */
+  { k:"reportsto", label:"Reports to" },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -41841,6 +41938,22 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
+    /* ── REPORTS TO (§655): A PICK FROM THE REGISTER, NEVER A TYPED NAME ──
+       The list is reportsToChoices(): everybody active, minus this person and
+       minus anybody who already answers to them, however far down — so a
+       loop cannot be chosen and no refusal has to be drawn. Somebody they
+       already point at stays in the list whatever their status, or opening
+       the dialog would silently read a retired manager as nobody (§54.4).
+       WIDE, like Job title above it: a fourth narrow field would put the
+       three places on a row of three and a row of one, §122's empty cell. */
+    var mgr = reportsToOf(p);
+    F("Reports to", '<select class="fld" data-preports="' + esc(p.key) + '">' +
+        '<option value="">&mdash; nobody &mdash;</option>' +
+        reportsToChoices(p).map(function(m){
+          return '<option value="' + esc(m.key) + '"' +
+            (mgr && mgr.key === m.key ? " selected" : "") + '>' +
+            esc(knownName(m, DNAMES)) + (personActive(m) ? "" : " (retired)") + '</option>';
+        }).join("") + '</select>', true);
     /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
@@ -42543,6 +42656,17 @@ function renderPeople(){
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
         })()) : '') +
+      /* ── REPORTS TO (§655): THE REGISTER'S NAME, READ AT DRAW TIME ────
+         The row holds a key; what it prints is whatever the register calls
+         that person today (§48, §130.9). A manager who has retired is still
+         named — the fact did not stop being true — and the hover says so,
+         the way every other mark in this table speaks (§116.4). */
+      (showCol("reportsto") ? pcell(p, "Reports to", (function(){
+          var m = reportsToOf(p);
+          if (!m) return '<span class="why" style="margin:0">&mdash;</span>';
+          return '<span class="val" title="' + esc(m.name) +
+            (personActive(m) ? '' : ' \u00b7 retired') + '">' + esc(knownName(m, DNAMES)) + '</span>';
+        })()) : '') +
       /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
          Islam: "can you make a right click on the email to highlight the
          whole email to copy on right click .. as it happens on the phone
@@ -43087,6 +43211,8 @@ function renderPeople(){
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th(esc(sitsInWord()), "wcol") : '') +
         (showCol("company")  ? th("Company")             : '') +
+        /* A select when the cell is open, so it takes §93.10's floor too. */
+        (showCol("reportsto") ? th("Reports to", "wcol") : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -44357,6 +44483,12 @@ function renderKB(){
            'already attributed to them stays true. Deleting takes the row, the password and ' +
            'the open sessions, and is <b>refused while anything still points at the ' +
            'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
+      { h: "Reports to says who somebody answers to, and decides nothing",
+        p: '<b>Reports to</b> names the person\u2019s manager, picked from the register ' +
+           'rather than typed, so renaming the manager renames them here too. It grants ' +
+           'nothing \u2014 what somebody may open is their roles, not who they answer to. ' +
+           'Nobody can be made to report to themselves or to somebody under them, and a ' +
+           'row cannot be deleted while anybody still reports to it.' },
       { h: "Two rows that are one person are merged, never guessed",
         p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
            'name, because two people really can share one. A row with neither is marked, ' +
@@ -84040,6 +84172,21 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ── REPORTS TO (§655) ────────────────────────────────────────────
+       Through setReportsTo(), the one door that writes it, and the same
+       grant every other field of the register asks. It refuses the person
+       themselves and anybody under them — the picker never offers either,
+       so a refusal here is a stale list, and the repaint draws the right
+       one. Nothing about roles: who somebody answers to grants nothing. */
+    R.querySelectorAll("[data-preports]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.preports);
+        if (!p) return;
+        setReportsTo(p, sel.value || null);
+        paint();
+      });
+    });
     R.querySelectorAll("[data-pat]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
@@ -87696,6 +87843,10 @@ var SYNC = (function () {
        to their full name (§93.8). Written through setKnownName so it is deleted
        rather than stored when it matches the guess (§50.6). */
     if (NEWDRAFT.known) setKnownName(made, NEWDRAFT.known);
+    /* And who they answer to (§655), through the one setter — the draft held
+       a key the picker offered, and a pick the Add press dropped would be
+       §96's inert editor on the one form that cannot be reopened. */
+    if (NEWDRAFT.reportsTo) setReportsTo(made, NEWDRAFT.reportsTo);
     newPersonReset();
     newDraftEnd();
     PDLG = null;

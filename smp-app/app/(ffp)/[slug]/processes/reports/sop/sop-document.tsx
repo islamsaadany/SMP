@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Sop } from "@/ffp/lib/domain/sop";
 import { PrintButton } from "./print-button";
 
@@ -10,13 +11,18 @@ function Val({ v }: { v: string | null }) {
 }
 
 /** One SOP per process, each starting on a new printed page. */
-export function SopDocument({ companyName, firmName, sops }: { companyName: string; firmName: string; sops: Sop[] }) {
+export function SopDocument({ workspaceId, companyName, firmName, sops }: { workspaceId: string; companyName: string; firmName: string; sops: Sop[] }) {
   return (
     <main data-sop-root className="mx-auto w-full max-w-4xl px-6 py-8 text-slate-900 print:max-w-none print:px-0">
       <div className="mb-6 flex items-center justify-between print:hidden">
-        <span className="text-sm text-slate-500">
-          {sops.length} SOP{sops.length === 1 ? "" : "s"} · {companyName}
-        </span>
+        <div className="flex items-center gap-4">
+          <Link href={`/${workspaceId}/processes/export`} className="text-sm font-semibold text-slate-500 hover:text-slate-900">
+            ← Back to picker
+          </Link>
+          <span className="text-sm text-slate-500">
+            {sops.length} SOP{sops.length === 1 ? "" : "s"} · {companyName}
+          </span>
+        </div>
         <PrintButton />
       </div>
       {sops.map((sop) => (

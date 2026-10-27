@@ -433,6 +433,26 @@ const ex2 = await A.get("/api/ffp/export/priorities/" + S);
 const wb2 = new (await import("exceljs")).default.Workbook(); await wb2.xlsx.load(await ex2.body());
 check(!!wb2.getWorksheet("Flagged steps"), "the Excel file has a Flagged steps sheet");
 
+/* ── AI review: a finding can be added as a proposed step, shown on the map, and confirmed or deleted ── */
+const P6 = await proc("P6.1", "Month-end close");
+await q(ffp, `insert into review_findings (id,"processId",category,area,severity,title,description,recommendation,status,"updatedAt") values (gen_random_uuid()::text,$1,'RISK','PROCESS_MAP','HIGH',$2,$3,$4,'OPEN',now())`, [P6, "No second check on journal entries", "Journals are posted by one person.", "Add a review of journals before posting"]);
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/review", { waitUntil: "networkidle" });
+check(/No second check on journal entries/.test(await body(A.page)) && (await A.page.$$("button:text-is('Add as a step')")).length === 1, "the AI review page lists a finding with Add as a step");
+await A.page.click("button:text-is('Add as a step')");
+await A.page.click("button:text-is('Add to process (proposed)')");
+await A.page.waitForSelector("text=Proposed · waiting on the map", { timeout: 20000 });
+await A.page.goto(BASE + "/" + S + "/processes/processes/" + P6 + "/map", { waitUntil: "networkidle" });
+check(/Proposed · from AI review/i.test(await body(A.page)) && (await A.page.$$("button:text-is('Confirm')")).length === 1 && (await A.page.$$("button:text-is('Delete')")).length >= 1, "the proposed step is highlighted on the map with Confirm and Delete");
+const before6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(before6 === 2, "until it is confirmed it is not a step");
+await A.page.click("button:text-is('Confirm')");
+await A.page.waitForFunction(() => !/Proposed · from AI review/i.test(document.body.innerText), null, { timeout: 20000 });
+const after6 = (await q(ffp, 'select count(*)::int n from process_steps where "processId"=$1', [P6]))[0].n;
+check(after6 === 3, "Confirm creates the real step", String(after6));
+
+const sopHtml = await (await A.get("/" + S + "/processes/reports/sop?ids=" + P1)).text();
+check(/Back to picker/.test(sopHtml) && /\/processes\/export/.test(sopHtml), "the SOP page has a Back to picker link");
+
 /* ── 4 · the office is unaffected, and its exports carry nothing from the AI review ── */
 const rep = await A.get("/" + S + "/processes/reports");
 check(rep.status() === 200 && !/AI Review|from AI review/.test(await rep.text()), "the office's report page opens and says nothing from the AI review", rep.status());

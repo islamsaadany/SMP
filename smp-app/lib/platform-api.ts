@@ -237,7 +237,15 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       "SELECT t.key, t.name, t.industry, t.mark, t.archived_at, (SELECT count(*)::int FROM case_studies c WHERE c.about_tenant_id = t.id) AS cases " +
       "FROM tenants t WHERE t.past ORDER BY t.name")).rows.map((r: any) => ({
         key: r.key, name: r.name, industry: r.industry, mark: r.mark, at: r.archived_at, cases: r.cases }));
-    return ok({ cards, archived, past, canAddPast: account.is_admin,
+    /* WHOSE WORK HAS ENDED (spec 069, Islam's choice (a), 2026-10-27): a live
+       client with at least one assignment and none still running — its end
+       month has come — is drawn under Ended. Only the filter moves: the
+       client keeps its platform and its access, and comes back to Active
+       the day an assignment that runs is added. */
+    const workEnded = (await pool.query(
+      "SELECT t.key FROM tenants t JOIN case_studies c ON c.about_tenant_id = t.id WHERE NOT t.past AND t.status <> 'retired' " +
+      "GROUP BY t.key HAVING bool_and(c.ended <> '' AND c.ended <= to_char(now(), 'YYYY-MM'))")).rows.map((r: any) => r.key);
+    return ok({ cards, archived, past, workEnded, canAddPast: account.is_admin,
       canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 

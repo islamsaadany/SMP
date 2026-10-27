@@ -1,0 +1,138 @@
+<title>Assignment Dates</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: the Clients list view's assignment row, today beside the proposal:
+   each date becomes two plain dropdowns, month and year, and the end date
+   gets a "Still running" choice instead of being left empty. Tokens are the
+   console's own (smp-app/shell/platform.html). */
+*{box-sizing:border-box}
+:root{
+  --ground:#F5F6F9;--surface:#FFFFFF;--surface-2:#EDF0F5;--line:#D8DEE8;--line-soft:#E6EAF1;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;
+  --ff:#0F2C69;--ff-ink:#FFFFFF;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#9C5D08;--amber-wash:#FEF4E2;
+  --bad:#B23025;--plan:#2F57A8;--plan-bg:#E8EEFA;--ret:#6B3FA0;--ret-bg:#F1EAF9;
+  --shadow:0 1px 2px rgba(20,28,43,.06),0 8px 26px rgba(20,28,43,.07);
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:Georgia,"Times New Roman",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --bad:#E8776B;--plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--line:#333B4A;--line-soft:#2A313E;
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--ff:#0D2350;--ff-ink:#F0F4FB;
+  --amber:#F5A623;--amber-ink:#231500;--gold:#F5A623;--amber-wash:#2B2210;
+  --bad:#E8776B;--plan:#8FB0F0;--plan-bg:#1E2A44;--ret:#C3A2EC;--ret-bg:#2A2238;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 14.5px/1.55 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font-family:inherit;font-size:inherit}
+.doc{max-width:1100px;margin:0 auto;padding-block:26px 64px;display:flex;flex-direction:column;gap:14px}
+h1{font-size:23px;margin:0;font-weight:650}
+.lede{margin:0;color:var(--ink-2);max-width:74ch}
+.cap{display:flex;gap:10px;align-items:baseline;margin-top:22px}
+.cap .n{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+.cap h2{margin:0;font-size:17px}
+.why{margin:0;color:var(--ink-2);font-size:14px;max-width:80ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.client{display:flex;gap:8px;align-items:center;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);font-weight:650}
+.mk{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;background:var(--ff);color:var(--amber);font-size:9.5px;font-weight:700}
+.form{background:var(--amber-wash);padding:12px 14px 12px 44px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px 14px}
+.lab{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+.fld{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:6px 8px;font-size:13px}
+.pair{display:flex;gap:6px}
+.pair .fld:first-child{flex:1.3}.pair .fld:last-child{flex:1}
+.acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:5px 12px;font-weight:600;font-size:12.5px}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.fake{position:relative}
+.cal{margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px;font-size:12px;color:var(--ink-2);width:220px;box-shadow:var(--shadow)}
+.cal .top{display:flex;justify-content:space-between;font-weight:650;color:var(--ink);margin-bottom:6px}
+.cal .m{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.cal .m span{text-align:center;padding:4px 0;border-radius:4px}
+.cal .m span.on{background:var(--ff);color:var(--ff-ink)}
+.pain{margin:8px 0 0;font-size:12.5px;color:var(--bad)}
+.out{margin-top:10px;font-size:13px;color:var(--ink-2)}
+.out b{color:var(--ink)}
+.ttag{display:inline-block;font-size:11px;font-weight:650;border-radius:5px;padding:1px 7px;background:var(--plan-bg);color:var(--plan)}
+ul{margin:0;padding-left:20px;color:var(--ink-2);display:flex;flex-direction:column;gap:5px;max-width:80ch}
+ul b{color:var(--ink)}
+@media (max-width:600px){.form{padding-left:14px}}
+</style>
+
+<div class="doc">
+  <h1>Picking an assignment's start and end</h1>
+  <p class="lede">The Start and End boxes on Clients › list view › + Add an assignment. Today they open the browser's own calendar, where reaching an older year means pressing the arrow once per year. The proposal: two plain lists for each date, the month and the year.</p>
+
+  <div class="cap"><span class="n">Today</span><h2>The browser's month calendar</h2></div>
+  <div class="panel">
+    <div class="client"><span class="mk">DL</span>Delta Logistics</div>
+    <div class="form">
+      <div class="grid">
+        <div><span class="lab">Start</span>
+          <div class="fake"><input class="fld" id="old-start" value="March 2023" readonly aria-label="Start, today's calendar">
+            <div class="cal"><div class="top"><span>‹</span><span>2026</span><span>›</span></div>
+              <div class="m"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span class="on">Oct</span><span>Nov</span><span>Dec</span></div></div>
+          </div>
+          <p class="pain">Back to 2023 is three presses on ‹, then the month. It looks different in every browser, and on some it is a text box with no calendar.</p></div>
+        <div><span class="lab">End (empty while running)</span><input class="fld" id="old-end" value="" readonly aria-label="End, today's calendar" placeholder="———— ----"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cap"><span class="n">Proposed</span><h2>Month and year, two plain lists</h2></div>
+  <p class="why">Try it: pick a year straight from the list. The years run from this year back to 2010, newest first, so recent work is at the top. End has <b>Still running</b> as its first choice, so nobody has to know that an empty box means running.</p>
+  <div class="panel">
+    <div class="client"><span class="mk">DL</span>Delta Logistics</div>
+    <div class="form">
+      <div class="grid">
+        <div><label class="lab" for="asg-name">Assignment</label><input class="fld" id="asg-name" value="Strategy build"></div>
+        <div><label class="lab" for="asg-type">Type</label><select class="fld" id="asg-type"><option>Planning</option><option>Retainer</option></select></div>
+        <div><span class="lab">Start</span><div class="pair"><select class="fld" id="s-m" aria-label="Start month"></select><select class="fld" id="s-y" aria-label="Start year"></select></div></div>
+        <div><span class="lab">End</span><div class="pair"><select class="fld" id="e-m" aria-label="End month"></select><select class="fld" id="e-y" aria-label="End year"></select></div></div>
+      </div>
+      <p class="out" id="out"></p>
+      <div class="acts"><button class="btn">Cancel</button><button class="btn amber">Add</button></div>
+    </div>
+  </div>
+
+  <div class="cap"><span class="n">What changes</span><h2>And what stays</h2></div>
+  <ul>
+    <li><b>Start:</b> a month list and a year list. Both must be picked before Add.</li>
+    <li><b>End:</b> the same two lists, with <b>Still running</b> first in the month list. Picking it greys out the year.</li>
+    <li><b>An end before the start</b> is still refused in words, as today.</li>
+    <li><b>Nothing stored changes:</b> it is still saved as a month and a year, so assignments already added are untouched.</li>
+    <li><b>Same on Edit</b>, with the assignment's own months already picked.</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  var M = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var now = new Date().getFullYear();
+  var fillM = function (sel, running) {
+    var o = document.createElement("option"); o.value = ""; o.textContent = running ? "Still running" : "Month"; sel.appendChild(o);
+    M.forEach(function (m, i) { var x = document.createElement("option"); x.value = String(i + 1).padStart(2, "0"); x.textContent = m; sel.appendChild(x); });
+  };
+  var fillY = function (sel) {
+    var o = document.createElement("option"); o.value = ""; o.textContent = "Year"; sel.appendChild(o);
+    for (var y = now + 1; y >= 2010; y--) { var x = document.createElement("option"); x.value = String(y); x.textContent = String(y); sel.appendChild(x); }
+  };
+  var sm = document.getElementById("s-m"), sy = document.getElementById("s-y"), em = document.getElementById("e-m"), ey = document.getElementById("e-y");
+  fillM(sm, false); fillY(sy); fillM(em, true); fillY(ey);
+  sm.value = "02"; sy.value = "2023"; em.value = "08"; ey.value = "2023";
+  var out = document.getElementById("out");
+  var show = function () {
+    ey.disabled = !em.value;
+    var s = sm.value && sy.value ? M[+sm.value - 1].slice(0, 3) + " " + sy.value : "pick a month and a year";
+    var e = !em.value ? "running" : (ey.value ? M[+em.value - 1].slice(0, 3) + " " + ey.value : "pick the year");
+    out.innerHTML = 'On the row it reads: <span class="ttag">Planning</span> <b>Strategy build</b> · ' + s + " – " + e;
+  };
+  [sm, sy, em, ey].forEach(function (x) { x.addEventListener("change", show); });
+  show();
+}());
+</script>

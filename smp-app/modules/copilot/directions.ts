@@ -96,7 +96,12 @@ export async function dirsAct(c: any, b: any, who: Who): Promise<Out> {
        as the plan's, keyed by the pillar they came from — so a save updates
        that pillar rather than adding a second one beside it (§48). */
     const existing = b.start === "plan" ? (Array.isArray(b.existing) ? b.existing : []).slice(0, MAX_OPTIONS)
-      .map((x: any) => ({ title: x && x.title, planId: x && x.id, mark: "plan", go: true })) : [];
+      /* §654 B5 — a row from the plan keeps the scores and owner the plan
+         holds; it starts ticked only when it is scored, so an unscored row
+         is scored (or left) before it goes ahead. */
+      .map((x: any) => { const n = (v: unknown) => { const k = Number(v); return k >= 1 && k <= 4 ? k : undefined; };
+        const sc = { urgency: n(x && x.urgency), importance: n(x && x.importance), ease: n(x && x.ease) };
+        return { title: x && x.title, planId: x && x.id, mark: "plan", ...sc, ownedBy: x && x.ownedBy, go: !!(sc.urgency && sc.importance && sc.ease) }; }) : [];
     const s = sanitizeDirs({ start: b.start, options: existing }, stored);
     await writeDirs(c, id, s);
     return out(200, { ok: true, ...(await dirsView(c, chat)) });

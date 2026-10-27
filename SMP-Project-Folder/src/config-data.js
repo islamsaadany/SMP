@@ -10980,6 +10980,21 @@ function archiveExecution(target, capIds, why){
   return a;
 }
 
+/* ── COMPETITIVE DISCIPLINE AS AN ARCHIVE OF ITS OWN (§654 B1) ──────────
+   The Copilot's Apply to plan for Competitive Discipline archives the
+   discipline and the value table the plan holds, and restoring puts them
+   back and nothing else. */
+function archiveCompete(target, why){
+  var w = competeWritable(target);
+  if (!w) return null;
+  var snap = { discipline: w.discipline || "", values: clone(w.values || []) };
+  if (!snap.discipline && !snap.values.length) return null;
+  var a = { id:archiveId(), kind:"compete", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ values:snap.values.length }, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -11017,6 +11032,16 @@ function restoreArchive(id){
     if (!sw) return false;
     archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
     ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
+  }
+  else if (a.kind === "compete") {
+    /* §654 B1: the discipline and the value table, put back; what stands is
+       archived first so the restore can itself be undone. */
+    var cw = competeWritable(a.key);
+    if (!cw) return false;
+    archiveCompete(a.key, "replaced by restoring the " + a.at + " archive");
+    cw.discipline = a.plan.discipline || "";
+    cw.values = clone(a.plan.values || []);
+    if (typeof competeTidy === "function") competeTidy(a.key);
   }
   else if (a.kind === "directions" || a.kind === "execution") {
     /* §654 A2: the part applied, put back; what stands is archived first as

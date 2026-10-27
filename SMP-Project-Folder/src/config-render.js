@@ -6786,7 +6786,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" || a.kind === "compete" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -7163,6 +7163,8 @@ function archiveHeld(a){
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
     : a.kind === "swot"
     ? plural(c.lines || 0, "SWOT line")
+    : a.kind === "compete"
+    ? plural(c.values || 0, "value")
     : a.kind === "directions"
     ? [plural(c.pillars || 0, L1("pillar"), L("pillar")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
     : a.kind === "execution"
@@ -7191,6 +7193,8 @@ function renderArchives(){
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "swot"
         ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "compete"
+        ? '<span class="why">Competitive Discipline only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "directions"
         ? '<span class="why">' + L("pillar") + ' and the capabilities they touch &mdash; the Foundation and the SWOT are untouched</span>'
         : a.kind === "execution"
@@ -7203,6 +7207,7 @@ function renderArchives(){
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
              : a.kind === "swot" ? !!swotWritable(a.key)
+             : a.kind === "compete" ? !!competeHolder(a.key)
              : a.kind === "unit" || a.kind === "directions" || a.kind === "execution" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"

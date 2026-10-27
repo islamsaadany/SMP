@@ -440,7 +440,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   if (kind === "planApplied") {
     const d = await oneDeliverable(c, id);
     if (!d) return refused(404, "That deliverable is not here any more.");
-    if (!["directions", "capabilities", "execution", "compete"].includes(d.type)) return refused(400, "That kind of deliverable is not applied this way.");
+    if (!["directions", "capabilities", "execution", "compete", "swot"].includes(d.type)) return refused(400, "That kind of deliverable is not applied this way.");
     const n = Number(b.n);
     const v = (await versionsOf(c, id)).find((x: any) => x.n === n);
     if (!v) return refused(400, "That version is not here.");

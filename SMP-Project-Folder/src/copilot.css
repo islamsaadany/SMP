@@ -940,3 +940,12 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .coppcard.copplan { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:color-mix(in srgb, var(--goldfill) 7%, var(--surface)); }
 .coppcard.copplan .coptag { display:block; font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep, var(--gold)); }
 .coppcard.copplan .copmeta { grid-column:2; font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+
+/* §654 B2 — a saved version drawn as its type, on its own page. */
+.copdtyped { display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
+.copdtyped h5 { margin:6px 0 0; font:700 var(--fs-small, 12.5px)/1.4 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copdline { margin:0; font-size:var(--fs-note, 13.5px); }
+.copdul { margin:0; padding-left:18px; font-size:var(--fs-note, 13.5px); color:var(--ink); display:flex; flex-direction:column; gap:3px; }
+.copdswot { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+@media (max-width:760px){ .copdswot { grid-template-columns:1fr; } }
+.copdstay { display:block; width:100%; margin-top:6px; }

@@ -974,6 +974,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(lay.lines === 2 && lay.inBubble === 0 && lay.panel.length === 1 && lay.panel[0] === "Save to Foundation deliverables" && lay.side === true && lay.boxes !== null && lay.boxes <= 2,
       "§638 the latest draft stands in the panel to the chat's right with one Save naming the section's deliverables; each drafting bubble says so in a line, and the box is as wide as the conversation", JSON.stringify(lay));
     const d0 = await count("copilot_deliverables");
+    const stay = await page.evaluate(() => ({ note: (document.querySelector("[data-cop-out] [data-cop-draftstay]") || {}).textContent || "", go: !!document.querySelector("[data-cop-out] [data-cop-home]") }));
+    check(/Stays in the Copilot/.test(stay.note) && /step by step/.test(stay.note) && stay.go, "§654 B3 a free chat's draft says it stays in the Copilot, and offers to start step by step", JSON.stringify(stay));
     await page.locator("[data-cop-out] [data-cop-savedraft]").click();
     await page.waitForFunction(() => document.querySelector("[data-cop-out] .copsaved"), null, { timeout: 10000 }).catch(() => {});
     await page.waitForFunction(() => /Mobile foundation/.test([...document.querySelectorAll(".coprail [data-cop-deliv]")].map((x) => x.textContent).join("|")), null, { timeout: 8000 }).catch(() => {});
@@ -2410,12 +2412,31 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
     await heldSweep(page, "Competitive Discipline, before the save");
     await shot("1-before-save");
+    /* §654 B1 — REWRITTEN, NOT LOOSENED (§218): Save keeps the version and
+       leaves the plan as it was; Apply to plan asks first (saying so where
+       the layer has Competitive Discipline switched off, A4), archives the
+       plan's own as its kind, then writes. */
+    const cpBefore = await page.evaluate(() => JSON.stringify(UNITS.mobile.compete || null));
+    const cpArch = await page.evaluate(() => ({ n: ARCHIVES.length, had: !!(UNITS.mobile.compete && ((UNITS.mobile.compete.values || []).length || UNITS.mobile.compete.discipline)), on: compOn("mobile", SMPRules.COMPETE) }));
     await page.click("[data-cop-cp-finish]");
     await page.waitForTimeout(1500);
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Competitive Discipline — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
+    const cpSv = await page.evaluate((b) => ({ same: JSON.stringify(UNITS.mobile.compete || null) === b, line: /not on the plan yet/.test((document.querySelector(".copsw-main") || {}).textContent || ""), apply: !!document.querySelector("[data-cop-cp-apply]") }), cpBefore);
+    check(cpSv.same && cpSv.line && cpSv.apply, "§654 Save leaves the plan's Competitive Discipline exactly as it was — the chat says it is not on the plan yet and offers Apply to plan", JSON.stringify(cpSv));
+    await page.click("[data-cop-cp-apply]");
+    await page.waitForSelector("[data-cop-planapply-yes]", { timeout: 5000 }).catch(() => {});
+    const cpAsk = await page.evaluate(() => (document.getElementById("modal-b") || {}).textContent || "");
+    check(/Competitive Discipline — Mobile v1/.test(cpAsk) && /archived first|nothing is replaced/.test(cpAsk) && (cpArch.on || /switched off for this layer/.test(cpAsk)),
+      "§654 Apply to plan asks first, naming the version and what is archived — and says so where the layer has it switched off (A4)", JSON.stringify({ cpAsk: cpAsk.slice(0, 300), on: cpArch.on }));
+    await page.click("[data-cop-planapply-yes]");
+    await page.waitForTimeout(1500);
     const plan = await page.evaluate(() => { try { const w = UNITS.mobile.compete; return w ? [w.discipline, w.values.length] : null; } catch (e) { return String(e); } });
-    check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and the table is written into the plan's How we compete", JSON.stringify(plan));
+    check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and Yes writes the table into the plan's Competitive Discipline", JSON.stringify(plan));
+    const cpAr = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), cpArch.n);
+    check(cpArch.had ? cpAr.includes("compete:mobile") && !cpAr.includes("unit:mobile") : cpAr.length === 0, "§654 …having archived the plan's Competitive Discipline as its own kind (or nothing, where the plan held none)", JSON.stringify({ cpAr, had: cpArch.had }));
+    const cpOn = await page.evaluate(() => ({ line: /It is on the plan\./.test((document.querySelector(".copsw-main") || {}).textContent || ""), again: /again/.test((document.querySelector("[data-cop-cp-apply]") || {}).textContent || "") }));
+    check(cpOn.line && cpOn.again, "§654 …and the chat says it is on the plan, offering Apply again", JSON.stringify(cpOn));
     await shot("2-saved");
     check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
@@ -2478,7 +2499,16 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     /* One row from the plan goes ahead too, or "updates THAT pillar" below
        is asserted over nothing (§113.8). */
     const iPlan = r.s.options.findIndex((o) => o.mark === "plan");
-    if (iPlan > -1 && !r.s.options[iPlan].go) { await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700); }
+    /* §654 B5 — a row from the plan with no scores cannot go ahead until it
+       is scored: its tick is held and says so; scored, it goes. */
+    if (iPlan > -1 && !r.s.options[iPlan].go) {
+      const unscored = !(r.s.options[iPlan].urgency && r.s.options[iPlan].importance && r.s.options[iPlan].ease);
+      const heldTick = await page.evaluate((i) => { const b = document.querySelector('[data-cop-dv-go="' + i + '"]'); return b ? { held: b.getAttribute("aria-disabled"), tip: b.getAttribute("data-tip") || "" } : null; }, iPlan);
+      check(!!heldTick && (unscored ? heldTick.held === "true" && /Score it first/.test(heldTick.tip) : heldTick.held !== "true"),
+        unscored ? "§654 a plan row with no scores has its go-ahead tick held, saying to score it first" : "§654 a plan row carries the scores the plan holds, so its tick is live", JSON.stringify({ unscored, heldTick, o: r.s.options[iPlan] }));
+      if (unscored) { for (const k of ["urgency", "importance", "ease"]) { if (!r.s.options[iPlan][k]) { await page.click('[data-cop-dv-sc="' + iPlan + '|' + k + '"]'); await page.waitForTimeout(500); } } r = await row(); }
+      await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700);
+    }
     r = await row();
     const goN = r.s.options.filter((o) => o.go).length;
     await page.click("[data-cop-dv-go-all]");
@@ -2577,8 +2607,10 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     if (await page.$('[data-cop-fold="delivs"][aria-expanded="false"]')) await page.click('[data-cop-fold="delivs"]');
     await page.waitForSelector("[data-cop-deliv]", { timeout: 8000 }).catch(() => {});
     if (await page.$("[data-cop-deliv]")) { await page.click("[data-cop-deliv]"); await page.waitForSelector(".copvers", { timeout: 8000 }).catch(() => {}); }
-    const ed = await page.evaluate(() => ({ text: !!document.querySelector("[data-cop-edit]"), chat: (document.querySelector("[data-cop-edit-chat]") || {}).textContent || "", chip: (document.querySelector(".copchip") || {}).textContent || "" }));
+    const ed = await page.evaluate(() => ({ text: !!document.querySelector("[data-cop-edit]"), chat: (document.querySelector("[data-cop-edit-chat]") || {}).textContent || "", chip: (document.querySelector(".copchip") || {}).textContent || "",
+      typed: document.querySelectorAll(".copdtyped .copdul li").length, row: (document.querySelector("[data-cop-planrow]") || {}).textContent || "", apply: (document.querySelector("[data-cop-dapply]") || {}).textContent || "" }));
     check(!ed.text && /^Edit as v2$/.test(ed.chat.trim()) && ed.chip === "Can go on the plan", "§654 a saved Directions version offers Edit as v2 into its chat and no plain-text Edit; the rail's chip speaks plainly", JSON.stringify(ed));
+    check(ed.typed > 0 && /On the plan as v1/.test(ed.row) && /Apply to plan again/.test(ed.apply), "§654 B2 …and the version's page draws the Directions as a list, says On the plan as v1, and offers Apply to plan again", JSON.stringify(ed));
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];

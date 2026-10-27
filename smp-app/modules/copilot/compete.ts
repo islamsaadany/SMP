@@ -26,12 +26,19 @@ const NOT_COMPETE = "This is not a Competitive Discipline chat.";
 
 /* What the chat GET adds: the state, the to-do list and the RESULTS worked
    out by the one scoring function — the page never adds a score up (§94.8). */
+/* §654 A3/B1 — the note the browser wrote once the plan's save landed. */
+async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; by: string } | null> {
+  const r = await c.query("SELECT extra->'applied' AS a FROM copilot_deliverables WHERE id = $1", [id]);
+  const a = r.rows[0] && r.rows[0].a;
+  return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
+}
 export async function competeView(c: any, chat: { id: string }) {
   const s = await competeOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
+  const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   const market = resultOf("market", s.market), internal = resultOf("internal", s.internal);
-  return { compete: s, competeTodo: todo, competeDone: doneCount(todo),
+  return { compete: s, competeApplied: applied, competeTodo: todo, competeDone: doneCount(todo),
     competeFactors: { market: MARKET, internal: INTERNAL },
     competeResult: { market, internal, recommended: market.complete ? market.leader : "", aligned: market.complete && internal.complete && market.leader === internal.leader },
     competeWords: { disc: DISC_WORD, sub: DISC_SUB, clarity: CLARITY_WORD, discs: DISCS } };

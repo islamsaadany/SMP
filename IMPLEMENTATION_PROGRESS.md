@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-27 — The Copilot swept; batch 3, the split and the SWOT's change (§654).** Competitive Discipline laid out as the SWOT is — the chat in the order it happened, the scores and the table on the right, Save and Apply at the pane's foot, the to-do beside, a change asked for in the chat's own box; the SWOT takes "say what to change" — a proposal in the chat with what differs, used or kept by a press. Shell `smp-shell-v7.32-sweep-3`.
+
 **2026-10-27 — The Copilot swept; batch 2, the plan's doors (§654).** Competitive Discipline saves a version and applies on an ask that archives the plan's own and warns where the layer has it switched off; every saved version's page is drawn as its type with On the plan and Apply to plan; a free chat's draft says it stays in the Copilot; a Direction from the plan keeps its scores and an unscored one cannot go ahead. Shell `smp-shell-v7.31-sweep-2`.
 
 **2026-10-27 — The Copilot swept; batch 1, safety first (§654), merged to `main` on Islam's word.** No plain-text edit of a structured version; Directions and Execution archive only the part they apply; on-the-plan survives a reload; three small lines.

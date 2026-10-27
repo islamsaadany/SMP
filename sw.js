@@ -677,7 +677,7 @@
    (option D), and the console's loading shape is the console as it is. */
 /* v7.27-held-says-why — §649: a Copilot button that cannot be pressed is
    held, never disabled, and says why in the platform's bubble. */
-const SHELL = "smp-shell-v7.31-sweep-2";
+const SHELL = "smp-shell-v7.32-sweep-3";
 const ASSETS = [
   "/",
   "/index.html",

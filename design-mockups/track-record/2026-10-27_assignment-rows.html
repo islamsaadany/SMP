@@ -63,19 +63,20 @@ tr.oldadd td{padding:8px 14px 12px 70px;background:var(--surface-2)}
 /* proposed */
 tr.asg td{padding:9px 14px}
 .line{display:grid;grid-template-columns:28px auto minmax(0,1fr) auto auto;gap:6px 14px;align-items:center;padding-left:28px}
-.plus{width:24px;height:24px;border-radius:50%;border:1px dashed var(--amber-tx);background:var(--amber-wash);color:var(--amber-tx);font-size:16px;font-weight:600;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
-.plus:hover{background:var(--amber);color:var(--amber-ink);border-style:solid}
+.plus{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink-3);font-size:15px;font-weight:500;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.plus:hover{color:var(--ink);border-color:var(--ink-3)}
 .plus:focus-visible,.btn:focus-visible{outline:2px solid var(--amber-tx);outline-offset:2px}
 .nm{display:flex;gap:10px;align-items:center;white-space:nowrap}
 .nm b{font-size:13.5px}
-.facts{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--ink-3);font-size:13px;min-width:0}
-.facts b{color:var(--ink);font-weight:600}
+.facts{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--ink-2);font-size:13px;min-width:0}
+.facts b{color:var(--ink);font-weight:650}
 .facts .mo{color:var(--ink-2);font-variant-numeric:tabular-nums}
-.pill{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:3px 10px;white-space:nowrap;justify-self:end}
-.pill.run{background:var(--good-bg);color:var(--good)}
-.pill.late{background:var(--bad-bg);color:var(--bad)}
-.pill.dr{background:var(--warn-bg);color:var(--warn)}
-.pill.pub{background:var(--plan-bg);color:var(--plan)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap;justify-self:end}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.run{color:var(--good)}
+.pill.late{color:var(--bad)}
+.pill.dr{color:var(--warn)}
+.pill.pub{color:var(--plan)}
 tr.none td{padding:9px 14px}
 .firstadd{display:flex;gap:10px;align-items:center;padding-left:56px;color:var(--ink-3);font-size:13px}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;color:var(--ink-2);font-size:13px}
@@ -100,7 +101,7 @@ ul b{color:var(--ink)}
     </tbody>
   </table></div></div>
 
-  <div class="cap"><span class="n">Proposed</span><h2>The + beside the last assignment, labels, a coloured status</h2></div>
+  <div class="cap"><span class="n">Proposed · second round</span><h2>Lead: and Team: in bold, the names plain, a quiet +</h2></div>
   <div class="card"><div class="tw"><table>
     <thead><tr><th>Client</th><th>Industry</th><th>Your seat</th><th>Units</th><th>Open</th><th></th></tr></thead>
     <tbody>
@@ -108,26 +109,26 @@ ul b{color:var(--ink)}
       <tr class="asg"><td colspan="6"><div class="line">
         <button class="plus" title="Add an assignment to ElAbd" aria-label="Add an assignment to ElAbd">+</button>
         <span class="nm"><span class="ttag ret">Retainer</span><b>ElAbd-RET-2601-2612</b></span>
-        <span class="facts"><span class="mo">Jan – Dec 2026</span><span>Lead: <b>Islam Saadany</b></span><span>Team: <b>Ahmed Galal, Momen Zaki, Aley Mahmoud, Noran Esam</b></span></span>
+        <span class="facts"><span class="mo">Jan – Dec 2026</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Ahmed Galal, Momen Zaki, Aley Mahmoud, Noran Esam</span></span>
         <span class="pill run">Running</span><button class="btn">Edit</button></div></td></tr>
 
       <tr class="crow"><td><span class="who"><span class="mk">RT</span>Raya Trade</span></td><td class="muted">Retail &amp; E-commerce</td><td>Super user</td><td>10</td><td><span class="mod">Strategy</span><span class="mod">Internal Tracker</span></td><td><span class="cog">≡</span></td></tr>
       <tr class="asg"><td colspan="6"><div class="line">
         <span></span>
         <span class="nm"><span class="ttag plan">Planning</span><b>Raya Trade-PLN-2501-2506</b></span>
-        <span class="facts"><span class="mo">Jan – Jun 2025</span><span>Lead: <b>Islam Saadany</b></span><span>Team: <b>Omar Alaa</b></span></span>
+        <span class="facts"><span class="mo">Jan – Jun 2025</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Omar Alaa</span></span>
         <span class="pill pub">Written up</span><button class="btn">Edit</button></div></td></tr>
       <tr class="asg"><td colspan="6"><div class="line">
         <button class="plus" title="Add an assignment to Raya Trade" aria-label="Add an assignment to Raya Trade">+</button>
         <span class="nm"><span class="ttag ret">Retainer</span><b>Raya Trade-RET-2607-2706</b></span>
-        <span class="facts"><span class="mo">Jul 2026 – Jun 2027</span><span>Lead: <b>Islam Saadany</b></span><span>Team: <b>Omar Alaa, Mohamed Essam</b></span></span>
+        <span class="facts"><span class="mo">Jul 2026 – Jun 2027</span><span><b>Lead:</b> Islam Saadany</span><span><b>Team:</b> Omar Alaa, Mohamed Essam</span></span>
         <span class="pill run">Running</span><button class="btn">Edit</button></div></td></tr>
 
       <tr class="crow"><td><span class="who"><span class="mk">WD</span>Wander Development</span></td><td class="muted">Real Estate &amp; Property</td><td>Super user</td><td>3</td><td><span class="mod">Strategy</span></td><td><span class="cog">≡</span></td></tr>
       <tr class="asg"><td colspan="6"><div class="line">
         <button class="plus" title="Add an assignment to Wander Development" aria-label="Add an assignment to Wander Development">+</button>
         <span class="nm"><span class="ttag ret">Retainer</span><b>Wander-RET-2601-2612</b></span>
-        <span class="facts"><span class="mo">Jan – Aug 2026</span><span>Lead: <b>Ahmed Galal</b></span><span>Team: <b>Islam Saadany</b></span></span>
+        <span class="facts"><span class="mo">Jan – Aug 2026</span><span><b>Lead:</b> Ahmed Galal</span><span><b>Team:</b> Islam Saadany</span></span>
         <span class="pill late">Not written</span><button class="btn">Edit</button></div></td></tr>
 
       <tr class="crow"><td><span class="who"><span class="mk">FC</span>Forefront Consulting</span></td><td class="muted">Professional Services</td><td>Super user</td><td>3</td><td><span class="mod">Strategy</span></td><td><span class="cog">≡</span></td></tr>
@@ -138,10 +139,10 @@ ul b{color:var(--ink)}
   <div class="legend"><span class="pill run">Running</span><span class="pill late">Not written</span>ended, no write-up yet<span class="pill dr">Draft</span>being written<span class="pill pub">Written up</span>published</div>
 
   <ul>
-    <li><b>The +</b> is a small round button beside the client's last assignment, so adding never takes a line of its own. A hover says "Add an assignment to …".</li>
+    <li><b>The +</b> is a small plain square, grey, beside the client's last assignment, so adding never takes a line of its own. A hover says "Add an assignment to …".</li>
     <li><b>A client with no assignment yet</b> keeps one line: <b>+ Add an assignment</b>, with "No assignments yet" beside it.</li>
-    <li><b>Lead:</b> and <b>Team:</b> are labels in grey and the names are bold. The lead is no longer repeated in the team.</li>
-    <li><b>Where it stands</b> is a pill: Running green, Not written red, Draft amber, Written up blue.</li>
+    <li>The words <b>Lead:</b> and <b>Team:</b> are bold; the names stay plain. The lead is no longer repeated in the team.</li>
+    <li><b>Where it stands</b> is a small dot and the word in its colour, no box: Running green, Not written red, Draft amber, Written up blue.</li>
     <li>Only the super user sees the + and Edit. Everyone else sees the same lines without them.</li>
   </ul>
 </div>

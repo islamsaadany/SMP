@@ -27,8 +27,7 @@ h1{font-size:24px;margin:0}
 .say b{color:var(--ink)}
 /* ── the frame: strip · rail · main ── */
 .frame{border:1px solid var(--line);border-radius:10px;background:var(--ground);padding:8px;height:760px;display:grid;grid-template-columns:24px 200px minmax(0,1fr);gap:8px}
-.frame.railshut{grid-template-columns:24px 0 minmax(0,1fr)}
-.frame.railshut .rail{display:none}
+.frame.railshut{grid-template-columns:24px minmax(0,1fr)}
 .strip{display:flex;flex-direction:column;gap:6px}
 .ib{width:24px;height:26px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;background:var(--surface);font-size:12px;color:var(--ink-3)}
 .rail{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;font-size:12.5px}
@@ -113,9 +112,9 @@ h1{font-size:24px;margin:0}
 .way{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;position:relative}
 .way b{font-size:14px}
 .way span{font-size:12.5px;color:var(--ink-2)}
-.way.plan{border-color:var(--goldfill);box-shadow:0 0 0 1px var(--goldfill) inset;grid-column:1/-1}
-.way.plan .tag{position:absolute;top:10px;right:12px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:700}
-.way.plan .meta{font-size:12.5px;color:var(--ink-3)}
+.way.plan{border-color:var(--goldfill);box-shadow:0 0 0 1px var(--goldfill) inset;background:color-mix(in srgb,var(--goldfill) 7%,var(--surface))}
+.way.plan .tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.way.plan .meta{font-size:12px;color:var(--ink-3);margin-top:auto;padding-top:4px}
 .mark{outline:2px dashed #C2452E;outline-offset:3px;border-radius:6px}
 .note{display:none;font-size:11.5px;color:#C2452E;font-weight:600}
 .before .note{display:inline}
@@ -199,7 +198,7 @@ h1{font-size:24px;margin:0}
   }
   function start(after){
     var ways = [["Answer guided questions","I ask you a few questions and draft your Foundation from your answers."],["Use a template","Download an interview template, fill it in, and upload it back."]];
-    var planCard = after ? '<button type="button" class="way plan"><span class="tag">Online\'s plan holds one</span><b>Start from the existing plan</b><span>Load the Foundation that is on the plan today onto the cards, then change any part from its card or in the chat. Nothing on the plan moves until Apply to plan.</span><span class="meta">Online\'s Foundation · 4 parts · last changed 12 Oct by Islam Saadany</span></button>' : '';
+    var planCard = after ? '<button type="button" class="way plan"><span class="tag">On the plan today</span><b>Start from the existing plan</b><span>Load what is on the plan onto the cards and change any part. The plan moves only on Apply.</span><span class="meta">4 parts · changed 12 Oct by Islam Saadany</span></button>' : '';
     var inChat = after ? '' : '<div class="n" style="margin-top:8px"><b>Today the plan question is asked later, inside the chat</b>Pick <i>Answer guided questions</i> and the first thing the Copilot says is "Online already has a Foundation. Do you want to start from what\'s there, or start fresh?" — a start decision, one step too late, and asked in its own words again in the SWOT and in Directions.<span class="note"> ← the inconsistency</span></div>';
     return '<div class="main start"><div class="startc"><h3>What would you like to do with Online\'s Foundation?</h3>' +
       '<div class="ask"><span>Ask anything, attach your notes, or paste a finished Foundation…</span><div class="row"><span>📎 Attach notes &nbsp;·&nbsp; Word, PDF or Excel · or paste · Enter sends</span><span>↵</span></div></div>' +
@@ -222,7 +221,7 @@ h1{font-size:24px;margin:0}
     start: ['<div class="n"><b>The box and the two cards stay</b>Everything §639–§640 built is kept: the box starts a free chat from a question, notes or a paste; the two cards start step by step. The plan card simply joins them.</div>',
             '<div class="n"><b>Only when it means something</b>The card appears when the plan holds that thing: a Foundation with parts, a SWOT with lines, Directions with pillars, measures for Execution. An empty plan shows the usual cards only.</div>',
             '<div class="n"><b>It says what it starts from</b>"Online\'s Foundation · 4 parts · last changed 12 Oct by Islam" — so you are not guessing what will land on the cards.</div>',
-            '<div class="n"><b>First, and marked</b>After the first session most work is revision, so it leads. Picking it loads the parts, each agreed and marked as the plan\'s; any other card starts fresh.</div>',
+            '<div class="n"><b>First, and marked — one card of three</b>After the first session most work is revision, so it leads. Picking it loads the parts, each agreed and marked as the plan\'s; any other card starts fresh.</div>',
             '<div class="n"><b>Same card in every area</b>Foundation, SWOT, Directions, Execution: one card, one wording, replacing the three different in-chat questions they ask today.</div>'] };
   function draw(){
     document.querySelectorAll("#scr button").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.s === S.s)); });
@@ -232,7 +231,7 @@ h1{font-size:24px;margin:0}
     document.getElementById("notes").innerHTML = NOTES[S.s].join("");
     var f = document.getElementById("frame");
     f.className = "frame " + S.v + (S.s === "work" && !after ? " railshut" : "");
-    f.innerHTML = strip() + rail() + (S.s === "work" ? work(after) : start(after));
+    f.innerHTML = strip() + (S.s === "work" && !after ? "" : rail()) + (S.s === "work" ? work(after) : start(after));
   }
   document.addEventListener("click", function(e){
     var b = e.target.closest("[data-s],[data-v]"); if (!b) return;

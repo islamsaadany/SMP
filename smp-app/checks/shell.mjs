@@ -1383,7 +1383,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /On the plan/.test(pl[0].st) && /On the plan/.test(pl[1].st),
       "the card fills the cards from the plan, each marked On the plan, and stores it (§653)", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
     check(!pl.some((c) => /Optional/.test(c.st || "")), "nothing is marked optional — switched on, Purpose is asked like the rest (§479)", JSON.stringify(pl.map((c) => c.st)));
-    check(/loaded what Mobile/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says what it loaded and asks no years");
+    check(/Started from Mobile’s Foundation/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says it started from the plan and asks no years (§653)");
     await shot("0c-loaded");
     await page.click("[data-cop-cards=hide]");
     check(await page.evaluate(() => !document.querySelector(".copleft") && document.querySelector(".copflow").classList.contains("nocards") && !!document.querySelector('[data-cop-cards="show"]')),
@@ -1484,13 +1484,13 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const cols = await page.evaluate(() => {
       const r = (q) => { const e = document.querySelector(q); return e ? e.getBoundingClientRect() : null; };
       return { rail: r(".coprails"), left: r(".copleft"), chat: r(".copfchat"), todo: r(".copftodo"), todoCss: getComputedStyle(document.querySelector(".copftodo")).width, grip: r(".copflow > [data-cop-grip]"), cards: document.querySelectorAll(".copcard").length,
-        empty: Array.from(document.querySelectorAll(".copcard p")).filter((p) => /Not started/.test(p.textContent)).length,
+        empty: Array.from(document.querySelectorAll(".copcard .copst")).filter((p) => /^Not started$/.test(p.textContent.trim())).length,
         pageW: document.documentElement.scrollWidth, winW: innerWidth };
     });
     check(cols.left && cols.chat && cols.todo && cols.grip && (!cols.rail || !cols.rail.width || cols.rail.right <= cols.chat.left + 1) &&
       cols.chat.right <= cols.grip.left + 1 && cols.grip.right <= cols.left.left + 1 && cols.left.right <= cols.todo.left + 1 && cols.todoCss === "200px",
       "§638 the chat first, then the handle, the six cards, and the to-do at 200px", JSON.stringify(cols));
-    check(cols.cards === 6 && cols.empty === 6, "Start fresh shows six empty cards, Not started", cols.cards + " cards, " + cols.empty + " empty");
+    check(cols.cards === 6 && cols.empty === 6, "the guided road shows six empty cards, each Not started (§653)", cols.cards + " cards, " + cols.empty + " empty");
     check(cols.pageW <= cols.winW, "nothing pushes the page sideways", cols.pageW + " > " + cols.winW);
     /* §638 THE HANDLE: dragged left the chat narrows and the cards take the
        room, the width is kept on this browser; a double-click puts the

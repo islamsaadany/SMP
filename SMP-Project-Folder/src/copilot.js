@@ -231,13 +231,29 @@ var COPILOT = (function(){
   var STARTROADS = ["guided", "template"];
   var BOXWORK = { foundation:"a finished Foundation", analysis:"an earlier SWOT or analysis", compete:"your value proposition",
     directions:"your Directions", capabilities:"your Capabilities", execution:"your plan", advisory:"the papers behind your decision" };
+  /* §653 — START FROM THE EXISTING PLAN is a card on the start screen, first
+     and marked, shown only where the plan holds the thing (Islam: "another
+     card can appear: start from the existing plan, and it only appears if
+     there is something already in the plan"). It replaces the question each
+     area asked inside the chat one step later (§478, the SWOT's, Directions'). */
+  var PLANMARK = '<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>';
+  function planCardHtml(s){
+    var attr, meta;
+    if (s === "foundation") { var pp = planParts(), off = skipNow(), n = Object.keys(pp).filter(function(k){ return pp[k] && (!Array.isArray(pp[k]) || pp[k].length) && off.indexOf(k) < 0; }).length; if (!n) return ""; attr = 'data-cop-road="plan"'; meta = n + (n === 1 ? " part" : " parts"); }
+    else if (s === "analysis") { var sw = planSwot(), ln = LETTERS.reduce(function(k, L){ return k + ((sw[L] || []).length); }, 0); if (!ln) return ""; attr = 'data-cop-newplan="analysis"'; meta = ln + (ln === 1 ? " line" : " lines"); }
+    else if (s === "directions") { var nd = dvExisting().length; if (!nd) return ""; attr = 'data-cop-newplan="directions"'; meta = nd + (nd === 1 ? " Direction" : " Directions"); }
+    else return "";
+    return '<button type="button" class="coppcard copplan" ' + attr + '>' + icon(PLANMARK) +
+      '<span class="coppt"><span class="coptag">On the plan today</span>Start from the existing plan</span>' +
+      '<span class="coppd">Load what is on the plan and change any part. The plan moves only on Apply.</span><span class="copmeta">' + E(placeWord()) + "’s " + E(sectionWord()) + ' · ' + E(meta) + '</span></button>';
+  }
   function startHtml(){
     var s = section(), area = placeWord() + "’s " + sectionWord();
-    var cards = s === "foundation"
+    var cards = planCardHtml(s) + (s === "foundation"
       ? PATH_CARDS.filter(function(c){ return STARTROADS.indexOf(c.k) >= 0; }).map(function(c){ return '<button type="button" class="coppcard" data-cop-road="' + c.k + '">' + icon(c.i) +
           '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>'; }).join("")
       : (function(c){ return '<button type="button" class="coppcard" data-cop-newchat>' + icon(PATH_CARDS[0].i) +
-          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]);
+          '<span class="coppt">' + E(c[0]) + '</span><span class="coppd">' + E(c[1]) + '</span></button>'; })(STARTS[s] || [WORKFLOW_WORD[s] || "Step by step", "Forefront's method, step by step."]));
     return '<div class="copstart" data-cop-startscreen>' +
       '<h2 class="copstarth">What would you like to do with ' + E(area) + '?</h2>' +
       '<div class="copbox copstartbox"><textarea data-cop-starttext rows="2" placeholder="Ask anything, attach your notes, or paste ' + E(BOXWORK[s] || "finished work") + '…" aria-label="Ask the Copilot, attach notes or paste work — this starts a free chat">' + E(STARTTEXT[key()] || "") + '</textarea>' +
@@ -825,12 +841,29 @@ var COPILOT = (function(){
      reaches its roads — at once on a place with no Foundation, after "start
      fresh" on one that has it. "Start from it" is the guided road already. */
   var PENDROAD = {};             /* chat id → the road chosen on the start screen (this visit only) */
+  var PENDSTART = {};            /* §653: chat id → "plan", a SWOT started from the plan's lines by the start screen's card */
+  function applyStart(){
+    if (!swotOn() || !PANE.swot || !canEdit()) return;
+    var id = PANE.chat.id; if (PENDSTART[id] !== "plan") return;
+    if (PANE.swot.phase !== "start") { delete PENDSTART[id]; return; }
+    delete PENDSTART[id];
+    var g = swCopy(); g.start = "plan"; g.phase = "methods"; swSave(g);
+  }
   function applyRoad(){
     if (!flowOn()) return;
     var id = PANE.chat.id, r = PENDROAD[id], f = PANE.flow; if (!r) return;
     if (f.path || f.start === "plan") { delete PENDROAD[id]; return; }
     if (f.phase !== "path" || !canEdit()) return;
-    delete PENDROAD[id]; pickPath(r);
+    delete PENDROAD[id];
+    if (r === "plan") { var gs = flowCopy(); startFromPlan(gs); flowSave(gs); return; }
+    pickPath(r);
+  }
+  /* The cards filled from the plan, each part agreed and marked the plan's. */
+  function startFromPlan(gs){
+    var pp = planParts();
+    gs.start = "plan";
+    steps().forEach(function(el, i){ var t = pp[el.key] || ""; gs.drafts[i] = t; gs.from[i] = gs.done[i] = !!t; });
+    gs.path = "guided"; gs.phase = "loaded";
   }
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
@@ -1032,18 +1065,15 @@ var COPILOT = (function(){
          ANSWERED, never the page: the position through one part's questions
          is a fact about that part, and on the head it sat beside a track
          counting something else. */
-      if (now && f.phase === "ask") { st = "Question " + (f.qi + 1) + " of " + n; cls += " now"; }
-      else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
-      else if (now) { st = f.done[i] && txt ? "Being changed in the chat" : "Being written in the chat"; cls += " now"; }
-      else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
-      else if (txt) { st = "In progress"; }
-      /* §513 — A PART HALF ANSWERED IS IN PROGRESS, NOT EMPTY. It said
-         "Empty · Not started" with three answers given, which is the one
-         card a person comes back to and the one that told them nothing. */
-      else if (a) { st = "In progress"; }
-      else { empty = true; st = "Empty"; }
+      /* §653 — FOUR STATUS WORDS, everywhere: Not started · In progress ·
+         Agreed · On the plan. Which question, and how it is being changed,
+         is the card body's and the chat's to say (§525.1). */
+      if (now) { st = "In progress"; cls += " now"; }
+      else if (f.done[i] && txt) { if (f.from[i]) { st = "On the plan"; cls += " plan"; } else { st = "Agreed"; cls += " done"; } }
+      else if (txt || a) { st = "In progress"; }
+      else { empty = true; st = "Not started"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f), el.key)
-        : '<p>' + (now && f.phase === "draft" ? "Nothing agreed yet. The proposal is in the chat." : now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+        : '<p>' + (now && f.phase === "draft" ? "Nothing agreed yet. The proposal is in the chat." : now && f.phase === "ask" ? E("Question " + (f.qi + 1) + " of " + n + ".") : now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "No answers yet.") + '</p>';
 
       var wide = el.key === "who" || el.key === "asp";
       var head = '<h3><span>' + E(partName(el)) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
@@ -1076,22 +1106,16 @@ var COPILOT = (function(){
   }
   function flowHead(f){
     var S = steps(), el = S[f.e] || {}, t, p = "";
-    if (f.phase === "year" || f.phase === "path" || f.phase === "start" || f.phase === "loaded") t = "Copilot · Foundation";
-    else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
-    else {
-      t = "Copilot · " + partName(el);
-      /* The question's position is the card's (§525.1), so the head says
-         which part and which step of it, never how far through its
-         questions — said twice on one screen otherwise (§87). */
-      p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
-    }
-    var total = countedParts(f), agreed = agreedCount(f);
+    /* §653 — ONE JOB PER HEADER: the chat's is the chat's name and the step
+       (the pane's is the version). The question's position stays the card's
+       (§525.1); the count is the to-do's alone. */
+    var step = f.phase === "year" || f.phase === "path" || f.phase === "start" ? "Start" : f.phase === "loaded" ? ""
+      : f.phase === "check" ? "Check" : f.phase === "saved" ? "Saved" : partName(el);
+    t = '<span class="copfname">' + E(PANE.chat.title || fname()) + '</span>' + (step ? '<small> · ' + E(step) + '</small>' : '');
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>'
       : sheetBtn("cards", "View " + sectionWord());
     show += sheetBtn("todo", "To-do " + doneCount(PANE.flow) + "/" + S.filter(function(_, i){ return on(i); }).length);
-    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="copfbar"><span class="copfcount" data-cop-progress>' + agreed + ' of ' + total + ' parts agreed</span>' +
-      '<div class="coptrack" role="progressbar" aria-label="Parts agreed" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + agreed + '"><i style="width:' + (total ? Math.round(agreed / total * 100) : 0) + '%"></i></div></div>';
+    return '<div class="copfhead"><b>' + t + '</b>' + show + sizeHtml() + '</div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -1099,7 +1123,11 @@ var COPILOT = (function(){
     /* §478: where the place already HAS a Foundation the chat opens by
        asking whether to start from it; the answer stays on the page with
        the chosen button lit, as the mockup draws it. */
-    if (f.phase === "start" || f.start) {
+    if (f.start === "plan" && f.phase !== "start") {
+      /* §653: started from the plan's Foundation by the start screen's card
+         (or §478's question): said once, as a fact, not as a question kept. */
+      out.push(aiMsg("Started from " + E(placeWord()) + "’s Foundation as it stands on the plan — the parts are on the cards, each marked On the plan."));
+    } else if (f.phase === "start" || f.start) {
       var ch = function(k, w){
         return f.phase === "start" && ed ? '<button type="button" class="copbtn' + (k === "plan" ? " solid" : "") + '" data-cop-start="' + k + '">' + w + '</button>'
           : '<span class="copchoice' + (f.start === k ? " picked" : "") + '">' + w + '</span>'; };
@@ -1108,7 +1136,7 @@ var COPILOT = (function(){
       if (f.phase === "start") return out.join("");
     } else out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
     if (plan) {
-      out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Edit a part from its card — the pen to write it yourself, or Edit with AI — or tell me what you want to change."));
+      out.push(aiMsg("Edit a part from its card — the pen to write it yourself, or Edit with AI — or tell me what you want to change."));
       if (f.phase === "loaded" && ed && agreedAll(f))
         out.push(aiMsg("When the parts read as you want them, run the check and save the Foundation from the pane."));
     } else {
@@ -1232,7 +1260,7 @@ var COPILOT = (function(){
       out.push(aiMsg("Every part is agreed. Run the check from the pane when you're ready — it reads the parts together.", true));
     }
     if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
+      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
@@ -1251,7 +1279,7 @@ var COPILOT = (function(){
     var lines = current ? [] : log.filter(function(x, k){ return member[k] === i; });
     var d = lines.filter(function(x){ return x.w === "ai"; }).length;
     var open = !!FOLD[PANE.chat.id + ":" + i];
-    var st = current ? '<span class="copst now">Drafting</span>' : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">Not agreed yet</span>';
+    var st = current ? '<span class="copst now">In progress</span>' : f.done[i] && txt ? '<span class="copst done">Agreed</span>' : '<span class="copst">In progress</span>';
     var bits = [n ? n + (n === 1 ? " answer" : " answers") : "", d ? d + (d === 1 ? " draft" : " drafts") : ""].filter(Boolean).join(" · ");
     var body = '';
     if (open) {
@@ -1303,8 +1331,11 @@ var COPILOT = (function(){
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
     var vn = f.saved ? f.saved.n : (PANE.nextVersion || 1), sNow = savedNow(f);
-    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> · ' + (sNow ? "saved" : "in progress") +
-      ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
+    /* §653 — the pane's head is the version and its standing; the parts
+       done are the to-do's count, the years are its second row. */
+    var apH = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
+    var vline = '<div class="copvline"><b>v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> ' + (sNow ? "saved" : "in progress") +
+      (apH ? ' · v' + E(apH) + ' on the plan' : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     /* §638: the chat first, the cards to its right behind the handle, the
        to-do last at its 200px (the signed-off concept). Without room beside it (§642) the
@@ -1346,12 +1377,14 @@ var COPILOT = (function(){
     /* §525 — whether the plan holds it, read off the same extra.applied the
        deliverable page reads (Islam: "keep in both"). */
     var ap = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
-    var onPlan = ap ? (ap === vn && f.saved ? ' · on the plan' : ' · v' + ap + ' is on the plan') : '';
-    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + onPlan + '</span>'
-      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + onPlan + '</span>'
-      : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
-      : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
     var saveN = f.saved && !sNow ? vn + 1 : vn;
+    /* §653 — THE PATH IN ONE LINE, always: what is in progress, what is
+       saved, what is on the plan. No count here: the to-do counts, and a
+       held Save says in its bubble what it waits for. */
+    var bits = [];
+    if (sNow) bits.push('<b>v' + E(vn) + '</b> saved'); else { bits.push('<b>v' + E(saveN) + '</b> in progress'); if (f.saved) bits.push('v' + E(vn) + ' saved'); }
+    if (ap) bits.push('<span class="on">v' + E(ap) + ' on the plan</span>');
+    var st = '<span class="copsvst" data-cop-fstate>' + bits.join(' <i>·</i> ') + '</span>';
     /* §525.1 — the green line only where the words beside it would otherwise
        be the only thing saying it landed: the version that is on the plan is
        the one just saved. A LATER unsaved version is a different state and
@@ -1367,7 +1400,7 @@ var COPILOT = (function(){
         var wc = busyHere ? BUSY : !all ? owed : "";
         var ws = busyHere ? BUSY : !all ? owed : sNow ? "Nothing has changed since v" + vn + " was saved." : "";
         return '<button type="button" class="copbtn quiet' + heldCls(wc) + '" data-cop-fcheck' + (wc ? held(wc) : ' title="Optional: the Copilot reads the parts together"') + '>Run the check</button>' +
-          '<button type="button" class="copbtn solid' + heldCls(ws) + '" data-cop-ffinish' + held(ws) + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>'; })() +
+          '<button type="button" class="copbtn solid' + heldCls(ws) + '" data-cop-ffinish' + held(ws) + '>Save as v' + E(saveN) + '</button>'; })() +
       /* HELD, NOT DEAD (§538), and the reason is now the RIGHT one: the old
          line said "Save the Foundation first" even while the Copilot was
          working on a Foundation already saved. */
@@ -1379,7 +1412,9 @@ var COPILOT = (function(){
      Start, each part with its answers counted, then the check and the save. */
   function ftodoHtml(f){
     var S = steps(), li = function(name, state, cnt, part){
-      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : state === "opt" ? "Optional" : "To do";
+      /* §653 — a part agreed reads Agreed, a step done reads Done, the one
+         in hand In progress, and the rest say nothing: the open dot says it. */
+      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? "In progress" : "";
       return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
         '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
         '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
@@ -1535,12 +1570,7 @@ var COPILOT = (function(){
       /* START FROM IT fills the cards from the plan, each part already
          agreed and marked as the plan's; START FRESH goes to the roads. */
       var gs = flowCopy(), how = b.getAttribute("data-cop-start");
-      gs.start = how;
-      if (how === "plan") {
-        var pp = planParts();
-        steps().forEach(function(el, i){ var t = pp[el.key] || ""; gs.drafts[i] = t; gs.from[i] = gs.done[i] = !!t; });
-        gs.path = "guided"; gs.phase = "loaded";
-      } else gs.phase = "path";
+      if (how === "plan") startFromPlan(gs); else { gs.start = how; gs.phase = "path"; }
       flowSave(gs); return true;
     }
     if ((b = hit(ev, "[data-cop-cards]"))) {
@@ -1694,7 +1724,18 @@ var COPILOT = (function(){
     if (flowView()) return !CARDSHUT[PANE.chat.id];
     return !!draftMsg();
   }
-  function railFolded(){ return railShut() || (resultOpen() && !RAILKEPT); }
+  /* §653 — THE RAIL STAYS OPEN WHILE THERE IS ROOM (Islam: "collapsing the
+     side banner by default … doesn't give the user the ability to know that
+     he is on the right chat"). It folds by itself only when the Copilot is
+     tight — §642's rule: the work beside the chat needs 1000px, the rail
+     about 240 more — and a fold made with the button is kept across visits.
+     Reverses §490.2's "a running chat folds the rails". */
+  function tight(){
+    if (!resultOpen()) return false;
+    var p = document.querySelector("[data-cop-pane]"); if (!p) return false;
+    return p.getBoundingClientRect().width / (typeof pageZoom === "function" ? pageZoom() : 1) < 1240;
+  }
+  function railFolded(){ return railShut() || (tight() && !RAILKEPT); }
   function syncRail(){
     var shut = railFolded();
     var p = document.querySelector("[data-cop-pane]"); if (p) p.classList.toggle("copshut", shut);
@@ -1779,7 +1820,7 @@ var COPILOT = (function(){
     if (penAt) { var pb = document.querySelector("[data-cop-pentext]"); if (pb) { pb.focus(); try { pb.setSelectionRange(penAt[0], penAt[1]); } catch (e) {} } }
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
-    applyRoad();
+    applyRoad(); applyStart();
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
   /* THE PANE FILLS THE WINDOW (§453): it ends at the bottom of the screen,
@@ -1806,7 +1847,7 @@ var COPILOT = (function(){
     var b = document.querySelector("[data-cop-send]");
     if (b) { b.hidden = !t.value.trim() && !(PANE && PANE.pending && PANE.pending.length); setHeld(b, THINKING ? BUSY : ""); if (b.getAttribute("aria-disabled")) b.removeAttribute("title"); else b.setAttribute("title", "Send"); }
   }
-  window.addEventListener("resize", function(){ fitPane(); fitBox(); });
+  window.addEventListener("resize", function(){ fitPane(); fitBox(); syncRail(); });
 
   /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
@@ -1822,6 +1863,8 @@ var COPILOT = (function(){
   var LETTERS = ["s", "w", "o", "t"], LETTER_WORD = { s: "Strengths", w: "Weaknesses", o: "Opportunities", t: "Threats" };
   function swotOn(){ return !!(PANE && PANE.chat && PANE.swot); }
   function swCopy(){ return JSON.parse(JSON.stringify(PANE.swot)); }
+  /* §653 — the step the SWOT chat is on, for its head. */
+  function swStepWord(ph){ return { start:"Start", methods:"Methods", gather:"Gathering", analyses:"Analyses", draft:"The SWOT", check:"Check", saved:"Saved" }[ph] || ""; }
   function swView(j){ ["swot","swotTodo","swotDone","swotCover","swotGatherDone","swotQuestions","swotOffered","swotMethodWord","swotAreaWord","swotTemplateOf","swotNextVersion"]
     .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
   function swSave(s, then){
@@ -1920,7 +1963,7 @@ var COPILOT = (function(){
     var body = groups.map(function(g){
       return '<div class="copsw-tg"><div class="copsw-th">' + (g === "_" ? "Then" : E((PANE.swotAreaWord || {})[g] || g)) + '</div><ul>' +
         seen[g].map(function(t){
-          var on = swLineKey(t) === cur, pill = t.state === "done" ? "Done" : t.state === "wait" ? "Waiting" : "To do";
+          var on = swLineKey(t) === cur, pill = t.state === "done" ? "Done" : t.state === "wait" ? "In progress" : "";
           /* Compact (§490.2): the line's "n of m" rides in its title as n/m; the
              status sentence stays on the hover rather than a second line. */
           var nm = /(\d+)\s+of\s+(\d+)/.exec(String(t.status || "")), cnt = nm ? '<i>' + nm[1] + '/' + nm[2] + '</i>' : '';
@@ -1997,7 +2040,7 @@ var COPILOT = (function(){
     var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
     var todo = PANE.swotTodo || [], done = PANE.swotDone || 0;
     var chat = '<div class="copchat copfchat copswchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-      '<div class="copfhead"><b>Copilot · SWOT</b>' + sheetBtn("cards", "View the SWOT") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + sizeHtml() + '</div>' +
+      '<div class="copfhead"><b><span class="copfname">' + E(PANE.chat.title || swTitle()) + '</span>' + (swStepWord(s.phase) ? '<small> · ' + E(swStepWord(s.phase)) + '</small>' : '') + '</b>' + sheetBtn("cards", "View the SWOT") + sheetBtn("todo", "To-do " + done + "/" + todo.length) + sizeHtml() + '</div>' +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + swMsgs(s, ed, busyHere) + work + '</div></div>' +
       (!ed ? VIEWONLY
         : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. <button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
@@ -2167,8 +2210,11 @@ var COPILOT = (function(){
   }
   function swFootHtml(s, ed, busyHere){
     var saved = s.phase === "saved" && s.saved, on = saved && swPlanHolds(s.draft);
-    var state = saved ? '<span class="copsvst ' + (on ? 'ok' : 'warn') + '" data-cop-swstate>' + (on ? 'On the plan as v' + E(s.saved.n) : 'Saved as v' + E(s.saved.n) + ' · not on the plan yet') + '</span>'
-      : '<span class="copm" data-cop-swstate>' + (s.draft ? 'Save keeps a version under Deliverables' : 'Drafted once the analyses are agreed') + '</span>';
+    /* §653 — the same one-line path as the Foundation's foot. */
+    var sb = [];
+    if (saved) sb.push('<b>v' + E(s.saved.n) + '</b> saved'); else { sb.push('<b>v' + E(s.saved ? s.saved.n + 1 : (PANE.swotNextVersion || 1)) + '</b> in progress'); if (s.saved) sb.push('v' + E(s.saved.n) + ' saved'); }
+    if (on) sb.push('<span class="on">v' + E(s.saved.n) + ' on the plan</span>');
+    var state = '<span class="copsvst" data-cop-swstate>' + sb.join(' <i>·</i> ') + '</span>';
     return '<div class="copoutf copswfoot" data-cop-swfoot>' + state + '<span class="copsw-sp"></span>' +
       (ed ? (function(){
         var wf = busyHere ? BUSY : !s.draft ? "Draft the SWOT first." : !(s.phase === "draft" || s.phase === "check") ? "Nothing has changed since it was saved." : "";
@@ -2181,7 +2227,7 @@ var COPILOT = (function(){
     var title = area === "micro" ? "Micro analysis — the five forces" : "Macro analysis — DESTEP";
     if (!an) return '<div class="copsw-card"><h3>' + E(title) + '</h3><p class="copnote">Not written yet — the chat offers to write it.</p></div>';
     var editing = SWEDIT && SWEDIT.area === area, src = editing ? SWEDIT.data : an;
-    return '<div class="copsw-card copsw-an"><h3>' + E(title) + (an.agreed ? ' <span class="copsw-pill done">Agreed</span>' : ' <span class="copsw-pill wait">Waiting for you</span>') +
+    return '<div class="copsw-card copsw-an"><h3>' + E(title) + (an.agreed ? ' <span class="copsw-pill done">Agreed</span>' :  ' <span class="copsw-pill wait">In progress</span>') +
       (ed && !editing ? ' <button type="button" class="linkbu" data-cop-sw-anedit="' + area + '">Edit</button>' : '') + '</h3>' +
       '<div class="copsw-forces">' + src.items.map(function(it, k){
         var q = qs.filter(function(x){ return x.key === it.key; })[0] || { name: it.key };
@@ -2467,7 +2513,7 @@ var COPILOT = (function(){
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-cp-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
           '<span class="copsw-lb"><span class="copsw-tt" title="' + E(t.status) + '"><span>' + E(t.title) + '</span></span><span class="copsw-ts">' + E(t.status) + '</span></span>' +
-          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "To do") + '</span></li>';
+          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "") + '</span></li>';
       }).join("") + '</ul></div></div></aside>';
   }
   function cpMsg(who, html){ return '<div class="copmsg ' + who + '"><div class="copbody">' + html + '</div></div>'; }
@@ -2697,7 +2743,7 @@ var COPILOT = (function(){
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-ad-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
           '<span class="copsw-lb"><span class="copsw-tt" title="' + E(t.status) + '"><span>' + E(t.title) + '</span></span><span class="copsw-ts">' + E(t.status) + '</span></span>' +
-          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "To do") + '</span></li>';
+          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "") + '</span></li>';
       }).join("") + '</ul></div></div>';
     var pips = ""; for (var k = 0; k < c.of; k++) pips += '<i class="' + (k < c.asked ? "u" : "") + '"></i>';
     h += '<div class="copsw-box adbudget" data-cop-ad-budget><div class="copsw-bh"><b>Round ' + c.round + ' of ' + c.rounds + '</b> <span class="copsw-n">' + c.asked + ' of ' + c.of + ' asked</span></div>' +
@@ -2911,7 +2957,7 @@ var COPILOT = (function(){
       '<div class="copsw-tg"><ul>' + todo.map(function(t){
         return '<li class="copsw-li ' + t.state + '" data-cop-dv-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
           '<span class="copsw-lb"><span class="copsw-tt" title="' + E(t.status) + '"><span>' + E(t.title) + '</span></span><span class="copsw-ts">' + E(t.status) + '</span></span>' +
-          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "To do") + '</span></li>';
+          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "") + '</span></li>';
       }).join("") + '</ul></div></div></aside>';
   }
   var DV_MARK = { plan:"Plan", yours:"Yours", "new":"New" };
@@ -3207,7 +3253,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  function dvNew(mode){
+  function dvNew(mode, fromPlan){
     act({ act:"newDirections", place: place(), mode: mode, title: dvTitle(mode),
           withCaps: mode === "directions", hadPlan: dvExisting().length }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
@@ -3215,6 +3261,16 @@ var COPILOT = (function(){
       dvView(j);
       OPEN[key()] = { kind:"chat", id: j.chat.id };
       draw();
+      /* §653: the start screen's plan card has already answered the chat's
+         own "start from them, or fresh?" */
+      if (fromPlan && PANE.dirs && PANE.dirs.start !== "plan") {
+        var nid = j.chat.id;
+        act({ act:"dirStart", id:nid, start:"plan", existing: dvExisting() }, function(k){
+          if (PANE && PANE.chat && PANE.chat.id === nid) dvView(k);
+          dvProgress(nid); draw(); dvAsk({ act:"dirSuggest" });
+        });
+        return;
+      }
       if (PANE.dirs && PANE.dirs.start === "fresh") dvAsk({ act: mode === "capabilities" ? "capSuggest" : "dirSuggest" });
     });
   }
@@ -3565,7 +3621,10 @@ var COPILOT = (function(){
      that sits still for that long reads as broken (§124). The server's own
      list replaces the page's guess when it lands. */
   function newFoundation(road){
-    act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
+    /* §653: the start decision is the start screen's; a chat opened from a
+       card never asks "start from it, or fresh?" again. The plain + New chat
+       still does (§478), for a person who chose nothing. */
+    act({ act:"newFlow", place: place(), title: fname(), hasPlan: !road && planHas(planParts()), skip: skipNow() }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       if (road) PENDROAD[j.chat.id] = road;
       PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
@@ -3755,6 +3814,18 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-startsend]"))) { startFree(); return; }
     if ((b = hit(ev, "[data-cop-startattach]"))) { var sfi = document.querySelector("[data-cop-startfile]"); if (sfi) sfi.click(); return; }
     if ((b = hit(ev, "[data-cop-road]"))) { newFoundation(b.getAttribute("data-cop-road")); return; }
+    if ((b = hit(ev, "[data-cop-newplan]"))) {
+      MENU = null;
+      var np = b.getAttribute("data-cop-newplan");
+      if (np === "directions") { dvNew("directions", true); return; }
+      act({ act:"newSwot", place: place(), title: swTitle(), fromPlan: planSwot() }, function(j){
+        var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+        PENDSTART[j.chat.id] = "plan";
+        OPEN[key()] = { kind:"chat", id: j.chat.id };
+        openItem("chat", j.chat.id);
+      });
+      return;
+    }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       MENU = null;
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided

@@ -1091,9 +1091,16 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
        visit. Asserted at both ends (§94.2), then the rail is used open. */
     const railNow = () => page.evaluate(() => { const r = document.querySelector(".coprails"); return r ? Math.round(r.getBoundingClientRect().width) : null; });
     const shut0 = await page.evaluate(() => { try { return [localStorage.getItem("smp.copilot.rail2"), localStorage.getItem("smp.copilot.rail")]; } catch (e) { return null; } });
-    check(shut0 && shut0[0] === null && shut0[1] === null && !(await railNow()), "§638 with a draft beside the chat the rail folds to its strip, and nothing is stored as the person's choice", JSON.stringify(shut0) + " " + (await railNow()));
-    await page.click(".copslim [data-cop-railtog]"); await page.waitForTimeout(200);
-    check((await railNow()) === 200, "…and pressed open it is the same 200px as in every other phase", String(await railNow()));
+    /* §653 — REWRITTEN, NOT LOOSENED (§218). Islam: "collapsing the side
+       banner by default … doesn't give the user the ability to know that he
+       is on the right chat". With room beside the chat the rail STAYS open,
+       and nothing is stored as the person's choice; it folds by itself only
+       when the Copilot is tight. */
+    check(shut0 && shut0[0] === null && shut0[1] === null && (await railNow()) > 0, "§653 with a draft beside the chat and room for it, the rail stays open — the chat and its versions in view — and nothing is stored as the person's choice", JSON.stringify(shut0) + " " + (await railNow()));
+    await page.setViewportSize({ width: 1000, height: 900 }); await page.waitForTimeout(300);
+    const tightRail = await railNow();
+    await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(300);
+    check(!tightRail && (await railNow()) > 0, "§653 …and folds by itself only when the Copilot is tight (a 1000px window), opening again with room", JSON.stringify({ tightRail, back: await railNow() }));
     const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
     const dotsShown = await page.evaluate(() => { const d = document.querySelector("[data-cop-chats] .coprow.on [data-cop-menu]"); return d ? getComputedStyle(d).opacity : "none"; });
     check(dotsShown === "1", "the open chat shows its three dots", dotsShown);
@@ -1339,35 +1346,42 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        saved its units' Structure, so Purpose and Core Values are OFF — four
        cards. Ticked on through the stored graph, it is six, nothing optional. */
     ST0 = await page.evaluate(() => GROUP.structure ? JSON.parse(JSON.stringify(GROUP.structure)) : null);
-    await newWorkflow();
-    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
-    await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 5000 }).catch(() => {});
+    /* §653 — START FROM THE EXISTING PLAN is the start screen's first card
+       where the plan holds a Foundation, saying what it holds; pressed, the
+       chat opens on the cards filled from the plan, with no question asked
+       inside it (§478's question stays only for the plain + New chat). */
+    const fromPlan = async () => { await page.locator("[data-cop-home]:visible").first().click(); await page.waitForSelector('.copstart [data-cop-road="plan"]', { timeout: 10000 }); await page.click('.copstart [data-cop-road="plan"]'); };
+    await fromPlan();
+    await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 10000 }).catch(() => {});
     const off4 = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()));
     check(off4.join("|") === [W0.who, W0.asp, W0.eim, W0.obj].join("|"),
       "with Purpose and Core Values off in Structure, the chat has no card for either, in the client's words (§479, §514)", JSON.stringify(off4) + " vs " + JSON.stringify(W0));
     await page.evaluate(() => { GROUP.structure = { bu: { on: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"] } }; paint(); });
     const W = await readW();
     const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
-    await newWorkflow();
-    /* the first chat's own Start buttons are still on screen, so wait for the
-       NEW chat to be the current one before reading its id (§222). */
+    await page.locator("[data-cop-home]:visible").first().click();
+    await page.waitForSelector('.copstart [data-cop-road="plan"]', { timeout: 10000 });
+    const pc = await page.evaluate(() => { const c = document.querySelector('.copstart [data-cop-road="plan"]'); const all = Array.from(document.querySelectorAll(".copstart .coppcard"));
+      return { first: all[0] === c, t: c.querySelector(".coppt").textContent, meta: (c.querySelector(".copmeta") || {}).textContent || "", tag: (c.querySelector(".coptag") || {}).textContent || "", n: all.length }; });
+    check(pc.first && /Start from the existing plan/.test(pc.t) && /On the plan today/.test(pc.tag) && /Foundation · \d+ parts/.test(pc.meta) && pc.n === 3,
+      "§653 Start from the existing plan is the start screen's first card of three, marked On the plan today, saying what it holds", JSON.stringify(pc));
+    await page.click('.copstart [data-cop-road="plan"]');
+    /* the first chat's own cards are still on screen, so wait for the NEW
+       chat to be the current one before reading its id (§222). */
     await page.waitForFunction((w) => { const e = document.querySelector(".copitem[aria-current]"); return e && e.dataset.copChat !== w; }, was4, { timeout: 10000 });
-    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     const pid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
-    await page.waitForFunction(() => document.querySelectorAll(".copcard").length === 6, null, { timeout: 5000 }).catch(() => {});
+    await page.waitForFunction(() => document.querySelectorAll(".copcard.acts, .copcard.pick").length === 6, null, { timeout: 10000 }).catch(() => {});
     const q0 = await page.evaluate(() => ({ q: document.querySelector("[data-cop-msgs]").textContent, b: Array.from(document.querySelectorAll("[data-cop-start]")).map((x) => x.textContent.trim()),
       cards: Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()), wide: document.querySelectorAll(".copcard.wide").length, roads: document.querySelectorAll("[data-cop-path]").length }));
-    check(/already has a Foundation/.test(q0.q) && q0.b.join("|") === "Start from it|Start fresh" && q0.roads === 0,
-      "a place that has a Foundation is asked: start from it, or start fresh — before any road", JSON.stringify(q0).slice(0, 300));
+    check(/Started from Mobile’s Foundation as it stands on the plan/.test(q0.q) && !/already has a Foundation/.test(q0.q) && q0.b.length === 0 && q0.roads === 0,
+      "§653 …pressed, the chat says it started from the plan — no question asked inside it, no road", JSON.stringify(q0).slice(0, 300));
     check(q0.cards.join("|") === [W.who, W.asp, W.eim, W.pur, W.obj, W.val].join("|") && q0.wide === 2,
       "six cards in order in the client's words — Ambition where the method says Winning Aspiration — the first two full width (§514)", JSON.stringify(q0.cards) + " " + q0.wide + " vs " + JSON.stringify(W));
     await shot("0b-start");
-    await page.click('[data-cop-start="plan"]');
-    await page.waitForSelector(".copcard.acts, .copcard.pick", { timeout: 10000 });
     const pl = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard")).map((c) => ({ st: (c.querySelector(".copst") || {}).textContent, p: c.textContent })));
     let P = await flowRow(pid);
-    check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /From the plan/.test(pl[0].st) && /From the plan/.test(pl[1].st),
-      "Start from it fills the cards from the plan, each marked From the plan, and stores it", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
+    check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /On the plan/.test(pl[0].st) && /On the plan/.test(pl[1].st),
+      "the card fills the cards from the plan, each marked On the plan, and stores it (§653)", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
     check(!pl.some((c) => /Optional/.test(c.st || "")), "nothing is marked optional — switched on, Purpose is asked like the rest (§479)", JSON.stringify(pl.map((c) => c.st)));
     check(/loaded what Mobile/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says what it loaded and asks no years");
     await shot("0c-loaded");
@@ -1421,8 +1435,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.keyboard.press("Control+Enter");
     for (let i = 0; i < 20 && (P = await flowRow(pid)).drafts[0] !== "We sell phones across Egypt, written by hand."; i++) await page.waitForTimeout(250);
     const st0 = await textOf('[data-cop-card="0"] .copst');
-    check(P.drafts[0] === "We sell phones across Egypt, written by hand." && P.done[0] === true && P.from[0] === false && /Done/.test(st0) && !(await page.$("[data-cop-pentext]")),
-      "Ctrl+Enter saves the words, the part reads Done and no longer From the plan", JSON.stringify({ d: P.drafts[0], done: P.done[0], from: P.from[0], st0 }));
+    check(P.drafts[0] === "We sell phones across Egypt, written by hand." && P.done[0] === true && P.from[0] === false && /Agreed/.test(st0) && !(await page.$("[data-cop-pentext]")),
+      "Ctrl+Enter saves the words, the part reads Agreed and no longer On the plan (§653)", JSON.stringify({ d: P.drafts[0], done: P.done[0], from: P.from[0], st0 }));
     /* §642 (Islam's screenshot: Key Objectives "all showing 2 more lines
        without a way of viewing them"): a card of five lines shows three and
        Show 2 more; pressed, all five open in place and it says Show fewer —
@@ -1457,15 +1471,16 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".copstart .coppcard")).map((b) => ({ k: b.dataset.copRoad, rec: b.classList.contains("rec"),
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
     const box0 = await page.evaluate(() => ({ box: !!document.querySelector(".copstart [data-cop-starttext]"), clip: !!document.querySelector(".copstart [data-cop-startattach]"), above: (() => { const b = document.querySelector(".copstart .copbox"), c = document.querySelector(".copstart .coppcard"); return b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false; })() }));
-    check(roads.map((r) => r.k).join() === "guided,template" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
+    check(roads.map((r) => r.k).join() === "plan,guided,template" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
       roads.every((r) => r.d.length > 20) && box0.box && box0.clip && box0.above,
-      "§640 the start screen: a box to ask, attach notes or paste, and under it only the roads that differ — guided questions and the template — none marked Recommended (§475)", JSON.stringify({ roads, box0 }));
+      "§640, §653 the start screen: a box to ask, attach notes or paste, and under it the plan card first, then the roads that differ — guided questions and the template — none marked Recommended (§475)", JSON.stringify({ roads, box0 }));
     await shot("2-roads");
     await page.click('.copstart [data-cop-road="guided"]');
-    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
-    const cid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
-    await page.click('[data-cop-start="fresh"]');
+    /* §653: a road chosen on the start screen asks no "start from it?" in
+       the chat — the years come at once. */
     await page.waitForSelector("[data-cop-setyears]", { timeout: 10000 });
+    const cid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
+    check(!(await page.$("[data-cop-start]")), "§653 a road chosen on the start screen opens the chat with no start question inside it");
     const cols = await page.evaluate(() => {
       const r = (q) => { const e = document.querySelector(q); return e ? e.getBoundingClientRect() : null; };
       return { rail: r(".coprails"), left: r(".copleft"), chat: r(".copfchat"), todo: r(".copftodo"), todoCss: getComputedStyle(document.querySelector(".copftodo")).width, grip: r(".copflow > [data-cop-grip]"), cards: document.querySelectorAll(".copcard").length,
@@ -1551,15 +1566,20 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
         badges: Array.from(document.querySelectorAll(".copftodo li.copsw-li i")).map((x) => x.textContent.trim()),
         count: ((document.querySelector("[data-cop-progress]") || {}).textContent || "").trim(),
         bar: t ? t.getAttribute("aria-valuenow") : null, max: t ? t.getAttribute("aria-valuemax") : null,
+        todo: ((document.querySelector(".copftodo .copsw-n") || {}).textContent || "").trim(),
+        head: ((document.querySelector(".copfhead b") || {}).textContent || "").trim(),
         nameLines: nm ? new Set(Array.from(nm.getClientRects()).filter((r) => r.width > 0).map((r) => Math.round(r.top))).size : -1 };
     });
     /* the bar's words and its own aria must agree, or two readers of one
        number can disagree about it — and the ARIA is what a screen reader
        is given, so asserting only the words leaves half of it unmeasured */
-    const agree = (q, n, of) => q.count === n + " of " + of + " parts agreed" && q.bar === String(n) && q.max === String(of);
+    /* §653 — ONE COUNTER, the to-do's: two start rows done plus the parts
+       agreed, of 2 + 6 + 2 rows. The head and the pane carry no count and
+       no bar (both ends, §94.2); the head is the chat's name and the step. */
+    const agree = (q, n, of) => q.todo === (2 + n) + "/" + (of + 4) && q.count === "" && q.bar === null;
     const q1 = await readQ();
-    check(q1.ex === 3 && q1.prog === "" && /^Question 1 of \d+$/.test(q1.now) && /^0 of \d+ answered\.$/.test(q1.body) && agree(q1, 0, 6) && q1.nameLines === 1,
-      "the first question comes with three examples, its position is on the card and not on the head, and the bar reads 0 of 6 parts agreed (§525.1)", JSON.stringify(q1));
+    check(q1.ex === 3 && q1.prog === "" && q1.now === "In progress" && /^Question 1 of \d+\.$/.test(q1.body) && agree(q1, 0, 6) && q1.nameLines === 1 && /^Foundation — Mobile · /.test(q1.head),
+      "the first question comes with three examples; the card reads In progress with the question's position in its body; the to-do alone counts, 2/10; the head is the chat's name and the part (§525.1, §653)", JSON.stringify(q1));
     check(q1.rows === 10 && q1.badges.join("|") === "optional",
       "…and the to-do carries no count beside a part — ten rows, and the one <i> on it is the check's Optional (§525.1, both ends)", JSON.stringify({ rows: q1.rows, badges: q1.badges }));
     await shot("3-ask");
@@ -1601,8 +1621,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        being answered — where the card already says the position — and Review
        and Draft are steps the card alone does not name, so they stay. */
     const qr = await readQ();
-    check(qr.prog === "Review" && qr.now === "Reviewing" && agree(qr, 0, 6),
-      "…at the review step the head says Review, the card says Reviewing, and the bar still counts parts (§525.1)", JSON.stringify({ prog: qr.prog, now: qr.now, count: qr.count }));
+    check(qr.prog === "" && qr.now === "In progress" && agree(qr, 0, 6),
+      "…at the review step the card still reads In progress and the to-do still counts (§653)", JSON.stringify({ prog: qr.prog, now: qr.now, todo: qr.todo }));
     await page.fill('[data-cop-fans="0"]', "We sell phones, plans and connectivity across Egypt through 300 stores.");
     await page.dispatchEvent('[data-cop-fans="0"]', "change");
     for (let i = 0; i < 20 && !/plans and/.test((F = await flowRow(cid)).ans[0][0]); i++) await page.waitForTimeout(250);
@@ -1654,7 +1674,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const LIVE = ".copmsg:not(.copold) .copfdraft";
     const dr = await page.evaluate((L) => ({ t: (document.querySelector(L) || {}).textContent || "", card: document.querySelector('[data-cop-card="0"] p').textContent, st: (document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || "",
       refines: document.querySelectorAll("[data-cop-refine]").length, save: (document.querySelector("[data-cop-fsave]") || {}).textContent, keep: !!document.querySelector("[data-cop-fkeep]") }), LIVE);
-    check(/connect every Egyptian/.test(dr.t) && !/connect every Egyptian/.test(dr.card) && /Being written in the chat/.test(dr.st) && dr.refines === 3 && dr.save === "Save to the card" && !dr.keep,
+    check(/connect every Egyptian/.test(dr.t) && !/connect every Egyptian/.test(dr.card) && /In progress/.test(dr.st) && dr.refines === 3 && dr.save === "Save to the card" && !dr.keep,
       "§643 the draft is a proposal in the chat with three refines and Save to the card; the card says it is being written there and holds none of it", JSON.stringify(dr));
     Object.assign(MODEL_ANSWER, { text: "We connect Egypt." });
     await page.click('[data-cop-refine="concise"]');
@@ -1664,7 +1684,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(rf.old.length === 1 && /connect every Egyptian/.test(rf.old[0]) && rf.me.includes("Make concise") && !/We connect Egypt/.test(rf.card),
       "§643 a refine is the next proposal: what was asked stays in the chat, the one it replaced stays faded above it, and the card has still not changed", JSON.stringify(rf));
     await page.click("[data-cop-fsave]");
-    await page.waitForFunction(() => /Done/.test((document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || ""), null, { timeout: 10000 });
+    await page.waitForFunction(() => /Agreed/.test((document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || ""), null, { timeout: 10000 });
     for (let i = 0; i < 20 && !(F = await flowRow(cid)).done[0]; i++) await page.waitForTimeout(250);
     check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt." && F.prop[0] === "" && F.log.map((x) => x.p + x.w).join() === "0qa,0ai,0me,0ai,0note",
       "Save to the card puts the proposal on the card, agrees the part and moves to the next; the conversation is kept in the order it happened (§643, §644)", JSON.stringify({ done: F.done, e: F.e, phase: F.phase, log: F.log }));
@@ -1689,8 +1709,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        claim: the two readings before this one are both 0 of 6, so without
        this a bar frozen at nought passes every assertion above it (§113.8). */
     const qa = await readQ();
-    check(agree(qa, 1, 6) && /^Question 1 of \d+$/.test(qa.now),
-      "…and the bar moves to 1 of 6 parts agreed, with the next card carrying its own first question (§525.1)", JSON.stringify({ count: qa.count, bar: qa.bar, now: qa.now }));
+    check(agree(qa, 1, 6) && qa.now === "In progress" && /^Question 1 of \d+\.$/.test(qa.body),
+      "…and the to-do moves to 3/10, with the next card carrying its own first question (§525.1, §653)", JSON.stringify({ todo: qa.todo, now: qa.now, body: qa.body }));
     await shot("7-next");
 
     /* §512 — A DONE PART STILL OPENS, ON THE FRESH ROAD TOO, and saving it
@@ -1717,7 +1737,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector("[data-cop-fkeep]", { timeout: 10000 }).catch(() => {});
     const opn = await page.evaluate(() => ({ card: (document.querySelector('[data-cop-card="0"] p') || {}).textContent || "", st: (document.querySelector('[data-cop-card="0"] .copst') || {}).textContent || "",
       ask: /What would you like to change in/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), keep: (document.querySelector("[data-cop-fkeep]") || {}).textContent || "", save: !!document.querySelector("[data-cop-fsave]") }));
-    check(F.e === 0 && F.phase === "draft" && F.done[0] === true && /We connect Egypt\./.test(opn.card) && /Being changed in the chat/.test(opn.st) && opn.ask && opn.keep === "Leave it as it is" && !opn.save,
+    check(F.e === 0 && F.phase === "draft" && F.done[0] === true && /We connect Egypt\./.test(opn.card) && /In progress/.test(opn.st) && opn.ask && opn.keep === "Leave it as it is" && !opn.save,
       "§643 pressing it opens it to change in the chat; it stays agreed and its card keeps its words, saying it is being changed", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0], opn }));
     /* §513 — the part left half answered says so: In progress, N of M. */
     const half = { st: await textOf('[data-cop-card="1"] .copst'), p: await textOf('[data-cop-card="1"] p') };
@@ -1777,8 +1797,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        since §538; what it is FOR — held, saying why, until saved — is what
        is asserted, now including the guard (§94.2: a held button that still
        works would pass a line that only reads the attribute). */
-    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.held === "true" && !ck.apply.dead && /Save the Foundation first/.test(ck.apply.tip),
-      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan held with its reason until something is saved (§524, §538)", JSON.stringify(ck));
+    check(/^Save as v1$/.test((ck.fin || "").trim()) && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.held === "true" && !ck.apply.dead && /Save the Foundation first/.test(ck.apply.tip),
+      "the bar under the cards holds Save as v1, Run the check, and Apply to plan held with its reason until something is saved (§524, §538)", JSON.stringify(ck));
     /* THE PRESS IS ANSWERED BY THE GUARD, NOT BY THE EMPTY ID: before a save
        there is no deliverable, so even an unguarded press opens no dialog —
        it falls to applyAsk's own "Save the Foundation first." line under the
@@ -1899,7 +1919,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
       finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][aria-disabled=true]") && /Nothing has changed since v1/.test((document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || { getAttribute: () => "" }).getAttribute("data-tip") || ""), apply: !!document.querySelector('[data-cop-savebar] [data-cop-fapply]:not([disabled]):not([aria-disabled="true"])'),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
-    check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§524)", JSON.stringify(sb));
+    check(/^v1 saved$/.test(sb.st.replace(/\s+/g, " ").trim()) && sb.finOff && sb.apply, "after the save the foot reads v1 saved — and nothing about the plan yet — Save is dimmed and Apply to plan is live (§524, §653)", JSON.stringify(sb));
     /* §525.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there
        is nothing on the plan to say so about. Without this, a build drawing
        the green line always passes the assertion after Apply (§113.8). */
@@ -2020,7 +2040,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-edit-chat]");
     await page.waitForSelector("[data-cop-savebar]", { timeout: 10000 });
     const onp = await page.evaluate(() => (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "");
-    check(/Saved as Foundation — Mobile v1 · on the plan/.test(onp), "…and that chat's bar says v1 is on the plan (§525)", onp);
+    check(/v1 saved\s*·\s*v1 on the plan/.test(onp), "…and that chat's foot reads v1 saved · v1 on the plan (§525, §653)", onp);
     await page.hover('[data-cop-card="1"]'); await pressIf('[data-cop-pen="1"]');
     await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 }).catch(() => {});
     await page.fill("[data-cop-pentext]", "A second aspiration, for {Y}.").catch(() => {});
@@ -2223,8 +2243,8 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const sv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title ilike 'SWOT%' order by d.created_at desc limit 1"))).rows[0];
     const afterSave = await page.evaluate(() => ({ plan: (() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } })(),
       state: (document.querySelector("[data-cop-swstate]") || {}).textContent || "" }));
-    check(!!sv && /SWOT/.test(sv.title) && afterSave.plan === plan0 && /not on the plan yet/.test(afterSave.state),
-      "§641 Save writes a SWOT deliverable and leaves the plan alone — the foot says it is not on the plan yet", JSON.stringify({ sv, state: afterSave.state, same: afterSave.plan === plan0 }));
+    check(!!sv && /SWOT/.test(sv.title) && afterSave.plan === plan0 && /v1 saved/.test(afterSave.state) && !/on the plan/.test(afterSave.state),
+      "§641 Save writes a SWOT deliverable and leaves the plan alone — the foot reads v1 saved and nothing about the plan (§653)", JSON.stringify({ sv, state: afterSave.state, same: afterSave.plan === plan0 }));
     const arch0 = await page.evaluate(() => ARCHIVES.length);
     await page.click("[data-cop-swfoot] [data-cop-sw-apply]");
     await page.waitForSelector("[data-cop-swapply-yes]", { timeout: 5000 });
@@ -2233,7 +2253,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.waitForTimeout(1200);
     const applied = await page.evaluate(() => ({ s: (UNITS.mobile.swot || {}).s, arch: ARCHIVES.length, kind: (ARCHIVES[0] || {}).kind, lines: ((ARCHIVES[0] || {}).counts || {}).lines,
       state: (document.querySelector("[data-cop-swstate]") || {}).textContent || "" }));
-    check(/archived first/.test(ask) && Array.isArray(applied.s) && applied.s.includes("Wide store network") && applied.arch === arch0 + 1 && applied.kind === "swot" && applied.lines > 0 && /On the plan as v1/.test(applied.state),
+    check(/archived first/.test(ask) && Array.isArray(applied.s) && applied.s.includes("Wide store network") && applied.arch === arch0 + 1 && applied.kind === "swot" && applied.lines > 0 && /v1 on the plan/.test(applied.state),
       "§641 Apply to plan asks first, archives the SWOT the plan held as its own kind, writes the titles in, and the foot says it is on the plan", JSON.stringify({ applied, arch0 }));
     await shot("7-saved");
     await heldSweep(page, "SWOT, saved");

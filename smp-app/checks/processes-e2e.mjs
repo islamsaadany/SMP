@@ -336,7 +336,8 @@ check(cl["P5.1"].r == null && cl["P5.1"].i === 5 && cl["P1.1"].r === 5, "Clear e
 await q(ffp, 'update processes set "priorityImportance"=null where code=$2 and "workspaceId"=$1', [S, "P5.1"]);
 
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=rank", { waitUntil: "networkidle" });
-check((await A.page.$$("svg circle")).length === 3 && /Not scored yet/.test(await body(A.page)), "the chart plots the scored processes and names the rest");
+const nCirc = (await A.page.$$("svg[aria-label^='Importance against risk'] circle")).length; const bodyR = await body(A.page);
+check(nCirc === 2 && /Not scored yet/.test(bodyR), "the chart plots the scored processes and names the rest", nCirc + " | " + bodyR.slice(0, 300));
 await A.page.click("svg a >> nth=0"); await A.page.waitForURL(/sel=/, { timeout: 20000 });
 check(/selected/i.test(await body(A.page)), "a circle opens that process beside the chart");
 await A.page.goto(BASE + "/" + S + "/processes/priorities?step=plan", { waitUntil: "networkidle" });

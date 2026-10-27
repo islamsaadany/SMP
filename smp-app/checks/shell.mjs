@@ -1541,7 +1541,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        it has landed rather than racing it (one red in three runs, §490.2) */
     let F = await flowRow(cid);
     for (let k = 0; k < 20 && !(F && F.y0); k++) { await page.waitForTimeout(150); F = await flowRow(cid); }
-    check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start === "fresh", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
+    check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start !== "plan", "the years are stored on the chat — a road from the start screen, so no start answer (§653)", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 
     /* The guided road: a question, its examples, a short answer held. */
     /* §525.1 — ONE COUNT, AND IT IS PARTS AGREED. §514 made the card's body,
@@ -1576,10 +1576,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     /* §653 — ONE COUNTER, the to-do's: two start rows done plus the parts
        agreed, of 2 + 6 + 2 rows. The head and the pane carry no count and
        no bar (both ends, §94.2); the head is the chat's name and the step. */
-    const agree = (q, n, of) => q.todo === (2 + n) + "/" + (of + 4) && q.count === "" && q.bar === null;
+    const agree = (q, n, of) => q.todo === (2 + n) + "/" + (of + 3) && q.count === "" && q.bar === null;
     const q1 = await readQ();
     check(q1.ex === 3 && q1.prog === "" && q1.now === "In progress" && /^Question 1 of \d+\.$/.test(q1.body) && agree(q1, 0, 6) && q1.nameLines === 1 && /^Foundation — Mobile · /.test(q1.head),
-      "the first question comes with three examples; the card reads In progress with the question's position in its body; the to-do alone counts, 2/10; the head is the chat's name and the part (§525.1, §653)", JSON.stringify(q1));
+      "the first question comes with three examples; the card reads In progress with the question's position in its body; the to-do alone counts, 2/9 (the optional check is a row, not a count); the head is the chat's name and the part (§525.1, §653)", JSON.stringify(q1));
     check(q1.rows === 10 && q1.badges.join("|") === "optional",
       "…and the to-do carries no count beside a part — ten rows, and the one <i> on it is the check's Optional (§525.1, both ends)", JSON.stringify({ rows: q1.rows, badges: q1.badges }));
     await shot("3-ask");
@@ -1598,14 +1598,16 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        reporting (§215) on a build that is right. §51.11 in this file's own
        harness: when a control moves, grep every place that reaches for it
        rather than the assertion that failed first. */
-    await page.waitForFunction(() => /Question 2 of/.test((document.querySelector(".copcard.now .copst") || {}).textContent || ""), null, { timeout: 10000 });
+    /* §653 moved the position again — into the card's body — and this wait
+       moved with it (§51.11). */
+    await page.waitForFunction(() => /Question 2 of/.test((document.querySelector(".copcard.now p") || {}).textContent || ""), null, { timeout: 10000 });
     for (let i = 0; i < 20 && !(F = await flowRow(cid)).ans[0][0]; i++) await page.waitForTimeout(250);
     check(F.ans[0][0] === "We sell phones and connectivity across Egypt through 300 stores." && F.qi === 1, "the answer is stored and the next question asked", JSON.stringify(F.ans[0]));
     const q2 = await readQ();
     /* the card counts answers and the bar counts PARTS, so one answer moves
        the card and must NOT move the bar — which is the whole of §525.1 and
        the one assertion a build that merely renamed the old count would fail */
-    check(/^1 of \d+ answered\.$/.test(q2.body) && /^Question 2 of \d+$/.test(q2.now) && agree(q2, 0, 6),
+    check(/^Question 2 of \d+\.$/.test(q2.body) && q2.now === "In progress" && agree(q2, 0, 6),
       "…one answer moves the card's own count and the question on it, and leaves the bar at 0 of 6 parts (§525.1)", JSON.stringify(q2));
     /* The rest of the part's questions, answered. */
     for (let k = 1; k < 20; k++) {
@@ -1710,7 +1712,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        this a bar frozen at nought passes every assertion above it (§113.8). */
     const qa = await readQ();
     check(agree(qa, 1, 6) && qa.now === "In progress" && /^Question 1 of \d+\.$/.test(qa.body),
-      "…and the to-do moves to 3/10, with the next card carrying its own first question (§525.1, §653)", JSON.stringify({ todo: qa.todo, now: qa.now, body: qa.body }));
+      "…and the to-do moves to 3/9, with the next card carrying its own first question (§525.1, §653)", JSON.stringify({ todo: qa.todo, now: qa.now, body: qa.body }));
     await shot("7-next");
 
     /* §512 — A DONE PART STILL OPENS, ON THE FRESH ROAD TOO, and saving it

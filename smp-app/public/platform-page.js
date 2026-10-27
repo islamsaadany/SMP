@@ -3642,7 +3642,9 @@
       r.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
       var who = el("td");
       var w = el("span", "clwho");
-      if (c.mark) { var im = el("img", "cmark solo"); im.src = c.mark; im.alt = ""; w.appendChild(im); }
+      /* the list draws the client's small square (§629): its icon, else a
+         mark that is not wide, else initials — never a wide word-mark */
+      if (c.square) { var im = el("img", "cmark solo"); im.src = c.square; im.alt = ""; w.appendChild(im); }
       else w.appendChild(el("span", "cmark", initials(c.name)));
       w.appendChild(el("b", null, c.name));
       if (c.kind === "demo") w.appendChild(el("span", "tag demo", "Demo"));

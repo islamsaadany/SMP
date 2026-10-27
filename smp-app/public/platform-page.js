@@ -1048,9 +1048,10 @@
     var b = csButton("+ Add to Track Record", "amber", function (e) {
       e.stopPropagation();
       if (!menu.hidden) { shut(); return; }
+      var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;   /* tipShow's reason */
       var r = b.getBoundingClientRect();
-      menu.style.top = Math.round(r.bottom + 6) + "px";
-      menu.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + "px";
+      menu.style.top = Math.round((r.bottom + 6) / z) + "px";
+      menu.style.right = Math.max(8, Math.round((window.innerWidth - r.right) / z)) + "px";
       menu.hidden = false;
       document.addEventListener("click", shut);
       window.addEventListener("scroll", shut, { passive: true });
@@ -3507,8 +3508,8 @@
     var ty = box("asg-type", "Type", el("select", "fld"));
     [["planning", "Planning"], ["retainer", "Retainer"]].forEach(function (t) { var op = el("option", null, t[1]); op.value = t[0]; ty.appendChild(op); });
     ty.value = a ? a.kind : "planning";
-    var st = box("asg-start", "Start", el("input", "fld")); st.type = "month"; st.value = a ? a.started : "";
-    var en = box("asg-end", "End (empty while running)", el("input", "fld")); en.type = "month"; en.value = a ? a.ended : "";
+    var st = box("asg-start", "Start", monthPick(a ? a.started : "", "Pick the month"));
+    var en = box("asg-end", "End", monthPick(a ? a.ended : "", "Still running"));
     var ld = box("asg-lead", "Lead", el("select", "fld"));
     var pick0 = el("option", null, "Pick the lead"); pick0.value = ""; ld.appendChild(pick0);
     o.consultants.forEach(function (p) { var op = el("option", null, p.name || p.email); op.value = p.id; ld.appendChild(op); });
@@ -3575,6 +3576,87 @@
     td.appendChild(said);
     tr.appendChild(td);
     return tr;
+  }
+
+  /* A MONTH PICKER OF OUR OWN (Islam, 2026-10-27, of the browser's month box:
+     "the year doesn't have the right and left arrows"). The browser's own
+     month picker scrolls a list of years and looks different in every
+     browser, so this draws the one in the drawing everywhere: ‹ year ›, the
+     twelve months, then Clear and This month. It is a button whose `value`
+     is 'YYYY-MM' ('' when empty), so a form reads it like the box it
+     replaces. The panel is placed on the screen, because the table it sits
+     in clips what overflows it. */
+  function monthPick(value, empty) {
+    var b = el("button", "fld mpick");
+    b.type = "button";
+    var cur = /^\d{4}-\d{2}$/.test(value || "") ? value : "";
+    var word = el("span"), ico = el("span", "mpico");
+    ico.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+    b.appendChild(word); b.appendChild(ico);
+    var show = function () { word.textContent = cur ? MONTHS[+cur.slice(5) - 1] + " " + cur.slice(0, 4) : empty; word.className = cur ? "" : "mpnone"; };
+    Object.defineProperty(b, "value", { get: function () { return cur; }, set: function (v) { cur = /^\d{4}-\d{2}$/.test(v || "") ? v : ""; show(); } });
+    show();
+    var panel = null, year = 0;
+    var shut = function () {
+      if (panel) { panel.remove(); panel = null; }
+      document.removeEventListener("mousedown", away, true); window.removeEventListener("scroll", shut, true); document.removeEventListener("keydown", esc);
+      b.setAttribute("aria-expanded", "false");
+    };
+    var away = function (e) { if (panel && !panel.contains(e.target) && e.target !== b && !b.contains(e.target)) shut(); };
+    var esc = function (e) { if (e.key === "Escape") { shut(); b.focus(); } };
+    var pick = function (v) { cur = v; show(); shut(); b.focus(); b.dispatchEvent(new Event("change", { bubbles: true })); };
+    var draw = function () {
+      panel.textContent = "";
+      var top = el("div", "mptop");
+      var prev = el("button", "mpnav", "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous year");
+      var next = el("button", "mpnav", "›"); next.type = "button"; next.setAttribute("aria-label", "Next year");
+      prev.addEventListener("click", function () { year--; draw(); });
+      next.addEventListener("click", function () { year++; draw(); });
+      top.appendChild(prev); top.appendChild(el("b", "mpyear", String(year))); top.appendChild(next);
+      panel.appendChild(top);
+      var grid = el("div", "mpgrid");
+      var today = thisMonth();
+      MONTHS.forEach(function (m, i) {
+        var v = year + "-" + (i < 9 ? "0" : "") + (i + 1);
+        var x = el("button", (v === cur ? "on" : "") + (v === today ? " now" : ""), m);
+        x.type = "button";
+        x.setAttribute("data-m", v.slice(5));
+        x.setAttribute("aria-label", MONTHS_LONG[i] + " " + year);
+        x.addEventListener("click", function () { pick(v); });
+        grid.appendChild(x);
+      });
+      panel.appendChild(grid);
+      var foot = el("div", "mpfoot");
+      var clr = el("button", "mplink", "Clear"); clr.type = "button";
+      clr.addEventListener("click", function () { pick(""); });
+      var tm = el("button", "mplink", "This month"); tm.type = "button";
+      tm.addEventListener("click", function () { pick(thisMonth()); });
+      foot.appendChild(clr); foot.appendChild(tm);
+      panel.appendChild(foot);
+    };
+    b.setAttribute("aria-haspopup", "dialog");
+    b.setAttribute("aria-expanded", "false");
+    b.addEventListener("click", function () {
+      if (panel) { shut(); return; }
+      year = +(cur || thisMonth()).slice(0, 4);
+      panel = el("div", "mppanel");
+      panel.setAttribute("role", "dialog");
+      panel.setAttribute("aria-label", "Pick a month");
+      draw();
+      document.body.appendChild(panel);
+      /* the box is in the window's pixels, the place is set in the page's,
+         and the console is zoomed on a computer (tipShow's reason) */
+      var z = parseFloat(getComputedStyle(ROOT).zoom) || 1;
+      var r = b.getBoundingClientRect(), w = panel.offsetWidth, h = panel.offsetHeight;
+      var L = r.left / z, T = r.top / z, B = r.bottom / z, W = window.innerWidth / z, H = window.innerHeight / z;
+      panel.style.left = Math.round(Math.max(8, Math.min(L, W - w - 8))) + "px";
+      panel.style.top = Math.round(B + 6 + h > H && T - 6 - h > 0 ? T - 6 - h : B + 6) + "px";
+      b.setAttribute("aria-expanded", "true");
+      document.addEventListener("mousedown", away, true); window.addEventListener("scroll", shut, true); document.addEventListener("keydown", esc);
+      var on = panel.querySelector(".mpgrid .on") || panel.querySelector(".mpgrid .now") || panel.querySelector(".mpgrid button");
+      if (on) on.focus();
+    });
+    return b;
   }
 
   /* + ADD A PAST CLIENT, on Ended (spec 067 §7, kept): its name, industry and

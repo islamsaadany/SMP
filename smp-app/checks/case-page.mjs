@@ -126,13 +126,26 @@ let boss, writer, reader, pastId, planId, retId;
 const rowOf = async (id) => (await owner.query("SELECT * FROM case_studies WHERE id = $1", [id])).rows[0];
 const goTab = async (p, tab) => { await p.click('.nav button[data-tab="' + tab + '"]'); await settle(p); await p.waitForTimeout(500); };
 const listView = async (p) => { await p.click('.clview button[data-view="list"]'); await p.waitForTimeout(900); };
+/* OUR MONTH PICKER (Islam, 2026-10-27: the year needs its arrows): opens on
+   the box, walks the year with ‹ and ›, and picks the month from the grid */
+async function pickMonth(p, id, ym) {
+  await p.click("#" + id);
+  await p.waitForSelector(".mppanel", { timeout: 5000 });
+  const want = +ym.slice(0, 4);
+  for (let i = 0; i < 40; i++) {
+    const y = +(await p.textContent(".mppanel .mpyear"));
+    if (y === want) break;
+    await p.click('.mppanel button[aria-label="' + (y > want ? "Previous year" : "Next year") + '"]');
+  }
+  await p.click('.mppanel .mpgrid button[data-m="' + ym.slice(5) + '"]');
+}
 /* fills the open assignment form in the Clients list and presses Add */
 async function addAssignment(p, client, a) {
   await p.click('[data-add-assignment="' + client + '"]'); await p.waitForTimeout(900);
   await p.fill("#asg-name", a.name);
   await p.selectOption("#asg-type", a.kind);
-  await p.fill("#asg-start", a.start);
-  if (a.end) await p.fill("#asg-end", a.end);
+  await pickMonth(p, "asg-start", a.start);
+  if (a.end) await pickMonth(p, "asg-end", a.end);
   if (a.lead) await p.selectOption("#asg-lead", { label: a.lead });
   await p.click('tr.asgform button:has-text("Add")'); await p.waitForTimeout(1200);
 }
@@ -175,6 +188,26 @@ await section("2 · the registry is the Clients page (the super user's)", async 
   check(db.length === 2 && db[0].kind === "planning" && db[1].kind === "retainer" && db[0].lead_id === writerId && db.every((r) => r.state === "running"),
     "…and in the rows: two assignments, typed, led by the writer, nothing written yet", JSON.stringify(db));
   await shot(boss, "2-registry");
+});
+
+await section("2b · the month picker", async () => {
+  await boss.click('[data-add-assignment="raya-trade"]'); await boss.waitForTimeout(900);
+  check(/Still running/.test(await boss.textContent("#asg-end")), "an empty end reads Still running, not a blank box", await boss.textContent("#asg-end"));
+  await boss.click("#asg-start");
+  const nav = await boss.$$eval(".mppanel .mpnav", (bs) => bs.map((b) => b.getAttribute("aria-label")));
+  const months = await boss.$$eval(".mppanel .mpgrid button", (bs) => bs.map((b) => b.textContent));
+  check(JSON.stringify(nav) === JSON.stringify(["Previous year", "Next year"]) && months.length === 12,
+    "it opens on the year with ‹ and › either side, and the twelve months under it", JSON.stringify([nav, months.length]));
+  const y0 = +(await boss.textContent(".mppanel .mpyear"));
+  await boss.click('.mppanel button[aria-label="Previous year"]'); await boss.click('.mppanel button[aria-label="Previous year"]');
+  check(+(await boss.textContent(".mppanel .mpyear")) === y0 - 2, "‹ goes back a year a press", await boss.textContent(".mppanel .mpyear"));
+  await shot(boss, "2b-picker");
+  const box = await boss.evaluate(() => { const r = document.querySelector("#asg-start").getBoundingClientRect(), q = document.querySelector(".mppanel").getBoundingClientRect();
+    return { gap: Math.round(q.top - r.bottom), dx: Math.round(q.left - r.left) }; });
+  check(box.gap >= 0 && box.gap < 16 && Math.abs(box.dx) < 4, "…and the panel opens just under its box, whatever the console's zoom", JSON.stringify(box));
+  await boss.click('.mppanel .mpgrid button[data-m="03"]');
+  check(/Mar \d{4}/.test(await boss.textContent("#asg-start")) && !(await boss.$(".mppanel")), "a month picked fills the box and closes the panel", await boss.textContent("#asg-start"));
+  await boss.click('tr.asgform button:has-text("Cancel")'); await boss.waitForTimeout(500);
 });
 
 await section("3 · a past client, added on Ended, with its assignment", async () => {

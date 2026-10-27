@@ -179,7 +179,14 @@ async function section(name, fn) {
      screen while building it. The full run is the one that counts. */
   if (process.env.SMP_ONLY && !name.startsWith(process.env.SMP_ONLY)) return;
   console.log("── " + name);
-  try { await fn(); } catch (e) { fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
+  try { await fn(); } catch (e) {
+    /* §654 — a section that dies leaves a picture and the page's last words, so the death can be read without a rerun */
+    let last = "";
+    try { if (page && process.env.SMP_SHOTS) { await page.screenshot({ path: process.env.SMP_SHOTS + "/died-" + name.slice(0, 2).replace(/\W/g, "") + ".png" });
+      last = await page.evaluate(() => JSON.stringify({ say: (document.querySelector(".copsay") || {}).textContent || "", msgs: Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg, .copsw-main .copmsg")).slice(-3).map((m) => m.className + ":" + m.textContent.trim().slice(0, 90)), flow: (document.querySelector(".copflow, .copsw, .copstart") || {}).className,
+        hit: Array.from(document.querySelectorAll(".copcp-more [data-cop-cp-more], [data-cop-cp-score], [data-cop-chats] [data-cop-chat]")).map((el) => { const r = el.getBoundingClientRect(); const t = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return [el.outerHTML.slice(0, 60), Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height), t ? t.tagName + "." + t.className : null, el.contains(t)]; }) })); } } catch {}
+    if (last) console.log("DIED " + last);
+    fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
   finally { try { if (ctx) await ctx.close(); } catch {} ctx = null; page = null; }
 }
 
@@ -2261,7 +2268,8 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const used = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"),
       prop: !!document.querySelector("[data-cop-sw-prop]"), check: !!document.querySelector(".copswpane .copsw-check") }));
     check(used.paneW === 4 && /Used — Merged/.test(used.note) && !used.prop && !used.check, "§654 C2 Use it writes the proposal into the SWOT on the right (four weaknesses), says so in the chat's record, and clears the old check", JSON.stringify(used));
-    await page.reload(); await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
+    await open("/raya-trade/strategy/mobile/copilot/analysis"); await page.click("[data-cop-chats] [data-cop-chat]");
+    await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
     const again = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).filter((m) => /Merge the two/.test(m.textContent)).length }));
     check(again.paneW === 4 && again.me === 1, "§654 C2 …and after a reload the ask and the change are still there — stored", JSON.stringify(again));
     Object.assign(MODEL_ANSWER, { w: wKeep });
@@ -2401,8 +2409,12 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/compete");
     await newWorkflow();
-    await page.waitForSelector("[data-cop-cp-sc], [data-cop-cp-score]", { timeout: 15000 });
-    if (!(await page.$("[data-cop-cp-sc]")) && (await page.$("[data-cop-cp-score]"))) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); }
+    /* A new chat scores itself, so "Score them" is on the page only for a
+       moment: wait for the scores, and press the button only if they never
+       come on their own (a click on a button that has just gone waits out
+       its whole timeout — the §654 C1 run's flake). */
+    await page.waitForSelector("[data-cop-cp-sc]", { timeout: 20000 }).catch(async () => {
+      if (await page.$("[data-cop-cp-score]")) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); } });
     let r = await row();
     check(!!r && r.s && r.s.phase === "discipline", "a new chat scores itself and moves on to the discipline", JSON.stringify(r && r.s && r.s.phase));
     const rec = await page.evaluate(() => (document.querySelector('[data-cop-cp-choose].rec') || {}).getAttribute ? document.querySelector('[data-cop-cp-choose].rec').getAttribute("data-cop-cp-choose") : null);
@@ -2454,7 +2466,8 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
     const lg = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me, [data-cop-msgs] .copmsg.ai")).slice(-2).map((m) => m.className.replace(/.*\b(me|ai)\b.*/, "$1") + ":" + m.textContent.trim().slice(0, 40)));
     check(lg.length === 2 && /^me:.*Rename the first value/.test(lg[0]) && /^ai:.*Done — the first value is renamed/.test(lg[1]), "§654 C1 the ask and its answer stay in the chat, in order", JSON.stringify(lg));
-    await page.reload(); await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
+    await open("/raya-trade/strategy/mobile/copilot/compete"); await page.click("[data-cop-chats] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
     const lg2 = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-msgs] .copmsg.me")).map((m) => m.textContent.trim()).filter((t) => /Rename the first value/.test(t)).length);
     check(lg2 === 1, "§654 C1 …and after a reload, still there — stored, not this visit's memory", lg2);
     await heldSweep(page, "Competitive Discipline, before the save");

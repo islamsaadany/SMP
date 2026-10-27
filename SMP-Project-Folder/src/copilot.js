@@ -2812,6 +2812,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-cp-int]"))) { CPINT[id] = !CPINT[id]; draw(); return true; }
     if ((b = hit(ev, "[data-cop-cp-more]"))) { CPMORE[id] = b.getAttribute("data-cop-cp-more") === "1" ? true : !CPMORE[id]; if (b.getAttribute("data-cop-cp-more") === "1" && tight()) SHEET = "cards"; draw(); return true; }
     if ((b = hit(ev, "[data-cop-cp-scores]"))) { CPSCORES[id] = !CPSCORES[id]; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-pfold]"))) { var fk = id + ":" + b.getAttribute("data-cop-pfold"); if (FOLD[fk]) delete FOLD[fk]; else FOLD[fk] = true; draw(); return true; }
     if (!canEdit() || s.saved) return false;
     if ((b = hit(ev, "[data-cop-cp-score]"))) { cpAsk({ act:"competeScore" }); return true; }
     if ((b = hit(ev, "[data-cop-cp-sc]"))) {

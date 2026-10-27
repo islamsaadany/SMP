@@ -65547,10 +65547,12 @@ var COPILOT = (function(){
     var id = PANE.chat.id, r = PENDROAD[id], f = PANE.flow; if (!r) return;
     if (f.path || f.start === "plan") { delete PENDROAD[id]; return; }
     if (f.phase !== "path" || !canEdit()) return;
+    /* §653: any road is taken only once the chat has come back with its
+       parts — the first draw is before that, and a road taken then raced
+       the chat's own load (the cards drawn empty, the roads left standing). */
+    if (!steps().length) return;
     delete PENDROAD[id];
-    /* the plan's parts land on the cards only once the structure has come
-       back with the chat — the first draw is before it */
-    if (r === "plan") { if (!steps().length) { PENDROAD[id] = r; return; } var gs = flowCopy(); startFromPlan(gs); flowSave(gs); return; }
+    if (r === "plan") { var gs = flowCopy(); startFromPlan(gs); flowSave(gs); return; }
     pickPath(r);
   }
   /* The cards filled from the plan, each part agreed and marked the plan's. */

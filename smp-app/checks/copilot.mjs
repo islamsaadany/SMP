@@ -1323,6 +1323,11 @@ try {
     sw_help("nope", "Retail & E-commerce") === null, JSON.stringify([sw_help("rivalry","Retail & E-commerce")?.industry, sw_help("rivalry","x")?.industry]));
   const sw_early = await call("POST", "api", { act: "swotAnalysis", id: sw_sid, area: "micro", placeWord: "Mobile" }, NORAN);
   check("an analysis is refused, in words, until the lines of the list are done", sw_early.st === 400 && /to-do list/.test(sw_early.j && sw_early.j.why), sw_early.st + " " + JSON.stringify(sw_early.j));
+  /* §654 C2 — a change asked for in words needs a draft first, and a proposal to decide on */
+  const sw_chg0 = await call("POST", "api", { act: "swotChange", id: sw_sid, ask: "Move pricing to threats", placeWord: "Mobile" }, NORAN);
+  check("§654 C2 a change asked for in words is refused, in words, until there is a draft", sw_chg0.st === 400 && /Draft the SWOT first/.test(sw_chg0.j && sw_chg0.j.why), sw_chg0.st + " " + JSON.stringify(sw_chg0.j));
+  const sw_prop0 = await call("POST", "api", { act: "swotProposal", id: sw_sid, use: true, placeWord: "Mobile" }, NORAN);
+  check("§654 C2 Use it with no proposal in hand is refused, in words", sw_prop0.st === 400 && /no proposed change/.test(sw_prop0.j && sw_prop0.j.why), sw_prop0.st + " " + JSON.stringify(sw_prop0.j));
   const sw_fin0 = await call("POST", "api", { act: "swotFinish", id: sw_sid, placeWord: "Mobile" }, NORAN);
   check("saving is refused until there is a draft and the analyses are agreed", sw_fin0.st === 400 && /Draft the SWOT/.test(sw_fin0.j && sw_fin0.j.why), sw_fin0.st + " " + JSON.stringify(sw_fin0.j));
   const sw_nsaved = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title LIKE 'SWOT%'"))).rows[0].n;

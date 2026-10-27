@@ -771,7 +771,7 @@ var COPILOT = (function(){
   /* What the box asks for: in the guided flow it says what a typed line
      will do there (§465). */
   function boxWord(pend){
-    if (swotOn()) return swGuidedNow() ? "Type your answer…" : "Use the choices above to carry on…";
+    if (swotOn()) return swGuidedNow() ? "Type your answer…" : swCanChange() ? "Say what to change — move a line, drop one, reword one…" : PANE.swot.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (competeOn()) return cpCanType() ? "Ask for a change — another title, a How to drop, a Measure to add…" : PANE.compete.saved ? "Saved — nothing more to type here." : "Use the choices above to carry on…";
     if (flowView()) {
       var ph = PANE.flow.phase;
@@ -789,7 +789,7 @@ var COPILOT = (function(){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
       '<div class="copbox">' +
-        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow()) || (competeOn() && !cpCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
+        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message"' + ((swotOn() && !swGuidedNow() && !swCanChange()) || (competeOn() && !cpCanType()) ? ' disabled' : '') + '>' + E(text) + '</textarea>' +
         /* §652 — Send appears only once there is something to send (Islam:
            "the enter button should only appear when I write something, like
            Claude"); while the Copilot works it stays, held, saying so. */
@@ -2187,9 +2187,35 @@ var COPILOT = (function(){
         (s.check.issues.length ? '<ul class="copswiss">' + s.check.issues.map(function(x){ return '<li>' + (x.letter ? '<b>' + E(LETTER_WORD[x.letter] || x.letter) + ':</b> ' : '') + E(x.text) + '</li>'; }).join("") + '</ul>' : ' Nothing to fix.') +
         swOpts(again)));
     }
+    /* §654 C2 — SAY WHAT TO CHANGE (§645's decision, built): the asks, the
+       proposals and the decisions, in the order they happened; the proposal
+       in hand says what differs from the SWOT on the right and waits for
+       Use it or Keep as it was — the draft moves only on Use it (§643). */
+    (s.log || []).forEach(function(x, k, a){
+      if (x.w === "me") { out.push(meMsg(x.t)); return; }
+      if (x.w === "note") { out.push('<div class="copfnote">' + E(x.t) + '</div>'); return; }
+      var inHand = s.proposal && k === a.length - 1 && s.proposal.reply === x.t;
+      out.push(aiMsg(E(x.t) + (inHand ? swDiffHtml(s.draft, s.proposal.draft) +
+        (ed && s.phase !== "saved" ? swOpts([swOpt('data-cop-sw-prop="use"', "Use it", true, busyHere), swOpt('data-cop-sw-prop="keep"', "Keep as it was", false, busyHere)]) : '') : ''), !!inHand));
+    });
     if (s.phase === "saved") out.push(aiMsg('Saved as <b>' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>; it is under Deliverables. <b>Apply to plan</b>, at the foot of the SWOT, writes it into the plan’s SWOT.'));
+    else if (ed && s.draft && !s.proposal) out.push('<div class="copfnote">Say what to change in the box below — move a line, drop one, reword one — and I will propose it here first.</div>');
     return out.join("");
   }
+  /* what a proposal changes, letter by letter: added, dropped, reworded */
+  function swDiffHtml(now, next){
+    var rows = [];
+    LETTERS.forEach(function(L){
+      var a = (now && now[L]) || [], b = (next && next[L]) || [], at = {}, bt = {};
+      a.forEach(function(x){ at[x.title.toLowerCase()] = x; }); b.forEach(function(x){ bt[x.title.toLowerCase()] = x; });
+      var add = b.filter(function(x){ return !at[x.title.toLowerCase()]; }).map(function(x){ return '<li class="add">+ ' + E(x.title) + '</li>'; });
+      var drop = a.filter(function(x){ return !bt[x.title.toLowerCase()]; }).map(function(x){ return '<li class="drop">− ' + E(x.title) + '</li>'; });
+      var chg = b.filter(function(x){ var o = at[x.title.toLowerCase()]; return o && (o.description !== x.description || o.evidence !== x.evidence); }).map(function(x){ return '<li class="chg">~ ' + E(x.title) + ' <span class="copm">· reworded</span></li>'; });
+      if (add.length || drop.length || chg.length) rows.push('<div class="copswdiff-l"><b>' + E(LETTER_WORD[L]) + '</b><ul>' + add.concat(drop, chg).join("") + '</ul></div>');
+    });
+    return '<div class="copswdiff">' + (rows.length ? rows.join("") : '<span class="copm">Nothing differs from the SWOT on the right.</span>') + '</div>';
+  }
+  function swCanChange(){ var s = PANE.swot; return !!(swotOn() && canEdit() && s.draft && (s.phase === "draft" || s.phase === "check") && !s.saved && !PANE.chat.archived); }
   /* The line being gathered: a guided question with the answers so far, or
      a source line (a template, a report, the research) with its controls. */
   function swLineMsgs(s, ed, busyHere, ext){
@@ -2481,6 +2507,8 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-sw-agree]"))) { var ga = b.getAttribute("data-cop-sw-agree"); g = swCopy(); g[ga].agreed = true; swSave(g); return true; }
     if ((b = hit(ev, "[data-cop-sw-draft]"))) { if (!b.disabled) swAsk({ act:"swotDraft", swot: swCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-sw-check]"))) { swAsk({ act:"swotCheck", swot: swCopy() }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-prop]"))) { if (THINKING) return true; var use = b.getAttribute("data-cop-sw-prop") === "use", pid = PANE.chat.id;
+      act({ act:"swotProposal", id: pid, use: use, placeWord: placeWord() }, function(j){ if (PANE && PANE.chat && PANE.chat.id === pid) swView(j); draw(); }); return true; }
     if ((b = hit(ev, "[data-cop-sw-finish]"))) {
       if (b.disabled) return true;
       act({ act:"swotFinish", id: id, placeWord: placeWord() }, function(j){
@@ -3827,7 +3855,12 @@ var COPILOT = (function(){
     var files = (PANE.pending || []).slice();
     if (!text.trim() && !files.length) return;
     if (flowView()) { if (forced == null && t) t.value = ""; flowType(text); return; }
-    if (swotOn()) { if (!swGuidedNow()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; swType(text); return; }
+    if (swotOn()) {
+      if (swGuidedNow()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swType(text); return; }
+      /* §654 C2 — with a draft on the right, the box says what to change */
+      if (swCanChange()) { if (forced == null && t) t.value = ""; DRAFT[id] = ""; swAsk({ act:"swotChange", ask: text.trim(), swot: swCopy() }); return; }
+      return;
+    }
     /* §654 C1 — in a Competitive Discipline chat the box asks for a change to the table */
     if (competeOn()) { if (!cpCanType()) return; if (forced == null && t) t.value = ""; DRAFT[id] = ""; cpAsk({ act:"competeRefine", ask: text.trim() }); return; }
     var ctx = contextOf();

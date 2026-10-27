@@ -2241,6 +2241,30 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
       "§641 Save and Apply to plan stand only at the pane's foot (Apply waits for a saved version); the check is said in the chat", JSON.stringify(nochat));
     await shot("6-check");
     await heldSweep(page, "SWOT, the check");
+    /* §654 C2 — SAY WHAT TO CHANGE: with a draft on the right the chat's own
+       box asks for a change; it comes back as a proposal in the chat, saying
+       what differs, and the SWOT on the right stays as it was until Use it. */
+    const wKeep = MODEL_ANSWER.w;
+    Object.assign(MODEL_ANSWER, { w: ["Thin online presence", "Slow pricing", "Stock gaps", "Legacy systems"].map(it), reply: "Merged the two overlapping weaknesses into one." });
+    const swBox = await page.evaluate(() => ({ dis: (document.querySelector("[data-cop-text]") || {}).disabled, ph: (document.querySelector("[data-cop-text]") || {}).placeholder || "" }));
+    check(swBox.dis === false && /Say what to change/.test(swBox.ph), "§654 C2 with a draft on the right, the chat's box opens and asks what to change", JSON.stringify(swBox));
+    await page.fill("[data-cop-text]", "Merge the two overlapping weaknesses");
+    await page.keyboard.press("Enter");
+    await page.waitForSelector('[data-cop-sw-prop="use"]', { timeout: 15000 });
+    const prop = await page.evaluate(() => ({ me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).some((m) => /Merge the two overlapping weaknesses/.test(m.textContent)),
+      reply: /Merged the two overlapping weaknesses/.test((document.querySelector(".copswchat") || {}).textContent || ""),
+      diff: (document.querySelector(".copswdiff") || {}).textContent || "", paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, keep: !!document.querySelector('[data-cop-sw-prop="keep"]') }));
+    check(prop.me && prop.reply && /Weaknesses/.test(prop.diff) && /− Few data skills/.test(prop.diff) && prop.paneW === 5 && prop.keep,
+      "§654 C2 the ask and the answer sit in the chat with what differs (− Few data skills), Use it and Keep as it was offered — and the SWOT on the right still holds five weaknesses", JSON.stringify(prop));
+    await page.click('[data-cop-sw-prop="use"]');
+    await page.waitForFunction(() => document.querySelectorAll(".copswpane .copsw-l.w li").length === 4, null, { timeout: 10000 }).catch(() => {});
+    const used = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, note: Array.from(document.querySelectorAll(".copswchat .copfnote")).map((n) => n.textContent).join("|"),
+      prop: !!document.querySelector("[data-cop-sw-prop]"), check: !!document.querySelector(".copswpane .copsw-check") }));
+    check(used.paneW === 4 && /Used — Merged/.test(used.note) && !used.prop && !used.check, "§654 C2 Use it writes the proposal into the SWOT on the right (four weaknesses), says so in the chat's record, and clears the old check", JSON.stringify(used));
+    await page.reload(); await page.waitForSelector(".copswpane .copsw-l", { timeout: 15000 });
+    const again = await page.evaluate(() => ({ paneW: document.querySelectorAll(".copswpane .copsw-l.w li").length, me: Array.from(document.querySelectorAll(".copswchat .copmsg.me")).filter((m) => /Merge the two/.test(m.textContent)).length }));
+    check(again.paneW === 4 && again.me === 1, "§654 C2 …and after a reload the ask and the change are still there — stored", JSON.stringify(again));
+    Object.assign(MODEL_ANSWER, { w: wKeep });
     const plan0 = await page.evaluate(() => { try { return JSON.stringify(UNITS.mobile.swot); } catch (e) { return String(e); } });
     await page.click("[data-cop-swfoot] [data-cop-sw-finish]");
     await page.waitForFunction(() => /Saved as v1/.test((document.querySelector("[data-cop-swstate]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});

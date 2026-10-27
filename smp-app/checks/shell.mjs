@@ -2526,7 +2526,17 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
     await page.click("[data-cop-planapply-yes]");
     await page.waitForTimeout(1500);
     const arDv = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), archBefore);
-    check(arDv.includes("unit:mobile"), "§645 …and Yes archives Mobile's plan before it writes", JSON.stringify(arDv));
+    /* §654 A2 — REWRITTEN, NOT LOOSENED (§218): the archive is of the
+       Directions alone, as their own kind — never the whole unit plan, whose
+       restore would roll the Foundation and the SWOT back too. */
+    check(arDv.includes("directions:mobile") && !arDv.includes("unit:mobile"), "§654 …and Yes archives Mobile's Directions as their own kind before it writes — not the whole plan", JSON.stringify(arDv));
+    /* §654 A3 — "on the plan" is the deliverable's note, so it survives a
+       reload: the page opened again, the chat reopened from the rail. */
+    await open("/raya-trade/strategy/mobile/copilot/directions");
+    await page.click("[data-cop-chats] [data-cop-chat]");
+    await page.waitForSelector("[data-cop-dv-apply]", { timeout: 10000 }).catch(() => {});
+    const re = await page.evaluate(() => ({ line: /It is on the plan\./.test((document.querySelector(".copsw-main") || {}).textContent || ""), again: (document.querySelector("[data-cop-dv-apply]") || {}).textContent || "" }));
+    check(re.line && /again/.test(re.again), "§654 after a reload the chat still says v1 is on the plan — the note on the deliverable, not this visit's memory", JSON.stringify(re));
     await shot("2-applied");
     const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
     const kept = r.s.options.filter((o) => o.go && o.planId);
@@ -2562,6 +2572,13 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
       const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; const up = UNITS.mobile.items.filter((p) => p.name === "Upper Egypt")[0]; return c ? [c.capKind, (c.serves || []).length === 1 && !!up && c.serves[0] === up.id] : null; });
       check(JSON.stringify(cap) === JSON.stringify(["enabler", true]), "…and Save writes the Capability with its kind and the Direction it serves, by key", JSON.stringify(cap));
     }
+    /* §654 A1 — the saved version's page offers Edit as v2 into its chat,
+       never a plain-text Edit that would lose the pillars. */
+    if (await page.$('[data-cop-fold="delivs"][aria-expanded="false"]')) await page.click('[data-cop-fold="delivs"]');
+    await page.waitForSelector("[data-cop-deliv]", { timeout: 8000 }).catch(() => {});
+    if (await page.$("[data-cop-deliv]")) { await page.click("[data-cop-deliv]"); await page.waitForSelector(".copvers", { timeout: 8000 }).catch(() => {}); }
+    const ed = await page.evaluate(() => ({ text: !!document.querySelector("[data-cop-edit]"), chat: (document.querySelector("[data-cop-edit-chat]") || {}).textContent || "", chip: (document.querySelector(".copchip") || {}).textContent || "" }));
+    check(!ed.text && /^Edit as v2$/.test(ed.chat.trim()) && ed.chip === "Can go on the plan", "§654 a saved Directions version offers Edit as v2 into its chat and no plain-text Edit; the rail's chip speaks plainly", JSON.stringify(ed));
     check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
   } finally {
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
@@ -2613,14 +2630,15 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
     await heldSweep(page, "Execution, before the save");
     await shot("1-before-save");
+    const strip = await page.evaluate(() => (document.querySelector("[data-cop-ex-strip]") || {}).textContent || "");
+    check(/This plan covers/.test(strip) && !/·/.test(strip), "§654 the period line carries no stray separator", strip);
     const fin = await page.$("[data-cop-ex-finish]");
     check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true" && (await fin.textContent()) === "Save", "Save is offered once everything is drafted — Save, not Save to plan (§645)");
     const exBefore = await page.evaluate(() => JSON.stringify([UNITS.mobile.items, GROUP.capabilities, GROUP[SMPRules.PLAN_FROM], GROUP[SMPRules.PLAN_TO]]));
     const exArch = await page.evaluate(() => ARCHIVES.length);
     /* A Capability holding nothing yet has nothing to archive (archiveCapPlan
        keeps nothing empty), so the ones expected are those that hold something. */
-    const exCapsHeld = await page.evaluate((ids) => (GROUP.capabilities || []).filter((c) => ids.includes(String(c.id)) && !planIsEmpty(capSnapshotCounts(capPlanSnapshot(c)))).map((c) => "cap:" + c.id),
-      r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId)));
+    const exCapIds = r.s.items.filter((x) => x.kind !== "direction").map((x) => String(x.planId));
     if (fin) { await fin.click(); await page.waitForTimeout(2200); }
     const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
     check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
@@ -2634,7 +2652,9 @@ await section("3m · the Execution chat: the period once, each item drafted, the
     await page.waitForTimeout(1500);
     const arEx = await page.evaluate((n) => ARCHIVES.slice(0, ARCHIVES.length - n).map((a) => a.kind + ":" + a.key), exArch);
     await shot("2-applied");
-    check(arEx.includes("unit:mobile") && exCapsHeld.every((k) => arEx.includes(k)), "§645 …and Yes archives Mobile's plan and each Capability it updates that holds anything, before it writes", JSON.stringify({ arEx, exCapsHeld }));
+    const exArchive = await page.evaluate(() => { const a = ARCHIVES.find((x) => x.kind === "execution" && x.key === "mobile"); return a ? { caps: (a.plan.caps || []).map((c) => String(c.id)), period: a.plan.period, counts: a.counts } : null; });
+    check(arEx.includes("execution:mobile") && !arEx.includes("unit:mobile") && !arEx.some((k) => k.indexOf("cap:") === 0) && exArchive && exCapIds.every((id) => exArchive.caps.includes(id)) && exArchive.period && "from" in exArchive.period,
+      "§654 …and Yes archives one execution archive — the pillars' measures and tactics, the Capabilities it updates, and the plan period — never the whole plan nor separate capability archives", JSON.stringify({ arEx, exArchive, exCapIds }));
     const plan = await page.evaluate((ids) => {
       const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
       (UNITS.mobile.items || []).forEach((p) => { if (!ids.includes(p.id)) return;
@@ -2694,6 +2714,8 @@ await section("3n · the Advisory chat: one question at a time, counted, proceed
       options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }], why: "Lower risk", next: ["Pick sites"] } });
     await page.click('[data-cop-ad-reply="proceed"]');
     await page.waitForSelector("[data-cop-ad-brief]", { timeout: 15000 });
+    const why = await page.evaluate(() => (document.querySelector("[data-cop-ad-budget] .adwhy") || {}).textContent || "");
+    check(/^Proceeded after 1 of 5\.$/.test(why.trim()), "§654 the round box says it proceeded after 1 of 5 — not that the questions are done", why);
     const recs = await page.$$eval("[data-cop-ad-brief] .adrec", (a) => a.length);
     check(recs === 1, "the brief shows exactly one recommended option", recs);
     const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));

@@ -1046,6 +1046,10 @@ try {
     const vrow = fn.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fn.j.saved.deliverableId]))).rows : [];
     check("...the version holds the table and the scores", vrow.length === 1 && vrow[0].body.compete.discipline === "bts" && vrow[0].body.compete.values.length === 2 && !!vrow[0].body.scores.market,
       JSON.stringify(vrow).slice(0, 200));
+    /* §654 A1 — a plain-text edit of a structured version is refused, as the
+       Foundation's is (§525): the table would be gone from that version. */
+    const edG = fn.j.saved ? await call("POST", "api", { act: "editVersion", id: fn.j.saved.deliverableId, text: "A plain line." }, NORAN) : { st: 0, j: {} };
+    check("a plain-text edit of a Competitive Discipline version is refused — its table stays whole for Apply (§654)", edG.st === 400 && /Competitive Discipline is changed in its chat/.test(edG.j.why || ""), JSON.stringify(edG.j));
     const after = await call("POST", "api", { act: "competeSave", id: cid, compete: tb.j.compete }, NORAN);
     check("a saved chat refuses further changes", after.st === 400 && /Start a new Competitive Discipline chat/.test(after.j.why));
     const nc2 = await call("POST", "api", { act: "newCompete", place: "mobile" }, OMAR);

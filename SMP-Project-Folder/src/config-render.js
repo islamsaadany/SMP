@@ -6786,7 +6786,7 @@ function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
     /* §524: a Foundation archive is keyed by its place already. */
-    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" ? a.key : "cap:" + a.key;
+    var v = a.kind === "unit" || a.kind === "foundation" || a.kind === "swot" || a.kind === "directions" || a.kind === "execution" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -7163,6 +7163,10 @@ function archiveHeld(a){
     ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
     : a.kind === "swot"
     ? plural(c.lines || 0, "SWOT line")
+    : a.kind === "directions"
+    ? [plural(c.pillars || 0, L1("pillar"), L("pillar")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
+    : a.kind === "execution"
+    ? [plural(c.measures || 0, L1("measure"), L("measure")), plural(c.tactics || 0, L1("tactic"), L("tactic")), plural(c.capabilities || 0, "capability", "capabilities")].join(" &middot; ")
     : a.kind === "unit"
     ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
        plural(c.tactics, L1("tactic"), L("tactic")),
@@ -7187,6 +7191,10 @@ function renderArchives(){
         ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
         : a.kind === "swot"
         ? '<span class="why">SWOT only &mdash; the plan beneath it is untouched</span>'
+        : a.kind === "directions"
+        ? '<span class="why">' + L("pillar") + ' and the capabilities they touch &mdash; the Foundation and the SWOT are untouched</span>'
+        : a.kind === "execution"
+        ? '<span class="why">Measures, tactics and the plan period &mdash; the rest of the plan is untouched</span>'
         : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
@@ -7195,7 +7203,7 @@ function renderArchives(){
     var live = a.kind === "figures" ? true
              : a.kind === "foundation" ? !!foundationRecord(a.key)
              : a.kind === "swot" ? !!swotWritable(a.key)
-             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+             : a.kind === "unit" || a.kind === "directions" || a.kind === "execution" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'

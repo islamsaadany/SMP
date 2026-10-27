@@ -433,6 +433,22 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, applied });
   }
 
+  /* §654 A3 — THE NOTE "version N is on the plan", for Directions,
+     Capabilities and Execution: written by the browser once the plan's own
+     save has landed (§524.1's order), read back by their views, so a reload
+     says what the plan holds instead of this visit's memory. */
+  if (kind === "planApplied") {
+    const d = await oneDeliverable(c, id);
+    if (!d) return refused(404, "That deliverable is not here any more.");
+    if (!["directions", "capabilities", "execution", "compete"].includes(d.type)) return refused(400, "That kind of deliverable is not applied this way.");
+    const n = Number(b.n);
+    const v = (await versionsOf(c, id)).find((x: any) => x.n === n);
+    if (!v) return refused(400, "That version is not here.");
+    const applied = { n, at: new Date().toISOString(), by };
+    await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify(applied)]);
+    return out(200, { ok: true, applied });
+  }
+
   if (kind === "editVersion" || kind === "restore") {
     const d = await oneDeliverable(c, id);
     if (!d) return refused(404, "That deliverable is not here any more.");
@@ -444,8 +460,11 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       /* §525 — a Foundation is its parts, and a plain-text edit would make a
          version holding none, which Apply to plan then refuses. Its parts
          are changed in the chat that built it. */
-      if (d.type === "foundation" && brk() !== "text-edit-foundation")
-        return refused(400, "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan.");
+      /* §654 A1 — the same guard for every structured type: a plain-text
+         version of a SWOT, a table, pillars or measures holds none of them. */
+      const STRUCTURED: Record<string, string> = { foundation: "Foundation", swot: "SWOT", compete: "Competitive Discipline", directions: "Directions", capabilities: "Capabilities", execution: "Execution" };
+      if (STRUCTURED[d.type] && brk() !== "text-edit-foundation")
+        return refused(400, "A " + STRUCTURED[d.type] + " is changed in its chat, so its parts stay whole for Apply to plan.");
       const n = await addVersion(c, id, { body: { text }, note: oneLine(b.note) || "Edited", by });
       return out(200, { ok: true, n });
     }

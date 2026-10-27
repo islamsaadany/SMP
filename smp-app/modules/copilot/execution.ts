@@ -24,12 +24,19 @@ const ARCHIVED = "This chat is archived. Restore it to keep talking.";
 const SAVED_ALREADY = "This is saved. Start a new chat to make the next version.";
 const NOT_EXEC = "This is not an Execution chat.";
 
+/* §654 A3 — the note the browser wrote once the plan's save landed. */
+async function appliedOf(c: any, id: string): Promise<{ n: number; at: string; by: string } | null> {
+  const r = await c.query("SELECT extra->'applied' AS a FROM copilot_deliverables WHERE id = $1", [id]);
+  const a = r.rows[0] && r.rows[0].a;
+  return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
+}
 export async function execView(c: any, chat: { id: string }) {
   const s = await execOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
+  const applied = s.saved && s.saved.deliverableId ? await appliedOf(c, s.saved.deliverableId) : null;
   const ch = periodChoices(new Date());
-  return { exec: s, execTodo: todo, execDone: doneCount(todo), execBlocker: finishBlocker(s),
+  return { exec: s, execApplied: applied, execTodo: todo, execDone: doneCount(todo), execBlocker: finishBlocker(s),
     execWords: { quarters: periodQuarters(s.period), period: s.period ? periodWords(s.period) : "", length: s.period ? periodLength(s.period) : 0,
       compiles: COMPILES, months: MONTHS, choices: { full: ch.full, fullWord: periodWords(ch.full), rest: ch.rest, restWord: periodWords(ch.rest) } } };
 }

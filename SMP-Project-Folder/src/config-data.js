@@ -10936,6 +10936,50 @@ function archiveSwot(target, why){
   return a;
 }
 
+/* ── DIRECTIONS AND EXECUTION AS ARCHIVES OF THEIR OWN (§654 A2) ───────
+   The Copilot's Apply to plan for Directions (§645) took a `unit` archive —
+   the Foundation, the SWOT and the pillars together — so restoring it would
+   have put back far more than the apply changed. Each apply now archives
+   the part it touches: `directions` holds the pillars and the Capabilities
+   it updates (name, kind, what they serve, owner); `execution` holds the
+   pillars' measures and tactics, the Capabilities' objectives and projects,
+   and the plan period. Restoring puts that part back and nothing else. */
+function planPeriodNow(){
+  var R = typeof SMPRules !== "undefined" ? SMPRules : null, g = typeof GROUP !== "undefined" ? GROUP : {};
+  return { from: g[(R && R.PLAN_FROM) || "planFrom"] || "", to: g[(R && R.PLAN_TO) || "planTo"] || "" };
+}
+function capsById(ids){
+  var all = typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  return (ids || []).map(function(id){ return all.filter(function(c){ return c && String(c.id) === String(id); })[0]; }).filter(Boolean);
+}
+function archiveDirections(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, name:c.name || "", capKind:c.capKind || "", serves:clone(c.serves || []), head:c.head || "" }; });
+  var pillars = items.filter(function(p){ return p && String(p.name || "").trim(); }).length;
+  if (!pillars && !caps.length) return null;
+  var a = { id:archiveId(), kind:"directions", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ pillars:pillars, capabilities:caps.length }, plan:{ items:items, caps:caps } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+function archiveExecution(target, capIds, why){
+  var u = unitLikeWritable(target);
+  if (!u) return null;
+  var items = clone(Array.isArray(u.items) ? u.items : []);
+  var caps = capsById(capIds).map(function(c){ return { id:c.id, keyObjectives:clone(c.keyObjectives || []), projects:clone(c.projects || []) }; });
+  var measures = 0, tactics = 0;
+  items.forEach(function(p){ if (!p) return; measures += (p.measures || []).length; tactics += (p.tactics || []).length; });
+  caps.forEach(function(c){ measures += c.keyObjectives.length; tactics += c.projects.length; });
+  var period = planPeriodNow();
+  if (!measures && !tactics && !period.from && !period.to) return null;
+  var a = { id:archiveId(), kind:"execution", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:{ measures:measures, tactics:tactics, capabilities:caps.length }, plan:{ items:items, caps:caps, period:period } };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -10973,6 +11017,32 @@ function restoreArchive(id){
     if (!sw) return false;
     archiveSwot(a.key, "replaced by restoring the " + a.at + " archive");
     ["s","w","o","t"].forEach(function(q){ sw[q] = clone((a.plan || {})[q] || []); });
+  }
+  else if (a.kind === "directions" || a.kind === "execution") {
+    /* §654 A2: the part applied, put back; what stands is archived first as
+       the same kind, so the restore can itself be undone. */
+    var ud = unitLikeWritable(a.key);
+    if (!ud) return false;
+    var ids = (a.plan.caps || []).map(function(c){ return c.id; });
+    if (a.kind === "directions") archiveDirections(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    else archiveExecution(a.key, ids, "replaced by restoring the " + a.at + " archive");
+    ud.items = clone(a.plan.items || []);
+    capsById(ids).forEach(function(c){
+      var sc = (a.plan.caps || []).filter(function(x){ return String(x.id) === String(c.id); })[0]; if (!sc) return;
+      if (a.kind === "directions") {
+        c.name = sc.name;
+        if (sc.capKind) c.capKind = sc.capKind; else delete c.capKind;
+        if (sc.serves && sc.serves.length) c.serves = clone(sc.serves); else delete c.serves;
+        if (sc.head) c.head = sc.head; else delete c.head;
+      } else { c.keyObjectives = clone(sc.keyObjectives || []); c.projects = clone(sc.projects || []); }
+    });
+    if (a.kind === "execution" && a.plan.period && typeof GROUP !== "undefined") {
+      var Rp = typeof SMPRules !== "undefined" ? SMPRules : null;
+      GROUP[(Rp && Rp.PLAN_FROM) || "planFrom"] = a.plan.period.from; GROUP[(Rp && Rp.PLAN_TO) || "planTo"] = a.plan.period.to;
+    }
+    if (ud.ukey && a.key !== "group") renumberUnit(ud);
+    var dFk = fnKeyOfTarget(a.key);
+    if (dFk) fnWriteBack(dFk, ud);
   }
   else if (a.kind === "foundation") {
     /* §524: six parts, put back whole; what stands is archived first so the

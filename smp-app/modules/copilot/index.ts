@@ -464,7 +464,8 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
          version of a SWOT, a table, pillars or measures holds none of them. */
       const STRUCTURED: Record<string, string> = { foundation: "Foundation", swot: "SWOT", compete: "Competitive Discipline", directions: "Directions", capabilities: "Capabilities", execution: "Execution" };
       if (STRUCTURED[d.type] && brk() !== "text-edit-foundation")
-        return refused(400, "A " + STRUCTURED[d.type] + " is changed in its chat, so its parts stay whole for Apply to plan.");
+        return refused(400, d.type === "foundation" ? "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan."
+          : "A " + STRUCTURED[d.type] + " is changed in its chat, so its parts stay whole for Apply to plan.");
       const n = await addVersion(c, id, { body: { text }, note: oneLine(b.note) || "Edited", by });
       return out(200, { ok: true, n });
     }

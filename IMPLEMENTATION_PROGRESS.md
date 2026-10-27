@@ -4,6 +4,27 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-27 — The Copilot swept; batch 2, the plan's doors (§654).** Competitive Discipline saves a version and applies on an ask that archives the plan's own and warns where the layer has it switched off; every saved version's page is drawn as its type with On the plan and Apply to plan; a free chat's draft says it stays in the Copilot; a Direction from the plan keeps its scores and an unscored one cannot go ahead. Shell `smp-shell-v7.31-sweep-2`.
+
+**2026-10-27 — The Copilot swept; batch 1, safety first (§654), merged to `main` on Islam's word.** No plain-text edit of a structured version; Directions and Execution archive only the part they apply; on-the-plan survives a reload; three small lines.
+
+**2026-10-27 — The Copilot, oriented (§653), merged to `main` on Islam's word.** The rail stays open with room; one job per header; one counter; four status words; a lighter chat; the path in one line; Start from the existing plan on the Foundation, SWOT and Directions start screens.
+
+**2026-10-26 — Send only when typed; the bubble never cut; no agreed part reads Drafting (§649.1, §652), merged to `main` on Islam's word.**
+
+**2026-10-26 — Case studies become the Track Record (§650, spec 069), merged to `main` on Islam's word.** The tab is Track Record. The super user adds each client's assignments on Clients (list view): Planning or Retainer, start and end month, lead and team; a past client is added on Ended. When an assignment ends, its lead gets "Write up the assignment" on My tasks and Home, with nobody asking, and any consultant can start one. Writing it up is one page: what Clients says about it, the prompt filled from that with Open in Claude beside Copy, and the paste box; the paste fills the write-up on the next page to check, attach files and Publish. The front is one card per client; picking Hiccup, Practice or Lesson lists those learnings across clients. A client's page has a tab per assignment with its write-up and its learnings. Learnings are added to an assignment with the learnings prompt or typed in. Gone: Open a piece of work, Ask for the write-up, the desk and shelves, the separate Insights view. Waiting on Islam: the client list to load.
+**2026-10-26 — Every held Copilot button says why (§649), merged to `main` on Islam's word.** No Copilot button is disabled: each that cannot be pressed is held, with its reason in the platform's bubble on hover, Tab and tap.
+
+**2026-10-26 — Directions and Execution: Save, then Apply to plan (§645), merged to `main` on Islam's word.** Save keeps a version under Deliverables; Apply to plan asks first, archives what stood, then writes.
+
+**2026-10-26 — View beside Download on Insights; the console's publishing page removed (§651), merged to `main` on Islam's word.** View opens the PDF in a pop-up over the list on a computer and in a new tab on a phone; a view is not a download; Forefront can view a draft's file.
+
+**2026-10-26 — Insights is published from the client's own Insights page (§648), merged to `main` on Islam's word.** + Publish a report in the band and Open on each row, for the platform's admin and the client's Super user; a pop-up with the console's form; drafts only they see. The console's publishing page is no longer the way in.
+
+**2026-10-26 — The Internal Tracker, Meeting Notes and Insights in My tasks' look (§646), merged to `main` on Islam's word.** Home's band in the client's colour (the Tracker too, now) with a sentence and the counts; one card with the filters in its header, frozen with the band on the Tracker; groups over a grey rule; striped rows; the main screens' typeface. Portfolio unchanged.
+
+**2026-10-26 — The chat in the order it happened (§644), merged to `main` on Islam's word.** Each part's guided pass folds where it happened, then plain chat; Your answers is a hover icon; Key Objectives shows every objective.
+
 **2026-10-26 — The chat keeps everything (§643), merged to `main` on Islam's word.** A draft or change is a proposal in the chat; the card changes only on Save to the card; guided answers fold and reopen; typed lines are kept; the check is the pane's.
 
 **2026-10-26 — The Copilot at any zoom (§642), merged to `main` on Islam's word.** The layout follows the Copilot's own width, so a laptop at 125–150% keeps chat, cards and to-do side by side; long cards open with Show N more; one Go back per part; closing the cards moves nothing into the chat.
@@ -10478,3 +10499,6 @@ Islam: the SOP page had no back button; and the AI review's add-a-step with acce
 ## §610 — Priorities: "Choose processes" picker and a where-things-stand strip (2026-10-27)
 Built as option A of `design-mockups/processes-priorities/2026-10-27_easier-priorities-page.html`. On the Score step, a **Choose processes · N of M** drop-down lists every process (mains with their subs, searchable). The table shows only the ticked ones; ticking a main ticks its subs (each can be unticked); quick picks: Select all, None, Only unscored, Has flagged steps; Escape or a click outside closes it. The choice is remembered in the browser per client and reset by "Show all". A sub whose main is not chosen shows on its own. A strip above the table shows shown / total, scored, steps flagged, and Wave 1 against capacity. "Clear entries" ticks only what is shown. The Excel downloads still carry everything.
 Checked: real run GREEN 128/0 (none chosen says so, one chosen shows one row and "1 / 5", remembered after reload, Select all brings all back); typecheck. Branch only; not merged (with the SOP and export back links, §609).
+
+## §647 — One mark everywhere; the bar opens on it; the console's loading shape as it is; product first for a client's people; every module at 80% (2026-10-26)
+The north star is the platform's one mark (tab, home-screen icons, built file). Every module's bar opens on it, a hairline, then the client and module (option D). Going back to the console draws the console as it is, and its column and band are there at the first paint. A client's own people read product first on every bar. Every module page is at 80% on a computer, like the console and Strategy, with window lengths, measured lengths and React Flow mended for the zoom. Checked on the merged tree (see DECISIONS §647); merged to `main` on Islam's word.

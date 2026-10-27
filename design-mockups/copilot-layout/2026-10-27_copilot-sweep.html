@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Copilot Sweep Findings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--accent:#D9773A;--nav:#16325C;--bad:#A23B2A;--badbg:#F8E7E3;--warn:#8A5A12;--warnbg:#FBF1DE;--good:#2E6B45;--goodbg:#E6F2EA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--bad:#E8907E;--badbg:#3A2420;--warn:#E3B868;--warnbg:#2E2717;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--accent:#E8975F;--nav:#0E2A4F;--bad:#E8907E;--badbg:#3A2420;--warn:#E3B868;--warnbg:#2E2717;--good:#8FCBA4;--goodbg:#1C2E23;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans)}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 56px;display:flex;flex-direction:column;gap:18px}
+h1{font-size:26px;margin:0}
+h2{font-size:18px;margin:18px 0 4px;display:flex;align-items:baseline;gap:10px}
+h2 small{font-weight:400;color:var(--ink-3);font-size:13px}
+.lede{color:var(--ink-2);margin:4px 0 0;max-width:92ch}
+.path{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.path b{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 9px;font-weight:600}
+.path i{color:var(--ink-3);font-style:normal}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);border-top:0;background:var(--surface-2)}
+td.n{color:var(--ink-3);white-space:nowrap;width:36px}
+td.w{width:19%}
+.sev{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.sev.h{background:var(--badbg);color:var(--bad)}.sev.m{background:var(--warnbg);color:var(--warn)}.sev.l{background:var(--surface-2);color:var(--ink-3)}
+td .f{display:block;color:var(--ink-2);margin-top:3px}
+td .f b{color:var(--ink);font-weight:600}
+.order{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.batch{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.batch h3{margin:0 0 6px;font-size:15px}
+.batch h3 small{color:var(--ink-3);font-weight:400;font-size:12.5px;margin-left:6px}
+.batch ol{margin:0;padding-left:20px;color:var(--ink-2);font-size:13.5px}
+.batch li{margin:3px 0}
+.note{font-size:13px;color:var(--ink-3)}
+.ok{background:var(--goodbg);border:1px solid var(--line);border-left:3px solid var(--good);border-radius:8px;padding:10px 14px;font-size:13.5px;color:var(--ink-2)}
+.ok b{color:var(--ink)}
+@media (max-width:700px){td.w{width:auto}th:nth-child(3),td:nth-child(3){display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The Copilot, swept: what is broken, what does not fit the plan, what breaks the flow</h1>
+    <p class="lede">A full pass over every Copilot area on <code>main</code> at §653 — the code of each area's save and apply, the deliverable page, the archives, and a screen of each area at its key steps (the Foundation at the draft, the check and the save; the SWOT; Competitive Discipline, Directions, Execution and Advisory before and after their save; a free chat with its draft). Findings are grouped by kind, each with where it was seen and the fix, then a proposed order.</p>
+  </header>
+
+  <div class="path"><i>The path every area is meant to follow (§641, §645):</i> <b>chat</b> <i>→</i> <b>pane</b> <i>→</i> <b>Save</b> <i>a version under Deliverables →</i> <b>Apply to plan</b> <i>asks, archives what stood, writes →</i> <b>the plan</b> <i>· Advisory stops at Deliverables.</i></div>
+
+  <div class="ok"><b>What held up.</b> The Foundation and the SWOT follow the whole path. Every held button says why. The rail stays open with room. Start from the existing plan shows only where the plan holds the thing. Directions and Execution ask before they write and archive first. Nothing failed in the browser run beyond the eleven known zoom readings.</div>
+
+  <h2>A · Broken <small>a wrong result, a lost thing, or a lie on screen</small></h2>
+  <table>
+    <tr><th>#</th><th>Where</th><th class="w">Seen</th><th>What is wrong, and the fix</th><th>Severity</th></tr>
+    <tr><td class="n">A1</td><td>Any saved SWOT, Competitive Discipline, Directions or Execution version</td><td class="w">Code: <code>editVersion</code></td><td>The page's plain-text <b>Edit</b> makes a new version holding <code>{ text }</code> only — the letters, the table, the pillars, the measures are gone from that version, silently. Only the Foundation is guarded (§525).<span class="f"><b>Fix:</b> the same refusal the Foundation has, for every structured type: "changed in its chat, so its parts stay whole"; the Edit button opens the chat instead.</span></td><td><span class="sev h">High</span></td></tr>
+    <tr><td class="n">A2</td><td>Directions and Execution, Apply to plan</td><td class="w">Code: <code>planArchive</code>, <code>restoreArchive</code></td><td>Apply archives the <b>whole unit plan</b> (a <code>unit</code> archive: Foundation, SWOT and pillars). Restoring that archive from Import &amp; storage rolls back the Foundation and the SWOT too — far more than the apply touched.<span class="f"><b>Fix:</b> an archive of the part applied, as the Foundation (§524) and the SWOT (§641) have: a <code>directions</code> kind holding the pillars (with their measures and tactics), restored alone; the same archive for Execution, with the plan period in it.</span></td><td><span class="sev h">High</span></td></tr>
+    <tr><td class="n">A3</td><td>Directions and Execution, after a reload</td><td class="w">Code: <code>APPLIED</code> (§645's limit)</td><td>"On the plan" is this visit's memory. Reload the chat and it reads <i>not on the plan yet</i> over a plan that holds it.<span class="f"><b>Fix:</b> the Foundation's own note (§524.1, <code>extra.applied</code> on the deliverable, written after the plan's save lands); the SWOT reads it off the plan, which also works for Directions.</span></td><td><span class="sev m">Medium</span></td></tr>
+    <tr><td class="n">A4</td><td>Competitive Discipline, Save</td><td class="w">Screen cd-2</td><td>The plan is written even where the layer has Competitive Discipline switched <b>off</b>; the chat then says "the plan keeps it hidden until it is turned on". A write into a hidden section, with no ask.<span class="f"><b>Fix:</b> falls out of B1 — Apply asks, and where the section is off the ask says so and offers to turn it on, or holds.</span></td><td><span class="sev m">Medium</span></td></tr>
+    <tr><td class="n">A5</td><td>Execution, the period line</td><td class="w">Screen exec-1</td><td>"This plan covers <b>Oct–Dec 2026 (Q4)</b> · Change" draws a stray "·" with nothing after it.<span class="f"><b>Fix:</b> the separator only when there is a second part.</span></td><td><span class="sev l">Low</span></td></tr>
+    <tr><td class="n">A6</td><td>Advisory, the round box</td><td class="w">Screen adv-1</td><td>After <i>Proceed with what you have</i> the side box reads "1 of 5 asked" and "The questions are done" at once.<span class="f"><b>Fix:</b> "Proceeded after 1 of 5".</span></td><td><span class="sev l">Low</span></td></tr>
+  </table>
+
+  <h2>B · The plan does not fit <small>the agreed path, broken at a step</small></h2>
+  <table>
+    <tr><th>#</th><th>Where</th><th class="w">Seen</th><th>What is wrong, and the fix</th><th>Severity</th></tr>
+    <tr><td class="n">B1</td><td>Competitive Discipline</td><td class="w">Code: <code>cpWritePlan</code> on <code>competeFinish</code>; screen cd-2</td><td>Save still writes the plan in the same press — no question, no archive, no Apply. The skip §645 fixed for Directions and Execution.<span class="f"><b>Fix:</b> §645's shape: Save keeps the version; Apply to plan asks, archives the plan's Competitive Discipline as its own kind, writes.</span></td><td><span class="sev h">High</span></td></tr>
+    <tr><td class="n">B2</td><td>Deliverables: every saved version but the Foundation's</td><td class="w">Code: <code>delivHtml</code>, <code>d.type === "foundation"</code> only</td><td>A saved SWOT, Competitive Discipline, Directions or Execution version opens as plain text with no <b>Apply to plan</b> and no <b>Edit as vN</b>. Directions and Execution can be applied only from inside the chat that made them; a Competitive Discipline version cannot be re-applied at all. The rail is half a library.<span class="f"><b>Fix:</b> each type drawn as it is in its pane (the letters, the table, the pillars, the measures), with <i>On the plan as vN</i>, <b>Apply to plan</b> and <b>Edit as vN+1</b> (opening its chat) — the Foundation's page as the pattern.</span></td><td><span class="sev h">High</span></td></tr>
+    <tr><td class="n">B3</td><td>A free chat's draft</td><td class="w">Screen free-1; §633's "not in this change"</td><td>A draft the Copilot structures from a question or notes can be <b>saved</b> under the area's deliverables but never applied; it is stored as "Copilot-only" plain groups, whatever it is a draft of.<span class="f"><b>Fix:</b> decide: a free-chat draft that is a Foundation, a SWOT or Directions becomes that type's deliverable (so B2 gives it Apply); anything else says "stays in the Copilot" at its foot, as Advisory's does.</span></td><td><span class="sev m">Medium</span></td></tr>
+    <tr><td class="n">B4</td><td>The rail's chip on a deliverable</td><td class="w">Code: <code>kindWord</code></td><td>"Promotable" / "Copilot-only" — a word the rest of the Copilot never uses or explains.<span class="f"><b>Fix:</b> "Can go on the plan" / "Stays in the Copilot", or drop the chip and let the version's page say it.</span></td><td><span class="sev l">Low</span></td></tr>
+    <tr><td class="n">B5</td><td>Directions, options from the plan</td><td class="w">Screen dirs-1</td><td>A Direction already on the plan shows "–" for Urgency, Importance, Ease and Score, yet can be ticked to go ahead — it joins the chosen set unranked beside scored ones.<span class="f"><b>Fix:</b> a plan row keeps the scores the plan holds; with none, the row reads "not scored" and asks for them before it can go ahead.</span></td><td><span class="sev m">Medium</span></td></tr>
+  </table>
+
+  <h2>C · The flow <small>where the experience is not yet the agreed one</small></h2>
+  <table>
+    <tr><th>#</th><th>Where</th><th class="w">Seen</th><th>What is wrong, and the fix</th><th>Severity</th></tr>
+    <tr><td class="n">C1</td><td>Competitive Discipline, Directions, Execution, Advisory</td><td class="w">Screens cd-1, dirs-1, exec-1, adv-1</td><td>Still one column: the work is drawn inside the chat and scrolls away with it; no folded steps, no chat in time, the head reads "Title · in progress"; Save (and §645's Apply) sit in the chat. The <a href="https://claude.ai/artifact/DkFdouKSL1fN97P6gJCzZ2">before/after of the four areas</a> shows the target.<span class="f"><b>Fix:</b> the split, one area at a time: chat · pane · to-do, the conversation in the order it happened, Save and Apply at the pane's foot. Competitive Discipline first (B1 lands with it), then Directions, Execution, Advisory.</span></td><td><span class="sev h">High</span></td></tr>
+    <tr><td class="n">C2</td><td>The SWOT after its check</td><td class="w">§645's decision</td><td>"Say what to change" — decided yes, not built: a line like "move pricing pressure to threats" comes back as a proposal to save or keep; editing by hand stays.<span class="f"><b>Fix:</b> build it with the SWOT's move to the chat-in-time model (§644).</span></td><td><span class="sev m">Medium</span></td></tr>
+    <tr><td class="n">C3</td><td>Competitive Discipline, the foot</td><td class="w">Screen cd-1</td><td>"Keep chatting" beside Save — a button whose effect is not said.<span class="f"><b>Fix:</b> goes with C1; until then, name what it does.</span></td><td><span class="sev l">Low</span></td></tr>
+    <tr><td class="n">C4</td><td>Execution, a tactic's owner</td><td class="w">Screen exec-2</td><td>An owner can be typed that is not in the register; it is flagged "not in the register" only after Apply.<span class="f"><b>Fix:</b> the owner picked from the register's people, as a Capability's is (§626), with "not yet in the register" offered as a choice that says so.</span></td><td><span class="sev l">Low</span></td></tr>
+  </table>
+
+  <h2>Proposed order <small>three batches, each merged on its own</small></h2>
+  <div class="order">
+    <div class="batch"><h3>1 · Safety first<small>small, no design question</small></h3><ol><li>A1 — no plain-text edit on a structured version</li><li>A2 — an archive of the part applied, Directions and Execution (the period included)</li><li>A3 — "on the plan" survives a reload</li><li>A5, A6 — the two cosmetic lines</li><li>B4 — the rail's chip in plain words</li></ol></div>
+    <div class="batch"><h3>2 · The path, whole<small>Deliverables becomes the library it says it is</small></h3><ol><li>B1 + A4 — Competitive Discipline: Save, then Apply that asks (and respects a switched-off section)</li><li>B2 — every saved version's page: drawn as its type, On the plan, Apply, Edit as vN+1</li><li>B3 — a free-chat draft becomes its type, or says it stays</li><li>B5 — plan Directions scored or asked</li></ol></div>
+    <div class="batch"><h3>3 · The four areas split<small>the largest, the most felt</small></h3><ol><li>C1 — Competitive Discipline (with the scoring guide once reviewed), then Directions, Execution, Advisory</li><li>C2 — the SWOT: chat in time, say what to change</li><li>C3, C4 — fall out of the split</li></ol></div>
+  </div>
+  <p class="note">Everything above is on <code>main</code> at §653 as of 27 Oct 2026. The screens named are the browser run's own, taken at each area's key steps.</p>
+</div>
+</body>
+</html>

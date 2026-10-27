@@ -45,7 +45,7 @@ const mayEdit = (me: SessionUser, authorId: string): boolean =>
 
 const ROW =
   "e.id, e.about_tenant_id, e.author_id, e.kind, e.title, e.happened, e.did, e.came_of_it, " +
-  "e.next_person, e.occurred, e.created_at, e.updated_at, e.case_id, cs.name AS case_name, " +
+  "e.next_person, e.occurred, e.created_at, e.updated_at, e.case_id, cs.name AS case_name, cs.kind AS case_kind, " +
   "t.key AS client_key, t.name AS client_name, t.industry, u.name AS author_name, u.email AS author_email";
 /* THE PIECE OF WORK IT CAME FROM (spec 067 §5) rides on every row, or null
    for one not yet placed — a LEFT JOIN, because most have none yet. */
@@ -60,7 +60,7 @@ function shape(r: Record<string, any>, me: SessionUser) {
     occurred: r.occurred, when: r.created_at,
     client: r.client_key, clientName: r.client_name, industry: r.industry,
     author: r.author_name, authorEmail: r.author_email,
-    caseId: r.case_id || null, caseName: r.case_name || "",
+    caseId: r.case_id || null, caseName: r.case_name || "", caseKind: r.case_kind || "",
     mine: mayEdit(me, r.author_id),
   };
 }
@@ -115,7 +115,10 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
     if (body.kind) { args.push(kindOf(body.kind)); where.push("e.kind = $" + args.length); }
     /* "none" is the insights still waiting to be placed (spec 067 §5) */
     if (body.case === "none") where.push("e.case_id IS NULL");
+    /* the assignment's type (spec 069): "every hiccup on a Retainer" */
     else if (body.case) { args.push(String(body.case)); where.push("e.case_id::text = $" + args.length); }
+    /* the assignment's type (spec 069): "every hiccup on a Retainer" */
+    if (body.type) { args.push(str(body.type)); where.push("cs.kind = $" + args.length); }
     if (str(body.q).trim()) {
       /* ILIKE over a few hundred rows is the right amount of machinery for a
          few hundred rows; full text is recorded in plan.md, not built. The
@@ -165,7 +168,7 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
        work. Otherwise the client is the one named, as before. */
     if (body.caseId) {
       const cs = await pool.query("SELECT id, about_tenant_id FROM case_studies WHERE id::text = $1", [str(body.caseId)]);
-      if (!cs.rowCount) return no(404, "That case study is no longer here.");
+      if (!cs.rowCount) return no(404, "That assignment is no longer here.");
       return ok({ id: await insert(pool, d, cs.rows[0].about_tenant_id, me.id, cs.rows[0].id) });
     }
     const tenantId = await tenantIdFor(pool, body.client);
@@ -174,7 +177,15 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
   }
 
   if (action === "saveMany") {
-    const tenantId = await tenantIdFor(pool, body.client);
+    /* FROM AN ASSIGNMENT (spec 069): its client is taken from it, never from
+       the body, so a learning cannot be filed under one client and tied to
+       another's assignment — the single save's own rule, below. */
+    let tenantId: string | null = null, caseId: string | null = null;
+    if (body.caseId) {
+      const cs = await pool.query("SELECT id, about_tenant_id FROM case_studies WHERE id::text = $1", [str(body.caseId)]);
+      if (!cs.rowCount) return no(404, "That assignment is no longer here.");
+      tenantId = cs.rows[0].about_tenant_id; caseId = cs.rows[0].id;
+    } else tenantId = await tenantIdFor(pool, body.client);
     if (!tenantId) return no(400, "Say which client it came from.");
     const drafts = Array.isArray(body.entries) ? body.entries.map(draftOf) : [];
     if (!drafts.length) return no(400, "There is nothing here to save.");
@@ -190,7 +201,7 @@ export async function memoryAction(pool: Pool, me: SessionUser, body: any): Prom
          the outcome nobody can tell from a bug. */
       if (process.env.SMP_BREAK !== "partial-save") await c.query("BEGIN");
       const ids: string[] = [];
-      for (const d of drafts) ids.push(await insert(c, d, tenantId, me.id));
+      for (const d of drafts) ids.push(await insert(c, d, tenantId, me.id, caseId));
       if (process.env.SMP_BREAK !== "partial-save") await c.query("COMMIT");
       return ok({ ids, saved: ids.length });
     } catch (e) {

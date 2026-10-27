@@ -312,7 +312,7 @@ button.copcard.pick { font:inherit; text-align:left; cursor:pointer; width:100%;
 button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--surface-2); outline:none; border-color:var(--gold); }
 .copcard ul { margin:0; padding-left:16px; font-size:13px; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; }
 .copcard li { overflow-wrap:anywhere; }
-ul:not(.open) > li.copx { display:none; }
+ul:not(.open) > li.copmorel { display:none; }
 .copmore { display:inline-block; margin-top:2px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
 .copmore:hover, .copmore:focus-visible { color:var(--ink); outline:none; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
@@ -892,8 +892,60 @@ button.copswrow:focus-visible { outline:2px solid var(--focus, var(--gold)); out
 .copfnote { font-size:var(--fs-small, 12.5px); color:var(--ink-3); text-align:center; }
 .copmsg.copold { opacity:.62; }
 .copmsg.copold .copfdraft { text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--ink-3) 60%, transparent); }
-.copanswers { display:inline-block; margin-top:4px; margin-right:10px; color:var(--gold); font-size:var(--fs-small, 12.5px); font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
-.copanswers:hover, .copanswers:focus-visible { color:var(--ink); outline:none; }
+/* §644 — after the guided pass the chat goes on as plain chat, marked once. */
+.copsep { display:flex; align-items:center; gap:10px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); margin:4px 0; }
+.copsep::before, .copsep::after { content:""; flex:1; height:1px; background:var(--line); }
 .coppf.flash { animation:copflash 1.2s ease; }
 @keyframes copflash { 0% { box-shadow:0 0 0 3px var(--gold); } 100% { box-shadow:0 0 0 0 transparent; } }
 @media (prefers-reduced-motion:reduce){ .copchev { transition:none; } .coppf.flash { animation:none; } }
+
+/* ── §649 A HELD BUTTON SAYS WHY (Islam, 26 Oct 2026: "for any disabled
+   button we need to have a tooltip explaining why"). §538's held button for
+   every Copilot control: dimmed like `disabled`, still reachable by a
+   pointer, Tab and a tap, and its reason in the platform's dark bubble
+   (#coptip, below); the press itself is stopped in copilot.js before any
+   handler. ── */
+:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick, .copcact button)[aria-disabled="true"] { opacity:.55; cursor:not-allowed; filter:none; }
+/* §649.1 — the bubble is one element at page level (#coptip), placed from
+   the button and kept inside the window, so the pane and the chat box —
+   which clip what crosses their edges — never cut it (Islam's screenshots of
+   Run the check and Send, each note sliced at the left). */
+#coptip { display:none; position:fixed; z-index:2147483000; pointer-events:none;
+  background:var(--ink); color:var(--ground); font:400 12px/1.4 var(--sans); letter-spacing:0; text-transform:none; text-align:left;
+  padding:8px 11px; border-radius:3px; width:max-content; max-width:min(280px, calc(100vw - 16px)); white-space:normal; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+:is(.copbtn, .copopt, .copsend, .copsz, .copsw-tick)[aria-disabled="true"][data-tip]:is(:hover, :focus-visible) { opacity:.75; }
+.copsend[hidden] { display:none !important; }
+
+/* ── §653 THE COPILOT, ORIENTED (Islam, 27 Oct 2026, from the signed-off
+   design-mockups/copilot-layout/2026-10-27_orientation-before-after.html):
+   the rail stays open while there is room (copilot.js); each header has one
+   job — the chat's head is the chat's name and the step; one counter, the
+   to-do's; four status words; the Copilot's lines lose their box; the path
+   in one line at the pane's foot; Start from the existing plan on the start
+   screen. ── */
+.copfhead .copfname { font-weight:700; }
+.copfhead small { font-weight:400; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
+/* The chat is lighter: the Copilot's lines keep the stripe and lose the box;
+   the person's stay bubbles; the draft inside a proposal keeps its own box. */
+.copmsg.ai .copbody { background:none; border:0; border-left:3px solid var(--gold); border-radius:0; padding:2px 11px; }
+.copmsg.ai.copold .copbody { opacity:1; }
+.copfchat { background:var(--surface); }
+/* The one-line path at the pane's foot. */
+.copsvst b { color:var(--ink); font-weight:600; }
+.copsvst i { font-style:normal; color:var(--line); margin:0 2px; }
+.copsvst .on { color:var(--good-tx); font-weight:600; }
+/* A to-do pill with nothing to say is not drawn. */
+.copsw-pill:empty { display:none; }
+/* Start from the existing plan: first, and marked. */
+.coppcard.copplan { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:color-mix(in srgb, var(--goldfill) 7%, var(--surface)); }
+.coppcard.copplan .coptag { display:block; font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep, var(--gold)); }
+.coppcard.copplan .copmeta { grid-column:2; font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+
+/* §654 B2 — a saved version drawn as its type, on its own page. */
+.copdtyped { display:flex; flex-direction:column; gap:8px; margin:6px 0 10px; }
+.copdtyped h5 { margin:6px 0 0; font:700 var(--fs-small, 12.5px)/1.4 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copdline { margin:0; font-size:var(--fs-note, 13.5px); }
+.copdul { margin:0; padding-left:18px; font-size:var(--fs-note, 13.5px); color:var(--ink); display:flex; flex-direction:column; gap:3px; }
+.copdswot { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+@media (max-width:760px){ .copdswot { grid-template-columns:1fr; } }
+.copdstay { display:block; width:100%; margin-top:6px; }

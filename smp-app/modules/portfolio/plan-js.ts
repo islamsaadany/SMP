@@ -40,7 +40,9 @@ export const PLAN_JS = `(function () {
       if (!pe || !ps) return;
       var tr = r.querySelector(".track"), ft = from.querySelector(".track");
       if (!tr || !ft) return;
-      var drop = tr.getBoundingClientRect().top - ft.getBoundingClientRect().top;
+      /* measured in the screen's pixels, drawn in the page's: the page is
+         zoomed to 0.8 on a computer (lib/topbar.ts) */
+      var drop = (tr.getBoundingClientRect().top - ft.getBoundingClientRect().top) / (parseFloat(getComputedStyle(document.documentElement).zoom) || 1);
       if (!drop) return;
       var mid = tr.clientHeight / 2;
       var add = function (cls, css) {

@@ -32,7 +32,7 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
-  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, sanitizeFlow, flowOf, writeFlow,
+  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, addTalk, withQa, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
   saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
   withYear,
@@ -433,6 +433,22 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, applied });
   }
 
+  /* §654 A3 — THE NOTE "version N is on the plan", for Directions,
+     Capabilities and Execution: written by the browser once the plan's own
+     save has landed (§524.1's order), read back by their views, so a reload
+     says what the plan holds instead of this visit's memory. */
+  if (kind === "planApplied") {
+    const d = await oneDeliverable(c, id);
+    if (!d) return refused(404, "That deliverable is not here any more.");
+    if (!["directions", "capabilities", "execution", "compete", "swot"].includes(d.type)) return refused(400, "That kind of deliverable is not applied this way.");
+    const n = Number(b.n);
+    const v = (await versionsOf(c, id)).find((x: any) => x.n === n);
+    if (!v) return refused(400, "That version is not here.");
+    const applied = { n, at: new Date().toISOString(), by };
+    await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify(applied)]);
+    return out(200, { ok: true, applied });
+  }
+
   if (kind === "editVersion" || kind === "restore") {
     const d = await oneDeliverable(c, id);
     if (!d) return refused(404, "That deliverable is not here any more.");
@@ -444,8 +460,12 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       /* §525 — a Foundation is its parts, and a plain-text edit would make a
          version holding none, which Apply to plan then refuses. Its parts
          are changed in the chat that built it. */
-      if (d.type === "foundation" && brk() !== "text-edit-foundation")
-        return refused(400, "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan.");
+      /* §654 A1 — the same guard for every structured type: a plain-text
+         version of a SWOT, a table, pillars or measures holds none of them. */
+      const STRUCTURED: Record<string, string> = { foundation: "Foundation", swot: "SWOT", compete: "Competitive Discipline", directions: "Directions", capabilities: "Capabilities", execution: "Execution" };
+      if (STRUCTURED[d.type] && brk() !== "text-edit-foundation")
+        return refused(400, d.type === "foundation" ? "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan."
+          : "A " + STRUCTURED[d.type] + " is changed in its chat, so its parts stay whole for Apply to plan.");
       const n = await addVersion(c, id, { body: { text }, note: oneLine(b.note) || "Edited", by });
       return out(200, { ok: true, n });
     }
@@ -658,10 +678,10 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
       return out(200, { ok: true, flow: g0 });
     }
     const prop = now.prop.slice(); prop[el] = text;
-    const talk = now.talk.map((t) => t.slice());
-    if (kind === "flowRefine") talk[el] = addTalk(talk[el], "me", (REFINE_WORDS[how] || how).slice(0, MAX_ANSWER));
-    talk[el] = addTalk(talk[el], "ai", text);
-    const g: Flow = { ...now, phase: "draft", e: el, prop, talk };
+    let log = kind === "flowDraft" ? withQa(now.log, el) : now.log;
+    if (kind === "flowRefine") log = addTalk(log, el, "me", (REFINE_WORDS[how] || how).slice(0, MAX_ANSWER));
+    log = addTalk(log, el, "ai", text);
+    const g: Flow = { ...now, phase: "draft", e: el, prop, log };
     await writeFlow(c, id, g);
     return out(200, { ok: true, flow: g });
   });

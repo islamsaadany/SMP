@@ -5,10 +5,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Forefront — Strategy Management Platform</title>
-<!-- the console's own mark (Islam's pick A, the north star, 2026-10-24); the
-     door and the client platforms keep /favicon.svg -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23F5A623'/%3E%3Cpath d='M12 3.6 13.6 10.4 20.4 12 13.6 13.6 12 20.4 10.4 13.6 3.6 12 10.4 10.4z' fill='none' stroke='%230F2C69' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E" type="image/svg+xml">
-<link rel="icon" href="/favicon.png" sizes="32x32">
+<!-- the platform's one mark, the north star (Islam's pick A, 2026-10-24), the
+     same file the door and the client platforms use -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
 <!--
   FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
   "the page you are showing should be just for login ... and the rest should be
@@ -64,6 +64,8 @@
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
     --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
+    /* an assignment's type (spec 069): Planning blue, Retainer violet */
+    --plan:#2F57A8; --plan-bg:#E8EEFA; --ret:#6B3FA0; --ret-bg:#F1EAF9;
     --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
   }
   @media (prefers-color-scheme: dark){
@@ -80,6 +82,7 @@
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
       --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --plan:#8FB0F0; --plan-bg:#1E2A44; --ret:#C3A2EC; --ret-bg:#2A2238;
       --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
     }
   }
@@ -102,6 +105,7 @@
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
     --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --plan:#8FB0F0; --plan-bg:#1E2A44; --ret:#C3A2EC; --ret-bg:#2A2238;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
   }
   *{ box-sizing:border-box }
@@ -112,6 +116,13 @@
      that paints a page and then corrects it has shown somebody a screen that
      was not theirs. */
   body:not(.ready) .wrap{ visibility:hidden }
+  .bootwait{ display:none }
+  body:not(.ready) .bootwait{ display:block; padding:16px 22px 0 }
+  .bwband{ height:113px; border-radius:14px; background:var(--ff); padding:21px 22px 17px; display:flex; flex-direction:column; justify-content:flex-end; gap:10px }
+  .bwband span{ display:block; height:13px; width:320px; max-width:70%; border-radius:6px; background:rgba(255,255,255,.18); animation:tskpulse 1.5s ease-in-out infinite }
+  .bwband .a{ height:10px; width:150px; background:rgba(245,166,35,.55) } .bwband .t{ height:20px; width:260px }
+  @media (max-width:999px){ body:not(.ready) .bootwait{ padding:14px 14px 0 } }
+  @media (prefers-reduced-motion:reduce){ .bwband span{ animation:none; opacity:.75 } }
 
   /* ── THE CHROME IS A COLUMN ON THE LEFT (§601) ─────────────────────────
      Islam, of design-mockups/left-nav/2026-10-23_left-sidebar.html: "yes
@@ -533,6 +544,17 @@
   .tsk .head{ padding-bottom:12px; border-bottom:1px solid var(--line) }
   .tsk .th{ height:34px; border-radius:8px 8px 0 0; background:var(--surface-2); border:1px solid var(--line) }
   .tsk .tr{ display:flex; align-items:center; gap:18px; padding:12px 14px; border:1px solid var(--line); border-top:0; background:var(--surface) }
+  /* Home's waiting cards are Home's own boxes (tabSkelBody), so the gap the
+     shape puts between its parts is the page's own margins instead */
+  .tsk.tskhome{ gap:0 }
+  .tsk .hotwo > div{ display:flex; flex-direction:column; gap:4px }
+  /* the column's tabs, waiting (drawWaiting): a tab's height, the label's */
+  .sbskrow{ display:flex; align-items:center; gap:11px; height:34px; padding:0 10px }
+  .sbskgl{ display:flex; align-items:center; height:22px; padding:0 10px }
+  .sbsk{ display:block; flex:none; height:12px; border-radius:6px; background:var(--sb-on); animation:tskpulse 1.5s ease-in-out infinite }
+  .sbskrow .sbsk:first-child{ height:18px; border-radius:5px }
+  html[data-rail="1"] .sbskrow{ justify-content:center; padding:0 } html[data-rail="1"] .sbskrow .sbsk + .sbsk, html[data-rail="1"] .sbskgl{ display:none }
+  @media (prefers-reduced-motion:reduce){ .sbsk{ animation:none; opacity:.75 } }
   .tsk .ln{ padding:11px 0; border-bottom:1px solid var(--line-soft) }
   @keyframes tskpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
   @media (prefers-reduced-motion:reduce){ .tsk .b{ animation:none; opacity:.75 } }
@@ -856,96 +878,6 @@
   .byline .who .em{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
   .byline .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
 
-  /* ── THE DOCUMENT ROOM (spec 053) ────────────────────────────────
-     THREE RULES, and that is the whole of what this page gains: the list is
-     .filters + .count + .elist + .erow, the editor is .ecard + .lab + .fld,
-     the dangerous pair is .apart + .teamrow, and every button is .btn — all
-     of them declared above for the consulting memory and the set-up flow
-     (§53.5). What is new is a category that can be pressed, a strip for the
-     file, and the row that holds them. */
-  .catpick{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
-    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:3px 8px;
-    color:var(--ink-2); background:var(--surface-2); cursor:pointer }
-  .catpick[aria-pressed="true"]{ color:var(--amber-tx); border-color:var(--amber);
-    background:var(--surface) }
-  /* A chip must answer the pointer in BOTH states, or the lit one reads as
-     something that has stopped being a control (§41.4 recorded exactly this:
-     a new pressed style with no hover beside it goes silent under the mouse).
-     The edge moves and the ground does not, so a pressed chip does not lose
-     the one thing saying it is pressed. */
-  .catpick:hover, .catpick:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .catrow{ display:flex; gap:7px; flex-wrap:wrap }
-
-  /* ── WHO CAN SEE ONE REPORT (spec 046 §4.10) ─────────────────────────
-     Four rule families, verbatim from the mockup signed off on 15 September
-     (design-mockups/insights/2026-09-15_report-visibility.html), which is
-     itself built out of the rules above.
-
-     THE STRIP is .filestrip's shape with a SOLID border rather than a dashed
-     one: it is a field among the others, and dashed is how the file row says
-     something can be dragged onto it.
-
-     THE PANEL is .wzpanel's box with .gp's headings and .opt's rows — the
-     set-up flow's picker, which is itself the client platform's own
-     searchable list one surface over (§130.1, §295.1). What is new is the
-     head (a search and the two words) and the tick.
-
-     THE MARK ON A ROW NEEDS NO RULE AT ALL: a narrowed report wears the
-     plain .tag, and only `Nobody` takes an alarm. Drawn amber first and the
-     render caught it — .tag.none (Draft) is already amber, so two meanings
-     landed in one colour in one slot (§87's twins, §41's budget).
-     --bad on --bad-bg measures 5.51 light and 5.28 dark in THIS palette;
-     §62's 4.41 is the client platform's and is not a measurement of this one
-     (§303's shape). */
-  .tag.shut{ color:var(--bad); background:var(--bad-bg); border-color:var(--bad) }
-  .seen{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    border:1px solid var(--line); border-radius:9px; padding:10px 12px; background:var(--surface) }
-  .seen .who{ min-width:0; display:flex; gap:6px; flex-wrap:wrap; align-items:center }
-  .seen .all{ font-size:13.5px; color:var(--ink-2) }
-  .seen .none{ font-size:13.5px; color:var(--bad); font-weight:600 }
-  .seen .sp{ margin-left:auto; display:flex; gap:8px }
-  .tickwrap{ position:relative }
-  .tickpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
-    background:var(--surface); border:1px solid var(--line); border-radius:9px;
-    box-shadow:var(--shadow); overflow:hidden }
-  .tickhead{ display:flex; gap:8px; align-items:center; padding:9px 9px 8px;
-    border-bottom:1px solid var(--line-soft); flex-wrap:wrap }
-  .tickhead .fld{ flex:1 1 180px; min-width:0; padding:6px 9px; font-size:13.5px }
-  .tickhead .lnk{ border:0; background:transparent; padding:2px 4px; cursor:pointer;
-    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.07em;
-    text-transform:uppercase; color:var(--ff-tx); text-decoration:underline;
-    text-underline-offset:3px }
-  .tickhead .lnk:hover, .tickhead .lnk:focus-visible{ color:var(--ink); outline:none }
-  .ticklist{ max-height:236px; overflow-y:auto; padding:5px }
-  .ticklist .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
-  .tick{ display:flex; gap:9px; align-items:center; width:100%; text-align:left; border:0;
-    background:transparent; color:var(--ink); font:inherit; font-size:13.5px;
-    padding:6px 9px; border-radius:6px; cursor:pointer }
-  .tick:hover, .tick:focus-visible{ background:var(--surface-2); outline:none }
-  .tick .bx{ flex:none; width:15px; height:15px; border-radius:4px; border:1.5px solid var(--line);
-    display:grid; place-items:center; background:var(--surface) }
-  .tick .bx svg{ width:11px; height:11px; display:none }
-  .tick[aria-pressed="true"] .bx{ border-color:var(--amber); background:var(--amber) }
-  .tick[aria-pressed="true"] .bx svg{ display:block; color:var(--amber-ink) }
-  .tick[aria-pressed="true"]{ font-weight:600 }
-  .tickfoot{ border-top:1px solid var(--line-soft); padding:8px 11px 9px;
-    font-size:12.5px; color:var(--ink-3) }
-  .tickfoot b{ color:var(--ink); font-weight:600 }
-  /* A bordered strip and not a card: the file is one field among the others,
-     and a card would rank it above the title. Dashed, because until something
-     is dropped on it there is nothing there — the same thing the Add card's
-     dashed edge says one page over. */
-  /* `.filestrip` AND NOT `.drop`: the debrief's own Drop button is a
-     `.btn drop` (§65.9 — a class name is one global namespace), so a bare
-     `.drop` here would have put a dashed box and 14px of padding round a
-     small remove control one page over, where nothing would have looked at
-     it. Found by grepping the name before trusting it. */
-  .filestrip{ display:flex; gap:12px; align-items:center; flex-wrap:wrap;
-    border:1px dashed var(--line); border-radius:9px; padding:12px 14px; background:var(--surface) }
-  .filestrip .fname{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
-    min-width:0; overflow-wrap:anywhere }
-  .filestrip .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center }
 
   .wiz{ max-width:720px }
   .wq{ margin-bottom:17px }
@@ -1034,6 +966,7 @@
   .clwho{ display:flex; gap:10px; align-items:center }
   .clwho b{ font-weight:600 }
   .clwho .cmark{ width:26px; height:26px; line-height:26px; font-size:10px; flex:none }
+  .clwho img.cmark{ object-fit:contain; border-radius:6px }
   .clwho .cmark.arch{ background:var(--surface-2); color:var(--ink-3) }
   .clmods{ display:flex; gap:6px; flex-wrap:wrap }
   .clmod{ border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:var(--surface); color:var(--ink);
@@ -1058,6 +991,117 @@
      one global namespace on this page (§65.9). New shapes, said: the cover
      and the shelf, the report header, the month strip, the file tile and the
      index card. */
+  /* ── TRACK RECORD (spec 069) ── the type and kind tags; the front's
+     chips, client cards and learning rows; a client's strip of months and
+     its tabs; the write-up's head; the + Add menu. Scoped to the tab, for
+     spec 067's reason: a class name is one global namespace here. */
+  .ttag{ display:inline-block; font-size:11px; font-weight:650; border-radius:5px; padding:1px 7px; white-space:nowrap; line-height:1.5 }
+  .ttag.planning{ background:var(--plan-bg); color:var(--plan) }
+  .ttag.retainer{ background:var(--ret-bg); color:var(--ret) }
+  #page[data-tab="memory"] .ktag{ display:inline-block; font-size:11px; font-weight:650; border-radius:5px; padding:1px 7px; white-space:nowrap }
+  #page[data-tab="memory"] .ktag.hiccup{ background:var(--bad-bg); color:var(--bad) }
+  #page[data-tab="memory"] .ktag.practice{ background:var(--good-bg); color:var(--good) }
+  #page[data-tab="memory"] .ktag.lesson{ background:var(--warn-bg); color:var(--warn) }
+  .st.pub{ color:var(--good) } .st.dr{ color:var(--amber-tx) } .st.run{ color:var(--ink-3) } .st.late{ color:var(--bad) }
+  .asgline .st, #page[data-tab="memory"] .st{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap }
+  #page[data-tab="memory"] .tradd{ position:relative; display:inline-flex }
+  #page[data-tab="memory"] .tramenu[hidden]{ display:none }
+  #page[data-tab="memory"] .tramenu{ position:fixed; z-index:60; width:min(300px, calc(100vw - 32px)); padding:6px; border:1px solid var(--line);
+    border-radius:10px; background:var(--surface); box-shadow:var(--shadow); display:flex; flex-direction:column; gap:2px; text-align:left }
+  #page[data-tab="memory"] .tramenu button{ display:flex; flex-direction:column; gap:2px; border:0; background:none; border-radius:7px; padding:9px 11px;
+    font-family:inherit; text-align:left; color:var(--ink); cursor:pointer }
+  #page[data-tab="memory"] .tramenu button:hover, #page[data-tab="memory"] .tramenu button:focus-visible{ background:var(--surface-2); outline:none }
+  #page[data-tab="memory"] .tramenu b{ font-size:13.5px; font-weight:600 }
+  #page[data-tab="memory"] .tramenu small{ font-size:12px; color:var(--ink-3) }
+  #page[data-tab="memory"] .trchips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line-soft) }
+  #page[data-tab="memory"] .trchips .lbl{ font-size:11px; font-weight:600; color:var(--ink-3); margin-right:2px }
+  #page[data-tab="memory"] .trchips .div{ width:1px; height:16px; background:var(--line); margin:0 4px }
+  #page[data-tab="memory"] .trchips button:not(.btn){ border:1px solid var(--line); border-radius:999px; padding:2px 10px; background:var(--surface);
+    color:var(--ink-2); font-family:inherit; font-size:12px; cursor:pointer }
+  #page[data-tab="memory"] .trchips button[aria-pressed="true"]{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  #page[data-tab="memory"] .btn.sm{ padding:3px 10px; font-size:12px }
+  #page[data-tab="memory"] .trcards{ display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:14px; padding:16px }
+  #page[data-tab="memory"] .trcard{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; background:var(--surface); overflow:hidden }
+  #page[data-tab="memory"] .trhd{ display:flex; gap:10px; align-items:center; padding:12px 14px; border:0; background:none; font-family:inherit; text-align:left; color:inherit; cursor:pointer }
+  #page[data-tab="memory"] .trhd .logo{ width:34px; height:34px; border-radius:8px; font-size:12px; line-height:34px; flex:none; text-align:center;
+    font-weight:700; background:var(--ff); color:var(--amber); object-fit:contain }
+  #page[data-tab="memory"] a.btn{ text-decoration:none; display:inline-flex; align-items:center }
+  #page[data-tab="memory"] .trhd b{ display:block; font-size:14.5px; font-weight:600 }
+  #page[data-tab="memory"] .trhd small{ display:block; font-size:12px; color:var(--ink-3) }
+  #page[data-tab="memory"] .trhd:hover b{ color:var(--amber-tx) }
+  #page[data-tab="memory"] .trasg{ display:flex; flex-direction:column; border-top:1px solid var(--line-soft) }
+  #page[data-tab="memory"] .trasg button{ display:flex; gap:8px; align-items:center; padding:8px 14px; border:0; border-bottom:1px solid var(--line-soft);
+    background:none; font-family:inherit; font-size:13px; color:var(--ink); text-align:left; cursor:pointer }
+  #page[data-tab="memory"] .trasg button:hover{ background:var(--surface-2) }
+  #page[data-tab="memory"] .trasg .nm{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  #page[data-tab="memory"] .trft{ margin:0; padding:9px 14px; font-size:12px; color:var(--ink-3) }
+  #page[data-tab="memory"] .trsub{ margin:0; padding:12px 16px 4px; font-size:13px; font-weight:600; color:var(--ink-2) }
+  #page[data-tab="memory"] .trres{ display:flex; flex-direction:column }
+  #page[data-tab="memory"] .trlr{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:12px; align-items:baseline; padding:11px 16px; border:0;
+    border-top:1px solid var(--line-soft); background:none; font-family:inherit; text-align:left; color:var(--ink); cursor:pointer }
+  #page[data-tab="memory"] .trlr:hover{ background:var(--surface-2) }
+  #page[data-tab="memory"] .trlr .tx b{ display:block; font-size:14px; font-weight:600 }
+  #page[data-tab="memory"] .trlr .tx small{ display:block; font-size:13px; color:var(--ink-2); margin-top:2px }
+  #page[data-tab="memory"] .trlr .wh{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; font-size:12px; color:var(--ink-3); text-align:right }
+  #page[data-tab="memory"] .trlr .wh b{ color:var(--ink); font-weight:600 }
+  #page[data-tab="memory"] .trlr .loose{ font-style:italic }
+  @media (max-width:640px){ #page[data-tab="memory"] .trlr{ grid-template-columns:minmax(0,1fr) } #page[data-tab="memory"] .trlr .wh{ align-items:flex-start; text-align:left } }
+  #page[data-tab="memory"] .trband{ display:flex; align-items:center; gap:16px }
+  #page[data-tab="memory"] .trband > .logo{ width:52px; height:52px; border-radius:11px; font-size:16px; line-height:52px; flex:none }
+  #page[data-tab="memory"] .trband .pgl{ flex:1; min-width:0 }
+  #page[data-tab="memory"] .trtl{ margin:0 0 18px; padding:14px 16px 10px; border:1px solid var(--line); border-radius:10px; background:var(--surface) }
+  #page[data-tab="memory"] .trbars{ position:relative; display:flex; flex-direction:column; gap:6px }
+  #page[data-tab="memory"] .trbar{ position:relative; height:28px; border-radius:6px; padding:0 10px; font-family:inherit; font-size:12px; font-weight:650;
+    text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; border:1px solid }
+  #page[data-tab="memory"] .trbar.planning{ background:var(--plan-bg); color:var(--plan); border-color:var(--plan) }
+  #page[data-tab="memory"] .trbar.retainer{ background:var(--ret-bg); color:var(--ret); border-color:var(--ret) }
+  #page[data-tab="memory"] .trbar.open{ border-style:dashed }
+  #page[data-tab="memory"] .trticks{ display:flex; justify-content:space-between; margin-top:8px; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums }
+  #page[data-tab="memory"] .trtabs{ display:flex; flex-wrap:wrap; gap:2px; border-bottom:1px solid var(--line) }
+  #page[data-tab="memory"] .trtabs button{ display:flex; gap:8px; align-items:center; padding:10px 14px; margin-bottom:-1px; border:0; border-bottom:3px solid transparent;
+    background:none; font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink-2); cursor:pointer }
+  #page[data-tab="memory"] .trtabs button[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--amber) }
+  #page[data-tab="memory"] .trgrid{ margin-top:4px }
+  #page[data-tab="memory"] .trlh{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 10px }
+  #page[data-tab="memory"] .trlh h2{ margin:0; font-size:16px; font-weight:600 }
+  #page[data-tab="memory"] .trlearn{ margin-top:34px }
+  #page[data-tab="memory"] .trloose{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line) }
+  #page[data-tab="memory"] .gbox .src{ margin:10px 0 0; font-size:11.5px; color:var(--ink-3) }
+  #page[data-tab="memory"] .trst{ display:flex; flex-wrap:wrap; gap:4px 10px; align-items:baseline; margin:12px 0 0; font-size:12.5px }
+  #page[data-tab="memory"] .gacts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px }
+  #page[data-tab="memory"] .trwh{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0 0 10px }
+  #page[data-tab="memory"] .trwh h1{ margin:0; font-size:24px; font-weight:600; letter-spacing:-.01em }
+  #page[data-tab="memory"] .trctxs{ display:flex; flex-wrap:wrap; gap:6px 18px; padding:10px 14px; border-radius:8px; background:var(--surface-2); font-size:13px; margin:0 0 14px }
+  #page[data-tab="memory"] .trctxs i{ font-style:normal; color:var(--ink-3) }
+  #page[data-tab="memory"] .trctxs b{ font-weight:600 }
+  #page[data-tab="memory"] .trctx{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:-6px 0 14px; font-size:13.5px }
+  #page[data-tab="memory"] .trpick{ margin:0 0 14px }
+  #page[data-tab="memory"] .trpickcard{ max-width:720px }
+  #page[data-tab="memory"] .trhow{ margin:0 0 14px }
+  #page[data-tab="memory"] .steps .st.done .dot{ background:var(--good); border-color:var(--good); color:var(--surface) }
+  #page[data-tab="memory"] .pubbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:22px; padding-top:14px; border-top:1px solid var(--line) }
+  /* the registry, on the Clients page's list view */
+  .cltable tr.asgrow td{ padding-top:7px; padding-bottom:7px; background:var(--surface) }
+  .cltable tr.asgadd td{ padding-top:4px; padding-bottom:10px }
+  .asgline{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; padding-left:38px; font-size:13px }
+  .asgline .textlink{ border:0; background:none; padding:0; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer }
+  .asgline .textlink:hover{ color:var(--amber-tx) }
+  .asgline .mo{ color:var(--ink-2); font-variant-numeric:tabular-nums }
+  .asgline .ld, .asgline .tm{ color:var(--ink-3) }
+  .asgline .sp, .asgacts .sp{ flex:1 }
+  .cltable tr.asgadd td{ padding-left:48px }
+  .cltable tr.asgform td{ background:var(--amber-wash) }
+  .asgf, .pastform{ display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:10px 14px; padding:6px 0 0 38px }
+  .pastform{ padding-left:0 }
+  .asgteam{ grid-column:1 / -1 }
+  .asgteam .pills{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:4px }
+  .asgteam .pill{ display:inline-flex; gap:6px; align-items:center; border:1px solid var(--line); border-radius:999px; padding:2px 4px 2px 10px; background:var(--surface); font-size:12.5px }
+  .asgteam .pill .x{ border:0; background:none; cursor:pointer; color:var(--ink-3); font-size:14px; line-height:1 }
+  .asgteam .addsel{ width:auto }
+  .asgacts{ display:flex; gap:8px; align-items:center; padding:10px 0 4px 38px }
+  .pastwrap{ margin:0 0 14px; padding:14px; border:1px solid var(--amber); border-radius:10px; background:var(--amber-wash) }
+  .pastwrap .asgacts{ padding-left:0 }
+  .btn.sm{ padding:3px 10px; font-size:12px }
   #page[data-tab="memory"] .csseg{ display:inline-flex; border:1px solid var(--line); border-radius:8px; padding:2px; background:var(--surface-2) }
   #page[data-tab="memory"] .csseg button{ border:0; background:transparent; color:var(--ink-2); font-family:inherit; font-size:12.5px; font-weight:600;
     line-height:1; padding:7px 11px; border-radius:6px; cursor:pointer }
@@ -1878,7 +1922,11 @@
     <button class="sbbtn" id="sbfold" type="button" aria-label="Show icons only" data-tip="Show icons only"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m11 7-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
     <button class="sbbtn" id="sbclose" type="button" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </div>
-  <nav class="nav" id="nav" aria-label="Pages"></nav>
+  <!-- THE COLUMN WAITS IN ITS OWN SHAPE (2026-10-26): the tabs are drawn
+       once `me` answers and drawNav() empties this first, so until then
+       the column shows its three runs and History in grey — in the page
+       itself, so it is there at the first paint, before any script. -->
+  <nav class="nav" id="nav" aria-label="Pages" aria-busy="true"><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:50px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:70px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:56px"></span></div></div><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:86px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:96px"></span></div></div><div class="sbgrp"><span class="sbskgl"><span class="sbsk" style="width:46px"></span></span><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:90px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:80px"></span></div><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:62px"></span></div></div><div class="sbgrp foot"><div class="sbskrow"><span class="sbsk" style="width:18px"></span><span class="sbsk" style="width:58px"></span></div></div></nav>
   <div class="sbfoot">
     <span class="sbav" id="sbav" aria-hidden="true"></span>
     <span id="who"></span>
@@ -1891,6 +1939,12 @@
     <button class="sbbtn" id="sbopen" type="button" aria-label="Open menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <button class="sblogo" type="button" data-home-logo aria-label="Home" data-tip="Home"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 13.9 10.1 21.2 12 13.9 13.9 12 21.2 10.1 13.9 2.8 12 10.1 10.1z"/><circle cx="12" cy="12" r="1.3"/></svg></button><span class="mtname">Strategy Management Platform</span><span id="sbhere"></span>
   </div>
+  <!-- AND THE BAND WAITS IN THE PAGE TOO (2026-10-26): every tab opens on
+       a band of one size in one place (2026-10-24), so it is drawn here,
+       before any script, and stands until the page is ready — the first
+       visit after a release, when the page's script is still on its way,
+       shows the band and the column's tabs rather than an empty page. -->
+  <div class="bootwait" aria-hidden="true"><div class="bwband"><span class="a"></span><span class="t"></span><span></span></div></div>
   <div class="wrap" id="page"></div>
 </div>
 </div>

@@ -507,9 +507,12 @@ try {
     if (hadOrg.length) await owner("UPDATE org SET extra = jsonb_set(extra, '{branding}', jsonb_build_object('bar', $2::text)) WHERE tenant_id = $1", [A, TAN]);
     else await owner("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Raya Trade', jsonb_build_object('branding', jsonb_build_object('bar', $2::text)))", [A, TAN]);
     const LEDGER = [
-      { what: "Insights", url: "/x/insights", title: "Insights", rows: "main .item" },
-      { what: "Meeting Notes", url: "/x/notes", title: "Meetings", rows: "main .nrow" },
-      { what: "Portfolio's projects", url: "/x/portfolio", title: "Projects", rows: "main section.sec:first-of-type tbody tr" },
+      /* §646: Insights and Meeting Notes wear My tasks' look — the main
+         screens' face, Georgia for the titles, the rows in one card striped
+         grey first. Portfolio keeps the ledger's face. */
+      { what: "Insights", url: "/x/insights", title: "Insights", rows: "main .card .item", faces: ["system-ui", "Georgia"] },
+      { what: "Meeting Notes", url: "/x/notes", title: "Meetings", rows: "main .card .nrow", faces: ["system-ui", "Georgia"] },
+      { what: "Portfolio's projects", url: "/x/portfolio", title: "Projects", rows: "main section.sec:first-of-type tbody tr", faces: ["Source Sans 3"] },
     ];
     const READ = `(a) => {
       const mast = document.querySelector("main .mast");
@@ -523,15 +526,19 @@ try {
         if (!own && !ctl) continue;
         const cs = getComputedStyle(el);
         const fam = cs.fontFamily.split(",")[0].replace(/["']/g, "").trim();
-        if (fam !== "Source Sans 3" || (ctl && cs.fontSize === "13.3333px"))
+        if (!a.faces.includes(fam) || (ctl && cs.fontSize === "13.3333px"))
           off.push(el.tagName.toLowerCase() + "." + String(el.className).split(" ")[0] + " " + fam + " " + cs.fontSize);
       }
       const th = Array.from(document.querySelectorAll("main section.sec:first-of-type thead th")).map((t) => getComputedStyle(t).fontSize);
       return { bg: mast ? getComputedStyle(mast).backgroundColor : null, want,
         title: mast && mast.querySelector("h2.pt") ? mast.querySelector("h2.pt").textContent.trim() : null,
         tile: mast && mast.querySelector(".tile b") ? mast.querySelector(".tile b").textContent.trim() : null,
-        rows: document.querySelectorAll(a.rows).length, off, th,
-        loaded: Array.from(document.fonts).some((f) => f.family.replace(/["']/g, "") === "Source Sans 3" && f.status === "loaded") };
+        /* §648: whoever may publish also sees the drafts, which the band does
+           not count — it counts what the client can see */
+        rows: Array.from(document.querySelectorAll(a.rows)).filter((r) => !r.querySelector(".draft")).length, off, th,
+        first: document.querySelector(a.rows) ? getComputedStyle(document.querySelector(a.rows)).backgroundColor : null,
+        second: document.querySelectorAll(a.rows)[1] ? getComputedStyle(document.querySelectorAll(a.rows)[1]).backgroundColor : null,
+        loaded: a.faces[0] !== "Source Sans 3" || Array.from(document.fonts).some((f) => f.family.replace(/["']/g, "") === "Source Sans 3" && f.status === "loaded") };
     }`;
     const PHONE = `() => {
       const mast = document.querySelector("main .mast");
@@ -546,14 +553,18 @@ try {
         await page.goto(base + L.url, { waitUntil: "load" });
         await page.evaluate(call("() => document.fonts.ready.then(() => 1)"));
         await page.waitForTimeout(200);
-        return await page.evaluate(call(READ, { tan: TAN, rows: L.rows }));
+        if (process.env.SMP_SHOT) await page.screenshot({ path: process.env.SMP_SHOT + "-" + L.url.split("/").pop() + ".png", fullPage: true });
+        return await page.evaluate(call(READ, { tan: TAN, rows: L.rows, faces: L.faces }));
       });
       if (r) {
         check(L.what + ": the panel names the page and counts the rows it drew",
           r.title === L.title && r.rows > 0 && r.tile === String(r.rows), JSON.stringify({ title: r.title, tile: r.tile, rows: r.rows }));
         check(L.what + ": the panel wears this client's own colour", !!r.bg && r.bg === r.want, r.bg + " against " + r.want);
-        check(L.what + ": every word and control draws in the Tracker's face, and the face is loaded",
+        check(L.what + ": every word and control draws in its own face (" + L.faces.join(" and ") + "), and the face is loaded",
           r.loaded && r.off.length === 0, (r.loaded ? "" : "Source Sans 3 not loaded · ") + r.off.join(" | "));
+        if (L.faces[0] === "system-ui")
+          check(L.what + ": the rows sit in one card, striped light grey then white (§646)",
+            r.first === "rgb(244, 246, 249)" && (r.second == null || r.second !== r.first), r.first + " then " + r.second);
         if (L.url === "/x/portfolio")
           check(L.what + ": the four column names are one size", r.th.length === 4 && new Set(r.th).size === 1, r.th.join(" "));
         const found = await probe(L.what + ": contrast on the client's colour", async () => page.evaluate(CONTRAST));

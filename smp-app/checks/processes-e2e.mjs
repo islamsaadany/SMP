@@ -291,6 +291,22 @@ await A.page.goto(BASE + "/" + S + "/processes/processes", { waitUntil: "network
 const openBox = await A.page.locator("a:text-is('Open →')").first().boundingBox();
 check(!!openBox && openBox.x + openBox.width <= 1440, "the process list's Open link is inside the window", JSON.stringify(openBox));
 await A.page.setViewportSize({ width: 1280, height: 720 });
+/* The picker: choose which processes the table shows; remembered; Select all brings them back. */
+await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('None')");
+check(/No processes chosen/.test(await body(A.page)), "with none chosen the table says so");
+await A.page.click("[aria-label='Choose processes'] label:has-text('Order to cash') input");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1 && /Order to cash/.test(await body(A.page)) && /1 \/ 5\s*shown/i.test(await body(A.page)), "the table shows only the chosen process, and the count says 1 / 5");
+await A.page.reload({ waitUntil: "networkidle" });
+await A.page.waitForFunction(() => document.querySelectorAll("tbody tr .font-mono").length === 1, null, { timeout: 10000 }).catch(() => {});
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 1, "the choice is remembered when the page is opened again");
+await A.page.click("button:has-text('Choose processes')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Select all')");
+await A.page.click("[aria-label='Choose processes'] button:text-is('Done')");
+check((await A.page.$$("tbody tr:has(.font-mono)")).length === 5, "Select all brings every process back");
+
 /* The list keeps its order while scoring; sub-processes sit under their main; "Clear entries" clears only what was picked. */
 const order = () => A.page.$$eval("tbody tr td:nth-child(2) .font-mono", (e) => e.map((x) => x.textContent.trim()));
 await A.page.goto(BASE + "/" + S + "/processes/priorities", { waitUntil: "networkidle" });

@@ -855,7 +855,9 @@ var COPILOT = (function(){
     if (f.path || f.start === "plan") { delete PENDROAD[id]; return; }
     if (f.phase !== "path" || !canEdit()) return;
     delete PENDROAD[id];
-    if (r === "plan") { var gs = flowCopy(); startFromPlan(gs); flowSave(gs); return; }
+    /* the plan's parts land on the cards only once the structure has come
+       back with the chat — the first draw is before it */
+    if (r === "plan") { if (!steps().length) { PENDROAD[id] = r; return; } var gs = flowCopy(); startFromPlan(gs); flowSave(gs); return; }
     pickPath(r);
   }
   /* The cards filled from the plan, each part agreed and marked the plan's. */

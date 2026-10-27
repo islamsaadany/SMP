@@ -2295,8 +2295,10 @@ await section("3j2 · a free chat beside the workflow (§633)", async () => {
         wf: !!document.querySelector(".copstart [data-cop-newchat]"), above: b && c ? b.getBoundingClientRect().bottom <= c.getBoundingClientRect().top : false,
         menu: !!document.querySelector(".copnewmenu, [data-cop-newfree]"), w: b ? Math.round(parseFloat(getComputedStyle(document.querySelector(".copstart")).width)) : 0 }; });
     if (process.env.SMP_SHOTS) await page.screenshot({ path: process.env.SMP_SHOTS + "/start-screen.png" });
-    check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.join("|") === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
-      "§639 the area opens on its start screen: a box to just ask, the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
+    /* §653: Mobile's plan holds a SWOT, so Start from the existing plan is
+       the first card, then the workflow's. */
+    check(/Mobile/.test(st.head) && /Analysis/.test(st.head) && st.cards.length === 2 && /Start from the existing plan/.test(st.cards[0]) && st.cards[1] === "SWOT, step by step" && st.wf && st.above && !st.menu && st.w <= 740,
+      "§639, §653 the area opens on its start screen: a box to just ask, the plan card first and the SWOT workflow as a card under it, no menu, at the reading width", JSON.stringify(st));
     /* §634: Competitive Discipline and the capabilities ride along too —
        set on the page's own objects, as their pages would set them. */
     await page.evaluate(() => {

@@ -70214,3 +70214,15 @@ No public shell file changed on this branch, so `release-stamp` stays clear and 
 - `npm run check:upkeep`: 8 / 0.
 
 **Red on `main` itself, not from this merge:** `npm run check:tracker` passes 248 lines and then dies at §10, where `locator('.addrow .when')` matches three elements. §656 gave every section its own write line, and the check still expects one. It dies at the same line on a clean copy of `origin/main`, and the Tracker's code and check are byte-identical to `main`'s on this tree, so it is left to the Tracker work.
+
+## §667 — The Tracker's own check runs to its end again (2026-10-28)
+
+Islam: *"yes fix the tracker check"*. Found at §658–§666's merge: `npm run check:tracker` passed 248 lines and then **died** in §10 ("the next empty line, pressed in a browser"). The same happened on `main` itself.
+
+**Why.** §656 gave every topic and person section its own write line (*+ Add to …*, *+ Add for …*): an `.addrow.chk` with a `data-line`, drawn hidden until its press opens it. §10 still named the page's own add line by a bare `.addrow`. Once there were three of them, Playwright's strict locators refused (`'.addrow .when' resolved to 3 elements`), and the counts that expect one (`.count() === 1`) would have read three.
+
+**The fix is in the check only** (`smp-app/checks/tracker.mjs`; the Tracker's code is unchanged). §10's checks of the page's own line (45 selectors, lines 908–1120) now name it as the line in the write strip at the top, `.write .addrow`, with a comment saying why. This is the same element, with every assertion as it was (§218: rewritten to the same purpose, not loosened). The section lines' own checks, which pick a line by its `data-line`, were already exact and are untouched.
+
+**What the death was hiding.** Every `check:tracker:red` break was "red" before this only because the whole run died at §10 whatever the break was. A run that dies proves nothing about the thing broken (§215). Now each break fails on its own assertion.
+
+**Checked**: `npm run check:tracker` **343 / 0**, to the end (before: 248 and died). `npm run check:tracker:red`: all **32** breaks red, none not red.

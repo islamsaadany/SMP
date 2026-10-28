@@ -905,7 +905,7 @@ try {
     await pg.evaluate("window.scrollTo(0, 900)");
     const pinAt = await pg.evaluate(`(() => {
       const r = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : null; };
-      const tb = r('.tb'), m = r('.mast'), add = r('.addrow'), pin = r('.pin'), first = r('.list .sec');
+      const tb = r('.tb'), m = r('.mast'), add = r('.write .addrow'), pin = r('.pin'), first = r('.list .sec');
       return { y: Math.round(scrollY), pin: !!document.querySelector('.pin > .mast + .card.ctop .chd .cats') && !!document.querySelector('.pin > .mast + .card.ctop .tools .addrow'),
         tb: tb && Math.round(tb.top), tbFoot: tb && Math.round(tb.bottom), mast: m && Math.round(m.top),
         add: add && Math.round(add.bottom), pinFoot: pin && Math.round(pin.bottom), first: first && Math.round(first.top) };
@@ -981,21 +981,25 @@ try {
        Both are asserted — invisible, and the box measured before and after the
        first letter — because visibility alone is satisfied by a build that
        removed them, which is the other option and the one he did not pick. */
+    /* THE PAGE'S OWN LINE is the one in the write strip at the top (`.write`):
+       since §656 every section carries its own `.addrow` too, drawn hidden
+       until its "+ Add to …" opens it (§2d), so a bare `.addrow` no longer
+       names one line. */
     const addBox = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();return Math.round(r.left)+','+Math.round(r.width)})()");
-    const restBox = await addBox(".addrow .tn");
-    check("the add line holds its details back until something is typed", !(await pg.locator(".addrow .when").isVisible()) &&
-      !(await pg.locator(".addrow .who").isVisible()) &&
-      !(await pg.locator(".addrow [data-act=add-note]").isVisible()));
-    check("...and they are still drawn, so their place is held", (await pg.locator(".addrow .when").count()) === 1 &&
-      (await pg.evaluate("document.querySelector('.addrow .when').getBoundingClientRect().width")) > 0);
+    const restBox = await addBox(".write .addrow .tn");
+    check("the add line holds its details back until something is typed", !(await pg.locator(".write .addrow .when").isVisible()) &&
+      !(await pg.locator(".write .addrow .who").isVisible()) &&
+      !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()));
+    check("...and they are still drawn, so their place is held", (await pg.locator(".write .addrow .when").count()) === 1 &&
+      (await pg.evaluate("document.querySelector('.write .addrow .when').getBoundingClientRect().width")) > 0);
     await pg.locator("#add").fill("x");
-    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".addrow .when").isVisible()) &&
-      (await pg.locator(".addrow .who").isVisible()) && !(await pg.locator(".addrow .st").isVisible()) &&
-      (await pg.locator(".addrow [data-act=add-note]").isVisible()) && (await addBox(".addrow .tn")) === restBox,
-      restBox + " -> " + (await addBox(".addrow .tn")));
-    check("the add line opens on This week in words, owned by me", (await pg.locator(".addrow .when .wk").innerText()) === "This week" &&
+    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".write .addrow .when").isVisible()) &&
+      (await pg.locator(".write .addrow .who").isVisible()) && !(await pg.locator(".write .addrow .st").isVisible()) &&
+      (await pg.locator(".write .addrow [data-act=add-note]").isVisible()) && (await addBox(".write .addrow .tn")) === restBox,
+      restBox + " -> " + (await addBox(".write .addrow .tn")));
+    check("the add line opens on This week in words, owned by me", (await pg.locator(".write .addrow .when .wk").innerText()) === "This week" &&
       weekWord(real, real) === "This week" &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran");
+      (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran");
     /* THE BOLD WENT WITH THE WORDS (§356.15) — asserted over the WHOLE page,
        because a mark left on one row of one view is exactly what a check
        scoped to one selector would walk past. Its other end is the picker,
@@ -1005,21 +1009,21 @@ try {
        arrow opens it, and BOTH ENDS are asserted — shut at rest, open on the
        press — or a build that simply deleted the note passes the first half. */
     check("no note box stands on the add line, and the arrow that opens one does", !(await pg.locator("#addnote").isVisible()) &&
-      (await pg.locator(".addrow [data-act=add-note]").count()) === 1 &&
-      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "false");
-    await pg.locator(".addrow [data-act=add-note]").click();
+      (await pg.locator(".write .addrow [data-act=add-note]").count()) === 1 &&
+      (await pg.locator(".write .addrow [data-act=add-note]").getAttribute("aria-expanded")) === "false");
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...the arrow opens it, lights, and puts the cursor in it", (await pg.locator("#addnote").isVisible()) &&
       (await pg.evaluate("document.activeElement && document.activeElement.id")) === "addnote" &&
-      (await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")) &&
-      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "true");
+      (await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")) &&
+      (await pg.locator(".write .addrow [data-act=add-note]").getAttribute("aria-expanded")) === "true");
     /* FOLDING EMPTIES IT, and that is the whole rule: a note folded away with
        words still in it would be posted by the next Enter with nothing on the
        screen saying so (§96). */
     await probe("the note box can be typed into once it is open", () => pg.locator("#addnote").fill("something I changed my mind about", { timeout: 4000 }));
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...pressed again it folds AND empties, so nothing unseen can be posted", !(await pg.locator("#addnote").isVisible()) &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" &&
-      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
+      !(await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")));
     /* TAB FROM THE ACTION IS THE OTHER DOOR (§61) — and only once the line
        has a name on it, or it would be the one detail the line did not hold
        back (§356.16). */
@@ -1038,11 +1042,11 @@ try {
        fold above: focusout fires before the click, so without the guard the
        arrow would find a shut note and open it again — reading as a control
        that does nothing on the one press where it plainly did (§96). */
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...and the arrow opens it once more", await pg.locator("#addnote").isVisible());
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     check("...and closes it again, though it is empty and the focus left it first", !(await pg.locator("#addnote").isVisible()) &&
-      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
+      !(await pg.evaluate("document.querySelector('.write .addrow [data-act=add-note]').classList.contains('on')")));
     await pg.locator("#add").fill("Book the room for Thursday");
     await pg.locator("#add").press("Enter"); await settle();
     const born = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Book the room for Thursday");
@@ -1062,11 +1066,11 @@ try {
        the row lands under Islam reading "Next week" (§356.15). */
     const nextThu = addDays(thu, 7);
     await pg.locator("#add").fill("Send the outcome to the managers");
-    await pg.locator(".addrow [data-act=add-note]").click();
+    await pg.locator(".write .addrow [data-act=add-note]").click();
     await probe("the note opens for the line that takes everything", () => pg.locator("#addnote").fill("Ahmed's list first. Copy Noran.", { timeout: 4000 }));
-    check("typing lights the line", await pg.evaluate("document.querySelector('.addrow').classList.contains('typing')"));
-    await pg.locator(".addrow .when.pick").click();
-    const addWeeks = pg.locator(".addrow .weeks");
+    check("typing lights the line", await pg.evaluate("document.querySelector('.write .addrow').classList.contains('typing')"));
+    await pg.locator(".write .addrow .when.pick").click();
+    const addWeeks = pg.locator(".write .addrow .weeks");
     check("the week pressed on the line opens the picker — a header, this week marked and bold, No date and a day of my own at the foot", await addWeeks.isVisible() &&
       (await addWeeks.locator(".wh span").allTextContents()).join("|") === "Week|Sun – Thu" &&
       (await addWeeks.locator("button.now.on b").innerText()) === "This week" && (await addWeeks.locator("button:nth-of-type(2) b").innerText()) === "Next week" &&
@@ -1079,19 +1083,19 @@ try {
        so what is asserted is the BOX against the window at both ends. */
     /* the edges against the window in the screen's pixels, the width in the
        page's own: the page is zoomed to 0.8 on a computer (lib/topbar.ts) */
-    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
+    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.write .addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.documentElement).zoom)||1;return [Math.round(r.left),Math.round(r.right),Math.round(r.width/z),window.innerWidth].join(' ')})()");
     check("...and the wider picker is inside the window, both edges", !!pbox && (() => { const [l, r, w, vw] = pbox.split(" ").map(Number); return l >= 0 && r <= vw && w === 232; })(), pbox);
     /* THE BOLD STAYS IN THE PICKER and only there — the other end of the
        assertion above, which is that no ROW carries one (§94.2). */
-    check("...the word is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button.now b')).fontWeight")) === "700" &&
-      (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button:not(.now) b')).fontWeight")) === "400");
+    check("...the word is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.write .addrow .weeks button.now b')).fontWeight")) === "700" &&
+      (await pg.evaluate("getComputedStyle(document.querySelector('.write .addrow .weeks button:not(.now) b')).fontWeight")) === "400");
     await addWeeks.locator('[data-day="' + nextThu + '"]').click();
-    check("picking next week on the line posts nothing yet and the line reads Next week, in the picker's own words", (await pg.locator(".addrow").getAttribute("data-due")) === nextThu &&
-      (await pg.locator(".addrow .when .wk").innerText()) === "Next week" && weekWord(nextThu, real) === "Next week" && (await pg.locator(".wk.now").count()) === 0 &&
+    check("picking next week on the line posts nothing yet and the line reads Next week, in the picker's own words", (await pg.locator(".write .addrow").getAttribute("data-due")) === nextThu &&
+      (await pg.locator(".write .addrow .when .wk").innerText()) === "Next week" && weekWord(nextThu, real) === "Next week" && (await pg.locator(".wk.now").count()) === 0 &&
       !(await asTenant(A, (c) => listActions(c))).some((r) => r.title === "Send the outcome to the managers"));
-    await pg.locator(".addrow .who.pick").click();
-    await pg.locator(".addrow .team [data-key=islam]").click();
-    check("...picking Islam on the line reads Islam, still nothing posted", (await pg.locator(".addrow").getAttribute("data-owner")) === "islam" && (await pg.locator(".addrow .who .wn").innerText()) === "Islam");
+    await pg.locator(".write .addrow .who.pick").click();
+    await pg.locator(".write .addrow .team [data-key=islam]").click();
+    check("...picking Islam on the line reads Islam, still nothing posted", (await pg.locator(".write .addrow").getAttribute("data-owner")) === "islam" && (await pg.locator(".write .addrow .who .wn").innerText()) === "Islam");
     await probe("Enter posts from the note box too", () => pg.locator("#addnote").press("Enter", { timeout: 4000 })); await settle();
     const full = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Send the outcome to the managers");
     check("Enter from the note adds it all — next week's Thursday, Islam's, the note kept", !!full && full.due === nextThu && full.firstDue === nextThu && full.ownerKey === "islam" && full.description === "Ahmed's list first. Copy Noran." && await stayed(), JSON.stringify(full));
@@ -1102,9 +1106,9 @@ try {
        typed there is deliberately nothing on the screen to read (§356.16). */
     check("...the line is cleared back to This week and me, with the note and the details held back again", (await pg.locator("#add").inputValue()) === "" &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" && !(await pg.locator("#addnote").isVisible()) &&
-      !(await pg.locator(".addrow .when").isVisible()) && !(await pg.locator(".addrow [data-act=add-note]").isVisible()) &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" &&
-      (await pg.evaluate("document.querySelector('.addrow .when .wk').textContent")) === "This week");
+      !(await pg.locator(".write .addrow .when").isVisible()) && !(await pg.locator(".write .addrow [data-act=add-note]").isVisible()) &&
+      (await pg.locator(".write .addrow").getAttribute("data-due")) === thu && (await pg.locator(".write .addrow").getAttribute("data-owner")) === "noran" &&
+      (await pg.evaluate("document.querySelector('.write .addrow .when .wk').textContent")) === "This week");
     /* Due NEXT week it is not on This week (inView), so it is read under All. */
     check("...and, due next week, it is not on This week", (await pg.locator(frow).count()) === 0);
     await pg.goto(base + "?view=all"); await settle();
@@ -1117,7 +1121,7 @@ try {
     /* NOT THERE reads as "" rather than throwing (§215): a falsification that
        stops a row being made must leave this REPORTING, not dying. */
     const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
-    const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".addrow .st");
+    const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".write .addrow .st");
     check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
       pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
     check("...in the page's own font, never the browser's control font (the main screens' since §646)", /system-ui/.test(pillSel) && /11px/.test(pillSel), pillSel);
